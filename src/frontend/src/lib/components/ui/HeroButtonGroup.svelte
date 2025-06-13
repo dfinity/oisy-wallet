@@ -5,7 +5,7 @@
 		children: Snippet;
 	}
 
-	let {children}: Props = $props();
+	let { children }: Props = $props();
 </script>
 
 <div role="toolbar" class="flex flex-1 flex-row justify-between gap-2">
