@@ -12,14 +12,7 @@
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import type { AnyTransactionUi } from '$lib/types/transaction';
-	import type { EthTransactionUi } from '$eth/types/eth-transaction';
-	import type { BtcTransactionUi } from '$btc/types/btc';
-	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import { isIcToken } from '$icp/validation/ic-token.validation.js';
-	import { isSupportedEthToken } from '$eth/utils/eth.utils';
-	import { isSolanaToken } from '$sol/utils/token.utils';
 
 	interface Props {
 		type: 'send' | 'receive';
@@ -27,9 +20,10 @@
 		toExplorerUrl?: string;
 		from: string | undefined;
 		fromExplorerUrl?: string;
+		onSaveAddressComplete?: (data: OpenTransactionParams<AnyTransactionUi>) => void;
 	}
 
-	const { type, to, from, toExplorerUrl, fromExplorerUrl }: Props = $props();
+	const { type, to, from, toExplorerUrl, fromExplorerUrl, onSaveAddressComplete }: Props = $props();
 
 	let address: string | undefined = $derived(
 		type === 'send' && nonNullish(to) ? to : type !== 'send' && nonNullish(from) ? from : undefined
@@ -46,29 +40,8 @@
 
 	let modalStoreData = $derived($modalStore?.data as OpenTransactionParams<AnyTransactionUi>);
 
-	let getOnComplete = (modalStoreDataClosure: OpenTransactionParams<AnyTransactionUi>) => () => {
-		if (isIcToken(modalStoreDataClosure.token)) {
-			modalStore.openIcTransaction({
-				id: Symbol(),
-				data: modalStoreDataClosure as OpenTransactionParams<IcTransactionUi>
-			});
-		} else if (isSupportedEthToken(modalStoreDataClosure.token)) {
-			modalStore.openEthTransaction({
-				id: Symbol(),
-				data: modalStoreDataClosure as OpenTransactionParams<EthTransactionUi>
-			});
-		} else if (isSolanaToken(modalStoreDataClosure.token)) {
-			modalStore.openSolTransaction({
-				id: Symbol(),
-				data: modalStoreDataClosure as OpenTransactionParams<SolTransactionUi>
-			});
-		} else {
-			modalStore.openBtcTransaction({
-				id: Symbol(),
-				data: modalStoreData as OpenTransactionParams<BtcTransactionUi>
-			});
-		}
-	};
+	const getOnComplete = (data: OpenTransactionParams<AnyTransactionUi>) => () =>
+		onSaveAddressComplete?.(data);
 </script>
 
 {#if nonNullish(address)}
