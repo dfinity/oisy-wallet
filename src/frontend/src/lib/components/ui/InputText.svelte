@@ -12,7 +12,16 @@
 		disabled?: boolean;
 	}
 
-	let {value = $bindable(), name, placeholder, showResetButton = false, required = true, testId, autofocus = false, disabled}: Props = $props();
+	let {
+		value = $bindable(),
+		name,
+		placeholder,
+		showResetButton = false,
+		required = true,
+		testId,
+		autofocus = false,
+		disabled
+	}: Props = $props();
 </script>
 
 <Input
