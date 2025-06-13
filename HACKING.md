@@ -12,6 +12,7 @@ This document lists a couple of useful information for development and deploymen
 - [Bitcoin](#bitcoin)
 - [Routes Styles](#routes-styles)
 - [Add EVM Networks](#add-evm-networks)
+- [Build Frontend locally with Docker](#build-frontend-locally-with-docker)
 
 ## Deployment
 
@@ -557,3 +558,32 @@ It must be updated to include the new network providers' URLs (and any other req
 
 > [!NOTE]
 > Remember to adapt all the existing tests and create new ones where needed, including E2E tests.
+
+## Build Frontend Locally with Docker
+
+To test building the frontend locally with Docker and inspect the results, follow these steps:
+
+### 1. Build the Docker image
+
+```bash
+docker build . --file Dockerfile.frontend -t oisy-wallet --progress=plain
+```
+
+2. Copy the build output to your machine
+
+```bash
+docker create --name oisy-wallet oisy-wallet /bin/true
+docker cp oisy-wallet:/frontend ./tmp/frontend-output
+docker rm oisy-wallet
+```
+
+> Notes:
+>
+> - Our final image uses `FROM scratch`, it has no default command or shell. To work around this, we specify a dummy command (`/bin/true`) when creating the container.
+> - Run `mkdir -p ./tmp` to ensure the folder exists before copying files into it.
+
+3. Serve the results locally (optional)
+
+```bash
+npx serve ./tmp/frontend-output
+```
