@@ -37,6 +37,9 @@
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import { contacts } from '$lib/derived/contacts.derived';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		destination: string;
@@ -60,7 +63,15 @@
 	const dispatch = createEventDispatcher();
 
 	const back = () => dispatch('icBack');
-	const next = () => dispatch('icNext');
+	const next = () => {
+		// if next button is clicked, it means theres no selected contact
+		// we manually lookup the contact and select it if one exists
+		const contact = getContactForAddress({ addressString: destination, contactList: $contacts });
+		if (nonNullish(contact)) {
+			selectedContact = contact;
+		}
+		dispatch('icNext');
+	};
 	const close = () => dispatch('icClose');
 
 	let invalidDestination = $state(false);
