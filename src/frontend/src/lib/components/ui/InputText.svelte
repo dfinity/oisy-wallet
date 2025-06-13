@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 
 	interface Props {
-		value?: string;
+		value: string;
 		name: string;
 		placeholder: string;
 		showResetButton?: boolean;
@@ -12,7 +12,7 @@
 		disabled?: boolean;
 	}
 
-	let {value = $bindable(''), name, placeholder, showResetButton = false, required = true, testId, autofocus = false, disabled}: Props = $props();
+	let {value = $bindable(), name, placeholder, showResetButton = false, required = true, testId, autofocus = false, disabled}: Props = $props();
 </script>
 
 <Input
