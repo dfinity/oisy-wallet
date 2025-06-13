@@ -30,7 +30,7 @@ describe('CreateContactStep', () => {
 		expect(getByTestId(ADDRESS_BOOK_CANCEL_BUTTON)).toBeInTheDocument();
 
 		// Check that the save button has the correct text
-		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).toHaveTextContent(en.core.text.save);
+		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).toHaveTextContent(en.core.text.create);
 	});
 
 	it('should disable save button when form is invalid', () => {
