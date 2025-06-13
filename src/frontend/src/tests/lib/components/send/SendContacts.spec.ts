@@ -1,5 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import SendContacts from '$lib/components/send/SendContacts.svelte';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { ContactUi } from '$lib/types/contact';
@@ -9,9 +10,11 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import {
 	getMockContactsUi,
 	mockContactBtcAddressUi,
-	mockContactEthAddressUi
+	mockContactEthAddressUi,
+	mockContactPrincipalAddressUi
 } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { render } from '@testing-library/svelte';
 
 describe('SendContacts', () => {
@@ -24,6 +27,12 @@ describe('SendContacts', () => {
 		n: 1,
 		name: 'Test 2',
 		addresses: [mockContactEthAddressUi]
+	}) as unknown as ContactUi[];
+
+	const [principalContact] = getMockContactsUi({
+		n: 1,
+		name: 'Principal User',
+		addresses: [mockContactPrincipalAddressUi]
 	}) as unknown as ContactUi[];
 
 	const mockContext = (sendToken: Token) =>
@@ -47,9 +56,8 @@ describe('SendContacts', () => {
 			context: mockContext(BTC_MAINNET_TOKEN)
 		});
 
-		expect(
-			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
-		).toBeInTheDocument();
+		expect(getByText('Test 1')).toBeInTheDocument();
+		expect(getByText(/bc1qt0n\.\.\.-Test 1/)).toBeInTheDocument();
 	});
 
 	it('renders filtered by address content if data is provided', () => {
@@ -65,7 +73,7 @@ describe('SendContacts', () => {
 		});
 
 		expect(() =>
-			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
+			getByText(`${shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address })}-Test 1`)
 		).toThrow();
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockContactEthAddressUi.address }))
@@ -85,7 +93,7 @@ describe('SendContacts', () => {
 		});
 
 		expect(() =>
-			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
+			getByText(`${shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address })}-Test 1`)
 		).toThrow();
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockContactEthAddressUi.address }))
@@ -115,14 +123,44 @@ describe('SendContacts', () => {
 		});
 
 		expect(() =>
-			getByText(shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address }))
+			getByText(`${shortenWithMiddleEllipsis({ text: mockContactBtcAddressUi.address })}-Test 1`)
 		).toThrow();
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockContactEthAddressUi.address }))
 		).toBeInTheDocument();
 	});
 
-	it('renders empty state component if data is empty', () => {
+	it('renders principal contact by address', () => {
+		const { getByText } = render(SendContacts, {
+			props: {
+				destination: mockPrincipalText,
+				networkContacts: {
+					[mockPrincipalText]: principalContact
+				}
+			},
+			context: mockContext(ICP_TOKEN)
+		});
+
+		expect(getByText('xlmdg')).toBeInTheDocument();
+		expect(getByText('Principal User')).toBeInTheDocument();
+	});
+
+	it('renders principal contact by name', () => {
+		const { getByText } = render(SendContacts, {
+			props: {
+				destination: principalContact.name.toLowerCase(),
+				networkContacts: {
+					[mockPrincipalText]: principalContact
+				}
+			},
+			context: mockContext(ICP_TOKEN)
+		});
+
+		expect(getByText('xlmdg')).toBeInTheDocument();
+		expect(getByText('Principal User')).toBeInTheDocument();
+	});
+
+	it('renders empty state if no contacts match', () => {
 		const { getByText } = render(SendContacts, {
 			props: {
 				destination: mockBtcAddress

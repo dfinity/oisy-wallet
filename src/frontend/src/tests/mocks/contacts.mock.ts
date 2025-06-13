@@ -6,7 +6,7 @@ import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 import { mockBtcAddress } from './btc.mock';
 import { mockEthAddress } from './eth.mocks';
-import { mockAccountIdentifierText } from './identity.mock';
+import { mockAccountIdentifierText, mockPrincipalText } from './identity.mock';
 
 export const mockBackendContactAddressSol: ContactAddressData = {
 	token_account_id: { Sol: mockSolAddress },
@@ -47,6 +47,12 @@ export const getMockContacts = ({
 export const mockContactIcrcAddressUi: ContactAddressUi = {
 	addressType: 'Icrcv2',
 	address: mockAccountIdentifierText
+};
+
+export const mockContactPrincipalAddressUi: ContactAddressUi = {
+	address: mockPrincipalText,
+	label: 'My Principal Address',
+	addressType: 'Icrcv2'
 };
 
 export const mockContactBtcAddressUi: ContactAddressUi = {
