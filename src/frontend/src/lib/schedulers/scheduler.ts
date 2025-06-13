@@ -58,7 +58,20 @@ export class SchedulerTimer {
 			return;
 		}
 
+		if (nonNullish(this.timer)) {
+			this.stopTimer();
+		}
+
 		this.timer = setInterval(execute, interval);
+
+		if (
+			nonNullish(rest.data) &&
+			rest.data instanceof Object &&
+			'ledgerCanisterId' in rest.data &&
+			rest.data?.ledgerCanisterId === 'l67es-4iaaa-aaaag-atvda-cai'
+		) {
+			console.log('New timer:', this.timer, rest.data);
+		}
 	}
 
 	async trigger<T>(params: SchedulerParams<T>) {
@@ -117,8 +130,9 @@ export class SchedulerTimer {
 		if (isNullish(this.timer)) {
 			return;
 		}
-
+		console.log('Stop timer:', this.timer);
 		clearInterval(this.timer);
+		// console.log('Stop timer:', this.timer);
 		this.timer = undefined;
 	}
 
