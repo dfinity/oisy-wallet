@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
@@ -23,10 +24,12 @@
 		SEND_DESTINATION_WIZARD_STEP,
 		SEND_FORM_DESTINATION_NEXT_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { SendDestinationTab } from '$lib/types/send';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
@@ -37,9 +40,6 @@
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 	import { solKnownDestinations } from '$sol/derived/sol-transactions.derived';
-	import { getContactForAddress } from '$lib/utils/contact.utils';
-	import { contacts } from '$lib/derived/contacts.derived';
-	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		destination: string;
