@@ -19,7 +19,7 @@
 	{autofocus}
 	{testId}
 >
-	<svelte:fragment slot="inner-end">
+	{#snippet innerEnd()}
 		{#if showResetButton}
 			<button on:click={() => (filter = '')} aria-label={$i18n.core.text.clear_filter}>
 				<IconClose />
@@ -27,5 +27,5 @@
 		{:else}
 			<IconSearch />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </InputTextWithAction>
