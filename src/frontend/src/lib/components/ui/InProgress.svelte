@@ -5,35 +5,36 @@
 	import type { StaticStep } from '$lib/types/steps';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
-	export let progressStep: string;
-	export let steps: NonEmptyArray<ProgressStep | StaticStep>;
-	export let type: 'progress' | 'static' = 'progress';
+	interface Props {
+		progressStep: string;
+		steps: NonEmptyArray<ProgressStep | StaticStep>;
+		type?: 'progress' | 'static';
+	}
 
-	let cmp: typeof StaticSteps | typeof ProgressStepsCmp;
-	$: cmp = type === 'static' ? StaticSteps : ProgressStepsCmp;
+	let {progressStep, steps, type = 'progress'}: Props = $props();
 
-	let dynamicSteps: ProgressSteps = [
+	const cmp: typeof StaticSteps | typeof ProgressStepsCmp = $derived(type === 'static' ? StaticSteps : ProgressStepsCmp);
+
+	let dynamicSteps: ProgressSteps = $state([
 		// TODO: have a look if there is a better solution than casting
 		...(steps as ProgressSteps)
-	];
+	])
 
-	const updateSteps = () => {
+	$effect(() => {
 		const progressIndex = dynamicSteps.findIndex(({ step }) => step === progressStep);
 
 		dynamicSteps = dynamicSteps.map((step, index) =>
 			step.step === progressStep
 				? {
-						...step,
-						state: 'in_progress'
-					}
+					...step,
+					state: 'in_progress'
+				}
 				: {
-						...step,
-						state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
-					}
+					...step,
+					state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
+				}
 		) as ProgressSteps;
-	};
-
-	$: progressStep, updateSteps();
+	})
 </script>
 
 <div class="px-2 pb-3">
