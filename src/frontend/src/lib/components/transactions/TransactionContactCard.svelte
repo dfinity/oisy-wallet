@@ -9,8 +9,9 @@
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
 
 	interface Props {
@@ -19,9 +20,10 @@
 		toExplorerUrl?: string;
 		from: string | undefined;
 		fromExplorerUrl?: string;
+		onSaveAddressComplete?: (data: OpenTransactionParams<AnyTransactionUi>) => void;
 	}
 
-	const { type, to, from, toExplorerUrl, fromExplorerUrl }: Props = $props();
+	const { type, to, from, toExplorerUrl, fromExplorerUrl, onSaveAddressComplete }: Props = $props();
 
 	let address: string | undefined = $derived(
 		type === 'send' && nonNullish(to) ? to : type !== 'send' && nonNullish(from) ? from : undefined
@@ -35,6 +37,11 @@
 				})
 			: undefined
 	);
+
+	let modalStoreData = $derived($modalStore?.data as OpenTransactionParams<AnyTransactionUi>);
+
+	const getOnComplete = (data: OpenTransactionParams<AnyTransactionUi>) => () =>
+		onSaveAddressComplete?.(data);
 </script>
 
 {#if nonNullish(address)}
@@ -57,7 +64,8 @@
 								data: {
 									entrypoint: {
 										type: AddressBookSteps.SAVE_ADDRESS,
-										address
+										address,
+										onComplete: getOnComplete(modalStoreData)
 									}
 								}
 							})}
