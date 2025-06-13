@@ -35,12 +35,14 @@
 	// Workaround: SvelteKit does not consistently call `onDestroy`. Various issues are open regarding this on Svelte side.
 	// This is the simplest, least verbose solution to always disconnect before unload, given that this component is used in `<WizardModal />` only.
 	$effect(() => {
+		void $dirtyWizardState;
+
 		if (nonNullish($modalStore)) {
 			return;
 		}
 
 		stopConfirmToClose();
-	}, [$modalStore, $dirtyWizardState]);
+	});
 
 </script>
 
