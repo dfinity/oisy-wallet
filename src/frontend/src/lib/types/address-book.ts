@@ -12,5 +12,6 @@ export interface AddressBookModalParams {
 	entrypoint?: {
 		type: AddressBookSteps.SAVE_ADDRESS;
 		address: string;
+		onComplete?: () => void;
 	};
 }
