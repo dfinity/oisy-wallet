@@ -20,7 +20,7 @@
 	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi));
 </script>
 
-<span class="flex flex-col items-center gap-2">
+<span class="flex flex-col items-center gap-4">
 	<output class="mt-8 inline-block break-all text-5xl font-bold">
 		{#if $loaded}
 			{#if hideBalance}
@@ -38,9 +38,7 @@
 			</span>
 		{/if}
 	</output>
-	<span
-		class="flex max-w-48 items-center gap-2 text-xl font-medium text-brand-secondary-alt sm:max-w-none"
-	>
+	<span class="flex items-center gap-2 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
 		{#if hideBalance}
 			<IconEyeOff />{$i18n.hero.text.hidden_balance}
 		{:else}
