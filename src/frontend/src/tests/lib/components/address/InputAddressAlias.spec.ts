@@ -1,21 +1,21 @@
-import AddressForm from '$lib/components/address/AddressForm.svelte';
+import InputAddressAlias from '$lib/components/address/InputAddressAlias.svelte';
 import { CONTACT_MAX_LABEL_LENGTH } from '$lib/constants/app.constants';
 import {
 	ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT,
 	ADDRESS_BOOK_ADDRESS_ALIAS_INPUT
 } from '$lib/constants/test-ids.constants';
 import type { ContactAddressUi } from '$lib/types/contact';
-import AddressFormTestHost from '$tests/lib/components/address/AddressFormTestHost.svelte';
+import InputAddressAliasTestHost from '$tests/lib/components/address/InputAddressAliasTestHost.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
-describe('AddressForm', () => {
+describe('InputAddressAlias', () => {
 	it('should render the form with address and label fields', () => {
 		const address: Partial<ContactAddressUi> = {};
-		const { getByTestId, getByText } = render(AddressForm, {
+		const { getByTestId, getByText } = render(InputAddressAlias, {
 			props: {
 				address,
-				isInvalid: false,
+				isValid: false,
 				onQRCodeScan: () => {}
 			}
 		});
@@ -35,11 +35,11 @@ describe('AddressForm', () => {
 			addressType: 'Eth'
 		};
 
-		const { getByTestId } = render(AddressForm, {
+		const { getByTestId } = render(InputAddressAlias, {
 			props: {
 				address,
 				disableAddressField: true,
-				isInvalid: false,
+				isValid: false,
 				onQRCodeScan: () => {}
 			}
 		});
@@ -52,11 +52,11 @@ describe('AddressForm', () => {
 	it('should enable address input when disableAddressField is false', () => {
 		const address: Partial<ContactAddressUi> = {};
 
-		const { getByTestId } = render(AddressForm, {
+		const { getByTestId } = render(InputAddressAlias, {
 			props: {
 				address,
 				disableAddressField: false,
-				isInvalid: false,
+				isValid: false,
 				onQRCodeScan: () => {}
 			}
 		});
@@ -70,10 +70,10 @@ describe('AddressForm', () => {
 describe('AddressFormTestHost', () => {
 	it('should bind address object between host and form', async () => {
 		const address: Partial<ContactAddressUi> = {};
-		const { getByTestId, component } = render(AddressFormTestHost, {
+		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isInvalid: false
+				isValid: false
 			}
 		});
 
@@ -91,10 +91,10 @@ describe('AddressFormTestHost', () => {
 
 	it('should trim whitespace from label input', async () => {
 		const address: Partial<ContactAddressUi> = {};
-		const { getByTestId, component } = render(AddressFormTestHost, {
+		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isInvalid: false
+				isValid: false
 			}
 		});
 
@@ -118,10 +118,10 @@ describe('AddressFormTestHost', () => {
 
 	it('should handle empty string label', async () => {
 		const address: Partial<ContactAddressUi> = { label: 'initial' };
-		const { getByTestId, component } = render(AddressFormTestHost, {
+		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isInvalid: false
+				isValid: false
 			}
 		});
 
@@ -138,13 +138,13 @@ describe('AddressFormTestHost', () => {
 		expect(component.getAddress().label).toBe('');
 	});
 
-	it('should update isInvalid when address is invalid or valid', async () => {
+	it('should update isValid when address is invalid or valid', async () => {
 		const address: Partial<ContactAddressUi> = {};
 
-		const { getByTestId, component } = render(AddressFormTestHost, {
+		const { getByTestId, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isInvalid: false
+				isValid: false
 			}
 		});
 
@@ -152,14 +152,14 @@ describe('AddressFormTestHost', () => {
 		const addressInput = getByTestId(ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT);
 		await fireEvent.input(addressInput, { target: { value: 'invalid-address' } });
 
-		// Check that isInvalid is now true
-		expect(component.getIsInvalid()).toBeTruthy();
+		// Check that isValid is now false
+		expect(component.getIsValid()).toBeFalsy();
 
 		const validAddress = '0x1234567890abcdef1234567890abcdef12345678';
 		await fireEvent.input(addressInput, { target: { value: validAddress } });
 
-		// Check that isInvalid is now true
-		expect(component.getIsInvalid()).toBeFalsy();
+		// Check that isValid is now true
+		expect(component.getIsValid()).toBeTruthy();
 	});
 
 	it('should maintain address type when address is updated', async () => {
@@ -167,10 +167,10 @@ describe('AddressFormTestHost', () => {
 			addressType: 'Btc'
 		};
 
-		const { component, getByTestId } = render(AddressFormTestHost, {
+		const { component, getByTestId } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isInvalid: false
+				isValid: false
 			}
 		});
 
@@ -187,10 +187,10 @@ describe('AddressFormTestHost', () => {
 
 	it('should show error when label exceeds 50 characters', async () => {
 		const address: Partial<ContactAddressUi> = {};
-		const { getByTestId, getByText, component } = render(AddressFormTestHost, {
+		const { getByTestId, getByText, component } = render(InputAddressAliasTestHost, {
 			props: {
 				address,
-				isInvalid: false
+				isValid: false
 			}
 		});
 
@@ -202,6 +202,6 @@ describe('AddressFormTestHost', () => {
 		expect(
 			getByText(`Label may not exceed ${CONTACT_MAX_LABEL_LENGTH} characters`)
 		).toBeInTheDocument();
-		expect(component.getIsInvalid).toBeTruthy();
+		expect(component.getIsValid()).toBeFalsy();
 	});
 });
