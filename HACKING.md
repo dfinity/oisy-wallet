@@ -577,7 +577,10 @@ docker cp oisy-wallet:/frontend ./tmp/frontend-output
 docker rm oisy-wallet
 ```
 
-> Note: Our final image uses `FROM scratch`, it has no default command or shell. To work around this, we specify a dummy command (`/bin/true`) when creating the container.
+> Notes:
+>
+> - Our final image uses `FROM scratch`, it has no default command or shell. To work around this, we specify a dummy command (`/bin/true`) when creating the container.
+> - Run `mkdir -p ./tmp` to ensure the folder exists before copying files into it.
 
 3. Serve the results locally (optional)
 
