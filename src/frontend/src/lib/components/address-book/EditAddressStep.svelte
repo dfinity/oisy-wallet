@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import AddressForm from '$lib/components/address/InputAddressAlias.svelte';
+	import InputAddressAlias from '$lib/components/address/InputAddressAlias.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -96,7 +96,7 @@
 		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
 			<div class="pb-4 text-xl font-bold">{title}</div>
 
-			<AddressForm
+			<InputAddressAlias
 				{onQRCodeScan}
 				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 				address={addressModel}

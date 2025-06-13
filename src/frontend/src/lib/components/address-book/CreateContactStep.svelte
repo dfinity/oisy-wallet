@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import AddressForm from '$lib/components/address/InputAddressAlias.svelte';
-	import ContactForm from '$lib/components/address-book/InputContactName.svelte';
+	import InputAddressAlias from '$lib/components/address/InputAddressAlias.svelte';
+	import InputContactName from '$lib/components/address-book/InputContactName.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -57,11 +57,11 @@
 <form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
 		<div class="w-full text-2xl font-bold text-primary md:text-3xl">
-			<ContactForm bind:contact={editingContact} bind:isValid={validName} />
+			<InputContactName bind:contact={editingContact} bind:isValid={validName} />
 		</div>
 
 		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
-			<AddressForm
+			<InputAddressAlias
 				disableAddressField={nonNullish(modalDataAddress)}
 				bind:address={addressModel}
 				bind:isValid={validAddress}
