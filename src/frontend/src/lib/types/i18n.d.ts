@@ -53,6 +53,7 @@ interface I18nNavigation {
 		dapp_explorer: string;
 		activity: string;
 		airdrops: string;
+		earning: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -639,7 +640,6 @@ interface I18nTokens {
 		token_address_copied: string;
 		twin_token: string;
 		standard: string;
-		confirm_deletion_title: string;
 		confirm_deletion_description: string;
 		deletion_confirmation: string;
 	};
@@ -722,6 +722,7 @@ interface I18nTokens {
 		incomplete_metadata: string;
 		duplicate_metadata: string;
 		unexpected_undefined: string;
+		unexpected_error_on_token_delete: string;
 	};
 }
 
@@ -986,6 +987,7 @@ interface I18nAddress_book {
 		show_address_text: string;
 		add_first_address: string;
 	};
+	create_contact: { title: string };
 }
 
 interface I18nContact {
@@ -1077,6 +1079,18 @@ interface I18nActivity {
 	warning: { no_index_canister: string; unavailable_index_canister: string };
 }
 
+interface I18nEarning {
+	text: { title: string };
+	cards: {
+		gold_title: string;
+		gold_description: string;
+		stablecoins_title: string;
+		stablecoins_description: string;
+		sprinkles_title: string;
+		sprinkles_description: string;
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -1112,4 +1126,5 @@ interface I18n {
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
 	activity: I18nActivity;
+	earning: I18nEarning;
 }
