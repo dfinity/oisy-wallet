@@ -58,17 +58,24 @@
 				<Card noMargin>
 					{token.token.name}
 
-					<Logo
-						src={token.token.icon}
-						slot="icon"
-						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
-						size="lg"
-						color="white"
-					/>
+					{#snippet icon()}
+						{#if nonNullish(token)}
+							<Logo
+								src={token.token.icon}
+								alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
+								size="lg"
+								color="white"
+							/>
+						{/if}
+					{/snippet}
 
-					<span class="break-all" slot="description">
-						{token.token.symbol}
-					</span>
+					{#snippet description()}
+						{#if nonNullish(token)}
+							<span class="break-all">
+								{token.token.symbol}
+							</span>
+						{/if}
+					{/snippet}
 				</Card>
 			</div>
 		{/if}
