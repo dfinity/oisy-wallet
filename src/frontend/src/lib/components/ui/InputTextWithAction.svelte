@@ -14,7 +14,16 @@
 		inputElement?: HTMLInputElement;
 	}
 
-	let {innerEnd, value = $bindable(''), name, placeholder, required = true, testId, autofocus = false, inputElement = $bindable()}: Props = $props();
+	let {
+		innerEnd,
+		value = $bindable(''),
+		name,
+		placeholder,
+		required = true,
+		testId,
+		autofocus = false,
+		inputElement = $bindable()
+	}: Props = $props();
 
 	onMount(() => {
 		if (autofocus && nonNullish(inputElement)) {
