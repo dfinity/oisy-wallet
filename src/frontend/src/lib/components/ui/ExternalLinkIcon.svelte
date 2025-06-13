@@ -3,7 +3,7 @@
 	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 		onClick?: () => void;
 		href: string;
 		ariaLabel: string;
@@ -21,5 +21,5 @@
 	onclick={onClick}
 	aria-label={ariaLabel}
 >
-	{@render children?.()}
+	{@render children()}
 </a>
