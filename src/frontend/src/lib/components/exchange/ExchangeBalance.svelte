@@ -38,9 +38,7 @@
 			</span>
 		{/if}
 	</output>
-	<span
-		class="flex items-center gap-2 text-xl font-medium text-brand-secondary-alt sm:max-w-none"
-	>
+	<span class="flex items-center gap-2 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
 		{#if hideBalance}
 			<IconEyeOff />{$i18n.hero.text.hidden_balance}
 		{:else}
