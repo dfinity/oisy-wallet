@@ -32,7 +32,7 @@
 			? (() => {
 					const expanded: NetworkContacts = {};
 
-					for (const [, contact] of Object.entries(networkContacts)) {
+					for (const [_, contact] of Object.entries(networkContacts)) {
 						const hasPrincipal = contact.addresses.some((a) => invalidIcpAddress(a.address));
 
 						for (const { address } of contact.addresses) {
@@ -45,7 +45,9 @@
 						}
 					}
 
-					if (isEmptyString(destination)) return expanded;
+					if (isEmptyString(destination)) {
+						return expanded;
+					}
 
 					return Object.entries(expanded).reduce<NetworkContacts>((acc, [key, contact]) => {
 						const address = key.split('-')[0];
