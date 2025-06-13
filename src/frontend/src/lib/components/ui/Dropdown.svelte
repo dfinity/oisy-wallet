@@ -1,15 +1,31 @@
 <script lang="ts">
 	import { Modal, Popover } from '@dfinity/gix-components';
+	import type { Snippet } from 'svelte';
 	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
-	export let disabled = false;
-	export let asModalOnMobile = false;
-	export let ariaLabel: string;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		children: Snippet;
+		title?: Snippet;
+		items: Snippet;
+		disabled?: boolean;
+		asModalOnMobile?: boolean;
+		ariaLabel: string;
+		testId?: string;
+	}
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
+	let {
+		children,
+		title,
+		items,
+		disabled = false,
+		asModalOnMobile = false,
+		ariaLabel,
+		testId
+	}: Props = $props();
+
+	let visible = $state(false);
+	let button: HTMLButtonElement | undefined = $state();
 
 	export const close = () => (visible = false);
 </script>
@@ -22,13 +38,13 @@
 	{disabled}
 	opened={visible}
 >
-	<slot />
+	{@render children()}
 </DropdownButton>
 
 {#if asModalOnMobile}
 	<Responsive up="1.5md">
 		<Popover bind:visible anchor={button} invisibleBackdrop>
-			<slot name="items" />
+			{@render items()}
 		</Popover>
 	</Responsive>
 
@@ -37,14 +53,16 @@
 	<Responsive down="md">
 		{#if visible}
 			<Modal on:nnsClose={close}>
-				<slot name="title" slot="title" />
+				<svelte:fragment slot="title">
+					{@render title?.()}
+				</svelte:fragment>
 
-				<slot name="items" />
+				{@render items()}
 			</Modal>
 		{/if}
 	</Responsive>
 {:else}
 	<Popover bind:visible anchor={button} invisibleBackdrop>
-		<slot name="items" />
+		{@render items()}
 	</Popover>
 {/if}
