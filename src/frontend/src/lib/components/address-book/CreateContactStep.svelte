@@ -31,20 +31,20 @@
 			? modalData.entrypoint.address
 			: undefined
 	);
-	let modalDataAddressUi = $state(
-		(nonNullish(modalDataAddress)
-			? mapAddressToContactAddressUi(modalDataAddress)
-			: {}) as ContactAddressUi
-	);
 
-	let editingContact = $state<Partial<ContactUi>>({
-		addresses: nonNullish(modalDataAddressUi) ? [modalDataAddressUi] : []
-	});
+	let editingAddress = $state<Partial<ContactAddressUi>>({});
+	let editingContact = $state<Partial<ContactUi>>({});
+
+	let addressModel = $derived(
+		nonNullish(modalDataAddress)
+			? (mapAddressToContactAddressUi(modalDataAddress) ?? editingAddress)
+			: editingAddress
+	);
 
 	const handleSubmit = (event: Event) => {
 		event.preventDefault();
 		if (isFormValid && !disabled) {
-			onSave(editingContact as ContactUi);
+			onSave({ ...editingContact, addresses: [addressModel] } as ContactUi);
 		}
 	};
 
@@ -63,7 +63,7 @@
 		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
 			<AddressForm
 				disableAddressField={nonNullish(modalDataAddress)}
-				address={modalDataAddressUi}
+				bind:address={addressModel}
 				bind:isValid={validAddress}
 				{disabled}
 			/>
