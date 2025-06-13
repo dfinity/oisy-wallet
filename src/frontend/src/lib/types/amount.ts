@@ -1,1 +1,1 @@
-export type AmountString = `${'+' | '-' | ''}${number}`;
+export type AmountString = `${'+' | '-' | '<' | ''}${number}`;
