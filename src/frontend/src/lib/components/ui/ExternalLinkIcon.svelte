@@ -4,13 +4,13 @@
 
 	interface Props {
 		children?: Snippet;
-		onclick?: () => void;
+		onClick?: () => void;
 		href: string;
 		ariaLabel: string;
 		colorStyle?: ButtonColorStyle;
 	}
 
-	let { children, onclick, href, ariaLabel, colorStyle = 'tertiary' }: Props = $props();
+	let { children, onClick, href, ariaLabel, colorStyle = 'tertiary' }: Props = $props();
 </script>
 
 <a
@@ -18,7 +18,7 @@
 	rel="external noopener noreferrer"
 	target="_blank"
 	class={`as-button ${colorStyle} icon flex flex-col text-center text-xs font-normal`}
-	{onclick}
+	onclick={onClick}
 	aria-label={ariaLabel}
 >
 	{@render children?.()}
