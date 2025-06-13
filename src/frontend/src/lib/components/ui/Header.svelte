@@ -6,7 +6,7 @@
 		end?: Snippet;
 	}
 
-	let {children, end}: Props = $props();
+	let { children, end }: Props = $props();
 </script>
 
 <div class="mb-6 flex items-center justify-between pb-1">
