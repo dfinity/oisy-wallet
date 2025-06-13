@@ -35,7 +35,7 @@
 	}
 
 	const {
-		amount,
+		amount: cardAmount,
 		type,
 		status,
 		timestamp,
@@ -48,7 +48,7 @@
 		onClick
 	}: Props = $props();
 
-	let icon: Component = $derived(mapTransactionIcon({ type, status }));
+	let cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
 	let iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
@@ -83,37 +83,39 @@
 				{/if}
 			</span>
 
-			<div slot="icon">
-				{#if iconType === 'token'}
-					<TokenLogo data={token} badge={{ type: 'icon', icon, ariaLabel: type }} />
-				{:else}
-					<RoundedIcon {icon} opacity={iconWithOpacity} />
-				{/if}
-			</div>
+			{#snippet icon()}
+				<div>
+					{#if iconType === 'token'}
+						<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+					{:else}
+						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
+					{/if}
+				</div>
+			{/snippet}
 
-			<svelte:fragment slot="amount">
-				{#if nonNullish(amount)}
+			{#snippet amount()}
+				{#if nonNullish(cardAmount)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
 						<Amount
-							{amount}
+							amount={cardAmount}
 							decimals={token.decimals}
 							symbol={getTokenDisplaySymbol(token)}
 							formatPositiveAmount
 						/>
 					{/if}
 				{/if}
-			</svelte:fragment>
+			{/snippet}
 
-			<svelte:fragment slot="description">
+			{#snippet description()}
 				<span data-tid="receive-tokens-modal-transaction-timestamp">
 					{#if nonNullish(timestamp)}
 						{formatSecondsToDate(timestamp)}
 					{/if}
 				</span>
 				<TransactionStatusComponent {status} />
-			</svelte:fragment>
+			{/snippet}
 		</Card>
 	</span>
 </button>
