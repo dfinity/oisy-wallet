@@ -83,6 +83,48 @@ fn test_add_custom_token(user_token: &CustomToken) {
 }
 
 #[test]
+fn test_remove_custom_spl_token() {
+    test_remove_custom_token(&SPL_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_icrc_token() {
+    test_remove_custom_token(&USER_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_no_index_token() {
+    test_remove_custom_token(&USER_TOKEN_NO_INDEX)
+}
+
+fn test_remove_custom_token(token: &CustomToken) {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let before_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+
+    assert_eq!(before_set, Ok(Vec::new()));
+
+    let result = pic_setup.update::<()>(caller, "set_custom_token", token.clone());
+
+    assert_eq!(result, Ok(()));
+
+    let before_remove = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+
+    let expected_tokens: Vec<CustomToken> = vec![token.with_incremented_version()];
+    assert_tokens_data_eq(&before_remove.unwrap(), &expected_tokens);
+
+    let result = pic_setup.update::<()>(caller, "remove_custom_token", token.clone());
+
+    assert_eq!(result, Ok(()));
+
+    let after_remove = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+
+    assert_eq!(after_remove, Ok(Vec::new()));
+}
+
+#[test]
 fn test_update_custom_token_with_index() {
     test_update_custom_token(&USER_TOKEN);
 }
