@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children: Snippet;
@@ -16,7 +16,7 @@
 		testId?: string;
 	}
 
-	let {children, level = 'info', closableKey, styleClass, testId}: Props = $props();
+	let { children, level = 'info', closableKey, styleClass, testId }: Props = $props();
 
 	const closable = $derived(nonNullish(closableKey));
 	let visible = $state(isNullish(closableKey) || !shouldHideInfo(closableKey));
