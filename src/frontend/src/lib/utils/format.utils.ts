@@ -1,11 +1,12 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { AmountString } from '$lib/types/amount';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import type { BigNumberish } from 'ethers/utils';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
+const MAX_DEFAULT_DISPLAY_DECIMALS = 8;
 
 interface FormatTokenParams {
 	value: bigint;
@@ -18,15 +19,26 @@ interface FormatTokenParams {
 export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
-	displayDecimals = DEFAULT_DISPLAY_DECIMALS,
+	displayDecimals,
 	trailingZeros = false,
 	showPlusSign = false
 }: FormatTokenParams): AmountString => {
 	const res = Utils.formatUnits(value, unitName);
+
+	const match = res.match(/^0\.0*/);
+	const leadingZeros = match ? match[0].length - 2 : 0;
+
+	if (isNullish(displayDecimals) && leadingZeros >= MAX_DEFAULT_DISPLAY_DECIMALS) {
+		return '< 0.00000001';
+	}
+
+	const maxFractionDigits = (leadingZeros + 2) > MAX_DEFAULT_DISPLAY_DECIMALS ? MAX_DEFAULT_DISPLAY_DECIMALS : (leadingZeros + 2);
+	const minFractionDigits = isNullish(displayDecimals) ? DEFAULT_DISPLAY_DECIMALS : displayDecimals;
+
 	const formatted = (+res).toLocaleString('en-US', {
 		useGrouping: false,
-		maximumFractionDigits: displayDecimals,
-		minimumFractionDigits: trailingZeros ? displayDecimals : undefined
+		maximumFractionDigits: isNullish(displayDecimals) ? leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS : displayDecimals,
+		minimumFractionDigits: trailingZeros ? minFractionDigits : undefined
 	}) as `${number}`;
 
 	if (trailingZeros) {
