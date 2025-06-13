@@ -4,7 +4,7 @@
 
 	interface Props {
 		children?: Snippet;
-		onclick: () => void;
+		onClick: () => void;
 		disabled?: boolean;
 		button?: HTMLButtonElement;
 		ariaLabel: string;
@@ -14,7 +14,7 @@
 
 	let {
 		children,
-		onclick,
+		onClick,
 		disabled = false,
 		button = $bindable(),
 		ariaLabel,
@@ -26,7 +26,7 @@
 <button
 	class="dropdown-button"
 	bind:this={button}
-	{onclick}
+	onclick={onClick}
 	aria-label={ariaLabel}
 	data-tid={testId}
 	{disabled}

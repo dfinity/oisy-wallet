@@ -16,7 +16,7 @@
 
 <DropdownButton
 	bind:button
-	onclick={() => (visible = true)}
+	onClick={() => (visible = true)}
 	{ariaLabel}
 	{testId}
 	{disabled}
