@@ -320,7 +320,7 @@ pub fn list_user_tokens() -> Vec<UserToken> {
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
-/// Add, remove or update custom token for the user.
+/// Add or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
