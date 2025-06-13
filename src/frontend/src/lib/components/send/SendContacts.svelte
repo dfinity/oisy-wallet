@@ -31,8 +31,7 @@
 		nonNullish(networkContacts)
 			? (() => {
 					const expanded: NetworkContacts = {};
-
-					for (const [_, contact] of Object.entries(networkContacts)) {
+					for (const contact of Object.values(networkContacts)) {
 						const hasPrincipal = contact.addresses.some((a) => invalidIcpAddress(a.address));
 
 						for (const { address } of contact.addresses) {
@@ -48,10 +47,8 @@
 					if (isEmptyString(destination)) {
 						return expanded;
 					}
-
 					return Object.entries(expanded).reduce<NetworkContacts>((acc, [key, contact]) => {
-						const address = key.split('-')[0];
-
+						const [address] = key.split('-');
 						if (
 							isContactMatchingFilter({
 								filterValue: destination,
@@ -62,7 +59,6 @@
 						) {
 							acc[address] = contact;
 						}
-
 						return acc;
 					}, {});
 				})()
