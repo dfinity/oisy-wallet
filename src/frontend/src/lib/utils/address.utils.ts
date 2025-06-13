@@ -68,21 +68,45 @@ export const getCaseSensitiveness = (
 export const areAddressesEqual = <T extends Address>({
 	address1,
 	address2,
-	addressType
-}: {
-	address1: OptionAddress<T>;
-	address2: OptionAddress<T>;
-	addressType: TokenAccountIdTypes;
-}): boolean => {
+	...rest
+}: { address1: OptionAddress<T>; address2: OptionAddress<T> } & (
+	| { networkId: NetworkId }
+	| { addressType: TokenAccountIdTypes }
+)): boolean => {
 	if (isNullish(address1) || isNullish(address2)) {
 		return false;
 	}
 
-	const isCaseSensitive = getCaseSensitiveness({ addressType });
+	const isCaseSensitive = getCaseSensitiveness(rest);
 
 	if (isCaseSensitive) {
 		return address1 === address2;
 	}
 
 	return address1.toLowerCase() === address2.toLowerCase();
+};
+
+export const areAddressesPartiallyEqual = <T extends Address>({
+	address1,
+	address2,
+	networkId
+}: {
+	address1: OptionAddress<T>;
+	address2: OptionAddress<T>;
+	networkId: NetworkId;
+}): boolean => {
+	if (isNullish(address1) || isNullish(address2)) {
+		return false;
+	}
+
+	const isCaseSensitive = getCaseSensitiveness({ networkId });
+
+	if (isCaseSensitive) {
+		return address1.includes(address2) || address2.includes(address1);
+	}
+
+	return (
+		address1.toLowerCase().includes(address2.toLowerCase()) ||
+		address2.toLowerCase().includes(address1.toLowerCase())
+	);
 };
