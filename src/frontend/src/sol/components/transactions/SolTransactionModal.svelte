@@ -10,8 +10,9 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -79,6 +80,13 @@
 			? replacePlaceholders(explorerUrl, { $args: `account/${fromAddress}/` })
 			: undefined
 	);
+
+	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
+		modalStore.openSolTransaction({
+			id: Symbol(),
+			data: data as OpenTransactionParams<SolTransactionUi>
+		});
+	};
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -118,6 +126,7 @@
 				{from}
 				{toExplorerUrl}
 				{fromExplorerUrl}
+				{onSaveAddressComplete}
 			/>
 		{/if}
 

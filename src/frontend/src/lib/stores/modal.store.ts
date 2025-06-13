@@ -74,7 +74,7 @@ interface SetWithOptionalDataParams<D> {
 	data?: D;
 }
 
-interface OpenTransactionParams<T extends AnyTransactionUi> {
+export interface OpenTransactionParams<T extends AnyTransactionUi> {
 	transaction: T;
 	token: Token;
 }

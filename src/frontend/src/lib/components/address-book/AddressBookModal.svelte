@@ -165,7 +165,13 @@
 	});
 
 	let modal: WizardModal | undefined = $state();
-	const close = () => modalStore.close();
+	const close = () => {
+		if (nonNullish(modalData?.entrypoint?.onComplete)) {
+			modalData.entrypoint.onComplete();
+			return;
+		}
+		modalStore.close();
+	};
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
 	let previousStepName = $state<AddressBookSteps | undefined>();
@@ -233,7 +239,7 @@
 			nonNullish(modalData?.entrypoint) &&
 			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
 		) {
-			modalStore.close();
+			close();
 			return;
 		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
@@ -492,6 +498,7 @@
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
+			onClose={close}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.CREATE_CONTACT}
 		<CreateContactStep
@@ -501,7 +508,7 @@
 				currentAddressIndex = undefined;
 				const createdContact = await callCreateContact({ name: contact.name });
 				await callUpdateContact({ contact: { ...createdContact, ...contact } });
-				modalStore.close();
+				close();
 			}}
 			onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
 			disabled={loading}

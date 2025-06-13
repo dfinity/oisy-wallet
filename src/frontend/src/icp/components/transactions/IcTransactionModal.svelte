@@ -12,8 +12,9 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -25,6 +26,13 @@
 
 	let { id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl } =
 		$derived(transaction);
+
+	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
+		modalStore.openIcTransaction({
+			id: Symbol(),
+			data: data as OpenTransactionParams<IcTransactionUi>
+		});
+	};
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -64,6 +72,7 @@
 				{from}
 				{toExplorerUrl}
 				{fromExplorerUrl}
+				{onSaveAddressComplete}
 			/>
 		{/if}
 
