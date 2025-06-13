@@ -18,7 +18,11 @@
 		warningType?: 'transaction' | 'manage';
 	}
 
-	let {progressStep = ProgressStepsSend.INITIALIZATION, steps, warningType = 'transaction'}: Props = $props();
+	let {
+		progressStep = ProgressStepsSend.INITIALIZATION,
+		steps,
+		warningType = 'transaction'
+	}: Props = $props();
 
 	const startConfirmToClose = () => {
 		dirtyWizardState.set(true);
