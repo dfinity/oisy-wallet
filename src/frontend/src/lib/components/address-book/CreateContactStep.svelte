@@ -2,19 +2,19 @@
 	import { nonNullish } from '@dfinity/utils';
 	import InputAddressAlias from '$lib/components/address/InputAddressAlias.svelte';
 	import InputContactName from '$lib/components/address-book/InputContactName.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ADDRESS_BOOK_SAVE_BUTTON } from '$lib/constants/test-ids.constants';
+	import { ADDRESS_BOOK_CANCEL_BUTTON } from '$lib/constants/test-ids.constants.js';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
-	import Avatar from '$lib/components/contact/Avatar.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import { ADDRESS_BOOK_CANCEL_BUTTON } from '$lib/constants/test-ids.constants.js';
 
 	interface Props {
 		onSave: (contact: ContactUi) => void;
