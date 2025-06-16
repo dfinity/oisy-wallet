@@ -5,6 +5,10 @@ import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
+
 describe('ConvertModal', () => {
 	const props = {
 		sourceToken: BTC_MAINNET_TOKEN,
