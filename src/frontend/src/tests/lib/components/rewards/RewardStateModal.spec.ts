@@ -1,7 +1,5 @@
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
-import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
-import rewardReceived from '$lib/assets/reward-received.svg';
 import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 import {
 	REWARDS_STATE_MODAL_IMAGE_BANNER,
