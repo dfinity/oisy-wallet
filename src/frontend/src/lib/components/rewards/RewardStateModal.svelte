@@ -34,12 +34,10 @@
 		/>
 
 		<div class="flex flex-col items-center gap-4 text-center">
-			<h3 class="my-3"
-				>{jackpot
-					? reward.win.jackpot.title
-					: reward.win.default.title}</h3
+			<h3 class="my-3">{jackpot ? reward.win.jackpot.title : reward.win.default.title}</h3>
+			<span class="block w-full"
+				>{jackpot ? reward.win.jackpot.description : reward.win.default.description}</span
 			>
-			<span class="block w-full">{jackpot ? reward.win.jackpot.description : reward.win.default.description}</span>
 
 			<Share
 				testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
