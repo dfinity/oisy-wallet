@@ -6,7 +6,7 @@
 	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
-	import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
+	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		modalReferralState,
@@ -81,6 +81,10 @@
 				endDate: season1Episode4Campaign.endDate
 			})
 		) {
+			trackEvent({
+				name: TRACK_WELCOME_OPEN,
+				metadata: { campaignId: `${season1Episode4Campaign.id}` }
+			});
 			modalStore.openWelcome(welcomeModalId);
 		}
 	});
