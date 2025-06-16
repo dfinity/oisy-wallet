@@ -155,6 +155,7 @@ describe('SendContacts', () => {
 
 		expect(getByText((content) => content.includes('xlmdg'))).toBeInTheDocument();
 	});
+
 	it('shows only the principal address if contact has both principal and account', () => {
 		const { getByText, queryByText, getByRole } = render(SendContacts, {
 			props: {
