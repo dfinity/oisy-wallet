@@ -7,10 +7,12 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 
 	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
@@ -44,7 +46,14 @@
 </script>
 
 <div class="flex flex-col gap-5">
+	{#if !$isPrivacyMode}
 	<PageTitle>{$i18n.activity.text.title}</PageTitle>
+	{:else}
+		<span class="flex items-center gap-2">
+			<PageTitle>{$i18n.activity.text.title}</PageTitle>
+			<IconEyeOff color="grey" />
+		</span>
+	{/if}
 
 	{#if notEmptyString(tokenListWithoutCanister)}
 		<MessageBox level="warning" closableKey="oisy_ic_hide_transaction_no_canister">

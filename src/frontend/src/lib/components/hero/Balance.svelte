@@ -55,7 +55,7 @@
 			/>
 		{:else}
 			<span class="flex items-center justify-center gap-2">
-				<IconEyeOff />
+				<IconEyeOff color="white" />
 				{$i18n.hero.text.hidden_balance}
 			</span>
 		{/if}
