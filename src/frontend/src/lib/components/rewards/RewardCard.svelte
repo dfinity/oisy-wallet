@@ -2,7 +2,7 @@
 	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -17,7 +17,7 @@
 
 	interface Props {
 		onclick: () => void;
-		reward: RewardDescription;
+		reward: RewardCampaignDescription;
 		testId?: string;
 	}
 
