@@ -141,6 +141,7 @@ describe('format.utils', () => {
 
 		it('should format too small value with default displayDecimals', () => {
 			expect(formatToken({ value: 1200000000n })).toBe('< 0.00000001');
+			expect(formatToken({ value: 7000000000n })).toBe('< 0.00000001');
 		});
 	});
 
