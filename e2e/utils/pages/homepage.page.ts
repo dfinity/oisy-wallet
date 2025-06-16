@@ -628,9 +628,9 @@ export class HomepageLoggedIn extends Homepage {
 	}
 
 	async clickTokenGroupCard({
-															tokenSymbol,
-															networkSymbol
-														}: {
+		tokenSymbol,
+		networkSymbol
+	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {

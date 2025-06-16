@@ -104,9 +104,9 @@ export class FlowPage extends HomepageLoggedIn {
 	}
 
 	async navigateToTransactionsPage({
-																		 tokenSymbol,
-																		 networkSymbol
-																	 }: {
+		tokenSymbol,
+		networkSymbol
+	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {
