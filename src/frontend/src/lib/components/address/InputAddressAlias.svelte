@@ -37,6 +37,12 @@
 	let addressParseError = $state<ZodError | undefined>();
 	let labelError = $derived(ContactAddressUiSchema.shape.label.safeParse(address.label)?.error);
 
+	let addressLabel = $state(address.label ?? '');
+
+	$effect(() => {
+		address.label = addressLabel;
+	});
+
 	$effect(() => {
 		if (nonNullish(address.label)) {
 			const trimmed = address.label.trim();
@@ -72,7 +78,7 @@
 	<InputText
 		name="label"
 		placeholder={$i18n.address.form.label_placeholder}
-		bind:value={address.label}
+		bind:value={addressLabel}
 		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
 		{disabled}
 		showResetButton={!disabled}
