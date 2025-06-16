@@ -12,6 +12,7 @@ import { contactsStore } from '$lib/stores/contacts.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { ContactUi } from '$lib/types/contact';
+import type { NetworkContacts } from '$lib/types/contacts';
 import type { Token } from '$lib/types/token';
 import { mapToFrontendContact } from '$lib/utils/contact.utils';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
@@ -49,7 +50,7 @@ describe('SendDestinationWizardStep', () => {
 	// mock derived eth contacts as its used for the contact list in the send flow
 	vi.mock('$eth/derived/eth-contacts.derived', () => ({
 		ethNetworkContacts: {
-			subscribe: (run: (value: any) => void) => {
+			subscribe: (run: (value: NetworkContacts) => void) => {
 				run(
 					getNetworkContacts({
 						addressType: 'Eth',
@@ -121,7 +122,7 @@ describe('SendDestinationWizardStep', () => {
 	});
 
 	it('should set selectedContact when a contact is selected', async () => {
-		let selectedContact: Writable<ContactUi> = writable();
+		const selectedContact: Writable<ContactUi> = writable();
 		const { getByText, getByTestId } = render(SendDestinationWizardStepTestHost, {
 			props: { selectedContact },
 			context: mockContext(ETHEREUM_TOKEN)
@@ -137,7 +138,7 @@ describe('SendDestinationWizardStep', () => {
 	});
 
 	it('should set selectedContact when a contacts address is entered and next is clicked', async () => {
-		let selectedContact: Writable<ContactUi> = writable();
+		const selectedContact: Writable<ContactUi> = writable();
 		const { getByTestId } = render(SendDestinationWizardStepTestHost, {
 			props: { destination: mockEthAddress3, selectedContact },
 			context: mockContext(ETHEREUM_TOKEN)
