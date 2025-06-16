@@ -470,6 +470,7 @@ service : (Arg) -> {
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
 	list_user_tokens : () -> (vec UserToken) query;
+	remove_custom_token : (CustomToken) -> ();
 	remove_user_token : (UserTokenId) -> ();
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
