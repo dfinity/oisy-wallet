@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 
 	interface Props {
-		value: string | undefined;
+		value: string;
 		name: string;
 		placeholder: string;
 		showResetButton?: boolean;
