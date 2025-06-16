@@ -214,6 +214,8 @@ export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
 export const SEND_DESTINATION_SECTION = 'send-destination-section';
 
+export const SEND_DESTINATION_WIZARD_CONTACT = 'send-destination-wizard-contact';
+
 export const CONVERT_AMOUNT_DISPLAY_VALUE = 'convert-amount-display-value';
 export const CONVERT_AMOUNT_DISPLAY_SKELETON = 'convert-amount-display-skeleton';
 export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
