@@ -1,5 +1,5 @@
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 import {
 	REFERRAL_STATE_MODAL_IMAGE_BANNER,
@@ -16,7 +16,7 @@ describe('ReferralStateModal', () => {
 	const shareAnchorSelector = `a[data-tid=${REFERRAL_STATE_MODAL_SHARE_ANCHOR}]`;
 
 	it('should render expected texts and items', () => {
-		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
+		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
 			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 		);
 		assertNonNullish(mockedReward);

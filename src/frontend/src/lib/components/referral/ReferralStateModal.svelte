@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import referralReward from '$lib/assets/referral-reward.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -17,7 +17,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
-		reward: RewardDescription;
+		reward: RewardCampaignDescription;
 	}
 
 	let { reward }: Props = $props();

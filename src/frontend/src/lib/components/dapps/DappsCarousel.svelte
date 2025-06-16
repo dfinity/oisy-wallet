@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
@@ -36,7 +36,7 @@
 		...temporaryHiddenDappsIds
 	];
 
-	const featuredAirdrop: RewardDescription | undefined = rewardCampaigns.find(
+	const featuredAirdrop: RewardCampaignDescription | undefined = rewardCampaigns.find(
 		({ id }) => id === FEATURED_REWARD_CAROUSEL_SLIDE_ID
 	);
 

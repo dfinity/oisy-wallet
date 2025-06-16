@@ -1,7 +1,7 @@
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 
-export const mockRewardCampaigns: RewardDescription[] = [
+export const mockRewardCampaigns: RewardCampaignDescription[] = [
 	{
 		id: SPRINKLES_SEASON_1_EPISODE_3_ID,
 		title: 'OISY Airdrop',

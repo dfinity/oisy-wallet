@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -7,7 +7,7 @@
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
-		reward: RewardDescription;
+		reward: RewardCampaignDescription;
 	}
 
 	let { reward }: Props = $props();

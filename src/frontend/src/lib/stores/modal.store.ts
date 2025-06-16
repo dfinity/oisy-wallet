@@ -1,5 +1,5 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
@@ -115,10 +115,10 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
-	openReferralState: (params: SetWithDataParams<RewardDescription>) => void;
+	openReferralState: (params: SetWithDataParams<RewardCampaignDescription>) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
-	openRewardDetails: (params: SetWithDataParams<RewardDescription>) => void;
+	openRewardDetails: (params: SetWithDataParams<RewardCampaignDescription>) => void;
 	openRewardState: (params: SetWithDataParams<RewardStateData>) => void;
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
@@ -187,7 +187,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
 			setTypeWithData('address-book')
 		),
-		openReferralState: <(params: SetWithDataParams<RewardDescription>) => void>(
+		openReferralState: <(params: SetWithDataParams<RewardCampaignDescription>) => void>(
 			setTypeWithData('referral-state')
 		),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
@@ -196,7 +196,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openVipRewardState: <(params: SetWithDataParams<VipRewardStateData>) => void>(
 			setTypeWithData('vip-reward-state')
 		),
-		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>(
+		openRewardDetails: <(params: SetWithDataParams<RewardCampaignDescription>) => void>(
 			setTypeWithData('reward-details')
 		),
 		openRewardState: <(params: SetWithDataParams<RewardStateData>) => void>(

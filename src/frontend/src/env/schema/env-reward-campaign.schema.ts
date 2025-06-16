@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-export const RewardEventsSchema = z.object({
+export const RewardCampaignSchema = z.object({
 	id: z.string(),
 	title: z.string(),
 	cardTitle: z.string(),

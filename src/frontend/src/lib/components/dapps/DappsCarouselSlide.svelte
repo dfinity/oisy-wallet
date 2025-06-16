@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import {
@@ -15,7 +15,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
-	export let airdrop: RewardDescription | undefined = undefined;
+	export let airdrop: RewardCampaignDescription | undefined = undefined;
 
 	$: ({
 		id: dappId,

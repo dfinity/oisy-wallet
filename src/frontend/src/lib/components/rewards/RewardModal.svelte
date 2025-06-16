@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
@@ -25,7 +25,7 @@
 	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
-		reward: RewardDescription;
+		reward: RewardCampaignDescription;
 	}
 
 	let { reward }: Props = $props();

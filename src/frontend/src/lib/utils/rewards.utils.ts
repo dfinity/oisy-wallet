@@ -1,5 +1,5 @@
 import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { getRewards } from '$lib/services/reward.services';
 import type {
@@ -83,7 +83,7 @@ export const isEndedCampaign = (endDate: Date) => {
 	return endDiff <= 0;
 };
 
-export const getCampaignState = (reward: RewardDescription) =>
+export const getCampaignState = (reward: RewardCampaignDescription) =>
 	isOngoingCampaign({ startDate: reward.startDate, endDate: reward.endDate })
 		? 'ongoing'
 		: isEndedCampaign(reward.endDate)

@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, setContext } from 'svelte';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import oisyEpisodeFour from '$lib/assets/oisy-episode-four-coming.svg';
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
@@ -43,15 +43,15 @@
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
-	const ongoingCampaigns: RewardDescription[] = rewardCampaigns.filter(({ startDate, endDate }) =>
-		isOngoingCampaign({ startDate, endDate })
+	const ongoingCampaigns: RewardCampaignDescription[] = rewardCampaigns.filter(
+		({ startDate, endDate }) => isOngoingCampaign({ startDate, endDate })
 	);
 
-	const upcomingCampaigns: RewardDescription[] = rewardCampaigns.filter(({ startDate }) =>
+	const upcomingCampaigns: RewardCampaignDescription[] = rewardCampaigns.filter(({ startDate }) =>
 		isUpcomingCampaign(startDate)
 	);
 
-	const endedCampaigns: RewardDescription[] = rewardCampaigns.filter(({ endDate }) =>
+	const endedCampaigns: RewardCampaignDescription[] = rewardCampaigns.filter(({ endDate }) =>
 		isEndedCampaign(endDate)
 	);
 </script>

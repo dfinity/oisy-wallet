@@ -1,4 +1,4 @@
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
@@ -156,9 +156,9 @@ export const modalReferralState: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'referral-state'
 );
-export const modalReferralStateData: Readable<RewardDescription> = derived(
+export const modalReferralStateData: Readable<RewardCampaignDescription> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.data as RewardDescription
+	($modalStore) => $modalStore?.data as RewardCampaignDescription
 );
 export const modalAddressBook: Readable<boolean> = derived(
 	modalStore,
@@ -181,10 +181,12 @@ export const modalRewardDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'reward-details'
 );
-export const modalRewardDetailsData: Readable<RewardDescription | undefined> = derived(
+export const modalRewardDetailsData: Readable<RewardCampaignDescription | undefined> = derived(
 	modalStore,
 	($modalStore) =>
-		$modalStore?.type === 'reward-details' ? ($modalStore?.data as RewardDescription) : undefined
+		$modalStore?.type === 'reward-details'
+			? ($modalStore?.data as RewardCampaignDescription)
+			: undefined
 );
 export const modalRewardState: Readable<boolean> = derived(
 	modalStore,

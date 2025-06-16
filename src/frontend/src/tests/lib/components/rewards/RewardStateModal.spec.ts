@@ -1,5 +1,5 @@
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
 import rewardReceived from '$lib/assets/reward-received.svg';
 import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
@@ -19,7 +19,7 @@ describe('RewardStateModal', () => {
 	const shareSelector = `a[data-tid="${REWARDS_STATE_MODAL_SHARE_BUTTON}"]`;
 
 	it('should render modal content', () => {
-		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
+		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
 			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 		);
 		assertNonNullish(mockedReward);
@@ -48,7 +48,7 @@ describe('RewardStateModal', () => {
 	});
 
 	it('should render modal content for jackpot', () => {
-		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
+		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
 			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 		);
 		assertNonNullish(mockedReward);
