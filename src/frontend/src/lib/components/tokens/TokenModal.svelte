@@ -1,111 +1,177 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { isTokenErc20 } from '$eth/utils/erc20.utils';
-	import { isTokenIcrc, isTokenDip20 } from '$icp/utils/icrc.utils';
-	import List from '$lib/components/common/List.svelte';
-	import ModalHero from '$lib/components/common/ModalHero.svelte';
-	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
+	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+	import { toUserToken } from '$icp-eth/services/user-token.services';
+	import { removeUserToken } from '$lib/api/backend.api';
+	import { deleteIdbEthToken } from '$lib/api/idb-tokens.api';
+	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
+	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
+	import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { TokenModalSteps } from '$lib/enums/wizard-steps';
+	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken } from '$lib/types/token';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import type { OptionToken, Token } from '$lib/types/token';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface BaseTokenModalProps {
-		children?: Snippet;
 		token: OptionToken;
+		children?: Snippet;
+		isDeletable?: boolean;
 	}
 
-	let { children, token }: BaseTokenModalProps = $props();
+	let { children, token, isDeletable = false }: BaseTokenModalProps = $props();
+
+	let loading = $state(false);
+	let showBottomSheetDeleteConfirmation = $state(false);
+
+	let modal: WizardModal | undefined = $state();
+	const close = () => modalStore.close();
+
+	const steps: WizardSteps = [
+		{
+			name: TokenModalSteps.CONTENT,
+			title: $i18n.tokens.details.title
+		},
+		{
+			name: TokenModalSteps.DELETE_CONFIRMATION,
+			title: $i18n.tokens.text.delete_token
+		}
+	];
+	let currentStep: WizardStep | undefined = $state();
+	let currentStepName = $derived(currentStep?.name as TokenModalSteps | undefined);
+
+	const gotoStep = (stepName: TokenModalSteps) => {
+		if (nonNullish(modal)) {
+			goToWizardStep({
+				modal,
+				steps,
+				stepName
+			});
+		}
+	};
+
+	const onTokenDeleteSuccess = async (deletedToken: Token) => {
+		loading = false;
+
+		close();
+
+		await gotoReplaceRoot();
+
+		toastsShow({
+			text: replacePlaceholders(
+				replaceOisyPlaceholders($i18n.tokens.details.deletion_confirmation),
+				{
+					$token: getTokenDisplaySymbol(deletedToken)
+				}
+			),
+			level: 'success',
+			duration: 2000
+		});
+	};
+
+	const onTokenDelete = async (tokenToDelete: OptionToken) => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		if (isNullish(tokenToDelete)) {
+			return;
+		}
+
+		try {
+			// TODO: update this function to handle ICRC/SPL when BE supports removing custom tokens
+			if (isTokenErc20UserToken(tokenToDelete)) {
+				loading = true;
+
+				const userToken = toUserToken(tokenToDelete);
+
+				await removeUserToken({
+					chain_id: userToken.chain_id,
+					contract_address: userToken.contract_address,
+					identity: $authIdentity
+				});
+
+				erc20UserTokensStore.reset(tokenToDelete.id);
+				await deleteIdbEthToken({ identity: $authIdentity, token: userToken });
+
+				await onTokenDeleteSuccess(tokenToDelete);
+			}
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected_error_on_token_delete },
+				err
+			});
+
+			gotoStep(TokenModalSteps.CONTENT);
+			showBottomSheetDeleteConfirmation = false;
+			loading = false;
+		}
+	};
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{$i18n.tokens.details.title}</svelte:fragment>
+<WizardModal
+	{steps}
+	bind:currentStep
+	bind:this={modal}
+	disablePointerEvents={loading}
+	on:nnsClose={close}
+>
+	<svelte:fragment slot="title">{currentStep?.title}</svelte:fragment>
 
-	<ContentWithToolbar>
-		{#if nonNullish(token)}
-			<ModalHero>
-				{#snippet logo()}
-					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
-				{/snippet}
-
-				{#snippet title()}
-					{getTokenDisplaySymbol(token)}
-				{/snippet}
-			</ModalHero>
-
-			<List styleClass="text-sm" condensed={false}>
-				<ModalListItem>
-					{#snippet label()}
-						{$i18n.tokens.details.network}
-					{/snippet}
-
-					{#snippet content()}
-						<output>{token.network.name}</output>
-						<NetworkLogo network={token.network} />
-					{/snippet}
-				</ModalListItem>
-
-				<ModalListItem>
-					{#snippet label()}
-						{$i18n.tokens.details.token}
-					{/snippet}
-
-					{#snippet content()}
-						<output>{token.name}</output>
-						<Logo
-							src={token.icon}
-							alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
-							color="white"
-						/>
-					{/snippet}
-				</ModalListItem>
-
+	{#if currentStepName === TokenModalSteps.CONTENT}
+		<Responsive up="md">
+			<TokenModalContent
+				{token}
+				{...isDeletable && { onDeleteClick: () => gotoStep(TokenModalSteps.DELETE_CONFIRMATION) }}
+			>
 				{@render children?.()}
+			</TokenModalContent>
+		</Responsive>
+		<Responsive down="sm">
+			<TokenModalContent
+				{token}
+				{...isDeletable && { onDeleteClick: () => (showBottomSheetDeleteConfirmation = true) }}
+			>
+				{@render children?.()}
+			</TokenModalContent>
+		</Responsive>
+	{:else if currentStepName === TokenModalSteps.DELETE_CONFIRMATION}
+		<TokenModalDeleteConfirmation
+			{token}
+			{loading}
+			onCancel={() => gotoStep(TokenModalSteps.CONTENT)}
+			onConfirm={() => onTokenDelete(token)}
+		/>
+	{/if}
+</WizardModal>
 
-				{#if isTokenIcrc(token) || isTokenErc20(token) || isTokenDip20(token)}
-					<ModalListItem>
-						{#snippet label()}
-							{$i18n.tokens.details.standard}
-						{/snippet}
-
-						{#snippet content()}
-							{token.standard}
-						{/snippet}
-					</ModalListItem>
-				{/if}
-
-				<ModalListItem>
-					{#snippet label()}
-						{$i18n.core.text.symbol}
-					{/snippet}
-
-					{#snippet content()}
-						{`${getTokenDisplaySymbol(token)}${nonNullish(token.oisySymbol) ? ` (${token.symbol})` : ''}`}
-					{/snippet}
-				</ModalListItem>
-
-				<ModalListItem>
-					{#snippet label()}
-						{$i18n.core.text.decimals}
-					{/snippet}
-
-					{#snippet content()}
-						{token.decimals}
-					{/snippet}
-				</ModalListItem>
-			</List>
-		{/if}
-
-		{#snippet toolbar()}
-			<ButtonDone onclick={modalStore.close} />
+{#if currentStep?.name === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}
+	<BottomSheetConfirmationPopup
+		onCancel={() => (showBottomSheetDeleteConfirmation = false)}
+		disabled={loading}
+	>
+		{#snippet title()}
+			{$i18n.tokens.text.delete_token}
 		{/snippet}
-	</ContentWithToolbar>
-</Modal>
+
+		{#snippet content()}
+			<TokenModalDeleteConfirmation
+				{token}
+				{loading}
+				onCancel={() => (showBottomSheetDeleteConfirmation = false)}
+				onConfirm={() => onTokenDelete(token)}
+			/>
+		{/snippet}
+	</BottomSheetConfirmationPopup>
+{/if}

@@ -187,6 +187,7 @@ export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button'
 export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
 export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
 export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
+export const ADDRESS_BOOK_BACK_BUTTON = 'address-book-back-button';
 export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
 export const ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT = 'address-book-address-address-input';
 export const ADDRESS_BOOK_ADDRESS_ALIAS_INPUT = 'address-book-address-alisas-input';
@@ -213,6 +214,8 @@ export const SEND_DESTINATION_WIZARD_STEP = 'send-destination-wizard-step';
 
 export const SEND_DESTINATION_SECTION = 'send-destination-section';
 
+export const SEND_DESTINATION_WIZARD_CONTACT = 'send-destination-wizard-contact';
+
 export const CONVERT_AMOUNT_DISPLAY_VALUE = 'convert-amount-display-value';
 export const CONVERT_AMOUNT_DISPLAY_SKELETON = 'convert-amount-display-skeleton';
 export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
@@ -228,4 +231,5 @@ export const CONTACT_CARD_BUTTON = 'contact-card-button';
 export const CONTACT_CARD_EXPAND_BUTTON = 'contact-card-expand-button';
 
 // token modal
+export const TOKEN_MODAL_CONTENT_DELETE_BUTTON = 'token-modal-content-delete-button';
 export const TOKEN_MODAL_DELETE_BUTTON = 'token-modal-delete-button';
