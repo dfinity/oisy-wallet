@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
@@ -23,10 +24,12 @@
 		SEND_DESTINATION_WIZARD_STEP,
 		SEND_FORM_DESTINATION_NEXT_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { SendDestinationTab } from '$lib/types/send';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
@@ -60,7 +63,15 @@
 	const dispatch = createEventDispatcher();
 
 	const back = () => dispatch('icBack');
-	const next = () => dispatch('icNext');
+	const next = () => {
+		// if next button is clicked, it means theres no selected contact
+		// we manually lookup the contact and select it if one exists
+		const contact = getContactForAddress({ addressString: destination, contactList: $contacts });
+		if (nonNullish(contact)) {
+			selectedContact = contact;
+		}
+		dispatch('icNext');
+	};
 	const close = () => dispatch('icClose');
 
 	let invalidDestination = $state(false);
