@@ -16,7 +16,7 @@
 		testId?: string;
 	}
 
-	const { title, description, icon, appPath, disabled, testId }: Props = $props();
+	const { title, description, icon, appPath, disabled = false, testId }: Props = $props();
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
