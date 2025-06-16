@@ -155,6 +155,27 @@ describe('SendContacts', () => {
 
 		expect(getByText((content) => content.includes('xlmdg'))).toBeInTheDocument();
 	});
+	it('shows only the principal address if contact has both principal and account', () => {
+		const { getByText, queryByText, getByRole } = render(SendContacts, {
+			props: {
+				destination: '',
+				networkContacts: {
+					[mockPrincipalText]: contactWithPrincipalAndAccount
+				}
+			},
+			context: mockContext(ICP_TOKEN)
+		});
+
+		expect(getByText((content) => content.includes('Principal + Account'))).toBeInTheDocument();
+
+		expect(getByText((content) => content.includes('xlmdg'))).toBeInTheDocument();
+
+		expect(getByRole('img', { name: /avatar for principal/i })).toBeInTheDocument();
+
+		expect(
+			queryByText(shortenWithMiddleEllipsis({ text: mockContactIcrcAddressUi.address }))
+		).not.toBeInTheDocument();
+	});
 
 	it('renders empty state component if data is empty', () => {
 		const { getByText } = render(SendContacts, {
