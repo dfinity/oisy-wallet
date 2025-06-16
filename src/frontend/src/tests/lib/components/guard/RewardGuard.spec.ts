@@ -1,6 +1,9 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardCampaigns from '$env/reward-campaigns.env';
-import { SPRINKLES_SEASON_1_EPISODE_3_ID, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
+import {
+	SPRINKLES_SEASON_1_EPISODE_3_ID,
+	SPRINKLES_SEASON_1_EPISODE_4_ID
+} from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import * as rewardApi from '$lib/api/reward.api';
 import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
