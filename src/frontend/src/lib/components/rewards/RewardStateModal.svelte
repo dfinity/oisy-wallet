@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
-	import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
-	import rewardReceived from '$lib/assets/reward-received.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -16,7 +14,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -31,23 +28,21 @@
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
 		<Img
-			src={jackpot ? rewardJackpotReceived : rewardReceived}
+			src={jackpot ? reward.win.jackpot.banner : reward.win.default.banner}
 			styleClass="w-full"
 			testId={REWARDS_STATE_MODAL_IMAGE_BANNER}
 		/>
 
 		<div class="flex flex-col items-center gap-4 text-center">
-			<h3 class="my-3"
-				>{jackpot
-					? replaceOisyPlaceholders($i18n.rewards.text.state_modal_title_jackpot)
-					: replaceOisyPlaceholders($i18n.rewards.text.state_modal_title)}</h3
+			<h3 class="my-3">{jackpot ? reward.win.jackpot.title : reward.win.default.title}</h3>
+			<span class="block w-full"
+				>{jackpot ? reward.win.jackpot.description : reward.win.default.description}</span
 			>
-			<span class="block w-full">{$i18n.rewards.text.state_modal_content_text}</span>
 
 			<Share
 				testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
 				text={$i18n.rewards.text.share}
-				href={jackpot ? reward.jackpotHref : reward.airdropHref}
+				href={jackpot ? reward.win.jackpot.shareHref : reward.win.default.shareHref}
 				trackEvent={{
 					name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
 					metadata: { campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}` }
