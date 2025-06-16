@@ -31,15 +31,17 @@
 		nonNullish(networkContacts)
 			? (() => {
 					const expanded: NetworkContacts = {};
+					const includedAddresses = new Set<string>();
+
 					for (const contact of Object.values(networkContacts)) {
 						const hasPrincipal = contact.addresses.some((a) => invalidIcpAddress(a.address));
 
 						for (const { address } of contact.addresses) {
 							const isPrincipal = invalidIcpAddress(address);
 
-							if (isPrincipal || !hasPrincipal) {
-								const key = `${address}-${contact.name}`;
-								expanded[key] = contact;
+							if ((isPrincipal || !hasPrincipal) && !includedAddresses.has(address)) {
+								expanded[address] = contact;
+								includedAddresses.add(address);
 							}
 						}
 					}
@@ -47,8 +49,8 @@
 					if (isEmptyString(destination)) {
 						return expanded;
 					}
-					return Object.entries(expanded).reduce<NetworkContacts>((acc, [key, contact]) => {
-						const [address] = key.split('-');
+
+					return Object.entries(expanded).reduce<NetworkContacts>((acc, [address, contact]) => {
 						if (
 							isContactMatchingFilter({
 								filterValue: destination,
