@@ -1,4 +1,4 @@
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { REWARDS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
@@ -47,7 +47,7 @@ describe('RewardModal', () => {
 			}
 		});
 
-		const mockedReward: RewardDescription = { ...mockRewardCampaigns[0] };
+		const mockedReward: RewardCampaignDescription = { ...mockRewardCampaigns[0] };
 
 		const { container, getByText } = render(RewardModal, {
 			props: {
@@ -98,7 +98,7 @@ describe('RewardModal', () => {
 			}
 		});
 
-		const mockedReward: RewardDescription = { ...mockRewardCampaigns[2] };
+		const mockedReward: RewardCampaignDescription = { ...mockRewardCampaigns[2] };
 
 		const { container, getByText, queryByText } = render(RewardModal, {
 			props: {
