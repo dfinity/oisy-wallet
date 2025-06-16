@@ -10,7 +10,7 @@ export type IcWalletMsg = 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet'
 export abstract class IcWalletScheduler<PostMessageDataRequest>
 	implements Scheduler<PostMessageDataRequest>
 {
-	protected timer = new SchedulerTimer('syncIcWalletStatus');
+	timer = new SchedulerTimer('syncIcWalletStatus');
 
 	stop() {
 		this.timer.stop();
@@ -56,5 +56,7 @@ export abstract class IcWalletScheduler<PostMessageDataRequest>
 				error
 			}
 		});
+
+		// this.timer.stop();
 	}
 }

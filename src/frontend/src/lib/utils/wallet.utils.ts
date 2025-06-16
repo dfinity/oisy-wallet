@@ -57,6 +57,8 @@ export const loadWorker = async ({
 	if (!workers.has(token.id)) {
 		const worker = await initWalletWorker({ token });
 
+		console.log('loadWorker', token.id);
+
 		worker.stop();
 		worker.start();
 

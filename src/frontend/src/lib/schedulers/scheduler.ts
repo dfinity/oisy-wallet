@@ -28,6 +28,7 @@ export interface Scheduler<T> {
 export class SchedulerTimer {
 	private timer: NodeJS.Timeout | undefined = undefined;
 	private timerStatus: SyncState = 'idle';
+	private interval = 0;
 
 	constructor(private statusMsg: PostMessageResponseStatus) {}
 
@@ -51,16 +52,19 @@ export class SchedulerTimer {
 		const execute = async () => await this.executeJob<T>({ identity, ...rest });
 
 		// We sync the cycles now but also schedule the update after wards
-		await execute();
+		execute();
 
 		// Support for features that implement the exact same pattern of a repetitive task but, are currently not scheduled for being refreshed automatically.
 		if (interval === 'disabled') {
 			return;
 		}
 
-		if (nonNullish(this.timer)) {
-			this.stopTimer();
-		}
+		this.interval = interval;
+
+		// if (nonNullish(this.timer)) {
+		// 	// console.log('check timer', this.timer);
+		// 	this.stopTimer();
+		// }
 
 		this.timer = setInterval(execute, interval);
 
@@ -112,9 +116,30 @@ export class SchedulerTimer {
 		}
 	}
 
+	private rand = Math.random();
+
 	stop() {
-		this.stopTimer();
-		this.setStatus('idle');
+		console.log('stop inside class', this.timer, this.rand);
+
+		const callStopTimer = () => {
+			this.stopTimer();
+			this.setStatus('idle');
+		};
+
+		// if (isNullish(this.timer)) {
+		// 	// setTimeout(callStopTimer, this.interval + 1000);
+		//
+		// 	// let it = 0;
+		// 	// while (it < 10000) {
+		// 	// 	it++;
+		// 	//
+		// 	// 	callStopTimer();
+		// 	// }
+		//
+		// 	return;
+		// }
+
+		callStopTimer();
 	}
 
 	postMsg<T>(data: { msg: PostMessageResponse; data?: T }) {
@@ -123,10 +148,13 @@ export class SchedulerTimer {
 			return;
 		}
 
+		// console.log('Post message:', data.msg, this.rand);
+
 		postMessage(data);
 	}
 
 	private stopTimer() {
+		console.log('Stop timer before check:', this.timer, isNullish(this.timer), this.rand);
 		if (isNullish(this.timer)) {
 			return;
 		}

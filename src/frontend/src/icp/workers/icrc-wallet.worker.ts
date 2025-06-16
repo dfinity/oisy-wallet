@@ -145,6 +145,8 @@ export const initIcrcWalletScheduler = (
 
 let scheduler: IcWalletScheduler<PostMessageDataRequestIcrc> | undefined;
 
+const rand = Math.random();
+
 export const onIcrcWalletMessage = async ({
 	data: dataMsg
 }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
@@ -154,7 +156,7 @@ export const onIcrcWalletMessage = async ({
 		case 'startIcrcWalletTimer':
 		case 'stopIcrcWalletTimer':
 			if (data?.ledgerCanisterId === 'l67es-4iaaa-aaaag-atvda-cai') {
-				console.log('Stopping timer', msg, data);
+				console.log('Stopping timer', msg, data, isNullish(scheduler), scheduler?.timer, rand);
 			}
 			scheduler?.stop();
 	}
@@ -166,6 +168,7 @@ export const onIcrcWalletMessage = async ({
 			break;
 		}
 		case 'triggerIcrcWalletTimer': {
+			console.log('trigger', rand);
 			if (isNullish(scheduler)) {
 				scheduler = initIcrcWalletScheduler(data);
 			}

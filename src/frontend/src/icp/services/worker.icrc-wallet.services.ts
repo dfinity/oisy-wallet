@@ -25,8 +25,8 @@ export const initIcrcWalletWorker = async ({
 	let restartedWithLedgerOnly = false;
 
 	const restartWorkerWithLedgerOnly = () => {
-		// For good measure, we stop the worker before restarting it with ledger only
-		stop();
+		// // For good measure, we stop the worker before restarting it with ledger only
+		// stop();
 
 		if (restartedWithLedgerOnly) {
 			return;
@@ -58,9 +58,9 @@ export const initIcrcWalletWorker = async ({
 
 		switch (msg) {
 			case 'syncIcrcWallet':
-				if (tokenId.description === 'AAA') {
-					console.log('syncIcrcWallet', tokenId, data);
-				}
+				// if (tokenId.description === 'AAA') {
+				// 	console.log('syncIcrcWallet', tokenId, data);
+				// }
 
 				syncWallet({
 					tokenId,
@@ -78,6 +78,7 @@ export const initIcrcWalletWorker = async ({
 				// In case of error, we start the listener again, but only with the ledgerCanisterId,
 				// to make it request only the balance and not the transactions
 				if (nonNullish(indexCanisterId)) {
+					// stop();
 					restartWorkerWithLedgerOnly();
 				}
 
