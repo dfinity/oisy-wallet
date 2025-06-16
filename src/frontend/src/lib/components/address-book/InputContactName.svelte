@@ -20,9 +20,9 @@
 
 	$effect(() => {
 		contact.name = name;
-	})
+	});
 
-	const trimmedName = $derived((name).trim());
+	const trimmedName = $derived(name.trim());
 	const isNameTooLong = $derived(trimmedName.length > CONTACT_MAX_NAME_LENGTH);
 
 	$effect(() => {
