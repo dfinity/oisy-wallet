@@ -347,13 +347,19 @@ describe('AddressBookModal', () => {
 			data: { entrypoint: { type: AddressBookSteps.SAVE_ADDRESS, address: '0x123', onComplete } }
 		});
 
-		await waitFor(async () => {
-			const closeBtn = getByTestId(BUTTON_MODAL_CLOSE);
+		let closeBtn;
+
+		await waitFor(() => {
+			closeBtn = getByTestId(BUTTON_MODAL_CLOSE);
 
 			expect(closeBtn).toBeInTheDocument();
-
-			await fireEvent.click(closeBtn);
 		});
+
+		expect(closeBtn).not.toBeUndefined();
+
+		if (closeBtn) {
+			await fireEvent.click(closeBtn);
+		}
 
 		expect(onComplete).toHaveBeenCalledOnce();
 	});
