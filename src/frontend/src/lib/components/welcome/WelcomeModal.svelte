@@ -8,7 +8,6 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
-
 		<div class="flex flex-col gap-4">
 			<h3 class="my-3 items-center text-center">{$i18n.welcome.title}</h3>
 			<Html text={$i18n.welcome.description} />
