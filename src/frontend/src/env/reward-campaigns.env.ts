@@ -4,7 +4,9 @@ import type { RewardCampaignDescription } from '$env/types/env-reward';
 import * as z from 'zod';
 
 const parseResult = z.array(RewardCampaignSchema).safeParse(rewardCampaignsJson);
-export const rewardCampaigns: RewardCampaignDescription[] = parseResult.success ? parseResult.data : [];
+export const rewardCampaigns: RewardCampaignDescription[] = parseResult.success
+	? parseResult.data
+	: [];
 
 export const SPRINKLES_SEASON_1_EPISODE_3_ID = 'sprinkles_s1e3';
 

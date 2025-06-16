@@ -43,8 +43,8 @@
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
-	const ongoingCampaigns: RewardCampaignDescription[] = rewardCampaigns.filter(({ startDate, endDate }) =>
-		isOngoingCampaign({ startDate, endDate })
+	const ongoingCampaigns: RewardCampaignDescription[] = rewardCampaigns.filter(
+		({ startDate, endDate }) => isOngoingCampaign({ startDate, endDate })
 	);
 
 	const upcomingCampaigns: RewardCampaignDescription[] = rewardCampaigns.filter(({ startDate }) =>

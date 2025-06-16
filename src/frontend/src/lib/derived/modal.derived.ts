@@ -184,7 +184,9 @@ export const modalRewardDetails: Readable<boolean> = derived(
 export const modalRewardDetailsData: Readable<RewardCampaignDescription | undefined> = derived(
 	modalStore,
 	($modalStore) =>
-		$modalStore?.type === 'reward-details' ? ($modalStore?.data as RewardCampaignDescription) : undefined
+		$modalStore?.type === 'reward-details'
+			? ($modalStore?.data as RewardCampaignDescription)
+			: undefined
 );
 export const modalRewardState: Readable<boolean> = derived(
 	modalStore,
