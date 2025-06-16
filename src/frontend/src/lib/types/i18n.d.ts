@@ -193,9 +193,6 @@ interface I18nRewards {
 		no_balance_title: string;
 		no_balance_description: string;
 		open_wallet: string;
-		state_modal_title: string;
-		state_modal_title_jackpot: string;
-		state_modal_content_text: string;
 		carousel_slide_title: string;
 		carousel_slide_cta: string;
 		sprinkles_earned: string;
