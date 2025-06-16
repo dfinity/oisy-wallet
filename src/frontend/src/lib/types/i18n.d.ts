@@ -24,6 +24,7 @@ interface I18nCore {
 		view: string;
 		copy: string;
 		delete: string;
+		create: string;
 		clear_filter: string;
 		not_available: string;
 		new: string;
@@ -987,6 +988,7 @@ interface I18nAddress_book {
 		show_address_text: string;
 		add_first_address: string;
 	};
+	create_contact: { title: string };
 }
 
 interface I18nContact {

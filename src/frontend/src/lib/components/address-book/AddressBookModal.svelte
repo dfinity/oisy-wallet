@@ -5,6 +5,7 @@
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookQrCodeStep from '$lib/components/address-book/AddressBookQrCodeStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import CreateContactStep from '$lib/components/address-book/CreateContactStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
 	import DeleteContactConfirmBottomSheet from '$lib/components/address-book/DeleteContactConfirmBottomSheet.svelte';
@@ -107,6 +108,10 @@
 			title: $i18n.address.save.title
 		},
 		{
+			name: AddressBookSteps.CREATE_CONTACT,
+			title: $i18n.address_book.create_contact.title
+		},
+		{
 			name: AddressBookSteps.SHOW_CONTACT,
 			title: $i18n.address_book.show_contact.title
 		},
@@ -160,11 +165,18 @@
 	});
 
 	let modal: WizardModal | undefined = $state();
-	const close = () => modalStore.close();
+	const close = () => {
+		if (nonNullish(modalData?.entrypoint?.onComplete)) {
+			modalData.entrypoint.onComplete();
+			return;
+		}
+		modalStore.close();
+	};
 
 	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
 	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
+	let editContactNameTitle = $state($i18n.contact.form.add_new_contact);
 
 	let isDeletingContact = $state<boolean>(false);
 
@@ -227,7 +239,7 @@
 			nonNullish(modalData?.entrypoint) &&
 			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
 		) {
-			modalStore.close();
+			close();
 			return;
 		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
@@ -301,7 +313,7 @@
 		{:else if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
 			{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
 		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
-			{editContactNameStep.title}
+			{editContactNameTitle}
 		{:else}
 			{currentStep?.title}
 		{/if}
@@ -357,7 +369,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
-				onEditAddress={(index: number) => {
+				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
@@ -382,7 +394,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
-				onEditAddress={(index: number) => {
+				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
@@ -397,6 +409,7 @@
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
 		<EditContactNameStep
 			bind:this={editContactNameStep}
+			bind:title={editContactNameTitle}
 			contact={currentContact}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
 				const createdContact = await callCreateContact({ name: contact.name });
@@ -478,13 +491,27 @@
 		<SaveAddressStep
 			onCreateContact={() => {
 				currentContact = undefined;
-				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				gotoStep(AddressBookSteps.CREATE_CONTACT);
 			}}
 			onSelectContact={(contact: ContactUi) => {
 				currentContact = contact;
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
+			onClose={close}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.CREATE_CONTACT}
+		<CreateContactStep
+			onSave={async (contact: ContactUi) => {
+				loading = true;
+				currentContact = contact;
+				currentAddressIndex = undefined;
+				const createdContact = await callCreateContact({ name: contact.name });
+				await callUpdateContact({ contact: { ...createdContact, ...contact } });
+				close();
+			}}
+			onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
 		<AddressBookQrCodeStep

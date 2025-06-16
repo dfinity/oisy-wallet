@@ -9,33 +9,25 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let {
-		contact = $bindable(),
-		disabled = false,
-		onSubmit = () => {}
-	}: { contact: Partial<ContactUi>; disabled?: boolean; onSubmit?: () => void } = $props();
+	interface Props {
+		contact: Partial<ContactUi>;
+		disabled?: boolean;
+		isValid: boolean;
+	}
+	let { contact = $bindable(), disabled = false, isValid = $bindable() }: Props = $props();
 
 	const trimmedName = $derived((contact.name ?? '').trim());
 	const isNameTooLong = $derived(trimmedName.length > CONTACT_MAX_NAME_LENGTH);
 
-	const assertValid = (): boolean => notEmptyString(trimmedName) && !isNameTooLong;
-
-	const isValid = $derived(assertValid());
-
-	const handleKeydown = (event: KeyboardEvent): void => {
-		if (event.key === 'Enter' && assertValid()) {
-			event.preventDefault();
-			onSubmit();
-		}
-	};
-
-	export { isValid };
+	$effect(() => {
+		isValid = notEmptyString(trimmedName) && !isNameTooLong;
+	});
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
-
-<form class="w-full" style="--input-font-size: var(--text-base)">
-	<div class="rounded-lg bg-brand-subtle-10 p-4 pb-6 pt-4 text-sm md:p-6 md:text-base md:font-bold">
+<div class="w-full" style="--input-font-size: var(--text-base)">
+	<div
+		class="w-full rounded-lg bg-brand-subtle-10 p-4 pb-6 pt-4 text-sm md:p-6 md:text-base md:font-bold"
+	>
 		{$i18n.contact.fields.name}
 		<InputText
 			name="name"
@@ -54,4 +46,4 @@
 			>
 		{/if}
 	</div>
-</form>
+</div>
