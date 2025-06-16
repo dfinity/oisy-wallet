@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { Size } from '$lib/types/components';
 
-	export let spacing: 'none' | Extract<Size, 'lg' | 'md'> = 'none';
+	interface Props {
+		spacing?: 'none' | Extract<Size, 'lg' | 'md'>;
+	}
+
+	let { spacing = 'none' }: Props = $props();
 </script>
 
 <hr
