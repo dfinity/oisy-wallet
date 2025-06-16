@@ -13,7 +13,7 @@
 	}
 
 	let {
-		value = $bindable(),
+		value = $bindable(''),
 		name,
 		placeholder,
 		showResetButton = false,
