@@ -40,7 +40,12 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 		}
 
 		if (lastTimestamp === 0n) {
-			return { receivedReward: false, receivedJackpot: false, receivedReferral: false, lastTimestamp };
+			return {
+				receivedReward: false,
+				receivedJackpot: false,
+				receivedReferral: false,
+				lastTimestamp
+			};
 		}
 	}
 
