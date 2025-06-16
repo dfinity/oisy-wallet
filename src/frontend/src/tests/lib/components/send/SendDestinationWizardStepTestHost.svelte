@@ -1,12 +1,13 @@
 <script lang="ts">
-	import type { SendDestinationTab } from '$lib/types/send';
-	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
+
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { allSendWizardSteps } from '$lib/config/send.config';
-	import { i18n } from '$lib/stores/i18n.store';
 	import type { Writable } from 'svelte/store';
-	import type { ContactUi } from '$lib/types/contact';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
+	import { allSendWizardSteps } from '$lib/config/send.config';
+	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { ContactUi } from '$lib/types/contact';
+	import type { SendDestinationTab } from '$lib/types/send';
 
 	let {
 		destination,
