@@ -14,7 +14,7 @@
 	<!-- we know we want to show these 3 cards, thats why the translations have been added already -->
 
 	<div class="grid grid-cols-3 gap-3">
-		<EarningCategoryCard appPath={AppPath.EarningGold}>
+		<EarningCategoryCard disabled>
 			{#snippet icon()}
 				<IconCrypto />
 			{/snippet}
