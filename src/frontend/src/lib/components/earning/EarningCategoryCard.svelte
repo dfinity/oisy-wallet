@@ -1,0 +1,47 @@
+<script lang="ts">
+	import { networkUrl } from '$lib/utils/nav.utils.js';
+	import { AppPath } from '$lib/constants/routes.constants.js';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
+	import { networkId } from '$lib/derived/network.derived';
+	import type { Snippet } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+
+	interface Props {
+		title: Snippet;
+		description: Snippet;
+		icon: Snippet;
+		appPath?: AppPath;
+		disabled?: boolean;
+	}
+
+	const { title, description, icon, appPath, disabled }: Props = $props();
+
+	let fromRoute = $state<NavigationTarget | null>(null);
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
+</script>
+
+<a
+	class="transition-bg duration-250 flex flex-col items-center rounded-2xl p-3 text-center text-primary no-underline shadow"
+	class:hover:bg-brand-subtle-30={!disabled}
+	class:hover:text-primary={!disabled}
+	class:bg-brand-subtle-20={!disabled}
+	class:bg-disabled-alt={disabled}
+	href={nonNullish(appPath) && !disabled
+		? networkUrl({
+				path: appPath,
+				networkId: $networkId,
+				usePreviousRoute: false,
+				fromRoute
+			})
+		: undefined}
+>
+	<span class="py-2">
+		{@render icon()}
+	</span>
+	<span class="inline-flex font-bold">{@render title()}</span>
+	<span class="inline-flex text-tertiary">{@render description()}</span>
+</a>
