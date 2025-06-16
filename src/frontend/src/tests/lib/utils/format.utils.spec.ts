@@ -110,6 +110,39 @@ describe('format.utils', () => {
 
 			expect(formatToken({ value: negativeValue, showPlusSign: true })).toBe('-1');
 		});
+
+		it('should format small values', () => {
+			expect(formatToken({ value: 1200000000000000n })).toBe('0.0012');
+			expect(formatToken({ value: 120000000000000n })).toBe('0.00012');
+			expect(formatToken({ value: 12000000000000n })).toBe('0.000012');
+			expect(formatToken({ value: 1200000000000n })).toBe('0.0000012');
+			expect(formatToken({ value: 120000000000n })).toBe('0.00000012');
+			expect(formatToken({ value: 12000000000n })).toBe('0.00000001');
+		});
+
+		it('should format small values with trailing zeros', () => {
+			expect(formatToken({ value: 1200000000000000n, trailingZeros: true })).toBe('0.0012');
+			expect(formatToken({ value: 120000000000000n, trailingZeros: true })).toBe('0.00012');
+			expect(formatToken({ value: 12000000000000n, trailingZeros: true })).toBe('0.000012');
+			expect(formatToken({ value: 1200000000000n, trailingZeros: true })).toBe('0.0000012');
+			expect(formatToken({ value: 120000000000n, trailingZeros: true })).toBe('0.00000012');
+			expect(formatToken({ value: 12000000000n, trailingZeros: true })).toBe('0.00000001');
+		});
+
+		it('should format small values with specified displayDecimals', () => {
+			expect(formatToken({ value: 1200000001000000n, displayDecimals: 12 })).toBe('0.001200000001');
+			expect(formatToken({ value: 120000001000000n, displayDecimals: 12 })).toBe('0.000120000001');
+			expect(formatToken({ value: 12000001000000n, displayDecimals: 12 })).toBe('0.000012000001');
+			expect(formatToken({ value: 1200001000000n, displayDecimals: 12 })).toBe('0.000001200001');
+			expect(formatToken({ value: 120001000000n, displayDecimals: 12 })).toBe('0.000000120001');
+			expect(formatToken({ value: 12001000000n, displayDecimals: 12 })).toBe('0.000000012001');
+			expect(formatToken({ value: 1201000000n, displayDecimals: 12 })).toBe('0.000000001201');
+		});
+
+		it('should format too small value with default displayDecimals', () => {
+			expect(formatToken({ value: 1200000000n })).toBe('< 0.00000001');
+			expect(formatToken({ value: 7000000000n })).toBe('< 0.00000001');
+		});
 	});
 
 	describe('formatSecondsToNormalizedDate', () => {
