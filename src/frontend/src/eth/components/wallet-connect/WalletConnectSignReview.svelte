@@ -42,5 +42,7 @@
 		</p>
 	{/if}
 
-	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+	{#snippet toolbar()}
+		<WalletConnectActions on:icApprove on:icReject />
+	{/snippet}
 </ContentWithToolbar>

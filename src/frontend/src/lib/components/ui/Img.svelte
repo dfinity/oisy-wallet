@@ -11,6 +11,8 @@
 		grayscale?: boolean;
 		styleClass?: string;
 		testId?: string;
+		onLoad?: () => void;
+		onError?: () => void;
 	}
 
 	let {
@@ -24,7 +26,9 @@
 		fitHeight = false,
 		grayscale = false,
 		styleClass,
-		testId
+		testId,
+		onLoad,
+		onError
 	}: Props = $props();
 </script>
 
@@ -37,8 +41,8 @@
 	{height}
 	data-tid={testId}
 	decoding="async"
-	on:load
-	on:error
+	onload={onLoad}
+	onerror={onError}
 	class:rounded-full={rounded}
 	class:grayscale
 	class={styleClass}
