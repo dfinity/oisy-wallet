@@ -1,10 +1,10 @@
 <script lang="ts">
+	import EarningCategoryCard from '$lib/components/earning/EarningCategoryCard.svelte';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { i18n } from '$lib/stores/i18n.store.js';
-	import EarningCategoryCard from '$lib/components/earning/EarningCategoryCard.svelte';
 </script>
 
 <div class="flex flex-col">

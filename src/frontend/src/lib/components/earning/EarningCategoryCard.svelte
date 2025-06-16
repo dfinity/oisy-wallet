@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { networkUrl } from '$lib/utils/nav.utils.js';
-	import { AppPath } from '$lib/constants/routes.constants.js';
-	import type { NavigationTarget } from '@sveltejs/kit';
-	import { afterNavigate } from '$app/navigation';
-	import { networkId } from '$lib/derived/network.derived';
-	import type { Snippet } from 'svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import type { Snippet } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
+	import type { AppPath } from '$lib/constants/routes.constants.js';
+	import { networkId } from '$lib/derived/network.derived';
+	import { networkUrl } from '$lib/utils/nav.utils.js';
 
 	interface Props {
 		title: Snippet;

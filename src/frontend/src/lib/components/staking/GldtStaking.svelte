@@ -1,14 +1,14 @@
 <script lang="ts">
-	import PageTitle from '$lib/components/ui/PageTitle.svelte';
-	import { i18n } from '$lib/stores/i18n.store.js';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
-	import { networkUrl } from '$lib/utils/nav.utils';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import PageTitle from '$lib/components/ui/PageTitle.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { networkId } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store.js';
+	import { networkUrl } from '$lib/utils/nav.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
