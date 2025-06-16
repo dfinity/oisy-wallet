@@ -32,12 +32,13 @@ export const formatToken = ({
 		return '< 0.00000001';
 	}
 
-	const maxFractionDigits = Math.min(leadingZeros + 2 , MAX_DEFAULT_DISPLAY_DECIMALS)
+	const maxFractionDigits = Math.min(leadingZeros + 2, MAX_DEFAULT_DISPLAY_DECIMALS);
 	const minFractionDigits = displayDecimals ?? DEFAULT_DISPLAY_DECIMALS;
 
 	const formatted = (+res).toLocaleString('en-US', {
 		useGrouping: false,
-		maximumFractionDigits: displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS),
+		maximumFractionDigits:
+			displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS),
 		minimumFractionDigits: trailingZeros ? minFractionDigits : undefined
 	}) as `${number}`;
 
