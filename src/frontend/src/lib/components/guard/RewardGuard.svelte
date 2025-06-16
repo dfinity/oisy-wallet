@@ -5,18 +5,19 @@
 	import type { RewardDescription } from '$env/types/env-reward';
 	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
+	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
 	import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		modalReferralState,
 		modalReferralStateData,
 		modalRewardState,
-		modalRewardStateData, modalWelcome
+		modalRewardStateData,
+		modalWelcome
 	} from '$lib/derived/modal.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isOngoingCampaign, loadRewardResult } from '$lib/utils/rewards.utils';
-	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
 
 	interface Props {
 		children?: Snippet;
@@ -68,9 +69,19 @@
 			}
 		}
 
-		const season1Episode4Campaign = rewardCampaigns.find(({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID);
-		if (nonNullish(lastTimestamp) && lastTimestamp === 0n && nonNullish(season1Episode4Campaign) && isOngoingCampaign({startDate: season1Episode4Campaign.startDate, endDate: season1Episode4Campaign.endDate})) {
-			modalStore.openWelcome(welcomeModalId)
+		const season1Episode4Campaign = rewardCampaigns.find(
+			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
+		);
+		if (
+			nonNullish(lastTimestamp) &&
+			lastTimestamp === 0n &&
+			nonNullish(season1Episode4Campaign) &&
+			isOngoingCampaign({
+				startDate: season1Episode4Campaign.startDate,
+				endDate: season1Episode4Campaign.endDate
+			})
+		) {
+			modalStore.openWelcome(welcomeModalId);
 		}
 	});
 </script>
