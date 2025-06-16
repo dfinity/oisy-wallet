@@ -71,8 +71,7 @@
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<ButtonCancel {disabled} onclick={onBack} testId={ADDRESS_BOOK_CANCEL_BUTTON}
-				></ButtonCancel>
+				<ButtonCancel {disabled} onclick={onBack} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
 				<Button
 					type="submit"
 					colorStyle="primary"
