@@ -17,7 +17,6 @@ import { AddressBookSteps } from '$lib/enums/progress-steps';
 import { loadContacts } from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { modalStore } from '$lib/stores/modal.store';
-import AddressBookModalTestHost from '$tests/lib/components/address-book/AddressBookModalTestHost.svelte';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -338,7 +337,7 @@ describe('AddressBookModal', () => {
 	});
 
 	it('should execute the onComplete callback function when the modal is closed during save address entrypoint', async () => {
-		const { getByTestId } = render(AddressBookModalTestHost);
+		const { getByTestId } = render(AddressBookModal);
 
 		const onComplete = vi.fn();
 
@@ -347,9 +346,7 @@ describe('AddressBookModal', () => {
 			data: { entrypoint: { type: AddressBookSteps.SAVE_ADDRESS, address: '0x123', onComplete } }
 		});
 
-		await waitFor(() => {
-			expect(getByTestId(BUTTON_MODAL_CLOSE)).toBeInTheDocument();
-		});
+		expect(getByTestId(BUTTON_MODAL_CLOSE)).toBeInTheDocument();
 
 		await fireEvent.click(getByTestId(BUTTON_MODAL_CLOSE));
 
