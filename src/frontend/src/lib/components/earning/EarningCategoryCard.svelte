@@ -13,9 +13,10 @@
 		icon: Snippet;
 		appPath?: AppPath;
 		disabled?: boolean;
+		testId?: string;
 	}
 
-	const { title, description, icon, appPath, disabled }: Props = $props();
+	const { title, description, icon, appPath, disabled, testId }: Props = $props();
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -38,6 +39,7 @@
 				fromRoute
 			})
 		: undefined}
+	data-tid={testId}
 >
 	<span class="py-2">
 		{@render icon()}
