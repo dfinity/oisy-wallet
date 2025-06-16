@@ -24,6 +24,7 @@ interface I18nCore {
 		view: string;
 		copy: string;
 		delete: string;
+		create: string;
 		clear_filter: string;
 		not_available: string;
 		new: string;

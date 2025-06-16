@@ -2,14 +2,13 @@
 	import { nonNullish } from '@dfinity/utils';
 	import InputAddressAlias from '$lib/components/address/InputAddressAlias.svelte';
 	import InputContactName from '$lib/components/address-book/InputContactName.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import {
-		ADDRESS_BOOK_BACK_BUTTON,
-		ADDRESS_BOOK_SAVE_BUTTON
-	} from '$lib/constants/test-ids.constants';
+	import { ADDRESS_BOOK_SAVE_BUTTON } from '$lib/constants/test-ids.constants';
+	import { ADDRESS_BOOK_CANCEL_BUTTON } from '$lib/constants/test-ids.constants.js';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -56,6 +55,7 @@
 
 <form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
+		<Avatar name={editingContact?.name} variant="xl"></Avatar>
 		<div class="w-full text-2xl font-bold text-primary md:text-3xl">
 			<InputContactName bind:contact={editingContact} bind:isValid={validName} />
 		</div>
@@ -71,7 +71,7 @@
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<ButtonBack {disabled} onclick={onBack} testId={ADDRESS_BOOK_BACK_BUTTON}></ButtonBack>
+				<ButtonCancel {disabled} onclick={onBack} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
 				<Button
 					type="submit"
 					colorStyle="primary"
@@ -79,7 +79,7 @@
 					testId={ADDRESS_BOOK_SAVE_BUTTON}
 					loading={disabled}
 				>
-					{$i18n.core.text.save}
+					{$i18n.core.text.create}
 				</Button>
 			</ButtonGroup>
 		{/snippet}
