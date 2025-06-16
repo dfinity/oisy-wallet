@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	let modalOpen = $derived($modalStore?.type === 'address-book');
 </script>

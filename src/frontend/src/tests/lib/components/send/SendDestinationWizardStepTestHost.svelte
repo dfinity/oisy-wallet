@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Writable } from 'svelte/store';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
