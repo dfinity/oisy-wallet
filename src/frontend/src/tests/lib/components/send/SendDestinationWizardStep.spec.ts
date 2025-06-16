@@ -11,6 +11,7 @@ import {
 import { contactsStore } from '$lib/stores/contacts.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import { mapToFrontendContact } from '$lib/utils/contact.utils';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
@@ -19,7 +20,7 @@ import { getMockContacts, mockBackendContactAddressEth } from '$tests/mocks/cont
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 
 const mockContacts = getMockContacts({
 	n: 2,
@@ -120,8 +121,9 @@ describe('SendDestinationWizardStep', () => {
 	});
 
 	it('should set selectedContact when a contact is selected', async () => {
-		const { getByText, getByTestId, component } = render(SendDestinationWizardStepTestHost, {
-			props: {},
+		let selectedContact: Writable<ContactUi> = writable();
+		const { getByText, getByTestId } = render(SendDestinationWizardStepTestHost, {
+			props: { selectedContact },
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
@@ -131,17 +133,18 @@ describe('SendDestinationWizardStep', () => {
 			getByTestId(`${SEND_DESTINATION_WIZARD_CONTACT}-${mockContacts[0].name}`)
 		);
 
-		expect(component.getSelectedContact()).toEqual(mapToFrontendContact(mockContacts[0]));
+		expect(get(selectedContact)).toEqual(mapToFrontendContact(mockContacts[0]));
 	});
 
 	it('should set selectedContact when a contacts address is entered and next is clicked', async () => {
-		const { getByTestId, component } = render(SendDestinationWizardStepTestHost, {
-			props: { destination: mockEthAddress3 },
+		let selectedContact: Writable<ContactUi> = writable();
+		const { getByTestId } = render(SendDestinationWizardStepTestHost, {
+			props: { destination: mockEthAddress3, selectedContact },
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
 		await fireEvent.click(getByTestId(SEND_FORM_DESTINATION_NEXT_BUTTON));
 
-		expect(component.getSelectedContact()).toEqual(mapToFrontendContact(mockContacts[0]));
+		expect(get(selectedContact)).toEqual(mapToFrontendContact(mockContacts[0]));
 	});
 });

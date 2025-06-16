@@ -6,6 +6,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { allSendWizardSteps } from '$lib/config/send.config';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Writable } from 'svelte/store';
 
 	let {
 		destination,
@@ -14,16 +15,18 @@
 	}: {
 		destination: string;
 		activeSendDestinationTab: SendDestinationTab;
-		selectedContact: ContactUi | undefined;
+		selectedContact: Writable<ContactUi>;
 	} = $props();
 
 	let steps: WizardSteps = allSendWizardSteps({ i18n: $i18n });
 
 	let currentStep: WizardStep = $state(steps[0]);
-
-	export const getSelectedContact: () => ContactUi | undefined = () => selectedContact;
 </script>
 
 <WizardModal {steps} bind:currentStep testId={SEND_TOKENS_MODAL}>
-	<SendDestinationWizardStep {destination} {activeSendDestinationTab} bind:selectedContact />
+	<SendDestinationWizardStep
+		{destination}
+		{activeSendDestinationTab}
+		bind:selectedContact={$selectedContact}
+	/>
 </WizardModal>
