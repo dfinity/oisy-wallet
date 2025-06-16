@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
 	import rewardReceived from '$lib/assets/reward-received.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
@@ -19,7 +19,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		reward: RewardDescription;
+		reward: RewardCampaignDescription;
 		jackpot?: boolean;
 	}
 

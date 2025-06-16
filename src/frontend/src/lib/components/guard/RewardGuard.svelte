@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
@@ -34,7 +34,7 @@
 		const { receivedReward, receivedJackpot, receivedReferral, reward } =
 			await loadRewardResult($authIdentity);
 
-		const campaign: RewardDescription | undefined = rewardCampaigns.find(
+		const campaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
 			({ id }) => id === reward?.campaignId
 		);
 

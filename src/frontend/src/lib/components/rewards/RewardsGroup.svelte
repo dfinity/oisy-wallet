@@ -2,7 +2,7 @@
 	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { TRACK_REWARD_CAMPAIGN_OPEN } from '$lib/constants/analytics.contants';
@@ -13,7 +13,7 @@
 
 	interface Props {
 		title?: string;
-		rewards: RewardDescription[];
+		rewards: RewardCampaignDescription[];
 		altText?: string;
 		altImg?: string;
 		testId?: string;
