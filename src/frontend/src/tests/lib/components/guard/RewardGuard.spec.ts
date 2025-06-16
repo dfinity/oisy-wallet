@@ -1,6 +1,9 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardCampaigns from '$env/reward-campaigns.env';
-import { SPRINKLES_SEASON_1_EPISODE_3_ID, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
+import {
+	SPRINKLES_SEASON_1_EPISODE_3_ID,
+	SPRINKLES_SEASON_1_EPISODE_4_ID
+} from '$env/reward-campaigns.env';
 import type { RewardDescription } from '$env/types/env-reward';
 import * as rewardApi from '$lib/api/reward.api';
 import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
@@ -18,16 +21,16 @@ describe('RewardGuard', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(
-			() => mockRewardCampaigns.map(campaign => {
-					if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
-						return {
-							...campaign,
-							startDate: new Date('2025-02-05T14:28:02.288Z'),
-						}
-					}
-					return campaign;
-				})
+		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(() =>
+			mockRewardCampaigns.map((campaign) => {
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
+					return {
+						...campaign,
+						startDate: new Date('2025-02-05T14:28:02.288Z')
+					};
+				}
+				return campaign;
+			})
 		);
 
 		sessionStorage.clear();
@@ -167,7 +170,7 @@ describe('RewardGuard', () => {
 			expect(trackEvent).toHaveBeenNthCalledWith(1, {
 				name: TRACK_WELCOME_OPEN,
 				metadata: {
-					campaignId: SPRINKLES_SEASON_1_EPISODE_4_ID,
+					campaignId: SPRINKLES_SEASON_1_EPISODE_4_ID
 				}
 			});
 		});
