@@ -2,7 +2,7 @@ import CreateContactStep from '$lib/components/address-book/CreateContactStep.sv
 import {
 	ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT,
 	ADDRESS_BOOK_ADDRESS_ALIAS_INPUT,
-	ADDRESS_BOOK_BACK_BUTTON,
+	ADDRESS_BOOK_CANCEL_BUTTON,
 	ADDRESS_BOOK_CONTACT_NAME_INPUT,
 	ADDRESS_BOOK_SAVE_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -27,10 +27,10 @@ describe('CreateContactStep', () => {
 
 		// Check that the buttons are rendered
 		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).toBeInTheDocument();
-		expect(getByTestId(ADDRESS_BOOK_BACK_BUTTON)).toBeInTheDocument();
+		expect(getByTestId(ADDRESS_BOOK_CANCEL_BUTTON)).toBeInTheDocument();
 
 		// Check that the save button has the correct text
-		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).toHaveTextContent(en.core.text.save);
+		expect(getByTestId(ADDRESS_BOOK_SAVE_BUTTON)).toHaveTextContent(en.core.text.create);
 	});
 
 	it('should disable save button when form is invalid', () => {
@@ -111,7 +111,7 @@ describe('CreateContactStep', () => {
 		});
 
 		// Click the cancel button
-		const cancelButton = getByTestId(ADDRESS_BOOK_BACK_BUTTON);
+		const cancelButton = getByTestId(ADDRESS_BOOK_CANCEL_BUTTON);
 		await fireEvent.click(cancelButton);
 
 		// Check that close was called
