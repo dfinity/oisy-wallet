@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
-	import { rewardCampaigns } from '$env/reward-campaigns.env';
+	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
@@ -11,11 +11,12 @@
 		modalReferralState,
 		modalReferralStateData,
 		modalRewardState,
-		modalRewardStateData
+		modalRewardStateData, modalWelcome
 	} from '$lib/derived/modal.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { loadRewardResult } from '$lib/utils/rewards.utils';
+	import { isOngoingCampaign, loadRewardResult } from '$lib/utils/rewards.utils';
+	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
 
 	interface Props {
 		children?: Snippet;
@@ -25,13 +26,14 @@
 
 	const rewardModalId = Symbol();
 	const referralModalId = Symbol();
+	const welcomeModalId = Symbol();
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
 			return;
 		}
 
-		const { receivedReward, receivedJackpot, receivedReferral, reward } =
+		const { receivedReward, receivedJackpot, receivedReferral, reward, lastTimestamp } =
 			await loadRewardResult($authIdentity);
 
 		const campaign: RewardDescription | undefined = rewardCampaigns.find(
@@ -65,6 +67,11 @@
 				});
 			}
 		}
+
+		const season1Episode4Campaign = rewardCampaigns.find(({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID);
+		if (nonNullish(lastTimestamp) && lastTimestamp === 0n && nonNullish(season1Episode4Campaign) && isOngoingCampaign({startDate: season1Episode4Campaign.startDate, endDate: season1Episode4Campaign.endDate})) {
+			modalStore.openWelcome(welcomeModalId)
+		}
 	});
 </script>
 
@@ -74,4 +81,6 @@
 	<RewardStateModal reward={$modalRewardStateData.reward} jackpot={$modalRewardStateData.jackpot} />
 {:else if $modalReferralState && nonNullish($modalReferralStateData)}
 	<ReferralStateModal reward={$modalReferralStateData} />
+{:else if $modalWelcome}
+	<WelcomeModal />
 {/if}

@@ -23,6 +23,7 @@ export interface RewardResult {
 	receivedJackpot: boolean;
 	receivedReferral: boolean;
 	reward?: RewardResponseInfo;
+	lastTimestamp?: bigint;
 }
 
 export interface RewardClaimApiResponse {
