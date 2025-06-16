@@ -21,6 +21,7 @@
 			"view": "View",
 			"copy": "Copy",
 			"delete": "Delete",
+			"create": "Create",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
 			"new": "New",
@@ -196,9 +197,6 @@
 			"no_balance_title": "Earn $oisy_short Sprinkles",
 			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
-			"state_modal_title": "Congratulations on earning today’s $oisy_short Sprinkles!",
-			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
-			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
 			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
@@ -1029,7 +1027,7 @@
 			"text": {
 				"title": "Refer a friend",
 				"referral_link_copied": "Referral link copied to clipboard.",
-				"information": "Get bonus sprinkles, every time your friends receive one!",
+				"information": "Refer friends and get bonus sprinkles!",
 				"not_referred_yet": "You haven't referred anyone yet",
 				"referred_amount": "You already referred $amount people",
 				"learn_more": "Learn more"
