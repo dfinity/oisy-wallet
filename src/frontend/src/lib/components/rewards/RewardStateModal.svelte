@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
-	import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
-	import rewardReceived from '$lib/assets/reward-received.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
