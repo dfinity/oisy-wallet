@@ -216,8 +216,12 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral, lastTimestamp: timestamp } =
-				await loadRewardResult(mockIdentity);
+			const {
+				receivedReward,
+				receivedJackpot,
+				receivedReferral,
+				lastTimestamp: timestamp
+			} = await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBeTruthy();
 			expect(receivedJackpot).toBeFalsy();
@@ -225,7 +229,7 @@ describe('rewards.utils', () => {
 			expect(timestamp).toBe(lastTimestamp);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
-		})
+		});
 
 		it('should return timestamp on first login', async () => {
 			const mockedUserData: UserData = {
