@@ -6,6 +6,7 @@
 	import type { Address } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { SEND_DESTINATION_WIZARD_CONTACT } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		address: Address;
@@ -16,7 +17,11 @@
 	let { contact, address, onClick }: Props = $props();
 </script>
 
-<LogoButton styleClass="group" {onClick}>
+<LogoButton
+	styleClass="group"
+	{onClick}
+	testId={`${SEND_DESTINATION_WIZARD_CONTACT}-${contact.name}`}
+>
 	{#snippet logo()}
 		<div class="mr-2">
 			<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} variant="sm" />
