@@ -16,7 +16,13 @@
 	}
 	let { contact = $bindable(), disabled = false, isValid = $bindable() }: Props = $props();
 
-	const trimmedName = $derived((contact.name ?? '').trim());
+	let name = $state(contact.name ?? '');
+
+	$effect(() => {
+		contact.name = name;
+	});
+
+	const trimmedName = $derived(name.trim());
 	const isNameTooLong = $derived(trimmedName.length > CONTACT_MAX_NAME_LENGTH);
 
 	$effect(() => {
@@ -32,7 +38,7 @@
 		<InputText
 			name="name"
 			placeholder=""
-			bind:value={contact.name}
+			bind:value={name}
 			showResetButton={!disabled}
 			testId={ADDRESS_BOOK_CONTACT_NAME_INPUT}
 			autofocus={true}
