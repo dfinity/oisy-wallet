@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
 	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
@@ -37,7 +37,7 @@
 		const { receivedReward, receivedJackpot, receivedReferral, reward, lastTimestamp } =
 			await loadRewardResult($authIdentity);
 
-		const campaign: RewardDescription | undefined = rewardCampaigns.find(
+		const campaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
 			({ id }) => id === reward?.campaignId
 		);
 

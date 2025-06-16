@@ -1,10 +1,7 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardCampaigns from '$env/reward-campaigns.env';
-import {
-	SPRINKLES_SEASON_1_EPISODE_3_ID,
-	SPRINKLES_SEASON_1_EPISODE_4_ID
-} from '$env/reward-campaigns.env';
-import type { RewardDescription } from '$env/types/env-reward';
+import { SPRINKLES_SEASON_1_EPISODE_3_ID, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import * as rewardApi from '$lib/api/reward.api';
 import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
@@ -47,7 +44,7 @@ describe('RewardGuard', () => {
 		campaign_id: SPRINKLES_SEASON_1_EPISODE_3_ID
 	};
 
-	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
+	const mockRewardCampaign: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
 		({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 	assertNonNullish(mockRewardCampaign);
