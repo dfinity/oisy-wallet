@@ -41,7 +41,7 @@
 
 	$effect(() => {
 		address.label = addressLabel;
-	})
+	});
 
 	$effect(() => {
 		if (nonNullish(address.label)) {
