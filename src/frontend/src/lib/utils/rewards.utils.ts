@@ -31,26 +31,21 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 			const containsJackpot: boolean = newRewards.some(({ name }) => name === 'jackpot');
 			const containsReferral: boolean = newRewards.some(({ name }) => name === 'referral');
 
+			const rewardType = containsJackpot ? 'jackpot' : containsReferral ? 'referral' : 'airdrop';
+
 			return {
-				receivedReward: true,
-				receivedJackpot: containsJackpot,
-				receivedReferral: containsReferral,
 				reward: getFirstReward({ rewards, containsJackpot, containsReferral }),
-				lastTimestamp
+				lastTimestamp,
+				rewardType
 			};
 		}
 
 		if (lastTimestamp === 0n) {
-			return {
-				receivedReward: false,
-				receivedJackpot: false,
-				receivedReferral: false,
-				lastTimestamp
-			};
+			return { lastTimestamp };
 		}
 	}
 
-	return { receivedReward: false, receivedJackpot: false, receivedReferral: false };
+	return { };
 };
 
 const getFirstReward = ({
