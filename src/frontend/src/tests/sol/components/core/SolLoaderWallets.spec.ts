@@ -35,8 +35,8 @@ describe('SolLoaderWallets', () => {
 	it('should not initialize wallet workers when no addresses are available', () => {
 		render(SolLoaderWallets);
 
-		// With testnets enabled, we expect mainnet + testnet + devnet tokens
-		expect(get(enabledSolanaTokens)).toHaveLength(3);
+		// With testnets enabled, we expect mainnet + devnet tokens
+		expect(get(enabledSolanaTokens)).toHaveLength(2);
 		expect(initSolWalletWorker).not.toHaveBeenCalled();
 	});
 
@@ -88,7 +88,7 @@ describe('SolLoaderWallets', () => {
 				networkId === SOLANA_TOKEN.network.id || networkId === SOLANA_DEVNET_TOKEN.network.id
 		);
 
-		expect(walletWorkerTokens).toHaveLength(3);
+		expect(walletWorkerTokens).toHaveLength(2);
 	});
 
 	it('should include local network token when LOCAL is true', () => {
@@ -96,7 +96,7 @@ describe('SolLoaderWallets', () => {
 
 		render(SolLoaderWallets);
 
-		// With LOCAL true and testnets enabled, we expect mainnet + testnet + devnet + local tokens
-		expect(get(enabledSolanaTokens)).toHaveLength(4);
+		// With LOCAL true and testnets enabled, we expect mainnet + devnet + local tokens
+		expect(get(enabledSolanaTokens)).toHaveLength(3);
 	});
 });
