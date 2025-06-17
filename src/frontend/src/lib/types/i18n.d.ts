@@ -182,7 +182,6 @@ interface I18nRewards {
 		upcoming_campaigns: string;
 		active_date: string;
 		ended_date: string;
-		participate_title: string;
 		share: string;
 		learn_more: string;
 		check_status: string;
@@ -205,6 +204,7 @@ interface I18nRewards {
 		min_logins: string;
 		min_transactions: string;
 		min_total_assets_usd: string;
+		hangover: string;
 	};
 	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
 }
