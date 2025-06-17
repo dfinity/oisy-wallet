@@ -1,15 +1,24 @@
+import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
-import type { Languages } from '$lib/types/languages';
+import { Languages } from '$lib/types/languages';
 import { get, set } from '$lib/utils/storage.utils';
 import { writable, type Readable } from 'svelte/store';
 
 const enI18n = (): I18n => ({
-	lang: 'en',
+	lang: Languages.ENGLISH,
 	...en
+});
+
+// @ts-ignore
+const deI18n = (): I18n => ({
+	lang: Languages.GERMAN,
+	...de
 });
 
 const loadLang = (lang: Languages): Promise<I18n> => {
 	switch (lang) {
+		case Languages.GERMAN:
+			return Promise.resolve(deI18n());
 		default:
 			return Promise.resolve(enI18n());
 	}
@@ -23,12 +32,10 @@ export interface I18nStore extends Readable<I18n> {
 }
 
 const initI18n = (): I18nStore => {
-	const { subscribe, set } = writable<I18n>({
-		lang: 'en',
-		...en
-	});
+	const { subscribe, set } = writable<I18n>(enI18n());
 
 	const switchLang = async (lang: Languages) => {
+		console.log('switchLang', lang);
 		const bundle = await loadLang(lang);
 		set(bundle);
 
@@ -39,9 +46,9 @@ const initI18n = (): I18nStore => {
 		subscribe,
 
 		init: async () => {
-			const lang = get<Languages>({ key: 'lang' }) ?? 'en';
+			const lang = get<Languages>({ key: 'lang' }) ?? Languages.ENGLISH;
 
-			if (lang === 'en') {
+			if (lang === Languages.ENGLISH) {
 				saveLang(lang);
 				// No need to reload the store, English is already the default
 				return;

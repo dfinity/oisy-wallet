@@ -31,7 +31,7 @@
 		NAVIGATION_MENU_GOLD_BUTTON,
 		NAVIGATION_MENU_PRIVACY_MODE_BUTTON
 	} from '$lib/constants/test-ids.constants';
-	import { authIdentity, authSignedIn } from '$lib/derived/auth.derived';
+	import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { getUserRoles } from '$lib/services/reward.services';
@@ -44,6 +44,8 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
+	import LanguageSelector from '$lib/components/core/LanguageSelector.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -87,8 +89,14 @@
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
-<Popover bind:visible anchor={button} direction="rtl" on:click={hidePopover}>
+<Popover bind:visible anchor={button} direction="rtl">
 	<div class="max-w-68 flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
+		{#if $authNotSignedIn}
+			<span class="mb-2 text-center">
+				<ButtonAuthenticateWithLicense />
+			</span>
+			<Hr />
+		{/if}
 		{#if $authSignedIn}
 			<ButtonMenu
 				ariaLabel={$isPrivacyMode
@@ -190,11 +198,16 @@
 			<Hr />
 
 			<SignOut on:icLogoutTriggered={hidePopover} />
+
+			<Hr />
+
+			<span class="text-center text-sm text-tertiary">
+				<LicenseLink noUnderline />
+			</span>
 		{/if}
+
 		<Hr />
 
-		<span class="text-center text-sm text-tertiary">
-			<LicenseLink noUnderline />
-		</span>
+		<LanguageSelector />
 	</div>
 </Popover>
