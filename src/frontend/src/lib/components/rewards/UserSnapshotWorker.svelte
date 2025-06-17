@@ -10,7 +10,7 @@
 		btcAddressTestnet,
 		ethAddress,
 		solAddressDevnet,
-		solAddressMainnet,
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';

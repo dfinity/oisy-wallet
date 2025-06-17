@@ -17,10 +17,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
 
@@ -40,10 +37,10 @@
 
 	let solanaNativeToken: Token;
 	$: solanaNativeToken = isNetworkIdSOLDevnet($sendTokenNetworkId)
-			? SOLANA_DEVNET_TOKEN
-			: isNetworkIdSOLLocal($sendTokenNetworkId)
-				? SOLANA_LOCAL_TOKEN
-				: SOLANA_TOKEN;
+		? SOLANA_DEVNET_TOKEN
+		: isNetworkIdSOLLocal($sendTokenNetworkId)
+			? SOLANA_LOCAL_TOKEN
+			: SOLANA_TOKEN;
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {

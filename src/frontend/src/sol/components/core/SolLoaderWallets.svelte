@@ -4,13 +4,13 @@
 	import {
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import type { Token } from '$lib/types/token';
 	import {
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
-		isNetworkIdSOLMainnet,
+		isNetworkIdSOLMainnet
 	} from '$lib/utils/network.utils';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';

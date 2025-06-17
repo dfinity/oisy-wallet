@@ -17,10 +17,7 @@
 	import type { OptionSolAddress } from '$lib/types/address';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import type { SolanaNetwork } from '$sol/types/network';
 
 	let address: OptionSolAddress;
