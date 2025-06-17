@@ -1,19 +1,13 @@
 import type { SchnorrKeyId } from '$declarations/signer/signer.did';
-import {
-	SOL_DEVNET_EXPLORER_URL,
-	SOL_MAINNET_EXPLORER_URL,
-	SOL_TESTNET_EXPLORER_URL
-} from '$env/explorers.env';
+import { SOL_DEVNET_EXPLORER_URL, SOL_MAINNET_EXPLORER_URL } from '$env/explorers.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { QUICKNODE_API_KEY } from '$env/rest/quicknode.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 
 import solDevnetIconDark from '$lib/assets/networks/dark/solana-devnet.svg';
 import solMainnetIconDark from '$lib/assets/networks/dark/solana-mainnet.svg';
-import solTestnetIconDark from '$lib/assets/networks/dark/solana-testnet.svg';
 import solDevnetIconLight from '$lib/assets/networks/light/solana-devnet.svg';
 import solMainnetIconLight from '$lib/assets/networks/light/solana-mainnet.svg';
-import solTestnetIconLight from '$lib/assets/networks/light/solana-testnet.svg';
 import type { Network, NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -61,16 +55,6 @@ export const SOLANA_TESTNET_NETWORK_SYMBOL = 'SOL (Testnet)';
 
 export const SOLANA_TESTNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_TESTNET_NETWORK_SYMBOL);
 
-export const SOLANA_TESTNET_NETWORK: SolanaNetwork = {
-	id: SOLANA_TESTNET_NETWORK_ID,
-	env: 'testnet',
-	name: 'Solana Testnet',
-	chainId: '4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z',
-	iconLight: solTestnetIconLight,
-	iconDark: solTestnetIconDark,
-	explorerUrl: SOL_TESTNET_EXPLORER_URL
-};
-
 export const SOLANA_DEVNET_NETWORK_SYMBOL = 'SOL (Devnet)';
 
 export const SOLANA_DEVNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_DEVNET_NETWORK_SYMBOL);
@@ -100,7 +84,7 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({
 	mainnetFlag: SOL_MAINNET_ENABLED,
 	mainnetNetworks: [SOLANA_MAINNET_NETWORK],
-	testnetNetworks: [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK],
+	testnetNetworks: [SOLANA_DEVNET_NETWORK],
 	localNetworks: [SOLANA_LOCAL_NETWORK]
 });
 

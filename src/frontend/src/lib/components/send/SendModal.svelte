@@ -48,7 +48,6 @@
 		isNetworkIdSOLMainnet,
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';

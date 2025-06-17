@@ -5,14 +5,12 @@
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet,
-		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import type { Token } from '$lib/types/token';
 	import {
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLMainnet,
-		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -22,7 +20,6 @@
 	$: walletWorkerTokens = [...$enabledSolanaTokens, ...$splTokens].filter(
 		({ network: { id: networkId } }) =>
 			(isNetworkIdSOLLocal(networkId) && nonNullish($solAddressLocal)) ||
-			(isNetworkIdSOLTestnet(networkId) && nonNullish($solAddressTestnet)) ||
 			(isNetworkIdSOLDevnet(networkId) && nonNullish($solAddressDevnet)) ||
 			(isNetworkIdSOLMainnet(networkId) && nonNullish($solAddressMainnet))
 	);

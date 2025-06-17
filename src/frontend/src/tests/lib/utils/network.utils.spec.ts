@@ -30,7 +30,6 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_TESTNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORKS,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
@@ -254,7 +253,6 @@ describe('network utils', () => {
 		});
 
 		it('should return false for non-SOL mainnet ID', () => {
-			expect(isNetworkIdSOLMainnet(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
 			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
 			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
 		});
@@ -267,7 +265,6 @@ describe('network utils', () => {
 
 		it('should return false for non-SOL devnet ID', () => {
 			expect(isNetworkIdSOLDevnet(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
-			expect(isNetworkIdSOLDevnet(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
 			expect(isNetworkIdSOLDevnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
 		});
 	});
@@ -279,7 +276,6 @@ describe('network utils', () => {
 
 		it('should return false for non-SOL local ID', () => {
 			expect(isNetworkIdSOLLocal(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
-			expect(isNetworkIdSOLLocal(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
 			expect(isNetworkIdSOLLocal(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
 		});
 	});

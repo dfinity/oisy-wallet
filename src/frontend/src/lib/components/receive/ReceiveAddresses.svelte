@@ -52,7 +52,6 @@
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet,
-		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import {
 		networkBitcoinMainnetEnabled,
@@ -65,7 +64,6 @@
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
 		networkSolanaMainnetEnabled,
-		networkSolanaTestnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
