@@ -33,22 +33,18 @@
 
 	$effect(() => {
 		if (type === RewardType.JACKPOT) {
-			({banner: imgSrc, title, description, shareHref} = reward.win.jackpot)
+			({ banner: imgSrc, title, description, shareHref } = reward.win.jackpot);
 		} else {
-			({banner: imgSrc, title, description, shareHref} = reward.win.default)
+			({ banner: imgSrc, title, description, shareHref } = reward.win.default);
 		}
-	})
+	});
 </script>
 
 <Sprinkles type={type === RewardType.JACKPOT ? 'page-jackpot' : 'page'} />
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
-		<Img
-			src={imgSrc}
-			styleClass="w-full"
-			testId={REWARDS_STATE_MODAL_IMAGE_BANNER}
-		/>
+		<Img src={imgSrc} styleClass="w-full" testId={REWARDS_STATE_MODAL_IMAGE_BANNER} />
 
 		<div class="flex flex-col items-center gap-4 text-center">
 			<h3 class="my-3">{title}</h3>

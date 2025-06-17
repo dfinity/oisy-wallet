@@ -13,10 +13,10 @@
 		modalRewardState,
 		modalRewardStateData
 	} from '$lib/derived/modal.derived';
+	import { RewardType } from '$lib/enums/reward-type';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadRewardResult } from '$lib/utils/rewards.utils';
-	import { RewardType } from '$lib/enums/reward-type';
 
 	interface Props {
 		children?: Snippet;
