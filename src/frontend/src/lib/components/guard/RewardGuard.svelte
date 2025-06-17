@@ -18,6 +18,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isOngoingCampaign, loadRewardResult } from '$lib/utils/rewards.utils';
+	import { ZERO } from '$lib/constants/app.constants';
 
 	interface Props {
 		children?: Snippet;
@@ -74,7 +75,7 @@
 		);
 		if (
 			nonNullish(lastTimestamp) &&
-			lastTimestamp === 0n &&
+			lastTimestamp === ZERO &&
 			nonNullish(season1Episode4Campaign) &&
 			isOngoingCampaign({
 				startDate: season1Episode4Campaign.startDate,
