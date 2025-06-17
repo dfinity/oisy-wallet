@@ -47,7 +47,7 @@
 
 <div class="flex flex-col gap-5">
 	{#if !$isPrivacyMode}
-	<PageTitle>{$i18n.activity.text.title}</PageTitle>
+		<PageTitle>{$i18n.activity.text.title}</PageTitle>
 	{:else}
 		<span class="flex items-center gap-2">
 			<PageTitle>{$i18n.activity.text.title}</PageTitle>
