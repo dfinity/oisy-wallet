@@ -3,6 +3,7 @@ import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import {
 	filterAddressFromContact,
 	getContactForAddress,
+	getNetworkContactKey,
 	isContactMatchingFilter,
 	mapAddressToContactAddressUi,
 	mapToBackendContact,
@@ -378,6 +379,20 @@ describe('contact.utils', () => {
 			expect(
 				filterAddressFromContact({ contact: mockContact, address: mockSolAddress.toUpperCase() })
 			).toBeUndefined();
+		});
+	});
+
+	describe('getNetworkContactKey', () => {
+		it('returns correct key', () => {
+			const [contact] = getMockContactsUi({
+				n: 1,
+				name: 'Multiple Addresses Contact',
+				addresses: [mockContactBtcAddressUi]
+			}) as unknown as ContactUi[];
+
+			expect(getNetworkContactKey({ address: mockContactBtcAddressUi.address, contact })).toBe(
+				`${mockContactBtcAddressUi.address}-${contact.id.toString()}`
+			);
 		});
 	});
 });

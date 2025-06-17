@@ -122,3 +122,11 @@ export const filterAddressFromContact = <T extends Address>({
 			addressType
 		})
 	);
+
+export const getNetworkContactKey = ({
+	contact,
+	address
+}: {
+	contact: ContactUi;
+	address: Address;
+}) => `${address}-${contact.id.toString()}`;
