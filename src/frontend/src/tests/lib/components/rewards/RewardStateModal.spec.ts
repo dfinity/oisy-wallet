@@ -1,14 +1,15 @@
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
+import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 import {
-	REWARDS_STATE_MODAL_IMAGE_BANNER, REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR,
+	REWARDS_STATE_MODAL_IMAGE_BANNER,
+	REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR,
 	REWARDS_STATE_MODAL_SHARE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 
 describe('RewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_STATE_MODAL_IMAGE_BANNER}"]`;

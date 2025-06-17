@@ -5,17 +5,18 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import { TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
+	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 	import {
-		REWARDS_STATE_MODAL_IMAGE_BANNER, REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR,
+		REWARDS_STATE_MODAL_IMAGE_BANNER,
+		REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR,
 		REWARDS_STATE_MODAL_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 
 	interface Props {
 		reward: RewardCampaignDescription;
