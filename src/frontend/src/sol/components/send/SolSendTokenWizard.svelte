@@ -38,7 +38,7 @@
 	import {
 		isNetworkIdSolana,
 		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
+		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
