@@ -4,7 +4,6 @@
 		SOLANA_DEVNET_NETWORK,
 		SOLANA_LOCAL_NETWORK,
 		SOLANA_MAINNET_NETWORK,
-		SOLANA_TESTNET_NETWORK
 	} from '$env/networks/networks.sol.env';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -12,7 +11,6 @@
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet,
-		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -28,9 +26,7 @@
 
 	let address: OptionSolAddress;
 	let network: SolanaNetwork;
-	$: [address, network] = isNetworkIdSOLTestnet($networkId)
-		? [$solAddressTestnet, SOLANA_TESTNET_NETWORK]
-		: isNetworkIdSOLDevnet($networkId)
+	$: [address, network] =  isNetworkIdSOLDevnet($networkId)
 			? [$solAddressDevnet, SOLANA_DEVNET_NETWORK]
 			: isNetworkIdSOLLocal($networkId)
 				? [$solAddressLocal, SOLANA_LOCAL_NETWORK]
