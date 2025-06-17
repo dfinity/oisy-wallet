@@ -23,8 +23,7 @@ import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.ut
 import {
 	loadSolAddressDevnet,
 	loadSolAddressLocal,
-	loadSolAddressMainnet,
-	loadSolAddressTestnet
+	loadSolAddressMainnet
 } from '$sol/services/sol-address.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -86,6 +85,7 @@ vi.mock('$sol/services/sol-address.services', () => ({
 		solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
 	}),
+	loadSolAddressTestnet: vi.fn(() => Promise.resolve({ success: true })),
 	loadSolAddressDevnet: vi.fn(() => {
 		solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
@@ -183,7 +183,6 @@ describe('Loader', () => {
 				expect(loadSolAddressMainnet).not.toHaveBeenCalled();
 
 				expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
-				expect(loadSolAddressTestnet).not.toHaveBeenCalled();
 				expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 
 				expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
@@ -233,7 +232,6 @@ describe('Loader', () => {
 					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
 
 					expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
-					expect(loadSolAddressTestnet).not.toHaveBeenCalled();
 					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 				});
 			});
@@ -321,7 +319,6 @@ describe('Loader', () => {
 				await waitFor(() => {
 					expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
 					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
-					expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
 					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 				});
 			});
@@ -336,7 +333,6 @@ describe('Loader', () => {
 				await waitFor(() => {
 					expect(loadEthAddress).toHaveBeenCalledOnce();
 					expect(loadBtcAddressTestnet).toHaveBeenCalledOnce();
-					expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
 					expect(loadSolAddressDevnet).toHaveBeenCalledOnce();
 
 					expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
@@ -358,7 +354,6 @@ describe('Loader', () => {
 				await waitFor(() => {
 					expect(loadEthAddress).not.toHaveBeenCalled();
 					expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
-					expect(loadSolAddressTestnet).not.toHaveBeenCalled();
 					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 				});
 			});
