@@ -2,6 +2,7 @@ import type { EligibilityReport, RewardInfo, UserData } from '$declarations/rewa
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import * as rewardApi from '$lib/api/reward.api';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+import { RewardType } from '$lib/enums/reward-type';
 import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
@@ -15,7 +16,6 @@ import {
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish, fromNullable, toNullable } from '@dfinity/utils';
-import { RewardType } from '$lib/enums/reward-type';
 
 describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
