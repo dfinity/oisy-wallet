@@ -12,7 +12,7 @@
 	import {
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { type ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
@@ -24,10 +24,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
@@ -51,10 +48,10 @@
 	let address: OptionSolAddress;
 	let token: Token;
 	$: [address, token] = isNetworkIdSOLDevnet(networkId)
-			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
-			: isNetworkIdSOLLocal(networkId)
-				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
-				: [$solAddressMainnet, SOLANA_TOKEN];
+		? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
+		: isNetworkIdSOLLocal(networkId)
+			? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+			: [$solAddressMainnet, SOLANA_TOKEN];
 
 	let signWithSending = false;
 	let data: string;
