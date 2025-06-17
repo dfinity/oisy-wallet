@@ -7,10 +7,10 @@ import {
 	REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR,
 	REWARDS_STATE_MODAL_SHARE_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { RewardType } from '$lib/enums/reward-type';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import { RewardType } from '$lib/enums/reward-type';
 
 describe('RewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_STATE_MODAL_IMAGE_BANNER}"]`;
