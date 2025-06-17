@@ -627,14 +627,8 @@ export class HomepageLoggedIn extends Homepage {
 		await this.clickMenuItem({ menuItemTestId: NAVIGATION_MENU_PRIVACY_MODE_BUTTON });
 	}
 
-	async clickTokenGroupCard({
-		tokenSymbol,
-		networkSymbol
-	}: {
-		tokenSymbol: string;
-		networkSymbol: string;
-	}): Promise<void> {
-		await this.clickByTestId({ testId: `${TOKEN_GROUP}-${tokenSymbol}-${networkSymbol}` });
+	async clickTokenGroupCard(tokenSymbol: string): Promise<void> {
+		await this.clickByTestId({ testId: `${TOKEN_GROUP}-${tokenSymbol}` });
 	}
 
 	async testReceiveModalQrCode({

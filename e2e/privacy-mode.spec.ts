@@ -9,7 +9,7 @@ testWithII('should display privacy mode on homepage', async ({ page, iiPage, isM
 
 	await homepageLoggedIn.activatePrivacyMode();
 
-	await homepageLoggedIn.clickTokenGroupCard({ tokenSymbol: 'ETH', networkSymbol: 'ETH' });
+	await homepageLoggedIn.clickTokenGroupCard('ETH');
 
 	await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
 });
