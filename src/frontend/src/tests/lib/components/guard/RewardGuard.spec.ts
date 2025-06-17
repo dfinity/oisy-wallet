@@ -113,7 +113,7 @@ describe('RewardGuard', () => {
 				name: TRACK_REWARD_CAMPAIGN_WIN,
 				metadata: {
 					campaignId: mockRewardCampaign.id,
-					type: 'airdrop'
+					type: RewardType.AIRDROP
 				}
 			});
 		});

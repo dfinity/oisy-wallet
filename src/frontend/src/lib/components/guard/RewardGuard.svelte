@@ -36,37 +36,36 @@
 			return;
 		}
 
-		const { receivedReward, receivedJackpot, receivedReferral, reward, lastTimestamp } =
-			await loadRewardResult($authIdentity);
+		const { reward, lastTimestamp, rewardType } = await loadRewardResult($authIdentity);
 
 		const campaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
 			({ id }) => id === reward?.campaignId
 		);
 
-		if (receivedReward && nonNullish(campaign)) {
-			if (receivedJackpot) {
+		if (nonNullish(rewardType) && nonNullish(campaign)) {
+			if (rewardType === RewardType.JACKPOT) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: RewardType.JACKPOT }
+					metadata: { campaignId: `${campaign.id}`, type: rewardType }
 				});
 				modalStore.openRewardState({
 					id: rewardModalId,
-					data: { reward: campaign, type: RewardType.JACKPOT }
+					data: { reward: campaign, type: rewardType }
 				});
-			} else if (receivedReferral) {
+			} else if (rewardType === RewardType.REFERRAL) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: RewardType.REFERRAL }
+					metadata: { campaignId: `${campaign.id}`, type: rewardType }
 				});
 				modalStore.openReferralState({ id: referralModalId, data: campaign });
 			} else {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: RewardType.AIRDROP }
+					metadata: { campaignId: `${campaign.id}`, type: rewardType }
 				});
 				modalStore.openRewardState({
 					id: rewardModalId,
-					data: { reward: campaign, type: RewardType.AIRDROP }
+					data: { reward: campaign, type: rewardType }
 				});
 			}
 		}
