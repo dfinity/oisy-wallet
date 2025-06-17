@@ -79,7 +79,7 @@
 			isOngoingCampaign({
 				startDate: season1Episode4Campaign.startDate,
 				endDate: season1Episode4Campaign.endDate
-			})
+			}) && isNullish($modalStore?.type)
 		) {
 			trackEvent({
 				name: TRACK_WELCOME_OPEN,

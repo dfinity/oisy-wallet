@@ -20,6 +20,7 @@ import { get } from 'svelte/store';
 describe('RewardGuard', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		modalStore.close();
 
 		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(() =>
 			mockRewardCampaigns.map((campaign) => {
@@ -172,6 +173,27 @@ describe('RewardGuard', () => {
 				metadata: {
 					campaignId: SPRINKLES_SEASON_1_EPISODE_4_ID
 				}
+			});
+		});
+	});
+
+	it('should not open welcome modal if another modal is already opened', async () => {
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			superpowers: [],
+			airdrops: [],
+			usage_awards: [[mockedReward]],
+			last_snapshot_timestamp: [0n],
+			sprinkles: []
+		};
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+		render(RewardGuard);
+
+		await waitFor(() => {
+			expect(get(modalStore)).not.toEqual({
+				id: get(modalStore)?.id,
+				type: 'welcome'
 			});
 		});
 	});
