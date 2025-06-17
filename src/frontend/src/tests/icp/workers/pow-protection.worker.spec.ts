@@ -185,6 +185,8 @@ describe('pow-protector.worker', () => {
 				it('should post messages for status updates', async () => {
 					await scheduler.start(startData);
 
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS - 100);
+
 					// For each execution cycle, we expect:
 					// 1. 'syncPowProtectionStatus' with state 'in_progress' from SchedulerTimer
 					// 2. 'syncPowProgress' with progress 'REQUEST_CHALLENGE'
@@ -293,6 +295,8 @@ describe('pow-protector.worker', () => {
 			tests: () => {
 				it('should not handle ExpiredChallengeError gracefully', async () => {
 					await scheduler.start(startData);
+
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
 
 					// Even with ExpiredChallengeError, we should complete normally
 					// because the error is caught and handled internally
