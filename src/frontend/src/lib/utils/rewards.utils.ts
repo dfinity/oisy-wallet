@@ -4,7 +4,8 @@ import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { getRewards } from '$lib/services/reward.services';
 import type {
 	CampaignCriterion,
-	CampaignEligibility, HangoverCriterion,
+	CampaignEligibility,
+	HangoverCriterion,
 	MinLoginsCriterion,
 	MinTotalAssetsUsdCriterion,
 	MinTransactionsCriterion,

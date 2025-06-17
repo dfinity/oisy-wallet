@@ -4,7 +4,8 @@
 	import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type {
-		CampaignCriterion, HangoverCriterion,
+		CampaignCriterion,
+		HangoverCriterion,
 		MinLoginsCriterion,
 		MinTotalAssetsUsdCriterion,
 		MinTransactionsCriterion
