@@ -307,6 +307,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 					await scheduler.start(startData);
 
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
 
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
@@ -342,18 +344,38 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			}
 		};
 
+		const mockPostMessageNoTransactionsCertified = {
+			msg,
+			data: {
+				wallet: {
+					balance: {
+						certified: true,
+						data: mockBalance
+					},
+					oldest_tx_id: [mockOldestTxId],
+					newTransactions: JSON.stringify([], jsonReplacer)
+				}
+			}
+		};
+
 		return {
 			setup: () => {
+				vi.useFakeTimers();
+
 				scheduler = initScheduler(startData);
 			},
 
 			teardown: () => {
 				scheduler.stop();
+
+				vi.useRealTimers();
 			},
 
 			tests: () => {
 				it('should trigger postMessage once with no transactions to display at least the balance', async () => {
 					await scheduler.start(startData);
+
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
 
 					// query + update = 2
 					expect(postMessageMock).toHaveBeenCalledTimes(4);
@@ -362,6 +384,10 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					expect(postMessageMock).toHaveBeenNthCalledWith(
 						2,
 						mockPostMessageNoTransactionsNotCertified
+					);
+					expect(postMessageMock).toHaveBeenNthCalledWith(
+						3,
+						mockPostMessageNoTransactionsCertified
 					);
 					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 				});
@@ -403,6 +429,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 					await scheduler.start(startData);
 
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 					// query + update = 2
 					// idle and in_progress
 					// cleanup
@@ -421,6 +449,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					initErrorMock(err);
 
 					await scheduler.start(startData);
+
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
 
 					// idle and in_progress
 					// error
