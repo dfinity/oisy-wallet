@@ -5,6 +5,7 @@ import type { RewardCampaignDescription } from '$env/types/env-reward';
 import * as rewardApi from '$lib/api/reward.api';
 import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
+import { RewardType } from '$lib/enums/reward-type';
 import { trackEvent } from '$lib/services/analytics.services';
 import { modalStore } from '$lib/stores/modal.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -13,7 +14,6 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import { RewardType } from '$lib/enums/reward-type';
 
 describe('RewardGuard', () => {
 	beforeEach(() => {
