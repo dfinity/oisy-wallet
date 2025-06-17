@@ -132,6 +132,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger postMessage with correct data', async () => {
 					await scheduler.start(startData);
 
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(
@@ -192,6 +194,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should postMessage with status of the worker', async () => {
 					await scheduler.start(startData);
 
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
 				});
@@ -201,6 +205,8 @@ describe('sol-wallet.scheduler', () => {
 					spyLoadBalance.mockRejectedValue(err);
 
 					await scheduler.start(startData);
+
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS - 100);
 
 					// first time + 10 retries
 					expect(spyLoadBalance).toHaveBeenCalledTimes(11);
@@ -220,6 +226,9 @@ describe('sol-wallet.scheduler', () => {
 
 				it('should not post message when no new transactions or balance changes', async () => {
 					await scheduler.start(startData);
+
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 					postMessageMock.mockClear();
 
 					// Mock no changes in transactions and balance
@@ -237,6 +246,8 @@ describe('sol-wallet.scheduler', () => {
 
 				it('should update store with new transactions', async () => {
 					await scheduler.start(startData);
+
+					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS - 100);
 
 					expect(scheduler['store'].transactions).toEqual(
 						expectedSoLTransactions.reduce(
