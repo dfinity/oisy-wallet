@@ -1,10 +1,13 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardCampaigns from '$env/reward-campaigns.env';
-import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+import {
+	SPRINKLES_SEASON_1_EPISODE_3_ID,
+	SPRINKLES_SEASON_1_EPISODE_4_ID
+} from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import * as rewardApi from '$lib/api/reward.api';
 import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
-import { TRACK_REWARD_CAMPAIGN_WIN } from '$lib/constants/analytics.contants';
+import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { modalStore } from '$lib/stores/modal.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -17,9 +20,18 @@ import { get } from 'svelte/store';
 describe('RewardGuard', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		modalStore.close();
 
-		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(
-			() => mockRewardCampaigns
+		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(() =>
+			mockRewardCampaigns.map((campaign) => {
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
+					return {
+						...campaign,
+						startDate: new Date('2025-02-05T14:28:02.288Z')
+					};
+				}
+				return campaign;
+			})
 		);
 
 		sessionStorage.clear();
@@ -133,6 +145,55 @@ describe('RewardGuard', () => {
 					campaignId: mockRewardCampaign.id,
 					type: 'referral'
 				}
+			});
+		});
+	});
+
+	it('should open welcome modal', async () => {
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			superpowers: [],
+			airdrops: [],
+			usage_awards: [],
+			last_snapshot_timestamp: [0n],
+			sprinkles: []
+		};
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+		render(RewardGuard);
+
+		await waitFor(() => {
+			expect(get(modalStore)).toEqual({
+				id: get(modalStore)?.id,
+				type: 'welcome'
+			});
+
+			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				name: TRACK_WELCOME_OPEN,
+				metadata: {
+					campaignId: SPRINKLES_SEASON_1_EPISODE_4_ID
+				}
+			});
+		});
+	});
+
+	it('should not open welcome modal if another modal is already opened', async () => {
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			superpowers: [],
+			airdrops: [],
+			usage_awards: [[mockedReward]],
+			last_snapshot_timestamp: [0n],
+			sprinkles: []
+		};
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+		render(RewardGuard);
+
+		await waitFor(() => {
+			expect(get(modalStore)).not.toEqual({
+				id: get(modalStore)?.id,
+				type: 'welcome'
 			});
 		});
 	});
