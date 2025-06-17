@@ -1254,5 +1254,9 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
 		}
+	},
+	"welcome": {
+		"title": "Ready to Earn?",
+		"description": "<div class=\"flex flex-col gap-2 items-center\"><div class=\"text-center\"><span>You're 3 steps away from your first reward:</span></div><ul><li>Log in</li><li>Hold $20+</li><li>Complete 2 actions</li></ul><div class=\"text-center\"><span>Hit all 3 and start earning. Refer 4 others to earn even more.</span></div></div>"
 	}
 }
