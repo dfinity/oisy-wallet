@@ -138,6 +138,7 @@ export const REWARDS_MODAL = 'rewards-modal';
 export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
 export const REWARDS_MODAL_IMAGE_BANNER = 'rewards-modal-image-banner';
 export const REWARDS_STATE_MODAL_IMAGE_BANNER = 'reward-state-modal-image-banner';
+export const REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR = 'reward-state-modal-learn-more-anchor';
 export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button';
 export const REWARDS_BANNER = 'rewards-banner';
 export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';

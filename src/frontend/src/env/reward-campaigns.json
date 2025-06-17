@@ -42,10 +42,10 @@
 		"endDate": "2025-07-09T21:00:00.000Z",
 		"win": {
 			"default": {
-				"title": "Congratulations on earning today’s OISY Sprinkles!",
+				"title": "You got rewarded",
 				"banner": "/images/rewards/reward-received.svg",
-				"description": "Share your victory on Twitter to qualify for another chance to earn.",
-				"shareHref": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+				"description": "Your rewards just landed in your wallet<br>Don't forget to refer and stay active to win more",
+				"shareHref": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
 			},
 			"jackpot": {
 				"title": "Congratulations on earning today’s largest OISY Sprinkles!",
