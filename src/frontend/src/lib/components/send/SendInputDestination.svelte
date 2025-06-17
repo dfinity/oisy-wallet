@@ -37,11 +37,9 @@
 
 	const convertContext = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	let sendTokenNetworkId: Readable<NetworkId> | undefined;
-	$: sendTokenNetworkId = nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined;
+	const sendTokenNetworkId = nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined;
 
-	let destinationToken: Readable<Token> | undefined;
-	$: destinationToken = nonNullish(convertContext) ? convertContext.destinationToken : undefined;
+	const destinationToken = nonNullish(convertContext) ? convertContext.destinationToken : undefined;
 
 	let destinationNetworkId: NetworkId | undefined;
 	$: destinationNetworkId = nonNullish(sendTokenNetworkId)
