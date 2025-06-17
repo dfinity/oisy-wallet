@@ -3,6 +3,7 @@ import type { RewardCampaignDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import type { Principal } from '@dfinity/principal';
+import type { RewardType } from '$lib/enums/reward-type';
 
 export interface RewardsResponse {
 	rewards: RewardResponseInfo[];
@@ -39,7 +40,7 @@ export interface RewardClaimResponse<T = unknown> {
 
 export interface RewardStateData {
 	reward: RewardCampaignDescription;
-	jackpot?: boolean;
+	type?: RewardType;
 }
 
 export interface UserRoleResult {

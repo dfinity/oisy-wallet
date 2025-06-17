@@ -16,6 +16,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadRewardResult } from '$lib/utils/rewards.utils';
+	import { RewardType } from '$lib/enums/reward-type';
 
 	interface Props {
 		children?: Snippet;
@@ -46,7 +47,7 @@
 				});
 				modalStore.openRewardState({
 					id: rewardModalId,
-					data: { reward: campaign, jackpot: receivedJackpot }
+					data: { reward: campaign, type: RewardType.JACKPOT }
 				});
 			} else if (receivedReferral) {
 				trackEvent({
@@ -61,7 +62,7 @@
 				});
 				modalStore.openRewardState({
 					id: rewardModalId,
-					data: { reward: campaign, jackpot: false }
+					data: { reward: campaign, type: RewardType.AIRDROP }
 				});
 			}
 		}

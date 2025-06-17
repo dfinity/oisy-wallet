@@ -10,6 +10,7 @@ import {
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
+import { RewardType } from '$lib/enums/reward-type';
 
 describe('RewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_STATE_MODAL_IMAGE_BANNER}"]`;
@@ -25,7 +26,7 @@ describe('RewardStateModal', () => {
 		const { container, getByText } = render(RewardStateModal, {
 			props: {
 				reward: mockedReward,
-				jackpot: false
+				type: RewardType.AIRDROP
 			}
 		});
 
@@ -57,7 +58,7 @@ describe('RewardStateModal', () => {
 		const { container, getByText } = render(RewardStateModal, {
 			props: {
 				reward: mockedReward,
-				jackpot: true
+				type: RewardType.JACKPOT
 			}
 		});
 
