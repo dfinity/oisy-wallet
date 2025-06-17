@@ -147,6 +147,8 @@ describe('btc-wallet.worker', () => {
 				it('should trigger postMessage with correct data', async () => {
 					await scheduler.start(startData);
 
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 					expect(postMessageMock).toHaveBeenCalledTimes(4);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
@@ -204,6 +206,8 @@ describe('btc-wallet.worker', () => {
 
 				it('should postMessage with status of the worker', async () => {
 					await scheduler.start(startData);
+
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
 
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
