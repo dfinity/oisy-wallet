@@ -182,7 +182,6 @@ interface I18nRewards {
 		upcoming_campaigns: string;
 		active_date: string;
 		ended_date: string;
-		participate_title: string;
 		share: string;
 		learn_more: string;
 		check_status: string;
@@ -205,6 +204,7 @@ interface I18nRewards {
 		min_logins: string;
 		min_transactions: string;
 		min_total_assets_usd: string;
+		hangover: string;
 	};
 	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
 }
@@ -399,7 +399,6 @@ interface I18nReceive {
 	solana: {
 		text: {
 			solana_address: string;
-			solana_testnet_address: string;
 			solana_devnet_address: string;
 			solana_local_address: string;
 			solana_address_copied: string;
@@ -1089,6 +1088,11 @@ interface I18nEarning {
 	};
 }
 
+interface I18nWelcome {
+	title: string;
+	description: string;
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -1125,4 +1129,5 @@ interface I18n {
 	license_agreement: I18nLicense_agreement;
 	activity: I18nActivity;
 	earning: I18nEarning;
+	welcome: I18nWelcome;
 }

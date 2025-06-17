@@ -34,7 +34,6 @@ export const RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION = 'receive-tokens-modal-bt
 export const RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION = 'receive-tokens-modal-btc-regtest-section';
 export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-section';
 export const RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION = 'receive-tokens-modal-sol-mainnet-section';
-export const RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION = 'receive-tokens-modal-sol-testnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION = 'receive-tokens-modal-sol-devnet-section';
 export const RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION = 'receive-tokens-modal-sol-local-section';
 
@@ -139,12 +138,17 @@ export const REWARDS_MODAL = 'rewards-modal';
 export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
 export const REWARDS_MODAL_IMAGE_BANNER = 'rewards-modal-image-banner';
 export const REWARDS_STATE_MODAL_IMAGE_BANNER = 'reward-state-modal-image-banner';
+export const REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR = 'reward-state-modal-learn-more-anchor';
 export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button';
 export const REWARDS_BANNER = 'rewards-banner';
 export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REWARDS_STATUS_BUTTON = 'reward-status-button';
 export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
 export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
+
+export const WELCOME_MODAL_IMAGE_BANNER = 'welcome-modal-image-banner';
+export const WELCOME_MODAL_LEARN_MORE_ANCHOR = 'welcome-modal-learn-more-anchor';
+export const WELCOME_MODAL_SHARE_ANCHOR = 'welcome-modal-share-anchor';
 
 export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
 export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
