@@ -85,6 +85,9 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	const postMessageMock = vi.fn();
 
+	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	const awaitJobExecution = () => vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 	beforeAll(() => {
 		originalPostMessage = window.postMessage;
 		window.postMessage = postMessageMock;
@@ -307,7 +310,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 					await scheduler.start(startData);
 
-					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+					await awaitJobExecution();
 
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
 
@@ -371,7 +374,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				it('should trigger postMessage once with no transactions to display at least the balance', async () => {
 					await scheduler.start(startData);
 
-					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+					await awaitJobExecution();
 
 					// query + update = 2
 					expect(postMessageMock).toHaveBeenCalledTimes(4);
@@ -425,7 +428,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 					await scheduler.start(startData);
 
-					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+					await awaitJobExecution();
 
 					// query + update = 2
 					// idle and in_progress
@@ -446,7 +449,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 					await scheduler.start(startData);
 
-					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+					await awaitJobExecution();
 
 					// idle and in_progress
 					// error

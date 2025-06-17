@@ -51,8 +51,9 @@ export class SchedulerTimer {
 		const execute = async () => await this.executeJob<T>({ identity, ...rest });
 
 		// We sync the cycles now but also schedule the update after wards
-		// We don't wait for the execution to finish before scheduling the next one, because, in case of error, there could be a race condition:
-		// the error would trigger another execution that first try and stop the timer, but the timer is still not set, so it would not stop it.
+		// We don't wait for the execution to finish before scheduling the next one, because, in case of error, there could be a race condition in case the UI submit a re-start of the worker.
+		// For example, awaiting the current promise might take longer than receiving a new message from the UI requesting to stop the interval—which hasn’t been initialized yet, as it only starts after the promise resolves.
+		// We observed this behavior empirically while debugging a live test instance deployed on the Internet Computer.
 		// TODO: If this doesn't really fix it, another solution is to loop the function that stops the timer, so that it will run until it is triggered at least once (or until a max number of attempts).
 		execute();
 
