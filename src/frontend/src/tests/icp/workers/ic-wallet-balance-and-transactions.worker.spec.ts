@@ -360,15 +360,11 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 		return {
 			setup: () => {
-				vi.useFakeTimers();
-
 				scheduler = initScheduler(startData);
 			},
 
 			teardown: () => {
 				scheduler.stop();
-
-				vi.useRealTimers();
 			},
 
 			tests: () => {
