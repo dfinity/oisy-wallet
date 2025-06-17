@@ -26,5 +26,33 @@
 				"shareHref": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
 			}
 		}
+	},
+	{
+		"id": "sprinkles_s1e4",
+		"title": "OISY Sprinkles",
+		"cardTitle": "OISY Sprinkles: Episode 4 is Live \uD83C\uDF89",
+		"oneLiner": "Earn BTC for staying active—and now, earn <strong>guaranteed</strong> Sprinkles for referrals.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer 4 friends and get rewarded directly. Top referrers win even more.",
+		"participateTitle": "Earn BTC by staying active - and now by inviting others.",
+		"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Now with referral rewards: invite a friend to set up a wallet and you’ll both earn guaranteed Sprinkles. Land in the top 4 referrers and win a jackpot.",
+		"logo": "/images/rewards/oisy-reward-logo.svg",
+		"cardBanner": "/images/rewards/oisy-episode-three-campaign.svg",
+		"campaignHref": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
+		"startDate": "2025-06-26T21:00:00.000Z",
+		"endDate": "2025-07-09T21:00:00.000Z",
+		"win": {
+			"default": {
+				"title": "Congratulations on earning today’s OISY Sprinkles!",
+				"banner": "/images/rewards/reward-received.svg",
+				"description": "Share your victory on Twitter to qualify for another chance to earn.",
+				"shareHref": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+			},
+			"jackpot": {
+				"title": "Congratulations on earning today’s largest OISY Sprinkles!",
+				"banner": "/images/rewards/reward-jackpot-received.svg",
+				"description": "Share your victory on Twitter to qualify for another chance to earn.",
+				"shareHref": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+			}
+		}
 	}
 ]
