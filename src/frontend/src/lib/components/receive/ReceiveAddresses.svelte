@@ -11,7 +11,7 @@
 	import {
 		SOLANA_DEVNET_NETWORK,
 		SOLANA_LOCAL_NETWORK,
-		SOLANA_MAINNET_NETWORK,
+		SOLANA_MAINNET_NETWORK
 	} from '$env/networks/networks.sol.env';
 	import {
 		BTC_MAINNET_TOKEN,
@@ -41,7 +41,7 @@
 		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
 		RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
 		RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION,
-		RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
+		RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnet,
@@ -50,7 +50,7 @@
 		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import {
 		networkBitcoinMainnetEnabled,
@@ -62,7 +62,7 @@
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
-		networkSolanaMainnetEnabled,
+		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
