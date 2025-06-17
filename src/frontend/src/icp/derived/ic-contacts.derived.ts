@@ -37,24 +37,16 @@ export const icNetworkContacts: Readable<NetworkContacts> = derived(
 			contacts: $contacts
 		});
 
-		const result: NetworkContacts = {};
+		return Object.keys(allIcNetworkContacts).reduce<NetworkContacts>((acc, key) => {
+			const { address } = allIcNetworkContacts[key];
 
-		for (const [address, contact] of Object.entries(allIcNetworkContacts)) {
-			let isValid = false;
-
-			if (isIcpAccountIdentifier(address) && isIcp) {
-				isValid = true;
-			} else if (isIcrcAddress(address) && isIcrc) {
-				isValid = true;
-			} else if (isPrincipalAddress(address)) {
-				isValid = true;
-			}
-
-			if (isValid) {
-				result[address] = contact;
-			}
-		}
-
-		return result;
+			return {
+				...acc,
+				...((isIcpToken && isIcpAccountIdentifier(address)) ||
+				(isIcrcToken && isIcrcAddress(address))
+					? { [key]: allIcNetworkContacts[key] }
+					: {})
+			};
+		}, {});
 	}
 );

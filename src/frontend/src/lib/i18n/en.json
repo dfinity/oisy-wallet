@@ -183,10 +183,9 @@
 		"text": {
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 is coming soon!<br> Stay tuned for updates",
+			"upcoming_campaigns": "Upcoming Campaigns",
 			"active_date": "Ends on",
 			"ended_date": "Ended on",
-			"participate_title": "Earn BTC by staying active - and now by inviting others.",
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
@@ -208,7 +207,8 @@
 			"requirements_title": "Eligibility criteria",
 			"min_logins": "Login $loginsx in last $days days",
 			"min_transactions": "Complete $transactions transactions in last $days days",
-			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance",
+			"hangover": "No recent win (last $days days)"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
@@ -1254,5 +1254,9 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
 		}
+	},
+	"welcome": {
+		"title": "Ready to Earn?",
+		"description": "<div class=\"flex flex-col gap-2 items-center\"><div class=\"text-center\"><span>You're 3 steps away from your first reward:</span></div><ul><li>Log in</li><li>Hold $20+</li><li>Complete 2 actions</li></ul><div class=\"text-center\"><span>Hit all 3 and start earning. Refer 4 others to earn even more.</span></div></div>"
 	}
 }

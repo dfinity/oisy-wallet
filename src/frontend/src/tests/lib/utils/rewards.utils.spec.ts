@@ -46,13 +46,14 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 
-			const { receivedReward, receivedJackpot, receivedReferral, reward } =
+			const { receivedReward, receivedJackpot, receivedReferral, reward, lastTimestamp } =
 				await loadRewardResult(mockIdentity);
 
 			expect(receivedReward).toBeFalsy();
 			expect(receivedJackpot).toBeFalsy();
 			expect(receivedReferral).toBeFalsy();
 			expect(reward).toBeUndefined();
+			expect(lastTimestamp).toBeUndefined();
 		});
 
 		it('should return falsy reward result and set entry in the session storage', async () => {
@@ -200,6 +201,52 @@ describe('rewards.utils', () => {
 			expect(reward).toEqual({ ...mappedMockedReward, name: 'referral' });
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return timestamp on initial loading with new rewards', async () => {
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const {
+				receivedReward,
+				receivedJackpot,
+				receivedReferral,
+				lastTimestamp: timestamp
+			} = await loadRewardResult(mockIdentity);
+
+			expect(receivedReward).toBeTruthy();
+			expect(receivedJackpot).toBeFalsy();
+			expect(receivedReferral).toBeFalsy();
+			expect(timestamp).toBe(lastTimestamp);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return timestamp on first login', async () => {
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [0n],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { lastTimestamp } = await loadRewardResult(mockIdentity);
+
+			expect(lastTimestamp).toBe(0n);
 		});
 	});
 
