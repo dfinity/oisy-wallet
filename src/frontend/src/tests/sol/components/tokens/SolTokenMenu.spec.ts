@@ -7,11 +7,7 @@ import {
 	TOKEN_MENU_SOL_BUTTON,
 	TOKEN_MENU_SOL_EXPLORER_LINK
 } from '$lib/constants/test-ids.constants';
-import {
-	solAddressDevnetStore,
-	solAddressMainnetStore,
-	solAddressTestnetStore
-} from '$lib/stores/address.store';
+import { solAddressDevnetStore, solAddressMainnetStore } from '$lib/stores/address.store';
 import { token as tokenStore } from '$lib/stores/token.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolTokenMenu from '$sol/components/tokens/SolTokenMenu.svelte';
@@ -32,7 +28,6 @@ describe('SolTokenMenu', () => {
 		mockPage.reset();
 
 		solAddressMainnetStore.reset();
-		solAddressTestnetStore.reset();
 		solAddressDevnetStore.reset();
 
 		// In component TokenMenu there is a dependency to the store erc20UserTokensStore that impedes the correct rendering of the component

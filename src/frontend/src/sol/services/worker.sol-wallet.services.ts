@@ -1,8 +1,7 @@
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore,
-	solAddressTestnetStore
+	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
@@ -11,11 +10,7 @@ import type {
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
-import {
-	isNetworkIdSOLDevnet,
-	isNetworkIdSOLLocal,
-	isNetworkIdSOLTestnet
-} from '$lib/utils/network.utils';
+import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
@@ -32,7 +27,6 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
-	const isTestnetNetwork = isNetworkIdSOLTestnet(networkId);
 	const isDevnetNetwork = isNetworkIdSOLDevnet(networkId);
 	const isLocalNetwork = isNetworkIdSOLLocal(networkId);
 
@@ -59,13 +53,11 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 
 	// TODO: stop/start the worker on address change (same as for worker.btc-wallet.services.ts)
 	const address = get(
-		isTestnetNetwork
-			? solAddressTestnetStore
-			: isDevnetNetwork
-				? solAddressDevnetStore
-				: isLocalNetwork
-					? solAddressLocalnetStore
-					: solAddressMainnetStore
+		isDevnetNetwork
+			? solAddressDevnetStore
+			: isLocalNetwork
+				? solAddressLocalnetStore
+				: solAddressMainnetStore
 	);
 	assertNonNullish(address, 'No Solana address provided to start Solana wallet worker.');
 

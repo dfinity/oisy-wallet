@@ -5,8 +5,7 @@ import {
 	ethAddressStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore,
-	solAddressTestnetStore
+	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import type {
 	BtcAddress,
@@ -43,11 +42,6 @@ export const ethAddressNotLoaded: Readable<boolean> = derived(
 export const solAddressMainnetNotLoaded: Readable<boolean> = derived(
 	[solAddressMainnetStore],
 	([$solAddressMainnetStore]) => isNullish($solAddressMainnetStore)
-);
-
-export const solAddressTestnetNotLoaded: Readable<boolean> = derived(
-	[solAddressTestnetStore],
-	([$solAddressTestnetStore]) => isNullish($solAddressTestnetStore)
 );
 
 export const solAddressDevnetNotLoaded: Readable<boolean> = derived(
@@ -93,11 +87,6 @@ export const ethAddressNotCertified: Readable<boolean> = derived(
 export const solAddressMainnet: Readable<OptionSolAddress> = derived(
 	[solAddressMainnetStore],
 	([$solAddressMainnetStore]) => mapAddress<SolAddress>($solAddressMainnetStore)
-);
-
-export const solAddressTestnet: Readable<OptionSolAddress> = derived(
-	[solAddressTestnetStore],
-	([$solAddressTestnetStore]) => mapAddress<SolAddress>($solAddressTestnetStore)
 );
 
 export const solAddressDevnet: Readable<OptionSolAddress> = derived(

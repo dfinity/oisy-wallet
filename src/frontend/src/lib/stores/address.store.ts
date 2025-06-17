@@ -29,6 +29,5 @@ export const btcAddressMainnetStore = initAddressStore<BtcAddress>();
 export const ethAddressStore = initAddressStore<EthAddress>();
 
 export const solAddressMainnetStore = initAddressStore<SolAddress>();
-export const solAddressTestnetStore = initAddressStore<SolAddress>();
 export const solAddressDevnetStore = initAddressStore<SolAddress>();
 export const solAddressLocalnetStore = initAddressStore<SolAddress>();

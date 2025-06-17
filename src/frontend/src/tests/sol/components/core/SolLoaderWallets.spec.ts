@@ -3,8 +3,7 @@ import * as appConstants from '$lib/constants/app.constants';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore,
-	solAddressTestnetStore
+	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -24,7 +23,6 @@ describe('SolLoaderWallets', () => {
 
 		// Reset all address stores
 		solAddressLocalnetStore.reset();
-		solAddressTestnetStore.reset();
 		solAddressDevnetStore.reset();
 		solAddressMainnetStore.reset();
 
@@ -80,7 +78,6 @@ describe('SolLoaderWallets', () => {
 
 	it('should handle all networks having addresses', () => {
 		solAddressLocalnetStore.set({ data: 'local-address', certified: true });
-		solAddressTestnetStore.set({ data: 'testnet-address', certified: true });
 		solAddressDevnetStore.set({ data: 'devnet-address', certified: true });
 		solAddressMainnetStore.set({ data: 'mainnet-address', certified: true });
 
