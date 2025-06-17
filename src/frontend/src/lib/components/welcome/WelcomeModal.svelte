@@ -9,8 +9,8 @@
 	import Share from '$lib/components/ui/Share.svelte';
 	import { OISY_REWARDS_URL, OISY_WELCOME_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import {
-		WELCOME_MODAL_IMAGE_BANNER,
-		WELCOME_MODAL_SHARE_BUTTON
+		WELCOME_MODAL_IMAGE_BANNER, WELCOME_MODAL_LEARN_MORE_ANCHOR,
+		WELCOME_MODAL_SHARE_ANCHOR
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -37,11 +37,12 @@
 					iconVisible={false}
 					asButton
 					styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
+					testId={WELCOME_MODAL_LEARN_MORE_ANCHOR}
 				>
 					{$i18n.rewards.text.learn_more}
 				</ExternalLink>
 				<Share
-					testId={WELCOME_MODAL_SHARE_BUTTON}
+					testId={WELCOME_MODAL_SHARE_ANCHOR}
 					text={$i18n.rewards.text.share}
 					href={OISY_WELCOME_TWITTER_URL}
 				/>
