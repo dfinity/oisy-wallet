@@ -16,15 +16,16 @@ export const icNetworkContacts: Readable<NetworkContacts> = derived(
 
 		const allIcNetworkContacts = getNetworkContacts({ addressType: 'Icrcv2', contacts: $contacts });
 
-		return Object.keys(allIcNetworkContacts).reduce<NetworkContacts>(
-			(acc, address) => ({
+		return Object.keys(allIcNetworkContacts).reduce<NetworkContacts>((acc, key) => {
+			const { address } = allIcNetworkContacts[key];
+
+			return {
 				...acc,
 				...((isIcpToken && isIcpAccountIdentifier(address)) ||
 				(isIcrcToken && isIcrcAddress(address))
-					? { [address]: allIcNetworkContacts[address] }
+					? { [key]: allIcNetworkContacts[key] }
 					: {})
-			}),
-			{}
-		);
+			};
+		}, {});
 	}
 );
