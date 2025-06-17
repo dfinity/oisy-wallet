@@ -399,7 +399,6 @@ interface I18nReceive {
 	solana: {
 		text: {
 			solana_address: string;
-			solana_testnet_address: string;
 			solana_devnet_address: string;
 			solana_local_address: string;
 			solana_address_copied: string;
@@ -1089,6 +1088,11 @@ interface I18nEarning {
 	};
 }
 
+interface I18nWelcome {
+	title: string;
+	description: string;
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -1125,4 +1129,5 @@ interface I18n {
 	license_agreement: I18nLicense_agreement;
 	activity: I18nActivity;
 	earning: I18nEarning;
+	welcome: I18nWelcome;
 }

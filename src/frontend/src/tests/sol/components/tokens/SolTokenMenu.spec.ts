@@ -1,19 +1,7 @@
-import {
-	SOL_DEVNET_EXPLORER_URL,
-	SOL_MAINNET_EXPLORER_URL,
-	SOL_TESTNET_EXPLORER_URL
-} from '$env/explorers.env';
-import {
-	SOLANA_DEVNET_NETWORK,
-	SOLANA_MAINNET_NETWORK,
-	SOLANA_TESTNET_NETWORK
-} from '$env/networks/networks.sol.env';
+import { SOL_DEVNET_EXPLORER_URL, SOL_MAINNET_EXPLORER_URL } from '$env/explorers.env';
+import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
-import {
-	SOLANA_DEVNET_TOKEN,
-	SOLANA_TESTNET_TOKEN,
-	SOLANA_TOKEN
-} from '$env/tokens/tokens.sol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import {
 	TOKEN_MENU_SOL_BUTTON,
@@ -60,13 +48,6 @@ describe('SolTokenMenu', () => {
 			network: SOLANA_MAINNET_NETWORK,
 			store: solAddressMainnetStore,
 			description: 'mainnet'
-		},
-		{
-			token: SOLANA_TESTNET_TOKEN,
-			explorerUrl: SOL_TESTNET_EXPLORER_URL,
-			network: SOLANA_TESTNET_NETWORK,
-			store: solAddressTestnetStore,
-			description: 'testnet'
 		},
 		{
 			token: SOLANA_DEVNET_TOKEN,
