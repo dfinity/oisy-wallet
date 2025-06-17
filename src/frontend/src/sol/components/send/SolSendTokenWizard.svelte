@@ -7,7 +7,6 @@
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -21,7 +20,6 @@
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet,
-		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { ProgressStepsSendSol } from '$lib/enums/progress-steps';
@@ -72,9 +70,7 @@
 
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
-	$: [source, solanaNativeToken] = isNetworkIdSOLTestnet(networkId)
-		? [$solAddressTestnet, SOLANA_TESTNET_TOKEN]
-		: isNetworkIdSOLDevnet(networkId)
+	$: [source, solanaNativeToken] = isNetworkIdSOLDevnet(networkId)
 			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
 			: isNetworkIdSOLLocal(networkId)
 				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
