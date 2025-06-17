@@ -23,7 +23,6 @@
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet,
-		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
@@ -37,7 +36,6 @@
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
 		networkSolanaMainnetEnabled,
-		networkSolanaTestnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
@@ -111,7 +109,6 @@
 	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
 	const debounceLoadSolAddressMainnet = debounce(loadSolAddressMainnet);
-	const debounceLoadSolAddressTestnet = debounce(loadSolAddressTestnet);
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
@@ -137,9 +134,7 @@
 				debounceLoadBtcAddressTestnet();
 			}
 
-			if ($networkSolanaTestnetEnabled && isNullish($solAddressTestnet)) {
-				debounceLoadSolAddressTestnet();
-			}
+
 
 			if ($networkSolanaDevnetEnabled && isNullish($solAddressDevnet)) {
 				debounceLoadSolAddressDevnet();

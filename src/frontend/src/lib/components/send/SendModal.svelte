@@ -17,7 +17,6 @@
 		ethAddressNotLoaded,
 		btcAddressRegtestNotLoaded,
 		btcAddressTestnetNotLoaded,
-		solAddressTestnetNotLoaded,
 		solAddressLocalnetNotLoaded,
 		solAddressDevnetNotLoaded,
 		solAddressMainnetNotLoaded
@@ -114,9 +113,7 @@
 								? $solAddressDevnetNotLoaded
 								: isNetworkIdSOLLocal(id)
 									? $solAddressLocalnetNotLoaded
-									: isNetworkIdSOLTestnet(id)
-										? $solAddressTestnetNotLoaded
-										: false;
+									: false;
 
 	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
 		if (isDisabled(token)) {
