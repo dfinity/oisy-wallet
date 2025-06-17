@@ -428,7 +428,6 @@
 		"solana": {
 			"text": {
 				"solana_address": "Solana Address",
-				"solana_testnet_address": "Solana Testnet Address",
 				"solana_devnet_address": "Solana Devnet Address",
 				"solana_local_address": "Solana Local Address",
 				"solana_address_copied": "Solana address copied to clipboard",
