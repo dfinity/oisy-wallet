@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
+	import { Modal, Html } from '@dfinity/gix-components';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -35,9 +35,7 @@
 
 		<div class="flex flex-col items-center gap-4 text-center">
 			<h3 class="my-3">{jackpot ? reward.win.jackpot.title : reward.win.default.title}</h3>
-			<span class="block w-full"
-				>{jackpot ? reward.win.jackpot.description : reward.win.default.description}</span
-			>
+			<Html text={jackpot ? reward.win.jackpot.description : reward.win.default.description} />
 
 			<Share
 				testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
