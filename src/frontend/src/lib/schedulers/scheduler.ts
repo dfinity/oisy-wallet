@@ -51,7 +51,10 @@ export class SchedulerTimer {
 		const execute = async () => await this.executeJob<T>({ identity, ...rest });
 
 		// We sync the cycles now but also schedule the update after wards
-		await execute();
+		// We don't wait for the execution to finish before scheduling the next one, because, in case of error, there could be a race condition:
+		// the error would trigger another execution that first try and stop the timer, but the timer is still not set, so it would not stop it.
+		// TODO: If this doesn't really fix it, another solution is to loop the function that stops the timer, so that it will run until it is triggered at least once (or until a max number of attempts).
+		execute();
 
 		// Support for features that implement the exact same pattern of a repetitive task but, are currently not scheduled for being refreshed automatically.
 		if (interval === 'disabled') {
