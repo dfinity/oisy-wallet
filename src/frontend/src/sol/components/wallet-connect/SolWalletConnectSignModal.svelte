@@ -5,7 +5,6 @@
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
@@ -14,7 +13,6 @@
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet,
-		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { type ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
@@ -29,7 +27,6 @@
 	import {
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
@@ -53,9 +50,7 @@
 
 	let address: OptionSolAddress;
 	let token: Token;
-	$: [address, token] = isNetworkIdSOLTestnet(networkId)
-		? [$solAddressTestnet, SOLANA_TESTNET_TOKEN]
-		: isNetworkIdSOLDevnet(networkId)
+	$: [address, token] = isNetworkIdSOLDevnet(networkId)
 			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
 			: isNetworkIdSOLLocal(networkId)
 				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
