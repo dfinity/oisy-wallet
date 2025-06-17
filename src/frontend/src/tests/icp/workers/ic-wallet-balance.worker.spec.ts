@@ -135,6 +135,8 @@ describe('ic-wallet-balance.worker', () => {
 				it('should not trigger postMessage again if no changes', async () => {
 					await scheduler.start(startData);
 
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 					// query + update = 2
 					expect(postMessageMock).toHaveBeenCalledTimes(4);
 
@@ -161,6 +163,8 @@ describe('ic-wallet-balance.worker', () => {
 				it('should postMessage with status of the worker', async () => {
 					await scheduler.start(startData);
 
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
@@ -168,6 +172,8 @@ describe('ic-wallet-balance.worker', () => {
 
 				it('should postMessage with balance', async () => {
 					await scheduler.start(startData);
+
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
 
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
 
@@ -207,6 +213,8 @@ describe('ic-wallet-balance.worker', () => {
 					initErrorMock(err);
 
 					await scheduler.start(startData);
+
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
 
 					// idle and in_progress
 					// error
