@@ -51,10 +51,6 @@ export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	buy: { onramperId: 'solana' }
 };
 
-export const SOLANA_TESTNET_NETWORK_SYMBOL = 'SOL (Testnet)';
-
-export const SOLANA_TESTNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_TESTNET_NETWORK_SYMBOL);
-
 export const SOLANA_DEVNET_NETWORK_SYMBOL = 'SOL (Devnet)';
 
 export const SOLANA_DEVNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_DEVNET_NETWORK_SYMBOL);
