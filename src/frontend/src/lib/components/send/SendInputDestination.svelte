@@ -17,6 +17,8 @@
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
+	import type { Readable } from 'svelte/store';
+	import type { Token } from '$lib/types/token';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -31,9 +33,19 @@
 
 	const debounceValidate = debounce(validate);
 
-	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const sendContext = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const { destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+	const convertContext = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+
+	let sendTokenNetworkId: Readable<NetworkId> | undefined
+	$: sendTokenNetworkId = nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined
+
+	let destinationToken :  Readable<Token> | undefined
+	$: destinationToken = nonNullish(convertContext) ? convertContext.destinationToken : undefined;
+
+	let destinationNetworkId: NetworkId | undefined
+	$: destinationNetworkId = nonNullish(sendTokenNetworkId) ? $sendTokenNetworkId :  nonNullish(destinationToken) ? $destinationToken?.network.id : undefined
+
 
 	let focused: boolean;
 	const onFocus = () => (focused = true);
@@ -47,23 +59,23 @@
 
 	let isNotKnownDestination = false;
 	$: isNotKnownDestination =
-		nonNullish(knownDestinations) &&
+		nonNullish(knownDestinations) && nonNullish(destinationNetworkId) &&
 		isNullish(
 			getKnownDestination({
 				knownDestinations,
 				address: destination,
-				networkId: $sendTokenNetworkId ?? $destinationToken?.network.id
+				networkId: destinationNetworkId
 			})
 		);
 
 	let isNotNetworkContact = false;
 	$: isNotNetworkContact =
-		nonNullish(networkContacts) &&
+		nonNullish(networkContacts) && nonNullish(destinationNetworkId) &&
 		isNullish(
 			getNetworkContact({
 				networkContacts,
 				address: destination,
-				networkId: $sendTokenNetworkId ?? $destinationToken?.network.id
+				networkId:destinationNetworkId
 			})
 		);
 </script>
