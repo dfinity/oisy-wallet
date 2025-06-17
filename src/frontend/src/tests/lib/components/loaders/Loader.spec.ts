@@ -307,7 +307,6 @@ describe('Loader', () => {
 								networks: [
 									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
-									[{ SolanaTestnet: null }, { enabled: true, is_testnet: true }],
 									[{ SolanaDevnet: null }, { enabled: false, is_testnet: true }]
 								]
 							}
