@@ -13,7 +13,7 @@
 	height={size}
 	viewBox="0 0 22 22"
 	fill="none"
-	style="color: {color || 'black'}"
+	style="color: {color ?? 'black'}"
 	xmlns="http://www.w3.org/2000/svg"
 >
 	<g clip-path="url(#clip0_12507_17697)">
