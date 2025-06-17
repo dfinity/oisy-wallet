@@ -17,7 +17,6 @@
 		ethAddressNotLoaded,
 		btcAddressRegtestNotLoaded,
 		btcAddressTestnetNotLoaded,
-		solAddressTestnetNotLoaded,
 		solAddressLocalnetNotLoaded,
 		solAddressDevnetNotLoaded,
 		solAddressMainnetNotLoaded
@@ -48,8 +47,7 @@
 		isNetworkIdBTCRegtest,
 		isNetworkIdSOLMainnet,
 		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
+		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -114,9 +112,7 @@
 								? $solAddressDevnetNotLoaded
 								: isNetworkIdSOLLocal(id)
 									? $solAddressLocalnetNotLoaded
-									: isNetworkIdSOLTestnet(id)
-										? $solAddressTestnetNotLoaded
-										: false;
+									: false;
 
 	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
 		if (isDisabled(token)) {
