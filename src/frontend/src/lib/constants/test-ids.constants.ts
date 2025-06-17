@@ -145,6 +145,10 @@ export const REWARDS_STATUS_BUTTON = 'reward-status-button';
 export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
 export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
 
+export const WELCOME_MODAL_IMAGE_BANNER = 'welcome-modal-image-banner';
+export const WELCOME_MODAL_LEARN_MORE_ANCHOR = 'welcome-modal-learn-more-anchor';
+export const WELCOME_MODAL_SHARE_ANCHOR = 'welcome-modal-share-anchor';
+
 export const REFERRAL_STATE_MODAL_IMAGE_BANNER = 'referral-state-modal-image-banner';
 export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anchor';
 
