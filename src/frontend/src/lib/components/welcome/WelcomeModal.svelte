@@ -9,7 +9,8 @@
 	import Share from '$lib/components/ui/Share.svelte';
 	import { OISY_REWARDS_URL, OISY_WELCOME_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import {
-		WELCOME_MODAL_IMAGE_BANNER, WELCOME_MODAL_SHARE_BUTTON
+		WELCOME_MODAL_IMAGE_BANNER,
+		WELCOME_MODAL_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -28,7 +29,7 @@
 		<h3 class="my-3 text-center">{$i18n.welcome.title}</h3>
 		<Html text={$i18n.welcome.description} />
 
-		<div class="pt-4 flex justify-center">
+		<div class="flex justify-center pt-4">
 			<div>
 				<ExternalLink
 					href={OISY_REWARDS_URL}
