@@ -26,10 +26,10 @@
 
 	let { reward, type = RewardType.AIRDROP }: Props = $props();
 
-	let imgSrc = $state();
-	let title = $state();
-	let description = $state();
-	let shareHref = $state();
+	let imgSrc = $state('');
+	let title = $state('');
+	let description = $state('');
+	let shareHref = $state('');
 
 	$effect(() => {
 		if (type === RewardType.JACKPOT) {

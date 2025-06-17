@@ -72,7 +72,7 @@
 {@render children?.()}
 
 {#if $modalRewardState && nonNullish($modalRewardStateData)}
-	<RewardStateModal reward={$modalRewardStateData.reward} jackpot={$modalRewardStateData.jackpot} />
+	<RewardStateModal reward={$modalRewardStateData.reward} type={$modalRewardStateData.type} />
 {:else if $modalReferralState && nonNullish($modalReferralStateData)}
 	<ReferralStateModal reward={$modalReferralStateData} />
 {/if}
