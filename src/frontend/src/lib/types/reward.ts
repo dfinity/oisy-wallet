@@ -77,3 +77,7 @@ export interface MinTransactionsCriterion extends CampaignCriterion {
 export interface MinTotalAssetsUsdCriterion extends CampaignCriterion {
 	usd: number;
 }
+
+export interface HangoverCriterion extends CampaignCriterion {
+	days: bigint;
+}
