@@ -20,7 +20,7 @@
 	import {
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { ProgressStepsSendSol } from '$lib/enums/progress-steps';
@@ -72,10 +72,10 @@
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
 	$: [source, solanaNativeToken] = isNetworkIdSOLDevnet(networkId)
-			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
-			: isNetworkIdSOLLocal(networkId)
-				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
-				: [$solAddressMainnet, SOLANA_TOKEN];
+		? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
+		: isNetworkIdSOLLocal(networkId)
+			? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+			: [$solAddressMainnet, SOLANA_TOKEN];
 
 	/**
 	 * Fee context store

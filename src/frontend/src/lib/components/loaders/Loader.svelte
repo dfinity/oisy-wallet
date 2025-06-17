@@ -22,7 +22,7 @@
 		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
@@ -35,7 +35,7 @@
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
-		networkSolanaMainnetEnabled,
+		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
@@ -48,7 +48,7 @@
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
-		loadSolAddressMainnet,
+		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
 
@@ -132,8 +132,6 @@
 			if ($networkBitcoinTestnetEnabled && isNullish($btcAddressTestnet)) {
 				debounceLoadBtcAddressTestnet();
 			}
-
-
 
 			if ($networkSolanaDevnetEnabled && isNullish($solAddressDevnet)) {
 				debounceLoadSolAddressDevnet();

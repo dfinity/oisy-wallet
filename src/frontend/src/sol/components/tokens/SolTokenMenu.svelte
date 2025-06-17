@@ -13,10 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
@@ -24,10 +21,10 @@
 	$: explorerUrl = ($token?.network as SolanaNetwork)?.explorerUrl;
 
 	$: address = isNetworkIdSOLDevnet($networkId)
-			? $solAddressDevnet
-			: isNetworkIdSOLLocal($networkId)
-				? $solAddressLocal
-				: $solAddressMainnet;
+		? $solAddressDevnet
+		: isNetworkIdSOLLocal($networkId)
+			? $solAddressLocal
+			: $solAddressMainnet;
 
 	let tokenAddress: string | undefined;
 	$: tokenAddress = nonNullish($token) && isTokenSpl($token) ? $token.address : undefined;
