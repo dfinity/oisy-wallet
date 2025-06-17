@@ -20,7 +20,6 @@
 	import {
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import type { SolanaNetwork } from '$sol/types/network';
 

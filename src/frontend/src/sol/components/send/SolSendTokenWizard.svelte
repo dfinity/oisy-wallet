@@ -7,7 +7,6 @@
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -40,7 +39,6 @@
 		isNetworkIdSolana,
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
