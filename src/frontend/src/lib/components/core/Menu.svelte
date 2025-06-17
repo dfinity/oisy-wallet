@@ -31,7 +31,7 @@
 		NAVIGATION_MENU_GOLD_BUTTON,
 		NAVIGATION_MENU_PRIVACY_MODE_BUTTON
 	} from '$lib/constants/test-ids.constants';
-	import { authIdentity } from '$lib/derived/auth.derived';
+	import { authIdentity, authSignedIn } from '$lib/derived/auth.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { getUserRoles } from '$lib/services/reward.services';
@@ -89,74 +89,76 @@
 
 <Popover bind:visible anchor={button} direction="rtl" on:click={hidePopover}>
 	<div class="max-w-68 flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
-		<ButtonMenu
-			ariaLabel={$isPrivacyMode
-				? $i18n.navigation.alt.show_balances
-				: $i18n.navigation.alt.hide_balances}
-			testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
-			onclick={() =>
-				privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })}
-			tag={$i18n.shortcuts.privacy_mode}
-		>
-			{#if $isPrivacyMode}
-				<IconEye />
-				{$i18n.navigation.text.show_balances}
-			{:else}
-				<IconEyeOff />
-				{$i18n.navigation.text.hide_balances}
+		{#if $authSignedIn}
+			<ButtonMenu
+				ariaLabel={$isPrivacyMode
+					? $i18n.navigation.alt.show_balances
+					: $i18n.navigation.alt.hide_balances}
+				testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
+				onclick={() =>
+					privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })}
+				tag={$i18n.shortcuts.privacy_mode}
+			>
+				{#if $isPrivacyMode}
+					<IconEye />
+					{$i18n.navigation.text.show_balances}
+				{:else}
+					<IconEyeOff />
+					{$i18n.navigation.text.hide_balances}
+				{/if}
+			</ButtonMenu>
+
+			<Hr />
+
+			{#if addressesOption}
+				<MenuAddresses on:icMenuClick={hidePopover} />
+				<Hr />
 			{/if}
-		</ButtonMenu>
 
-		<Hr />
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.address_book}
+				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
+				onclick={() => modalStore.openAddressBook({ id: addressModalId })}
+			>
+				<IconUserSquare size="20" />
+				{$i18n.navigation.text.address_book}
+			</ButtonMenu>
 
-		{#if addressesOption}
-			<MenuAddresses on:icMenuClick={hidePopover} />
+			<Hr />
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.refer_a_friend}
+				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
+				onclick={() => modalStore.openReferralCode(referralModalId)}
+			>
+				<IconShare size="20" />
+				{$i18n.navigation.text.refer_a_friend}
+			</ButtonMenu>
+
+			{#if isGold}
+				<ButtonMenu
+					ariaLabel={$i18n.navigation.alt.binance_qr_code}
+					testId={NAVIGATION_MENU_GOLD_BUTTON}
+					onclick={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
+				>
+					<IconBinance size="20" />
+					{$i18n.navigation.text.binance_qr_code}
+				</ButtonMenu>
+			{/if}
+
+			{#if isVip}
+				<ButtonMenu
+					ariaLabel={$i18n.navigation.alt.vip_qr_code}
+					testId={NAVIGATION_MENU_VIP_BUTTON}
+					onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
+				>
+					<IconVipQr size="20" />
+					{$i18n.navigation.text.vip_qr_code}
+				</ButtonMenu>
+			{/if}
+
 			<Hr />
 		{/if}
-
-		<ButtonMenu
-			ariaLabel={$i18n.navigation.alt.address_book}
-			testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
-			onclick={() => modalStore.openAddressBook({ id: addressModalId })}
-		>
-			<IconUserSquare size="20" />
-			{$i18n.navigation.text.address_book}
-		</ButtonMenu>
-
-		<Hr />
-
-		<ButtonMenu
-			ariaLabel={$i18n.navigation.alt.refer_a_friend}
-			testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-			onclick={() => modalStore.openReferralCode(referralModalId)}
-		>
-			<IconShare size="20" />
-			{$i18n.navigation.text.refer_a_friend}
-		</ButtonMenu>
-
-		{#if isGold}
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.binance_qr_code}
-				testId={NAVIGATION_MENU_GOLD_BUTTON}
-				onclick={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
-			>
-				<IconBinance size="20" />
-				{$i18n.navigation.text.binance_qr_code}
-			</ButtonMenu>
-		{/if}
-
-		{#if isVip}
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.vip_qr_code}
-				testId={NAVIGATION_MENU_VIP_BUTTON}
-				onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
-			>
-				<IconVipQr size="20" />
-				{$i18n.navigation.text.vip_qr_code}
-			</ButtonMenu>
-		{/if}
-
-		<Hr />
 
 		<AboutWhyOisy
 			asMenuItem
@@ -169,25 +171,26 @@
 
 		<SupportLink asMenuItem asMenuItemCondensed />
 
-		<Hr />
+		{#if $authSignedIn}
+			<Hr />
 
-		<a
-			href={OISY_REPO_URL}
-			rel="external noopener noreferrer"
-			target="_blank"
-			class="nav-item nav-item-condensed"
-			aria-label={$i18n.navigation.text.source_code_on_github}
-		>
-			<IconGitHub />
-			{$i18n.navigation.text.source_code}
-		</a>
+			<a
+				href={OISY_REPO_URL}
+				rel="external noopener noreferrer"
+				target="_blank"
+				class="nav-item nav-item-condensed"
+				aria-label={$i18n.navigation.text.source_code_on_github}
+			>
+				<IconGitHub />
+				{$i18n.navigation.text.source_code}
+			</a>
 
-		<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
+			<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
 
-		<Hr />
+			<Hr />
 
-		<SignOut on:icLogoutTriggered={hidePopover} />
-
+			<SignOut on:icLogoutTriggered={hidePopover} />
+		{/if}
 		<Hr />
 
 		<span class="text-center text-sm text-tertiary">
