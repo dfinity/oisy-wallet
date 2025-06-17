@@ -399,7 +399,6 @@ interface I18nReceive {
 	solana: {
 		text: {
 			solana_address: string;
-			solana_testnet_address: string;
 			solana_devnet_address: string;
 			solana_local_address: string;
 			solana_address_copied: string;
