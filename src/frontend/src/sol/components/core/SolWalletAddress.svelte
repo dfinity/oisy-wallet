@@ -3,14 +3,14 @@
 	import {
 		SOLANA_DEVNET_NETWORK,
 		SOLANA_LOCAL_NETWORK,
-		SOLANA_MAINNET_NETWORK,
+		SOLANA_MAINNET_NETWORK
 	} from '$env/networks/networks.sol.env';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -26,11 +26,11 @@
 
 	let address: OptionSolAddress;
 	let network: SolanaNetwork;
-	$: [address, network] =  isNetworkIdSOLDevnet($networkId)
-			? [$solAddressDevnet, SOLANA_DEVNET_NETWORK]
-			: isNetworkIdSOLLocal($networkId)
-				? [$solAddressLocal, SOLANA_LOCAL_NETWORK]
-				: [$solAddressMainnet, SOLANA_MAINNET_NETWORK];
+	$: [address, network] = isNetworkIdSOLDevnet($networkId)
+		? [$solAddressDevnet, SOLANA_DEVNET_NETWORK]
+		: isNetworkIdSOLLocal($networkId)
+			? [$solAddressLocal, SOLANA_LOCAL_NETWORK]
+			: [$solAddressMainnet, SOLANA_MAINNET_NETWORK];
 
 	let explorerUrl: string | undefined;
 	$: ({ explorerUrl } = network);

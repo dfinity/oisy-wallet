@@ -11,7 +11,7 @@
 	import {
 		SOLANA_DEVNET_NETWORK,
 		SOLANA_LOCAL_NETWORK,
-		SOLANA_MAINNET_NETWORK,
+		SOLANA_MAINNET_NETWORK
 	} from '$env/networks/networks.sol.env';
 	import {
 		BTC_MAINNET_TOKEN,
