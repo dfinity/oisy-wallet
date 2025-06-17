@@ -5,6 +5,7 @@ import { getRewards } from '$lib/services/reward.services';
 import type {
 	CampaignCriterion,
 	CampaignEligibility,
+	HangoverCriterion,
 	MinLoginsCriterion,
 	MinTotalAssetsUsdCriterion,
 	MinTransactionsCriterion,
@@ -34,7 +35,17 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 				receivedReward: true,
 				receivedJackpot: containsJackpot,
 				receivedReferral: containsReferral,
-				reward: getFirstReward({ rewards, containsJackpot, containsReferral })
+				reward: getFirstReward({ rewards, containsJackpot, containsReferral }),
+				lastTimestamp
+			};
+		}
+
+		if (lastTimestamp === 0n) {
+			return {
+				receivedReward: false,
+				receivedJackpot: false,
+				receivedReferral: false,
+				lastTimestamp
 			};
 		}
 	}
@@ -137,6 +148,18 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 			usd
 		} as MinTotalAssetsUsdCriterion;
+	}
+	if ('Hangover' in criterion.criterion) {
+		const duration = criterion.criterion.Hangover;
+		if ('Days' in duration) {
+			const days = duration.Days;
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.HANGOVER,
+				days
+			} as HangoverCriterion;
+		}
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
 
 	return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
