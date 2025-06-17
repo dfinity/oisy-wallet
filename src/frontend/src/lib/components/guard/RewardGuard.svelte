@@ -16,6 +16,7 @@
 		modalRewardStateData,
 		modalWelcome
 	} from '$lib/derived/modal.derived';
+	import { RewardType } from '$lib/enums/reward-type';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isOngoingCampaign, loadRewardResult } from '$lib/utils/rewards.utils';
@@ -35,33 +36,32 @@
 			return;
 		}
 
-		const { receivedReward, receivedJackpot, receivedReferral, reward, lastTimestamp } =
-			await loadRewardResult($authIdentity);
+		const { reward, lastTimestamp, rewardType } = await loadRewardResult($authIdentity);
 
 		const campaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
 			({ id }) => id === reward?.campaignId
 		);
 
-		if (receivedReward && nonNullish(campaign)) {
-			if (receivedJackpot) {
+		if (nonNullish(rewardType) && nonNullish(campaign)) {
+			if (rewardType === RewardType.JACKPOT) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: 'jackpot' }
+					metadata: { campaignId: `${campaign.id}`, type: rewardType }
 				});
 				modalStore.openRewardState({
 					id: rewardModalId,
-					data: { reward: campaign, jackpot: receivedJackpot }
+					data: { reward: campaign, jackpot: true }
 				});
-			} else if (receivedReferral) {
+			} else if (rewardType === RewardType.REFERRAL) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: 'referral' }
+					metadata: { campaignId: `${campaign.id}`, type: rewardType }
 				});
 				modalStore.openReferralState({ id: referralModalId, data: campaign });
 			} else {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: 'airdrop' }
+					metadata: { campaignId: `${campaign.id}`, type: rewardType }
 				});
 				modalStore.openRewardState({
 					id: rewardModalId,
