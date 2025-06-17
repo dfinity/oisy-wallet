@@ -90,10 +90,15 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
-	<div class="max-w-68 flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
+	<div
+		class="max-w-68 flex flex-col gap-1"
+		data-tid={NAVIGATION_MENU}
+		onclick={hidePopover}
+		role="none"
+	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				<ButtonAuthenticateWithLicense />
+				<ButtonAuthenticateWithLicense fullWidth />
 			</span>
 			<Hr />
 		{/if}
@@ -207,7 +212,9 @@
 		{/if}
 
 		<Hr />
+	</div>
 
+	<div class="max-w-68 mt-3 flex flex-col gap-1">
 		<LanguageSelector />
 	</div>
 </Popover>

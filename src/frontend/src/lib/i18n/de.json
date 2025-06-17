@@ -1254,5 +1254,9 @@
       "sprinkles_title": "Sprinkles",
       "sprinkles_description": "OISY Rewards"
     }
+  },
+  "languages": {
+    "en": "Englisch",
+    "de": "Deutsch"
   }
 }

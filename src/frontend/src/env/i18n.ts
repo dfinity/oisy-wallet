@@ -1,7 +1,7 @@
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import { Languages } from '$lib/types/languages';
 
-export const SUPPORTED_LANGUAGES = Object.keys(Languages);
+export const SUPPORTED_LANGUAGES = Object.entries(Languages);
 
 // Enabled on Staging and Local if not set
 // Todo: remove once the feature has been completed
