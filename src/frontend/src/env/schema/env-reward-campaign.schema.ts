@@ -5,6 +5,7 @@ export const RewardCampaignSchema = z.object({
 	title: z.string(),
 	cardTitle: z.string(),
 	oneLiner: z.string(),
+	participateTitle: z.string(),
 	description: z.string(),
 	logo: z.string(),
 	cardBanner: z.string(),

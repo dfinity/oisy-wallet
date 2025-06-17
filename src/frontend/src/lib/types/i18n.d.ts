@@ -182,7 +182,6 @@ interface I18nRewards {
 		upcoming_campaigns: string;
 		active_date: string;
 		ended_date: string;
-		participate_title: string;
 		share: string;
 		learn_more: string;
 		check_status: string;
@@ -1088,6 +1087,11 @@ interface I18nEarning {
 	};
 }
 
+interface I18nWelcome {
+	title: string;
+	description: string;
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -1124,4 +1128,5 @@ interface I18n {
 	license_agreement: I18nLicense_agreement;
 	activity: I18nActivity;
 	earning: I18nEarning;
+	welcome: I18nWelcome;
 }
