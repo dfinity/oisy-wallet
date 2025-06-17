@@ -43,7 +43,7 @@
 			if (receivedJackpot) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: 'jackpot' }
+					metadata: { campaignId: `${campaign.id}`, type: RewardType.JACKPOT }
 				});
 				modalStore.openRewardState({
 					id: rewardModalId,
@@ -52,13 +52,13 @@
 			} else if (receivedReferral) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: 'referral' }
+					metadata: { campaignId: `${campaign.id}`, type: RewardType.REFERRAL }
 				});
 				modalStore.openReferralState({ id: referralModalId, data: campaign });
 			} else {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: 'airdrop' }
+					metadata: { campaignId: `${campaign.id}`, type: RewardType.AIRDROP }
 				});
 				modalStore.openRewardState({
 					id: rewardModalId,

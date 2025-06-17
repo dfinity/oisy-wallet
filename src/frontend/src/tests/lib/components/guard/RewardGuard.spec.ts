@@ -13,6 +13,7 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import { RewardType } from '$lib/enums/reward-type';
 
 describe('RewardGuard', () => {
 	beforeEach(() => {
@@ -62,7 +63,7 @@ describe('RewardGuard', () => {
 		await waitFor(() => {
 			expect(get(modalStore)).toEqual({
 				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, jackpot: true },
+				data: { reward: mockRewardCampaign, type: RewardType.JACKPOT },
 				type: 'reward-state'
 			});
 
@@ -70,7 +71,7 @@ describe('RewardGuard', () => {
 				name: TRACK_REWARD_CAMPAIGN_WIN,
 				metadata: {
 					campaignId: mockRewardCampaign.id,
-					type: 'jackpot'
+					type: RewardType.JACKPOT
 				}
 			});
 		});
@@ -92,7 +93,7 @@ describe('RewardGuard', () => {
 		await waitFor(() => {
 			expect(get(modalStore)).toEqual({
 				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, jackpot: false },
+				data: { reward: mockRewardCampaign, type: RewardType.AIRDROP },
 				type: 'reward-state'
 			});
 
@@ -131,7 +132,7 @@ describe('RewardGuard', () => {
 				name: TRACK_REWARD_CAMPAIGN_WIN,
 				metadata: {
 					campaignId: mockRewardCampaign.id,
-					type: 'referral'
+					type: RewardType.REFERRAL
 				}
 			});
 		});
