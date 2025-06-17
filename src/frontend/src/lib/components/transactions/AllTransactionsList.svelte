@@ -70,9 +70,11 @@
 		debounceUpdateTransactions();
 
 	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
-	$: sortedTransactions = nonNullish(transactions) ? transactions.sort(({ transaction: a }, { transaction: b }) =>
-		sortTransactions({ transactionA: a, transactionB: b })
-	) : undefined
+	$: sortedTransactions = nonNullish(transactions)
+		? transactions.sort(({ transaction: a }, { transaction: b }) =>
+				sortTransactions({ transactionA: a, transactionB: b })
+			)
+		: undefined;
 
 	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
 	$: groupedTransactions = nonNullish(sortedTransactions)
@@ -114,7 +116,7 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader {transactions}>
-		{#if nonNullish(groupedTransactions) &&  Object.values(groupedTransactions).length > 0}
+		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
 			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 				<TransactionsDateGroup
 					{formattedDate}
