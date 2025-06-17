@@ -45,7 +45,7 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 		}
 	}
 
-	return { };
+	return {};
 };
 
 const getFirstReward = ({
