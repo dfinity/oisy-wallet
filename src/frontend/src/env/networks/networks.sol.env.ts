@@ -102,7 +102,7 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({
 	mainnetFlag: SOL_MAINNET_ENABLED,
 	mainnetNetworks: [SOLANA_MAINNET_NETWORK],
-	testnetNetworks: [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK],
+	testnetNetworks: [SOLANA_DEVNET_NETWORK],
 	localNetworks: [SOLANA_LOCAL_NETWORK]
 });
 
