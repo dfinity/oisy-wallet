@@ -4,7 +4,7 @@ import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { getRewards } from '$lib/services/reward.services';
 import type {
 	CampaignCriterion,
-	CampaignEligibility,
+	CampaignEligibility, HangoverCriterion,
 	MinLoginsCriterion,
 	MinTotalAssetsUsdCriterion,
 	MinTransactionsCriterion,
@@ -147,6 +147,18 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 			usd
 		} as MinTotalAssetsUsdCriterion;
+	}
+	if ('Hangover' in criterion.criterion) {
+		const duration = criterion.criterion.Hangover;
+		if ('Days' in duration) {
+			const days = duration.Days;
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.HANGOVER,
+				days
+			} as HangoverCriterion;
+		}
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
 
 	return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
