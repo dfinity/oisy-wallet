@@ -8,6 +8,7 @@ import type { RewardCampaignDescription } from '$env/types/env-reward';
 import * as rewardApi from '$lib/api/reward.api';
 import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
+import { RewardType } from '$lib/enums/reward-type';
 import { trackEvent } from '$lib/services/analytics.services';
 import { modalStore } from '$lib/stores/modal.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -82,7 +83,7 @@ describe('RewardGuard', () => {
 				name: TRACK_REWARD_CAMPAIGN_WIN,
 				metadata: {
 					campaignId: mockRewardCampaign.id,
-					type: 'jackpot'
+					type: RewardType.JACKPOT
 				}
 			});
 		});
@@ -112,7 +113,7 @@ describe('RewardGuard', () => {
 				name: TRACK_REWARD_CAMPAIGN_WIN,
 				metadata: {
 					campaignId: mockRewardCampaign.id,
-					type: 'airdrop'
+					type: RewardType.AIRDROP
 				}
 			});
 		});
@@ -143,7 +144,7 @@ describe('RewardGuard', () => {
 				name: TRACK_REWARD_CAMPAIGN_WIN,
 				metadata: {
 					campaignId: mockRewardCampaign.id,
-					type: 'referral'
+					type: RewardType.REFERRAL
 				}
 			});
 		});
