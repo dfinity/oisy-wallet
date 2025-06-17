@@ -56,7 +56,6 @@ import {
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
 	isNetworkIdSOLMainnet,
-	isNetworkIdSOLTestnet,
 	isNetworkIdSepolia,
 	isNetworkIdSolana,
 	isNetworkSolana,
@@ -258,18 +257,6 @@ describe('network utils', () => {
 			expect(isNetworkIdSOLMainnet(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
 			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
 			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
-		});
-	});
-
-	describe('isNetworkIdSOLTestnet', () => {
-		it('should return true for SOL testnet ID', () => {
-			expect(isNetworkIdSOLTestnet(SOLANA_TESTNET_NETWORK_ID)).toBeTruthy();
-		});
-
-		it('should return false for non-SOL testnet ID', () => {
-			expect(isNetworkIdSOLTestnet(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
-			expect(isNetworkIdSOLTestnet(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
-			expect(isNetworkIdSOLTestnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
