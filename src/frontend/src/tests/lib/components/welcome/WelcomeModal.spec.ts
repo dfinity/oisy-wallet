@@ -21,7 +21,7 @@ describe('WelcomeModal', () => {
 
 		expect(imageBanner).toBeInTheDocument();
 
-		expect(getByText(get(i18n).welcome.title)).toBeInTheDocument();
+		expect(getByText(get(i18n).welcome.subtitle)).toBeInTheDocument();
 
 		const learnMoreAnchor: HTMLAnchorElement | null =
 			container.querySelector(learnMoreAnchorSelector);
