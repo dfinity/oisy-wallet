@@ -89,7 +89,10 @@ export type Criterion =
 			};
 	  }
 	| { MinTotalAssetsUsd: { usd: number } }
-	| { MinTokens: { count: number } };
+	| { Hangover: { duration: CandidDuration } }
+	| { MinTokens: { count: number } }
+	| { MinEligibleReferrals: { count: number; campaign_name: string } }
+	| { EligibleForCampaign: { campaign_name: string } };
 export interface CriterionEligibility {
 	satisfied: boolean;
 	criterion: Criterion;
@@ -174,6 +177,18 @@ export interface SprinkleEvent {
 export interface SprinkleStatus {
 	next_timestamp: [] | [bigint];
 	past_events: Array<SprinkleEvent>;
+}
+export type StatsKeyType = { TokenGroup: null } | { Network: null } | { TokenSymbol: null };
+export interface StatsRequest {
+	by: StatsKeyType;
+}
+export interface StatsResponse {
+	request: StatsRequest;
+	stats: Array<[string, StatsValue]>;
+}
+export interface StatsValue {
+	user_count: bigint;
+	assets_usd: number;
 }
 export interface StatusResponse {
 	latest_oisy_user_timestamp: [] | [bigint];
@@ -308,6 +323,7 @@ export interface _SERVICE {
 	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
 	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
 	set_referrer: ActorMethod<[number], SetReferrerResponse>;
+	stats_by: ActorMethod<[StatsKeyType], StatsResponse>;
 	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
 	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
 	usage_stats: ActorMethod<[], UsageAwardStats>;

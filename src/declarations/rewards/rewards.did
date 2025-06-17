@@ -119,8 +119,17 @@ type Criterion = variant {
 	};
 	/// The minimum total assets at the last valuation.
 	MinTotalAssetsUsd : record { usd : nat32 };
-	/// The minimum number of distrinct tokens that the user must hold.
-	MinTokens : record { count : nat32 }
+	/// The minimum number of distinct tokens that the user must hold.
+	MinTokens : record { count : nat32 };
+	/// The minimum time since the user's last sprinkles award.
+	Hangover : record {
+		/// The time that must pass before a sprinkled user can be eligible again.
+		duration : CandidDuration
+	};
+	/// The user must be eligible for this campaign.
+	EligibleForCampaign : record { campaign_name : text };
+	/// The user must have made at least this many referrals.
+	MinEligibleReferrals : record { count : nat32; campaign_name : text }
 };
 /// Whether a user satisfies a given criterion.
 type CriterionEligibility = record {
@@ -302,6 +311,13 @@ type SprinkleStatus = record {
 	/// A list of past sprinkle events that have been completed
 	past_events : vec SprinkleEvent
 };
+type StatsKeyType = variant { TokenGroup; Network; TokenSymbol };
+type StatsRequest = record { by : StatsKeyType };
+type StatsResponse = record {
+	request : StatsRequest;
+	stats : vec record { text; StatsValue }
+};
+type StatsValue = record { user_count : nat64; assets_usd : float64 };
 type StatusResponse = record {
 	/// The latest last_updated timestamp of a fetched Oisy user
 	latest_oisy_user_timestamp : opt nat64;
@@ -491,6 +507,7 @@ service : (opt Config) -> {
 	register_snapshot_for : (principal, UserSnapshot) -> ();
 	/// Sets the caller's referrer.
 	set_referrer : (nat32) -> (SetReferrerResponse);
+	stats_by : (StatsKeyType) -> (StatsResponse) query;
 	stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
 	/// Runs the provided award event.  This is normally done automatically.  It can be useful
 	/// to trigger an event directly when testing.
