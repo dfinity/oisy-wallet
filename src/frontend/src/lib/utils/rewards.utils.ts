@@ -34,7 +34,17 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 				receivedReward: true,
 				receivedJackpot: containsJackpot,
 				receivedReferral: containsReferral,
-				reward: getFirstReward({ rewards, containsJackpot, containsReferral })
+				reward: getFirstReward({ rewards, containsJackpot, containsReferral }),
+				lastTimestamp
+			};
+		}
+
+		if (lastTimestamp === 0n) {
+			return {
+				receivedReward: false,
+				receivedJackpot: false,
+				receivedReferral: false,
+				lastTimestamp
 			};
 		}
 	}
