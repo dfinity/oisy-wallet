@@ -3,6 +3,7 @@ import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { token } from '$lib/stores/token.store';
 import type { ContactUi } from '$lib/types/contact';
+import { getNetworkContactKey } from '$lib/utils/contact.utils';
 import { getMockContactsUi, mockContactIcrcAddressUi } from '$tests/mocks/contacts.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
@@ -17,7 +18,7 @@ describe('ic-contacts.derived', () => {
 
 		it('has correct data if there are some IC contacts and current token is ICRC', () => {
 			const contactWithIcrcAddress = getMockContactsUi({
-				n: 3,
+				n: 2,
 				name: 'Multiple Addresses Contact',
 				addresses: [
 					{
@@ -31,13 +32,26 @@ describe('ic-contacts.derived', () => {
 			contactsStore.set([...contactWithIcrcAddress]);
 
 			expect(get(icNetworkContacts)).toStrictEqual({
-				[mockPrincipalText]: contactWithIcrcAddress[0]
+				[getNetworkContactKey({
+					contact: contactWithIcrcAddress[0],
+					address: mockPrincipalText
+				})]: {
+					address: mockPrincipalText,
+					contact: contactWithIcrcAddress[0]
+				},
+				[getNetworkContactKey({
+					contact: contactWithIcrcAddress[1],
+					address: mockPrincipalText
+				})]: {
+					address: mockPrincipalText,
+					contact: contactWithIcrcAddress[1]
+				}
 			});
 		});
 
 		it('has correct data if there are some IC contacts and current token is ICP', () => {
 			const contactWithIcrcAddress = getMockContactsUi({
-				n: 3,
+				n: 2,
 				name: 'Multiple Addresses Contact',
 				addresses: [mockContactIcrcAddressUi]
 			}) as unknown as ContactUi[];
@@ -46,7 +60,20 @@ describe('ic-contacts.derived', () => {
 			contactsStore.set([...contactWithIcrcAddress]);
 
 			expect(get(icNetworkContacts)).toStrictEqual({
-				[mockContactIcrcAddressUi.address]: contactWithIcrcAddress[0]
+				[getNetworkContactKey({
+					contact: contactWithIcrcAddress[0],
+					address: mockContactIcrcAddressUi.address
+				})]: {
+					address: mockContactIcrcAddressUi.address,
+					contact: contactWithIcrcAddress[0]
+				},
+				[getNetworkContactKey({
+					contact: contactWithIcrcAddress[1],
+					address: mockContactIcrcAddressUi.address
+				})]: {
+					address: mockContactIcrcAddressUi.address,
+					contact: contactWithIcrcAddress[1]
+				}
 			});
 		});
 

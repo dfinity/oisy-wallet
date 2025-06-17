@@ -31,7 +31,7 @@
 			? isEmptyString(destination)
 				? networkContacts
 				: Object.entries(networkContacts).reduce<NetworkContacts>(
-						(acc, [address, contact]) => ({
+						(acc, [key, { contact, address }]) => ({
 							...acc,
 							...(isContactMatchingFilter({
 								filterValue: destination,
@@ -39,7 +39,7 @@
 								address,
 								networkId: $sendTokenNetworkId
 							})
-								? { [address]: contact }
+								? { [key]: { address, contact } }
 								: {})
 						}),
 						{}
@@ -52,7 +52,7 @@
 	{#if nonNullish(networkContacts) && Object.keys(filteredNetworkContacts).length > 0}
 		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
-				{#each Object.entries(filteredNetworkContacts) as [address, contact], index (index)}
+				{#each Object.values(filteredNetworkContacts) as { contact, address }, index (index)}
 					<SendContact
 						{contact}
 						{address}
