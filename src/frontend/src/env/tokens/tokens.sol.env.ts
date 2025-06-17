@@ -78,6 +78,6 @@ export const SOLANA_LOCAL_TOKEN: RequiredToken = {
 export const SUPPORTED_SOLANA_TOKENS: Token[] = defineSupportedTokens({
 	mainnetFlag: SOL_MAINNET_ENABLED,
 	mainnetTokens: [SOLANA_TOKEN],
-	testnetTokens: [SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN],
+	testnetTokens: [SOLANA_DEVNET_TOKEN],
 	localTokens: [SOLANA_LOCAL_TOKEN]
 });

@@ -16,11 +16,7 @@ import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import * as solEnv from '$env/networks/networks.sol.env';
-import {
-	SOLANA_DEVNET_NETWORK,
-	SOLANA_MAINNET_NETWORK,
-	SOLANA_TESTNET_NETWORK
-} from '$env/networks/networks.sol.env';
+import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import {
@@ -40,11 +36,7 @@ import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import {
-	SOLANA_DEVNET_TOKEN,
-	SOLANA_TESTNET_TOKEN,
-	SOLANA_TOKEN
-} from '$env/tokens/tokens.sol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -141,10 +133,6 @@ describe('network-tokens.derived', () => {
 				{
 					network: SOLANA_MAINNET_NETWORK,
 					tokens: [SOLANA_TOKEN, mockSplCustomToken]
-				},
-				{
-					network: SOLANA_TESTNET_NETWORK,
-					tokens: [SOLANA_TESTNET_TOKEN]
 				},
 				{
 					network: SOLANA_DEVNET_NETWORK,

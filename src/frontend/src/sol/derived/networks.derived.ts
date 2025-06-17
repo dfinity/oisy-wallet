@@ -2,8 +2,7 @@ import {
 	SOL_MAINNET_ENABLED,
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
-	SOLANA_MAINNET_NETWORK,
-	SOLANA_TESTNET_NETWORK
+	SOLANA_MAINNET_NETWORK
 } from '$env/networks/networks.sol.env';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userNetworks } from '$lib/derived/user-networks.derived';
@@ -20,7 +19,7 @@ export const enabledSolanaNetworks: Readable<SolanaNetwork[]> = derived(
 			$userNetworks,
 			mainnetFlag: SOL_MAINNET_ENABLED,
 			mainnetNetworks: [SOLANA_MAINNET_NETWORK],
-			testnetNetworks: [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK],
+			testnetNetworks: [SOLANA_DEVNET_NETWORK],
 			localNetworks: [SOLANA_LOCAL_NETWORK]
 		})
 );
