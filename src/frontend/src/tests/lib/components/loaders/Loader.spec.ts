@@ -15,8 +15,7 @@ import {
 	ethAddressStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore,
-	solAddressTestnetStore
+	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import { loading } from '$lib/stores/loader.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -85,10 +84,6 @@ vi.mock('$eth/services/eth-address.services', () => ({
 vi.mock('$sol/services/sol-address.services', () => ({
 	loadSolAddressMainnet: vi.fn(() => {
 		solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
-		return Promise.resolve({ success: true });
-	}),
-	loadSolAddressTestnet: vi.fn(() => {
-		solAddressTestnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
 	}),
 	loadSolAddressDevnet: vi.fn(() => {
@@ -212,7 +207,6 @@ describe('Loader', () => {
 			btcAddressRegtestStore.reset();
 
 			solAddressMainnetStore.reset();
-			solAddressTestnetStore.reset();
 			solAddressDevnetStore.reset();
 			solAddressLocalnetStore.reset();
 		});
@@ -353,7 +347,6 @@ describe('Loader', () => {
 			it('should not call loaders if addresses are already loaded', async () => {
 				ethAddressStore.set({ data: mockEthAddress, certified: false });
 				btcAddressTestnetStore.set({ data: mockBtcAddress, certified: false });
-				solAddressTestnetStore.set({ data: mockSolAddress, certified: false });
 				solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
 
 				render(Loader);
