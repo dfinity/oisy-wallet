@@ -13,6 +13,7 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import { RewardType } from '$lib/enums/reward-type';
 
 describe('RewardGuard', () => {
 	beforeEach(() => {
@@ -70,7 +71,7 @@ describe('RewardGuard', () => {
 				name: TRACK_REWARD_CAMPAIGN_WIN,
 				metadata: {
 					campaignId: mockRewardCampaign.id,
-					type: 'jackpot'
+					type: RewardType.JACKPOT
 				}
 			});
 		});
@@ -100,7 +101,7 @@ describe('RewardGuard', () => {
 				name: TRACK_REWARD_CAMPAIGN_WIN,
 				metadata: {
 					campaignId: mockRewardCampaign.id,
-					type: 'airdrop'
+					type: RewardType.AIRDROP
 				}
 			});
 		});
@@ -131,7 +132,7 @@ describe('RewardGuard', () => {
 				name: TRACK_REWARD_CAMPAIGN_WIN,
 				metadata: {
 					campaignId: mockRewardCampaign.id,
-					type: 'referral'
+					type: RewardType.REFERRAL
 				}
 			});
 		});

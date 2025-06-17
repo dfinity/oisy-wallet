@@ -14,6 +14,7 @@ import type {
 } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
+import { RewardType } from '$lib/enums/reward-type';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 
@@ -28,10 +29,14 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 		sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
 
 		if (newRewards.length > 0) {
-			const containsJackpot: boolean = newRewards.some(({ name }) => name === 'jackpot');
-			const containsReferral: boolean = newRewards.some(({ name }) => name === 'referral');
+			const containsJackpot: boolean = newRewards.some(({ name }) => name === RewardType.JACKPOT);
+			const containsReferral: boolean = newRewards.some(({ name }) => name === RewardType.REFERRAL);
 
-			const rewardType = containsJackpot ? 'jackpot' : containsReferral ? 'referral' : 'airdrop';
+			const rewardType = containsJackpot
+				? RewardType.JACKPOT
+				: containsReferral
+					? RewardType.REFERRAL
+					: RewardType.AIRDROP;
 
 			return {
 				reward: getFirstReward({ rewards, containsJackpot, containsReferral }),
@@ -58,10 +63,10 @@ const getFirstReward = ({
 	containsReferral: boolean;
 }): RewardResponseInfo | undefined => {
 	if (containsJackpot) {
-		return rewards.find(({ name }) => name === 'jackpot');
+		return rewards.find(({ name }) => name === RewardType.JACKPOT);
 	}
 	if (containsReferral) {
-		return rewards.find(({ name }) => name === 'referral');
+		return rewards.find(({ name }) => name === RewardType.REFERRAL);
 	}
 
 	return rewards.at(0);

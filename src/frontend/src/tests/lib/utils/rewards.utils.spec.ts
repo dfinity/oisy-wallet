@@ -15,6 +15,7 @@ import {
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish, fromNullable, toNullable } from '@dfinity/utils';
+import { RewardType } from '$lib/enums/reward-type';
 
 describe('rewards.utils', () => {
 	describe('loadRewardResult', () => {
@@ -89,7 +90,7 @@ describe('rewards.utils', () => {
 			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
 			expect(reward).toEqual(mappedMockedReward);
-			expect(rewardType).toBe('airdrop');
+			expect(rewardType).toBe(RewardType.AIRDROP);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -111,7 +112,7 @@ describe('rewards.utils', () => {
 			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
 			expect(reward).toEqual({ ...mappedMockedReward, name: 'jackpot' });
-			expect(rewardType).toBe('jackpot');
+			expect(rewardType).toBe(RewardType.JACKPOT);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -133,7 +134,7 @@ describe('rewards.utils', () => {
 			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
 			expect(reward).toEqual({ ...mappedMockedReward, name: 'jackpot' });
-			expect(rewardType).toBe('jackpot');
+			expect(rewardType).toBe(RewardType.JACKPOT);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -155,7 +156,7 @@ describe('rewards.utils', () => {
 			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
 			expect(reward).toEqual({ ...mappedMockedReward, name: 'referral' });
-			expect(rewardType).toBe('referral');
+			expect(rewardType).toBe(RewardType.REFERRAL);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -177,7 +178,7 @@ describe('rewards.utils', () => {
 			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
 			expect(reward).toEqual({ ...mappedMockedReward, name: 'referral' });
-			expect(rewardType).toBe('referral');
+			expect(rewardType).toBe(RewardType.REFERRAL);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
@@ -199,7 +200,7 @@ describe('rewards.utils', () => {
 
 			expect(reward).toEqual(mappedMockedReward);
 			expect(timestamp).toBe(lastTimestamp);
-			expect(rewardType).toBe('airdrop');
+			expect(rewardType).toBe(RewardType.AIRDROP);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});

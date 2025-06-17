@@ -16,6 +16,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadRewardResult } from '$lib/utils/rewards.utils';
+	import { RewardType } from '$lib/enums/reward-type';
 
 	interface Props {
 		children?: Snippet;
@@ -38,7 +39,7 @@
 		);
 
 		if (nonNullish(rewardType) && nonNullish(campaign)) {
-			if (rewardType === 'jackpot') {
+			if (rewardType === RewardType.Jackpot) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
 					metadata: { campaignId: `${campaign.id}`, type: rewardType }
@@ -47,7 +48,7 @@
 					id: rewardModalId,
 					data: { reward: campaign, jackpot: true }
 				});
-			} else if (rewardType === 'referral') {
+			} else if (rewardType === RewardType.REFERRAL) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
 					metadata: { campaignId: `${campaign.id}`, type: rewardType }
