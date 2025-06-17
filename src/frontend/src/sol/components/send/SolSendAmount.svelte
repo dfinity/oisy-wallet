@@ -4,7 +4,6 @@
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -21,7 +20,6 @@
 	import {
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
@@ -41,9 +39,7 @@
 	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
 	let solanaNativeToken: Token;
-	$: solanaNativeToken = isNetworkIdSOLTestnet($sendTokenNetworkId)
-		? SOLANA_TESTNET_TOKEN
-		: isNetworkIdSOLDevnet($sendTokenNetworkId)
+	$: solanaNativeToken =isNetworkIdSOLDevnet($sendTokenNetworkId)
 			? SOLANA_DEVNET_TOKEN
 			: isNetworkIdSOLLocal($sendTokenNetworkId)
 				? SOLANA_LOCAL_TOKEN
