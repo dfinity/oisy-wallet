@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import type { Readable } from 'svelte/store';
 	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
@@ -8,17 +9,16 @@
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { NetworkId } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
-	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
-	import type { Readable } from 'svelte/store';
-	import type { Token } from '$lib/types/token';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -37,15 +37,18 @@
 
 	const convertContext = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	let sendTokenNetworkId: Readable<NetworkId> | undefined
-	$: sendTokenNetworkId = nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined
+	let sendTokenNetworkId: Readable<NetworkId> | undefined;
+	$: sendTokenNetworkId = nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined;
 
-	let destinationToken :  Readable<Token> | undefined
+	let destinationToken: Readable<Token> | undefined;
 	$: destinationToken = nonNullish(convertContext) ? convertContext.destinationToken : undefined;
 
-	let destinationNetworkId: NetworkId | undefined
-	$: destinationNetworkId = nonNullish(sendTokenNetworkId) ? $sendTokenNetworkId :  nonNullish(destinationToken) ? $destinationToken?.network.id : undefined
-
+	let destinationNetworkId: NetworkId | undefined;
+	$: destinationNetworkId = nonNullish(sendTokenNetworkId)
+		? $sendTokenNetworkId
+		: nonNullish(destinationToken)
+			? $destinationToken?.network.id
+			: undefined;
 
 	let focused: boolean;
 	const onFocus = () => (focused = true);
@@ -59,7 +62,8 @@
 
 	let isNotKnownDestination = false;
 	$: isNotKnownDestination =
-		nonNullish(knownDestinations) && nonNullish(destinationNetworkId) &&
+		nonNullish(knownDestinations) &&
+		nonNullish(destinationNetworkId) &&
 		isNullish(
 			getKnownDestination({
 				knownDestinations,
@@ -70,12 +74,13 @@
 
 	let isNotNetworkContact = false;
 	$: isNotNetworkContact =
-		nonNullish(networkContacts) && nonNullish(destinationNetworkId) &&
+		nonNullish(networkContacts) &&
+		nonNullish(destinationNetworkId) &&
 		isNullish(
 			getNetworkContact({
 				networkContacts,
 				address: destination,
-				networkId:destinationNetworkId
+				networkId: destinationNetworkId
 			})
 		);
 </script>
