@@ -49,7 +49,6 @@
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
 		loadSolAddressMainnet,
-		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
 

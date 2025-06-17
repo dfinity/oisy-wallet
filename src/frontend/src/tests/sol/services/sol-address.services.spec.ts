@@ -16,7 +16,6 @@ import {
 	getSolAddressDevnet,
 	getSolAddressLocal,
 	getSolAddressMainnet,
-	getSolAddressTestnet,
 	loadIdbSolAddressMainnet,
 	loadSolAddressDevnet,
 	loadSolAddressLocal,
@@ -68,7 +67,6 @@ describe('sol-address.services', () => {
 
 		const networkCases = [
 			['mainnet', getSolAddressMainnet, SolanaNetworks.mainnet],
-			['testnet', getSolAddressTestnet, SolanaNetworks.testnet],
 			['devnet', getSolAddressDevnet, SolanaNetworks.devnet],
 			['local', getSolAddressLocal, SolanaNetworks.local]
 		] as const;
