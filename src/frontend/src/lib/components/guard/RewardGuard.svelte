@@ -39,7 +39,7 @@
 		);
 
 		if (nonNullish(rewardType) && nonNullish(campaign)) {
-			if (rewardType === RewardType.Jackpot) {
+			if (rewardType === RewardType.JACKPOT) {
 				trackEvent({
 					name: TRACK_REWARD_CAMPAIGN_WIN,
 					metadata: { campaignId: `${campaign.id}`, type: rewardType }
