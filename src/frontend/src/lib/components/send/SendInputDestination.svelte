@@ -16,6 +16,7 @@
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
+	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -31,6 +32,8 @@
 	const debounceValidate = debounce(validate);
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	const { destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	let focused: boolean;
 	const onFocus = () => (focused = true);
@@ -49,7 +52,7 @@
 			getKnownDestination({
 				knownDestinations,
 				address: destination,
-				networkId: $sendTokenNetworkId
+				networkId: $sendTokenNetworkId ?? $destinationToken?.network.id
 			})
 		);
 
@@ -60,7 +63,7 @@
 			getNetworkContact({
 				networkContacts,
 				address: destination,
-				networkId: $sendTokenNetworkId
+				networkId: $sendTokenNetworkId ?? $destinationToken?.network.id
 			})
 		);
 </script>
