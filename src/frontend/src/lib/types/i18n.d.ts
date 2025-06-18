@@ -204,6 +204,7 @@ interface I18nRewards {
 		min_logins: string;
 		min_transactions: string;
 		min_total_assets_usd: string;
+		hangover: string;
 	};
 	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
 }
@@ -1089,6 +1090,7 @@ interface I18nEarning {
 
 interface I18nWelcome {
 	title: string;
+	subtitle: string;
 	description: string;
 }
 
