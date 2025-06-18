@@ -1,4 +1,8 @@
 {
+	"languages": {
+		"en": "English",
+		"de": "German"
+	},
 	"core": {
 		"text": {
 			"cancel": "Cancel",
@@ -1034,15 +1038,6 @@
 			"error": {
 				"loading_referrer_info": "Error while loading referral info",
 				"setting_referrer": "Error while setting referrer"
-			}
-		},
-		"reward": {
-			"text": {
-				"title": "Congratulations!",
-				"content_title": "Here a small thank you",
-				"content_text": "One of your referred users just got some sprinkles.",
-				"share": "Share on X",
-				"open_wallet": "Take me to the wallet"
 			}
 		}
 	},

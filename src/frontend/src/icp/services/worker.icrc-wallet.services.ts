@@ -25,9 +25,6 @@ export const initIcrcWalletWorker = async ({
 	let restartedWithLedgerOnly = false;
 
 	const restartWorkerWithLedgerOnly = () => {
-		// For good measure, we stop the worker before restarting it with ledger only
-		stop();
-
 		if (restartedWithLedgerOnly) {
 			return;
 		}
@@ -83,12 +80,6 @@ export const initIcrcWalletWorker = async ({
 		}
 	};
 
-	const stop = () => {
-		worker.postMessage({
-			msg: 'stopIcrcWalletTimer'
-		});
-	};
-
 	return {
 		start: () => {
 			worker.postMessage({
@@ -100,7 +91,11 @@ export const initIcrcWalletWorker = async ({
 				}
 			});
 		},
-		stop,
+		stop: () => {
+			worker.postMessage({
+				msg: 'stopIcrcWalletTimer'
+			});
+		},
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerIcrcWalletTimer',

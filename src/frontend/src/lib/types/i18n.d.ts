@@ -2,6 +2,11 @@
  * Auto-generated definitions file ("npm run i18n")
  */
 
+interface I18nLanguages {
+	en: string;
+	de: string;
+}
+
 interface I18nCore {
 	text: {
 		cancel: string;
@@ -953,15 +958,6 @@ interface I18nReferral {
 		};
 		error: { loading_referrer_info: string; setting_referrer: string };
 	};
-	reward: {
-		text: {
-			title: string;
-			content_title: string;
-			content_text: string;
-			share: string;
-			open_wallet: string;
-		};
-	};
 }
 
 interface I18nAddress_book {
@@ -1096,6 +1092,7 @@ interface I18nWelcome {
 
 interface I18n {
 	lang: Languages;
+	languages: I18nLanguages;
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;

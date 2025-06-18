@@ -24,6 +24,12 @@
 				"banner": "/images/rewards/reward-jackpot-received.svg",
 				"description": "Share your victory on Twitter to qualify for another chance to earn.",
 				"shareHref": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+			},
+			"referral": {
+				"title": "Here a small thank you",
+				"banner": "/images/rewards/reward-received.svg",
+				"description": "One of your referred users just got some sprinkles.",
+				"shareHref": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
 			}
 		}
 	},
@@ -52,6 +58,12 @@
 				"banner": "/images/rewards/reward-jackpot-received.svg",
 				"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more",
 				"shareHref": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+			},
+			"leaderboard": {
+				"title": "You topped the Leaderboard",
+				"banner": "/images/rewards/reward-jackpot-received.svg",
+				"description": "You ranked among the top 4 referrers this season<br>$200 has been added to your wallet",
+				"shareHref": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
 			}
 		}
 	}
