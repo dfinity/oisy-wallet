@@ -10,8 +10,9 @@ const enI18n = (): I18n => ({
 	lang: Languages.ENGLISH
 });
 
+// Todo: remove typing "as unknown" when the github action is adjusted and always adds empty strings for missing translations
 const deI18n = (): I18n => ({
-	...mergeWithFallback(enI18n(), de as unknown as I18n),
+	...mergeWithFallback({ refLang: enI18n(), targetLang: de as unknown as I18n }),
 	lang: Languages.GERMAN
 });
 
