@@ -67,7 +67,6 @@
 					transactions: ($icTransactionsStore?.[tokenId] ?? []).map(({ data }) => data),
 					owner: $authIdentity.getPrincipal(),
 					identity: $authIdentity,
-					maxResults: ALL_TRANSACTIONS_WALLET_PAGINATION,
 					token,
 					signalEnd: () => (disableLoader[tokenId] = true)
 				});
