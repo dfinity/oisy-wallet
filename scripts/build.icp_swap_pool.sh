@@ -19,7 +19,7 @@ print_help() {
 ICP_SWAP_POOL_BUILDENV="$DFX_NETWORK"
 export ICP_SWAP_POOL_BUILDENV
 
-ICP_SWAP_REPO_URL="https://raw.githubusercontent.com/ICPSwap-Labs/docs/refs/heads/main/_canister/SwapPool"
+ICP_SWAP_REPO_URL="https://raw.githubusercontent.com/ICPSwap-Labs/docs/82ce96a5c401d78c5b3d34b001495943c169bc29/_canister/SwapPool"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${ICP_SWAP_REPO_URL}/SwapPool.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
