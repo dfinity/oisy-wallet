@@ -135,5 +135,8 @@
 		"fee": {
 			"__bigint__": "1000000"
 		}
+	},
+	"ICONFUCIUS": {
+		"ledgerCanisterId": "5kijx-siaaa-aaaar-qaqda-cai"
 	}
 }
