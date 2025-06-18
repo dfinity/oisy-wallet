@@ -84,7 +84,8 @@ export const mockRewardCampaigns: RewardCampaignDescription[] = [
 				title: 'You and 4 friends you referred got a bonus sprinkle',
 				banner: '/images/rewards/airdrop-icp.svg',
 				description: 'Keep on referring friends to add more bonus sprinkles.',
-				shareHref: 'https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com'
+				shareHref:
+					'https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com'
 			}
 		}
 	},

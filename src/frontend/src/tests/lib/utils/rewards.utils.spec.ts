@@ -162,8 +162,14 @@ describe('rewards.utils', () => {
 		});
 
 		it('should return reward with type referrer if one of several received rewards is a referrer and set entry in the session storage', async () => {
-			const customMockedReferrerReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRER] };
-			const customMockedReferralReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRAL] };
+			const customMockedReferrerReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRER]
+			};
+			const customMockedReferralReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRAL]
+			};
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				superpowers: [],

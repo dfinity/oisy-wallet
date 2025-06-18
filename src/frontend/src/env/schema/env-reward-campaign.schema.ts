@@ -49,6 +49,6 @@ export const RewardCampaignSchema = z.object({
 				description: z.string(),
 				shareHref: z.string()
 			})
-			.optional(),
+			.optional()
 	})
 });
