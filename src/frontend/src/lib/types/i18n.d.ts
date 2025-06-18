@@ -43,6 +43,7 @@ interface I18nCore {
 		back: string;
 		open_details: string;
 		close_details: string;
+		switch_language: string;
 	};
 	warning: { do_not_close: string };
 }
