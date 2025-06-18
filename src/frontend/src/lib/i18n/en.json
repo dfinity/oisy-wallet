@@ -1,4 +1,8 @@
 {
+	"languages": {
+		"en": "English",
+		"de": "German"
+	},
 	"core": {
 		"text": {
 			"cancel": "Cancel",
