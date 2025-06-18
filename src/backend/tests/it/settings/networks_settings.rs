@@ -44,7 +44,7 @@ lazy_static! {
             },
         );
         map.insert(
-            NetworkSettingsFor::SolanaTestnet,
+            NetworkSettingsFor::SolanaDevnet,
             NetworkSettings {
                 enabled: true,
                 is_testnet: true,
@@ -83,7 +83,7 @@ lazy_static! {
             },
         );
         map.insert(
-            NetworkSettingsFor::SolanaTestnet,
+            NetworkSettingsFor::SolanaDevnet,
             NetworkSettings {
                 enabled: true,
                 is_testnet: true,
