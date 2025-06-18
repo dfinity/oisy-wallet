@@ -48,10 +48,10 @@
 				"shareHref": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
 			},
 			"jackpot": {
-				"title": "Congratulations on earning today’s largest OISY Sprinkles!",
+				"title": "You've won the jackpot",
 				"banner": "/images/rewards/reward-jackpot-received.svg",
-				"description": "Share your victory on Twitter to qualify for another chance to earn.",
-				"shareHref": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+				"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more",
+				"shareHref": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
 			}
 		}
 	}
