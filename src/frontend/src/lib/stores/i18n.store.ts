@@ -1,25 +1,9 @@
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
 import { Languages } from '$lib/types/languages';
+import { mergeWithFallback } from '$lib/utils/i18n.utils';
 import { get, set } from '$lib/utils/storage.utils';
 import { writable, type Readable } from 'svelte/store';
-
-function mergeWithFallback(refLang: Partial<I18n>, targetLang: Partial<I18n>): I18n {
-	const merged: Partial<I18n> = {};
-
-	for (const key in refLang) {
-		const refValue = refLang[key as keyof I18n];
-		const targetValue = targetLang?.[key as keyof I18n];
-
-		if (typeof refValue === 'object' && !Array.isArray(refValue)) {
-			merged[key as keyof I18n] = mergeWithFallback(refValue as I18n, (targetValue as I18n) || {});
-		} else {
-			merged[key as keyof I18n] = (targetValue as string) ?? (refValue as string);
-		}
-	}
-
-	return merged as I18n;
-}
 
 const enI18n = (): I18n => ({
 	...en,
@@ -27,7 +11,7 @@ const enI18n = (): I18n => ({
 });
 
 const deI18n = (): I18n => ({
-	...mergeWithFallback(en, de as unknown as I18n),
+	...mergeWithFallback(enI18n(), de as unknown as I18n),
 	lang: Languages.GERMAN
 });
 

@@ -6,7 +6,12 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
-import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+import {
+	mergeWithFallback,
+	replaceOisyPlaceholders,
+	replacePlaceholders
+} from '$lib/utils/i18n.utils';
+import { describe, expect } from 'vitest';
 
 describe('i18n-utils', () => {
 	describe('replacePlaceholders', () => {
@@ -59,6 +64,56 @@ describe('i18n-utils', () => {
 			expect(replaceOisyPlaceholders('Url: $oisy_url')).toBe(`Url: ${OISY_URL}`);
 
 			expect(replaceOisyPlaceholders('Url: $oisy_repo_url')).toBe(`Url: ${OISY_REPO_URL}`);
+		});
+	});
+
+	describe('mergeWithFallback', () => {
+		const mockEnglishTranslations = {
+			key1: 'Key 1 English',
+			key2: 'Key 2 English',
+			key3: 'Key 3 English',
+			nested: {
+				key4: 'Key 4 English',
+				deeplyNested: {
+					key5: 'Key 5 English'
+				}
+			}
+		} as unknown as I18n;
+		const mockGermanTranslations = {
+			key1: 'Key 1 Deutsch',
+			key2: 'Key 2 Deutsch',
+			nested: {
+				key4: 'Key 4 Deutsch'
+			}
+		} as unknown as I18n;
+
+		const expectedMergeResult = {
+			key1: 'Key 1 Deutsch',
+			key2: 'Key 2 Deutsch',
+			key3: 'Key 3 English',
+			nested: {
+				key4: 'Key 4 Deutsch',
+				deeplyNested: {
+					key5: 'Key 5 English'
+				}
+			}
+		} as unknown as I18n;
+
+		it('should merge missing translations from a reference language', () => {
+			const result = mergeWithFallback(mockEnglishTranslations, mockGermanTranslations);
+
+			expect(result).toEqual(expectedMergeResult);
+		});
+
+		it('should handle malformed translations by ignoring them', () => {
+			const result = mergeWithFallback(mockEnglishTranslations, {
+				...mockGermanTranslations,
+				arrayNotAllowed: ['test'],
+				emptyObj: {},
+				nullKey: null
+			} as unknown as I18n);
+
+			expect(result).toEqual(expectedMergeResult);
 		});
 	});
 });
