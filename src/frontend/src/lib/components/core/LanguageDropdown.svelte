@@ -8,7 +8,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 
-	let dropdown: Dropdown | undefined;
+	let dropdown = $state<Dropdown>();
 
 	const currentLang: keyof I18nLanguages = $derived($i18n.lang);
 
@@ -29,7 +29,7 @@
 		{$i18n.languages[currentLang]}
 
 		{#snippet title()}
-			Select Language
+			{$i18n.core.alt.switch_language}
 		{/snippet}
 
 		{#snippet items()}
