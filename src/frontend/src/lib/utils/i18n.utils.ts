@@ -7,7 +7,7 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
 const escapeRegExp = (regExpText: string): string =>
@@ -68,18 +68,22 @@ export const mergeWithFallback = ({
 	targetLang
 }: {
 	refLang: I18n;
-	targetLang: Partial<I18n>;
+	targetLang: I18n;
 }): I18n => {
-	const merged: Partial<I18n> = {};
+	const merged: I18n = {};
 
 	for (const key in refLang) {
 		const refValue = refLang[key as keyof I18n];
 		const targetValue = targetLang?.[key as keyof I18n];
 
 		if (typeof refValue === 'object' && !Array.isArray(refValue)) {
-			merged[key as keyof I18n] = mergeWithFallback(refValue as I18n, (targetValue as I18n) ?? {});
+			merged[key as keyof I18n] = mergeWithFallback({
+				refLang: refValue,
+				targetLang: targetValue ?? {}
+			});
 		} else {
-			merged[key as keyof I18n] = (targetValue as string) ?? (refValue as string);
+			merged[key as keyof I18n] =
+				isNullish(targetValue) || isEmptyString(targetValue) ? refValue : targetValue;
 		}
 	}
 

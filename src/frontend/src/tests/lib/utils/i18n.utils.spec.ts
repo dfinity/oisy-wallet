@@ -167,8 +167,16 @@ describe('i18n-utils', () => {
 				refLang: mockEnglishTranslations as unknown as I18n,
 				targetLang: null as unknown as I18n
 			});
-
 			expect(result).toEqual(mockEnglishTranslations);
+		});
+
+		it('should consider empty strings as missing and fall back to reference', () => {
+			const result = mergeWithFallback({
+				refLang: mockEnglishTranslations,
+				targetLang: { ...mockGermanTranslations, key3: '' }
+			});
+
+			expect(result).toEqual(expectedMergeResult);
 		});
 	});
 });
