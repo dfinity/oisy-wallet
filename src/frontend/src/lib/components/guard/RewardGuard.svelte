@@ -43,29 +43,22 @@
 		);
 
 		if (nonNullish(rewardType) && nonNullish(campaign)) {
+			trackEvent({
+				name: TRACK_REWARD_CAMPAIGN_WIN,
+				metadata: { campaignId: `${campaign.id}`, type: rewardType }
+			});
+
 			if (rewardType === RewardType.JACKPOT) {
-				trackEvent({
-					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: rewardType }
-				});
 				modalStore.openRewardState({
 					id: rewardModalId,
-					data: { reward: campaign, jackpot: true }
+					data: { reward: campaign, rewardType }
 				});
 			} else if (rewardType === RewardType.REFERRAL) {
-				trackEvent({
-					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: rewardType }
-				});
 				modalStore.openReferralState({ id: referralModalId, data: campaign });
 			} else {
-				trackEvent({
-					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: rewardType }
-				});
 				modalStore.openRewardState({
 					id: rewardModalId,
-					data: { reward: campaign, jackpot: false }
+					data: { reward: campaign, rewardType }
 				});
 			}
 		}
@@ -95,7 +88,10 @@
 {@render children?.()}
 
 {#if $modalRewardState && nonNullish($modalRewardStateData)}
-	<RewardStateModal reward={$modalRewardStateData.reward} jackpot={$modalRewardStateData.jackpot} />
+	<RewardStateModal
+		reward={$modalRewardStateData.reward}
+		rewardType={$modalRewardStateData.rewardType}
+	/>
 {:else if $modalReferralState && nonNullish($modalReferralStateData)}
 	<ReferralStateModal reward={$modalReferralStateData} />
 {:else if $modalWelcome}

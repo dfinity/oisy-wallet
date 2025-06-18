@@ -7,6 +7,7 @@ import {
 	REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR,
 	REWARDS_STATE_MODAL_SHARE_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { RewardType } from '$lib/enums/reward-type';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -25,7 +26,7 @@ describe('RewardStateModal', () => {
 		const { container, getByText } = render(RewardStateModal, {
 			props: {
 				reward: mockedReward,
-				jackpot: false
+				rewardType: RewardType.AIRDROP
 			}
 		});
 
@@ -57,7 +58,7 @@ describe('RewardStateModal', () => {
 		const { container, getByText } = render(RewardStateModal, {
 			props: {
 				reward: mockedReward,
-				jackpot: true
+				rewardType: RewardType.JACKPOT
 			}
 		});
 

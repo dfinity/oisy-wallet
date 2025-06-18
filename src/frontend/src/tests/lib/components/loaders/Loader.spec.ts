@@ -85,7 +85,6 @@ vi.mock('$sol/services/sol-address.services', () => ({
 		solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
 	}),
-	loadSolAddressTestnet: vi.fn(() => Promise.resolve({ success: true })),
 	loadSolAddressDevnet: vi.fn(() => {
 		solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });

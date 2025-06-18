@@ -98,6 +98,12 @@ export class BackendCanister extends Canister<BackendService> {
 		return remove_user_token(params);
 	};
 
+	removeCustomToken = ({ token }: { token: CustomToken }): Promise<void> => {
+		const { remove_custom_token } = this.caller({ certified: true });
+
+		return remove_custom_token(token);
+	};
+
 	createUserProfile = (): Promise<UserProfile> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
