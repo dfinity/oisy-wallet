@@ -15,30 +15,40 @@
 		REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR,
 		REWARDS_STATE_MODAL_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { RewardType } from '$lib/enums/reward-type';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
 		reward: RewardCampaignDescription;
-		jackpot?: boolean;
+		rewardType?: RewardType;
 	}
 
-	let { reward, jackpot = false }: Props = $props();
+	let { reward, rewardType = RewardType.AIRDROP }: Props = $props();
+
+	let imgSrc = $state('');
+	let title = $state('');
+	let description = $state('');
+	let shareHref = $state('');
+
+	$effect(() => {
+		if (rewardType === RewardType.JACKPOT) {
+			({ banner: imgSrc, title, description, shareHref } = reward.win.jackpot);
+		} else {
+			({ banner: imgSrc, title, description, shareHref } = reward.win.default);
+		}
+	});
 </script>
 
-<Sprinkles type={jackpot ? 'page-jackpot' : 'page'} />
+<Sprinkles type={rewardType === RewardType.JACKPOT ? 'page-jackpot' : 'page'} />
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
-		<Img
-			src={jackpot ? reward.win.jackpot.banner : reward.win.default.banner}
-			styleClass="w-full"
-			testId={REWARDS_STATE_MODAL_IMAGE_BANNER}
-		/>
+		<Img src={imgSrc} styleClass="w-full" testId={REWARDS_STATE_MODAL_IMAGE_BANNER} />
 
 		<div class="flex flex-col items-center gap-4 text-center">
-			<h3 class="my-3">{jackpot ? reward.win.jackpot.title : reward.win.default.title}</h3>
-			<Html text={jackpot ? reward.win.jackpot.description : reward.win.default.description} />
+			<h3 class="my-3">{title}</h3>
+			<Html text={description} />
 
 			<div>
 				<ExternalLink
@@ -55,10 +65,10 @@
 				<Share
 					testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
 					text={$i18n.rewards.text.share}
-					href={jackpot ? reward.win.jackpot.shareHref : reward.win.default.shareHref}
+					href={shareHref}
 					trackEvent={{
 						name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
-						metadata: { campaignId: `${reward.id}`, type: `${jackpot ? 'jackpot' : 'airdrop'}` }
+						metadata: { campaignId: `${reward.id}`, type: rewardType }
 					}}
 				/>
 			</div>
