@@ -1,5 +1,8 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import {
+	GHOSTNODE_LEDGER_CANISTER_ID,
+	ICONFUCIUS_LEDGER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
 import type {
@@ -26,7 +29,8 @@ export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 };
 
 const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
-	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE'
+	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE',
+	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS'
 };
 
 export const mapIcrcToken = ({
