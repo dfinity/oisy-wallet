@@ -39,6 +39,8 @@
 			({ banner: imgSrc, title, description, shareHref } = reward.win.jackpot);
 		} else if (rewardType === RewardType.REFERRER && nonNullish(reward.win.referrer)) {
 			({ banner: imgSrc, title, description, shareHref } = reward.win.referrer);
+		} else if (rewardType === RewardType.REFEREE && nonNullish(reward.win.referee)) {
+			({ banner: imgSrc, title, description, shareHref } = reward.win.referee);
 		} else if (rewardType === RewardType.REFERRAL && nonNullish(reward.win.referral)) {
 			({ banner: imgSrc, title, description, shareHref } = reward.win.referral);
 		} else {

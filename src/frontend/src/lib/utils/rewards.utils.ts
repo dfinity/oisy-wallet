@@ -51,6 +51,7 @@ const getRewardType = (rewards: RewardResponseInfo[]) => {
 		RewardType.LEADERBOARD,
 		RewardType.JACKPOT,
 		RewardType.REFERRER,
+		RewardType.REFEREE,
 		RewardType.REFERRAL,
 		RewardType.AIRDROP
 	];

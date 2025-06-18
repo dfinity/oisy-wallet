@@ -6,7 +6,12 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
-import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+import {
+	mergeWithFallback,
+	replaceOisyPlaceholders,
+	replacePlaceholders
+} from '$lib/utils/i18n.utils';
+import { describe, expect } from 'vitest';
 
 describe('i18n-utils', () => {
 	describe('replacePlaceholders', () => {
@@ -59,6 +64,120 @@ describe('i18n-utils', () => {
 			expect(replaceOisyPlaceholders('Url: $oisy_url')).toBe(`Url: ${OISY_URL}`);
 
 			expect(replaceOisyPlaceholders('Url: $oisy_repo_url')).toBe(`Url: ${OISY_REPO_URL}`);
+		});
+	});
+
+	describe('mergeWithFallback', () => {
+		interface MockI18n {
+			[key: string]: string | MockI18n;
+		}
+
+		const mockEnglishTranslations = {
+			key1: 'Key 1 English',
+			key2: 'Key 2 English',
+			key3: 'Key 3 English',
+			nested: {
+				key4: 'Key 4 English',
+				deeplyNested: {
+					key5: 'Key 5 English'
+				}
+			}
+		} as MockI18n;
+		const mockGermanTranslations = {
+			key1: 'Key 1 Deutsch',
+			key2: 'Key 2 Deutsch',
+			nested: {
+				key4: 'Key 4 Deutsch'
+			}
+		} as MockI18n;
+
+		const expectedMergeResult = {
+			key1: 'Key 1 Deutsch',
+			key2: 'Key 2 Deutsch',
+			key3: 'Key 3 English',
+			nested: {
+				key4: 'Key 4 Deutsch',
+				deeplyNested: {
+					key5: 'Key 5 English'
+				}
+			}
+		} as MockI18n;
+
+		it('should merge missing translations from a reference language', () => {
+			const result = mergeWithFallback({
+				refLang: mockEnglishTranslations as unknown as I18n,
+				targetLang: mockGermanTranslations as unknown as I18n
+			});
+
+			expect(result).toEqual(expectedMergeResult);
+		});
+
+		it('should handle malformed translations by ignoring them', () => {
+			const result = mergeWithFallback({
+				refLang: mockEnglishTranslations as unknown as I18n,
+				targetLang: {
+					...mockGermanTranslations,
+					arrayNotAllowed: ['test'],
+					emptyObj: {},
+					nullKey: null
+				} as unknown as I18n
+			});
+
+			expect(result).toEqual(expectedMergeResult);
+		});
+
+		it('should return the full reference language when target is empty', () => {
+			const result = mergeWithFallback({
+				refLang: mockEnglishTranslations as unknown as I18n,
+				targetLang: {} as I18n
+			});
+
+			expect(result).toEqual(mockEnglishTranslations);
+		});
+
+		it('should copy entire nested object from reference if missing in target', () => {
+			const result = mergeWithFallback({
+				refLang: mockEnglishTranslations as unknown as I18n,
+				targetLang: {
+					key1: 'Key 1 Deutsch',
+					key2: 'Key 2 Deutsch',
+					key3: 'Key 3 Deutsch'
+				} as unknown as I18n
+			});
+
+			expect((result as unknown as MockI18n).nested).toEqual(mockEnglishTranslations.nested);
+		});
+
+		it('should prefer reference value if target type mismatches (e.g., object vs string)', () => {
+			const brokenTarget = {
+				key1: 'Key 1 Deutsch',
+				nested: 'not-an-object'
+			} as unknown as I18n;
+
+			const result = mergeWithFallback({
+				refLang: mockEnglishTranslations as unknown as I18n,
+				targetLang: brokenTarget as unknown as I18n
+			});
+
+			expect((result as unknown as MockI18n).nested).toEqual(mockEnglishTranslations.nested);
+		});
+
+		it('should return reference when target is null', () => {
+			const result = mergeWithFallback({
+				refLang: mockEnglishTranslations as unknown as I18n,
+				targetLang: null as unknown as I18n
+			});
+
+			expect(result).toEqual(mockEnglishTranslations);
+		});
+
+		it('should consider empty strings as missing and fall back to reference', () => {
+			const result = mergeWithFallback({
+				refLang: mockEnglishTranslations as unknown as I18n,
+				targetLang: { ...mockGermanTranslations, key3: '' } as unknown as I18n
+			});
+
+			expect(result).toEqual(expectedMergeResult);
 		});
 	});
 });
