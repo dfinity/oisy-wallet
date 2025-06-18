@@ -34,7 +34,7 @@
 
 		{#snippet items()}
 			<List noPadding condensed>
-				{#each SUPPORTED_LANGUAGES as [langKey, langVal]}
+				{#each SUPPORTED_LANGUAGES as [langKey, langVal], index (index + langKey)}
 					<ListItem>
 						<Button
 							onclick={() => handleLangChange(langKey)}
