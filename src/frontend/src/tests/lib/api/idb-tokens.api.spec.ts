@@ -5,6 +5,7 @@ import { toUserToken } from '$icp-eth/services/user-token.services';
 import {
 	deleteIdbEthToken,
 	deleteIdbEthTokens,
+	deleteIdbIcToken,
 	deleteIdbIcTokens,
 	deleteIdbSolTokens,
 	getIdbEthTokens,
@@ -12,6 +13,7 @@ import {
 	getIdbSolTokens,
 	setIdbTokensStore
 } from '$lib/api/idb-tokens.api';
+import * as authServices from '$lib/services/auth.services';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
@@ -19,6 +21,7 @@ import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
+import { expect, vi } from 'vitest';
 
 vi.mock('idb-keyval', () => ({
 	createStore: vi.fn(() => ({
@@ -34,10 +37,14 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
+
 describe('idb-tokens.api', () => {
 	const mockIdbTokensStore = createStore('mock-store', 'mock-store');
 
-	const mockTokens: CustomToken[] = [
+	const icMockTokens = [
 		{
 			token: {
 				Icrc: {
@@ -50,11 +57,17 @@ describe('idb-tokens.api', () => {
 		},
 		{
 			token: {
-				Icrc: { ledger_id: Principal.fromText(IC_CKETH_LEDGER_CANISTER_ID), index_id: toNullable() }
+				Icrc: {
+					ledger_id: Principal.fromText(IC_CKETH_LEDGER_CANISTER_ID),
+					index_id: toNullable()
+				}
 			},
 			version: toNullable(1n),
 			enabled: false
-		},
+		}
+	] as CustomToken[];
+	const mockTokens: CustomToken[] = [
+		...icMockTokens,
 		{
 			token: {
 				SplDevnet: {
@@ -226,6 +239,60 @@ describe('idb-tokens.api', () => {
 				restUserTokens,
 				mockIdbTokensStore
 			);
+		});
+	});
+
+	describe('deleteIdbIcToken', () => {
+		it('should delete provided IC token', async () => {
+			const [tokenToDelete, ...rest] = icMockTokens;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([tokenToDelete, ...rest]);
+
+			await deleteIdbIcToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				rest,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should not delete anything if provided IC token is not in the IDB', async () => {
+			const [tokenToDelete, ...rest] = icMockTokens;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue(rest);
+
+			await deleteIdbIcToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				rest,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should call nullishSignOur if no identity provided', async () => {
+			const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
+			const [tokenToDelete, ...rest] = icMockTokens;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([tokenToDelete, ...rest]);
+
+			await deleteIdbIcToken({
+				identity: undefined,
+				token: tokenToDelete
+			});
+
+			expect(signOutSpy).toHaveBeenCalled();
 		});
 	});
 });
