@@ -15,37 +15,35 @@ export interface AccountSnapshot {
 export type AccountSnapshotFor =
 	| { Erc20Sepolia: AccountSnapshot }
 	| { EthSepolia: AccountSnapshot }
-	| { SplTestnet: AccountSnapshot_1 }
-	| { BtcMainnet: AccountSnapshot_2 }
-	| { SolDevnet: AccountSnapshot_1 }
+	| { BtcMainnet: AccountSnapshot_1 }
+	| { SolDevnet: AccountSnapshot_2 }
 	| { Erc20Mainnet: AccountSnapshot }
-	| { SolTestnet: AccountSnapshot_1 }
 	| { Icrcv2: AccountSnapshot_3 }
-	| { BtcRegtest: AccountSnapshot_2 }
-	| { SplDevnet: AccountSnapshot_1 }
+	| { BtcRegtest: AccountSnapshot_1 }
+	| { SplDevnet: AccountSnapshot_2 }
 	| { EthMainnet: AccountSnapshot }
-	| { SplMainnet: AccountSnapshot_1 }
-	| { SolLocal: AccountSnapshot_1 }
-	| { BtcTestnet: AccountSnapshot_2 }
-	| { SplLocal: AccountSnapshot_1 }
-	| { SolMainnet: AccountSnapshot_1 };
+	| { SplMainnet: AccountSnapshot_2 }
+	| { SolLocal: AccountSnapshot_2 }
+	| { BtcTestnet: AccountSnapshot_1 }
+	| { SplLocal: AccountSnapshot_2 }
+	| { SolMainnet: AccountSnapshot_2 };
 export interface AccountSnapshot_1 {
 	decimals: number;
-	token_address: string;
+	token_address: BtcTokenId;
 	network: {};
 	approx_usd_per_token: number;
 	last_transactions: Array<Transaction_1>;
-	account: string;
+	account: BtcAddress;
 	timestamp: bigint;
 	amount: bigint;
 }
 export interface AccountSnapshot_2 {
 	decimals: number;
-	token_address: BtcTokenId;
+	token_address: string;
 	network: {};
 	approx_usd_per_token: number;
 	last_transactions: Array<Transaction_2>;
-	account: BtcAddress;
+	account: string;
 	timestamp: bigint;
 	amount: bigint;
 }
@@ -289,7 +287,6 @@ export type NetworkSettingsFor =
 	| { InternetComputer: null }
 	| { BaseSepolia: null }
 	| { PolygonMainnet: null }
-	| { SolanaTestnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }
 	| { PolygonAmoy: null }
@@ -405,14 +402,14 @@ export type TransactionType = { Send: null } | { Receive: null };
 export interface Transaction_1 {
 	transaction_type: TransactionType;
 	network: {};
-	counterparty: string;
+	counterparty: BtcAddress;
 	timestamp: bigint;
 	amount: bigint;
 }
 export interface Transaction_2 {
 	transaction_type: TransactionType;
 	network: {};
-	counterparty: BtcAddress;
+	counterparty: string;
 	timestamp: bigint;
 	amount: bigint;
 }
