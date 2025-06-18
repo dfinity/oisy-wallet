@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal, Html } from '@dfinity/gix-components';
+	import { Html, Modal } from '@dfinity/gix-components';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -18,6 +18,7 @@
 	import { RewardType } from '$lib/enums/reward-type';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -32,7 +33,9 @@
 	let shareHref = $state('');
 
 	$effect(() => {
-		if (rewardType === RewardType.JACKPOT) {
+		if (rewardType === RewardType.LEADERBOARD && nonNullish(reward.win.leaderboard)) {
+			({ banner: imgSrc, title, description, shareHref } = reward.win.leaderboard);
+		} else if (rewardType === RewardType.JACKPOT) {
 			({ banner: imgSrc, title, description, shareHref } = reward.win.jackpot);
 		} else {
 			({ banner: imgSrc, title, description, shareHref } = reward.win.default);

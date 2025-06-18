@@ -48,7 +48,12 @@
 				metadata: { campaignId: `${campaign.id}`, type: rewardType }
 			});
 
-			if (rewardType === RewardType.JACKPOT) {
+			if (rewardType === RewardType.LEADERBOARD) {
+				modalStore.openRewardState({
+					id: rewardModalId,
+					data: { reward: campaign, rewardType }
+				});
+			} else if (rewardType === RewardType.JACKPOT) {
 				modalStore.openRewardState({
 					id: rewardModalId,
 					data: { reward: campaign, rewardType }
