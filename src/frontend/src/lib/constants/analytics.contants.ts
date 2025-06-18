@@ -93,6 +93,9 @@ export const TRACK_COUNT_OPEN_WHY_OISY = 'open_why_oisy';
 export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation';
 export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog';
 
+// Snapshots
+export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
+
 // Analytics event source routes
 export const LANDING_PAGE_ROUTE = 'landing-page';
 export const HOME_PAGE_ROUTE = 'home-page';
