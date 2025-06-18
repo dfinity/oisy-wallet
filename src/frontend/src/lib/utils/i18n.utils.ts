@@ -73,19 +73,18 @@ export const mergeWithFallback = ({
 	const merged: I18n = {};
 
 	for (const key in refLang) {
-		const refValue = refLang[key as keyof I18n];
-		const targetValue = targetLang?.[key as keyof I18n];
+		const refValue = refLang[key];
+		const targetValue = targetLang[key];
 
 		if (typeof refValue === 'object' && !Array.isArray(refValue)) {
-			merged[key as keyof I18n] = mergeWithFallback({
+			merged[key] = mergeWithFallback({
 				refLang: refValue,
 				targetLang: targetValue ?? {}
 			});
 		} else {
-			merged[key as keyof I18n] =
-				isNullish(targetValue) || isEmptyString(targetValue) ? refValue : targetValue;
+			merged[key] = isNullish(targetValue) || isEmptyString(targetValue) ? refValue : targetValue;
 		}
 	}
 
-	return merged as I18n;
+	return merged;
 };
