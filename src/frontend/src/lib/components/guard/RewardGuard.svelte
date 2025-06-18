@@ -1,21 +1,14 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
-	import {
-		rewardCampaigns,
-		SPRINKLES_SEASON_1_EPISODE_4_ID
-	} from '$env/reward-campaigns.env';
+	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
 	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import {
-		modalRewardState,
-		modalRewardStateData,
-		modalWelcome
-	} from '$lib/derived/modal.derived';
+	import { modalRewardState, modalRewardStateData, modalWelcome } from '$lib/derived/modal.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isOngoingCampaign, loadRewardResult } from '$lib/utils/rewards.utils';
