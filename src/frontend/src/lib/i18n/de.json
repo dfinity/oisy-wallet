@@ -41,7 +41,8 @@
 			"go_to_home": "Zur $oisy_name-Startseite gehen",
 			"back": "Zurück zur vorherigen Seite",
 			"open_details": "Details öffnen",
-			"close_details": "Details schließen"
+			"close_details": "Details schließen",
+			"switch_language": "Sprache wechseln"
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist"
