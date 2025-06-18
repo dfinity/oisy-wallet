@@ -70,11 +70,11 @@ export const mergeWithFallback = ({
 	refLang: I18n;
 	targetLang: I18n;
 }): I18n => {
-	const merged: I18n = {};
+	const merged: Partial<I18n> = {};
 
 	for (const key in refLang) {
 		const refValue = refLang[key as keyof I18n];
-		const targetValue = targetLang[key];
+		const targetValue = targetLang[key] as I18n[keyof I18n];
 
 		if (typeof refValue === 'object' && !Array.isArray(refValue)) {
 			merged[key as keyof I18n] = mergeWithFallback({
