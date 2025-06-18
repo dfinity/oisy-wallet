@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { SUPPORTED_LANGUAGES, LANGUAGES } from '$env/i18n';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Languages } from '$lib/types/languages';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import List from '$lib/components/common/List.svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 
 	let dropdown = $state<Dropdown>();
 
