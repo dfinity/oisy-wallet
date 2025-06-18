@@ -120,6 +120,37 @@ describe('RewardGuard', () => {
 		});
 	});
 
+	it('should open reward state modal for referral', async () => {
+		const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRAL] };
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			superpowers: [],
+			airdrops: [],
+			usage_awards: [[mockedReward, customMockedReward]],
+			last_snapshot_timestamp: [lastTimestamp],
+			sprinkles: []
+		};
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+		render(RewardGuard);
+
+		await waitFor(() => {
+			expect(get(modalStore)).toEqual({
+				id: get(modalStore)?.id,
+				data: { reward: mockRewardCampaign, rewardType: RewardType.REFERRAL },
+				type: 'reward-state'
+			});
+
+			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				name: TRACK_REWARD_CAMPAIGN_WIN,
+				metadata: {
+					campaignId: mockRewardCampaign.id,
+					type: RewardType.REFERRAL
+				}
+			});
+		});
+	});
+
 	it('should open reward state modal for normal airdrop', async () => {
 		const mockedUserData: UserData = {
 			is_vip: [false],
@@ -145,37 +176,6 @@ describe('RewardGuard', () => {
 				metadata: {
 					campaignId: mockRewardCampaign.id,
 					type: RewardType.AIRDROP
-				}
-			});
-		});
-	});
-
-	it('should open reward state modal for referral', async () => {
-		const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRAL] };
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [[mockedReward, customMockedReward]],
-			last_snapshot_timestamp: [lastTimestamp],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-		render(RewardGuard);
-
-		await waitFor(() => {
-			expect(get(modalStore)).toEqual({
-				id: get(modalStore)?.id,
-				data: mockRewardCampaign,
-				type: 'referral-state'
-			});
-
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
-				name: TRACK_REWARD_CAMPAIGN_WIN,
-				metadata: {
-					campaignId: mockRewardCampaign.id,
-					type: RewardType.REFERRAL
 				}
 			});
 		});
