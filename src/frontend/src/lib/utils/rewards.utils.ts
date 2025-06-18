@@ -1,6 +1,7 @@
 import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+import { RewardType } from '$lib/enums/reward-type';
 import { getRewards } from '$lib/services/reward.services';
 import type {
 	CampaignCriterion,
@@ -28,49 +29,46 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 		sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
 
 		if (newRewards.length > 0) {
-			const containsJackpot: boolean = newRewards.some(({ name }) => name === 'jackpot');
-			const containsReferral: boolean = newRewards.some(({ name }) => name === 'referral');
+			const rewardType = getRewardType(newRewards);
 
 			return {
-				receivedReward: true,
-				receivedJackpot: containsJackpot,
-				receivedReferral: containsReferral,
-				reward: getFirstReward({ rewards, containsJackpot, containsReferral }),
-				lastTimestamp
+				reward: getFirstReward({ rewards: newRewards, rewardType }),
+				lastTimestamp,
+				rewardType
 			};
 		}
 
 		if (lastTimestamp === 0n) {
-			return {
-				receivedReward: false,
-				receivedJackpot: false,
-				receivedReferral: false,
-				lastTimestamp
-			};
+			return { lastTimestamp };
 		}
 	}
 
-	return { receivedReward: false, receivedJackpot: false, receivedReferral: false };
+	return {};
+};
+
+const getRewardType = (rewards: RewardResponseInfo[]) => {
+	const priorityOrder = [
+		RewardType.LEADERBOARD,
+		RewardType.JACKPOT,
+		RewardType.REFERRAL,
+		RewardType.AIRDROP
+	];
+
+	const foundRewardType = priorityOrder.find((rewardType) =>
+		rewards.some(({ name }) => name === rewardType)
+	);
+
+	return foundRewardType ?? RewardType.AIRDROP;
 };
 
 const getFirstReward = ({
 	rewards,
-	containsJackpot,
-	containsReferral
+	rewardType
 }: {
 	rewards: RewardResponseInfo[];
-	containsJackpot: boolean;
-	containsReferral: boolean;
-}): RewardResponseInfo | undefined => {
-	if (containsJackpot) {
-		return rewards.find(({ name }) => name === 'jackpot');
-	}
-	if (containsReferral) {
-		return rewards.find(({ name }) => name === 'referral');
-	}
-
-	return rewards.at(0);
-};
+	rewardType: RewardType;
+}): RewardResponseInfo | undefined =>
+	rewards.find(({ name }) => name === rewardType) ?? rewards.at(0);
 
 export const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
 	const currentDate = new Date(Date.now());

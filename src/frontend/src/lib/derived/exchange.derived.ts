@@ -21,7 +21,6 @@ import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import {
 	SOLANA_DEVNET_TOKEN_ID,
 	SOLANA_LOCAL_TOKEN_ID,
-	SOLANA_TESTNET_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
@@ -64,7 +63,6 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
 			[SOLANA_TOKEN_ID]: solPrice,
-			[SOLANA_TESTNET_TOKEN_ID]: solPrice,
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
 			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
 			[BASE_ETH_TOKEN_ID]: ethPrice,
