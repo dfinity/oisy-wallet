@@ -54,12 +54,12 @@ const getRewardType = (rewards: RewardResponseInfo[]) => {
 		RewardType.AIRDROP
 	];
 
-	const foundRewardType = priorityOrder.find(rewardType =>
+	const foundRewardType = priorityOrder.find((rewardType) =>
 		rewards.some(({ name }) => name === rewardType)
 	);
 
 	return foundRewardType ?? RewardType.AIRDROP;
-}
+};
 
 const getFirstReward = ({
 	rewards,
