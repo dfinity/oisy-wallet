@@ -2,6 +2,8 @@ import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CK_TOKENS_LEDGER_CANISTER_IDS
 } from '$env/networks/networks.icrc.env';
+import { buildDip20Tokens } from '$icp/services/dip20-tokens.services';
+import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -13,13 +15,14 @@ import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import type { CanisterIdText } from '$lib/types/canister';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
  * The list of Icrc default tokens - i.e. the statically configured Icrc tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
  */
-const icrcDefaultTokens: Readable<IcToken[]> = derived(
+export const icrcDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcDefaultTokensStore, testnetsEnabled],
 	([$icrcTokensStore, $testnetsEnabled]) =>
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
@@ -145,4 +148,22 @@ export const enabledIcrcLedgerCanisterIdsNoCk: Readable<LedgerCanisterIdText[]> 
 			])
 		).values()
 	]
+);
+
+/**
+ * The list of all known to OISY ICRC token ledger ids.
+ * It is used to determine whether a token can be deleted or not.
+ */
+export const allKnownIcrcTokensLedgerCanisterIds: Readable<LedgerCanisterIdText[]> = derived(
+	[icrcDefaultTokens],
+	([$icrcDefaultTokens]) => {
+		const tokens = [...buildIcrcCustomTokens(), ...buildDip20Tokens()];
+		const icrcEnvTokens: IcTokenToggleable[] =
+			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
+
+		return [
+			...$icrcDefaultTokens.map(({ ledgerCanisterId }) => ledgerCanisterId),
+			...icrcEnvTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
+		];
+	}
 );
