@@ -9,7 +9,7 @@ use crate::types::{
     account::{AccountId, BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal},
     network::marker_trait::{
         BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, EthereumMainnet, EthereumSepolia,
-        InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet, SolanaTestnet,
+        InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet,
     },
     number::ComparableFloat,
     token_id::{BtcTokenId, EthTokenId, IcrcTokenId, SolTokenId, TokenId},
@@ -43,11 +43,9 @@ pub enum AccountSnapshotFor {
     Icrcv2(AccountSnapshot<InternetComputer, Icrcv2AccountId, IcrcTokenId>),
     SolDevnet(AccountSnapshot<SolanaDevnet, SolPrincipal, SolTokenId>),
     SolMainnet(AccountSnapshot<SolanaMainnet, SolPrincipal, SolTokenId>),
-    SolTestnet(AccountSnapshot<SolanaTestnet, SolPrincipal, SolTokenId>),
     SolLocal(AccountSnapshot<SolanaLocal, SolPrincipal, SolTokenId>),
     SplMainnet(AccountSnapshot<SolanaMainnet, SolPrincipal, SolTokenId>),
     SplDevnet(AccountSnapshot<SolanaDevnet, SolPrincipal, SolTokenId>),
-    SplTestnet(AccountSnapshot<SolanaTestnet, SolPrincipal, SolTokenId>),
     SplLocal(AccountSnapshot<SolanaLocal, SolPrincipal, SolTokenId>),
     BtcMainnet(AccountSnapshot<BitcoinMainnet, BtcAddress, BtcTokenId>),
     BtcTestnet(AccountSnapshot<BitcoinTestnet, BtcAddress, BtcTokenId>),
@@ -68,9 +66,6 @@ impl AccountSnapshotFor {
                 snapshot.timestamp
             }
             AccountSnapshotFor::SolMainnet(snapshot) | AccountSnapshotFor::SplMainnet(snapshot) => {
-                snapshot.timestamp
-            }
-            AccountSnapshotFor::SolTestnet(snapshot) | AccountSnapshotFor::SplTestnet(snapshot) => {
                 snapshot.timestamp
             }
             AccountSnapshotFor::SolLocal(snapshot) | AccountSnapshotFor::SplLocal(snapshot) => {
@@ -96,9 +91,6 @@ impl AccountSnapshotFor {
             AccountSnapshotFor::SolMainnet(snapshot) | AccountSnapshotFor::SplMainnet(snapshot) => {
                 snapshot.decimals
             }
-            AccountSnapshotFor::SolTestnet(snapshot) | AccountSnapshotFor::SplTestnet(snapshot) => {
-                snapshot.decimals
-            }
             AccountSnapshotFor::SolLocal(snapshot) | AccountSnapshotFor::SplLocal(snapshot) => {
                 snapshot.decimals
             }
@@ -122,9 +114,6 @@ impl AccountSnapshotFor {
             AccountSnapshotFor::SolMainnet(snapshot) | AccountSnapshotFor::SplMainnet(snapshot) => {
                 snapshot.approx_usd_per_token
             }
-            AccountSnapshotFor::SolTestnet(snapshot) | AccountSnapshotFor::SplTestnet(snapshot) => {
-                snapshot.approx_usd_per_token
-            }
             AccountSnapshotFor::SolLocal(snapshot) | AccountSnapshotFor::SplLocal(snapshot) => {
                 snapshot.approx_usd_per_token
             }
@@ -146,9 +135,6 @@ impl AccountSnapshotFor {
                 snapshot.amount
             }
             AccountSnapshotFor::SolMainnet(snapshot) | AccountSnapshotFor::SplMainnet(snapshot) => {
-                snapshot.amount
-            }
-            AccountSnapshotFor::SolTestnet(snapshot) | AccountSnapshotFor::SplTestnet(snapshot) => {
                 snapshot.amount
             }
             AccountSnapshotFor::SolLocal(snapshot) | AccountSnapshotFor::SplLocal(snapshot) => {
@@ -191,11 +177,6 @@ impl AccountSnapshotFor {
                 .iter()
                 .map(|t| t.timestamp)
                 .collect(),
-            AccountSnapshotFor::SolTestnet(snapshot) => snapshot
-                .last_transactions
-                .iter()
-                .map(|t| t.timestamp)
-                .collect(),
             AccountSnapshotFor::SolLocal(snapshot) => snapshot
                 .last_transactions
                 .iter()
@@ -207,11 +188,6 @@ impl AccountSnapshotFor {
                 .map(|t| t.timestamp)
                 .collect(),
             AccountSnapshotFor::SplDevnet(snapshot) => snapshot
-                .last_transactions
-                .iter()
-                .map(|t| t.timestamp)
-                .collect(),
-            AccountSnapshotFor::SplTestnet(snapshot) => snapshot
                 .last_transactions
                 .iter()
                 .map(|t| t.timestamp)

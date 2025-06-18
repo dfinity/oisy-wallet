@@ -1,16 +1,16 @@
 <script lang="ts">
-	import Dropdown from '$lib/components/ui/Dropdown.svelte';
-	import { SUPPORTED_LANGUAGES } from '$env/i18n';
+	import { SUPPORTED_LANGUAGES, LANGUAGES } from '$env/i18n';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Languages } from '$lib/types/languages';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import List from '$lib/components/common/List.svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 
-	let dropdown: Dropdown | undefined;
+	let dropdown = $state<Dropdown>();
 
-	const currentLang: keyof I18nLanguages = $derived($i18n.lang);
+	const currentLang: string = $derived(LANGUAGES[$i18n.lang as Languages]);
 
 	const handleLangChange = (lang: string) => {
 		i18n.switchLang(Languages[lang as keyof typeof Languages]);
@@ -21,20 +21,20 @@
 <span class="lang-selector min-w-32">
 	<Dropdown
 		bind:this={dropdown}
-		ariaLabel="Swtch lang"
+		ariaLabel={$i18n.core.alt.switch_language}
 		asModalOnMobile
 		buttonFullWidth
 		buttonBorder
 	>
-		{$i18n.languages[currentLang]}
+		{currentLang}
 
 		{#snippet title()}
-			Select Language
+			{$i18n.core.alt.switch_language}
 		{/snippet}
 
 		{#snippet items()}
 			<List noPadding condensed>
-				{#each SUPPORTED_LANGUAGES as [langKey, langVal]}
+				{#each SUPPORTED_LANGUAGES as [langKey, langVal], index (index + langKey)}
 					<ListItem>
 						<Button
 							onclick={() => handleLangChange(langKey)}
@@ -49,7 +49,7 @@
 									<IconCheck size="20" />
 								{/if}
 							</span>
-							{$i18n.languages[langVal]}
+							{LANGUAGES[langVal]}
 						</Button>
 					</ListItem>
 				{/each}
