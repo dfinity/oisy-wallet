@@ -9,6 +9,8 @@
 		button?: HTMLButtonElement;
 		ariaLabel: string;
 		opened?: boolean;
+		fullWidth?: boolean;
+		border?: boolean;
 		testId?: string;
 	}
 
@@ -19,6 +21,8 @@
 		button = $bindable(),
 		ariaLabel,
 		opened = false,
+		fullWidth = false,
+		border = false,
 		testId
 	}: Props = $props();
 </script>
@@ -32,6 +36,8 @@
 	{disabled}
 	class:disabled
 	class:opened
+	{fullWidth}
+	{border}
 >
 	{@render children?.()}
 	<div class="transform transition-transform duration-300 ease-in-out" class:-scale-y-100={opened}>
