@@ -17,7 +17,7 @@ ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
 ic-cycles-ledger-pic = { path = "src/cycles_ledger/pic" }
 ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }
 ic-ledger-types = "0.13.0"
-ic-stable-structures = "0.6.8"
+ic-stable-structures = "0.6.9"
 ic-metrics-encoder = "1.1.1"
 ic-canister-sig-creation = "1.1.0"
 ic-verifiable-credentials = "1.0.1"
