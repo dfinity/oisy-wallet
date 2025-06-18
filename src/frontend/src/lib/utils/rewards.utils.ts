@@ -50,6 +50,7 @@ const getRewardType = (rewards: RewardResponseInfo[]) => {
 	const priorityOrder = [
 		RewardType.LEADERBOARD,
 		RewardType.JACKPOT,
+		RewardType.REFERRER,
 		RewardType.REFEREE,
 		RewardType.REFERRAL,
 		RewardType.AIRDROP
