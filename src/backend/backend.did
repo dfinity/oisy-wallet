@@ -281,7 +281,6 @@ type NetworkSettingsFor = variant {
 	InternetComputer;
 	BaseSepolia;
 	PolygonMainnet;
-	SolanaTestnet;
 	BitcoinRegtest;
 	SolanaDevnet;
 	PolygonAmoy;

@@ -232,7 +232,6 @@ export const idlFactory = ({ IDL }) => {
 		InternetComputer: IDL.Null,
 		BaseSepolia: IDL.Null,
 		PolygonMainnet: IDL.Null,
-		SolanaTestnet: IDL.Null,
 		BitcoinRegtest: IDL.Null,
 		SolanaDevnet: IDL.Null,
 		PolygonAmoy: IDL.Null,
