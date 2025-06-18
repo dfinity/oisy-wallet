@@ -68,6 +68,10 @@ describe('i18n-utils', () => {
 	});
 
 	describe('mergeWithFallback', () => {
+		type MockI18n = {
+			[key: string]: string | MockI18n;
+		};
+
 		const mockEnglishTranslations = {
 			key1: 'Key 1 English',
 			key2: 'Key 2 English',
@@ -78,14 +82,14 @@ describe('i18n-utils', () => {
 					key5: 'Key 5 English'
 				}
 			}
-		} as unknown as I18n;
+		} as MockI18n;
 		const mockGermanTranslations = {
 			key1: 'Key 1 Deutsch',
 			key2: 'Key 2 Deutsch',
 			nested: {
 				key4: 'Key 4 Deutsch'
 			}
-		} as unknown as I18n;
+		} as MockI18n;
 
 		const expectedMergeResult = {
 			key1: 'Key 1 Deutsch',
@@ -97,23 +101,67 @@ describe('i18n-utils', () => {
 					key5: 'Key 5 English'
 				}
 			}
-		} as unknown as I18n;
+		} as MockI18n;
 
 		it('should merge missing translations from a reference language', () => {
-			const result = mergeWithFallback(mockEnglishTranslations, mockGermanTranslations);
+			const result = mergeWithFallback(
+				mockEnglishTranslations as unknown as I18n,
+				mockGermanTranslations
+			);
 
 			expect(result).toEqual(expectedMergeResult);
 		});
 
 		it('should handle malformed translations by ignoring them', () => {
-			const result = mergeWithFallback(mockEnglishTranslations, {
-				...mockGermanTranslations,
-				arrayNotAllowed: ['test'],
-				emptyObj: {},
-				nullKey: null
-			} as unknown as I18n);
+			const result = mergeWithFallback(
+				mockEnglishTranslations as unknown as I18n,
+				{
+					...mockGermanTranslations,
+					arrayNotAllowed: ['test'],
+					emptyObj: {},
+					nullKey: null
+				} as unknown as I18n
+			);
 
 			expect(result).toEqual(expectedMergeResult);
+		});
+
+		it('should return the full reference language when target is empty', () => {
+			const result = mergeWithFallback(mockEnglishTranslations as unknown as I18n, {} as I18n);
+
+			expect(result).toEqual(mockEnglishTranslations);
+		});
+
+		it('should copy entire nested object from reference if missing in target', () => {
+			const result = mergeWithFallback(
+				mockEnglishTranslations as unknown as I18n,
+				{
+					key1: 'Key 1 Deutsch',
+					key2: 'Key 2 Deutsch',
+					key3: 'Key 3 Deutsch'
+				} as unknown as I18n
+			);
+
+			expect((result as unknown as MockI18n).nested).toEqual(mockEnglishTranslations.nested);
+		});
+
+		it('should prefer reference value if target type mismatches (e.g., object vs string)', () => {
+			const brokenTarget = {
+				key1: 'Key 1 Deutsch',
+				nested: 'not-an-object'
+			} as unknown as I18n;
+
+			const result = mergeWithFallback(mockEnglishTranslations as unknown as I18n, brokenTarget);
+
+			expect((result as unknown as MockI18n).nested).toEqual(mockEnglishTranslations.nested);
+		});
+
+		it('should return reference when target is null', () => {
+			const result = mergeWithFallback(
+				mockEnglishTranslations as unknown as I18n,
+				null as unknown as I18n
+			);
+			expect(result).toEqual(mockEnglishTranslations);
 		});
 	});
 });
