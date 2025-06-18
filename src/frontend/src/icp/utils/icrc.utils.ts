@@ -1,6 +1,8 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { GHOSTNODE_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import { ICONFUCIUS_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import {
+	GHOSTNODE_LEDGER_CANISTER_ID,
+	ICONFUCIUS_LEDGER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
 import type {
