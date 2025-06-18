@@ -39,6 +39,7 @@
 						<Button
 							onclick={() => handleLangChange(langKey)}
 							fullWidth
+							alignLeft
 							paddingSmall
 							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
 							colorStyle="tertiary-alt"

@@ -31,7 +31,8 @@
 			"to": "An",
 			"add": "Hinzufügen",
 			"more_items": "+$items mehr",
-			"select": "Auswählen"
+			"select": "Auswählen",
+			"language": "Sprache"
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!"
