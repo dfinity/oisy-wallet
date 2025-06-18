@@ -164,10 +164,9 @@
 		},
 		"cycles_ledger": {
 			"type": "custom",
-			"candid": "out/cycles_ledger.did",
-			"wasm": "out/cycles_ledger.wasm",
-			"build": "scripts/build.cycles_ledger.sh",
-			"init_arg_file": "out/cycles_ledger.args.did",
+			"candid": "https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.1/cycles-ledger.did",
+			"wasm": "https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.1/cycles-ledger.wasm.gz",
+			"init_arg": "( variant { Init = record { index_id = null; max_blocks_per_request = 9_999 : nat64 }},)",
 			"specified_id": "um5iw-rqaaa-aaaaq-qaaba-cai",
 			"remote": {
 				"id": {

@@ -55,10 +55,6 @@ DFX_NETWORK=ic ./scripts/build.icp_swap_pool.sh
 DFX_NETWORK=ic ./scripts/build.icp_swap_factory.sh
 # .. downloads candid for the xtc_ledger
 DFX_NETWORK=ic ./scripts/build.xtc_ledger.sh
-# .. downloads candid for the cycles_ledger
-DFX_NETWORK=ic ./scripts/build.cycles_ledger.sh
-# .. downloads candid for the cycles_depositor
-DFX_NETWORK=ic ./scripts/build.cycles_depositor.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
@@ -69,7 +65,6 @@ for canister in "${canisters[@]}"; do
   echo "Generating bindings for $canister"
   dfx generate "$canister"
 done
-
 # Clean up..
 node scripts/did.update.types.mjs
 node scripts/did.delete.types.mjs

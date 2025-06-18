@@ -682,7 +682,7 @@ pub fn create_user_profile() -> UserProfile {
         // guarantee correct functionality, create_user_profile(..) must be invoked
         // before any signer-related calls (e.g., get_eth_address). Spawns the async
         // task separately after returning UserProfile synchronously
-        if let Err(e) = signer::allow_signing(Some(1u64)).await {
+        if let Err(e) = signer::allow_signing(None).await {
             // We don't return errors or panic here because:
             // 1. The user profile was already created successfully
             // 2. This is running in a spawned task, so we can't return errors to the original
