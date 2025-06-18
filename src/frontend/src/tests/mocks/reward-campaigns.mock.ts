@@ -30,6 +30,13 @@ export const mockRewardCampaigns: RewardCampaignDescription[] = [
 				description: 'Share your victory on Twitter to qualify for another chance to earn.',
 				shareHref:
 					'https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin.'
+			},
+			referral: {
+				title: 'Here a small thank you',
+				banner: '/images/rewards/reward-jackpot-received.svg',
+				description: 'One of your referred users just got some sprinkles.',
+				shareHref:
+					'https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin.'
 			}
 		}
 	},
