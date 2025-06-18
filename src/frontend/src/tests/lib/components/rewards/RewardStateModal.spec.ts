@@ -1,4 +1,7 @@
-import { SPRINKLES_SEASON_1_EPISODE_3_ID, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
+import {
+	SPRINKLES_SEASON_1_EPISODE_3_ID,
+	SPRINKLES_SEASON_1_EPISODE_4_ID
+} from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';

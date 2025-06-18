@@ -1,4 +1,7 @@
-import { SPRINKLES_SEASON_1_EPISODE_3_ID, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
+import {
+	SPRINKLES_SEASON_1_EPISODE_3_ID,
+	SPRINKLES_SEASON_1_EPISODE_4_ID
+} from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 
 export const mockRewardCampaigns: RewardCampaignDescription[] = [
@@ -65,8 +68,10 @@ export const mockRewardCampaigns: RewardCampaignDescription[] = [
 			leaderboard: {
 				title: 'You topped the Leaderboard',
 				banner: '/images/rewards/reward-jackpot-received.svg',
-				description: 'You ranked among the top 4 referrers this season $200 has been added to your wallet',
-				shareHref: 'https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today'
+				description:
+					'You ranked among the top 4 referrers this season $200 has been added to your wallet',
+				shareHref:
+					'https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today'
 			}
 		}
 	},
