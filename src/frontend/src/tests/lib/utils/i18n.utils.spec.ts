@@ -68,9 +68,9 @@ describe('i18n-utils', () => {
 	});
 
 	describe('mergeWithFallback', () => {
-		type MockI18n = {
+		interface MockI18n {
 			[key: string]: string | MockI18n;
-		};
+		}
 
 		const mockEnglishTranslations = {
 			key1: 'Key 1 English',
