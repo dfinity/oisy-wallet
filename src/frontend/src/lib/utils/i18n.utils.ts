@@ -63,7 +63,13 @@ export const resolveText = ({
 	return nonNullish(text) && typeof text !== 'object' ? text : path;
 };
 
-export const mergeWithFallback = (refLang: I18n, targetLang: Partial<I18n>): I18n => {
+export const mergeWithFallback = ({
+	refLang,
+	targetLang
+}: {
+	refLang: I18n;
+	targetLang: Partial<I18n>;
+}): I18n => {
 	const merged: Partial<I18n> = {};
 
 	for (const key in refLang) {
@@ -71,7 +77,7 @@ export const mergeWithFallback = (refLang: I18n, targetLang: Partial<I18n>): I18
 		const targetValue = targetLang?.[key as keyof I18n];
 
 		if (typeof refValue === 'object' && !Array.isArray(refValue)) {
-			merged[key as keyof I18n] = mergeWithFallback(refValue as I18n, (targetValue as I18n) || {});
+			merged[key as keyof I18n] = mergeWithFallback(refValue as I18n, (targetValue as I18n) ?? {});
 		} else {
 			merged[key as keyof I18n] = (targetValue as string) ?? (refValue as string);
 		}
