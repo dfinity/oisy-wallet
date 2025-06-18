@@ -106,7 +106,7 @@ describe('i18n-utils', () => {
 		it('should merge missing translations from a reference language', () => {
 			const result = mergeWithFallback({
 				refLang: mockEnglishTranslations as unknown as I18n,
-				targetLang: mockGermanTranslations
+				targetLang: mockGermanTranslations as unknown as I18n
 			});
 
 			expect(result).toEqual(expectedMergeResult);
@@ -156,7 +156,7 @@ describe('i18n-utils', () => {
 
 			const result = mergeWithFallback({
 				refLang: mockEnglishTranslations as unknown as I18n,
-				targetLang: brokenTarget
+				targetLang: brokenTarget as unknown as I18n
 			});
 
 			expect((result as unknown as MockI18n).nested).toEqual(mockEnglishTranslations.nested);
@@ -172,8 +172,8 @@ describe('i18n-utils', () => {
 
 		it('should consider empty strings as missing and fall back to reference', () => {
 			const result = mergeWithFallback({
-				refLang: mockEnglishTranslations,
-				targetLang: { ...mockGermanTranslations, key3: '' }
+				refLang: mockEnglishTranslations as unknown as I18n,
+				targetLang: { ...mockGermanTranslations, key3: '' } as unknown as I18n
 			});
 
 			expect(result).toEqual(expectedMergeResult);
