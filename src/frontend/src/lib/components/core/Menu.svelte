@@ -4,7 +4,9 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
+	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -44,8 +46,6 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
-	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
-	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
