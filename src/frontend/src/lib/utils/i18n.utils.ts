@@ -87,5 +87,5 @@ export const mergeWithFallback = ({
 		}
 	}
 
-	return merged as I18n;
+	return merged;
 };

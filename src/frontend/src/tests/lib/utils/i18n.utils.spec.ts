@@ -167,6 +167,7 @@ describe('i18n-utils', () => {
 				refLang: mockEnglishTranslations as unknown as I18n,
 				targetLang: null as unknown as I18n
 			});
+
 			expect(result).toEqual(mockEnglishTranslations);
 		});
 
