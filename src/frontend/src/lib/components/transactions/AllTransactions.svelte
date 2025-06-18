@@ -51,7 +51,9 @@
 	{:else}
 		<span class="flex items-center gap-2">
 			<PageTitle>{$i18n.activity.text.title}</PageTitle>
-			<IconEyeOff color="grey" />
+			<span class="text-tertiary">
+				<IconEyeOff />
+			</span>
 		</span>
 	{/if}
 

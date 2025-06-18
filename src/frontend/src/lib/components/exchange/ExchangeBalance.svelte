@@ -40,7 +40,7 @@
 	</output>
 	<span class="flex items-center gap-2 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
 		{#if hideBalance}
-			<IconEyeOff color="white" />{$i18n.hero.text.hidden_balance}
+			<IconEyeOff />{$i18n.hero.text.hidden_balance}
 		{:else}
 			{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
 		{/if}
