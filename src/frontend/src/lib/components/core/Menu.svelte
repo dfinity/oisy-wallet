@@ -38,6 +38,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { privacyModeStore } from '$lib/stores/settings.store';
+	import { toastsShow } from '$lib/stores/toasts.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -58,6 +59,20 @@
 	});
 
 	const hidePopover = () => (visible = false);
+	const handlePrivacyToggle = () => {
+		privacyModeStore.set({
+			key: 'privacy-mode',
+			value: { enabled: !$isPrivacyMode }
+		});
+
+		toastsShow({
+			text: $isPrivacyMode
+				? $i18n.navigation.text.privacy_mode_enabled
+				: $i18n.navigation.text.privacy_mode_disabled,
+			level: 'info',
+			duration: 2000
+		});
+	};
 
 	const settingsRoute = $derived(isRouteSettings(page));
 	const dAppExplorerRoute = $derived(isRouteDappExplorer(page));
@@ -94,8 +109,7 @@
 				? $i18n.navigation.alt.show_balances
 				: $i18n.navigation.alt.hide_balances}
 			testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
-			onclick={() =>
-				privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })}
+			onclick={handlePrivacyToggle}
 			tag={$i18n.shortcuts.privacy_mode}
 		>
 			{#if $isPrivacyMode}
