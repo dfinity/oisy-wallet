@@ -31,15 +31,16 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 		if (newRewards.length > 0) {
 			const containsJackpot: boolean = newRewards.some(({ name }) => name === RewardType.JACKPOT);
 			const containsReferral: boolean = newRewards.some(({ name }) => name === RewardType.REFERRAL);
+			const containsLeaderboard: boolean = newRewards.some(({ name }) => name === RewardType.LEADERBOARD);
 
-			const rewardType = containsJackpot
+			const rewardType = containsLeaderboard ? RewardType.LEADERBOARD : containsJackpot
 				? RewardType.JACKPOT
 				: containsReferral
 					? RewardType.REFERRAL
 					: RewardType.AIRDROP;
 
 			return {
-				reward: getFirstReward({ rewards, containsJackpot, containsReferral }),
+				reward: getFirstReward({ rewards: newRewards, rewardType }),
 				lastTimestamp,
 				rewardType
 			};
@@ -55,22 +56,11 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 
 const getFirstReward = ({
 	rewards,
-	containsJackpot,
-	containsReferral
+	rewardType
 }: {
 	rewards: RewardResponseInfo[];
-	containsJackpot: boolean;
-	containsReferral: boolean;
-}): RewardResponseInfo | undefined => {
-	if (containsJackpot) {
-		return rewards.find(({ name }) => name === RewardType.JACKPOT);
-	}
-	if (containsReferral) {
-		return rewards.find(({ name }) => name === RewardType.REFERRAL);
-	}
-
-	return rewards.at(0);
-};
+	rewardType: RewardType;
+}): RewardResponseInfo | undefined => rewards.find(({ name }) => name === rewardType) ?? rewards.at(0);
 
 export const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
 	const currentDate = new Date(Date.now());
