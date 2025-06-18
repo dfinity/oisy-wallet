@@ -45,7 +45,7 @@
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
-	import ManuLanguageSelector from '$lib/components/core/ManuLanguageSelector.svelte';
+	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -215,6 +215,6 @@
 	</div>
 
 	<div class="max-w-68 mt-3 flex flex-col gap-1">
-		<ManuLanguageSelector />
+		<MenuLanguageSelector />
 	</div>
 </Popover>
