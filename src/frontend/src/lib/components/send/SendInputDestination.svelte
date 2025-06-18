@@ -8,6 +8,7 @@
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
 	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkContacts } from '$lib/types/contacts';
@@ -30,7 +31,20 @@
 
 	const debounceValidate = debounce(validate);
 
-	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const sendContext = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	const convertContext = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+
+	const sendTokenNetworkId = nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined;
+
+	const destinationToken = nonNullish(convertContext) ? convertContext.destinationToken : undefined;
+
+	let destinationNetworkId: NetworkId | undefined;
+	$: destinationNetworkId = nonNullish(sendTokenNetworkId)
+		? $sendTokenNetworkId
+		: nonNullish(destinationToken)
+			? $destinationToken?.network.id
+			: undefined;
 
 	let focused: boolean;
 	const onFocus = () => (focused = true);
@@ -45,22 +59,24 @@
 	let isNotKnownDestination = false;
 	$: isNotKnownDestination =
 		nonNullish(knownDestinations) &&
+		nonNullish(destinationNetworkId) &&
 		isNullish(
 			getKnownDestination({
 				knownDestinations,
 				address: destination,
-				networkId: $sendTokenNetworkId
+				networkId: destinationNetworkId
 			})
 		);
 
 	let isNotNetworkContact = false;
 	$: isNotNetworkContact =
 		nonNullish(networkContacts) &&
+		nonNullish(destinationNetworkId) &&
 		isNullish(
 			getNetworkContact({
 				networkContacts,
 				address: destination,
-				networkId: $sendTokenNetworkId
+				networkId: destinationNetworkId
 			})
 		);
 </script>

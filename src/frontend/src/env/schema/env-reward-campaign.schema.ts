@@ -5,6 +5,7 @@ export const RewardCampaignSchema = z.object({
 	title: z.string(),
 	cardTitle: z.string(),
 	oneLiner: z.string(),
+	participateTitle: z.string(),
 	description: z.string(),
 	logo: z.string(),
 	cardBanner: z.string(),
@@ -24,6 +25,14 @@ export const RewardCampaignSchema = z.object({
 			banner: z.string(),
 			description: z.string(),
 			shareHref: z.string()
-		})
+		}),
+		leaderboard: z
+			.object({
+				title: z.string(),
+				banner: z.string(),
+				description: z.string(),
+				shareHref: z.string()
+			})
+			.optional()
 	})
 });
