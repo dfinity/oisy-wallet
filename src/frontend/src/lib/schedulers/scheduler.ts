@@ -100,31 +100,8 @@ export class SchedulerTimer {
 	}
 
 	stop() {
-		const stopFn = () => {
-			this.stopTimer();
-			this.setStatus('idle');
-		};
-
-		stopFn();
-
-		let attempts = 0;
-
-		const tryStop = () => {
-			if (attempts >= 100) {
-				return;
-			}
-
-			if (nonNullish(this.timer)) {
-				stopFn();
-				return;
-			}
-
-			attempts++;
-
-			setTimeout(tryStop, 0);
-		};
-
-		tryStop();
+		this.stopTimer();
+		this.setStatus('idle');
 	}
 
 	postMsg<T>(data: { msg: PostMessageResponse; data?: T }) {
