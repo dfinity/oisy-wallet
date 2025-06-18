@@ -85,7 +85,6 @@ vi.mock('$sol/services/sol-address.services', () => ({
 		solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
 	}),
-	loadSolAddressTestnet: vi.fn(() => Promise.resolve({ success: true })),
 	loadSolAddressDevnet: vi.fn(() => {
 		solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
@@ -308,7 +307,6 @@ describe('Loader', () => {
 								networks: [
 									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
-									[{ SolanaTestnet: null }, { enabled: true, is_testnet: true }],
 									[{ SolanaDevnet: null }, { enabled: false, is_testnet: true }]
 								]
 							}
