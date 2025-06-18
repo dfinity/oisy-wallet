@@ -183,10 +183,9 @@
 		"text": {
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 is coming soon!<br> Stay tuned for updates",
+			"upcoming_campaigns": "Upcoming Campaigns",
 			"active_date": "Ends on",
 			"ended_date": "Ended on",
-			"participate_title": "Earn BTC by staying active - and now by inviting others.",
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
@@ -208,7 +207,8 @@
 			"requirements_title": "Eligibility criteria",
 			"min_logins": "Login $loginsx in last $days days",
 			"min_transactions": "Complete $transactions transactions in last $days days",
-			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance",
+			"hangover": "No recent win (last $days days)"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
@@ -1035,15 +1035,6 @@
 				"loading_referrer_info": "Error while loading referral info",
 				"setting_referrer": "Error while setting referrer"
 			}
-		},
-		"reward": {
-			"text": {
-				"title": "Congratulations!",
-				"content_title": "Here a small thank you",
-				"content_text": "One of your referred users just got some sprinkles.",
-				"share": "Share on X",
-				"open_wallet": "Take me to the wallet"
-			}
 		}
 	},
 	"address_book": {
@@ -1255,8 +1246,9 @@
 			"sprinkles_description": "OISY Rewards"
 		}
 	},
-	"languages": {
-		"en": "English",
-		"de": "German"
+	"welcome": {
+		"title": "Welcome to $oisy_short!",
+		"subtitle": "Ready to Earn?",
+		"description": "You're 3 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
 	}
 }

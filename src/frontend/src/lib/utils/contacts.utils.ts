@@ -3,8 +3,9 @@ import type { ContactUi } from '$lib/types/contact';
 import type { NetworkContacts } from '$lib/types/contacts';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
-import { getRecordValueByCaseSensitivity } from '$lib/utils/record.utils';
-import { isNullish } from '@dfinity/utils';
+import { getCaseSensitiveness } from '$lib/utils/address.utils';
+import { getNetworkContactKey } from '$lib/utils/contact.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const getNetworkContacts = ({
 	addressType,
@@ -16,9 +17,14 @@ export const getNetworkContacts = ({
 	isNullish(contacts)
 		? {}
 		: contacts.reduce<NetworkContacts>((acc, contact) => {
-				contact.addresses.forEach((addressUi) => {
-					if (addressUi.addressType === addressType && isNullish(acc[addressUi.address])) {
-						acc[addressUi.address] = contact;
+				contact.addresses.forEach(({ addressType: contactAddressType, address }) => {
+					const key = getNetworkContactKey({ contact, address });
+
+					if (contactAddressType === addressType && isNullish(acc[key])) {
+						acc[key] = {
+							address,
+							contact
+						};
 					}
 				});
 
@@ -33,9 +39,20 @@ export const getNetworkContact = ({
 	networkContacts: NetworkContacts;
 	address: Address;
 	networkId: NetworkId;
-}): ContactUi | undefined =>
-	getRecordValueByCaseSensitivity({
-		record: networkContacts,
-		address,
-		networkId
+}): ContactUi | undefined => {
+	const isCaseSensitive = getCaseSensitiveness({ networkId });
+
+	const matchingNetworkContactId = Object.keys(networkContacts).find((key) => {
+		const networkContactAddress = networkContacts[key].address;
+
+		if (isCaseSensitive) {
+			return networkContactAddress === address;
+		}
+
+		return networkContactAddress.toLowerCase() === address.toLowerCase();
 	});
+
+	return nonNullish(matchingNetworkContactId)
+		? networkContacts[matchingNetworkContactId].contact
+		: undefined;
+};

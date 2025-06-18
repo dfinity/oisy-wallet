@@ -152,14 +152,6 @@ export const modalReferralCode: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'referral-code'
 );
-export const modalReferralState: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'referral-state'
-);
-export const modalReferralStateData: Readable<RewardCampaignDescription> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.data as RewardCampaignDescription
-);
 export const modalAddressBook: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'address-book'
@@ -196,6 +188,11 @@ export const modalRewardStateData: Readable<RewardStateData | undefined> = deriv
 	modalStore,
 	($modalStore) =>
 		$modalStore?.type === 'reward-state' ? ($modalStore?.data as RewardStateData) : undefined
+);
+
+export const modalWelcome: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'welcome'
 );
 
 export const modalWalletConnect: Readable<boolean> = derived(

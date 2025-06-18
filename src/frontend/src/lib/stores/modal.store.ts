@@ -57,6 +57,7 @@ export interface Modal<T> {
 		| 'vip-reward-state'
 		| 'reward-details'
 		| 'reward-state'
+		| 'welcome'
 		| 'settings'
 		| 'auth-help';
 	data?: T;
@@ -115,11 +116,11 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
-	openReferralState: (params: SetWithDataParams<RewardCampaignDescription>) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
 	openRewardDetails: (params: SetWithDataParams<RewardCampaignDescription>) => void;
 	openRewardState: (params: SetWithDataParams<RewardStateData>) => void;
+	openWelcome: (id: symbol) => void;
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	close: () => void;
@@ -187,9 +188,6 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
 			setTypeWithData('address-book')
 		),
-		openReferralState: <(params: SetWithDataParams<RewardCampaignDescription>) => void>(
-			setTypeWithData('referral-state')
-		),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
 			setTypeWithData('dapp-details')
 		),
@@ -202,6 +200,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openRewardState: <(params: SetWithDataParams<RewardStateData>) => void>(
 			setTypeWithData('reward-state')
 		),
+		openWelcome: setType('welcome'),
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
 			setTypeWithData('settings')
 		),

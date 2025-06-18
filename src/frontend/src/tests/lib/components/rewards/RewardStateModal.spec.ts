@@ -1,16 +1,23 @@
-import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+import {
+	SPRINKLES_SEASON_1_EPISODE_3_ID,
+	SPRINKLES_SEASON_1_EPISODE_4_ID
+} from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
+import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 import {
 	REWARDS_STATE_MODAL_IMAGE_BANNER,
+	REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR,
 	REWARDS_STATE_MODAL_SHARE_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { RewardType } from '$lib/enums/reward-type';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
 describe('RewardStateModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_STATE_MODAL_IMAGE_BANNER}"]`;
+	const learnMoreSelector = `a[data-tid="${REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR}"]`;
 	const shareSelector = `a[data-tid="${REWARDS_STATE_MODAL_SHARE_BUTTON}"]`;
 
 	it('should render modal content', () => {
@@ -22,7 +29,7 @@ describe('RewardStateModal', () => {
 		const { container, getByText } = render(RewardStateModal, {
 			props: {
 				reward: mockedReward,
-				jackpot: false
+				rewardType: RewardType.AIRDROP
 			}
 		});
 
@@ -34,10 +41,47 @@ describe('RewardStateModal', () => {
 		expect(imageBanner).toBeInTheDocument();
 		expect(imageBanner?.src).toContain(mockedReward.win.default.banner);
 
+		const learnMore: HTMLAnchorElement | null = container.querySelector(learnMoreSelector);
+
+		expect(learnMore).toBeInTheDocument();
+		expect(learnMore?.href).toBe(OISY_REWARDS_URL);
+
 		const share: HTMLAnchorElement | null = container.querySelector(shareSelector);
 
 		expect(share).toBeInTheDocument();
 		expect(share?.href).toBe(mockedReward.win.default.shareHref);
+	});
+
+	it('should render modal content for referral', () => {
+		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
+			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
+		);
+		assertNonNullish(mockedReward);
+
+		const { container, getByText } = render(RewardStateModal, {
+			props: {
+				reward: mockedReward,
+				rewardType: RewardType.REFERRAL
+			}
+		});
+
+		expect(getByText(mockedReward.win.referral?.title ?? '')).toBeInTheDocument();
+		expect(getByText(mockedReward.win.referral?.description ?? '')).toBeInTheDocument();
+
+		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
+		expect(imageBanner).toBeInTheDocument();
+		expect(imageBanner?.src).toContain(mockedReward.win.referral?.banner ?? '');
+
+		const learnMore: HTMLAnchorElement | null = container.querySelector(learnMoreSelector);
+
+		expect(learnMore).toBeInTheDocument();
+		expect(learnMore?.href).toBe(OISY_REWARDS_URL);
+
+		const share: HTMLAnchorElement | null = container.querySelector(shareSelector);
+
+		expect(share).toBeInTheDocument();
+		expect(share?.href).toBe(mockedReward.win.referral?.shareHref ?? '');
 	});
 
 	it('should render modal content for jackpot', () => {
@@ -49,7 +93,7 @@ describe('RewardStateModal', () => {
 		const { container, getByText } = render(RewardStateModal, {
 			props: {
 				reward: mockedReward,
-				jackpot: true
+				rewardType: RewardType.JACKPOT
 			}
 		});
 
@@ -61,9 +105,46 @@ describe('RewardStateModal', () => {
 		expect(imageBanner).toBeInTheDocument();
 		expect(imageBanner?.src).toContain(mockedReward.win.jackpot.banner);
 
+		const learnMore: HTMLAnchorElement | null = container.querySelector(learnMoreSelector);
+
+		expect(learnMore).toBeInTheDocument();
+		expect(learnMore?.href).toBe(OISY_REWARDS_URL);
+
 		const share: HTMLAnchorElement | null = container.querySelector(shareSelector);
 
 		expect(share).toBeInTheDocument();
 		expect(share?.href).toBe(mockedReward.win.jackpot.shareHref);
+	});
+
+	it('should render modal content for leaderboard', () => {
+		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
+			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID
+		);
+		assertNonNullish(mockedReward);
+
+		const { container, getByText } = render(RewardStateModal, {
+			props: {
+				reward: mockedReward,
+				rewardType: RewardType.LEADERBOARD
+			}
+		});
+
+		expect(getByText(mockedReward.win.leaderboard?.title ?? '')).toBeInTheDocument();
+		expect(getByText(mockedReward.win.leaderboard?.description ?? '')).toBeInTheDocument();
+
+		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
+		expect(imageBanner).toBeInTheDocument();
+		expect(imageBanner?.src).toContain(mockedReward.win.leaderboard?.banner ?? '');
+
+		const learnMore: HTMLAnchorElement | null = container.querySelector(learnMoreSelector);
+
+		expect(learnMore).toBeInTheDocument();
+		expect(learnMore?.href).toBe(OISY_REWARDS_URL);
+
+		const share: HTMLAnchorElement | null = container.querySelector(shareSelector);
+
+		expect(share).toBeInTheDocument();
+		expect(share?.href).toBe(mockedReward.win.leaderboard?.shareHref ?? '');
 	});
 });
