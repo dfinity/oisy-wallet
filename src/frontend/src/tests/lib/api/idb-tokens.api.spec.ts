@@ -1,7 +1,18 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
-import { deleteIdbIcTokens, deleteIdbSolTokens, setIdbTokensStore } from '$lib/api/idb-tokens.api';
+import { toUserToken } from '$icp-eth/services/user-token.services';
+import {
+	deleteIdbEthToken,
+	deleteIdbEthTokens,
+	deleteIdbIcTokens,
+	deleteIdbSolTokens,
+	getIdbEthTokens,
+	getIdbIcTokens,
+	getIdbSolTokens,
+	setIdbTokensStore
+} from '$lib/api/idb-tokens.api';
+import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
@@ -114,9 +125,51 @@ describe('idb-tokens.api', () => {
 		});
 	});
 
+	describe('getIdbIcTokens', () => {
+		it('should get IC tokens', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbIcTokens(mockPrincipal);
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
+	describe('getIdbEthTokens', () => {
+		it('should get ETH tokens', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbEthTokens(mockPrincipal);
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
+	describe('getIdbSolTokens', () => {
+		it('should get SOL tokens', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbSolTokens(mockPrincipal);
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
 	describe('deleteIdbIcTokens', () => {
 		it('should delete IC tokens', async () => {
 			await deleteIdbIcTokens(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledOnce();
+			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
+	describe('deleteIdbEthTokens', () => {
+		it('should delete ETH tokens', async () => {
+			await deleteIdbEthTokens(mockPrincipal);
 
 			expect(idbKeyval.del).toHaveBeenCalledOnce();
 			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
@@ -129,6 +182,50 @@ describe('idb-tokens.api', () => {
 
 			expect(idbKeyval.del).toHaveBeenCalledOnce();
 			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
+	describe('deleteIdbEthToken', () => {
+		it('should delete provided ETH token', async () => {
+			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
+			const restUserTokens = rest.map(({ data }) => toUserToken(data));
+			const userTokenToDelete = toUserToken(tokenToDelete.data);
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([userTokenToDelete, ...restUserTokens]);
+
+			await deleteIdbEthToken({
+				identity: mockIdentity,
+				token: userTokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				restUserTokens,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should not delete anything if provided ETH token is not in the IDB', async () => {
+			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
+			const restUserTokens = rest.map(({ data }) => toUserToken(data));
+			const userTokenToDelete = toUserToken(tokenToDelete.data);
+
+			vi.mocked(idbKeyval.get).mockResolvedValue(restUserTokens);
+
+			await deleteIdbEthToken({
+				identity: mockIdentity,
+				token: userTokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				restUserTokens,
+				mockIdbTokensStore
+			);
 		});
 	});
 });

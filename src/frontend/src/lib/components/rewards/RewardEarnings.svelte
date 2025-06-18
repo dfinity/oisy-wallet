@@ -6,7 +6,7 @@
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import type { IcToken } from '$icp/types/ic-token';
 	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -31,7 +31,7 @@
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
 
 	interface Props {
-		reward: RewardDescription;
+		reward: RewardCampaignDescription;
 		amountOfRewards?: number;
 	}
 
@@ -159,7 +159,7 @@
 		<div class="my-5 w-full justify-items-center text-center">
 			<Button
 				paddingSmall
-				on:click={gotoActivity}
+				onclick={gotoActivity}
 				styleClass="font-semibold bg-transparent text-brand-primary-alt"
 				testId={REWARDS_EARNINGS_ACTIVITY_BUTTON}
 			>

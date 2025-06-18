@@ -17,6 +17,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import type { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
@@ -108,7 +109,7 @@ export const onLoadTransactionsError = ({
 		name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 		metadata: {
 			tokenId: tokenId.description ?? '',
-			error: `${err}`
+			...(mapIcErrorMetadata(err) ?? {})
 		}
 	});
 

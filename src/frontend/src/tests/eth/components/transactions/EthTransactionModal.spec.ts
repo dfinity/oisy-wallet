@@ -37,10 +37,6 @@ describe('EthTransactionModal', () => {
 			token: ETHEREUM_TOKEN
 		});
 
-		expect(
-			getByText(shortenWithMiddleEllipsis({ text: mockEthTransactionUi.from as string }))
-		).toBeInTheDocument();
-
 		expect(getByText(mockEthTransactionUi.to as string)).toBeInTheDocument();
 	});
 

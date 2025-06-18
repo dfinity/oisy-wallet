@@ -320,7 +320,7 @@ pub fn list_user_tokens() -> Vec<UserToken> {
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
-/// Add, remove or update custom token for the user.
+/// Add or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
@@ -345,6 +345,21 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 
             add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
         }
+    });
+}
+
+/// Remove custom token for the user.
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
+pub fn remove_custom_token(token: CustomToken) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        let find = |t: &CustomToken| -> bool {
+            CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
+        };
+
+        remove_from_user_token(stored_principal, &mut s.custom_token, &find);
     });
 }
 
@@ -910,12 +925,14 @@ pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_allowed")]
+///
+/// # Notes
+/// This operation is idempotent - it will return OK if the contact has already been deleted.
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
-    // TODO integrate delete contact service
-    let normal_result = Ok(contact_id);
-    normal_result.into()
+    let result = contacts::delete_contact(contact_id);
+    result.into()
 }
 
 /// Gets a contact by ID for the caller.

@@ -1,22 +1,13 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	solAddressDevnet,
-	solAddressLocal,
-	solAddressMainnet,
-	solAddressTestnet
-} from '$lib/derived/address.derived';
+import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
 import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
-import {
-	isNetworkIdSOLDevnet,
-	isNetworkIdSOLLocal,
-	isNetworkIdSOLTestnet
-} from '$lib/utils/network.utils';
+import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
-import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
@@ -169,6 +160,15 @@ export const fetchSolTransactionsForSignature = async ({
 				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
 
+			const fromOwner: SolTransactionUi['fromOwner'] = await getAccountOwner({
+				address: from,
+				network
+			});
+
+			const toOwner: SolTransactionUi['toOwner'] = nonNullish(to)
+				? await getAccountOwner({ address: to, network })
+				: undefined;
+
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
@@ -176,7 +176,9 @@ export const fetchSolTransactionsForSignature = async ({
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,
+				...(nonNullish(fromOwner) && { fromOwner }),
 				to,
+				...(nonNullish(toOwner) && { toOwner }),
 				status,
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
@@ -223,13 +225,11 @@ export const loadNextSolTransactions = async ({
 		network: { id: networkId }
 	} = token;
 
-	const address = isNetworkIdSOLTestnet(networkId)
-		? get(solAddressTestnet)
-		: isNetworkIdSOLDevnet(networkId)
-			? get(solAddressDevnet)
-			: isNetworkIdSOLLocal(networkId)
-				? get(solAddressLocal)
-				: get(solAddressMainnet);
+	const address = isNetworkIdSOLDevnet(networkId)
+		? get(solAddressDevnet)
+		: isNetworkIdSOLLocal(networkId)
+			? get(solAddressLocal)
+			: get(solAddressMainnet);
 
 	const network = mapNetworkIdToNetwork(token.network.id);
 

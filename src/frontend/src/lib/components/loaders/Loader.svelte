@@ -22,8 +22,7 @@
 		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
-		solAddressTestnet
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
@@ -36,8 +35,7 @@
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
-		networkSolanaMainnetEnabled,
-		networkSolanaTestnetEnabled
+		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
@@ -50,8 +48,7 @@
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
-		loadSolAddressMainnet,
-		loadSolAddressTestnet
+		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
 
@@ -88,15 +85,9 @@
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
 		await Promise.all([
-			loadErc20Tokens({
-				identity: $authIdentity
-			}),
-			loadIcrcTokens({
-				identity: $authIdentity
-			}),
-			loadSplTokens({
-				identity: $authIdentity
-			})
+			loadErc20Tokens({ identity: $authIdentity }),
+			loadIcrcTokens({ identity: $authIdentity }),
+			loadSplTokens({ identity: $authIdentity })
 		]);
 	};
 
@@ -117,7 +108,6 @@
 	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
 	const debounceLoadSolAddressMainnet = debounce(loadSolAddressMainnet);
-	const debounceLoadSolAddressTestnet = debounce(loadSolAddressTestnet);
 	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
@@ -141,10 +131,6 @@
 
 			if ($networkBitcoinTestnetEnabled && isNullish($btcAddressTestnet)) {
 				debounceLoadBtcAddressTestnet();
-			}
-
-			if ($networkSolanaTestnetEnabled && isNullish($solAddressTestnet)) {
-				debounceLoadSolAddressTestnet();
 			}
 
 			if ($networkSolanaDevnetEnabled && isNullish($solAddressDevnet)) {

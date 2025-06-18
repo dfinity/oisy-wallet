@@ -3,6 +3,7 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { EARNING_ENABLED } from '$env/earning';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
@@ -26,7 +27,8 @@
 		isRouteSettings,
 		isRouteTokens,
 		isRouteTransactions,
-		networkUrl
+		networkUrl,
+		isRouteEarning
 	} from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -92,20 +94,42 @@
 	{$i18n.navigation.text.dapp_explorer}
 </NavigationItem>
 
-<NavigationItem
-	href={networkUrl({
-		path: AppPath.Rewards,
-		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute,
-		fromRoute
-	})}
-	ariaLabel={$i18n.navigation.alt.airdrops}
-	selected={isRouteRewards(page)}
-	testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
->
-	<IconGift />
-	{$i18n.navigation.text.airdrops}
-</NavigationItem>
+<!-- Todo: remove condition once the feature is completed -->
+{#if EARNING_ENABLED}
+	<NavigationItem
+		href={networkUrl({
+			path: AppPath.Earning,
+			networkId: $networkId,
+			usePreviousRoute: isTransactionsRoute,
+			fromRoute
+		})}
+		ariaLabel={$i18n.navigation.alt.airdrops}
+		selected={isRouteEarning(page)}
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+		tag={$i18n.core.text.new}
+		tagVariant="emphasis"
+	>
+		<IconGift />
+		{$i18n.navigation.text.earning}
+	</NavigationItem>
+{:else}
+	<NavigationItem
+		href={networkUrl({
+			path: AppPath.Rewards,
+			networkId: $networkId,
+			usePreviousRoute: isTransactionsRoute,
+			fromRoute
+		})}
+		ariaLabel={$i18n.navigation.alt.airdrops}
+		selected={isRouteRewards(page)}
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+		tag={$i18n.core.text.new}
+		tagVariant="emphasis"
+	>
+		<IconGift />
+		{$i18n.navigation.text.airdrops}
+	</NavigationItem>
+{/if}
 
 <NavigationItem
 	href={networkUrl({

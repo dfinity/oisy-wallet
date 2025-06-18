@@ -28,7 +28,6 @@ export const SOL_MAINNET_ENABLED = parseEnabledMainnetBoolEnvVar(
  * RPC URLs
  */
 export const SOLANA_RPC_HTTP_URL_MAINNET = `https://solana-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
-export const SOLANA_RPC_HTTP_URL_TESTNET = 'https://api.testnet.solana.com';
 export const SOLANA_RPC_HTTP_URL_DEVNET = `https://solana-devnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
 export const SOLANA_RPC_HTTP_URL_LOCAL = 'http://localhost:8899';
 
@@ -36,7 +35,6 @@ export const SOLANA_RPC_HTTP_URL_LOCAL = 'http://localhost:8899';
 // TODO: Last time checked Alchemy: 2025-01-22
 // TODO: https://dashboard.alchemy.com/services/smart-websockets
 export const SOLANA_RPC_WS_URL_MAINNET = `wss://burned-little-dinghy.solana-mainnet.quiknode.pro/${QUICKNODE_API_KEY}`;
-export const SOLANA_RPC_WS_URL_TESTNET = 'wss://api.testnet.solana.com/';
 export const SOLANA_RPC_WS_URL_DEVNET = 'wss://api.devnet.solana.com/';
 export const SOLANA_RPC_WS_URL_LOCAL = 'ws://localhost:8900';
 
@@ -102,12 +100,16 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({
 	mainnetFlag: SOL_MAINNET_ENABLED,
 	mainnetNetworks: [SOLANA_MAINNET_NETWORK],
-	testnetNetworks: [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK],
+	testnetNetworks: [SOLANA_DEVNET_NETWORK],
 	localNetworks: [SOLANA_LOCAL_NETWORK]
 });
 
 export const SUPPORTED_SOLANA_NETWORK_IDS: NetworkId[] = SUPPORTED_SOLANA_NETWORKS.map(
 	({ id }) => id
+);
+
+export const SUPPORTED_SOLANA_MAINNET_NETWORKS: Network[] = SUPPORTED_SOLANA_NETWORKS.filter(
+	({ env }) => env === 'mainnet'
 );
 
 export const SOLANA_KEY_ID: SchnorrKeyId = {

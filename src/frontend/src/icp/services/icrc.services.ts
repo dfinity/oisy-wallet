@@ -16,7 +16,9 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { setIdbIcTokens } from '$lib/api/idb-tokens.api';
+import { getIdbIcTokens, setIdbIcTokens } from '$lib/api/idb-tokens.api';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -25,6 +27,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
+import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
 import {
 	fromNullable,
@@ -37,7 +40,7 @@ import {
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity })]);
+	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity, useCache: true })]);
 };
 
 const loadDefaultIcrcTokens = async () => {
@@ -48,12 +51,23 @@ const loadDefaultIcrcTokens = async () => {
 	);
 };
 
-export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadCustomTokens = ({
+	identity,
+	useCache = false
+}: {
+	identity: OptionIdentity;
+	useCache?: boolean;
+}): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
-		request: (params) => loadIcrcCustomTokens(params),
+		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
 		onLoad: loadIcrcCustomData,
 		onUpdateError: ({ error: err }) => {
 			icrcCustomTokensStore.resetAll();
+
+			trackEvent({
+				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+				metadata: mapIcErrorMetadata(err)
+			});
 
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
@@ -63,7 +77,7 @@ export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Pr
 		identity
 	});
 
-export const loadDefaultIcrc = ({
+const loadDefaultIcrc = ({
 	data,
 	strategy
 }: {
@@ -75,6 +89,11 @@ export const loadDefaultIcrc = ({
 		onLoad: loadIcrcData,
 		onUpdateError: ({ error: err }) => {
 			icrcDefaultTokensStore.reset(data.ledgerCanisterId);
+
+			trackEvent({
+				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+				metadata: mapIcErrorMetadata(err)
+			});
 
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
@@ -111,16 +130,20 @@ const loadIcrcData = ({
 
 const loadIcrcCustomTokens = async ({
 	identity,
-	certified
+	certified,
+	useCache = false
 }: {
 	identity: OptionIdentity;
 	certified: boolean;
+	useCache?: boolean;
 }): Promise<IcrcCustomToken[]> => {
 	const tokens = await loadNetworkCustomTokens({
 		identity,
 		certified,
 		filterTokens: ({ token }) => 'Icrc' in token,
-		setIdbTokens: setIdbIcTokens
+		setIdbTokens: setIdbIcTokens,
+		getIdbTokens: getIdbIcTokens,
+		useCache
 	});
 
 	return await loadCustomIcrcTokensData({

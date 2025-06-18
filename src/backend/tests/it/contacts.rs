@@ -44,6 +44,16 @@ pub fn call_get_contact(
     wrapped_result.expect("that get_contact succeeds")
 }
 
+pub fn call_delete_contact(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    contact_id: u64,
+) -> Result<u64, ContactError> {
+    let wrapped_result =
+        pic_setup.update::<Result<u64, ContactError>>(caller, "delete_contact", contact_id);
+    wrapped_result.expect("that delete_contact call completes")
+}
+
 pub fn call_update_contact(
     pic_setup: &PicBackend,
     caller: Principal,
@@ -59,12 +69,38 @@ pub fn call_update_contact(
 // -------------------------------------------------------------------------------------------------
 
 #[test]
+fn test_create_contact_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Try to create a contact as anonymous user
+    let request = CreateContactRequest {
+        name: "Test Contact".to_string(),
+    };
+    let result = pic_setup.update::<Result<Contact, ContactError>>(
+        Principal::anonymous(),
+        "create_contact",
+        request,
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to create contacts"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
+}
+#[test]
 fn test_create_contact_should_succeed_with_valid_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
     let result = call_create_contact(&pic_setup, caller, "John Doe".to_string());
-    let contact = result.expect("");
+    let contact = result.expect("that create_contact succeeds");
 
     assert_eq!(contact.name, "John Doe");
     assert!(contact.id > 0); // Should have a valid ID
@@ -72,10 +108,11 @@ fn test_create_contact_should_succeed_with_valid_name() {
 }
 
 #[test]
-fn test_create_contact_should_fail_with_empty_name() {
+fn test_create_contact_should_fail_with_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
+    // Test empty string
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
         caller,
         "create_contact",
@@ -83,9 +120,9 @@ fn test_create_contact_should_fail_with_empty_name() {
             name: String::new(),
         },
     );
-    assert!(wrapped_result.is_err());
+    assert!(wrapped_result.is_err(), "Empty string should be rejected");
 
-    // Also test with just whitespace
+    // Test two whitespaces
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
         caller,
         "create_contact",
@@ -93,7 +130,81 @@ fn test_create_contact_should_fail_with_empty_name() {
             name: "  ".to_string(),
         },
     );
-    assert!(wrapped_result.is_err());
+    assert!(
+        wrapped_result.is_err(),
+        "String with multiples whitespaces should be rejected"
+    );
+}
+
+#[test]
+fn test_create_contact_should_fail_with_leading_and_trailing_whitespace_name() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact with a name that has leading whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "   Leading Whitespace".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Leading whitespace should be rejected"
+    );
+
+    // Create a contact with a name that has trailing whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "Trailing Whitespace   ".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Trailing whitespace should be rejected"
+    );
+
+    // Create a contact with a name that has both leading and trailing whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "   Leading and Trailing Whitespace   ".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Leading and trailing whitespace should be rejected"
+    );
+
+    // Verify that a name with internal whitespace is accepted
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "Valid Name With Spaces".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_ok(),
+        "Internal whitespace should be accepted"
+    );
+
+    // Verify that a name with multiple internal whitespaces is accepted
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "create_contact",
+        CreateContactRequest {
+            name: "Valid Name  With  Multiple  Spaces".to_string(),
+        },
+    );
+    assert!(
+        wrapped_result.is_ok(),
+        "Multiple internal whitespaces should be accepted"
+    );
 }
 
 #[test]
@@ -138,6 +249,31 @@ fn test_create_contact_should_be_retrievable_by_get_contact() {
 }
 
 #[test]
+fn test_get_contact_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Try to get a specific contact as anonymous user
+    let contact_id = 123; // Any ID will do as we expect rejection before ID is processed
+    let result = pic_setup.query::<Result<Contact, ContactError>>(
+        Principal::anonymous(),
+        "get_contact",
+        contact_id,
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to get a specific contact"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
+}
+
+#[test]
 fn test_get_contact_should_fail_with_nonexistent_id() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
@@ -147,6 +283,30 @@ fn test_get_contact_should_fail_with_nonexistent_id() {
     let result = call_get_contact(&pic_setup, caller, nonexistent_id);
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
+}
+
+#[test]
+fn test_get_contacts_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Try to get contacts as anonymous user
+    let result = pic_setup.query::<Result<Vec<Contact>, ContactError>>(
+        Principal::anonymous(),
+        "get_contacts",
+        (),
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to get contacts"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
 }
 
 #[test]
@@ -227,6 +387,65 @@ fn test_contacts_are_isolated_between_users() {
 // - Integration tests for the update contact functionality
 // -------------------------------------------------------------------------------------------------
 #[test]
+fn test_update_contact_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Create a dummy contact to attempt to update
+    let contact = Contact {
+        id: 123,
+        name: "Test Contact".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: 0,
+    };
+
+    // Try to update a contact as anonymous user
+    let result = pic_setup.update::<Result<Contact, ContactError>>(
+        Principal::anonymous(),
+        "update_contact",
+        contact,
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to update contacts"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
+}
+
+#[test]
+fn test_update_contact_should_succeed_with_valid_name_only() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // First, create a contact
+    let created_contact_result =
+        call_create_contact(&pic_setup, caller, "Original Name".to_string());
+    assert!(created_contact_result.is_ok());
+    let created_contact = created_contact_result.unwrap();
+
+    let updated_contact_data = Contact {
+        id: created_contact.id,
+        name: "Updated Name".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: created_contact.update_timestamp_ns,
+    };
+
+    let update_contact_result = call_update_contact(&pic_setup, caller, updated_contact_data);
+    assert!(update_contact_result.is_ok());
+    let updated_contact = update_contact_result.unwrap();
+
+    assert_eq!(updated_contact.name, "Updated Name");
+    assert!(updated_contact.id > 0);
+    assert!(updated_contact.addresses.is_empty());
+}
+
+#[test]
 fn test_update_contact_should_succeed_with_valid_data() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
@@ -259,7 +478,7 @@ fn test_update_contact_should_succeed_with_valid_data() {
 }
 
 #[test]
-fn test_update_contact_should_fail_with_empty_name() {
+fn test_update_contact_should_fail_with_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -282,12 +501,12 @@ fn test_update_contact_should_fail_with_empty_name() {
         "update_contact",
         updated_contact_data,
     );
-    assert!(wrapped_result.is_err());
+    assert!(wrapped_result.is_err(), "Empty name should be rejected");
 
-    // Also test with multiple whitespaces
+    // Test with multiple whitespaces
     let whitespace_contact_data = Contact {
         id: created_contact.id,
-        name: "   ".to_string(), // Whitespace name should fail
+        name: "   ".to_string(), // Multiple whitespaces should fail
         addresses: vec![],
         update_timestamp_ns: created_contact.update_timestamp_ns,
     };
@@ -296,7 +515,93 @@ fn test_update_contact_should_fail_with_empty_name() {
         "update_contact",
         whitespace_contact_data,
     );
-    assert!(whitespace_result.is_err());
+    assert!(
+        whitespace_result.is_err(),
+        "Name with multiple whitespaces should be rejected"
+    );
+}
+
+#[test]
+fn test_update_contact_should_fail_with_leading_and_trailing_whitespace_name() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // First, create a contact with a valid name
+    let result = call_create_contact(&pic_setup, caller, "Valid Name".to_string());
+    assert!(result.is_ok());
+    let created_contact = result.unwrap();
+
+    // Prepare updated contact data with a name that has leading whitespace
+    let leading_whitespace_data = Contact {
+        id: created_contact.id,
+        name: "   Leading Whitespace".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: created_contact.update_timestamp_ns,
+    };
+
+    // Try to update with a name that has leading whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        leading_whitespace_data,
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Leading whitespace should be rejected"
+    );
+
+    // Prepare updated contact data with a name that has trailing whitespace
+    let trailing_whitespace_data = Contact {
+        id: created_contact.id,
+        name: "Trailing Whitespace   ".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: created_contact.update_timestamp_ns,
+    };
+
+    // Try to update with a name that has trailing whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        trailing_whitespace_data,
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Trailing whitespace should be rejected"
+    );
+
+    // Prepare updated contact data with a name that has both leading and trailing whitespace
+    let both_whitespace_data = Contact {
+        id: created_contact.id,
+        name: "   Both Leading and Trailing   ".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: created_contact.update_timestamp_ns,
+    };
+
+    // Try to update with a name that has both leading and trailing whitespace
+    let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
+        caller,
+        "update_contact",
+        both_whitespace_data,
+    );
+    assert!(
+        wrapped_result.is_err(),
+        "Leading and trailing whitespace should be rejected"
+    );
+
+    // Verify a valid update works
+    let valid_data = Contact {
+        id: created_contact.id,
+        name: "Valid Name With Internal Spaces".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: created_contact.update_timestamp_ns,
+    };
+
+    let valid_result =
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", valid_data);
+    assert!(
+        valid_result.is_ok(),
+        "Name with internal spaces should be accepted"
+    );
 }
 
 #[test]
@@ -404,4 +709,189 @@ fn test_updated_contact_can_be_retrieved_directly() {
     assert_eq!(retrieved_contact.name, "New Name After Update");
     assert_eq!(retrieved_contact.id, created_contact.id);
     assert!(retrieved_contact.update_timestamp_ns > created_contact.update_timestamp_ns);
+}
+// -------------------------------------------------------------------------------------------------
+// - Integration tests for the delete contact functionality
+// -------------------------------------------------------------------------------------------------
+#[test]
+fn test_delete_contact_requires_authenticated_user() {
+    let pic_setup = setup();
+
+    // Try to delete a contact as anonymous user
+    let contact_id = 123; // Any ID will do as we expect rejection before ID is processed
+    let result = pic_setup.update::<Result<u64, ContactError>>(
+        Principal::anonymous(),
+        "delete_contact",
+        contact_id,
+    );
+
+    // Verify that the call is rejected for anonymous users
+    assert!(
+        result.is_err(),
+        "Anonymous user should not be able to delete contacts"
+    );
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Anonymous caller not authorized"),
+        "Error should indicate unauthorized anonymous caller"
+    );
+}
+
+#[test]
+fn test_delete_contact_should_succeed_with_valid_id() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact
+    let result = call_create_contact(&pic_setup, caller, "Contact to Delete".to_string());
+    assert!(result.is_ok());
+    let contact = result.unwrap();
+
+    // Verify the contact exists
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 1);
+
+    // Delete the contact
+    let delete_result = call_delete_contact(&pic_setup, caller, contact.id);
+    assert!(delete_result.is_ok());
+    assert_eq!(delete_result.unwrap(), contact.id);
+
+    // Verify the contact no longer exists
+    let contacts_after = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after.len(), 0);
+
+    // Verify get_contact also fails
+    let get_result = call_get_contact(&pic_setup, caller, contact.id);
+    assert!(get_result.is_err());
+    assert_eq!(get_result.unwrap_err(), ContactError::ContactNotFound);
+}
+
+#[test]
+fn test_delete_contact_should_fail_with_nonexistent_id() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Try to delete a contact with a non-existent ID
+    let nonexistent_id = 999999;
+    let result = call_delete_contact(&pic_setup, caller, nonexistent_id);
+
+    // Verify the operation fails with ContactNotFound
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
+}
+
+#[test]
+fn test_delete_specific_contact_from_multiple() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create multiple contacts
+    let contact1 = call_create_contact(&pic_setup, caller, "Contact 1".to_string()).unwrap();
+    let contact2 = call_create_contact(&pic_setup, caller, "Contact 2".to_string()).unwrap();
+    let contact3 = call_create_contact(&pic_setup, caller, "Contact 3".to_string()).unwrap();
+
+    // Verify all contacts exist
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 3);
+
+    // Delete the middle contact
+    let delete_result = call_delete_contact(&pic_setup, caller, contact2.id);
+    assert!(delete_result.is_ok());
+    assert_eq!(delete_result.unwrap(), contact2.id);
+
+    // Verify only the specific contact was deleted
+    let contacts_after = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after.len(), 2);
+
+    // Check that the correct contacts remain
+    let remaining_ids: Vec<u64> = contacts_after.iter().map(|c| c.id).collect();
+    assert!(remaining_ids.contains(&contact1.id));
+    assert!(!remaining_ids.contains(&contact2.id));
+    assert!(remaining_ids.contains(&contact3.id));
+
+    // Verify we can still get the remaining contacts by ID
+    let get_result1 = call_get_contact(&pic_setup, caller, contact1.id);
+    assert!(get_result1.is_ok());
+
+    let get_result3 = call_get_contact(&pic_setup, caller, contact3.id);
+    assert!(get_result3.is_ok());
+
+    // Verify we cannot get the deleted contact
+    let get_result2 = call_get_contact(&pic_setup, caller, contact2.id);
+    assert!(get_result2.is_err());
+    assert_eq!(get_result2.unwrap_err(), ContactError::ContactNotFound);
+}
+
+#[test]
+fn test_delete_all_contacts() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create multiple contacts
+    let contact1 = call_create_contact(&pic_setup, caller, "Contact 1".to_string()).unwrap();
+    let contact2 = call_create_contact(&pic_setup, caller, "Contact 2".to_string()).unwrap();
+    let contact3 = call_create_contact(&pic_setup, caller, "Contact 3".to_string()).unwrap();
+
+    // Verify all contacts exist
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 3);
+
+    // Delete all contacts one by one
+    call_delete_contact(&pic_setup, caller, contact1.id).expect("Failed to delete contact 1");
+    call_delete_contact(&pic_setup, caller, contact2.id).expect("Failed to delete contact 2");
+    call_delete_contact(&pic_setup, caller, contact3.id).expect("Failed to delete contact 3");
+
+    // Verify all contacts are deleted
+    let contacts_after = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after.len(), 0);
+
+    // Create a new contact after deleting all
+    let new_contact = call_create_contact(&pic_setup, caller, "New Contact".to_string()).unwrap();
+
+    // Verify the new contact exists
+    let contacts_final = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_final.len(), 1);
+    assert_eq!(contacts_final[0].name, "New Contact");
+
+    // Verify we can get the new contact by ID
+    let get_result = call_get_contact(&pic_setup, caller, new_contact.id);
+    assert!(get_result.is_ok());
+}
+
+#[test]
+fn test_delete_contact_returns_error_for_already_deleted_contact() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact
+    let contact =
+        call_create_contact(&pic_setup, caller, "Contact to Delete Twice".to_string()).unwrap();
+
+    // Verify the contact exists
+    let contacts_before = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_before.len(), 1);
+
+    // Delete the contact first time
+    let first_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
+    assert!(first_delete_result.is_ok());
+    assert_eq!(first_delete_result.unwrap(), contact.id);
+
+    // Verify the contact is deleted
+    let contacts_after_first_delete = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after_first_delete.len(), 0);
+
+    // Delete the same contact again
+    let second_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
+
+    // Verify the second delete fails with ContactNotFound
+    assert!(second_delete_result.is_err());
+    assert_eq!(
+        second_delete_result.unwrap_err(),
+        ContactError::ContactNotFound
+    );
+
+    // Verify contacts are still empty
+    let contacts_after_second_delete = call_get_contacts(&pic_setup, caller);
+    assert_eq!(contacts_after_second_delete.len(), 0);
 }

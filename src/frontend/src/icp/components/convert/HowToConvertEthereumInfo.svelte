@@ -154,7 +154,7 @@
 						colorStyle="secondary"
 						fullWidth
 						styleClass="mb-4 mt-3"
-						on:click={() => dispatch('icConvert')}
+						onclick={() => dispatch('icConvert')}
 					>
 						<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
 					</Button>
@@ -163,11 +163,11 @@
 		</div>
 	</div>
 
-	<svelte:fragment slot="toolbar">
+	{#snippet toolbar()}
 		{#if formCancelAction === 'back'}
 			<ButtonBack fullWidth onclick={() => dispatch('icBack')} />
 		{:else}
 			<ButtonDone onclick={modalStore.close} />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </ContentWithToolbar>

@@ -3,7 +3,7 @@ import {
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
-import { deleteIdbIcTokens, deleteIdbSolTokens } from '$lib/api/idb-tokens.api';
+import { deleteIdbEthTokens, deleteIdbIcTokens, deleteIdbSolTokens } from '$lib/api/idb-tokens.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -118,6 +118,8 @@ const emptyIdbSolAddress = (): Promise<void> => emptyIdbStore(deleteIdbSolAddres
 
 const emptyIdbIcTokens = (): Promise<void> => emptyIdbStore(deleteIdbIcTokens);
 
+const emptyIdbEthTokens = (): Promise<void> => emptyIdbStore(deleteIdbEthTokens);
+
 const emptyIdbSolTokens = (): Promise<void> => emptyIdbStore(deleteIdbSolTokens);
 
 // eslint-disable-next-line require-await
@@ -143,6 +145,7 @@ const logout = async ({
 			emptyIdbEthAddress(),
 			emptyIdbSolAddress(),
 			emptyIdbIcTokens(),
+			emptyIdbEthTokens(),
 			emptyIdbSolTokens()
 		]);
 	}
@@ -175,6 +178,10 @@ const PARAM_LEVEL = 'level';
  * If a message was provided to the logout process - e.g. a message informing the logout happened because the session timed-out - append the information to the url as query params
  */
 const appendMsgToUrl = (msg: ToastMsg) => {
+	if (typeof window === 'undefined') {
+		return;
+	}
+
 	const { text, level } = msg;
 
 	const url: URL = new URL(window.location.href);

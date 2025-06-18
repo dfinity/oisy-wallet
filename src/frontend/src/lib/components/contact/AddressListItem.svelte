@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { notEmptyString } from '@dfinity/utils';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import AddressItemActions, {
 		type Props as AddressItemActionsProps
 	} from '$lib/components/contact/AddressItemActions.svelte';
+	import { ADDRESS_LIST_ITEM_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -14,6 +15,7 @@
 		styleClass?: string;
 		showFullAddress?: boolean;
 		addressItemActionsProps?: Omit<AddressItemActionsProps, 'address'>;
+		hideCopyButton?: boolean;
 	}
 
 	let {
@@ -21,7 +23,8 @@
 		onClick,
 		styleClass = '',
 		showFullAddress = false,
-		addressItemActionsProps
+		addressItemActionsProps,
+		hideCopyButton = false
 	}: Props = $props();
 
 	let displayAddress = $derived(
@@ -31,8 +34,8 @@
 
 <button
 	onclick={() => onClick?.()}
-	disabled={nonNullish(onClick)}
 	class={`flex w-full items-center gap-3 rounded-xl bg-primary p-2 text-left hover:bg-brand-subtle-10 ${styleClass}`}
+	data-tid={ADDRESS_LIST_ITEM_BUTTON}
 >
 	<IconAddressType addressType={address.addressType} size="32" />
 
@@ -50,5 +53,10 @@
 			<span>{displayAddress}</span>
 		</div>
 	</div>
-	<AddressItemActions {address} styleClass="ml-auto items-center" {...addressItemActionsProps} />
+	<AddressItemActions
+		{address}
+		{hideCopyButton}
+		styleClass="ml-auto items-center"
+		{...addressItemActionsProps}
+	/>
 </button>

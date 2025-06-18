@@ -21,6 +21,7 @@
 			"view": "View",
 			"copy": "Copy",
 			"delete": "Delete",
+			"create": "Create",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
 			"new": "New",
@@ -29,7 +30,8 @@
 			"paste": "Paste",
 			"to": "To",
 			"add": "Add",
-			"more_items": "+$items more"
+			"more_items": "+$items more",
+			"select": "Select"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -52,6 +54,7 @@
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
 			"airdrops": "Rewards",
+			"earning": "Earn & Rewards",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -69,7 +72,7 @@
 		"alt": {
 			"tokens": "Go to the assets view",
 			"settings": "Open your settings",
-			"dapp_explorer": "Open dapp explorer",
+			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
 			"more_settings": "More settings",
@@ -154,24 +157,24 @@
 	},
 	"dapps": {
 		"text": {
-			"all_dapps": "All dapps",
+			"all_dapps": "All apps",
 			"featured": "Featured",
 			"sign_in": "Sign-in to explore the ecosystem.",
 			"title": "Explore Apps",
 			"open_dapp": "Open $dAppName",
-			"submit_your_dapp": "Submit your dapp"
+			"submit_your_dapp": "Submit your app"
 		},
 		"alt": {
 			"learn_more": "Learn more about $dAppName",
 			"logo": "Logo of $dAppName",
-			"show_all": "Show all decentralised applications",
-			"show_tag": "Show decentralised applications with the tag $tag",
+			"show_all": "Show all applications",
+			"show_tag": "Show applications with the tag $tag",
 			"open_dapp": "Open the app $dAppName",
 			"open_telegram": "Open $dAppName on Telegram",
 			"open_open_chat": "Open $dAppName on OpenChat",
 			"open_twitter": "Open the $dAppName X/Twitter feed",
 			"source_code_on_github": "View source code of $dAppName on github",
-			"submit_your_dapp": "Submit your dapp to be shown in the dapp-explorer",
+			"submit_your_dapp": "Submit your app to be shown in the app-explorer",
 			"tags": "Tags related to $dAppName",
 			"website": "Image of $dAppName"
 		}
@@ -180,10 +183,9 @@
 		"text": {
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 is coming soon!<br> Stay tuned for updates",
+			"upcoming_campaigns": "Upcoming Campaigns",
 			"active_date": "Ends on",
 			"ended_date": "Ended on",
-			"participate_title": "Earn BTC by staying active - and now by inviting others.",
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
@@ -194,9 +196,6 @@
 			"no_balance_title": "Earn $oisy_short Sprinkles",
 			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
-			"state_modal_title": "Congratulations on earning today’s $oisy_short Sprinkles!",
-			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
-			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
 			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
@@ -208,7 +207,8 @@
 			"requirements_title": "Eligibility criteria",
 			"min_logins": "Login $loginsx in last $days days",
 			"min_transactions": "Complete $transactions transactions in last $days days",
-			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance",
+			"hangover": "No recent win (last $days days)"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
@@ -299,8 +299,9 @@
 	},
 	"hero": {
 		"text": {
-			"available_balance": "Available balance",
+			"available_balance": "Your balance",
 			"unavailable_balance": "$ value is not available",
+			"hidden_balance": "Your balance is hidden",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
@@ -427,7 +428,6 @@
 		"solana": {
 			"text": {
 				"solana_address": "Solana Address",
-				"solana_testnet_address": "Solana Testnet Address",
 				"solana_devnet_address": "Solana Devnet Address",
 				"solana_local_address": "Solana Local Address",
 				"solana_address_copied": "Solana address copied to clipboard",
@@ -468,12 +468,13 @@
 			"recently_used_empty_state_title": "Recently used addresses will appear here",
 			"recently_used_empty_state_description": "Make your first send now!",
 			"contacts_empty_state_title": "Your contacts will appear here",
-			"contacts_empty_state_description": "It looks like you haven’t added contacts yet"
+			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
+			"send_review_subtitle": "You send"
 		},
 		"placeholder": {
-			"enter_eth_address": "Enter public address (0x)",
-			"enter_recipient_address": "Enter recipient address",
-			"enter_wallet_address": "Enter wallet address",
+			"enter_eth_address": "Enter public address (0x), name or alias",
+			"enter_recipient_address": "Enter recipient address, name or alias",
+			"enter_wallet_address": "Enter wallet address, name or alias",
 			"select_network": "Select network"
 		},
 		"info": {
@@ -603,6 +604,7 @@
 			"swapping": "Swapping...",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
+			"swap_provider_website": "Website",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
 			"included_liquidity_fees": "Included liquidity pool fees",
@@ -659,7 +661,8 @@
 			"chain_key": "Chain Key",
 			"show_more_networks": "Show $number more networks",
 			"hide_more_networks": "Hide more networks",
-			"on_network": " on $network"
+			"on_network": " on $network",
+			"delete_token": "Delete token"
 		},
 		"details": {
 			"title": "Token details",
@@ -668,7 +671,9 @@
 			"contract_address_copied": "Contract address copied to clipboard.",
 			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
-			"standard": "Standard"
+			"standard": "Standard",
+			"confirm_deletion_description": "This will remove <span class=\"font-bold\">$token</span> from your $oisy_short token list. Your funds will remain untouched — you can re-add the token at any time.",
+			"deletion_confirmation": "$token has been successfully removed from your $oisy_short token list."
 		},
 		"balance": {
 			"error": {
@@ -769,7 +774,8 @@
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
-			"unexpected_undefined": "Token is undefined. This is unexpected."
+			"unexpected_undefined": "Token is undefined. This is unexpected.",
+			"unexpected_error_on_token_delete": "Something went wrong while removing the token."
 		}
 	},
 	"fee": {
@@ -882,8 +888,14 @@
 			"type": "Type",
 			"from": "From",
 			"from_copied": "From address copied to clipboard.",
+			"received_from": "Received from $name",
+			"from_ata": "Sender token account (ATA)",
+			"from_ata_copied": "Sender token account (ATA) copied to clipboard.",
 			"to": "To",
 			"to_copied": "To address copied to clipboard.",
+			"sent_to": "Sent to $name",
+			"to_ata": "Recipient token account (ATA)",
+			"to_ata_copied": "Recipient token account (ATA) copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"status": "Status",
@@ -932,8 +944,8 @@
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
-			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
-			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"missing_index_canister_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer hasn’t provided the tracking feature yet. It should be added soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
+			"index_canister_not_working_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer's tracking feature is currently not responding. It should be resolved soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
 			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
 		},
 		"error": {
@@ -1014,7 +1026,7 @@
 			"text": {
 				"title": "Refer a friend",
 				"referral_link_copied": "Referral link copied to clipboard.",
-				"information": "Get bonus sprinkles, every time your friends receive one!",
+				"information": "Refer friends and get bonus sprinkles!",
 				"not_referred_yet": "You haven't referred anyone yet",
 				"referred_amount": "You already referred $amount people",
 				"learn_more": "Learn more"
@@ -1042,6 +1054,7 @@
 			"add_new_contact": "Add new contact",
 			"add_contact": "Add contact",
 			"search_contact": "Search contact",
+			"no_address_found": "No address available.",
 			"no_contact_found": "No contacts found"
 		},
 		"alt": {
@@ -1053,11 +1066,18 @@
 			"add_address": "Add address",
 			"delete_contact": "Delete contact"
 		},
+		"avatar": {
+			"default": "Default avatar",
+			"avatar_for": "Avatar for"
+		},
 		"show_contact": {
 			"title": "Contact",
 			"add_address": "Add address",
 			"show_address_text": "Associated addresses will appear here",
 			"add_first_address": "Add first address to contactName!"
+		},
+		"create_contact": {
+			"title": "Create Contact"
 		}
 	},
 	"contact": {
@@ -1067,6 +1087,17 @@
 		},
 		"fields": {
 			"name": "Name"
+		},
+		"delete": {
+			"title": "Delete $contact contact?",
+			"delete_contact": "Delete contact",
+			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
+		},
+		"error": {
+			"create": "Failed to create the contact",
+			"update": "Failed to update the contact",
+			"delete": "Failed to delete the contact",
+			"name_too_long": "Please keep the name to $maxCharacters characters or fewer."
 		}
 	},
 	"address": {
@@ -1081,7 +1112,10 @@
 			"address_placeholder": "Enter or paste address",
 			"label_placeholder": "E.g., “Mom’s wallet“",
 			"invalid_address": "Invalid address",
-			"valid_for_networks": "Valid for networks:"
+			"valid_for_networks": "Valid for networks:",
+			"error": {
+				"label_too_long": "Label may not exceed $maxCharacters characters"
+			}
 		},
 		"fields": {
 			"label": "Alias",
@@ -1091,6 +1125,14 @@
 			"title": "Delete address?",
 			"delete_address": "Delete address",
 			"content_text": "This will delete <strong>$address</strong> address from $contact's contact.<br>This action cannot be undone."
+		},
+		"save": {
+			"title": "Save address",
+			"add_to_existing_contact": "Add to existing contact",
+			"create_contact": "Create contact"
+		},
+		"qr": {
+			"title": "Scan QR code"
 		}
 	},
 	"signer": {
@@ -1199,5 +1241,23 @@
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
 			"unavailable_index_canister": "Transactions for $token_list can not be displayed. Index canister is currently unavailable."
 		}
+	},
+	"earning": {
+		"text": {
+			"title": "Earn"
+		},
+		"cards": {
+			"gold_title": "Gold",
+			"gold_description": "GLDT Staking",
+			"stablecoins_title": "Stablecoins",
+			"stablecoins_description": "Coming soon",
+			"sprinkles_title": "Sprinkles",
+			"sprinkles_description": "OISY Rewards"
+		}
+	},
+	"welcome": {
+		"title": "Welcome to $oisy_short!",
+		"subtitle": "Ready to Earn?",
+		"description": "You're 3 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
 	}
 }

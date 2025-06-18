@@ -65,6 +65,7 @@ describe('ic-transactions.services', () => {
 		});
 
 		it('should track events', () => {
+			const mockError = new Error('Test error, Request ID: 423, status: rejected');
 			onLoadTransactionsError({ tokenId, error: mockError });
 
 			expect(spyAnalytics).toHaveBeenCalledOnce();
@@ -72,7 +73,7 @@ describe('ic-transactions.services', () => {
 				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 				metadata: {
 					tokenId: tokenId.description,
-					error: mockError.toString()
+					error: 'Test error, status: rejected'
 				}
 			});
 		});
@@ -97,15 +98,13 @@ describe('ic-transactions.services', () => {
 			expect(spyAnalytics).toHaveBeenNthCalledWith(1, {
 				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 				metadata: {
-					tokenId: tokenId.description,
-					error: 'null'
+					tokenId: tokenId.description
 				}
 			});
 			expect(spyAnalytics).toHaveBeenNthCalledWith(2, {
 				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 				metadata: {
-					tokenId: tokenId.description,
-					error: 'undefined'
+					tokenId: tokenId.description
 				}
 			});
 

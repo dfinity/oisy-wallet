@@ -16,7 +16,6 @@ export const isTokenUiGroup = (
 ): tokenUiOrGroupUi is { group: TokenUiGroup } =>
 	typeof tokenUiOrGroupUi === 'object' &&
 	'group' in tokenUiOrGroupUi &&
-	'nativeToken' in tokenUiOrGroupUi.group &&
 	'tokens' in tokenUiOrGroupUi.group;
 
 /**
@@ -79,7 +78,6 @@ export const filterTokenGroups = ({
 const mapNewTokenGroup = (token: TokenUiGroupable): TokenUiGroup => ({
 	id: token.groupData.id,
 	decimals: token.decimals,
-	nativeToken: token,
 	groupData: token.groupData,
 	tokens: [token],
 	balance: token.balance,

@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { ADDRESS_BOOK_ENABLED } from '$env/address-book.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
@@ -21,6 +20,7 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
@@ -50,6 +50,7 @@
 
 	let isVip = $state(false);
 	let isGold = $state(false);
+
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
 			({ isVip, isGold } = await getUserRoles({ identity: $authIdentity }));
@@ -113,18 +114,16 @@
 			<Hr />
 		{/if}
 
-		{#if ADDRESS_BOOK_ENABLED}
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.address_book}
-				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
-				onclick={() => modalStore.openAddressBook(addressModalId)}
-			>
-				<IconUserSquare size="20" />
-				{$i18n.navigation.text.address_book}
-			</ButtonMenu>
+		<ButtonMenu
+			ariaLabel={$i18n.navigation.alt.address_book}
+			testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
+			onclick={() => modalStore.openAddressBook({ id: addressModalId })}
+		>
+			<IconUserSquare size="20" />
+			{$i18n.navigation.text.address_book}
+		</ButtonMenu>
 
-			<Hr />
-		{/if}
+		<Hr />
 
 		<ButtonMenu
 			ariaLabel={$i18n.navigation.alt.refer_a_friend}
@@ -159,9 +158,14 @@
 
 		<Hr />
 
-		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
+		<AboutWhyOisy
+			asMenuItem
+			asMenuItemCondensed
+			onIcOpenAboutModal={hidePopover}
+			trackEventSource={USER_MENU_ROUTE}
+		/>
 
-		<DocumentationLink asMenuItem asMenuItemCondensed />
+		<DocumentationLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
 
 		<SupportLink asMenuItem asMenuItemCondensed />
 
@@ -178,7 +182,7 @@
 			{$i18n.navigation.text.source_code}
 		</a>
 
-		<ChangelogLink asMenuItem asMenuItemCondensed />
+		<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
 
 		<Hr />
 

@@ -5,8 +5,7 @@ import * as signerApi from '$lib/api/signer.api';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore,
-	solAddressTestnetStore
+	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -17,12 +16,10 @@ import {
 	getSolAddressDevnet,
 	getSolAddressLocal,
 	getSolAddressMainnet,
-	getSolAddressTestnet,
 	loadIdbSolAddressMainnet,
 	loadSolAddressDevnet,
 	loadSolAddressLocal,
 	loadSolAddressMainnet,
-	loadSolAddressTestnet,
 	validateSolAddressMainnet
 } from '$sol/services/sol-address.services';
 import { SolanaNetworks } from '$sol/types/network';
@@ -70,7 +67,6 @@ describe('sol-address.services', () => {
 
 		const networkCases = [
 			['mainnet', getSolAddressMainnet, SolanaNetworks.mainnet],
-			['testnet', getSolAddressTestnet, SolanaNetworks.testnet],
 			['devnet', getSolAddressDevnet, SolanaNetworks.devnet],
 			['local', getSolAddressLocal, SolanaNetworks.local]
 		] as const;
@@ -98,7 +94,6 @@ describe('sol-address.services', () => {
 
 		const loadCases = [
 			['mainnet', loadSolAddressMainnet, solAddressMainnetStore],
-			['testnet', loadSolAddressTestnet, solAddressTestnetStore],
 			['devnet', loadSolAddressDevnet, solAddressDevnetStore],
 			['local', loadSolAddressLocal, solAddressLocalnetStore]
 		] as const;

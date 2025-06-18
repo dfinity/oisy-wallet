@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import referralReward from '$lib/assets/referral-reward.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
+	import { TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
 	import { OISY_REFERRAL_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import {
 		REFERRAL_STATE_MODAL_IMAGE_BANNER,
@@ -13,6 +15,12 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+
+	interface Props {
+		reward: RewardCampaignDescription;
+	}
+
+	let { reward }: Props = $props();
 </script>
 
 <Sprinkles />
@@ -37,11 +45,17 @@
 				testId={REFERRAL_STATE_MODAL_SHARE_ANCHOR}
 				text={$i18n.referral.reward.text.share}
 				href={OISY_REFERRAL_TWITTER_URL}
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
+					metadata: { campaignId: `${reward.id}`, type: 'referral' }
+				}}
 			/>
 		</div>
 
-		<Button on:click={modalStore.close} colorStyle="secondary-light" fullWidth slot="toolbar">
-			{$i18n.referral.reward.text.open_wallet}
-		</Button>
+		{#snippet toolbar()}
+			<Button onclick={modalStore.close} colorStyle="secondary-light" fullWidth>
+				{$i18n.referral.reward.text.open_wallet}
+			</Button>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

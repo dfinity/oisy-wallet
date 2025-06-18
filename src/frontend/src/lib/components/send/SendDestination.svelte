@@ -1,23 +1,27 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { isNullish } from '@dfinity/utils';
+	import { createEventDispatcher } from 'svelte';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
+	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import SendContactName from '$lib/components/send/SendContactName.svelte';
 	import { SEND_DESTINATION_SECTION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ContactUi } from '$lib/types/contact';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
 		destination: string;
 		invalidDestination?: boolean;
+		selectedContact?: ContactUi;
 	}
-	let { destination, invalidDestination = false }: Props = $props();
+	let { destination, invalidDestination = false, selectedContact }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
 	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
+
+	let addressToDisplay = $derived(shortenWithMiddleEllipsis({ text: destination }));
 </script>
 
 <div class="mb-10 mt-6" data-tid={SEND_DESTINATION_SECTION}>
@@ -25,11 +29,23 @@
 
 	<AddressCard hasError={invalidDestination} items="center">
 		{#snippet logo()}
-			<NetworkLogo network={$sendToken.network} />
+			<div class="mr-2">
+				<AvatarWithBadge
+					contact={selectedContact}
+					address={destination}
+					badge={{ type: 'addressType', address: destination }}
+				/>
+			</div>
 		{/snippet}
 
 		{#snippet content()}
-			{destination}
+			{#if isNullish(selectedContact)}
+				{addressToDisplay}
+			{:else}
+				<SendContactName contact={selectedContact} address={destination} />
+
+				<span class="text-sm text-tertiary">{addressToDisplay}</span>
+			{/if}
 		{/snippet}
 
 		{#snippet actions()}

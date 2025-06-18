@@ -20,6 +20,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -33,6 +34,7 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -134,11 +136,28 @@
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
-	<BtcSendReview on:icBack on:icSend={send} bind:utxosFee {destination} {amount} {source} />
+	<BtcSendReview
+		on:icBack
+		on:icSend={send}
+		bind:utxosFee
+		{destination}
+		{selectedContact}
+		{amount}
+		{source}
+	/>
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<BtcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<BtcSendForm {source} on:icNext on:icClose on:icBack on:icTokensList bind:destination bind:amount>
+	<BtcSendForm
+		{source}
+		{selectedContact}
+		on:icNext
+		on:icClose
+		on:icBack
+		on:icTokensList
+		bind:destination
+		bind:amount
+	>
 		<ButtonBack onclick={back} slot="cancel" />
 	</BtcSendForm>
 {:else}

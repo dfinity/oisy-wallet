@@ -6,7 +6,7 @@
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -54,7 +54,10 @@
 
 		{#snippet action()}
 			<ButtonIcon
-				styleClass="-m-1 md:m-0 hover:text-primary"
+				styleClass="-m-1 md:m-0"
+				colorStyle="tertiary-alt"
+				transparent
+				link={false}
 				ariaLabel={$i18n.core.text.edit}
 				onclick={() => onEdit(contact)}
 				testId={CONTACT_HEADER_EDITING_EDIT_BUTTON}
@@ -79,13 +82,14 @@
 		/>
 	{/each}
 
-	<div class="flex justify-start">
+	<div class="mt-3 flex justify-start">
 		<Button
 			alignLeft
 			ariaLabel={$i18n.address_book.edit_contact.add_address}
-			colorStyle="tertiary-main-card"
+			transparent
+			colorStyle="secondary-light"
 			disabled={isNullish(onAddAddress)}
-			on:click={() => onAddAddress?.()}
+			onclick={() => onAddAddress?.()}
 			testId={CONTACT_EDIT_ADD_ADDRESS_BUTTON}
 		>
 			<IconPlus />
@@ -98,10 +102,10 @@
 	<div class="flex justify-start">
 		<Button
 			alignLeft
-			styleClass="text-error-primary hover:bg-error-light"
 			ariaLabel={$i18n.address_book.edit_contact.delete_contact}
-			colorStyle="tertiary-main-card"
-			on:click={() => onDeleteContact?.(contact.id)}
+			transparent
+			colorStyle="error"
+			onclick={() => onDeleteContact?.(contact.id)}
 			testId={CONTACT_EDIT_DELETE_CONTACT_BUTTON}
 		>
 			<IconTrash />
@@ -111,7 +115,9 @@
 
 	<div class="flex-grow"></div>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={onClose} testId={CONTACT_SHOW_CLOSE_BUTTON}></ButtonCancel>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={onClose} testId={CONTACT_SHOW_CLOSE_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
