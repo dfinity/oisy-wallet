@@ -9,12 +9,7 @@ import {
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import {
-	SOLANA_DEVNET_TOKEN,
-	SOLANA_LOCAL_TOKEN,
-	SOLANA_TESTNET_TOKEN,
-	SOLANA_TOKEN
-} from '$env/tokens/tokens.sol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import * as appContants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -498,7 +493,7 @@ describe('tokens.utils', () => {
 
 	describe('defineEnabledTokens', () => {
 		const mainnetTokens: Token[] = [SOLANA_TOKEN];
-		const testnetTokens: Token[] = [SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN];
+		const testnetTokens: Token[] = [SOLANA_DEVNET_TOKEN];
 		const localTokens: Token[] = [SOLANA_LOCAL_TOKEN];
 
 		const mainnetNetworks: Network[] = mainnetTokens.map(({ network }) => network);
