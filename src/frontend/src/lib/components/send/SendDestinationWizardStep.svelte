@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
@@ -64,11 +64,13 @@
 
 	const back = () => dispatch('icBack');
 	const next = () => {
-		// if next button is clicked, it means theres no selected contact
-		// we manually lookup the contact and select it if one exists
-		const contact = getContactForAddress({ addressString: destination, contactList: $contacts });
-		if (nonNullish(contact)) {
-			selectedContact = contact;
+		if (isNullish(selectedContact)) {
+			// if next button is clicked and there is no contact selected,
+			// we manually lookup the contact and select it if one exists
+			const contact = getContactForAddress({ addressString: destination, contactList: $contacts });
+			if (nonNullish(contact)) {
+				selectedContact = contact;
+			}
 		}
 		dispatch('icNext');
 	};

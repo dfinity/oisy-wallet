@@ -24,9 +24,13 @@ import { fireEvent, render } from '@testing-library/svelte';
 import { get, writable, type Writable } from 'svelte/store';
 
 const mockContacts = getMockContacts({
-	n: 2,
-	names: ['Contact 1', 'Contact 2'],
-	addresses: [[mockBackendContactAddressEth]]
+	n: 3,
+	names: ['Contact 1', 'Contact 2', 'Contact 3'],
+	addresses: [
+		[mockBackendContactAddressEth],
+		[mockBackendContactAddressEth],
+		[mockBackendContactAddressEth]
+	]
 });
 
 contactsStore.addContact(mapToFrontendContact(mockContacts[0]));
@@ -147,5 +151,23 @@ describe('SendDestinationWizardStep', () => {
 		await fireEvent.click(getByTestId(SEND_FORM_DESTINATION_NEXT_BUTTON));
 
 		expect(get(selectedContact)).toEqual(mapToFrontendContact(mockContacts[0]));
+	});
+
+	it('should set selectedContact when selecting a contact without overwriting it with a lookup', async () => {
+		const selectedContact: Writable<ContactUi> = writable();
+		const { getByTestId, getByText } = render(SendDestinationWizardStepTestHost, {
+			props: { destination: mockEthAddress3, selectedContact },
+			context: mockContext(ETHEREUM_TOKEN)
+		});
+
+		await fireEvent.click(getByText(get(i18n).send.text.contacts_tab));
+
+		// we deliberately select the last contact, which also has the same address as the first in store
+		// since the lookup for the contact would return the first one, the contacts would not match in this test if we overwrote it with the lookup result
+		await fireEvent.click(
+			getByTestId(`${SEND_DESTINATION_WIZARD_CONTACT}-${mockContacts[2].name}`)
+		);
+
+		expect(get(selectedContact)).toEqual(mapToFrontendContact(mockContacts[2]));
 	});
 });
