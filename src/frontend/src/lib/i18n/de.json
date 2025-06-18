@@ -188,7 +188,6 @@
 			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 erscheint bald!<br>Bleib dran für Updates",
 			"active_date": "Endet am",
 			"ended_date": "Endete am",
-			"participate_title": "Verdiene BTC, indem Du aktiv bleibst – und jetzt auch durch Einladen anderer.",
 			"share": "Teilen auf X",
 			"learn_more": "Mehr erfahren",
 			"check_status": "Status & Berechtigung prüfen",
@@ -210,7 +209,8 @@
 			"requirements_title": "Berechtigungskriterien",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
 			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
-			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt"
+			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
+			"hangover": ""
 		},
 		"alt": {
 			"upcoming_campaigns": "Behalte anstehende Token-Drops im Auge! <a href=\"https://x.com/oisy\" target=\"_blank\">Folge uns auf X</a>, tritt unserem <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> bei oder komm in unseren <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>, um auf dem Laufenden zu bleiben.",
@@ -674,8 +674,8 @@
 			"token_address_copied": "Token-Adresse in Zwischenablage kopiert.",
 			"twin_token": "Twin-Token",
 			"standard": "Standard",
-			"confirm_deletion_title": "Aus der Liste Deiner Token entfernen?",
-			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus Deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen."
+			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus Deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen.",
+			"deletion_confirmation": ""
 		},
 		"balance": {
 			"error": {
@@ -1037,15 +1037,6 @@
 				"loading_referrer_info": "Fehler beim Laden der Empfehlungsinfo",
 				"setting_referrer": "Fehler beim Festlegen des Empfehlers"
 			}
-		},
-		"reward": {
-			"text": {
-				"title": "Herzlichen Glückwunsch!",
-				"content_title": "Hier ein kleines Dankeschön",
-				"content_text": "Einer Deiner empfohlenen Nutzer hat gerade Sprinkles erhalten.",
-				"share": "Auf X teilen",
-				"open_wallet": "Zur Wallet"
-			}
 		}
 	},
 	"address_book": {
@@ -1256,5 +1247,10 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
 		}
+	},
+	"welcome": {
+		"title": "",
+		"subtitle": "",
+		"description": ""
 	}
 }
