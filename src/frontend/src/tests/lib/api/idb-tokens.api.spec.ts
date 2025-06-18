@@ -5,6 +5,7 @@ import { toUserToken } from '$icp-eth/services/user-token.services';
 import {
 	deleteIdbEthToken,
 	deleteIdbEthTokens,
+	deleteIdbIcToken,
 	deleteIdbIcTokens,
 	deleteIdbSolTokens,
 	getIdbEthTokens,
@@ -37,7 +38,7 @@ vi.mock('$app/environment', () => ({
 describe('idb-tokens.api', () => {
 	const mockIdbTokensStore = createStore('mock-store', 'mock-store');
 
-	const mockTokens: CustomToken[] = [
+	const icMockTokens = [
 		{
 			token: {
 				Icrc: {
@@ -50,11 +51,17 @@ describe('idb-tokens.api', () => {
 		},
 		{
 			token: {
-				Icrc: { ledger_id: Principal.fromText(IC_CKETH_LEDGER_CANISTER_ID), index_id: toNullable() }
+				Icrc: {
+					ledger_id: Principal.fromText(IC_CKETH_LEDGER_CANISTER_ID),
+					index_id: toNullable()
+				}
 			},
 			version: toNullable(1n),
 			enabled: false
-		},
+		}
+	] as CustomToken[];
+	const mockTokens: CustomToken[] = [
+		...icMockTokens,
 		{
 			token: {
 				SplDevnet: {
@@ -224,6 +231,46 @@ describe('idb-tokens.api', () => {
 				1,
 				mockIdentity.getPrincipal().toText(),
 				restUserTokens,
+				mockIdbTokensStore
+			);
+		});
+	});
+
+	describe('deleteIdbIcToken', () => {
+		it('should delete provided IC token', async () => {
+			const [tokenToDelete, ...rest] = icMockTokens;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([tokenToDelete, ...rest]);
+
+			await deleteIdbIcToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				rest,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should not delete anything if provided IC token is not in the IDB', async () => {
+			const [tokenToDelete, ...rest] = icMockTokens;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue(rest);
+
+			await deleteIdbIcToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				rest,
 				mockIdbTokensStore
 			);
 		});

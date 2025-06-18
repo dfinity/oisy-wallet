@@ -1,11 +1,11 @@
 import { browser } from '$app/environment';
-import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
+import type { CustomToken, IcrcToken, UserToken } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
 import { nullishSignOut } from '$lib/services/auth.services';
 import type { DeleteIdbTokenParams, SetIdbTokensParams } from '$lib/types/idb-tokens';
-import type { Principal } from '@dfinity/principal';
+import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
 
@@ -83,6 +83,40 @@ export const deleteIdbEthToken = async ({
 			identity,
 			tokens: currentTokens.filter(({ contract_address, chain_id }) =>
 				token.chain_id === chain_id ? token.contract_address !== contract_address : true
+			)
+		});
+	}
+};
+
+export const deleteIdbIcToken = async ({
+	identity,
+	token
+}: DeleteIdbTokenParams<CustomToken>): Promise<void> => {
+	if (isNullish(identity)) {
+		await nullishSignOut();
+		return;
+	}
+
+	const { token: tokenToDelete } = token;
+
+	if (!('Icrc' in tokenToDelete)) {
+		return;
+	}
+
+	const {
+		Icrc: { ledger_id: tokenToDeleteLedgerId }
+	} = tokenToDelete as { Icrc: IcrcToken };
+
+	const currentTokens = await getIdbIcTokens(identity.getPrincipal());
+
+	if (nonNullish(currentTokens)) {
+		await setIdbIcTokens({
+			identity,
+			tokens: currentTokens.filter(({ token: savedToken }) =>
+				'Icrc' in savedToken
+					? Principal.from((savedToken as { Icrc: IcrcToken }).Icrc.ledger_id).toText() !==
+						tokenToDeleteLedgerId.toText()
+					: true
 			)
 		});
 	}
