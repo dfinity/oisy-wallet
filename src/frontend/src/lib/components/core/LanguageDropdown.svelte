@@ -21,7 +21,7 @@
 <span class="lang-selector min-w-32">
 	<Dropdown
 		bind:this={dropdown}
-		ariaLabel="Swtch lang"
+		ariaLabel={$i18n.core.alt.switch_language}
 		asModalOnMobile
 		buttonFullWidth
 		buttonBorder
