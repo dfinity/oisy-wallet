@@ -23,8 +23,8 @@
 		<span class="flex">Language</span>
 	</span>
 
-	<span class="min-w-32 overflow-hidden rounded-xl border border-tertiary">
-		<Dropdown bind:this={dropdown} ariaLabel="Swtch lang" asModalOnMobile fullWidth>
+	<span class="min-w-32">
+		<Dropdown bind:this={dropdown} ariaLabel="Swtch lang" asModalOnMobile fullWidth border>
 			{$i18n.languages[$i18n.lang]}
 
 			{#snippet title()}
