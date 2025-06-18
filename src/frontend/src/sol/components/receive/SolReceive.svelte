@@ -9,30 +9,23 @@
 		solAddressDevnetStore,
 		solAddressLocalnetStore,
 		solAddressMainnetStore,
-		solAddressTestnetStore,
 		type StorageAddressData
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { SolAddress } from '$lib/types/address';
 	import type { Token } from '$lib/types/token';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 
 	export let token: Token;
 
 	let addressData: StorageAddressData<SolAddress>;
 	//TODO consolidate this logic together with btc into $networkAddress like it's done for ICP and ETH
-	$: addressData = isNetworkIdSOLTestnet($networkId)
-		? $solAddressTestnetStore
-		: isNetworkIdSOLDevnet($networkId)
-			? $solAddressDevnetStore
-			: isNetworkIdSOLLocal($networkId)
-				? $solAddressLocalnetStore
-				: $solAddressMainnetStore;
+	$: addressData = isNetworkIdSOLDevnet($networkId)
+		? $solAddressDevnetStore
+		: isNetworkIdSOLLocal($networkId)
+			? $solAddressLocalnetStore
+			: $solAddressMainnetStore;
 
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
 
