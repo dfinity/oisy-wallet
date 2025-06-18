@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import type { CustomToken, IcrcToken, UserToken } from '$declarations/backend/backend.did';
+import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
@@ -105,7 +105,7 @@ export const deleteIdbIcToken = async ({
 
 	const {
 		Icrc: { ledger_id: tokenToDeleteLedgerId }
-	} = tokenToDelete as { Icrc: IcrcToken };
+	} = tokenToDelete;
 
 	const currentTokens = await getIdbIcTokens(identity.getPrincipal());
 
@@ -114,8 +114,7 @@ export const deleteIdbIcToken = async ({
 			identity,
 			tokens: currentTokens.filter(({ token: savedToken }) =>
 				'Icrc' in savedToken
-					? Principal.from((savedToken as { Icrc: IcrcToken }).Icrc.ledger_id).toText() !==
-						tokenToDeleteLedgerId.toText()
+					? Principal.from(savedToken.Icrc.ledger_id).toText() !== tokenToDeleteLedgerId.toText()
 					: true
 			)
 		});
