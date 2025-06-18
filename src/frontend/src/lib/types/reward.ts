@@ -38,7 +38,7 @@ export interface RewardClaimResponse<T = unknown> {
 
 export interface RewardStateData {
 	reward: RewardCampaignDescription;
-	type?: RewardType;
+	rewardType?: RewardType;
 }
 
 export interface UserRoleResult {

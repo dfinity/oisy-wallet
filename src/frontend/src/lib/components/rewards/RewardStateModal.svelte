@@ -21,10 +21,10 @@
 
 	interface Props {
 		reward: RewardCampaignDescription;
-		type?: RewardType;
+		rewardType?: RewardType;
 	}
 
-	let { reward, type = RewardType.AIRDROP }: Props = $props();
+	let { reward, rewardType = RewardType.AIRDROP }: Props = $props();
 
 	let imgSrc = $state('');
 	let title = $state('');
@@ -32,7 +32,7 @@
 	let shareHref = $state('');
 
 	$effect(() => {
-		if (type === RewardType.JACKPOT) {
+		if (rewardType === RewardType.JACKPOT) {
 			({ banner: imgSrc, title, description, shareHref } = reward.win.jackpot);
 		} else {
 			({ banner: imgSrc, title, description, shareHref } = reward.win.default);
@@ -40,7 +40,7 @@
 	});
 </script>
 
-<Sprinkles type={type === RewardType.JACKPOT ? 'page-jackpot' : 'page'} />
+<Sprinkles type={rewardType === RewardType.JACKPOT ? 'page-jackpot' : 'page'} />
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
@@ -68,7 +68,7 @@
 					href={shareHref}
 					trackEvent={{
 						name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
-						metadata: { campaignId: `${reward.id}`, type }
+						metadata: { campaignId: `${reward.id}`, type: rewardType }
 					}}
 				/>
 			</div>

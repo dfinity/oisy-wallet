@@ -75,7 +75,7 @@ describe('RewardGuard', () => {
 		await waitFor(() => {
 			expect(get(modalStore)).toEqual({
 				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, type: RewardType.JACKPOT },
+				data: { reward: mockRewardCampaign, rewardType: RewardType.JACKPOT },
 				type: 'reward-state'
 			});
 
@@ -105,7 +105,7 @@ describe('RewardGuard', () => {
 		await waitFor(() => {
 			expect(get(modalStore)).toEqual({
 				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, type: RewardType.AIRDROP },
+				data: { reward: mockRewardCampaign, rewardType: RewardType.AIRDROP },
 				type: 'reward-state'
 			});
 
