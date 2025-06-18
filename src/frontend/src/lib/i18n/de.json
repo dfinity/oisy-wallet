@@ -1,8 +1,4 @@
 {
-	"languages": {
-		"en": "Englisch",
-		"de": "Deutsch"
-	},
 	"core": {
 		"text": {
 			"cancel": "Abbrechen",
