@@ -11,6 +11,7 @@
 		disabled?: boolean;
 		asModalOnMobile?: boolean;
 		ariaLabel: string;
+		fullWidth?: boolean;
 		testId?: string;
 	}
 
@@ -21,6 +22,7 @@
 		disabled = false,
 		asModalOnMobile = false,
 		ariaLabel,
+		fullWidth = false,
 		testId
 	}: Props = $props();
 
@@ -37,6 +39,7 @@
 	{testId}
 	{disabled}
 	opened={visible}
+	{fullWidth}
 >
 	{@render children()}
 </DropdownButton>

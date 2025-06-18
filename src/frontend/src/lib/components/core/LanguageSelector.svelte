@@ -7,6 +7,7 @@
 	import { Languages } from '$lib/types/languages';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import List from '$lib/components/common/List.svelte';
+	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 
 	let dropdown: Dropdown | undefined;
 
@@ -16,14 +17,14 @@
 	};
 </script>
 
-<div class="flex flex-row justify-between pl-3">
+<div class="lang-selector flex flex-row justify-between pl-3">
 	<span class="mr-3 flex flex-row items-center text-tertiary">
 		<span class="mr-1 flex"><IconLanguage /></span>
 		<span class="flex">Language</span>
 	</span>
 
-	<span class="overflow-hidden rounded-xl border border-tertiary">
-		<Dropdown bind:this={dropdown} ariaLabel="Swtch lang" asModalOnMobile>
+	<span class="min-w-32 overflow-hidden rounded-xl border border-tertiary">
+		<Dropdown bind:this={dropdown} ariaLabel="Swtch lang" asModalOnMobile fullWidth>
 			{$i18n.languages[$i18n.lang]}
 
 			{#snippet title()}
@@ -35,11 +36,20 @@
 					{#each SUPPORTED_LANGUAGES as [langKey, langVal]}
 						<ListItem>
 							<Button
-								colorStyle="secondary-light"
+								onclick={() => handleLangChange(langKey)}
+								fullWidth
 								paddingSmall
+								styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
+								colorStyle="tertiary-alt"
 								transparent
-								onclick={() => handleLangChange(langKey)}>{$i18n.languages[langVal]}</Button
 							>
+								<span class="pt-0.75 w-[20px] text-brand-primary">
+									{#if $i18n.lang === langVal}
+										<IconCheck size="20" />
+									{/if}
+								</span>
+								{$i18n.languages[langVal]}
+							</Button>
 						</ListItem>
 					{/each}
 				</List>
@@ -47,3 +57,15 @@
 		</Dropdown>
 	</span>
 </div>
+
+<style lang="scss">
+	:global .lang-selector {
+		button {
+			font-weight: normal !important;
+		}
+
+		.wrapper {
+			padding: var(--padding-1_25x) !important;
+		}
+	}
+</style>
