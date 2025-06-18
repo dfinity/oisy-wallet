@@ -2,7 +2,6 @@
 	interface Props {
 		size?: string;
 	}
-
 	const { size = '24' }: Props = $props();
 </script>
 
