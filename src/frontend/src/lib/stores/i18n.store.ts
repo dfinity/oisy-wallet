@@ -26,7 +26,6 @@ const initI18n = (): I18nStore => {
 	const { subscribe, set } = writable<I18n>(enI18n());
 
 	const switchLang = async (lang: Languages) => {
-		console.log('switchLang', lang);
 		const bundle = await loadLang(lang);
 		set(bundle);
 
