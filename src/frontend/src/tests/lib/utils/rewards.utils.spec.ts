@@ -163,7 +163,10 @@ describe('rewards.utils', () => {
 
 		it('should return reward with type jackpot if one of several received rewards is a jackpot and set entry in the session storage', async () => {
 			const customMockedJackpotReward: RewardInfo = { ...mockedReward, name: [RewardType.JACKPOT] };
-			const customMockedReferralReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRAL] };
+			const customMockedReferralReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRAL]
+			};
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				superpowers: [],
@@ -207,7 +210,10 @@ describe('rewards.utils', () => {
 		});
 
 		it('should return reward with type leaderboard if one of several received rewards is a leaderboard and set entry in the session storage', async () => {
-			const customMockedLeaderboardReward: RewardInfo = { ...mockedReward, name: [RewardType.LEADERBOARD] };
+			const customMockedLeaderboardReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.LEADERBOARD]
+			};
 			const customMockedJackpotReward: RewardInfo = { ...mockedReward, name: [RewardType.JACKPOT] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
