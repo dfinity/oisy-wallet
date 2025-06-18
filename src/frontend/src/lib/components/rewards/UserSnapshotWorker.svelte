@@ -20,6 +20,9 @@
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_COUNT_WC_ETH_SEND_SUCCESS, TRACK_SNAPSHOT_SEND_ERROR } from '$lib/constants/analytics.contants';
+	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
@@ -35,6 +38,11 @@
 			await registerUserSnapshot();
 		} catch (error: unknown) {
 			console.error('Unexpected error while taking user snapshot:', error);
+
+			trackEvent({
+				name: TRACK_SNAPSHOT_SEND_ERROR,
+				metadata: mapIcErrorMetadata(error)
+			});
 		}
 
 		syncInProgress = false;
