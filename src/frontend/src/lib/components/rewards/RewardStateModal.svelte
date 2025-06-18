@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -18,7 +19,6 @@
 	import { RewardType } from '$lib/enums/reward-type';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
