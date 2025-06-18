@@ -1,5 +1,5 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
@@ -7,7 +7,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
-import type { VipRewardStateData } from '$lib/types/reward';
+import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction';
 import type { Option } from '$lib/types/utils';
@@ -57,6 +57,7 @@ export interface Modal<T> {
 		| 'vip-reward-state'
 		| 'reward-details'
 		| 'reward-state'
+		| 'welcome'
 		| 'settings'
 		| 'auth-help';
 	data?: T;
@@ -74,7 +75,7 @@ interface SetWithOptionalDataParams<D> {
 	data?: D;
 }
 
-interface OpenTransactionParams<T extends AnyTransactionUi> {
+export interface OpenTransactionParams<T extends AnyTransactionUi> {
 	transaction: T;
 	token: Token;
 }
@@ -115,11 +116,12 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
-	openReferralState: (id: symbol) => void;
+	openReferralState: (params: SetWithDataParams<RewardCampaignDescription>) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
-	openRewardDetails: (params: SetWithDataParams<RewardDescription>) => void;
-	openRewardState: (params: SetWithDataParams<boolean>) => void;
+	openRewardDetails: (params: SetWithDataParams<RewardCampaignDescription>) => void;
+	openRewardState: (params: SetWithDataParams<RewardStateData>) => void;
+	openWelcome: (id: symbol) => void;
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	close: () => void;
@@ -187,17 +189,22 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
 			setTypeWithData('address-book')
 		),
-		openReferralState: setType('referral-state'),
+		openReferralState: <(params: SetWithDataParams<RewardCampaignDescription>) => void>(
+			setTypeWithData('referral-state')
+		),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
 			setTypeWithData('dapp-details')
 		),
 		openVipRewardState: <(params: SetWithDataParams<VipRewardStateData>) => void>(
 			setTypeWithData('vip-reward-state')
 		),
-		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>(
+		openRewardDetails: <(params: SetWithDataParams<RewardCampaignDescription>) => void>(
 			setTypeWithData('reward-details')
 		),
-		openRewardState: <(params: SetWithDataParams<boolean>) => void>setTypeWithData('reward-state'),
+		openRewardState: <(params: SetWithDataParams<RewardStateData>) => void>(
+			setTypeWithData('reward-state')
+		),
+		openWelcome: setType('welcome'),
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
 			setTypeWithData('settings')
 		),

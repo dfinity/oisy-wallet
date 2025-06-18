@@ -7,7 +7,6 @@
 	import ContactCard from '$lib/components/contact/ContactCard.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
@@ -22,9 +21,10 @@
 	interface Props {
 		onCreateContact?: () => void;
 		onSelectContact: (contact: ContactUi) => void;
+		onClose: () => void;
 	}
 
-	const { onCreateContact, onSelectContact }: Props = $props();
+	const { onCreateContact, onSelectContact, onClose }: Props = $props();
 
 	let inputValue: string = $state('');
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
@@ -95,7 +95,15 @@
 		<EmptyState title={$i18n.address_book.text.no_contact_found} />
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCloseModal />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<Button
+				paddingSmall
+				colorStyle="secondary-light"
+				type="button"
+				fullWidth
+				onclick={() => onClose()}>{$i18n.core.text.close}</Button
+			>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

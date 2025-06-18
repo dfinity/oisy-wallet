@@ -126,5 +126,23 @@
 		"name": "Windoge98",
 		"symbol": "EXE",
 		"decimals": 8
+	},
+	"BOB": {
+		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
+		"decimals": 8,
+		"name": "BOB",
+		"symbol": "BOB",
+		"fee": {
+			"__bigint__": "1000000"
+		}
+	},
+	"ICONFUCIUS": {
+		"ledgerCanisterId": "5kijx-siaaa-aaaar-qaqda-cai",
+		"decimals": 8,
+		"name": "ICONFUCIUS•ID•RVMN•ODIN",
+		"symbol": "ICONFUCIUS•ID•RVMN•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
 	}
 }

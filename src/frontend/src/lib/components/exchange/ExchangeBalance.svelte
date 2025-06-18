@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
@@ -19,7 +20,7 @@
 	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi));
 </script>
 
-<span class="flex flex-col items-center gap-2">
+<span class="flex flex-col items-center gap-4">
 	<output class="mt-8 inline-block break-all text-5xl font-bold">
 		{#if $loaded}
 			{#if hideBalance}
@@ -37,7 +38,11 @@
 			</span>
 		{/if}
 	</output>
-	<span class="max-w-48 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
-		{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
+	<span class="flex items-center gap-2 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
+		{#if hideBalance}
+			<IconEyeOff />{$i18n.hero.text.hidden_balance}
+		{:else}
+			{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
+		{/if}
 	</span>
 </span>

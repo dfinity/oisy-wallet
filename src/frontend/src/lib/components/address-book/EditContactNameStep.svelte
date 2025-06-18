@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import ContactForm from '$lib/components/address-book/ContactForm.svelte';
+	import InputContactName from '$lib/components/address-book/InputContactName.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -20,6 +20,7 @@
 		onClose: () => void;
 		isNewContact: boolean;
 		disabled?: boolean;
+		title?: string;
 	}
 
 	let {
@@ -28,18 +29,21 @@
 		onClose,
 		isNewContact,
 		contact = {},
-		disabled = false
+		disabled = false,
+		title = $bindable<string | undefined>()
 	}: Props = $props();
 
 	let editingContact = $state(contact ? { ...contact } : {});
 
-	let form: ContactForm | undefined = $state();
+	const handleSave = (event: Event) => {
+		event.preventDefault();
 
-	const handleSave = () => {
-		if (!form?.isValid) {
+		if (!isFormValid || disabled) {
 			return;
 		}
-
+		if (nonNullish(editingContact.name)) {
+			editingContact.name = editingContact.name.trim();
+		}
 		if (isNewContact && nonNullish(editingContact.name)) {
 			onAddContact({ name: editingContact.name });
 		} else {
@@ -47,33 +51,40 @@
 		}
 	};
 
-	let title = $derived(
-		notEmptyString(editingContact?.name?.trim?.())
-			? editingContact?.name
+	const trimedTitle = $derived(
+		notEmptyString(editingContact.name?.trim())
+			? editingContact.name
 			: $i18n.contact.form.add_new_contact
 	);
 
-	export { title };
+	let isFormValid = $state(false);
+
+	$effect(() => {
+		title = trimedTitle;
+	});
 </script>
 
-<ContentWithToolbar styleClass="flex flex-col gap-6 items-center">
-	<Avatar name={editingContact?.name} variant="xl"></Avatar>
-	<ContactForm bind:contact={editingContact} bind:this={form} {disabled} onSubmit={handleSave}
-	></ContactForm>
+<form onsubmit={handleSave} method="POST" class="flex w-full flex-col items-center">
+	<ContentWithToolbar styleClass="flex flex-col gap-6 items-center w-full">
+		<Avatar name={editingContact?.name} variant="xl"></Avatar>
+		<InputContactName bind:contact={editingContact} bind:isValid={isFormValid} {disabled} />
 
-	<!-- TODO Add address list here -->
+		<!-- TODO Add address list here -->
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel {disabled} onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}
-		></ButtonCancel>
-		<Button
-			colorStyle="primary"
-			onclick={handleSave}
-			disabled={!form?.isValid}
-			loading={disabled}
-			testId={ADDRESS_BOOK_SAVE_BUTTON}
-		>
-			{$i18n.core.text.save}
-		</Button>
-	</ButtonGroup>
-</ContentWithToolbar>
+		{#snippet toolbar()}
+			<ButtonGroup>
+				<ButtonCancel {disabled} onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}
+				></ButtonCancel>
+				<Button
+					type="submit"
+					colorStyle="primary"
+					disabled={!isFormValid}
+					loading={disabled}
+					testId={ADDRESS_BOOK_SAVE_BUTTON}
+				>
+					{$i18n.core.text.save}
+				</Button>
+			</ButtonGroup>
+		{/snippet}
+	</ContentWithToolbar>
+</form>

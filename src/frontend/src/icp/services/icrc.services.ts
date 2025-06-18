@@ -17,6 +17,8 @@ import {
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
 import { getIdbIcTokens, setIdbIcTokens } from '$lib/api/idb-tokens.api';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -25,6 +27,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
+import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
 import {
 	fromNullable,
@@ -61,6 +64,11 @@ export const loadCustomTokens = ({
 		onUpdateError: ({ error: err }) => {
 			icrcCustomTokensStore.resetAll();
 
+			trackEvent({
+				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+				metadata: mapIcErrorMetadata(err)
+			});
+
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
 				err
@@ -69,7 +77,7 @@ export const loadCustomTokens = ({
 		identity
 	});
 
-export const loadDefaultIcrc = ({
+const loadDefaultIcrc = ({
 	data,
 	strategy
 }: {
@@ -81,6 +89,11 @@ export const loadDefaultIcrc = ({
 		onLoad: loadIcrcData,
 		onUpdateError: ({ error: err }) => {
 			icrcDefaultTokensStore.reset(data.ledgerCanisterId);
+
+			trackEvent({
+				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+				metadata: mapIcErrorMetadata(err)
+			});
 
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
