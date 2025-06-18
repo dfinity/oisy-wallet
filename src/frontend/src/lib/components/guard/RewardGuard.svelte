@@ -20,7 +20,6 @@
 	let { children }: Props = $props();
 
 	const rewardModalId = Symbol();
-	const referralModalId = Symbol();
 	const welcomeModalId = Symbol();
 
 	onMount(async () => {
