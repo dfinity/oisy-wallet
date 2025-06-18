@@ -65,6 +65,12 @@
 				"description": "You ranked among the top 4 referrers this season<br>$200 has been added to your wallet",
 				"shareHref": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
 			},
+			"referrer": {
+				"title": "You're just getting started",
+				"banner": "/images/rewards/airdrop-icp.svg",
+				"description": "You earned $1.<br>Refer more - top 4 referrers get $200.<br>You're close. Keep going.",
+				"shareHref": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
+			},
 			"referee": {
 				"title": "Get more for Referring",
 				"banner": "/images/rewards/airdrop-icp.svg",

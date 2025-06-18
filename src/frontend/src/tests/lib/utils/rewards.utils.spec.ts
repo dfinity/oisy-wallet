@@ -139,6 +139,57 @@ describe('rewards.utils', () => {
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
 
+		it('should return reward with type referrer and set entry in the session storage', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRER] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
+
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.REFERRER });
+			expect(rewardType).toBe(RewardType.REFERRER);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return reward with type referrer if one of several received rewards is a referrer and set entry in the session storage', async () => {
+			const customMockedReferrerReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRER]
+			};
+			const customMockedReferralReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRAL]
+			};
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward, customMockedReferrerReward, customMockedReferralReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
+
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.REFERRER });
+			expect(rewardType).toBe(RewardType.REFERRER);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
 		it('should return reward with type referee and set entry in the session storage', async () => {
 			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFEREE] };
 			const mockedUserData: UserData = {
