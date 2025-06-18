@@ -1256,7 +1256,8 @@
 		}
 	},
 	"welcome": {
-		"title": "Ready to Earn?",
-		"description": "<div class=\"flex flex-col gap-2 items-center\"><div class=\"text-center\"><span>You're 3 steps away from your first reward:</span></div><ul><li>Log in</li><li>Hold $20+</li><li>Complete 2 actions</li></ul><div class=\"text-center\"><span>Hit all 3 and start earning. Refer 4 others to earn even more.</span></div></div>"
+		"title": "Welcome to $oisy_short!",
+		"subtitle": "Ready to Earn?",
+		"description": "You're 3 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
 	}
 }

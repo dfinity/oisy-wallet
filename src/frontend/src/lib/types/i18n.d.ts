@@ -1090,6 +1090,7 @@ interface I18nEarning {
 
 interface I18nWelcome {
 	title: string;
+	subtitle: string;
 	description: string;
 }
 

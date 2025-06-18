@@ -15,9 +15,14 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
+	<svelte:fragment slot="title">
+		<span class="text-xl">{replaceOisyPlaceholders($i18n.welcome.title)}</span>
+	</svelte:fragment>
+
 	<ContentWithToolbar>
 		<div class="overflow-hidden rounded-2xl">
 			<Img
@@ -27,8 +32,10 @@
 			/>
 		</div>
 
-		<h3 class="my-3 text-center">{$i18n.welcome.title}</h3>
-		<Html text={$i18n.welcome.description} />
+		<div class="text-center">
+			<h3 class="my-3">{$i18n.welcome.subtitle}</h3>
+			<Html text={$i18n.welcome.description} />
+		</div>
 
 		<div class="flex justify-center pt-4">
 			<div>
