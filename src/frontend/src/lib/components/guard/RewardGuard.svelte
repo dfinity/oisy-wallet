@@ -43,26 +43,19 @@
 		);
 
 		if (nonNullish(rewardType) && nonNullish(campaign)) {
+			trackEvent({
+				name: TRACK_REWARD_CAMPAIGN_WIN,
+				metadata: { campaignId: `${campaign.id}`, type: rewardType }
+			});
+
 			if (rewardType === RewardType.JACKPOT) {
-				trackEvent({
-					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: rewardType }
-				});
 				modalStore.openRewardState({
 					id: rewardModalId,
 					data: { reward: campaign, jackpot: true }
 				});
 			} else if (rewardType === RewardType.REFERRAL) {
-				trackEvent({
-					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: rewardType }
-				});
 				modalStore.openReferralState({ id: referralModalId, data: campaign });
 			} else {
-				trackEvent({
-					name: TRACK_REWARD_CAMPAIGN_WIN,
-					metadata: { campaignId: `${campaign.id}`, type: rewardType }
-				});
 				modalStore.openRewardState({
 					id: rewardModalId,
 					data: { reward: campaign, jackpot: false }
