@@ -35,6 +35,7 @@ interface I18nCore {
 		add: string;
 		more_items: string;
 		select: string;
+		language: string;
 	};
 	info: { test_banner: string };
 	alt: {

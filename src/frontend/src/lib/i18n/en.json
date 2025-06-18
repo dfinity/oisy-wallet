@@ -31,7 +31,8 @@
 			"to": "To",
 			"add": "Add",
 			"more_items": "+$items more",
-			"select": "Select"
+			"select": "Select",
+			"language": "Language"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
