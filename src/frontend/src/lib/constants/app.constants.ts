@@ -141,6 +141,7 @@ export const ZERO = 0n;
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
+export const ALL_TRANSACTIONS_WALLET_PAGINATION = 100n; // For the "All transactions" wallet, we want to load more transactions at once.
 // Solana wallets
 // Until we find a way to reduce the number of calls (that we pay proportionally) done to the Solana RPC, we delay them more than the other wallets.
 // TODO: Use the normal one when we have a better way to handle the Solana wallets, for example when we have the internal Solana RPC canister, or when we don't load again the transactions that are already loaded.
