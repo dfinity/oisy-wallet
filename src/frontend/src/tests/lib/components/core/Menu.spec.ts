@@ -10,7 +10,7 @@ import {
 	NAVIGATION_MENU_VIP_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('Menu', () => {
@@ -27,6 +27,7 @@ describe('Menu', () => {
 		userProfileStore.reset();
 		vi.resetAllMocks();
 		mockAuthStore();
+		mockAuthSignedIn();
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 	});
 
