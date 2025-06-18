@@ -70,7 +70,10 @@
 					asButton
 					styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
 					testId={REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR}
-					trackEvent={{ name: TRACK_REWARD_CAMPAIGN_WIN_LEARN_MORE, metadata: { campaignId: `${reward.id}`, type: rewardType } }}
+					trackEvent={{
+						name: TRACK_REWARD_CAMPAIGN_WIN_LEARN_MORE,
+						metadata: { campaignId: `${reward.id}`, type: rewardType }
+					}}
 				>
 					{$i18n.rewards.text.learn_more}
 				</ExternalLink>
