@@ -12,7 +12,7 @@ import {
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON
 } from '$lib/constants/test-ids.constants';
-import { type Page, type ViewportSize , expect, type Locator } from '@playwright/test';
+import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { Homepage } from './homepage.page';
 
 interface AddressBookPageParams {

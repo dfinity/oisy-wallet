@@ -116,7 +116,7 @@ testWithII(
 testWithII('should show empty state for non-existent contacts', async ({ page, iiPage }) => {
 	const homepage = new HomepageLoggedIn({ page, iiPage });
 	const addressBook = new AddressBookPage({ page });
-	const nonExistentName = `Non-Existent-Contact-${  Math.random().toString(36).substring(2, 10)}`;
+	const nonExistentName = `Non-Existent-Contact-${Math.random().toString(36).substring(2, 10)}`;
 
 	// Authenticate and navigate to the app
 	await homepage.waitForAuthentication();
