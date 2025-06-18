@@ -141,11 +141,8 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(postMessageSpy).toHaveBeenCalledTimes(2);
+					expect(postMessageSpy).toHaveBeenCalledTimes(1);
 					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-						msg: 'stopIcrcWalletTimer'
-					});
-					expect(postMessageSpy).toHaveBeenNthCalledWith(2, {
 						msg: 'startIcrcWalletTimer',
 						data: {
 							ledgerCanisterId,
@@ -164,23 +161,13 @@ describe('worker.icrc-wallet.services', () => {
 						workerInstance.onmessage?.({ data: payload } as MessageEvent);
 					});
 
-					expect(postMessageSpy).toHaveBeenCalledTimes(10 + 1);
-
+					expect(postMessageSpy).toHaveBeenCalledTimes(1);
 					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-						msg: 'stopIcrcWalletTimer'
-					});
-					expect(postMessageSpy).toHaveBeenNthCalledWith(2, {
 						msg: 'startIcrcWalletTimer',
 						data: {
 							ledgerCanisterId,
 							env
 						}
-					});
-
-					Array.from({ length: 8 }).forEach((_, index) => {
-						expect(postMessageSpy).toHaveBeenNthCalledWith(index + 3, {
-							msg: 'stopIcrcWalletTimer'
-						});
 					});
 				});
 			});
