@@ -2,6 +2,11 @@
  * Auto-generated definitions file ("npm run i18n")
  */
 
+interface I18nLanguages {
+	en: string;
+	de: string;
+}
+
 interface I18nCore {
 	text: {
 		cancel: string;
@@ -1087,6 +1092,7 @@ interface I18nWelcome {
 
 interface I18n {
 	lang: Languages;
+	languages: I18nLanguages;
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
