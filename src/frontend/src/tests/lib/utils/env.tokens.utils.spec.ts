@@ -1,9 +1,4 @@
-import {
-	SOLANA_DEVNET_TOKEN,
-	SOLANA_LOCAL_TOKEN,
-	SOLANA_TESTNET_TOKEN,
-	SOLANA_TOKEN
-} from '$env/tokens/tokens.sol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import * as appContants from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
@@ -11,7 +6,7 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 describe('env.tokens.utils', () => {
 	describe('defineSupportedTokens', () => {
 		const mainnetTokens: Token[] = [SOLANA_TOKEN];
-		const testnetTokens: Token[] = [SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN];
+		const testnetTokens: Token[] = [SOLANA_DEVNET_TOKEN];
 		const localTokens: Token[] = [SOLANA_LOCAL_TOKEN];
 
 		const mockBaseParams = {
