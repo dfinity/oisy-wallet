@@ -74,7 +74,7 @@ export const mergeWithFallback = ({
 
 	for (const key in refLang) {
 		const refValue = refLang[key as keyof I18n];
-		const targetValue = targetLang[key as keyof I18n] as I18n[keyof I18n];
+		const targetValue = targetLang?.[key as keyof I18n] as I18n[keyof I18n];
 
 		if (typeof refValue === 'object' && !Array.isArray(refValue)) {
 			merged[key as keyof I18n] = mergeWithFallback({
