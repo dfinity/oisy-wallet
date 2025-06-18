@@ -4,6 +4,10 @@
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import {
+		TRACK_COUNT_WC_ETH_SEND_SUCCESS,
+		TRACK_SNAPSHOT_SEND_ERROR
+	} from '$lib/constants/analytics.contants';
 	import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import {
 		btcAddressMainnet,
@@ -17,12 +21,11 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { exchangeNotInitialized } from '$lib/derived/exchange.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_COUNT_WC_ETH_SEND_SUCCESS, TRACK_SNAPSHOT_SEND_ERROR } from '$lib/constants/analytics.contants';
 	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
+	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
