@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
-	import { SUPPORTED_LANGUAGES } from '$env/i18n';
+	import { SUPPORTED_LANGUAGES, LANGUAGES } from '$env/i18n';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Languages } from '$lib/types/languages';
@@ -10,7 +10,7 @@
 
 	let dropdown = $state<Dropdown>();
 
-	const currentLang: keyof I18nLanguages = $derived($i18n.lang);
+	const currentLang: string = $derived(LANGUAGES[$i18n.lang as Languages]);
 
 	const handleLangChange = (lang: string) => {
 		i18n.switchLang(Languages[lang as keyof typeof Languages]);
@@ -26,7 +26,7 @@
 		buttonFullWidth
 		buttonBorder
 	>
-		{$i18n.languages[currentLang]}
+		{currentLang}
 
 		{#snippet title()}
 			{$i18n.core.alt.switch_language}
@@ -49,7 +49,7 @@
 									<IconCheck size="20" />
 								{/if}
 							</span>
-							{$i18n.languages[langVal]}
+							{LANGUAGES[langVal]}
 						</Button>
 					</ListItem>
 				{/each}
