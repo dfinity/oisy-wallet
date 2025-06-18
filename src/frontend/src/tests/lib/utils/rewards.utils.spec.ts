@@ -163,7 +163,10 @@ describe('rewards.utils', () => {
 
 		it('should return reward with type referee if one of several received rewards is a referee and set entry in the session storage', async () => {
 			const customMockedRefereeReward: RewardInfo = { ...mockedReward, name: [RewardType.REFEREE] };
-			const customMockedReferralReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRAL] };
+			const customMockedReferralReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRAL]
+			};
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				superpowers: [],
