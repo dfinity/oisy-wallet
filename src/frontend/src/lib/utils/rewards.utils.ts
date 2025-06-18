@@ -29,19 +29,7 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 		sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
 
 		if (newRewards.length > 0) {
-			const containsJackpot: boolean = newRewards.some(({ name }) => name === RewardType.JACKPOT);
-			const containsReferral: boolean = newRewards.some(({ name }) => name === RewardType.REFERRAL);
-			const containsLeaderboard: boolean = newRewards.some(
-				({ name }) => name === RewardType.LEADERBOARD
-			);
-
-			const rewardType = containsLeaderboard
-				? RewardType.LEADERBOARD
-				: containsJackpot
-					? RewardType.JACKPOT
-					: containsReferral
-						? RewardType.REFERRAL
-						: RewardType.AIRDROP;
+			const rewardType = getRewardType(newRewards);
 
 			return {
 				reward: getFirstReward({ rewards: newRewards, rewardType }),
@@ -57,6 +45,21 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 
 	return {};
 };
+
+const getRewardType = (rewards: RewardResponseInfo[]) => {
+	const priorityOrder = [
+		RewardType.LEADERBOARD,
+		RewardType.JACKPOT,
+		RewardType.REFERRAL,
+		RewardType.AIRDROP
+	];
+
+	const foundRewardType = priorityOrder.find(rewardType =>
+		rewards.some(({ name }) => name === rewardType)
+	);
+
+	return foundRewardType ?? RewardType.AIRDROP;
+}
 
 const getFirstReward = ({
 	rewards,
