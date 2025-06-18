@@ -3,8 +3,7 @@ import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import {
 	SOLANA_DEVNET_NETWORK_SYMBOL,
 	SOLANA_LOCAL_NETWORK_SYMBOL,
-	SOLANA_MAINNET_NETWORK_SYMBOL,
-	SOLANA_TESTNET_NETWORK_SYMBOL
+	SOLANA_MAINNET_NETWORK_SYMBOL
 } from '$env/networks/networks.sol.env';
 import { BTC_MAINNET_SYMBOL, BTC_TESTNET_SYMBOL } from '$env/tokens/tokens.btc.env';
 import type { BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
@@ -28,7 +27,6 @@ const idbBtcAddressesStoreTestnet = idbAddressesStore(BTC_TESTNET_SYMBOL.toLower
 const idbEthAddressesStore = idbAddressesStore(ETHEREUM_NETWORK_SYMBOL.toLowerCase());
 
 const idbSolAddressesStoreMainnet = idbAddressesStore(SOLANA_MAINNET_NETWORK_SYMBOL.toLowerCase());
-const idbSolAddressesStoreTestnet = idbAddressesStore(SOLANA_TESTNET_NETWORK_SYMBOL.toLowerCase());
 const idbSolAddressesStoreDevnet = idbAddressesStore(SOLANA_DEVNET_NETWORK_SYMBOL.toLowerCase());
 const idbSolAddressesStoreLocal = idbAddressesStore(SOLANA_LOCAL_NETWORK_SYMBOL.toLowerCase());
 
@@ -55,12 +53,6 @@ export const setIdbSolAddressMainnet = ({
 	principal
 }: SetIdbAddressParams<SolAddress>): Promise<void> =>
 	set(principal.toText(), address, idbSolAddressesStoreMainnet);
-
-export const setIdbSolAddressTestnet = ({
-	address,
-	principal
-}: SetIdbAddressParams<SolAddress>): Promise<void> =>
-	set(principal.toText(), address, idbSolAddressesStoreTestnet);
 
 export const setIdbSolAddressDevnet = ({
 	address,

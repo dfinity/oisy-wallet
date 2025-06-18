@@ -13,8 +13,7 @@ import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
-	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_TESTNET_NETWORK_ID
+	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { enabledEvmNetworks } from '$evm/derived/networks.derived';
@@ -111,10 +110,6 @@ export const networkBitcoinMainnetDisabled: Readable<boolean> = derived(
 
 export const networkSolanaMainnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
 	$networks.some(({ id }) => id === SOLANA_MAINNET_NETWORK_ID)
-);
-
-export const networkSolanaTestnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
-	$networks.some(({ id }) => id === SOLANA_TESTNET_NETWORK_ID)
 );
 
 export const networkSolanaDevnetEnabled: Readable<boolean> = derived([networks], ([$networks]) =>

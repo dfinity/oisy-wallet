@@ -15,7 +15,6 @@ import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_TESTNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
@@ -68,9 +67,6 @@ export const isNetworkIdSolana: IsNetworkIdUtil = (networkId) =>
 
 export const isNetworkIdSOLMainnet: IsNetworkIdUtil = (networkId) =>
 	SOLANA_MAINNET_NETWORK_ID === networkId;
-
-export const isNetworkIdSOLTestnet: IsNetworkIdUtil = (networkId) =>
-	SOLANA_TESTNET_NETWORK_ID === networkId;
 
 export const isNetworkIdSOLDevnet: IsNetworkIdUtil = (networkId) =>
 	SOLANA_DEVNET_NETWORK_ID === networkId;
