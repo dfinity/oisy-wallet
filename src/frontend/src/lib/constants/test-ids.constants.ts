@@ -6,6 +6,18 @@ export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button'
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
 
+// Address Book
+export const ADDRESS_BOOK_MODAL = 'address-book-modal';
+export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
+export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
+export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
+export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
+export const ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT = 'address-book-address-address-input';
+export const ADDRESS_BOOK_ADDRESS_ALIAS_INPUT = 'address-book-address-alias-input';
+export const ADDRESS_BOOK_NETWORK_SELECT = 'address-book-network-select';
+export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
+export const ADDRESS_BOOK_CONTACT_ITEM = 'address-book-contact-item';
+
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
 export const MAX_BUTTON = 'max-button';
