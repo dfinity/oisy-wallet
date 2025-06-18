@@ -68,6 +68,9 @@ describe('pow-protector.worker', () => {
 
 	const postMessageMock = vi.fn();
 
+	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	const awaitJobExecution = () => vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS - 100);
+
 	beforeAll(() => {
 		originalPostmessage = window.postMessage;
 		window.postMessage = postMessageMock;
@@ -185,6 +188,8 @@ describe('pow-protector.worker', () => {
 				it('should post messages for status updates', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					// For each execution cycle, we expect:
 					// 1. 'syncPowProtectionStatus' with state 'in_progress' from SchedulerTimer
 					// 2. 'syncPowProgress' with progress 'REQUEST_CHALLENGE'
@@ -293,6 +298,8 @@ describe('pow-protector.worker', () => {
 			tests: () => {
 				it('should not handle ExpiredChallengeError gracefully', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					// Even with ExpiredChallengeError, we should complete normally
 					// because the error is caught and handled internally

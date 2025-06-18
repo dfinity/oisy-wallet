@@ -73,6 +73,10 @@ describe('sol-wallet.scheduler', () => {
 
 	let originalPostMessage: unknown;
 
+	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	const awaitJobExecution = () =>
+		vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 	beforeAll(() => {
 		originalPostMessage = window.postMessage;
 		window.postMessage = postMessageMock;
@@ -131,6 +135,8 @@ describe('sol-wallet.scheduler', () => {
 			tests: () => {
 				it('should trigger postMessage with correct data', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
@@ -192,6 +198,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should postMessage with status of the worker', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
 				});
@@ -201,6 +209,8 @@ describe('sol-wallet.scheduler', () => {
 					spyLoadBalance.mockRejectedValue(err);
 
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					// first time + 10 retries
 					expect(spyLoadBalance).toHaveBeenCalledTimes(11);
@@ -220,6 +230,9 @@ describe('sol-wallet.scheduler', () => {
 
 				it('should not post message when no new transactions or balance changes', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
+
 					postMessageMock.mockClear();
 
 					// Mock no changes in transactions and balance
@@ -237,6 +250,8 @@ describe('sol-wallet.scheduler', () => {
 
 				it('should update store with new transactions', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					expect(scheduler['store'].transactions).toEqual(
 						expectedSoLTransactions.reduce(
