@@ -3,20 +3,12 @@
 	import { onMount, type Snippet } from 'svelte';
 	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
-	import ReferralStateModal from '$lib/components/referral/ReferralStateModal.svelte';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
 	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import {
-		modalReferralState,
-		modalReferralStateData,
-		modalRewardState,
-		modalRewardStateData,
-		modalWelcome
-	} from '$lib/derived/modal.derived';
-	import { RewardType } from '$lib/enums/reward-type';
+	import { modalRewardState, modalRewardStateData, modalWelcome } from '$lib/derived/modal.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isOngoingCampaign, loadRewardResult } from '$lib/utils/rewards.utils';
@@ -28,7 +20,6 @@
 	let { children }: Props = $props();
 
 	const rewardModalId = Symbol();
-	const referralModalId = Symbol();
 	const welcomeModalId = Symbol();
 
 	onMount(async () => {
@@ -48,24 +39,10 @@
 				metadata: { campaignId: `${campaign.id}`, type: rewardType }
 			});
 
-			if (rewardType === RewardType.LEADERBOARD) {
-				modalStore.openRewardState({
-					id: rewardModalId,
-					data: { reward: campaign, rewardType }
-				});
-			} else if (rewardType === RewardType.JACKPOT) {
-				modalStore.openRewardState({
-					id: rewardModalId,
-					data: { reward: campaign, rewardType }
-				});
-			} else if (rewardType === RewardType.REFERRAL) {
-				modalStore.openReferralState({ id: referralModalId, data: campaign });
-			} else {
-				modalStore.openRewardState({
-					id: rewardModalId,
-					data: { reward: campaign, rewardType }
-				});
-			}
+			modalStore.openRewardState({
+				id: rewardModalId,
+				data: { reward: campaign, rewardType }
+			});
 		}
 
 		const season1Episode4Campaign = rewardCampaigns.find(
@@ -97,8 +74,6 @@
 		reward={$modalRewardStateData.reward}
 		rewardType={$modalRewardStateData.rewardType}
 	/>
-{:else if $modalReferralState && nonNullish($modalReferralStateData)}
-	<ReferralStateModal reward={$modalReferralStateData} />
 {:else if $modalWelcome}
 	<WelcomeModal />
 {/if}
