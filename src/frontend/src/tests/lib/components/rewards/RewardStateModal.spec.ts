@@ -52,6 +52,38 @@ describe('RewardStateModal', () => {
 		expect(share?.href).toBe(mockedReward.win.default.shareHref);
 	});
 
+	it('should render modal content for referrer', () => {
+		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
+			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID
+		);
+		assertNonNullish(mockedReward);
+
+		const { container, getByText } = render(RewardStateModal, {
+			props: {
+				reward: mockedReward,
+				rewardType: RewardType.REFERRER
+			}
+		});
+
+		expect(getByText(mockedReward.win.referrer?.title ?? '')).toBeInTheDocument();
+		expect(getByText(mockedReward.win.referrer?.description ?? '')).toBeInTheDocument();
+
+		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+
+		expect(imageBanner).toBeInTheDocument();
+		expect(imageBanner?.src).toContain(mockedReward.win.referrer?.banner ?? '');
+
+		const learnMore: HTMLAnchorElement | null = container.querySelector(learnMoreSelector);
+
+		expect(learnMore).toBeInTheDocument();
+		expect(learnMore?.href).toBe(OISY_REWARDS_URL);
+
+		const share: HTMLAnchorElement | null = container.querySelector(shareSelector);
+
+		expect(share).toBeInTheDocument();
+		expect(share?.href).toBe(mockedReward.win.referrer?.shareHref ?? '');
+	});
+
 	it('should render modal content for referral', () => {
 		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
 			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
