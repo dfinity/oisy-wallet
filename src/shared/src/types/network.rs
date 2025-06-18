@@ -23,7 +23,6 @@ pub enum NetworkSettingsFor {
     EthereumMainnet,
     EthereumSepolia,
     SolanaMainnet,
-    SolanaTestnet,
     SolanaDevnet,
     SolanaLocal,
     BaseMainnet,
