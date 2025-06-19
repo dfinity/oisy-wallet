@@ -31,7 +31,8 @@
 			"to": "To",
 			"add": "Add",
 			"more_items": "+$items more",
-			"select": "Select"
+			"select": "Select",
+			"language": "Language"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -41,7 +42,8 @@
 			"go_to_home": "Go to the $oisy_name home page",
 			"back": "Go back to the previous page",
 			"open_details": "Open details",
-			"close_details": "Close details"
+			"close_details": "Close details",
+			"switch_language": "Switch language"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -183,10 +185,9 @@
 		"text": {
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 is coming soon!<br> Stay tuned for updates",
+			"upcoming_campaigns": "Upcoming Campaigns",
 			"active_date": "Ends on",
 			"ended_date": "Ended on",
-			"participate_title": "Earn BTC by staying active - and now by inviting others.",
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
@@ -197,9 +198,6 @@
 			"no_balance_title": "Earn $oisy_short Sprinkles",
 			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
-			"state_modal_title": "Congratulations on earning today’s $oisy_short Sprinkles!",
-			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
-			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
 			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
@@ -211,7 +209,8 @@
 			"requirements_title": "Eligibility criteria",
 			"min_logins": "Login $loginsx in last $days days",
 			"min_transactions": "Complete $transactions transactions in last $days days",
-			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance",
+			"hangover": "No recent win (last $days days)"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
@@ -431,7 +430,6 @@
 		"solana": {
 			"text": {
 				"solana_address": "Solana Address",
-				"solana_testnet_address": "Solana Testnet Address",
 				"solana_devnet_address": "Solana Devnet Address",
 				"solana_local_address": "Solana Local Address",
 				"solana_address_copied": "Solana address copied to clipboard",
@@ -1039,15 +1037,6 @@
 				"loading_referrer_info": "Error while loading referral info",
 				"setting_referrer": "Error while setting referrer"
 			}
-		},
-		"reward": {
-			"text": {
-				"title": "Congratulations!",
-				"content_title": "Here a small thank you",
-				"content_text": "One of your referred users just got some sprinkles.",
-				"share": "Share on X",
-				"open_wallet": "Take me to the wallet"
-			}
 		}
 	},
 	"address_book": {
@@ -1252,11 +1241,16 @@
 		},
 		"cards": {
 			"gold_title": "Gold",
-			"gold_description": "Coming soon",
+			"gold_description": "GLDT Staking",
 			"stablecoins_title": "Stablecoins",
 			"stablecoins_description": "Coming soon",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
 		}
+	},
+	"welcome": {
+		"title": "Welcome to $oisy_short!",
+		"subtitle": "Ready to Earn?",
+		"description": "You're 3 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
 	}
 }

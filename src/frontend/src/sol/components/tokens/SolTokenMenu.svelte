@@ -5,7 +5,6 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { TOKEN_MENU_SOL, TOKEN_MENU_SOL_EXPLORER_LINK } from '$lib/constants/test-ids.constants';
 	import {
-		solAddressTestnet,
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet
@@ -14,24 +13,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = ($token?.network as SolanaNetwork)?.explorerUrl;
 
-	$: address = isNetworkIdSOLTestnet($networkId)
-		? $solAddressTestnet
-		: isNetworkIdSOLDevnet($networkId)
-			? $solAddressDevnet
-			: isNetworkIdSOLLocal($networkId)
-				? $solAddressLocal
-				: $solAddressMainnet;
+	$: address = isNetworkIdSOLDevnet($networkId)
+		? $solAddressDevnet
+		: isNetworkIdSOLLocal($networkId)
+			? $solAddressLocal
+			: $solAddressMainnet;
 
 	let tokenAddress: string | undefined;
 	$: tokenAddress = nonNullish($token) && isTokenSpl($token) ? $token.address : undefined;

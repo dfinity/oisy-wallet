@@ -54,7 +54,7 @@
 		{/if}
 
 		<div class="flex w-full justify-between text-lg font-semibold">
-			<span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
+			<span class="inline-flex">{reward.participateTitle}</span>
 			<span>
 				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
 			</span>

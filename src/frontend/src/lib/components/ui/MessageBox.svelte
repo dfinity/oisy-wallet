@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
@@ -7,16 +8,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
 
-	export let level: 'plain' | 'info' | 'warning' | 'error' | 'success' = 'info';
-	export let closableKey: HideInfoKey | undefined = undefined;
-	export let styleClass: string | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		children: Snippet;
+		level?: 'plain' | 'info' | 'warning' | 'error' | 'success';
+		closableKey?: HideInfoKey;
+		styleClass?: string;
+		testId?: string;
+	}
 
-	let closable = false;
-	$: closable = nonNullish(closableKey);
+	let { children, level = 'info', closableKey, styleClass, testId }: Props = $props();
 
-	let visible = true;
-	$: visible = isNullish(closableKey) || !shouldHideInfo(closableKey);
+	const closable = $derived(nonNullish(closableKey));
+	let visible = $state(isNullish(closableKey) || !shouldHideInfo(closableKey));
 
 	const close = () => {
 		visible = false;
@@ -54,12 +57,12 @@
 			class:text-error-secondary={level === 'error'}
 			class:text-success-secondary={level === 'success'}
 		>
-			<slot />
+			{@render children()}
 		</div>
 		{#if closable}
 			<button
 				class="ml-auto p-0.5 text-tertiary"
-				on:click={close}
+				onclick={close}
 				aria-label={$i18n.core.text.close}
 			>
 				<IconClose />

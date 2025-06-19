@@ -1,15 +1,23 @@
 <script lang="ts">
 	import type { Identity } from '@dfinity/agent';
 	import { assertNonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { loadErc20UserTokens } from '$eth/services/erc20.services';
 	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
 	import { setUserToken } from '$icp-eth/services/user-token.services';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
+	import {
+		HIDE_TOKEN_MODAL_ROUTE,
+		TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS
+	} from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+
+	export let fromRoute: NavigationTarget | undefined;
 
 	let selectedToken: OptionErc20UserToken;
 
@@ -32,6 +40,17 @@
 	const hideToken = async (params: { identity: Identity }) => {
 		assertNonNullish(selectedToken);
 
+		trackEvent({
+			name: TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
+			metadata: {
+				tokenId: `${selectedToken.id.description}`,
+				tokenSymbol: selectedToken.symbol,
+				address: selectedToken.address,
+				networkId: `${selectedToken.network.id.description}`,
+				source: HIDE_TOKEN_MODAL_ROUTE
+			}
+		});
+
 		await setUserToken({ ...params, token: selectedToken, enabled: false });
 	};
 
@@ -39,4 +58,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadErc20UserTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} />
+<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />

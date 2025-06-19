@@ -13,6 +13,7 @@ import type { AnyTransactionUi } from '$lib/types/transaction';
 import type { Option } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { WalletKitTypes } from '@reown/walletkit';
+import type { NavigationTarget } from '@sveltejs/kit';
 import { writable, type Readable } from 'svelte/store';
 
 export interface Modal<T> {
@@ -57,6 +58,7 @@ export interface Modal<T> {
 		| 'vip-reward-state'
 		| 'reward-details'
 		| 'reward-state'
+		| 'welcome'
 		| 'settings'
 		| 'auth-help';
 	data?: T;
@@ -104,22 +106,22 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openBtcTransaction: (params: SetWithDataParams<OpenTransactionParams<BtcTransactionUi>>) => void;
 	openSolTransaction: (params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void;
 	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
-	openHideToken: (id: symbol) => void;
-	openIcHideToken: (id: symbol) => void;
-	openEthToken: (id: symbol) => void;
-	openBtcToken: (id: symbol) => void;
-	openIcToken: (id: symbol) => void;
-	openSolToken: (id: symbol) => void;
+	openHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openIcHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openEthToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openBtcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openIcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openSolToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openReceiveBitcoin: (id: symbol) => void;
 	openAboutWhyOisy: (id: symbol) => void;
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
-	openReferralState: (params: SetWithDataParams<RewardCampaignDescription>) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
 	openRewardDetails: (params: SetWithDataParams<RewardCampaignDescription>) => void;
 	openRewardState: (params: SetWithDataParams<RewardStateData>) => void;
+	openWelcome: (id: symbol) => void;
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	close: () => void;
@@ -174,21 +176,30 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
 			setTypeWithData('manage-tokens')
 		),
-		openHideToken: setType('hide-token'),
-		openIcHideToken: setType('ic-hide-token'),
-		openEthToken: setType('eth-token'),
-		openBtcToken: setType('btc-token'),
-		openIcToken: setType('ic-token'),
-		openSolToken: setType('sol-token'),
+		openHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('hide-token')
+		),
+		openIcHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('ic-hide-token')
+		),
+		openEthToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('eth-token')
+		),
+		openBtcToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('btc-token')
+		),
+		openIcToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('ic-token')
+		),
+		openSolToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('sol-token')
+		),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
 			setTypeWithData('address-book')
-		),
-		openReferralState: <(params: SetWithDataParams<RewardCampaignDescription>) => void>(
-			setTypeWithData('referral-state')
 		),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
 			setTypeWithData('dapp-details')
@@ -202,6 +213,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openRewardState: <(params: SetWithDataParams<RewardStateData>) => void>(
 			setTypeWithData('reward-state')
 		),
+		openWelcome: setType('welcome'),
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
 			setTypeWithData('settings')
 		),
