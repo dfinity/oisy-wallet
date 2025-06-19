@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { BtcTransactionUi } from '$btc/types/btc';
@@ -37,44 +37,24 @@
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 	let transactions: AllTransactionUiWithCmp[];
-
-	const updateTransactions = () => {
-		transactions = mapAllTransactionsUi({
-			tokens: $enabledNetworkTokens,
-			$btcTransactions: $btcTransactionsStore,
-			$ethTransactions: $ethTransactionsStore,
-			$ckEthMinterInfo: $ckEthMinterInfoStore,
-			$ethAddress,
-			$btcStatuses: $btcStatusesStore,
-			$solTransactions: $solTransactionsStore,
-			$icTransactionsStore,
-			$ckBtcMinterInfoStore,
-			$icPendingTransactionsStore,
-			$ckBtcPendingUtxosStore
-		});
-	};
-
-	const debounceUpdateTransactions = debounce(updateTransactions, 1000);
-
-	$: $enabledNetworkTokens,
-		$btcTransactionsStore,
-		$ethTransactionsStore,
-		$ckEthMinterInfoStore,
+	$: transactions = mapAllTransactionsUi({
+		tokens: $enabledNetworkTokens,
+		$btcTransactions: $btcTransactionsStore,
+		$ethTransactions: $ethTransactionsStore,
+		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress,
-		$btcStatusesStore,
-		$solTransactionsStore,
+		$btcStatuses: $btcStatusesStore,
+		$solTransactions: $solTransactionsStore,
 		$icTransactionsStore,
 		$ckBtcMinterInfoStore,
 		$icPendingTransactionsStore,
-		$ckBtcPendingUtxosStore,
-		debounceUpdateTransactions();
+		$ckBtcPendingUtxosStore
+	});
 
-	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
-	$: sortedTransactions = nonNullish(transactions)
-		? transactions.sort(({ transaction: a }, { transaction: b }) =>
-				sortTransactions({ transactionA: a, transactionB: b })
-			)
-		: undefined;
+	let sortedTransactions: AllTransactionUiWithCmp[];
+	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>
+		sortTransactions({ transactionA: a, transactionB: b })
+	);
 
 	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
 	$: groupedTransactions = nonNullish(sortedTransactions)
@@ -116,7 +96,7 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader {transactions}>
-		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+		{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
 			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 				<TransactionsDateGroup
 					{formattedDate}
@@ -126,7 +106,7 @@
 			{/each}
 		{/if}
 
-		{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+		{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
 			<TransactionsPlaceholder />
 		{/if}
 	</AllTransactionsLoader>
