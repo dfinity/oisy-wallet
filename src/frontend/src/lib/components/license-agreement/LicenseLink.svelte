@@ -11,7 +11,6 @@
 	aria-label={replaceOisyPlaceholders($i18n.license_agreement.alt.license_agreement)}
 	data-tid={testId}
 	class:no-underline={noUnderline}
-	class="primary"
 >
 	{$i18n.license_agreement.text.accept_terms_link}
 </a>
