@@ -113,7 +113,9 @@
 		hideProgressStep = ProgressStepsHideToken.INITIALIZATION;
 	};
 
-	onDestroy(async () => nonNullish(from) ? await back({ pop: nonNullish(from) }) : await gotoReplaceRoot());
+	onDestroy(async () =>
+		nonNullish(from) ? await back({ pop: nonNullish(from) }) : await gotoReplaceRoot()
+	);
 </script>
 
 <WizardModal
