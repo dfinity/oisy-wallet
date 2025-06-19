@@ -9,7 +9,7 @@
 	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { setCustomToken } from '$lib/api/backend.api';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
-	import { HIDE_TOKEN_MODAL_ROUTE } from '$lib/constants/analytics.contants';
+	import { HIDE_TOKEN_MODAL_ROUTE, TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS } from '$lib/constants/analytics.contants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -47,7 +47,7 @@
 		assertNonNullish(ledgerCanisterId);
 
 		trackEvent({
-			name: TRACK_HIDE_TOKEN,
+			name: TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
 			metadata: { ledgerCanisterId, indexCanisterId: `${indexCanisterId}`, networkId: 'ICP', source: HIDE_TOKEN_MODAL_ROUTE }
 		});
 
