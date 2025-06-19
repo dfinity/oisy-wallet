@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Identity } from '@dfinity/agent';
 	import { assertNonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { loadErc20UserTokens } from '$eth/services/erc20.services';
 	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
@@ -10,7 +11,6 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 
 	export let from: NavigationTarget;
 

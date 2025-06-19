@@ -16,7 +16,9 @@
 		modalSettingsState,
 		modalReferralCode,
 		modalAddressBook,
-		modalVipQrCodeData, modalIcHideTokenData, modalHideTokenData
+		modalVipQrCodeData,
+		modalIcHideTokenData,
+		modalHideTokenData
 	} from '$lib/derived/modal.derived';
 
 	/**

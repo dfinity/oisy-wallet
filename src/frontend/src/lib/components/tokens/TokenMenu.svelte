@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -17,8 +19,6 @@
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
-	import { afterNavigate } from '$app/navigation';
 
 	export let testId: string | undefined = undefined;
 
