@@ -87,8 +87,6 @@
 			}
 		});
 
-		await gotoReplaceRoot();
-
 		toastsShow({
 			text: replacePlaceholders(
 				replaceOisyPlaceholders($i18n.tokens.details.deletion_confirmation),
