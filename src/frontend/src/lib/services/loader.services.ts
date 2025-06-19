@@ -6,7 +6,11 @@ import { POW_FEATURE_ENABLED } from '$env/pow.env';
 import { allowance } from '$icp/api/icrc-ledger.api';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { allowSigning } from '$lib/api/backend.api';
-import { BACKEND_CANISTER_ID, BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import {
+	BACKEND_CANISTER_ID,
+	BACKEND_CANISTER_PRINCIPAL,
+	SIGNER_CANISTER_ID
+} from '$lib/constants/app.constants';
 import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
 	networkBitcoinMainnetEnabled,
