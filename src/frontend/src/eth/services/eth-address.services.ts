@@ -36,6 +36,10 @@ const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
 			console.warn(
 				`Derived Ethereum address (${derivedEthAddress}) does not match the one from the signer canister (${signerAddress}).`
 			);
+		} else {
+			console.info(
+				`Derived Ethereum address (${derivedEthAddress}) matches the one from the signer canister (${signerAddress}).`
+			);
 		}
 	} catch (error) {
 		console.error('Error on Ethereum address:', error);
