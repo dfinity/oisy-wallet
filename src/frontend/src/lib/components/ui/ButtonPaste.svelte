@@ -18,7 +18,7 @@
 <Button
 	link
 	type="button"
-	styleClass="text-sm px-1 py-2 mx-1"
+	styleClass="text-sm pr-1 py-2 mr-1"
 	colorStyle="tertiary-alt"
 	ariaLabel={$i18n.core.text.paste}
 	onclick={handlePaste}>{$i18n.core.text.paste}</Button
