@@ -1,5 +1,6 @@
 import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import {
+	MANAGE_TOKENS_MODAL_ROUTE,
 	TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR
@@ -93,7 +94,8 @@ export const saveTokens = async <
 					...(nonNullish(indexCanisterId) && { indexCanisterId }),
 					...(nonNullish(tokenId) && { tokenId: `${tokenId.description}` }),
 					...(nonNullish(tokenSymbol) && { tokenSymbol }),
-					...(nonNullish(network) && { networkId: `${network.id.description}` })
+					...(nonNullish(network) && { networkId: `${network.id.description}` }),
+					...{ source: MANAGE_TOKENS_MODAL_ROUTE }
 				}
 			});
 		});
