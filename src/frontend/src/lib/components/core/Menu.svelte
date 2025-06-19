@@ -59,14 +59,17 @@
 	});
 
 	const hidePopover = () => (visible = false);
+
 	const handlePrivacyToggle = () => {
+		const nextValue = !$isPrivacyMode;
+
 		privacyModeStore.set({
 			key: 'privacy-mode',
-			value: { enabled: !$isPrivacyMode }
+			value: { enabled: nextValue }
 		});
 
 		toastsShow({
-			text: $isPrivacyMode
+			text: nextValue
 				? $i18n.navigation.text.privacy_mode_enabled
 				: $i18n.navigation.text.privacy_mode_disabled,
 			level: 'info',
