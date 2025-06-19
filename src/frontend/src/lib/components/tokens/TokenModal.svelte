@@ -68,12 +68,12 @@
 		close();
 
 		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot();
-	}
+	};
 
 	const onTokenDeleteSuccess = async (deletedToken: Token) => {
 		loading = false;
 
-		await handleCloseAndNavigate(fromRoute)
+		await handleCloseAndNavigate(fromRoute);
 
 		const address: string | undefined =
 			'address' in deletedToken ? (deletedToken.address as string) : undefined;
