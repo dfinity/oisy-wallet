@@ -48,10 +48,5 @@
 	on:focus
 	bind:inputElement
 	{showResetButton}
->
-	{#snippet innerEnd()}
-		<div class="pl-2">
-			{@render innerEnd?.()}
-		</div>
-	{/snippet}
-</Input>
+	{innerEnd}
+/>

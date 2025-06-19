@@ -45,7 +45,9 @@
 				{#if showPasteButton}
 					<ButtonPaste onpaste={(text) => (value = text)} />
 				{/if}
-				{@render innerEnd?.()}
+				<div class="pl-2">
+					{@render innerEnd?.()}
+				</div>
 			</div>
 		</svelte:fragment>
 	</GixInput>
