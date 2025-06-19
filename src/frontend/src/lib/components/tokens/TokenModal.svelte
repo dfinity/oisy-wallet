@@ -67,7 +67,8 @@
 
 		close();
 
-		const address: string | undefined = 'address' in deletedToken ? (deletedToken.address as string) : undefined
+		const address: string | undefined =
+			'address' in deletedToken ? (deletedToken.address as string) : undefined;
 		trackEvent({
 			name: TRACK_DELETE_TOKEN_SUCCESS,
 			metadata: {
