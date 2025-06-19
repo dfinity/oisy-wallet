@@ -5,6 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -21,7 +22,7 @@
 		testId={REWARDS_MODAL_IMAGE_BANNER}
 		grayscale={hasEnded}
 		alt={replacePlaceholders($i18n.rewards.alt.reward_banner, {
-			$campaignName: reward.cardTitle
+			$campaignName: resolveText({ i18n: $i18n, path: reward.cardTitle })
 		})}
 	/>
 </div>
