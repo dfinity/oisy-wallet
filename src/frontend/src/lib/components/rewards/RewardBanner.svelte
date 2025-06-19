@@ -4,8 +4,8 @@
 	import { REWARDS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;

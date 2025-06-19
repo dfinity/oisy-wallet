@@ -22,8 +22,8 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
-	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
