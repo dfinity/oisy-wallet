@@ -9,6 +9,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token as TokenType } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+
+	export let from: NavigationTarget | undefined;
 
 	let twinToken: TokenType | undefined;
 	$: twinToken = ($pageToken as OptionIcCkToken)?.twinToken;
@@ -17,7 +20,7 @@
 	$: ckToken = $pageToken as OptionIcCkToken;
 </script>
 
-<TokenModal token={$pageToken}>
+<TokenModal token={$pageToken} {from}>
 	{#if nonNullish(twinToken)}
 		<ModalListItem>
 			{#snippet label()}

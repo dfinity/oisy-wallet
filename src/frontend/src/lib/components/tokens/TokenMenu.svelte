@@ -17,11 +17,17 @@
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { afterNavigate } from '$app/navigation';
 
 	export let testId: string | undefined = undefined;
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
+	let fromRoute: NavigationTarget | null;
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 
 	const hideModalId = Symbol();
 	const openModalId = Symbol();
@@ -43,7 +49,10 @@
 					: $networkSolana
 						? modalStore.openSolToken
 						: () => {};
-		fn(openModalId);
+		fn({
+			id: openModalId,
+			data: fromRoute
+		});
 
 		visible = false;
 	};

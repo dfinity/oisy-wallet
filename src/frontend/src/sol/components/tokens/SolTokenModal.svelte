@@ -10,6 +10,9 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+
+	export let from: NavigationTarget | undefined;
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = isNetworkSolana($pageToken?.network)
@@ -21,7 +24,7 @@
 		nonNullish($pageToken) && isTokenSpl($pageToken) ? $pageToken.address : undefined;
 </script>
 
-<TokenModal token={$pageToken}>
+<TokenModal token={$pageToken} {from}>
 	{#if nonNullish(tokenAddress)}
 		<ModalListItem>
 			{#snippet label()}

@@ -19,17 +19,19 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
+	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface BaseTokenModalProps {
 		token: OptionToken;
 		children?: Snippet;
 		isDeletable?: boolean;
+		from?: NavigationTarget
 	}
 
-	let { children, token, isDeletable = false }: BaseTokenModalProps = $props();
+	let { children, token, isDeletable = false, from }: BaseTokenModalProps = $props();
 
 	let loading = $state(false);
 	let showBottomSheetDeleteConfirmation = $state(false);
@@ -63,9 +65,9 @@
 	const onTokenDeleteSuccess = async (deletedToken: Token) => {
 		loading = false;
 
-		close();
+		nonNullish(from) ? await back({pop : nonNullish(from)}) : await gotoReplaceRoot();
 
-		await gotoReplaceRoot();
+		close();
 
 		toastsShow({
 			text: replacePlaceholders(
