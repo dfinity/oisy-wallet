@@ -34,20 +34,10 @@ describe('AllTransactionsList', () => {
 		]);
 	});
 
-	beforeEach(() => {
-		vi.useFakeTimers();
-	});
-
-	afterEach(() => {
-		vi.useRealTimers();
-	});
-
-	it('should call the function to map the transactions list', async () => {
+	it('should call the function to map the transactions list', () => {
 		const spyMapAllTransactionsUi = vi.spyOn(transactionsUtils, 'mapAllTransactionsUi');
 
 		render(AllTransactionsList);
-
-		await vi.advanceTimersByTimeAsync(5000);
 
 		expect(spyMapAllTransactionsUi).toHaveBeenCalled();
 
@@ -122,10 +112,8 @@ describe('AllTransactionsList', () => {
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);
 		});
 
-		it('should not render the placeholder', async () => {
+		it('should not render the placeholder', () => {
 			const { queryByText } = render(AllTransactionsList);
-
-			await vi.advanceTimersByTimeAsync(5000);
 
 			expect(queryByText(en.transactions.text.transaction_history)).not.toBeInTheDocument();
 		});
@@ -142,10 +130,8 @@ describe('AllTransactionsList', () => {
 			});
 		});
 
-		it('should render the transactions list with group of dates', async () => {
+		it('should render the transactions list with group of dates', () => {
 			const { getByText, getByTestId } = render(AllTransactionsList);
-
-			await vi.advanceTimersByTimeAsync(5000);
 
 			const todayDateGroup = getByTestId('all-transactions-date-group-0');
 
@@ -158,10 +144,8 @@ describe('AllTransactionsList', () => {
 			expect(getByText('yesterday')).toBeInTheDocument();
 		});
 
-		it('should render the transactions list with all the transactions', async () => {
+		it('should render the transactions list with all the transactions', () => {
 			const { container } = render(AllTransactionsList);
-
-			await vi.advanceTimersByTimeAsync(5000);
 
 			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
 				(el) => el.parentElement?.parentElement?.parentElement === container
