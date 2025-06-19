@@ -108,10 +108,10 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
 	openHideToken: (id: symbol) => void;
 	openIcHideToken: (id: symbol) => void;
-	openEthToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
-	openBtcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
-	openIcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
-	openSolToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openEthToken: (params: SetWithDataParams<NavigationTarget>) => void;
+	openBtcToken: (params: SetWithDataParams<NavigationTarget>) => void;
+	openIcToken: (params: SetWithDataParams<NavigationTarget>) => void;
+	openSolToken: (params: SetWithDataParams<NavigationTarget>) => void;
 	openReceiveBitcoin: (id: symbol) => void;
 	openAboutWhyOisy: (id: symbol) => void;
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
