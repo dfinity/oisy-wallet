@@ -1,4 +1,6 @@
-import { AffinePoint, ProjectivePoint } from '@noble/secp256k1';
+/* eslint-disable */
+
+import { ProjectivePoint, type AffinePoint } from '@noble/secp256k1';
 import createHmac from 'create-hmac';
 import { blobDecode, blobEncode } from '../encoding.js';
 
