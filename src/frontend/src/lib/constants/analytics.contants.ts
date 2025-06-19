@@ -89,6 +89,9 @@ export const TRACK_REWARD_CAMPAIGN_SHARE = 'reward_campaign_share';
 // Welcome
 export const TRACK_WELCOME_OPEN = 'welcome_open';
 
+// Delete Token
+export const TRACK_DELETE_TOKEN_SUCCESS = 'delete_token_success';
+
 // Navigation
 export const TRACK_COUNT_OPEN_WHY_OISY = 'open_why_oisy';
 export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation';

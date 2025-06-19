@@ -11,8 +11,10 @@
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
 	import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { TRACK_DELETE_TOKEN_SUCCESS } from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { TokenModalSteps } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -64,6 +66,18 @@
 		loading = false;
 
 		close();
+
+		const address: string | undefined =
+			'address' in deletedToken ? (deletedToken.address as string) : undefined;
+		trackEvent({
+			name: TRACK_DELETE_TOKEN_SUCCESS,
+			metadata: {
+				tokenId: `${deletedToken.id.description}`,
+				tokenSymbol: deletedToken.symbol,
+				...(nonNullish(address) && { address: `${address}` }),
+				networkId: `${deletedToken.network.id.description}`
+			}
+		});
 
 		await gotoReplaceRoot();
 
