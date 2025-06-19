@@ -5,6 +5,7 @@ import type {
 } from '$declarations/signer/signer.did';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import { deriveEthAddress } from '$lib/ic-pub-key/src/cli';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type {
 	GetSchnorrPublicKeyParams,
@@ -13,7 +14,7 @@ import type {
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
 let canister: SignerCanister | undefined = undefined;
 
@@ -31,7 +32,19 @@ export const getBtcAddress = async ({
 export const getEthAddress = async ({
 	identity
 }: CanisterApiFunctionParams): Promise<EthAddress> => {
+	const derivedEthAddress = nonNullish(identity)
+		? deriveEthAddress(identity.getPrincipal().toString())
+		: undefined;
+
 	const { getEthAddress } = await signerCanister({ identity });
+
+	const signerEthAddress = await getEthAddress();
+
+	if (derivedEthAddress !== signerEthAddress) {
+		console.warn(
+			`Derived Ethereum address (${derivedEthAddress}) does not match the one from the signer canister (${signerEthAddress}).`
+		);
+	}
 
 	return getEthAddress();
 };
