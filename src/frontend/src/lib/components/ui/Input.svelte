@@ -21,6 +21,7 @@
 		resetButtonAriaLabel,
 		showPasteButton,
 		value = $bindable(),
+		inputElement = $bindable(),
 		innerEnd,
 		...props
 	}: InputProps & GixInputProps = $props();
@@ -30,7 +31,7 @@
 	style={`--input-padding-inner-end: calc(var(--padding-2x) + ${endWidth}px)`}
 	class="base-input"
 >
-	<GixInput {...props} bind:value on:nnsInput>
+	<GixInput {...props} bind:value bind:inputElement on:nnsInput>
 		<svelte:fragment slot="inner-end">
 			<div bind:clientWidth={endWidth} class="flex items-center pl-2">
 				{#if nonNullish(value) && notEmptyString(value.toString()) && showResetButton}
