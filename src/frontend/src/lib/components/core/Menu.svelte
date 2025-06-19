@@ -47,6 +47,8 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
+	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
+	import { I18N_ENABLED } from '$env/i18n';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -92,14 +94,14 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div
-		class="max-w-68 flex flex-col gap-1"
+		class="max-w-68 mb-1 flex flex-col gap-1"
 		data-tid={NAVIGATION_MENU}
 		onclick={hidePopover}
 		role="none"
 	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				<ButtonAuthenticateWithLicense fullWidth />
+				<ButtonAuthenticateWithLicense fullWidth needHelpLink={false} licenseAlignment="center" />
 			</span>
 			<Hr />
 		{/if}
@@ -205,13 +207,24 @@
 			</a>
 
 			<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
+		{/if}
+	</div>
 
-			<Hr />
+	<Hr />
+
+	<div class="max-w-68 flex flex-col gap-3 pt-3">
+		{#if I18N_ENABLED}
+			<MenuLanguageSelector />
+		{/if}
+
+		{#if $authSignedIn}
+			{#if I18N_ENABLED}
+				<Hr />
+			{/if}
 
 			<SignOut on:icLogoutTriggered={hidePopover} />
 
 			<Hr />
-
 			<span class="text-center text-sm text-tertiary">
 				<LicenseLink noUnderline />
 			</span>
