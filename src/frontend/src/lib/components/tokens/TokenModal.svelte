@@ -62,12 +62,16 @@
 		}
 	};
 
+	const handleCloseAndNavigate = async (fromRoute: NavigationTarget) => {
+		close();
+
+		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot();
+	}
+
 	const onTokenDeleteSuccess = async (deletedToken: Token) => {
 		loading = false;
 
-		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot();
-
-		close();
+		await handleCloseAndNavigate(fromRoute)
 
 		toastsShow({
 			text: replacePlaceholders(
