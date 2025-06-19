@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -10,7 +11,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 
 	export let from: NavigationTarget | undefined;
 

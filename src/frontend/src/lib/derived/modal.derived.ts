@@ -4,8 +4,8 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
-import { derived, type Readable } from 'svelte/store';
 import type { NavigationTarget } from '@sveltejs/kit';
+import { derived, type Readable } from 'svelte/store';
 
 export const modalEthReceive: Readable<boolean> = derived(
 	modalStore,
@@ -122,7 +122,8 @@ export const modalEthToken: Readable<boolean> = derived(
 );
 export const modalEthTokenData: Readable<NavigationTarget | undefined> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'eth-token' ? ($modalStore?.data as NavigationTarget) : undefined
+	($modalStore) =>
+		$modalStore?.type === 'eth-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalBtcToken: Readable<boolean> = derived(
 	modalStore,
@@ -130,7 +131,8 @@ export const modalBtcToken: Readable<boolean> = derived(
 );
 export const modalBtcTokenData: Readable<NavigationTarget | undefined> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'btc-token' ? ($modalStore?.data as NavigationTarget) : undefined
+	($modalStore) =>
+		$modalStore?.type === 'btc-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalIcToken: Readable<boolean> = derived(
 	modalStore,
@@ -138,7 +140,8 @@ export const modalIcToken: Readable<boolean> = derived(
 );
 export const modalIcTokenData: Readable<NavigationTarget | undefined> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'ic-token' ? ($modalStore?.data as NavigationTarget) : undefined
+	($modalStore) =>
+		$modalStore?.type === 'ic-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalSolToken: Readable<boolean> = derived(
 	modalStore,
@@ -146,7 +149,8 @@ export const modalSolToken: Readable<boolean> = derived(
 );
 export const modalSolTokenData: Readable<NavigationTarget | undefined> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'sol-token' ? ($modalStore?.data as NavigationTarget) : undefined
+	($modalStore) =>
+		$modalStore?.type === 'sol-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,

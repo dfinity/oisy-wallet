@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
@@ -9,7 +10,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token as TokenType } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 
 	export let from: NavigationTarget | undefined;
 

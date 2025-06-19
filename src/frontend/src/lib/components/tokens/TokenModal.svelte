@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
@@ -22,13 +23,12 @@
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface BaseTokenModalProps {
 		token: OptionToken;
 		children?: Snippet;
 		isDeletable?: boolean;
-		from?: NavigationTarget
+		from?: NavigationTarget;
 	}
 
 	let { children, token, isDeletable = false, from }: BaseTokenModalProps = $props();
@@ -65,7 +65,7 @@
 	const onTokenDeleteSuccess = async (deletedToken: Token) => {
 		loading = false;
 
-		nonNullish(from) ? await back({pop : nonNullish(from)}) : await gotoReplaceRoot();
+		nonNullish(from) ? await back({ pop: nonNullish(from) }) : await gotoReplaceRoot();
 
 		close();
 

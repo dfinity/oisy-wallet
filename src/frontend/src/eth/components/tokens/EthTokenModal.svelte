@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { erc20DefaultTokens } from '$eth/derived/erc20.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils.js';
@@ -11,13 +12,12 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface Props {
 		from?: NavigationTarget;
 	}
 
-	let {from}: Props = $props()
+	let { from }: Props = $props();
 
 	let isErc20 = $derived(nonNullish($pageToken) && isTokenErc20($pageToken));
 
