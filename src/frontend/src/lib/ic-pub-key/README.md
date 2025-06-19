@@ -5,4 +5,3 @@ Since it is still not public, for now, in the interest of time, we copy the nece
 # TODO
 
 Remove the entire folder and install the library from npm once it is public.
-
