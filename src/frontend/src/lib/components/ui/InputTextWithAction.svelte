@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
+	import Input from '$lib/components/ui/Input.svelte';
 
 	interface Props {
 		innerEnd?: Snippet;
@@ -12,6 +12,7 @@
 		testId?: string;
 		autofocus?: boolean;
 		inputElement?: HTMLInputElement;
+		showResetButton?: boolean;
 	}
 
 	let {
@@ -22,7 +23,8 @@
 		required = true,
 		testId,
 		autofocus = false,
-		inputElement = $bindable()
+		inputElement = $bindable(),
+		showResetButton = false
 	}: Props = $props();
 
 	onMount(() => {
@@ -45,6 +47,11 @@
 	on:blur
 	on:focus
 	bind:inputElement
+	{showResetButton}
 >
-	<svelte:fragment slot="inner-end">{@render innerEnd?.()}</svelte:fragment>
+	{#snippet innerEnd()}
+		<div class="pl-2">
+			{@render innerEnd?.()}
+		</div>
+	{/snippet}
 </Input>

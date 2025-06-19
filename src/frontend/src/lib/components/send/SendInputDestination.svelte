@@ -54,12 +54,13 @@
 
 	let isErrorState = false;
 	$: isErrorState =
-		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
+		invalidDestination && nonNullish(destination) && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
 
 	let isNotKnownDestination = false;
 	$: isNotKnownDestination =
 		nonNullish(knownDestinations) &&
 		nonNullish(destinationNetworkId) &&
+		nonNullish(destination) &&
 		isNullish(
 			getKnownDestination({
 				knownDestinations,
@@ -72,6 +73,7 @@
 	$: isNotNetworkContact =
 		nonNullish(networkContacts) &&
 		nonNullish(destinationNetworkId) &&
+		nonNullish(destination) &&
 		isNullish(
 			getNetworkContact({
 				networkContacts,
@@ -99,6 +101,7 @@
 			placeholder={inputPlaceholder}
 			testId={DESTINATION_INPUT}
 			autofocus={isDesktop()}
+			showResetButton
 			on:focus={onFocus}
 			on:blur={onBlur}
 			on:nnsInput
@@ -118,7 +121,7 @@
 	</div>
 </div>
 
-{#if !invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && isNotKnownDestination && isNotNetworkContact}
+{#if !invalidDestination && nonNullish(destination) && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE && isNotKnownDestination && isNotNetworkContact}
 	<div transition:slide={SLIDE_DURATION}>
 		<MessageBox level="warning" styleClass="mt-4">
 			{$i18n.send.info.unknown_destination}
