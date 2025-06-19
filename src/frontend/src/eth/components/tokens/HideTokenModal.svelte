@@ -7,12 +7,12 @@
 	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
 	import { setUserToken } from '$icp-eth/services/user-token.services';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
+	import { TRACK_HIDE_TOKEN } from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_HIDE_TOKEN } from '$lib/constants/analytics.contants';
 
 	export let fromRoute: NavigationTarget | undefined;
 
@@ -39,7 +39,12 @@
 
 		trackEvent({
 			name: TRACK_HIDE_TOKEN,
-			metadata: { tokenId: selectedToken.id.description, tokenSymbol: selectedToken.symbol, address: selectedToken.address , networkId: selectedToken.network.id.description }
+			metadata: {
+				tokenId: selectedToken.id.description,
+				tokenSymbol: selectedToken.symbol,
+				address: selectedToken.address,
+				networkId: selectedToken.network.id.description
+			}
 		});
 
 		await setUserToken({ ...params, token: selectedToken, enabled: false });

@@ -9,12 +9,12 @@
 	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { setCustomToken } from '$lib/api/backend.api';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
+	import { TRACK_HIDE_TOKEN } from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_HIDE_TOKEN } from '$lib/constants/analytics.contants';
 
 	export let fromRoute: NavigationTarget | undefined;
 
