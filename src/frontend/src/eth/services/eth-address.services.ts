@@ -29,7 +29,7 @@ const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
 
 	try {
 		const derivedEthAddress = nonNullish(identity)
-			? deriveEthAddress(identity.getPrincipal().toString())
+			? await deriveEthAddress(identity.getPrincipal().toString())
 			: undefined;
 
 		if (derivedEthAddress !== signerAddress) {

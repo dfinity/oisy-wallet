@@ -1,8 +1,33 @@
 /* eslint-disable */
 
 import { ProjectivePoint, type AffinePoint } from '@noble/secp256k1';
-import createHmac from 'create-hmac';
+// import createHmac from 'create-hmac';
 import { blobDecode, blobEncode } from '../encoding.js';
+// import { createHmac } from 'crypto';
+
+async function browserHmacSha512(key: Uint8Array, data: Uint8Array[]): Promise<Uint8Array> {
+	// Import key
+	const cryptoKey = await crypto.subtle.importKey(
+		'raw',
+		key,
+		{ name: 'HMAC', hash: 'SHA-512' },
+		false,
+		['sign']
+	);
+
+	// Concatenate all update parts
+	const totalLength = data.reduce((sum, part) => sum + part.length, 0);
+	const fullMessage = new Uint8Array(totalLength);
+	let offset = 0;
+	for (const part of data) {
+		fullMessage.set(part, offset);
+		offset += part.length;
+	}
+
+	// Sign
+	const signature = await crypto.subtle.sign('HMAC', cryptoKey, fullMessage);
+	return new Uint8Array(signature);
+}
 
 /**
  * The response type for the ICP management canister's `ecdsa_public_key` method.
@@ -96,8 +121,10 @@ export class PublicKeyWithChainCode {
 	/**
 	 * Applies the given derivation path to obtain a new public key and chain code.
 	 */
-	deriveSubkeyWithChainCode(derivation_path: DerivationPath): PublicKeyWithChainCode {
-		return this.public_key.deriveSubkeyWithChainCode(derivation_path, this.chain_code);
+	async deriveSubkeyWithChainCode(
+		derivation_path: DerivationPath
+	): Promise<PublicKeyWithChainCode> {
+		return await this.public_key.deriveSubkeyWithChainCode(derivation_path, this.chain_code);
 	}
 }
 
@@ -131,12 +158,12 @@ export class Sec1EncodedPublicKey {
 	 * @param derivation_path The derivation path to derive the subkey from.
 	 * @returns A tuple containing the derived subkey and the chain code.
 	 */
-	deriveSubkeyWithChainCode(
+	async deriveSubkeyWithChainCode(
 		derivation_path: DerivationPath,
 		chain_code: ChainCode
-	): PublicKeyWithChainCode {
+	): Promise<PublicKeyWithChainCode> {
 		let public_key = this.toAffinePoint();
-		let [affine_pt, _offset, new_chain_code] = derivation_path.derive_offset(
+		let [affine_pt, _offset, new_chain_code] = await derivation_path.derive_offset(
 			public_key,
 			chain_code
 		);
@@ -313,18 +340,27 @@ export class DerivationPath {
 	 * - The public key is not ProjectivePoint.ZERO.
 	 * - The offset is strictly less than DerivationPath.ORDER.
 	 */
-	derive_offset(pt: AffinePoint, chain_code: ChainCode): [AffinePoint, bigint, ChainCode] {
-		return this.path.reduce(
-			([pt, offset, chain_code], idx) => {
-				let [next_chain_code, next_offset, next_pt] = DerivationPath.ckd_pub(idx, pt, chain_code);
-				offset += next_offset;
-				// Note: next_offset _should_ be less than DerivationPath.ORDER, so at most one subtraction _should_ be necessary.
-				while (offset >= DerivationPath.ORDER) {
-					offset -= DerivationPath.ORDER;
+	async derive_offset(
+		pt: AffinePoint,
+		chain_code: ChainCode
+	): Promise<[AffinePoint, bigint, ChainCode]> {
+		return await this.path.reduce(
+			async (accP, idx) => {
+				const [pt, offset, chain_code] = await accP;
+				const [next_chain_code, next_offset, next_pt] = await DerivationPath.ckd_pub(
+					idx,
+					pt,
+					chain_code
+				);
+
+				let new_offset = offset + next_offset;
+				while (new_offset >= DerivationPath.ORDER) {
+					new_offset -= DerivationPath.ORDER;
 				}
-				return [next_pt, offset, next_chain_code];
+
+				return [next_pt, new_offset, next_chain_code] as [AffinePoint, bigint, ChainCode];
 			},
-			[pt, 0n, chain_code]
+			Promise.resolve<[AffinePoint, bigint, ChainCode]>([pt, 0n, chain_code])
 		);
 	}
 
@@ -339,15 +375,15 @@ export class DerivationPath {
 	 * - The offset is strictly less than DerivationPath.ORDER.
 	 * - The public key is not ProjectivePoint.ZERO.
 	 */
-	static ckd_pub(
+	static async ckd_pub(
 		idx: PathComponent,
 		pt: AffinePoint,
 		chain_code: ChainCode
-	): [ChainCode, bigint, AffinePoint] {
+	): Promise<[ChainCode, bigint, AffinePoint]> {
 		let ckd_input = ProjectivePoint.fromAffine(pt).toRawBytes(true);
 
 		while (true) {
-			let [next_chain_code, next_offset] = DerivationPath.ckd(idx, ckd_input, chain_code);
+			let [next_chain_code, next_offset] = await DerivationPath.ckd(idx, ckd_input, chain_code);
 
 			let base_mul = ProjectivePoint.BASE.multiply(next_offset);
 			let next_pt = ProjectivePoint.fromAffine(pt).add(base_mul);
@@ -372,21 +408,33 @@ export class DerivationPath {
 	 * Properties:
 	 * - The offset is strictly less than DerivationPath.ORDER.
 	 */
-	static ckd(
+	static async ckd(
 		idx: PathComponent,
 		ckd_input: Uint8Array,
 		chain_code: ChainCode
-	): [ChainCode, bigint] {
-		let hmac = createHmac('sha512', Buffer.from(chain_code.bytes));
-		hmac.update(ckd_input);
-		hmac.update(idx);
-		let hmac_output = hmac.digest();
+	): Promise<[ChainCode, bigint]> {
+		// let hmac = createHmac('sha512', Buffer.from(chain_code.bytes));
+		// hmac.update(ckd_input);
+		// hmac.update(idx);
+		// let hmac_output = hmac.digest();
+		const key = Buffer.from(chain_code.bytes);
+		const input1 = ckd_input;
+		const input2 = idx;
+
+		const hmac_output = await browserHmacSha512(Buffer.from(chain_code.bytes), [ckd_input, idx]);
+
 		if (hmac_output.length !== 64) {
 			throw new Error('Invalid HMAC output length');
 		}
 
+		function toHex(bytes: Uint8Array): string {
+			return Array.from(bytes)
+				.map((b) => b.toString(16).padStart(2, '0'))
+				.join('');
+		}
+
 		let fb = hmac_output.subarray(0, 32);
-		let fb_hex = fb.toString('hex');
+		let fb_hex = toHex(fb);
 		let next_chain_key = hmac_output.subarray(32, 64);
 		// Treat the bytes as an integer.
 		//
