@@ -5,7 +5,7 @@ use super::{CandidType, Debug, Deserialize};
 // -------------------------------------------------------------------------------------------------
 // If `POW_ENABLED` is false, PoW protection remains disabled, preserving the original behavior
 // of the `allow_signing` function.
-pub const POW_ENABLED: bool = true;
+pub const POW_ENABLED: bool = false;
 
 // If set to `true`, the difficulty for a principal auto-adjusts after each solved challenge,
 // starting at `START_DIFFICULTY`.
@@ -26,11 +26,11 @@ pub const TARGET_DURATION_MS: u64 = 30_000;
 // TARGET_DURATION_MS, ensuring that challenges have sufficient time to be solved before expiration.
 // By default, EXPIRY_DURATION_MS is set to twice the TARGET_DURATION_MS to provide a reasonable
 // time limit for solving challenges.
-pub const EXPIRY_DURATION_MS: u64 = 120_000;
+pub const EXPIRY_DURATION_MS: u64 = 300_000;
 
 // The default starting difficulty for the first PoW challenge.
 // Must lie between `MIN_DIFFICULTY` and `MAX_DIFFICULTY`.
-pub const START_DIFFICULTY: u32 = 200_000;
+pub const START_DIFFICULTY: u32 = 800_000;
 
 // The minimum allowed difficulty. Auto-adjustment will not reduce difficulty below this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
@@ -38,7 +38,7 @@ pub const MIN_DIFFICULTY: u32 = 100_000;
 
 // The maximum allowed difficulty. Auto-adjustment will not raise difficulty above this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
-pub const MAX_DIFFICULTY: u32 = 50_000_000;
+pub const MAX_DIFFICULTY: u32 = 4_000_000;
 
 // The number of execution cycles granted to the system for each unit of difficulty in a
 // Proof-of-Work (PoW) challenge. A higher difficulty level results in more cycles being granted,
