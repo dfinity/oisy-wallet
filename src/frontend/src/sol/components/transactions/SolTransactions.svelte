@@ -53,5 +53,5 @@
 {#if $modalSolTransaction && nonNullish(selectedTransaction)}
 	<SolTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalSolToken}
-	<SolTokenModal from={$modalSolTokenData} />
+	<SolTokenModal fromRoute={$modalSolTokenData} />
 {/if}

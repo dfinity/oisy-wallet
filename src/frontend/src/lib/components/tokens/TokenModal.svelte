@@ -28,10 +28,10 @@
 		token: OptionToken;
 		children?: Snippet;
 		isDeletable?: boolean;
-		from?: NavigationTarget;
+		fromRoute?: NavigationTarget;
 	}
 
-	let { children, token, isDeletable = false, from }: BaseTokenModalProps = $props();
+	let { children, token, isDeletable = false, fromRoute }: BaseTokenModalProps = $props();
 
 	let loading = $state(false);
 	let showBottomSheetDeleteConfirmation = $state(false);
@@ -65,7 +65,7 @@
 	const onTokenDeleteSuccess = async (deletedToken: Token) => {
 		loading = false;
 
-		nonNullish(from) ? await back({ pop: nonNullish(from) }) : await gotoReplaceRoot();
+		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot();
 
 		close();
 

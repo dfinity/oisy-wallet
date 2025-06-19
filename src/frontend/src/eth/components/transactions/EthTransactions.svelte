@@ -68,5 +68,5 @@
 {#if $modalEthTransaction && nonNullish(selectedTransaction)}
 	<EthTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalEthToken}
-	<EthTokenModal from={$modalEthTokenData} />
+	<EthTokenModal fromRoute={$modalEthTokenData} />
 {/if}

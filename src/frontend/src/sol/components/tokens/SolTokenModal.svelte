@@ -12,7 +12,7 @@
 	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
-	export let from: NavigationTarget | undefined;
+	export let fromRoute: NavigationTarget | undefined;
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = isNetworkSolana($pageToken?.network)
@@ -24,7 +24,7 @@
 		nonNullish($pageToken) && isTokenSpl($pageToken) ? $pageToken.address : undefined;
 </script>
 
-<TokenModal token={$pageToken} {from}>
+<TokenModal token={$pageToken} {fromRoute}>
 	{#if nonNullish(tokenAddress)}
 		<ModalListItem>
 			{#snippet label()}

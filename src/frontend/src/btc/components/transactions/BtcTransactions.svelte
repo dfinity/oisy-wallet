@@ -50,5 +50,5 @@
 {#if $modalBtcTransaction && nonNullish(selectedTransaction)}
 	<BtcTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalBtcToken}
-	<BtcTokenModal from={$modalBtcTokenData} />
+	<BtcTokenModal fromRoute={$modalBtcTokenData} />
 {/if}

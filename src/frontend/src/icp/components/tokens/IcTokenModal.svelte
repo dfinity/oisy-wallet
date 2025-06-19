@@ -11,7 +11,7 @@
 	import type { Token as TokenType } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let from: NavigationTarget | undefined;
+	export let fromRoute: NavigationTarget | undefined;
 
 	let twinToken: TokenType | undefined;
 	$: twinToken = ($pageToken as OptionIcCkToken)?.twinToken;
@@ -20,7 +20,7 @@
 	$: ckToken = $pageToken as OptionIcCkToken;
 </script>
 
-<TokenModal token={$pageToken} {from}>
+<TokenModal token={$pageToken} {fromRoute}>
 	{#if nonNullish(twinToken)}
 		<ModalListItem>
 			{#snippet label()}

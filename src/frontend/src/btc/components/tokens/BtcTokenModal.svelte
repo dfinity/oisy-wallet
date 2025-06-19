@@ -4,10 +4,10 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 
 	interface Props {
-		from?: NavigationTarget;
+		fromRoute?: NavigationTarget;
 	}
 
-	let { from }: Props = $props();
+	let { fromRoute }: Props = $props();
 </script>
 
-<TokenModal token={$pageToken} {from} />
+<TokenModal token={$pageToken} {fromRoute} />

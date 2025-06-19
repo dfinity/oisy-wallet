@@ -102,5 +102,5 @@
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
 	<IcTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalIcToken}
-	<IcTokenModal from={$modalIcTokenData} />
+	<IcTokenModal fromRoute={$modalIcTokenData} />
 {/if}

@@ -14,10 +14,10 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	interface Props {
-		from?: NavigationTarget;
+		fromRoute?: NavigationTarget;
 	}
 
-	let { from }: Props = $props();
+	let { fromRoute }: Props = $props();
 
 	let isErc20 = $derived(nonNullish($pageToken) && isTokenErc20($pageToken));
 
@@ -33,7 +33,7 @@
 	);
 </script>
 
-<TokenModal token={$pageToken} isDeletable={!undeletableToken} {from}>
+<TokenModal token={$pageToken} isDeletable={!undeletableToken} {fromRoute}>
 	{#if nonNullish(contractAddress)}
 		<ModalListItem>
 			{#snippet label()}
