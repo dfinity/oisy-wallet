@@ -4,7 +4,6 @@
 	import type { PowProtectorWorkerInitResult } from '$icp/services/pow-protector-listener';
 	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 
-
 	interface Props {
 		children?: Snippet;
 	}
