@@ -1,12 +1,12 @@
 <script lang="ts">
+	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { signOut } from '$lib/services/auth.services';
-	import { i18n } from '$lib/stores/i18n.store';
-	import Button from '$lib/components/ui/Button.svelte';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
-	import { nonNullish, secondsToDuration } from '@dfinity/utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const dispatch = createEventDispatcher();
 
