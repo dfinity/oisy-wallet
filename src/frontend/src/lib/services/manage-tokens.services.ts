@@ -95,7 +95,7 @@ export const saveTokens = async <
 					...(nonNullish(tokenId) && { tokenId: `${tokenId.description}` }),
 					...(nonNullish(tokenSymbol) && { tokenSymbol }),
 					...(nonNullish(network) && { networkId: `${network.id.description}` }),
-					...({source: MANAGE_TOKENS_MODAL_ROUTE})
+					...{ source: MANAGE_TOKENS_MODAL_ROUTE }
 				}
 			});
 		});

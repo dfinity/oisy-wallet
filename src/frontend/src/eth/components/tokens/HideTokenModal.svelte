@@ -42,8 +42,13 @@
 
 		trackEvent({
 			name: TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
-			metadata: { tokenId: `${selectedToken.id.description}`, tokenSymbol: selectedToken.symbol, address: selectedToken.address,
-				networkId: `${selectedToken.network.id.description}`, source: HIDE_TOKEN_MODAL_ROUTE }
+			metadata: {
+				tokenId: `${selectedToken.id.description}`,
+				tokenSymbol: selectedToken.symbol,
+				address: selectedToken.address,
+				networkId: `${selectedToken.network.id.description}`,
+				source: HIDE_TOKEN_MODAL_ROUTE
+			}
 		});
 
 		await setUserToken({ ...params, token: selectedToken, enabled: false });
