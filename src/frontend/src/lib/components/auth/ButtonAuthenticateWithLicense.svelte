@@ -10,9 +10,10 @@
 	interface Props {
 		fullWidth?: boolean;
 		licenseAlignment?: 'inherit' | 'center';
+		needHelpLink?: boolean;
 	}
 
-	let { fullWidth = false, licenseAlignment = 'inherit' }: Props = $props();
+	let { fullWidth = false, licenseAlignment = 'inherit', needHelpLink = true }: Props = $props();
 
 	const modalId = Symbol();
 
@@ -32,11 +33,16 @@
 	<ButtonAuthenticate {onclick} {fullWidth} />
 
 	<span
-		class={`mt-4 flex flex-col text-sm text-tertiary ${licenseAlignment === 'center' ? 'text-center' : ''}`}
+		class="mt-4 flex flex-col text-sm text-tertiary"
+		class:text-center={licenseAlignment === 'center'}
+		class:w-full={fullWidth}
 	>
 		{$i18n.license_agreement.text.accept_terms}
 
 		<LicenseLink testId={AUTH_LICENSE_LINK} />
-		<SigningInHelpLink styleClass="mt-4" testId={AUTH_SIGNING_IN_HELP_LINK} />
+
+		{#if needHelpLink}
+			<SigningInHelpLink styleClass="mt-4" testId={AUTH_SIGNING_IN_HELP_LINK} />
+		{/if}
 	</span>
 </div>
