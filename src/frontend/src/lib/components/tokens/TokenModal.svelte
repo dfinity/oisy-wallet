@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
@@ -21,7 +22,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
+	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -29,9 +30,10 @@
 		token: OptionToken;
 		children?: Snippet;
 		isDeletable?: boolean;
+		fromRoute?: NavigationTarget;
 	}
 
-	let { children, token, isDeletable = false }: BaseTokenModalProps = $props();
+	let { children, token, isDeletable = false, fromRoute }: BaseTokenModalProps = $props();
 
 	let loading = $state(false);
 	let showBottomSheetDeleteConfirmation = $state(false);
@@ -62,10 +64,16 @@
 		}
 	};
 
+	const handleCloseAndNavigate = async (fromRoute: NavigationTarget | undefined) => {
+		close();
+
+		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot();
+	};
+
 	const onTokenDeleteSuccess = async (deletedToken: Token) => {
 		loading = false;
 
-		close();
+		await handleCloseAndNavigate(fromRoute);
 
 		const address: string | undefined =
 			'address' in deletedToken ? (deletedToken.address as string) : undefined;
@@ -78,8 +86,6 @@
 				networkId: `${deletedToken.network.id.description}`
 			}
 		});
-
-		await gotoReplaceRoot();
 
 		toastsShow({
 			text: replacePlaceholders(
