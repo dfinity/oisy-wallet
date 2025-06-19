@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * Encodes an array of bytes as a Candid blob string.
  * @param path
