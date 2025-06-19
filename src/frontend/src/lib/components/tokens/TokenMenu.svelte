@@ -53,7 +53,10 @@
 					: $networkSolana
 						? modalStore.openSolToken
 						: () => {};
-		fn(openModalId);
+		fn({
+			id: openModalId,
+			data: fromRoute
+		});
 
 		visible = false;
 	};

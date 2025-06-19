@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { erc20DefaultTokens } from '$eth/derived/erc20.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils.js';
@@ -11,6 +12,12 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+
+	interface Props {
+		fromRoute?: NavigationTarget;
+	}
+
+	let { fromRoute }: Props = $props();
 
 	let isErc20 = $derived(nonNullish($pageToken) && isTokenErc20($pageToken));
 
@@ -26,7 +33,7 @@
 	);
 </script>
 
-<TokenModal token={$pageToken} isDeletable={!undeletableToken}>
+<TokenModal token={$pageToken} isDeletable={!undeletableToken} {fromRoute}>
 	{#if nonNullish(contractAddress)}
 		<ModalListItem>
 			{#snippet label()}

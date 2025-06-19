@@ -24,7 +24,7 @@ describe('SolTokenModal', () => {
 
 		const { container } = render(SplTokenModal);
 
-		modalStore.openBtcToken(mockSplCustomToken.id);
+		modalStore.openSolToken({ id: mockSplCustomToken.id, data: undefined });
 
 		expect(container).toHaveTextContent(mockSplCustomToken.network.name);
 		expect(container).toHaveTextContent(mockSplCustomToken.name);

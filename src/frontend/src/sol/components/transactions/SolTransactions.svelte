@@ -5,7 +5,11 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { modalSolToken, modalSolTransaction } from '$lib/derived/modal.derived';
+	import {
+		modalSolToken,
+		modalSolTokenData,
+		modalSolTransaction
+	} from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
@@ -49,5 +53,5 @@
 {#if $modalSolTransaction && nonNullish(selectedTransaction)}
 	<SolTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalSolToken}
-	<SolTokenModal />
+	<SolTokenModal fromRoute={$modalSolTokenData} />
 {/if}

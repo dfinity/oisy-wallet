@@ -34,7 +34,7 @@ describe('IcTokenModal', () => {
 
 		const { container } = render(IcTokenModal);
 
-		modalStore.openBtcToken(mockIcCkToken.id);
+		modalStore.openBtcToken({ id: mockIcCkToken.id, data: undefined });
 
 		expect(container).toHaveTextContent(mockIcCkToken.network.name);
 		expect(container).toHaveTextContent(mockIcCkToken.name);
