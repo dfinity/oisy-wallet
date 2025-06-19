@@ -39,8 +39,12 @@
 
 		trackEvent({
 			name: TRACK_HIDE_TOKEN,
-			metadata: { tokenId: `${selectedToken.id.description}`, tokenSymbol: selectedToken.symbol, address: selectedToken.address,
-				networkId: `${selectedToken.network.id.description}` }
+			metadata: {
+				tokenId: `${selectedToken.id.description}`,
+				tokenSymbol: selectedToken.symbol,
+				address: selectedToken.address,
+				networkId: `${selectedToken.network.id.description}`
+			}
 		});
 
 		await setUserToken({ ...params, token: selectedToken, enabled: false });
