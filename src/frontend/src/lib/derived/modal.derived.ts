@@ -4,6 +4,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
+import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
 export const modalEthReceive: Readable<boolean> = derived(
@@ -103,9 +104,19 @@ export const modalHideToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'hide-token'
 );
+export const modalHideTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'hide-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
 export const modalIcHideToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-hide-token'
+);
+export const modalIcHideTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'ic-hide-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalBtcTransaction: Readable<boolean> = derived(
 	modalStore,
