@@ -39,7 +39,7 @@
 						<ButtonReset onclick={() => (value = undefined)} ariaLabel={resetButtonAriaLabel} />
 					</div>
 					{#if nonNullish(innerEnd) || showPasteButton}
-						<div class="border-r-1 self-stretch border-black/20 mr-2" transition:fade></div>
+						<div class="border-r-1 self-stretch border-black/20" transition:fade></div>
 					{/if}
 				{/if}
 				{#if showPasteButton}
