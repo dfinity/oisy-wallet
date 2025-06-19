@@ -104,7 +104,7 @@ export const modalHideToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'hide-token'
 );
-export const modalHideTokenData: Readable<NavigationTarget> = derived(
+export const modalHideTokenData: Readable<NavigationTarget | undefined> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'hide-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
@@ -112,7 +112,7 @@ export const modalIcHideToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-hide-token'
 );
-export const modalIcHideTokenData: Readable<NavigationTarget> = derived(
+export const modalIcHideTokenData: Readable<NavigationTarget | undefined> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-hide-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
