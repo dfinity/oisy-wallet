@@ -9,7 +9,10 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
-	import { TRACK_REWARD_CAMPAIGN_WIN_SHARE } from '$lib/constants/analytics.contants';
+	import {
+		TRACK_REWARD_CAMPAIGN_WIN_LEARN_MORE,
+		TRACK_REWARD_CAMPAIGN_WIN_SHARE
+	} from '$lib/constants/analytics.contants';
 	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 	import {
 		REWARDS_STATE_MODAL_IMAGE_BANNER,
@@ -37,6 +40,10 @@
 			({ banner: imgSrc, title, description, shareHref } = reward.win.leaderboard);
 		} else if (rewardType === RewardType.JACKPOT) {
 			({ banner: imgSrc, title, description, shareHref } = reward.win.jackpot);
+		} else if (rewardType === RewardType.REFERRER && nonNullish(reward.win.referrer)) {
+			({ banner: imgSrc, title, description, shareHref } = reward.win.referrer);
+		} else if (rewardType === RewardType.REFEREE && nonNullish(reward.win.referee)) {
+			({ banner: imgSrc, title, description, shareHref } = reward.win.referee);
 		} else if (rewardType === RewardType.REFERRAL && nonNullish(reward.win.referral)) {
 			({ banner: imgSrc, title, description, shareHref } = reward.win.referral);
 		} else {
@@ -63,6 +70,10 @@
 					asButton
 					styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
 					testId={REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR}
+					trackEvent={{
+						name: TRACK_REWARD_CAMPAIGN_WIN_LEARN_MORE,
+						metadata: { campaignId: `${reward.id}`, type: rewardType }
+					}}
 				>
 					{$i18n.rewards.text.learn_more}
 				</ExternalLink>
