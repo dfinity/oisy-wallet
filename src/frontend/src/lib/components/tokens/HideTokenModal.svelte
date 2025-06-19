@@ -19,12 +19,12 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
-	import { back } from '$lib/utils/nav.utils';
+	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
 	export let updateUi: (params: { identity: Identity }) => Promise<void>;
-	export let from: NavigationTarget | null;
+	export let from: NavigationTarget | undefined;
 
 	const hide = async () => {
 		const { valid } = assertHide();
@@ -113,7 +113,7 @@
 		hideProgressStep = ProgressStepsHideToken.INITIALIZATION;
 	};
 
-	onDestroy(async () => await back({ pop: nonNullish(from) }));
+	onDestroy(async () => nonNullish(from) ? await back({ pop: nonNullish(from) }) : await gotoReplaceRoot());
 </script>
 
 <WizardModal

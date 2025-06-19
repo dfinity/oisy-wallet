@@ -27,9 +27,9 @@
 </script>
 
 {#if $authSignedIn}
-	{#if $modalHideToken && nonNullish($modalHideTokenData)}
+	{#if $modalHideToken}
 		<HideTokenModal from={$modalHideTokenData} />
-	{:else if $modalIcHideToken && nonNullish($modalIcHideTokenData)}
+	{:else if $modalIcHideToken}
 		<IcHideTokenModal from={$modalIcHideTokenData} />
 	{:else if $modalDAppDetails}
 		<DappModalDetails />

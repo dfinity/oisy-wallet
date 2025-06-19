@@ -34,15 +34,13 @@
 	const openModalId = Symbol();
 
 	const hideToken = () => {
-		if (nonNullish(fromRoute)) {
-			const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
-			fn({
-				id: hideModalId,
-				data: fromRoute
-			});
+		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
+		fn({
+			id: hideModalId,
+			data: fromRoute
+		});
 
-			visible = false;
-		}
+		visible = false;
 	};
 
 	const openToken = () => {

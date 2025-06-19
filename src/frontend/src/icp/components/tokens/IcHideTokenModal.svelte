@@ -14,7 +14,7 @@
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let from: NavigationTarget;
+	export let from: NavigationTarget | undefined;
 
 	let selectedToken: OptionIcrcCustomToken;
 
