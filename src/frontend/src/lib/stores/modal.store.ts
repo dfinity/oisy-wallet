@@ -106,8 +106,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openBtcTransaction: (params: SetWithDataParams<OpenTransactionParams<BtcTransactionUi>>) => void;
 	openSolTransaction: (params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void;
 	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
-	openHideToken: (params: SetWithDataParams<NavigationTarget>) => void;
-	openIcHideToken: (params: SetWithDataParams<NavigationTarget>) => void;
+	openHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openIcHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openEthToken: (id: symbol) => void;
 	openBtcToken: (id: symbol) => void;
 	openIcToken: (id: symbol) => void;
@@ -176,10 +176,10 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
 			setTypeWithData('manage-tokens')
 		),
-		openHideToken: <(params: SetWithDataParams<NavigationTarget>) => void>(
+		openHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('hide-token')
 		),
-		openIcHideToken: <(params: SetWithDataParams<NavigationTarget>) => void>(
+		openIcHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('ic-hide-token')
 		),
 		openEthToken: setType('eth-token'),
