@@ -37,6 +37,7 @@ describe('Menu', () => {
 		userProfileStore.reset();
 		vi.resetAllMocks();
 		mockAuthStore();
+		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 	});
 
@@ -80,13 +81,11 @@ describe('Menu', () => {
 		});
 
 	it('renders the privacy mode menu item', async () => {
-		mockAuthSignedIn(true);
 		await openMenu();
 		await waitForElement({ selector: menuItemPrivacyModeButtonSelector });
 	});
 
 	it('renders the vip menu item', async () => {
-		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(['vip']));
 
 		await openMenu();
@@ -94,13 +93,11 @@ describe('Menu', () => {
 	});
 
 	it('does not render the vip menu item', async () => {
-		mockAuthSignedIn(true);
 		await openMenu();
 		await waitForElement({ selector: menuItemVipButtonSelector, shouldExist: false });
 	});
 
 	it('renders the gold menu item', async () => {
-		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData(['gold']));
 
 		await openMenu();
@@ -108,19 +105,16 @@ describe('Menu', () => {
 	});
 
 	it('does not render the gold menu item', async () => {
-		mockAuthSignedIn(true);
 		await openMenu();
 		await waitForElement({ selector: menuItemGoldButtonSelector, shouldExist: false });
 	});
 
 	it('renders the address book button in the menu', async () => {
-		mockAuthSignedIn(true);
 		await openMenu();
 		await waitForElement({ selector: menuItemAddressBookSelector });
 	});
 
 	it('always renders the referral button', async () => {
-		mockAuthSignedIn(true);
 		await openMenu();
 		await waitForElement({ selector: menuItemReferralButtonSelector });
 	});
