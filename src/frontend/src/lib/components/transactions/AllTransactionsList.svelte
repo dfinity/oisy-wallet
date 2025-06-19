@@ -54,8 +54,8 @@
 	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
 	$: sortedTransactions = nonNullish(transactions)
 		? transactions.sort(({ transaction: a }, { transaction: b }) =>
-			sortTransactions({ transactionA: a, transactionB: b })
-		)
+				sortTransactions({ transactionA: a, transactionB: b })
+			)
 		: undefined;
 
 	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
