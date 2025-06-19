@@ -54,7 +54,9 @@
 
 	let isErrorState = false;
 	$: isErrorState =
-		invalidDestination && nonNullish(destination) && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
+		invalidDestination &&
+		nonNullish(destination) &&
+		destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
 
 	let isNotKnownDestination = false;
 	$: isNotKnownDestination =

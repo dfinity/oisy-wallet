@@ -79,7 +79,9 @@
 	let invalidDestination = $state(false);
 
 	let disabled = $derived(
-		invalidDestination || isNullish(destination) || destination.length <= MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
+		invalidDestination ||
+			isNullish(destination) ||
+			destination.length <= MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
 	);
 
 	let testId = $derived(`${SEND_DESTINATION_WIZARD_STEP}-${$sendToken.network.name}`);
