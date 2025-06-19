@@ -35,7 +35,10 @@
 
 	const hideToken = () => {
 		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
-		fn(hideModalId);
+		fn({
+			id: hideModalId,
+			data: fromRoute
+		});
 
 		visible = false;
 	};
