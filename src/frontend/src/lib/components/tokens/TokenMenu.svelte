@@ -24,10 +24,10 @@
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
-	let fromRoute: NavigationTarget | null;
+	let fromRoute: NavigationTarget | undefined;
 
 	afterNavigate(({ from }) => {
-		fromRoute = from;
+		fromRoute = from ?? undefined;
 	});
 
 	const hideModalId = Symbol();
