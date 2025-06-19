@@ -30,7 +30,9 @@
 		NAVIGATION_MENU_REFERRAL_BUTTON,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 		NAVIGATION_MENU_GOLD_BUTTON,
-		NAVIGATION_MENU_PRIVACY_MODE_BUTTON
+		NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
+		NAVIGATION_MENU_SUPPORT_BUTTON,
+		NAVIGATION_MENU_DOC_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
@@ -179,9 +181,14 @@
 			trackEventSource={USER_MENU_ROUTE}
 		/>
 
-		<DocumentationLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
+		<DocumentationLink
+			asMenuItem
+			asMenuItemCondensed
+			trackEventSource={USER_MENU_ROUTE}
+			testId={NAVIGATION_MENU_DOC_BUTTON}
+		/>
 
-		<SupportLink asMenuItem asMenuItemCondensed />
+		<SupportLink asMenuItem asMenuItemCondensed testId={NAVIGATION_MENU_SUPPORT_BUTTON} />
 
 		{#if $authSignedIn}
 			<Hr />
