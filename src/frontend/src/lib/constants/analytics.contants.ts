@@ -101,3 +101,5 @@ export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
 export const LANDING_PAGE_ROUTE = 'landing-page';
 export const HOME_PAGE_ROUTE = 'home-page';
 export const USER_MENU_ROUTE = 'user-menu';
+export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
+export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
