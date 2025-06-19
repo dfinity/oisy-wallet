@@ -13,6 +13,8 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_HIDE_TOKEN } from '$lib/constants/analytics.contants';
 
 	export let fromRoute: NavigationTarget | undefined;
 
@@ -43,6 +45,11 @@
 
 	const hideToken = async (params: { identity: Identity }) => {
 		assertNonNullish(ledgerCanisterId);
+
+		trackEvent({
+			name: TRACK_HIDE_TOKEN,
+			metadata: { ledgerCanisterId, indexCanisterId, networkId: 'ICP' }
+		});
 
 		await setCustomToken({
 			...params,
