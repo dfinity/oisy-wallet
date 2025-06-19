@@ -78,6 +78,8 @@
 		"@dfinity/verifiable-credentials": "^0.0.4",
 		"@dfinity/zod-schemas": "^0.0.2",
 		"@metamask/detect-provider": "^2.0.0",
+		"@noble/hashes": "^1.8.0",
+		"@noble/secp256k1": "^2.3.0",
 		"@reown/walletkit": "^1.2.6",
 		"@solana-program/compute-budget": "^0.8.0",
 		"@solana-program/system": "^0.7.0",
