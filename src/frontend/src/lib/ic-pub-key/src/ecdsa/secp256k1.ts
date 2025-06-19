@@ -6,30 +6,6 @@ import { hmac } from '@noble/hashes/hmac';
 import { sha512 } from '@noble/hashes/sha2';
 import { blobDecode, blobEncode } from '../encoding.js';
 
-// async function browserHmacSha512(key: Uint8Array, data: Uint8Array[]): Promise<Uint8Array> {
-// 	// Import key
-// 	const cryptoKey = await crypto.subtle.importKey(
-// 		'raw',
-// 		key,
-// 		{ name: 'HMAC', hash: 'SHA-512' },
-// 		false,
-// 		['sign']
-// 	);
-//
-// 	// Concatenate all update parts
-// 	const totalLength = data.reduce((sum, part) => sum + part.length, 0);
-// 	const fullMessage = new Uint8Array(totalLength);
-// 	let offset = 0;
-// 	for (const part of data) {
-// 		fullMessage.set(part, offset);
-// 		offset += part.length;
-// 	}
-//
-// 	// Sign
-// 	const signature = await crypto.subtle.sign('HMAC', cryptoKey, fullMessage);
-// 	return new Uint8Array(signature);
-// }
-
 /**
  * The response type for the ICP management canister's `ecdsa_public_key` method.
  */
