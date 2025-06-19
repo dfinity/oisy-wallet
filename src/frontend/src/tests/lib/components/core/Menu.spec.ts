@@ -167,6 +167,7 @@ describe('Menu', () => {
 			duration: 2000
 		});
 	});
+
 	it('should render the logged out version if not signed in', async () => {
 		mockAuthSignedIn(false);
 
