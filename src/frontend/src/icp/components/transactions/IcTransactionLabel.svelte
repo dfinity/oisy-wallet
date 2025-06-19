@@ -3,18 +3,26 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
+	import { isEmptyString, nonNullish } from '@dfinity/utils';
 
-	export let label: string | undefined;
-	export let fallback = '';
-	export let token: OptionToken;
+	interface Props {
+		label: string | undefined;
+		fallback: string;
+		token: OptionToken;
+	}
 
-	$: fallback = fallback.charAt(0).toUpperCase() + fallback.slice(1);
+	const { label, fallback = '', token }: Props = $props();
 
-	let twinToken: Token | undefined;
-	$: twinToken = (token as OptionIcCkToken)?.twinToken;
+	const fallbackLabel: string = $derived(fallback.charAt(0).toUpperCase() + fallback.slice(1));
+
+	const twinToken: Token | undefined = $derived((token as OptionIcCkToken)?.twinToken);
+
+	const labelText: string = $derived(
+		nonNullish(label) ? resolveText({ i18n: $i18n, path: label }) : fallbackLabel
+	);
 </script>
 
-{replacePlaceholders(resolveText({ i18n: $i18n, path: label }) ?? fallback, {
+{replacePlaceholders(labelText, {
 	$twinToken: twinToken?.symbol ?? '',
 	$twinNetwork: twinToken?.network.name ?? '',
 	$ckToken: token?.symbol ?? ''
