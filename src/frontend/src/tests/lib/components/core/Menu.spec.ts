@@ -2,17 +2,22 @@ import type { UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
+	AUTH_LICENSE_LINK,
+	LOGIN_BUTTON,
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON,
+	NAVIGATION_MENU_DOC_BUTTON,
 	NAVIGATION_MENU_GOLD_BUTTON,
 	NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
-	NAVIGATION_MENU_VIP_BUTTON
+	NAVIGATION_MENU_SUPPORT_BUTTON,
+	NAVIGATION_MENU_VIP_BUTTON,
+	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { privacyModeStore } from '$lib/stores/settings.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
@@ -23,6 +28,11 @@ describe('Menu', () => {
 	const menuItemGoldButtonSelector = `button[data-tid="${NAVIGATION_MENU_GOLD_BUTTON}"]`;
 	const menuItemAddressBookSelector = `button[data-tid="${NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}"]`;
 	const menuItemReferralButtonSelector = `button[data-tid="${NAVIGATION_MENU_REFERRAL_BUTTON}"]`;
+	const menuItemWhyOisyButtonSelector = `button[data-tid="${NAVIGATION_MENU_WHY_OISY_BUTTON}"]`;
+	const menuItemDocButtonSelector = `a[data-tid="${NAVIGATION_MENU_DOC_BUTTON}"]`;
+	const menuItemSupportButtonSelector = `a[data-tid="${NAVIGATION_MENU_SUPPORT_BUTTON}"]`;
+	const loginOrCreateButton = `button[data-tid="${LOGIN_BUTTON}"]`;
+	const authLicenseLink = `a[data-tid="${AUTH_LICENSE_LINK}"]`;
 
 	let container: HTMLElement;
 
@@ -34,6 +44,7 @@ describe('Menu', () => {
 		userProfileStore.reset();
 		vi.resetAllMocks();
 		mockAuthStore();
+		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 		vi.spyOn(toastsStore, 'toastsShow');
 		privacyModeStore.set({ key: 'privacy-mode', value: { enabled: false } });
@@ -155,5 +166,15 @@ describe('Menu', () => {
 			level: 'info',
 			duration: 2000
 		});
+	});
+	it('should render the logged out version if not signed in', async () => {
+		mockAuthSignedIn(false);
+
+		await openMenu();
+		await waitForElement({ selector: menuItemDocButtonSelector });
+		await waitForElement({ selector: menuItemWhyOisyButtonSelector });
+		await waitForElement({ selector: menuItemSupportButtonSelector });
+		await waitForElement({ selector: loginOrCreateButton });
+		await waitForElement({ selector: authLicenseLink });
 	});
 });
