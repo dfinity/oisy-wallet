@@ -12,6 +12,9 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+
+	export let from: NavigationTarget;
 
 	let selectedToken: OptionIcrcCustomToken;
 
@@ -62,4 +65,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} />
+<HideTokenModal {assertHide} {hideToken} {updateUi} {from} />

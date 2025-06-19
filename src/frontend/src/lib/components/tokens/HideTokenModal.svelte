@@ -6,7 +6,7 @@
 		type WizardStep,
 		type WizardSteps
 	} from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
@@ -18,11 +18,13 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
-	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
+	import { back } from '$lib/utils/nav.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
 	export let updateUi: (params: { identity: Identity }) => Promise<void>;
+	export let from: NavigationTarget | null;
 
 	const hide = async () => {
 		const { valid } = assertHide();
@@ -111,7 +113,7 @@
 		hideProgressStep = ProgressStepsHideToken.INITIALIZATION;
 	};
 
-	onDestroy(async () => await gotoReplaceRoot());
+	onDestroy(async () => await back({pop: nonNullish(from)}));
 </script>
 
 <WizardModal

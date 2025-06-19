@@ -17,18 +17,28 @@
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
 
 	export let testId: string | undefined = undefined;
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
+	let fromRoute: NavigationTarget | null;
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 
 	const hideModalId = Symbol();
 	const openModalId = Symbol();
 
 	const hideToken = () => {
 		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
-		fn(hideModalId);
+		fn({
+			id: hideModalId,
+			data: fromRoute
+		});
 
 		visible = false;
 	};

@@ -16,7 +16,7 @@
 		modalSettingsState,
 		modalReferralCode,
 		modalAddressBook,
-		modalVipQrCodeData
+		modalVipQrCodeData, modalIcHideTokenData, modalHideTokenData
 	} from '$lib/derived/modal.derived';
 
 	/**
@@ -25,10 +25,10 @@
 </script>
 
 {#if $authSignedIn}
-	{#if $modalHideToken}
-		<HideTokenModal />
-	{:else if $modalIcHideToken}
-		<IcHideTokenModal />
+	{#if $modalHideToken && nonNullish($modalHideTokenData)}
+		<HideTokenModal from={$modalHideTokenData} />
+	{:else if $modalIcHideToken && nonNullish($modalIcHideTokenData)}
+		<IcHideTokenModal from={$modalIcHideTokenData} />
 	{:else if $modalDAppDetails}
 		<DappModalDetails />
 	{:else if $modalVipQrCode && nonNullish($modalVipQrCodeData)}
