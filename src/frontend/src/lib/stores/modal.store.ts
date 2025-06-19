@@ -108,10 +108,10 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
 	openHideToken: (id: symbol) => void;
 	openIcHideToken: (id: symbol) => void;
-	openEthToken: (params: SetWithDataParams<NavigationTarget>) => void;
-	openBtcToken: (params: SetWithDataParams<NavigationTarget>) => void;
-	openIcToken: (params: SetWithDataParams<NavigationTarget>) => void;
-	openSolToken: (params: SetWithDataParams<NavigationTarget>) => void;
+	openEthToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openBtcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openIcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openSolToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openReceiveBitcoin: (id: symbol) => void;
 	openAboutWhyOisy: (id: symbol) => void;
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
@@ -178,16 +178,16 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openHideToken: setType('hide-token'),
 		openIcHideToken: setType('ic-hide-token'),
-		openEthToken: <(params: SetWithDataParams<NavigationTarget>) => void>(
+		openEthToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('eth-token')
 		),
-		openBtcToken: <(params: SetWithDataParams<NavigationTarget>) => void>(
+		openBtcToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('btc-token')
 		),
-		openIcToken: <(params: SetWithDataParams<NavigationTarget>) => void>(
+		openIcToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('ic-token')
 		),
-		openSolToken: <(params: SetWithDataParams<NavigationTarget>) => void>(
+		openSolToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('sol-token')
 		),
 		openReceiveBitcoin: setType('receive-bitcoin'),
