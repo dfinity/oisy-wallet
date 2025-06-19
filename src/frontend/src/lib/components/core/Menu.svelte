@@ -3,9 +3,11 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { I18N_ENABLED } from '$env/i18n';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
+	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -92,14 +94,14 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div
-		class="max-w-68 flex flex-col gap-1"
+		class="max-w-68 mb-1 flex flex-col gap-1"
 		data-tid={NAVIGATION_MENU}
 		onclick={hidePopover}
 		role="none"
 	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				<ButtonAuthenticateWithLicense fullWidth />
+				<ButtonAuthenticateWithLicense fullWidth needHelpLink={false} licenseAlignment="center" />
 			</span>
 			<Hr />
 		{/if}
@@ -205,13 +207,24 @@
 			</a>
 
 			<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
+		{/if}
+	</div>
 
-			<Hr />
+	<Hr />
+
+	<div class="max-w-68 flex flex-col gap-3 pt-3">
+		{#if I18N_ENABLED}
+			<MenuLanguageSelector />
+		{/if}
+
+		{#if $authSignedIn}
+			{#if I18N_ENABLED}
+				<Hr />
+			{/if}
 
 			<SignOut on:icLogoutTriggered={hidePopover} />
 
 			<Hr />
-
 			<span class="text-center text-sm text-tertiary">
 				<LicenseLink noUnderline />
 			</span>
