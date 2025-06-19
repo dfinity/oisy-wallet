@@ -3,7 +3,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		label: string | undefined;
