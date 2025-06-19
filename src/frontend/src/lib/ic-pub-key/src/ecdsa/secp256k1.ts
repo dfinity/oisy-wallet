@@ -2,32 +2,33 @@
 
 import { ProjectivePoint, type AffinePoint } from '@noble/secp256k1';
 // import createHmac from 'create-hmac';
+import { hmac } from '@noble/hashes/hmac';
+import { sha512 } from '@noble/hashes/sha2';
 import { blobDecode, blobEncode } from '../encoding.js';
-// import { createHmac } from 'crypto';
 
-async function browserHmacSha512(key: Uint8Array, data: Uint8Array[]): Promise<Uint8Array> {
-	// Import key
-	const cryptoKey = await crypto.subtle.importKey(
-		'raw',
-		key,
-		{ name: 'HMAC', hash: 'SHA-512' },
-		false,
-		['sign']
-	);
-
-	// Concatenate all update parts
-	const totalLength = data.reduce((sum, part) => sum + part.length, 0);
-	const fullMessage = new Uint8Array(totalLength);
-	let offset = 0;
-	for (const part of data) {
-		fullMessage.set(part, offset);
-		offset += part.length;
-	}
-
-	// Sign
-	const signature = await crypto.subtle.sign('HMAC', cryptoKey, fullMessage);
-	return new Uint8Array(signature);
-}
+// async function browserHmacSha512(key: Uint8Array, data: Uint8Array[]): Promise<Uint8Array> {
+// 	// Import key
+// 	const cryptoKey = await crypto.subtle.importKey(
+// 		'raw',
+// 		key,
+// 		{ name: 'HMAC', hash: 'SHA-512' },
+// 		false,
+// 		['sign']
+// 	);
+//
+// 	// Concatenate all update parts
+// 	const totalLength = data.reduce((sum, part) => sum + part.length, 0);
+// 	const fullMessage = new Uint8Array(totalLength);
+// 	let offset = 0;
+// 	for (const part of data) {
+// 		fullMessage.set(part, offset);
+// 		offset += part.length;
+// 	}
+//
+// 	// Sign
+// 	const signature = await crypto.subtle.sign('HMAC', cryptoKey, fullMessage);
+// 	return new Uint8Array(signature);
+// }
 
 /**
  * The response type for the ICP management canister's `ecdsa_public_key` method.
@@ -417,11 +418,13 @@ export class DerivationPath {
 		// hmac.update(ckd_input);
 		// hmac.update(idx);
 		// let hmac_output = hmac.digest();
-		const key = Buffer.from(chain_code.bytes);
-		const input1 = ckd_input;
-		const input2 = idx;
 
-		const hmac_output = await browserHmacSha512(Buffer.from(chain_code.bytes), [ckd_input, idx]);
+		const joined = new Uint8Array(ckd_input.length + idx.length);
+		joined.set(ckd_input);
+		joined.set(idx, ckd_input.length);
+		let hmac_output = hmac(sha512, Buffer.from(chain_code.bytes), joined);
+
+		// const hmac_output = await browserHmacSha512(Buffer.from(chain_code.bytes), [ckd_input, idx]);
 
 		if (hmac_output.length !== 64) {
 			throw new Error('Invalid HMAC output length');
