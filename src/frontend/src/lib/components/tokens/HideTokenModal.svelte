@@ -24,7 +24,7 @@
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
 	export let updateUi: (params: { identity: Identity }) => Promise<void>;
-	export let from: NavigationTarget | undefined;
+	export let fromRoute: NavigationTarget | undefined;
 
 	const hide = async () => {
 		const { valid } = assertHide();
@@ -114,7 +114,7 @@
 	};
 
 	onDestroy(async () =>
-		nonNullish(from) ? await back({ pop: nonNullish(from) }) : await gotoReplaceRoot()
+		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot()
 	);
 </script>
 

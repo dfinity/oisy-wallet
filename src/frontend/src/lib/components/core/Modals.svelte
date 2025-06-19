@@ -28,9 +28,9 @@
 
 {#if $authSignedIn}
 	{#if $modalHideToken}
-		<HideTokenModal from={$modalHideTokenData} />
+		<HideTokenModal fromRoute={$modalHideTokenData} />
 	{:else if $modalIcHideToken}
-		<IcHideTokenModal from={$modalIcHideTokenData} />
+		<IcHideTokenModal fromRoute={$modalIcHideTokenData} />
 	{:else if $modalDAppDetails}
 		<DappModalDetails />
 	{:else if $modalVipQrCode && nonNullish($modalVipQrCodeData)}

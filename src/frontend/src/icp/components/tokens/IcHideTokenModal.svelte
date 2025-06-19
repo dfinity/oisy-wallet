@@ -14,7 +14,7 @@
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let from: NavigationTarget | undefined;
+	export let fromRoute: NavigationTarget | undefined;
 
 	let selectedToken: OptionIcrcCustomToken;
 
@@ -65,4 +65,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} {from} />
+<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />

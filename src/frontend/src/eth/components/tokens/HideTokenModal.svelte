@@ -12,7 +12,7 @@
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let from: NavigationTarget | undefined;
+	export let fromRoute: NavigationTarget | undefined;
 
 	let selectedToken: OptionErc20UserToken;
 
@@ -42,4 +42,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadErc20UserTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} {from} />
+<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />
