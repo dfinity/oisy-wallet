@@ -205,6 +205,7 @@ export class AddressBookPage extends Homepage {
 
 			try {
 				await expect(networkContactLocator).toBeVisible({ timeout });
+
 				return;
 			} catch (_error) {
 				// Fall through to more generic selector
