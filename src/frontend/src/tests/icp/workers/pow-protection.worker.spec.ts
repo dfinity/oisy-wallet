@@ -22,6 +22,7 @@ describe('pow-protector.worker', () => {
 	let spyCreatePowChallenge: MockInstance;
 	let spyAllowSigning: MockInstance;
 	let spySolvePowChallenge: MockInstance;
+	let spyHasRequiredCycles: MockInstance;
 
 	let originalPostmessage: unknown;
 
@@ -94,6 +95,11 @@ describe('pow-protector.worker', () => {
 		spySolvePowChallenge = vi
 			.spyOn(powProtectorServices, 'solvePowChallenge')
 			.mockResolvedValue(42n);
+
+		// Mock hasRequiredCycles to return false so the scheduler logic is executed
+		spyHasRequiredCycles = vi
+			.spyOn(powProtectorServices, 'hasRequiredCycles')
+			.mockResolvedValue(false);
 	});
 
 	afterEach(() => {

@@ -1,17 +1,9 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { POW_FEATURE_ENABLED } from '$env/pow.env';
-import { allowance } from '$icp/api/icrc-ledger.api';
-import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
+import { hasRequiredCycles } from '$icp/services/pow-protector.services';
 import { allowSigning } from '$lib/api/backend.api';
-import {
-	BACKEND_CANISTER_ID,
-	BACKEND_CANISTER_PRINCIPAL,
-	SIGNER_CANISTER_ID
-} from '$lib/constants/app.constants';
-import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -27,8 +19,7 @@ import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -43,33 +34,10 @@ import { get } from 'svelte/store';
  * @returns {Promise<boolean>} A promise resolving to `true` if the required cycles are met or exceeded,
  * otherwise `false` if insufficient cycles are detected or an error occurs during processing.
  */
-export const hasRequiredCycles = async (): Promise<boolean> => {
+export const handleInsufficientCycles = async (): Promise<boolean> => {
 	try {
 		const { identity } = get(authStore);
-
-		assertNonNullish(identity);
-		assertNonNullish(SIGNER_CANISTER_ID);
-
-		console.warn(BACKEND_CANISTER_ID);
-
-		const allowanceResult = await allowance({
-			identity,
-			certified: false,
-			ledgerCanisterId: IC_CYCLES_LEDGER_CANISTER_ID,
-			owner: {
-				owner: BACKEND_CANISTER_PRINCIPAL,
-				subaccount: undefined
-			},
-			spender: {
-				owner: Principal.fromText(SIGNER_CANISTER_ID),
-				subaccount: getIcrcSubaccount(identity.getPrincipal())
-			}
-		});
-
-		if (allowanceResult.allowance >= POW_MIN_CYCLES_THRESHOLD) {
-			// The user has enough cycles to continue
-			return true;
-		}
+		return await hasRequiredCycles({ identity });
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
 		await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
