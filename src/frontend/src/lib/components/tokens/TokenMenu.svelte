@@ -18,6 +18,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { afterNavigate } from '$app/navigation';
+	import type { NavigationTarget } from '@sveltejs/kit';
 
 	export let testId: string | undefined = undefined;
 
