@@ -74,7 +74,7 @@
 			metadata: {
 				tokenId: `${deletedToken.id.description}`,
 				tokenSymbol: deletedToken.symbol,
-				address: `${address}`,
+				...(nonNullish(address) && { address: `${address}` }),
 				networkId: `${deletedToken.network.id.description}`
 			}
 		});
