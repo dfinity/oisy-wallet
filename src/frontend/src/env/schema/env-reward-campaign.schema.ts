@@ -26,7 +26,31 @@ export const RewardCampaignSchema = z.object({
 			description: z.string(),
 			shareHref: z.string()
 		}),
+		referral: z
+			.object({
+				title: z.string(),
+				banner: z.string(),
+				description: z.string(),
+				shareHref: z.string()
+			})
+			.optional(),
 		leaderboard: z
+			.object({
+				title: z.string(),
+				banner: z.string(),
+				description: z.string(),
+				shareHref: z.string()
+			})
+			.optional(),
+		referrer: z
+			.object({
+				title: z.string(),
+				banner: z.string(),
+				description: z.string(),
+				shareHref: z.string()
+			})
+			.optional(),
+		referee: z
 			.object({
 				title: z.string(),
 				banner: z.string(),

@@ -35,6 +35,7 @@ interface I18nCore {
 		add: string;
 		more_items: string;
 		select: string;
+		language: string;
 	};
 	info: { test_banner: string };
 	alt: {
@@ -43,6 +44,7 @@ interface I18nCore {
 		back: string;
 		open_details: string;
 		close_details: string;
+		switch_language: string;
 	};
 	warning: { do_not_close: string };
 }
@@ -953,15 +955,6 @@ interface I18nReferral {
 			learn_more: string;
 		};
 		error: { loading_referrer_info: string; setting_referrer: string };
-	};
-	reward: {
-		text: {
-			title: string;
-			content_title: string;
-			content_text: string;
-			share: string;
-			open_wallet: string;
-		};
 	};
 }
 
