@@ -4,7 +4,8 @@ import {
 	setIdbEthAddress,
 	updateIdbEthAddressLastUsage
 } from '$lib/api/idb-addresses.api';
-import { getEthAddress } from '$lib/api/signer.api';
+import { getEthAddress as getSignerEthAddress } from '$lib/api/signer.api';
+import { deriveEthAddress } from '$lib/ic-pub-key/src/cli';
 import {
 	certifyAddress,
 	loadIdbTokenAddress,
@@ -17,16 +18,36 @@ import type { EthAddress } from '$lib/types/address';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
+import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
+	const signerAddress = await getSignerEthAddress({
+		identity,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	try {
+		const derivedEthAddress = nonNullish(identity)
+			? deriveEthAddress(identity.getPrincipal().toString())
+			: undefined;
+
+		if (derivedEthAddress !== signerAddress) {
+			console.warn(
+				`Derived Ethereum address (${derivedEthAddress}) does not match the one from the signer canister (${signerAddress}).`
+			);
+		}
+	} catch (error) {
+		console.error('Error on Ethereum address:', error);
+	}
+
+	return signerAddress;
+};
 
 export const loadEthAddress = (): Promise<ResultSuccess> =>
 	loadTokenAddress<EthAddress>({
 		networkId: ETHEREUM_NETWORK_ID,
-		getAddress: (identity: OptionIdentity) =>
-			getEthAddress({
-				identity,
-				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			}),
+		getAddress: getEthAddress,
 		setIdbAddress: setIdbEthAddress,
 		addressStore: ethAddressStore
 	});
@@ -44,7 +65,7 @@ const certifyEthAddress = (address: EthAddress): Promise<ResultSuccess<string>> 
 		networkId: ETHEREUM_NETWORK_ID,
 		address,
 		getAddress: (identity: OptionIdentity) =>
-			getEthAddress({
+			getSignerEthAddress({
 				identity,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			}),
