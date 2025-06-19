@@ -2,6 +2,7 @@
 	import type { Identity } from '@dfinity/agent';
 	import { Principal } from '@dfinity/principal';
 	import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -12,6 +13,8 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+
+	export let fromRoute: NavigationTarget | undefined;
 
 	let selectedToken: OptionIcrcCustomToken;
 
@@ -62,4 +65,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} />
+<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />
