@@ -64,7 +64,7 @@
 		}
 	};
 
-	const handleCloseAndNavigate = async (fromRoute: NavigationTarget) => {
+	const handleCloseAndNavigate = async (fromRoute: NavigationTarget | undefined) => {
 		close();
 
 		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot();
