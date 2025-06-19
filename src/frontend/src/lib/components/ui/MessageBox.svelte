@@ -62,7 +62,7 @@
 		{#if closable}
 			<button
 				class="ml-auto p-0.5 text-tertiary"
-				on:click={close}
+				onclick={close}
 				aria-label={$i18n.core.text.close}
 			>
 				<IconClose />
