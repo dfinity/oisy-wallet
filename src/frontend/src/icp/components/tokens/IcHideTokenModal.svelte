@@ -48,7 +48,7 @@
 
 		trackEvent({
 			name: TRACK_HIDE_TOKEN,
-			metadata: { ledgerCanisterId, indexCanisterId, networkId: 'ICP' }
+			metadata: { ledgerCanisterId, indexCanisterId: `${indexCanisterId}`, networkId: 'ICP' }
 		});
 
 		await setCustomToken({
