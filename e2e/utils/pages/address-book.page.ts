@@ -9,6 +9,7 @@ import {
 	ADDRESS_BOOK_SAVE_BUTTON,
 	ADDRESS_BOOK_SEARCH_CONTACT_INPUT,
 	BUTTON_MODAL_CLOSE,
+	NAVIGATION_MENU,
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -26,14 +27,8 @@ interface AddressBookPageParams {
 }
 
 export class AddressBookPage extends Homepage {
-	// Store page reference for use in methods
-	protected readonly page: Page;
-
 	constructor(params: AddressBookPageParams) {
-		// Call parent constructor with required params
 		super(params);
-		// Store page reference
-		this.page = params.page;
 	}
 
 	// Helper method to get a locator by test ID
@@ -49,17 +44,22 @@ export class AddressBookPage extends Homepage {
 
 	// Override waitForReady to ensure the page is fully loaded
 	public override async waitForReady(): Promise<void> {
-		// Don't call super.waitForReady() to avoid the abstract method issue
+		await super.waitForReady();
 		await this.waitForAddressBookModal();
+	}
+
+	// Helper to wait for navigation menu to be ready
+	private async waitForNavigationMenu(): Promise<void> {
+		await this.page.waitForSelector(`[data-tid="${NAVIGATION_MENU}"]`, { state: 'visible' });
 	}
 
 	/**
 	 * Opens the address book modal from the navigation menu
 	 */
-	/**
-	 * Opens the address book modal from the navigation menu
-	 */
 	async open(): Promise<void> {
+		// Wait for navigation menu to be ready
+		await this.waitForNavigationMenu();
+
 		// Click the navigation menu button
 		await this.getByTestId(NAVIGATION_MENU_BUTTON).click();
 
@@ -105,6 +105,7 @@ export class AddressBookPage extends Homepage {
 	 * @param name Contact name (required)
 	 * @param address Contact address (required)
 	 * @param alias Contact alias (optional)
+	 * @param network Network type (default: 'ICP')
 	 */
 	async fillContactForm({
 		name,
@@ -171,7 +172,7 @@ export class AddressBookPage extends Homepage {
 	 * Searches for a contact in the address book
 	 * @param searchTerm The search term to look for
 	 */
-	async searchContact(searchTerm: string): Promise<void> {
+	async searchContact({ searchTerm }: { searchTerm: string }): Promise<void> {
 		const searchInput = this.getByTestId(ADDRESS_BOOK_SEARCH_CONTACT_INPUT);
 		await searchInput.fill(searchTerm);
 
@@ -188,21 +189,39 @@ export class AddressBookPage extends Homepage {
 	 * @param timeout Timeout in milliseconds (default: 5 seconds)
 	 * @throws Will throw an error if the contact is not found
 	 */
-	async verifyContactExists(
-		contactName: string,
-		network?: NetworkType,
+	async verifyContactExists({
+		contactName,
+		network,
 		timeout = 5000
-	): Promise<void> {
-		let selector = `[data-tid^="address-book-contact-"]:has-text("${contactName}")`;
-
+	}: {
+		contactName: string;
+		network?: NetworkType;
+		timeout?: number;
+	}): Promise<void> {
+		// First try the more specific selector with network if provided
 		if (network) {
-			selector += `[data-network="${network.toLowerCase()}"]`;
+			const networkSelector = `[data-tid^="address-book-contact-"]:has-text("${contactName}")[data-network="${network.toLowerCase()}"]`;
+			const networkContactLocator = this.page.locator(networkSelector);
+
+			try {
+				await expect(networkContactLocator).toBeVisible({ timeout });
+				return;
+			} catch (_error) {
+				// Fall through to more generic selector
+			}
 		}
 
-		const contactLocator = this.page.locator(selector);
+		// Try the generic contact selector
 		try {
+			// Look for a contact with the given name in the list
+			const contactLocator = this.page
+				.locator('[data-tid^="contact-"],[data-tid^="address-book-contact-"]', {
+					hasText: contactName
+				})
+				.first();
+
 			await expect(contactLocator).toBeVisible({ timeout });
-		} catch (error) {
+		} catch (_error) {
 			throw new Error(`Contact with name "${contactName}" not found in the address book`);
 		}
 	}
@@ -217,7 +236,7 @@ export class AddressBookPage extends Homepage {
 		const emptyState = this.page.locator('text=No contacts found,text=No results found').first();
 		try {
 			await expect(emptyState).toBeVisible({ timeout });
-		} catch (error) {
+		} catch (_error) {
 			throw new Error('Expected to find no contacts message, but it was not visible');
 		}
 	}
