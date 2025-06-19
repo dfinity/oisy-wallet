@@ -41,6 +41,7 @@
 				<AboutWhyOisy trackEventSource={LANDING_PAGE_ROUTE} />
 				<DocumentationLink shortTextOnMobile trackEventSource={LANDING_PAGE_ROUTE} />
 				<ThemeSwitchButton />
+				<Menu />
 			</div>
 		{/if}
 	</div>
