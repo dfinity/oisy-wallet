@@ -182,7 +182,7 @@ type Config = record {
 };
 type ContactImage = record {
 	data : blob;
-	mime_type : text;
+	mime_type : text
 };
 
 type Contact = record {
@@ -190,7 +190,7 @@ type Contact = record {
 	name : text;
 	update_timestamp_ns : nat64;
 	addresses : vec ContactAddressData;
-	image : opt ContactImage;
+	image : opt ContactImage
 };
 type ContactAddressData = record {
 	label : opt text;
@@ -202,7 +202,7 @@ type ContactError = variant {
 	RandomnessError;
 	ImageTooLarge;
 	TooManyContactsWithImages;
-	CanisterMemoryNearCapacity;
+	CanisterMemoryNearCapacity
 };
 type CreateChallengeError = variant {
 	ChallengeInProgress;
@@ -215,9 +215,9 @@ type CreateChallengeResponse = record {
 	start_timestamp_ms : nat64;
 	expiry_timestamp_ms : nat64
 };
-type CreateContactRequest = record { 
+type CreateContactRequest = record {
 	name : text;
-	image : opt ContactImage;
+	image : opt ContactImage
 };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
 type CreatePowChallengeResult = variant {
