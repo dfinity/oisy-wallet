@@ -1,10 +1,11 @@
+import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
 	getIdbEthAddress,
 	setIdbEthAddress,
 	updateIdbEthAddressLastUsage
 } from '$lib/api/idb-addresses.api';
-import { getEthAddress } from '$lib/api/signer.api';
+import { getEthAddress as getSignerEthAddress } from '$lib/api/signer.api';
 import {
 	certifyAddress,
 	loadIdbTokenAddress,
@@ -19,14 +20,21 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { get } from 'svelte/store';
 
+const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
+	if (FRONTEND_DERIVATION_ENABLED) {
+		// TODO: Implement the derivation logic here.
+	}
+
+	return await getSignerEthAddress({
+		identity,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+};
+
 export const loadEthAddress = (): Promise<ResultSuccess> =>
 	loadTokenAddress<EthAddress>({
 		networkId: ETHEREUM_NETWORK_ID,
-		getAddress: (identity: OptionIdentity) =>
-			getEthAddress({
-				identity,
-				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			}),
+		getAddress: getEthAddress,
 		setIdbAddress: setIdbEthAddress,
 		addressStore: ethAddressStore
 	});
@@ -43,11 +51,7 @@ const certifyEthAddress = (address: EthAddress): Promise<ResultSuccess<string>> 
 	certifyAddress<EthAddress>({
 		networkId: ETHEREUM_NETWORK_ID,
 		address,
-		getAddress: (identity: OptionIdentity) =>
-			getEthAddress({
-				identity,
-				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			}),
+		getAddress: getEthAddress,
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage,
 		addressStore: ethAddressStore
 	});

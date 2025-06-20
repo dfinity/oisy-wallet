@@ -1,26 +1,36 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
+	import { allKnownIcrcTokensLedgerCanisterIds } from '$icp/derived/icrc.derived';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
+	import { isTokenIcrc } from '$icp/utils/icrc.utils';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token as TokenType } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		fromRoute: NavigationTarget | undefined;
+	}
+	let { fromRoute }: Props = $props();
 
-	let twinToken: TokenType | undefined;
-	$: twinToken = ($pageToken as OptionIcCkToken)?.twinToken;
+	let twinToken = $derived(($pageToken as OptionIcCkToken)?.twinToken);
 
-	let ckToken: OptionIcCkToken;
-	$: ckToken = $pageToken as OptionIcCkToken;
+	let ckToken = $derived($pageToken as OptionIcCkToken);
+
+	let undeletableToken = $derived(
+		nonNullish($pageToken) && isTokenIcrc($pageToken)
+			? $allKnownIcrcTokensLedgerCanisterIds.some(
+					(ledgerCanisterId) => $pageToken.ledgerCanisterId === ledgerCanisterId
+				)
+			: true
+	);
 </script>
 
-<TokenModal token={$pageToken} {fromRoute}>
+<TokenModal token={$pageToken} isDeletable={!undeletableToken} {fromRoute}>
 	{#if nonNullish(twinToken)}
 		<ModalListItem>
 			{#snippet label()}
