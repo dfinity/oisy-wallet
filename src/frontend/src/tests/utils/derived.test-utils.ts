@@ -119,7 +119,7 @@ export const testDerivedUpdates = async (changeStore: () => void) => {
 
 	try {
 		// Initialization call
-		derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledTimes(1));
+		derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledOnce());
 
 		changeStore();
 
