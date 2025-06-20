@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -11,6 +12,8 @@
 	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
+	export let fromRoute: NavigationTarget | undefined;
+
 	let explorerUrl: string | undefined;
 	$: explorerUrl = isNetworkSolana($pageToken?.network)
 		? $pageToken.network.explorerUrl
@@ -21,7 +24,7 @@
 		nonNullish($pageToken) && isTokenSpl($pageToken) ? $pageToken.address : undefined;
 </script>
 
-<TokenModal token={$pageToken}>
+<TokenModal token={$pageToken} {fromRoute}>
 	{#if nonNullish(tokenAddress)}
 		<ModalListItem>
 			{#snippet label()}

@@ -69,7 +69,9 @@
 			"refer_a_friend": "Freunde werben",
 			"address_book": "Adressbuch",
 			"hide_balances": "Salden verbergen",
-			"show_balances": "Salden anzeigen"
+			"show_balances": "Salden anzeigen",
+			"privacy_mode_enabled": "",
+			"privacy_mode_disabled": ""
 		},
 		"alt": {
 			"tokens": "Zum Vermögenswerte-Bereich gehen",

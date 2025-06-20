@@ -69,7 +69,9 @@
 			"refer_a_friend": "Refer your friends",
 			"address_book": "Address book",
 			"hide_balances": "Hide balances",
-			"show_balances": "Show balances"
+			"show_balances": "Show balances",
+			"privacy_mode_enabled": "Privacy mode enabled. Press [P] to show your balances again.",
+			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances."
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
