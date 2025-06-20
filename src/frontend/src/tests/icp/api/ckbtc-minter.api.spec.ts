@@ -55,7 +55,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.retrieveBtcWithApproval).toHaveBeenCalledTimes(1);
+			expect(canisterMock.retrieveBtcWithApproval).toHaveBeenCalledOnce();
 			expect(canisterMock.retrieveBtcWithApproval).toHaveBeenCalledWith({
 				amount,
 				address: mockBtcAddress
@@ -84,7 +84,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.updateBalance).toHaveBeenCalledTimes(1);
+			expect(canisterMock.updateBalance).toHaveBeenCalledOnce();
 			expect(canisterMock.updateBalance).toHaveBeenCalledWith({
 				owner: mockIdentity.getPrincipal()
 			});
@@ -117,7 +117,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.getMinterInfo).toHaveBeenCalledTimes(1);
+			expect(canisterMock.getMinterInfo).toHaveBeenCalledOnce();
 			expect(canisterMock.getMinterInfo).toHaveBeenCalledWith({ certified: true });
 		});
 
@@ -126,7 +126,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.getMinterInfo).toHaveBeenCalledTimes(1);
+			expect(canisterMock.getMinterInfo).toHaveBeenCalledOnce();
 			expect(canisterMock.getMinterInfo).toHaveBeenCalledWith({ certified: false });
 		});
 
@@ -150,7 +150,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(mockBtcAddress);
 
-			expect(canisterMock.getBtcAddress).toHaveBeenCalledTimes(1);
+			expect(canisterMock.getBtcAddress).toHaveBeenCalledOnce();
 			expect(canisterMock.getBtcAddress).toHaveBeenCalledWith({
 				owner: mockIdentity.getPrincipal()
 			});
@@ -185,7 +185,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledTimes(1);
+			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledOnce();
 			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledWith({ amount, certified: true });
 		});
 
@@ -194,7 +194,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledTimes(1);
+			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledOnce();
 			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledWith({ certified: true });
 		});
 
@@ -203,7 +203,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledTimes(1);
+			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledOnce();
 			expect(canisterMock.estimateWithdrawalFee).toHaveBeenCalledWith({ amount, certified: false });
 		});
 
@@ -233,7 +233,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledTimes(1);
+			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledOnce();
 			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledWith({ certified: true });
 		});
 
@@ -242,7 +242,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledTimes(1);
+			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledOnce();
 			expect(canisterMock.retrieveBtcStatusV2ByAccount).toHaveBeenCalledWith({ certified: false });
 		});
 
@@ -268,7 +268,7 @@ describe('ckbtc-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.getKnownUtxos).toHaveBeenCalledTimes(1);
+			expect(canisterMock.getKnownUtxos).toHaveBeenCalledOnce();
 			expect(canisterMock.getKnownUtxos).toHaveBeenCalledWith({
 				owner: mockIdentity.getPrincipal()
 			});
