@@ -98,7 +98,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(fee);
 
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledWith({
 				certified: true
 			});
