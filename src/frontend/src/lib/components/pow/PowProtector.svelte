@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal, themeStore, type ProgressStep } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import { POW_FEATURE_ENABLED } from '$env/pow.env';
@@ -9,12 +9,12 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
 	import { errorSignOut } from '$lib/services/auth.services';
-	import { hasRequiredCycles } from '$lib/services/loader.services';
+	import { handleInsufficientCycles } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
 	import type { StaticStep } from '$lib/types/steps';
 	import type { NonEmptyArray } from '$lib/types/utils';
-	import { replacePlaceholders, replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		children?: Snippet;
@@ -76,7 +76,7 @@
 	] as NonEmptyArray<ProgressStep | StaticStep>);
 
 	const checkCycles = async (): Promise<void> => {
-		hasCycles = await hasRequiredCycles();
+		hasCycles = await handleInsufficientCycles();
 		checkAttempts++;
 
 		if (hasCycles) {
@@ -104,7 +104,7 @@
 	onMount(async () => {
 		// Initial check
 		if (POW_FEATURE_ENABLED) {
-			hasCycles = await hasRequiredCycles();
+			hasCycles = await handleInsufficientCycles();
 			loading = true;
 
 			// Always initialize the worker regardless of cycles status
@@ -162,13 +162,13 @@
 {/if}
 
 <style lang="scss">
-	:root:has(.insufficient-cycles-modal) {
-		--alert-max-width: 90vw;
-		--alert-max-height: initial;
-		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
+  :root:has(.insufficient-cycles-modal) {
+    --alert-max-width: 90vw;
+    --alert-max-height: initial;
+    --dialog-border-radius: calc(var(--border-radius-sm) * 3);
+  }
 
-	.banner-container {
-		width: 100%;
-	}
+  .banner-container {
+    width: 100%;
+  }
 </style>
