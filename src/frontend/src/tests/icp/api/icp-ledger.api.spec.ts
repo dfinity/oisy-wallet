@@ -39,7 +39,7 @@ describe('icp-ledger.api', () => {
 
 			expect(result).toEqual(mockBlock);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
 				amount,
 				to: AccountIdentifier.fromHex(mockPrincipalText2)
@@ -83,7 +83,7 @@ describe('icp-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledWith({
 				amount,
 				to: toAccount,
@@ -98,7 +98,7 @@ describe('icp-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledWith({
 				amount,
 				to: toAccount,

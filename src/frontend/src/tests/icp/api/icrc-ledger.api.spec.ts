@@ -60,7 +60,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockMetadata);
 
-			expect(ledgerCanisterMock.metadata).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.metadata).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.metadata).toHaveBeenCalledWith({
 				certified: true
 			});
@@ -71,7 +71,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockMetadata);
 
-			expect(ledgerCanisterMock.metadata).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.metadata).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.metadata).toHaveBeenCalledWith({ certified: false });
 		});
 
@@ -109,7 +109,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(fee);
 
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledWith({ certified: false });
 		});
 
@@ -141,7 +141,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(tokens).toEqual(balanceE8s);
 
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith({
 				certified: true,
 				...account
@@ -153,7 +153,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(tokens).toEqual(balanceE8s);
 
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith({ certified: false, ...account });
 		});
 
@@ -195,7 +195,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
 				amount,
 				to: toAccount,
@@ -210,7 +210,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
 				amount,
 				to: toAccount,
@@ -258,7 +258,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.approve).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.approve).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.approve).toHaveBeenCalledWith({
 				amount,
 				spender: spenderAccount,
@@ -274,7 +274,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.approve).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.approve).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.approve).toHaveBeenCalledWith({
 				amount,
 				spender: spenderAccount,
@@ -327,7 +327,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
 				certified: true,
 				account: {
@@ -353,7 +353,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
 				certified: false,
 				account: {
@@ -378,7 +378,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
 				certified: true,
 				account: {
@@ -403,7 +403,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
 				certified: true,
 				account: {
@@ -428,7 +428,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
 				certified: true,
 				account: {
@@ -456,7 +456,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
 				certified: true,
 				account: {
