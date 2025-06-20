@@ -1,6 +1,7 @@
 import { balance, transactions, transfer } from '$icp/api/xtc-ledger.api';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { Dip20TransactionWithId } from '$icp/types/api';
+import { XTC_LEDGER_CANISTER_ID } from '$lib/constants/app.constants';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import type { IcrcAccount } from '@dfinity/ledger-icrc';
 import { toNullable } from '@dfinity/utils';
@@ -18,6 +19,7 @@ describe('xtc-ledger.api', () => {
 	describe('transfer', () => {
 		const params = {
 			owner: mockPrincipal,
+			ledgerCanisterId: XTC_LEDGER_CANISTER_ID,
 			identity: mockIdentity,
 			to: mockPrincipal2,
 			amount: 100_000n
@@ -42,6 +44,7 @@ describe('xtc-ledger.api', () => {
 			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
 				to: params.to,
 				amount: params.amount,
+				ledgerCanisterId: XTC_LEDGER_CANISTER_ID,
 				...account
 			});
 		});
@@ -54,6 +57,7 @@ describe('xtc-ledger.api', () => {
 	describe('balance', () => {
 		const params = {
 			owner: mockPrincipal,
+			ledgerCanisterId: XTC_LEDGER_CANISTER_ID,
 			identity: mockIdentity
 		};
 
@@ -79,6 +83,7 @@ describe('xtc-ledger.api', () => {
 
 	describe('transactions', () => {
 		const params = {
+			ledgerCanisterId: XTC_LEDGER_CANISTER_ID,
 			identity: mockIdentity,
 			certified: true
 		};
