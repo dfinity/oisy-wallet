@@ -3,9 +3,11 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { I18N_ENABLED } from '$env/i18n';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
+	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -41,6 +43,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { privacyModeStore } from '$lib/stores/settings.store';
+	import { toastsShow } from '$lib/stores/toasts.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -61,6 +64,23 @@
 	});
 
 	const hidePopover = () => (visible = false);
+
+	const handlePrivacyToggle = () => {
+		const nextValue = !$isPrivacyMode;
+
+		privacyModeStore.set({
+			key: 'privacy-mode',
+			value: { enabled: nextValue }
+		});
+
+		toastsShow({
+			text: nextValue
+				? $i18n.navigation.text.privacy_mode_enabled
+				: $i18n.navigation.text.privacy_mode_disabled,
+			level: 'info',
+			duration: 2000
+		});
+	};
 
 	const settingsRoute = $derived(isRouteSettings(page));
 	const dAppExplorerRoute = $derived(isRouteDappExplorer(page));
@@ -92,14 +112,14 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div
-		class="max-w-68 flex flex-col gap-1"
+		class="max-w-68 mb-1 flex flex-col gap-1"
 		data-tid={NAVIGATION_MENU}
 		onclick={hidePopover}
 		role="none"
 	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				<ButtonAuthenticateWithLicense fullWidth />
+				<ButtonAuthenticateWithLicense fullWidth needHelpLink={false} licenseAlignment="center" />
 			</span>
 			<Hr />
 		{/if}
@@ -109,8 +129,7 @@
 					? $i18n.navigation.alt.show_balances
 					: $i18n.navigation.alt.hide_balances}
 				testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
-				onclick={() =>
-					privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })}
+				onclick={handlePrivacyToggle}
 				tag={$i18n.shortcuts.privacy_mode}
 			>
 				{#if $isPrivacyMode}
@@ -205,13 +224,24 @@
 			</a>
 
 			<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
+		{/if}
+	</div>
 
-			<Hr />
+	<Hr />
+
+	<div class="max-w-68 flex flex-col gap-3 pt-3">
+		{#if I18N_ENABLED}
+			<MenuLanguageSelector />
+		{/if}
+
+		{#if $authSignedIn}
+			{#if I18N_ENABLED}
+				<Hr />
+			{/if}
 
 			<SignOut on:icLogoutTriggered={hidePopover} />
 
 			<Hr />
-
 			<span class="text-center text-sm text-tertiary">
 				<LicenseLink noUnderline />
 			</span>
