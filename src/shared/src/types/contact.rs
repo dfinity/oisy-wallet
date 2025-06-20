@@ -1,8 +1,15 @@
 use std::collections::BTreeMap;
 
 use candid::{CandidType, Deserialize};
+use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
+
+/// Maximum allowed size for a contact image in bytes (100KB)
+pub const MAX_CONTACT_IMAGE_SIZE_BYTES: usize = 100 * 1024;
+
+/// Maximum number of contacts with images per principal
+pub const MAX_CONTACTS_WITH_IMAGES_PER_PRINCIPAL: usize = 100;
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
@@ -11,6 +18,17 @@ pub struct Contact {
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
     pub update_timestamp_ns: u64,
+    /// Optional image data for the contact
+    pub image: Option<ContactImage>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
+pub struct ContactImage {
+    /// Binary image data
+    pub data: ByteBuf,
+    /// MIME type of the image (e.g., "image/jpeg", "image/png")
+    pub mime_type: String,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -24,12 +42,16 @@ pub struct ContactAddressData {
 pub struct StoredContacts {
     pub contacts: BTreeMap<u64, Contact>,
     pub update_timestamp_ns: u64,
+    /// Count of contacts with images to enforce limits
+    pub contacts_with_images_count: usize,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
 pub struct CreateContactRequest {
     pub name: String,
+    /// Optional image for the contact
+    pub image: Option<ContactImage>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -39,6 +61,8 @@ pub struct UpdateContactRequest {
     pub name: String,
     pub addresses: Vec<ContactAddressData>,
     pub update_timestamp_ns: u64,
+    /// Optional image for the contact
+    pub image: Option<ContactImage>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -46,4 +70,10 @@ pub enum ContactError {
     ContactNotFound,
     InvalidContactData,
     RandomnessError,
+    /// Image is too large
+    ImageTooLarge,
+    /// Maximum number of contacts with images reached
+    TooManyContactsWithImages,
+    /// Canister memory is near capacity
+    CanisterMemoryNearCapacity,
 }
