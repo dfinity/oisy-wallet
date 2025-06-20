@@ -4,6 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 
 	export let dAppDescription: OisyDappDescription;
 	$: ({ name: dAppName, logo, oneLiner, tags } = dAppDescription);
@@ -17,7 +18,7 @@
 	<span class="absolute -top-5 left-4">
 		<Logo
 			src={logo}
-			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppName })}
+			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: resolveText({i18n: $i18n, path: dAppName}) })}
 			size="xl"
 			ring
 			color="white"

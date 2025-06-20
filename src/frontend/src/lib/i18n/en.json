@@ -179,6 +179,56 @@
 			"submit_your_dapp": "Submit your app to be shown in the app-explorer",
 			"tags": "Tags related to $dAppName",
 			"website": "Image of $dAppName"
+		},
+		"descriptions": {
+			"kongswap": {
+				"name": "KongSwap",
+				"one_liner": "The one stop token shop - Trade tokens across all chains with ease using KongSwap.",
+				"description": "KongSwap is a fully decentralized exchange (DEX) offering bridgeless cross-chain trading across ICP, Bitcoin, Ethereum, and Solana. <br/><br/>Using Chain Fusion technology and the Internet Computer Protocol, it reduces fees, simplifies user experience, and avoids liquidity fragmentation. Both frontend and backend operate on-chain via smart contracts, delivering a seamless DeFi experience.",
+				"carousel": {
+					"text": "Swap tokens on DEX",
+					"call_to_action": "Try KongSwap"
+				}
+			},
+			"openchat": {
+				"name": "OpenChat",
+				"one_liner": "Decentralized alternative to WhatsApp.",
+				"call_to_action": "Go to OpenChat",
+				"description": "OpenChat is a fully featured chat application running end-to-end on the Internet Computer blockchain.<br/><br/>OpenChat is governed by its community as a DAO and has its own CHAT token. CHAT tokens are given as rewards to users to turbo-charge growth and to create a team of millions of advocates allowing OpenChat to become a viable challenger to centralized big tech competitors!",
+				"stats": "80,000+ users",
+				"carousel": {
+					"text": "OpenChat - where web3 communicates",
+					"call_to_action": "Show more"
+				}
+			},
+			"decideid": {
+				"one_liner": "Unique Identity Verification for Trustworthy Digital Engagements.",
+				"callToAction": "Open DecideID",
+				"stats": "50,000+ inference requests",
+				"description": "Decide ID is at the heart of the Decide AI system, ensuring trust and security through its unique Proof of Personhood (PoP) methodology. When you join, you'll go through a verification process where you provide multiple proofs and complete a special challenge to confirm your identity. This makes sure that every user is real, unique, and not a bot. Your Principal ID, a unique on-chain identifier, is created during this process. It can be used across various applications that require verified personhood, ensuring a secure and seamless integration into any app’s sign-up or login process. Plus, the use of Zero-Knowledge proofs means your private data, like biometric information, remains confidential and safe.<br/><br/>With Decide ID, enjoy a flexible, secure, and privacy-first way to verify and engage online.",
+				"carousel": {
+					"text": "Enjoy a privacy-first way to verify and engage online",
+					"call_to_action": "Interested?"
+				}
+			},
+			"icpswap": {
+				"name": "ICPSwap",
+				"one_liner": "ICPSwap is an AMM DEX built completely onchain that is the premier hub for full-stack financial and DAO services on ICP.",
+				"call_to_action": "Meet the future",
+				"description": "The Hub of Future Decentralized Finance!<br/>Reinventing the Exchange as a Hub, ICPSwap provides full-stack financial, market, and DAO services on the Internet Computer. Based on the underlying technology of DFINITY's Internet Computer, ICPSwap establishes an ecosystem of genuinely decentralized finance by refactoring the way users and developers build projects jointly."
+			},
+			"nnsdapp": {
+				"name": "NNS Dapp",
+				"one_liner": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI.",
+				"call_to_action": "Get engaged",
+				"description": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI. Served completely end-to-end through blockchain, this decentralized dapp allows you to easily perform the following actions:<br/><ul><li>Send and receive tokens (ICP, ckBTC, CHAT, etc.)</li><li>Stake and manage neurons</li><li>Vote on the governance of the Internet Computer and SNSes</li><li>Participate in decentralization swaps</li><li>Create and top up canisters</li><li>Earn governance rewards</li></ul>"
+			},
+			"uniswap": {
+				"name": "Uniswap",
+				"one_liner": "The largest onchain marketplace. Buy and sell crypto on Ethereum and 11+ other chains.",
+				"call_to_action": "Let’s get swappin'",
+				"description": "Uniswap is a decentralized cryptocurrency exchange that uses a set of smart contracts to create liquidity pools for the execution of trades. It is an open source project and falls into the category of a DeFi product because it uses smart contracts to facilitate trades instead of a centralized exchange."
+			}
 		}
 	},
 	"rewards": {
