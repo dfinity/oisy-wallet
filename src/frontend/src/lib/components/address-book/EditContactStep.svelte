@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Popover } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
@@ -40,6 +41,8 @@
 		onDeleteContact,
 		onDeleteAddress
 	}: Props = $props();
+	let visible = $state(false);
+	let menuButton = $state<HTMLButtonElement | undefined>();
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
@@ -52,18 +55,21 @@
 					data-tid={`avatar-badge-${contact.name}`}
 				>
 					<ButtonIcon
-						styleClass="m-0"
+						bind:button={menuButton}
+						onclick={() => (visible = true)}
 						colorStyle="tertiary-alt"
 						transparent
 						link={false}
 						ariaLabel={$i18n.core.text.edit}
-						onclick={() => onEdit(contact)}
-						testId={CONTACT_HEADER_EDITING_EDIT_BUTTON}
 					>
 						{#snippet icon()}
 							<IconPencil />
 						{/snippet}
 					</ButtonIcon>
+					<Popover bind:visible anchor={menuButton} invisibleBackdrop direction="rtl">
+						<div><p>Set contact image</p></div>
+						<!-- LINKS FOR avatar upload -->
+					</Popover>
 				</span>
 			</div>
 		{/snippet}
