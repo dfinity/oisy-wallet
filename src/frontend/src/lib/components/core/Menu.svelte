@@ -142,7 +142,6 @@
 
 			{#if addressesOption}
 				<MenuAddresses on:icMenuClick={hidePopover} />
-				<Hr />
 			{/if}
 
 			<ButtonMenu
@@ -153,8 +152,6 @@
 				<IconUserSquare size="20" />
 				{$i18n.navigation.text.address_book}
 			</ButtonMenu>
-
-			<Hr />
 
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.refer_a_friend}
