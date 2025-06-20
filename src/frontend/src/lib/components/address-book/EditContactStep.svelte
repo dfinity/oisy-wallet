@@ -45,7 +45,27 @@
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
 	<LogoButton hover={false} condensed={true}>
 		{#snippet logo()}
-			<Avatar name={contact.name} variant="xs" styleClass="md:text-[19.2px]"></Avatar>
+			<div class="relative flex">
+				<Avatar name={contact.name} variant="xs" styleClass="md:text-[19.2px]"></Avatar>
+				<span
+					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+					data-tid={`avatar-badge-${contact.name}`}
+				>
+					<ButtonIcon
+						styleClass="m-0"
+						colorStyle="tertiary-alt"
+						transparent
+						link={false}
+						ariaLabel={$i18n.core.text.edit}
+						onclick={() => onEdit(contact)}
+						testId={CONTACT_HEADER_EDITING_EDIT_BUTTON}
+					>
+						{#snippet icon()}
+							<IconPencil />
+						{/snippet}
+					</ButtonIcon>
+				</span>
+			</div>
 		{/snippet}
 
 		{#snippet title()}
