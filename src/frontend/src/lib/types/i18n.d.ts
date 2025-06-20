@@ -70,6 +70,8 @@ interface I18nNavigation {
 		address_book: string;
 		hide_balances: string;
 		show_balances: string;
+		privacy_mode_enabled: string;
+		privacy_mode_disabled: string;
 	};
 	alt: {
 		tokens: string;

@@ -14,8 +14,11 @@ import {
 	NAVIGATION_MENU_VIP_BUTTON,
 	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { privacyModeStore } from '$lib/stores/settings.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('Menu', () => {
@@ -33,12 +36,18 @@ describe('Menu', () => {
 
 	let container: HTMLElement;
 
+	vi.mock('$lib/utils/share.utils', () => ({
+		copyText: vi.fn()
+	}));
+
 	beforeEach(() => {
 		userProfileStore.reset();
 		vi.resetAllMocks();
 		mockAuthStore();
 		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
+		vi.spyOn(toastsStore, 'toastsShow');
+		privacyModeStore.set({ key: 'privacy-mode', value: { enabled: false } });
 	});
 
 	const mockUserData = (powers: Array<string>): UserData => ({
@@ -117,6 +126,46 @@ describe('Menu', () => {
 	it('always renders the referral button', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemReferralButtonSelector });
+	});
+
+	it('enables privacy mode and show toast', async () => {
+		const settingsModule = await import('$lib/stores/settings.store');
+		settingsModule.privacyModeStore.subscribe = (fn) => {
+			fn({ enabled: false });
+			return () => {};
+		};
+
+		await openMenu();
+		const button = (await waitForElement({
+			selector: menuItemPrivacyModeButtonSelector
+		})) as HTMLButtonElement;
+		button.click();
+
+		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
+			text: en.navigation.text.privacy_mode_enabled,
+			level: 'info',
+			duration: 2000
+		});
+	});
+
+	it('disables privacy mode and show toast', async () => {
+		const settingsModule = await import('$lib/stores/settings.store');
+		settingsModule.privacyModeStore.subscribe = (fn) => {
+			fn({ enabled: true });
+			return () => {};
+		};
+
+		await openMenu();
+		const button = (await waitForElement({
+			selector: menuItemPrivacyModeButtonSelector
+		})) as HTMLButtonElement;
+		button.click();
+
+		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
+			text: en.navigation.text.privacy_mode_disabled,
+			level: 'info',
+			duration: 2000
+		});
 	});
 
 	it('should render the logged out version if not signed in', async () => {

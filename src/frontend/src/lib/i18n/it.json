@@ -69,7 +69,9 @@
 			"refer_a_friend": "",
 			"address_book": "",
 			"hide_balances": "",
-			"show_balances": ""
+			"show_balances": "",
+			"privacy_mode_enabled": "",
+			"privacy_mode_disabled": ""
 		},
 		"alt": {
 			"tokens": "",
