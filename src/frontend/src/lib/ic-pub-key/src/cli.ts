@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* istanbul ignore file */
+/* v8 ignore start */
 
 import { Principal } from '@dfinity/principal';
 import { computeAddress } from 'ethers/transaction';
@@ -23,3 +24,5 @@ export const deriveEthAddress = async (user: string): Promise<string> => {
 		await signer_pubkey_with_chain_code.deriveSubkeyWithChainCode(derivation_path);
 	return computeAddress('0x' + eth_pubkey_with_chaincode.public_key.toHex());
 };
+
+/* v8 ignore stop */
