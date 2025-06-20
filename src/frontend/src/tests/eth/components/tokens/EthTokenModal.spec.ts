@@ -27,7 +27,7 @@ describe('EthTokenModal', () => {
 	it('displays all required values including the delete button', () => {
 		const { container } = render(EthTokenModal);
 
-		modalStore.openBtcToken(mockValidErc20Token.id);
+		modalStore.openBtcToken({ id: mockValidErc20Token.id, data: undefined });
 
 		expect(container).toHaveTextContent(mockValidErc20Token.network.name);
 		expect(container).toHaveTextContent(mockValidErc20Token.name);
@@ -48,7 +48,7 @@ describe('EthTokenModal', () => {
 
 		const { container } = render(EthTokenModal);
 
-		modalStore.openBtcToken(mockValidErc20Token.id);
+		modalStore.openBtcToken({ id: mockValidErc20Token.id, data: undefined });
 
 		expect(container).toHaveTextContent(mockValidErc20Token.network.name);
 		expect(container).toHaveTextContent(mockValidErc20Token.name);
