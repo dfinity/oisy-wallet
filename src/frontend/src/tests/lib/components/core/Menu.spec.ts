@@ -14,9 +14,9 @@ import {
 	NAVIGATION_MENU_VIP_BUTTON,
 	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
-import { privacyModeStore } from '$lib/stores/settings.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
@@ -47,7 +47,7 @@ describe('Menu', () => {
 		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 		vi.spyOn(toastsStore, 'toastsShow');
-		privacyModeStore.set({ key: 'privacy-mode', value: { enabled: false } });
+		setPrivacyMode(false);
 	});
 
 	const mockUserData = (powers: Array<string>): UserData => ({
