@@ -1,7 +1,7 @@
-import { decodeIcrcAccount, type IcrcAccount } from '@dfinity/ledger-icrc';
+import { AccountIdentifier } from '@dfinity/ledger-icp';
+import { decodeIcrcAccount, type IcrcAccount, type IcrcSubaccount } from '@dfinity/ledger-icrc';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
-import { sha256 } from '@noble/hashes/sha256';
 
 export const getIcrcAccount = (principal: Principal): IcrcAccount => ({ owner: principal });
 
@@ -10,9 +10,14 @@ export const getIcrcAccount = (principal: Principal): IcrcAccount => ({ owner: p
  * @param principal The principal to derive the subaccount from
  * @returns A 32-byte Uint8Array to be used as an ICRC subaccount
  */
-export const getIcrcSubaccount = (principal: Principal): Uint8Array => {
-	const principalBytes = principal.toUint8Array();
-	return sha256(principalBytes);
+export const getIcrcSubaccount = (principal: Principal): IcrcSubaccount => {
+	const accountIdentifier = AccountIdentifier.fromPrincipal({
+		principal,
+		subAccount: undefined
+	});
+
+	// Convert to Uint8Array (the bytes of the account identifier)
+	return accountIdentifier.toUint8Array();
 };
 
 export const isIcrcAddress = (address: string | undefined): boolean => {

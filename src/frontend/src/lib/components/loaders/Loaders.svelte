@@ -11,33 +11,36 @@
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
+	import PowProtector from '$lib/components/pow/PowProtector.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 </script>
 
 <LoaderUserProfile>
-	<AddressGuard>
-		<Loader>
-			<UrlGuard>
-				<ShortcutGuard>
-					<RewardGuard>
-						<LoaderEthBalances>
-							<LoaderWallets>
-								<ExchangeWorker>
-									<LoaderMetamask>
-										<UserSnapshotWorker>
-											<LoaderContacts>
-												<slot />
-											</LoaderContacts>
-										</UserSnapshotWorker>
-									</LoaderMetamask>
-								</ExchangeWorker>
-							</LoaderWallets>
-						</LoaderEthBalances>
-					</RewardGuard>
-				</ShortcutGuard>
-			</UrlGuard>
-		</Loader>
-	</AddressGuard>
+	<PowProtector>
+		<AddressGuard>
+			<Loader>
+				<UrlGuard>
+					<ShortcutGuard>
+						<RewardGuard>
+							<LoaderEthBalances>
+								<LoaderWallets>
+									<ExchangeWorker>
+										<LoaderMetamask>
+											<UserSnapshotWorker>
+												<LoaderContacts>
+													<slot />
+												</LoaderContacts>
+											</UserSnapshotWorker>
+										</LoaderMetamask>
+									</ExchangeWorker>
+								</LoaderWallets>
+							</LoaderEthBalances>
+						</RewardGuard>
+					</ShortcutGuard>
+				</UrlGuard>
+			</Loader>
+		</AddressGuard>
+	</PowProtector>
 </LoaderUserProfile>
 
 <!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->

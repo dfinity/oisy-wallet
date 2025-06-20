@@ -17,7 +17,7 @@ pub const DIFFICULTY_AUTO_ADJUSTMENT: bool = false;
 // time approaches this target. A well-chosen TARGET_DURATION_MS ensures that challenges are neither
 // too easy nor too difficult to solve, trying to find the balance between system security and
 // usability.
-pub const TARGET_DURATION_MS: u64 = 120_000;
+pub const TARGET_DURATION_MS: u64 = 30_000;
 
 // Every PoW (Proof-of-Work) challenge expires after this duration (in milliseconds).
 // This constant defines the exact time window in which a challenge must be solved.
@@ -26,11 +26,11 @@ pub const TARGET_DURATION_MS: u64 = 120_000;
 // TARGET_DURATION_MS, ensuring that challenges have sufficient time to be solved before expiration.
 // By default, EXPIRY_DURATION_MS is set to twice the TARGET_DURATION_MS to provide a reasonable
 // time limit for solving challenges.
-pub const EXPIRY_DURATION_MS: u64 = 900_000;
+pub const EXPIRY_DURATION_MS: u64 = 300_000;
 
 // The default starting difficulty for the first PoW challenge.
 // Must lie between `MIN_DIFFICULTY` and `MAX_DIFFICULTY`.
-pub const START_DIFFICULTY: u32 = 1_000_000;
+pub const START_DIFFICULTY: u32 = 800_000;
 
 // The minimum allowed difficulty. Auto-adjustment will not reduce difficulty below this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
@@ -38,7 +38,7 @@ pub const MIN_DIFFICULTY: u32 = 100_000;
 
 // The maximum allowed difficulty. Auto-adjustment will not raise difficulty above this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
-pub const MAX_DIFFICULTY: u32 = 5_000_000;
+pub const MAX_DIFFICULTY: u32 = 4_000_000;
 
 // The number of execution cycles granted to the system for each unit of difficulty in a
 // Proof-of-Work (PoW) challenge. A higher difficulty level results in more cycles being granted,
@@ -48,7 +48,7 @@ pub const MAX_DIFFICULTY: u32 = 5_000_000;
 // `1_000_000` will grant `10_000 * 1_000_000 = 10,000,000,000` cycles.
 // It is important to find the correct balance here (also taking the cycles used to execute the PoW
 // code itself into account)
-pub const CYCLES_PER_DIFFICULTY: u64 = 10_000;
+pub const CYCLES_PER_DIFFICULTY: u64 = 900_000;
 
 // ---------------------------------------------------------------------------------------------
 // - Error-structures and -enums
