@@ -162,13 +162,13 @@
 {/if}
 
 <style lang="scss">
-  :root:has(.insufficient-cycles-modal) {
-    --alert-max-width: 90vw;
-    --alert-max-height: initial;
-    --dialog-border-radius: calc(var(--border-radius-sm) * 3);
-  }
+	:root:has(.insufficient-cycles-modal) {
+		--alert-max-width: 90vw;
+		--alert-max-height: initial;
+		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	}
 
-  .banner-container {
-    width: 100%;
-  }
+	.banner-container {
+		width: 100%;
+	}
 </style>
