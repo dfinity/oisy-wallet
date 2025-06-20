@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
@@ -10,6 +11,8 @@
 	import type { Token as TokenType } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	export let fromRoute: NavigationTarget | undefined;
+
 	let twinToken: TokenType | undefined;
 	$: twinToken = ($pageToken as OptionIcCkToken)?.twinToken;
 
@@ -17,7 +20,7 @@
 	$: ckToken = $pageToken as OptionIcCkToken;
 </script>
 
-<TokenModal token={$pageToken}>
+<TokenModal token={$pageToken} {fromRoute}>
 	{#if nonNullish(twinToken)}
 		<ModalListItem>
 			{#snippet label()}

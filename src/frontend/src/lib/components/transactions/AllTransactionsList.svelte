@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { BtcTransactionUi } from '$btc/types/btc';
@@ -37,37 +37,19 @@
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 	let transactions: AllTransactionUiWithCmp[];
-
-	const updateTransactions = () => {
-		transactions = mapAllTransactionsUi({
-			tokens: $enabledNetworkTokens,
-			$btcTransactions: $btcTransactionsStore,
-			$ethTransactions: $ethTransactionsStore,
-			$ckEthMinterInfo: $ckEthMinterInfoStore,
-			$ethAddress,
-			$btcStatuses: $btcStatusesStore,
-			$solTransactions: $solTransactionsStore,
-			$icTransactionsStore,
-			$ckBtcMinterInfoStore,
-			$icPendingTransactionsStore,
-			$ckBtcPendingUtxosStore
-		});
-	};
-
-	const debounceUpdateTransactions = debounce(updateTransactions, 1000);
-
-	$: $enabledNetworkTokens,
-		$btcTransactionsStore,
-		$ethTransactionsStore,
-		$ckEthMinterInfoStore,
+	$: transactions = mapAllTransactionsUi({
+		tokens: $enabledNetworkTokens,
+		$btcTransactions: $btcTransactionsStore,
+		$ethTransactions: $ethTransactionsStore,
+		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress,
-		$btcStatusesStore,
-		$solTransactionsStore,
+		$btcStatuses: $btcStatusesStore,
+		$solTransactions: $solTransactionsStore,
 		$icTransactionsStore,
 		$ckBtcMinterInfoStore,
 		$icPendingTransactionsStore,
-		$ckBtcPendingUtxosStore,
-		debounceUpdateTransactions();
+		$ckBtcPendingUtxosStore
+	});
 
 	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
 	$: sortedTransactions = nonNullish(transactions)
