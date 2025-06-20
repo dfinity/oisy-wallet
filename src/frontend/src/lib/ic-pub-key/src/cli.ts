@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import { Principal } from '@dfinity/principal';
-import { computeAddress } from 'ethers';
+import { computeAddress } from 'ethers/transaction';
 import {
 	DerivationPath,
 	PublicKeyWithChainCode as Secp256k1PublicKeyWithChainCode
