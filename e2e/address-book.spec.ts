@@ -61,8 +61,8 @@ testWithII('should create and verify a new ICP contact', async ({ page, iiPage }
 	await addressBook.saveContact();
 
 	// Verify the contact was created by searching for it
-	await addressBook.searchContact(TEST_CONTACT_ICP.name);
-	await addressBook.verifyContactExists(TEST_CONTACT_ICP.name, 'ICP');
+	await addressBook.searchContact({ searchTerm: TEST_CONTACT_ICP.name });
+	await addressBook.verifyContactExists({ contactName: TEST_CONTACT_ICP.name, network: 'ICP' });
 
 	// Clean up
 	await addressBook.close();
@@ -102,11 +102,11 @@ testWithII(
 		await addressBook.saveContact();
 
 		// Verify contacts exist with their respective networks
-		await addressBook.searchContact(TEST_CONTACT_ETH.name);
-		await addressBook.verifyContactExists(TEST_CONTACT_ETH.name, 'ETH');
+		await addressBook.searchContact({ searchTerm: TEST_CONTACT_ETH.name });
+		await addressBook.verifyContactExists({ contactName: TEST_CONTACT_ETH.name, network: 'ETH' });
 
-		await addressBook.searchContact(TEST_CONTACT_BTC.name);
-		await addressBook.verifyContactExists(TEST_CONTACT_BTC.name, 'BTC');
+		await addressBook.searchContact({ searchTerm: TEST_CONTACT_BTC.name });
+		await addressBook.verifyContactExists({ contactName: TEST_CONTACT_BTC.name, network: 'BTC' });
 
 		// Clean up
 		await addressBook.close();
@@ -126,7 +126,7 @@ testWithII('should show empty state for non-existent contacts', async ({ page, i
 	await addressBook.open();
 
 	// Search for a non-existent contact
-	await addressBook.searchContact(nonExistentName);
+	await addressBook.searchContact({ searchTerm: nonExistentName });
 
 	// Verify the empty state is shown
 	await addressBook.verifyNoContactsMessage();
@@ -165,8 +165,8 @@ testWithII('should use ICP as default network when none specified', async ({ pag
 	await addressBook.saveContact();
 
 	// Verify the contact was created with ICP network
-	await addressBook.searchContact(testContact.name);
-	await addressBook.verifyContactExists(testContact.name, 'ICP');
+	await addressBook.searchContact({ searchTerm: testContact.name });
+	await addressBook.verifyContactExists({ contactName: testContact.name, network: 'ICP' });
 
 	// Clean up
 	await addressBook.close();
