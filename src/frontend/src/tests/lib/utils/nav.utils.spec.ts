@@ -1,3 +1,4 @@
+import * as appEnvironment from '$app/environment';
 import * as appNavigation from '$app/navigation';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
@@ -33,6 +34,7 @@ import {
 	type RouteParams
 } from '$lib/utils/nav.utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
+import type { MockInstance } from 'vitest';
 
 describe('nav.utils', () => {
 	const mockGoTo = vi.fn();
@@ -171,19 +173,31 @@ describe('nav.utils', () => {
 	});
 
 	describe('loadRouteParams', () => {
+		let spyBrowser: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			spyBrowser = vi.spyOn(appEnvironment, 'browser', 'get');
+
+			spyBrowser.mockReturnValue(true);
+		});
+
 		it('should return undefined values if not in a browser', () => {
+			spyBrowser.mockReturnValueOnce(false);
+
 			const result = loadRouteParams({
 				url: {
 					searchParams: {
-						get: vi.fn((_) => null)
+						get: vi.fn((key) => (key === TOKEN_PARAM ? 'testToken' : null))
 					}
 				}
 			} as unknown as LoadEvent);
 
 			expect(result).toEqual({
-				[TOKEN_PARAM]: null,
-				[NETWORK_PARAM]: null,
-				[URI_PARAM]: null
+				[TOKEN_PARAM]: undefined,
+				[NETWORK_PARAM]: undefined,
+				[URI_PARAM]: undefined
 			});
 		});
 
@@ -229,6 +243,82 @@ describe('nav.utils', () => {
 				[NETWORK_PARAM]: null,
 				[URI_PARAM]: 'testURI'
 			});
+		});
+
+		it('should handle emoji in search params', () => {
+			expect(
+				loadRouteParams({
+					url: {
+						searchParams: {
+							get: vi.fn((key) => (key === TOKEN_PARAM ? '💰' : null))
+						}
+					}
+				} as unknown as LoadEvent)
+			).toEqual({
+				[TOKEN_PARAM]: '💰',
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: null
+			});
+		});
+
+		it('should handle correctly one missing parameter', () => {
+			expect(
+				loadRouteParams({
+					url: {
+						searchParams: {
+							get: vi.fn((key) => (key === TOKEN_PARAM ? null : 'mock-params'))
+						}
+					}
+				} as unknown as LoadEvent)
+			).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: 'mock-params',
+				[URI_PARAM]: 'mock-params'
+			});
+		});
+
+		it('should return all parameters as null if none are present', () => {
+			expect(
+				loadRouteParams({
+					url: {
+						searchParams: {
+							get: vi.fn(() => null)
+						}
+					}
+				} as unknown as LoadEvent)
+			).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: null
+			});
+		});
+
+		it('should handle null decoded values', () => {
+			vi.stubGlobal('decodeURIComponent', () => null);
+
+			const result = loadRouteParams({
+				url: {
+					searchParams: {
+						get: vi.fn((key) =>
+							key === TOKEN_PARAM
+								? 'testToken'
+								: key === URI_PARAM
+									? 'testURI'
+									: key === NETWORK_PARAM
+										? 'testNetwork'
+										: null
+						)
+					}
+				}
+			} as unknown as LoadEvent);
+
+			expect(result).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: 'testNetwork',
+				[URI_PARAM]: null
+			});
+
+			vi.unstubAllGlobals();
 		});
 	});
 
