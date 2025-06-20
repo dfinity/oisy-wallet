@@ -211,6 +211,36 @@ interface I18nRewards {
 		hangover: string;
 	};
 	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
+	campaigns: {
+		sprinkles_s1e3: {
+			title: string;
+			card_title: string;
+			one_liner: string;
+			participate_title: string;
+			description: string;
+			campaign_href: string;
+			win: {
+				default: { title: string; description: string; share_href: string };
+				jackpot: { title: string; description: string; share_href: string };
+				referral: { title: string; description: string; share_href: string };
+			};
+		};
+		sprinkles_s1e4: {
+			title: string;
+			card_title: string;
+			one_liner: string;
+			participate_title: string;
+			description: string;
+			campaign_href: string;
+			win: {
+				default: { title: string; description: string; share_href: string };
+				jackpot: { title: string; description: string; share_href: string };
+				leaderboard: { title: string; description: string; share_href: string };
+				referrer: { title: string; description: string; share_href: string };
+				referee: { title: string; description: string; share_href: string };
+			};
+		};
+	};
 }
 
 interface I18nFooter {
