@@ -24,7 +24,7 @@ describe('pow-protector.worker', () => {
 	let spyAllowSigning: MockInstance;
 	let spySolvePowChallenge: MockInstance;
 	let spyHasRequiredCycles: MockInstance;
-	let spyAllowance: MockInstance;
+	let _spyAllowance: MockInstance;
 
 	let originalPostmessage: unknown;
 
@@ -86,7 +86,7 @@ describe('pow-protector.worker', () => {
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 
 		// Mock the allowance API call that hasRequiredCycles depends on
-		spyAllowance = vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({
+		_spyAllowance = vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({
 			allowance: 0n,
 			expires_at: []
 		}); // Return insufficient allowance by default
