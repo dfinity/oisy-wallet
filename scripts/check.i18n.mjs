@@ -30,6 +30,11 @@ const checkKeyUsage = ({ key, content }) => {
 		return true;
 	}
 
+	const dynamicPattern = `${parts.slice(0, -1).join('.')}[`;
+	if (content.includes(dynamicPattern)) {
+		return true;
+	}
+
 	return content.includes('get(i18n)') && parts.every((p) => content.includes(p));
 };
 
