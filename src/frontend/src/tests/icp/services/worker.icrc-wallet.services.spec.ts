@@ -141,7 +141,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(postMessageSpy).toHaveBeenCalledTimes(1);
+					expect(postMessageSpy).toHaveBeenCalledOnce();
 					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 						msg: 'startIcrcWalletTimer',
 						data: {
@@ -161,7 +161,7 @@ describe('worker.icrc-wallet.services', () => {
 						workerInstance.onmessage?.({ data: payload } as MessageEvent);
 					});
 
-					expect(postMessageSpy).toHaveBeenCalledTimes(1);
+					expect(postMessageSpy).toHaveBeenCalledOnce();
 					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 						msg: 'startIcrcWalletTimer',
 						data: {

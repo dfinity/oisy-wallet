@@ -168,8 +168,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyLoadBalance).toHaveBeenCalledTimes(1);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
+					expect(spyLoadBalance).toHaveBeenCalledOnce();
+					expect(spyLoadTransactions).toHaveBeenCalledOnce();
 				});
 
 				it('should stop the scheduler', () => {
@@ -181,8 +181,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger syncWallet periodically', async () => {
 					await scheduler.start(startData);
 
-					expect(spyLoadBalance).toHaveBeenCalledTimes(1);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
+					expect(spyLoadBalance).toHaveBeenCalledOnce();
+					expect(spyLoadTransactions).toHaveBeenCalledOnce();
 
 					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 

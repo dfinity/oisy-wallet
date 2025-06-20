@@ -114,7 +114,7 @@ describe('AddressBookStep', () => {
 		const addButton = getByText(en.address_book.text.add_new_contact);
 		await fireEvent.click(addButton);
 
-		expect(mockAddContact).toHaveBeenCalledTimes(1);
+		expect(mockAddContact).toHaveBeenCalledOnce();
 	});
 
 	it('should render contacts list when there are contacts', () => {
@@ -154,7 +154,7 @@ describe('AddressBookStep', () => {
 		const addButton = getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON);
 		await fireEvent.click(addButton);
 
-		expect(mockAddContact).toHaveBeenCalledTimes(1);
+		expect(mockAddContact).toHaveBeenCalledOnce();
 	});
 
 	it('should call showContact with the correct contact when ContactCard is clicked', async () => {

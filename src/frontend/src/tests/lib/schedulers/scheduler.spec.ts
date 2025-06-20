@@ -270,7 +270,7 @@ describe('scheduler', () => {
 
 				expect(spyClearInterval).toHaveBeenCalledOnce();
 
-				expect(postMessageMock).toHaveBeenCalledTimes(1);
+				expect(postMessageMock).toHaveBeenCalledOnce();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: statusMsg,
 					data: { state: 'idle' }
@@ -286,7 +286,7 @@ describe('scheduler', () => {
 
 				expect(spyClearInterval).not.toHaveBeenCalled();
 
-				expect(postMessageMock).toHaveBeenCalledTimes(1);
+				expect(postMessageMock).toHaveBeenCalledOnce();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: statusMsg,
 					data: { state: 'idle' }

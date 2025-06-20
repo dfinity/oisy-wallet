@@ -42,9 +42,9 @@ describe('App Layout', () => {
 
 		render(App);
 
-		expect(spyAuthSync).toHaveBeenCalledTimes(1);
-		expect(spyInitPlausibleAnalytics).toHaveBeenCalledTimes(1);
-		expect(spyI18n).toHaveBeenCalledTimes(1);
+		expect(spyAuthSync).toHaveBeenCalledOnce();
+		expect(spyInitPlausibleAnalytics).toHaveBeenCalledOnce();
+		expect(spyI18n).toHaveBeenCalledOnce();
 	});
 
 	it('should initialize analytics tracking on mount', () => {
@@ -54,6 +54,6 @@ describe('App Layout', () => {
 
 		render(App);
 
-		expect(spy).toHaveBeenCalledTimes(1);
+		expect(spy).toHaveBeenCalledOnce();
 	});
 });

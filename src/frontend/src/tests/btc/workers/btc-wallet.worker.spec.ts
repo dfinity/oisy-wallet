@@ -180,8 +180,8 @@ describe('btc-wallet.worker', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
-					expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(1);
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
+					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
 				});
 
 				it('should stop the scheduler', () => {
@@ -193,8 +193,8 @@ describe('btc-wallet.worker', () => {
 				it('should trigger syncWallet periodically', async () => {
 					await scheduler.start(startData);
 
-					expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
-					expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(1);
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
+					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 

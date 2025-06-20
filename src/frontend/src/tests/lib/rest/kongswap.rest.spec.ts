@@ -85,7 +85,7 @@ describe('KongSwap REST client', () => {
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
 
-			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(fetch).toHaveBeenCalledOnce();
 			expect(result).toEqual([]);
 		});
 
@@ -114,7 +114,7 @@ describe('KongSwap REST client', () => {
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
 
-			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(fetch).toHaveBeenCalledOnce();
 			expect(result).toEqual([]);
 		});
 
@@ -128,7 +128,7 @@ describe('KongSwap REST client', () => {
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
 
-			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(fetch).toHaveBeenCalledOnce();
 			expect(result).toEqual([]);
 		});
 	});

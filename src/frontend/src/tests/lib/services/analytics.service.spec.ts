@@ -68,7 +68,7 @@ describe('plausible analytics service', () => {
 
 		initPlausibleAnalytics();
 
-		expect(enableAutoPageviews).toHaveBeenCalledTimes(1);
+		expect(enableAutoPageviews).toHaveBeenCalledOnce();
 	});
 
 	it('should call trackEvent if tracker is initialized', async () => {
