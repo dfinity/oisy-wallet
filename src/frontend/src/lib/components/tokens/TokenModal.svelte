@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
@@ -11,15 +12,17 @@
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
 	import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { TRACK_DELETE_TOKEN_SUCCESS } from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { TokenModalSteps } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
+	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -27,9 +30,10 @@
 		token: OptionToken;
 		children?: Snippet;
 		isDeletable?: boolean;
+		fromRoute?: NavigationTarget;
 	}
 
-	let { children, token, isDeletable = false }: BaseTokenModalProps = $props();
+	let { children, token, isDeletable = false, fromRoute }: BaseTokenModalProps = $props();
 
 	let loading = $state(false);
 	let showBottomSheetDeleteConfirmation = $state(false);
@@ -60,12 +64,28 @@
 		}
 	};
 
+	const handleCloseAndNavigate = async (fromRoute: NavigationTarget | undefined) => {
+		close();
+
+		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot();
+	};
+
 	const onTokenDeleteSuccess = async (deletedToken: Token) => {
 		loading = false;
 
-		close();
+		await handleCloseAndNavigate(fromRoute);
 
-		await gotoReplaceRoot();
+		const address: string | undefined =
+			'address' in deletedToken ? (deletedToken.address as string) : undefined;
+		trackEvent({
+			name: TRACK_DELETE_TOKEN_SUCCESS,
+			metadata: {
+				tokenId: `${deletedToken.id.description}`,
+				tokenSymbol: deletedToken.symbol,
+				...(nonNullish(address) && { address: `${address}` }),
+				networkId: `${deletedToken.network.id.description}`
+			}
+		});
 
 		toastsShow({
 			text: replacePlaceholders(

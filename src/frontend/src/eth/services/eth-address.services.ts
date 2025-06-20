@@ -1,3 +1,4 @@
+import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
 	getIdbEthAddress,
@@ -68,11 +69,7 @@ const certifyEthAddress = (address: EthAddress): Promise<ResultSuccess<string>> 
 	certifyAddress<EthAddress>({
 		networkId: ETHEREUM_NETWORK_ID,
 		address,
-		getAddress: (identity: OptionIdentity) =>
-			getSignerEthAddress({
-				identity,
-				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			}),
+		getAddress: getEthAddress,
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage,
 		addressStore: ethAddressStore
 	});
