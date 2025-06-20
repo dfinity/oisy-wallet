@@ -51,7 +51,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.withdrawEth).toHaveBeenCalledTimes(1);
+			expect(canisterMock.withdrawEth).toHaveBeenCalledOnce();
 			expect(canisterMock.withdrawEth).toHaveBeenCalledWith({
 				amount,
 				address: mockEthAddress
@@ -85,7 +85,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.withdrawErc20).toHaveBeenCalledTimes(1);
+			expect(canisterMock.withdrawErc20).toHaveBeenCalledOnce();
 			expect(canisterMock.withdrawErc20).toHaveBeenCalledWith({
 				amount,
 				address: mockEthAddress,
@@ -125,7 +125,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledTimes(1);
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledOnce();
 			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledWith({
 				ckErc20LedgerId,
 				certified: true
@@ -137,7 +137,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledTimes(1);
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledOnce();
 			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledWith({ certified: true });
 		});
 
@@ -146,7 +146,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledTimes(1);
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledOnce();
 			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledWith({
 				ckErc20LedgerId,
 				certified: false
