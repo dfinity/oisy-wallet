@@ -1,4 +1,5 @@
 /* eslint-disable */
+/* istanbul ignore file */
 
 import { ProjectivePoint, type AffinePoint } from '@noble/secp256k1';
 // import createHmac from 'create-hmac';

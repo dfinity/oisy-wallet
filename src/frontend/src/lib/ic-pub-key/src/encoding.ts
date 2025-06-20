@@ -1,4 +1,5 @@
 /* eslint-disable */
+/* istanbul ignore file */
 
 /**
  * Encodes an array of bytes as a Candid blob string.

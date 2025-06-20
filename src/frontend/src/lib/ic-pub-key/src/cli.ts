@@ -1,4 +1,5 @@
 /* eslint-disable */
+/* istanbul ignore file */
 
 import { Principal } from '@dfinity/principal';
 import { computeAddress } from 'ethers/transaction';
