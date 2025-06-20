@@ -13,11 +13,11 @@
 
 	const { label, fallback = '', token }: Props = $props();
 
-	const fallbackLabel: string = $derived(fallback.charAt(0).toUpperCase() + fallback.slice(1));
+	let fallbackLabel: string = $derived(fallback.charAt(0).toUpperCase() + fallback.slice(1));
 
-	const twinToken: Token | undefined = $derived((token as OptionIcCkToken)?.twinToken);
+	let twinToken: Token | undefined = $derived((token as OptionIcCkToken)?.twinToken);
 
-	const labelText: string = $derived(
+	let labelText: string = $derived(
 		nonNullish(label) ? resolveText({ i18n: $i18n, path: label }) : fallbackLabel
 	);
 </script>
