@@ -79,7 +79,6 @@ interface I18nNavigation {
 		dapp_explorer: string;
 		activity: string;
 		airdrops: string;
-		more_settings: string;
 		menu: string;
 		changelog: string;
 		documentation: string;
@@ -182,7 +181,6 @@ interface I18nDapps {
 interface I18nRewards {
 	text: {
 		title: string;
-		active_campaigns: string;
 		upcoming_campaigns: string;
 		active_date: string;
 		ended_date: string;
@@ -193,8 +191,6 @@ interface I18nRewards {
 		modal_button_text: string;
 		activity_button_text: string;
 		activity_button_text_short: string;
-		no_balance_title: string;
-		no_balance_description: string;
 		open_wallet: string;
 		carousel_slide_title: string;
 		carousel_slide_cta: string;
@@ -280,7 +276,6 @@ interface I18nInit {
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
-		no_solana_rpc: string;
 		no_solana_network: string;
 		eth_address_unknown: string;
 		loading_address: string;
@@ -324,21 +319,17 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
-		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
 		session_duration: string;
 		session_expires_in: string;
-		session_description: string;
 		networks: string;
 		enable_testnets: string;
 		active_networks: string;
 		active_networks_description: string;
 		enable_network: string;
 		disable_network: string;
-		testnets_description: string;
-		hide_zero_balances_description: string;
 		credentials_title: string;
 		pouh_credential: string;
 		pouh_credential_description: string;
@@ -369,7 +360,6 @@ interface I18nShortcuts {
 interface I18nNetworks {
 	title: string;
 	test_networks: string;
-	more: string;
 	chain_fusion: string;
 	network: string;
 	testnet: string;
@@ -496,7 +486,6 @@ interface I18nSend {
 		insufficient_funds: string;
 		unknown_minimum_ckbtc_amount: string;
 		unknown_minimum_cketh_amount: string;
-		unknown_minimum_amount: string;
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
 		minimum_amount: string;
@@ -588,8 +577,6 @@ interface I18nSwap {
 		review: string;
 		review_button: string;
 		max_slippage: string;
-		max_balance: string;
-		not_available: string;
 		value_difference: string;
 		total_fee: string;
 		network_fee: string;
@@ -641,12 +628,10 @@ interface I18nTokens {
 		token_address: string;
 		balance: string;
 		hide_zero_balances: string;
-		hide_zeros: string;
 		all_tokens_with_zero_hidden: string;
 		filter_nothing_found: string;
 		filter_nothing_found_description: string;
 		filter_placeholder: string;
-		filter_button: string;
 		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
@@ -711,11 +696,8 @@ interface I18nTokens {
 		text: {
 			title: string;
 			manage_list: string;
-			default_message: string;
 			list_settings: string;
-			do_not_see_import: string;
 			import_token: string;
-			manage_for_network: string;
 			network: string;
 			all_tokens_zero_balance: string;
 		};
@@ -802,7 +784,6 @@ interface I18nWallet_connect {
 		events: string;
 		message: string;
 		hex_data: string;
-		base64_data: string;
 		raw_copied: string;
 		sign_message: string;
 	};
@@ -888,7 +869,6 @@ interface I18nTransaction {
 		ck_token_sent: string;
 		twin_token_converted: string;
 		ck_token_converted: string;
-		receiving_twin_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;
 		converting_twin_token: string;
@@ -910,7 +890,6 @@ interface I18nTransactions {
 		title: string;
 		buy_or_receive: string;
 		transaction_history: string;
-		open_transactions: string;
 		mainnet_btc_transactions_info: string;
 		transaction_history_unavailable: string;
 		missing_index_canister_explanation: string;
