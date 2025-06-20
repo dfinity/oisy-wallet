@@ -107,9 +107,9 @@
 	},
 	{
 		"id": "1inch",
-		"name": "dapps.descriptions.1inch.name",
-		"oneLiner": "dapps.descriptions.1inch.one_liner",
-		"callToAction": "dapps.descriptions.1inch.call_to_action",
+		"name": "dapps.descriptions._1inch.name",
+		"oneLiner": "dapps.descriptions._1inch.one_liner",
+		"callToAction": "dapps.descriptions._1inch.call_to_action",
 		"website": "https://1inch.io/",
 		"twitter": "https://twitter.com/1inch",
 		"telegram": "https://t.me/OneInchNetworkNews",
@@ -117,7 +117,7 @@
 		"tags": ["DeFi", "WalletConnect"],
 		"stats": "",
 		"usesInternetIdentity": true,
-		"description": "dapps.descriptions.1inch.description",
+		"description": "dapps.descriptions._1inch.description",
 		"logo": "/images/dapps/1-inch-logo.svg",
 		"screenshots": ["/images/dapps/1-inch.webp"]
 	},
