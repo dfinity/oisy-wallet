@@ -1,4 +1,6 @@
 /* eslint-disable */
+/* istanbul ignore file */
+/* v8 ignore start */
 
 import { ProjectivePoint, type AffinePoint } from '@noble/secp256k1';
 // import createHmac from 'create-hmac';
@@ -436,3 +438,5 @@ export class DerivationPath {
 		return [new ChainCode(next_chain_key_array), next_offset];
 	}
 }
+
+/* v8 ignore stop */
