@@ -5,9 +5,11 @@
 	import type { Snippet } from 'svelte';
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+	import { isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { toUserToken } from '$icp-eth/services/user-token.services';
-	import { removeUserToken } from '$lib/api/backend.api';
-	import { deleteIdbEthToken } from '$lib/api/idb-tokens.api';
+	import { removeCustomToken, removeUserToken } from '$lib/api/backend.api';
+	import { deleteIdbEthToken, deleteIdbIcToken } from '$lib/api/idb-tokens.api';
 	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
 	import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
@@ -21,6 +23,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionToken, Token } from '$lib/types/token';
+	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -124,6 +127,24 @@
 
 				erc20UserTokensStore.reset(tokenToDelete.id);
 				await deleteIdbEthToken({ identity: $authIdentity, token: userToken });
+
+				await onTokenDeleteSuccess(tokenToDelete);
+			} else if (isTokenIcrc(tokenToDelete)) {
+				loading = true;
+
+				const customToken = toCustomToken({
+					...tokenToDelete,
+					enabled: true,
+					networkKey: 'Icrc'
+				});
+
+				await removeCustomToken({
+					identity: $authIdentity,
+					token: customToken
+				});
+
+				icrcCustomTokensStore.reset(tokenToDelete.ledgerCanisterId);
+				await deleteIdbIcToken({ identity: $authIdentity, token: customToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
 			}
