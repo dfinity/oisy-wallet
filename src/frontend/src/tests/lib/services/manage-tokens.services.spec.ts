@@ -5,6 +5,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import {
+	MANAGE_TOKENS_MODAL_ROUTE,
 	TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR
@@ -108,7 +109,8 @@ describe('manage-tokens.services', () => {
 						indexCanisterId: 'indexCanisterId' in token ? token.indexCanisterId : undefined,
 						tokenId: token.id?.description,
 						tokenSymbol: token.symbol,
-						networkId: token.network?.id.description
+						networkId: token.network?.id.description,
+						source: MANAGE_TOKENS_MODAL_ROUTE
 					}
 				});
 			});
