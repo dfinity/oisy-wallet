@@ -38,7 +38,7 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(transactionId);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
 				to: params.to,
 				amount: params.amount,
@@ -68,7 +68,7 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(balanceE8s);
 
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith(mockPrincipal);
 		});
 
@@ -121,7 +121,7 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(transactionsResponse);
 
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.transactions).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.transactions).toHaveBeenCalledWith({ certified: true });
 		});
 
@@ -133,7 +133,7 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(transactionsResponse);
 
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledTimes(1);
+			expect(ledgerCanisterMock.transactions).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.transactions).toHaveBeenCalledWith({ certified: false });
 		});
 
