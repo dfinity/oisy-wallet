@@ -218,6 +218,68 @@
 			"upcoming_campaigns": "Behalte anstehende Token-Drops im Auge! <a href=\"https://x.com/oisy\" target=\"_blank\">Folge uns auf X</a>, tritt unserem <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> bei oder komm in unseren <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>, um auf dem Laufenden zu bleiben.",
 			"coming_soon": "$oisy_short Folge 4 erscheint bald",
 			"reward_banner": "Banner der Kampagne $campaignName"
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referrer": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referee": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			}
 		}
 	},
 	"footer": {
