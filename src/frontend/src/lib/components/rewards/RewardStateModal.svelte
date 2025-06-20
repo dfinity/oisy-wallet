@@ -22,6 +22,7 @@
 	import { RewardType } from '$lib/enums/reward-type';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -59,8 +60,8 @@
 		<Img src={imgSrc} styleClass="w-full" testId={REWARDS_STATE_MODAL_IMAGE_BANNER} />
 
 		<div class="flex flex-col items-center gap-4 text-center">
-			<h3 class="my-3">{title}</h3>
-			<Html text={description} />
+			<h3 class="my-3">{resolveText({ i18n: $i18n, path: title })}</h3>
+			<Html text={resolveText({ i18n: $i18n, path: description })} />
 
 			<div>
 				<ExternalLink
@@ -81,7 +82,7 @@
 				<Share
 					testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
 					text={$i18n.rewards.text.share}
-					href={shareHref}
+					href={resolveText({ i18n: $i18n, path: shareHref })}
 					trackEvent={{
 						name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
 						metadata: { campaignId: `${reward.id}`, type: rewardType }

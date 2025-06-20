@@ -218,6 +218,68 @@
 			"upcoming_campaigns": "",
 			"coming_soon": "",
 			"reward_banner": ""
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referrer": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referee": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			}
 		}
 	},
 	"footer": {
