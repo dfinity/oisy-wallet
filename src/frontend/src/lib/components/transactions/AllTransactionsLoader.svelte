@@ -4,7 +4,6 @@
 	import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { transactionsStoreWithTokens } from '$lib/derived/transactions.derived';
@@ -67,7 +66,6 @@
 					transactions: ($icTransactionsStore?.[tokenId] ?? []).map(({ data }) => data),
 					owner: $authIdentity.getPrincipal(),
 					identity: $authIdentity,
-					maxResults: WALLET_PAGINATION,
 					token,
 					signalEnd: () => (disableLoader[tokenId] = true)
 				});

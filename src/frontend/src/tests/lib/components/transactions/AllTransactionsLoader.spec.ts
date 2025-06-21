@@ -14,7 +14,6 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, Transaction } from '$lib/types/transaction';
 import * as transactionsUtils from '$lib/utils/transactions.utils';
@@ -271,7 +270,6 @@ describe('AllTransactionsLoader', () => {
 					transactions,
 					owner: mockIdentity.getPrincipal(),
 					identity: mockIdentity,
-					maxResults: WALLET_PAGINATION,
 					token,
 					signalEnd: expect.any(Function)
 				});
@@ -297,7 +295,6 @@ describe('AllTransactionsLoader', () => {
 					transactions,
 					owner: mockIdentity.getPrincipal(),
 					identity: mockIdentity,
-					maxResults: WALLET_PAGINATION,
 					token,
 					signalEnd: expect.any(Function)
 				});
@@ -321,7 +318,6 @@ describe('AllTransactionsLoader', () => {
 					transactions,
 					owner: mockIdentity.getPrincipal(),
 					identity: mockIdentity,
-					maxResults: WALLET_PAGINATION,
 					token,
 					signalEnd: expect.any(Function)
 				});
@@ -529,7 +525,6 @@ describe('AllTransactionsLoader', () => {
 				transactions,
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
-				maxResults: WALLET_PAGINATION,
 				token,
 				signalEnd: expect.any(Function)
 			});
