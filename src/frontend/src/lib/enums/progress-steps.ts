@@ -39,6 +39,12 @@ export enum ProgressStepsLoader {
 	DONE = 'done'
 }
 
+export enum ProgressStepsPowProtectorLoader {
+	REQUEST_CHALLENGE = 'request_challenge',
+	SOLVE_CHALLENGE = 'solve_challenge',
+	GRANT_CYCLES = 'done'
+}
+
 export enum ProgressStepsAddToken {
 	INITIALIZATION = 'initialization',
 	SAVE = 'save',
