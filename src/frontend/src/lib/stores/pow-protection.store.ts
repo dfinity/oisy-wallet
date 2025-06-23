@@ -20,9 +20,7 @@ export const initPowProtectorProgressStore = (): PowProtectorProgressStore => {
 	const { subscribe, set } = writable<PowProtectorProgressData>(undefined);
 	return {
 		subscribe,
-		setPowProtectorProgressData: (data: PowProtectorProgressData) => {
-			set(data);
-		}
+		setPowProtectorProgressData: set
 	};
 };
 
@@ -30,9 +28,7 @@ export const initPowProtectorNextAllowanceStore = (): PowProtectorNextAllowanceS
 	const { subscribe, set } = writable<PowProtectorNextAllowanceData>(undefined);
 	return {
 		subscribe,
-		setPowProtectorNextAllowanceData: (data: PowProtectorNextAllowanceData) => {
-			set(data);
-		}
+		setPowProtectorNextAllowanceData: set
 	};
 };
 
