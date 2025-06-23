@@ -322,7 +322,7 @@
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
-			"ongoing": "Läuft",
+			"ongoing": "Aktiv",
 			"ended": "Beendet ($amount)"
 		},
 		"requirements": {
@@ -342,7 +342,7 @@
 				"title": "OISY Sprinkles",
 				"card_title": "OISY Sprinkles: Episode 3 ist aktiv 🎉",
 				"one_liner": "Sei aktiv und verdiene BTC — und jetzt, fürs <strong>Einladen von Freunden</strong>.<br/>Logge ein, führe Transaktionen aus und halte Tokens um dich für tägliche Gewinne zu qualifizieren. Lade Freunde ein und verdiene zusätzlich 10% ihrer Gewinne.",
-				"participate_title": "Sei aktiv und verdiene BTC - und jetzt auch durchs EInladen von Freunden.",
+				"participate_title": "Sei aktiv und verdiene BTC - und jetzt auch durchs Einladen von Freunden.",
 				"description": "Erfülle einfache wöchentliche Anforderungen. Melde dich an, führe zwei Transaktionen durch und halte Token im Wert von mindestens $20, um täglich 50 BTC-Drops zu erhalten.<br/><strong>Jetzt mit Empfehlungsprämien:</strong> Lade Freunde ein um eine Wallet einzurichten und verdiene 30 Tage lang 10 % ihrer Sprinkles. Sie behalten 100 % – du verdienst zusätzlich.",
 				"campaign_href": "https://x.com/intent/post?text=Noch%20nicht%20f%C3%BCr%20%40OISY%20Sprinkles%20qualifiziert%3F%0ASie%20liefern%20%24BTC%20frei%20Haus%20-%20Tag%20ein%2C%20Tag%20aus.%0ABesuche%20OISY.com%20und%20entdecke%20es%20selber.%20%F0%9F%9A%80",
 				"win": {
