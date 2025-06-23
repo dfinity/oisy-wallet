@@ -13,6 +13,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
 	export let airdrop: RewardCampaignDescription | undefined = undefined;
@@ -63,17 +64,21 @@
 			width="64"
 			rounded
 			src={logo}
-			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppName })}
+			alt={replacePlaceholders($i18n.dapps.alt.logo, {
+				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
+			})}
 		/>
 	</div>
 	<div class="w-full justify-start">
-		<div class="mb-1">{text}</div>
+		<div class="mb-1">{resolveText({ i18n: $i18n, path: text })}</div>
 		<button
 			on:click={open}
-			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
+			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
+				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
+			})}
 			class="text-sm font-semibold text-brand-primary-alt"
 		>
-			{callToAction} →
+			{resolveText({ i18n: $i18n, path: callToAction })} →
 		</button>
 	</div>
 	<div class="h-full items-start">

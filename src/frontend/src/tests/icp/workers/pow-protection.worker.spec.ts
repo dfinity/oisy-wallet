@@ -132,16 +132,16 @@ describe('pow-protector.worker', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
 					expect(spySolvePowChallenge).toHaveBeenCalledWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledTimes(1);
+					expect(spyAllowSigning).toHaveBeenCalledOnce();
 					expect(spyAllowSigning).toHaveBeenCalledWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }
@@ -157,16 +157,16 @@ describe('pow-protector.worker', () => {
 				it('should trigger pow protection periodically', async () => {
 					await scheduler.start(startData);
 
-					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
 					expect(spySolvePowChallenge).toHaveBeenCalledWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledTimes(1);
+					expect(spyAllowSigning).toHaveBeenCalledOnce();
 					expect(spyAllowSigning).toHaveBeenCalledWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }

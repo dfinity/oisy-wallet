@@ -42,7 +42,6 @@
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { privacyModeStore } from '$lib/stores/settings.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import {
 		isRouteActivity,
@@ -50,6 +49,7 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
+	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -68,10 +68,7 @@
 	const handlePrivacyToggle = () => {
 		const nextValue = !$isPrivacyMode;
 
-		privacyModeStore.set({
-			key: 'privacy-mode',
-			value: { enabled: nextValue }
-		});
+		setPrivacyMode(nextValue);
 
 		toastsShow({
 			text: nextValue
@@ -145,7 +142,6 @@
 
 			{#if addressesOption}
 				<MenuAddresses on:icMenuClick={hidePopover} />
-				<Hr />
 			{/if}
 
 			<ButtonMenu
@@ -156,8 +152,6 @@
 				<IconUserSquare size="20" />
 				{$i18n.navigation.text.address_book}
 			</ButtonMenu>
-
-			<Hr />
 
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.refer_a_friend}
