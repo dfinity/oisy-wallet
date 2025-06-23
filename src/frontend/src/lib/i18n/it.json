@@ -1417,5 +1417,21 @@
 		"title": "",
 		"subtitle": "",
 		"description": ""
+	},
+	"temporal": {
+		"seconds_to_duration": {
+			"year": "",
+			"year_plural": "",
+			"month": "",
+			"month_plural": "",
+			"day": "",
+			"day_plural": "",
+			"hour": "",
+			"hour_plural": "",
+			"minute": "",
+			"minute_plural": "",
+			"second": "",
+			"second_plural": ""
+		}
 	}
 }

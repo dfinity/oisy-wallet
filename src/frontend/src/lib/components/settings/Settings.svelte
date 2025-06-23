@@ -85,7 +85,10 @@
 				{$i18n.settings.text.session_expires_in}
 				{remainingTimeMilliseconds <= 0
 					? '0'
-					: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
+					: secondsToDuration({
+							seconds: BigInt(remainingTimeMilliseconds) / 1000n,
+							i18n: $i18n.temporal.seconds_to_duration
+						})}
 			{/if}
 		</svelte:fragment>
 	</SettingsCardItem>
