@@ -197,9 +197,6 @@
 				"carousel": {
 					"text": "Swap tokens on DEX",
 					"call_to_action": "Try KongSwap"
-				},
-				"tags": {
-					"defi": "DeFi"
 				}
 			},
 			"openchat": {
@@ -211,9 +208,6 @@
 				"carousel": {
 					"text": "OpenChat - where web3 communicates",
 					"call_to_action": "Show more"
-				},
-				"tags": {
-					"social_media": "Social Media"
 				}
 			},
 			"decideid": {
@@ -225,9 +219,6 @@
 				"carousel": {
 					"text": "Enjoy a privacy-first way to verify and engage online",
 					"call_to_action": "Interested?"
-				},
-				"tags": {
-					"verifiable_credentials": "Verifiable Credentials"
 				}
 			},
 			"icpswap": {
