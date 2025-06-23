@@ -181,6 +181,14 @@
 			"tags": "Tags related to $dAppName",
 			"website": "Image of $dAppName"
 		},
+		"categories": {
+			"defi": "DeFi",
+			"social_media": "Social Media",
+			"verifiable_credentials": "Verifiable Credentials",
+			"staking": "Staking",
+			"walletconnect": "WalletConnect",
+			"game": "Game"
+		},
 		"descriptions": {
 			"kongswap": {
 				"name": "KongSwap",
