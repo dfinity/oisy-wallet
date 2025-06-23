@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { BadgeVariant } from '$lib/types/style';
 	import { formatToShortDateString } from '$lib/utils/format.utils';
 	import { i18n } from '$lib/stores/i18n.store';
