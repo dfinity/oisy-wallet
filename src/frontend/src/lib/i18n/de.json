@@ -182,12 +182,12 @@
 			"website": "Bild von $dAppName"
 		},
 		"categories": {
-			"defi": "",
-			"social_media": "",
-			"verifiable_credentials": "",
-			"staking": "",
-			"walletconnect": "",
-			"game": ""
+			"defi": "DeFi",
+			"social_media": "Soziale Medien",
+			"verifiable_credentials": "Verifizierbare Nachweise",
+			"staking": "Beteiligungen",
+			"walletconnect": "Wallet Connect",
+			"game": "Spiele"
 		},
 		"descriptions": {
 			"kongswap": {
