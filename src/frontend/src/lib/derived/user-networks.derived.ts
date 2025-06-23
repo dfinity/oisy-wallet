@@ -57,10 +57,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			return { ...defaultMainnetUserNetworks, ...($testnetsEnabled && defaultTestnetUserNetworks) };
 		}
 
-		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {
-
-			console.log(`Mapping user network key to NetworkId: ${key.toString()}`);
-			
+		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {			
 			if ('InternetComputer' in key) {
 				return ICP_NETWORK_ID;
 			}

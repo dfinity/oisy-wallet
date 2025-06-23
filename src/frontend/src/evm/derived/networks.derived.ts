@@ -23,9 +23,5 @@ export const enabledEvmNetworks: Readable<EthereumNetwork[]> = derived(
 
 export const enabledEvmNetworksIds: Readable<NetworkId[]> = derived(
 	[enabledEvmNetworks],
-	([$enabledEvmNetworks]) => {
-		console.log('Enabled EVM Networks:', $enabledEvmNetworks);
-
-		return $enabledEvmNetworks.map(({ id }) => id);
-	}
+	([$enabledEvmNetworks]) => $enabledEvmNetworks.map(({ id }) => id)
 );
