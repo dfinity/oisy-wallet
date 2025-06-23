@@ -1,11 +1,11 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	formatNanosecondsToDate,
 	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
-import { describe } from 'vitest';
 
 describe('format.utils', () => {
 	describe('formatToken', () => {
@@ -331,6 +331,43 @@ describe('format.utils', () => {
 
 		it('returns invalid date if NaN is passed', () => {
 			const result = formatSecondsToDate({ seconds: NaN });
+
+			expect(result).toBe('Invalid Date');
+		});
+	});
+
+	describe('formatNanosecondsToDate', () => {
+		it('formats nanoseconds correctly in default (en) locale', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
+			const result = formatNanosecondsToDate({ nanoseconds: jan1_2023_ns });
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('formats date in German locale when i18n.lang is de', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
+			const result = formatNanosecondsToDate({
+				nanoseconds: jan1_2023_ns,
+				i18n: { lang: 'de' } as unknown as I18n
+			});
+
+			expect(result).toMatch('1. Jan. 2023');
+		});
+
+		it('falls back to en locale when i18n.lang is not provided', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
+			const result = formatNanosecondsToDate({
+				nanoseconds: jan1_2023_ns,
+				i18n: {} as unknown as I18n
+			});
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('returns Invalid Date if BigInt is invalid or NaN-like', () => {
+			// Use a value that will overflow or convert to NaN
+			const invalid = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(1_000_000_000); // Too large for Number()
+			const result = formatNanosecondsToDate({ nanoseconds: invalid });
 
 			expect(result).toBe('Invalid Date');
 		});

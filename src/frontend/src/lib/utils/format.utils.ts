@@ -92,9 +92,15 @@ export const formatSecondsToDate = ({
 	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
 };
 
-export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
+export const formatNanosecondsToDate = ({
+	nanoseconds,
+	i18n
+}: {
+	nanoseconds: bigint;
+	i18n?: I18n;
+}): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
-	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
