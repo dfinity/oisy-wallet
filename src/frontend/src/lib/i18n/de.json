@@ -374,22 +374,22 @@
 					"default": {
 						"title": "Du wurdest belohnt",
 						"description": "Deine Belohnungen sind gerade in Deiner Wallet eingetroffen.<br>Nicht vergessen: Weiter einladen und aktiv bleiben, um mehr zu gewinnen.",
-						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
+						"share_href": "https://x.com/intent/post?text=Wieder%20ein%20%40OISY%20Sprinkle%20in%20meiner%20Wallet%20gelandet.%20%20%0AEiner%20der%20einfachsten%20Airdrops%20in%20DeFi.%20%20%0ASchau%20vorbei%20auf%20OISY.com"
 					},
 					"jackpot": {
 						"title": "Du hast den Jackpot gewonnen",
 						"description": "Du hast gerade unsere höchste Sprinkles-Belohnung erhalten.<br>Bleib aktiv und lade weiter ein, um noch mehr zu gewinnen.",
-						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+						"share_href": "https://x.com/intent/post?text=Habe%20den%20%2450%20Sprinkle%20Jackpot%20von%20%40OISY%20gewonnen.%20%20%0ADiese%20Saison%20gibt%E2%80%99s%20richtig%20starke%20Belohnungen%20f%C3%BCr%20Aktivit%C3%A4t%20und%20Einladungen.%20%20%0AOISY.com"
 					},
 					"leaderboard": {
 						"title": "Du führst die Rangliste an",
 						"description": "Du gehörst zu den Top 4 Werbern dieser Saison.<br>$200 wurden Deiner Wallet gutgeschrieben.",
-						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+						"share_href": "https://x.com/intent/post?text=Gerade%20unter%20die%20Top%204%20bei%20den%20%40OISY%20Einladungen%20gekommen%20und%20%24200%20gewonnen.%20%20%0AEines%20der%20besten%20Belohnungssysteme%20im%20Space.%20%20%0ASchau%20noch%20heute%20auf%20OISY.com%20vorbei"
 					},
 					"referrer": {
 						"title": "Du fängst gerade erst an",
 						"description": "Du hast $1 verdient.<br>Lade weiter ein – die Top 4 Werber erhalten $200.<br>Du bist nah dran. Mach weiter so.",
-						"share_href": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
+						"share_href": "https://x.com/intent/post?text=Habe%20Sprinkles%20durch%20Einladen%20mit%20%40OISY%20verdient.%20%20%0ADiese%20Saison%20gewinnen%20alle%20%E2%80%93%20Einladende%20und%20Eingeladene.%20%20%0AJetzt%20live%20auf%20OISY.com"
 					},
 					"referee": {
 						"title": "Mehr verdienen durch Einladen",
