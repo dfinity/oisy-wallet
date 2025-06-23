@@ -1162,6 +1162,7 @@ interface I18nTemporal {
 		month_plural: string;
 		day: string;
 		day_plural: string;
+		hour: string;
 		hour_plural: string;
 		minute: string;
 		minute_plural: string;
