@@ -176,6 +176,54 @@ interface I18nDapps {
 		tags: string;
 		website: string;
 	};
+	descriptions: {
+		kongswap: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		openchat: {
+			name: string;
+			one_liner: string;
+			call_to_action: string;
+			description: string;
+			stats: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		decideid: {
+			name: string;
+			one_liner: string;
+			call_to_action: string;
+			stats: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		icpswap: { name: string; one_liner: string; call_to_action: string; description: string };
+		nnsdapp: { name: string; one_liner: string; call_to_action: string; description: string };
+		uniswap: { name: string; one_liner: string; call_to_action: string; description: string };
+		oneinch: { name: string; one_liner: string; call_to_action: string; description: string };
+		compound_finance: {
+			name: string;
+			one_liner: string;
+			call_to_action: string;
+			description: string;
+		};
+		aave: { name: string; one_liner: string; call_to_action: string; description: string };
+		eigenlayer: { name: string; one_liner: string; call_to_action: string; description: string };
+		curve_finance: { name: string; one_liner: string; call_to_action: string; description: string };
+		zkpoker: { name: string; one_liner: string; call_to_action: string; description: string };
+		sonic: {
+			name: string;
+			one_liner: string;
+			call_to_action: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
+		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
+		waterneuron: { name: string; one_liner: string; description: string };
+	};
 }
 
 interface I18nRewards {

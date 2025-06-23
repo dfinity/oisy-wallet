@@ -83,7 +83,7 @@ describe('EditContactStep', () => {
 		const editButton = getByTestId(CONTACT_HEADER_EDITING_EDIT_BUTTON);
 		await fireEvent.click(editButton);
 
-		expect(mockEdit).toHaveBeenCalledTimes(1);
+		expect(mockEdit).toHaveBeenCalledOnce();
 		expect(mockEdit).toHaveBeenCalledWith(mockContact);
 	});
 
@@ -103,7 +103,7 @@ describe('EditContactStep', () => {
 		const addAddressButton = getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON);
 		await fireEvent.click(addAddressButton);
 
-		expect(mockAddAddress).toHaveBeenCalledTimes(1);
+		expect(mockAddAddress).toHaveBeenCalledOnce();
 	});
 
 	it('should call deleteContact function when delete contact button is clicked', async () => {
@@ -122,7 +122,7 @@ describe('EditContactStep', () => {
 		const deleteContactButton = getByTestId(CONTACT_EDIT_DELETE_CONTACT_BUTTON);
 		await fireEvent.click(deleteContactButton);
 
-		expect(mockDeleteContact).toHaveBeenCalledTimes(1);
+		expect(mockDeleteContact).toHaveBeenCalledOnce();
 		expect(mockDeleteContact).toHaveBeenCalledWith(mockContact.id);
 	});
 
@@ -142,7 +142,7 @@ describe('EditContactStep', () => {
 		const closeButton = getByTestId(CONTACT_SHOW_CLOSE_BUTTON);
 		await fireEvent.click(closeButton);
 
-		expect(mockClose).toHaveBeenCalledTimes(1);
+		expect(mockClose).toHaveBeenCalledOnce();
 	});
 
 	it('should call editAddress function when edit address button is clicked', async () => {
@@ -163,7 +163,7 @@ describe('EditContactStep', () => {
 		// Click the first edit address button
 		await fireEvent.click(editAddressButtons[0]);
 
-		expect(mockEditAddress).toHaveBeenCalledTimes(1);
+		expect(mockEditAddress).toHaveBeenCalledOnce();
 		expect(mockEditAddress).toHaveBeenCalledWith(0);
 	});
 
@@ -185,7 +185,7 @@ describe('EditContactStep', () => {
 		// Click the first delete address button
 		await fireEvent.click(deleteAddressButtons[0]);
 
-		expect(mockDeleteAddress).toHaveBeenCalledTimes(1);
+		expect(mockDeleteAddress).toHaveBeenCalledOnce();
 		expect(mockDeleteAddress).toHaveBeenCalledWith(0);
 	});
 
