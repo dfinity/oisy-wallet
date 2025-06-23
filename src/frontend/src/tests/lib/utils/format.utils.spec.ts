@@ -1,9 +1,11 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
+import { describe } from 'vitest';
 
 describe('format.utils', () => {
 	describe('formatToken', () => {
@@ -302,6 +304,35 @@ describe('format.utils', () => {
 					expected
 				);
 			});
+		});
+	});
+
+	describe('formatSecondsToDate', () => {
+		it('formats seconds correctly in default (en) locale', () => {
+			const result = formatSecondsToDate({ seconds: 1672531200 }); // Jan 1, 2023
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('formats date in German locale when i18n.lang is de', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672531200,
+				i18n: { lang: 'de' } as unknown as I18n
+			});
+
+			expect(result).toMatch('1. Jan. 2023');
+		});
+
+		it('falls back to en locale when i18n.lang is not provided', () => {
+			const result = formatSecondsToDate({ seconds: 1672531200, i18n: {} as unknown as I18n });
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('returns invalid date if NaN is passed', () => {
+			const result = formatSecondsToDate({ seconds: NaN });
+
+			expect(result).toBe('Invalid Date');
 		});
 	});
 
