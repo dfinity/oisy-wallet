@@ -34,7 +34,6 @@ export const initPowProtectorWorker: PowProtectorWorker =
 
 			switch (msg) {
 				case 'syncPowProgress': {
-					// Check if data.data exists and has proper structure
 					if ('progress' in data.data) {
 						syncPowProgress({
 							data: data.data
