@@ -1,4 +1,6 @@
 /* eslint-disable */
+/* istanbul ignore file */
+/* v8 ignore start */
 
 /**
  * Encodes an array of bytes as a Candid blob string.
@@ -65,3 +67,5 @@ function blobEncodeU8(u8: number): string {
 	// Backslash and two hex chars:
 	return `\\${u8.toString(16).padStart(2, '0')}`;
 }
+
+/* v8 ignore stop */
