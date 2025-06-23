@@ -108,8 +108,8 @@ export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 	return date.getTime();
 };
 
-export const formatToShortDateString = (date: Date): string =>
-	date.toLocaleDateString('en', { month: 'long' });
+export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
+	date.toLocaleDateString(i18n?.lang ?? 'en', { month: 'long' });
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
