@@ -311,7 +311,7 @@
 			"active_date": "Endet am",
 			"ended_date": "Endete am",
 			"share": "Teilen auf X",
-			"learn_more": "Erfahre mehr",
+			"learn_more": "Mehr erfahren",
 			"check_status": "Status & Berechtigung prüfen",
 			"view_details": "Details anzeigen",
 			"modal_button_text": "Verstanden",
@@ -321,12 +321,12 @@
 			"carousel_slide_title": "$oisy_short Sprinkles sind jetzt live!",
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
-			"youre_eligible": "Du bist qualifiziert!",
+			"youre_eligible": "Du bist berechtigt!",
 			"ongoing": "Läuft",
 			"ended": "Beendet ($amount)"
 		},
 		"requirements": {
-			"requirements_title": "Qualifikations Kriterien",
+			"requirements_title": "Berechtigungskriterien",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
 			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
 			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
@@ -344,22 +344,22 @@
 				"one_liner": "Sei aktiv und verdiene BTC — und jetzt, fürs <strong>Einladen von Freunden</strong>.<br/>Logge ein, führe Transaktionen aus und halte Tokens um dich für tägliche Gewinne zu qualifizieren. Lade Freunde ein und verdiene zusätzlich 10% ihrer Gewinne.",
 				"participate_title": "Sei aktiv und verdiene BTC - und jetzt auch durchs EInladen von Freunden.",
 				"description": "Erfülle einfache wöchentliche Anforderungen. Melde dich an, führe zwei Transaktionen durch und halte Token im Wert von mindestens $20, um täglich 50 BTC-Drops zu erhalten.<br/><strong>Jetzt mit Empfehlungsprämien:</strong> Lade Freunde ein um eine Wallet einzurichten und verdiene 30 Tage lang 10 % ihrer Sprinkles. Sie behalten 100 % – du verdienst zusätzlich.",
-				"campaign_href": "https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A",
+				"campaign_href": "https://x.com/intent/post?text=Noch%20nicht%20f%C3%BCr%20%40OISY%20Sprinkles%20qualifiziert%3F%0ASie%20liefern%20%24BTC%20frei%20Haus%20-%20Tag%20ein%2C%20Tag%20aus.%0ABesuche%20OISY.com%20und%20entdecke%20es%20selber.%20%F0%9F%9A%80",
 				"win": {
 					"default": {
 						"title": "Gratulation zum Erhalt von OISY Sprinkles!",
 						"description": "Teile deinen Sieg auf Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
-						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+						"share_href": "https://x.com/intent/post?text=Habe%20soeben%20gratis%20Bitcoin%20von%20%40OISY%20Wallet%20bekommen%20%F0%9F%AA%82%0ASie%20verteilen%20%24BTC%20Sprinkles%20non-stop.%0AFalls%20du%20noch%20nicht%20auf%20OISY.com%20bist%2C%20jetzt%20ist%20der%20beste%20Zeitpunkt."
 					},
 					"jackpot": {
 						"title": "Gratulation zum Erhalt von OISY Jackpot Sprinkles!",
 						"description": "Teile deinen Sieg auf Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
-						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+						"share_href": "https://x.com/intent/post?text=Habe%20soeben%20die%20Super%20Sprinkles%20%40OISY%20Wallet%20bekommen%20%F0%9F%AA%82%0AKleine%20Streusel%20den%20ganzen%20Tag%20%2B%205%20grosse%20%24BTC%20jeden%20Tag.%0ARegistriere%20dich%20auf%20OISY.com%2C%20und%20erhalte%20gratis%20Bitcoin."
 					},
 					"referral": {
 						"title": "Hier ein kleines Dankeschön",
-						"description": "Ein Benutzer der durch dich eigeladen wurde hat soeben OISY Sprinkles gewonnen.",
-						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+						"description": "Ein Benutzer, der durch dich eigeladen wurde, hat soeben OISY Sprinkles gewonnen.",
+						"share_href": "https://x.com/intent/post?text=Habe%20einem%20Freund%20die%20%40OISY%20Wallet%20empfohlen%20-%20and%20gratis%20%24BTC%20gewonnen%20%F0%9F%AA%82%0AWenn%20deine%20Freunde%20gewinnen%2C%20gewinnst%20du%20auch.%20Einfach%21%0AVersuche%20es%20auch%2C%20bei%20OISY.com"
 					}
 				}
 			},
