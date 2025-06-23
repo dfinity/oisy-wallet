@@ -365,10 +365,10 @@
 			},
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 4 is Live 🎉",
-				"one_liner": "Earn BTC for staying active—and now, earn <strong>guaranteed</strong> Sprinkles for referrals.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer 4 friends and get rewarded directly. Top referrers win even more.",
-				"participate_title": "Earn BTC by staying active - and now by inviting others.",
-				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Now with referral rewards: invite a friend to set up a wallet and you’ll both earn guaranteed Sprinkles. Land in the top 4 referrers and win a jackpot.",
+				"card_title": "OISY Sprinkles: Episode 4 ist aktiv 🎉",
+				"one_liner": "Verdiene BTC durch Aktivität – und jetzt auch <strong>garantierte</strong> Sprinkles für Einladungen.<br/>Melde dich an, mach Transaktionen und halte Tokens, um dich für tägliche Drops zu qualifizieren. Lade 4 Freunde ein und erhalte direkt eine Belohnung. Top-Werber gewinnen noch mehr.",
+				"participate_title": "Verdiene BTC durch Aktivität – und jetzt auch durch Einladungen.",				
+				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Tokens, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
 				"win": {
 					"default": {
