@@ -33,7 +33,7 @@ describe('AllRewardsList', () => {
 
 		render(AllRewardsList);
 
-		expect(initStoreSpy).toHaveBeenCalledTimes(1);
+		expect(initStoreSpy).toHaveBeenCalledOnce();
 	});
 
 	it('should render reward filter and ongoing campaigns', () => {

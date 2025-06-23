@@ -6,7 +6,9 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
+import { Languages } from '$lib/types/languages';
 import {
+	getLocaleForLanguage,
 	mergeWithFallback,
 	replaceOisyPlaceholders,
 	replacePlaceholders
@@ -178,6 +180,28 @@ describe('i18n-utils', () => {
 			});
 
 			expect(result).toEqual(expectedMergeResult);
+		});
+	});
+
+	describe('getLocaleForLanguage', () => {
+		it('should return the correct locale code for languages enum', () => {
+			const resultEn = getLocaleForLanguage(Languages.ENGLISH);
+			const resultDe = getLocaleForLanguage(Languages.GERMAN);
+
+			expect(resultEn).toEqual('en-US');
+			expect(resultDe).toEqual('de-DE');
+		});
+
+		it('should return the default english locale if param is nullish or not supported', () => {
+			const result1 = getLocaleForLanguage();
+			const result2 = getLocaleForLanguage(null as unknown as Languages);
+			const result3 = getLocaleForLanguage(undefined as unknown as Languages);
+			const result4 = getLocaleForLanguage('abc' as unknown as Languages);
+
+			expect(result1).toEqual('en-US');
+			expect(result2).toEqual('en-US');
+			expect(result3).toEqual('en-US');
+			expect(result4).toEqual('en-US');
 		});
 	});
 });

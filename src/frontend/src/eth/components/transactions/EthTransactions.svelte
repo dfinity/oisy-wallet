@@ -16,7 +16,11 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { modalEthTransaction, modalEthToken } from '$lib/derived/modal.derived';
+	import {
+		modalEthTransaction,
+		modalEthToken,
+		modalEthTokenData
+	} from '$lib/derived/modal.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -64,5 +68,5 @@
 {#if $modalEthTransaction && nonNullish(selectedTransaction)}
 	<EthTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalEthToken}
-	<EthTokenModal />
+	<EthTokenModal fromRoute={$modalEthTokenData} />
 {/if}

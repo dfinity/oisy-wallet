@@ -22,6 +22,7 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
@@ -43,7 +44,9 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
-	<span class="text-center text-xl" slot="title">{reward.title}</span>
+	<span class="text-center text-xl" slot="title">
+		{resolveText({ i18n: $i18n, path: reward.title })}
+	</span>
 
 	<ContentWithToolbar>
 		<RewardBanner {reward} />
@@ -54,12 +57,12 @@
 		{/if}
 
 		<div class="flex w-full justify-between text-lg font-semibold">
-			<span class="inline-flex">{reward.participateTitle}</span>
+			<span class="inline-flex">{resolveText({ i18n: $i18n, path: reward.participateTitle })}</span>
 			<span>
 				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
 			</span>
 		</div>
-		<p class="my-3"><Html text={reward.description} /></p>
+		<p class="my-3"><Html text={resolveText({ i18n: $i18n, path: reward.description })} /></p>
 
 		{#if !hasEnded}
 			<ExternalLink
@@ -78,7 +81,7 @@
 
 			<Share
 				text={$i18n.rewards.text.share}
-				href={reward.campaignHref}
+				href={resolveText({ i18n: $i18n, path: reward.campaignHref })}
 				styleClass="my-2"
 				trackEvent={{
 					name: TRACK_REWARD_CAMPAIGN_SHARE,

@@ -7,6 +7,7 @@ import {
 	deleteIdbEthTokens,
 	deleteIdbIcToken,
 	deleteIdbIcTokens,
+	deleteIdbSolToken,
 	deleteIdbSolTokens,
 	getIdbEthTokens,
 	getIdbIcTokens,
@@ -66,8 +67,7 @@ describe('idb-tokens.api', () => {
 			enabled: false
 		}
 	] as CustomToken[];
-	const mockTokens: CustomToken[] = [
-		...icMockTokens,
+	const splDevnetMockTokens = [
 		{
 			token: {
 				SplDevnet: {
@@ -79,7 +79,21 @@ describe('idb-tokens.api', () => {
 			version: toNullable(),
 			enabled: true
 		}
-	];
+	] as CustomToken[];
+	const splMainnetMockTokens = [
+		{
+			token: {
+				SplMainnet: {
+					decimals: toNullable(18),
+					symbol: toNullable(),
+					token_address: 'JacMjZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
+				}
+			},
+			version: toNullable(),
+			enabled: true
+		}
+	] as CustomToken[];
+	const mockTokens: CustomToken[] = [...icMockTokens, ...splDevnetMockTokens];
 
 	const mockParams = {
 		identity: mockIdentity,
@@ -290,6 +304,69 @@ describe('idb-tokens.api', () => {
 			await deleteIdbIcToken({
 				identity: undefined,
 				token: tokenToDelete
+			});
+
+			expect(signOutSpy).toHaveBeenCalled();
+		});
+	});
+
+	describe('deleteIdbSolToken', () => {
+		it('should delete provided SPL token', async () => {
+			const [tokenToDelete] = splMainnetMockTokens;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([...splMainnetMockTokens, ...splDevnetMockTokens]);
+
+			await deleteIdbSolToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				splDevnetMockTokens,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should not delete anything if provided SPL token is not in the IDB', async () => {
+			const tokenToDelete = {
+				token: {
+					SplDevnet: {
+						decimals: toNullable(18),
+						symbol: toNullable(),
+						token_address: 'token_addresss'
+					}
+				},
+				version: toNullable(),
+				enabled: true
+			} as CustomToken;
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([...splMainnetMockTokens, ...splDevnetMockTokens]);
+
+			await deleteIdbSolToken({
+				identity: mockIdentity,
+				token: tokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				[...splMainnetMockTokens, ...splDevnetMockTokens],
+				mockIdbTokensStore
+			);
+		});
+
+		it('should call nullishSignOur if no identity provided', async () => {
+			const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([...splMainnetMockTokens, ...splDevnetMockTokens]);
+
+			await deleteIdbIcToken({
+				identity: undefined,
+				token: splMainnetMockTokens[0]
 			});
 
 			expect(signOutSpy).toHaveBeenCalled();

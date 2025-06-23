@@ -130,17 +130,37 @@ export const modalEthToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-token'
 );
+export const modalEthTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'eth-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
 export const modalBtcToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'btc-token'
+);
+export const modalBtcTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'btc-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalIcToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-token'
 );
+export const modalIcTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'ic-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
 export const modalSolToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'sol-token'
+);
+export const modalSolTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'sol-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
 	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -9,19 +10,30 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
+	import { splDefaultTokens } from '$sol/derived/spl.derived';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = isNetworkSolana($pageToken?.network)
-		? $pageToken.network.explorerUrl
-		: undefined;
+	interface Props {
+		fromRoute: NavigationTarget | undefined;
+	}
+	let { fromRoute }: Props = $props();
 
-	let tokenAddress: string | undefined;
-	$: tokenAddress =
-		nonNullish($pageToken) && isTokenSpl($pageToken) ? $pageToken.address : undefined;
+	let explorerUrl = $derived(
+		isNetworkSolana($pageToken?.network) ? $pageToken.network.explorerUrl : undefined
+	);
+
+	let tokenAddress = $derived(
+		nonNullish($pageToken) && isTokenSpl($pageToken) ? $pageToken.address : undefined
+	);
+
+	let undeletableToken = $derived(
+		nonNullish($pageToken) && isTokenSpl($pageToken)
+			? $splDefaultTokens.some(({ address }) => $pageToken.address === address)
+			: true
+	);
 </script>
 
-<TokenModal token={$pageToken}>
+<TokenModal token={$pageToken} isDeletable={!undeletableToken} {fromRoute}>
 	{#if nonNullish(tokenAddress)}
 		<ModalListItem>
 			{#snippet label()}

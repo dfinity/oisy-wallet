@@ -120,3 +120,42 @@ export const deleteIdbIcToken = async ({
 		});
 	}
 };
+
+export const deleteIdbSolToken = async ({
+	identity,
+	token
+}: DeleteIdbTokenParams<CustomToken>): Promise<void> => {
+	if (isNullish(identity)) {
+		await nullishSignOut();
+		return;
+	}
+
+	const { token: tokenToDelete } = token;
+
+	let tokenToDeleteAddress: string;
+	if ('SplDevnet' in tokenToDelete) {
+		tokenToDeleteAddress = tokenToDelete.SplDevnet.token_address;
+	} else if ('SplMainnet' in tokenToDelete) {
+		tokenToDeleteAddress = tokenToDelete.SplMainnet.token_address;
+	} else {
+		return;
+	}
+
+	const currentTokens = await getIdbIcTokens(identity.getPrincipal());
+
+	if (nonNullish(currentTokens)) {
+		await setIdbSolTokens({
+			identity,
+			tokens: currentTokens.filter(({ token: savedToken }) => {
+				let tokenAddress: string | undefined;
+				if ('SplDevnet' in savedToken) {
+					tokenAddress = savedToken.SplDevnet.token_address;
+				} else if ('SplMainnet' in savedToken) {
+					tokenAddress = savedToken.SplMainnet.token_address;
+				}
+
+				return nonNullish(tokenAddress) ? tokenAddress !== tokenToDeleteAddress : true;
+			})
+		});
+	}
+};

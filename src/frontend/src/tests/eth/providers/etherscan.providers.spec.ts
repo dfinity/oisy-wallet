@@ -237,7 +237,7 @@ describe('etherscan.providers', () => {
 
 					expect(provider).toBeDefined();
 
-					expect(mockFetch).toHaveBeenCalledTimes(1);
+					expect(mockFetch).toHaveBeenCalledOnce();
 
 					expect(result).toStrictEqual(expectedTransactions);
 				});

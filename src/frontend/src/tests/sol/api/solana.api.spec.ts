@@ -290,7 +290,7 @@ describe('solana.api', () => {
 			});
 
 			expect(transactions).toHaveLength(2);
-			expect(mockGetSignaturesForAddress).toHaveBeenCalledTimes(1);
+			expect(mockGetSignaturesForAddress).toHaveBeenCalledOnce();
 		});
 
 		it('should handle empty signatures response', async () => {
@@ -366,7 +366,7 @@ describe('solana.api', () => {
 			});
 
 			expect(account).toEqual(mockSplAddress);
-			expect(mockGetTokenAccountsByOwner).toHaveBeenCalledTimes(1);
+			expect(mockGetTokenAccountsByOwner).toHaveBeenCalledOnce();
 		});
 
 		it('should return undefined if no token account exists', async () => {
