@@ -1,8 +1,8 @@
 import {
-	type PowProtectorWorker,
-	type PowProtectorWorkerInitResult,
 	syncPowNextAllowance,
-	syncPowProgress
+	syncPowProgress,
+	type PowProtectorWorker,
+	type PowProtectorWorkerInitResult
 } from '$icp/services/pow-protector-listener';
 import type {
 	PostMessage,
