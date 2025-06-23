@@ -658,7 +658,7 @@
 		"info": {
 			"ckbtc_certified": "Bitte warte, bis die ckBTC-Parameter zertifiziert sind.",
 			"cketh_certified": "Bitte warte, bis die ckETH-Parameter zertifiziert sind.",
-			"pending_bitcoin_transaction": "du kannst eine weitere Bitcoin-Transaktion senden, sobald die ausstehende abgeschlossen ist.",
+			"pending_bitcoin_transaction": "Du kannst eine weitere Bitcoin-Transaktion senden, sobald die ausstehende abgeschlossen ist.",
 			"no_available_utxos": "Du hast keine verfügbaren UTXOs für diese Transaktion.",
 			"unknown_destination": "Du hast zuvor nicht mit dieser Adresse interagiert. Stelle sicher, dass du den Empfänger kennst.",
 			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>"
