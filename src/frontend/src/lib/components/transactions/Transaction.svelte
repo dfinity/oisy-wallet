@@ -111,7 +111,7 @@
 			{#snippet description()}
 				<span data-tid="receive-tokens-modal-transaction-timestamp">
 					{#if nonNullish(timestamp)}
-						{formatSecondsToDate(timestamp)}
+						{formatSecondsToDate({ seconds: Number(timestamp), i18n: $i18n })}
 					{/if}
 				</span>
 				<TransactionStatusComponent {status} />

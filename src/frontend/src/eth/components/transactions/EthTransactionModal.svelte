@@ -163,7 +163,7 @@
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
-					<output>{formatSecondsToDate(timestamp)}</output>
+					<output>{formatSecondsToDate({ seconds: Number(timestamp), i18n: $i18n })}</output>
 				</ListItem>
 			{/if}
 

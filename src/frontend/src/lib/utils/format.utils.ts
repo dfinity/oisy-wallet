@@ -81,9 +81,15 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	hour12: false
 };
 
-export const formatSecondsToDate = (seconds: number): string => {
+export const formatSecondsToDate = ({
+	seconds,
+	i18n
+}: {
+	seconds: number;
+	i18n?: I18n;
+}): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
