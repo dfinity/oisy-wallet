@@ -1,8 +1,8 @@
 import {
-	syncPowNextAllowance,
-	syncPowProgress,
 	type PowProtectorWorker,
-	type PowProtectorWorkerInitResult
+	type PowProtectorWorkerInitResult,
+	syncPowNextAllowance,
+	syncPowProgress
 } from '$icp/services/pow-protector-listener';
 import type {
 	PostMessage,
@@ -10,6 +10,7 @@ import type {
 	PostMessageDataResponsePowProtectorNextAllowance,
 	PostMessageDataResponsePowProtectorProgress
 } from '$lib/types/post-message';
+import { assertNonNullish } from '@dfinity/utils';
 
 // TODO: add tests for POW worker/scheduler
 export const initPowProtectorWorker: PowProtectorWorker =
@@ -27,11 +28,12 @@ export const initPowProtectorWorker: PowProtectorWorker =
 			>
 		>) => {
 			const { msg } = data;
+			assertNonNullish(data.data);
 
 			switch (msg) {
 				case 'syncPowProgress': {
 					// Check if data.data exists and has proper structure
-					if (data.data && 'progress' in data.data) {
+					if ('progress' in data.data) {
 						syncPowProgress({
 							data: data.data
 						});
@@ -40,7 +42,7 @@ export const initPowProtectorWorker: PowProtectorWorker =
 				}
 				case 'syncPowNextAllowance': {
 					// Check if data.data exists and has proper structure
-					if (data.data && 'nextAllowanceMs' in data.data) {
+					if ('nextAllowanceMs' in data.data) {
 						syncPowNextAllowance({
 							data: data.data
 						});
