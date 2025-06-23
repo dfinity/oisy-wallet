@@ -299,11 +299,11 @@
 	"rewards": {
 		"text": {
 			"title": "Belohnungen",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 erscheint bald!<br>Bleib dran für Updates",
+			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 startet bald!<br>Bleib dran für Updates",
 			"active_date": "Endet am",
 			"ended_date": "Endete am",
 			"share": "Teilen auf X",
-			"learn_more": "Mehr erfahren",
+			"learn_more": "Erfahre mehr",
 			"check_status": "Status & Berechtigung prüfen",
 			"view_details": "Details anzeigen",
 			"modal_button_text": "Verstanden",
@@ -313,16 +313,16 @@
 			"carousel_slide_title": "$oisy_short Sprinkles sind jetzt live!",
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
-			"youre_eligible": "Du bist berechtigt!",
+			"youre_eligible": "Du bist qualifiziert!",
 			"ongoing": "Läuft",
 			"ended": "Beendet ($amount)"
 		},
 		"requirements": {
-			"requirements_title": "Berechtigungskriterien",
+			"requirements_title": "Qualifikations Kriterien",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
 			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
 			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
-			"hangover": ""
+			"hangover": "Kein Gewinn (in den letzten $days Tagen)"
 		},
 		"alt": {
 			"upcoming_campaigns": "Behalte anstehende Token-Drops im Auge! <a href=\"https://x.com/oisy\" target=\"_blank\">Folge uns auf X</a>, tritt unserem <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> bei oder komm in unseren <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>, um auf dem Laufenden zu bleiben.",
