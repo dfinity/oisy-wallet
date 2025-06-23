@@ -102,6 +102,14 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			if ('PolygonAmoy' in key) {
 				return POLYGON_AMOY_NETWORK_ID;
 			}
+			if ('ArbitrumMainnet' in key) {
+				//TODO: Replace with actual Arbitrum Mainnet ID when available
+				return ETHEREUM_NETWORK_ID;
+			}
+			if ('ArbitrumSepolia' in key) {
+				// TODO: Replace with actual Arbitrum Sepolia ID when available
+				return SEPOLIA_NETWORK_ID;
+			}
 
 			// Force compiler error on unhandled cases based on leftover types
 			const _: never = key;
