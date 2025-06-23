@@ -73,7 +73,8 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 
 		const date = formatSecondsToNormalizedDate({
 			seconds: normalizeTimestampToSeconds(transaction.transaction.timestamp),
-			currentDate
+			currentDate,
+			i18n: get(i18n)
 		});
 
 		return { ...acc, [date]: [...(acc[date] ?? []), transaction] };

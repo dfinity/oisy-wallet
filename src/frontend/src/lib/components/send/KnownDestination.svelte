@@ -73,7 +73,8 @@
 			{#if nonNullish(timestamp)}
 				{formatSecondsToNormalizedDate({
 					seconds: normalizeTimestampToSeconds(timestamp),
-					currentDate
+					currentDate,
+					i18n: $i18n
 				})}
 			{/if}
 		</div>
