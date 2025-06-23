@@ -68,7 +68,8 @@
 							$fee: formatToken({
 								value: kytFee,
 								unitName: BTC_DECIMALS,
-								displayDecimals: BTC_DECIMALS
+								displayDecimals: BTC_DECIMALS,
+								i18n: $i18n
 							})
 						})}</span
 					>{/if}

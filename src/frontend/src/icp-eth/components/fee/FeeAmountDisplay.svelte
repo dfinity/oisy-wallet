@@ -41,7 +41,8 @@
 		{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 			$balance: formatToken({
 				value: balance,
-				displayDecimals: feeDecimals
+				displayDecimals: feeDecimals,
+				i18n: $i18n
 			}),
 			$symbol: feeSymbol ?? ''
 		})}

@@ -67,7 +67,8 @@
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
 						value: $ckEthereumNativeTokenBalance ?? ZERO,
-						unitName: $ckEthereumNativeToken.decimals
+						unitName: $ckEthereumNativeToken.decimals,
+						i18n: $i18n
 					})}
 					{$ckEthereumNativeToken.symbol}</output
 				>
@@ -125,7 +126,8 @@
 						{formatToken({
 							value: $sourceTokenBalance ?? ZERO,
 							unitName: $sourceToken.decimals,
-							displayDecimals: $sourceToken.decimals
+							displayDecimals: $sourceToken.decimals,
+							i18n: $i18n
 						})}
 						{$sourceToken.symbol}
 					</p>

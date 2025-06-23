@@ -123,7 +123,7 @@ export const decodeQrCode = ({
 		functionName === 'transfer'
 			? uint256
 			: nonNullish(value)
-				? +formatToken({ value: BigInt(value), unitName: token.decimals })
+				? +formatToken({ value: BigInt(value), unitName: token.decimals, i18n: $i18n })
 				: undefined;
 
 	return { status: 'success', destination, symbol: token.symbol, amount };

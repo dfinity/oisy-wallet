@@ -5,6 +5,7 @@
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let amount: bigint;
 	export let decimals: number;
@@ -24,7 +25,8 @@
 	$: displayAmount = `${formatToken({
 		value: amount,
 		unitName: decimals,
-		displayDecimals: EIGHT_DECIMALS
+		displayDecimals: EIGHT_DECIMALS,
+		i18n: $i18n
 	})} ${symbol}`;
 </script>
 

@@ -28,7 +28,8 @@
 			{:else}
 				{formatToken({
 					value: data.balance,
-					unitName: data.decimals
+					unitName: data.decimals,
+					i18n: $i18n
 				})}
 			{/if}
 		{:else}

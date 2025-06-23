@@ -46,7 +46,8 @@
 					value: formatToken({
 						value: $sendBalance,
 						unitName: $sendTokenDecimals,
-						displayDecimals: $sendTokenDecimals
+						displayDecimals: $sendTokenDecimals,
+						i18n: $i18n
 					}),
 					unitName: $sendTokenDecimals
 				})

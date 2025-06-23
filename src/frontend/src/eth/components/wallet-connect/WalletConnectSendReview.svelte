@@ -31,7 +31,7 @@
 
 <ContentWithToolbar>
 	<SendData
-		amount={formatToken({ value: amountDisplay })}
+		amount={formatToken({ value: amountDisplay, i18n: $i18n })}
 		{destination}
 		token={$sendToken}
 		balance={$balance}

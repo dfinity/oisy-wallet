@@ -6,6 +6,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		amount: bigint;
@@ -21,7 +22,8 @@
 		formatToken({
 			value: amount,
 			unitName: token?.decimals,
-			displayDecimals: EIGHT_DECIMALS
+			displayDecimals: EIGHT_DECIMALS,
+			i18n: $i18n
 		})
 	);
 

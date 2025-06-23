@@ -24,7 +24,8 @@
 			? formatToken({
 					value: $icTokenFeeStore[$sourceToken.symbol],
 					displayDecimals: $sourceToken.decimals,
-					unitName: $sourceToken.decimals
+					unitName: $sourceToken.decimals,
+					i18n: $i18n
 				})
 			: '0';
 

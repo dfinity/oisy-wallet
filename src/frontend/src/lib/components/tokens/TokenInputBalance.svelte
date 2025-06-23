@@ -5,6 +5,7 @@
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		token: Token;
@@ -21,7 +22,8 @@
 	<div class="ml-1 font-semibold">
 		{formatToken({
 			value: balance ?? ZERO,
-			unitName: token.decimals
+			unitName: token.decimals,
+			i18n: $i18n
 		})}
 		{getTokenDisplaySymbol(token)}
 	</div>

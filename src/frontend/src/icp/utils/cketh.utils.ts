@@ -46,7 +46,8 @@ export const assertCkETHMinWithdrawalAmount = ({
 				$amount: formatToken({
 					value: minWithdrawalAmount,
 					unitName: tokenDecimals,
-					displayDecimals: tokenDecimals
+					displayDecimals: tokenDecimals,
+					i18n
 				}),
 				$symbol: tokenSymbol
 			})
@@ -120,7 +121,8 @@ export const assertCkETHBalanceEstimatedFee = ({
 				$amount: formatToken({
 					value: estimatedFee,
 					unitName: decimals,
-					displayDecimals: decimals
+					displayDecimals: decimals,
+					i18n
 				}),
 				$symbol: symbol
 			})

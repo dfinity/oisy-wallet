@@ -35,7 +35,8 @@
 				$feeBalance: formatToken({
 					value: balanceForFee,
 					displayDecimals: decimals,
-					unitName: decimals
+					unitName: decimals,
+					i18n: $i18n
 				})
 			})}
 		/>

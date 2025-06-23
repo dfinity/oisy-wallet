@@ -1,6 +1,7 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { AmountString } from '$lib/types/amount';
+import { getLocaleForLanguage } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import type { BigNumberish } from 'ethers/utils';
@@ -14,6 +15,7 @@ interface FormatTokenParams {
 	displayDecimals?: number;
 	trailingZeros?: boolean;
 	showPlusSign?: boolean;
+	i18n?: I18n;
 }
 
 export const formatToken = ({
@@ -21,7 +23,8 @@ export const formatToken = ({
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
 	displayDecimals,
 	trailingZeros = false,
-	showPlusSign = false
+	showPlusSign = false,
+	i18n
 }: FormatTokenParams): AmountString => {
 	const res = Utils.formatUnits(value, unitName);
 
@@ -35,7 +38,7 @@ export const formatToken = ({
 	const maxFractionDigits = Math.min(leadingZeros + 2, MAX_DEFAULT_DISPLAY_DECIMALS);
 	const minFractionDigits = displayDecimals ?? DEFAULT_DISPLAY_DECIMALS;
 
-	const formatted = (+res).toLocaleString('en-US', {
+	const formatted = (+res).toLocaleString(getLocaleForLanguage(i18n?.lang), {
 		useGrouping: false,
 		maximumFractionDigits:
 			displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS),

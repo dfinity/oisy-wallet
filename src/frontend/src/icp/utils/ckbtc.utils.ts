@@ -37,7 +37,8 @@ export const assertCkBTCUserInputAmount = ({
 			replacePlaceholders(i18n.send.assertion.minimum_ckbtc_amount, {
 				$amount: formatToken({
 					value: retrieveBtcMinAmount,
-					unitName: tokenDecimals
+					unitName: tokenDecimals,
+					i18n
 				})
 			})
 		);

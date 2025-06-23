@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		amount: bigint;
@@ -15,7 +16,8 @@
 		formatToken({
 			value: amount,
 			unitName: decimals,
-			displayDecimals: decimals
+			displayDecimals: decimals,
+			i18n: $i18n
 		})
 	);
 
@@ -24,7 +26,8 @@
 			value: amount,
 			unitName: decimals,
 			displayDecimals: EIGHT_DECIMALS,
-			showPlusSign: formatPositiveAmount
+			showPlusSign: formatPositiveAmount,
+			i18n: $i18n
 		})
 	);
 </script>

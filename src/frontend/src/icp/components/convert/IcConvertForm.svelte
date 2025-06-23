@@ -66,7 +66,8 @@
 					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
 				) ?? ZERO),
 		unitName: $sourceToken.decimals,
-		displayDecimals: $sourceToken.decimals
+		displayDecimals: $sourceToken.decimals,
+		i18n: $i18n
 	});
 
 	let totalSourceTokenFee: bigint | undefined;
@@ -83,7 +84,8 @@
 				$balance: formatToken({
 					value: $balanceForFee ?? ZERO,
 					unitName: tokenForFee.decimals,
-					displayDecimals: tokenForFee.decimals
+					displayDecimals: tokenForFee.decimals,
+					i18n: $i18n
 				})
 			})
 		: $unknownMinimumAmount

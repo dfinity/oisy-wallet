@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import ConvertAmountDisplay from '$lib/components/convert/ConvertAmountDisplay.svelte';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let feeAmount: bigint | undefined = undefined;
 	export let symbol: string;
@@ -12,7 +13,7 @@
 
 	let formattedFeeAmount: string | undefined;
 	$: formattedFeeAmount = nonNullish(feeAmount)
-		? formatToken({ value: feeAmount, unitName: decimals, displayDecimals: decimals })
+		? formatToken({ value: feeAmount, unitName: decimals, displayDecimals: decimals, i18n: $i18n })
 		: undefined;
 </script>
 

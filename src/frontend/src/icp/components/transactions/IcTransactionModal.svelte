@@ -55,7 +55,8 @@
 							value,
 							unitName: token.decimals,
 							displayDecimals: token.decimals,
-							showPlusSign: type === 'receive'
+							showPlusSign: type === 'receive',
+							i18n: $i18n
 						})}
 						{token.symbol}
 					</output>
