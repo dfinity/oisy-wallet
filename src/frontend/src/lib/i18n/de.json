@@ -51,12 +51,12 @@
 	},
 	"navigation": {
 		"text": {
-			"tokens": "Vermögenswerte",
-			"settings": "Einstellungen",
+			"tokens": "Vermögen",
+			"settings": "Einstellen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
-			"airdrops": "Belohnungen",
-			"earning": "Belohnungen",
+			"airdrops": "Preise",
+			"earning": "Preise",
 			"source_code_on_github": "Quellcode auf GitHub",
 			"view_on_explorer": "Im Explorer ansehen",
 			"source_code": "Quellcode",
