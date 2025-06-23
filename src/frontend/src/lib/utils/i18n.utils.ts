@@ -7,7 +7,6 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
-import { Languages } from '$lib/types/languages';
 import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
@@ -78,13 +77,4 @@ export const mergeWithFallback = ({
 	}
 
 	return merged;
-};
-
-export const getLocaleForLanguage = (lang?: Languages): string => {
-	switch (lang) {
-		case Languages.GERMAN:
-			return 'de-DE';
-		default:
-			return 'en-US';
-	}
 };

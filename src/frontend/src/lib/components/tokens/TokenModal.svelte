@@ -9,7 +9,7 @@
 	import { isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { toUserToken } from '$icp-eth/services/user-token.services';
 	import { removeCustomToken, removeUserToken } from '$lib/api/backend.api';
-	import { deleteIdbEthToken, deleteIdbIcToken } from '$lib/api/idb-tokens.api';
+	import { deleteIdbEthToken, deleteIdbIcToken, deleteIdbSolToken } from '$lib/api/idb-tokens.api';
 	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
 	import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
@@ -26,8 +26,11 @@
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
+	import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface BaseTokenModalProps {
 		token: OptionToken;
@@ -145,6 +148,24 @@
 
 				icrcCustomTokensStore.reset(tokenToDelete.ledgerCanisterId);
 				await deleteIdbIcToken({ identity: $authIdentity, token: customToken });
+
+				await onTokenDeleteSuccess(tokenToDelete);
+			} else if (isTokenSpl(tokenToDelete)) {
+				loading = true;
+
+				const customToken = toCustomToken({
+					...tokenToDelete,
+					enabled: true,
+					networkKey: isNetworkIdSOLDevnet(tokenToDelete.network.id) ? 'SplDevnet' : 'SplMainnet'
+				});
+
+				await removeCustomToken({
+					identity: $authIdentity,
+					token: customToken
+				});
+
+				splCustomTokensStore.reset(tokenToDelete.id);
+				await deleteIdbSolToken({ identity: $authIdentity, token: customToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
 			}
