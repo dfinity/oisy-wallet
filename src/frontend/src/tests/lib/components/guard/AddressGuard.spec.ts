@@ -295,7 +295,7 @@ describe('AddressGuard', () => {
 					});
 
 					await waitFor(() => {
-						expect(validateSpy).toHaveBeenCalledTimes(1);
+						expect(validateSpy).toHaveBeenCalledOnce();
 					});
 
 					emit({ message: 'oisyValidateAddresses' });

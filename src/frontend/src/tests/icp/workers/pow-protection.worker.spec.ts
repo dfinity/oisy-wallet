@@ -148,16 +148,16 @@ describe('pow-protector.worker', () => {
 					await scheduler.trigger(startData);
 
 					expect(spyHasRequiredCycles).toHaveBeenCalledTimes(1);
-					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
 					expect(spySolvePowChallenge).toHaveBeenCalledWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledTimes(1);
+					expect(spyAllowSigning).toHaveBeenCalledOnce();
 					expect(spyAllowSigning).toHaveBeenCalledWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }
@@ -177,16 +177,16 @@ describe('pow-protector.worker', () => {
 					await vi.advanceTimersByTimeAsync(100);
 
 					// After start() - should have run once immediately
-					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
 					expect(spySolvePowChallenge).toHaveBeenCalledWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledTimes(1);
+					expect(spyAllowSigning).toHaveBeenCalledOnce();
 					expect(spyAllowSigning).toHaveBeenCalledWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }
