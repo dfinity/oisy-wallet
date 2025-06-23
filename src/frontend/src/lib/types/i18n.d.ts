@@ -176,6 +176,14 @@ interface I18nDapps {
 		tags: string;
 		website: string;
 	};
+	categories: {
+		defi: string;
+		social_media: string;
+		verifiable_credentials: string;
+		staking: string;
+		walletconnect: string;
+		game: string;
+	};
 	descriptions: {
 		kongswap: {
 			name: string;
