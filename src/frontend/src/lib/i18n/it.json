@@ -181,6 +181,14 @@
 			"tags": "",
 			"website": ""
 		},
+		"categories": {
+			"defi": "",
+			"social_media": "",
+			"verifiable_credentials": "",
+			"staking": "",
+			"walletconnect": "",
+			"game": ""
+		},
 		"descriptions": {
 			"kongswap": {
 				"name": "",

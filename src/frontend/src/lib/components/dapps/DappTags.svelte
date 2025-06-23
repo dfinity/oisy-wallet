@@ -16,7 +16,7 @@
 	{#each tags as tag (tag)}
 		<li class="flex">
 			<Badge>
-				{tag}
+				{resolveText({ i18n: $i18n, path: tag })}
 			</Badge>
 		</li>
 	{/each}

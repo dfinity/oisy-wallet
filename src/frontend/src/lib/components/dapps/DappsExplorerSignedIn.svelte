@@ -13,6 +13,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 
 	// For the moment only the first featured dapp is highlighted
 	const selectFirstFeaturedDapp = (): FeaturedOisyDappDescription | undefined =>
@@ -61,10 +62,13 @@
 	{#each uniqueTags as tag (tag)}
 		<Button
 			paddingSmall
-			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, { $tag: tag })}
+			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, {
+				$tag: resolveText({ i18n: $i18n, path: tag })
+			})}
 			onclick={() => (selectedTag = tag)}
 			styleClass="text-nowrap max-w-fit text-sm"
-			colorStyle={selectedTag === tag ? 'primary' : 'tertiary'}>{tag}</Button
+			colorStyle={selectedTag === tag ? 'primary' : 'tertiary'}
+			>{resolveText({ i18n: $i18n, path: tag })}</Button
 		>
 	{/each}
 </div>
