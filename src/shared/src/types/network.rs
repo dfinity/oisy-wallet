@@ -84,7 +84,7 @@ pub enum EthereumNetworkId {
     PolygonAmoy = 80_002,
     Sepolia = 11_155_111,
     ArbitrumMainnet = 42_161,
-    ArbitrumSepolia = 42_161_4,
+    ArbitrumSepolia = 421_614,
 }
 impl Network for EthereumNetworkId {}
 /// Solana networks, or "clusters".
