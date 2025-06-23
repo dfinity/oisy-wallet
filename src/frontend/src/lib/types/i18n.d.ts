@@ -190,7 +190,6 @@ interface I18nDapps {
 			one_liner: string;
 			description: string;
 			carousel: { text: string; call_to_action: string };
-			tags: { defi: string };
 		};
 		openchat: {
 			name: string;
@@ -199,7 +198,6 @@ interface I18nDapps {
 			description: string;
 			stats: string;
 			carousel: { text: string; call_to_action: string };
-			tags: { social_media: string };
 		};
 		decideid: {
 			name: string;
@@ -208,7 +206,6 @@ interface I18nDapps {
 			stats: string;
 			description: string;
 			carousel: { text: string; call_to_action: string };
-			tags: { verifiable_credentials: string };
 		};
 		icpswap: { name: string; one_liner: string; call_to_action: string; description: string };
 		nnsdapp: { name: string; one_liner: string; call_to_action: string; description: string };

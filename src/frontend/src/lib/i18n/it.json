@@ -197,9 +197,6 @@
 				"carousel": {
 					"text": "",
 					"call_to_action": ""
-				},
-				"tags": {
-					"defi": ""
 				}
 			},
 			"openchat": {
@@ -211,9 +208,6 @@
 				"carousel": {
 					"text": "",
 					"call_to_action": ""
-				},
-				"tags": {
-					"social_media": ""
 				}
 			},
 			"decideid": {
@@ -225,9 +219,6 @@
 				"carousel": {
 					"text": "",
 					"call_to_action": ""
-				},
-				"tags": {
-					"verifiable_credentials": ""
 				}
 			},
 			"icpswap": {
