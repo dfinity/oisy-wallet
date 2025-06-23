@@ -69,7 +69,9 @@
 			"refer_a_friend": "",
 			"address_book": "",
 			"hide_balances": "",
-			"show_balances": ""
+			"show_balances": "",
+			"privacy_mode_enabled": "",
+			"privacy_mode_disabled": ""
 		},
 		"alt": {
 			"tokens": "",
@@ -77,7 +79,6 @@
 			"dapp_explorer": "",
 			"activity": "",
 			"airdrops": "",
-			"more_settings": "",
 			"menu": "",
 			"changelog": "",
 			"documentation": "",
@@ -179,12 +180,125 @@
 			"submit_your_dapp": "",
 			"tags": "",
 			"website": ""
+		},
+		"descriptions": {
+			"kongswap": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"openchat": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"stats": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"decideid": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"stats": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icpswap": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"nnsdapp": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"uniswap": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"oneinch": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"compound_finance": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"aave": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"eigenlayer": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"curve_finance": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"zkpoker": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"sonic": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"raydium": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"jupiter": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"waterneuron": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			}
 		}
 	},
 	"rewards": {
 		"text": {
 			"title": "",
-			"active_campaigns": "",
 			"upcoming_campaigns": "",
 			"active_date": "",
 			"ended_date": "",
@@ -195,8 +309,6 @@
 			"modal_button_text": "",
 			"activity_button_text": "",
 			"activity_button_text_short": "",
-			"no_balance_title": "",
-			"no_balance_description": "",
 			"open_wallet": "",
 			"carousel_slide_title": "",
 			"carousel_slide_cta": "",
@@ -216,6 +328,68 @@
 			"upcoming_campaigns": "",
 			"coming_soon": "",
 			"reward_banner": ""
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referrer": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referee": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			}
 		}
 	},
 	"footer": {
@@ -269,7 +443,6 @@
 			"no_infura_cketh_provider": "",
 			"no_infura_erc20_provider": "",
 			"no_infura_erc20_icp_provider": "",
-			"no_solana_rpc": "",
 			"no_solana_network": "",
 			"eth_address_unknown": "",
 			"loading_address": "",
@@ -311,21 +484,17 @@
 	"settings": {
 		"text": {
 			"title": "",
-			"general": "",
 			"principal": "",
 			"principal_copied": "",
 			"principal_description": "",
 			"session_duration": "",
 			"session_expires_in": "",
-			"session_description": "",
 			"networks": "",
 			"enable_testnets": "",
 			"active_networks": "",
 			"active_networks_description": "",
 			"enable_network": "",
 			"disable_network": "",
-			"testnets_description": "",
-			"hide_zero_balances_description": "",
 			"credentials_title": "",
 			"pouh_credential": "",
 			"pouh_credential_description": "",
@@ -356,7 +525,6 @@
 	"networks": {
 		"title": "",
 		"test_networks": "",
-		"more": "",
 		"chain_fusion": "",
 		"network": "",
 		"testnet": "",
@@ -492,7 +660,6 @@
 			"insufficient_funds": "",
 			"unknown_minimum_ckbtc_amount": "",
 			"unknown_minimum_cketh_amount": "",
-			"unknown_minimum_amount": "",
 			"minimum_ckbtc_amount": "",
 			"minimum_cketh_amount": "",
 			"minimum_amount": "",
@@ -588,8 +755,6 @@
 			"review": "",
 			"review_button": "",
 			"max_slippage": "",
-			"max_balance": "",
-			"not_available": "",
 			"value_difference": "",
 			"total_fee": "",
 			"network_fee": "",
@@ -644,12 +809,10 @@
 			"token_address": "",
 			"balance": "",
 			"hide_zero_balances": "",
-			"hide_zeros": "",
 			"all_tokens_with_zero_hidden": "",
 			"filter_nothing_found": "",
 			"filter_nothing_found_description": "",
 			"filter_placeholder": "",
-			"filter_button": "",
 			"buy_or_receive": "",
 			"initializing": "",
 			"updating_ui": "",
@@ -720,11 +883,8 @@
 			"text": {
 				"title": "",
 				"manage_list": "",
-				"default_message": "",
 				"list_settings": "",
-				"do_not_see_import": "",
 				"import_token": "",
-				"manage_for_network": "",
 				"network": "",
 				"all_tokens_zero_balance": ""
 			},
@@ -832,7 +992,6 @@
 			"events": "",
 			"message": "",
 			"hex_data": "",
-			"base64_data": "",
 			"raw_copied": "",
 			"sign_message": ""
 		},
@@ -919,7 +1078,6 @@
 			"ck_token_sent": "",
 			"twin_token_converted": "",
 			"ck_token_converted": "",
-			"receiving_twin_token": "",
 			"sending_twin_token": "",
 			"sending_twin_token_failed": "",
 			"converting_twin_token": "",
@@ -943,7 +1101,6 @@
 			"title": "",
 			"buy_or_receive": "",
 			"transaction_history": "",
-			"open_transactions": "",
 			"mainnet_btc_transactions_info": "",
 			"transaction_history_unavailable": "",
 			"missing_index_canister_explanation": "",

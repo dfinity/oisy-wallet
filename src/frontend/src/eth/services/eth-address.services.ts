@@ -19,11 +19,19 @@ import type { EthAddress } from '$lib/types/address';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
-import { nonNullish } from '@dfinity/utils';
+import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
-	const signerAddress = await getSignerEthAddress({
+	if (FRONTEND_DERIVATION_ENABLED) {
+		// We use the same logic of the canister method. The potential error will be handled in the consumer.
+		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+
+		// HACK: This is working right now ONLY in Beta and Prod because the library is aware of the production Chain Fusion Signer's public key (used by both envs), but not for the staging Chain Fusion Signer (used by all other envs).
+		return await deriveEthAddress(identity.getPrincipal().toString());
+	}
+
+	return await getSignerEthAddress({
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
