@@ -1,4 +1,5 @@
 import type { NetworkSettingsFor } from '$declarations/backend/backend.did';
+import { ARBITRUM_MAINNET_NETWORK_ID, ARBITRUM_SEPOLIA_NETWORK_ID, ARBITRUM_SEPOLIA_NETWORK_SYMBOL } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK_ID,
 	BASE_SEPOLIA_NETWORK_ID
@@ -57,6 +58,9 @@ export const userNetworks: Readable<UserNetworks> = derived(
 		}
 
 		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {
+
+			console.log(`Mapping user network key to NetworkId: ${key.toString()}`);
+			
 			if ('InternetComputer' in key) {
 				return ICP_NETWORK_ID;
 			}
@@ -112,7 +116,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 		return {
 			...defaultMainnetUserNetworks,
 			...userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
-				const networkId: NetworkId = keyToNetworkId(key);
+				const networkId: NetworkId = keyToNetworkId(key) || ARBITRUM_SEPOLIA_NETWORK_ID;
 				return { ...acc, [networkId]: { enabled, isTestnet } };
 			}, {}),
 			// We always enable ICP network.

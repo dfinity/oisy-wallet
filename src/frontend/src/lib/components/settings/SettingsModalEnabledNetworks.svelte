@@ -67,6 +67,8 @@
 	};
 
 	const toggleNetwork = ({ id, env }: Network) => {
+		console.log(`Toggling network: ${id.toString()}, env: ${env}`);
+
 		enabledNetworks[id] = {
 			enabled: !enabledNetworks[id]?.enabled,
 			isTestnet: env === 'testnet'
@@ -81,9 +83,13 @@
 			return;
 		}
 
+		console.log('Saving enabled networks1:', enabledNetworks);
+
 		if (!isModified) {
 			return;
 		}
+
+		console.log('Saving enabled networks2:', enabledNetworks);
 
 		saveLoading = true;
 		await setUserShowTestnets({
@@ -95,6 +101,8 @@
 		// we need to manually reload the profile in order to get the correct $userProfileVersion for the second call to update userNetworkSettings
 		// TODO: refactor this when we have a single method for both calls
 		await loadUserProfile({ identity: $authIdentity, reload: true });
+
+		console.log('Saving enabled networks:', enabledNetworks);
 
 		await updateUserNetworkSettings({
 			identity: $authIdentity,

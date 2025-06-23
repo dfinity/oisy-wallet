@@ -1,4 +1,5 @@
 import { EXCHANGE_DISABLED } from '$env/exchange.env';
+import { ARBITRUM_ETH_TOKEN_ID } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import {
 	BASE_ETH_TOKEN_ID,
 	BASE_SEPOLIA_ETH_TOKEN_ID
@@ -71,6 +72,8 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[BNB_TESTNET_TOKEN_ID]: bnbPrice,
 			[POL_MAINNET_TOKEN_ID]: polPrice,
 			[POL_AMOY_TOKEN_ID]: polPrice,
+			[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
+
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const token =
 					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
