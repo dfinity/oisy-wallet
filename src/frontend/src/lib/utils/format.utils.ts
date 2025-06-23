@@ -81,14 +81,26 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	hour12: false
 };
 
-export const formatSecondsToDate = (seconds: number): string => {
+export const formatSecondsToDate = ({
+	seconds,
+	i18n
+}: {
+	seconds: number;
+	i18n?: I18n;
+}): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
 };
 
-export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
+export const formatNanosecondsToDate = ({
+	nanoseconds,
+	i18n
+}: {
+	nanoseconds: bigint;
+	i18n?: I18n;
+}): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
-	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
@@ -96,8 +108,8 @@ export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 	return date.getTime();
 };
 
-export const formatToShortDateString = (date: Date): string =>
-	date.toLocaleDateString('en', { month: 'long' });
+export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
+	date.toLocaleDateString(i18n?.lang ?? 'en', { month: 'long' });
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 

@@ -1,6 +1,9 @@
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	formatNanosecondsToDate,
+	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
+	formatToShortDateString,
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
@@ -302,6 +305,110 @@ describe('format.utils', () => {
 					expected
 				);
 			});
+		});
+	});
+
+	describe('formatSecondsToDate', () => {
+		it('formats seconds correctly in default (en) locale', () => {
+			const result = formatSecondsToDate({ seconds: 1672531200 }); // Jan 1, 2023
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('formats date in German locale when i18n.lang is de', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672531200,
+				i18n: { lang: 'de' } as unknown as I18n
+			});
+
+			expect(result).toMatch('1. Jan. 2023');
+		});
+
+		it('falls back to en locale when i18n.lang is not provided', () => {
+			const result = formatSecondsToDate({ seconds: 1672531200, i18n: {} as unknown as I18n });
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('returns invalid date if NaN is passed', () => {
+			const result = formatSecondsToDate({ seconds: NaN });
+
+			expect(result).toBe('Invalid Date');
+		});
+	});
+
+	describe('formatNanosecondsToDate', () => {
+		it('formats nanoseconds correctly in default (en) locale', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
+			const result = formatNanosecondsToDate({ nanoseconds: jan1_2023_ns });
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('formats date in German locale when i18n.lang is de', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
+			const result = formatNanosecondsToDate({
+				nanoseconds: jan1_2023_ns,
+				i18n: { lang: 'de' } as unknown as I18n
+			});
+
+			expect(result).toMatch('1. Jan. 2023');
+		});
+
+		it('falls back to en locale when i18n.lang is not provided', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
+			const result = formatNanosecondsToDate({
+				nanoseconds: jan1_2023_ns,
+				i18n: {} as unknown as I18n
+			});
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('returns Invalid Date if BigInt is invalid or NaN-like', () => {
+			// Use a value that will overflow or convert to NaN
+			const invalid = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(1_000_000_000); // Too large for Number()
+			const result = formatNanosecondsToDate({ nanoseconds: invalid });
+
+			expect(result).toBe('Invalid Date');
+		});
+	});
+
+	describe('formatToShortDateString', () => {
+		it('formats date to full month name in default (en) locale', () => {
+			const result = formatToShortDateString({
+				date: new Date('2023-01-15'),
+				i18n: {} as unknown as I18n
+			});
+
+			expect(result).toBe('January');
+		});
+
+		it('formats date to month name in German locale', () => {
+			const result = formatToShortDateString({
+				date: new Date('2023-01-15'),
+				i18n: { lang: 'de' } as unknown as I18n
+			});
+
+			expect(result).toBe('Januar');
+		});
+
+		it('formats date to month name in French locale', () => {
+			const result = formatToShortDateString({
+				date: new Date('2023-01-15'),
+				i18n: { lang: 'fr' } as unknown as I18n
+			});
+
+			expect(result).toBe('janvier');
+		});
+
+		it('handles invalid date input by returning "Invalid Date"', () => {
+			const result = formatToShortDateString({
+				date: new Date('invalid'),
+				i18n: { lang: 'en' } as unknown as I18n
+			});
+
+			expect(result).toBe('Invalid Date');
 		});
 	});
 
