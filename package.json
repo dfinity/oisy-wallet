@@ -124,7 +124,7 @@
 		"prettier-plugin-tailwindcss": "^0.6.12",
 		"sass": "^1.89.1",
 		"svelte": "^5.33.18",
-		"svelte-check": "^4.2.1",
+		"svelte-check": "^4.2.2",
 		"tailwindcss": "4.1.10",
 		"tslib": "^2.8.1",
 		"typescript": "^5.4.5",
