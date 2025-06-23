@@ -310,6 +310,7 @@ describe('format.utils', () => {
 	describe('formatSecondsToDate', () => {
 		it('formats seconds correctly in default (en) locale', () => {
 			const result = formatSecondsToDate({ seconds: 1672531200 }); // Jan 1, 2023
+
 			expect(result).toMatch('Jan 1, 2023');
 		});
 
@@ -324,11 +325,13 @@ describe('format.utils', () => {
 
 		it('falls back to en locale when i18n.lang is not provided', () => {
 			const result = formatSecondsToDate({ seconds: 1672531200, i18n: {} as unknown as I18n });
+
 			expect(result).toMatch('Jan 1, 2023');
 		});
 
 		it('returns invalid date if NaN is passed', () => {
 			const result = formatSecondsToDate({ seconds: NaN });
+
 			expect(result).toBe('Invalid Date');
 		});
 	});
