@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { POW_FEATURE_ENABLED } from '$env/pow.env';
-	import type { PowProtectorWorkerInitResult } from '$icp/services/pow-protector-listener';
+	import type { PowProtectorWorkerInitResult } from '$icp/services/pow-protector-listener.services';
 	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 
 	interface Props {
