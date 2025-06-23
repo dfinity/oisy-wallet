@@ -369,31 +369,31 @@
 				"one_liner": "Verdiene BTC durch Aktivität – und jetzt auch <strong>garantierte</strong> Sprinkles für Einladungen.<br/>Melde dich an, mach Transaktionen und halte Tokens, um dich für tägliche Drops zu qualifizieren. Lade 4 Freunde ein und erhalte direkt eine Belohnung. Top-Werber gewinnen noch mehr.",
 				"participate_title": "Verdiene BTC durch Aktivität – und jetzt auch durch Einladungen.",
 				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Tokens, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
-				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Tokens%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
 				"win": {
 					"default": {
-						"title": "You got rewarded",
-						"description": "Your rewards just landed in your wallet<br>Don't forget to refer and stay active to win more",
+						"title": "Du wurdest belohnt",
+						"description": "Deine Belohnungen sind gerade in Deiner Wallet eingetroffen.<br>Nicht vergessen: Weiter einladen und aktiv bleiben, um mehr zu gewinnen.",
 						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
 					},
 					"jackpot": {
-						"title": "You've won the jackpot",
-						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more",
+						"title": "Du hast den Jackpot gewonnen",
+						"description": "Du hast gerade unsere höchste Sprinkles-Belohnung erhalten.<br>Bleib aktiv und lade weiter ein, um noch mehr zu gewinnen.",
 						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
 					},
 					"leaderboard": {
-						"title": "You topped the Leaderboard",
-						"description": "You ranked among the top 4 referrers this season<br>$200 has been added to your wallet",
+						"title": "Du führst die Rangliste an",
+						"description": "Du gehörst zu den Top 4 Werbern dieser Saison.<br>$200 wurden Deiner Wallet gutgeschrieben.",
 						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
 					},
 					"referrer": {
-						"title": "You're just getting started",
-						"description": "You earned $1.<br>Refer more - top 4 referrers get $200.<br>You're close. Keep going.",
+						"title": "Du fängst gerade erst an",
+						"description": "Du hast $1 verdient.<br>Lade weiter ein – die Top 4 Werber erhalten $200.<br>Du bist nah dran. Mach weiter so.",
 						"share_href": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
 					},
 					"referee": {
-						"title": "Get more for Referring",
-						"description": "You just earned Sprinkles - so did the person who referred you.<br>Send 4 friends and earn $1.<br>Top 4 referrers win $200 each.",
+						"title": "Mehr verdienen durch Einladen",
+						"description": "Du hast gerade Sprinkles verdient – und die Person, die Dich eingeladen hat, auch.<br>Lade 4 Freunde ein und erhalte $1.<br>Die Top 4 Werber gewinnen jeweils $200.",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
 					}
 				}
