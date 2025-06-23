@@ -1,5 +1,8 @@
 import type { NetworkSettingsFor } from '$declarations/backend/backend.did';
-import { ARBITRUM_SEPOLIA_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
+	ARBITRUM_MAINNET_NETWORK_ID,
+	ARBITRUM_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK_ID,
 	BASE_SEPOLIA_NETWORK_ID
@@ -104,6 +107,14 @@ export const userNetworks: Readable<UserNetworks> = derived(
 				return POLYGON_AMOY_NETWORK_ID;
 			}
 
+			if ('ArbitrumMainnet' in key) {
+				return ARBITRUM_MAINNET_NETWORK_ID;
+			}
+
+			if ('ArbitrumSepolia' in key) {
+				return ARBITRUM_SEPOLIA_NETWORK_ID;
+			}
+
 			// Force compiler error on unhandled cases based on leftover types
 			const _: never = key;
 
@@ -113,7 +124,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 		return {
 			...defaultMainnetUserNetworks,
 			...userNetworks.reduce<UserNetworks>((acc, [key, { enabled, is_testnet: isTestnet }]) => {
-				const networkId: NetworkId = keyToNetworkId(key) || ARBITRUM_SEPOLIA_NETWORK_ID;
+				const networkId: NetworkId = keyToNetworkId(key);
 				return { ...acc, [networkId]: { enabled, isTestnet } };
 			}, {}),
 			// We always enable ICP network.

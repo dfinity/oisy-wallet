@@ -51,7 +51,6 @@
 
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 		{#each $networksTestnets as network (network.id)}
-			<span>{network}</span>
 			<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
 				><Network
 					{network}

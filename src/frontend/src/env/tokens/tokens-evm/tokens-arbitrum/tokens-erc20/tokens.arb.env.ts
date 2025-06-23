@@ -1,4 +1,7 @@
-import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
+	ARBITRUM_MAINNET_NETWORK,
+	ARBITRUM_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import arb from '$eth/assets/arb.svg';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -24,4 +27,21 @@ export const ARB_TOKEN: RequiredEvmErc20Token = {
 	buy: {
 		onramperId: 'arb_arbitrum'
 	}
+};
+
+export const ARB_SEPOLIA_ARB_SYMBOL = 'SepoliaARB';
+
+export const ARB_SEPOLIA_ARB_TOKEN_ID: TokenId = parseTokenId(ARB_SEPOLIA_ARB_SYMBOL);
+
+export const ARB_SEPOLIA_ARB_TOKEN: RequiredEvmErc20Token = {
+	id: ARB_SEPOLIA_ARB_TOKEN_ID,
+	network: ARBITRUM_SEPOLIA_NETWORK,
+	standard: 'erc20',
+	category: 'default',
+	name: 'ARB (Sepolia Testnet)',
+	symbol: ARB_SEPOLIA_ARB_SYMBOL,
+	decimals: ARB_DECIMALS,
+	icon: arb,
+	address: '0x7Cc1d0980c8D0e248e4F94cf3714F890Dc4F084c',
+	exchange: 'erc20'
 };
