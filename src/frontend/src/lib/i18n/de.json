@@ -100,7 +100,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% dezentralisiert",
 			"logout": "Abmelden",
-			"authenticate": "Öffnen oder Erstellen",
+			"authenticate": "Anmelden",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Sofortiger und privater Zugriff überall",
 			"advanced_cryptography": "100% On-Chain: Sicherheit durch fortschrittliche Kryptographie"
@@ -542,7 +542,7 @@
 	},
 	"receive": {
 		"text": {
-			"receive": "Empfangen",
+			"receive": "Empfang",
 			"address": "Empfangsadresse",
 			"receive_token": "$token empfangen"
 		},
