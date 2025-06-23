@@ -19,31 +19,31 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import type { MockInstance } from 'vitest';
 
+const postMessageSpy = vi.fn();
+
+class MockWorker {
+	postMessage = postMessageSpy;
+	onmessage: ((event: MessageEvent) => void) | null = null;
+}
+
+vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
+
+let workerInstance: Worker;
+
+vi.mock('$lib/workers/workers?worker', () => ({
+	default: vi.fn().mockImplementation(() => {
+		// @ts-expect-error testing this on purpose with a mock class
+		workerInstance = new Worker();
+		return workerInstance;
+	})
+}));
+
 describe('pow-protector.worker', () => {
 	let spyCreatePowChallenge: MockInstance;
 	let spyAllowSigning: MockInstance;
 	let spySolvePowChallenge: MockInstance;
 
 	let originalPostmessage: unknown;
-
-	const postMessageSpy = vi.fn();
-
-	class MockWorker {
-		postMessage = postMessageSpy;
-		onmessage: ((event: MessageEvent) => void) | null = null;
-	}
-
-	vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
-
-	let workerInstance: Worker;
-
-	vi.mock('$lib/workers/workers?worker', () => ({
-		default: vi.fn().mockImplementation(() => {
-			// @ts-expect-error testing this on purpose with a mock class
-			workerInstance = new Worker();
-			return workerInstance;
-		})
-	}));
 
 	// Mock for CreateChallengeResponse
 	const mockCreateChallengeResponse: CreateChallengeResponse = {
