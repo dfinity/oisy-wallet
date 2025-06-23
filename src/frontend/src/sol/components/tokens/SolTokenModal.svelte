@@ -10,21 +10,30 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
+	import { splDefaultTokens } from '$sol/derived/spl.derived';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		fromRoute: NavigationTarget | undefined;
+	}
+	let { fromRoute }: Props = $props();
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = isNetworkSolana($pageToken?.network)
-		? $pageToken.network.explorerUrl
-		: undefined;
+	let explorerUrl = $derived(
+		isNetworkSolana($pageToken?.network) ? $pageToken.network.explorerUrl : undefined
+	);
 
-	let tokenAddress: string | undefined;
-	$: tokenAddress =
-		nonNullish($pageToken) && isTokenSpl($pageToken) ? $pageToken.address : undefined;
+	let tokenAddress = $derived(
+		nonNullish($pageToken) && isTokenSpl($pageToken) ? $pageToken.address : undefined
+	);
+
+	let undeletableToken = $derived(
+		nonNullish($pageToken) && isTokenSpl($pageToken)
+			? $splDefaultTokens.some(({ address }) => $pageToken.address === address)
+			: true
+	);
 </script>
 
-<TokenModal token={$pageToken} {fromRoute}>
+<TokenModal token={$pageToken} isDeletable={!undeletableToken} {fromRoute}>
 	{#if nonNullish(tokenAddress)}
 		<ModalListItem>
 			{#snippet label()}
