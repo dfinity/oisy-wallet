@@ -42,13 +42,14 @@
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { privacyModeStore } from '$lib/stores/settings.store';
+	import { toastsShow } from '$lib/stores/toasts.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
+	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -63,6 +64,20 @@
 	});
 
 	const hidePopover = () => (visible = false);
+
+	const handlePrivacyToggle = () => {
+		const nextValue = !$isPrivacyMode;
+
+		setPrivacyMode(nextValue);
+
+		toastsShow({
+			text: nextValue
+				? $i18n.navigation.text.privacy_mode_enabled
+				: $i18n.navigation.text.privacy_mode_disabled,
+			level: 'info',
+			duration: 2000
+		});
+	};
 
 	const settingsRoute = $derived(isRouteSettings(page));
 	const dAppExplorerRoute = $derived(isRouteDappExplorer(page));
@@ -111,8 +126,7 @@
 					? $i18n.navigation.alt.show_balances
 					: $i18n.navigation.alt.hide_balances}
 				testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
-				onclick={() =>
-					privacyModeStore.set({ key: 'privacy-mode', value: { enabled: !$isPrivacyMode } })}
+				onclick={handlePrivacyToggle}
 				tag={$i18n.shortcuts.privacy_mode}
 			>
 				{#if $isPrivacyMode}
@@ -128,7 +142,6 @@
 
 			{#if addressesOption}
 				<MenuAddresses on:icMenuClick={hidePopover} />
-				<Hr />
 			{/if}
 
 			<ButtonMenu
@@ -139,8 +152,6 @@
 				<IconUserSquare size="20" />
 				{$i18n.navigation.text.address_book}
 			</ButtonMenu>
-
-			<Hr />
 
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.refer_a_friend}

@@ -675,7 +675,7 @@ describe('backend.canister', () => {
 
 			const result = await getAllowedCycles();
 
-			expect(service.get_allowed_cycles).toHaveBeenCalledTimes(1);
+			expect(service.get_allowed_cycles).toHaveBeenCalledOnce();
 			expect(result).toEqual({ allowed_cycles: mockAllowedCycles });
 		});
 
@@ -765,7 +765,7 @@ describe('backend.canister', () => {
 
 			const res = await allowSigning();
 
-			expect(service.allow_signing).toHaveBeenCalledTimes(1);
+			expect(service.allow_signing).toHaveBeenCalledOnce();
 			expect(res).toBeDefined();
 		});
 
