@@ -12,7 +12,6 @@ import type {
 	PostMessageDataResponsePowProtectorNextAllowance,
 	PostMessageDataResponsePowProtectorProgress
 } from '$lib/types/post-message';
-import { assertNonNullish } from '@dfinity/utils';
 
 // TODO: add tests for POW worker/scheduler
 export const initPowProtectorWorker: PowProtectorWorker =
@@ -30,24 +29,19 @@ export const initPowProtectorWorker: PowProtectorWorker =
 			>
 		>) => {
 			const { msg } = data;
-			assertNonNullish(data.data);
 
 			switch (msg) {
 				case 'syncPowProgress': {
-					if ('progress' in data.data) {
-						syncPowProgress({
-							data: data.data
-						});
-					}
+					syncPowProgress({
+						data: data.data as PostMessageDataResponsePowProtectorProgress
+					});
 					return;
 				}
 				case 'syncPowNextAllowance': {
 					// Check if data.data exists and has proper structure
-					if ('nextAllowanceMs' in data.data) {
-						syncPowNextAllowance({
-							data: data.data
-						});
-					}
+					syncPowNextAllowance({
+						data: data.data as PostMessageDataResponsePowProtectorNextAllowance
+					});
 					return;
 				}
 			}
