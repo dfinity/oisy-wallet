@@ -35,26 +35,6 @@ const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
-
-	try {
-		const derivedEthAddress = nonNullish(identity)
-			? await deriveEthAddress(identity.getPrincipal().toString())
-			: undefined;
-
-		if (derivedEthAddress !== signerAddress) {
-			console.warn(
-				`Derived Ethereum address (${derivedEthAddress}) does not match the one from the signer canister (${signerAddress}).`
-			);
-		} else {
-			console.info(
-				`Derived Ethereum address (${derivedEthAddress}) matches the one from the signer canister (${signerAddress}).`
-			);
-		}
-	} catch (error) {
-		console.error('Error on Ethereum address:', error);
-	}
-
-	return signerAddress;
 };
 
 export const loadEthAddress = (): Promise<ResultSuccess> =>
