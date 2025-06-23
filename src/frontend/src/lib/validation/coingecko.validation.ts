@@ -7,5 +7,5 @@ export const CoingeckoCoinsIdSchema = z.enum([
 	'solana',
 	'binancecoin',
 	'polygon-ecosystem-token',
-	'arbitrum-one',
+	'arbitrum-one'
 ]);

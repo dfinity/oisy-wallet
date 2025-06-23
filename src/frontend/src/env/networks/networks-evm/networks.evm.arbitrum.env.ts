@@ -6,7 +6,6 @@ import arbitrumMainnetIconLight from '$lib/assets/networks/light/arbitrum-mainne
 import arbitrumSepoliaIconLight from '$lib/assets/networks/light/arbitrum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
-import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import { Network } from 'alchemy-sdk';
 
@@ -14,7 +13,7 @@ import { Network } from 'alchemy-sdk';
 // 	import.meta.env.VITE_ARBITRUM_MAINNET_DISABLED
 // );
 
-export const ARBITRUM_MAINNET_ENABLED = true
+export const ARBITRUM_MAINNET_ENABLED = true;
 
 export const ARBITRUM_MAINNET_NETWORK_SYMBOL = 'ARB';
 

@@ -1,5 +1,5 @@
 import type { NetworkSettingsFor } from '$declarations/backend/backend.did';
-import { ARBITRUM_MAINNET_NETWORK_ID, ARBITRUM_SEPOLIA_NETWORK_ID, ARBITRUM_SEPOLIA_NETWORK_SYMBOL } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { ARBITRUM_SEPOLIA_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK_ID,
 	BASE_SEPOLIA_NETWORK_ID
@@ -57,7 +57,7 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			return { ...defaultMainnetUserNetworks, ...($testnetsEnabled && defaultTestnetUserNetworks) };
 		}
 
-		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {			
+		const keyToNetworkId = (key: NetworkSettingsFor): NetworkId => {
 			if ('InternetComputer' in key) {
 				return ICP_NETWORK_ID;
 			}
