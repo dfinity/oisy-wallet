@@ -1,9 +1,11 @@
+import { selectUtxosFee as selectUtxosFeeReview } from '$btc/services/btc-review.services';
 import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
-import { addPendingBtcTransaction, selectUserUtxosFee } from '$lib/api/backend.api';
+import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import type { BtcAddress } from '$lib/types/address';
+import type { CanisterIdText } from '$lib/types/canister';
 import type { Amount } from '$lib/types/send';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -29,21 +31,28 @@ export type SendBtcParams = BtcSendServiceParams & {
 export const selectUtxosFee = async ({
 	identity,
 	network,
-	amount
-}: Omit<BtcSendServiceParams, 'progress'>): Promise<UtxosFee> => {
-	const satoshisAmount = convertNumberToSatoshis({ amount });
-	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
-
-	const { fee_satoshis, utxos } = await selectUserUtxosFee({
+	amount,
+	address,
+	minterCanisterId,
+	feeRateSatoshisPerByte
+}: BtcSendServiceParams & {
+	address: string;
+	minterCanisterId: CanisterIdText;
+	feeRateSatoshisPerByte: bigint;
+}): Promise<UtxosFee> => {
+	// Use our new frontend service instead of backend call
+	const result = await selectUtxosFeeReview({
 		identity,
-		network: signerBitcoinNetwork,
-		amountSatoshis: satoshisAmount,
-		minConfirmations: [DEFAULT_MIN_CONFIRMATIONS]
+		network,
+		amount,
+		address,
+		minterCanisterId,
+		feeRateSatoshisPerByte
 	});
 
 	return {
-		feeSatoshis: fee_satoshis,
-		utxos
+		feeSatoshis: result.feeSatoshis,
+		utxos: result.utxos
 	};
 };
 

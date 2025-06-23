@@ -9,7 +9,7 @@ import {
 } from '$btc/utils/btc-utxos.utils';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { BitcoinNetwork, get_utxos_response, Utxo } from '@dfinity/ckbtc';
+import type { BitcoinNetwork, Utxo, get_utxos_response } from '@dfinity/ckbtc';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock the bitcoin API

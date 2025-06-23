@@ -126,13 +126,13 @@ export const estimateTransactionSize = ({
 	numInputs: number;
 	numOutputs: number;
 }): number => {
-	// Base transaction size
-	const baseSize = 10; // version (4) and locktime (4) and input count (1) and output count (1)
+	// version (4) and locktime (4) and input count (1) and output count (1)
+	const baseSize = 10;
 
 	// P2WPKH input size: outpoint (36) and scriptSig length (1) and scriptSig (0) and sequence (4) = 41 bytes
 	// Plus witness data: witness stack items (1) and signature (72) and pubkey (33) = 106 bytes
 	// But witness data is counted as 1/4 for fee calculation, so effective size is 41 and 106/4 = 67.5 bytes
-	const inputSize = 68; // Rounded up
+	const inputSize = 68;
 
 	// P2WPKH output size: value (8) and scriptPubKey length (1) and scriptPubKey (22) = 31 bytes
 	const outputSize = 31;

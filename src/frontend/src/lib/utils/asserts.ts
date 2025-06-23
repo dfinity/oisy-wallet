@@ -6,7 +6,10 @@ import type { Amount } from '$lib/types/send';
  * @param message - Optional custom error message
  * @throws Error if array is empty
  */
-export const assertArrayNotEmpty = <T>(
+export const assertArrayNotEmpty: <T>(
+	array: T[],
+	message?: string
+) => asserts array is [T, ...T[]] = <T>(
 	array: T[],
 	message = 'Array must not be empty'
 ): asserts array is [T, ...T[]] => {
@@ -21,7 +24,7 @@ export const assertArrayNotEmpty = <T>(
  * @param message - Optional custom error message
  * @throws Error if string is empty or whitespace-only
  */
-export const assertStringNotEmpty = (
+export const assertStringNotEmpty: (value: string, message?: string) => asserts value is string = (
 	value: string,
 	message = 'String must not be empty'
 ): asserts value is string => {
@@ -36,7 +39,7 @@ export const assertStringNotEmpty = (
  * @param message - Optional custom error message
  * @throws Error if amount is not a positive number
  */
-export const assertAmount = (
+export const assertAmount: (amount: Amount, message?: string) => asserts amount is number = (
 	amount: Amount,
 	message = 'Amount must be a positive number'
 ): asserts amount is number => {
@@ -52,7 +55,11 @@ export const assertAmount = (
  * @param message - Optional custom error message
  * @throws Error if insufficient funds
  */
-export const assertSufficientBalance = (
+export const assertSufficientBalance: (
+	required: bigint,
+	available: bigint,
+	message?: string
+) => void = (
 	required: bigint,
 	available: bigint,
 	message = 'Insufficient balance for the transaction'
