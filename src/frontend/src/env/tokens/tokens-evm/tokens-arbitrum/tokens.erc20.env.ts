@@ -9,7 +9,6 @@ import {
 	ARB_SEPOLIA_USDT_TOKEN,
 	USDT_TOKEN
 } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
-
 import {
 	ARB_SEPOLIA_ARB_TOKEN,
 	ARB_TOKEN
