@@ -43,8 +43,8 @@ scripts/build.sol_rpc.args.sh
 
 # Success
 cat <<EOF
-SUCCESS: The cycles_depositor installation files have been created:
-cycles_depositor candid:       $CANDID_FILE
-cycles_depositor Wasm:         $WASM_FILE
-cycles_depositor install args: $ARG_FILE
+SUCCESS: The sol_rpc installation files have been created:
+sol_rpc candid:       $CANDID_FILE
+sol_rpc Wasm:         $WASM_FILE
+sol_rpc install args: $ARG_FILE
 EOF
