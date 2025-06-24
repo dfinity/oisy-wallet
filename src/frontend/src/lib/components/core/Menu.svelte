@@ -68,14 +68,7 @@
 
 	const handlePrivacyToggle = () => {
 		const nextValue = !$isPrivacyMode;
-		setPrivacyMode(nextValue);
-		toastsShow({
-			text: nextValue
-				? $i18n.navigation.text.privacy_mode_enabled
-				: $i18n.navigation.text.privacy_mode_disabled,
-			level: 'info',
-			duration: 2000
-		});
+		setPrivacyMode(nextValue, true);
 	};
 
 	const settingsRoute = $derived(isRouteSettings(page));
