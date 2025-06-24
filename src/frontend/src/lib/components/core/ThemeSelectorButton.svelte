@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/Button.svelte';
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	interface Props {
 		label: string;
