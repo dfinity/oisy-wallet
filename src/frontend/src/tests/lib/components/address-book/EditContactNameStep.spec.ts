@@ -78,7 +78,7 @@ describe('EditContactNameStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that addContact was called with the correct contact
-		expect(onAddContact).toHaveBeenCalledTimes(1);
+		expect(onAddContact).toHaveBeenCalledOnce();
 		expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Contact' }));
 	});
 
@@ -97,7 +97,7 @@ describe('EditContactNameStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that addContact was called with the full contact
-		expect(onSaveContact).toHaveBeenCalledTimes(1);
+		expect(onSaveContact).toHaveBeenCalledOnce();
 		expect(onSaveContact).toHaveBeenCalledWith(contact);
 	});
 
@@ -115,7 +115,7 @@ describe('EditContactNameStep', () => {
 		await fireEvent.click(cancelButton);
 
 		// Check that close was called
-		expect(onClose).toHaveBeenCalledTimes(1);
+		expect(onClose).toHaveBeenCalledOnce();
 	});
 
 	it('should update title when contact name changes', async () => {
@@ -165,7 +165,7 @@ describe('EditContactNameStep', () => {
 		const saveButton = getByTestId(ADDRESS_BOOK_SAVE_BUTTON);
 		await fireEvent.click(saveButton);
 
-		expect(onAddContact).toHaveBeenCalledTimes(1);
+		expect(onAddContact).toHaveBeenCalledOnce();
 		expect(onAddContact).toHaveBeenCalledWith({ name: 'Test Name' }); // No leading space
 	});
 });
