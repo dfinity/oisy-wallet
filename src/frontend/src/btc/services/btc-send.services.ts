@@ -5,7 +5,6 @@ import type { SendBtcResponse } from '$declarations/signer/signer.did';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import type { BtcAddress } from '$lib/types/address';
-import type { CanisterIdText } from '$lib/types/canister';
 import type { Amount } from '$lib/types/send';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -28,26 +27,20 @@ export type SendBtcParams = BtcSendServiceParams & {
 	onProgress?: () => void;
 };
 
-export const selectUtxosFee = async ({
+export const selectUtxosFeeForSend = async ({
 	identity,
 	network,
 	amount,
-	address,
-	minterCanisterId,
-	feeRateSatoshisPerByte
+	address
 }: BtcSendServiceParams & {
 	address: string;
-	minterCanisterId: CanisterIdText;
-	feeRateSatoshisPerByte: bigint;
 }): Promise<UtxosFee> => {
 	// Use our new frontend service instead of backend call
 	const result = await selectUtxosFeeReview({
 		identity,
 		network,
 		amount,
-		address,
-		minterCanisterId,
-		feeRateSatoshisPerByte
+		address
 	});
 
 	return {

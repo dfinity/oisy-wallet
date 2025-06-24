@@ -42,8 +42,6 @@ export const selectUtxosFee = async ({
 	network,
 	amount,
 	address,
-	minterCanisterId,
-	feeRateSatoshisPerByte,
 	pendingTxIds = []
 }: BtcReviewParams): Promise<BtcReviewResult> => {
 	assertNonNullish(identity);
