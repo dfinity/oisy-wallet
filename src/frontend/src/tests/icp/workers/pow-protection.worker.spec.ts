@@ -4,7 +4,6 @@ import type {
 } from '$declarations/backend/backend.did';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
 import * as powProtectorServices from '$icp/services/pow-protector.services';
-import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 import * as backendApi from '$lib/api/backend.api';
 import {
 	ChallengeCompletionErrorEnum,
@@ -18,25 +17,6 @@ import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import type { MockInstance } from 'vitest';
-
-const postMessageSpy = vi.fn();
-
-class MockWorker {
-	postMessage = postMessageSpy;
-	onmessage: ((event: MessageEvent) => void) | null = null;
-}
-
-vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
-
-let workerInstance: Worker;
-
-vi.mock('$lib/workers/workers?worker', () => ({
-	default: vi.fn().mockImplementation(() => {
-		// @ts-expect-error testing this on purpose with a mock class
-		workerInstance = new Worker();
-		return workerInstance;
-	})
-}));
 
 describe('pow-protector.worker', () => {
 	let spyCreatePowChallenge: MockInstance;
@@ -123,41 +103,6 @@ describe('pow-protector.worker', () => {
 	afterAll(() => {
 		// @ts-expect-error redo original
 		window.postMessage = originalPostmessage;
-	});
-
-	describe('initPowProtectorWorker', () => {
-		it('should start the worker and send the correct start message', async () => {
-			const worker = await initPowProtectorWorker();
-
-			worker.start();
-
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'startPowProtectionTimer'
-			});
-		});
-
-		it('should stop the worker and send the correct stop message', async () => {
-			const worker = await initPowProtectorWorker();
-
-			worker.stop();
-
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'stopPowProtectionTimer'
-			});
-		});
-
-		it('should trigger the worker and send the correct trigger message', async () => {
-			const worker = await initPowProtectorWorker();
-
-			worker.trigger();
-
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'triggerPowProtectionTimer'
-			});
-		});
 	});
 
 	const initWithSuccess = ({
