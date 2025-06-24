@@ -323,7 +323,8 @@
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
 			"youre_eligible": "You're eligible!",
 			"ongoing": "Ongoing",
-			"ended": "Ended ($amount)"
+			"ended": "Ended ($amount)",
+			"banner_text": "Earn daily rewards with OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Eligibility criteria",

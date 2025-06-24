@@ -254,6 +254,7 @@ interface I18nRewards {
 		youre_eligible: string;
 		ongoing: string;
 		ended: string;
+		banner_text: string;
 	};
 	requirements: {
 		requirements_title: string;
