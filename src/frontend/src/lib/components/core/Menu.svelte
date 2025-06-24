@@ -43,7 +43,6 @@
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsShow } from '$lib/stores/toasts.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -67,8 +66,7 @@
 	const hidePopover = () => (visible = false);
 
 	const handlePrivacyToggle = () => {
-		const nextValue = !$isPrivacyMode;
-		setPrivacyMode(nextValue, true);
+		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true });
 	};
 
 	const settingsRoute = $derived(isRouteSettings(page));
