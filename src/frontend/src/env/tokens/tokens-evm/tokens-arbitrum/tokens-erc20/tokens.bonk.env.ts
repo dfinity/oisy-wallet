@@ -1,6 +1,6 @@
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BONK_TOKEN_GROUP } from '$env/tokens/groups/groups.bonk.env';
-import bonk from '$eth/assets/bonk.svg';
+import bonk from '$sol/assets/bonk.svg';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
