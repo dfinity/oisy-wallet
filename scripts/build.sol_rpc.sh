@@ -39,7 +39,7 @@ scripts/download-immutable.sh "$WASM_URL" "$WASM_FILE"
 
 ####
 # Computes the install args, overwriting any existing args file.
-scripts/build.cycles_depositor.args.sh
+scripts/build.sol_rpc.args.sh
 
 # Success
 cat <<EOF
