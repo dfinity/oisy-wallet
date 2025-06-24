@@ -39,7 +39,7 @@ export const ARBITRUM_SEPOLIA_ETH_TOKEN: RequiredToken = {
 	network: ARBITRUM_SEPOLIA_NETWORK,
 	standard: 'ethereum',
 	category: 'default',
-	name: 'ArbitrumETH',
+	name: 'SepoliaETH',
 	symbol: ARBITRUM_SEPOLIA_ETH_SYMBOL,
 	decimals: ARBITRUM_ETH_DECIMALS,
 	icon: eth
