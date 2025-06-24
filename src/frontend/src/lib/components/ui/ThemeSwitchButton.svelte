@@ -21,9 +21,9 @@
 	{#snippet icon()}
 		<span>
 			{#if $themeStore === Theme.DARK}
-				<IconSun size="44" />
+				<IconSun size="24" />
 			{:else}
-				<IconMoon size="18" />
+				<IconMoon size="24" />
 			{/if}
 		</span>
 	{/snippet}
