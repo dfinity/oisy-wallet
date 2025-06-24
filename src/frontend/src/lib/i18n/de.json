@@ -323,7 +323,8 @@
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
 			"ongoing": "Aktiv",
-			"ended": "Beendet ($amount)"
+			"ended": "Beendet ($amount)",
+			"banner_text": "Verdiene Belohnungen mit OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Berechtigungskriterien",
