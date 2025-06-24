@@ -1,4 +1,4 @@
-import bonk from '$eth/assets/bonk.svg';
+import bonk from '$sol/assets/bonk.svg';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 
