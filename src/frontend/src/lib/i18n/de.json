@@ -64,14 +64,14 @@
 			"documentation": "Dokumentation",
 			"support": "Support",
 			"confirm_navigate": "Möchtest du wirklich die Seite verlassen?",
-			"vip_qr_code": "VIP-QR-Code",
+			"vip_qr_code": "VIP QR-Code",
 			"binance_qr_code": "Binance Clubhouse-QR",
 			"refer_a_friend": "Freunde einladen",
 			"address_book": "Kontakte",
 			"hide_balances": "Salden verbergen",
 			"show_balances": "Salden anzeigen",
-			"privacy_mode_enabled": "",
-			"privacy_mode_disabled": ""
+			"privacy_mode_enabled": "Privatsphären Modus aktiviert. Drücke [P] um die Salden wieder anzuzeigen.",
+			"privacy_mode_disabled": "Privatsphären Modus deaktiviert. Drücke [P] um die Salden zu verbergen."
 		},
 		"alt": {
 			"tokens": "Zum Vermögenswerte-Bereich gehen",
@@ -491,7 +491,7 @@
 	},
 	"settings": {
 		"text": {
-			"title": "Einstellungen",
+			"title": "Einrichten",
 			"principal": "Dein Principal",
 			"principal_copied": "Principal in Zwischenablage kopiert",
 			"principal_description": "Deine ID für $oisy_name. Erstellt durch deine Internet Identity.",
