@@ -1,7 +1,4 @@
-import {
-	ARBITRUM_MAINNET_NETWORK,
-	ARBITRUM_SEPOLIA_NETWORK
-} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import arb from '$eth/assets/arb.svg';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import type { TokenId } from '$lib/types/token';

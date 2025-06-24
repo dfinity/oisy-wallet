@@ -1,9 +1,5 @@
-import {
-	ARBITRUM_MAINNET_NETWORK,
-	ARBITRUM_SEPOLIA_NETWORK
-} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
-import usdt from '$eth/assets/usdt.svg';
 import usdt0 from '$eth/assets/usdt0.svg';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import type { TokenId } from '$lib/types/token';
