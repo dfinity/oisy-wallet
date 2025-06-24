@@ -16,7 +16,7 @@ export const BONK_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: 'erc20',
 	category: 'default',
-	name: 'BONK',
+	name: 'Bonk',
 	symbol: BONK_SYMBOL,
 	decimals: BONK_DECIMALS,
 	icon: bonk,
