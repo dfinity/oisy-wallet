@@ -1154,6 +1154,23 @@ interface I18nWelcome {
 	description: string;
 }
 
+interface I18nTemporal {
+	seconds_to_duration: {
+		year: string;
+		year_plural: string;
+		month: string;
+		month_plural: string;
+		day: string;
+		day_plural: string;
+		hour: string;
+		hour_plural: string;
+		minute: string;
+		minute_plural: string;
+		second: string;
+		second_plural: string;
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -1191,4 +1208,5 @@ interface I18n {
 	activity: I18nActivity;
 	earning: I18nEarning;
 	welcome: I18nWelcome;
+	temporal: I18nTemporal;
 }
