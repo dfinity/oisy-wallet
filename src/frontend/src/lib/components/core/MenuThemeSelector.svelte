@@ -13,18 +13,15 @@
 
 	// TODO: use variable exposed from gix-components when it will be exposed.
 	const THEME_KEY = 'nnsTheme';
-
 	const THEME_SYSTEM = 'system';
 
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
 		// even though we call initSelectedTheme on store change, changing to system theme will not update the store so we manually update the selectedCard
 		selectedCard = theme;
-
 		if (theme === THEME_SYSTEM) {
 			themeStore.resetToSystemSettings();
 			return;
 		}
-
 		themeStore.select(theme);
 	};
 
