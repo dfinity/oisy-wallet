@@ -87,7 +87,7 @@
 			"vip_qr_code": "Einladungslink generieren",
 			"binance_qr_code": "Binance Clubhouse-Link generieren",
 			"refer_a_friend": "Empfehlungslink für einen Freund erstellen",
-			"address_book": "Adressbuch öffnen",
+			"address_book": "Kontakte öffnen",
 			"hide_balances": "Angezeigte Salden verbergen",
 			"show_balances": "Versteckte Salden anzeigen"
 		},
@@ -1207,7 +1207,7 @@
 	},
 	"address_book": {
 		"text": {
-			"title": "Adressbuch",
+			"title": "Kontakte",
 			"empty_title": "Deine Kontakte sind leer",
 			"empty_text": "Alle deine Kontakte werden hier angezeigt",
 			"add_new_contact": "Neuen Kontakt hinzufügen",
@@ -1248,9 +1248,9 @@
 			"name": "Name"
 		},
 		"delete": {
-			"title": "$contact löschen?",
+			"title": "Kontakt $contact löschen?",
 			"delete_contact": "Kontakt löschen",
-			"content_text": "Dadurch wird $contact und alle zugehörigen Adressen aus deinem Adressbuch gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden."
+			"content_text": "Dadurch wird $contact und alle zugehörigen Adressen aus deinen Kontakten gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden."
 		},
 		"error": {
 			"create": "Kontakt konnte nicht erstellt werden",
