@@ -258,8 +258,8 @@
 		},
 		"sol_rpc2": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/sol-rpc-canister/releases/download/v1.0.0/cycles-ledger.did",
-			"wasm": "https://github.com/dfinity/sol-rpc-canister/releases/download/v1.0.0/cycles-ledger.wasm.gz",
+			"candid": "https://github.com/dfinity/sol-rpc-canister/releases/download/v1.0.0/sol_rpc_canister.did",
+			"wasm": "https://github.com/dfinity/sol-rpc-canister/releases/download/v1.0.0/sol_rpc_canister.wasm.gz",
 			"init_arg": "( record { }, )",
 			"specified_id": "tghme-zyaaa-aaaar-qarca-cai",
 			"remote": {
