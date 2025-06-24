@@ -47,7 +47,7 @@ describe('Menu', () => {
 		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 		vi.spyOn(toastsStore, 'toastsShow');
-		setPrivacyMode(false);
+		setPrivacyMode({ enabled: false });
 	});
 
 	const mockUserData = (powers: Array<string>): UserData => ({
