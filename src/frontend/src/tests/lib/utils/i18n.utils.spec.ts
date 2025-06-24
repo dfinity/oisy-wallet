@@ -203,16 +203,19 @@ describe('i18n-utils', () => {
 
 		it('returns ENGLISH when language is unsupported', () => {
 			mockNavigatorLanguage('fr-FR');
+
 			expect(getDefaultLang()).toBe(Languages.ENGLISH);
 		});
 
 		it('returns GERMAN when browser language is de-DE', () => {
 			mockNavigatorLanguage('de-DE');
+
 			expect(getDefaultLang()).toBe(Languages.GERMAN);
 		});
 
 		it('returns ENGLISH when browser language is en-US', () => {
 			mockNavigatorLanguage('en-US');
+
 			expect(getDefaultLang()).toBe(Languages.ENGLISH);
 		});
 
@@ -223,6 +226,7 @@ describe('i18n-utils', () => {
 			for (const lang of testLocales) {
 				mockNavigatorLanguage(lang);
 				const result = getDefaultLang();
+
 				expect(supported).toContain(result);
 			}
 		});
