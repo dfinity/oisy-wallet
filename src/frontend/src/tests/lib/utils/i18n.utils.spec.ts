@@ -6,7 +6,9 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
+import { Languages } from '$lib/types/languages';
 import {
+	getDefaultLang,
 	mergeWithFallback,
 	replaceOisyPlaceholders,
 	replacePlaceholders
@@ -178,6 +180,55 @@ describe('i18n-utils', () => {
 			});
 
 			expect(result).toEqual(expectedMergeResult);
+		});
+	});
+
+	describe('getDefaultLang', () => {
+		const originalLanguage = navigator.language;
+
+		afterEach(() => {
+			// Restore original language after each test
+			Object.defineProperty(global.navigator, 'language', {
+				configurable: true,
+				value: originalLanguage
+			});
+		});
+
+		const mockNavigatorLanguage = (lang: string) => {
+			Object.defineProperty(global.navigator, 'language', {
+				configurable: true,
+				value: lang
+			});
+		};
+
+		it('returns ENGLISH when language is unsupported', () => {
+			mockNavigatorLanguage('fr-FR');
+
+			expect(getDefaultLang()).toBe(Languages.ENGLISH);
+		});
+
+		it('returns GERMAN when browser language is de-DE', () => {
+			mockNavigatorLanguage('de-DE');
+
+			expect(getDefaultLang()).toBe(Languages.GERMAN);
+		});
+
+		it('returns ENGLISH when browser language is en-US', () => {
+			mockNavigatorLanguage('en-US');
+
+			expect(getDefaultLang()).toBe(Languages.ENGLISH);
+		});
+
+		it('only returns supported Languages enum values', () => {
+			const supported = Object.values(Languages);
+			const testLocales = ['es-ES', 'zh-CN', 'pt-BR'];
+
+			for (const lang of testLocales) {
+				mockNavigatorLanguage(lang);
+				const result = getDefaultLang();
+
+				expect(supported).toContain(result);
+			}
 		});
 	});
 });
