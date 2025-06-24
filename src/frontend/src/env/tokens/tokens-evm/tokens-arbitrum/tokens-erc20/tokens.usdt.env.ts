@@ -31,20 +31,3 @@ export const USDT_TOKEN: RequiredEvmBep20Token = {
 		onramperId: 'usdt_arbitrum'
 	}
 };
-
-export const ARB_SEPOLIA_USDT_SYMBOL = 'SepoliaUSDT';
-
-export const ARB_SEPOLIA_USDT_TOKEN_ID: TokenId = parseTokenId(ARB_SEPOLIA_USDT_SYMBOL);
-
-export const ARB_SEPOLIA_USDT_TOKEN: RequiredEvmBep20Token = {
-	id: ARB_SEPOLIA_USDT_TOKEN_ID,
-	network: ARBITRUM_SEPOLIA_NETWORK,
-	standard: 'erc20',
-	category: 'default',
-	name: 'Tether USD (Sepolia Testnet)',
-	symbol: USDT_SYMBOL,
-	decimals: USDT_DECIMALS,
-	icon: usdt,
-	address: '0xE5b6C29411b3ad31C3613BbA0145293fC9957256',
-	exchange: 'erc20'
-};
