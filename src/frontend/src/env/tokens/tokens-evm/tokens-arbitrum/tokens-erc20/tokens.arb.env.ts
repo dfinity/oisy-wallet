@@ -29,7 +29,7 @@ export const ARB_TOKEN: RequiredEvmErc20Token = {
 	}
 };
 
-export const ARB_SEPOLIA_ARB_SYMBOL = 'SepoliaARB';
+const ARB_SEPOLIA_ARB_SYMBOL = 'SepoliaARB';
 
 export const ARB_SEPOLIA_ARB_TOKEN_ID: TokenId = parseTokenId(ARB_SEPOLIA_ARB_SYMBOL);
 
