@@ -54,11 +54,7 @@
 		"usesInternetIdentity": true,
 		"logo": "/images/dapps/decide-ai-logo.svg",
 		"github": "https://github.com/modclub-app",
-		"screenshots": ["/images/dapps/decide-ai.webp"],
-		"carousel": {
-			"text": "dapps.descriptions.decideid.carousel.text",
-			"callToAction": "dapps.descriptions.decideid.carousel.call_to_action"
-		}
+		"screenshots": ["/images/dapps/decide-ai.webp"]
 	},
 	{
 		"id": "icpswap",
@@ -208,11 +204,7 @@
 		"usesInternetIdentity": true,
 		"description": "dapps.descriptions.sonic.description",
 		"logo": "/images/dapps/sonic-logo.svg",
-		"screenshots": ["/images/dapps/sonic.webp"],
-		"carousel": {
-			"text": "dapps.descriptions.sonic.carousel.text",
-			"callToAction": "dapps.descriptions.sonic.carousel.call_to_action"
-		}
+		"screenshots": ["/images/dapps/sonic.webp"]
 	},
 	{
 		"id": "raydium",
