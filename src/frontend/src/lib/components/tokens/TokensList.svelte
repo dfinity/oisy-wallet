@@ -19,10 +19,19 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
+	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import type { ExchangesData } from '$lib/types/exchange';
+	import { onMount } from 'svelte';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import type { Token, TokenUi } from '$lib/types/token';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { mapTokenUi } from '$lib/utils/token.utils';
+	import { balancesStore } from '$lib/stores/balances.store';
 
-	let tokens: TokenUiOrGroupUi[] | undefined;
+	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
-	let animating = false;
+	let animating = $state(false);
 
 	const handleAnimationStart = () => {
 		animating = true;
@@ -40,17 +49,47 @@
 		}
 	}, 250);
 
-	let loading: boolean;
-	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
+	let loading: boolean = $derived($erc20UserTokensNotInitialized || isNullish(tokens));
 
-	let filteredTokens: TokenUiOrGroupUi[] | undefined;
-	$: filteredTokens = getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] });
+	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
+		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
+	);
 
-	let initialSearch: string | undefined;
-	let message: string | undefined;
-	$: ({ initialSearch, message } = nonNullish($modalManageTokensData)
-		? $modalManageTokensData
-		: { initialSearch: undefined, message: undefined });
+	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
+	// since some of them are sorted by market cap), we store the exchange data in a variable during
+	// the life of the component.
+	let exchangesStaticData: ExchangesData | undefined = $state();
+
+	onMount(() => {
+		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
+	});
+
+	let allTokensSorted: TokenUiOrGroupUi[] = $derived(
+		getFilteredTokenList({
+			filter: $tokenListStore.filter,
+			list: (nonNullish(exchangesStaticData)
+				? pinEnabledTokensAtTop(
+						sortTokens({
+							$tokens: $allTokens,
+							$exchanges: exchangesStaticData,
+							$tokensToPin
+						})
+					)
+				: []
+			).map((t) => ({
+				token: mapTokenUi({ token: t, $balances: $balancesStore, $exchanges })
+			})) as TokenUiOrGroupUi[]
+		})
+	);
+
+	let {
+		initialSearch,
+		message
+	}: { initialSearch: string | undefined; message?: string | undefined } = $derived(
+		nonNullish($modalManageTokensData)
+			? $modalManageTokensData
+			: { initialSearch: undefined, message: undefined }
+	);
 </script>
 
 <TokensDisplayHandler bind:tokens>
@@ -88,6 +127,29 @@
 			{:else}
 				<NothingFoundPlaceholder />
 			{/if}
+		{/if}
+
+		{#if $tokenListStore.filter !== ''}
+			<div class="mb-3 mt-12 flex flex-col gap-3">
+				<h2 class="text-base">Enable more assets</h2>
+
+				{#each allTokensSorted as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+					<div
+						class="overflow-hidden rounded-xl"
+						transition:fade
+						animate:flip={{ duration: 250 }}
+						on:animationstart={handleAnimationStart}
+						on:animationend={handleAnimationEnd}
+						class:pointer-events-none={animating}
+					>
+						<div class="transition duration-300 hover:bg-primary">
+							{#if !isTokenUiGroup(tokenOrGroup)}
+								<TokenCard data={tokenOrGroup.token} togglable />
+							{/if}
+						</div>
+					</div>
+				{/each}
+			</div>
 		{/if}
 
 		{#if $modalManageTokens}
