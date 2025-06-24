@@ -1,4 +1,8 @@
 import {
+	ARBITRUM_MAINNET_NETWORK,
+	ARBITRUM_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
 } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -19,6 +23,10 @@ import * as solEnv from '$env/networks/networks.sol.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import {
+	ARBITRUM_ETH_TOKEN,
+	ARBITRUM_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import {
 	BASE_ETH_TOKEN,
 	BASE_SEPOLIA_ETH_TOKEN
@@ -88,7 +96,8 @@ describe('network-tokens.derived', () => {
 				SOLANA_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
-				POL_MAINNET_TOKEN
+				POL_MAINNET_TOKEN,
+				ARBITRUM_ETH_TOKEN
 			]);
 		});
 
@@ -161,6 +170,14 @@ describe('network-tokens.derived', () => {
 				{
 					network: POLYGON_AMOY_NETWORK,
 					tokens: [POL_AMOY_TOKEN]
+				},
+				{
+					network: ARBITRUM_MAINNET_NETWORK,
+					tokens: [ARBITRUM_ETH_TOKEN]
+				},
+				{
+					network: ARBITRUM_SEPOLIA_NETWORK,
+					tokens: [ARBITRUM_SEPOLIA_ETH_TOKEN]
 				}
 			];
 
@@ -186,6 +203,7 @@ describe('network-tokens.derived', () => {
 					BASE_ETH_TOKEN,
 					BNB_MAINNET_TOKEN,
 					POL_MAINNET_TOKEN,
+					ARBITRUM_ETH_TOKEN,
 					mockErc20UserToken,
 					mockSplCustomToken
 				]);
