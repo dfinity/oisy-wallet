@@ -150,7 +150,7 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 		} as MinTotalAssetsUsdCriterion;
 	}
 	if ('Hangover' in criterion.criterion) {
-		const duration = criterion.criterion.Hangover;
+		const { duration } = criterion.criterion.Hangover;
 		if ('Days' in duration) {
 			const days = duration.Days;
 			return {
