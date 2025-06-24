@@ -35,7 +35,7 @@ export class SolRpcCanisterError extends CanisterInternalError {
 		}
 
 		if ('ValidationError' in err) {
-			super(`Validation error: ${JSON.stringify(err.ValidationError, jsonReplacer)}`);
+			super(`Validation error: ${err.ValidationError}`);
 			return;
 		}
 
