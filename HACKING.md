@@ -315,17 +315,18 @@ Location: `src/frontend/src/env/networks/networks-evm/`
 - Create a new file: `networks.<network>.env.ts`
 - Copy contents from an existing EVM network file (e.g., `networks.bsc.env.ts`)
 - Update the following fields:
-	- `SYMBOL` – short identifier (e.g., `'BSC'`, `'ARB'`)
-	- `NAME` – name of the network
-	- `CHAIN ID` - chainId of the network
-	- `ICONS` – for all themes &rarr; They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
-	- `EXPLORER URL` – to have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
-	- `PROVIDERS`:
-		- `infura`
-		- `alchemy`
-		- `alchemyJsonRpcUrl`
-	- `EXCHANGE` (Coingecko ID) - Update the `CoingeckoPlatformId` type if needed
-	- `BUY` (Onramper ID) - Update the `OnramperNetworkId` type if needed
+
+  - `SYMBOL` – short identifier (e.g., `'BSC'`, `'ARB'`)
+  - `NAME` – name of the network
+  - `CHAIN ID` - chainId of the network
+  - `ICONS` – for all themes &rarr; They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
+  - `EXPLORER URL` – to have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
+  - `PROVIDERS`:
+    - `infura`
+    - `alchemy`
+    - `alchemyJsonRpcUrl`
+  - `EXCHANGE` (Coingecko ID) - Update the `CoingeckoPlatformId` type if needed
+  - `BUY` (Onramper ID) - Update the `OnramperNetworkId` type if needed
 
 - Add testnet object(s) If there are testnets, create a similar object for each one.
 
@@ -366,34 +367,36 @@ Location: `src/frontend/src/env/tokens/tokens-evm/`
 - Inside the folder, create a new file: `tokens.<token>.env.ts`
 - Copy contents from another EVM network’s token file (e.g., `tokens.pol.env.ts`)
 
-	```typescript
-	const POL_DECIMALS = 18;
+  ```typescript
+  const POL_DECIMALS = 18;
 
-	const POL_MAINNET_SYMBOL = 'POL';
+  const POL_MAINNET_SYMBOL = 'POL';
 
-	export const POL_MAINNET_TOKEN_ID: TokenId = parseTokenId(POL_MAINNET_SYMBOL);
+  export const POL_MAINNET_TOKEN_ID: TokenId = parseTokenId(POL_MAINNET_SYMBOL);
 
-	export const POL_MAINNET_TOKEN: RequiredToken = {
-		id: POL_MAINNET_TOKEN_ID,
-		network: POLYGON_MAINNET_NETWORK,
-		standard: 'ethereum',
-		category: 'default',
-		name: 'POL (prev. MATIC)',
-		symbol: POL_MAINNET_SYMBOL,
-		decimals: POL_DECIMALS,
-		icon: pol,
-		buy: {
-			onramperId: 'pol_polygon'
-		}
-	};
-	```
+  export const POL_MAINNET_TOKEN: RequiredToken = {
+  	id: POL_MAINNET_TOKEN_ID,
+  	network: POLYGON_MAINNET_NETWORK,
+  	standard: 'ethereum',
+  	category: 'default',
+  	name: 'POL (prev. MATIC)',
+  	symbol: POL_MAINNET_SYMBOL,
+  	decimals: POL_DECIMALS,
+  	icon: pol,
+  	buy: {
+  		onramperId: 'pol_polygon'
+  	}
+  };
+  ```
+
 - Update the following fields:
-	- **Decimals** – token precision (e.g., `18`)
-	- **Symbol** – short token symbol (e.g., `'POL'`, `'ARB'`)
-	- **Network** – reference the network object created in the previous step
-	- **Name** – display name of the token
-	- **Icon** – SVG format, placed in `src/frontend/src/evm/<network>/assets` folder.
-	- **Buy** – Onramper ID if applicable (e.g., `'pol_polygon'`)
+
+  - **Decimals** – token precision (e.g., `18`)
+  - **Symbol** – short token symbol (e.g., `'POL'`, `'ARB'`)
+  - **Network** – reference the network object created in the previous step
+  - **Name** – display name of the token
+  - **Icon** – SVG format, placed in `src/frontend/src/evm/<network>/assets` folder.
+  - **Buy** – Onramper ID if applicable (e.g., `'pol_polygon'`)
 
 - If the network includes testnet tokens, repeat the process for each testnet.
 
@@ -422,11 +425,12 @@ After creating your network and token objects, make sure they are registered in 
 
   ```ts
   export const SUPPORTED_EVM_NETWORKS = [
-    ...SUPPORTED_BASE_NETWORKS,
-    ...SUPPORTED_BSC_NETWORKS,
-    ...SUPPORTED_POLYGON_NETWORKS,
-    ...SUPPORTED_<NETWORK>_NETWORKS
+  	...SUPPORTED_BASE_NETWORKS,
+  	...SUPPORTED_BSC_NETWORKS,
+  	...SUPPORTED_POLYGON_NETWORKS,
+  	...(SUPPORTED_ < NETWORK > _NETWORKS)
   ];
+  ```
 
 #### 2. Add the Token to `SUPPORTED_EVM_TOKENS`
 
@@ -436,12 +440,11 @@ Action: Include your network's token list in the main EVM token array:
 
 ```ts
 export const SUPPORTED_EVM_TOKENS = [
-  ...SUPPORTED_BASE_TOKENS,
-  ...SUPPORTED_BSC_TOKENS,
-  ...SUPPORTED_POLYGON_TOKENS,
-  ...SUPPORTED_<NETWORK>_TOKENS
+	...SUPPORTED_BASE_TOKENS,
+	...SUPPORTED_BSC_TOKENS,
+	...SUPPORTED_POLYGON_TOKENS,
+	...(SUPPORTED_ < NETWORK > _TOKENS)
 ];
-
 ```
 
 ### Create derived store for enabled network(s)
@@ -546,14 +549,15 @@ To do this, the following steps are required:
 
 - Create a folder: `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/` named `tokens-erc20`
 - For each token:
-	- Create a file named: `tokens.<token>.env.ts`
-	- Copy content from a similar token file in another EVM network.
-	- Update the following fields:
-		- `name`
-		- `symbol`
-		- `decimals`
-		- `network` (reference the correct network object)
-		- `icon` (SVG format, placed in `evm/<network>/assets/`)
+
+  - Create a file named: `tokens.<token>.env.ts`
+  - Copy content from a similar token file in another EVM network.
+  - Update the following fields:
+    - `name`
+    - `symbol`
+    - `decimals`
+    - `network` (reference the correct network object)
+    - `icon` (SVG format, placed in `evm/<network>/assets/`)
 
 - If the token has similar bridged tokens on the other EVM networks or on IC, add the `groupData` property, similar to existing ones (for example USDC, USDT, etc.).
 
