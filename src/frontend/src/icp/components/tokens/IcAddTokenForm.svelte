@@ -5,9 +5,10 @@
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';
+	export let editMode = false;
 </script>
 
-<p class="mb-6">{$i18n.tokens.import.text.info}</p>
+<p class="mb-6 text-sm">{$i18n.tokens.import.text.info}</p>
 
 <label for="ledgerCanisterId" class="font-bold"
 	>{$i18n.tokens.import.text.ledger_canister_id}:
@@ -16,6 +17,7 @@
 <InputText
 	name="ledgerCanisterId"
 	bind:value={ledgerCanisterId}
+	disabled={editMode}
 	placeholder="_____-_____-_____-_____-cai"
 />
 
@@ -29,4 +31,4 @@
 	required={false}
 />
 
-<p class="mb-6">{replaceOisyPlaceholders($i18n.tokens.import.text.info_index)}</p>
+<p class="mb-6 mt-2 text-sm">{replaceOisyPlaceholders($i18n.tokens.import.text.info_index)}</p>
