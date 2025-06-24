@@ -51,27 +51,27 @@
 	},
 	"navigation": {
 		"text": {
-			"tokens": "Vermögenswerte",
-			"settings": "Einstellungen",
+			"tokens": "Vermögen",
+			"settings": "Einrichten",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
-			"airdrops": "Belohnungen",
-			"earning": "Verdienen & Belohnungen",
+			"airdrops": "Prämien",
+			"earning": "Verdienen",
 			"source_code_on_github": "Quellcode auf GitHub",
 			"view_on_explorer": "Im Explorer ansehen",
 			"source_code": "Quellcode",
 			"changelog": "Änderungsprotokoll",
 			"documentation": "Dokumentation",
 			"support": "Support",
-			"confirm_navigate": "Möchtest Du wirklich die Seite verlassen?",
-			"vip_qr_code": "VIP-QR-Code",
+			"confirm_navigate": "Möchtest du wirklich die Seite verlassen?",
+			"vip_qr_code": "VIP QR-Code",
 			"binance_qr_code": "Binance Clubhouse-QR",
-			"refer_a_friend": "Freunde werben",
+			"refer_a_friend": "Freunde einladen",
 			"address_book": "Kontakte",
 			"hide_balances": "Salden verbergen",
 			"show_balances": "Salden anzeigen",
-			"privacy_mode_enabled": "",
-			"privacy_mode_disabled": ""
+			"privacy_mode_enabled": "Privatsphären Modus aktiviert. Drücke [P] um die Salden wieder anzuzeigen.",
+			"privacy_mode_disabled": "Privatsphären Modus deaktiviert. Drücke [P] um die Salden zu verbergen."
 		},
 		"alt": {
 			"tokens": "Zum Vermögenswerte-Bereich gehen",
@@ -98,9 +98,9 @@
 	"auth": {
 		"text": {
 			"title_part_1": "$oisy_name",
-			"title_part_2": "100% dezentralisiert",
+			"title_part_2": "100% Dezentralisiert",
 			"logout": "Abmelden",
-			"authenticate": "Öffnen oder Erstellen",
+			"authenticate": "Anmelden",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Sofortiger und privater Zugriff überall",
 			"advanced_cryptography": "100% On-Chain: Sicherheit durch fortschrittliche Kryptographie"
@@ -110,7 +110,7 @@
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
-			"session_expired": "Deine Sitzung ist abgelaufen, Du wurdest abgemeldet."
+			"session_expired": "Deine Sitzung ist abgelaufen, du wurdest abgemeldet."
 		},
 		"error": {
 			"no_internet_identity": "Keine Internet Identity.",
@@ -119,14 +119,14 @@
 			"error_validating_pouh_credential": "Entschuldigung, aber beim Validieren des Humanity-Zertifikats ist ein Fehler aufgetreten.",
 			"error_requesting_pouh_credential": "Entschuldigung, aber beim Anfordern des Humanity-Zertifikats ist ein Fehler aufgetreten.",
 			"missing_pouh_issuer_origin": "Entschuldigung, aber beim Anfordern des Humanity-Zertifikats ist ein Fehler aufgetreten. Die Ausstellerquelle fehlt.",
-			"no_pouh_credential": "Entschuldigung, aber beim Anfordern des Humanity-Zertifikats ist ein Fehler aufgetreten. Hast Du ein gültiges Zertifikat in Decide AI?",
+			"no_pouh_credential": "Entschuldigung, aber beim Anfordern des Humanity-Zertifikats ist ein Fehler aufgetreten. Hast du ein gültiges Zertifikat in Decide AI?",
 			"error_while_signing_in": "Beim Anmelden ist ein Fehler aufgetreten.",
 			"unexpected_issue_with_syncing": "Unerwartetes Problem beim Synchronisieren des Authentifizierungsstatus."
 		},
 		"help": {
 			"text": {
 				"title": "Probleme bei der Authentifizierung?",
-				"description": "Wir haben bemerkt, dass Du die Authentifizierung mit Internet Identity abgebrochen hast. Wir würden gern verstehen, was passiert ist, um Deine Erfahrung zu verbessern.",
+				"description": "Wir haben bemerkt, dass du die Authentifizierung mit Internet Identity abgebrochen hast. Wir würden gern verstehen, was passiert ist, um deine Erfahrung zu verbessern.",
 				"subtitle": "Wurde das Problem durch Folgendes verursacht?",
 				"lost_identity": "Ich habe meine Internet Identity-Nummer verloren",
 				"security": "Ich war besorgt wegen Sicherheit oder Datenschutz",
@@ -135,16 +135,16 @@
 				"feedback_text": "Dein Feedback hilft uns, die Wallet zu verbessern.",
 				"thanks_text": "Danke!",
 				"identity_new_identity": "$oisy_short Wallet wechselt die Internet Identity-Domain zu: <span class=\"font-bold\">identity.internetcomputer.org</span>",
-				"identity_legacy_description": "Daher wird Deine Internet Identity-Nummer möglicherweise nicht automatisch angezeigt und Du musst sie möglicherweise erneut eingeben.",
+				"identity_legacy_description": "Daher wird deine Internet Identity-Nummer möglicherweise nicht automatisch angezeigt und du musst sie möglicherweise erneut eingeben.",
 				"identity_legacy_sign_in": "Mit der Legacy-Internet-Identity-Domain anmelden",
 				"identity_learn_more": "Mehr erfahren in den $oisy_short Docs",
-				"other_title": "Danke für Dein Feedback!",
+				"other_title": "Danke für dein Feedback!",
 				"other_description": "Hier sind einige hilfreiche Ressourcen zu <span class=\"font-bold\">Sicherheit</span> und <span class=\"font-bold\">Datenschutz</span> in $oisy_short und Internet Identity. Wir hoffen, sie helfen Dir, eine informierte Entscheidung zu treffen:",
 				"other_introduction": "$oisy_short Einführung",
 				"other_docs": "$oisy_short-Dokumentation: Internet Identity",
 				"other_private_key": "Wer kontrolliert den privaten Schlüssel für die nativen Assets?",
 				"other_asset_control": "Asset-Kontrolle, Wiederherstellung und Governance in $oisy_short Wallet",
-				"need_help": "Brauchst Du Hilfe bei",
+				"need_help": "Brauchst du Hilfe bei",
 				"sign_in": "Anmeldung?"
 			},
 			"alt": {
@@ -165,7 +165,7 @@
 			"sign_in": "Melde Dich an, um das Ökosystem zu erkunden.",
 			"title": "Apps entdecken",
 			"open_dapp": "Öffne $dAppName",
-			"submit_your_dapp": "Reiche Deine App ein"
+			"submit_your_dapp": "Reiche deine App ein"
 		},
 		"alt": {
 			"learn_more": "Mehr über $dAppName erfahren",
@@ -177,7 +177,7 @@
 			"open_open_chat": "Öffne $dAppName auf OpenChat",
 			"open_twitter": "Öffne den X/Twitter-Feed von $dAppName",
 			"source_code_on_github": "Quellcode von $dAppName auf GitHub ansehen",
-			"submit_your_dapp": "Reiche Deine App ein, um im App-Explorer angezeigt zu werden",
+			"submit_your_dapp": "Reiche deine App ein, um im App-Explorer angezeigt zu werden",
 			"tags": "Tags zu $dAppName",
 			"website": "Bild von $dAppName"
 		},
@@ -306,7 +306,7 @@
 	},
 	"rewards": {
 		"text": {
-			"title": "Belohnungen",
+			"title": "Prämien",
 			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 startet bald!<br>Bleib dran für Updates",
 			"active_date": "Endet am",
 			"ended_date": "Endete am",
@@ -419,12 +419,12 @@
 			"address_copied": "Adresse in die Zwischenablage kopiert.",
 			"wallet_address_copied": "Wallet-Adresse in die Zwischenablage kopiert.",
 			"display_wallet_address_qr": "Wallet-Adresse als QR-Code anzeigen",
-			"icp_deposits": "Hinweis: Für ICP-Einzahlungen benutze die 'Empfangen'-Schaltfläche in Deinem ICP-Konto, um die richtige Adresse zu erhalten.",
-			"use_address_from_to": "Verwende diese Adresse, um $token an Dein Wallet zu senden und von dort zu empfangen."
+			"icp_deposits": "Hinweis: Für ICP-Einzahlungen benutze die 'Empfangen'-Schaltfläche in deinem ICP-Konto, um die richtige Adresse zu erhalten.",
+			"use_address_from_to": "Verwende diese Adresse, um $token an deine Wallet zu senden und von dort zu empfangen."
 		},
 		"alt": {
-			"open_etherscan": "Öffne Deine Adresse auf Etherscan",
-			"open_solscan": "Öffne Deine Adresse auf Solscan",
+			"open_etherscan": "Öffne deine Adresse auf Etherscan",
+			"open_solscan": "Öffne deine Adresse auf Solscan",
 			"qrcode_address": "Scanne diesen QR-Code, um die Adresse zu kopieren, um $token zu empfangen"
 		}
 	},
@@ -432,7 +432,7 @@
 		"text": {
 			"initializing_wallet": "Deine Wallet wird vorbereitet...",
 			"securing_session": "Sichere Sitzung mit Internet Identity",
-			"retrieving_public_keys": "Hole Deine öffentlichen Schlüssel für Bitcoin, Ethereum, Solana, Base, Polygon und BNB",
+			"retrieving_public_keys": "Hole deine öffentlichen Schlüssel für Bitcoin, Ethereum, Solana, Base, Polygon und BNB",
 			"done": "Viel Spaß mit $oisy_short"
 		},
 		"alt": {
@@ -440,7 +440,7 @@
 		},
 		"info": {
 			"hold_loading": "Einen Moment Geduld, wir laden Informationen...",
-			"hold_loading_wallet": "Einen Moment Geduld, wir laden erste Daten für Deine Wallet..."
+			"hold_loading_wallet": "Einen Moment Geduld, wir laden erste Daten für deine Wallet..."
 		},
 		"error": {
 			"no_alchemy_config": "Keine Alchemy-Konfiguration für Netzwerk $network",
@@ -475,7 +475,7 @@
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
-			"allow_signing": "Ein Problem trat auf beim Einrichten Deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
+			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
 			"btc_wallet_error": "Fehler beim Laden der BTC-Wallet-Informationen.",
 			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen."
 		}
@@ -485,22 +485,22 @@
 			"available_balance": "Dein Guthaben",
 			"unavailable_balance": "$ Wert ist nicht verfügbar",
 			"hidden_balance": "Dein Guthaben ist ausgeblendet",
-			"top_up": "Lade Dein Wallet auf, um es zu nutzen!",
+			"top_up": "Lade dein Wallet auf, um es zu nutzen!",
 			"learn_more_about_erc20_icp": "Erfahre mehr über ERC20 ICP auf Ethereum."
 		}
 	},
 	"settings": {
 		"text": {
-			"title": "Einstellungen",
+			"title": "Einrichten",
 			"principal": "Dein Principal",
 			"principal_copied": "Principal in Zwischenablage kopiert",
-			"principal_description": "Deine ID für $oisy_name. Erstellt durch Deine Internet Identity.",
+			"principal_description": "Deine ID für $oisy_name. Erstellt durch deine Internet Identity.",
 			"session_duration": "Sitzungsdauer",
 			"session_expires_in": "Läuft ab in",
 			"networks": "Netzwerke",
 			"enable_testnets": "Testnetzwerke aktivieren",
 			"active_networks": "Aktive Netzwerke",
-			"active_networks_description": "Wähle die Netzwerke aus, mit denen Du in $oisy_name arbeiten möchtest. Token und Transaktionen aus inaktiven Netzwerken werden nicht angezeigt oder in Deinem verfügbaren Guthaben berücksichtigt.",
+			"active_networks_description": "Wähle die Netzwerke aus, mit denen du in $oisy_name arbeiten möchtest. Token und Transaktionen aus inaktiven Netzwerken werden nicht angezeigt oder in deinem verfügbaren Guthaben berücksichtigt.",
 			"enable_network": "Netzwerk aktivieren",
 			"disable_network": "Netzwerk deaktivieren",
 			"credentials_title": "Zugangsdaten",
@@ -521,7 +521,7 @@
 			"github_release": "$oisy_short Release-Notes auf GitHub",
 			"appearance_light": "Aktiviert den Hellmodus",
 			"appearance_dark": "Aktiviert den Dunkelmodus",
-			"appearance_system": "Aktiviert den Farbmodus Deines Betriebssystems"
+			"appearance_system": "Aktiviert den Farbmodus deines Betriebssystems"
 		},
 		"error": {
 			"loading_profile": "Fehler beim Laden des Profils. Bitte aktualisiere die Seite, um das volle Erlebnis zu haben."
@@ -542,14 +542,14 @@
 	},
 	"receive": {
 		"text": {
-			"receive": "Empfangen",
+			"receive": "Empfang",
 			"address": "Empfangsadresse",
 			"receive_token": "$token empfangen"
 		},
 		"icp": {
 			"text": {
 				"account_id": "ICP-Konto-ID",
-				"use_for_all_tokens": "Für alle Token verwenden, wenn Du von Wallets, Nutzern oder anderen Apps empfängst, die dieses Adressformat unterstützen.",
+				"use_for_all_tokens": "Für alle Token verwenden, wenn du von Wallets, Nutzern oder anderen Apps empfängst, die dieses Adressformat unterstützen.",
 				"use_for_icrc_deposit": "Für den Empfang von ICRC-1-Token im ICP-Netzwerk verwenden, z. B. SNS, ck-Token usw.",
 				"use_for_icp_deposit": "Für ICP-Einzahlungen von Börsen oder anderen Wallets verwenden, die nur Konto-IDs unterstützen.",
 				"your_private_eth_address": "Deine private Adresse für alle ERC20-Token.",
@@ -567,8 +567,8 @@
 			"text": {
 				"checking_status": "Prüfe $token-Status...",
 				"from_network": "Empfange vom $network-Netzwerk",
-				"eth_to_cketh_description": "Das Umwandeln von $token in $ckToken erfordert einen Aufruf eines Smart Contracts im $network-Netzwerk und das Übergeben Deines IC-Principals als Argument – $oisy_name vereinfacht dies, indem Du die Umwandlung direkt in der Wallet durchführen kannst.",
-				"learn_how_to_convert": "Erfahre, wie Du $token in $ckToken umwandelst",
+				"eth_to_cketh_description": "Das Umwandeln von $token in $ckToken erfordert einen Aufruf eines Smart Contracts im $network-Netzwerk und das Übergeben deines IC-Principals als Argument – $oisy_name vereinfacht dies, indem Du die Umwandlung direkt in der Wallet durchführen kannst.",
+				"learn_how_to_convert": "Erfahre, wie du $token in $ckToken umwandelst",
 				"metamask": "Empfangen über Metamask",
 				"ethereum": "Ethereum",
 				"ethereum_address": "Adresse",
@@ -646,7 +646,7 @@
 			"recently_used_empty_state_title": "Hier erscheinen kürzlich genutzte Adressen",
 			"recently_used_empty_state_description": "Sende jetzt die erste Transaktion!",
 			"contacts_empty_state_title": "Deine Kontakte werden hier angezeigt",
-			"contacts_empty_state_description": "Es sieht so aus, als hättest Du noch keine Kontakte hinzugefügt",
+			"contacts_empty_state_description": "Es sieht so aus, als hättest du noch keine Kontakte hinzugefügt",
 			"send_review_subtitle": "Du sendest"
 		},
 		"placeholder": {
@@ -660,7 +660,7 @@
 			"cketh_certified": "Bitte warte, bis die ckETH-Parameter zertifiziert sind.",
 			"pending_bitcoin_transaction": "Du kannst eine weitere Bitcoin-Transaktion senden, sobald die ausstehende abgeschlossen ist.",
 			"no_available_utxos": "Du hast keine verfügbaren UTXOs für diese Transaktion.",
-			"unknown_destination": "Du hast zuvor nicht mit dieser Adresse interagiert. Stelle sicher, dass Du den Empfänger kennst.",
+			"unknown_destination": "Du hast zuvor nicht mit dieser Adresse interagiert. Stelle sicher, dass du den Empfänger kennst.",
 			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>"
 		},
 		"assertion": {
@@ -692,7 +692,7 @@
 		"error": {
 			"unexpected": "Beim Senden der Transaktion ist etwas schiefgelaufen.",
 			"destination_address_unknown": "ETH-Zieladresse ist unbekannt.",
-			"metamask_connected": "Konnte Deine Konten nicht abrufen. Ist Metamask geöffnet und verbunden?",
+			"metamask_connected": "Konnte deine Konten nicht abrufen. Ist Metamask geöffnet und verbunden?",
 			"metamask_no_accounts": "Keine Metamask-Konten gefunden.",
 			"metamask_switch_network": "Kann Metamask nicht auffordern, zu Chain ID $chain_id zu wechseln. Nutzt Metamask $network_name?",
 			"erc20_data_undefined": "ERC20-Transaktionsdaten dürfen nicht undefined oder null sein.",
@@ -721,8 +721,8 @@
 			"convert_eth_to_cketh": "Wandle $token in $ckToken um",
 			"cketh_conversions_may_take": "ckETH-Umwandlungen können bis zu 20 Minuten dauern",
 			"ckerc20_conversions_may_take": "$ckErc20-Umwandlungen können bis zu 20 Minuten dauern",
-			"how_to_convert_eth_to_cketh": "So kannst Du $token in $ckToken auf $oisy_name umwandeln",
-			"send_eth": "Sende $token an Deine $oisy_name-Adresse",
+			"how_to_convert_eth_to_cketh": "So kannst du $token in $ckToken auf $oisy_name umwandeln",
+			"send_eth": "Sende $token an deine $oisy_name-Adresse",
 			"wait_eth_current_balance": "Warte darauf, dass $token ankommt. Aktuelles Guthaben",
 			"set_amount": "Betrag für Umwandlung festlegen",
 			"check_balance_for_fees": "Prüfe $token-Guthaben für Umwandlungsgebühren",
@@ -794,10 +794,10 @@
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
 			"unexpected": "Beim Tauschen der Token ist etwas schiefgelaufen.",
 			"unexpected_missing_data": "Beim Starten der Tauschtransaktion ist etwas schiefgelaufen.",
-			"slippage_exceeded": "$oisy_short schützt Dich: Der Handel liegt außerhalb Deiner Slippage-Toleranz von $maxSlippage%. Bitte passe die maximale Slippage an und versuche es erneut.",
+			"slippage_exceeded": "$oisy_short schützt Dich: Der Handel liegt außerhalb deiner Slippage-Toleranz von $maxSlippage%. Bitte passe die maximale Slippage an und versuche es erneut.",
 			"pool_not_found": "Tausch fehlgeschlagen. Pool nicht gefunden.",
-			"deposit_error": "Tausch fehlgeschlagen. Wir konnten Deine Token nicht in den Pool einzahlen. Bitte versuche es erneut.",
-			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe Dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
+			"deposit_error": "Tausch fehlgeschlagen. Wir konnten deine Token nicht in den Pool einzahlen. Bitte versuche es erneut.",
+			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
 			"swap_failed_withdraw_success": "Tausch fehlgeschlagen. Deine Token wurden erfolgreich zurückerstattet. Du kannst es erneut versuchen oder die Slippage-Toleranz erhöhen."
 		}
 	},
@@ -821,7 +821,7 @@
 			"filter_nothing_found": "Ups, nichts gefunden",
 			"filter_nothing_found_description": "Gib Token-Ticker oder Namen ein, um die Liste zu filtern",
 			"filter_placeholder": "Nach Token oder Symbol filtern",
-			"buy_or_receive": "Kaufe oder empfange jetzt Deine ersten Token, um sie in der Liste zu sehen",
+			"buy_or_receive": "Kaufe oder empfange jetzt deine ersten Token, um sie in der Liste zu sehen",
 			"initializing": "Initialisiere...",
 			"updating_ui": "UI aktualisieren...",
 			"show_token": "Token anzeigen",
@@ -845,7 +845,7 @@
 			"token_address_copied": "Token-Adresse in Zwischenablage kopiert.",
 			"twin_token": "Twin-Token",
 			"standard": "Standard",
-			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus Deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen.",
+			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen.",
 			"deletion_confirmation": ""
 		},
 		"balance": {
@@ -878,9 +878,9 @@
 				"unexpected_index": "Beim Validieren des Index-Canisters ist etwas schiefgelaufen.",
 				"unexpected_index_ledger": "Beim Laden der Ledger-ID im Zusammenhang mit dem Index-Canister ist etwas schiefgelaufen.",
 				"invalid_ledger_id": "Die Ledger-ID gehört nicht zum Index-Canister.",
-				"missing_ledger_id": "Die Ledger-ID fehlt. Hast Du einen Wert angegeben?",
-				"missing_contract_address": "Die Vertragsadresse fehlt. Hast Du einen Wert angegeben?",
-				"missing_token_address": "Die Token-Adresse fehlt. Hast Du einen Wert angegeben?",
+				"missing_ledger_id": "Die Ledger-ID fehlt. Hast du einen Wert angegeben?",
+				"missing_contract_address": "Die Vertragsadresse fehlt. Hast du einen Wert angegeben?",
+				"missing_token_address": "Die Token-Adresse fehlt. Hast du einen Wert angegeben?",
 				"no_network": "Kein Netzwerk ausgewählt. Das ist unerwartet."
 			},
 			"warning": {
@@ -910,7 +910,7 @@
 		"hide": {
 			"title": "Token verbergen?",
 			"token": "Verberge $token",
-			"info": "Du kannst dieses Token später wieder hinzufügen, indem Du im Wallet-Bereich auf <strong>„Token verwalten“</strong> gehst.",
+			"info": "Du kannst dieses Token später wieder hinzufügen, indem du im Wallet-Bereich auf <strong>„Token verwalten“</strong> gehst.",
 			"confirm": "Verbergen",
 			"hiding": "Verberge..."
 		},
@@ -930,7 +930,7 @@
 			"search_token": "Nach Token suchen"
 		},
 		"warning": {
-			"trust_token": "Stelle sicher, dass Du dem Token vertraust, das Du hinzufügst. Wenn das Token von einer böswilligen Partei kontrolliert wird, könnten sie versuchen, Dich zu betrügen, z. B. indem sie Dir glauben machen, Du hättest eine beträchtliche Menge Token erhalten, um Dich dazu zu bringen, Token zurückzusenden oder andere unerwünschte Aktionen vorzunehmen. Erfahre mehr über Betrugs- und Sicherheitsrisiken z. B. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">hier</a>."
+			"trust_token": "Stelle sicher, dass du dem Token vertraust, das du hinzufügst. Wenn das Token von einer böswilligen Partei kontrolliert wird, könnten sie versuchen, Dich zu betrügen, z. B. indem sie Dir glauben machen, du hättest eine beträchtliche Menge Token erhalten, um Dich dazu zu bringen, Token zurückzusenden oder andere unerwünschte Aktionen vorzunehmen. Erfahre mehr über Betrugs- und Sicherheitsrisiken z. B. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">hier</a>."
 		},
 		"error": {
 			"invalid_contract_address": "Vertragsadresse ist ungültig.",
@@ -974,14 +974,14 @@
 			"title": "BTC empfangen & in ckBTC umwandeln",
 			"description": "Wandle Bitcoin in ckBTC um und profitiere von der schnellsten und günstigsten Bitcoin-Transaktion. Der Umwandlungsprozess kann bis zu einer Stunde dauern.",
 			"note": "Du kannst ckBTC jederzeit wieder in BTC umwandeln.",
-			"how_to": "So wandelst Du in ckBTC um"
+			"how_to": "So wandelst du in ckBTC um"
 		},
 		"ethereum": {
 			"title": "In $ckToken umwandeln",
-			"description": "Mit ein paar Schritten wandelst Du Dein natives $network $token direkt innerhalb von $oisy_name in das getwinte ICP $ckToken um. Der Umwandlungsprozess kann bis zu 20 Minuten dauern.",
+			"description": "Mit ein paar Schritten wandelst du dein natives $network $token direkt innerhalb von $oisy_name in das getwinte ICP $ckToken um. Der Umwandlungsprozess kann bis zu 20 Minuten dauern.",
 			"note": "Du kannst $ckToken jederzeit wieder in $token umwandeln.",
-			"how_to": "So wandelst Du in $ckToken um",
-			"how_to_short": "So wandelst Du $token um"
+			"how_to": "So wandelst du in $ckToken um",
+			"how_to_short": "So wandelst du $token um"
 		}
 	},
 	"wallet_connect": {
@@ -1107,12 +1107,12 @@
 	"transactions": {
 		"text": {
 			"title": "Transaktionen",
-			"buy_or_receive": "Mache Deine erste Transaktion und kaufe oder empfange jetzt Token!",
+			"buy_or_receive": "Mache deine erste Transaktion und kaufe oder empfange jetzt Token!",
 			"transaction_history": "Deine Transaktionshistorie erscheint hier",
 			"mainnet_btc_transactions_info": "BTC-Transaktionsinformationen stammen von zentralen Drittanbietern und sollten eigenständig überprüft werden.",
 			"transaction_history_unavailable": "Transaktionshistorie nicht verfügbar",
-			"missing_index_canister_explanation": "Im Moment kann $oisy_short Deine vergangenen Token-Transaktionen nicht anzeigen, da der Aussteller die Verfolgungsfunktion noch nicht bereitgestellt hat. Diese sollte bald hinzugefügt werden. In der Zwischenzeit keine Sorge – Du kannst Deine Token weiterhin wie gewohnt senden und empfangen.",
-			"index_canister_not_working_explanation": "Im Moment kann $oisy_short Deine vergangenen Token-Transaktionen nicht anzeigen, da die Tracking-Funktion des Ausstellers derzeit nicht reagiert. Dies sollte bald behoben sein. In der Zwischenzeit keine Sorge – Du kannst Deine Token weiterhin wie gewohnt senden und empfangen.",
+			"missing_index_canister_explanation": "Im Moment kann $oisy_short deine vergangenen Token-Transaktionen nicht anzeigen, da der Aussteller die Verfolgungsfunktion noch nicht bereitgestellt hat. Diese sollte bald hinzugefügt werden. In der Zwischenzeit keine Sorge – Du kannst deine Token weiterhin wie gewohnt senden und empfangen.",
+			"index_canister_not_working_explanation": "Im Moment kann $oisy_short deine vergangenen Token-Transaktionen nicht anzeigen, da die Tracking-Funktion des Ausstellers derzeit nicht reagiert. Dies sollte bald behoben sein. In der Zwischenzeit keine Sorge – Du kannst deine Token weiterhin wie gewohnt senden und empfangen.",
 			"token_needs_enabling": "Das Token muss aktiviert sein, um die Transaktionshistorie anzuzeigen."
 		},
 		"error": {
@@ -1123,7 +1123,7 @@
 			"loading_pending_ck_ethereum_transactions": "Beim Abrufen der ausstehenden $network-Transaktionen ist etwas schiefgelaufen.",
 			"get_transaction_for_hash": "Konnte die Transaktion mit dem angegebenen Hash ($hash) nicht abrufen.",
 			"unexpected_transaction_for_hash": "Beim Laden der ausstehenden Transaktion für Hash $hash ist etwas schiefgelaufen.",
-			"loading_token_with_network": "Das Token $token im Netzwerk $network konnte nicht geladen werden, da es nicht in Deiner Token-Liste ist.",
+			"loading_token_with_network": "Das Token $token im Netzwerk $network konnte nicht geladen werden, da es nicht in deiner Token-Liste ist.",
 			"loading_token": "Der angegebene Link zu einem Token ist ungültig."
 		}
 	},
@@ -1133,24 +1133,24 @@
 				"label": "Warum $oisy_short",
 				"title": "Warum $oisy_short",
 				"hold_crypto": {
-					"title": "Vereinheitlichte Verwaltung aller Deiner digitalen Vermögenswerte",
-					"description": "$oisy_short ermöglicht es Dir, all Deine digitalen Vermögenswerte – einschließlich Bitcoin, Solana, Ethereum, ICP und mehr – in einer einzigen, einheitlichen Wallet zu verwalten. Kein Jonglieren mehr mit mehreren Wallets für verschiedene Kryptowährungen – genieße ein nahtloses und effizientes Erlebnis über verschiedene Plattformen hinweg."
+					"title": "Vereinheitlichte Verwaltung aller deiner digitalen Vermögenswerte",
+					"description": "$oisy_short ermöglicht es Dir, all deine digitalen Vermögenswerte – einschließlich Bitcoin, Solana, Ethereum, ICP und mehr – in einer einzigen, einheitlichen Wallet zu verwalten. Kein Jonglieren mehr mit mehreren Wallets für verschiedene Kryptowährungen – genieße ein nahtloses und effizientes Erlebnis über verschiedene Plattformen hinweg."
 				},
 				"network_custody": {
 					"title": "Keine Angst vor privaten Schlüsseln mehr dank Network Custody",
-					"description": "$oisy_name implementiert Network Custody, einen innovativen Ansatz, der die fortschrittliche Kryptographie des Internet Computer nutzt, um zu vermeiden, dass Du private Schlüssel direkt verwalten musst. Dies bietet eine sichere und benutzerfreundliche Alternative zu traditionellen Methoden und entspricht der „Onchain is the New Online“-Bewegung – eine Verschiebung hin zu Lösungen, die Sicherheit und Widerstandsfähigkeit gegen Cyberangriffe durch den Betrieb in einem verteilten Netzwerk erhöhen."
+					"description": "$oisy_name implementiert Network Custody, einen innovativen Ansatz, der die fortschrittliche Kryptographie des Internet Computer nutzt, um zu vermeiden, dass du private Schlüssel direkt verwalten musst. Dies bietet eine sichere und benutzerfreundliche Alternative zu traditionellen Methoden und entspricht der „Onchain is the New Online“-Bewegung – eine Verschiebung hin zu Lösungen, die Sicherheit und Widerstandsfähigkeit gegen Cyberangriffe durch den Betrieb in einem verteilten Netzwerk erhöhen."
 				},
 				"fully_on_chain": {
 					"title": "Manipulationssichere Sicherheit mit einer vollständig On-Chain Wallet",
-					"description": "Nicht nur sind Deine Schlüssel gesichert, sondern die gesamte Wallet-Anwendung wird <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">vollständig On-Chain</a> gespeichert und direkt in Deinen Browser vom Internet Computer ausgeliefert. Dies bedeutet, dass die gesamte Wallet von einem dezentralen Vertrauensmodell profitiert, was sie manipulationssicher und hochgradig sicher macht."
+					"description": "Nicht nur sind deine Schlüssel gesichert, sondern die gesamte Wallet-Anwendung wird <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">vollständig On-Chain</a> gespeichert und direkt in deinen Browser vom Internet Computer ausgeliefert. Dies bedeutet, dass die gesamte Wallet von einem dezentralen Vertrauensmodell profitiert, was sie manipulationssicher und hochgradig sicher macht."
 				},
 				"cross_device": {
-					"title": "Greife jederzeit und überall auf Deine Wallet zu",
-					"description": "Mit <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">Internet Identity</a> kann $oisy_short einfach auf allen Geräten verwendet werden, die Du mit Deiner privaten dezentralen Identität verknüpft hast. Dies gewährleistet nahtlosen und sicheren Zugriff auf Deine Wallet, egal ob Du auf einem Smartphone, Tablet oder Desktop bist."
+					"title": "Greife jederzeit und überall auf deine Wallet zu",
+					"description": "Mit <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">Internet Identity</a> kann $oisy_short einfach auf allen Geräten verwendet werden, die du mit deiner privaten dezentralen Identität verknüpft hast. Dies gewährleistet nahtlosen und sicheren Zugriff auf deine Wallet, egal ob du auf einem Smartphone, Tablet oder Desktop bist."
 				},
 				"verifiable_credentials": {
 					"title": "Entsperre zusätzliche Funktionen mit verifizierbaren Berechtigungen",
-					"description": "$oisy_short integriert sich in die verifizierbaren Berechtigungen des Internet Computer <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">Plattform</a>. Greife auf zusätzliche Funktionen wie Airdrops und exklusive Funktionalitäten zu, indem Du bestimmte Arten von Berechtigungen erwirbst, und verbessere so Dein Gesamterlebnis."
+					"description": "$oisy_short integriert sich in die verifizierbaren Berechtigungen des Internet Computer <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">Plattform</a>. Greife auf zusätzliche Funktionen wie Airdrops und exklusive Funktionalitäten zu, indem du bestimmte Arten von Berechtigungen erwirbst, und verbessere so dein Gesamterlebnis."
 				},
 				"open_source": {
 					"title": "Vertraue auf Transparenz mit Open Source",
@@ -1167,7 +1167,7 @@
 				"title_failed": "Ungültiger Einladungscode",
 				"reward_received": "Willkommen bei $oisy_short!",
 				"reward_failed": "Code ist abgelaufen",
-				"reward_received_description": "Du erhältst Dein Willkommensgeschenk in Kürze.",
+				"reward_received_description": "Du erhältst dein Willkommensgeschenk in Kürze.",
 				"reward_failed_description": "Fordere einen neuen an und versuche es erneut"
 			},
 			"error": {
@@ -1193,7 +1193,7 @@
 			"text": {
 				"title": "Empfiehl einen Freund",
 				"referral_link_copied": "Empfehlungslink in Zwischenablage kopiert.",
-				"information": "Erhalte Bonus-Sprinkles, jedes Mal wenn Deine Freunde einen erhalten!",
+				"information": "Erhalte Bonus-Sprinkles, jedes Mal wenn deine Freunde einen erhalten!",
 				"not_referred_yet": "Du hast noch niemanden empfohlen",
 				"referred_amount": "Du hast bereits $amount Personen empfohlen",
 				"learn_more": "Mehr erfahren"
@@ -1208,7 +1208,7 @@
 		"text": {
 			"title": "Adressbuch",
 			"empty_title": "Deine Kontakte sind leer",
-			"empty_text": "Alle Deine Kontakte werden hier angezeigt",
+			"empty_text": "Alle deine Kontakte werden hier angezeigt",
 			"add_new_contact": "Neuen Kontakt hinzufügen",
 			"add_contact": "Kontakt hinzufügen",
 			"search_contact": "Kontakt suchen",
@@ -1249,7 +1249,7 @@
 		"delete": {
 			"title": "$contact löschen?",
 			"delete_contact": "Kontakt löschen",
-			"content_text": "Dadurch wird $contact und alle zugehörigen Adressen aus Deinem Adressbuch gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden."
+			"content_text": "Dadurch wird $contact und alle zugehörigen Adressen aus deinem Adressbuch gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden."
 		},
 		"error": {
 			"create": "Kontakt konnte nicht erstellt werden",
@@ -1296,8 +1296,8 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"access_your_wallet": "Greife auf Dein $oisy_name zu",
-				"open_or_create": "Öffne oder erstelle Deine Wallet, um Dich sicher mit der dApp zu verbinden und Deine Assets zu verwalten."
+				"access_your_wallet": "Greife auf dein $oisy_name zu",
+				"open_or_create": "Öffne oder erstelle deine Wallet, um Dich sicher mit der dApp zu verbinden und dein Vermögen zu verwalten."
 			}
 		},
 		"idle": {
@@ -1313,7 +1313,7 @@
 				"title": "Berechtigungen prüfen",
 				"requested_permissions": "Angeforderte Berechtigungen",
 				"your_wallet_address": "Deine Wallet-Adresse",
-				"icrc27_accounts": "Zeige Deine $oisy_name-Adresse",
+				"icrc27_accounts": "Zeige deine $oisy_name-Adresse",
 				"icrc49_call_canister": "Genehmigung für Transaktionen anfordern"
 			},
 			"error": {
@@ -1348,7 +1348,7 @@
 				"executed": "Die Anfrage wurde ausgeführt",
 				"close_window": "Du kannst dieses Fenster schließen",
 				"error": "Anfrage ist aufgrund eines Fehlers fehlgeschlagen",
-				"try_again": "Bitte versuche es erneut. Wenn das Problem weiterhin besteht, kontaktiere den Entwickler der dApp, bei der Du die Anfrage initiiert hast."
+				"try_again": "Bitte versuche es erneut. Wenn das Problem weiterhin besteht, kontaktiere den Entwickler der dApp, bei der du die Anfrage initiiert hast."
 			},
 			"error": {
 				"cannot_call": "Der Aufruf kann nicht verarbeitet werden"
@@ -1364,8 +1364,8 @@
 	},
 	"license_agreement": {
 		"text": {
-			"accept_terms": "Durch Klicken auf diese Schaltfläche stimmst Du der",
-			"accept_terms_link": "Lizenzvereinbarung",
+			"accept_terms": "Durch Klicken auf diese Schaltfläche stimmst du der",
+			"accept_terms_link": "Lizenzvereinbarung zu",
 			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
 			"paragraph_1": "Danke für Dein Interesse an $oisy_name, einer browserbasierten, selbstverwahrenden und Multi-Chain-Wallet-DApp, gehostet im öffentlichen Blockchain-Netzwerk des Internet Computer („$oisy_short“). Weitere Informationen zu $oisy_short, seinem Open-Source-Code und den zugehörigen Lizenzen findest Du im $oisy_short-GitHub-Repository hier: $oisy_repo_url.",
 			"paragraph_2": "Diese Lizenzvereinbarung regelt Deine Nutzung von $oisy_short („Du“). DURCH DIE NUTZUNG VON $oisy_short BESTÄTIGST DU, DASS DU DIESE LIZENZVEREINBARUNG GELESEN, VERSTANDEN UND AKZEPTIERT HAST. WENN DU NICHT ZUSTIMMST, DARFST DU $oisy_short NICHT NUTZEN.",
