@@ -10,7 +10,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 
 export const USDT_DECIMALS = 6;
 
-export const USDT_SYMBOL = 'USDT';
+export const USDT_SYMBOL = 'USDT0';
 
 export const USDT_TOKEN_ID: TokenId = parseTokenId(USDT_SYMBOL);
 
