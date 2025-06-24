@@ -846,7 +846,7 @@
 			"twin_token": "Twin-Token",
 			"standard": "Standard",
 			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen.",
-			"deletion_confirmation": ""
+			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Tokenliste entfernt."
 		},
 		"balance": {
 			"error": {
@@ -1191,16 +1191,16 @@
 	"referral": {
 		"invitation": {
 			"text": {
-				"title": "Empfiehl einen Freund",
+				"title": "Freunde einladen",
 				"referral_link_copied": "Empfehlungslink in Zwischenablage kopiert.",
 				"information": "Erhalte Bonus-Sprinkles, jedes Mal wenn deine Freunde einen erhalten!",
-				"not_referred_yet": "Du hast noch niemanden empfohlen",
-				"referred_amount": "Du hast bereits $amount Personen empfohlen",
+				"not_referred_yet": "Du hast noch niemanden eingeladen",
+				"referred_amount": "Du hast bereits $amount Personen eingeladen",
 				"learn_more": "Mehr erfahren"
 			},
 			"error": {
-				"loading_referrer_info": "Fehler beim Laden der Empfehlungsinfo",
-				"setting_referrer": "Fehler beim Festlegen des Empfehlers"
+				"loading_referrer_info": "Fehler beim Laden der Einladungs-Info",
+				"setting_referrer": "Fehler beim Festlegen der einladendenden Person"
 			}
 		}
 	},
@@ -1414,9 +1414,9 @@
 		}
 	},
 	"welcome": {
-		"title": "",
-		"subtitle": "",
-		"description": ""
+		"title": "Wilkommen bei $oisy_short!",
+		"subtitle": "Bereit zum Verdienen?",
+		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Werbe vier Freunde und sichere dir einen garantierten Bonus."
 	},
 	"temporal": {
 		"seconds_to_duration": {
