@@ -1,3 +1,4 @@
+import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK_ID,
 	SUPPORTED_BASE_NETWORK_IDS
@@ -42,6 +43,7 @@ import type { Token } from '$lib/types/token';
 import {
 	filterTokensForSelectedNetwork,
 	isNetworkICP,
+	isNetworkIdArbitrum,
 	isNetworkIdBTCMainnet,
 	isNetworkIdBTCRegtest,
 	isNetworkIdBTCTestnet,
@@ -157,6 +159,23 @@ describe('network utils', () => {
 			expect(isNetworkIdPolygon(ETHEREUM_NETWORK_ID)).toBeFalsy();
 
 			expect(isNetworkIdPolygon(BASE_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdArbitrum', () => {
+		it.each(SUPPORTED_ARBITRUM_NETWORK_IDS)(
+			'should return true for Arbitrum network ID %s',
+			(id) => {
+				expect(isNetworkIdArbitrum(id as NetworkId)).toBeTruthy();
+			}
+		);
+
+		it('should return false for non-Arbitrum network IDs', () => {
+			expect(isNetworkIdArbitrum(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdArbitrum(ETHEREUM_NETWORK_ID)).toBeFalsy();
+
+			expect(isNetworkIdArbitrum(BASE_NETWORK_ID)).toBeFalsy();
 		});
 	});
 

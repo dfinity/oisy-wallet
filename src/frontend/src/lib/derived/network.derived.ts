@@ -5,6 +5,7 @@ import { networks } from '$lib/derived/networks.derived';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import {
+	isNetworkIdArbitrum,
 	isNetworkIdBase,
 	isNetworkIdBitcoin,
 	isNetworkIdBsc,
@@ -56,6 +57,10 @@ export const networkBsc: Readable<boolean> = derived([networkId], ([$networkId])
 
 export const networkPolygon: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdPolygon($networkId)
+);
+
+export const networkArbitrum: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdArbitrum($networkId)
 );
 
 export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>

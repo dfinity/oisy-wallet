@@ -17,7 +17,9 @@ const EXPLORER_URLS = {
 	BSC: 'https://bscscan.com',
 	BSC_TESTNET: 'https://testnet.bscscan.com',
 	POLYGON: 'https://polygonscan.com',
-	POLYGON_AMOY: 'https://amoy.polygonscan.com/'
+	POLYGON_AMOY: 'https://amoy.polygonscan.com/',
+	ARBITRUM: 'https://arbiscan.io',
+	ARBITRUM_SEPOLIA: 'https://sepolia.arbiscan.io'
 };
 
 export const {
@@ -39,5 +41,7 @@ export const {
 	BSC: BSC_EXPLORER_URL,
 	BSC_TESTNET: BSC_TESTNET_EXPLORER_URL,
 	POLYGON: POLYGON_EXPLORER_URL,
-	POLYGON_AMOY: POLYGON_AMOY_EXPLORER_URL
+	POLYGON_AMOY: POLYGON_AMOY_EXPLORER_URL,
+	ARBITRUM: ARBITRUM_EXPLORER_URL,
+	ARBITRUM_SEPOLIA: ARBITRUM_SEPOLIA_EXPLORER_URL
 } = EXPLORER_URLS;

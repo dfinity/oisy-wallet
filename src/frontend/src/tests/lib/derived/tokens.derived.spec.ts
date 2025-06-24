@@ -18,6 +18,11 @@ import {
 	BTC_REGTEST_TOKEN,
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
+
+import {
+	ARBITRUM_ETH_TOKEN,
+	ARBITRUM_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -112,10 +117,11 @@ describe('tokens.derived', () => {
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
+				ARBITRUM_ETH_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[9].id },
-				{ ...mockIcrcCustomToken, id: result[10].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
+				{ ...mockIcrcCustomToken, id: result[11].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
@@ -129,7 +135,8 @@ describe('tokens.derived', () => {
 				SOLANA_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
-				POL_MAINNET_TOKEN
+				POL_MAINNET_TOKEN,
+				ARBITRUM_ETH_TOKEN
 			]);
 		});
 
@@ -138,7 +145,13 @@ describe('tokens.derived', () => {
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => false);
 			vi.spyOn(bscEnv, 'BSC_MAINNET_ENABLED', 'get').mockImplementation(() => false);
 
-			expect(get(tokens)).toEqual([ICP_TOKEN, SOLANA_TOKEN, BASE_ETH_TOKEN, POL_MAINNET_TOKEN]);
+			expect(get(tokens)).toEqual([
+				ICP_TOKEN,
+				SOLANA_TOKEN,
+				BASE_ETH_TOKEN,
+				POL_MAINNET_TOKEN,
+				ARBITRUM_ETH_TOKEN
+			]);
 		});
 
 		it('should return testnet tokens too when testnets are enabled', () => {
@@ -157,7 +170,9 @@ describe('tokens.derived', () => {
 				BNB_MAINNET_TOKEN,
 				BNB_TESTNET_TOKEN,
 				POL_MAINNET_TOKEN,
-				POL_AMOY_TOKEN
+				POL_AMOY_TOKEN,
+				ARBITRUM_ETH_TOKEN,
+				ARBITRUM_SEPOLIA_ETH_TOKEN
 			]);
 		});
 
@@ -180,7 +195,9 @@ describe('tokens.derived', () => {
 				BNB_MAINNET_TOKEN,
 				BNB_TESTNET_TOKEN,
 				POL_MAINNET_TOKEN,
-				POL_AMOY_TOKEN
+				POL_AMOY_TOKEN,
+				ARBITRUM_ETH_TOKEN,
+				ARBITRUM_SEPOLIA_ETH_TOKEN
 			]);
 		});
 	});
