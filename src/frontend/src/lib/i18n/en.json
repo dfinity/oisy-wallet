@@ -87,7 +87,7 @@
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
-			"address_book": "Open address book",
+			"address_book": "Open contacts",
 			"hide_balances": "Hide the displayed balances",
 			"show_balances": "Show the hidden balances"
 		},
@@ -1207,7 +1207,7 @@
 	},
 	"address_book": {
 		"text": {
-			"title": "Address book",
+			"title": "Contacts",
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
@@ -1250,7 +1250,7 @@
 		"delete": {
 			"title": "Delete $contact contact?",
 			"delete_contact": "Delete contact",
-			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
+			"content_text": "This will delete $contact and all associated addresses from your Contacts. This action cannot be undone."
 		},
 		"error": {
 			"create": "Failed to create the contact",
