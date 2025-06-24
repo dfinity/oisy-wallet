@@ -6,7 +6,7 @@ SOURCE_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 print_help() {
   cat <<-EOF
 
-	Grants a developer permission to uplaod assets to a frontend canister.
+	Grants a developer permission to upload assets to a frontend canister.
 
 	EOF
 }
