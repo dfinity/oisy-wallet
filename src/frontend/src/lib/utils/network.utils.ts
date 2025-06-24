@@ -1,4 +1,5 @@
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
+import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
@@ -15,7 +16,6 @@ import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_TESTNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
@@ -49,6 +49,9 @@ export const isNetworkIdBsc: IsNetworkIdUtil = (id) =>
 export const isNetworkIdPolygon: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_POLYGON_NETWORK_IDS.includes(id);
 
+export const isNetworkIdArbitrum: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && SUPPORTED_ARBITRUM_NETWORK_IDS.includes(id);
+
 export const isNetworkIdBitcoin: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_BITCOIN_NETWORK_IDS.includes(id);
 
@@ -68,9 +71,6 @@ export const isNetworkIdSolana: IsNetworkIdUtil = (networkId) =>
 
 export const isNetworkIdSOLMainnet: IsNetworkIdUtil = (networkId) =>
 	SOLANA_MAINNET_NETWORK_ID === networkId;
-
-export const isNetworkIdSOLTestnet: IsNetworkIdUtil = (networkId) =>
-	SOLANA_TESTNET_NETWORK_ID === networkId;
 
 export const isNetworkIdSOLDevnet: IsNetworkIdUtil = (networkId) =>
 	SOLANA_DEVNET_NETWORK_ID === networkId;

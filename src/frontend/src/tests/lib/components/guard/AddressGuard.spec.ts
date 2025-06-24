@@ -187,6 +187,7 @@ describe('AddressGuard', () => {
 									[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ ArbitrumMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
 								]
 							}
@@ -295,7 +296,7 @@ describe('AddressGuard', () => {
 					});
 
 					await waitFor(() => {
-						expect(validateSpy).toHaveBeenCalledTimes(1);
+						expect(validateSpy).toHaveBeenCalledOnce();
 					});
 
 					emit({ message: 'oisyValidateAddresses' });

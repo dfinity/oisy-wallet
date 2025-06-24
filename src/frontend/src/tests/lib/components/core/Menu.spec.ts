@@ -2,15 +2,23 @@ import type { UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
+	AUTH_LICENSE_LINK,
+	LOGIN_BUTTON,
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON,
+	NAVIGATION_MENU_DOC_BUTTON,
 	NAVIGATION_MENU_GOLD_BUTTON,
 	NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
-	NAVIGATION_MENU_VIP_BUTTON
+	NAVIGATION_MENU_SUPPORT_BUTTON,
+	NAVIGATION_MENU_VIP_BUTTON,
+	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { setPrivacyMode } from '$lib/utils/privacy.utils';
+import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('Menu', () => {
@@ -20,14 +28,26 @@ describe('Menu', () => {
 	const menuItemGoldButtonSelector = `button[data-tid="${NAVIGATION_MENU_GOLD_BUTTON}"]`;
 	const menuItemAddressBookSelector = `button[data-tid="${NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}"]`;
 	const menuItemReferralButtonSelector = `button[data-tid="${NAVIGATION_MENU_REFERRAL_BUTTON}"]`;
+	const menuItemWhyOisyButtonSelector = `button[data-tid="${NAVIGATION_MENU_WHY_OISY_BUTTON}"]`;
+	const menuItemDocButtonSelector = `a[data-tid="${NAVIGATION_MENU_DOC_BUTTON}"]`;
+	const menuItemSupportButtonSelector = `a[data-tid="${NAVIGATION_MENU_SUPPORT_BUTTON}"]`;
+	const loginOrCreateButton = `button[data-tid="${LOGIN_BUTTON}"]`;
+	const authLicenseLink = `a[data-tid="${AUTH_LICENSE_LINK}"]`;
 
 	let container: HTMLElement;
+
+	vi.mock('$lib/utils/share.utils', () => ({
+		copyText: vi.fn()
+	}));
 
 	beforeEach(() => {
 		userProfileStore.reset();
 		vi.resetAllMocks();
 		mockAuthStore();
+		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
+		vi.spyOn(toastsStore, 'toastsShow');
+		setPrivacyMode(false);
 	});
 
 	const mockUserData = (powers: Array<string>): UserData => ({
@@ -106,5 +126,56 @@ describe('Menu', () => {
 	it('always renders the referral button', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemReferralButtonSelector });
+	});
+
+	it('enables privacy mode and show toast', async () => {
+		const settingsModule = await import('$lib/stores/settings.store');
+		settingsModule.privacyModeStore.subscribe = (fn) => {
+			fn({ enabled: false });
+			return () => {};
+		};
+
+		await openMenu();
+		const button = (await waitForElement({
+			selector: menuItemPrivacyModeButtonSelector
+		})) as HTMLButtonElement;
+		button.click();
+
+		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
+			text: en.navigation.text.privacy_mode_enabled,
+			level: 'info',
+			duration: 2000
+		});
+	});
+
+	it('disables privacy mode and show toast', async () => {
+		const settingsModule = await import('$lib/stores/settings.store');
+		settingsModule.privacyModeStore.subscribe = (fn) => {
+			fn({ enabled: true });
+			return () => {};
+		};
+
+		await openMenu();
+		const button = (await waitForElement({
+			selector: menuItemPrivacyModeButtonSelector
+		})) as HTMLButtonElement;
+		button.click();
+
+		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
+			text: en.navigation.text.privacy_mode_disabled,
+			level: 'info',
+			duration: 2000
+		});
+	});
+
+	it('should render the logged out version if not signed in', async () => {
+		mockAuthSignedIn(false);
+
+		await openMenu();
+		await waitForElement({ selector: menuItemDocButtonSelector });
+		await waitForElement({ selector: menuItemWhyOisyButtonSelector });
+		await waitForElement({ selector: menuItemSupportButtonSelector });
+		await waitForElement({ selector: loginOrCreateButton });
+		await waitForElement({ selector: authLicenseLink });
 	});
 });
