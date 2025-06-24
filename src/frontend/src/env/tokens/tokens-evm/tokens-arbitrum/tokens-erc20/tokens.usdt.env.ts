@@ -31,7 +31,7 @@ export const USDT_TOKEN: RequiredEvmBep20Token = {
 	}
 };
 
-export const ARB_SEPOLIA_USDT_SYMBOL = 'ARBSepoliaUSDT';
+export const ARB_SEPOLIA_USDT_SYMBOL = 'SepoliaUSDT';
 
 export const ARB_SEPOLIA_USDT_TOKEN_ID: TokenId = parseTokenId(ARB_SEPOLIA_USDT_SYMBOL);
 
