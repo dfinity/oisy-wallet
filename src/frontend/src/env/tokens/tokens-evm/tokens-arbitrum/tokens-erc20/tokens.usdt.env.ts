@@ -4,6 +4,7 @@ import {
 } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import usdt from '$eth/assets/usdt.svg';
+import usdt0 from '$eth/assets/usdt0.svg';
 import type { RequiredEvmBep20Token } from '$evm/types/bep20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -22,7 +23,7 @@ export const USDT_TOKEN: RequiredEvmBep20Token = {
 	name: 'Tether USD',
 	symbol: USDT_SYMBOL,
 	decimals: USDT_DECIMALS,
-	icon: usdt,
+	icon: usdt0,
 	address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
 	exchange: 'erc20',
 	groupData: USDT_TOKEN_GROUP,
@@ -44,6 +45,6 @@ export const ARB_SEPOLIA_USDT_TOKEN: RequiredEvmBep20Token = {
 	symbol: USDT_SYMBOL,
 	decimals: USDT_DECIMALS,
 	icon: usdt,
-	address: '0x1be207f7ae412c6deb0505485a36bfbdbd921d89',
+	address: '0xE5b6C29411b3ad31C3613BbA0145293fC9957256',
 	exchange: 'erc20'
 };
