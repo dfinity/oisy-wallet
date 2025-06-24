@@ -194,12 +194,12 @@ describe('i18n-utils', () => {
 			});
 		});
 
-		function mockNavigatorLanguage(lang: string) {
+		const mockNavigatorLanguage = (lang: string) => {
 			Object.defineProperty(global.navigator, 'language', {
 				configurable: true,
 				value: lang
 			});
-		}
+		};
 
 		it('returns ENGLISH when language is unsupported', () => {
 			mockNavigatorLanguage('fr-FR');
