@@ -1191,16 +1191,16 @@
 	"referral": {
 		"invitation": {
 			"text": {
-				"title": "Empfiehl einen Freund",
+				"title": "Freunde einladen",
 				"referral_link_copied": "Empfehlungslink in Zwischenablage kopiert.",
 				"information": "Erhalte Bonus-Sprinkles, jedes Mal wenn deine Freunde einen erhalten!",
-				"not_referred_yet": "Du hast noch niemanden empfohlen",
-				"referred_amount": "Du hast bereits $amount Personen empfohlen",
+				"not_referred_yet": "Du hast noch niemanden eingeladen",
+				"referred_amount": "Du hast bereits $amount Personen eingeladen",
 				"learn_more": "Mehr erfahren"
 			},
 			"error": {
-				"loading_referrer_info": "Fehler beim Laden der Empfehlungsinfo",
-				"setting_referrer": "Fehler beim Festlegen des Empfehlers"
+				"loading_referrer_info": "Fehler beim Laden der Einladungs-Info",
+				"setting_referrer": "Fehler beim Festlegen der einladendenden Person"
 			}
 		}
 	},
