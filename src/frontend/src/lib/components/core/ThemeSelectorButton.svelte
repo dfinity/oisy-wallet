@@ -6,7 +6,7 @@
 	interface Props {
 		label: string;
 		selected: boolean;
-		testId: string | undefined;
+		testId?: string;
 		onclick: MouseEventHandler<HTMLButtonElement>;
 		children: Snippet;
 	}
