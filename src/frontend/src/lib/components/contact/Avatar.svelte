@@ -1,10 +1,14 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import imageCompression from 'browser-image-compression';
+
 	import type { AvatarVariants } from '$lib/types/style';
+
 	import { selectColorForName } from '$lib/utils/contact.utils';
 
 	interface AvatarProps {
@@ -14,6 +18,8 @@
 	}
 
 	const { name, variant = 'md', styleClass }: AvatarProps = $props();
+
+	let imageUrl = $state<string | null>(null);
 
 	const font = $derived(
 		{
@@ -27,7 +33,9 @@
 
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
 	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
-	let commonClasses = $derived(`${font} ${size} ${bgColor} relative z-0 rounded-full`);
+	const commonClasses = $derived(
+		`${font} ${size} ${bgColor} rounded-full overflow-hidden relative ${styleClass}`
+	);
 	let ariaLabel = $derived(
 		name ? `${$i18n.address_book.avatar.avatar_for} ${name}` : $i18n.address_book.avatar.default
 	);
@@ -40,22 +48,41 @@
 			.slice(0, 2)
 			.toUpperCase()
 	);
+
+	async function handleFileChange(e: Event) {
+		const file = (e.target as HTMLInputElement)?.files?.[0];
+		if (!file) return;
+		try {
+			const options = { maxSizeMB: 1, maxWidthOrHeight: 200, useWebWorker: true };
+			const compressed = await imageCompression(file, options);
+			const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+			imageUrl = null;
+			await tick();
+			imageUrl = dataUrl;
+			console.log('Preview imageUrl:', imageUrl);
+		} catch (err) {
+			console.error('Image compression failed:', err);
+		}
+	}
+
+	function triggerUpload() {
+		document.getElementById('avatarUpload')?.click();
+	}
 </script>
 
-{#if !initials}
-	<div
-		class={`${commonClasses} text-brand-primary ${styleClass}`}
-		role="img"
-		aria-label={ariaLabel}
-	>
+<input id="avatarUpload" type="file" accept="image/*" class="hidden" onchange={handleFileChange} />
+
+<button
+	type="button"
+	class={`${commonClasses} flex items-center justify-center ${!imageUrl ? bgColor : ''}`}
+	aria-label={ariaLabel}
+	onclick={triggerUpload}
+>
+	{#if imageUrl}
+		<img src={imageUrl} alt={ariaLabel} class="object-cover w-full h-full rounded-full" />
+	{:else if initials}
+		<span class="text-white font-bold">{initials}</span>
+	{:else}
 		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
-	</div>
-{:else}
-	<span
-		class={`${commonClasses} inline-block inline-flex items-center justify-center font-bold text-white transition-colors duration-1000 ${styleClass}`}
-		role="img"
-		aria-label={ariaLabel}
-	>
-		{initials}
-	</span>
-{/if}
+	{/if}
+</button>
