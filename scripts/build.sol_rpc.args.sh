@@ -26,7 +26,7 @@ CANISTER_ID_SOL_RPC="${CANISTER_ID_SOL_RPC:-$(dfx canister id sol_rpc --network 
 rm -f "$ARG_FILE"
 mkdir -p "$(dirname "$ARG_FILE")"
 cat <<EOF >"$ARG_FILE"
-( )
+(record {})
 EOF
 
 ####
