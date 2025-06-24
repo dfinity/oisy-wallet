@@ -25,6 +25,7 @@ dfx deploy pouh_issuer
 dfx deploy cycles_ledger
 dfx deploy cycles_depositor
 dfx deploy rewards
+
 dfx deploy sol_rpc
 
 scripts/top-up-cycles-ledger-account.sh --cycles 50T
