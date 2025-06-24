@@ -1,10 +1,10 @@
-import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
+import MenuThemeSelector from '$lib/components/core/MenuThemeSelector';
 import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
 import { Theme, themeStore } from '@dfinity/gix-components';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-describe('ThemeSelector', () => {
+describe('MenuThemeSelector', () => {
 	const originalMatchMedia = window.matchMedia;
 
 	const THEME_SYSTEM = 'system';
@@ -32,7 +32,7 @@ describe('ThemeSelector', () => {
 	});
 
 	it('should render all theme options', () => {
-		const { getByTestId } = render(ThemeSelector);
+		const { getByTestId } = render(MenuThemeSelector);
 
 		THEME_VALUES.forEach((theme) => {
 			expect(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`)).toBeTruthy();
@@ -42,7 +42,7 @@ describe('ThemeSelector', () => {
 	it('should set the correct theme option', async () => {
 		const spy = vi.spyOn(themeStore, 'select');
 
-		const { getByTestId } = render(ThemeSelector);
+		const { getByTestId } = render(MenuThemeSelector);
 
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
 
@@ -69,7 +69,7 @@ describe('ThemeSelector', () => {
 	it('should call set the System theme when clicking on the System option', async () => {
 		const spy = vi.spyOn(themeStore, 'resetToSystemSettings');
 
-		const { getByTestId } = render(ThemeSelector);
+		const { getByTestId } = render(MenuThemeSelector);
 
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
 
@@ -85,7 +85,7 @@ describe('ThemeSelector', () => {
 	});
 
 	it('should save "null" to localStorage when selecting system theme', async () => {
-		const { getByTestId } = render(ThemeSelector);
+		const { getByTestId } = render(MenuThemeSelector);
 
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
 
@@ -95,7 +95,7 @@ describe('ThemeSelector', () => {
 	});
 
 	it.each(THEME_VALUES)('should set correct aria-checked for "%s" theme option', async (theme) => {
-		const { getByTestId } = render(ThemeSelector);
+		const { getByTestId } = render(MenuThemeSelector);
 
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`));
 
@@ -111,7 +111,7 @@ describe('ThemeSelector', () => {
 	});
 
 	it('should set correct aria-checked when switching back and forth between themes', async () => {
-		const { getByTestId } = render(ThemeSelector);
+		const { getByTestId } = render(MenuThemeSelector);
 
 		const testIdSystem = `${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`;
 		const testIdDark = `${THEME_SELECTOR_CARD}-${Theme.DARK}`;
@@ -153,7 +153,7 @@ describe('ThemeSelector', () => {
 	it.each(THEME_VALUES.map((theme, index) => ({ theme, index })))(
 		'should set correct tabindex for "%s" theme option',
 		({ theme, index }) => {
-			const { getByTestId } = render(ThemeSelector);
+			const { getByTestId } = render(MenuThemeSelector);
 
 			expect(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`).getAttribute('tabindex')).toBe(
 				index.toString()
