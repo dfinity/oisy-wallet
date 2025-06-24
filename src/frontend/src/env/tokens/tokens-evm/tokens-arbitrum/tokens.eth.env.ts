@@ -25,7 +25,6 @@ export const ARBITRUM_ETH_TOKEN: RequiredToken = {
 	decimals: ARBITRUM_ETH_DECIMALS,
 	icon: eth,
 	groupData: ETH_TOKEN_GROUP,
-
 	buy: {
 		onramperId: 'eth_arbitrum'
 	}
