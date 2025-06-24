@@ -62,7 +62,6 @@ export const defaultFallbackToken: Readable<Token> = derived(
 		if ($networkPolygon) {
 			return DEFAULT_POLYGON_TOKEN;
 		}
-
 		if ($networkArbitrum) {
 			return DEFAULT_ARBITRUM_TOKEN;
 		}
