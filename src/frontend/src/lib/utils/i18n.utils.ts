@@ -7,6 +7,7 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
+import { Languages } from '$lib/types/languages';
 import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
@@ -77,4 +78,15 @@ export const mergeWithFallback = ({
 	}
 
 	return merged;
+};
+
+export const getDefaultLang = (): Languages => {
+	const browserLocale = new Intl.Locale(navigator.language);
+	const browserLanguage = Object.keys(Languages).find(
+		(l) => Languages[l as keyof typeof Languages] === browserLocale.language
+	);
+	if (nonNullish(browserLanguage)) {
+		return Languages[browserLanguage as keyof typeof Languages];
+	}
+	return Languages.ENGLISH;
 };
