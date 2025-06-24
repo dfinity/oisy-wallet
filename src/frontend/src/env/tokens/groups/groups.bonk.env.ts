@@ -1,6 +1,6 @@
-import bonk from '$sol/assets/bonk.svg';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
+import bonk from '$sol/assets/bonk.svg';
 
 const BONK_TOKEN_GROUP_SYMBOL = 'BONK';
 
