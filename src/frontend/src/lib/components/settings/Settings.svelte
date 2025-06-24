@@ -140,10 +140,4 @@
 	</SettingsCard>
 {/if}
 
-<SettingsCard>
-	<svelte:fragment slot="title">{$i18n.settings.text.appearance}</svelte:fragment>
-
-	<ThemeSelector />
-</SettingsCard>
-
 <SettingsVersion />

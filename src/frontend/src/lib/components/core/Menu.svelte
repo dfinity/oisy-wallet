@@ -50,6 +50,7 @@
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
+	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -109,7 +110,7 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div
-		class="max-w-68 mb-1 flex flex-col gap-1"
+		class="mb-1 flex max-w-80 flex-col gap-1"
 		data-tid={NAVIGATION_MENU}
 		onclick={hidePopover}
 		role="none"
@@ -223,16 +224,22 @@
 
 	<Hr />
 
-	<div class="max-w-68 flex flex-col gap-3 pt-3">
+	<div class="flex max-w-80 flex-col gap-5 py-5">
 		{#if I18N_ENABLED}
 			<MenuLanguageSelector />
 		{/if}
 
 		{#if $authSignedIn}
-			{#if I18N_ENABLED}
-				<Hr />
-			{/if}
+			<MenuThemeSelector />
+		{/if}
+	</div>
 
+	{#if I18N_ENABLED && $authSignedIn}
+		<Hr />
+	{/if}
+
+	<div class="flex max-w-80 flex-col gap-3 pt-3">
+		{#if $authSignedIn}
 			<SignOut on:icLogoutTriggered={hidePopover} />
 
 			<Hr />
