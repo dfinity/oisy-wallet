@@ -52,11 +52,11 @@
 	"navigation": {
 		"text": {
 			"tokens": "Vermögen",
-			"settings": "Einstellen",
+			"settings": "Einrichten",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
-			"airdrops": "Preise",
-			"earning": "Preise",
+			"airdrops": "Prämien",
+			"earning": "Verdienen",
 			"source_code_on_github": "Quellcode auf GitHub",
 			"view_on_explorer": "Im Explorer ansehen",
 			"source_code": "Quellcode",
@@ -306,7 +306,7 @@
 	},
 	"rewards": {
 		"text": {
-			"title": "Belohnungen",
+			"title": "Prämien",
 			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 startet bald!<br>Bleib dran für Updates",
 			"active_date": "Endet am",
 			"ended_date": "Endete am",
