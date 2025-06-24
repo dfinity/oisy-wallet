@@ -432,7 +432,7 @@
 		"text": {
 			"initializing_wallet": "Deine Wallet wird vorbereitet...",
 			"securing_session": "Sichere Sitzung mit Internet Identity",
-			"retrieving_public_keys": "Hole deine öffentlichen Schlüssel für Bitcoin, Ethereum, Solana, Base, Polygon und BNB",
+			"retrieving_public_keys": "Hole deine öffentlichen Schlüssel für Bitcoin, Ethereum, Solana, Base, Polygon, BNB und Arbitrum",
 			"done": "Viel Spaß mit $oisy_short"
 		},
 		"alt": {
