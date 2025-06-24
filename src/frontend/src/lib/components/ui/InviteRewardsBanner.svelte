@@ -1,8 +1,8 @@
 <script lang="ts">
+	import IconSprinkles from '$lib/components/icons/IconSprinkles.svelte';
 	import IconUpRight from '$lib/components/icons/lucide/IconUpRight.svelte';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import IconSprinkles from '$lib/components/icons/IconSprinkles.svelte';
 </script>
 
 <a
@@ -14,10 +14,10 @@
 	<div class="banner-content">
 		<!-- Sprinkles Animation -->
 		<Sprinkles type="box" />
-		
+
 		<IconSprinkles size="24" />
 
-        <span class="banner-text text-base text-primary">{$i18n.rewards.text.banner_text}</span>
+		<span class="banner-text text-base text-primary">{$i18n.rewards.text.banner_text}</span>
 		<IconUpRight size="20" />
 	</div>
 </a>
@@ -40,7 +40,7 @@
 	.invite-rewards-banner:hover {
 		transform: scale(1.02);
 		text-decoration: none;
-        color: var(--color-foreground-brand-primary-alt);
+		color: var(--color-foreground-brand-primary-alt);
 	}
 
 	.invite-rewards-banner:hover .banner-text {
@@ -52,7 +52,7 @@
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem; 
+		gap: 0.5rem;
 		padding: 0.25rem 0.5rem;
 		border-radius: 1.5rem;
 		white-space: nowrap;
@@ -69,4 +69,4 @@
 			font-size: var(--font-size-sm);
 		}
 	}
-</style> 
+</style>
