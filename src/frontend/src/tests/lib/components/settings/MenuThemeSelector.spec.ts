@@ -94,23 +94,26 @@ describe('MenuThemeSelector', () => {
 		expect(localStorage.getItem(THEME_KEY)).toBeNull();
 	});
 
-	it.each(THEME_VALUES)('should set correct aria-checked for "%s" theme option', async (theme) => {
-		const { getByTestId } = render(MenuThemeSelector);
+	it.each(THEME_VALUES)(
+		'should set correct "primary" class (indicates selected) for "%s" theme option',
+		async (theme) => {
+			const { getByTestId } = render(MenuThemeSelector);
 
-		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`));
+			await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`));
 
-		expect(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`).getAttribute('class')).toContain(
-			'primary'
-		);
+			expect(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`).getAttribute('class')).toContain(
+				'primary'
+			);
 
-		THEME_VALUES.filter((t) => t !== theme).forEach((otherTheme) => {
-			expect(
-				getByTestId(`${THEME_SELECTOR_CARD}-${otherTheme}`).getAttribute('class')
-			).not.toContain('primary');
-		});
-	});
+			THEME_VALUES.filter((t) => t !== theme).forEach((otherTheme) => {
+				expect(
+					getByTestId(`${THEME_SELECTOR_CARD}-${otherTheme}`).getAttribute('class')
+				).not.toContain('primary');
+			});
+		}
+	);
 
-	it('should set correct aria-checked when switching back and forth between themes', async () => {
+	it('should set correct "primary" class (indicates selected) when switching back and forth between themes', async () => {
 		const { getByTestId } = render(MenuThemeSelector);
 
 		const testIdSystem = `${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`;
