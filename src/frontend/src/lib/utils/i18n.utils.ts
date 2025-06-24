@@ -82,9 +82,9 @@ export const mergeWithFallback = ({
 
 export const getDefaultLang = (): Languages => {
 	const browserLocale = new Intl.Locale(navigator.language);
-	const browserLanguage = Object.keys(Languages).filter(
+	const browserLanguage = Object.keys(Languages).find(
 		(l) => Languages[l as keyof typeof Languages] === browserLocale.language
-	)?.[0];
+	);
 	if (nonNullish(browserLanguage)) {
 		return Languages[browserLanguage as keyof typeof Languages];
 	}
