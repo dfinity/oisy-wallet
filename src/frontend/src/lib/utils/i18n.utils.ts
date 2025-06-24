@@ -80,7 +80,7 @@ export const mergeWithFallback = ({
 	return merged;
 };
 
-export const getDefaultLang = () => {
+export const getDefaultLang = (): Languages => {
 	const browserLocale = new Intl.Locale(navigator.language);
 	const browserLanguage = Object.keys(Languages).filter(
 		(l) => Languages[l as keyof typeof Languages] === browserLocale.language
