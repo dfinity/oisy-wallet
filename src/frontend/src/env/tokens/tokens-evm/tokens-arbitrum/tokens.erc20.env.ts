@@ -1,5 +1,4 @@
 import { ARBITRUM_MAINNET_ENABLED } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
-
 import {
 	ARB_SEPOLIA_USDC_TOKEN,
 	USDC_TOKEN
