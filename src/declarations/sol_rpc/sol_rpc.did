@@ -1,0 +1,918 @@
+// Identifies a Solana cluster
+type SolanaCluster = variant {
+	// Live production environment
+	Mainnet;
+	// Public testing and development
+	Devnet;
+	// Validator and stress testing
+	Testnet
+};
+
+// Identifies an RPC provider for a particular Solana cluster.
+type SupportedProvider = variant {
+	AlchemyMainnet;
+	AlchemyDevnet;
+	AnkrMainnet;
+	AnkrDevnet;
+	ChainstackMainnet;
+	ChainstackDevnet;
+	DrpcMainnet;
+	DrpcDevnet;
+	HeliusMainnet;
+	HeliusDevnet;
+	PublicNodeMainnet
+};
+
+// Defines an RPC provider for a particular Solana cluster and how to access it.
+type RpcProvider = record {
+	cluster : SolanaCluster;
+	access : RpcAccess
+};
+
+// Configures how to perform RPC HTTP calls.
+type RpcConfig = record {
+	responseSizeEstimate : opt nat64;
+	responseConsensus : opt ConsensusStrategy
+};
+
+// Rounding error for fetching the current slot from Solana using the JSON-RPC interface, meaning slots will be rounded
+// down to the nearest multiple of this error when being fetched.
+//
+// Solana slot time (around 400ms) is faster than the latency of an HTTPs outcall (which involves every node in the
+// subnet making an HTTP request), which is typically around a couple of seconds. It is therefore extremely likely that
+// the nodes will receive different results and will fail to reach consensus.
+//
+// Rounding down the slot received by each node artificially increases the slot time observed by each node and therefore
+// increases the probability of reaching consensus. In other words, the higher the rounding error, the more likely it is
+// that consensus will be reached (which is required for the HTTPs outcall to be successful), but the older the
+// resulting slot will be. Certain use cases, such as sending transactions, require a relatively recent block hash (less
+// than 150 blocks old) so that too a large rounding error is not advisable.
+//
+// The default value of 20 has been experimentally shown to likely achieve consensus while still resulting in a slot
+// whose corresponding block is "recent enough" to be used in a Solana transaction.
+type RoundingError = nat64;
+
+// Configures how to perform `getSlot` RPC HTTP calls.
+type GetSlotRpcConfig = record {
+	responseSizeEstimate : opt nat64;
+	responseConsensus : opt ConsensusStrategy;
+	roundingError : opt RoundingError
+};
+
+// Configures how to perform `getRecentPrioritizationFees` RPC HTTP calls.
+//
+// The response to `getRecentPrioritizationFees` corresponds to a (non-necessarily continuous) range of slots associated
+// with the priority fee for that slot and may include `processed` slots (a new `processed` slot is produced every ca. 400ms).
+// Similarly to the necessary rounding used for `getSlot`,
+// achieving consensus for `getRecentPrioritizationFees` requires to select a subset of those slots
+// that can be seen my a super-majority of the nodes, which is done as follows:
+// 1) `maxSlotRoundingError`: round down the slot with the maximum value.
+//    The selected subset will only contain priority fees for slots that are smaller or equal to the rounded down slot.
+// 2) `maxLength`: limit the size of the selected subset by removing priority fees for the older slots (lower values).
+type GetRecentPrioritizationFeesRpcConfig = record {
+	responseSizeEstimate : opt nat64;
+	responseConsensus : opt ConsensusStrategy;
+	// Round down the slot with the maximum value.
+	// Increasing that value will reduce the freshness of the returned prioritization fees
+	// but increase the likelihood of nodes reaching consensus.
+	maxSlotRoundingError : opt RoundingError;
+	// Limit the number of returned priority fees.
+	// Valid numbers are 1-150, default is 100.
+	// Increasing that value can help in estimating the current priority fee
+	// but will reduce the likelihood of nodes reaching consensus.
+	maxLength : opt nat8
+};
+
+// Defines a consensus strategy for combining responses from different providers.
+type ConsensusStrategy = variant {
+	Equality;
+	Threshold : record {
+		total : opt nat8;
+		min : nat8
+	}
+};
+
+// Defines a Solana RPC source.
+type RpcSource = variant {
+	Supported : SupportedProvider;
+	Custom : RpcEndpoint
+};
+
+// Defines a collection of Solana RPC sources.
+type RpcSources = variant {
+	//  List explicitly which providers should be contacted.
+	Custom : vec RpcSource;
+	// Let the SOL RPC canister decide how many and which providers should be contacted for that cluster.
+	// The exact number of contacted providers can be influenced by the chosen `ConsensusStrategy`.
+	Default : SolanaCluster
+};
+
+// Defines how to reach the supported RPC provider.
+type RpcAccess = variant {
+	Authenticated : record {
+		auth : RpcAuth;
+		publicUrl : opt text
+	};
+	Unauthenticated : record {
+		publicUrl : text
+	}
+};
+
+// Defines how a call to a supported provider is authenticated.
+type RpcAuth = variant {
+	BearerToken : record { url : text };
+	UrlParameter : record { urlPattern : text }
+};
+
+// Specifies how to reach a Solana RPC provider
+type RpcEndpoint = record {
+	url : text;
+	headers : opt vec HttpHeader
+};
+
+// An HTTP header.
+type HttpHeader = record {
+	value : text;
+	name : text
+};
+
+// Represents an error that occurred while trying to perform an RPC call.
+type RpcError = variant {
+	JsonRpcError : JsonRpcError;
+	ProviderError : ProviderError;
+	ValidationError : text;
+	HttpOutcallError : HttpOutcallError
+};
+
+// Represents a JSON-RPC error.
+type JsonRpcError = record { code : int64; message : text };
+
+// Represents an error with an RPC provider.
+type ProviderError = variant {
+	TooFewCycles : record { expected : nat; received : nat };
+	InvalidRpcConfig : text;
+	UnsupportedCluster : text
+};
+
+// Represents an HTTP outcall error.
+type HttpOutcallError = variant {
+	IcError : record { code : RejectionCode; message : text };
+	InvalidHttpJsonRpcResponse : record {
+		status : nat16;
+		body : text;
+		parsingError : opt text
+	}
+};
+
+// Represents an IC rejection code for an HTTP outcall.
+type RejectionCode = variant {
+	NoError;
+	CanisterError;
+	SysTransient;
+	DestinationInvalid;
+	Unknown;
+	SysFatal;
+	CanisterReject
+};
+
+// Cycles cost of a request made to the SOL RPC canister.
+// E.g., the cycle cost for `getSlot` can be retrieved by calling `getSlotCyclesCost`.
+type RequestCostResult = variant { Ok : nat; Err : RpcError };
+
+// Represents the encoding of the return value of the `getAccountInfo` Solana RPC method.
+type GetAccountInfoEncoding = variant {
+	// Return the account data encoded in base-58. This is slow and limited to less than 129 bytes of account data.
+	base58;
+	// Return the account data encoded in base-64. This works for account data of any size.
+	base64;
+	// Compress the account data using the Zstandard library and return the base64-encoded result.
+	"base64+zstd";
+	// Return the data as a JSON string.
+	// * jsonParsed encoding attempts to use program-specific state parsers to return more human-readable and explicit
+	//   account state data.
+	// * If jsonParsed is requested but a parser cannot be found, the field falls back to base64 encoding, detectable
+	//   when the data field is type string.
+	jsonParsed
+};
+
+// Represents a slice of the return value of the `getAccountInfo` Solana RPC method.
+// NOTE: Data slicing is only available for base58, base64, or base64+zstd encodings.
+type DataSlice = record {
+	length : nat32;
+	offset : nat32
+};
+
+// The parameters for a call to the `getAccountInfo` Solana RPC method.
+type GetAccountInfoParams = record {
+	pubkey : Pubkey;
+	commitment : opt CommitmentLevel;
+	encoding : opt GetAccountInfoEncoding;
+	dataSlice : opt DataSlice;
+	minContextSlot : opt Slot
+};
+
+// Address of a [Solana account][acc].
+//
+// This is a base-58 encoded string with at most 44 characters.
+// Some account addresses are ed25519 public keys. Often, though, account addresses do not
+// have corresponding secret keys as with [program derived addresses][pdas].
+// Example: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+//
+// [acc]: https://solana.com/docs/core/accounts
+// [pdas]: https://solana.com/docs/core/cpi#program-derived-addresses
+type Pubkey = text;
+
+// Ed25519 signature.
+// This is a base-58 encoded string with at most 88 characters.
+// Example: "5LrcE2f6uvydKRquEJ8xp19heGxSvqsVbcqUeFoiWbXe8JNip7ftPQNTAVPyTK7ijVdpkzmKKaAQR7MWMmujAhXD"
+type Signature = text;
+
+// A Solana hash.
+// This is a base-58 encoded string with at most 44 characters.
+// Example: "DzfXchZJoLMG3cNftcf2sw7qatkkuwQf4xH15N5wkKAb"
+type Hash = text;
+
+// Solana account info.
+type AccountInfo = record {
+	// Number of lamports assigned to this account.
+	lamports : nat64;
+	// Data associated with the account.
+	data : AccountData;
+	// Pubkey of the program this account has been assigned to.
+	owner : Pubkey;
+	// Boolean indicating if the account contains a program (and is strictly read-only).
+	executable : bool;
+	// The epoch at which this account will next owe rent.
+	rentEpoch : nat64;
+	// The data size of the account.
+	space : nat64
+};
+
+// Represents Solana account data.
+type AccountData = variant {
+	// The data is formatted as a binary string. This is a legacy format retained for RPC backwards compatibility
+	legacyBinary : text;
+	// The data is formatted as a JSON `ParsedAccount`.
+	json : ParsedAccount;
+	// The data is formatted as a string containing the account data encoded according to one of
+	// the `AccountEncoding` formats.
+	binary : record { text; AccountEncoding }
+};
+
+// Represents Solana account data parsed as JSON.
+type ParsedAccount = record {
+	// The Solana program that interprets the data.
+	program : Pubkey;
+	// The account data parsed as JSON and formatted as a string.
+	parsed : text;
+	// The data size of the account.
+	space : nat64
+};
+
+// Represents an encoding format for Solana account data.
+type AccountEncoding = variant {
+	// The account data is formatted as a binary string. Legacy. Retained for RPC backwards compatibility.
+	binary;
+	// The account data is formatted as a base-58 string.
+	base58;
+	// The account data is formatted as a base-64 string.
+	base64;
+	// The account data was first compressed using Zstandard and the
+	// result was then formatted as a base-64 string.
+	"base64+zstd";
+	// The account data is formatted as a JSON string.
+	jsonParsed
+};
+
+// The parameters for a Solana `getTransaction` RPC method call.
+type GetTransactionParams = record {
+	// Transaction signature, as base-58 encoded string.
+	signature : Signature;
+	// The commitment describes how finalized a block is at that point in time.
+	commitment : opt CommitmentLevel;
+	// Set the max transaction version to return in responses.
+	// If the requested transaction is a higher version, an error will be returned.
+	// If this parameter is omitted, only legacy transactions will be returned,
+	// and any versioned transaction will prompt the error.
+	maxSupportedTransactionVersion : opt nat8;
+	// Encoding for the returned Transaction.
+	encoding : opt variant { base58; base64 }
+};
+
+// The parameters for a Solana `sendTransaction` RPC method call.
+type SendTransactionParams = record {
+	// Fully-signed transaction, as encoded string.
+	transaction : text;
+	// Encoding format for the transaction.
+	encoding : opt SendTransactionEncoding;
+	// When true, skip the preflight transaction checks. Default: false.
+	skipPreflight : opt bool;
+	// Commitment level to use for preflight. See Configuring State Commitment. Default finalized.
+	preflightCommitment : opt CommitmentLevel;
+	// Maximum number of times for the RPC node to retry sending the transaction to the leader.
+	// If this parameter not provided, the RPC node will retry the transaction until it is
+	// finalized or until the blockhash expires.
+	maxRetries : opt nat32;
+	// Set the minimum slot at which to perform preflight transaction checks
+	minContextSlot : opt Slot
+};
+
+// The encoding format for the transaction argument to the Solana `sendTransaction` RPC method call.
+type SendTransactionEncoding = variant {
+	// DEPRECATED: The transaction is base-58 encoded.
+	base58;
+	// The transaction is base-64 encoded.
+	base64
+};
+
+// Represents the result of a call to the `getAccountInfo` Solana RPC method.
+// If the requested account doesn't exist, the `Ok` variant will be null.
+type GetAccountInfoResult = variant { Ok : opt AccountInfo; Err : RpcError };
+
+// Represents an aggregated result from multiple RPC calls to the `getAccountInfo` Solana RPC method.
+type MultiGetAccountInfoResult = variant {
+	Consistent : GetAccountInfoResult;
+	Inconsistent : vec record { RpcSource; GetAccountInfoResult }
+};
+
+// The parameters for a Solana `getBalance` RPC method call.
+type GetBalanceParams = record {
+	// Pubkey of account to query, as base-58 encoded string.
+	pubkey : Pubkey;
+	// The commitment describes how finalized a block is at that point in time.
+	commitment : opt CommitmentLevel;
+	// The minimum slot that the request can be evaluated at.
+	minContextSlot : opt Slot
+};
+
+// Smallest denomination of SOL, the native token on Solana, i.e.
+// 1_000_000_000 Lamports is 1 SOL
+type Lamport = nat64;
+
+// Micro-lamports are used for the calculation of prioritization fees.
+// 1_000_000 MicroLamport == 1 Lamport
+type MicroLamport = nat64;
+
+// Represents an aggregated result from multiple RPC calls to the `getBalance` Solana RPC method.
+type MultiGetBalanceResult = variant {
+	Consistent : GetBalanceResult;
+	Inconsistent : vec record { RpcSource; GetBalanceResult }
+};
+
+// Represents the result of a call to the `getBalance` Solana RPC method.
+type GetBalanceResult = variant { Ok : Lamport; Err : RpcError };
+
+// The parameters for a Solana `getBlock` RPC method call.
+type GetBlockParams = record {
+	// Slot number of the block to fetch.
+	slot : Slot;
+	// Specifies what transaction details to include in the response.
+	//
+	// *Warning:* If this value is not specified, the default value of `none` will be used, which
+	// is different from the default value in the Solana RPC API. This is because the default value
+	// of `full` for the Solana RPC API results in response sizes that are generally too large to
+	// be supported by the ICP.
+	transactionDetails : opt TransactionDetails;
+	// The commitment describes how finalized a block is at that point in time.
+	commitment : opt variant { confirmed; finalized };
+	// The max transaction version to return in responses.
+	// * If the requested block contains a transaction with a higher version,
+	// an error will be returned.
+	// * If this parameter is omitted, only legacy transactions will be returned, and a block
+	// containing any versioned transaction will prompt the error.
+	maxSupportedTransactionVersion : opt nat8;
+	// Whether to populate the rewards array. If not provided, the default includes rewards.
+	rewards : opt bool
+};
+
+// Unix timestamp (seconds since the Unix epoch).
+// NOTE: This type is defined as an unsigned integer to align with the Solana JSON-RPC interface,
+// although in practice, an unsigned integer type would be functionally equivalent.
+type Timestamp = int64;
+
+// The result of a Solana `getBlock` RPC method call.
+type ConfirmedBlock = record {
+	// The blockhash of this block's parent, as base-58 encoded string; if the parent block is not
+	// available due to ledger cleanup, this field will return "11111111111111111111111111111111".
+	previousBlockhash : Hash;
+	// The blockhash of this block, as base-58 encoded string.
+	blockhash : Hash;
+	// The slot index of this block's parent.
+	parentSlot : Slot;
+	// Estimated production time.
+	blockTime : opt Timestamp;
+	// The number of blocks beneath this block.
+	blockHeight : opt nat64;
+	// The signatures of the transactions in this block. Included if the request parameter `transactionDetails` is not
+	// `none`.
+	signatures : opt vec Signature;
+	// Array of rewards distributed in this block.
+	rewards : opt vec Reward;
+	// The epoch rewards are distributed over `1 + numRewardPartition` blocks. See the
+	// [Partitioned Inflationary Rewards Distribution](https://docs.anza.xyz/proposals/partitioned-inflationary-rewards-distribution/)
+	// feature for more details.
+	numRewardPartition : opt nat64;
+	// Transaction details for the transactions included in this block. Included in the response
+	// when `transactionDetails` is set to `accounts`.
+	transactions : opt vec EncodedTransactionWithStatusMeta
+};
+
+// Represents the result of a call to the `getBlock` Solana RPC method.
+// If there is no confirmed block for the requested block, the `Ok` variant will be null.
+type GetBlockResult = variant { Ok : opt ConfirmedBlock; Err : RpcError };
+
+// Represents an aggregated result from multiple RPC calls to the `getBlock` Solana RPC method.
+type MultiGetBlockResult = variant {
+	Consistent : GetBlockResult;
+	Inconsistent : vec record { RpcSource; GetBlockResult }
+};
+
+// A compiled Solana instruction.
+type CompiledInstruction = record {
+	data : text;
+	accounts : blob;
+	programIdIndex : nat8;
+	stackHeight : opt nat32
+};
+
+// Encoding of a Solana transaction.
+type EncodedTransaction = variant {
+	binary : record { text; variant { base58; base64 } };
+	legacyBinary : text
+};
+
+// Specific operation executed by a Solana transaction.
+type Instruction = variant { compiled : CompiledInstruction };
+
+// List of inner instructions executed by a Solana transaction.
+// See the [Solana documentation](https://solana.com/de/docs/rpc/json-structures#inner-instructions) for more details.
+type InnerInstructions = record {
+	instructions : vec Instruction;
+	index : nat8
+};
+
+// Errors that can occur during the execution of a specific instruction within a Solana transaction.
+// See the [Solana documentation](https://github.com/solana-labs/solana/blob/7700cb3128c1f19820de67b81aa45d18f73d2ac0/sdk/program/src/instruction.rs#L33) for more details.
+type InstructionError = variant {
+	ModifiedProgramId;
+	CallDepth;
+	Immutable;
+	GenericError;
+	ExecutableAccountNotRentExempt;
+	IncorrectAuthority;
+	PrivilegeEscalation;
+	ReentrancyNotAllowed;
+	InvalidInstructionData;
+	RentEpochModified;
+	IllegalOwner;
+	ComputationalBudgetExceeded;
+	ExecutableDataModified;
+	ExecutableLamportChange;
+	UnbalancedInstruction;
+	ProgramEnvironmentSetupFailure;
+	IncorrectProgramId;
+	UnsupportedSysvar;
+	UnsupportedProgramId;
+	AccountDataTooSmall;
+	NotEnoughAccountKeys;
+	AccountBorrowFailed;
+	InvalidRealloc;
+	AccountNotExecutable;
+	AccountNotRentExempt;
+	Custom : nat32;
+	AccountDataSizeChanged;
+	MaxAccountsDataAllocationsExceeded;
+	ExternalAccountLamportSpend;
+	ExternalAccountDataModified;
+	MissingAccount;
+	ProgramFailedToComplete;
+	MaxInstructionTraceLengthExceeded;
+	InvalidAccountData;
+	ProgramFailedToCompile;
+	ExecutableModified;
+	InvalidAccountOwner;
+	MaxSeedLengthExceeded;
+	AccountAlreadyInitialized;
+	AccountBorrowOutstanding;
+	ReadonlyDataModified;
+	UninitializedAccount;
+	InvalidArgument;
+	BorshIoError : text;
+	BuiltinProgramsMustConsumeComputeUnits;
+	MissingRequiredSignature;
+	DuplicateAccountOutOfSync;
+	MaxAccountsExceeded;
+	ArithmeticOverflow;
+	InvalidError;
+	InvalidSeeds;
+	DuplicateAccountIndex;
+	ReadonlyLamportChange;
+	InsufficientFunds
+};
+
+// Transaction addresses loaded from address lookup tables.
+type LoadedAddresses = record { writable : vec Pubkey; readonly : vec Pubkey };
+
+// Reward or penalty applied to an account for fees, rent, voting, or staking activity.
+type Reward = record {
+	lamports : int64;
+	commission : opt nat8;
+	pubkey : Pubkey;
+	rewardType : opt variant { fee; rent; voting; staking };
+	postBalance : nat64
+};
+
+// A human-readable representation of a token amount.
+type TokenAmount = record {
+	decimals : nat8;
+	uiAmount : opt float64;
+	uiAmountString : text;
+	amount : text
+};
+
+// Determines whether and how transactions are included in a `getBlock` response.
+type TransactionDetails = variant { accounts; none; signatures };
+
+// Error that can occur when processing a Solana transaction.
+// See the [Solana documentation](https://github.com/solana-labs/solana/blob/c0c60386544ec9a9ec7119229f37386d9f070523/sdk/src/transaction/error.rs#L13) for more details.
+type TransactionError = variant {
+	ProgramCacheHitMaxLimit;
+	InvalidAccountForFee;
+	AddressLookupTableNotFound;
+	MissingSignatureForFee;
+	WouldExceedAccountDataBlockLimit;
+	AccountInUse;
+	DuplicateInstruction : nat8;
+	AccountNotFound;
+	TooManyAccountLocks;
+	InvalidAccountIndex;
+	AlreadyProcessed;
+	WouldExceedAccountDataTotalLimit;
+	InvalidAddressLookupTableIndex;
+	SanitizeFailure;
+	ResanitizationNeeded;
+	InvalidRentPayingAccount;
+	MaxLoadedAccountsDataSizeExceeded;
+	InvalidAddressLookupTableData;
+	InvalidWritableAccount;
+	WouldExceedMaxAccountCostLimit;
+	InvalidLoadedAccountsDataSizeLimit;
+	InvalidProgramForExecution;
+	InstructionError : record { nat8; InstructionError };
+	InsufficientFundsForRent : record { account_index : nat8 };
+	UnsupportedVersion;
+	ClusterMaintenance;
+	WouldExceedMaxVoteCostLimit;
+	SignatureFailure;
+	ProgramAccountNotFound;
+	AccountLoadedTwice;
+	ProgramExecutionTemporarilyRestricted : record { account_index : nat8 };
+	AccountBorrowOutstanding;
+	WouldExceedMaxBlockCostLimit;
+	InvalidAddressLookupTableOwner;
+	InsufficientFundsForFee;
+	CallChainTooDeep;
+	UnbalancedTransaction;
+	CommitCancelled;
+	BlockhashNotFound
+};
+
+// Represents an encoded confirmed Solana transaction with status metadata object.
+type EncodedConfirmedTransactionWithStatusMeta = record {
+	// The slot this transaction was processed in
+	slot : Slot;
+	// Estimated production time, as Unix timestamp (seconds since the Unix epoch) of when the transaction was processed.
+	// `null` if not available.
+	blockTime : opt Timestamp;
+	// Transaction information including the metadata, version and encoded transaction.
+	transaction : EncodedTransactionWithStatusMeta
+};
+
+// Represents an encoded Solana transaction with status metadata object.
+type EncodedTransactionWithStatusMeta = record {
+	// [Transaction status metadata object](https://solana.com/docs/rpc/json-structures#transaction-status-metadata) or null.
+	meta : opt TransactionStatusMeta;
+	// Transaction object, either in JSON format or encoded binary data.
+	transaction : EncodedTransaction;
+	// Transaction version. `null` if `maxSupportedTransactionVersion` is not set in request params.
+	version : opt variant { legacy; number : nat8 }
+};
+
+// Transaction status metadata.
+// See the [Solana documentation](https://solana.com/docs/rpc/json-structures#transaction-status-metadata) for more details.
+type TransactionStatusMeta = record {
+	fee : nat64;
+	status : variant { Ok; Err : TransactionError };
+	innerInstructions : opt vec InnerInstructions;
+	postTokenBalances : opt vec TransactionTokenBalance;
+	preBalances : vec nat64;
+	postBalances : vec nat64;
+	returnData : opt record { data : text; programId : Pubkey };
+	logMessages : opt vec text;
+	rewards : opt vec Reward;
+	loadedAddresses : opt LoadedAddresses;
+	preTokenBalances : opt vec TransactionTokenBalance;
+	computeUnitsConsumed : opt nat64
+};
+
+// Balance of a specific SPL token account.
+type TransactionTokenBalance = record {
+	owner : opt Pubkey;
+	mint : text;
+	programId : opt Pubkey;
+	accountIndex : nat8;
+	uiTokenAmount : TokenAmount
+};
+
+// Solana transaction status as returned by the `getSignatureStatuses` RPC method.
+//
+// *WARNING*: The optional `confirmations` field in the `getSignatureStatuses` response is not
+//   included in this type. This value is ignored when processing the RPC response because it
+//   changes with every Solana block (approximately every 400ms) which is too quick to achieve
+//   consensus between the different nodes performing the request.
+type TransactionStatus = record {
+	// The slot the transaction was processed.
+	slot : Slot;
+	// *DEPRECATED*: Transaction status:
+	//  * Ok - Transaction was successful
+	//  * Err - Transaction failed with `TransactionError`
+	status : variant { Ok; Err : TransactionError };
+	// Error if transaction failed, null if transaction succeeded.
+	err : opt TransactionError;
+	// The transaction's cluster confirmation status; Either `processed`, `confirmed`, or `finalized`.
+	// See [Commitment](https://solana.com/docs/rpc#configuring-state-commitment) for more on
+	// optimistic confirmation.
+	confirmationStatus : opt TransactionConfirmationStatus
+};
+
+// A Solana transaction confirmation status.
+type TransactionConfirmationStatus = variant {
+	processed;
+	confirmed;
+	finalized
+};
+
+// Solana transaction signature information as returned by the `getSignaturesForAddress` RPC method.
+type ConfirmedTransactionStatusWithSignature = record {
+	// Transaction signature.
+	signature : Signature;
+	// The slot that contains the block with the transaction.
+	slot : Slot;
+	// Error if transaction failed, null if transaction succeeded.
+	err : opt TransactionError;
+	// Memo associated with the transaction, null if no memo is present.
+	memo : opt text;
+	// Estimated production time of when transaction was processed, null if not available.
+	blockTime : opt Timestamp;
+	// The transaction's cluster confirmation status; Either `processed`, `confirmed`, or `finalized`.
+	// See [Commitment](https://solana.com/docs/rpc#configuring-state-commitment) for more on
+	// optimistic confirmation.
+	confirmationStatus : opt TransactionConfirmationStatus
+};
+
+// Represents the result of a call to the `getSignaturesForAddress` Solana RPC method containing
+// an array of transaction signature information objects, ordered from newest to oldest transaction.
+type GetSignaturesForAddressResult = variant {
+	Ok : vec ConfirmedTransactionStatusWithSignature;
+	Err : RpcError
+};
+
+// Represents an aggregated result from multiple RPC calls to the `getSignatureStatuses` Solana RPC method.
+type MultiGetSignaturesForAddressResult = variant {
+	Consistent : GetSignaturesForAddressResult;
+	Inconsistent : vec record { RpcSource; GetSignaturesForAddressResult }
+};
+
+// Represents the result of a call to the `getSignatureStatuses` Solana RPC method.
+type GetSignatureStatusesResult = variant { Ok : vec opt TransactionStatus; Err : RpcError };
+
+// Represents an aggregated result from multiple RPC calls to the `getSignatureStatuses` Solana RPC method.
+type MultiGetSignatureStatusesResult = variant {
+	Consistent : GetSignatureStatusesResult;
+	Inconsistent : vec record { RpcSource; GetSignatureStatusesResult }
+};
+
+// Represents the result of a call to the `getTransaction` Solana RPC method.
+type GetTransactionResult = variant {
+	Ok : opt EncodedConfirmedTransactionWithStatusMeta;
+	Err : RpcError
+};
+
+// Represents an aggregated result from multiple RPC calls to the `getTransaction` Solana RPC method.
+type MultiGetTransactionResult = variant {
+	Consistent : GetTransactionResult;
+	Inconsistent : vec record { RpcSource; GetTransactionResult }
+};
+
+// Prioritization fee returned by `getRecentPrioritizationFees`.
+type PrioritizationFee = record {
+	// Slot in which the fee was observed.
+	slot : Slot;
+	// The per-compute-unit fee paid by at least one successfully landed transaction,
+	// specified in increments of micro-lamports.
+	prioritizationFee : MicroLamport
+};
+
+// Represents the result of a call to the `getSlot` Solana RPC method.
+type GetRecentPrioritizationFeesResult = variant { Ok : vec PrioritizationFee; Err : RpcError };
+
+// Represents an aggregated result from multiple RPC calls to the `getRecentPrioritizationFeesResult` Solana RPC method.
+type MultiGetRecentPrioritizationFeesResult = variant {
+	Consistent : GetRecentPrioritizationFeesResult;
+	Inconsistent : vec record { RpcSource; GetRecentPrioritizationFeesResult }
+};
+
+// Represents a Solana slot
+type Slot = nat64;
+
+// Represents the result of a call to the `getSlot` Solana RPC method.
+type GetSlotResult = variant { Ok : Slot; Err : RpcError };
+
+// Represents an aggregated result from multiple RPC calls to the `getSlot` Solana RPC method.
+type MultiGetSlotResult = variant {
+	Consistent : GetSlotResult;
+	Inconsistent : vec record { RpcSource; GetSlotResult }
+};
+
+// The parameters for a Solana `getTokenAccountBalance` RPC method call.
+type GetTokenAccountBalanceParams = record {
+	// Pubkey of token account to query, as base-58 encoded string.
+	pubkey : Pubkey;
+	// The commitment describes how finalized a block is at that point in time.
+	commitment : opt CommitmentLevel
+};
+
+// Represents the result of a call to the `getTokenAccountBalance` Solana RPC method.
+type GetTokenAccountBalanceResult = variant { Ok : TokenAmount; Err : RpcError };
+
+// Represents an aggregated result from multiple RPC calls to the `getTokenAccountBalance` Solana RPC method.
+type MultiGetTokenAccountBalanceResult = variant {
+	Consistent : GetTokenAccountBalanceResult;
+	Inconsistent : vec record { RpcSource; GetTokenAccountBalanceResult }
+};
+
+// Represents the result of a call to the `sendTransaction` Solana RPC method.
+type SendTransactionResult = variant { Ok : Signature; Err : RpcError };
+
+// Represents an aggregated result from multiple RPC calls to the `sendTransaction` Solana RPC method.
+type MultiSendTransactionResult = variant {
+	Consistent : SendTransactionResult;
+	Inconsistent : vec record { RpcSource; SendTransactionResult }
+};
+
+// Commitment levels in Solana, representing finality guarantees of transactions and state queries.
+type CommitmentLevel = variant {
+	processed;
+	confirmed;
+	finalized
+};
+
+// The parameters for a call to the `getRecentPrioritizationFees` Solana RPC method.
+// An array of Account addresses (up to a maximum of 128 addresses), as base-58 encoded strings.
+type GetRecentPrioritizationFeesParams = vec Pubkey;
+
+// The parameters for a call to the `getSignaturesForAddress` Solana RPC method.
+type GetSignaturesForAddressParams = record {
+	// The account address.
+	pubkey : Pubkey;
+	// The commitment describes how finalized a block is at that point in time.
+	commitment : opt CommitmentLevel;
+	// The minimum slot that the request can be evaluated at.
+	minContextSlot : opt Slot;
+	// Maximum transaction signatures to return (between 1 and 1,000).
+	limit : opt nat32;
+	// Start searching backwards from this transaction signature. Any transaction can be used for this field; it
+	// does not necessarily have to use the `pubkey` account. If not provided, the search starts from the top of
+	// the highest max confirmed block.
+	//
+	// This field is required to obtain an idempotent response, and hence crucial for the replicas to reach
+	// consensus. If not included, different replicas will likely have different responses due to the fast-changing
+	// nature of the highest max confirmed block. Furthermore, it is highly recommended to use a finalized
+	// transaction so that all returned transactions are also finalized. Otherwise, different replicas might
+	// see different statuses for some of the returned transactions and hence be unable to reach consensus.
+	before : opt Signature;
+	// Search until this transaction signature, if found before `limit` reached.
+	until : opt Signature
+};
+
+// The parameters for a call to the `getSignatureStatuses` Solana RPC method.
+type GetSignatureStatusesParams = record {
+	// An array of transaction signatures to confirm, as base-58 encoded strings (up to a maximum of 256)
+	signatures : vec Signature;
+	// If set to true, a Solana node will search its ledger cache for any signatures not found in the recent status cache.
+	searchTransactionHistory : opt bool
+};
+
+// The parameters for a call to the `getSlot` Solana RPC method.
+type GetSlotParams = record {
+	commitment : opt CommitmentLevel;
+	minContextSlot : opt Slot
+};
+
+// Represents the result of a raw JSON-RPC request.
+type RequestResult = variant { Ok : text; Err : RpcError };
+
+// Represents an aggregated result from multiple RPC calls for a raw JSON-RPC request.
+type MultiRequestResult = variant {
+	Consistent : RequestResult;
+	Inconsistent : vec record { RpcSource; RequestResult }
+};
+
+// A string used as a regex pattern.
+type Regex = text;
+
+// A regex-based substitution with a pattern and replacement string.
+type RegexSubstitution = record {
+	pattern : Regex;
+	replacement : text
+};
+
+// Allows modifying an RpcEndpoint's request URL and HTTP headers.
+type OverrideProvider = record {
+	overrideUrl : opt RegexSubstitution
+};
+
+// A filter for log entries.
+type LogFilter = variant {
+	ShowAll;
+	HideAll;
+	ShowPattern : Regex;
+	HidePattern : Regex
+};
+
+// The number of nodes in the subnet
+type NumSubnetNodes = nat32;
+
+// The canister operation mode. Default is 'Normal'.
+type Mode = variant {
+	// Normal mode, where cycle payment is required for certain operations.
+	Normal;
+	// Demo mode, where cycle payment is not required.
+	Demo
+};
+
+// The installation args for the Solana RPC canister.
+type InstallArgs = record {
+	manageApiKeys : opt vec principal;
+	overrideProvider : opt OverrideProvider;
+	logFilter : opt LogFilter;
+	numSubnetNodes : opt NumSubnetNodes;
+	mode : opt Mode
+};
+
+service : (InstallArgs) -> {
+	// Returns a list of all supported providers.
+	getProviders : () -> (vec record { SupportedProvider; RpcProvider }) query;
+
+	// Update the API keys for a list of supported providers.
+	//
+	// # Preconditions
+	//
+	// The caller is the controller or a principal specified in `InstallArgs::manage_api_keys`.
+	updateApiKeys : (vec record { SupportedProvider; opt text }) -> ();
+
+	// Call the Solana `getAccountInfo` RPC method and return the resulting info.
+	getAccountInfo : (RpcSources, opt RpcConfig, GetAccountInfoParams) -> (MultiGetAccountInfoResult);
+	getAccountInfoCyclesCost : (RpcSources, opt RpcConfig, GetAccountInfoParams) -> (RequestCostResult) query;
+
+	// Call the Solana `getBalance` RPC method and return the resulting balance.
+	getBalance : (RpcSources, opt RpcConfig, GetBalanceParams) -> (MultiGetBalanceResult);
+	getBalanceCyclesCost : (RpcSources, opt RpcConfig, GetBalanceParams) -> (RequestCostResult) query;
+
+	// Call the Solana `getBlock` RPC method and return the resulting block.
+	getBlock : (RpcSources, opt RpcConfig, GetBlockParams) -> (MultiGetBlockResult);
+	getBlockCyclesCost : (RpcSources, opt RpcConfig, GetBlockParams) -> (RequestCostResult) query;
+
+	// Call the Solana `getRecentPrioritizationFees` RPC method and return the resulting slot.
+	getRecentPrioritizationFees : (RpcSources, opt GetRecentPrioritizationFeesRpcConfig, opt GetRecentPrioritizationFeesParams) -> (MultiGetRecentPrioritizationFeesResult);
+	getRecentPrioritizationFeesCyclesCost : (RpcSources, opt GetRecentPrioritizationFeesRpcConfig, opt GetRecentPrioritizationFeesParams) -> (RequestCostResult) query;
+
+	// Call the Solana `getSignaturesForAddress` RPC method and return the resulting signatures.
+	getSignaturesForAddress : (RpcSources, opt RpcConfig, GetSignaturesForAddressParams) -> (MultiGetSignaturesForAddressResult);
+	getSignaturesForAddressCyclesCost : (RpcSources, opt RpcConfig, GetSignaturesForAddressParams) -> (RequestCostResult) query;
+
+	// Call the Solana `getSignatureStatuses` RPC method and return the resulting statuses.
+	getSignatureStatuses : (RpcSources, opt RpcConfig, GetSignatureStatusesParams) -> (MultiGetSignatureStatusesResult);
+	getSignatureStatusesCyclesCost : (RpcSources, opt RpcConfig, GetSignatureStatusesParams) -> (RequestCostResult) query;
+
+	// Call the Solana `getSlot` RPC method and return the resulting slot.
+	getSlot : (RpcSources, opt GetSlotRpcConfig, opt GetSlotParams) -> (MultiGetSlotResult);
+	getSlotCyclesCost : (RpcSources, opt GetSlotRpcConfig, opt GetSlotParams) -> (RequestCostResult) query;
+
+	// Call the Solana `getTokenAccountBalance` RPC method and return the resulting balance.
+	// If the account does not exist, this method will return a JSON-RPC error.
+	getTokenAccountBalance : (RpcSources, opt RpcConfig, GetTokenAccountBalanceParams) -> (MultiGetTokenAccountBalanceResult);
+	getTokenAccountBalanceCyclesCost : (RpcSources, opt RpcConfig, GetTokenAccountBalanceParams) -> (RequestCostResult) query;
+
+	// Call the Solana `getTransaction` RPC method and return the resulting transaction.
+	getTransaction : (RpcSources, opt RpcConfig, GetTransactionParams) -> (MultiGetTransactionResult);
+	getTransactionCyclesCost : (RpcSources, opt RpcConfig, GetTransactionParams) -> (RequestCostResult) query;
+
+	// Call the Solana `sendTransaction` RPC method and return the resulting transaction ID.
+	sendTransaction : (RpcSources, opt RpcConfig, SendTransactionParams) -> (MultiSendTransactionResult);
+	sendTransactionCyclesCost : (RpcSources, opt RpcConfig, SendTransactionParams) -> (RequestCostResult) query;
+
+	// Make a raw JSON-RPC request that sends the given json_rpc_payload.
+	jsonRequest : (RpcSources, opt RpcConfig, json_rpc_payload : text) -> (MultiRequestResult);
+	jsonRequestCyclesCost : (RpcSources, opt RpcConfig, json_rpc_payload : text) -> (RequestCostResult) query
+}
