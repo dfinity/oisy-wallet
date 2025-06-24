@@ -31,7 +31,7 @@ export const USDC_TOKEN: RequiredEvmErc20Token = {
 	}
 };
 
-export const ARB_SEPOLIA_USDC_SYMBOL = 'ARBSepoliaUSDC';
+export const ARB_SEPOLIA_USDC_SYMBOL = 'SepoliaUSDC';
 
 export const ARB_SEPOLIA_USDC_TOKEN_ID: TokenId = parseTokenId(ARB_SEPOLIA_USDC_SYMBOL);
 
