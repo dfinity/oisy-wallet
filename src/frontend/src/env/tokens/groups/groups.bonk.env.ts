@@ -9,6 +9,6 @@ export const BONK_TOKEN_GROUP_ID: TokenGroupId = parseTokenGroupId(BONK_TOKEN_GR
 export const BONK_TOKEN_GROUP: TokenGroupData = {
 	id: BONK_TOKEN_GROUP_ID,
 	icon: bonk,
-	name: 'BONK',
+	name: 'Bonk',
 	symbol: BONK_TOKEN_GROUP_SYMBOL
 };
