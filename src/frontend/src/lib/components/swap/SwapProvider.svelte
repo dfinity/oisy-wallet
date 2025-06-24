@@ -19,6 +19,7 @@
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 
 	interface Props {
 		slippageValue: OptionAmount;
@@ -78,11 +79,15 @@
 							<div class="mt-1">
 								<Logo
 									src={swapDApp.logo}
-									alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
+									alt={replacePlaceholders($i18n.dapps.alt.logo, {
+										$dAppName: resolveText({ i18n: $i18n, path: swapDApp.name })
+									})}
 								/>
 							</div>
 							<div class="mr-auto">
-								<div class="text-lg font-bold">{swapDApp.name}</div>
+								<div class="text-lg font-bold"
+									>{resolveText({ i18n: $i18n, path: swapDApp.name })}</div
+								>
 							</div>
 						</div>
 					</div>
