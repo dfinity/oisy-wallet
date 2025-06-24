@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
-	import IconSunMoon from '$lib/components/icons/IconSunMoon.svelte';
-	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
-	import ThemeSelectorButton from '$lib/components/core/ThemeSelectorButton.svelte';
 	import { Theme, themeStore, type ThemeStoreData } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import IconSun from '$lib/components/icons/IconSun.svelte';
-	import IconMoon from '$lib/components/icons/IconMoon.svelte';
+	import ThemeSelectorButton from '$lib/components/core/ThemeSelectorButton.svelte';
 	import IconDuoTone from '$lib/components/icons/IconDuoTone.svelte';
+	import IconMoon from '$lib/components/icons/IconMoon.svelte';
+	import IconSun from '$lib/components/icons/IconSun.svelte';
+	import IconSunMoon from '$lib/components/icons/IconSunMoon.svelte';
+	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const THEME_VALUES = [...Object.values(Theme)];
 
