@@ -26,8 +26,8 @@
 	.invite-rewards-banner {
 		position: relative;
 		border-radius: 1.5rem;
-		border: 1px solid #fff;
-		background: var(--color-background-surface);
+		border: 1px solid var(--color-background-secondary-alt);
+		background: var(--color-background-primary);
 		cursor: pointer;
 		transition: transform 0.2s ease;
 		width: fit-content;
@@ -40,6 +40,7 @@
 	.invite-rewards-banner:hover {
 		transform: scale(1.02);
 		text-decoration: none;
+        color: var(--color-foreground-brand-primary-alt);
 	}
 
 	.invite-rewards-banner:hover .banner-text {
