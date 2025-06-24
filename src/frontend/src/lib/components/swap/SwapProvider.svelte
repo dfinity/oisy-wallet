@@ -18,8 +18,8 @@
 	import type { OptionString } from '$lib/types/string';
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { UrlSchema } from '$lib/validation/url.validation';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { UrlSchema } from '$lib/validation/url.validation';
 
 	interface Props {
 		slippageValue: OptionAmount;
