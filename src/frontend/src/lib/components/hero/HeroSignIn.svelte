@@ -3,6 +3,7 @@
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
+	import InviteRewardsBanner from '$lib/components/ui/InviteRewardsBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -23,6 +24,11 @@
 </script>
 
 <div class="flex flex-col items-center text-center md:items-start md:text-left lg:mb-20">
+	<!-- Invite Rewards Banner -->
+	<div class="flex justify-center md:justify-start">
+		<InviteRewardsBanner />
+	</div>
+
 	<div class="mb-7 mt-5 pt-2">
 		<h1 class="text-4xl md:leading-tight lg:text-5xl">
 			{replaceOisyPlaceholders($i18n.auth.text.title_part_1)}<br /><span

@@ -9,7 +9,8 @@ export type OnramperNetworkId =
 	| 'solana'
 	| 'base'
 	| 'bsc'
-	| 'polygon';
+	| 'polygon'
+	| 'arbitrum';
 
 // The list of cryptocurrencies that are supported by Onramper can be found here:
 // https://docs.onramper.com/docs/crypto-asset-support
