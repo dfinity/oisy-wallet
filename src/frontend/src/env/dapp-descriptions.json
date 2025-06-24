@@ -93,7 +93,7 @@
 	{
 		"id": "uniswap",
 		"name": "dapps.descriptions.uniswap.name",
-		"oneLiner": "dapps.descriptions.uniswap.name",
+		"oneLiner": "dapps.descriptions.uniswap.one_liner",
 		"callToAction": "dapps.descriptions.uniswap.call_to_action",
 		"website": "https://app.uniswap.org/",
 		"twitter": "https://x.com/Uniswap",

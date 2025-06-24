@@ -88,7 +88,8 @@ const syncExchange = async ({
 					coingeckoId !== 'ethereum' &&
 					coingeckoId !== 'base' &&
 					coingeckoId !== 'binance-smart-chain' &&
-					coingeckoId !== 'polygon-pos'
+					coingeckoId !== 'polygon-pos' &&
+					coingeckoId !== 'arbitrum-one'
 				) {
 					return acc;
 				}

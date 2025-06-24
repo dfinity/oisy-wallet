@@ -432,7 +432,7 @@
 		"text": {
 			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon and BNB",
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon, BNB and Arbitrum",
 			"done": "Enjoy $oisy_short"
 		},
 		"alt": {
@@ -1416,7 +1416,7 @@
 	"welcome": {
 		"title": "Welcome to $oisy_short!",
 		"subtitle": "Ready to Earn?",
-		"description": "You're 3 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
+		"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
 	},
 	"temporal": {
 		"seconds_to_duration": {
