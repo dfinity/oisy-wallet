@@ -1,4 +1,7 @@
-import { ARBITRUM_MAINNET_NETWORK, ARBITRUM_SEPOLIA_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
+	ARBITRUM_MAINNET_NETWORK,
+	ARBITRUM_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
@@ -20,7 +23,10 @@ import * as solEnv from '$env/networks/networks.sol.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { ARBITRUM_ETH_TOKEN, ARBITRUM_SEPOLIA_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
+import {
+	ARBITRUM_ETH_TOKEN,
+	ARBITRUM_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import {
 	BASE_ETH_TOKEN,
 	BASE_SEPOLIA_ETH_TOKEN
