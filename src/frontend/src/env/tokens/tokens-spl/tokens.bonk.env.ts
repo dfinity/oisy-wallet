@@ -1,10 +1,10 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { BONK_TOKEN_GROUP } from '$env/tokens/groups/groups.bonk.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import bonk from '$sol/assets/bonk.svg';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { RequiredSplToken } from '$sol/types/spl';
-import { BONK_TOKEN_GROUP } from '../groups/groups.bonk.env';
 
 export const BONK_DECIMALS = 5;
 
