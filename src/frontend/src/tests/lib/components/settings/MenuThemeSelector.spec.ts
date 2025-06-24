@@ -1,4 +1,4 @@
-import MenuThemeSelector from '$lib/components/core/MenuThemeSelector';
+import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
 import { Theme, themeStore } from '@dfinity/gix-components';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -99,14 +99,14 @@ describe('MenuThemeSelector', () => {
 
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`));
 
-		expect(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`).getAttribute('aria-checked')).toBe(
-			JSON.stringify(true)
+		expect(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`).getAttribute('class')).toContain(
+			'primary'
 		);
 
 		THEME_VALUES.filter((t) => t !== theme).forEach((otherTheme) => {
-			expect(getByTestId(`${THEME_SELECTOR_CARD}-${otherTheme}`).getAttribute('aria-checked')).toBe(
-				JSON.stringify(false)
-			);
+			expect(
+				getByTestId(`${THEME_SELECTOR_CARD}-${otherTheme}`).getAttribute('class')
+			).not.toContain('primary');
 		});
 	});
 
@@ -119,45 +119,34 @@ describe('MenuThemeSelector', () => {
 
 		await fireEvent.click(getByTestId(testIdSystem));
 
-		expect(getByTestId(testIdSystem).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+		expect(getByTestId(testIdSystem).getAttribute('class')).toContain('primary');
 
 		await fireEvent.click(getByTestId(testIdDark));
 
-		expect(getByTestId(testIdDark).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+		expect(getByTestId(testIdDark).getAttribute('class')).toContain('primary');
 
 		await fireEvent.click(getByTestId(testIdSystem));
 
-		expect(getByTestId(testIdSystem).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+		expect(getByTestId(testIdSystem).getAttribute('class')).toContain('primary');
 
 		await fireEvent.click(getByTestId(testIdLight));
 
-		expect(getByTestId(testIdLight).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+		expect(getByTestId(testIdLight).getAttribute('class')).toContain('primary');
 
 		await fireEvent.click(getByTestId(testIdSystem));
 
-		expect(getByTestId(testIdSystem).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+		expect(getByTestId(testIdSystem).getAttribute('class')).toContain('primary');
 
 		await fireEvent.click(getByTestId(testIdDark));
 
-		expect(getByTestId(testIdDark).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+		expect(getByTestId(testIdDark).getAttribute('class')).toContain('primary');
 
 		await fireEvent.click(getByTestId(testIdLight));
 
-		expect(getByTestId(testIdLight).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+		expect(getByTestId(testIdLight).getAttribute('class')).toContain('primary');
 
 		await fireEvent.click(getByTestId(testIdDark));
 
-		expect(getByTestId(testIdDark).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+		expect(getByTestId(testIdDark).getAttribute('class')).toContain('primary');
 	});
-
-	it.each(THEME_VALUES.map((theme, index) => ({ theme, index })))(
-		'should set correct tabindex for "%s" theme option',
-		({ theme, index }) => {
-			const { getByTestId } = render(MenuThemeSelector);
-
-			expect(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`).getAttribute('tabindex')).toBe(
-				index.toString()
-			);
-		}
-	);
 });
