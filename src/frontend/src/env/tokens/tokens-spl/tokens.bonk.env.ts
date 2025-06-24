@@ -4,6 +4,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import bonk from '$sol/assets/bonk.svg';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { RequiredSplToken } from '$sol/types/spl';
+import { BONK_TOKEN_GROUP } from '../groups/groups.bonk.env';
 
 export const BONK_DECIMALS = 5;
 
@@ -22,6 +23,7 @@ export const BONK_TOKEN: RequiredSplToken = {
 	icon: bonk,
 	address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
 	owner: TOKEN_PROGRAM_ADDRESS,
+	groupData: BONK_TOKEN_GROUP,
 	buy: {
 		onramperId: 'bonk_solana'
 	}
