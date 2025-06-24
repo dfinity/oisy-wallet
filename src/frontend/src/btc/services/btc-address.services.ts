@@ -1,3 +1,4 @@
+import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -9,7 +10,7 @@ import {
 	setIdbBtcAddressTestnet,
 	updateIdbBtcAddressMainnetLastUsage
 } from '$lib/api/idb-addresses.api';
-import { getBtcAddress } from '$lib/api/signer.api';
+import { getBtcAddress as getSignerBtcAddress } from '$lib/api/signer.api';
 import {
 	certifyAddress,
 	loadIdbTokenAddress,
@@ -52,6 +53,24 @@ const bitcoinMapper: Record<
 	}
 };
 
+const getBtcAddress = async ({
+	identity,
+	network
+}: {
+	identity: OptionIdentity;
+	network: BitcoinNetwork;
+}): Promise<BtcAddress> => {
+	if (FRONTEND_DERIVATION_ENABLED) {
+		// TODO: Implement the derivation logic here.
+	}
+
+	return await getSignerBtcAddress({
+		identity,
+		network: mapToSignerBitcoinNetwork({ network }),
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+};
+
 const loadBtcAddress = ({
 	networkId,
 	network
@@ -61,12 +80,7 @@ const loadBtcAddress = ({
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		networkId,
-		getAddress: (identity: OptionIdentity) =>
-			getBtcAddress({
-				identity,
-				network: mapToSignerBitcoinNetwork({ network }),
-				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			}),
+		getAddress: (identity: OptionIdentity) => getBtcAddress({ identity, network }),
 		...bitcoinMapper[network]
 	});
 
@@ -100,11 +114,7 @@ const certifyBtcAddressMainnet = (address: BtcAddress): Promise<ResultSuccess<st
 	certifyAddress<BtcAddress>({
 		networkId: BTC_MAINNET_NETWORK_ID,
 		address,
-		getAddress: (identity: OptionIdentity) =>
-			getBtcAddress({
-				identity,
-				network: { mainnet: null }
-			}),
+		getAddress: (identity: OptionIdentity) => getBtcAddress({ identity, network: 'mainnet' }),
 		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage,
 		addressStore: btcAddressMainnetStore
 	});

@@ -8,6 +8,7 @@
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
+	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -42,7 +43,6 @@
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { privacyModeStore } from '$lib/stores/settings.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import {
 		isRouteActivity,
@@ -50,6 +50,7 @@
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
+	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -67,12 +68,7 @@
 
 	const handlePrivacyToggle = () => {
 		const nextValue = !$isPrivacyMode;
-
-		privacyModeStore.set({
-			key: 'privacy-mode',
-			value: { enabled: nextValue }
-		});
-
+		setPrivacyMode(nextValue);
 		toastsShow({
 			text: nextValue
 				? $i18n.navigation.text.privacy_mode_enabled
@@ -112,7 +108,7 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div
-		class="max-w-68 mb-1 flex flex-col gap-1"
+		class="mb-1 flex max-w-80 flex-col gap-1"
 		data-tid={NAVIGATION_MENU}
 		onclick={hidePopover}
 		role="none"
@@ -145,7 +141,6 @@
 
 			{#if addressesOption}
 				<MenuAddresses on:icMenuClick={hidePopover} />
-				<Hr />
 			{/if}
 
 			<ButtonMenu
@@ -156,8 +151,6 @@
 				<IconUserSquare size="20" />
 				{$i18n.navigation.text.address_book}
 			</ButtonMenu>
-
-			<Hr />
 
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.refer_a_friend}
@@ -229,16 +222,22 @@
 
 	<Hr />
 
-	<div class="max-w-68 flex flex-col gap-3 pt-3">
+	<div class="flex max-w-80 flex-col gap-5 py-5">
 		{#if I18N_ENABLED}
 			<MenuLanguageSelector />
 		{/if}
 
 		{#if $authSignedIn}
-			{#if I18N_ENABLED}
-				<Hr />
-			{/if}
+			<MenuThemeSelector />
+		{/if}
+	</div>
 
+	{#if I18N_ENABLED && $authSignedIn}
+		<Hr />
+	{/if}
+
+	<div class="flex max-w-80 flex-col gap-3 pt-3">
+		{#if $authSignedIn}
 			<SignOut on:icLogoutTriggered={hidePopover} />
 
 			<Hr />

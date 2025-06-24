@@ -1,4 +1,5 @@
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
+import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
@@ -47,6 +48,9 @@ export const isNetworkIdBsc: IsNetworkIdUtil = (id) =>
 
 export const isNetworkIdPolygon: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_POLYGON_NETWORK_IDS.includes(id);
+
+export const isNetworkIdArbitrum: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && SUPPORTED_ARBITRUM_NETWORK_IDS.includes(id);
 
 export const isNetworkIdBitcoin: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_BITCOIN_NETWORK_IDS.includes(id);
