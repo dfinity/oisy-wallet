@@ -4,8 +4,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<div class="flex flex-row justify-between pl-3">
-	<span class="mr-3 flex flex-row items-center text-tertiary">
+<div class="flex justify-between pl-3">
+	<span class="mr-3 flex items-center text-tertiary">
 		<span class="mr-1 flex"><IconLanguage /></span>
 		<span class="flex">{$i18n.core.text.language}</span>
 	</span>
