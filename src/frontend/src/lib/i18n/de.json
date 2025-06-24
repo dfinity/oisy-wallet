@@ -184,123 +184,123 @@
 		"categories": {
 			"defi": "DeFi",
 			"social_media": "Soziale Medien",
-			"verifiable_credentials": "Verifizierbare Nachweise",
+			"verifiable_credentials": "Bescheinigungen",
 			"staking": "Beteiligungen",
 			"walletconnect": "Wallet Connect",
 			"game": "Spiele"
 		},
 		"descriptions": {
 			"kongswap": {
-				"name": "",
-				"one_liner": "",
-				"description": "",
+				"name": "KongSwap",
+				"one_liner": "Der Token Shop für alles - Handle Token aller Blochchains mühelos mit KongSwap.",
+				"description": "KongSwap ist eine vollständig dezentrale Börse (DEX), die brückenlose, kettenübergreifende Transaktionen zwischen ICP, Bitcoin, Ethereum und Solana anbietet. Durch die Nutzung der Chain Fusion Technologie und des Internet Computer Protokolls reduziert sie Gebühren, vereinfacht die Benutzererfahrung und vermeidet Liquiditätsfragmentierung. Sowohl das Frontend als auch das Backend operieren on-chain über Smart Contracts, was ein nahtloses DeFi-Erlebnis ermöglicht.",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "Tausche deine Token via DEX",
+					"call_to_action": "Probiere KongSwap"
 				}
 			},
 			"openchat": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": "",
-				"stats": "",
+				"name": "OpenChat",
+				"one_liner": "Dezentralisierte Alternative zu WhatsApp.",
+				"call_to_action": "Gehe zu OpenChat",
+				"description": "OpenChat ist eine voll funktionsfähige Chat-Anwendung, die vollständig auf der Internet Computer Blockchain läuft. Es wird von seiner Community als DAO (Decentralized Autonomous Organization) verwaltet und verfügt über einen eigenen CHAT-Token. CHAT-Token werden an Benutzer als Belohnung vergeben, um das Wachstum anzukurbeln und ein Team von Millionen von Unterstützern aufzubauen, was es OpenChat ermöglicht, ein konkurrenzfähiger Herausforderer zu zentralisierten großen Technologiekonkurrenten zu werden.",
+				"stats": "80,000+ Benutzer",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "OpenChat - Wo web3 kommuniziert",
+					"call_to_action": "Zeige mit mehr"
 				}
 			},
 			"decideid": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"stats": "",
-				"description": "",
+				"name": "DecideID",
+				"one_liner": "Eindeutige Identitätsprüfung für vertrauliche digitale Interaktionen.",
+				"call_to_action": "Öffne DecideID",
+				"stats": "50,000+ geprüfte Anfragen",
+				"description": "Decide ID ist das Herzstück des Decide AI-Systems und gewährleistet Vertrauen und Sicherheit durch seine einzigartige Proof of Personhood (PoP)-Methode. Bei Ihrem Beitritt durchlaufen Sie einen Verifizierungsprozess, bei dem Sie mehrere Nachweise erbringen und eine spezielle Herausforderung meistern, um Ihre Identität zu bestätigen. Dadurch wird sichergestellt, dass jeder Benutzer echt, einzigartig und kein Bot ist. Ihre Principal ID, eine eindeutige On-Chain-Kennung, wird während dieses Prozesses erstellt. Sie kann in verschiedenen Anwendungen verwendet werden, die eine verifizierte Identität erfordern, und gewährleistet eine sichere und nahtlose Integration in den Anmelde- oder Login-Prozess jeder App. Darüber hinaus sorgt die Verwendung von Zero-Knowledge-Nachweisen dafür, dass Ihre privaten Daten, wie biometrische Informationen, vertraulich und sicher bleiben.<br/><br/>Genießen Sie mit Decide ID eine flexible, sichere und datenschutzorientierte Möglichkeit zur Online-Verifizierung und -Aktivierung.",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "Vertraue der Privacy-first Methode und interagiere online",
+					"call_to_action": "Interessiert?"
 				}
 			},
 			"icpswap": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "ICPSwap",
+				"one_liner": "ICPSwap ist ein vollständig onchain erstellter AMM DEX, und der wichtigste Hub für Full-Stack-Finanz- und DAO-Dienste auf ICP.",
+				"call_to_action": "Gehe zu ICPSwap",
+				"description": "Der Hub der zukünftigen dezentralen Finanzwelt!<br/>ICPSwap erfindet die Börse als Hub neu und bietet umfassende Finanz-, Markt- und DAO-Dienste auf dem Internet-Computer. Basierend auf der zugrundeliegenden Technologie des Internet-Computers von DFINITY etabliert ICPSwap ein Ökosystem für wirklich dezentrale Finanzwelt, indem es die Art und Weise, wie Nutzer und Entwickler gemeinsam Projekte erstellen, neu gestaltet."
 			},
 			"nnsdapp": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "NNS Dapp",
+				"one_liner": "Die NNS-Front-End-Dapp ermöglicht jedem die Interaktion mit dem Netzwerknervensystem des Internetcomputers über eine benutzerfreundliche Benutzeroberfläche.",
+				"call_to_action": "Öffne NNS Dapp",
+				"description": "Die NNS-Frontend-Dapp ermöglicht jedem die Interaktion mit dem Netzwerknervensystem des Internetcomputers über eine benutzerfreundliche Oberfläche. Diese dezentrale Dapp wird vollständig durchgängig über die Blockchain bereitgestellt und ermöglicht Ihnen die einfache Durchführung folgender Aktionen:<br/><ul><li>Token senden und empfangen (ICP, ckBTC, CHAT usw.)</li><li>Neuronen staken und verwalten</li><li>Über die Governance des Internetcomputers und der SNSes abstimmen</li><li>An Dezentralisierungs-Swaps teilnehmen</li><li>Kanister erstellen und aufladen</li><li>Governance-Belohnungen erhalten</li></ul>"
 			},
 			"uniswap": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Uniswap",
+				"one_liner": "Der grösste onchain Marktplatz. Kaufe und verkaufe Crypto auf Ethereum und 11+ anderen Netzwerken.",
+				"call_to_action": "Gehe zu Uniswap",
+				"description": "Die NNS-Frontend-Dapp ermöglicht jedem die Interaktion mit dem Netzwerknervensystem des Internetcomputers über eine benutzerfreundliche Oberfläche. Diese dezentrale Dapp wird vollständig durchgängig über die Blockchain bereitgestellt und ermöglicht Ihnen die einfache Durchführung folgender Aktionen:<br/><ul><li>Token senden und empfangen (ICP, ckBTC, CHAT usw.)</li><li>Neuronen staken und verwalten</li><li>Über die Governance des Internetcomputers und der SNSes abstimmen</li><li>An Dezentralisierungs-Swaps teilnehmen</li><li>Kanister erstellen und aufladen</li><li>Governance-Belohnungen erhalten</li></ul>"
 			},
 			"oneinch": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "1inch",
+				"one_liner": "Optimiere dein Handeln über Hunderte von DEXes in mehreren Netzwerken.",
+				"call_to_action": "Gehe zu 1inch",
+				"description": "1inch Network bietet ein DeFi-Ökosystem mit Produkten wie 1inch dApp, Wallet, Developer Portal, Portfolio und Fusion für sichere Web3-Operationen. 1inch bietet Zugriff auf Hunderte von Liquiditätsquellen über mehrere Blockchains hinweg.<br/><br/>Angetrieben von der 1inch Swap Engine ermöglicht der Fusion-Modus Nutzern den Token-Tausch ohne Netzwerkgebühren und zu den günstigsten Konditionen. Darüber hinaus bietet der Fusion-Modus Nutzern zusätzlichen MEV-Schutz. Alle Swaps im Fusion-Modus werden von Resolvern ausgeführt – professionellen Händlern, die die Swaps ihrer Nutzer mit modernsten und effizientesten Methoden vor MEV schützen."
 			},
 			"compound_finance": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Compound Finance",
+				"one_liner": "Ein dezentraler Geldmarkt und ein Kreditprotokoll, das auf Ethereum basiert.",
+				"call_to_action": "Öffne Compound",
+				"description": "Compound Finance ist ein dezentrales Geldmarkt- und Kreditprotokoll auf Basis von Ethereum. Das Compound III (Comet)-Protokoll ermöglicht es Nutzern, aus einzelnen Sicherheitenpools von „Basiswerten“ zu leihen oder zu verleihen. Compound III unterstützt Basiswerte (z. B. USDC, WETH usw.) auf Ethereum, Polygon, Base und Arbitrum."
 			},
 			"aave": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Aave",
+				"one_liner": "Aave ist ein dezentrales, nicht verwahrtes Liquiditätsprotokoll, an dem Benutzer als Lieferanten oder Kreditnehmer teilnehmen können.",
+				"call_to_action": "Gehe zu Aave",
+				"description": "Aave ist ein dezentrales, nicht depotbasiertes Liquiditätsprotokoll, an dem Nutzer als Anbieter oder Kreditnehmer teilnehmen können. Anbieter stellen dem Markt Liquidität zur Verfügung und erhalten Zinsen. Kreditnehmer erhalten Zugang zu Liquidität, indem sie Sicherheiten stellen, die den geliehenen Betrag übersteigen. Das Protokoll ist vollständig erlaubnisfrei, d. h. jeder kann über eine benutzerfreundliche Oberfläche oder direkt über die Smart Contracts in unterstützten Blockchain-Netzwerken auf Aave zugreifen und mit ihm interagieren."
 			},
 			"eigenlayer": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "EigenLayer",
+				"one_liner": "Auf Ethereum basierendes Protokoll, das Restaking einführt und das Staking beliebiger ERC20-Token ermöglicht.",
+				"call_to_action": "Öffne EigenLayer ",
+				"description": "EigenLayer ist ein auf Ethereum basierendes Protokoll, das Restaking einführt, ein neues Element der kryptoökonomischen Sicherheit. Es ermöglicht Nutzern, Vermögenswerte wie Native ETH, Liquid Staking Tokens (LSTs), EIGEN-Token oder beliebige ERC20-Token in EigenLayer-Smart Contracts zu staken und so die kryptoökonomische Sicherheit von Ethereum auf zusätzliche Anwendungen im Netzwerk auszuweiten."
 			},
 			"curve_finance": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Curve Finance",
+				"one_liner": "Führender DEX-, Stablecoin-Anbieter und Kreditplattform auf Ethereum- und EVM-kompatiblen Ketten.",
+				"call_to_action": "Gehe zu Curve",
+				"description": "Curve Finance ist eine führende dezentrale Börse, ein Stablecoin-Anbieter und eine Kreditplattform auf Ethereum- und EVM-kompatiblen Blockchains. Das Unternehmen ist bekannt für seine fortschrittlichen automatisierten Market Maker für Stablecoins und volatile Vermögenswerte sowie sein einzigartiges Soft-Liquidation-System für Kredite."
 			},
 			"zkpoker": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "zkPoker",
+				"one_liner": "Modernste Kryptografie und Blockchain verflechten sich zu einer sicheren und transparenten Spielumgebung für alle.",
+				"call_to_action": "Spiele jetzt!",
+				"description": "Modernste Kryptografie und Blockchain verschmelzen zu einer sicheren und transparenten Spielumgebung für alle.<br/><br/>Spielen Sie mit den digitalen Assets Ihrer Wahl – jetzt ICP, bald auch BTC, ETH, SOL und USDC. Vollständig on-chain, keine zentralen Fehlerquellen. Unser Blockchain-basierter Zufallsgenerator (RNG) sorgt für nachweislich faires Spielen und nutzt Open-Source-Technologie des Forschungs- und Entwicklungsteams von Dfinity."
 			},
 			"sonic": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": "",
+				"name": "Sonic",
+				"one_liner": "Schöpfen Sie das volle Potenzial von DeFi und optimiertem Handel aus. Tauschen Sie Token, verdienen Sie als Liquiditätsanbieter und nutzen Sie das führende AMM von Bitfinity EVM.",
+				"call_to_action": "Öffne Sonic",
+				"description": "Sonic, eine dezentrale Multichain-Börse, die auf dem Internet Computer Protocol (ICP) basiert, bietet eine breite Palette an DeFi-Diensten. Nutzer können problemlos Token und Perpetuals handeln, Liquidität bereitstellen und am LBP-Token-Verkauf teilnehmen. Nutzer können sich an der DAO-Governance beteiligen, Belohnungen einbringen und über Plattformentscheidungen abstimmen.<br/><br/>Vollständig on-chain & Open Source! Tauschen Sie Token wie ein Profi, stapeln Sie Gebühren als Liquiditätsanbieter, tauchen Sie in die AMM-Szene ein und werden Sie ein integraler Bestandteil der Sonic DAO.",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "Schöpfen Sie das volle Potenzial von Defi",
+					"call_to_action": "Öffne Sonic"
 				}
 			},
 			"raydium": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Raydium",
+				"one_liner": "DEX und automatisierter Market Maker, der auf der Solana-Blockchain basiert und ein zentrales Limit-Orderbuch bietet, das schnelle Trades ermöglicht.",
+				"call_to_action": "Gehe zu Raydium",
+				"description": "Raydium ist ein automatisierter Market Maker (AMM), der auf der Solana-Blockchain basiert und eine einzigartige Kombination aus AMM-Technologie und Zugang zur Liquidität der dezentralen Börse Serum bietet. Als AMM ermöglicht Raydium den erlaubnisfreien Handel mit digitalen Vermögenswerten über Liquiditätspools."
 			},
 			"jupiter": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Jupiter",
+				"one_liner": "Solana basierter DEX-Aggregator, der die besten verfügbaren Swaps zwischen allen unterstützten Token-Paaren optimiert.",
+				"call_to_action": "Gehe zu Jupiter",
+				"description": "Jupiter ist eine dezentrale Finanzplattform auf der Solana-Blockchain, die als Liquiditätsaggregator fungiert und Handelsaktivitäten im DeFi-Bereich rationalisiert und optimiert. Ihr Protokoll erleichtert die Bereitstellung von Liquidität und den Token-Austausch und gewährleistet effiziente, latenzarme und kostengünstige Transaktionen. Die Plattform ermöglicht Nutzern den Token-Austausch, die Bereitstellung von Liquidität und die Teilnahme am Yield Farming über ein automatisiertes Market-Maker-Modell (AMM)."
 			},
 			"waterneuron": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "WaterNeuron",
+				"one_liner": "ICP-Liquid-Staking – Maximieren Sie Ihre Kapitaleffizienz durch Liquid-Staking Ihres ICP.",
+				"description": "WaterNeuron bietet eine kapitaleffizientere Staking-Methode, indem Sie weiterhin von ICP-Staking-Belohnungen profitieren und gleichzeitig Ihre Token liquide halten. Dieser Ansatz vereinfacht den Staking-Prozess und macht die Auswahl spezifischer Validatoren zur Maximierung der Belohnungen überflüssig."
 			}
 		}
 	},
