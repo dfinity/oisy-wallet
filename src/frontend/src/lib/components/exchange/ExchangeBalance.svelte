@@ -1,16 +1,16 @@
 <script lang="ts">
+	import { Tooltip } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatUSD } from '$lib/utils/format.utils';
-	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
-	import { Tooltip } from '@dfinity/gix-components';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
-	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		hideBalance?: boolean;
@@ -42,7 +42,7 @@
 		{/if}
 	</output>
 	<span
-		class="flex flex-col items-center gap-4 text-xl font-medium text-brand-secondary-alt cursor-pointer"
+		class="flex cursor-pointer flex-col items-center gap-4 text-xl font-medium text-brand-secondary-alt"
 		role="button"
 		tabindex="0"
 		ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true })}

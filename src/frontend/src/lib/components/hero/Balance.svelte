@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Tooltip } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -10,9 +11,8 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import { Tooltip } from '@dfinity/gix-components';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		token: OptionTokenUi;
@@ -51,7 +51,7 @@
 	<div class="flex flex-col items-center">
 		<button
 			type="button"
-			class="text-xl font-bold cursor-pointer bg-transparent border-none p-0"
+			class="cursor-pointer border-none bg-transparent p-0 text-xl font-bold"
 			ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true })}
 		>
 			{#if !$isPrivacyMode}
