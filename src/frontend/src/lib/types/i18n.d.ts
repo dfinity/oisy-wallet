@@ -231,6 +231,7 @@ interface I18nDapps {
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
+		taggr: { name: string; one_liner: string; call_to_action: string; description: string };
 	};
 }
 
@@ -254,6 +255,7 @@ interface I18nRewards {
 		youre_eligible: string;
 		ongoing: string;
 		ended: string;
+		banner_text: string;
 	};
 	requirements: {
 		requirements_title: string;
