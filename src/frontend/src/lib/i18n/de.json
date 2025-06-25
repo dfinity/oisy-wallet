@@ -306,7 +306,11 @@
 				"name": "Taggr",
 				"one_liner": "Dezentrale soziale Medien – posten, verdienen, besitzen.",
 				"call_to_action": "Gehe zu Taggr",
-				"description": "Taggr ist eine vollständig dezentralisierte Social-Media-Plattform, die auf einem öffentlichen, verteilten Computernetzwerk basiert, das vom Internetcomputer betrieben wird. Im Gegensatz zu herkömmlichen, von Unternehmen kontrollierten Social-Media-Plattformen gehört Taggr vollständig seinen Nutzern und wird von ihnen verwaltet."
+				"description": "Taggr ist eine vollständig dezentralisierte Social-Media-Plattform, die auf einem öffentlichen, verteilten Computernetzwerk basiert, das vom Internetcomputer betrieben wird. Im Gegensatz zu herkömmlichen, von Unternehmen kontrollierten Social-Media-Plattformen gehört Taggr vollständig seinen Nutzern und wird von ihnen verwaltet.",
+				"carousel": {
+					"text": "Dezentrale soziale Medien",
+					"call_to_action": "Mehr erfahren"
+				}
 			}
 		}
 	},
@@ -843,7 +847,8 @@
 			"show_more_networks": "Zeige $number weitere Netzwerke",
 			"hide_more_networks": "Weitere Netzwerke verbergen",
 			"on_network": " auf $network",
-			"delete_token": "Token löschen"
+			"delete_token": "Token löschen",
+			"edit_token": "Token bearbeiten"
 		},
 		"details": {
 			"title": "Token-Details",
@@ -854,7 +859,11 @@
 			"twin_token": "Twin-Token",
 			"standard": "Standard",
 			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen.",
-			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Tokenliste entfernt."
+			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Tokenliste entfernt.",
+			"update_confirmation": "$token wurde erfolgreich aktualisiert.",
+			"missing_index_canister_id_label": "Nicht zugewiesen",
+			"missing_index_canister_id_warning": "Index Canister fehlt, und $oisy_short kann die Transaktionshistorie nicht anzeigen",
+			"missing_index_canister_id_button": "Index Canister angeben"
 		},
 		"balance": {
 			"error": {
@@ -953,7 +962,8 @@
 			"incomplete_metadata": "Kein Name oder Symbol in den Metadaten vorhanden.",
 			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol existiert bereits.",
 			"unexpected_undefined": "Token ist undefiniert. Das ist unerwartet.",
-			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen."
+			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen.",
+			"unexpected_error_on_token_update": "Beim Aktualisieren des Tokens ist etwas schiefgelaufen."
 		}
 	},
 	"fee": {
