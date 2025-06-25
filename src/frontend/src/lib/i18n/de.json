@@ -87,7 +87,7 @@
 			"vip_qr_code": "Einladungslink generieren",
 			"binance_qr_code": "Binance Clubhouse-Link generieren",
 			"refer_a_friend": "Empfehlungslink für einen Freund erstellen",
-			"address_book": "Adressbuch öffnen",
+			"address_book": "Kontakte öffnen",
 			"hide_balances": "Angezeigte Salden verbergen",
 			"show_balances": "Versteckte Salden anzeigen"
 		},
@@ -301,6 +301,12 @@
 				"name": "WaterNeuron",
 				"one_liner": "ICP-Liquid-Staking – Maximieren Sie Ihre Kapitaleffizienz durch Liquid-Staking Ihres ICP.",
 				"description": "WaterNeuron bietet eine kapitaleffizientere Staking-Methode, indem Sie weiterhin von ICP-Staking-Belohnungen profitieren und gleichzeitig Ihre Token liquide halten. Dieser Ansatz vereinfacht den Staking-Prozess und macht die Auswahl spezifischer Validatoren zur Maximierung der Belohnungen überflüssig."
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "Dezentrale soziale Medien – posten, verdienen, besitzen.",
+				"call_to_action": "Gehe zu Taggr",
+				"description": "Taggr ist eine vollständig dezentralisierte Social-Media-Plattform, die auf einem öffentlichen, verteilten Computernetzwerk basiert, das vom Internetcomputer betrieben wird. Im Gegensatz zu herkömmlichen, von Unternehmen kontrollierten Social-Media-Plattformen gehört Taggr vollständig seinen Nutzern und wird von ihnen verwaltet."
 			}
 		}
 	},
@@ -318,7 +324,7 @@
 			"activity_button_text": "Letzte Aktivität prüfen",
 			"activity_button_text_short": "Aktivität prüfen",
 			"open_wallet": "Zur Wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles sind jetzt live!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 4 ist jetzt aktiv!",
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
@@ -836,7 +842,8 @@
 			"show_more_networks": "Zeige $number weitere Netzwerke",
 			"hide_more_networks": "Weitere Netzwerke verbergen",
 			"on_network": " auf $network",
-			"delete_token": "Token löschen"
+			"delete_token": "Token löschen",
+			"edit_token": ""
 		},
 		"details": {
 			"title": "Token-Details",
@@ -847,7 +854,11 @@
 			"twin_token": "Twin-Token",
 			"standard": "Standard",
 			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen.",
-			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Tokenliste entfernt."
+			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Tokenliste entfernt.",
+			"update_confirmation": "",
+			"missing_index_canister_id_label": "",
+			"missing_index_canister_id_warning": "",
+			"missing_index_canister_id_button": ""
 		},
 		"balance": {
 			"error": {
@@ -946,7 +957,8 @@
 			"incomplete_metadata": "Kein Name oder Symbol in den Metadaten vorhanden.",
 			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol existiert bereits.",
 			"unexpected_undefined": "Token ist undefiniert. Das ist unerwartet.",
-			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen."
+			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen.",
+			"unexpected_error_on_token_update": ""
 		}
 	},
 	"fee": {
@@ -1207,7 +1219,7 @@
 	},
 	"address_book": {
 		"text": {
-			"title": "Adressbuch",
+			"title": "Kontakte",
 			"empty_title": "Deine Kontakte sind leer",
 			"empty_text": "Alle deine Kontakte werden hier angezeigt",
 			"add_new_contact": "Neuen Kontakt hinzufügen",
@@ -1248,9 +1260,9 @@
 			"name": "Name"
 		},
 		"delete": {
-			"title": "$contact löschen?",
+			"title": "Kontakt $contact löschen?",
 			"delete_contact": "Kontakt löschen",
-			"content_text": "Dadurch wird $contact und alle zugehörigen Adressen aus deinem Adressbuch gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden."
+			"content_text": "Dadurch wird $contact und alle zugehörigen Adressen aus deinen Kontakten gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden."
 		},
 		"error": {
 			"create": "Kontakt konnte nicht erstellt werden",

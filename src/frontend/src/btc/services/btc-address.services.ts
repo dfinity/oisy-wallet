@@ -11,6 +11,7 @@ import {
 	updateIdbBtcAddressMainnetLastUsage
 } from '$lib/api/idb-addresses.api';
 import { getBtcAddress as getSignerBtcAddress } from '$lib/api/signer.api';
+import { deriveBtcAddress } from '$lib/ic-pub-key/src/cli';
 import {
 	certifyAddress,
 	loadIdbTokenAddress,
@@ -32,6 +33,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const bitcoinMapper: Record<
@@ -61,7 +63,11 @@ const getBtcAddress = async ({
 	network: BitcoinNetwork;
 }): Promise<BtcAddress> => {
 	if (FRONTEND_DERIVATION_ENABLED) {
-		// TODO: Implement the derivation logic here.
+		// We use the same logic of the canister method. The potential error will be handled in the consumer.
+		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+
+		// HACK: This is working right now ONLY in Beta and Prod because the library is aware of the production Chain Fusion Signer's public key (used by both envs), but not for the staging Chain Fusion Signer (used by all other envs).
+		return await deriveBtcAddress(identity.getPrincipal().toString(), network);
 	}
 
 	return await getSignerBtcAddress({
