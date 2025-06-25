@@ -17,10 +17,11 @@ describe('icp-ledger.api', () => {
 
 	describe('getAccountInfo', () => {
 		const address = mockSolAddress;
+		const network = 'mainnet' as const;
 
 		const params = {
 			address,
-			network: 'mainnet' as const,
+			network,
 			identity: mockIdentity
 		};
 
@@ -47,22 +48,17 @@ describe('icp-ledger.api', () => {
 
 			expect(solRpcCanisterMock.getAccountInfo).toHaveBeenCalledExactlyOnceWith({
 				address,
-				network: 'mainnet'
+				network
 			});
 		});
 
 		it('should returned unparsed account info', async () => {
-			solRpcCanisterMock.getAccountInfo.mockResolvedValue({
-				...mockAccountInfo,
-				data: { legacyBinary: 'binary-string' }
-			});
+			const mockData = { legacyBinary: 'binary-string' };
+			solRpcCanisterMock.getAccountInfo.mockResolvedValue({ ...mockAccountInfo, data: mockData });
 
 			const result = await getAccountInfo(params);
 
-			expect(result).toEqual({
-				...mockAccountInfo,
-				data: { legacyBinary: 'binary-string' }
-			});
+			expect(result).toEqual({ ...mockAccountInfo, data: mockData });
 		});
 
 		it('should handle undefined account info', async () => {
