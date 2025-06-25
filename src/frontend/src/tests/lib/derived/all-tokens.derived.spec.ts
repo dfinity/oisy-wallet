@@ -1,6 +1,10 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import {
+	ARBITRUM_ETH_TOKEN,
+	ARBITRUM_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
+import {
 	BASE_ETH_TOKEN,
 	BASE_SEPOLIA_ETH_TOKEN
 } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -138,6 +142,7 @@ describe('all-tokens.derived', () => {
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
+				ARBITRUM_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockDip20Token.id.description,
 				mockIcrcToken2.id.description,
@@ -216,7 +221,9 @@ describe('all-tokens.derived', () => {
 				BNB_MAINNET_TOKEN.id.description,
 				BNB_TESTNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
-				POL_AMOY_TOKEN.id.description
+				POL_AMOY_TOKEN.id.description,
+				ARBITRUM_ETH_TOKEN.id.description,
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
 			]);
 		});
 
@@ -244,7 +251,9 @@ describe('all-tokens.derived', () => {
 				BNB_MAINNET_TOKEN.id.description,
 				BNB_TESTNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
-				POL_AMOY_TOKEN.id.description
+				POL_AMOY_TOKEN.id.description,
+				ARBITRUM_ETH_TOKEN.id.description,
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
 			]);
 		});
 	});

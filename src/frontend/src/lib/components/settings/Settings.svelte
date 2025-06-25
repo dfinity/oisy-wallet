@@ -6,7 +6,6 @@
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
-	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
@@ -85,7 +84,10 @@
 				{$i18n.settings.text.session_expires_in}
 				{remainingTimeMilliseconds <= 0
 					? '0'
-					: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
+					: secondsToDuration({
+							seconds: BigInt(remainingTimeMilliseconds) / 1000n,
+							i18n: $i18n.temporal.seconds_to_duration
+						})}
 			{/if}
 		</svelte:fragment>
 	</SettingsCardItem>
@@ -136,11 +138,5 @@
 		</SettingsCardItem>
 	</SettingsCard>
 {/if}
-
-<SettingsCard>
-	<svelte:fragment slot="title">{$i18n.settings.text.appearance}</svelte:fragment>
-
-	<ThemeSelector />
-</SettingsCard>
 
 <SettingsVersion />

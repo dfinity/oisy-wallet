@@ -1,7 +1,7 @@
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
 import { Languages } from '$lib/types/languages';
-import { mergeWithFallback } from '$lib/utils/i18n.utils';
+import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
 import { get, set } from '$lib/utils/storage.utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -10,7 +10,6 @@ const enI18n = (): I18n => ({
 	lang: Languages.ENGLISH
 });
 
-// Todo: remove typing "as unknown" when the github action is adjusted and always adds empty strings for missing translations
 const deI18n = (): I18n => ({
 	...mergeWithFallback({ refLang: enI18n(), targetLang: de as I18n }),
 	lang: Languages.GERMAN
@@ -46,9 +45,9 @@ const initI18n = (): I18nStore => {
 		subscribe,
 
 		init: async () => {
-			const lang = get<Languages>({ key: 'lang' }) ?? Languages.ENGLISH;
+			const lang = get<Languages>({ key: 'lang' }) ?? getDefaultLang();
 
-			if (lang === Languages.ENGLISH) {
+			if (lang === getDefaultLang()) {
 				saveLang(lang);
 				// No need to reload the store, English is already the default
 				return;

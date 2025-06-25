@@ -11,16 +11,22 @@
 
 {#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
 	<div in:fade>
-		<WarningBanner>{$i18n.send.info.pending_bitcoin_transaction}</WarningBanner>
+		<WarningBanner>
+			<span>{$i18n.send.info.pending_bitcoin_transaction}</span>
+		</WarningBanner>
 	</div>
 {:else if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.ERROR}
 	<div in:fade>
-		<WarningBanner>{$i18n.send.error.no_pending_bitcoin_transaction}</WarningBanner>
+		<WarningBanner>
+			<span>{$i18n.send.error.no_pending_bitcoin_transaction}</span>
+		</WarningBanner>
 	</div>
 {/if}
 
 {#if utxosFee?.utxos.length === 0}
 	<div in:fade>
-		<WarningBanner>{$i18n.send.info.no_available_utxos}</WarningBanner>
+		<WarningBanner>
+			<span>{$i18n.send.info.no_available_utxos}</span>
+		</WarningBanner>
 	</div>
 {/if}

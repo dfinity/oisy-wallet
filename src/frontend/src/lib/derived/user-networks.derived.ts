@@ -1,5 +1,9 @@
 import type { NetworkSettingsFor } from '$declarations/backend/backend.did';
 import {
+	ARBITRUM_MAINNET_NETWORK_ID,
+	ARBITRUM_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
 	BASE_NETWORK_ID,
 	BASE_SEPOLIA_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -101,6 +105,12 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			}
 			if ('PolygonAmoy' in key) {
 				return POLYGON_AMOY_NETWORK_ID;
+			}
+			if ('ArbitrumMainnet' in key) {
+				return ARBITRUM_MAINNET_NETWORK_ID;
+			}
+			if ('ArbitrumSepolia' in key) {
+				return ARBITRUM_SEPOLIA_NETWORK_ID;
 			}
 
 			// Force compiler error on unhandled cases based on leftover types

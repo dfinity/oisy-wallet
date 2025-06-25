@@ -280,6 +280,7 @@ type InitArg = record {
 };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
+	ArbitrumMainnet;
 	InternetComputer;
 	BaseSepolia;
 	PolygonMainnet;
@@ -292,6 +293,7 @@ type NetworkSettingsFor = variant {
 	BaseMainnet;
 	BscMainnet;
 	SolanaLocal;
+	ArbitrumSepolia;
 	EthereumMainnet;
 	SolanaMainnet;
 	BitcoinMainnet;

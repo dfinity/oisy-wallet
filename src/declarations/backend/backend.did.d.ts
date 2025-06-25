@@ -286,6 +286,7 @@ export interface NetworkSettings {
 	is_testnet: boolean;
 }
 export type NetworkSettingsFor =
+	| { ArbitrumMainnet: null }
 	| { InternetComputer: null }
 	| { BaseSepolia: null }
 	| { PolygonMainnet: null }
@@ -298,6 +299,7 @@ export type NetworkSettingsFor =
 	| { BaseMainnet: null }
 	| { BscMainnet: null }
 	| { SolanaLocal: null }
+	| { ArbitrumSepolia: null }
 	| { EthereumMainnet: null }
 	| { SolanaMainnet: null }
 	| { BitcoinMainnet: null }

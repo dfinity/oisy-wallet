@@ -5,6 +5,8 @@
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
+	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
+	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
@@ -18,7 +20,9 @@
 		modalAddressBook,
 		modalVipQrCodeData,
 		modalIcHideTokenData,
-		modalHideTokenData
+		modalHideTokenData,
+		modalRewardDetails,
+		modalRewardDetailsData
 	} from '$lib/derived/modal.derived';
 
 	/**
@@ -41,5 +45,9 @@
 		<ReferralCodeModal />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
+	{:else if $modalRewardDetails && nonNullish($modalRewardDetailsData)}
+		<RewardsEligibilityContext>
+			<RewardModal reward={$modalRewardDetailsData} />
+		</RewardsEligibilityContext>
 	{/if}
 {/if}

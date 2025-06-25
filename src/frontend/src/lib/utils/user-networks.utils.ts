@@ -1,5 +1,9 @@
 import type { NetworkSettings, NetworkSettingsFor } from '$declarations/backend/backend.did';
 import {
+	ARBITRUM_MAINNET_NETWORK_ID,
+	ARBITRUM_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
 	BASE_NETWORK_ID,
 	BASE_SEPOLIA_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -59,6 +63,10 @@ const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined =>
 			return { PolygonMainnet: null };
 		case POLYGON_AMOY_NETWORK_ID:
 			return { PolygonAmoy: null };
+		case ARBITRUM_MAINNET_NETWORK_ID:
+			return { ArbitrumMainnet: null };
+		case ARBITRUM_SEPOLIA_NETWORK_ID:
+			return { ArbitrumSepolia: null };
 		default:
 			// We just print the error to console and ignore the missing network, for the sake of the user's experience.
 			console.warn(`Unknown networkId: ${networkId.description}`);

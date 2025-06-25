@@ -3,6 +3,7 @@ import weth from '$eth/assets/weth.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { WETH_TOKEN_GROUP } from '../groups/groups.weth.env';
 
 const WETH_DECIMALS = 18;
 
@@ -20,5 +21,6 @@ export const WETH_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: WETH_DECIMALS,
 	icon: weth,
 	address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-	exchange: 'erc20'
+	exchange: 'erc20',
+	groupData: WETH_TOKEN_GROUP
 };

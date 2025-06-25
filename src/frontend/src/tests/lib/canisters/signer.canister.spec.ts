@@ -528,7 +528,7 @@ describe('signer.canister', () => {
 		});
 	});
 
-	describe('btc_caller_send', () => {
+	describe('sendBtc', () => {
 		it('sends BTC correctly', async () => {
 			const response = { Ok: { txid: '1' } };
 			service.btc_caller_send.mockResolvedValue(response);

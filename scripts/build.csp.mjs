@@ -147,6 +147,10 @@ const updateCSP = (indexHtml) => {
 		'wss://base-mainnet.g.alchemy.com https://base-mainnet.g.alchemy.com https://base-mainnet.infura.io';
 	const baseSepoliaConnectSrc =
 		'wss://base-sepolia.g.alchemy.com https://base-sepolia.g.alchemy.com https://base-sepolia.infura.io';
+	const arbitrumMainnetConnectSrc =
+		'wss://arb-mainnet.g.alchemy.com https://arb-mainnet.g.alchemy.com https://arbitrum-mainnet.infura.io';
+	const arbitrumSepoliaConnectSrc =
+		'wss://arb-sepolia.g.alchemy.com https://arb-sepolia.g.alchemy.com https://arbitrum-sepolia.infura.io';
 	const bnbMainnetConnectSrc =
 		'wss://bnb-mainnet.g.alchemy.com https://bnb-mainnet.g.alchemy.com https://bsc-mainnet.infura.io';
 	const bnbTestnetConnectSrc =
@@ -155,7 +159,7 @@ const updateCSP = (indexHtml) => {
 		'wss://polygon-mainnet.g.alchemy.com https://polygon-mainnet.g.alchemy.com https://polygon-mainnet.infura.io https://gasstation.polygon.technology';
 	const polygonAmoyConnectSrc =
 		'wss://polygon-amoy.g.alchemy.com https://polygon-amoy.g.alchemy.com https://polygon-amoy.infura.io';
-	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc} ${polygonMainnetConnectSrc} ${polygonAmoyConnectSrc}`;
+	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${arbitrumMainnetConnectSrc} ${arbitrumSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc} ${polygonMainnetConnectSrc} ${polygonAmoyConnectSrc}`;
 
 	const infuraConnectSrc = 'https://gas.api.infura.io';
 
