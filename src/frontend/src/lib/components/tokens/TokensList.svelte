@@ -80,7 +80,7 @@
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
-	let allTokensSorted: TokenUiOrGroupUi[] = $derived(
+	let allTokensFilteredAndSorted: TokenUiOrGroupUi[] = $derived(
 		getFilteredTokenList({
 			filter: $tokenListStore.filter,
 			list: (nonNullish(exchangesStaticData)
@@ -109,6 +109,7 @@
 
 	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
 		let modifiedTokens: Record<string, Token> = {};
+
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 
@@ -167,8 +168,7 @@
 		]);
 	};
 
-	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
-	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
+	const progress = () => ProgressStepsAddToken.DONE;
 
 	const saveIcrc = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
 		saveIcrcCustomTokens({
@@ -209,8 +209,8 @@
 					class="overflow-hidden rounded-xl"
 					transition:fade
 					animate:flip={{ duration: 250 }}
-					on:animationstart={handleAnimationStart}
-					on:animationend={handleAnimationEnd}
+					onanimationstart={handleAnimationStart}
+					onanimationend={handleAnimationEnd}
 					class:pointer-events-none={animating}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
@@ -242,13 +242,13 @@
 			<div class="mb-3 mt-12 flex flex-col gap-3">
 				<h2 class="text-base">Enable more assets</h2>
 
-				{#each allTokensSorted as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+				{#each allTokensFilteredAndSorted as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 					<div
 						class="overflow-hidden rounded-xl"
 						transition:fade
 						animate:flip={{ duration: 250 }}
-						on:animationstart={handleAnimationStart}
-						on:animationend={handleAnimationEnd}
+						onanimationstart={handleAnimationStart}
+						onanimationend={handleAnimationEnd}
 						class:pointer-events-none={animating}
 					>
 						<div class="transition duration-300 hover:bg-primary">
