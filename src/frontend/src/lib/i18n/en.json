@@ -301,6 +301,12 @@
 				"name": "WaterNeuron",
 				"one_liner": "ICP liquid staking - Maximize your capital efficiency by liquid staking your ICP.",
 				"description": "WaterNeuron offers a more capital-efficient method of staking by allowing you to maintain exposure to ICP staking rewards while keeping your tokens liquid. This approach simplifies the staking process, removing the need to select specific validators to maximize rewards."
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "Decentralized social media - post, earn, own.",
+				"call_to_action": "Go to Taggr",
+				"description": "Taggr is a fully decentralized social media platform that lives on a public distributed compute network powered by the Internet Computer. Unlike traditional social media platforms controlled by corporations, Taggr is owned and governed entirely by its users."
 			}
 		}
 	},
@@ -318,7 +324,7 @@
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
 			"open_wallet": "Take me to the wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 4 is now Live!",
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
 			"youre_eligible": "You're eligible!",
@@ -836,7 +842,8 @@
 			"show_more_networks": "Show $number more networks",
 			"hide_more_networks": "Hide more networks",
 			"on_network": " on $network",
-			"delete_token": "Delete token"
+			"delete_token": "Delete token",
+			"edit_token": "Edit token"
 		},
 		"details": {
 			"title": "Token details",
@@ -847,7 +854,11 @@
 			"twin_token": "Twin token",
 			"standard": "Standard",
 			"confirm_deletion_description": "This will remove <span class=\"font-bold\">$token</span> from your $oisy_short token list. Your funds will remain untouched — you can re-add the token at any time.",
-			"deletion_confirmation": "$token has been successfully removed from your $oisy_short token list."
+			"deletion_confirmation": "$token has been successfully removed from your $oisy_short token list.",
+			"update_confirmation": "$token has been successfully updated.",
+			"missing_index_canister_id_label": "Not assigned",
+			"missing_index_canister_id_warning": "Index canister is missing, so $oisy_short can’t fetch a list of transactions",
+			"missing_index_canister_id_button": "Set Index Canister"
 		},
 		"balance": {
 			"error": {
@@ -946,7 +957,8 @@
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
 			"unexpected_undefined": "Token is undefined. This is unexpected.",
-			"unexpected_error_on_token_delete": "Something went wrong while removing the token."
+			"unexpected_error_on_token_delete": "Something went wrong while removing the token.",
+			"unexpected_error_on_token_update": "Something went wrong while updating the token."
 		}
 	},
 	"fee": {
