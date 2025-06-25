@@ -80,11 +80,13 @@ export const mergeWithFallback = ({
 	return merged;
 };
 
-export const getLocaleForLanguage = (lang?: Languages): string => {
-	switch (lang) {
-		case Languages.GERMAN:
-			return 'de-DE';
-		default:
-			return 'en-US';
+export const getDefaultLang = (): Languages => {
+	const browserLocale = new Intl.Locale(navigator.language);
+	const browserLanguage = Object.keys(Languages).find(
+		(l) => Languages[l as keyof typeof Languages] === browserLocale.language
+	);
+	if (nonNullish(browserLanguage)) {
+		return Languages[browserLanguage as keyof typeof Languages];
 	}
+	return Languages.ENGLISH;
 };

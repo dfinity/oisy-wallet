@@ -8,7 +8,7 @@ import {
 } from '$lib/constants/oisy.constants';
 import { Languages } from '$lib/types/languages';
 import {
-	getLocaleForLanguage,
+	getDefaultLang,
 	mergeWithFallback,
 	replaceOisyPlaceholders,
 	replacePlaceholders
@@ -183,25 +183,52 @@ describe('i18n-utils', () => {
 		});
 	});
 
-	describe('getLocaleForLanguage', () => {
-		it('should return the correct locale code for languages enum', () => {
-			const resultEn = getLocaleForLanguage(Languages.ENGLISH);
-			const resultDe = getLocaleForLanguage(Languages.GERMAN);
+	describe('getDefaultLang', () => {
+		const originalLanguage = navigator.language;
 
-			expect(resultEn).toEqual('en-US');
-			expect(resultDe).toEqual('de-DE');
+		afterEach(() => {
+			// Restore original language after each test
+			Object.defineProperty(global.navigator, 'language', {
+				configurable: true,
+				value: originalLanguage
+			});
 		});
 
-		it('should return the default english locale if param is nullish or not supported', () => {
-			const result1 = getLocaleForLanguage();
-			const result2 = getLocaleForLanguage(null as unknown as Languages);
-			const result3 = getLocaleForLanguage(undefined as unknown as Languages);
-			const result4 = getLocaleForLanguage('abc' as unknown as Languages);
+		const mockNavigatorLanguage = (lang: string) => {
+			Object.defineProperty(global.navigator, 'language', {
+				configurable: true,
+				value: lang
+			});
+		};
 
-			expect(result1).toEqual('en-US');
-			expect(result2).toEqual('en-US');
-			expect(result3).toEqual('en-US');
-			expect(result4).toEqual('en-US');
+		it('returns ENGLISH when language is unsupported', () => {
+			mockNavigatorLanguage('fr-FR');
+
+			expect(getDefaultLang()).toBe(Languages.ENGLISH);
+		});
+
+		it('returns GERMAN when browser language is de-DE', () => {
+			mockNavigatorLanguage('de-DE');
+
+			expect(getDefaultLang()).toBe(Languages.GERMAN);
+		});
+
+		it('returns ENGLISH when browser language is en-US', () => {
+			mockNavigatorLanguage('en-US');
+
+			expect(getDefaultLang()).toBe(Languages.ENGLISH);
+		});
+
+		it('only returns supported Languages enum values', () => {
+			const supported = Object.values(Languages);
+			const testLocales = ['es-ES', 'zh-CN', 'pt-BR'];
+
+			for (const lang of testLocales) {
+				mockNavigatorLanguage(lang);
+				const result = getDefaultLang();
+
+				expect(supported).toContain(result);
+			}
 		});
 	});
 });
