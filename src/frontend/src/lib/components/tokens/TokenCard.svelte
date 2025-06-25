@@ -14,9 +14,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
-	import { getToken } from 'prettier-plugin-motoko/lib/printers/motoko-tt-ast/utils';
-	import type { Token, TokenUi } from '$lib/types/token';
-	import type { UserToken } from '$lib/types/user-token';
+	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
@@ -131,9 +129,9 @@
 				{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
 					<ManageTokenToggle {token} on:icShowOrHideToken={(t) => ontoggle?.(t)} />
 				{:else if isBitcoinToken(token)}
-					<BtcManageTokenToggle on:icToken={() => ontoggle?.()} />
+					<BtcManageTokenToggle />
 				{:else if isSolanaToken(token)}
-					<SolManageTokenToggle on:icToken={() => ontoggle?.()} />
+					<SolManageTokenToggle />
 				{/if}
 			</span>
 		{/snippet}

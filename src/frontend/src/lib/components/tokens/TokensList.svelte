@@ -23,15 +23,14 @@
 	import type { ExchangesData } from '$lib/types/exchange';
 	import { onMount } from 'svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import type { Token, TokenUi } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
-	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { toastsShow } from '$lib/stores/toasts.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
@@ -44,11 +43,7 @@
 	import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
-	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
-	import { get } from 'svelte/store';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import type { EthereumNetwork } from '$eth/types/network';
-	import type { SolanaNetwork } from '$sol/types/network';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -112,9 +107,8 @@
 			: { initialSearch: undefined, message: undefined }
 	);
 
-	let modifiedTokens: Record<string, Token> = $state({});
-
 	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+		let modifiedTokens: Record<string, Token> = {};
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 
@@ -180,9 +174,9 @@
 		saveIcrcCustomTokens({
 			tokens,
 			progress,
-			modalNext: () => null,
+			modalNext: () => {},
 			onSuccess: close,
-			onError: () => null,
+			onError: () => {},
 			identity: $authIdentity
 		});
 
@@ -190,9 +184,9 @@
 		saveErc20UserTokens({
 			tokens,
 			progress,
-			modalNext: () => null,
+			modalNext: () => {},
 			onSuccess: close,
-			onError: () => null,
+			onError: () => {},
 			identity: $authIdentity
 		});
 
@@ -200,9 +194,9 @@
 		saveSplCustomTokens({
 			tokens,
 			progress,
-			modalNext: () => null,
+			modalNext: () => {},
 			onSuccess: close,
-			onError: () => null,
+			onError: () => {},
 			identity: $authIdentity
 		});
 </script>
