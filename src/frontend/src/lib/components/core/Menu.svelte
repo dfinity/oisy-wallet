@@ -8,6 +8,7 @@
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
+	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -42,7 +43,6 @@
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsShow } from '$lib/stores/toasts.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -66,17 +66,7 @@
 	const hidePopover = () => (visible = false);
 
 	const handlePrivacyToggle = () => {
-		const nextValue = !$isPrivacyMode;
-
-		setPrivacyMode(nextValue);
-
-		toastsShow({
-			text: nextValue
-				? $i18n.navigation.text.privacy_mode_enabled
-				: $i18n.navigation.text.privacy_mode_disabled,
-			level: 'info',
-			duration: 2000
-		});
+		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true });
 	};
 
 	const settingsRoute = $derived(isRouteSettings(page));
@@ -109,7 +99,7 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div
-		class="max-w-68 mb-1 flex flex-col gap-1"
+		class="mb-1 flex max-w-80 flex-col gap-1"
 		data-tid={NAVIGATION_MENU}
 		onclick={hidePopover}
 		role="none"
@@ -221,24 +211,31 @@
 		{/if}
 	</div>
 
-	<Hr />
+	{#if I18N_ENABLED || $authSignedIn}
+		<Hr />
 
-	<div class="max-w-68 flex flex-col gap-3 pt-3">
-		{#if I18N_ENABLED}
-			<MenuLanguageSelector />
-		{/if}
-
-		{#if $authSignedIn}
+		<div class="flex max-w-80 flex-col gap-5 py-5">
 			{#if I18N_ENABLED}
-				<Hr />
+				<MenuLanguageSelector />
 			{/if}
 
+			{#if $authSignedIn}
+				<MenuThemeSelector />
+			{/if}
+		</div>
+	{/if}
+
+	{#if $authSignedIn}
+		<Hr />
+
+		<div class="flex max-w-80 flex-col gap-3 pt-3">
 			<SignOut on:icLogoutTriggered={hidePopover} />
 
 			<Hr />
+
 			<span class="text-center text-sm text-tertiary">
 				<LicenseLink noUnderline />
 			</span>
-		{/if}
-	</div>
+		</div>
+	{/if}
 </Popover>

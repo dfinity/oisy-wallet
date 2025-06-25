@@ -9,7 +9,7 @@ describe('ShortcutGuard', () => {
 		const keyDownEvent = new KeyboardEvent('keydown', { key: 'p' });
 
 		beforeEach(() => {
-			setPrivacyMode(false);
+			setPrivacyMode({ enabled: false });
 		});
 
 		it('should turn on and off privacy mode on keyboard click', () => {
