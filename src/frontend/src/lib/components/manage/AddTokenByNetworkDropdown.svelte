@@ -19,7 +19,12 @@
 	{/snippet}
 
 	{#snippet content()}
-		<div id="network" class="mt-1 pt-0.5" class:disabled>
+		<div
+			id="network"
+			class="network mt-1 pt-0.5"
+			class:disabled
+			style={`${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
+		>
 			<Dropdown name="network" bind:selectedValue={networkName} {disabled}>
 				<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
 					>{$i18n.tokens.manage.placeholder.select_network}</option

@@ -14,12 +14,14 @@
 	>{$i18n.tokens.import.text.ledger_canister_id}:
 	<span class="text-brand-primary-alt">*</span></label
 >
-<InputText
-	name="ledgerCanisterId"
-	bind:value={ledgerCanisterId}
-	disabled={editMode}
-	placeholder="_____-_____-_____-_____-cai"
-/>
+<div style={`${editMode ? '--input-background: var(--color-background-disabled);' : ''}`}>
+	<InputText
+		name="ledgerCanisterId"
+		bind:value={ledgerCanisterId}
+		disabled={editMode}
+		placeholder="_____-_____-_____-_____-cai"
+	/>
+</div>
 
 <label for="indexCanisterId" class="mt-6 block font-bold"
 	>{$i18n.tokens.import.text.index_canister_id}:</label
