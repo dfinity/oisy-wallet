@@ -423,14 +423,14 @@ Location: `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`
 
 Action: Add your constant to the `SUPPORTED_EVM_NETWORKS` list:
 
-  ```ts
-  export const SUPPORTED_EVM_NETWORKS = [
-  	...SUPPORTED_BASE_NETWORKS,
-  	...SUPPORTED_BSC_NETWORKS,
-  	...SUPPORTED_POLYGON_NETWORKS,
-  	...SUPPORTED_<NETWORK>_NETWORKS
-  ];
-  ```
+```ts
+export const SUPPORTED_EVM_NETWORKS = [
+	...SUPPORTED_BASE_NETWORKS,
+	...SUPPORTED_BSC_NETWORKS,
+	...SUPPORTED_POLYGON_NETWORKS,
+	...(SUPPORTED_ < NETWORK > _NETWORKS)
+];
+```
 
 #### 2. Add the Token to `SUPPORTED_EVM_TOKENS`
 
@@ -443,7 +443,7 @@ export const SUPPORTED_EVM_TOKENS = [
 	...SUPPORTED_BASE_TOKENS,
 	...SUPPORTED_BSC_TOKENS,
 	...SUPPORTED_POLYGON_TOKENS,
-	...SUPPORTED_<NETWORK>_TOKENS
+	...(SUPPORTED_ < NETWORK > _TOKENS)
 ];
 ```
 
