@@ -52,13 +52,13 @@ describe('sol-rpc.api', () => {
 			});
 		});
 
-		it('should returned unparsed account info', async () => {
+		it('should returned undefined for unparsed account info', async () => {
 			const mockData = { legacyBinary: 'binary-string' };
 			solRpcCanisterMock.getAccountInfo.mockResolvedValue({ ...mockAccountInfo, data: mockData });
 
 			const result = await getAccountInfo(params);
 
-			expect(result).toEqual({ ...mockAccountInfo, data: mockData });
+			expect(result).toBeUndefined();
 		});
 
 		it('should handle undefined account info', async () => {

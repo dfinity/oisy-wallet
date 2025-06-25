@@ -21,11 +21,11 @@ export const getAccountInfo = async ({
 	const accountInfo = await getAccountInfo(rest);
 
 	if (isNullish(accountInfo)) {
-		return accountInfo;
+		return;
 	}
 
 	if (!('json' in accountInfo.data)) {
-		return accountInfo;
+		return;
 	}
 
 	return {
