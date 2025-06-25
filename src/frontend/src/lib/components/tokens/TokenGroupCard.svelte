@@ -53,8 +53,8 @@
 			// Only include tokens with a balance
 			return (
 				(token.usdBalance ?? 0) > 0 ||
-				// If the total balance is 0, only include CK or specific tokens
-				(totalBalance === 0 && (isCkToken(token) || showTokenInGroup(token)))
+				// If the total balance is 0, show all
+				totalBalance === 0
 			);
 		})
 	);
