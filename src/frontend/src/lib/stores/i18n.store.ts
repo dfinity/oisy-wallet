@@ -1,3 +1,4 @@
+import { I18N_ENABLED } from '$env/i18n';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
 import { Languages } from '$lib/types/languages';
@@ -45,7 +46,9 @@ const initI18n = (): I18nStore => {
 		subscribe,
 
 		init: async () => {
-			const lang = get<Languages>({ key: 'lang' }) ?? getDefaultLang();
+			const lang = I18N_ENABLED
+				? (get<Languages>({ key: 'lang' }) ?? getDefaultLang())
+				: Languages.ENGLISH;
 
 			if (lang === getDefaultLang()) {
 				saveLang(lang);

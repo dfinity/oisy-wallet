@@ -211,30 +211,31 @@
 		{/if}
 	</div>
 
-	<Hr />
-
-	<div class="flex max-w-80 flex-col gap-5 py-5">
-		{#if I18N_ENABLED}
-			<MenuLanguageSelector />
-		{/if}
-
-		{#if $authSignedIn}
-			<MenuThemeSelector />
-		{/if}
-	</div>
-
-	{#if I18N_ENABLED && $authSignedIn}
+	{#if I18N_ENABLED || $authSignedIn}
 		<Hr />
+
+		<div class="flex max-w-80 flex-col gap-5 py-5">
+			{#if I18N_ENABLED}
+				<MenuLanguageSelector />
+			{/if}
+
+			{#if $authSignedIn}
+				<MenuThemeSelector />
+			{/if}
+		</div>
 	{/if}
 
-	<div class="flex max-w-80 flex-col gap-3 pt-3">
-		{#if $authSignedIn}
+	{#if $authSignedIn}
+		<Hr />
+
+		<div class="flex max-w-80 flex-col gap-3 pt-3">
 			<SignOut on:icLogoutTriggered={hidePopover} />
 
 			<Hr />
+
 			<span class="text-center text-sm text-tertiary">
 				<LicenseLink noUnderline />
 			</span>
-		{/if}
-	</div>
+		</div>
+	{/if}
 </Popover>
