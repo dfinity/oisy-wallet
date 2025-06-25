@@ -1,3 +1,6 @@
+use crate::bitcoin_api::get_current_fee_percentiles;
+use shared::types::bitcoin::BtcGetFeePercentilesResponse;
+use shared::types::result_types::BtcGetFeePercentilesResult;
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
@@ -24,9 +27,9 @@ use shared::{
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
-            BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
-            BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
-            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+            BtcGetFeePercentilesRequest, BtcGetPendingTransactionsError,
+            BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest, PendingTransaction,
+            SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
         contact::{Contact, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
@@ -371,6 +374,17 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+
+pub async fn btc_get_current_fee_percentiles(
+    params: BtcGetFeePercentilesRequest,
+) -> BtcGetFeePercentilesResult {
+    match get_current_fee_percentiles(params.network).await {
+        Ok(fee_percentiles) => Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into(),
+        Err(err) => {
+            BtcGetFeePercentilesResult::Err(SelectedUtxosFeeError::InternalError { msg: err })
+        }
+    }
+}
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
 ///
