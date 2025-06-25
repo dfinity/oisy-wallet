@@ -1,4 +1,3 @@
-import { selectUtxosFee as selectUtxosFeeReview } from '$btc/services/btc-review.services';
 import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
@@ -12,8 +11,6 @@ import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
 
-const DEFAULT_MIN_CONFIRMATIONS = 6;
-
 interface BtcSendServiceParams {
 	identity: Identity;
 	network: BitcoinNetwork;
@@ -25,28 +22,6 @@ export type SendBtcParams = BtcSendServiceParams & {
 	source: BtcAddress;
 	utxosFee: UtxosFee;
 	onProgress?: () => void;
-};
-
-export const selectUtxosFeeForSend = async ({
-	identity,
-	network,
-	amount,
-	address
-}: BtcSendServiceParams & {
-	address: string;
-}): Promise<UtxosFee> => {
-	// Use our new frontend service instead of backend call
-	const result = await selectUtxosFeeReview({
-		identity,
-		network,
-		amount,
-		address
-	});
-
-	return {
-		feeSatoshis: result.feeSatoshis,
-		utxos: result.utxos
-	};
 };
 
 export const sendBtc = async ({

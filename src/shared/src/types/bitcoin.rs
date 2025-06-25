@@ -1,8 +1,7 @@
 pub mod impls;
 
 use candid::CandidType;
-use ic_cdk::api::management_canister::bitcoin::MillisatoshiPerByte;
-use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Utxo};
+use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
 use serde::Deserialize;
 
 /// The maximum length of a bitcoin address, expressed as a string.

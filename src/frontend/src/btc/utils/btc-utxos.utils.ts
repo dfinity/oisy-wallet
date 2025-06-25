@@ -4,7 +4,19 @@ import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, uint8ArrayToHexString } from '@dfinity/utils';
+
+/**
+ * Converts a UTXO transaction ID (Uint8Array) to a hex string
+ */
+export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
+	uint8ArrayToHexString(txid);
+
+/**
+ * Extracts transaction IDs from an array of UTXOs
+ */
+export const extractUtxoTxIds = (utxos: Utxo[]): string[] =>
+	utxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
 
 /**
  * Fetches UTXOs for a given Bitcoin address using query call for better performance
@@ -144,7 +156,7 @@ export const estimateTransactionSize = ({
  * Main function to select UTXOs for a transaction with fee consideration
  * This function iteratively selects UTXOs and calculates fees until sufficient funds are found
  */
-export const selectUtxosWithFee = ({
+export const calculateUtxoSelection = ({
 	availableUtxos,
 	amountSatoshis,
 	feeRateSatoshisPerByte
@@ -215,32 +227,8 @@ export const filterLockedUtxos = ({
 }: {
 	utxos: Utxo[];
 	pendingTxIds: string[];
-}): Utxo[] => filterUtxos({ utxos, options: { excludeTxIds: pendingTxIds } });
-
-/**
- * Handles pagination for UTXO queries (for edge case of >1000 UTXOs)
- * Most users will have <1000 UTXOs, so this is mainly for completeness
- */
-export const getAllUtxosPaginated = async (params: {
-	identity: OptionIdentity;
-	address: string;
-	network: BitcoinNetwork;
-	minterCanisterId: CanisterIdText;
-	maxBatchSize?: number;
-}): Promise<Utxo[]> => {
-	const { maxBatchSize = 1000, ...baseParams } = params;
-
-	// For now, we'll implement basic single-call logic
-	// This can be extended later if pagination becomes necessary
-	const utxos = await getUtxos(baseParams);
-
-	// If we get exactly the max batch size, there might be more UTXOs
-	// In a full implementation, we'd make additional calls with pagination
-	if (utxos.length >= maxBatchSize) {
-		console.warn(
-			`Retrieved ${utxos.length} UTXOs. There might be more available. Consider implementing pagination.`
-		);
-	}
-
-	return utxos;
-};
+}): Utxo[] =>
+	utxos.filter((utxo) => {
+		const txIdHex = utxoTxIdToString(utxo.outpoint.txid);
+		return !pendingTxIds.includes(txIdHex);
+	});

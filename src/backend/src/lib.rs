@@ -1,6 +1,3 @@
-use crate::bitcoin_api::get_current_fee_percentiles;
-use shared::types::bitcoin::BtcGetFeePercentilesResponse;
-use shared::types::result_types::BtcGetFeePercentilesResult;
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
@@ -27,9 +24,10 @@ use shared::{
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
-            BtcGetFeePercentilesRequest, BtcGetPendingTransactionsError,
-            BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest, PendingTransaction,
-            SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+            BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
+            BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
+            BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
+            SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
         contact::{Contact, CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
@@ -41,10 +39,11 @@ use shared::{
         },
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
-            BtcAddPendingTransactionResult, BtcGetPendingTransactionsResult,
-            BtcSelectUserUtxosFeeResult, CreateContactResult, CreatePowChallengeResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
+            BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
+            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
+            UpdateContactResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -68,6 +67,7 @@ use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::assert_token_enabled_is_some,
+    bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     types::{ContactMap, PowChallengeMap},

@@ -1,4 +1,3 @@
-use crate::types::bitcoin::BtcGetFeePercentilesResponse;
 use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
@@ -15,6 +14,7 @@ use super::{
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
+    bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
     network::SaveTestnetsSettingsError,
     user_profile::AddUserCredentialError,
