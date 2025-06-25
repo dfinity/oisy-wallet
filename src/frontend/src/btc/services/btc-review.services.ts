@@ -11,7 +11,7 @@ import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
-import { assertAmount, assertArrayNotEmpty, assertStringNotEmpty } from '$lib/utils/asserts';
+import { assertArrayNotEmpty, assertStringNotEmpty } from '$lib/utils/asserts';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -46,7 +46,7 @@ export const prepareTransactionUtxos = async ({
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
 	assertNonNullish(identity);
 	console.warn('amount: ', amount);
-	assertAmount({ amount });
+	// assertAmount({ amount });
 	assertStringNotEmpty({ value: source, message: 'Source address is required' });
 
 	const minterCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
