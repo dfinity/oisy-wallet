@@ -2,9 +2,9 @@
 	import IconSprinkles from '$lib/components/icons/IconSprinkles.svelte';
 	import IconUpRight from '$lib/components/icons/lucide/IconUpRight.svelte';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { TRACK_SPRINKLES_BANNER_CLICK } from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const handleSprinklesBannerClick = () => {
 		trackEvent({
