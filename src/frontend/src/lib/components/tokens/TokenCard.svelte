@@ -24,19 +24,20 @@
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
 	import { isSolanaToken } from '$sol/utils/token.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
+	import { isTokenUiGroup } from '$lib/utils/token-group.utils.js';
 
 	let {
 		data,
 		testIdPrefix = TOKEN_CARD,
 		asNetwork = false,
 		hover = false,
-		ontoggle
+		onToggle
 	}: {
 		data: CardData;
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
 		hover?: boolean;
-		ontoggle?: (t: CustomEvent<Token>) => void;
+		onToggle?: (t: CustomEvent<Token>) => void;
 	} = $props();
 
 	const dispatch = createEventDispatcher();
@@ -45,7 +46,9 @@
 		`${testIdPrefix}-${data.symbol}${nonNullish(data.network) ? `-${data.network.id.description}` : ''}`
 	);
 
-	let token: TokenToggleable<Token> = $derived(data as TokenToggleable<Token>);
+	let token: TokenToggleable<Token> | undefined = $derived(
+		nonNullish(onToggle) ? (data as TokenToggleable<Token>) : undefined
+	);
 </script>
 
 <div class="flex w-full flex-col">
@@ -120,11 +123,11 @@
 
 		{#snippet descriptionEnd()}
 			<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
-				{#if nonNullish(ontoggle)}
+				{#if nonNullish(onToggle) && nonNullish(token)}
 					{#if icTokenIcrcCustomToken(token)}
-						<IcManageTokenToggle {token} on:icToken={(t) => ontoggle(t)} />
+						<IcManageTokenToggle {token} on:icToken={(t) => onToggle(t)} />
 					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
-						<ManageTokenToggle {token} on:icShowOrHideToken={(t) => ontoggle(t)} />
+						<ManageTokenToggle {token} on:icShowOrHideToken={(t) => onToggle(t)} />
 					{:else if isBitcoinToken(token)}
 						<BtcManageTokenToggle />
 					{:else if isSolanaToken(token)}
