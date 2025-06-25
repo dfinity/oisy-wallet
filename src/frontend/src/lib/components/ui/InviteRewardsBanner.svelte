@@ -3,6 +3,17 @@
 	import IconUpRight from '$lib/components/icons/lucide/IconUpRight.svelte';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_SPRINKLES_BANNER_CLICK } from '$lib/constants/analytics.contants';
+
+	const handleSprinklesBannerClick = () => {
+		trackEvent({
+			name: TRACK_SPRINKLES_BANNER_CLICK,
+			metadata: {
+				source: 'login-page'
+			}
+		});
+	};
 </script>
 
 <a
@@ -10,6 +21,7 @@
 	target="_blank"
 	rel="noopener noreferrer"
 	class="invite-rewards-banner"
+	onclick={handleSprinklesBannerClick}
 >
 	<div class="banner-content">
 		<!-- Sprinkles Animation -->
