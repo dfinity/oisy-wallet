@@ -16,7 +16,7 @@
 
 		if (!isInputField) {
 			if (e.key.toLowerCase() === $i18n.shortcuts.privacy_mode.toLowerCase() && !hasModifier) {
-				setPrivacyMode(!$isPrivacyMode);
+				setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true });
 			}
 		}
 	};
