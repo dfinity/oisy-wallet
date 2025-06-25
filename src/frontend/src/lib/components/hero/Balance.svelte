@@ -11,6 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { Tooltip } from '@dfinity/gix-components';
 
 	interface Props {
 		token: OptionTokenUi;
@@ -48,16 +49,20 @@
 	</output>
 	<span class="text-xl font-bold opacity-50">
 		{#if !$isPrivacyMode}
-			<TokenExchangeBalance
-				balance={token?.balance}
-				usdBalance={token?.usdBalance}
-				nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
-			/>
+			<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+				<TokenExchangeBalance
+					balance={token?.balance}
+					usdBalance={token?.usdBalance}
+					nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
+				/>
+			</Tooltip>
 		{:else}
-			<span class="flex items-center justify-center gap-2">
-				<IconEyeOff />
-				{$i18n.hero.text.hidden_balance}
-			</span>
+			<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+				<span class="flex items-center justify-center gap-2">
+					<IconEyeOff />
+					{$i18n.hero.text.hidden_balance}
+				</span>
+			</Tooltip>
 		{/if}
 	</span>
 </span>

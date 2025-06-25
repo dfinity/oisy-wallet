@@ -8,6 +8,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
+	import { Tooltip } from '@dfinity/gix-components';
 
 	interface Props {
 		hideBalance?: boolean;
@@ -38,11 +39,18 @@
 			</span>
 		{/if}
 	</output>
-	<span class="flex items-center gap-2 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
-		{#if hideBalance}
-			<IconEyeOff />{$i18n.hero.text.hidden_balance}
-		{:else}
+
+	{#if hideBalance}
+		<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+			<span
+				class="flex items-center gap-2 text-xl font-medium text-brand-secondary-alt sm:max-w-none"
+			>
+				<IconEyeOff />{$i18n.hero.text.hidden_balance}
+			</span>
+		</Tooltip>
+	{:else}
+		<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
 			{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
-		{/if}
-	</span>
+		</Tooltip>
+	{/if}
 </span>
