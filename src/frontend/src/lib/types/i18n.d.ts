@@ -176,6 +176,14 @@ interface I18nDapps {
 		tags: string;
 		website: string;
 	};
+	categories: {
+		defi: string;
+		social_media: string;
+		verifiable_credentials: string;
+		staking: string;
+		walletconnect: string;
+		game: string;
+	};
 	descriptions: {
 		kongswap: {
 			name: string;
@@ -223,6 +231,7 @@ interface I18nDapps {
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
+		taggr: { name: string; one_liner: string; call_to_action: string; description: string };
 	};
 }
 
@@ -246,6 +255,7 @@ interface I18nRewards {
 		youre_eligible: string;
 		ongoing: string;
 		ended: string;
+		banner_text: string;
 	};
 	requirements: {
 		requirements_title: string;
@@ -1146,6 +1156,23 @@ interface I18nWelcome {
 	description: string;
 }
 
+interface I18nTemporal {
+	seconds_to_duration: {
+		year: string;
+		year_plural: string;
+		month: string;
+		month_plural: string;
+		day: string;
+		day_plural: string;
+		hour: string;
+		hour_plural: string;
+		minute: string;
+		minute_plural: string;
+		second: string;
+		second_plural: string;
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -1183,4 +1210,5 @@ interface I18n {
 	activity: I18nActivity;
 	earning: I18nEarning;
 	welcome: I18nWelcome;
+	temporal: I18nTemporal;
 }

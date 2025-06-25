@@ -1,9 +1,11 @@
 import {
 	syncPowNextAllowance,
-	syncPowProgress,
-	type PowProtectorWorker,
-	type PowProtectorWorkerInitResult
-} from '$icp/services/pow-protector-listener';
+	syncPowProgress
+} from '$icp/services/pow-protector-listener.services';
+import type {
+	PowProtectorWorker,
+	PowProtectorWorkerInitResult
+} from '$icp/types/pow-protector-listener';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,
@@ -30,21 +32,16 @@ export const initPowProtectorWorker: PowProtectorWorker =
 
 			switch (msg) {
 				case 'syncPowProgress': {
-					// Check if data.data exists and has proper structure
-					if (data.data && 'progress' in data.data) {
-						syncPowProgress({
-							data: data.data
-						});
-					}
+					syncPowProgress({
+						data: data.data as PostMessageDataResponsePowProtectorProgress
+					});
 					return;
 				}
 				case 'syncPowNextAllowance': {
 					// Check if data.data exists and has proper structure
-					if (data.data && 'nextAllowanceMs' in data.data) {
-						syncPowNextAllowance({
-							data: data.data
-						});
-					}
+					syncPowNextAllowance({
+						data: data.data as PostMessageDataResponsePowProtectorNextAllowance
+					});
 					return;
 				}
 			}
