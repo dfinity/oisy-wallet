@@ -7,6 +7,7 @@
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
+	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -16,6 +17,7 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -27,8 +29,6 @@
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
-	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
-	import { tokensToPin } from '$lib/derived/tokens.derived';
 
 	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
 
