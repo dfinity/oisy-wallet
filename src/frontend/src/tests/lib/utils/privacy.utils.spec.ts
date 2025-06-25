@@ -64,4 +64,5 @@ describe('setPrivacyMode', () => {
 			duration: 7000
 		});
 	});
+	})
 });
