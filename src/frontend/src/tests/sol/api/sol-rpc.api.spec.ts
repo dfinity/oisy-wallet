@@ -6,7 +6,7 @@ import { mockAccountInfo, mockParsedAccountInfo } from '$tests/mocks/sol-rpc.moc
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mock } from 'vitest-mock-extended';
 
-describe('icp-ledger.api', () => {
+describe('sol-rpc.api', () => {
 	const solRpcCanisterMock = mock<SolRpcCanister>();
 
 	beforeEach(() => {
