@@ -13,17 +13,32 @@
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import type { Token } from '$lib/types/token';
+	import type { TokenToggleable } from '$lib/types/token-toggleable';
+	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
+	import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
+	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
+	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
+	import { isSolanaToken } from '$sol/utils/token.utils';
+	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 
 	let {
 		data,
 		testIdPrefix = TOKEN_CARD,
 		asNetwork = false,
-		hover = false
+		hover = false,
+		togglable = false,
+		ontoggle
 	}: {
 		data: CardData;
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
 		hover?: boolean;
+		togglable?: boolean;
+		ontoggle?: (t: CustomEvent<Token>) => void;
 	} = $props();
 
 	const dispatch = createEventDispatcher();
@@ -31,6 +46,8 @@
 	let testId = $derived(
 		`${testIdPrefix}-${data.symbol}${nonNullish(data.network) ? `-${data.network.id.description}` : ''}`
 	);
+
+	let token: TokenToggleable<Token> = $derived(data as TokenToggleable<Token>);
 </script>
 
 <div class="flex w-full flex-col">
@@ -75,16 +92,18 @@
 		{/snippet}
 
 		{#snippet titleEnd()}
-			<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
-				<TokenBalance {data} hideBalance={$isPrivacyMode}>
-					{#snippet privacyBalance()}
-						<IconDots
-							variant={asNetwork ? 'sm' : 'md'}
-							styleClass={asNetwork ? 'my-4.25' : 'pb-4'}
-						/>
-					{/snippet}
-				</TokenBalance>
-			</span>
+			{#if !togglable}
+				<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
+					<TokenBalance {data} hideBalance={$isPrivacyMode}>
+						{#snippet privacyBalance()}
+							<IconDots
+								variant={asNetwork ? 'sm' : 'md'}
+								styleClass={asNetwork ? 'my-4.25' : 'pb-4'}
+							/>
+						{/snippet}
+					</TokenBalance>
+				</span>
+			{/if}
 		{/snippet}
 
 		{#snippet description()}
@@ -103,8 +122,16 @@
 
 		{#snippet descriptionEnd()}
 			<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
-				{#if !$isPrivacyMode}
+				{#if !$isPrivacyMode && !togglable}
 					<ExchangeTokenValue {data} />
+				{:else if icTokenIcrcCustomToken(token)}
+					<IcManageTokenToggle {token} on:icToken={(t) => ontoggle?.(t)} />
+				{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
+					<ManageTokenToggle {token} on:icShowOrHideToken={(t) => ontoggle?.(t)} />
+				{:else if isBitcoinToken(token)}
+					<BtcManageTokenToggle />
+				{:else if isSolanaToken(token)}
+					<SolManageTokenToggle />
 				{/if}
 			</span>
 		{/snippet}
