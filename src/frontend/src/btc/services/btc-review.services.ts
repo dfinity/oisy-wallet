@@ -45,6 +45,7 @@ export const prepareTransactionUtxos = async ({
 	source
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
 	assertNonNullish(identity);
+	console.warn('amount: ', amount);
 	assertAmount({ amount });
 	assertStringNotEmpty({ value: source, message: 'Source address is required' });
 
