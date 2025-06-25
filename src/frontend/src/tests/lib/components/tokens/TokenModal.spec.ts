@@ -26,6 +26,10 @@ vi.mock('$icp/services/icrc.services', () => ({
 	loadCustomTokens: vi.fn()
 }));
 
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
+
 describe('TokenModal', () => {
 	const mockRemoveUserToken = () =>
 		vi.spyOn(backendApi, 'removeUserToken').mockResolvedValue(undefined);
