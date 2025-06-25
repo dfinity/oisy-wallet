@@ -1,16 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
-	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
-	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-	import { isTokenErc20UserToken, isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
+	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
+	import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
-	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -20,7 +16,6 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -30,10 +25,10 @@
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
-	import { isSolanaToken } from '$sol/utils/token.utils';
+	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
 
 	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
 
@@ -171,15 +166,7 @@
 				{/snippet}
 
 				{#snippet action()}
-					{#if icTokenIcrcCustomToken(token)}
-						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
-						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
-					{:else if isBitcoinToken(token)}
-						<BtcManageTokenToggle />
-					{:else if isSolanaToken(token)}
-						<SolManageTokenToggle />
-					{/if}
+					<EnableTokenToggle {token} {onToggle} />
 				{/snippet}
 			</LogoButton>
 		{/snippet}
