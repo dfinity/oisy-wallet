@@ -547,7 +547,7 @@ If the new network supports ERC-20 tokens, they can be included among the suppor
 
 To do this, the following steps are required:
 
-- Create a folder: `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/` named `tokens-erc20`
+- Create a folder in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/` named `tokens-erc20`
 - For each token:
 
   - Create a file named: `tokens.<token>.env.ts`
