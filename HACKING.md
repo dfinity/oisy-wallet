@@ -328,7 +328,7 @@ Location: `src/frontend/src/env/networks/networks-evm/`
   - `EXCHANGE` (Coingecko ID) - Update the `CoingeckoPlatformId` type if needed
   - `BUY` (Onramper ID) - Update the `OnramperNetworkId` type if needed
 
-- Add testnet object(s) If there are testnets, create a similar object for each one.
+- Add testnet object(s): if there are testnets, create a similar object for each one.
 
 Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTED_<network>_NETWORK_IDS` exist and are accordingly updated, at the end of the file.
 
