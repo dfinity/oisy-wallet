@@ -419,7 +419,7 @@ After creating your network and token objects, make sure they are registered in 
 
 #### 1. Add the Network to `SUPPORTED_EVM_NETWORKS`
 
-- Location: `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`
+Location: `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`
 
 - Action: Add your constant to the SUPPORTED_EVM_NETWORKS list:
 
