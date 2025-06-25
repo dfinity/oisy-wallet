@@ -120,9 +120,7 @@
 
 		{#snippet descriptionEnd()}
 			<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
-				{#if !$isPrivacyMode}
-					<ExchangeTokenValue {data} />
-				{:else if nonNullish(ontoggle)}
+				{#if nonNullish(ontoggle)}
 					{#if icTokenIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={(t) => ontoggle(t)} />
 					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
@@ -132,6 +130,8 @@
 					{:else if isSolanaToken(token)}
 						<SolManageTokenToggle />
 					{/if}
+				{:else if !$isPrivacyMode}
+					<ExchangeTokenValue {data} />
 				{/if}
 			</span>
 		{/snippet}
