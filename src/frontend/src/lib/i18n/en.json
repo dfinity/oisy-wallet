@@ -301,6 +301,12 @@
 				"name": "WaterNeuron",
 				"one_liner": "ICP liquid staking - Maximize your capital efficiency by liquid staking your ICP.",
 				"description": "WaterNeuron offers a more capital-efficient method of staking by allowing you to maintain exposure to ICP staking rewards while keeping your tokens liquid. This approach simplifies the staking process, removing the need to select specific validators to maximize rewards."
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "Decentralized social media - post, earn, own.",
+				"call_to_action": "Go to Taggr",
+				"description": "Taggr is a fully decentralized social media platform that lives on a public distributed compute network powered by the Internet Computer. Unlike traditional social media platforms controlled by corporations, Taggr is owned and governed entirely by its users."
 			}
 		}
 	},
