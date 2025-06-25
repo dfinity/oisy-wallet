@@ -1,10 +1,13 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { loadCustomTokens } from '$icp/services/icrc.services';
 import * as backendApi from '$lib/api/backend.api';
 import * as idbTokensApi from '$lib/api/idb-tokens.api';
 import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 import {
 	TOKEN_MODAL_CONTENT_DELETE_BUTTON,
-	TOKEN_MODAL_DELETE_BUTTON
+	TOKEN_MODAL_DELETE_BUTTON,
+	TOKEN_MODAL_INDEX_CANISTER_ID_INPUT,
+	TOKEN_MODAL_SAVE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as authServices from '$lib/services/auth.services';
 import { modalStore } from '$lib/stores/modal.store';
@@ -13,18 +16,35 @@ import type { Token } from '$lib/types/token';
 import * as navUtils from '$lib/utils/nav.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { MOCK_CANISTER_ID_1 } from '$tests/mocks/exchanges.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
+
+vi.mock('$icp/services/icrc.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
+
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
 
 describe('TokenModal', () => {
-	const mockBackendApi = () => vi.spyOn(backendApi, 'removeUserToken').mockResolvedValue(undefined);
+	const mockRemoveUserToken = () =>
+		vi.spyOn(backendApi, 'removeUserToken').mockResolvedValue(undefined);
+	const mockSetCustomToken = () =>
+		vi.spyOn(backendApi, 'setCustomToken').mockResolvedValue(undefined);
 	const mockIdbTokensApi = () =>
 		vi.spyOn(idbTokensApi, 'deleteIdbEthToken').mockResolvedValue(undefined);
 	const mockToastsShow = () => vi.spyOn(toastsStore, 'toastsShow').mockImplementation(vi.fn());
 	const mockToastsError = () => vi.spyOn(toastsStore, 'toastsError').mockImplementation(vi.fn());
 	const mockGoToRoot = () => vi.spyOn(navUtils, 'gotoReplaceRoot').mockImplementation(vi.fn());
+	const mockIcToken = {
+		...mockValidIcrcToken,
+		minterCanisterId: 'random id',
+		twinToken: mockValidIcrcToken
+	};
 
 	beforeEach(() => {
 		vi.resetAllMocks();
@@ -43,7 +63,7 @@ describe('TokenModal', () => {
 			}
 		});
 
-		const removeUserTokenMock = mockBackendApi();
+		const removeUserTokenMock = mockRemoveUserToken();
 		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
 		const idbTokensApi = mockIdbTokensApi();
@@ -63,6 +83,36 @@ describe('TokenModal', () => {
 		expect(gotoReplaceRoot).toHaveBeenCalledOnce();
 	});
 
+	it('saves token after all required steps', async () => {
+		const { getByTestId, getByText } = render(TokenModal, {
+			props: {
+				token: {
+					...mockIcToken,
+					enabled: true
+				} as Token,
+				isEditable: true
+			}
+		});
+
+		const setCustomTokenMock = mockSetCustomToken();
+		const toasts = mockToastsShow();
+		mockAuthStore();
+
+		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
+
+		await fireEvent.click(getByText(en.tokens.details.missing_index_canister_id_button));
+
+		await fireEvent.input(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_INPUT), {
+			target: { value: MOCK_CANISTER_ID_1 }
+		});
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
+
+		expect(setCustomTokenMock).toHaveBeenCalledOnce();
+		expect(loadCustomTokens).toHaveBeenCalledOnce();
+		expect(toasts).toHaveBeenCalledOnce();
+	});
+
 	it('does not delete token if it is not erc20', async () => {
 		const { getByTestId, getByText, getAllByText } = render(TokenModal, {
 			props: {
@@ -71,7 +121,7 @@ describe('TokenModal', () => {
 			}
 		});
 
-		const removeUserTokenMock = mockBackendApi();
+		const removeUserTokenMock = mockRemoveUserToken();
 		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
 		const idbTokensApi = mockIdbTokensApi();
@@ -103,7 +153,7 @@ describe('TokenModal', () => {
 			}
 		});
 
-		const removeUserTokenMock = mockBackendApi();
+		const removeUserTokenMock = mockRemoveUserToken();
 		const toasts = mockToastsShow();
 		const gotoReplaceRoot = mockGoToRoot();
 		const idbTokensApi = mockIdbTokensApi();

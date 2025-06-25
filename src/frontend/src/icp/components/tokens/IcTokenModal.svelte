@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { allKnownIcrcTokensLedgerCanisterIds } from '$icp/derived/icrc.derived';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
@@ -18,7 +18,6 @@
 	let { fromRoute }: Props = $props();
 
 	let twinToken = $derived(($pageToken as OptionIcCkToken)?.twinToken);
-
 	let ckToken = $derived($pageToken as OptionIcCkToken);
 
 	let undeletableToken = $derived(
@@ -28,9 +27,16 @@
 				)
 			: true
 	);
+
+	let uneditableToken = $derived(undeletableToken || !isEmptyString(ckToken?.indexCanisterId));
 </script>
 
-<TokenModal token={$pageToken} isDeletable={!undeletableToken} {fromRoute}>
+<TokenModal
+	token={$pageToken}
+	isDeletable={!undeletableToken}
+	isEditable={!uneditableToken}
+	{fromRoute}
+>
 	{#if nonNullish(twinToken)}
 		<ModalListItem>
 			{#snippet label()}
@@ -60,25 +66,6 @@
 					<Copy
 						value={ckToken.ledgerCanisterId}
 						text={$i18n.tokens.import.text.ledger_canister_id_copied}
-						inline
-					/>
-				{/snippet}
-			</ModalListItem>
-		{/if}
-
-		{#if nonNullish(ckToken.indexCanisterId)}
-			{@const { indexCanisterId: safeIndexCanisterId } = ckToken}
-
-			<ModalListItem>
-				{#snippet label()}
-					{$i18n.tokens.import.text.index_canister_id}
-				{/snippet}
-
-				{#snippet content()}
-					<output>{safeIndexCanisterId}</output>
-					<Copy
-						value={safeIndexCanisterId}
-						text={$i18n.tokens.import.text.index_canister_id_copied}
 						inline
 					/>
 				{/snippet}

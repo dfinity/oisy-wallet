@@ -45,5 +45,7 @@ export enum WizardStepsReceive {
 
 export enum TokenModalSteps {
 	CONTENT = 'content',
-	DELETE_CONFIRMATION = 'delete_confirnation'
+	DELETE_CONFIRMATION = 'delete_confirmation',
+	EDIT = 'edit',
+	EDIT_PROGRESS = 'edit_progress'
 }
