@@ -29,17 +29,39 @@ export const assertStringNotEmpty = (params: { value: string; message?: string }
 };
 
 /**
- * Asserts that an amount is valid (positive number)
+ * Asserts that an amount is valid (positive number or parseable positive string)
  * @param params - Object containing amount and optional message
- * @param params.amount - The amount to check
+ * @param params.amount - The amount to check (string or number)
  * @param params.message - Optional custom error message
- * @throws Error if amount is not a positive number
+ * @throws Error if amount is not a positive number or parseable positive string
  */
 export const assertAmount = (params: { amount: Amount; message?: string }): void => {
 	const { amount, message = 'Amount must be a positive number' } = params;
-	if (typeof amount !== 'number' || amount <= 0) {
-		throw new Error(message);
+
+	// Handle number type
+	if (typeof amount === 'number') {
+		if (amount <= 0 || !isFinite(amount)) {
+			throw new Error(message);
+		}
+		return;
 	}
+
+	// Handle string type
+	if (typeof amount === 'string') {
+		const trimmedAmount = amount.trim();
+		if (trimmedAmount === '') {
+			throw new Error(message);
+		}
+
+		const numericAmount = parseFloat(trimmedAmount);
+		if (isNaN(numericAmount) || numericAmount <= 0 || !isFinite(numericAmount)) {
+			throw new Error(message);
+		}
+		return;
+	}
+
+	// Neither string nor number
+	throw new Error(message);
 };
 
 /**
