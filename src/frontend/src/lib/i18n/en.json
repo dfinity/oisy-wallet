@@ -306,7 +306,11 @@
 				"name": "Taggr",
 				"one_liner": "Decentralized social media - post, earn, own.",
 				"call_to_action": "Go to Taggr",
-				"description": "Taggr is a fully decentralized social media platform that lives on a public distributed compute network powered by the Internet Computer. Unlike traditional social media platforms controlled by corporations, Taggr is owned and governed entirely by its users."
+				"description": "Taggr is a fully decentralized social media platform that lives on a public distributed compute network powered by the Internet Computer. Unlike traditional social media platforms controlled by corporations, Taggr is owned and governed entirely by its users.",
+				"carousel": {
+					"text": "Decentr. social media - post, earn, own.",
+					"call_to_action": "Learn more"
+				}
 			}
 		}
 	},

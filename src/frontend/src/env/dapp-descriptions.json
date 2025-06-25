@@ -265,6 +265,10 @@
 		"display": "Large",
 		"stats": "",
 		"logo": "/images/dapps/taggr.webp",
-		"screenshots": ["/images/dapps/taggr-screenshot.webp"]
+		"screenshots": ["/images/dapps/taggr-screenshot.webp"],
+		"carousel": {
+			"text": "dapps.descriptions.taggr.carousel.text",
+			"callToAction": "dapps.descriptions.taggr.carousel.call_to_action"
+		}
 	}
 ]

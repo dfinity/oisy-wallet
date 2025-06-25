@@ -306,7 +306,11 @@
 				"name": "Taggr",
 				"one_liner": "Dezentrale soziale Medien – posten, verdienen, besitzen.",
 				"call_to_action": "Gehe zu Taggr",
-				"description": "Taggr ist eine vollständig dezentralisierte Social-Media-Plattform, die auf einem öffentlichen, verteilten Computernetzwerk basiert, das vom Internetcomputer betrieben wird. Im Gegensatz zu herkömmlichen, von Unternehmen kontrollierten Social-Media-Plattformen gehört Taggr vollständig seinen Nutzern und wird von ihnen verwaltet."
+				"description": "Taggr ist eine vollständig dezentralisierte Social-Media-Plattform, die auf einem öffentlichen, verteilten Computernetzwerk basiert, das vom Internetcomputer betrieben wird. Im Gegensatz zu herkömmlichen, von Unternehmen kontrollierten Social-Media-Plattformen gehört Taggr vollständig seinen Nutzern und wird von ihnen verwaltet.",
+				"carousel": {
+					"text": "Dezentrale soziale Medien",
+					"call_to_action": "Mehr erfahren"
+				}
 			}
 		}
 	},
