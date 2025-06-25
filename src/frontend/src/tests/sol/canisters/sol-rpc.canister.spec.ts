@@ -1,5 +1,4 @@
 import type {
-	AccountInfo,
 	GetAccountInfoResult,
 	MultiGetAccountInfoResult,
 	RpcError,
@@ -11,9 +10,9 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { SolRpcCanister, networkToCluster } from '$sol/canisters/sol-rpc.canister';
 import { JSON_PARSED, SOL_RPC_CONFIG } from '$sol/canisters/sol-rpc.constants';
 import { SolRpcCanisterError } from '$sol/canisters/sol-rpc.errors';
-import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { SOLANA_NETWORK_TYPES } from '$sol/schema/network.schema';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockAccountInfo } from '$tests/mocks/sol-rpc.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -68,14 +67,6 @@ describe('sol-rpc.canister', () => {
 			const networkCluster = networkToCluster(network);
 			const mockParams = { address, network };
 
-			const mockAccountInfo: AccountInfo = {
-				executable: false,
-				owner: address,
-				lamports: 1000n,
-				data: { json: { space: 1n, parsed: 'parsed', program: SYSTEM_PROGRAM_ADDRESS } },
-				space: 1n,
-				rentEpoch: 123n
-			};
 			const mockResult: GetAccountInfoResult = { Ok: toNullable(mockAccountInfo) };
 			const mockResponse: MultiGetAccountInfoResult = { Consistent: mockResult };
 

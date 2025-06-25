@@ -11,4 +11,4 @@ export const rewardCampaigns: RewardCampaignDescription[] = parseResult.success
 export const SPRINKLES_SEASON_1_EPISODE_3_ID = 'sprinkles_s1e3';
 export const SPRINKLES_SEASON_1_EPISODE_4_ID = 'sprinkles_s1e4';
 
-export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = '';
+export const FEATURED_REWARD_CAROUSEL_SLIDE_ID = SPRINKLES_SEASON_1_EPISODE_4_ID;
