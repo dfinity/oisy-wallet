@@ -4,7 +4,6 @@ import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { vi, type MockInstance } from 'vitest';
 
-
 describe('setPrivacyMode', () => {
 	let spyToastsShow: MockInstance;
 
