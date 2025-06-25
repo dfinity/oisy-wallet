@@ -1,9 +1,9 @@
-import type { PowProtectorWorkerInitResult } from '$icp/services/pow-protector-listener';
 import {
 	syncPowNextAllowance,
 	syncPowProgress
 } from '$icp/services/pow-protector-listener.services';
 import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
+import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 import {
 	powProtectoreNextAllowanceStore,
 	powProtectoreProgressStore
