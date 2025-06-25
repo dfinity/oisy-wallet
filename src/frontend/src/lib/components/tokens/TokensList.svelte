@@ -28,6 +28,27 @@
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
+	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
+	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
+	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+	import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
+	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
+	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
+	import { get } from 'svelte/store';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type { EthereumNetwork } from '$eth/types/network';
+	import type { SolanaNetwork } from '$sol/types/network';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -90,6 +111,100 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	let modifiedTokens: Record<string, Token> = $state({});
+
+	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+		const { id: networkId } = network;
+		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
+
+		if (nonNullish(current)) {
+			modifiedTokens = { ...tokens };
+			return;
+		}
+
+		modifiedTokens = {
+			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
+			...tokens
+		};
+
+		const grouped = Object.values(modifiedTokens).reduce<{
+			icrc: IcrcCustomToken[];
+			erc20: Erc20UserToken[];
+			spl: SplTokenToggleable[];
+		}>(
+			({ icrc, erc20, spl }, token) => ({
+				icrc: [
+					...icrc,
+					...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
+				],
+				erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
+				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
+			}),
+			{ icrc: [], erc20: [], spl: [] }
+		);
+
+		saveTokens(grouped);
+	};
+
+	const saveTokens = async ({
+		icrc,
+		erc20,
+		spl
+	}: {
+		icrc: IcrcCustomToken[];
+		erc20: Erc20UserToken[];
+		spl: SplTokenToggleable[];
+	}) => {
+		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
+			toastsShow({
+				text: $i18n.tokens.manage.info.no_changes,
+				level: 'info',
+				duration: 5000
+			});
+
+			return;
+		}
+
+		await Promise.allSettled([
+			...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
+			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
+			...(spl.length > 0 ? [saveSpl(spl)] : [])
+		]);
+	};
+
+	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
+	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
+
+	const saveIcrc = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
+		saveIcrcCustomTokens({
+			tokens,
+			progress,
+			modalNext: () => null,
+			onSuccess: close,
+			onError: () => null,
+			identity: $authIdentity
+		});
+
+	const saveErc20 = (tokens: SaveUserToken[]): Promise<void> =>
+		saveErc20UserTokens({
+			tokens,
+			progress,
+			modalNext: () => null,
+			onSuccess: close,
+			onError: () => null,
+			identity: $authIdentity
+		});
+
+	const saveSpl = (tokens: SaveSplCustomToken[]): Promise<void> =>
+		saveSplCustomTokens({
+			tokens,
+			progress,
+			modalNext: () => null,
+			onSuccess: close,
+			onError: () => null,
+			identity: $authIdentity
+		});
 </script>
 
 <TokensDisplayHandler bind:tokens>
@@ -144,7 +259,7 @@
 					>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}
-								<TokenCard data={tokenOrGroup.token} togglable />
+								<TokenCard data={tokenOrGroup.token} togglable ontoggle={onToggle} />
 							{/if}
 						</div>
 					</div>

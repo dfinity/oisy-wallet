@@ -32,13 +32,15 @@
 		testIdPrefix = TOKEN_CARD,
 		asNetwork = false,
 		hover = false,
-		togglable = false
+		togglable = false,
+		ontoggle
 	}: {
 		data: CardData;
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
 		hover?: boolean;
 		togglable?: boolean;
+		ontoggle?: (t: CustomEvent<Token>) => void;
 	} = $props();
 
 	const dispatch = createEventDispatcher();
@@ -125,13 +127,13 @@
 				{#if !$isPrivacyMode && !togglable}
 					<ExchangeTokenValue {data} />
 				{:else if icTokenIcrcCustomToken(token)}
-					<IcManageTokenToggle {token} />
+					<IcManageTokenToggle {token} on:icToken={(t) => ontoggle?.(t)} />
 				{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
-					<ManageTokenToggle {token} />
+					<ManageTokenToggle {token} on:icShowOrHideToken={(t) => ontoggle?.(t)} />
 				{:else if isBitcoinToken(token)}
-					<BtcManageTokenToggle />
+					<BtcManageTokenToggle on:icToken={() => ontoggle?.()} />
 				{:else if isSolanaToken(token)}
-					<SolManageTokenToggle />
+					<SolManageTokenToggle on:icToken={() => ontoggle?.()} />
 				{/if}
 			</span>
 		{/snippet}
