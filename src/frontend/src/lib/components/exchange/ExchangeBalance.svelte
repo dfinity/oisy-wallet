@@ -9,6 +9,8 @@
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import { Tooltip } from '@dfinity/gix-components';
+	import { setPrivacyMode } from '$lib/utils/privacy.utils';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 
 	interface Props {
 		hideBalance?: boolean;
@@ -39,18 +41,22 @@
 			</span>
 		{/if}
 	</output>
-
-	{#if hideBalance}
-		<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
-			<span
-				class="flex items-center gap-2 text-xl font-medium text-brand-secondary-alt sm:max-w-none"
-			>
-				<IconEyeOff />{$i18n.hero.text.hidden_balance}
-			</span>
-		</Tooltip>
-	{:else}
-		<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
-			{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
-		</Tooltip>
-	{/if}
+	<span
+		class="flex flex-col items-center gap-4 text-xl font-medium text-brand-secondary-alt cursor-pointer"
+		role="button"
+		tabindex="0"
+		ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true })}
+	>
+		{#if hideBalance}
+			<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+				<span class="flex items-center gap-2 sm:max-w-none">
+					<IconEyeOff />{$i18n.hero.text.hidden_balance}
+				</span>
+			</Tooltip>
+		{:else}
+			<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+				{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
+			</Tooltip>
+		{/if}
+	</span>
 </span>

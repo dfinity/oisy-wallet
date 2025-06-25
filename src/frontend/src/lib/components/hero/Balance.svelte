@@ -12,6 +12,7 @@
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { Tooltip } from '@dfinity/gix-components';
+	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
 	interface Props {
 		token: OptionTokenUi;
@@ -47,22 +48,28 @@
 			</span>
 		{/if}
 	</output>
-	<span class="text-xl font-bold opacity-50">
-		{#if !$isPrivacyMode}
-			<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
-				<TokenExchangeBalance
-					balance={token?.balance}
-					usdBalance={token?.usdBalance}
-					nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
-				/>
-			</Tooltip>
-		{:else}
-			<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
-				<span class="flex items-center justify-center gap-2">
-					<IconEyeOff />
-					{$i18n.hero.text.hidden_balance}
-				</span>
-			</Tooltip>
-		{/if}
-	</span>
+	<div class="flex flex-col items-center">
+		<button
+			type="button"
+			class="text-xl font-bold cursor-pointer bg-transparent border-none p-0"
+			ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true })}
+		>
+			{#if !$isPrivacyMode}
+				<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+					<TokenExchangeBalance
+						balance={token?.balance}
+						usdBalance={token?.usdBalance}
+						nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
+					/>
+				</Tooltip>
+			{:else}
+				<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+					<span class="flex items-center justify-center gap-2">
+						<IconEyeOff />
+						{$i18n.hero.text.hidden_balance}
+					</span>
+				</Tooltip>
+			{/if}
+		</button>
+	</div>
 </span>
