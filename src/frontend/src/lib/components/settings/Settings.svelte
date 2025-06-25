@@ -6,7 +6,6 @@
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
-	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
@@ -139,11 +138,5 @@
 		</SettingsCardItem>
 	</SettingsCard>
 {/if}
-
-<SettingsCard>
-	<svelte:fragment slot="title">{$i18n.settings.text.appearance}</svelte:fragment>
-
-	<ThemeSelector />
-</SettingsCard>
 
 <SettingsVersion />
