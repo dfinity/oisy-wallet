@@ -13,7 +13,7 @@ vi.mock('$lib/stores/i18n.store', () => ({
 	}
 }));
 
-describe('privacy.utils', () => {
+describe('setPrivacyMode', () => {
 	let spyToastsShow: MockInstance;
 
 	beforeEach(() => {
