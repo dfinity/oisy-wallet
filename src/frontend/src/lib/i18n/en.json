@@ -87,7 +87,7 @@
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
-			"address_book": "Open address book",
+			"address_book": "Open contacts",
 			"hide_balances": "Hide the displayed balances",
 			"show_balances": "Show the hidden balances"
 		},
@@ -301,6 +301,12 @@
 				"name": "WaterNeuron",
 				"one_liner": "ICP liquid staking - Maximize your capital efficiency by liquid staking your ICP.",
 				"description": "WaterNeuron offers a more capital-efficient method of staking by allowing you to maintain exposure to ICP staking rewards while keeping your tokens liquid. This approach simplifies the staking process, removing the need to select specific validators to maximize rewards."
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "Decentralized social media - post, earn, own.",
+				"call_to_action": "Go to Taggr",
+				"description": "Taggr is a fully decentralized social media platform that lives on a public distributed compute network powered by the Internet Computer. Unlike traditional social media platforms controlled by corporations, Taggr is owned and governed entirely by its users."
 			}
 		}
 	},
@@ -323,7 +329,8 @@
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
 			"youre_eligible": "You're eligible!",
 			"ongoing": "Ongoing",
-			"ended": "Ended ($amount)"
+			"ended": "Ended ($amount)",
+			"banner_text": "Earn daily rewards with OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Eligibility criteria",
@@ -432,7 +439,7 @@
 		"text": {
 			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon and BNB",
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon, BNB and Arbitrum",
 			"done": "Enjoy $oisy_short"
 		},
 		"alt": {
@@ -1206,7 +1213,7 @@
 	},
 	"address_book": {
 		"text": {
-			"title": "Address book",
+			"title": "Contacts",
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
@@ -1249,7 +1256,7 @@
 		"delete": {
 			"title": "Delete $contact contact?",
 			"delete_contact": "Delete contact",
-			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
+			"content_text": "This will delete $contact and all associated addresses from your Contacts. This action cannot be undone."
 		},
 		"error": {
 			"create": "Failed to create the contact",
@@ -1416,7 +1423,7 @@
 	"welcome": {
 		"title": "Welcome to $oisy_short!",
 		"subtitle": "Ready to Earn?",
-		"description": "You're 3 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
+		"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
 	},
 	"temporal": {
 		"seconds_to_duration": {
