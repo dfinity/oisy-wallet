@@ -11,8 +11,13 @@ pub const MAX_CONTACT_IMAGE_SIZE_BYTES: usize = 100 * 1024;
 /// Maximum number of contacts with images per principal
 pub const MAX_CONTACTS_WITH_IMAGES_PER_PRINCIPAL: usize = 100;
 
+/// Memory usage threshold (80%) above which new images cannot be added
+pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
+
+pub type ImageId = u64;
+
+/// This is the DTO for the frontend
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(remote = "Self")]
 pub struct Contact {
     pub id: u64,
     pub name: String,
@@ -20,6 +25,17 @@ pub struct Contact {
     pub update_timestamp_ns: u64,
     /// Optional image data for the contact
     pub image: Option<ContactImage>,
+}
+
+/// This is what we store in stable memory
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+pub struct StoredContact {
+    pub id: u64,
+    pub name: String,
+    pub addresses: Vec<ContactAddressData>,
+    pub update_timestamp_ns: u64,
+    /// Optional image ID for the contact
+    pub image_id: Option<ImageId>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -38,9 +54,9 @@ pub struct ContactAddressData {
     pub label: Option<String>,
 }
 
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct StoredContacts {
-    pub contacts: BTreeMap<u64, Contact>,
+    pub contacts: BTreeMap<u64, StoredContact>,
     pub update_timestamp_ns: u64,
     /// Count of contacts with images to enforce limits
     pub contacts_with_images_count: usize,
@@ -76,4 +92,6 @@ pub enum ContactError {
     TooManyContactsWithImages,
     /// Canister memory is near capacity
     CanisterMemoryNearCapacity,
+    /// Error while fetching canister status
+    CanisterStatusError,
 }

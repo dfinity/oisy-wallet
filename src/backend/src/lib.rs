@@ -67,7 +67,7 @@ use crate::{
     assertions::assert_token_enabled_is_some,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
-    types::{ContactMap, PowChallengeMap},
+    types::{ContactMap, ImageMap, PowChallengeMap},
     user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
 };
 
@@ -98,6 +98,7 @@ const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 const POW_CHALLENGE_MEMORY_ID: MemoryId = MemoryId::new(5);
 const CONTACT_MEMORY_ID: MemoryId = MemoryId::new(6);
+const IMAGE_MEMORY_ID: MemoryId = MemoryId::new(7);
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -114,6 +115,7 @@ thread_local! {
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
+            image_store: ImageMap::init(mm.borrow().get(IMAGE_MEMORY_ID)),
         })
     );
 }
@@ -141,17 +143,18 @@ fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
 }
 
 pub struct State {
-    config: ConfigCell,
+    pub config: ConfigCell,
     /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the
     /// users.
-    user_token: UserTokenMap,
+    pub user_token: UserTokenMap,
     /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
     /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
-    custom_token: CustomTokenMap,
-    user_profile: UserProfileMap,
-    user_profile_updated: UserProfileUpdatedMap,
-    pow_challenge: PowChallengeMap,
-    contact: ContactMap,
+    pub custom_token: CustomTokenMap,
+    pub user_profile: UserProfileMap,
+    pub user_profile_updated: UserProfileUpdatedMap,
+    pub pow_challenge: PowChallengeMap,
+    pub contact: ContactMap,
+    pub image_store: ImageMap,
 }
 
 fn set_config(arg: InitArg) {
@@ -909,16 +912,8 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 /// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    let contact = Contact {
-        id: request.id,
-        name: request.name,
-        addresses: request.addresses,
-        update_timestamp_ns: request.update_timestamp_ns,
-    };
-
-    let result = contacts::update_contact(contact);
-    result.into()
+pub async fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
+    contacts::update_contact(request).await.into()
 }
 
 /// Deletes a contact for the caller.
