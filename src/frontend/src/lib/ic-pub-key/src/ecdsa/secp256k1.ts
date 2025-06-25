@@ -150,6 +150,10 @@ export class Sec1EncodedPublicKey {
 		return new PublicKeyWithChainCode(Sec1EncodedPublicKey.fromProjectivePoint(pt), new_chain_code);
 	}
 
+	toBuffer(): Buffer {
+		return Buffer.from(this.bytes);
+	}
+
 	/**
 	 * Creates a new Sec1EncodedPublicKey from a 66 character hex string.
 	 * @param hex The 66 character hex string.
