@@ -4,14 +4,6 @@ import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { vi, type MockInstance } from 'vitest';
 
-vi.mock('$lib/stores/i18n.store', () => ({
-	i18n: {
-		subscribe: (fn: (val: typeof en) => void) => {
-			fn(en);
-			return () => {};
-		}
-	}
-}));
 
 describe('setPrivacyMode', () => {
 	let spyToastsShow: MockInstance;
