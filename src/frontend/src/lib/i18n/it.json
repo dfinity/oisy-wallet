@@ -301,6 +301,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"taggr": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
