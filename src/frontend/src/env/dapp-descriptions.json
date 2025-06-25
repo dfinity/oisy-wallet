@@ -259,5 +259,20 @@
 		"stats": "",
 		"logo": "/images/dapps/waterneuron.webp",
 		"screenshots": ["/images/dapps/waterneuron-screenshot.webp"]
+	},
+	{
+		"id": "taggr",
+		"name": "dapps.descriptions.taggr.name",
+		"oneLiner": "dapps.descriptions.taggr.one_liner",
+		"website": "https://taggr.link/",
+		"github": "https://github.com/TaggrNetwork/taggr",
+		"openChat": "https://oc.app/community/zbg63-qqaaa-aaaar-atika-cai",
+		"tags": ["dapps.categories.social_media"],
+		"description": "dapps.descriptions.taggr.description",
+		"usesInternetIdentity": true,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/taggr.webp",
+		"screenshots": ["/images/dapps/taggr-screenshot.webp"]
 	}
 ]
