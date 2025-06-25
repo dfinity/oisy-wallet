@@ -1,30 +1,30 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
+	import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
+	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { CardData } from '$lib/types/token-card';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import type { Token } from '$lib/types/token';
+	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
-	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
-	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
-	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
-	import { isBitcoinToken } from '$btc/utils/token.utils';
-	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
-	import { isSolanaToken } from '$sol/utils/token.utils';
-	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils.js';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
+	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
+	import { isSolanaToken } from '$sol/utils/token.utils';
 
 	let {
 		data,
