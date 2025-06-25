@@ -85,6 +85,7 @@ export const TRACK_REWARD_CAMPAIGN_WIN_LEARN_MORE = 'reward_campaign_win_learn_m
 export const TRACK_REWARD_CAMPAIGN_OPEN = 'reward_campaign_open';
 export const TRACK_REWARD_CAMPAIGN_LEARN_MORE = 'reward_campaign_learn_more';
 export const TRACK_REWARD_CAMPAIGN_SHARE = 'reward_campaign_share';
+export const TRACK_SPRINKLES_BANNER_CLICK = 'sprinkles_banner_click';
 
 // Welcome
 export const TRACK_WELCOME_OPEN = 'welcome_open';
