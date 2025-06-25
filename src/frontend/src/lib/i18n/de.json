@@ -842,7 +842,8 @@
 			"show_more_networks": "Zeige $number weitere Netzwerke",
 			"hide_more_networks": "Weitere Netzwerke verbergen",
 			"on_network": " auf $network",
-			"delete_token": "Token löschen"
+			"delete_token": "Token löschen",
+			"edit_token": ""
 		},
 		"details": {
 			"title": "Token-Details",
@@ -853,7 +854,11 @@
 			"twin_token": "Twin-Token",
 			"standard": "Standard",
 			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen.",
-			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Tokenliste entfernt."
+			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Tokenliste entfernt.",
+			"update_confirmation": "",
+			"missing_index_canister_id_label": "",
+			"missing_index_canister_id_warning": "",
+			"missing_index_canister_id_button": ""
 		},
 		"balance": {
 			"error": {
@@ -952,7 +957,8 @@
 			"incomplete_metadata": "Kein Name oder Symbol in den Metadaten vorhanden.",
 			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol existiert bereits.",
 			"unexpected_undefined": "Token ist undefiniert. Das ist unerwartet.",
-			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen."
+			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen.",
+			"unexpected_error_on_token_update": ""
 		}
 	},
 	"fee": {
