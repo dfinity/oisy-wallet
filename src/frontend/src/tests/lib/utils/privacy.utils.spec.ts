@@ -1,7 +1,7 @@
 import { privacyModeStore } from '$lib/stores/settings.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
-import { type MockInstance , vi } from 'vitest';
+import { vi, type MockInstance } from 'vitest';
 
 vi.mock('$lib/stores/i18n.store', () => ({
 	i18n: {
