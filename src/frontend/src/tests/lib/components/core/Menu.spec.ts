@@ -47,7 +47,7 @@ describe('Menu', () => {
 		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 		vi.spyOn(toastsStore, 'toastsShow');
-		setPrivacyMode(false);
+		setPrivacyMode({ enabled: false });
 	});
 
 	const mockUserData = (powers: Array<string>): UserData => ({
@@ -144,7 +144,7 @@ describe('Menu', () => {
 		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
 			text: en.navigation.text.privacy_mode_enabled,
 			level: 'info',
-			duration: 2000
+			duration: 7000
 		});
 	});
 
@@ -164,7 +164,7 @@ describe('Menu', () => {
 		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
 			text: en.navigation.text.privacy_mode_disabled,
 			level: 'info',
-			duration: 2000
+			duration: 7000
 		});
 	});
 
