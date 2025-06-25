@@ -6,27 +6,33 @@
 	import List from '$lib/components/common/List.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
+	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { TOKEN_MODAL_CONTENT_DELETE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface BaseTokenModalProps {
 		children?: Snippet;
 		token: OptionToken;
 		onDeleteClick?: () => void;
+		onEditClick?: () => void;
 	}
 
-	let { children, token, onDeleteClick }: BaseTokenModalProps = $props();
+	let { children, token, onDeleteClick, onEditClick }: BaseTokenModalProps = $props();
 </script>
 
 <ContentWithToolbar>
@@ -69,6 +75,62 @@
 			</ModalListItem>
 
 			{@render children?.()}
+
+			{#if isTokenIcrc(token) && (!isNullishOrEmpty(token.indexCanisterId) || nonNullish(onEditClick))}
+				<ModalListItem styleClass="flex-wrap">
+					{#snippet label()}
+						{$i18n.tokens.import.text.index_canister_id}
+					{/snippet}
+
+					{#snippet content()}
+						{#if !isNullishOrEmpty(token.indexCanisterId)}
+							<output>{token.indexCanisterId}</output>
+
+							<Copy
+								value={token.indexCanisterId}
+								text={$i18n.tokens.import.text.index_canister_id_copied}
+								inline
+							/>
+						{:else if nonNullish(onEditClick)}
+							<output class="text-warning-primary">
+								{$i18n.tokens.details.missing_index_canister_id_label}
+							</output>
+
+							<ButtonIcon
+								styleClass="inline-block align-sub"
+								onclick={onEditClick}
+								ariaLabel={$i18n.core.text.edit}
+								width="w-6"
+								height="h-6"
+							>
+								{#snippet icon()}
+									<IconPencil />
+								{/snippet}
+							</ButtonIcon>
+						{/if}
+					{/snippet}
+
+					{#snippet banner()}
+						{#if isNullishOrEmpty(token.indexCanisterId) && nonNullish(onEditClick)}
+							<WarningBanner styleClass="font-normal mt-2.5">
+								<div class="max-w-[60%]">
+									{replaceOisyPlaceholders($i18n.tokens.details.missing_index_canister_id_warning)}
+								</div>
+
+								<Button
+									ariaLabel={$i18n.tokens.details.missing_index_canister_id_button}
+									link
+									transparent
+									onclick={onEditClick}
+									type="button"
+								>
+									{$i18n.tokens.details.missing_index_canister_id_button}
+								</Button>
+							</WarningBanner>
+						{/if}
+					{/snippet}
+				</ModalListItem>
+			{/if}
 
 			{#if isTokenIcrc(token) || isTokenErc20(token) || isTokenDip20(token)}
 				<ModalListItem>

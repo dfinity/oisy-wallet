@@ -842,7 +842,8 @@
 			"show_more_networks": "",
 			"hide_more_networks": "",
 			"on_network": "",
-			"delete_token": ""
+			"delete_token": "",
+			"edit_token": ""
 		},
 		"details": {
 			"title": "",
@@ -853,7 +854,11 @@
 			"twin_token": "",
 			"standard": "",
 			"confirm_deletion_description": "",
-			"deletion_confirmation": ""
+			"deletion_confirmation": "",
+			"update_confirmation": "",
+			"missing_index_canister_id_label": "",
+			"missing_index_canister_id_warning": "",
+			"missing_index_canister_id_button": ""
 		},
 		"balance": {
 			"error": {
@@ -952,7 +957,8 @@
 			"incomplete_metadata": "",
 			"duplicate_metadata": "",
 			"unexpected_undefined": "",
-			"unexpected_error_on_token_delete": ""
+			"unexpected_error_on_token_delete": "",
+			"unexpected_error_on_token_update": ""
 		}
 	},
 	"fee": {
