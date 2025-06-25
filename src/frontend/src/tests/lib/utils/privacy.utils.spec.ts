@@ -1,12 +1,20 @@
 import { privacyModeStore } from '$lib/stores/settings.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
-import type { MockInstance } from 'vitest';
-import { vi } from 'vitest';
+import { type MockInstance , vi } from 'vitest';
 
 vi.mock('$lib/stores/i18n.store', () => ({
 	i18n: {
-		subscribe: (fn: any) => {
+		subscribe: (
+			fn: (value: {
+				navigation: {
+					text: {
+						privacy_mode_enabled: string;
+						privacy_mode_disabled: string;
+					};
+				};
+			}) => void
+		) => {
 			fn({
 				navigation: {
 					text: {
@@ -27,6 +35,7 @@ describe('privacy.utils', () => {
 		vi.resetAllMocks();
 		spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
 	});
+
 	it('should enable privacy mode without toast', () => {
 		const spyStoreSet = vi.spyOn(privacyModeStore, 'set');
 
