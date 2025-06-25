@@ -1,6 +1,7 @@
 import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
+	BtcGetFeePercentilesResponse,
 	Contact,
 	CreateChallengeResponse,
 	CustomToken,
@@ -18,6 +19,7 @@ import type {
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	CreateContactParams,
@@ -163,6 +165,15 @@ export const selectUserUtxosFee = async ({
 	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
 
 	return btcSelectUserUtxosFee(params);
+};
+
+export const getCurrentBtcFeePercentiles = async ({
+	identity,
+	network
+}: CanisterApiFunctionParams<BtcGetFeePercentilesParams>): Promise<BtcGetFeePercentilesResponse> => {
+	const { btcGetCurrentFeePercentiles } = await backendCanister({ identity });
+
+	return btcGetCurrentFeePercentiles({ network });
 };
 
 export const createPowChallenge = async ({

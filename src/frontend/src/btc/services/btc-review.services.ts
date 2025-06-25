@@ -3,8 +3,12 @@ import type { UtxoSelectionResult } from '$btc/types/btc-review.services';
 import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterLockedUtxos, getUtxos } from '$btc/utils/btc-utxos.utils';
-import type { PendingTransaction } from '$declarations/backend/backend.did';
+import type {
+	BitcoinNetwork as BackendBitcoinNetwork,
+	PendingTransaction
+} from '$declarations/backend/backend.did';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { assertAmount, assertArrayNotEmpty, assertStringNotEmpty } from '$lib/utils/asserts';
@@ -45,7 +49,6 @@ export const prepareTransactionUtxos = async ({
 	assertStringNotEmpty({ value: source, message: 'Source address is required' });
 
 	const minterCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
-	const feeRateSatoshisPerByte = DEFAULT_FEE_RATE_SATOSHIS_PER_BYTE;
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
@@ -54,7 +57,13 @@ export const prepareTransactionUtxos = async ({
 	const amountSatoshis = convertNumberToSatoshis({ amount });
 
 	try {
-		// Step 1: Fetch all available UTXOs using query call (fast and no cycle cost)
+		// Step 1: Get current fee percentiles from backend
+		const feeRateSatoshisPerByte = await getFeeRateFromPercentiles({
+			identity,
+			network
+		});
+
+		// Step 2: Fetch all available UTXOs using query call (fast and no cycle cost)
 		const allUtxos = await getUtxos({
 			identity,
 			address: source,
@@ -62,7 +71,7 @@ export const prepareTransactionUtxos = async ({
 			minterCanisterId
 		});
 
-		// Step 2: Filter UTXOs based on confirmations and exclude locked ones
+		// Step 3: Filter UTXOs based on confirmations and exclude locked ones
 		const availableUtxos = filterAvailableUtxos({
 			utxos: allUtxos,
 			options: {
@@ -76,16 +85,14 @@ export const prepareTransactionUtxos = async ({
 			message: 'No available UTXOs found for the transaction'
 		});
 
-		get;
-
-		// Step 3: Select UTXOs with fee consideration
+		// Step 4: Select UTXOs with fee consideration
 		const selection = calculateUtxoSelection({
 			availableUtxos,
 			amountSatoshis,
 			feeRateSatoshisPerByte
 		});
 
-		// Step 4: Calculate final fee based on selected UTXOs
+		// Step 5: Calculate final fee based on selected UTXOs
 		const feeSatoshis = calculateFinalFee({ selection, amountSatoshis });
 
 		return {
@@ -97,6 +104,71 @@ export const prepareTransactionUtxos = async ({
 	} catch (error) {
 		console.error('Error in selectUtxosFee:', error);
 		throw error;
+	}
+};
+
+/**
+ * Converts BitcoinNetwork from @dfinity/ckbtc to backend BitcoinNetwork type
+ */
+const convertNetworkType = (network: BitcoinNetwork): BackendBitcoinNetwork => {
+	switch (network) {
+		case 'mainnet':
+			return { mainnet: null };
+		case 'testnet':
+			return { testnet: null };
+		case 'regtest':
+			return { regtest: null };
+		default:
+			throw new Error(`Unsupported Bitcoin network: ${network}`);
+	}
+};
+
+/**
+ * Gets fee rate from current fee percentiles, with fallback to default
+ * Uses the median fee rate (50th percentile) for balanced speed/cost
+ */
+const getFeeRateFromPercentiles = async ({
+	identity,
+	network
+}: {
+	identity: Identity;
+	network: BitcoinNetwork;
+}): Promise<bigint> => {
+	try {
+		// Convert network type to backend format
+		const backendNetwork = convertNetworkType(network);
+
+		const response = await getCurrentBtcFeePercentiles({
+			identity,
+			network: backendNetwork
+		});
+
+		// Get fee percentiles array
+		const feePercentiles = response.fee_percentiles;
+
+		if (feePercentiles.length === 0) {
+			console.warn('No fee percentiles returned, using default fee rate');
+			// TODO verify if we can use a default fee or we should fail
+			return DEFAULT_FEE_RATE_SATOSHIS_PER_BYTE;
+		}
+
+		// Use the median fee rate (50th percentile) for balanced transaction speed/cost
+		// Fee percentiles are typically returned in order: [10th, 25th, 50th, 75th, 90th]
+		const medianIndex = Math.floor(feePercentiles.length / 2);
+		const medianFeeRate = feePercentiles[medianIndex];
+
+		// Ensure we have a reasonable minimum fee rate
+		// TODO add a reasaoble value for the minFeeRate
+		const minFeeRate = 1n;
+		// m ake sure to use the minimun fee rate if medianFeeRate is below the minimum rate
+		const finalFeeRate = medianFeeRate > minFeeRate ? medianFeeRate : minFeeRate;
+
+		console.warn(`Using fee rate: ${finalFeeRate} sat/byte (from percentiles)`);
+		return finalFeeRate;
+	} catch (error) {
+		console.warn('Failed to get fee percentiles, using default fee rate:', error);
+		// TODO should we throw an error instead of using a default fee rateS?
+		return DEFAULT_FEE_RATE_SATOSHIS_PER_BYTE;
 	}
 };
 
