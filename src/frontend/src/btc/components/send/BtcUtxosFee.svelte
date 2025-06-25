@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { prepareTransactionUtxos } from '$btc/services/btc-review.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -10,18 +11,19 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
-	import { selectUtxosFeeForSend } from '$btc/services/btc-send.services';
 
 	interface Props {
 		utxosFee?: UtxosFee;
 		amount?: OptionAmount;
 		networkId?: NetworkId;
+		source: string;
 	}
 
 	let {
 		utxosFee = $bindable(undefined),
 		amount = undefined,
-		networkId = undefined
+		networkId = undefined,
+		source
 	}: Props = $props();
 
 	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
@@ -32,18 +34,24 @@
 	const selectUtxosFee = async () => {
 		try {
 			// all required params should be already defined at this stage
-			if (isNullish(amount) || isNullish(networkId) || isNullish($authIdentity)) {
+			if (
+				isNullish(amount) ||
+				isNullish(networkId) ||
+				isNullish($authIdentity) ||
+				isNullish(source)
+			) {
 				return;
 			}
 
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
 
 			utxosFee = nonNullish(network)
-				? await selectUtxosFeeForSend({
-					amount,
-					network,
-					identity: $authIdentity
-				})
+				? await prepareTransactionUtxos({
+						identity: $authIdentity,
+						network,
+						amount,
+						source
+					})
 				: undefined;
 		} catch (err: unknown) {
 			toastsError({

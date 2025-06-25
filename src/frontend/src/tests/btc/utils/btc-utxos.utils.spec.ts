@@ -1,11 +1,11 @@
 import {
+	calculateUtxoSelection,
 	estimateTransactionSize,
 	filterLockedUtxos,
 	filterUtxos,
 	getAllUtxosPaginated,
 	getUtxos,
-	selectUtxos,
-	selectUtxosWithFee
+	selectUtxos
 } from '$btc/utils/btc-utxos.utils';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -226,7 +226,7 @@ describe('btc-utxos.utils', () => {
 		];
 
 		it('should select UTXOs considering transaction fees', () => {
-			const result = selectUtxosWithFee({
+			const result = calculateUtxoSelection({
 				availableUtxos: utxos,
 				amountSatoshis: 250_000n,
 				feeRateSatoshisPerByte: 10n
@@ -240,7 +240,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should throw error when insufficient funds including fees', () => {
 			expect(() =>
-				selectUtxosWithFee({
+				calculateUtxoSelection({
 					availableUtxos: utxos,
 					amountSatoshis: 590_000n, // Very close to total, won't cover fees
 					feeRateSatoshisPerByte: 100n // High fee rate
@@ -250,7 +250,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should throw error when no UTXOs available', () => {
 			expect(() =>
-				selectUtxosWithFee({
+				calculateUtxoSelection({
 					availableUtxos: [],
 					amountSatoshis: 100_000n,
 					feeRateSatoshisPerByte: 10n
