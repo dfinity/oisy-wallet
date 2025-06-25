@@ -1,28 +1,13 @@
 import { privacyModeStore } from '$lib/stores/settings.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
+import en from '$tests/mocks/i18n.mock';
 import { vi, type MockInstance } from 'vitest';
 
 vi.mock('$lib/stores/i18n.store', () => ({
 	i18n: {
-		subscribe: (
-			fn: (value: {
-				navigation: {
-					text: {
-						privacy_mode_enabled: string;
-						privacy_mode_disabled: string;
-					};
-				};
-			}) => void
-		) => {
-			fn({
-				navigation: {
-					text: {
-						privacy_mode_enabled: 'Privacy mode enabled',
-						privacy_mode_disabled: 'Privacy mode disabled'
-					}
-				}
-			});
+		subscribe: (fn: (val: typeof en) => void) => {
+			fn(en);
 			return () => {};
 		}
 	}
@@ -64,7 +49,7 @@ describe('privacy.utils', () => {
 		setPrivacyMode({ enabled: true, withToast: true });
 
 		expect(spyToastsShow).toHaveBeenCalledWith({
-			text: 'Privacy mode enabled',
+			text: en.navigation.text.privacy_mode_enabled,
 			level: 'info',
 			duration: 7000
 		});
@@ -74,7 +59,7 @@ describe('privacy.utils', () => {
 		setPrivacyMode({ enabled: false, withToast: true });
 
 		expect(spyToastsShow).toHaveBeenCalledWith({
-			text: 'Privacy mode disabled',
+			text: en.navigation.text.privacy_mode_disabled,
 			level: 'info',
 			duration: 7000
 		});
