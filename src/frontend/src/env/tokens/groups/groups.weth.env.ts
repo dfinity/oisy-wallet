@@ -9,6 +9,6 @@ export const WETH_TOKEN_GROUP_ID: TokenGroupId = parseTokenGroupId(WETH_TOKEN_GR
 export const WETH_TOKEN_GROUP: TokenGroupData = {
 	id: WETH_TOKEN_GROUP_ID,
 	icon: weth,
-	name: 'WETH',
+	name: 'Wrapped Ether',
 	symbol: WETH_TOKEN_GROUP_SYMBOL
 };
