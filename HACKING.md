@@ -428,7 +428,7 @@ Location: `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`
   	...SUPPORTED_BASE_NETWORKS,
   	...SUPPORTED_BSC_NETWORKS,
   	...SUPPORTED_POLYGON_NETWORKS,
-  	...(SUPPORTED_ < NETWORK > _NETWORKS)
+  	...SUPPORTED_<NETWORK>_NETWORKS
   ];
   ```
 
