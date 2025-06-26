@@ -7,8 +7,6 @@ import type { CardData } from '$lib/types/token-card';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import { isCardDataTogglableToken, mapHeaderData } from '$lib/utils/token-card.utils';
 import { bn1Bi } from '$tests/mocks/balances.mock';
-import { expect } from 'vitest';
-import { undefined } from 'zod';
 
 describe('mapHeaderData', () => {
 	const mockGroup = ETH_TOKEN_GROUP;
