@@ -74,6 +74,8 @@ on:
         required: true
       VITE_FRONTEND_DERIVATION_ENABLED_STAGING:
         required: true
+      VITE_I18N_ENABLED_STAGING:
+        required: true
       VITE_ONRAMPER_API_KEY_DEV_STAGING:
         required: true
       VITE_ONRAMPER_API_KEY_PROD_STAGING:
@@ -109,6 +111,8 @@ on:
       VITE_ICP_SWAP_ENABLED_BETA:
         required: true
       VITE_FRONTEND_DERIVATION_ENABLED_BETA:
+        required: true
+      VITE_I18N_ENABLED_BETA:
         required: true
       VITE_ONRAMPER_API_KEY_PROD_BETA:
         required: true
@@ -230,6 +234,7 @@ jobs:
               echo "VITE_PLAUSIBLE_ENABLED=$VITE_PLAUSIBLE_ENABLED_STAGING"
               echo "VITE_ICP_SWAP_ENABLED=$VITE_ICP_SWAP_ENABLED_STAGING"
               echo "VITE_FRONTEND_DERIVATION_ENABLED=$VITE_FRONTEND_DERIVATION_ENABLED_STAGING"
+              echo "VITE_I18N_ENABLED=$VITE_I18N_ENABLED_STAGING"
             } >> $GITHUB_OUTPUT
             if [[ "$NETWORK" == "staging" ]]; then
               echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING" >> $GITHUB_OUTPUT
@@ -259,6 +264,7 @@ jobs:
               echo "VITE_PLAUSIBLE_ENABLED=$VITE_PLAUSIBLE_ENABLED_BETA"
               echo "VITE_ICP_SWAP_ENABLED=$VITE_ICP_SWAP_ENABLED_BETA"
               echo "VITE_FRONTEND_DERIVATION_ENABLED=$VITE_FRONTEND_DERIVATION_ENABLED_BETA"
+              echo "VITE_I18N_ENABLED=$VITE_I18N_ENABLED_BETA"
             } >> $GITHUB_OUTPUT
             {
               echo "DFX_DEPLOY_KEY<<EOF"
@@ -279,6 +285,7 @@ jobs:
           VITE_PLAUSIBLE_ENABLED_STAGING: ${{ secrets.VITE_PLAUSIBLE_ENABLED_STAGING }}
           VITE_ICP_SWAP_ENABLED_STAGING: ${{ secrets.VITE_ICP_SWAP_ENABLED_STAGING }}
           VITE_FRONTEND_DERIVATION_ENABLED_STAGING: ${{ secrets.VITE_FRONTEND_DERIVATION_ENABLED_STAGING }}
+          VITE_I18N_ENABLED_STAGING: ${{ secrets.VITE_I18N_ENABLED_STAGING }}
           VITE_ONRAMPER_API_KEY_DEV_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}
           VITE_ONRAMPER_API_KEY_PROD_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
           VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}
@@ -298,6 +305,7 @@ jobs:
           VITE_PLAUSIBLE_ENABLED_BETA: ${{ secrets.VITE_PLAUSIBLE_ENABLED_BETA }}
           VITE_ICP_SWAP_ENABLED_BETA: ${{ secrets.VITE_ICP_SWAP_ENABLED_BETA }}
           VITE_FRONTEND_DERIVATION_ENABLED_BETA: ${{ secrets.VITE_FRONTEND_DERIVATION_ENABLED_BETA }}
+          VITE_I18N_ENABLED_BETA: ${{ secrets.VITE_I18N_ENABLED_BETA }}
           VITE_ONRAMPER_API_KEY_PROD_BETA: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}
           DFX_DEPLOY_KEY_BETA: ${{ secrets.DFX_DEPLOY_KEY_BETA }}
 
@@ -356,6 +364,7 @@ jobs:
           VITE_PLAUSIBLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_PLAUSIBLE_ENABLED }}
           VITE_ICP_SWAP_ENABLED: ${{ steps.set-outputs.outputs.VITE_ICP_SWAP_ENABLED }}
           VITE_FRONTEND_DERIVATION_ENABLED: ${{ steps.set-outputs.outputs.VITE_FRONTEND_DERIVATION_ENABLED }}
+          VITE_I18N_ENABLED: ${{ steps.set-outputs.outputs.VITE_I18N_ENABLED }}
           VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}
@@ -378,6 +387,7 @@ jobs:
           VITE_PLAUSIBLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_PLAUSIBLE_ENABLED }}
           VITE_ICP_SWAP_ENABLED: ${{ steps.set-outputs.outputs.VITE_ICP_SWAP_ENABLED }}
           VITE_FRONTEND_DERIVATION_ENABLED: ${{ steps.set-outputs.outputs.VITE_FRONTEND_DERIVATION_ENABLED }}
+          VITE_I18N_ENABLED: ${{ steps.set-outputs.outputs.VITE_I18N_ENABLED }}
           VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}

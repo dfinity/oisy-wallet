@@ -30,6 +30,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
+	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -64,7 +65,7 @@
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
-			const { getFeeData } = infuraProviders(sendToken.network.id);
+			const { getFeeData, estimateGas } = infuraProviders(sendToken.network.id);
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
@@ -79,19 +80,23 @@
 
 			const feeData = {
 				...feeDataRest,
-				maxFeePerGas: maxFeePerGas ?? suggestedMaxFeePerGas,
-				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas
+				maxFeePerGas: maxBigInt(maxFeePerGas, suggestedMaxFeePerGas) ?? null,
+				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas) ?? null
 			};
+
+			const feeDataGas = getEthFeeData({
+				...params,
+				helperContractAddress: toCkEthHelperContractAddress(
+					$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+				)
+			});
+
+			const estimatedGas = await estimateGas(params);
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
 					...feeData,
-					gas: getEthFeeData({
-						...params,
-						helperContractAddress: toCkEthHelperContractAddress(
-							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
-						)
-					})
+					gas: maxBigInt(feeDataGas, estimatedGas)
 				});
 				return;
 			}
