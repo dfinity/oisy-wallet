@@ -3,7 +3,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
@@ -90,7 +90,7 @@
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
 	$: feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
 
-	let feeContext: FeeContext | undefined;
+	let feeContext: EthFeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
@@ -210,7 +210,7 @@
 	const back = () => dispatch('icSendBack');
 </script>
 
-<FeeContext
+<EthFeeContext
 	bind:this={feeContext}
 	sendToken={$sendToken}
 	sendTokenId={$sendTokenId}
@@ -243,4 +243,4 @@
 	{:else}
 		<slot />
 	{/if}
-</FeeContext>
+</EthFeeContext>

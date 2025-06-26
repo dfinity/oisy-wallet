@@ -4,7 +4,7 @@
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
@@ -168,7 +168,7 @@
 		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
 	>
 
-	<FeeContext
+	<EthFeeContext
 		amount={amount.toString()}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
@@ -196,5 +196,5 @@
 				/>
 			{/if}
 		</CkEthLoader>
-	</FeeContext>
+	</EthFeeContext>
 </WizardModal>
