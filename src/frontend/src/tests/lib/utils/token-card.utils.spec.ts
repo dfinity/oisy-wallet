@@ -63,21 +63,21 @@ describe('isCardDataTogglableToken', () => {
 		const token: IcrcCustomToken = { ...ICP_TOKEN, enabled: false };
 		const result = isCardDataTogglableToken(token);
 
-		expect(result).not.toBeUndefined();
+		expect(result).toBeTruthy();
 	});
 
 	it('should return undefined if no togglable token is passed', () => {
 		const token: Token = ICP_TOKEN;
 		const result = isCardDataTogglableToken(token);
 
-		expect(result).toBeUndefined();
+		expect(result).toBeFalsy();
 	});
 
 	it('should return undefined if no parsable token is passed', () => {
 		const token = { ...ICP_TOKEN, standard: undefined, network: null };
 		const result = isCardDataTogglableToken(token as unknown as Token);
 
-		expect(result).toBeUndefined();
+		expect(result).toBeFalsy();
 	});
 
 	it('should return undefined if no valid input', () => {
@@ -85,8 +85,8 @@ describe('isCardDataTogglableToken', () => {
 		const result2 = isCardDataTogglableToken({} as unknown as Token);
 		const result3 = isCardDataTogglableToken(undefined as unknown as Token);
 
-		expect(result1).toBeUndefined();
-		expect(result2).toBeUndefined();
-		expect(result3).toBeUndefined();
+		expect(result1).toBeFalsy();
+		expect(result2).toBeFalsy();
+		expect(result3).toBeFalsy();
 	});
 });
