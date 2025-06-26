@@ -13,7 +13,6 @@ export const hasRequiredCycles = async ({
 	identity: OptionIdentity;
 }): Promise<boolean> => {
 	assertNonNullish(identity);
-	assertNonNullish(SIGNER_CANISTER_ID);
 
 	const allowanceResult = await allowance({
 		identity,
