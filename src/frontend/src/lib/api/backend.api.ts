@@ -169,11 +169,11 @@ export const selectUserUtxosFee = async ({
 
 export const getCurrentBtcFeePercentiles = async ({
 	identity,
-	network
+	...params
 }: CanisterApiFunctionParams<BtcGetFeePercentilesParams>): Promise<BtcGetFeePercentilesResponse> => {
 	const { btcGetCurrentFeePercentiles } = await backendCanister({ identity });
 
-	return btcGetCurrentFeePercentiles({ network });
+	return btcGetCurrentFeePercentiles(params);
 };
 
 export const createPowChallenge = async ({
