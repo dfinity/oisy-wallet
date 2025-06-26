@@ -229,7 +229,6 @@ export const idlFactory = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const NetworkSettingsFor = IDL.Variant({
-		ArbitrumMainnet: IDL.Null,
 		InternetComputer: IDL.Null,
 		BaseSepolia: IDL.Null,
 		PolygonMainnet: IDL.Null,
@@ -242,7 +241,6 @@ export const idlFactory = ({ IDL }) => {
 		BaseMainnet: IDL.Null,
 		BscMainnet: IDL.Null,
 		SolanaLocal: IDL.Null,
-		ArbitrumSepolia: IDL.Null,
 		EthereumMainnet: IDL.Null,
 		SolanaMainnet: IDL.Null,
 		BitcoinMainnet: IDL.Null,

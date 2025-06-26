@@ -11,6 +11,19 @@ pub const MAX_CONTACT_IMAGE_SIZE_BYTES: usize = 100 * 1024;
 /// Maximum number of contacts with images per principal
 pub const MAX_CONTACTS_WITH_IMAGES_PER_PRINCIPAL: usize = 100;
 
+/// Represents the MIME type of an image.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum ImageMimeType {
+    #[serde(rename = "image/jpeg")]
+    Jpeg,
+    #[serde(rename = "image/png")]
+    Png,
+    #[serde(rename = "image/gif")]
+    Gif,
+    #[serde(rename = "image/webp")]
+    Webp,
+}
+
 /// Memory usage threshold (80%) above which new images cannot be added
 pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
 
@@ -43,8 +56,8 @@ pub struct StoredContact {
 pub struct ContactImage {
     /// Binary image data
     pub data: ByteBuf,
-    /// MIME type of the image (e.g., "image/jpeg", "image/png")
-    pub mime_type: String,
+    /// MIME type of the image (e.g., "image/jpeg", "image/png", etc.)
+    pub mime_type: ImageMimeType,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
