@@ -80,8 +80,8 @@
 
 			const feeData = {
 				...feeDataRest,
-				maxFeePerGas:maxBigInt( maxFeePerGas , suggestedMaxFeePerGas),
-				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas , suggestedMaxPriorityFeePerGas)
+				maxFeePerGas:maxBigInt( maxFeePerGas , suggestedMaxFeePerGas) ?? null,
+				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas , suggestedMaxPriorityFeePerGas) ?? null
 			};
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
