@@ -4,71 +4,114 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
+import * as tokenToggleUtils from '$lib/utils/token-toggle.utils';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { expect } from 'vitest';
 
 describe('EnableTokenToggle', () => {
 	const getTestIdForToggle = (token: Token) =>
 		`${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${token.symbol}-${token.network.id.description}`;
 
-	const mockTogglableIcToken = { ...mockValidIcrcToken, enabled: true };
-	const mockTogglableSplToken = { ...BONK_TOKEN, enabled: true };
-	const mockTogglableBtcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
-	const mockTogglableSolToken = { ...SOLANA_TOKEN, enabled: true };
+	const mockToggleableIcToken = { ...mockValidIcrcToken, enabled: true };
+	const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
+	const mockToggleableBtcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
+	const mockToggleableSolToken = { ...SOLANA_TOKEN, enabled: true };
+
+	const mockOnToggle = vi.fn();
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		vi.spyOn(tokenToggleUtils, 'isIcrcTokenToggleDisabled').mockReturnValue(false);
+	});
 
 	it('renders toggle IC token', () => {
 		const { getByTestId } = render(EnableTokenToggle, {
-			props: {
-				token: mockTogglableIcToken as Token,
-				onToggle: () => {}
-			}
+			props: { token: mockToggleableIcToken, onToggle: mockOnToggle }
 		});
 
-		expect(getByTestId(getTestIdForToggle(mockTogglableIcToken as Token))).toBeInTheDocument();
+		expect(getByTestId(getTestIdForToggle(mockToggleableIcToken))).toBeInTheDocument();
 	});
 
 	it('renders toggle Spl token', () => {
 		const { getByTestId } = render(EnableTokenToggle, {
-			props: { token: mockTogglableSplToken as Token, onToggle: () => {} }
+			props: { token: mockToggleableSplToken, onToggle: mockOnToggle }
 		});
 
-		expect(getByTestId(getTestIdForToggle(mockTogglableSplToken))).toBeInTheDocument();
+		expect(getByTestId(getTestIdForToggle(mockToggleableSplToken))).toBeInTheDocument();
 	});
 
 	it('should call onToggle on clicking it', async () => {
-		const fn = vi.fn();
-
 		const { getByTestId } = render(EnableTokenToggle, {
-			props: { token: mockTogglableIcToken as Token, onToggle: () => fn() }
+			props: { token: mockToggleableIcToken, onToggle: mockOnToggle }
 		});
 
-		await fireEvent.click(getByTestId(getTestIdForToggle(mockTogglableIcToken as Token)));
+		const toggleElement = getByTestId(getTestIdForToggle(mockToggleableIcToken));
 
-		expect(fn).toHaveBeenCalledOnce();
+		expect(toggleElement).toBeInTheDocument();
+
+		const checkbox = toggleElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
+
+		expect(checkbox).toBeInTheDocument();
+
+		await fireEvent.click(checkbox);
+
+		expect(mockOnToggle).toHaveBeenCalledOnce();
+	});
+
+	it('should not call onToggle on clicking it if it is disabled', async () => {
+		vi.spyOn(tokenToggleUtils, 'isIcrcTokenToggleDisabled').mockReturnValue(true);
+
+		const { getByTestId } = render(EnableTokenToggle, {
+			props: { token: mockToggleableIcToken, onToggle: mockOnToggle }
+		});
+
+		const toggleElement = getByTestId(getTestIdForToggle(mockToggleableIcToken));
+
+		expect(toggleElement).toBeInTheDocument();
+
+		const checkbox = toggleElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
+
+		expect(checkbox).toBeInTheDocument();
+
+		await fireEvent.click(checkbox);
+
+		expect(mockOnToggle).not.toHaveBeenCalled();
 	});
 
 	it('should not call onToggle on clicking BTC Native token', async () => {
-		const fn = vi.fn();
-
 		const { getByTestId } = render(EnableTokenToggle, {
-			props: { token: mockTogglableBtcToken as Token, onToggle: () => fn() }
+			props: { token: mockToggleableBtcToken, onToggle: mockOnToggle }
 		});
 
-		await fireEvent.click(getByTestId('toggle'));
+		const toggleElement = getByTestId('toggle');
 
-		expect(fn).toHaveBeenCalledTimes(0);
+		expect(toggleElement).toBeInTheDocument();
+
+		const checkbox = toggleElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
+
+		expect(checkbox).toBeInTheDocument();
+
+		await fireEvent.click(checkbox);
+
+		expect(mockOnToggle).not.toHaveBeenCalled();
 	});
 
 	it('should not call onToggle on clicking SOL Native token', async () => {
-		const fn = vi.fn();
-
 		const { getByTestId } = render(EnableTokenToggle, {
-			props: { token: mockTogglableSolToken as Token, onToggle: () => fn() }
+			props: { token: mockToggleableSolToken, onToggle: mockOnToggle }
 		});
 
-		await fireEvent.click(getByTestId('toggle'));
+		const toggleElement = getByTestId('toggle');
 
-		expect(fn).toHaveBeenCalledTimes(0);
+		expect(toggleElement).toBeInTheDocument();
+
+		const checkbox = toggleElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
+
+		expect(checkbox).toBeInTheDocument();
+
+		await fireEvent.click(checkbox);
+
+		expect(mockOnToggle).not.toHaveBeenCalled();
 	});
 });
