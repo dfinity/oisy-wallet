@@ -4,6 +4,7 @@
 	import Divider from '$lib/components/common/Divider.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -15,7 +16,6 @@
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 
 	let {
 		data,
