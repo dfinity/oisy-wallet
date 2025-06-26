@@ -2,7 +2,6 @@ import type {
 	_SERVICE as BackendService,
 	AddUserCredentialResult,
 	AllowSigningResponse,
-	BtcGetFeePercentilesRequest,
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CreateChallengeResponse,
@@ -29,6 +28,7 @@ import type {
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse,
@@ -197,9 +197,7 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcGetCurrentFeePercentiles = async ({
 		network
-	}: {
-		network: BtcGetFeePercentilesRequest['network'];
-	}): Promise<BtcGetFeePercentilesResponse> => {
+	}: BtcGetFeePercentilesParams): Promise<BtcGetFeePercentilesResponse> => {
 		const { btc_get_current_fee_percentiles } = this.caller({ certified: false });
 
 		const response = await btc_get_current_fee_percentiles({
