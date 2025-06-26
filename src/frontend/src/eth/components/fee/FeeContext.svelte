@@ -65,7 +65,7 @@
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
-			const { getFeeData } = infuraProviders(sendToken.network.id);
+			const { getFeeData, estimateGas } = infuraProviders(sendToken.network.id);
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
@@ -84,15 +84,19 @@
 				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas) ?? null
 			};
 
+			const feeDataGas = getEthFeeData({
+				...params,
+				helperContractAddress: toCkEthHelperContractAddress(
+					$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+				)
+			});
+
+			const estimatedGas = await estimateGas(params);
+
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
 					...feeData,
-					gas: getEthFeeData({
-						...params,
-						helperContractAddress: toCkEthHelperContractAddress(
-							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
-						)
-					})
+					gas: maxBigInt(feeDataGas, estimatedGas)
 				});
 				return;
 			}
