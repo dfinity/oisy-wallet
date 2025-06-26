@@ -30,9 +30,9 @@
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
+	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { maxBigInt } from '$lib/utils/bigint.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -80,8 +80,8 @@
 
 			const feeData = {
 				...feeDataRest,
-				maxFeePerGas:maxBigInt( maxFeePerGas , suggestedMaxFeePerGas) ?? null,
-				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas , suggestedMaxPriorityFeePerGas) ?? null
+				maxFeePerGas: maxBigInt(maxFeePerGas, suggestedMaxFeePerGas) ?? null,
+				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas, suggestedMaxPriorityFeePerGas) ?? null
 			};
 
 			const feeDataGas = getEthFeeData({
@@ -89,9 +89,9 @@
 				helperContractAddress: toCkEthHelperContractAddress(
 					$ckEthMinterInfoStore?.[nativeEthereumToken.id]
 				)
-			})
+			});
 
-			const estimatedGas = await estimateGas(params)
+			const estimatedGas = await estimateGas(params);
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
