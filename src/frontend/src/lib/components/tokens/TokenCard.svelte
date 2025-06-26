@@ -16,6 +16,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
+	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
 
 	let {
 		data,
@@ -38,7 +39,7 @@
 	);
 
 	let token: TokenToggleable<Token> | undefined = $derived(
-		nonNullish(onToggle) ? (data as TokenToggleable<Token>) : undefined
+		isCardDataTogglableToken(data) ? (data as TokenToggleable<Token>) : undefined
 	);
 </script>
 
