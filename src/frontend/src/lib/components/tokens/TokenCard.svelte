@@ -39,7 +39,7 @@
 	);
 
 	let token: TokenToggleable<Token> | undefined = $derived(
-		isCardDataTogglableToken(data) ? (data as TokenToggleable<Token>) : undefined
+		isCardDataTogglableToken(data) ? data : undefined
 	);
 </script>
 
@@ -85,7 +85,7 @@
 		{/snippet}
 
 		{#snippet titleEnd()}
-			{#if isNullish(ontoggle)}
+			{#if isNullish(onToggle)}
 				<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
 					<TokenBalance {data} hideBalance={$isPrivacyMode}>
 						{#snippet privacyBalance()}

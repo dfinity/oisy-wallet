@@ -1,6 +1,8 @@
 import { TokenSchema } from '$lib/schema/token.schema';
+import type { Token } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenUiGroup } from '$lib/types/token-group';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 
 /** Maps the token group to the card data of the card that will be used as "summary" for the group.
  *
@@ -25,7 +27,7 @@ export const mapHeaderData = ({
 	tokenCount: tokens.length
 });
 
-export const isCardDataTogglableToken = (data: CardData): boolean => {
+export const isCardDataTogglableToken = (data: CardData): data is TokenToggleable<Token> => {
 	const { success: parseSuccess } = TokenSchema.safeParse(data);
 	return parseSuccess && 'enabled' in data;
 };
