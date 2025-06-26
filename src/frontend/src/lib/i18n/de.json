@@ -87,7 +87,7 @@
 			"vip_qr_code": "Einladungslink generieren",
 			"binance_qr_code": "Binance Clubhouse-Link generieren",
 			"refer_a_friend": "Empfehlungslink für einen Freund erstellen",
-			"address_book": "Adressbuch öffnen",
+			"address_book": "Kontakte öffnen",
 			"hide_balances": "Angezeigte Salden verbergen",
 			"show_balances": "Versteckte Salden anzeigen"
 		},
@@ -301,6 +301,16 @@
 				"name": "WaterNeuron",
 				"one_liner": "ICP-Liquid-Staking – Maximieren Sie Ihre Kapitaleffizienz durch Liquid-Staking Ihres ICP.",
 				"description": "WaterNeuron bietet eine kapitaleffizientere Staking-Methode, indem Sie weiterhin von ICP-Staking-Belohnungen profitieren und gleichzeitig Ihre Token liquide halten. Dieser Ansatz vereinfacht den Staking-Prozess und macht die Auswahl spezifischer Validatoren zur Maximierung der Belohnungen überflüssig."
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "Dezentrale soziale Medien – posten, verdienen, besitzen.",
+				"call_to_action": "Gehe zu Taggr",
+				"description": "Taggr ist eine vollständig dezentralisierte Social-Media-Plattform, die auf einem öffentlichen, verteilten Computernetzwerk basiert, das vom Internetcomputer betrieben wird. Im Gegensatz zu herkömmlichen, von Unternehmen kontrollierten Social-Media-Plattformen gehört Taggr vollständig seinen Nutzern und wird von ihnen verwaltet.",
+				"carousel": {
+					"text": "Dezentrale soziale Medien",
+					"call_to_action": "Mehr erfahren"
+				}
 			}
 		}
 	},
@@ -318,12 +328,13 @@
 			"activity_button_text": "Letzte Aktivität prüfen",
 			"activity_button_text_short": "Aktivität prüfen",
 			"open_wallet": "Zur Wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles sind jetzt live!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 4 ist jetzt aktiv!",
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
 			"ongoing": "Aktiv",
-			"ended": "Beendet ($amount)"
+			"ended": "Beendet ($amount)",
+			"banner_text": "Erhalte täglich Prämien mit Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Berechtigungskriterien",
@@ -432,7 +443,7 @@
 		"text": {
 			"initializing_wallet": "Deine Wallet wird vorbereitet...",
 			"securing_session": "Sichere Sitzung mit Internet Identity",
-			"retrieving_public_keys": "Hole deine öffentlichen Schlüssel für Bitcoin, Ethereum, Solana, Base, Polygon und BNB",
+			"retrieving_public_keys": "Hole deine öffentlichen Schlüssel für Bitcoin, Ethereum, Solana, Base, Polygon, BNB und Arbitrum",
 			"done": "Viel Spaß mit $oisy_short"
 		},
 		"alt": {
@@ -835,7 +846,8 @@
 			"show_more_networks": "Zeige $number weitere Netzwerke",
 			"hide_more_networks": "Weitere Netzwerke verbergen",
 			"on_network": " auf $network",
-			"delete_token": "Token löschen"
+			"delete_token": "Token löschen",
+			"edit_token": "Token bearbeiten"
 		},
 		"details": {
 			"title": "Token-Details",
@@ -846,7 +858,11 @@
 			"twin_token": "Twin-Token",
 			"standard": "Standard",
 			"confirm_deletion_description": "Dies entfernt <span class=\"font-bold\">$token</span> aus deiner $oisy_short-Tokenliste. Deine Gelder bleiben unberührt – Du kannst das Token jederzeit wieder hinzufügen.",
-			"deletion_confirmation": ""
+			"deletion_confirmation": "$token wurde erfolgreich aus deiner $oisy_short Tokenliste entfernt.",
+			"update_confirmation": "$token wurde erfolgreich aktualisiert.",
+			"missing_index_canister_id_label": "Nicht zugewiesen",
+			"missing_index_canister_id_warning": "Index Canister fehlt, und $oisy_short kann die Transaktionshistorie nicht anzeigen",
+			"missing_index_canister_id_button": "Index Canister angeben"
 		},
 		"balance": {
 			"error": {
@@ -945,7 +961,8 @@
 			"incomplete_metadata": "Kein Name oder Symbol in den Metadaten vorhanden.",
 			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol existiert bereits.",
 			"unexpected_undefined": "Token ist undefiniert. Das ist unerwartet.",
-			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen."
+			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen.",
+			"unexpected_error_on_token_update": "Beim Aktualisieren des Tokens ist etwas schiefgelaufen."
 		}
 	},
 	"fee": {
@@ -1191,22 +1208,22 @@
 	"referral": {
 		"invitation": {
 			"text": {
-				"title": "Empfiehl einen Freund",
+				"title": "Freunde einladen",
 				"referral_link_copied": "Empfehlungslink in Zwischenablage kopiert.",
 				"information": "Erhalte Bonus-Sprinkles, jedes Mal wenn deine Freunde einen erhalten!",
-				"not_referred_yet": "Du hast noch niemanden empfohlen",
-				"referred_amount": "Du hast bereits $amount Personen empfohlen",
+				"not_referred_yet": "Du hast noch niemanden eingeladen",
+				"referred_amount": "Du hast bereits $amount Personen eingeladen",
 				"learn_more": "Mehr erfahren"
 			},
 			"error": {
-				"loading_referrer_info": "Fehler beim Laden der Empfehlungsinfo",
-				"setting_referrer": "Fehler beim Festlegen des Empfehlers"
+				"loading_referrer_info": "Fehler beim Laden der Einladungs-Info",
+				"setting_referrer": "Fehler beim Festlegen der einladendenden Person"
 			}
 		}
 	},
 	"address_book": {
 		"text": {
-			"title": "Adressbuch",
+			"title": "Kontakte",
 			"empty_title": "Deine Kontakte sind leer",
 			"empty_text": "Alle deine Kontakte werden hier angezeigt",
 			"add_new_contact": "Neuen Kontakt hinzufügen",
@@ -1247,9 +1264,9 @@
 			"name": "Name"
 		},
 		"delete": {
-			"title": "$contact löschen?",
+			"title": "Kontakt $contact löschen?",
 			"delete_contact": "Kontakt löschen",
-			"content_text": "Dadurch wird $contact und alle zugehörigen Adressen aus deinem Adressbuch gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden."
+			"content_text": "Dadurch wird $contact und alle zugehörigen Adressen aus deinen Kontakten gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden."
 		},
 		"error": {
 			"create": "Kontakt konnte nicht erstellt werden",
@@ -1414,9 +1431,9 @@
 		}
 	},
 	"welcome": {
-		"title": "",
-		"subtitle": "",
-		"description": ""
+		"title": "Wilkommen bei $oisy_short!",
+		"subtitle": "Bereit zum Verdienen?",
+		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Werbe vier Freunde und sichere dir einen garantierten Bonus."
 	},
 	"temporal": {
 		"seconds_to_duration": {
