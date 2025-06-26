@@ -15,8 +15,8 @@
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	let {
 		data,
