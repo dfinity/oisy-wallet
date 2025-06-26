@@ -147,7 +147,7 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(blockNumber) && nonNullish(token) && nonNullish(token.network.id)}
+			{#if nonNullish(blockNumber) && nonNullish(token)}
 				<ListItem>
 					<span>{$i18n.transaction.text.block}</span>
 					<span>
