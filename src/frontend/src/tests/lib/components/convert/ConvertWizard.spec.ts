@@ -10,10 +10,10 @@ import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
 	ETH_FEE_CONTEXT_KEY,
-	initFeeContext,
+	initEthFeeContext,
 	initFeeStore,
-	type FeeContext
-} from '$eth/stores/fee.store';
+	type EthFeeContext
+} from '$eth/stores/eth-fee.store';
 import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 import {
 	BTC_CONVERT_FORM_TEST_ID,
@@ -60,12 +60,12 @@ describe('ConvertWizard', () => {
 	const mockContext = (sourceToken: Token) =>
 		new Map<
 			symbol,
-			ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext | FeeContext
+			ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext | EthFeeContext
 		>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
 			[
 				ETH_FEE_CONTEXT_KEY,
-				initFeeContext({
+				initEthFeeContext({
 					feeStore: initFeeStore(),
 					feeTokenIdStore: writable(sourceToken.id),
 					feeExchangeRateStore: writable(100),

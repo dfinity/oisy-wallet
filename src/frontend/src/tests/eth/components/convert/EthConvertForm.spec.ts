@@ -3,11 +3,11 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 import {
 	ETH_FEE_CONTEXT_KEY,
-	initFeeContext,
+	initEthFeeContext,
 	initFeeStore,
-	type FeeContext,
-	type FeeStore
-} from '$eth/stores/fee.store';
+	type EthFeeContext,
+	type EthFeeStore
+} from '$eth/stores/eth-fee.store';
 import {
 	CONVERT_CONTEXT_KEY,
 	initConvertContext,
@@ -23,12 +23,12 @@ import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('EthConvertForm', () => {
-	let store: FeeStore;
-	const mockContext = ({ feeStore }: { feeStore: FeeStore }) =>
-		new Map<symbol, ConvertContext | FeeContext | TokenActionValidationErrorsContext>([
+	let store: EthFeeStore;
+	const mockContext = ({ feeStore }: { feeStore: EthFeeStore }) =>
+		new Map<symbol, ConvertContext | EthFeeContext | TokenActionValidationErrorsContext>([
 			[
 				ETH_FEE_CONTEXT_KEY,
-				initFeeContext({
+				initEthFeeContext({
 					feeStore,
 					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
 					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),

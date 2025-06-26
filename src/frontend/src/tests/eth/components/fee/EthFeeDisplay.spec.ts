@@ -1,6 +1,6 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-import { ETH_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
+import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initFeeStore } from '$eth/stores/eth-fee.store';
 import { maxGasFee as maxGasFeeUtils } from '$eth/utils/fee.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { formatToken } from '$lib/utils/format.utils';
@@ -20,7 +20,7 @@ describe('EthFeeDisplay', () => {
 	const mockContext = new Map([]);
 	mockContext.set(
 		ETH_FEE_CONTEXT_KEY,
-		initFeeContext({
+		initEthFeeContext({
 			feeStore: store,
 			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),

@@ -11,10 +11,10 @@
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
+		type EthFeeContext as FeeContextType,
+		initEthFeeContext,
 		initFeeStore
-	} from '$eth/stores/fee.store';
+	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
@@ -68,7 +68,7 @@
 
 	setContext<FeeContextType>(
 		ETH_FEE_CONTEXT_KEY,
-		initFeeContext({
+		initEthFeeContext({
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,

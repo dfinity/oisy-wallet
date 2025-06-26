@@ -1,6 +1,6 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendReview from '$eth/components/send/EthSendReview.svelte';
-import { ETH_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
+import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initFeeStore } from '$eth/stores/eth-fee.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
@@ -16,7 +16,7 @@ describe('EthSendReview', () => {
 	);
 	mockContext.set(
 		ETH_FEE_CONTEXT_KEY,
-		initFeeContext({
+		initEthFeeContext({
 			feeStore: initFeeStore(),
 			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),

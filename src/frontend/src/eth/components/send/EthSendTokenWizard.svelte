@@ -10,10 +10,10 @@
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
+		type EthFeeContext as FeeContextType,
+		initEthFeeContext,
 		initFeeStore
-	} from '$eth/stores/fee.store';
+	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
@@ -95,7 +95,7 @@
 
 	setContext<FeeContextType>(
 		ETH_FEE_CONTEXT_KEY,
-		initFeeContext({
+		initEthFeeContext({
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,

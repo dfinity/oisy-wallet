@@ -3,10 +3,10 @@
 	import { writable } from 'svelte/store';
 	import {
 		ETH_FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
+		type EthFeeContext as FeeContextType,
+		initEthFeeContext,
 		initFeeStore
-	} from '$eth/stores/fee.store';
+	} from '$eth/stores/eth-fee.store';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import type { Token, TokenId } from '$lib/types/token';
 
@@ -28,7 +28,7 @@
 
 	setContext<FeeContextType>(
 		ETH_FEE_CONTEXT_KEY,
-		initFeeContext({
+		initEthFeeContext({
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,
