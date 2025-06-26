@@ -39,7 +39,7 @@
 	);
 
 	let token: TokenToggleable<Token> | undefined = $derived(
-		isCardDataTogglableToken(data) ? (data as TokenToggleable<Token>) : undefined
+		isCardDataTogglableToken(data) ? data : undefined
 	);
 </script>
 
