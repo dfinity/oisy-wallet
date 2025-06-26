@@ -6,6 +6,7 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
@@ -13,7 +14,6 @@
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import Button from '$lib/components/ui/Button.svelte';
 
 	interface Props {
 		token: OptionTokenUi;
