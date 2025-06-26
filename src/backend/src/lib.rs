@@ -143,18 +143,18 @@ fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
 }
 
 pub struct State {
-    pub config: ConfigCell,
+    config: ConfigCell,
     /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the
     /// users.
-    pub user_token: UserTokenMap,
+    user_token: UserTokenMap,
     /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
     /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
-    pub custom_token: CustomTokenMap,
-    pub user_profile: UserProfileMap,
-    pub user_profile_updated: UserProfileUpdatedMap,
-    pub pow_challenge: PowChallengeMap,
-    pub contact: ContactMap,
-    pub image_store: ImageMap,
+    custom_token: CustomTokenMap,
+    user_profile: UserProfileMap,
+    user_profile_updated: UserProfileUpdatedMap,
+    pow_challenge: PowChallengeMap,
+    contact: ContactMap,
+    image_store: ImageMap,
 }
 
 fn set_config(arg: InitArg) {
