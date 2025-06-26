@@ -11,7 +11,7 @@
 
 <div>
 	<Sticky>
-		<div class="block py-2">
+		<div class="block">
 			<div class="flex w-full flex-row justify-between">
 				<div class="grow-1 relative flex flex-row justify-between">
 					<TokensFilter>

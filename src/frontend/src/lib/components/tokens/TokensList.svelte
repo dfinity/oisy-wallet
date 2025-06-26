@@ -77,10 +77,10 @@
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
+	// Token list for enabling when filtering
 	let allTokensFilteredAndSorted: TokenUiOrGroupUi[] = $state([]);
 
 	const updateFilterList = (filter: string) => {
-		console.log('Filtr called', filter);
 		allTokensFilteredAndSorted = getFilteredTokenList({
 			filter,
 			list: (nonNullish(exchangesStaticData)
@@ -94,7 +94,9 @@
 				: []
 			)
 				.filter(
-					(t) =>
+					(
+						t // hide enabled initially, but keep enabled ones that have just been enabled to let the user revert easily
+					) =>
 						!t.enabled ||
 						(t.enabled && nonNullish(Object.values(modifiedTokens).find((s) => s.id === t.id)))
 				)
@@ -102,12 +104,15 @@
 					token: mapTokenUi({ token: t, $balances: $balancesStore, $exchanges })
 				})) as TokenUiOrGroupUi[]
 		});
+		// we need to reset modified tokens, since the filter has changed the selected token(s) may not be visible anymore
 		modifiedTokens = {};
 	};
 
+	// we debounce the filter input for updating the enable tokens list
+	const debouncedFilterList = debounce((filter: string) => updateFilterList(filter), 300);
 	$effect(() => {
 		const filter = $tokenListStore.filter;
-		untrack(() => updateFilterList(filter));
+		untrack(() => debouncedFilterList(filter)); // we untrack the function so it only updates the list on filter change
 	});
 
 	let {
@@ -122,7 +127,6 @@
 	const onSave = async () => {
 		const { icrc, erc20, spl } = groupTogglableTokens(modifiedTokens);
 
-		// save the changes
 		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
 			toastsShow({
 				text: $i18n.tokens.manage.info.no_changes,
@@ -139,6 +143,7 @@
 			...(spl.length > 0 ? [saveSpl(spl)] : [])
 		]);
 
+		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
 		updateFilterList($tokenListStore.filter);
 	};
 
@@ -234,7 +239,7 @@
 		{#if $tokenListStore.filter !== '' && allTokensFilteredAndSorted.length > 0}
 			<div class="mb-3 mt-12 flex flex-col gap-3">
 				<Sticky>
-					<div class="flex max-h-[60px] items-center justify-between py-2">
+					<div class="flex items-center justify-between pb-4">
 						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
 						<div>
 							<Button

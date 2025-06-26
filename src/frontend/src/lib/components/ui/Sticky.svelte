@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		children: Snippet;
@@ -10,7 +10,8 @@
 
 	let rootElement: HTMLElement | undefined = $state();
 	let alignmentElement: HTMLElement | undefined = $state();
-	let { originalWidth, originalHeight } = $state({ originalWidth: 0, originalHeight: 0 });
+	let { originalWidth, originalHeight }: { originalWidth?: number; originalHeight?: number } =
+		$state({});
 
 	let scrolledSoon = $state(false);
 	let scrolledPast = $state(false);
@@ -20,35 +21,40 @@
 		if (!rootElement) return;
 
 		const rect = rootElement.getBoundingClientRect();
-		scrolledSoon = rect.top <= originalHeight + 16;
-		scrolledPast = rect.top <= 16;
+		scrolledSoon = rect.top <= 24 * 4;
+		scrolledPast = rect.top <= 24;
 	};
 
-	$effect(() => {
+	const calcSizes = (force = false) => {
 		if (isNullish(rootElement) || isNullish(alignmentElement)) {
 			return;
 		}
 
-		if (originalWidth === 0) {
+		if (isNullish(originalWidth) || force) {
 			originalWidth = rootElement.clientWidth;
 		}
-		if (originalHeight === 0) {
+		if (isNullish(originalHeight) || force) {
 			originalHeight = rootElement.children?.[0].clientHeight;
 		}
+	};
+
+	$effect(() => {
+		calcSizes();
 	});
 </script>
 
-<svelte:window on:scroll={handleScroll} />
+<svelte:window on:scroll={handleScroll} on:resize={() => calcSizes(true)} />
 
-<div bind:this={rootElement} class="block" style={`height: ${originalHeight}px`}>
+<div bind:this={rootElement} class="relative block" style={`height: ${originalHeight ?? 0}px`}>
 	<div
-		class="z-9 absolute block transition duration-150"
+		class="z-2 block"
 		bind:this={alignmentElement}
-		class:bg-page={scrolledSoon || scrolledPast}
+		class:absolute={nonNullish(originalHeight)}
+		class:bg-page={scrolledSoon}
 		class:fixed={scrolledPast}
 		class:top-0={scrolledPast}
-		class:pt-4={scrolledPast}
-		style={`width: ${originalWidth}px`}
+		class:pt-6={scrolledPast}
+		style={`width: ${originalWidth ?? 0}px`}
 	>
 		{@render children()}
 	</div>
