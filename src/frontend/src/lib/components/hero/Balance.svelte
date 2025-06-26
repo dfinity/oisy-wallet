@@ -13,6 +13,7 @@
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	interface Props {
 		token: OptionTokenUi;
@@ -49,9 +50,10 @@
 		{/if}
 	</output>
 	<div class="flex flex-col items-center">
-		<button
-			type="button"
-			class="cursor-pointer border-none bg-transparent p-0 text-xl font-bold"
+		<Button
+			transparent
+			fullWidth
+			styleClass="bg-transparent p-0 text-xl font-bold"
 			ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true })}
 		>
 			{#if !$isPrivacyMode}
@@ -70,6 +72,6 @@
 					</span>
 				</Tooltip>
 			{/if}
-		</button>
+		</Button>
 	</div>
 </span>
