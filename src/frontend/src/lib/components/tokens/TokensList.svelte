@@ -21,7 +21,7 @@
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { groupTogglableTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import type { ExchangesData } from '$lib/types/exchange';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import type { Token } from '$lib/types/token';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
@@ -38,6 +38,9 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import Button from '$lib/components/ui/Button.svelte';
+	import type { TokenToggleable } from '$lib/types/token-toggleable';
+	import Sticky from '$lib/components/ui/Sticky.svelte';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -74,9 +77,12 @@
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
-	let allTokensFilteredAndSorted: TokenUiOrGroupUi[] = $derived(
-		getFilteredTokenList({
-			filter: $tokenListStore.filter,
+	let allTokensFilteredAndSorted: TokenUiOrGroupUi[] = $state([]);
+
+	const updateFilterList = (filter: string) => {
+		console.log('Filtr called', filter);
+		allTokensFilteredAndSorted = getFilteredTokenList({
+			filter,
 			list: (nonNullish(exchangesStaticData)
 				? pinEnabledTokensAtTop(
 						sortTokens({
@@ -86,11 +92,23 @@
 						})
 					)
 				: []
-			).map((t) => ({
-				token: mapTokenUi({ token: t, $balances: $balancesStore, $exchanges })
-			})) as TokenUiOrGroupUi[]
-		})
-	);
+			)
+				.filter(
+					(t) =>
+						!t.enabled ||
+						(t.enabled && nonNullish(Object.values(modifiedTokens).find((s) => s.id === t.id)))
+				)
+				.map((t) => ({
+					token: mapTokenUi({ token: t, $balances: $balancesStore, $exchanges })
+				})) as TokenUiOrGroupUi[]
+		});
+		modifiedTokens = {};
+	};
+
+	$effect(() => {
+		const filter = $tokenListStore.filter;
+		untrack(() => updateFilterList(filter));
+	});
 
 	let {
 		initialSearch,
@@ -101,22 +119,7 @@
 			: { initialSearch: undefined, message: undefined }
 	);
 
-	const onToggle = async ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
-		let modifiedTokens: Record<string, Token> = {};
-
-		const { id: networkId } = network;
-		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
-
-		if (nonNullish(current)) {
-			modifiedTokens = { ...tokens };
-			return;
-		}
-
-		modifiedTokens = {
-			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
-			...tokens
-		};
-
+	const onSave = async () => {
 		const { icrc, erc20, spl } = groupTogglableTokens(modifiedTokens);
 
 		// save the changes
@@ -135,6 +138,27 @@
 			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
 			...(spl.length > 0 ? [saveSpl(spl)] : [])
 		]);
+
+		updateFilterList($tokenListStore.filter);
+	};
+
+	let modifiedTokens: Record<string, Token> = $state({});
+
+	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
+
+	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+		const { id: networkId } = network;
+		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
+
+		if (nonNullish(current)) {
+			modifiedTokens = { ...tokens };
+			return;
+		}
+
+		modifiedTokens = {
+			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
+			...tokens
+		};
 	};
 
 	const progress = () => ProgressStepsAddToken.DONE;
@@ -209,7 +233,20 @@
 
 		{#if $tokenListStore.filter !== '' && allTokensFilteredAndSorted.length > 0}
 			<div class="mb-3 mt-12 flex flex-col gap-3">
-				<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
+				<Sticky>
+					<div class="flex max-h-[60px] items-center justify-between py-2">
+						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
+						<Button
+							onclick={() => onSave()}
+							disabled={saveDisabled}
+							paddingSmall
+							fullWidth={false}
+							styleClass="py-2"
+						>
+							Apply ({Object.keys(modifiedTokens).length} token)
+						</Button>
+					</div>
+				</Sticky>
 
 				{#each allTokensFilteredAndSorted as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 					<div
