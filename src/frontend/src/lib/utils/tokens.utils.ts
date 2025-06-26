@@ -251,13 +251,13 @@ export const defineEnabledTokens = <T extends Token>({
 	);
 
 export const groupTogglableTokens = (
-	modifiedTokens: Record<string, Token>
+	tokens: Record<string, Token>
 ): {
 	icrc: IcrcCustomToken[];
 	erc20: Erc20UserToken[];
 	spl: SplTokenToggleable[];
 } =>
-	Object.values(modifiedTokens).reduce<{
+	Object.values(tokens ?? {}).reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		spl: SplTokenToggleable[];
