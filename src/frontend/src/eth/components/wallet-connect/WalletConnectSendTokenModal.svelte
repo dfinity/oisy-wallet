@@ -10,7 +10,7 @@
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
-		FEE_CONTEXT_KEY,
+		ETH_FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
 		initFeeContext,
 		initFeeStore
@@ -67,7 +67,7 @@
 	$: feeDecimalsStore.set($sendToken.decimals);
 
 	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
+		ETH_FEE_CONTEXT_KEY,
 		initFeeContext({
 			feeStore,
 			feeSymbolStore,

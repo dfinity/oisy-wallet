@@ -52,4 +52,4 @@ export const initFeeContext = ({
 	};
 };
 
-export const FEE_CONTEXT_KEY = Symbol('fee');
+export const ETH_FEE_CONTEXT_KEY = Symbol('fee');

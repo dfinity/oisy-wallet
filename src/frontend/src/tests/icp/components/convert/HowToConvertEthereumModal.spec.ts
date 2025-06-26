@@ -2,7 +2,7 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
-	FEE_CONTEXT_KEY,
+	ETH_FEE_CONTEXT_KEY,
 	initFeeContext,
 	initFeeStore,
 	type FeeContext
@@ -22,7 +22,7 @@ describe('HowToConvertEthereumModal', () => {
 	const mockContext = () =>
 		new Map<symbol, FeeContext>([
 			[
-				FEE_CONTEXT_KEY,
+				ETH_FEE_CONTEXT_KEY,
 				initFeeContext({
 					feeStore: initFeeStore(),
 					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),

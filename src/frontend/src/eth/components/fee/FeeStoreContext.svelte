@@ -2,7 +2,7 @@
 	import { setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
-		FEE_CONTEXT_KEY,
+		ETH_FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
 		initFeeContext,
 		initFeeStore
@@ -27,7 +27,7 @@
 	$: feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
 
 	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
+		ETH_FEE_CONTEXT_KEY,
 		initFeeContext({
 			feeStore,
 			feeSymbolStore,

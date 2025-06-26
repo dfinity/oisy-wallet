@@ -9,7 +9,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
-	FEE_CONTEXT_KEY,
+	ETH_FEE_CONTEXT_KEY,
 	initFeeContext,
 	initFeeStore,
 	type FeeContext
@@ -64,7 +64,7 @@ describe('ConvertWizard', () => {
 		>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
 			[
-				FEE_CONTEXT_KEY,
+				ETH_FEE_CONTEXT_KEY,
 				initFeeContext({
 					feeStore: initFeeStore(),
 					feeTokenIdStore: writable(sourceToken.id),

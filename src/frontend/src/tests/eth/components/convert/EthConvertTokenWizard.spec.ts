@@ -5,7 +5,7 @@ import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard
 import * as tokensDerived from '$eth/derived/token.derived';
 import * as sendServices from '$eth/services/send.services';
 import {
-	FEE_CONTEXT_KEY,
+	ETH_FEE_CONTEXT_KEY,
 	initFeeContext,
 	initFeeStore,
 	type FeeContext,
@@ -69,7 +69,7 @@ describe('EthConvertTokenWizard', () => {
 				initConvertContext({ sourceToken: ETHEREUM_TOKEN, destinationToken: SEPOLIA_TOKEN })
 			],
 			[
-				FEE_CONTEXT_KEY,
+				ETH_FEE_CONTEXT_KEY,
 				initFeeContext({
 					feeStore,
 					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),

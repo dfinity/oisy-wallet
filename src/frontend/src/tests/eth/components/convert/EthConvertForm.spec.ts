@@ -2,7 +2,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 import {
-	FEE_CONTEXT_KEY,
+	ETH_FEE_CONTEXT_KEY,
 	initFeeContext,
 	initFeeStore,
 	type FeeContext,
@@ -27,7 +27,7 @@ describe('EthConvertForm', () => {
 	const mockContext = ({ feeStore }: { feeStore: FeeStore }) =>
 		new Map<symbol, ConvertContext | FeeContext | TokenActionValidationErrorsContext>([
 			[
-				FEE_CONTEXT_KEY,
+				ETH_FEE_CONTEXT_KEY,
 				initFeeContext({
 					feeStore,
 					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),

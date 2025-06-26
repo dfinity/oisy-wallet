@@ -4,7 +4,7 @@
 	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy } from 'svelte';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import { ETH_FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Option } from '$lib/types/utils';
@@ -15,7 +15,7 @@
 		feeTokenIdStore,
 		feeDecimalsStore,
 		feeExchangeRateStore
-	}: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	}: FeeContext = getContext<FeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	let fee: Option<bigint> = undefined;
 

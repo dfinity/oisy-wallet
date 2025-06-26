@@ -10,7 +10,7 @@
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
-	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
+	import { ETH_FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
@@ -49,7 +49,7 @@
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	const { feeStore } = getContext<EthFeeContext>(FEE_CONTEXT_KEY);
+	const { feeStore } = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	let destination = '';
 	$: destination = isTokenErc20($sourceToken)

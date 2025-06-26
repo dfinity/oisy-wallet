@@ -9,7 +9,7 @@
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
-		FEE_CONTEXT_KEY,
+		ETH_FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
 		initFeeContext,
 		initFeeStore
@@ -94,7 +94,7 @@
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
+		ETH_FEE_CONTEXT_KEY,
 		initFeeContext({
 			feeStore,
 			feeSymbolStore,
