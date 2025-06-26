@@ -1,15 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
-	import { isBitcoinToken } from '$btc/utils/token.utils';
-	import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
-	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -20,11 +14,8 @@
 	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import { isTokenUiGroup } from '$lib/utils/token-group.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
-	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
-	import { isSolanaToken } from '$sol/utils/token.utils';
+	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 
 	let {
 		data,
@@ -124,15 +115,7 @@
 		{#snippet descriptionEnd()}
 			<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
 				{#if nonNullish(onToggle) && nonNullish(token)}
-					{#if icTokenIcrcCustomToken(token)}
-						<IcManageTokenToggle {token} on:icToken={(t) => onToggle(t)} />
-					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
-						<ManageTokenToggle {token} on:icShowOrHideToken={(t) => onToggle(t)} />
-					{:else if isBitcoinToken(token)}
-						<BtcManageTokenToggle />
-					{:else if isSolanaToken(token)}
-						<SolManageTokenToggle />
-					{/if}
+					<EnableTokenToggle {token} {onToggle} />
 				{:else if !$isPrivacyMode}
 					<ExchangeTokenValue {data} />
 				{/if}
