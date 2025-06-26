@@ -11,7 +11,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
 	ETH_FEE_CONTEXT_KEY,
 	initEthFeeContext,
-	initFeeStore,
+	initEthFeeStore,
 	type EthFeeContext
 } from '$eth/stores/eth-fee.store';
 import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
@@ -66,7 +66,7 @@ describe('ConvertWizard', () => {
 			[
 				ETH_FEE_CONTEXT_KEY,
 				initEthFeeContext({
-					feeStore: initFeeStore(),
+					feeStore: initEthFeeStore(),
 					feeTokenIdStore: writable(sourceToken.id),
 					feeExchangeRateStore: writable(100),
 					feeSymbolStore: writable(sourceToken.symbol),

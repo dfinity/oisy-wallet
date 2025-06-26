@@ -4,7 +4,7 @@ import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 import {
 	ETH_FEE_CONTEXT_KEY,
 	initEthFeeContext,
-	initFeeStore,
+	initEthFeeStore,
 	type EthFeeContext,
 	type EthFeeStore
 } from '$eth/stores/eth-fee.store';
@@ -63,7 +63,7 @@ describe('EthConvertForm', () => {
 	beforeEach(() => {
 		mockPage.reset();
 		vi.resetAllMocks();
-		store = initFeeStore();
+		store = initEthFeeStore();
 	});
 
 	it('should keep the next button clickable if all requirements are met', () => {

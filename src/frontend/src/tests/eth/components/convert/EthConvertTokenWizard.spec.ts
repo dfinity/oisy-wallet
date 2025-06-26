@@ -7,7 +7,7 @@ import * as sendServices from '$eth/services/send.services';
 import {
 	ETH_FEE_CONTEXT_KEY,
 	initEthFeeContext,
-	initFeeStore,
+	initEthFeeStore,
 	type EthFeeContext,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
@@ -57,7 +57,7 @@ describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
 	const mockContext = (fees?: FeeStoreData) => {
-		const feeStore = initFeeStore();
+		const feeStore = initEthFeeStore();
 
 		if (nonNullish(fees)) {
 			feeStore.setFee(fees);

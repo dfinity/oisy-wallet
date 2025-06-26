@@ -1,7 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
-import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initFeeStore } from '$eth/stores/eth-fee.store';
+import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import {
 	SEND_DESTINATION_SECTION,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -21,7 +21,7 @@ describe('EthSendForm', () => {
 	mockContext.set(
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext({
-			feeStore: initFeeStore(),
+			feeStore: initEthFeeStore(),
 			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)

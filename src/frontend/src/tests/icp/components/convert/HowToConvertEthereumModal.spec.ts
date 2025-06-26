@@ -4,7 +4,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
 	ETH_FEE_CONTEXT_KEY,
 	initEthFeeContext,
-	initFeeStore,
+	initEthFeeStore,
 	type EthFeeContext
 } from '$eth/stores/eth-fee.store';
 import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
@@ -24,7 +24,7 @@ describe('HowToConvertEthereumModal', () => {
 			[
 				ETH_FEE_CONTEXT_KEY,
 				initEthFeeContext({
-					feeStore: initFeeStore(),
+					feeStore: initEthFeeStore(),
 					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 					feeExchangeRateStore: writable(100),
 					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),

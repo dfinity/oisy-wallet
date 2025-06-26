@@ -10,7 +10,7 @@ export interface EthFeeStore extends Readable<FeeStoreData> {
 	setFee: (data: TransactionFeeData) => void;
 }
 
-export const initFeeStore = (): EthFeeStore => {
+export const initEthFeeStore = (): EthFeeStore => {
 	const { subscribe, set } = writable<FeeStoreData>(undefined);
 
 	return {

@@ -13,7 +13,7 @@
 		ETH_FEE_CONTEXT_KEY,
 		type EthFeeContext as FeeContextType,
 		initEthFeeContext,
-		initFeeStore
+		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
@@ -55,7 +55,7 @@
 	 * Fee context store
 	 */
 
-	const feeStore = initFeeStore();
+	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set($sendToken.symbol);

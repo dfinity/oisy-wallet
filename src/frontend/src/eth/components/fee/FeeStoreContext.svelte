@@ -5,14 +5,14 @@
 		ETH_FEE_CONTEXT_KEY,
 		type EthFeeContext as FeeContextType,
 		initEthFeeContext,
-		initFeeStore
+		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import type { Token, TokenId } from '$lib/types/token';
 
 	export let token: Token;
 
-	const feeStore = initFeeStore();
+	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(token.symbol);
