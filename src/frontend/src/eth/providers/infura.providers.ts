@@ -26,8 +26,7 @@ export class InfuraProvider {
 
 	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
 
-	estimateGas = ({ to, from }: GetFeeData): Promise<bigint> =>
-		this.provider.estimateGas({ to, from });
+	estimateGas = (params: GetFeeData): Promise<bigint> => this.provider.estimateGas(params);
 
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
 		this.provider.broadcastTransaction(signedTransaction);
