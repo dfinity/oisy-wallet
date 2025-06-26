@@ -42,7 +42,7 @@
 
 <div bind:this={rootElement} class="block" style={`height: ${originalHeight}px`}>
 	<div
-		class="z-9 duration-250 absolute block transition"
+		class="z-9 absolute block transition duration-150"
 		bind:this={alignmentElement}
 		class:bg-page={scrolledSoon || scrolledPast}
 		class:fixed={scrolledPast}

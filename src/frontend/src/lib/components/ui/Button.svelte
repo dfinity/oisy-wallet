@@ -28,7 +28,7 @@
 		disabled,
 		loading = false,
 		loadingAsSkeleton = true,
-		fullWidth = true,
+		fullWidth = false,
 		alignLeft = false,
 		link = false,
 		inlineLink = false,
@@ -44,7 +44,7 @@
 
 <button
 	class={`${colorStyle} flex text-center ${styleClass}`}
-	class:flex-1={!inlineLink && fullWidth}
+	class:flex-1={!inlineLink}
 	class:font-normal={inlineLink}
 	class:text-tertiary={inlineLink}
 	class:underline={inlineLink}

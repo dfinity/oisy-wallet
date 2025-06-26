@@ -236,15 +236,17 @@
 				<Sticky>
 					<div class="flex max-h-[60px] items-center justify-between py-2">
 						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
-						<Button
-							onclick={() => onSave()}
-							disabled={saveDisabled}
-							paddingSmall
-							fullWidth={false}
-							styleClass="py-2"
-						>
-							Apply ({Object.keys(modifiedTokens).length} token)
-						</Button>
+						<div>
+							<Button
+								onclick={() => onSave()}
+								disabled={saveDisabled}
+								paddingSmall
+								fullWidth={false}
+								styleClass="py-2"
+							>
+								Apply ({Object.keys(modifiedTokens).length} token)
+							</Button>
+						</div>
 					</div>
 				</Sticky>
 
