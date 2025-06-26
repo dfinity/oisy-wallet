@@ -207,9 +207,9 @@
 			{/if}
 		{/if}
 
-		{#if $tokenListStore.filter !== ''}
+		{#if $tokenListStore.filter !== '' && allTokensFilteredAndSorted.length > 0}
 			<div class="mb-3 mt-12 flex flex-col gap-3">
-				<h2 class="text-base">Enable more assets</h2>
+				<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
 
 				{#each allTokensFilteredAndSorted as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 					<div
@@ -222,7 +222,7 @@
 					>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}
-								<TokenCard data={tokenOrGroup.token} togglable ontoggle={onToggle} />
+								<TokenCard data={tokenOrGroup.token} {onToggle} />
 							{/if}
 						</div>
 					</div>
