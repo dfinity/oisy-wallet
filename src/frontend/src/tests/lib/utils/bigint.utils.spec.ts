@@ -16,12 +16,30 @@ describe('bigint.utils', () => {
 			expect(maxBigInt(null, null)).toBeNull();
 		});
 
+		it('should return undefined if both values are undefined', () => {
+			expect(maxBigInt(undefined, undefined)).toBeUndefined();
+		});
+
 		it('should return the non-null value if one is null', () => {
 			expect(maxBigInt(10n, null)).toBe(10n);
 			expect(maxBigInt(null, 20n)).toBe(20n);
 
 			expect(maxBigInt(-10n, null)).toBe(-10n);
 			expect(maxBigInt(null, -20n)).toBe(-20n);
+		});
+
+		it('should return the non-undefined value if one is undefined', () => {
+			expect(maxBigInt(10n, undefined)).toBe(10n);
+			expect(maxBigInt(undefined, 20n)).toBe(20n);
+
+			expect(maxBigInt(-10n, undefined)).toBe(-10n);
+			expect(maxBigInt(undefined, -20n)).toBe(-20n);
+		});
+
+		it('should return the second value if both are nullish', () => {
+			expect(maxBigInt(null, undefined)).toBeUndefined();
+
+			expect(maxBigInt(undefined, null)).toBeNull();
 		});
 	});
 });
