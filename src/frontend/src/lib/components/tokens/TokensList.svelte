@@ -19,7 +19,7 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
-	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { groupTogglableTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import { onMount } from 'svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -27,9 +27,6 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
@@ -40,9 +37,6 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-	import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
-	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
-	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
@@ -107,7 +101,7 @@
 			: { initialSearch: undefined, message: undefined }
 	);
 
-	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+	const onToggle = async ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
 		let modifiedTokens: Record<string, Token> = {};
 
 		const { id: networkId } = network;
@@ -123,34 +117,8 @@
 			...tokens
 		};
 
-		const grouped = Object.values(modifiedTokens).reduce<{
-			icrc: IcrcCustomToken[];
-			erc20: Erc20UserToken[];
-			spl: SplTokenToggleable[];
-		}>(
-			({ icrc, erc20, spl }, token) => ({
-				icrc: [
-					...icrc,
-					...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
-				],
-				erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
-				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
-			}),
-			{ icrc: [], erc20: [], spl: [] }
-		);
+		const { icrc, erc20, spl } = groupTogglableTokens(modifiedTokens);
 
-		saveTokens(grouped);
-	};
-
-	const saveTokens = async ({
-		icrc,
-		erc20,
-		spl
-	}: {
-		icrc: IcrcCustomToken[];
-		erc20: Erc20UserToken[];
-		spl: SplTokenToggleable[];
-	}) => {
 		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
 			toastsShow({
 				text: $i18n.tokens.manage.info.no_changes,
