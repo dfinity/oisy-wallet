@@ -242,17 +242,23 @@
 
 				progress(ProgressStepsAddToken.UPDATE_UI);
 				// Similar as on token "save", we reload all custom tokens for simplicity reason.
-				await loadCustomTokens({ identity: $authIdentity });
+				await loadCustomTokens({
+					identity: $authIdentity,
+					onSuccess: () => {
+						progress(ProgressStepsAddToken.DONE);
+						close();
 
-				progress(ProgressStepsAddToken.DONE);
-				modalStore.close();
+						// the token needs to be reset to restart the worker with indexCanisterId
+						icrcCustomTokensStore.reset(tokenToEdit.ledgerCanisterId);
 
-				toastsShow({
-					text: replacePlaceholders($i18n.tokens.details.update_confirmation, {
-						$token: getTokenDisplaySymbol(tokenToEdit)
-					}),
-					level: 'success',
-					duration: 2000
+						toastsShow({
+							text: replacePlaceholders($i18n.tokens.details.update_confirmation, {
+								$token: getTokenDisplaySymbol(tokenToEdit)
+							}),
+							level: 'success',
+							duration: 2000
+						});
+					}
 				});
 			}
 		} catch (err) {
@@ -339,7 +345,7 @@
 	{/if}
 </WizardModal>
 
-{#if currentStep?.name === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}
+{#if currentStepName === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}
 	<BottomSheetConfirmationPopup
 		onCancel={() => (showBottomSheetDeleteConfirmation = false)}
 		disabled={loading}

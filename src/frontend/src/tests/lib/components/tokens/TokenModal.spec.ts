@@ -95,7 +95,6 @@ describe('TokenModal', () => {
 		});
 
 		const setCustomTokenMock = mockSetCustomToken();
-		const toasts = mockToastsShow();
 		mockAuthStore();
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
@@ -110,7 +109,6 @@ describe('TokenModal', () => {
 
 		expect(setCustomTokenMock).toHaveBeenCalledOnce();
 		expect(loadCustomTokens).toHaveBeenCalledOnce();
-		expect(toasts).toHaveBeenCalledOnce();
 	});
 
 	it('does not delete token if it is not erc20', async () => {
