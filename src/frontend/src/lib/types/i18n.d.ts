@@ -231,6 +231,13 @@ interface I18nDapps {
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
+		taggr: {
+			name: string;
+			one_liner: string;
+			call_to_action: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
 	};
 }
 
@@ -704,6 +711,7 @@ interface I18nTokens {
 		hide_more_networks: string;
 		on_network: string;
 		delete_token: string;
+		edit_token: string;
 	};
 	details: {
 		title: string;
@@ -715,6 +723,10 @@ interface I18nTokens {
 		standard: string;
 		confirm_deletion_description: string;
 		deletion_confirmation: string;
+		update_confirmation: string;
+		missing_index_canister_id_label: string;
+		missing_index_canister_id_warning: string;
+		missing_index_canister_id_button: string;
 	};
 	balance: { error: { not_applicable: string } };
 	import: {
@@ -793,6 +805,7 @@ interface I18nTokens {
 		duplicate_metadata: string;
 		unexpected_undefined: string;
 		unexpected_error_on_token_delete: string;
+		unexpected_error_on_token_update: string;
 	};
 }
 
