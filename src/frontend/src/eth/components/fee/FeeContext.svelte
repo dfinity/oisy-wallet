@@ -32,6 +32,7 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { maxBigInt } from '$lib/utils/bigint.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -79,8 +80,8 @@
 
 			const feeData = {
 				...feeDataRest,
-				maxFeePerGas: maxFeePerGas ?? suggestedMaxFeePerGas,
-				maxPriorityFeePerGas: maxPriorityFeePerGas ?? suggestedMaxPriorityFeePerGas
+				maxFeePerGas:maxBigInt( maxFeePerGas , suggestedMaxFeePerGas),
+				maxPriorityFeePerGas: maxBigInt(maxPriorityFeePerGas , suggestedMaxPriorityFeePerGas)
 			};
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
