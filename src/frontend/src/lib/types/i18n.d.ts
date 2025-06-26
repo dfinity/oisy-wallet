@@ -769,6 +769,7 @@ interface I18nTokens {
 			import_token: string;
 			network: string;
 			all_tokens_zero_balance: string;
+			enable_more_assets: string;
 		};
 		placeholder: { select_network: string };
 		info: { no_changes: string };
