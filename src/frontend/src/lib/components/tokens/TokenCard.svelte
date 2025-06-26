@@ -4,39 +4,32 @@
 	import Divider from '$lib/components/common/Divider.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TOKEN_CARD, type TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { CardData } from '$lib/types/token-card';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import type { Token } from '$lib/types/token';
+	import type { CardData } from '$lib/types/token-card';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
-	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
-	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
-	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
-	import { isBitcoinToken } from '$btc/utils/token.utils';
-	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
-	import { isSolanaToken } from '$sol/utils/token.utils';
-	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { isCardDataTogglableToken } from '$lib/utils/token-card.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	let {
 		data,
 		testIdPrefix = TOKEN_CARD,
 		asNetwork = false,
 		hover = false,
-		ontoggle
+		onToggle
 	}: {
 		data: CardData;
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
 		hover?: boolean;
-		ontoggle?: (t: CustomEvent<Token>) => void;
+		onToggle?: (t: CustomEvent<Token>) => void;
 	} = $props();
 
 	const dispatch = createEventDispatcher();
@@ -45,7 +38,9 @@
 		`${testIdPrefix}-${data.symbol}${nonNullish(data.network) ? `-${data.network.id.description}` : ''}`
 	);
 
-	let token: TokenToggleable<Token> = $derived(data as TokenToggleable<Token>);
+	let token: TokenToggleable<Token> | undefined = $derived(
+		isCardDataTogglableToken(data) ? (data as TokenToggleable<Token>) : undefined
+	);
 </script>
 
 <div class="flex w-full flex-col">
@@ -120,16 +115,8 @@
 
 		{#snippet descriptionEnd()}
 			<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
-				{#if nonNullish(ontoggle)}
-					{#if icTokenIcrcCustomToken(token)}
-						<IcManageTokenToggle {token} on:icToken={(t) => ontoggle(t)} />
-					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
-						<ManageTokenToggle {token} on:icShowOrHideToken={(t) => ontoggle(t)} />
-					{:else if isBitcoinToken(token)}
-						<BtcManageTokenToggle />
-					{:else if isSolanaToken(token)}
-						<SolManageTokenToggle />
-					{/if}
+				{#if nonNullish(onToggle) && nonNullish(token)}
+					<EnableTokenToggle {token} {onToggle} />
 				{:else if !$isPrivacyMode}
 					<ExchangeTokenValue {data} />
 				{/if}

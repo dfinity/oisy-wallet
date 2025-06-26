@@ -1,3 +1,4 @@
+import { TokenSchema } from '$lib/schema/token.schema';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenUiGroup } from '$lib/types/token-group';
 
@@ -23,3 +24,8 @@ export const mapHeaderData = ({
 	usdBalance,
 	tokenCount: tokens.length
 });
+
+export const isCardDataTogglableToken = (data: CardData): boolean => {
+	const { success: parseSuccess } = TokenSchema.safeParse(data);
+	return parseSuccess && 'enabled' in data;
+};
