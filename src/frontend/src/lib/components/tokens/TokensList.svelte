@@ -119,6 +119,7 @@
 
 		const { icrc, erc20, spl } = groupTogglableTokens(modifiedTokens);
 
+		// save the changes
 		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
 			toastsShow({
 				text: $i18n.tokens.manage.info.no_changes,
