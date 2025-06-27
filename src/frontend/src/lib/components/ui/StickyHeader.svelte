@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children: Snippet;
 	}
+
+	const SPACING_TOP = 24; // since we add pt-6 we need to trigger earlier
 
 	const { children }: Props = $props();
 
@@ -17,13 +19,10 @@
 	let scrolledPast = $state(false);
 
 	const handleScroll = () => {
-		if (!rootElement) {
-			return;
-		}
-
+		if (!rootElement) return;
 		const rect = rootElement.getBoundingClientRect();
-		scrolledSoon = rect.top <= 24 * 4;
-		scrolledPast = rect.top <= 24;
+		scrolledSoon = rect.top <= SPACING_TOP * 4;
+		scrolledPast = rect.top <= SPACING_TOP;
 	};
 
 	const calcSizes = (force = false) => {
@@ -44,7 +43,7 @@
 	});
 </script>
 
-<svelte:window on:scroll={handleScroll} on:resize={() => calcSizes(true)} />
+<svelte:window on:scroll={handleScroll} on:resize={debounce(() => calcSizes(true), 250)} />
 
 <div bind:this={rootElement} class="relative block" style={`height: ${originalHeight ?? 0}px`}>
 	<div
