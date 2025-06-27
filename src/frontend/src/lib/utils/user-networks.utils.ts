@@ -33,7 +33,9 @@ import { isNullish } from '@dfinity/utils';
 
 const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined => {
 	switch (networkId) {
-		case ICP_NETWORK_ID || ICP_PSEUDO_TESTNET_NETWORK_ID:
+		case ICP_NETWORK_ID:
+			return { InternetComputer: null };
+		case ICP_PSEUDO_TESTNET_NETWORK_ID:
 			return { InternetComputer: null };
 		case ETHEREUM_NETWORK_ID:
 			return { EthereumMainnet: null };
