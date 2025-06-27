@@ -1,3 +1,5 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
@@ -14,6 +16,7 @@ import type { CertifiedData } from '$lib/types/store';
 import type { Token } from '$lib/types/token';
 import type { UserToken } from '$lib/types/user-token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { get } from 'svelte/store';
 
 describe('user-token.store', () => {
@@ -118,6 +121,43 @@ describe('user-token.store', () => {
 
 				const expectedResults = [
 					{ data: { ...erc20Token2, enabled, id: BONK_TOKEN.id }, certified }
+				];
+
+				expect(get(mockStore)).toEqual(expectedResults);
+			});
+
+			it('should not save ERC20 tokens with same address and same networks as different tokens', () => {
+				mockStore.setAll([
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified }
+				]);
+				mockStore.setAll([
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified }
+				]);
+
+				const expectedResults = [
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified }
+				];
+
+				expect(get(mockStore)).toEqual(expectedResults);
+			});
+
+			it('should save ERC20 tokens with same address but different networks as different tokens', () => {
+				mockStore.setAll([
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified }
+				]);
+				mockStore.setAll([
+					{
+						data: { ...mockValidErc20Token, network: ARBITRUM_MAINNET_NETWORK, enabled },
+						certified
+					}
+				]);
+
+				const expectedResults = [
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified },
+					{
+						data: { ...mockValidErc20Token, network: ARBITRUM_MAINNET_NETWORK, enabled },
+						certified
+					}
 				];
 
 				expect(get(mockStore)).toEqual(expectedResults);
