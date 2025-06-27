@@ -497,7 +497,8 @@
 			"unavailable_balance": "",
 			"hidden_balance": "",
 			"top_up": "",
-			"learn_more_about_erc20_icp": ""
+			"learn_more_about_erc20_icp": "",
+			"tooltip_toggle_balance": ""
 		}
 	},
 	"settings": {
