@@ -2,6 +2,7 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import {
 	BTC_MAINNET_SYMBOL,
 	BTC_MAINNET_TOKEN,
@@ -25,6 +26,7 @@ import {
 	filterEnabledTokens,
 	filterTokens,
 	findToken,
+	groupTogglableTokens,
 	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
@@ -32,8 +34,9 @@ import {
 	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
-import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcCkToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
 import type { MockedFunction } from 'vitest';
 
@@ -665,6 +668,40 @@ describe('tokens.utils', () => {
 					expect(defineEnabledTokens(params)).toEqual([...mainnetTokens, ...testnetTokens]);
 				});
 			});
+		});
+	});
+
+	describe('groupTogglableTokens', () => {
+		it('should return empty arrays if no tokens passed', () => {
+			const result = groupTogglableTokens({});
+
+			expect(result).toEqual({ icrc: [], erc20: [], spl: [] });
+		});
+
+		it('should return empty arrays if invalid data passed', () => {
+			const result1 = groupTogglableTokens({ invalidkey: ICP_TOKEN });
+			const result2 = groupTogglableTokens(null as unknown as Record<string, Token>);
+
+			expect(result1).toEqual({ icrc: [], erc20: [], spl: [] });
+			expect(result2).toEqual({ icrc: [], erc20: [], spl: [] });
+		});
+
+		it('should group the tokens correctly', () => {
+			const mockToggleableIcToken1 = { ...mockValidIcrcToken, name: 'token1', enabled: true };
+			const mockToggleableIcToken2 = { ...mockValidIcrcToken, name: 'token2', enabled: true };
+			const mockToggleableErc20Token = { ...mockValidErc20Token, enabled: true };
+			const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
+
+			const { icrc, spl, erc20 } = groupTogglableTokens({
+				SOL: mockToggleableSplToken,
+				ETH: mockToggleableErc20Token,
+				'ICP-t1': mockToggleableIcToken1,
+				'ICP-t2': mockToggleableIcToken2
+			});
+
+			expect(icrc).toEqual([mockToggleableIcToken1, mockToggleableIcToken2]);
+			expect(spl).toEqual([mockToggleableSplToken]);
+			expect(erc20).toEqual([mockToggleableErc20Token]);
 		});
 	});
 });
