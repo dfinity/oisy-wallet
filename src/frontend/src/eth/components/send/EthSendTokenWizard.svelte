@@ -3,17 +3,17 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
-		FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
-		initFeeStore
-	} from '$eth/stores/fee.store';
+		ETH_FEE_CONTEXT_KEY,
+		type EthFeeContext as FeeContextType,
+		initEthFeeContext,
+		initEthFeeStore
+	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
@@ -36,7 +36,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Network } from '$lib/types/network';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -56,9 +56,9 @@
 
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
+	export let selectedContact: ContactUi | undefined = undefined;
 	// Required for the fee and also to retrieve ck minter information.
 	// i.e. Ethereum or Sepolia "main" token.
 	export let nativeEthereumToken: Token;
@@ -76,7 +76,7 @@
 	 * Fee context store
 	 */
 
-	const feeStore = initFeeStore();
+	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(nativeEthereumToken.symbol);
@@ -90,12 +90,12 @@
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
 	$: feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
 
-	let feeContext: FeeContext | undefined;
+	let feeContext: EthFeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
-		initFeeContext({
+		ETH_FEE_CONTEXT_KEY,
+		initEthFeeContext({
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,
@@ -134,8 +134,7 @@
 		}
 
 		const { valid } = assertCkEthMinterInfoLoaded({
-			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
-			network: targetNetwork
+			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 		});
 
 		if (!valid) {
@@ -178,7 +177,6 @@
 				maxPriorityFeePerGas,
 				gas,
 				sourceNetwork,
-				targetNetwork,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
@@ -212,7 +210,7 @@
 	const back = () => dispatch('icSendBack');
 </script>
 
-<FeeContext
+<EthFeeContext
 	bind:this={feeContext}
 	sendToken={$sendToken}
 	sendTokenId={$sendTokenId}
@@ -220,11 +218,10 @@
 	{destination}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
 	{sourceNetwork}
-	{targetNetwork}
 	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<EthSendReview on:icBack on:icSend={send} {destination} {amount} />
+		<EthSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
 			progressStep={sendProgressStep}
@@ -236,6 +233,7 @@
 			on:icClose={close}
 			on:icBack
 			on:icTokensList
+			{selectedContact}
 			bind:destination
 			bind:amount
 			{nativeEthereumToken}
@@ -245,4 +243,4 @@
 	{:else}
 		<slot />
 	{/if}
-</FeeContext>
+</EthFeeContext>

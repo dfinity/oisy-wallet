@@ -11,38 +11,36 @@ type AccountSnapshot = record {
 type AccountSnapshotFor = variant {
 	Erc20Sepolia : AccountSnapshot;
 	EthSepolia : AccountSnapshot;
-	SplTestnet : AccountSnapshot_1;
-	BtcMainnet : AccountSnapshot_2;
-	SolDevnet : AccountSnapshot_1;
+	BtcMainnet : AccountSnapshot_1;
+	SolDevnet : AccountSnapshot_2;
 	Erc20Mainnet : AccountSnapshot;
-	SolTestnet : AccountSnapshot_1;
 	Icrcv2 : AccountSnapshot_3;
-	BtcRegtest : AccountSnapshot_2;
-	SplDevnet : AccountSnapshot_1;
+	BtcRegtest : AccountSnapshot_1;
+	SplDevnet : AccountSnapshot_2;
 	EthMainnet : AccountSnapshot;
-	SplMainnet : AccountSnapshot_1;
-	SolLocal : AccountSnapshot_1;
-	BtcTestnet : AccountSnapshot_2;
-	SplLocal : AccountSnapshot_1;
-	SolMainnet : AccountSnapshot_1
+	SplMainnet : AccountSnapshot_2;
+	SolLocal : AccountSnapshot_2;
+	BtcTestnet : AccountSnapshot_1;
+	SplLocal : AccountSnapshot_2;
+	SolMainnet : AccountSnapshot_2
 };
 type AccountSnapshot_1 = record {
 	decimals : nat8;
-	token_address : text;
+	token_address : BtcTokenId;
 	network : record {};
 	approx_usd_per_token : float64;
 	last_transactions : vec Transaction_1;
-	account : text;
+	account : BtcAddress;
 	timestamp : nat64;
 	amount : nat64
 };
 type AccountSnapshot_2 = record {
 	decimals : nat8;
-	token_address : BtcTokenId;
+	token_address : text;
 	network : record {};
 	approx_usd_per_token : float64;
 	last_transactions : vec Transaction_2;
-	account : BtcAddress;
+	account : text;
 	timestamp : nat64;
 	amount : nat64
 };
@@ -190,7 +188,11 @@ type ContactAddressData = record {
 	label : opt text;
 	token_account_id : TokenAccountId
 };
-type ContactError = variant { InvalidContactData; ContactNotFound };
+type ContactError = variant {
+	InvalidContactData;
+	ContactNotFound;
+	RandomnessError
+};
 type CreateChallengeError = variant {
 	ChallengeInProgress;
 	MissingUserProfile;
@@ -276,10 +278,10 @@ type InitArg = record {
 };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
+	ArbitrumMainnet;
 	InternetComputer;
 	BaseSepolia;
 	PolygonMainnet;
-	SolanaTestnet;
 	BitcoinRegtest;
 	SolanaDevnet;
 	PolygonAmoy;
@@ -288,6 +290,7 @@ type NetworkSettingsFor = variant {
 	BaseMainnet;
 	BscMainnet;
 	SolanaLocal;
+	ArbitrumSepolia;
 	EthereumMainnet;
 	SolanaMainnet;
 	BitcoinMainnet;
@@ -389,14 +392,14 @@ type TransactionType = variant { Send; Receive };
 type Transaction_1 = record {
 	transaction_type : TransactionType;
 	network : record {};
-	counterparty : text;
+	counterparty : BtcAddress;
 	timestamp : nat64;
 	amount : nat64
 };
 type Transaction_2 = record {
 	transaction_type : TransactionType;
 	network : record {};
-	counterparty : BtcAddress;
+	counterparty : text;
 	timestamp : nat64;
 	amount : nat64
 };
@@ -466,6 +469,7 @@ service : (Arg) -> {
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
 	list_user_tokens : () -> (vec UserToken) query;
+	remove_custom_token : (CustomToken) -> ();
 	remove_user_token : (UserTokenId) -> ();
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();

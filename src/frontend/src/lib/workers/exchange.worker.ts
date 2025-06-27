@@ -12,7 +12,7 @@ import {
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd
 } from '$lib/services/exchange.services';
-import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko';
+import type { CoingeckoErc20PriceParams, CoingeckoPlatformId } from '$lib/types/coingecko';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -48,7 +48,7 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 			splTokenAddresses: data?.splAddresses ?? []
 		});
 
-	// We sync now but also schedule the update afterwards
+	// We sync now but also schedule the update afterward
 	await sync();
 
 	timer = setInterval(sync, SYNC_EXCHANGE_TIMER_INTERVAL);
@@ -74,36 +74,40 @@ const syncExchange = async ({
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
 	splTokenAddresses: SplTokenAddress[];
 }) => {
-	// Avoid to duplicate the sync if already in progress and not yet finished
+	// Avoid duplicating the sync if already in progress and not yet finished
 	if (syncInProgress) {
 		return;
 	}
 
 	syncInProgress = true;
 
-	const erc20PriceParams: CoingeckoErc20PriceParams[] = erc20ContractAddresses.reduce<
-		CoingeckoErc20PriceParams[]
-	>((acc, { address, coingeckoId }) => {
-		if (
-			coingeckoId !== 'ethereum' &&
-			coingeckoId !== 'base' &&
-			coingeckoId !== 'binance-smart-chain' &&
-			coingeckoId !== 'polygon-pos'
-		) {
-			return acc;
-		}
+	const erc20PriceParams: CoingeckoErc20PriceParams[] = Object.values(
+		erc20ContractAddresses.reduce<Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>>(
+			(acc, { address, coingeckoId }) => {
+				if (
+					coingeckoId !== 'ethereum' &&
+					coingeckoId !== 'base' &&
+					coingeckoId !== 'binance-smart-chain' &&
+					coingeckoId !== 'polygon-pos' &&
+					coingeckoId !== 'arbitrum-one'
+				) {
+					return acc;
+				}
 
-		const existing = acc.find(({ coingeckoPlatformId }) => coingeckoPlatformId === coingeckoId);
-
-		return [
-			...acc,
-			{
-				...existing,
-				coingeckoPlatformId: coingeckoId,
-				contractAddresses: [...(existing?.contractAddresses ?? []), { address, coingeckoId }]
-			}
-		];
-	}, []);
+				return {
+					...acc,
+					[coingeckoId]: {
+						coingeckoPlatformId: coingeckoId,
+						contractAddresses: [
+							...(acc[coingeckoId]?.contractAddresses ?? []),
+							{ address, coingeckoId }
+						]
+					}
+				};
+			},
+			{} as Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>
+		)
+	);
 
 	try {
 		const erc20Prices = await Promise.all(

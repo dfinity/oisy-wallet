@@ -98,5 +98,51 @@
 		"fee": {
 			"__bigint__": "10000"
 		}
+	},
+	"GHOSTNODE": {
+		"ledgerCanisterId": "sx3gz-hqaaa-aaaar-qaoca-cai",
+		"decimals": 8,
+		"name": "GHOSTNODE•ID•ZVVO•ODIN",
+		"symbol": "GHOSTNODE•ID•ZVVO•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"XP": {
+		"ledgerCanisterId": "wqihv-qyaaa-aaaak-afjoa-cai",
+		"indexCanisterId": "7hwgv-uaaaa-aaaao-qjv7q-cai",
+		"decimals": 8,
+		"name": "WindogeXP",
+		"symbol": "XP",
+		"fee": {
+			"__bigint__": "100000000"
+		}
+	},
+	"EXE": {
+		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
+		"fee": {
+			"__bigint__": "100000"
+		},
+		"name": "Windoge98",
+		"symbol": "EXE",
+		"decimals": 8
+	},
+	"BOB": {
+		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
+		"decimals": 8,
+		"name": "BOB",
+		"symbol": "BOB",
+		"fee": {
+			"__bigint__": "1000000"
+		}
+	},
+	"ICONFUCIUS": {
+		"ledgerCanisterId": "5kijx-siaaa-aaaar-qaqda-cai",
+		"decimals": 8,
+		"name": "ICONFUCIUS•ID•RVMN•ODIN",
+		"symbol": "ICONFUCIUS•ID•RVMN•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
 	}
 }

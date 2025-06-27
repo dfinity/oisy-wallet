@@ -6,7 +6,9 @@ export const SolRpcConnectionConfigSchema = z.object({
 	websocketUrl: UrlSchema
 });
 
-export const SolanaNetworkSchema = z.enum(['mainnet', 'testnet', 'devnet', 'local']);
+export const SOLANA_NETWORK_TYPES = ['mainnet', 'devnet', 'local'] as const;
+
+export const SolanaNetworkSchema = z.enum(SOLANA_NETWORK_TYPES);
 
 export const SolanaChainIdSchema = z.object({
 	chainId: z.string().optional()

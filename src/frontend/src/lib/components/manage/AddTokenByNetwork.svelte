@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks, networksMainnets } from '$lib/derived/networks.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -95,24 +94,7 @@
 <form on:submit={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
-			<Value ref="network" element="div">
-				{#snippet label()}
-					{$i18n.tokens.manage.text.network}
-				{/snippet}
-
-				{#snippet content()}
-					<div id="network" class="network mt-1 pt-0.5">
-						<Dropdown name="network" bind:selectedValue={networkName}>
-							<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
-								>{$i18n.tokens.manage.placeholder.select_network}</option
-							>
-							{#each availableNetworks as network (network.id)}
-								<DropdownItem value={network.name}>{network.name}</DropdownItem>
-							{/each}
-						</Dropdown>
-					</div>
-				{/snippet}
-			</Value>
+			<AddTokenByNetworkDropdown bind:networkName {availableNetworks} />
 		{/if}
 
 		{#if isIcpNetwork}
@@ -125,16 +107,8 @@
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}
 
-		<AddTokenByNetworkToolbar slot="toolbar" {invalid} on:icBack />
+		{#snippet toolbar()}
+			<AddTokenByNetworkToolbar {invalid} on:icBack />
+		{/snippet}
 	</ContentWithToolbar>
 </form>
-
-<style lang="scss">
-	.hidden {
-		display: none;
-	}
-
-	.network {
-		--disable-contrast: rgba(0, 0, 0, 0.5);
-	}
-</style>

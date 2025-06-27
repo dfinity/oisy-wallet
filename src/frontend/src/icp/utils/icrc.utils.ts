@@ -1,4 +1,8 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import {
+	GHOSTNODE_LEDGER_CANISTER_ID,
+	ICONFUCIUS_LEDGER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
 import type {
@@ -9,6 +13,7 @@ import type {
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { UrlSchema } from '$lib/validation/url.validation';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
@@ -21,6 +26,11 @@ export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;
 	category: TokenCategory;
 	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
+};
+
+const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
+	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE',
+	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS'
 };
 
 export const mapIcrcToken = ({
@@ -37,7 +47,14 @@ export const mapIcrcToken = ({
 
 	const { symbol, icon: tokenIcon, ...metadataToken } = token;
 
-	const icon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
+	const staticIcon = `/icons/icrc/${ledgerCanisterId}.png`;
+
+	const dynamicIcon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
+
+	const { success: dynamicIconIsUrl } = UrlSchema.safeParse(dynamicIcon);
+
+	// We do not allow external URLs anyway, so it is safe to use the static icon, even if it does not exist
+	const icon = dynamicIconIsUrl ? staticIcon : dynamicIcon;
 
 	return {
 		id: parseTokenId(symbol),
@@ -119,6 +136,7 @@ export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token i
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
 
+// TODO: create tests
 export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
 	...(isIcCkInterface(token) && nonNullish(token.twinToken)
@@ -126,6 +144,18 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 				oisyName: {
 					prefix: 'ck',
 					oisyName: token.twinToken.name
+				}
+			}
+		: {})
+});
+
+// TODO: create tests
+export const mapTokenOisySymbol = (token: IcInterface): IcInterface => ({
+	...token,
+	...(nonNullish(CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId])
+		? {
+				oisySymbol: {
+					oisySymbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId]
 				}
 			}
 		: {})

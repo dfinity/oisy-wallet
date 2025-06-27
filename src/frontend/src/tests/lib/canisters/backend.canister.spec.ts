@@ -675,7 +675,7 @@ describe('backend.canister', () => {
 
 			const result = await getAllowedCycles();
 
-			expect(service.get_allowed_cycles).toHaveBeenCalledTimes(1);
+			expect(service.get_allowed_cycles).toHaveBeenCalledOnce();
 			expect(result).toEqual({ allowed_cycles: mockAllowedCycles });
 		});
 
@@ -765,7 +765,7 @@ describe('backend.canister', () => {
 
 			const res = await allowSigning();
 
-			expect(service.allow_signing).toHaveBeenCalledTimes(1);
+			expect(service.allow_signing).toHaveBeenCalledOnce();
 			expect(res).toBeDefined();
 		});
 
@@ -1247,6 +1247,82 @@ describe('backend.canister', () => {
 			});
 
 			const res = updateContact(mockContact);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('removeUserToken', () => {
+		it('should call remove_user_token method', async () => {
+			const params = {
+				chain_id: mockedUserToken.chain_id,
+				contract_address: mockedUserToken.contract_address
+			};
+			const response = undefined;
+
+			service.remove_user_token.mockResolvedValue(response);
+
+			const { removeUserToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await removeUserToken(params);
+
+			expect(service.remove_user_token).toHaveBeenCalledWith(params);
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if remove_user_token throws', async () => {
+			service.remove_user_token.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { removeUserToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = removeUserToken({
+				chain_id: mockedUserToken.chain_id,
+				contract_address: mockedUserToken.contract_address
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('removeCustomToken', () => {
+		it('should call remove_custom_token method', async () => {
+			const params = {
+				token: mockedCustomToken
+			};
+			const response = undefined;
+
+			service.remove_custom_token.mockResolvedValue(response);
+
+			const { removeCustomToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await removeCustomToken(params);
+
+			expect(service.remove_custom_token).toHaveBeenCalledWith(params.token);
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if remove_custom_token throws', async () => {
+			service.remove_custom_token.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { removeCustomToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = removeCustomToken({
+				token: mockedCustomToken
+			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});

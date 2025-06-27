@@ -16,8 +16,12 @@
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let status: Commitment | null;
+	let to: string | undefined;
+	let from: string | undefined;
+	let toOwner: string | undefined;
+	let fromOwner: string | undefined;
 
-	$: ({ type, value, timestamp, status } = transaction);
+	$: ({ type, value, timestamp, status, to, from, toOwner, fromOwner } = transaction);
 
 	let label: string;
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
@@ -35,13 +39,15 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
+	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
 	{type}
 	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
 	status={transactionStatus}
 	{token}
 	{iconType}
+	to={toOwner ?? to}
+	from={fromOwner ?? from}
 >
 	{label}
 </Transaction>

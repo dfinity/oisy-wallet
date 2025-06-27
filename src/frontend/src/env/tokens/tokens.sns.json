@@ -325,7 +325,7 @@
 				"__bigint__": "100000"
 			},
 			"alternativeName": "EstateDAO",
-			"url": "https://wbdy5-yyaaa-aaaap-abysq-cai.icp0.io/"
+			"url": "https://estatedao.org/"
 		}
 	},
 	{
@@ -565,6 +565,21 @@
 			},
 			"alternativeName": "ICPEx",
 			"url": "https://icpex.org/"
+		}
+	},
+	{
+		"ledgerCanisterId": "kknbx-zyaaa-aaaaq-aae4a-cai",
+		"rootCanisterId": "lacdn-3iaaa-aaaaq-aae3a-cai",
+		"indexCanisterId": "kepm7-ciaaa-aaaaq-aae5a-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "TACO DAO Token",
+			"symbol": "TACO",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "TACO DAO",
+			"url": "https://tacodao.com"
 		}
 	}
 ]

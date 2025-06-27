@@ -88,6 +88,8 @@
 
 	--backdrop-contrast: var(--color-foreground-primary-inverted);
 	--backdrop-filter: blur(4px);
+	--tooltip-background: var(--color-base-black);
+	--tooltip-text-color: var(--color-foreground-primary-inverted);
 
 	@media (width >= theme(--breakpoint-sm)) {
 		--dialog-width: 560px;
@@ -395,4 +397,41 @@ div.select {
 div.error .toast {
 	--overlay-background: var(--color-background-error-light);
 	--overlay-background-contrast: var(--color-foreground-error-secondary);
+}
+
+// Tooltip
+.tooltip {
+	--tooltip-background: var(--color-base-black);
+	--tooltip-text-color: var(--color-foreground-primary-inverted);
+	--tooltip-border-color: var(--color-base-black);
+	--tooltip-border-size: 1px;
+}
+
+.gix-tooltip {
+	background-color: var(--color-base-black);
+	color: var(--color-foreground-primary-inverted);
+}
+
+/* Tooltip arrow */
+.tooltip::after,
+.gix-tooltip::after {
+	content: '';
+	position: absolute;
+	top: -6px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 0 6px 6px 6px;
+	border-style: solid;
+	border-color: transparent transparent var(--tooltip-background) transparent;
+}
+
+.tooltip.top::after,
+.gix-tooltip.top::after {
+	bottom: -6px;
+	top: auto;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 6px 6px 0 6px;
+	border-style: solid;
+	border-color: var(--tooltip-background) transparent transparent transparent;
 }

@@ -1,15 +1,25 @@
+import { I18N_ENABLED } from '$env/i18n';
+import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
-import type { Languages } from '$lib/types/languages';
+import { Languages } from '$lib/types/languages';
+import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
 import { get, set } from '$lib/utils/storage.utils';
 import { writable, type Readable } from 'svelte/store';
 
 const enI18n = (): I18n => ({
-	lang: 'en',
-	...en
+	...en,
+	lang: Languages.ENGLISH
+});
+
+const deI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: de as I18n }),
+	lang: Languages.GERMAN
 });
 
 const loadLang = (lang: Languages): Promise<I18n> => {
 	switch (lang) {
+		case Languages.GERMAN:
+			return Promise.resolve(deI18n());
 		default:
 			return Promise.resolve(enI18n());
 	}
@@ -23,10 +33,7 @@ export interface I18nStore extends Readable<I18n> {
 }
 
 const initI18n = (): I18nStore => {
-	const { subscribe, set } = writable<I18n>({
-		lang: 'en',
-		...en
-	});
+	const { subscribe, set } = writable<I18n>(enI18n());
 
 	const switchLang = async (lang: Languages) => {
 		const bundle = await loadLang(lang);
@@ -39,9 +46,11 @@ const initI18n = (): I18nStore => {
 		subscribe,
 
 		init: async () => {
-			const lang = get<Languages>({ key: 'lang' }) ?? 'en';
+			const lang = I18N_ENABLED
+				? (get<Languages>({ key: 'lang' }) ?? getDefaultLang())
+				: Languages.ENGLISH;
 
-			if (lang === 'en') {
+			if (lang === getDefaultLang()) {
 				saveLang(lang);
 				// No need to reload the store, English is already the default
 				return;

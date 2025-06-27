@@ -27,23 +27,27 @@
 
 {#if nonNullish(sourceNetwork)}
 	<ModalValue ref="destination-network">
-		<svelte:fragment slot="label">
+		{#snippet label()}
 			{#if showDestinationNetwork}
 				{$i18n.send.text.source_network}
 			{:else}
 				{$i18n.send.text.network}
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 
-		<NetworkWithLogo network={sourceNetwork} slot="main-value" />
+		{#snippet mainValue()}
+			<NetworkWithLogo network={sourceNetwork} />
+		{/snippet}
 	</ModalValue>
 {/if}
 
 {#if nonNullish(destinationNetworkId) && showDestinationNetwork}
 	<ModalValue ref="destination-network">
-		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
+		{#snippet label()}
+			{$i18n.send.text.destination_network}
+		{/snippet}
 
-		<svelte:fragment slot="main-value">
+		{#snippet mainValue()}
 			{#if isNetworkBitcoin}
 				<span class="flex gap-1">
 					<SendBtcNetwork networkId={destinationNetworkId} />
@@ -57,6 +61,6 @@
 			{:else if isNetworkEthereum}
 				<NetworkWithLogo network={$ckEthereumTwinToken.network} />
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</ModalValue>
 {/if}

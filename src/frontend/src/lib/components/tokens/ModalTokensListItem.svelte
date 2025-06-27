@@ -6,36 +6,47 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
-	import type { CardData } from '$lib/types/token-card';
+	import type { Token } from '$lib/types/token';
 
-	export let data: CardData;
-	export let logoSize: LogoSize = 'lg';
+	interface Props {
+		token: Token;
+		logoSize?: LogoSize;
+		onClick: () => void;
+	}
 
-	const { oisyName, oisySymbol, symbol, name, network } = data;
+	let { token, logoSize = 'lg', onClick }: Props = $props();
+
+	const { oisyName, oisySymbol, symbol, name, network } = token;
 </script>
 
-<LogoButton on:click dividers={true}>
-	<svelte:fragment slot="title">
+<LogoButton {onClick} dividers={true}>
+	{#snippet title()}
 		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="subtitle">
+	{#snippet subtitle()}
 		{#if nonNullish(oisyName?.prefix)}
 			{$i18n.tokens.text.chain_key}
 		{/if}
 
 		{oisyName?.oisyName ?? name}
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="description">
+	{#snippet description()}
 		{network.name}
-	</svelte:fragment>
+	{/snippet}
 
-	<div class="mr-2" slot="logo">
-		<TokenLogo {data} color="white" badge={{ type: 'network' }} {logoSize} />
-	</div>
+	{#snippet logo()}
+		<div class="mr-2">
+			<TokenLogo data={token} color="white" badge={{ type: 'network' }} {logoSize} />
+		</div>
+	{/snippet}
 
-	<TokenBalance {data} slot="title-end" />
+	{#snippet titleEnd()}
+		<TokenBalance data={token} />
+	{/snippet}
 
-	<ExchangeTokenValue {data} slot="description-end" />
+	{#snippet descriptionEnd()}
+		<ExchangeTokenValue data={token} />
+	{/snippet}
 </LogoButton>

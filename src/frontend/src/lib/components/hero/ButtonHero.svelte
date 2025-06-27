@@ -17,7 +17,7 @@
 </script>
 
 <Button
-	on:click={onclick}
+	{onclick}
 	{ariaLabel}
 	{disabled}
 	loading={$loading}

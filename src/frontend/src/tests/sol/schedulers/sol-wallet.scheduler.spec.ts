@@ -15,6 +15,10 @@ import { jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
+vi.mock('$lib/utils/time.utils', () => ({
+	randomWait: vi.fn()
+}));
+
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
 	let spyLoadTransactions: MockInstance;
@@ -68,6 +72,10 @@ describe('sol-wallet.scheduler', () => {
 	const postMessageMock = vi.fn();
 
 	let originalPostMessage: unknown;
+
+	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	const awaitJobExecution = () =>
+		vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS - 100);
 
 	beforeAll(() => {
 		originalPostMessage = window.postMessage;
@@ -128,6 +136,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger postMessage with correct data', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(
@@ -158,8 +168,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyLoadBalance).toHaveBeenCalledTimes(1);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
+					expect(spyLoadBalance).toHaveBeenCalledOnce();
+					expect(spyLoadTransactions).toHaveBeenCalledOnce();
 				});
 
 				it('should stop the scheduler', () => {
@@ -171,8 +181,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger syncWallet periodically', async () => {
 					await scheduler.start(startData);
 
-					expect(spyLoadBalance).toHaveBeenCalledTimes(1);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
+					expect(spyLoadBalance).toHaveBeenCalledOnce();
+					expect(spyLoadTransactions).toHaveBeenCalledOnce();
 
 					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
@@ -188,15 +198,23 @@ describe('sol-wallet.scheduler', () => {
 				it('should postMessage with status of the worker', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
 				});
 
-				it('should trigger postMessage with error', async () => {
+				it('should trigger postMessage with error after retrying', async () => {
 					const err = new Error('test');
 					spyLoadBalance.mockRejectedValue(err);
 
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
+
+					// first time + 10 retries
+					expect(spyLoadBalance).toHaveBeenCalledTimes(11);
+					expect(spyLoadTransactions).toHaveBeenCalledTimes(11);
 
 					// idle and in_progress
 					// error
@@ -212,6 +230,9 @@ describe('sol-wallet.scheduler', () => {
 
 				it('should not post message when no new transactions or balance changes', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
+
 					postMessageMock.mockClear();
 
 					// Mock no changes in transactions and balance
@@ -229,6 +250,8 @@ describe('sol-wallet.scheduler', () => {
 
 				it('should update store with new transactions', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					expect(scheduler['store'].transactions).toEqual(
 						expectedSoLTransactions.reduce(

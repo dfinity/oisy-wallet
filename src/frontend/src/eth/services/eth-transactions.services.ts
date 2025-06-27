@@ -7,14 +7,13 @@ import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { trackEvent } from '$lib/services/analytics.services';
-import { retry } from '$lib/services/rest.services';
+import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { randomWait } from '$lib/utils/time.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -158,9 +157,8 @@ const loadErc20Transactions = async ({
 
 	try {
 		const { erc20Transactions } = etherscanProviders(networkId);
-		const transactions = await retry({
-			request: async () => await erc20Transactions({ contract: token, address }),
-			onRetry: async () => await randomWait({})
+		const transactions = await retryWithDelay({
+			request: async () => await erc20Transactions({ contract: token, address })
 		});
 
 		if (updateOnly) {

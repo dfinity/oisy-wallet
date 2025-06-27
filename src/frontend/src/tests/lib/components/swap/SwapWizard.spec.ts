@@ -5,10 +5,15 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
+
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
 const mockDestToken = { ...mockValidIcCkToken, enabled: true } as IcToken;
@@ -54,6 +59,8 @@ describe('SwapWizard', () => {
 
 	beforeEach(() => {
 		mockContext = createContext();
+
+		mockAuthStore();
 	});
 
 	const renderWithStep = (step: WizardStepsSwap) =>

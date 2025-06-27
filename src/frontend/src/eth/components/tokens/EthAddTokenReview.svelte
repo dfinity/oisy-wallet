@@ -16,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let contractAddress: string | undefined;
@@ -44,8 +45,11 @@
 		if (
 			$erc20Tokens?.find(
 				({ address, network: tokenNetwork }) =>
-					address.toLowerCase() === contractAddress?.toLowerCase() &&
-					(tokenNetwork as EthereumNetwork).chainId === (network as EthereumNetwork).chainId
+					areAddressesEqual({
+						address1: address,
+						address2: contractAddress,
+						networkId: network.id
+					}) && tokenNetwork.chainId === (network as EthereumNetwork).chainId
 			) !== undefined
 		) {
 			toastsError({
@@ -74,7 +78,7 @@
 					({ symbol, name, network: tokenNetwork }) =>
 						(symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
 							name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')) &&
-						(tokenNetwork as EthereumNetwork).chainId === (network as EthereumNetwork).chainId
+						tokenNetwork.chainId === (network as EthereumNetwork).chainId
 				) !== undefined
 			) {
 				toastsError({
@@ -156,10 +160,12 @@
 
 	<AddTokenWarning />
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={() => dispatch('icBack')} />
-		<Button disabled={invalid} on:click={() => dispatch('icSave')}>
-			{$i18n.tokens.import.text.add_the_token}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={() => dispatch('icBack')} />
+			<Button disabled={invalid} onclick={() => dispatch('icSave')}>
+				{$i18n.tokens.import.text.add_the_token}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

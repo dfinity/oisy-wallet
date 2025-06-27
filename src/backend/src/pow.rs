@@ -38,6 +38,7 @@ fn get_current_time_ms() -> u64 {
 ///     - The `raw_rand()` call fails
 ///     - Fewer than 8 bytes are returned
 ///     - The byte conversion fails.
+// TODO: remove this function and replace it with generate_random_u64
 async fn get_random_u64() -> Result<u64, String> {
     // Call raw_rand() and await the result
     let (random_bytes,): (Vec<u8>,) = ic_cdk::api::management_canister::main::raw_rand()

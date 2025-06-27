@@ -1,5 +1,9 @@
 import type { NetworkSettingsFor } from '$declarations/backend/backend.did';
 import {
+	ARBITRUM_MAINNET_NETWORK_ID,
+	ARBITRUM_SEPOLIA_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
 	BASE_NETWORK_ID,
 	BASE_SEPOLIA_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -25,8 +29,7 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
-	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_TESTNET_NETWORK_ID
+	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
@@ -79,9 +82,6 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			if ('SolanaMainnet' in key) {
 				return SOLANA_MAINNET_NETWORK_ID;
 			}
-			if ('SolanaTestnet' in key) {
-				return SOLANA_TESTNET_NETWORK_ID;
-			}
 			if ('SolanaDevnet' in key) {
 				return SOLANA_DEVNET_NETWORK_ID;
 			}
@@ -105,6 +105,12 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			}
 			if ('PolygonAmoy' in key) {
 				return POLYGON_AMOY_NETWORK_ID;
+			}
+			if ('ArbitrumMainnet' in key) {
+				return ARBITRUM_MAINNET_NETWORK_ID;
+			}
+			if ('ArbitrumSepolia' in key) {
+				return ARBITRUM_SEPOLIA_NETWORK_ID;
 			}
 
 			// Force compiler error on unhandled cases based on leftover types

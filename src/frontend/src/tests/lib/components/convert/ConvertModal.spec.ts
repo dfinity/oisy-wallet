@@ -5,6 +5,10 @@ import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
+
 describe('ConvertModal', () => {
 	const props = {
 		sourceToken: BTC_MAINNET_TOKEN,
@@ -12,7 +16,7 @@ describe('ConvertModal', () => {
 	};
 
 	it('should display correct modal title after navigating between steps', async () => {
-		const { container, getByText } = render(ConvertModal, {
+		const { container, getByText, getByTestId } = render(ConvertModal, {
 			props,
 			context: new Map([[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }]])
 		});
@@ -21,7 +25,7 @@ describe('ConvertModal', () => {
 
 		expect(container).toHaveTextContent(firstStepTitle);
 
-		await fireEvent.click(getByText(en.convert.text.review_button));
+		await fireEvent.click(getByTestId('convert-form-button-next'));
 
 		expect(container).toHaveTextContent(en.convert.text.review);
 

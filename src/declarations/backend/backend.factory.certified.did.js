@@ -201,7 +201,8 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const ContactError = IDL.Variant({
 		InvalidContactData: IDL.Null,
-		ContactNotFound: IDL.Null
+		ContactNotFound: IDL.Null,
+		RandomnessError: IDL.Null
 	});
 	const CreateContactResult = IDL.Variant({
 		Ok: Contact,
@@ -228,10 +229,10 @@ export const idlFactory = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const NetworkSettingsFor = IDL.Variant({
+		ArbitrumMainnet: IDL.Null,
 		InternetComputer: IDL.Null,
 		BaseSepolia: IDL.Null,
 		PolygonMainnet: IDL.Null,
-		SolanaTestnet: IDL.Null,
 		BitcoinRegtest: IDL.Null,
 		SolanaDevnet: IDL.Null,
 		PolygonAmoy: IDL.Null,
@@ -240,6 +241,7 @@ export const idlFactory = ({ IDL }) => {
 		BaseMainnet: IDL.Null,
 		BscMainnet: IDL.Null,
 		SolanaLocal: IDL.Null,
+		ArbitrumSepolia: IDL.Null,
 		EthereumMainnet: IDL.Null,
 		SolanaMainnet: IDL.Null,
 		BitcoinMainnet: IDL.Null,
@@ -334,38 +336,38 @@ export const idlFactory = ({ IDL }) => {
 		timestamp: IDL.Nat64,
 		amount: IDL.Nat64
 	});
-	const Transaction_1 = IDL.Record({
-		transaction_type: TransactionType,
-		network: IDL.Record({}),
-		counterparty: IDL.Text,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
-	const AccountSnapshot_1 = IDL.Record({
-		decimals: IDL.Nat8,
-		token_address: IDL.Text,
-		network: IDL.Record({}),
-		approx_usd_per_token: IDL.Float64,
-		last_transactions: IDL.Vec(Transaction_1),
-		account: IDL.Text,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
 	const BtcTokenId = IDL.Variant({ Native: IDL.Null });
-	const Transaction_2 = IDL.Record({
+	const Transaction_1 = IDL.Record({
 		transaction_type: TransactionType,
 		network: IDL.Record({}),
 		counterparty: BtcAddress,
 		timestamp: IDL.Nat64,
 		amount: IDL.Nat64
 	});
-	const AccountSnapshot_2 = IDL.Record({
+	const AccountSnapshot_1 = IDL.Record({
 		decimals: IDL.Nat8,
 		token_address: BtcTokenId,
 		network: IDL.Record({}),
 		approx_usd_per_token: IDL.Float64,
-		last_transactions: IDL.Vec(Transaction_2),
+		last_transactions: IDL.Vec(Transaction_1),
 		account: BtcAddress,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const Transaction_2 = IDL.Record({
+		transaction_type: TransactionType,
+		network: IDL.Record({}),
+		counterparty: IDL.Text,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshot_2 = IDL.Record({
+		decimals: IDL.Nat8,
+		token_address: IDL.Text,
+		network: IDL.Record({}),
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction_2),
+		account: IDL.Text,
 		timestamp: IDL.Nat64,
 		amount: IDL.Nat64
 	});
@@ -396,20 +398,18 @@ export const idlFactory = ({ IDL }) => {
 	const AccountSnapshotFor = IDL.Variant({
 		Erc20Sepolia: AccountSnapshot,
 		EthSepolia: AccountSnapshot,
-		SplTestnet: AccountSnapshot_1,
-		BtcMainnet: AccountSnapshot_2,
-		SolDevnet: AccountSnapshot_1,
+		BtcMainnet: AccountSnapshot_1,
+		SolDevnet: AccountSnapshot_2,
 		Erc20Mainnet: AccountSnapshot,
-		SolTestnet: AccountSnapshot_1,
 		Icrcv2: AccountSnapshot_3,
-		BtcRegtest: AccountSnapshot_2,
-		SplDevnet: AccountSnapshot_1,
+		BtcRegtest: AccountSnapshot_1,
+		SplDevnet: AccountSnapshot_2,
 		EthMainnet: AccountSnapshot,
-		SplMainnet: AccountSnapshot_1,
-		SolLocal: AccountSnapshot_1,
-		BtcTestnet: AccountSnapshot_2,
-		SplLocal: AccountSnapshot_1,
-		SolMainnet: AccountSnapshot_1
+		SplMainnet: AccountSnapshot_2,
+		SolLocal: AccountSnapshot_2,
+		BtcTestnet: AccountSnapshot_1,
+		SplLocal: AccountSnapshot_2,
+		SolMainnet: AccountSnapshot_2
 	});
 	const UserSnapshot = IDL.Record({
 		accounts: IDL.Vec(AccountSnapshotFor),
@@ -545,6 +545,7 @@ export const idlFactory = ({ IDL }) => {
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
+		remove_custom_token: IDL.Func([CustomToken], [], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),

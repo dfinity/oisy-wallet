@@ -80,6 +80,7 @@ mod guards;
 mod heap_state;
 mod impls;
 mod pow;
+pub mod random;
 pub mod signer;
 mod state;
 mod token;
@@ -319,7 +320,7 @@ pub fn list_user_tokens() -> Vec<UserToken> {
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
-/// Add, remove or update custom token for the user.
+/// Add or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
@@ -344,6 +345,21 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 
             add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
         }
+    });
+}
+
+/// Remove custom token for the user.
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
+pub fn remove_custom_token(token: CustomToken) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        let find = |t: &CustomToken| -> bool {
+            CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
+        };
+
+        remove_from_user_token(stored_principal, &mut s.custom_token, &find);
     });
 }
 
@@ -880,48 +896,43 @@ pub fn get_snapshot() -> Option<UserSnapshot> {
 ///
 /// # Test
 /// This endpoint is currently a placeholder and will be fully implemented in a future PR.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn create_contact(request: CreateContactRequest) -> CreateContactResult {
-    // TODO replace mock data with contact service that returns Contact
-    let contact = Contact {
-        id: time(),
-        name: request.name,
-        addresses: vec![],
-        update_timestamp_ns: time(),
-    };
-
-    Ok(contact).into()
+pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
+    let result = contacts::create_contact(request).await;
+    result.into()
 }
 
 /// Updates an existing contact for the caller.
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    // TODO replace mock data with data from contact service
     let contact = Contact {
         id: request.id,
         name: request.name,
         addresses: request.addresses,
-        update_timestamp_ns: time(),
+        update_timestamp_ns: request.update_timestamp_ns,
     };
 
-    Ok(contact).into()
+    let result = contacts::update_contact(contact);
+    result.into()
 }
 
 /// Deletes a contact for the caller.
 ///
 /// # Errors
 /// Errors are enumerated by: `ContactError`.
-#[update(guard = "caller_is_allowed")]
+///
+/// # Notes
+/// This operation is idempotent - it will return OK if the contact has already been deleted.
+#[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
-    // TODO integrate delete contact service
-    let normal_result = Ok(contact_id);
-    normal_result.into()
+    let result = contacts::delete_contact(contact_id);
+    result.into()
 }
 
 /// Gets a contact by ID for the caller.

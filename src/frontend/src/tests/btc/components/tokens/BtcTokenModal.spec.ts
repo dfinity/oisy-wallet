@@ -1,22 +1,27 @@
 import BtcTokenModal from '$btc/components/tokens/BtcTokenModal.svelte';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-import { token } from '$lib/stores/token.store';
+import { modalStore } from '$lib/stores/modal.store';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
-import { get } from 'svelte/store';
 
 describe('BtcTokenModal', () => {
 	beforeEach(() => {
-		token.reset();
+		mockPage.reset();
 	});
 
 	it('necessary content is displayed', () => {
-		token.set(BTC_MAINNET_TOKEN);
+		mockPage.mock({
+			token: BTC_MAINNET_TOKEN.name,
+			network: BTC_MAINNET_TOKEN.network.id.description
+		});
 
 		const { container } = render(BtcTokenModal);
 
-		expect(container?.textContent).includes(get(token)?.network.name);
-		expect(container?.textContent).includes(get(token)?.name);
-		expect(container?.textContent).includes(get(token)?.symbol);
-		expect(container?.textContent).includes(get(token)?.decimals);
+		modalStore.openBtcToken({ id: BTC_MAINNET_TOKEN.id, data: undefined });
+
+		expect(container).toHaveTextContent(BTC_MAINNET_TOKEN.network.name);
+		expect(container).toHaveTextContent(BTC_MAINNET_TOKEN.name);
+		expect(container).toHaveTextContent(BTC_MAINNET_TOKEN.symbol);
+		expect(container).toHaveTextContent(`${BTC_MAINNET_TOKEN.decimals}`);
 	});
 });

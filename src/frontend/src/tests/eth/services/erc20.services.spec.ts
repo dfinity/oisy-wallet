@@ -20,8 +20,19 @@ import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/e
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
+import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+
+vi.mock('idb-keyval', () => ({
+	createStore: vi.fn(() => ({
+		/* mock store implementation */
+	})),
+	set: vi.fn(),
+	get: vi.fn(),
+	del: vi.fn(),
+	update: vi.fn()
+}));
 
 vi.mock('$lib/api/backend.api', () => ({
 	listUserTokens: vi.fn()
@@ -420,6 +431,29 @@ describe('erc20.services', () => {
 				msg: { text: en.init.error.erc20_user_tokens },
 				err: mockError
 			});
+		});
+
+		it('should cache the custom tokens in IDB on update call', async () => {
+			await loadErc20UserTokens({ identity: mockIdentity });
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				mockUserTokens,
+				expect.any(Object)
+			);
+		});
+
+		it('should fetch the cached custom tokens in IDB on query call', async () => {
+			await loadErc20UserTokens({ identity: mockIdentity, useCache: true });
+
+			expect(idbKeyval.get).toHaveBeenCalledOnce();
+			expect(idbKeyval.get).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				expect.any(Object)
+			);
 		});
 	});
 });

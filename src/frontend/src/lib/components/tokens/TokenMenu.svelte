@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -15,18 +18,27 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let testId: string | undefined = undefined;
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
+	let fromRoute: NavigationTarget | undefined;
+
+	afterNavigate(({ from }) => {
+		fromRoute = from ?? undefined;
+	});
 
 	const hideModalId = Symbol();
 	const openModalId = Symbol();
 
 	const hideToken = () => {
 		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
-		fn(hideModalId);
+		fn({
+			id: hideModalId,
+			data: fromRoute
+		});
 
 		visible = false;
 	};
@@ -41,14 +53,17 @@
 					: $networkSolana
 						? modalStore.openSolToken
 						: () => {};
-		fn(openModalId);
+		fn({
+			id: openModalId,
+			data: fromRoute
+		});
 
 		visible = false;
 	};
 
 	let hideTokenLabel: string;
 	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
-		$token: $token?.name ?? ''
+		$token: nonNullish($token) ? getTokenDisplaySymbol($token) : ''
 	});
 </script>
 

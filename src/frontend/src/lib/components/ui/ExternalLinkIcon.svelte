@@ -1,9 +1,16 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { ButtonColorStyle } from '$lib/types/style';
 
-	export let href: string;
-	export let ariaLabel: string;
-	export let colorStyle: ButtonColorStyle = 'tertiary';
+	interface Props {
+		children: Snippet;
+		onClick?: () => void;
+		href: string;
+		ariaLabel: string;
+		colorStyle?: ButtonColorStyle;
+	}
+
+	let { children, onClick, href, ariaLabel, colorStyle = 'tertiary' }: Props = $props();
 </script>
 
 <a
@@ -11,8 +18,8 @@
 	rel="external noopener noreferrer"
 	target="_blank"
 	class={`as-button ${colorStyle} icon flex flex-col text-center text-xs font-normal`}
-	on:click
+	onclick={onClick}
 	aria-label={ariaLabel}
 >
-	<slot />
+	{@render children()}
 </a>

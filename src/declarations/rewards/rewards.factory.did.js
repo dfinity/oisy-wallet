@@ -36,7 +36,13 @@ export const idlFactory = ({ IDL }) => {
 			session_duration: IDL.Opt(CandidDuration)
 		}),
 		MinTotalAssetsUsd: IDL.Record({ usd: IDL.Nat32 }),
-		MinTokens: IDL.Record({ count: IDL.Nat32 })
+		Hangover: IDL.Record({ duration: CandidDuration }),
+		MinTokens: IDL.Record({ count: IDL.Nat32 }),
+		MinEligibleReferrals: IDL.Record({
+			count: IDL.Nat32,
+			campaign_name: IDL.Text
+		}),
+		EligibleForCampaign: IDL.Record({ campaign_name: IDL.Text })
 	});
 	const UsageCriteria = IDL.Record({ criteria: IDL.Vec(Criterion) });
 	const UsageAwardConfig = IDL.Record({
@@ -194,6 +200,20 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: SetReferrerError
 	});
+	const StatsKeyType = IDL.Variant({
+		TokenGroup: IDL.Null,
+		Network: IDL.Null,
+		TokenSymbol: IDL.Null
+	});
+	const StatsRequest = IDL.Record({ by: StatsKeyType });
+	const StatsValue = IDL.Record({
+		user_count: IDL.Nat64,
+		assets_usd: IDL.Float64
+	});
+	const StatsResponse = IDL.Record({
+		request: StatsRequest,
+		stats: IDL.Vec(IDL.Tuple(IDL.Text, StatsValue))
+	});
 	const UsageAndHolding = IDL.Record({
 		first_activity_ns: IDL.Opt(IDL.Nat64),
 		approx_usd_valuation: IDL.Float64,
@@ -278,6 +298,7 @@ export const idlFactory = ({ IDL }) => {
 		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
 		register_snapshot_for: IDL.Func([IDL.Principal, UserSnapshot], [], []),
 		set_referrer: IDL.Func([IDL.Nat32], [SetReferrerResponse], []),
+		stats_by: IDL.Func([StatsKeyType], [StatsResponse], ['query']),
 		stats_usage_vs_holding: IDL.Func([], [UsageVsHoldingStats], ['query']),
 		trigger_usage_award_event: IDL.Func([UsageAwardEvent], [], []),
 		usage_stats: IDL.Func([], [UsageAwardStats], ['query']),
@@ -326,7 +347,13 @@ export const init = ({ IDL }) => {
 			session_duration: IDL.Opt(CandidDuration)
 		}),
 		MinTotalAssetsUsd: IDL.Record({ usd: IDL.Nat32 }),
-		MinTokens: IDL.Record({ count: IDL.Nat32 })
+		Hangover: IDL.Record({ duration: CandidDuration }),
+		MinTokens: IDL.Record({ count: IDL.Nat32 }),
+		MinEligibleReferrals: IDL.Record({
+			count: IDL.Nat32,
+			campaign_name: IDL.Text
+		}),
+		EligibleForCampaign: IDL.Record({ campaign_name: IDL.Text })
 	});
 	const UsageCriteria = IDL.Record({ criteria: IDL.Vec(Criterion) });
 	const UsageAwardConfig = IDL.Record({

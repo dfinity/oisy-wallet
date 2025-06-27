@@ -281,8 +281,8 @@ describe('eth-balance.services', () => {
 			expect(trackEvent).toHaveBeenNthCalledWith(1, {
 				name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
 				metadata: {
-					tokenId: mockErc20DefaultTokens[0].symbol,
-					networkId: mockErc20DefaultTokens[0].network.name,
+					tokenId: mockErc20DefaultTokens[0].id.description,
+					networkId: mockErc20DefaultTokens[0].network.id.description,
 					error: mockError.toString()
 				}
 			});
@@ -313,18 +313,16 @@ describe('eth-balance.services', () => {
 
 			expect(trackEvent).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
 
-			mockErc20DefaultTokens.forEach(
-				({ symbol: tokenSymbol, network: { name: networkName } }, index) => {
-					expect(trackEvent).toHaveBeenNthCalledWith(index + 1, {
-						name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
-						metadata: {
-							tokenId: tokenSymbol,
-							networkId: networkName,
-							error: mockError.toString()
-						}
-					});
-				}
-			);
+			mockErc20DefaultTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+				expect(trackEvent).toHaveBeenNthCalledWith(index + 1, {
+					name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
+					metadata: {
+						tokenId: tokenId.description,
+						networkId: networkId.description,
+						error: mockError.toString()
+					}
+				});
+			});
 
 			expect(console.warn).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
 

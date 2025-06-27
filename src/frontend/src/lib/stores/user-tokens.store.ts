@@ -23,7 +23,11 @@ export const initCertifiedUserTokensStore = <T extends Token>(): CertifiedUserTo
 	const getIdentifier = <T extends Token>(
 		token: T
 	): TokenId | Erc20ContractAddress['address'] | SplTokenAddress =>
-		isTokenSpl(token) ? token.address : isTokenErc20(token) ? token.address : token.id;
+		isTokenSpl(token)
+			? token.address
+			: isTokenErc20(token)
+				? `${token.address}#${token.network.chainId}`
+				: token.id;
 
 	return {
 		setAll: (tokens: CertifiedData<UserToken<T>>[]) =>

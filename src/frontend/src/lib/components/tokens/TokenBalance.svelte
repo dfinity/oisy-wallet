@@ -14,13 +14,14 @@
 	}
 
 	let { privacyBalance, data, hideBalance = false }: Props = $props();
+
+	let testId = $derived(
+		`${TOKEN_BALANCE}-${data.symbol}${nonNullish(data.network) ? `-${data.network.id.description}` : ''}`
+	);
 </script>
 
 <TokenBalanceSkeleton {data}>
-	<output
-		class="break-all"
-		data-tid={`${TOKEN_BALANCE}-${data.symbol}-${data.network.id.description}`}
-	>
+	<output class="break-all" data-tid={testId}>
 		{#if nonNullish(data.balance)}
 			{#if hideBalance}
 				{@render privacyBalance?.()}

@@ -1,10 +1,15 @@
 import { getBtcAddressString } from '$btc/utils/btc-address.utils';
 import type { TokenAccountId } from '$declarations/backend/backend.did';
-import type { Address } from '$lib/types/address';
+import { getIcrcv2AccountIdString } from '$icp/utils/icp-account.utils';
+import {
+	TOKEN_ACCOUNT_ID_TO_NETWORKS,
+	TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER
+} from '$lib/constants/token-account-id.constants';
+import type { Network } from '$lib/types/network';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import { assertNever } from '$lib/types/utils';
 
-export const tokenAccountIdToAddressString = (tokenAccountId: TokenAccountId): string => {
+export const getTokenAccountIdAddressString = (tokenAccountId: TokenAccountId): string => {
 	if ('Btc' in tokenAccountId) {
 		return getBtcAddressString(tokenAccountId.Btc);
 	}
@@ -12,8 +17,7 @@ export const tokenAccountIdToAddressString = (tokenAccountId: TokenAccountId): s
 		return tokenAccountId.Eth.Public;
 	}
 	if ('Icrcv2' in tokenAccountId) {
-		// TODO PR: https://github.com/dfinity/oisy-wallet/pull/6716
-		throw new Error('Not implemented yet');
+		return getIcrcv2AccountIdString(tokenAccountId.Icrcv2);
 	}
 	if ('Sol' in tokenAccountId) {
 		return tokenAccountId.Sol;
@@ -41,20 +45,17 @@ export const getDiscriminatorForTokenAccountId = (
 	return assertNever({ variable: tokenAccountId, typeName: 'TokenAccountId' });
 };
 
-export const getAddressString = (tokenAccountId: TokenAccountId): Address => {
-	if ('Btc' in tokenAccountId) {
-		return getBtcAddressString(tokenAccountId.Btc);
-	}
-	if ('Eth' in tokenAccountId) {
-		return tokenAccountId.Eth.Public;
-	}
-	if ('Icrcv2' in tokenAccountId) {
-		// TODO PR: https://github.com/dfinity/oisy-wallet/pull/6716
-		throw new Error('Not implemented yet');
-	}
-	if ('Sol' in tokenAccountId) {
-		return tokenAccountId.Sol;
-	}
+export const getNetworksForTokenAccountIdType = (addressType: TokenAccountIdTypes): Network[] =>
+	TOKEN_ACCOUNT_ID_TO_NETWORKS[addressType];
 
-	return assertNever({ variable: tokenAccountId, typeName: 'TokenAccountId' });
+export const compareTokenAccountIdTypes = ({
+	a,
+	b
+}: {
+	a: TokenAccountIdTypes;
+	b: TokenAccountIdTypes;
+}): number => {
+	const orderA = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[a];
+	const orderB = TOKEN_ACCOUNT_ID_TYPES_SORT_ORDER[b];
+	return orderA - orderB;
 };

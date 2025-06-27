@@ -42,3 +42,10 @@ export enum WizardStepsReceive {
 	RECEIVE = 'Receive',
 	QR_CODE = 'QR Code'
 }
+
+export enum TokenModalSteps {
+	CONTENT = 'content',
+	DELETE_CONFIRMATION = 'delete_confirmation',
+	EDIT = 'edit',
+	EDIT_PROGRESS = 'edit_progress'
+}

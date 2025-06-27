@@ -6,7 +6,7 @@
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import { getMaxTransactionAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
@@ -57,6 +57,6 @@
 >
 	{$i18n.core.text.max}:
 	{nonNullish(maxAmount) && nonNullish(token)
-		? `${maxAmount} ${token.symbol}`
+		? `${maxAmount} ${getTokenDisplaySymbol(token)}`
 		: $i18n.core.text.not_available}
 </button>

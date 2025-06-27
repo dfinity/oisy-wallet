@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
@@ -39,10 +39,12 @@
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
-		<FeeDisplay slot="fee" />
+		<EthFeeDisplay slot="fee" />
 
 		<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
 	</SendData>
 
-	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+	{#snippet toolbar()}
+		<WalletConnectActions on:icApprove on:icReject />
+	{/snippet}
 </ContentWithToolbar>

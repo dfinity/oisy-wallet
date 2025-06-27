@@ -1472,7 +1472,7 @@ describe('transactions.utils', () => {
 			const btcTransactionsUi = {
 				...mockTransaction,
 				type: 'send' as BtcTransactionType,
-				to: [mockTransaction.to, mockTransaction.from] as string[],
+				to: [...(mockTransaction.to as string[]), mockTransaction.from] as string[],
 				token: BTC_MAINNET_TOKEN
 			};
 
