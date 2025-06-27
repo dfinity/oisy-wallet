@@ -2,8 +2,10 @@ import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
+import { TRACK_IC_NETWORK_CONTACTS_GENERATION_ISSUE } from '$lib/constants/analytics.contants';
 import { contacts } from '$lib/derived/contacts.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
+import { trackEvent } from '$lib/services/analytics.services';
 import type { NetworkContacts } from '$lib/types/contacts';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
 import { Principal } from '@dfinity/principal';
@@ -23,13 +25,21 @@ export const icNetworkContacts: Readable<NetworkContacts> = derived(
 			const { address, contact } = allIcNetworkContacts[key];
 
 			if (isIcrcAddress(address)) {
-				return {
-					...acc,
-					[contact.id.toString()]: [
-						...(acc[contact.id.toString()] ?? []),
-						getAccountIdentifier(Principal.fromText(address)).toHex()
-					]
-				};
+				try {
+					return {
+						...acc,
+						[contact.id.toString()]: [
+							...(acc[contact.id.toString()] ?? []),
+							getAccountIdentifier(Principal.fromText(address)).toHex()
+						]
+					};
+				} catch (_: unknown) {
+					trackEvent({ name: TRACK_IC_NETWORK_CONTACTS_GENERATION_ISSUE });
+
+					// Principal.fromText does not support sub-accounts and therefore throws an error.
+					// As a temporary patch, we ignore such addresses and proceed with the generation further.
+					return acc;
+				}
 			}
 
 			return acc;
