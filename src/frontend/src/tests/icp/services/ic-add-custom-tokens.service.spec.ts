@@ -1,4 +1,8 @@
-import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import {
+	ICP_INDEX_CANISTER_ID,
+	ICP_LEDGER_CANISTER_ID,
+	ICP_NETWORK
+} from '$env/networks/networks.icp.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
 import type { IcCanisters, IcToken } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
@@ -93,6 +97,21 @@ describe('ic-add-custom-tokens.service', () => {
 
 				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
 					msg: { text: get(i18n).tokens.import.error.missing_ledger_id }
+				});
+			});
+
+			it('should return error if the ledger canister is the ICP token ledger', async () => {
+				const result = await loadAndAssertAddCustomToken({
+					identity: mockIdentity,
+					icrcTokens: [],
+					ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
+					indexCanisterId: ICP_INDEX_CANISTER_ID
+				});
+
+				expect(result).toEqual({ result: 'error' });
+
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).tokens.error.already_available }
 				});
 			});
 
