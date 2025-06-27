@@ -14,13 +14,13 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokenToggleable } from '$lib/derived/token.derived';
 	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
+	import { WizardStepsHideToken } from '$lib/enums/wizard-steps';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
-	import { WizardStepsHideToken } from '$lib/enums/wizard-steps';
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;

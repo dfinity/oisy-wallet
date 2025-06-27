@@ -8,10 +8,10 @@
 	import type ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
+	import { WizardStepsReceiveAddress } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
-	import { WizardStepsReceiveAddress } from '$lib/enums/wizard-steps';
 
 	export let infoCmp:
 		| typeof ReceiveAddresses
