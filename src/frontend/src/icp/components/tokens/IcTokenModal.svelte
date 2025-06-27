@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { allKnownIcrcTokensLedgerCanisterIds } from '$icp/derived/icrc.derived';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
@@ -20,21 +20,19 @@
 	let twinToken = $derived(($pageToken as OptionIcCkToken)?.twinToken);
 	let ckToken = $derived($pageToken as OptionIcCkToken);
 
-	let undeletableToken = $derived(
+	let knownIcrcToken = $derived(
 		nonNullish($pageToken) && isTokenIcrc($pageToken)
 			? $allKnownIcrcTokensLedgerCanisterIds.some(
 					(ledgerCanisterId) => $pageToken.ledgerCanisterId === ledgerCanisterId
 				)
 			: true
 	);
-
-	let uneditableToken = $derived(undeletableToken || !isEmptyString(ckToken?.indexCanisterId));
 </script>
 
 <TokenModal
 	token={$pageToken}
-	isDeletable={!undeletableToken}
-	isEditable={!uneditableToken}
+	isDeletable={!knownIcrcToken}
+	isEditable={!knownIcrcToken}
 	{fromRoute}
 >
 	{#if nonNullish(twinToken)}

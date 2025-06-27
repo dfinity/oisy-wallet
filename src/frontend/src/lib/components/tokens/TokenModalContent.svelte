@@ -17,7 +17,10 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
-	import { TOKEN_MODAL_CONTENT_DELETE_BUTTON } from '$lib/constants/test-ids.constants';
+	import {
+		TOKEN_MODAL_CONTENT_DELETE_BUTTON,
+		TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
@@ -85,21 +88,26 @@
 					{#snippet content()}
 						{#if !isNullishOrEmpty(token.indexCanisterId)}
 							<output>{token.indexCanisterId}</output>
+						{:else if nonNullish(onEditClick)}
+							<output class="text-warning-primary">
+								{$i18n.tokens.details.missing_index_canister_id_label}
+							</output>
+						{/if}
 
+						{#if !isNullishOrEmpty(token.indexCanisterId)}
 							<Copy
 								value={token.indexCanisterId}
 								text={$i18n.tokens.import.text.index_canister_id_copied}
 								inline
 							/>
-						{:else if nonNullish(onEditClick)}
-							<output class="text-warning-primary">
-								{$i18n.tokens.details.missing_index_canister_id_label}
-							</output>
+						{/if}
 
+						{#if nonNullish(onEditClick)}
 							<ButtonIcon
 								styleClass="inline-block align-sub"
 								onclick={onEditClick}
 								ariaLabel={$i18n.core.text.edit}
+								testId={TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON}
 								width="w-6"
 								height="h-6"
 							>

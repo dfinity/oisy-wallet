@@ -1,11 +1,11 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
-	FEE_CONTEXT_KEY,
-	initFeeContext,
-	initFeeStore,
-	type FeeContext
-} from '$eth/stores/fee.store';
+	ETH_FEE_CONTEXT_KEY,
+	initEthFeeContext,
+	initEthFeeStore,
+	type EthFeeContext
+} from '$eth/stores/eth-fee.store';
 import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
 import {
 	RECEIVE_TOKEN_CONTEXT_KEY,
@@ -23,11 +23,11 @@ describe('IcReceiveCkEthereumModal', () => {
 	};
 
 	const mockContext = () =>
-		new Map<symbol, ReceiveTokenContext | FeeContext>([
+		new Map<symbol, ReceiveTokenContext | EthFeeContext>([
 			[
-				FEE_CONTEXT_KEY,
-				initFeeContext({
-					feeStore: initFeeStore(),
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore: initEthFeeStore(),
 					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 					feeExchangeRateStore: writable(100),
 					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),

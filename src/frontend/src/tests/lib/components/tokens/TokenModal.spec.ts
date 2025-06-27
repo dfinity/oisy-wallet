@@ -6,6 +6,7 @@ import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 import {
 	TOKEN_MODAL_CONTENT_DELETE_BUTTON,
 	TOKEN_MODAL_DELETE_BUTTON,
+	TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON,
 	TOKEN_MODAL_INDEX_CANISTER_ID_INPUT,
 	TOKEN_MODAL_SAVE_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -83,7 +84,7 @@ describe('TokenModal', () => {
 		expect(gotoReplaceRoot).toHaveBeenCalledOnce();
 	});
 
-	it('saves token after all required steps', async () => {
+	it('saves token after all required steps if indexCanisterId was missing', async () => {
 		const { getByTestId, getByText } = render(TokenModal, {
 			props: {
 				token: {
@@ -100,6 +101,35 @@ describe('TokenModal', () => {
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
 
 		await fireEvent.click(getByText(en.tokens.details.missing_index_canister_id_button));
+
+		await fireEvent.input(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_INPUT), {
+			target: { value: MOCK_CANISTER_ID_1 }
+		});
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
+
+		expect(setCustomTokenMock).toHaveBeenCalledOnce();
+		expect(loadCustomTokens).toHaveBeenCalledOnce();
+	});
+
+	it('saves token after all required steps if indexCanisterId was present', async () => {
+		const { getByTestId, getByText } = render(TokenModal, {
+			props: {
+				token: {
+					...mockIcToken,
+					indexCanisterId: 'test',
+					enabled: true
+				} as Token,
+				isEditable: true
+			}
+		});
+
+		const setCustomTokenMock = mockSetCustomToken();
+		mockAuthStore();
+
+		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON));
 
 		await fireEvent.input(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_INPUT), {
 			target: { value: MOCK_CANISTER_ID_1 }
