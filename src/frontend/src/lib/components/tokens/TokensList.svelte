@@ -17,8 +17,10 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -30,8 +32,6 @@
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, saveCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
-	import { tokensToPin } from '$lib/derived/tokens.derived';
-	import { authIdentity } from '$lib/derived/auth.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 

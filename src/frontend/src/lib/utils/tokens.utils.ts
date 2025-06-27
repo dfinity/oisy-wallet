@@ -7,7 +7,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
-import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
