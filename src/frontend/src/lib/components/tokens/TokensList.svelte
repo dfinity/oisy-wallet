@@ -23,23 +23,23 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsShow } from '$lib/stores/toasts.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
+	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
+	import type { ExchangesData } from '$lib/types/exchange';
+	import type { Token } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
-	import { groupTogglableTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import type { ExchangesData } from '$lib/types/exchange';
-	import type { Token } from '$lib/types/token';
 	import { mapTokenUi } from '$lib/utils/token.utils';
-	import { toastsShow } from '$lib/stores/toasts.store';
-	import { i18n } from '$lib/stores/i18n.store';
-	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
+	import { groupTogglableTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-	import { tokensToPin } from '$lib/derived/tokens.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -110,7 +110,7 @@
 	// we debounce the filter input for updating the enable tokens list
 	const debouncedFilterList = debounce((filter: string) => updateFilterList(filter), 300);
 	$effect(() => {
-		const {filter} = $tokenListStore;
+		const { filter } = $tokenListStore;
 		untrack(() => debouncedFilterList(filter)); // we untrack the function so it only updates the list on filter change
 	});
 
