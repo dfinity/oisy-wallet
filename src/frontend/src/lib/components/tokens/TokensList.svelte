@@ -5,9 +5,6 @@
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
-	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
-	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
@@ -20,16 +17,11 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
-	import { tokensToPin } from '$lib/derived/tokens.derived';
-	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsShow } from '$lib/stores/toasts.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
-	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
@@ -37,9 +29,9 @@
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
-	import { groupTogglableTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
-	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import { pinEnabledTokensAtTop, saveCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -124,23 +116,7 @@
 	);
 
 	const onSave = async () => {
-		const { icrc, erc20, spl } = groupTogglableTokens(modifiedTokens);
-
-		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
-			toastsShow({
-				text: $i18n.tokens.manage.info.no_changes,
-				level: 'info',
-				duration: 5000
-			});
-
-			return;
-		}
-
-		await Promise.allSettled([
-			...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
-			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
-			...(spl.length > 0 ? [saveSpl(spl)] : [])
-		]);
+		await saveCustomTokens({ tokens: modifiedTokens, $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
 		updateFilterList($tokenListStore.filter);
@@ -164,38 +140,6 @@
 			...tokens
 		};
 	};
-
-	const progress = () => ProgressStepsAddToken.DONE;
-
-	const saveIcrc = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
-		saveIcrcCustomTokens({
-			tokens,
-			progress,
-			modalNext: () => {},
-			onSuccess: close,
-			onError: () => {},
-			identity: $authIdentity
-		});
-
-	const saveErc20 = (tokens: SaveUserToken[]): Promise<void> =>
-		saveErc20UserTokens({
-			tokens,
-			progress,
-			modalNext: () => {},
-			onSuccess: close,
-			onError: () => {},
-			identity: $authIdentity
-		});
-
-	const saveSpl = (tokens: SaveSplCustomToken[]): Promise<void> =>
-		saveSplCustomTokens({
-			tokens,
-			progress,
-			modalNext: () => {},
-			onSuccess: close,
-			onError: () => {},
-			identity: $authIdentity
-		});
 </script>
 
 <TokensDisplayHandler bind:tokens>
