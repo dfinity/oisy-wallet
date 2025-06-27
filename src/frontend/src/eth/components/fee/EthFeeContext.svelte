@@ -11,7 +11,7 @@
 		getEthFeeData,
 		type GetFeeData
 	} from '$eth/services/fee.services';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -43,7 +43,7 @@
 	export let sendToken: Token;
 	export let sendTokenId: TokenId;
 
-	const { feeStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee
