@@ -1,8 +1,4 @@
-import {
-	ICP_INDEX_CANISTER_ID,
-	ICP_LEDGER_CANISTER_ID,
-	ICP_NETWORK
-} from '$env/networks/networks.icp.env';
+import { ICP_LEDGER_CANISTER_ID, ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
 import type { IcCanisters, IcToken } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
@@ -104,7 +100,7 @@ describe('ic-add-custom-tokens.service', () => {
 				const result = await loadAndAssertAddCustomToken({
 					identity: mockIdentity,
 					icrcTokens: [],
-					ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
+					ledgerCanisterId: ICP_LEDGER_CANISTER_ID
 				});
 
 				expect(result).toEqual({ result: 'error' });
