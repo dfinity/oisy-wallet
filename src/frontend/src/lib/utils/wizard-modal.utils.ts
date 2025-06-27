@@ -10,13 +10,13 @@ import type {
 import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 
 type StepName =
-		| WizardStepsSend
-		| WizardStepsConvert
-		| WizardStepsAuthHelp
-		| WizardStepsHowToConvert
-		| WizardStepsReceive
-		| AddressBookSteps
-		| TokenModalSteps;
+	| WizardStepsSend
+	| WizardStepsConvert
+	| WizardStepsAuthHelp
+	| WizardStepsHowToConvert
+	| WizardStepsReceive
+	| AddressBookSteps
+	| TokenModalSteps;
 
 export const goToWizardStep = <T extends StepName>({
 	modal,

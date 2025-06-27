@@ -43,7 +43,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-
 	let loading = $state(false);
 
 	export const callWithState =
@@ -99,7 +98,7 @@
 		)
 	);
 
-const steps: WizardSteps<AddressBookSteps> = [
+	const steps: WizardSteps<AddressBookSteps> = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
