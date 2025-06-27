@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { type Snippet } from 'svelte';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children: Snippet;
@@ -19,16 +19,15 @@
 	let scrolledPast = $state(false);
 
 	const handleScroll = () => {
-		console.log('scroll');
-		if (!rootElement) return;
-
+		if (!rootElement) {
+			return;
+		}
 		const rect = rootElement.getBoundingClientRect();
 		scrolledSoon = rect.top <= SPACING_TOP * 4;
 		scrolledPast = rect.top <= SPACING_TOP;
 	};
 
 	const calcSizes = (force = false) => {
-		console.log('rsize');
 		if (isNullish(rootElement) || isNullish(alignmentElement)) {
 			return;
 		}
