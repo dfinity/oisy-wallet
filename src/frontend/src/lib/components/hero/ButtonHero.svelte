@@ -24,11 +24,12 @@
 	{testId}
 	colorStyle="tertiary-main-card"
 	paddingSmall
+	styleClass="py-1 min-w-0"
 >
-	<div class="flex flex-col items-center justify-center gap-2 lg:flex-row">
+	<div class="flex min-w-0 flex-col items-center justify-center">
 		{@render icon()}
-		<div class="min-w-12 max-w-[72px] break-words text-sm lg:text-base">
-			{@render label()}
-		</div>
+		<span class="block w-full truncate text-sm lg:text-base">
+			{@render label()} very long label
+		</span>
 	</div>
 </Button>
