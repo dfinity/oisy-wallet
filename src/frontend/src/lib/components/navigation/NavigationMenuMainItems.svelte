@@ -61,7 +61,7 @@
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
 	<IconWallet />
-	{$i18n.navigation.text.tokens}
+	<span class="block w-full truncate">{$i18n.navigation.text.tokens}</span>
 </NavigationItem>
 
 <NavigationItem
@@ -76,7 +76,7 @@
 	testId={addTestIdPrefix(NAVIGATION_ITEM_ACTIVITY)}
 >
 	<IconActivity />
-	{$i18n.navigation.text.activity}
+	<span class="block w-full truncate">{$i18n.navigation.text.activity}</span>
 </NavigationItem>
 
 <NavigationItem
@@ -91,7 +91,7 @@
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
 	<AnimatedIconUfo />
-	{$i18n.navigation.text.dapp_explorer}
+	<span class="block w-full truncate">{$i18n.navigation.text.dapp_explorer}</span>
 </NavigationItem>
 
 <!-- Todo: remove condition once the feature is completed -->
@@ -110,7 +110,7 @@
 		tagVariant="emphasis"
 	>
 		<IconGift />
-		{$i18n.navigation.text.earning}
+		<span class="block w-full truncate">{$i18n.navigation.text.earning}</span>
 	</NavigationItem>
 {:else}
 	<NavigationItem
@@ -127,7 +127,7 @@
 		tagVariant="emphasis"
 	>
 		<IconGift />
-		{$i18n.navigation.text.airdrops}
+		<span class="block w-full truncate">{$i18n.navigation.text.airdrops}</span>
 	</NavigationItem>
 {/if}
 
@@ -143,5 +143,5 @@
 	testId={addTestIdPrefix(NAVIGATION_ITEM_SETTINGS)}
 >
 	<IconlySettings />
-	{$i18n.navigation.text.settings}
+	<span class="block w-full truncate">{$i18n.navigation.text.settings}</span>
 </NavigationItem>
