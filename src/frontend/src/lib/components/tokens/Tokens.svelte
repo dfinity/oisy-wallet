@@ -11,18 +11,16 @@
 
 <div>
 	<StickyHeader>
-		<div class="block">
-			<div class="flex w-full flex-row justify-between">
-				<div class="grow-1 relative flex flex-row justify-between">
-					<TokensFilter>
-						{#snippet overflowableContent()}
-							<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
-						{/snippet}
-					</TokensFilter>
-				</div>
-				<div class="flex">
-					<TokensMenu />
-				</div>
+		<div class="flex w-full flex-row justify-between">
+			<div class="grow-1 relative flex flex-row justify-between">
+				<TokensFilter>
+					{#snippet overflowableContent()}
+						<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+					{/snippet}
+				</TokensFilter>
+			</div>
+			<div class="flex">
+				<TokensMenu />
 			</div>
 		</div>
 	</StickyHeader>
