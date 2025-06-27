@@ -105,7 +105,6 @@ describe('ic-add-custom-tokens.service', () => {
 					identity: mockIdentity,
 					icrcTokens: [],
 					ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
-					indexCanisterId: ICP_INDEX_CANISTER_ID
 				});
 
 				expect(result).toEqual({ result: 'error' });
