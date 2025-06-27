@@ -6,11 +6,11 @@
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import Sticky from '$lib/components/ui/Sticky.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 </script>
 
 <div>
-	<Sticky>
+	<StickyHeader>
 		<div class="block">
 			<div class="flex w-full flex-row justify-between">
 				<div class="grow-1 relative flex flex-row justify-between">
@@ -25,7 +25,7 @@
 				</div>
 			</div>
 		</div>
-	</Sticky>
+	</StickyHeader>
 
 	<TokensList />
 

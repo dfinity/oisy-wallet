@@ -40,7 +40,7 @@
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import Button from '$lib/components/ui/Button.svelte';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
-	import Sticky from '$lib/components/ui/Sticky.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -238,7 +238,7 @@
 
 		{#if $tokenListStore.filter !== '' && allTokensFilteredAndSorted.length > 0}
 			<div class="mb-3 mt-12 flex flex-col gap-3">
-				<Sticky>
+				<StickyHeader>
 					<div class="flex items-center justify-between pb-4">
 						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
 						<div>
@@ -253,7 +253,7 @@
 							</Button>
 						</div>
 					</div>
-				</Sticky>
+				</StickyHeader>
 
 				{#each allTokensFilteredAndSorted as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 					<div
