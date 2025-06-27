@@ -573,6 +573,3 @@ export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> 
 
 export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	GHOSTNODE_IC_DATA?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';
-
-export const ICONFUCIUS_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ICONFUCIUS_IC_DATA?.ledgerCanisterId ?? '5kijx-siaaa-aaaar-qaqda-cai';
