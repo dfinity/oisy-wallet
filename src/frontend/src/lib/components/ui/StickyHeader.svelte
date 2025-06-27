@@ -17,7 +17,6 @@
 	let scrolledPast = $state(false);
 
 	const handleScroll = () => {
-		console.log('scroll');
 		if (!rootElement) return;
 
 		const rect = rootElement.getBoundingClientRect();
