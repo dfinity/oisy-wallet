@@ -39,7 +39,6 @@
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import Button from '$lib/components/ui/Button.svelte';
-	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
@@ -249,7 +248,7 @@
 								fullWidth={false}
 								styleClass="py-2"
 							>
-								Apply ({Object.keys(modifiedTokens).length} token)
+								{$i18n.core.text.apply} ({Object.keys(modifiedTokens).length})
 							</Button>
 						</div>
 					</div>
