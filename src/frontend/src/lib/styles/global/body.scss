@@ -1,6 +1,6 @@
 body {
 	width: 100vw;
-	height: 100svh;
+	height: inherit; // needed for window on:scroll to work
 
 	overflow-y: auto;
 	overflow-x: hidden;
