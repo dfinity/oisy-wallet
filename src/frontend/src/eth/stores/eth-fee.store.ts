@@ -6,11 +6,11 @@ import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export type FeeStoreData = TransactionFeeData | undefined;
 
-export interface FeeStore extends Readable<FeeStoreData> {
+export interface EthFeeStore extends Readable<FeeStoreData> {
 	setFee: (data: TransactionFeeData) => void;
 }
 
-export const initFeeStore = (): FeeStore => {
+export const initEthFeeStore = (): EthFeeStore => {
 	const { subscribe, set } = writable<FeeStoreData>(undefined);
 
 	return {
@@ -22,8 +22,8 @@ export const initFeeStore = (): FeeStore => {
 	};
 };
 
-export interface FeeContext {
-	feeStore: FeeStore;
+export interface EthFeeContext {
+	feeStore: EthFeeStore;
 	feeSymbolStore: Writable<string | undefined>;
 	feeTokenIdStore: Writable<TokenId | undefined>;
 	feeDecimalsStore: Writable<number | undefined>;
@@ -33,10 +33,10 @@ export interface FeeContext {
 	evaluateFee?: () => void;
 }
 
-export const initFeeContext = ({
+export const initEthFeeContext = ({
 	feeStore,
 	...rest
-}: Omit<FeeContext, 'maxGasFee' | 'minGasFee'>): FeeContext => {
+}: Omit<EthFeeContext, 'maxGasFee' | 'minGasFee'>): EthFeeContext => {
 	const maxGasFee = derived(feeStore, (feeData) =>
 		nonNullish(feeData) ? maxGasFeeUtils(feeData) : undefined
 	);
@@ -52,4 +52,4 @@ export const initFeeContext = ({
 	};
 };
 
-export const FEE_CONTEXT_KEY = Symbol('fee');
+export const ETH_FEE_CONTEXT_KEY = Symbol('eth-fee');
