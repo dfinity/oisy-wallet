@@ -45,9 +45,9 @@
 
 <svelte:window on:scroll={handleScroll} on:resize={debounce(() => calcSizes(true), 250)} />
 
-<div bind:this={rootElement} class="relative block" style={`height: ${originalHeight ?? 0}px`}>
+<div bind:this={rootElement} class="relative" style={`height: ${originalHeight ?? 0}px`}>
 	<div
-		class="z-2 block"
+		class="z-2"
 		bind:this={alignmentElement}
 		class:absolute={nonNullish(originalHeight)}
 		class:bg-page={scrolledSoon}
