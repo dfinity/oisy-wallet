@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		children: Snippet;
 	}
+
+	const SPACING_TOP = 24; // since we add pt-6 we need to trigger earlier
 
 	const { children }: Props = $props();
 
@@ -17,14 +19,16 @@
 	let scrolledPast = $state(false);
 
 	const handleScroll = () => {
+		console.log('scroll');
 		if (!rootElement) return;
 
 		const rect = rootElement.getBoundingClientRect();
-		scrolledSoon = rect.top <= 24 * 4;
-		scrolledPast = rect.top <= 24;
+		scrolledSoon = rect.top <= SPACING_TOP * 4;
+		scrolledPast = rect.top <= SPACING_TOP;
 	};
 
 	const calcSizes = (force = false) => {
+		console.log('rsize');
 		if (isNullish(rootElement) || isNullish(alignmentElement)) {
 			return;
 		}
@@ -42,11 +46,11 @@
 	});
 </script>
 
-<svelte:window on:scroll={handleScroll} on:resize={() => calcSizes(true)} />
+<svelte:window on:scroll={handleScroll} on:resize={debounce(() => calcSizes(true), 250)} />
 
-<div bind:this={rootElement} class="relative block" style={`height: ${originalHeight ?? 0}px`}>
+<div bind:this={rootElement} class="relative" style={`height: ${originalHeight ?? 0}px`}>
 	<div
-		class="z-2 block"
+		class="z-2"
 		bind:this={alignmentElement}
 		class:absolute={nonNullish(originalHeight)}
 		class:bg-page={scrolledSoon}
