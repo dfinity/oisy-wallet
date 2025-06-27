@@ -36,7 +36,8 @@ export const icNetworkContacts: Readable<NetworkContacts> = derived(
 				} catch (_: unknown) {
 					trackEvent({ name: TRACK_IC_NETWORK_CONTACTS_GENERATION_ISSUE });
 
-					// if address parsing failed, we ignore it and continue further
+					// Principal.fromText does not support sub-accounts and therefore throws an error.
+					// As a temporary patch, we ignore such addresses and proceed with the generation further.
 					return acc;
 				}
 			}
