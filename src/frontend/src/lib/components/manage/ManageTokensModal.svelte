@@ -21,6 +21,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -39,7 +40,6 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
 
 	let {
 		initialSearch,
@@ -57,7 +57,7 @@
 			title: $i18n.tokens.import.text.title
 		},
 		{
-			name:  WizardStepsManageTokens.REVIEW,
+			name: WizardStepsManageTokens.REVIEW,
 			title: $i18n.tokens.import.text.review
 		},
 		{

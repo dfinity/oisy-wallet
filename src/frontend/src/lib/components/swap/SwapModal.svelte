@@ -48,7 +48,7 @@
 
 	let modal = $state<WizardModal>();
 
-	let steps : WizardSteps<WizardStepsSwap>= $derived(swapWizardSteps({ i18n: $i18n }));
+	let steps: WizardSteps<WizardStepsSwap> = $derived(swapWizardSteps({ i18n: $i18n }));
 
 	let swapAmount = $state<OptionAmount>();
 	let receiveAmount = $state<number | undefined>();
