@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount, untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
+	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
@@ -12,8 +16,14 @@
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
@@ -21,25 +31,15 @@
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { groupTogglableTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import type { ExchangesData } from '$lib/types/exchange';
-	import { onMount, untrack } from 'svelte';
-	import { exchanges } from '$lib/derived/exchange.derived';
 	import type { Token } from '$lib/types/token';
-	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { mapTokenUi } from '$lib/utils/token.utils';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
-	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
-	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
-	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
-	import { authIdentity } from '$lib/derived/auth.derived';
+	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
-	import Button from '$lib/components/ui/Button.svelte';
-	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -110,7 +110,7 @@
 	// we debounce the filter input for updating the enable tokens list
 	const debouncedFilterList = debounce((filter: string) => updateFilterList(filter), 300);
 	$effect(() => {
-		const filter = $tokenListStore.filter;
+		const {filter} = $tokenListStore;
 		untrack(() => debouncedFilterList(filter)); // we untrack the function so it only updates the list on filter change
 	});
 
