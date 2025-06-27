@@ -39,6 +39,7 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
 
 	let {
 		initialSearch,
@@ -46,28 +47,28 @@
 		infoElement
 	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsManageTokens> = [
 		{
-			name: 'Manage',
+			name: WizardStepsManageTokens.MANAGE,
 			title: $i18n.tokens.manage.text.title
 		},
 		{
-			name: 'Import',
+			name: WizardStepsManageTokens.IMPORT,
 			title: $i18n.tokens.import.text.title
 		},
 		{
-			name: 'Review',
+			name:  WizardStepsManageTokens.REVIEW,
 			title: $i18n.tokens.import.text.review
 		},
 		{
-			name: 'Saving',
+			name: WizardStepsManageTokens.SAVING,
 			title: $i18n.tokens.import.text.updating
 		}
 	];
 
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
-	let currentStep: WizardStep | undefined = $state();
+	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal | undefined = $state();
 
 	const saveTokens = async ({

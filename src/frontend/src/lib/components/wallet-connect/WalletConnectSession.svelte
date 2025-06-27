@@ -19,6 +19,7 @@
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
@@ -41,20 +42,20 @@
 	const signModalId = Symbol();
 	const sendModalId = Symbol();
 
-	const STEP_CONNECT: WizardStep = {
-		name: 'Connect',
+	const STEP_CONNECT: WizardStep<WizardStepsWalletConnect> = {
+		name: WizardStepsWalletConnect.CONNECT,
 		title: $i18n.wallet_connect.text.name
 	};
 
-	const STEP_REVIEW: WizardStep = {
-		name: 'Review',
+	const STEP_REVIEW: WizardStep<WizardStepsWalletConnect> = {
+		name: WizardStepsWalletConnect.REVIEW,
 		title: $i18n.wallet_connect.text.session_proposal
 	};
 
-	let steps: WizardSteps = [STEP_CONNECT, STEP_REVIEW];
+	let steps: WizardSteps<WizardStepsWalletConnect> = [STEP_CONNECT, STEP_REVIEW];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsWalletConnect> | undefined;
+	let modal: WizardModal<WizardStepsWalletConnect>;
 
 	const close = () => modalStore.close();
 	const resetAndClose = () => {

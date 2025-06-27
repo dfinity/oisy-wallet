@@ -20,6 +20,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
+	import { WizardStepsHideToken } from '$lib/enums/wizard-steps';
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
@@ -73,13 +74,13 @@
 		}
 	};
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsHideToken> = [
 		{
-			name: 'Hide',
+			name: WizardStepsHideToken.HIDE,
 			title: $i18n.tokens.hide.title
 		},
 		{
-			name: 'Hiding',
+			name: WizardStepsHideToken.HIDING,
 			title: $i18n.tokens.hide.hiding
 		}
 	];
