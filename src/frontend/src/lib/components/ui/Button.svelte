@@ -19,6 +19,7 @@
 		styleClass?: string;
 		transparent?: boolean;
 		onclick?: MouseEventHandler<HTMLButtonElement>;
+		ondblclick?: MouseEventHandler<HTMLButtonElement>;
 		children: Snippet;
 	}
 
@@ -38,6 +39,7 @@
 		styleClass = '',
 		transparent,
 		onclick,
+		ondblclick,
 		children
 	}: Props = $props();
 </script>
@@ -62,6 +64,7 @@
 	class:animate-pulse={loading}
 	class:transparent
 	{onclick}
+	{ondblclick}
 	data-tid={testId}
 	aria-label={ariaLabel}
 >

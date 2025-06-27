@@ -377,6 +377,7 @@ interface I18nHero {
 		hidden_balance: string;
 		top_up: string;
 		learn_more_about_erc20_icp: string;
+		tooltip_toggle_balance: string;
 	};
 }
 
