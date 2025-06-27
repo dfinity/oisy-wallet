@@ -17,7 +17,9 @@
 	let scrolledPast = $state(false);
 
 	const handleScroll = () => {
-		if (!rootElement) {return;}
+		if (!rootElement) {
+			return;
+		}
 
 		const rect = rootElement.getBoundingClientRect();
 		scrolledSoon = rect.top <= 24 * 4;
