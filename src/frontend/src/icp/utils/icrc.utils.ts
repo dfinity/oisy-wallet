@@ -1,4 +1,4 @@
-import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { ICP_NETWORK, ICP_PSEUDO_TESTNET_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	GHOSTNODE_LEDGER_CANISTER_ID,
 	ICONFUCIUS_LEDGER_CANISTER_ID
@@ -10,6 +10,7 @@ import type {
 	IcTokenWithoutIdExtended,
 	IcrcCustomToken
 } from '$icp/types/icrc-custom-token';
+import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -58,7 +59,7 @@ export const mapIcrcToken = ({
 
 	return {
 		id: parseTokenId(symbol),
-		network: ICP_NETWORK,
+		network: isTokenIcrcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK,
 		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
 		symbol,
 		...(notEmptyString(icon) && { icon }),

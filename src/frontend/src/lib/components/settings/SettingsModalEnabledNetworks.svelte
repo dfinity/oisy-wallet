@@ -34,6 +34,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
+	import { isNetworkIdICP } from '$lib/utils/network.utils.js';
 
 	const enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...enabledNetworks };
@@ -134,7 +135,7 @@
 				<ManageNetworkToggle
 					checked={enabledNetworks[network.id]?.enabled ?? false}
 					on:nnsToggle={() => toggleNetwork(network)}
-					disabled={network.id === ICP_NETWORK_ID}
+					disabled={isNetworkIdICP(network.id)}
 				/>
 			</ListItem>
 		{/each}
@@ -156,6 +157,7 @@
 						checked={enabledNetworks[network.id]?.enabled ?? false}
 						on:nnsToggle={() => toggleNetwork(network)}
 						testId={`${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-${network.id.description}`}
+						disabled={isNetworkIdICP(network.id)}
 					/>
 				</ListItem>
 			{/each}
