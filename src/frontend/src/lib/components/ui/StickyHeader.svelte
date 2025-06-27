@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { type Snippet } from 'svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children: Snippet;
@@ -17,7 +17,7 @@
 	let scrolledPast = $state(false);
 
 	const handleScroll = () => {
-		if (!rootElement) return;
+		if (!rootElement) {return;}
 
 		const rect = rootElement.getBoundingClientRect();
 		scrolledSoon = rect.top <= 24 * 4;
