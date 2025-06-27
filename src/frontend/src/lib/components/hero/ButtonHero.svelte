@@ -29,7 +29,7 @@
 	<div class="flex min-w-0 flex-col items-center justify-center">
 		{@render icon()}
 		<span class="block w-full truncate text-sm lg:text-base">
-			{@render label()} very long label
+			{@render label()}
 		</span>
 	</div>
 </Button>
