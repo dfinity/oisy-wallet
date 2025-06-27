@@ -11,6 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
+	import { WizardStepsReceiveAddress } from '$lib/enums/wizard-steps';
 
 	export let infoCmp:
 		| typeof ReceiveAddresses
@@ -18,13 +19,13 @@
 		| typeof IcReceiveInfoICP
 		| typeof IcReceiveInfoIcrc;
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsReceiveAddress> = [
 		{
-			name: 'Receive',
+			name: WizardStepsReceiveAddress.RECEIVE,
 			title: $i18n.receive.text.receive
 		},
 		{
-			name: 'QR code',
+			name: WizardStepsReceiveAddress.QR_CODE,
 			title: $i18n.receive.text.address
 		}
 	];
