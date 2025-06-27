@@ -6,7 +6,6 @@
 		SUPPORTED_NETWORKS,
 		SUPPORTED_TESTNET_NETWORKS
 	} from '$env/networks/networks.env';
-	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { setUserShowTestnets, updateUserNetworkSettings } from '$lib/api/backend.api';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
