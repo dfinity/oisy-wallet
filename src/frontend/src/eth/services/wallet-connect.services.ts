@@ -1,5 +1,5 @@
 import { send as executeSend } from '$eth/services/send.services';
-import type { FeeStoreData } from '$eth/stores/fee.store';
+import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { SendParams } from '$eth/types/send';
 import {
 	getSignParamsMessageHex,
