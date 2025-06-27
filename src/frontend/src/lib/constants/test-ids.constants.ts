@@ -241,4 +241,6 @@ export const CONTACT_CARD_EXPAND_BUTTON = 'contact-card-expand-button';
 export const TOKEN_MODAL_CONTENT_DELETE_BUTTON = 'token-modal-content-delete-button';
 export const TOKEN_MODAL_DELETE_BUTTON = 'token-modal-delete-button';
 export const TOKEN_MODAL_INDEX_CANISTER_ID_INPUT = 'token-modal-index-canister-id-input';
+export const TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON =
+	'token-modal-index-canister-id-edit-button';
 export const TOKEN_MODAL_SAVE_BUTTON = 'token-modal-save-button';
