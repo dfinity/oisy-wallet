@@ -29,8 +29,7 @@ export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 };
 
 const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
-	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE',
-	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS'
+	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE'
 };
 
 export const mapIcrcToken = ({
