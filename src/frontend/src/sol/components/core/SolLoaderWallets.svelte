@@ -6,6 +6,7 @@
 		solAddressLocal,
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
+	import { enabledSplTokens } from '$lib/derived/tokens.derived';
 	import type { Token } from '$lib/types/token';
 	import {
 		isNetworkIdSOLDevnet,
@@ -14,7 +15,6 @@
 	} from '$lib/utils/network.utils';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { initSolWalletWorker as initWalletWorker } from '$sol/services/worker.sol-wallet.services';
-	import { enabledSplTokens } from '$lib/derived/tokens.derived';
 
 	let walletWorkerTokens: Token[];
 	$: walletWorkerTokens = [...$enabledSolanaTokens, ...$enabledSplTokens].filter(
