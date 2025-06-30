@@ -9,6 +9,24 @@ export const NAVIGATION_MENU_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button
 export const NAVIGATION_MENU_DOC_BUTTON = 'navigation-documentation-button';
 export const NAVIGATION_MENU_SUPPORT_BUTTON = 'navigation-support-button';
 
+// Address Book
+export const ADDRESS_BOOK_MODAL = 'address-book-modal';
+export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
+export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
+export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
+export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
+export const ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT = 'address-book-address-address-input';
+export const ADDRESS_BOOK_ADDRESS_ALIAS_INPUT = 'address-book-address-alias-input';
+export const ADDRESS_BOOK_NETWORK_SELECT = 'address-book-network-select';
+export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
+export const ADDRESS_BOOK_CONTACT_ITEM = 'address-book-contact-item';
+export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
+export const ADDRESS_BOOK_BACK_BUTTON = 'address-book-back-button';
+export const ADDRESS_BOOK_QR_CODE_SCAN = 'address-book-qr-code-scan';
+export const ADDRESS_EDIT_CANCEL_BUTTON = 'address-edit-cancel-button';
+export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
+export const ADDRESS_BOOK_FALLBACK_MESSAGE = 'address-book-fallback-message';
+
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
 export const MAX_BUTTON = 'max-button';
@@ -188,21 +206,6 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
-
-export const ADDRESS_BOOK_MODAL = 'address-book-modal';
-export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
-export const ADDRESS_BOOK_CONTACT_FORM = 'address-book-contact-form';
-export const ADDRESS_BOOK_CONTACT_NAME_INPUT = 'address-book-contact-name-input';
-export const ADDRESS_BOOK_SAVE_BUTTON = 'address-book-save-button';
-export const ADDRESS_BOOK_BACK_BUTTON = 'address-book-back-button';
-export const ADDRESS_BOOK_CANCEL_BUTTON = 'address-book-cancel-button';
-export const ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT = 'address-book-address-address-input';
-export const ADDRESS_BOOK_ADDRESS_ALIAS_INPUT = 'address-book-address-alisas-input';
-export const ADDRESS_BOOK_QR_CODE_SCAN = 'address-book-qr-code-scan';
-export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-input';
-export const ADDRESS_EDIT_CANCEL_BUTTON = 'address-edit-cancel-button';
-export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
-export const ADDRESS_BOOK_FALLBACK_MESSAGE = 'address-book-fallback-message';
 
 export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
 export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
