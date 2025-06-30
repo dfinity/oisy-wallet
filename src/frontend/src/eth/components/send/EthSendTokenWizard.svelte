@@ -3,17 +3,17 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
-		FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
-		initFeeStore
-	} from '$eth/stores/fee.store';
+		ETH_FEE_CONTEXT_KEY,
+		type EthFeeContext as FeeContextType,
+		initEthFeeContext,
+		initEthFeeStore
+	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
@@ -76,7 +76,7 @@
 	 * Fee context store
 	 */
 
-	const feeStore = initFeeStore();
+	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(nativeEthereumToken.symbol);
@@ -90,12 +90,12 @@
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
 	$: feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
 
-	let feeContext: FeeContext | undefined;
+	let feeContext: EthFeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
-		initFeeContext({
+		ETH_FEE_CONTEXT_KEY,
+		initEthFeeContext({
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,
@@ -210,7 +210,7 @@
 	const back = () => dispatch('icSendBack');
 </script>
 
-<FeeContext
+<EthFeeContext
 	bind:this={feeContext}
 	sendToken={$sendToken}
 	sendTokenId={$sendTokenId}
@@ -243,4 +243,4 @@
 	{:else}
 		<slot />
 	{/if}
-</FeeContext>
+</EthFeeContext>
