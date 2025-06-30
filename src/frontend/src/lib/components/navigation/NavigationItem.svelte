@@ -5,7 +5,8 @@
 	import type { TagVariant } from '$lib/types/style';
 
 	interface Props {
-		children?: Snippet;
+		label?: Snippet;
+		icon?: Snippet;
 		href: string;
 		selected?: boolean;
 		ariaLabel: string;
@@ -14,7 +15,7 @@
 		tagVariant?: TagVariant;
 	}
 
-	let { children, href, selected = false, ariaLabel, testId, tag, tagVariant }: Props = $props();
+	let { label, icon, href, selected = false, ariaLabel, testId, tag, tagVariant }: Props = $props();
 </script>
 
 <a
@@ -24,7 +25,10 @@
 	aria-label={ariaLabel}
 	data-tid={testId}
 >
-	{@render children?.()}
+	{@render icon?.()}
+	<span class="block w-full truncate md:w-auto">
+		{@render label?.()}
+	</span>
 	{#if nonNullish(tag)}
 		<div
 			class="text-xs/4.5 md:mt-0.75 absolute -mt-1.5 ml-10 scale-75 font-bold uppercase md:relative md:ml-1 md:scale-100"
