@@ -453,7 +453,7 @@ service : (Arg) -> {
 	);
 	btc_get_current_fee_percentiles : (BtcGetFeePercentilesRequest) -> (
 		BtcGetFeePercentilesResult
-	) query;
+	);
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
