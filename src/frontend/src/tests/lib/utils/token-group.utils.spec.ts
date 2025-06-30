@@ -11,8 +11,8 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import type { TokenUi } from '$lib/types/token';
-import type { TokenUiGroup } from '$lib/types/token-group';
+import type { Token, TokenUi } from '$lib/types/token';
+import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import { last } from '$lib/utils/array.utils';
 import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 import {
@@ -20,11 +20,13 @@ import {
 	groupSecondaryToken,
 	groupTokens,
 	groupTokensByTwin,
+	sortTokenOrGroupUiAlphabetically,
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
 import { bn1Bi, bn2Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import { expect } from 'vitest';
 
 const tokens: TokenUi[] = [
 	{
@@ -730,6 +732,42 @@ describe('token-group.utils', () => {
 				balance: undefined,
 				usdBalance: mockToken.usdBalance + mockTwinToken2.usdBalance
 			});
+		});
+	});
+
+	describe('sortTokenOrGroupUiAlphabetically', () => {
+		const toTokenUiOrGroupUi = (token: Token): TokenUiOrGroupUi => ({ token });
+
+		const mockToken = toTokenUiOrGroupUi({ ...ETHEREUM_TOKEN, name: 'Aaa' });
+		const mockSecondToken = toTokenUiOrGroupUi({ ...BTC_MAINNET_TOKEN, name: 'Bbb' });
+		const mockThirdToken = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: 'Ccc' });
+		const mockFourthToken = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- AAA' });
+
+		const tokenList = [mockToken, mockSecondToken, mockThirdToken, mockFourthToken]
+			.map((value) => ({ value, sort: Math.random() }))
+			.sort((a, b) => a.sort - b.sort)
+			.map(({ value }) => value);
+		// map().sort().map() is used to shuffle the array randomly
+
+		it('should sort correctly', () => {
+			const result = sortTokenOrGroupUiAlphabetically(tokenList);
+
+			expect(result).toEqual([mockToken, mockSecondToken, mockThirdToken, mockFourthToken]);
+		});
+
+		it('should keep order the same if groups passed', () => {
+			const expected = [
+				{ group: { id: 'Bgroup1', tokens: [mockToken] } as unknown as TokenUiGroup },
+				{
+					group: {
+						id: 'Agroup1',
+						tokens: [mockSecondToken, mockThirdToken]
+					} as unknown as TokenUiGroup
+				}
+			];
+			const result = sortTokenOrGroupUiAlphabetically(expected);
+
+			expect(result).toEqual(expected);
 		});
 	});
 });

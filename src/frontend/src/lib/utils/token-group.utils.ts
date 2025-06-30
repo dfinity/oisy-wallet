@@ -187,7 +187,7 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	return Object.getOwnPropertySymbols(tokenGroupsMap).map((id) => tokenGroupsMap[id as TokenId]);
 };
 
-const sortTokenOrGroupUiAlphabetically = (tokenOrGroup: TokenUiOrGroupUi[]) =>
+export const sortTokenOrGroupUiAlphabetically = (tokenOrGroup: TokenUiOrGroupUi[]) =>
 	tokenOrGroup.sort(
 		(a, b) =>
 			!isTokenUiGroup(a) && !isTokenUiGroup(b)
