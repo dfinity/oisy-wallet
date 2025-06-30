@@ -7,6 +7,7 @@ import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/ic
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import type { ManageTokensSaveParams } from '$lib/services/manage-tokens.services';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
@@ -308,40 +309,36 @@ export const saveAllCustomTokens = async ({
 		return;
 	}
 
+	const commonParams: ManageTokensSaveParams = {
+		progress,
+		modalNext,
+		onSuccess,
+		onError,
+		identity: $authIdentity
+	};
+
 	await Promise.allSettled([
 		...(icrc.length > 0
 			? [
 					saveIcrcCustomTokens({
-						tokens: icrc.map((t) => ({ ...t, networkKey: 'Icrc' })),
-						progress,
-						modalNext,
-						onSuccess,
-						onError,
-						identity: $authIdentity
+						...commonParams,
+						tokens: icrc.map((t) => ({ ...t, networkKey: 'Icrc' }))
 					})
 				]
 			: []),
 		...(erc20.length > 0
 			? [
 					saveErc20UserTokens({
-						tokens: erc20,
-						progress,
-						modalNext,
-						onSuccess,
-						onError,
-						identity: $authIdentity
+						...commonParams,
+						tokens: erc20
 					})
 				]
 			: []),
 		...(spl.length > 0
 			? [
 					saveSplCustomTokens({
-						tokens: spl,
-						progress,
-						modalNext,
-						onSuccess,
-						onError,
-						identity: $authIdentity
+						...commonParams,
+						tokens: spl
 					})
 				]
 			: [])

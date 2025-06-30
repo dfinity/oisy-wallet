@@ -62,9 +62,7 @@ export const saveTokens = async <
 		return;
 	}
 
-	if (nonNullish(modalNext)) {
-		modalNext();
-	}
+	modalNext?.();
 
 	try {
 		await save({
@@ -73,9 +71,7 @@ export const saveTokens = async <
 			tokens: tokens as NonEmptyArray<T>
 		});
 
-		if (nonNullish(progress)) {
-			progress(ProgressStepsAddToken.DONE);
-		}
+		progress?.(ProgressStepsAddToken.DONE);
 
 		if (nonNullish(onSuccess)) {
 			setTimeout(() => onSuccess(), 750);
@@ -111,9 +107,7 @@ export const saveTokens = async <
 			err
 		});
 
-		if (nonNullish(onError)) {
-			onError();
-		}
+		onError?.();
 
 		trackEvent({
 			name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,

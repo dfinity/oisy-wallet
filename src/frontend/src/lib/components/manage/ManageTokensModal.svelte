@@ -19,6 +19,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -32,11 +33,11 @@
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
+	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	let {
 		initialSearch,
@@ -44,36 +45,34 @@
 		infoElement
 	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsManageTokens> = [
 		{
-			name: 'Manage',
+			name: WizardStepsManageTokens.MANAGE,
 			title: $i18n.tokens.manage.text.title
 		},
 		{
-			name: 'Import',
+			name: WizardStepsManageTokens.IMPORT,
 			title: $i18n.tokens.import.text.title
 		},
 		{
-			name: 'Review',
+			name: WizardStepsManageTokens.REVIEW,
 			title: $i18n.tokens.import.text.review
 		},
 		{
-			name: 'Saving',
+			name: WizardStepsManageTokens.SAVING,
 			title: $i18n.tokens.import.text.updating
 		}
 	];
 
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
-	let currentStep: WizardStep | undefined = $state();
+	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal | undefined = $state();
 
 	const saveTokens = async ({
 		detail: { modifiedTokens }
-	}: CustomEvent<{
-		modifiedTokens: Record<string, Token>;
-	}>) =>
-		saveAllCustomTokens({
+	}: CustomEvent<{ modifiedTokens: Record<string, Token> }>) => {
+		await saveAllCustomTokens({
 			tokens: modifiedTokens,
 			progress,
 			modalNext: () => modal?.set(3),
@@ -82,6 +81,7 @@
 			$authIdentity,
 			$i18n
 		});
+	};
 
 	const addIcrcToken = async () => {
 		if (isNullish(ledgerCanisterId)) {
