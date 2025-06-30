@@ -1,12 +1,11 @@
+use std::{cell::RefCell, collections::HashMap, time::Duration};
+
 use ic_cdk::api::management_canister::bitcoin::{
     bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, BitcoinNetwork,
     GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Utxo,
     UtxoFilter,
 };
 use ic_cdk_timers::set_timer_interval;
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::time::Duration;
 
 // Store fee percentiles in memory, with a map for each network type
 thread_local! {
