@@ -20,7 +20,7 @@ import {
 	groupSecondaryToken,
 	groupTokens,
 	groupTokensByTwin,
-	sortTokenOrGroupUiAlphabetically,
+	sortTokenOrGroupUi,
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
 import { bn1Bi, bn2Bi, bn3Bi } from '$tests/mocks/balances.mock';
@@ -735,7 +735,7 @@ describe('token-group.utils', () => {
 		});
 	});
 
-	describe('sortTokenOrGroupUiAlphabetically', () => {
+	describe('sortTokenOrGroupUi', () => {
 		const toTokenUiOrGroupUi = (token: Token): TokenUiOrGroupUi => ({ token });
 
 		const mockToken = toTokenUiOrGroupUi({ ...ETHEREUM_TOKEN, name: 'Aaa' });
@@ -750,7 +750,7 @@ describe('token-group.utils', () => {
 		// map().sort().map() is used to shuffle the array randomly
 
 		it('should sort correctly', () => {
-			const result = sortTokenOrGroupUiAlphabetically(tokenList);
+			const result = sortTokenOrGroupUi(tokenList);
 
 			expect(result).toEqual([mockToken, mockSecondToken, mockThirdToken, mockFourthToken]);
 		});
@@ -765,7 +765,7 @@ describe('token-group.utils', () => {
 					} as unknown as TokenUiGroup
 				}
 			];
-			const result = sortTokenOrGroupUiAlphabetically(expected);
+			const result = sortTokenOrGroupUi(expected);
 
 			expect(result).toEqual(expected);
 		});

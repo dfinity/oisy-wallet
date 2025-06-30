@@ -24,7 +24,7 @@
 	import type { Token, TokenUi } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { isTokenUiGroup, sortTokenOrGroupUiAlphabetically } from '$lib/utils/token-group.utils';
+	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
@@ -76,7 +76,7 @@
 		// sort alphabetally and apply filter
 		enableMoreTokensList = getFilteredTokenList({
 			filter,
-			list: sortTokenOrGroupUiAlphabetically(reducedTokens)
+			list: sortTokenOrGroupUi(reducedTokens)
 		});
 
 		// we need to reset modified tokens, since the filter has changed the selected token(s) may not be visible anymore

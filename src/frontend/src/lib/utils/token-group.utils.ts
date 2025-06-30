@@ -187,7 +187,7 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	return Object.getOwnPropertySymbols(tokenGroupsMap).map((id) => tokenGroupsMap[id as TokenId]);
 };
 
-export const sortTokenOrGroupUiAlphabetically = (tokenOrGroup: TokenUiOrGroupUi[]) =>
+export const sortTokenOrGroupUi = (tokenOrGroup: TokenUiOrGroupUi[]) =>
 	tokenOrGroup.sort(
 		(a, b) =>
 			!isTokenUiGroup(a) && !isTokenUiGroup(b)
@@ -206,5 +206,5 @@ export const sortTokenOrGroupUiAlphabetically = (tokenOrGroup: TokenUiOrGroupUi[
 						}
 						return aName.localeCompare(bName);
 					})()
-				: 1 // currently we have no plans to sort groups alphabetically so we fallback to not sorting it
+				: 1 // Todo: currently we have no plans to sort groups alphabetically so we fallback to not sorting it
 	);
