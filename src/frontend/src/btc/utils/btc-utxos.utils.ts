@@ -1,5 +1,4 @@
 import type { UtxoFilterOptions, UtxoSelectionResult } from '$btc/types/btc-review.services';
-import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -25,19 +24,17 @@ export const getUtxos = async ({
 	identity,
 	address,
 	network,
-	minterCanisterId
+	bitcoinCanisterId
 }: {
 	identity: OptionIdentity;
 	address: string;
 	network: BitcoinNetwork;
-	minterCanisterId: CanisterIdText;
+	bitcoinCanisterId: CanisterIdText;
 }): Promise<Utxo[]> => {
 	assertNonNullish(identity);
 
-	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[minterCanisterId];
-
 	if (isNullish(bitcoinCanisterId)) {
-		throw new Error(`No Bitcoin canister ID found for minter: ${minterCanisterId}`);
+		throw new Error(`No Bitcoin canister ID found for minter: ${bitcoinCanisterId}`);
 	}
 
 	const response = await getUtxosQuery({

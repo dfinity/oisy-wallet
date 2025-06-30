@@ -49,7 +49,7 @@ export const prepareTransactionUtxos = async ({
 	// assertAmount({ amount });
 	assertStringNotEmpty({ value: source, message: 'Source address is required' });
 
-	const minterCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
+	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
@@ -69,7 +69,7 @@ export const prepareTransactionUtxos = async ({
 			identity,
 			address: source,
 			network,
-			minterCanisterId
+			bitcoinCanisterId
 		});
 
 		// Step 3: Filter UTXOs based on confirmations and exclude locked ones

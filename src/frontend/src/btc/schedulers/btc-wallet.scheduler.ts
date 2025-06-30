@@ -8,7 +8,7 @@ import { getBtcBalance } from '$lib/api/signer.api';
 import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
-import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
@@ -34,6 +34,7 @@ interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	shouldFetchTransactions?: boolean;
 	minterCanisterId?: OptionCanisterIdText;
 }
+
 interface BtcWalletStore {
 	balance: CertifiedData<bigint | null> | undefined;
 	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;
@@ -111,10 +112,12 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		if (!certified) {
 			// Query BTC balance only if minterCanisterId and BITCOIN_CANISTER_IDS[minterCanisterId] are available
 			// These values will be there only for "mainnet", for other networks - balance on "query" will be null
-			return {
+			const affe = {
 				data:
 					nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]
-						? await getBalanceQuery({
+						? // Queries the Bitcoin canister balance endpoint 'bitcoin_get_balance' through the management interface
+							// ??? Shouldn't we make the call against the bitcoin canister?
+							await getBalanceQuery({
 								identity,
 								network: bitcoinNetwork,
 								address: btcAddress,
@@ -124,9 +127,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 						: null,
 				certified: false
 			};
+			return affe;
 		}
 
-		return {
+		// Calls the btc_caller_balance endpoint on the signer canister to get certified balance
+		const wuff = {
 			data: await getBtcBalance({
 				identity,
 				network: mapToSignerBitcoinNetwork({
@@ -136,6 +141,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			}),
 			certified: true
 		};
+		return wuff;
 	};
 
 	private loadWalletData = async ({

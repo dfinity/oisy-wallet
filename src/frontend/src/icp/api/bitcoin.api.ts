@@ -21,7 +21,7 @@ export const getUtxosQuery = async ({
 }: BitcoinCanisterParams): Promise<get_utxos_response> => {
 	assertNonNullish(identity);
 
-	const { getUtxosQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
+	const { getUtxosQuery } = await bitcoinCanister({ identity });
 
 	return getUtxosQuery({
 		address,
@@ -41,7 +41,8 @@ export const getBalanceQuery = async ({
 	assertNonNullish(identity);
 
 	const { getBalanceQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
-
+	// TODO: Directly call the endpoint on the bitcoin canister or update the ic-cdk library since calling it through the
+	//  management interface is deprecated). See https://internetcomputer.org/docs/references/ic-interface-spec#ic-bitcoin_get_balance
 	return getBalanceQuery({
 		address,
 		network,

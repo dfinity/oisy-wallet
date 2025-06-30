@@ -198,7 +198,7 @@ export class BackendCanister extends Canister<BackendService> {
 	btcGetCurrentFeePercentiles = async ({
 		network
 	}: BtcGetFeePercentilesParams): Promise<BtcGetFeePercentilesResponse> => {
-		const { btc_get_current_fee_percentiles } = this.caller({ certified: false });
+		const { btc_get_current_fee_percentiles } = this.caller({ certified: true });
 
 		const response = await btc_get_current_fee_percentiles({
 			network
