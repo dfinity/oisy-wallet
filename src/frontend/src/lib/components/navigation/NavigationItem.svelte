@@ -17,7 +17,13 @@
 	let { children, href, selected = false, ariaLabel, testId, tag, tagVariant }: Props = $props();
 </script>
 
-<a {href} class="nav-item" class:selected aria-label={ariaLabel} data-tid={testId}>
+<a
+	{href}
+	class="nav-item flex min-w-0 flex-1"
+	class:selected
+	aria-label={ariaLabel}
+	data-tid={testId}
+>
 	{@render children?.()}
 	{#if nonNullish(tag)}
 		<div
