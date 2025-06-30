@@ -8,7 +8,10 @@ use crate::{
     types::{
         backend_config::{Config, InitArg},
         contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
-        custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
+        custom_token::{
+            CustomToken, CustomTokenId, Erc20Token, Erc20TokenId, IcrcToken, SplToken, SplTokenId,
+            Token,
+        },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
             NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
@@ -24,7 +27,6 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
-use crate::types::custom_token::{Erc20Token, Erc20TokenId};
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -374,7 +376,6 @@ impl OisyUser {
     }
 }
 
-
 impl SplTokenId {
     pub const MAX_LENGTH: usize = 44;
     pub const MIN_LENGTH: usize = 32;
@@ -415,18 +416,17 @@ impl Erc20TokenId {
     pub const MIN_LENGTH: usize = 42;
 }
 
-
 impl Validate for Erc20TokenId {
     /// Verifies that an Ethereum/EVM address is valid.
     fn validate(&self) -> Result<(), candid::Error> {
         if self.0.len() != 42 {
-            return Err(candid::Error::msg("Invalid Ethereum/EVM contract address length"));
+            return Err(candid::Error::msg(
+                "Invalid Ethereum/EVM contract address length",
+            ));
         }
         Ok(())
     }
 }
-
-
 
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
@@ -435,8 +435,8 @@ impl Validate for CustomTokenId {
             // check the exact type of principal.
             CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
                 token_address.validate()
-            },
-            CustomTokenId::Erc20(token_address) => { token_address.validate() },
+            }
+            CustomTokenId::Erc20(token_address) => token_address.validate(),
         }
     }
 }

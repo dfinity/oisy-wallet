@@ -2,10 +2,12 @@ use std::sync::LazyLock;
 
 use candid::Principal;
 use shared::types::{
-    custom_token::{CustomToken, IcrcToken, SplToken, SplTokenId, Token},
+    custom_token::{
+        ChainId, CustomToken, Erc20Token, Erc20TokenId, IcrcToken, SplToken, SplTokenId, Token,
+    },
     TokenVersion,
 };
-use shared::types::custom_token::{ChainId, Erc20Token, Erc20TokenId};
+
 use crate::utils::{
     assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
     mock::CALLER,
