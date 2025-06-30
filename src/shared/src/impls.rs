@@ -82,9 +82,11 @@ impl From<&Token> for CustomTokenId {
             Token::SplDevnet(SplToken { token_address, .. }) => {
                 CustomTokenId::SolDevnet(token_address.clone())
             }
-            Token::Erc20(Erc20Token { token_address, .. }, chain_id) => {
-                CustomTokenId::Ethereum(token_address.clone(), *chain_id)
-            }
+            Token::Erc20(Erc20Token {
+                token_address,
+                chain_id,
+                ..
+            }) => CustomTokenId::Ethereum(token_address.clone(), chain_id.clone()),
         }
     }
 }
@@ -455,7 +457,7 @@ impl Validate for Token {
         match self {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
-            Token::Erc20(token, _) => token.validate(),
+            Token::Erc20(token) => token.validate(),
         }
     }
 }

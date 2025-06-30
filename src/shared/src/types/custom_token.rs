@@ -55,7 +55,7 @@ pub enum Token {
     Icrc(IcrcToken) = 0,
     SplMainnet(SplToken) = 1,
     SplDevnet(SplToken) = 2,
-    Erc20(Erc20Token, ChainId) = 3,
+    Erc20(Erc20Token) = 3,
 }
 
 /// User preferences for any token
