@@ -71,9 +71,8 @@
 
 	const saveTokens = async ({
 		detail: { modifiedTokens }
-	}: CustomEvent<{modifiedTokens: Record<string, Token>}>) => {
-
-		saveAllCustomTokens({
+	}: CustomEvent<{ modifiedTokens: Record<string, Token> }>) => {
+		await saveAllCustomTokens({
 			tokens: modifiedTokens,
 			progress,
 			modalNext: () => modal?.set(3),
