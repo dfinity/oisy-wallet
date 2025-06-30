@@ -11,6 +11,8 @@ import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
 
+const DEFAULT_MIN_CONFIRMATIONS = 6;
+
 interface BtcSendServiceParams {
 	identity: Identity;
 	network: BitcoinNetwork;

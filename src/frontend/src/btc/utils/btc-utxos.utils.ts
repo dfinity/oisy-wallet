@@ -39,8 +39,8 @@ export const getUtxos = async ({
 
 	const response = await getUtxosQuery({
 		identity,
-		address,
 		network,
+		address,
 		bitcoinCanisterId
 	});
 
@@ -69,59 +69,6 @@ export const filterUtxos = ({
 		const txIdHex = Buffer.from(utxo.outpoint.txid).toString('hex');
 		return !excludeTxIds.includes(txIdHex);
 	});
-};
-
-/**
- * Selects UTXOs to cover the required amount using a simple greedy algorithm
- * This implements a basic coin selection strategy similar to the backend
- */
-export const selectUtxos = ({
-	availableUtxos,
-	amountSatoshis
-}: {
-	availableUtxos: Utxo[];
-	amountSatoshis: bigint;
-}): UtxoSelectionResult => {
-	if (availableUtxos.length === 0) {
-		throw new Error('No UTXOs available for selection');
-	}
-
-	// Sort UTXOs by value in descending order (largest first strategy)
-	const sortedUtxos = [...availableUtxos].sort((a, b) => {
-		const aValue = BigInt(a.value);
-		const bValue = BigInt(b.value);
-		return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-	});
-
-	const selectedUtxos: Utxo[] = [];
-	let totalInputValue = 0n;
-
-	// Greedy selection: pick UTXOs until we have enough to cover the amount
-	for (const utxo of sortedUtxos) {
-		selectedUtxos.push(utxo);
-		totalInputValue += BigInt(utxo.value);
-
-		// Check if we have enough to cover the required amount
-		// Note: We don't calculate fee here as that's done in the parent service
-		if (totalInputValue >= amountSatoshis) {
-			break;
-		}
-	}
-
-	// Verify we have sufficient funds
-	if (totalInputValue < amountSatoshis) {
-		throw new Error(
-			`Insufficient funds: required ${amountSatoshis} satoshis, available ${totalInputValue} satoshis`
-		);
-	}
-
-	const changeAmount = totalInputValue - amountSatoshis;
-
-	return {
-		selectedUtxos,
-		totalInputValue,
-		changeAmount
-	};
 };
 
 /**

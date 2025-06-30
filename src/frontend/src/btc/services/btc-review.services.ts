@@ -7,7 +7,10 @@ import type {
 	BitcoinNetwork as BackendBitcoinNetwork,
 	PendingTransaction
 } from '$declarations/backend/backend.did';
-import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import {
+	BITCOIN_CANISTER_IDS,
+	LOCAL_CKBTC_MINTER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
@@ -45,11 +48,11 @@ export const prepareTransactionUtxos = async ({
 	source
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
 	assertNonNullish(identity);
-	console.warn('amount: ', amount);
+
 	// assertAmount({ amount });
 	assertStringNotEmpty({ value: source, message: 'Source address is required' });
 
-	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
+	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[LOCAL_CKBTC_MINTER_CANISTER_ID];
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
@@ -147,10 +150,8 @@ const getFeeRateFromPercentiles = async ({
 		// Get fee percentiles array
 		const feePercentiles = response.fee_percentiles;
 
-		if (feePercentiles.length === 0) {
-			console.warn('No fee percentiles returned, using default fee rate');
-			// TODO verify if we can use a default fee or we should fail
-			return DEFAULT_FEE_RATE_SATOSHIS_PER_BYTE;
+		if (isNullish(feePercentiles) || feePercentiles.length === 0) {
+			throw new Error('No fee percentiles available - cannot calculate transaction fee');
 		}
 
 		// Use the median fee rate (50th percentile) for balanced transaction speed/cost
@@ -161,7 +162,7 @@ const getFeeRateFromPercentiles = async ({
 		// Ensure we have a reasonable minimum fee rate
 		// TODO add a reasaoble value for the minFeeRate
 		const minFeeRate = 1n;
-		// m ake sure to use the minimun fee rate if medianFeeRate is below the minimum rate
+		// make sure to use the minimun fee rate if medianFeeRate is below the minimum rate
 		const finalFeeRate = medianFeeRate > minFeeRate ? medianFeeRate : minFeeRate;
 
 		console.warn(`Using fee rate: ${finalFeeRate} sat/byte (from percentiles)`);

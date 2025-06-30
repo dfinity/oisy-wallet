@@ -1,11 +1,12 @@
-use std::{cell::RefCell, collections::HashMap, time::Duration};
+use std::{cell::RefCell, collections::HashMap};
 
 use ic_cdk::api::management_canister::bitcoin::{
     bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, BitcoinNetwork,
     GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Utxo,
     UtxoFilter,
 };
-use ic_cdk_timers::set_timer_interval;
+use ic_cdk_timers::{set_timer, set_timer_interval};
+use shared::types::bitcoin::FEE_PERCENTILES_UPDATE_INTERVAL;
 
 // Store fee percentiles in memory, with a map for each network type
 thread_local! {
@@ -61,20 +62,24 @@ pub async fn get_all_utxos(
 
 // Initialization function to start the timer that updates the fee percentiles
 pub fn init_fee_percentiles_cache() {
-    // Update every 10 minutes (600_000 milliseconds)
-    set_timer_interval(Duration::from_millis(600_000), || {
+    ic_cdk::println!("Initializing fee percentiles cache with 1-minute update interval");
+
+    // Schedule the initial cache population and timer setup to run after init completes
+    set_timer(std::time::Duration::from_secs(0), || {
+        // Set up the recurring timer to update the data
+        set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || {
+            ic_cdk::spawn(async {
+                let _ = update_fee_percentiles_cache().await;
+            });
+        });
+
+        // Initialize the cache immediately (after init)
         ic_cdk::spawn(async {
             let _ = update_fee_percentiles_cache().await;
         });
     });
-
-    // Initialize the cache immediately
-    ic_cdk::spawn(async {
-        let _ = update_fee_percentiles_cache().await;
-    });
 }
 
-// Function to update the fee percentiles in the cache
 // Function to update the fee percentiles in the cache
 async fn update_fee_percentiles_cache() -> Result<(), String> {
     // Update for each network type

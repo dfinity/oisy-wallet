@@ -1,10 +1,11 @@
 import { getAgent } from '$lib/actors/agents.ic';
+import { BitcoinDirectCanister } from '$lib/canisters/bitcoin.canister';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import { BitcoinCanister, type BitcoinNetwork, type get_utxos_response } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 interface BitcoinCanisterParams {
 	identity: OptionIdentity;
@@ -12,6 +13,8 @@ interface BitcoinCanisterParams {
 	network: BitcoinNetwork;
 	bitcoinCanisterId: CanisterIdText;
 }
+
+let directCanister: BitcoinDirectCanister | undefined = undefined;
 
 export const getUtxosQuery = async ({
 	identity,
@@ -21,11 +24,21 @@ export const getUtxosQuery = async ({
 }: BitcoinCanisterParams): Promise<get_utxos_response> => {
 	assertNonNullish(identity);
 
-	const { getUtxosQuery } = await bitcoinCanister({ identity });
+	// Workaround: The BitcoinCanister.getUtxosQuery() method from @dfinity/ckbtc
+	// maps 'regtest' network to 'mainnet' in its toGetUtxosParams() function.
+	// Use custom bitcoinDirectCanister for regtest to preserve correct network mapping,
+	// otherwise use the standard bitcoinCanister for mainnet/testnet.
+	const { getUtxosQuery } =
+		network === 'regtest'
+			? await bitcoinDirectCanister({ identity, bitcoinCanisterId })
+			: await bitcoinCanister({ identity, bitcoinCanisterId });
+
+	const minConfirmations = 1;
 
 	return getUtxosQuery({
 		address,
-		network
+		network,
+		filter: { minConfirmations }
 	});
 };
 
@@ -41,13 +54,31 @@ export const getBalanceQuery = async ({
 	assertNonNullish(identity);
 
 	const { getBalanceQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
-	// TODO: Directly call the endpoint on the bitcoin canister or update the ic-cdk library since calling it through the
-	//  management interface is deprecated). See https://internetcomputer.org/docs/references/ic-interface-spec#ic-bitcoin_get_balance
+
 	return getBalanceQuery({
 		address,
 		network,
 		minConfirmations
 	});
+};
+
+const bitcoinDirectCanister = async ({
+	identity,
+	bitcoinCanisterId
+}: {
+	identity: Identity;
+	bitcoinCanisterId: CanisterIdText;
+}): Promise<BitcoinDirectCanister> => {
+	assertNonNullish(identity);
+
+	if (isNullish(directCanister)) {
+		directCanister = await BitcoinDirectCanister.create({
+			identity,
+			canisterId: Principal.fromText(bitcoinCanisterId)
+		});
+	}
+
+	return directCanister;
 };
 
 const bitcoinCanister = async ({

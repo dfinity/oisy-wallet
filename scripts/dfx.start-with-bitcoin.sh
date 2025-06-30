@@ -34,7 +34,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [ "$clean_flag" = true ]; then
-  dfx start --enable-bitcoin --bitcoin-node "127.0.0.1:18444" --clean
+  dfx start -vv --enable-bitcoin --bitcoin-node "127.0.0.1:18444" --clean
 else
-  dfx start --enable-bitcoin --bitcoin-node "127.0.0.1:18444"
+  dfx start -vv --enable-bitcoin --bitcoin-node "127.0.0.1:18444"
 fi

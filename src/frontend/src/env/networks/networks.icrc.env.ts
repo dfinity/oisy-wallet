@@ -79,8 +79,10 @@ export const LOCAL_CKBTC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKBTC_IN
 	| CanisterIdText
 	| null
 	| undefined;
-export const LOCAL_CKBTC_MINTER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
+
+export const LOCAL_CKBTC_MINTER_CANISTER_ID =
+	(import.meta.env.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText) ??
+	'mqygn-kiaaa-aaaar-qaadq-cai';
 
 const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
@@ -573,11 +575,9 @@ export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> 
 		[IC_CKBTC_MINTER_CANISTER_ID]: 'ghsi2-tqaaa-aaaan-aaaca-cai'
 	}),
 	...(nonNullish(LOCAL_CKBTC_MINTER_CANISTER_ID) && {
-		[LOCAL_CKBTC_MINTER_CANISTER_ID]: 'aaaaa-aa'
+		[LOCAL_CKBTC_MINTER_CANISTER_ID]: 'g4xu7-jiaaa-aaaan-aaaaq-cai'
 	})
 };
-
-console.warn('BITCOIN_CANISTER_IDS=', BITCOIN_CANISTER_IDS);
 
 export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	GHOSTNODE_IC_DATA?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';

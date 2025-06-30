@@ -1,4 +1,3 @@
-import { utxoTxIdToString } from '$btc/utils/btc-utxos.utils';
 import {
 	BTC_MAINNET_EXPLORER_URL,
 	BTC_TESTNET_EXPLORER_URL,
@@ -12,6 +11,7 @@ import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/ckbtc-memo.utils';
 import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';

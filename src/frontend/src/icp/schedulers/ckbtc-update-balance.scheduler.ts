@@ -1,10 +1,10 @@
-import { extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
-import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -139,7 +139,7 @@ export class CkBTCUpdateBalanceScheduler
 		btcAddress: string;
 		bitcoinNetwork: BitcoinNetwork;
 	}): Promise<boolean> {
-		const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
+		const bitcoinCanisterId = BITCOIN_CANISTER_IDS[minterCanisterId];
 
 		// TODO: Deploy Bitcoin canister for local development.
 		// We currently do not deploy locally the Bitcoin canister. That is why we do not throw an error if undefined.
@@ -158,8 +158,9 @@ export class CkBTCUpdateBalanceScheduler
 			getKnownUtxos({ identity, minterCanisterId })
 		]);
 
-		const allUtxosTxids = extractUtxoTxIds(allUtxos);
-		const knownUtxosTxids = extractUtxoTxIds(knownUtxos);
+		const allUtxosTxids = allUtxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
+
+		const knownUtxosTxids = knownUtxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
 
 		return allUtxosTxids.some((txid) => !knownUtxosTxids.includes(txid));
 	}

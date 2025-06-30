@@ -1,5 +1,7 @@
 pub mod impls;
 
+use std::time::Duration;
+
 use candid::CandidType;
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
 use serde::Deserialize;
@@ -21,6 +23,9 @@ pub const MAX_TXID_BYTES: usize = 32;
 /// - Typical transactions apparently take 1-3 UTXOs;
 /// - Consolidation transactions typically take many more, however that doesn't apply to this API.
 pub const MAX_UTXOS_LEN: usize = 128;
+
+/// Timer interval for updating fee percentiles cache (1 minute)
+pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_secs(60);
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct BtcGetFeePercentilesRequest {

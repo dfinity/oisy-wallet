@@ -112,12 +112,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		if (!certified) {
 			// Query BTC balance only if minterCanisterId and BITCOIN_CANISTER_IDS[minterCanisterId] are available
 			// These values will be there only for "mainnet", for other networks - balance on "query" will be null
-			const affe = {
+			return {
 				data:
 					nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]
-						? // Queries the Bitcoin canister balance endpoint 'bitcoin_get_balance' through the management interface
-							// ??? Shouldn't we make the call against the bitcoin canister?
-							await getBalanceQuery({
+						? await getBalanceQuery({
 								identity,
 								network: bitcoinNetwork,
 								address: btcAddress,
@@ -127,11 +125,9 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 						: null,
 				certified: false
 			};
-			return affe;
 		}
 
-		// Calls the btc_caller_balance endpoint on the signer canister to get certified balance
-		const wuff = {
+		return {
 			data: await getBtcBalance({
 				identity,
 				network: mapToSignerBitcoinNetwork({
@@ -141,7 +137,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			}),
 			certified: true
 		};
-		return wuff;
 	};
 
 	private loadWalletData = async ({
