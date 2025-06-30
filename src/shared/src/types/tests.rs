@@ -259,7 +259,9 @@ mod custom_token {
             vec![
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId("0x1234567890123456789012345678901234567890".to_string()),
+                        token_address: Erc20TokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
                         chain_id: 1,
                         symbol: Some("☃☃☃ ☃ ☃☃☃".to_string()),
                         decimals: Some(6),
@@ -269,7 +271,9 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId("0x1234567890123456789012345678901234567890".to_string()),
+                        token_address: Erc20TokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
                         chain_id: 1,
                         symbol: None,
                         decimals: None,
@@ -279,7 +283,9 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId("0x12345678901234567890123456789012345678".to_string()),
+                        token_address: Erc20TokenId(
+                            "0x12345678901234567890123456789012345678".to_string()
+                        ),
                         chain_id: 1,
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(6),
@@ -299,7 +305,9 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId("0x1234567890123456789012345678901234567890".to_string()),
+                        token_address: Erc20TokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
                         chain_id: 1,
                         symbol: Some("B".repeat(MAX_SYMBOL_LENGTH + 1)),
                         decimals: Some(6),
@@ -309,7 +317,9 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId("0x1234567890123456789012345678901234567890".to_string()),
+                        token_address: Erc20TokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
                         chain_id: 1,
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(255),
@@ -319,7 +329,9 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId("0x1234567890123456789012345678901234567890".to_string()),
+                        token_address: Erc20TokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
                         chain_id: 1,
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(0),
@@ -329,8 +341,10 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId("0x1234567890123456789012345678901234567890".to_string()),
-                        chain_id: 2^64 - 1,
+                        token_address: Erc20TokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 2 ^ 64 - 1,
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(6),
                     },
@@ -339,7 +353,9 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId("0x1234567890123456789012345678901234567890".to_string()),
+                        token_address: Erc20TokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
                         chain_id: 0,
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(6),
