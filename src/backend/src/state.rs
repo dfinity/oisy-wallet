@@ -19,3 +19,8 @@ pub static SIGNER: LazyLock<Principal> = LazyLock::new(|| {
     Principal::from_text(option_env!("CANISTER_ID_SIGNER").unwrap_or(MAINNET_SIGNER_CANISTER_ID))
         .unwrap_or_else(|e| unreachable!("The signer canister ID from mainnet or dfx valid and should have been parsed.  Is this being compiled in some strange way? {e}"))
 });
+
+/*pub static BITCOIN: LazyLock<Principal> = LazyLock::new(|| {
+    Principal::from_text(option_env!("CANISTER_ID_BITCOIN").unwrap_or(LOCAL_BITCOIN_CANISTER_ID))
+        .unwrap_or_else(|e| unreachable!("The signer canister ID from mainnet or dfx valid and should have been parsed.  Is this being compiled in some strange way? {e}"))
+});*/

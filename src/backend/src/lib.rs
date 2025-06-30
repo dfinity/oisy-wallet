@@ -199,6 +199,10 @@ pub fn init(arg: Arg) {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
@@ -219,6 +223,9 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
