@@ -17,20 +17,15 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
-	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
-	import type { ExchangesData } from '$lib/types/exchange';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenUi } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
-	import { mapTokenUi } from '$lib/utils/token.utils';
-	import { pinEnabledTokensAtTop, saveAllCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
-	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { saveAllCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
 	import { authIdentity } from '$lib/derived/auth.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
@@ -55,46 +50,53 @@
 
 	let loading: boolean = $derived($erc20UserTokensNotInitialized || isNullish(tokens));
 
+	// Default token / tokengroup list
 	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
 		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
 	);
 
-	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
-	// since some of them are sorted by market cap), we store the exchange data in a variable during
-	// the life of the component.
-	let exchangesStaticData: ExchangesData | undefined = $state();
-
-	onMount(() => {
-		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
-	});
-
 	// Token list for enabling when filtering
-	let allTokensFilteredAndSorted: TokenUiOrGroupUi[] = $state([]);
+	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
 
 	const updateFilterList = (filter: string) => {
-		allTokensFilteredAndSorted = getFilteredTokenList({
+		// hide enabled initially, but keep enabled (modified) ones that have just been enabled to let the user revert easily
+		// then we return it as a valid TokenUiOrGroupUi since the displaying cards require that type
+		const reducedTokens = ($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
+			const isModified = nonNullish(
+				Object.values(modifiedTokens).find((modifiedToken) => modifiedToken.id === token.id)
+			);
+			if (!token.enabled || (token.enabled && isModified)) {
+				acc.push({
+					token: token as TokenUi
+				});
+			}
+			return acc;
+		}, []);
+
+		// sort alphabetally and apply filter
+		enableMoreTokensList = getFilteredTokenList({
 			filter,
-			list: (nonNullish(exchangesStaticData)
-				? pinEnabledTokensAtTop(
-						sortTokens({
-							$tokens: $allTokens,
-							$exchanges: exchangesStaticData,
-							$tokensToPin
-						})
-					)
-				: []
+			list: reducedTokens.sort((a, b) =>
+				!isTokenUiGroup(a) && !isTokenUiGroup(b)
+					? (() => {
+							const aName = a.token.name;
+							const bName = b.token.name;
+
+							// we want non alphanumeric starting items to come last
+							const isAlphaNum = (char: string) => /^[a-zA-Z0-9]$/.test(char);
+
+							const aStartsValid = isAlphaNum(aName.charAt(0));
+							const bStartsValid = isAlphaNum(bName.charAt(0));
+
+							if (aStartsValid && !bStartsValid) return -1;
+							if (!aStartsValid && bStartsValid) return 1;
+
+							return aName.localeCompare(bName);
+						})()
+					: 1
 			)
-				.filter(
-					(
-						t // hide enabled initially, but keep enabled ones that have just been enabled to let the user revert easily
-					) =>
-						!t.enabled ||
-						(t.enabled && nonNullish(Object.values(modifiedTokens).find((s) => s.id === t.id)))
-				)
-				.map((t) => ({
-					token: mapTokenUi({ token: t, $balances: $balancesStore, $exchanges })
-				})) as TokenUiOrGroupUi[]
 		});
+
 		// we need to reset modified tokens, since the filter has changed the selected token(s) may not be visible anymore
 		modifiedTokens = {};
 	};
@@ -179,7 +181,7 @@
 			{/if}
 		{/if}
 
-		{#if $tokenListStore.filter !== '' && allTokensFilteredAndSorted.length > 0}
+		{#if $tokenListStore.filter !== '' && enableMoreTokensList.length > 0}
 			<div class="mb-3 mt-12 flex flex-col gap-3">
 				<StickyHeader>
 					<div class="flex items-center justify-between pb-4">
@@ -198,7 +200,7 @@
 					</div>
 				</StickyHeader>
 
-				{#each allTokensFilteredAndSorted as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+				{#each enableMoreTokensList as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 					<div
 						class="overflow-hidden rounded-xl"
 						transition:fade
