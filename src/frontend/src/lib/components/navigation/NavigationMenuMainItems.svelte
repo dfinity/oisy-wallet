@@ -60,8 +60,12 @@
 	selected={isRouteTokens(page) || isRouteTransactions(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
-	<IconWallet />
-	{$i18n.navigation.text.tokens}
+	{#snippet icon()}
+		<IconWallet />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.navigation.text.tokens}
+	{/snippet}
 </NavigationItem>
 
 <NavigationItem
@@ -75,8 +79,13 @@
 	selected={isRouteActivity(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_ACTIVITY)}
 >
-	<IconActivity />
-	{$i18n.navigation.text.activity}
+	{#snippet icon()}
+		<IconActivity />
+	{/snippet}
+
+	{#snippet label()}
+		{$i18n.navigation.text.activity}
+	{/snippet}
 </NavigationItem>
 
 <NavigationItem
@@ -90,8 +99,12 @@
 	selected={isRouteDappExplorer(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
-	<AnimatedIconUfo />
-	{$i18n.navigation.text.dapp_explorer}
+	{#snippet icon()}
+		<AnimatedIconUfo />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.navigation.text.dapp_explorer}
+	{/snippet}
 </NavigationItem>
 
 <!-- Todo: remove condition once the feature is completed -->
@@ -109,8 +122,12 @@
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
 	>
-		<IconGift />
-		{$i18n.navigation.text.earning}
+		{#snippet icon()}
+			<IconGift />
+		{/snippet}
+		{#snippet label()}
+			{$i18n.navigation.text.earning}
+		{/snippet}
 	</NavigationItem>
 {:else}
 	<NavigationItem
@@ -126,8 +143,12 @@
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
 	>
-		<IconGift />
-		{$i18n.navigation.text.airdrops}
+		{#snippet icon()}
+			<IconGift />
+		{/snippet}
+		{#snippet label()}
+			{$i18n.navigation.text.airdrops}
+		{/snippet}
 	</NavigationItem>
 {/if}
 
@@ -142,6 +163,10 @@
 	selected={isRouteSettings(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_SETTINGS)}
 >
-	<IconlySettings />
-	{$i18n.navigation.text.settings}
+	{#snippet icon()}
+		<IconlySettings />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.navigation.text.settings}
+	{/snippet}
 </NavigationItem>
