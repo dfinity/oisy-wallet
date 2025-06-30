@@ -1,8 +1,8 @@
 import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
 import {
 	getIcrcv2AccountIdString,
-	parseIcrcAccountToAccountIdentifierText,
-	parseIcrcv2AccountId
+	parseIcrcv2AccountId,
+	tryToParseIcrcAccountStringToAccountIdentifierText
 } from '$icp/utils/icp-account.utils';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { encodeIcrcAccount } from '@dfinity/ledger-icrc';
@@ -217,10 +217,12 @@ describe('icp-account.utils', () => {
 		});
 	});
 
-	describe('parseAddressToAccountIdentifierText', () => {
+	describe('tryToParseIcrcAccountStringToAccountIdentifierText', () => {
 		it('should return a correct account identifier text for account without subaccount', () => {
 			expect(
-				parseIcrcAccountToAccountIdentifierText(encodeIcrcAccount({ owner: mockPrincipal }))
+				tryToParseIcrcAccountStringToAccountIdentifierText(
+					encodeIcrcAccount({ owner: mockPrincipal })
+				)
 			).toEqual('97783b7f0f34634c06ced774bd1bd27d2c76e80b0dd88f56ad55b3ecab292f68');
 		});
 
@@ -229,7 +231,7 @@ describe('icp-account.utils', () => {
 			subaccount[31] = 1; // Set the last byte to 1
 
 			expect(
-				parseIcrcAccountToAccountIdentifierText(
+				tryToParseIcrcAccountStringToAccountIdentifierText(
 					encodeIcrcAccount({
 						owner: mockPrincipal,
 						subaccount
@@ -239,7 +241,7 @@ describe('icp-account.utils', () => {
 		});
 
 		it('should return undefined if the provided address failed to be parsed', () => {
-			expect(parseIcrcAccountToAccountIdentifierText('test')).toEqual(undefined);
+			expect(tryToParseIcrcAccountStringToAccountIdentifierText('test')).toEqual(undefined);
 		});
 	});
 });

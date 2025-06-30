@@ -1,5 +1,4 @@
 import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
-import type { Address } from '$lib/types/address';
 import { assertNever } from '$lib/types/utils';
 import { AccountIdentifier, isIcpAccountIdentifier, SubAccount } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, encodeIcrcAccount } from '@dfinity/ledger-icrc';
@@ -56,20 +55,25 @@ export const getIcrcv2AccountIdString = (accountId: Icrcv2AccountId): string => 
 	return assertNever({ variable: accountId, typeName: 'Icrcv2AccountId' });
 };
 
-export const parseIcrcAccountToAccountIdentifierText = (address: Address): string | undefined => {
+/**
+ * Tries to parse an Icrc-1 account string to AccountIdentifier text.
+ * @param accountString A string that will be decoded into an Icrc-1 compatible account
+ * @returns AccountIdentifier text equivalent of the provided accountString or undefined if parsing fails
+ */
+export const tryToParseIcrcAccountStringToAccountIdentifierText = (
+	accountString: string
+): string | undefined => {
 	try {
-		const { owner: principal, subaccount: unparsedSubAccount } = decodeIcrcAccount(address);
+		const { owner: principal, subaccount: icrcSubaccount } = decodeIcrcAccount(accountString);
 
-		const subAccount = nonNullish(unparsedSubAccount)
-			? SubAccount.fromBytes(new Uint8Array(unparsedSubAccount))
+		const subAccount = nonNullish(icrcSubaccount)
+			? SubAccount.fromBytes(new Uint8Array(icrcSubaccount))
 			: undefined;
 
 		if (!(subAccount instanceof Error)) {
 			return AccountIdentifier.fromPrincipal({
 				principal,
-				...(nonNullish(subAccount) && {
-					subAccount
-				})
+				subAccount
 			}).toHex();
 		}
 	} catch (_: unknown) {

@@ -1,5 +1,5 @@
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { parseIcrcAccountToAccountIdentifierText } from '$icp/utils/icp-account.utils';
+import { tryToParseIcrcAccountStringToAccountIdentifierText } from '$icp/utils/icp-account.utils';
 import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { contacts } from '$lib/derived/contacts.derived';
@@ -23,7 +23,7 @@ export const icNetworkContacts: Readable<NetworkContacts> = derived(
 			const { address, contact } = allIcNetworkContacts[key];
 
 			if (isIcrcAddress(address)) {
-				const accountIdentifierText = parseIcrcAccountToAccountIdentifierText(address);
+				const accountIdentifierText = tryToParseIcrcAccountStringToAccountIdentifierText(address);
 
 				return {
 					...acc,
