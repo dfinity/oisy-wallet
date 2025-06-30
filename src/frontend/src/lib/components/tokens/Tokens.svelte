@@ -11,8 +11,8 @@
 
 <div>
 	<StickyHeader>
-		<div class="flex w-full flex-row justify-between">
-			<div class="grow-1 relative flex flex-row justify-between">
+		<div class="flex w-full justify-between">
+			<div class="grow-1 relative flex justify-between">
 				<TokensFilter>
 					{#snippet overflowableContent()}
 						<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>

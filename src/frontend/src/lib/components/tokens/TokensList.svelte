@@ -188,7 +188,7 @@
 						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
 						<div>
 							<Button
-								onclick={() => onSave()}
+								onclick={onSave}
 								disabled={saveDisabled}
 								paddingSmall
 								fullWidth={false}
