@@ -17,7 +17,7 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST">
+<form on:submit|preventDefault={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
 		<slot name="amount" />
 
