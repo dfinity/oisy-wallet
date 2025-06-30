@@ -5,6 +5,7 @@
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Languages } from '$lib/types/languages';
 
@@ -33,7 +34,7 @@
 		{/snippet}
 
 		{#snippet items()}
-			<List noPadding condensed>
+			<List noPadding condensed testId={LANGUAGE_DROPDOWN}>
 				{#each SUPPORTED_LANGUAGES as [langKey, langVal], index (index + langKey)}
 					<ListItem>
 						<Button
