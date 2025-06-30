@@ -34,6 +34,32 @@ const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string>
 	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS'
 };
 
+/**
+ * Determines which network a given ICRC token belongs to based on its ledger canister ID.
+ *
+ * Some tokens (e.g., `ckSepoliaETH`, `ckSepoliaUSDC`) are considered "testnet" tokens.
+ * These are tied to testnets of external chains (like Sepolia for Ethereum), but since the
+ * Internet Computer (IC) does not have a native testnet environment, we fake one.
+ *
+ * Originally, testnet tokens were shown as part of the IC network, but that led to confusion
+ * — especially when aggregating balances — as their balances would mix with mainnet tokens.
+ *
+ * To avoid this, we now separate these testnet tokens into a pseudo-test network:
+ * `ICP_PSEUDO_TESTNET_NETWORK`, which mirrors the IC network in behavior but is visually
+ * and logically distinct.
+ *
+ * This ensures:
+ * - Production tokens only show in the "real" IC network (`ICP_NETWORK`)
+ * - Testnet tokens only show in the pseudo-network when testnet mode is enabled
+ *
+ * @param ledgerCanisterId - The ledger canister ID of the token.
+ * @returns The appropriate network identifier for the token:
+ *          - `ICP_NETWORK` for "mainnet" tokens
+ *          - `ICP_PSEUDO_TESTNET_NETWORK` for known "testnet" tokens
+ */
+const mapIcNetwork = (ledgerCanisterId: LedgerCanisterIdText) =>
+	isTokenIcrcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
+
 export const mapIcrcToken = ({
 	metadata,
 	icrcCustomTokens,
@@ -59,7 +85,7 @@ export const mapIcrcToken = ({
 
 	return {
 		id: parseTokenId(symbol),
-		network: isTokenIcrcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK,
+		network: mapIcNetwork(ledgerCanisterId),
 		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
 		symbol,
 		...(notEmptyString(icon) && { icon }),
