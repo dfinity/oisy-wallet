@@ -17,6 +17,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -26,7 +27,6 @@
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
-	import { authIdentity } from '$lib/derived/auth.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -88,8 +88,8 @@
 							const aStartsValid = isAlphaNum(aName.charAt(0));
 							const bStartsValid = isAlphaNum(bName.charAt(0));
 
-							if (aStartsValid && !bStartsValid) return -1;
-							if (!aStartsValid && bStartsValid) return 1;
+							if (aStartsValid && !bStartsValid) {return -1;}
+							if (!aStartsValid && bStartsValid) {return 1;}
 
 							return aName.localeCompare(bName);
 						})()
