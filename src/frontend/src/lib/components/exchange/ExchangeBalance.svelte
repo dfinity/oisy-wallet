@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Tooltip } from '@dfinity/gix-components';
+	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
@@ -48,15 +48,15 @@
 		ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false })}
 	>
 		{#if hideBalance}
-			<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+			<DelayedTooltip text={$i18n.hero.text.tooltip_toggle_balance} delay={2000}>
 				<span class="flex items-center gap-2 sm:max-w-none">
 					<IconEyeOff />{$i18n.hero.text.hidden_balance}
 				</span>
-			</Tooltip>
+			</DelayedTooltip>
 		{:else}
-			<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+			<DelayedTooltip text={$i18n.hero.text.tooltip_toggle_balance} delay={2000}>
 				{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
-			</Tooltip>
+			</DelayedTooltip>
 		{/if}
 	</span>
 </span>
