@@ -3,8 +3,8 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-OISY_WALLET_DIR="$( cd "${BASE_DIR}/../frontend/oisy-wallet" && pwd )"
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OISY_WALLET_DIR="$(cd "${BASE_DIR}/../frontend/oisy-wallet" && pwd)"
 
 source ${BASE_DIR}/dfx-helper.sh
 echo "BASE_DIR=${BASE_DIR}"
@@ -18,16 +18,15 @@ error_exit() {
   exit 1
 }
 
-
 clean_files() {
-	rm -rf ./.dfx
-	rm -rf ./out
-	
-	rm -rf ./in;
-	# rm -rf ./build;
-	rm -rf ./target;
-	
-	${OISY_WALLET_DIR}/scripts/setup.bitcoin-node.sh --reset
+  rm -rf ./.dfx
+  rm -rf ./out
+
+  rm -rf ./in
+  # rm -rf ./build;
+  rm -rf ./target
+
+  ${OISY_WALLET_DIR}/scripts/setup.bitcoin-node.sh --reset
 }
 
 ensure_dfx_is_down() {
@@ -39,7 +38,7 @@ ensure_dfx_is_down() {
 }
 
 ensure_bitcoind_is_down() {
- echo "Checking for any running 'bitcoind' processes in regtest mode..."
+  echo "Checking for any running 'bitcoind' processes in regtest mode..."
 
   # Find and stop the running Bitcoin node in regtest mode
   local BITCOIND_PID=""
@@ -65,10 +64,10 @@ start_bitcoind_node() {
   echo "Starting the Bitcoin node in regtest mode using nohup..."
 
   # Run the setup script in the background
-  nohup ./scripts/setup.bitcoin-node.sh > ${SCRIPTS_LOG_DIR}/bitcoin-node.log 2>&1 &
-  
+  nohup ./scripts/setup.bitcoin-node.sh >${SCRIPTS_LOG_DIR}/bitcoin-node.log 2>&1 &
+
   echo "bitcoin node started"
-  
+
   sleep 10 # Give it some time to initialize
 
   # Validate if the Bitcoin node is running
@@ -98,19 +97,18 @@ Please set it correctly: VITE_BITCOIN_MAINNET_DISABLED=false"
   echo "Environment check passed: VITE_BITCOIN_MAINNET_DISABLED=false"
 }
 
-
 start_dfx_with_bitcoin() {
   echo "Starting dfx with Bitcoin support in the background..."
-  
+
   # Clean state and start dfx in the background
-  nohup ./scripts/dfx.start-with-bitcoin.sh --clean > ${SCRIPTS_LOG_DIR}/dfx-start.log 2>&1 &
+  nohup ./scripts/dfx.start-with-bitcoin.sh --clean >${SCRIPTS_LOG_DIR}/dfx-start.log 2>&1 &
   sleep 15
-  
+
   # Optionally check if dfx started successfully
   if ! pgrep -f 'dfx' >/dev/null; then
     error_exit "dfx did not start successfully. Check logs: ${SCRIPTS_LOG_DIR}/dfx-start.log"
   fi
-  
+
   echo "dfx started successfully with Bitcoin support (logs: ${SCRIPTS_LOG_DIR}/dfx-start.log)."
 }
 
@@ -120,7 +118,7 @@ deploy_bitcoin_canister() {
   dfx deploy --no-wallet bitcoin --argument "(record {
   stability_threshold = opt 1;
   network = opt variant { regtest };
-})" > "${SCRIPTS_LOG_DIR}/bitcoin-canister.log" 2>&1 || \
+})" >"${SCRIPTS_LOG_DIR}/bitcoin-canister.log" 2>&1 ||
     error_exit "Failed to deploy the Bitcoin canister. Check logs: ${SCRIPTS_LOG_DIR}/bitcoin-canister.log"
 
   echo "Bitcoin canister deployed successfully."
@@ -130,23 +128,19 @@ deploy_bitcoin_canister() {
 main() {
   echo "Installing bitcoin environment in a local ICP environment"
   check_environment
-  
+
   ensure_dfx_is_down
   ensure_bitcoind_is_down
-  
+
   clean_files
-  
+
   start_bitcoind_node
   start_dfx_with_bitcoin
-  
+
   deploy_bitcoin_canister
 }
 
-
 main
-
-
-
 
 #"bitcoin": {
 #"type": "custom",
@@ -169,5 +163,3 @@ main
 #		}
 #	}
 #},
-
-
