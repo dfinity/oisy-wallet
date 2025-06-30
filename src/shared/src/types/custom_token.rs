@@ -28,7 +28,6 @@ pub struct SplToken {
     pub decimals: Option<u8>,
 }
 
-
 /// A network-specific unique ERC20 token identifier.
 #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
 #[serde(remote = "Self")]
@@ -39,7 +38,6 @@ pub struct Erc20TokenId(pub String);
 /// IDs may be found on: <https://chainlist.org/>
 pub type ChainId = u64;
 
-
 /// An ERC20 compliant token on the Ethereum or EVM-compatible networks.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[serde(remote = "Self")]
@@ -49,7 +47,6 @@ pub struct Erc20Token {
     pub symbol: Option<String>,
     pub decimals: Option<u8>,
 }
-
 
 /// A variant describing any token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
