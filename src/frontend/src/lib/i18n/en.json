@@ -911,7 +911,8 @@
 				"list_settings": "List settings",
 				"import_token": "Import token",
 				"network": "Network",
-				"all_tokens_zero_balance": "All tokens have zero balance."
+				"all_tokens_zero_balance": "All tokens have zero balance.",
+				"enable_more_assets": "Enable more assets"
 			},
 			"placeholder": {
 				"select_network": "Select the network"

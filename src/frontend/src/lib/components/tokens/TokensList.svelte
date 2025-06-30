@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount, untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
@@ -12,13 +13,25 @@
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
+	import type { ExchangesData } from '$lib/types/exchange';
+	import type { Token } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
+	import { mapTokenUi } from '$lib/utils/token.utils';
+	import { pinEnabledTokensAtTop, saveCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -46,6 +59,53 @@
 		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
 	);
 
+	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
+	// since some of them are sorted by market cap), we store the exchange data in a variable during
+	// the life of the component.
+	let exchangesStaticData: ExchangesData | undefined = $state();
+
+	onMount(() => {
+		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
+	});
+
+	// Token list for enabling when filtering
+	let allTokensFilteredAndSorted: TokenUiOrGroupUi[] = $state([]);
+
+	const updateFilterList = (filter: string) => {
+		allTokensFilteredAndSorted = getFilteredTokenList({
+			filter,
+			list: (nonNullish(exchangesStaticData)
+				? pinEnabledTokensAtTop(
+						sortTokens({
+							$tokens: $allTokens,
+							$exchanges: exchangesStaticData,
+							$tokensToPin
+						})
+					)
+				: []
+			)
+				.filter(
+					(
+						t // hide enabled initially, but keep enabled ones that have just been enabled to let the user revert easily
+					) =>
+						!t.enabled ||
+						(t.enabled && nonNullish(Object.values(modifiedTokens).find((s) => s.id === t.id)))
+				)
+				.map((t) => ({
+					token: mapTokenUi({ token: t, $balances: $balancesStore, $exchanges })
+				})) as TokenUiOrGroupUi[]
+		});
+		// we need to reset modified tokens, since the filter has changed the selected token(s) may not be visible anymore
+		modifiedTokens = {};
+	};
+
+	// we debounce the filter input for updating the enable tokens list
+	const debouncedFilterList = debounce((filter: string) => updateFilterList(filter), 300);
+	$effect(() => {
+		const { filter } = $tokenListStore;
+		untrack(() => debouncedFilterList(filter)); // we untrack the function so it only updates the list on filter change
+	});
+
 	let {
 		initialSearch,
 		message
@@ -54,6 +114,32 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	const onSave = async () => {
+		await saveCustomTokens({ tokens: modifiedTokens, $authIdentity, $i18n });
+
+		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
+		updateFilterList($tokenListStore.filter);
+	};
+
+	let modifiedTokens: Record<string, Token> = $state({});
+
+	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
+
+	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+		const { id: networkId } = network;
+		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
+
+		if (nonNullish(current)) {
+			modifiedTokens = { ...tokens };
+			return;
+		}
+
+		modifiedTokens = {
+			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
+			...tokens
+		};
+	};
 </script>
 
 <TokensDisplayHandler bind:tokens>
@@ -91,6 +177,44 @@
 			{:else}
 				<NothingFoundPlaceholder />
 			{/if}
+		{/if}
+
+		{#if $tokenListStore.filter !== '' && allTokensFilteredAndSorted.length > 0}
+			<div class="mb-3 mt-12 flex flex-col gap-3">
+				<StickyHeader>
+					<div class="flex items-center justify-between pb-4">
+						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
+						<div>
+							<Button
+								onclick={() => onSave()}
+								disabled={saveDisabled}
+								paddingSmall
+								fullWidth={false}
+								styleClass="py-2"
+							>
+								{$i18n.core.text.apply} ({Object.keys(modifiedTokens).length})
+							</Button>
+						</div>
+					</div>
+				</StickyHeader>
+
+				{#each allTokensFilteredAndSorted as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+					<div
+						class="overflow-hidden rounded-xl"
+						transition:fade
+						animate:flip={{ duration: 250 }}
+						onanimationstart={handleAnimationStart}
+						onanimationend={handleAnimationEnd}
+						class:pointer-events-none={animating}
+					>
+						<div class="transition duration-300 hover:bg-primary">
+							{#if !isTokenUiGroup(tokenOrGroup)}
+								<TokenCard data={tokenOrGroup.token} {onToggle} />
+							{/if}
+						</div>
+					</div>
+				{/each}
+			</div>
 		{/if}
 
 		{#if $modalManageTokens}
