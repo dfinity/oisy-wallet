@@ -37,7 +37,7 @@ export const ICP_NETWORK: Network = {
  * ICP Pseudo Testnet Network
  *
  * This is a pseudo testnet network for ICP, used for testing/developing purposes.
- * It will be associated with what we call ck-testnet-tokens.
+ * It will be associated with what we call "testnet" tokens.
  * This allows us to simplify the filters of the token list and avoid polluting "real" ICP balance with the balances of the testnet tokens.
  */
 const ICP_PSEUDO_TESTNET_NETWORK_SYMBOL = 'ICP-PSEUDO-TESTNET';
