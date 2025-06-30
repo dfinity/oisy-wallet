@@ -88,8 +88,12 @@
 							const aStartsValid = isAlphaNum(aName.charAt(0));
 							const bStartsValid = isAlphaNum(bName.charAt(0));
 
-							if (aStartsValid && !bStartsValid) {return -1;}
-							if (!aStartsValid && bStartsValid) {return 1;}
+							if (aStartsValid && !bStartsValid) {
+								return -1;
+							}
+							if (!aStartsValid && bStartsValid) {
+								return 1;
+							}
 
 							return aName.localeCompare(bName);
 						})()
