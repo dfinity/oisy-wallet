@@ -6,7 +6,6 @@
 		SUPPORTED_NETWORKS,
 		SUPPORTED_TESTNET_NETWORKS
 	} from '$env/networks/networks.env';
-	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { setUserShowTestnets, updateUserNetworkSettings } from '$lib/api/backend.api';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -34,6 +33,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { UserNetworks } from '$lib/types/user-networks';
 	import { emit } from '$lib/utils/events.utils';
+	import { isNetworkIdICP } from '$lib/utils/network.utils.js';
 
 	const enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...enabledNetworks };
@@ -134,7 +134,7 @@
 				<ManageNetworkToggle
 					checked={enabledNetworks[network.id]?.enabled ?? false}
 					on:nnsToggle={() => toggleNetwork(network)}
-					disabled={network.id === ICP_NETWORK_ID}
+					disabled={isNetworkIdICP(network.id)}
 				/>
 			</ListItem>
 		{/each}
@@ -156,6 +156,7 @@
 						checked={enabledNetworks[network.id]?.enabled ?? false}
 						on:nnsToggle={() => toggleNetwork(network)}
 						testId={`${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-${network.id.description}`}
+						disabled={isNetworkIdICP(network.id)}
 					/>
 				</ListItem>
 			{/each}

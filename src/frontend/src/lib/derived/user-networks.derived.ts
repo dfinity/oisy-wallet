@@ -25,7 +25,7 @@ import {
 	SUPPORTED_TESTNET_NETWORK_IDS
 } from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
@@ -126,7 +126,8 @@ export const userNetworks: Readable<UserNetworks> = derived(
 				return { ...acc, [networkId]: { enabled, isTestnet } };
 			}, {}),
 			// We always enable ICP network.
-			[ICP_NETWORK_ID]: { enabled: true, isTestnet: false }
+			[ICP_NETWORK_ID]: { enabled: true, isTestnet: false },
+			[ICP_PSEUDO_TESTNET_NETWORK_ID]: { enabled: true, isTestnet: true }
 		};
 	}
 );

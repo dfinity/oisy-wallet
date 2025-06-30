@@ -14,6 +14,7 @@ export const mockUserNetworksMap: Array<[NetworkSettingsFor, NetworkSettings]> =
 	[{ EthereumMainnet: null }, { enabled: true, is_testnet: false }],
 	[{ EthereumSepolia: null }, { enabled: false, is_testnet: false }],
 	[{ InternetComputer: null }, { enabled: true, is_testnet: false }],
+	[{ InternetComputer: null }, { enabled: true, is_testnet: true }],
 	[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
 	[{ SolanaDevnet: null }, { enabled: true, is_testnet: true }]
 ];
