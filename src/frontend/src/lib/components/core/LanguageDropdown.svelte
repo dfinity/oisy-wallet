@@ -7,6 +7,7 @@
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Languages } from '$lib/types/languages';
+	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
 
 	let dropdown = $state<Dropdown>();
 
@@ -33,7 +34,7 @@
 		{/snippet}
 
 		{#snippet items()}
-			<List noPadding condensed>
+			<List noPadding condensed testId={LANGUAGE_DROPDOWN}>
 				{#each SUPPORTED_LANGUAGES as [langKey, langVal], index (index + langKey)}
 					<ListItem>
 						<Button
