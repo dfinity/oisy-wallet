@@ -5,7 +5,7 @@ use shared::types::{
     custom_token::{CustomToken, IcrcToken, SplToken, SplTokenId, Token},
     TokenVersion,
 };
-
+use shared::types::custom_token::{ChainId, Erc20Token, Erc20TokenId};
 use crate::utils::{
     assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
     mock::CALLER,
@@ -48,11 +48,25 @@ static SPL_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     enabled: true,
     version: None,
 });
+static ERC20_TOKEN_ID: LazyLock<Erc20TokenId> =
+    LazyLock::new(|| Erc20TokenId("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string()));
+static ERC20_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
+static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc20(Erc20Token {
+        token_address: ERC20_TOKEN_ID.clone(),
+        chain_id: ERC20_CHAIN_ID.clone(),
+        symbol: Some("USDC".to_string()),
+        decimals: Some(u8::MAX),
+    }),
+    enabled: true,
+    version: None,
+});
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
         USER_TOKEN.clone(),
         ANOTHER_USER_TOKEN.clone(),
         SPL_TOKEN.clone(),
+        ERC20_TOKEN.clone(),
     ]
 });
 
@@ -85,6 +99,11 @@ fn test_add_custom_token(user_token: &CustomToken) {
 #[test]
 fn test_remove_custom_spl_token() {
     test_remove_custom_token(&SPL_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_erc20_token() {
+    test_remove_custom_token(&ERC20_TOKEN)
 }
 
 #[test]

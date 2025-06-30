@@ -28,6 +28,26 @@ pub struct SplToken {
 #[serde(remote = "Self")]
 pub struct SplTokenId(pub String);
 
+/// EVM chain ID
+///
+/// IDs may be found on: <https://chainlist.org/>
+pub type ChainId = u64;
+
+/// An ERC20 compliant token on the Ethereum or EVM-compatible networks.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct Erc20Token {
+    pub token_address: Erc20TokenId,
+    pub chain_id: ChainId,
+    pub symbol: Option<String>,
+    pub decimals: Option<u8>,
+}
+
+/// A network-specific unique ERC20 token identifier.
+#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+#[serde(remote = "Self")]
+pub struct Erc20TokenId(pub String);
+
 /// A variant describing any token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[repr(u8)]
@@ -35,6 +55,7 @@ pub enum Token {
     Icrc(IcrcToken) = 0,
     SplMainnet(SplToken) = 1,
     SplDevnet(SplToken) = 2,
+    Erc20(Erc20Token) = 3,
 }
 
 /// User preferences for any token
@@ -57,4 +78,6 @@ pub enum CustomTokenId {
     SolMainnet(SplTokenId) = 1,
     /// A Solana token on the Solana devnet.
     SolDevnet(SplTokenId) = 2,
+    /// An ERC20 token on an EVM-compatible network.
+    Erc20(Erc20TokenId) = 3,
 }
