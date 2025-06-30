@@ -118,6 +118,36 @@ async fn fetch_current_fee_percentiles(
     Ok(res.0)
 }
 
+/// This function is readonly and only returns data that's already stored in memory.
+/// If the data isn't available in the cache, it returns an error instead of fetching it.
+/// This function is readonly and only returns data that's already stored in memory.
+/// If the data isn't available in the cache, it returns an error instead of fetching it.
+pub async fn get_current_fee_percentiles(
+    network: BitcoinNetwork,
+) -> Result<Vec<MillisatoshiPerByte>, String> {
+    // Only get from cache, no async fetching
+    let cached_percentiles =
+        FEE_PERCENTILES_CACHE.with(|cache| cache.borrow().get(&network).cloned());
+
+    match cached_percentiles {
+        Some(percentiles) if !percentiles.is_empty() => {
+            ic_cdk::println!(
+                "Using cached fee percentiles for network {:?}: {:?}",
+                network,
+                percentiles
+            );
+            Ok(percentiles)
+        }
+        _ => {
+            // Return an error instead of fetching directly
+            Err(format!(
+                "Fee percentiles not available in cache for network {network:?}"
+            ))
+        }
+    }
+}
+
+/*
 /// Returns the 100 fee percentiles measured in millisatoshi/byte.
 /// Percentiles are computed from the last 10,000 transactions (if available).
 ///
@@ -153,6 +183,7 @@ pub async fn get_current_fee_percentiles(
         }
     }
 }
+*/
 
 /// Returns the 50th percentile for sending fees.
 pub async fn get_fee_per_byte(network: BitcoinNetwork) -> Result<u64, String> {

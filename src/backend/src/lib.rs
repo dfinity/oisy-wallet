@@ -382,7 +382,7 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 
-#[update(guard = "caller_is_not_anonymous")]
+#[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub async fn btc_get_current_fee_percentiles(
     params: BtcGetFeePercentilesRequest,
