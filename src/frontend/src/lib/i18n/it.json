@@ -911,7 +911,8 @@
 				"list_settings": "",
 				"import_token": "",
 				"network": "",
-				"all_tokens_zero_balance": ""
+				"all_tokens_zero_balance": "",
+				"enable_more_assets": ""
 			},
 			"placeholder": {
 				"select_network": ""
