@@ -14,6 +14,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokenToggleable } from '$lib/derived/token.derived';
 	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
+	import { WizardStepsHideToken } from '$lib/enums/wizard-steps';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -73,13 +74,13 @@
 		}
 	};
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsHideToken> = [
 		{
-			name: 'Hide',
+			name: WizardStepsHideToken.HIDE,
 			title: $i18n.tokens.hide.title
 		},
 		{
-			name: 'Hiding',
+			name: WizardStepsHideToken.HIDING,
 			title: $i18n.tokens.hide.hiding
 		}
 	];
