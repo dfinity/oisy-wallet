@@ -1,8 +1,5 @@
 import { I18N_ENABLED } from '$env/i18n';
-import {
-	TRACK_COUNT_CHANGE_LANGUAGE_SIGNED_IN,
-	TRACK_COUNT_CHANGE_LANGUAGE_SIGNED_OUT
-} from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
 import { authSignedIn } from '$lib/derived/auth.derived';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
@@ -46,11 +43,10 @@ const initI18n = (): I18nStore => {
 		set(bundle);
 
 		trackEvent({
-			name: getStore(authSignedIn)
-				? TRACK_COUNT_CHANGE_LANGUAGE_SIGNED_IN
-				: TRACK_COUNT_CHANGE_LANGUAGE_SIGNED_OUT,
+			name: TRACK_COUNT_CHANGE_LANGUAGE,
 			metadata: {
-				language: lang
+				language: lang,
+				source: getStore(authSignedIn) ? 'app' : 'landing-page'
 			}
 		});
 
