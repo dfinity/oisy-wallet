@@ -1,12 +1,17 @@
+import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
+import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -14,6 +19,7 @@ import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
+import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -272,3 +278,72 @@ export const groupTogglableTokens = (
 		}),
 		{ icrc: [], erc20: [], spl: [] }
 	);
+
+export const saveAllCustomTokens = async ({
+	tokens,
+	progress,
+	modalNext,
+	onSuccess,
+	onError,
+	$authIdentity,
+	$i18n
+}: {
+	tokens: Record<string, Token>;
+	progress?: (step: ProgressStepsAddToken) => ProgressStepsAddToken;
+	modalNext?: () => void;
+	onSuccess?: () => void;
+	onError?: () => void;
+	$authIdentity: OptionIdentity;
+	$i18n: I18n;
+}): Promise<void> => {
+	const { icrc, erc20, spl } = groupTogglableTokens(tokens);
+
+	if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
+		toastsShow({
+			text: $i18n.tokens.manage.info.no_changes,
+			level: 'info',
+			duration: 5000
+		});
+
+		return;
+	}
+
+	await Promise.allSettled([
+		...(icrc.length > 0
+			? [
+					saveIcrcCustomTokens({
+						tokens: icrc.map((t) => ({ ...t, networkKey: 'Icrc' })),
+						progress,
+						modalNext,
+						onSuccess,
+						onError,
+						identity: $authIdentity
+					})
+				]
+			: []),
+		...(erc20.length > 0
+			? [
+					saveErc20UserTokens({
+						tokens: erc20,
+						progress,
+						modalNext,
+						onSuccess,
+						onError,
+						identity: $authIdentity
+					})
+				]
+			: []),
+		...(spl.length > 0
+			? [
+					saveSplCustomTokens({
+						tokens: spl,
+						progress,
+						modalNext,
+						onSuccess,
+						onError,
+						identity: $authIdentity
+					})
+				]
+			: [])
+	]);
+};
