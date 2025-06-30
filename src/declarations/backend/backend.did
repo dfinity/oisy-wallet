@@ -230,6 +230,12 @@ type DefiniteCanisterSettingsArgs = record {
 	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
+type Erc20Token = record {
+	decimals : opt nat8;
+	token_address : text;
+	chain_id : nat64;
+	symbol : opt text
+};
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
@@ -349,6 +355,7 @@ type SupportedCredential = record {
 };
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
+	Erc20 : Erc20Token;
 	Icrc : IcrcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken
