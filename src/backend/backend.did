@@ -1,499 +1,499 @@
 type AccountSnapshot = record {
-  decimals : nat8;
-  token_address : EthAddress;
-  network : record {};
-  approx_usd_per_token : float64;
-  last_transactions : vec Transaction;
-  account : EthAddress;
-  timestamp : nat64;
-  amount : nat64;
+	decimals : nat8;
+	token_address : EthAddress;
+	network : record {};
+	approx_usd_per_token : float64;
+	last_transactions : vec Transaction;
+	account : EthAddress;
+	timestamp : nat64;
+	amount : nat64
 };
 type AccountSnapshotFor = variant {
-  Erc20Sepolia : AccountSnapshot;
-  EthSepolia : AccountSnapshot;
-  BtcMainnet : AccountSnapshot_1;
-  SolDevnet : AccountSnapshot_2;
-  Erc20Mainnet : AccountSnapshot;
-  Icrcv2 : AccountSnapshot_3;
-  BtcRegtest : AccountSnapshot_1;
-  SplDevnet : AccountSnapshot_2;
-  EthMainnet : AccountSnapshot;
-  SplMainnet : AccountSnapshot_2;
-  SolLocal : AccountSnapshot_2;
-  BtcTestnet : AccountSnapshot_1;
-  SplLocal : AccountSnapshot_2;
-  SolMainnet : AccountSnapshot_2;
+	Erc20Sepolia : AccountSnapshot;
+	EthSepolia : AccountSnapshot;
+	BtcMainnet : AccountSnapshot_1;
+	SolDevnet : AccountSnapshot_2;
+	Erc20Mainnet : AccountSnapshot;
+	Icrcv2 : AccountSnapshot_3;
+	BtcRegtest : AccountSnapshot_1;
+	SplDevnet : AccountSnapshot_2;
+	EthMainnet : AccountSnapshot;
+	SplMainnet : AccountSnapshot_2;
+	SolLocal : AccountSnapshot_2;
+	BtcTestnet : AccountSnapshot_1;
+	SplLocal : AccountSnapshot_2;
+	SolMainnet : AccountSnapshot_2
 };
 type AccountSnapshot_1 = record {
-  decimals : nat8;
-  token_address : BtcTokenId;
-  network : record {};
-  approx_usd_per_token : float64;
-  last_transactions : vec Transaction_1;
-  account : BtcAddress;
-  timestamp : nat64;
-  amount : nat64;
+	decimals : nat8;
+	token_address : BtcTokenId;
+	network : record {};
+	approx_usd_per_token : float64;
+	last_transactions : vec Transaction_1;
+	account : BtcAddress;
+	timestamp : nat64;
+	amount : nat64
 };
 type AccountSnapshot_2 = record {
-  decimals : nat8;
-  token_address : text;
-  network : record {};
-  approx_usd_per_token : float64;
-  last_transactions : vec Transaction_2;
-  account : text;
-  timestamp : nat64;
-  amount : nat64;
+	decimals : nat8;
+	token_address : text;
+	network : record {};
+	approx_usd_per_token : float64;
+	last_transactions : vec Transaction_2;
+	account : text;
+	timestamp : nat64;
+	amount : nat64
 };
 type AccountSnapshot_3 = record {
-  decimals : nat8;
-  token_address : IcrcTokenId;
-  network : record {};
-  approx_usd_per_token : float64;
-  last_transactions : vec Transaction_3;
-  account : Icrcv2AccountId;
-  timestamp : nat64;
-  amount : nat64;
+	decimals : nat8;
+	token_address : IcrcTokenId;
+	network : record {};
+	approx_usd_per_token : float64;
+	last_transactions : vec Transaction_3;
+	account : Icrcv2AccountId;
+	timestamp : nat64;
+	amount : nat64
 };
 type AddDappSettingsError = variant {
-  MaxHiddenDappIds;
-  VersionMismatch;
-  DappIdTooLong;
-  UserNotFound;
+	MaxHiddenDappIds;
+	VersionMismatch;
+	DappIdTooLong;
+	UserNotFound
 };
 type AddHiddenDappIdRequest = record {
-  current_user_version : opt nat64;
-  dapp_id : text;
+	current_user_version : opt nat64;
+	dapp_id : text
 };
 type AddUserCredentialError = variant {
-  InvalidCredential;
-  VersionMismatch;
-  ConfigurationError;
-  UserNotFound;
+	InvalidCredential;
+	VersionMismatch;
+	ConfigurationError;
+	UserNotFound
 };
 type AddUserCredentialRequest = record {
-  credential_jwt : text;
-  issuer_canister_id : principal;
-  current_user_version : opt nat64;
-  credential_spec : CredentialSpec;
+	credential_jwt : text;
+	issuer_canister_id : principal;
+	current_user_version : opt nat64;
+	credential_spec : CredentialSpec
 };
 type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
 type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
 type AllowSigningError = variant {
-  ApproveError : ApproveError;
-  PowChallenge : ChallengeCompletionError;
-  Other : text;
-  FailedToContactCyclesLedger;
+	ApproveError : ApproveError;
+	PowChallenge : ChallengeCompletionError;
+	Other : text;
+	FailedToContactCyclesLedger
 };
 type AllowSigningRequest = record { nonce : nat64 };
 type AllowSigningResponse = record {
-  status : AllowSigningStatus;
-  challenge_completion : opt ChallengeCompletion;
-  allowed_cycles : nat64;
+	status : AllowSigningStatus;
+	challenge_completion : opt ChallengeCompletion;
+	allowed_cycles : nat64
 };
 type AllowSigningResult = variant {
-  Ok : AllowSigningResponse;
-  Err : AllowSigningError;
+	Ok : AllowSigningResponse;
+	Err : AllowSigningError
 };
 type AllowSigningStatus = variant { Skipped; Failed; Executed };
 type ApproveError = variant {
-  GenericError : record { message : text; error_code : nat };
-  TemporarilyUnavailable;
-  Duplicate : record { duplicate_of : nat };
-  BadFee : record { expected_fee : nat };
-  AllowanceChanged : record { current_allowance : nat };
-  CreatedInFuture : record { ledger_time : nat64 };
-  TooOld;
-  Expired : record { ledger_time : nat64 };
-  InsufficientFunds : record { balance : nat };
+	GenericError : record { message : text; error_code : nat };
+	TemporarilyUnavailable;
+	Duplicate : record { duplicate_of : nat };
+	BadFee : record { expected_fee : nat };
+	AllowanceChanged : record { current_allowance : nat };
+	CreatedInFuture : record { ledger_time : nat64 };
+	TooOld;
+	Expired : record { ledger_time : nat64 };
+	InsufficientFunds : record { balance : nat }
 };
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type BtcAddPendingTransactionError = variant {
-  InternalError : record { msg : text };
+	InternalError : record { msg : text }
 };
 type BtcAddPendingTransactionRequest = record {
-  txid : blob;
-  network : BitcoinNetwork;
-  address : text;
-  utxos : vec Utxo;
+	txid : blob;
+	network : BitcoinNetwork;
+	address : text;
+	utxos : vec Utxo
 };
 type BtcAddPendingTransactionResult = variant {
-  Ok;
-  Err : BtcAddPendingTransactionError;
+	Ok;
+	Err : BtcAddPendingTransactionError
 };
 type BtcAddress = variant {
-  P2WPKH : text;
-  P2PKH : text;
-  P2WSH : text;
-  P2SH : text;
-  P2TR : text;
+	P2WPKH : text;
+	P2PKH : text;
+	P2WSH : text;
+	P2SH : text;
+	P2TR : text
 };
 type BtcGetFeePercentilesRequest = record { network : BitcoinNetwork };
 type BtcGetFeePercentilesResponse = record { fee_percentiles : vec nat64 };
 type BtcGetFeePercentilesResult = variant {
-  Ok : BtcGetFeePercentilesResponse;
-  Err : SelectedUtxosFeeError;
+	Ok : BtcGetFeePercentilesResponse;
+	Err : SelectedUtxosFeeError
 };
 type BtcGetPendingTransactionsReponse = record {
-  transactions : vec PendingTransaction;
+	transactions : vec PendingTransaction
 };
 type BtcGetPendingTransactionsRequest = record {
-  network : BitcoinNetwork;
-  address : text;
+	network : BitcoinNetwork;
+	address : text
 };
 type BtcGetPendingTransactionsResult = variant {
-  Ok : BtcGetPendingTransactionsReponse;
-  Err : BtcAddPendingTransactionError;
+	Ok : BtcGetPendingTransactionsReponse;
+	Err : BtcAddPendingTransactionError
 };
 type BtcSelectUserUtxosFeeResult = variant {
-  Ok : SelectedUtxosFeeResponse;
-  Err : SelectedUtxosFeeError;
+	Ok : SelectedUtxosFeeResponse;
+	Err : SelectedUtxosFeeError
 };
 type BtcTokenId = variant { Native };
 type CanisterStatusResultV2 = record {
-  controller : principal;
-  status : CanisterStatusType;
-  freezing_threshold : nat;
-  balance : vec record { blob; nat };
-  memory_size : nat;
-  cycles : nat;
-  settings : DefiniteCanisterSettingsArgs;
-  idle_cycles_burned_per_day : nat;
-  module_hash : opt blob;
+	controller : principal;
+	status : CanisterStatusType;
+	freezing_threshold : nat;
+	balance : vec record { blob; nat };
+	memory_size : nat;
+	cycles : nat;
+	settings : DefiniteCanisterSettingsArgs;
+	idle_cycles_burned_per_day : nat;
+	module_hash : opt blob
 };
 type CanisterStatusType = variant { stopped; stopping; running };
 type ChallengeCompletion = record {
-  solved_duration_ms : nat64;
-  next_allowance_ms : nat64;
-  next_difficulty : nat32;
-  current_difficulty : nat32;
+	solved_duration_ms : nat64;
+	next_allowance_ms : nat64;
+	next_difficulty : nat32;
+	current_difficulty : nat32
 };
 type ChallengeCompletionError = variant {
-  InvalidNonce;
-  MissingChallenge;
-  ExpiredChallenge;
-  MissingUserProfile;
-  ChallengeAlreadySolved;
+	InvalidNonce;
+	MissingChallenge;
+	ExpiredChallenge;
+	MissingUserProfile;
+	ChallengeAlreadySolved
 };
 type Config = record {
-  derivation_origin : opt text;
-  ecdsa_key_name : text;
-  cfs_canister_id : opt principal;
-  allowed_callers : vec principal;
-  supported_credentials : opt vec SupportedCredential;
-  ic_root_key_raw : opt blob;
+	derivation_origin : opt text;
+	ecdsa_key_name : text;
+	cfs_canister_id : opt principal;
+	allowed_callers : vec principal;
+	supported_credentials : opt vec SupportedCredential;
+	ic_root_key_raw : opt blob
 };
 type Contact = record {
-  id : nat64;
-  name : text;
-  update_timestamp_ns : nat64;
-  addresses : vec ContactAddressData;
+	id : nat64;
+	name : text;
+	update_timestamp_ns : nat64;
+	addresses : vec ContactAddressData
 };
 type ContactAddressData = record {
-  label : opt text;
-  token_account_id : TokenAccountId;
+	label : opt text;
+	token_account_id : TokenAccountId
 };
 type ContactError = variant {
-  InvalidContactData;
-  ContactNotFound;
-  RandomnessError;
+	InvalidContactData;
+	ContactNotFound;
+	RandomnessError
 };
 type CreateChallengeError = variant {
-  ChallengeInProgress;
-  MissingUserProfile;
-  RandomnessError : text;
-  Other : text;
+	ChallengeInProgress;
+	MissingUserProfile;
+	RandomnessError : text;
+	Other : text
 };
 type CreateChallengeResponse = record {
-  difficulty : nat32;
-  start_timestamp_ms : nat64;
-  expiry_timestamp_ms : nat64;
+	difficulty : nat32;
+	start_timestamp_ms : nat64;
+	expiry_timestamp_ms : nat64
 };
 type CreateContactRequest = record { name : text };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
 type CreatePowChallengeResult = variant {
-  Ok : CreateChallengeResponse;
-  Err : CreateChallengeError;
+	Ok : CreateChallengeResponse;
+	Err : CreateChallengeError
 };
 type CredentialSpec = record {
-  arguments : opt vec record { text; ArgumentValue };
-  credential_type : text;
+	arguments : opt vec record { text; ArgumentValue };
+	credential_type : text
 };
 type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
-  token : Token;
-  version : opt nat64;
-  enabled : bool;
+	token : Token;
+	version : opt nat64;
+	enabled : bool
 };
 type DappCarouselSettings = record { hidden_dapp_ids : vec text };
 type DappSettings = record { dapp_carousel : DappCarouselSettings };
 type DefiniteCanisterSettingsArgs = record {
-  controller : principal;
-  freezing_threshold : nat;
-  controllers : vec principal;
-  memory_allocation : nat;
-  compute_allocation : nat;
+	controller : principal;
+	freezing_threshold : nat;
+	controllers : vec principal;
+	memory_allocation : nat;
+	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
-  Other : text;
-  FailedToContactCyclesLedger;
+	Other : text;
+	FailedToContactCyclesLedger
 };
 type GetAllowedCyclesResponse = record { allowed_cycles : nat };
 type GetAllowedCyclesResult = variant {
-  Ok : GetAllowedCyclesResponse;
-  Err : GetAllowedCyclesError;
+	Ok : GetAllowedCyclesResponse;
+	Err : GetAllowedCyclesError
 };
 type GetContactResult = variant { Ok : Contact; Err : ContactError };
 type GetContactsResult = variant { Ok : vec Contact; Err : ContactError };
 type GetUserProfileError = variant { NotFound };
 type GetUserProfileResult = variant {
-  Ok : UserProfile;
-  Err : GetUserProfileError;
+	Ok : UserProfile;
+	Err : GetUserProfileError
 };
 type HasUserProfileResponse = record { has_user_profile : bool };
 type HttpRequest = record {
-  url : text;
-  method : text;
-  body : blob;
-  headers : vec record { text; text };
+	url : text;
+	method : text;
+	body : blob;
+	headers : vec record { text; text }
 };
 type HttpResponse = record {
-  body : blob;
-  headers : vec record { text; text };
-  status_code : nat16;
+	body : blob;
+	headers : vec record { text; text };
+	status_code : nat16
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type IcrcTokenId = variant {
-  Icrc : record { ledger : principal; index : opt principal };
-  Native;
+	Icrc : record { ledger : principal; index : opt principal };
+	Native
 };
 type Icrcv2AccountId = variant {
-  Account : blob;
-  WithPrincipal : record { owner : principal; subaccount : opt blob };
+	Account : blob;
+	WithPrincipal : record { owner : principal; subaccount : opt blob }
 };
 type InitArg = record {
-  derivation_origin : opt text;
-  ecdsa_key_name : text;
-  cfs_canister_id : opt principal;
-  allowed_callers : vec principal;
-  supported_credentials : opt vec SupportedCredential;
-  ic_root_key_der : opt blob;
+	derivation_origin : opt text;
+	ecdsa_key_name : text;
+	cfs_canister_id : opt principal;
+	allowed_callers : vec principal;
+	supported_credentials : opt vec SupportedCredential;
+	ic_root_key_der : opt blob
 };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
-  ArbitrumMainnet;
-  InternetComputer;
-  BaseSepolia;
-  PolygonMainnet;
-  BitcoinRegtest;
-  SolanaDevnet;
-  PolygonAmoy;
-  EthereumSepolia;
-  BitcoinTestnet;
-  BaseMainnet;
-  BscMainnet;
-  SolanaLocal;
-  ArbitrumSepolia;
-  EthereumMainnet;
-  SolanaMainnet;
-  BitcoinMainnet;
-  BscTestnet;
+	ArbitrumMainnet;
+	InternetComputer;
+	BaseSepolia;
+	PolygonMainnet;
+	BitcoinRegtest;
+	SolanaDevnet;
+	PolygonAmoy;
+	EthereumSepolia;
+	BitcoinTestnet;
+	BaseMainnet;
+	BscMainnet;
+	SolanaLocal;
+	ArbitrumSepolia;
+	EthereumMainnet;
+	SolanaMainnet;
+	BitcoinMainnet;
+	BscTestnet
 };
 type NetworksSettings = record {
-  networks : vec record { NetworkSettingsFor; NetworkSettings };
-  testnets : TestnetsSettings;
+	networks : vec record { NetworkSettingsFor; NetworkSettings };
+	testnets : TestnetsSettings
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type SaveNetworksSettingsRequest = record {
-  networks : vec record { NetworkSettingsFor; NetworkSettings };
-  current_user_version : opt nat64;
+	networks : vec record { NetworkSettingsFor; NetworkSettings };
+	current_user_version : opt nat64
 };
 type SaveTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
 type SelectedUtxosFeeError = variant {
-  PendingTransactions;
-  InternalError : record { msg : text };
+	PendingTransactions;
+	InternalError : record { msg : text }
 };
 type SelectedUtxosFeeRequest = record {
-  network : BitcoinNetwork;
-  amount_satoshis : nat64;
-  min_confirmations : opt nat32;
+	network : BitcoinNetwork;
+	amount_satoshis : nat64;
+	min_confirmations : opt nat32
 };
 type SelectedUtxosFeeResponse = record {
-  fee_satoshis : nat64;
-  utxos : vec Utxo;
+	fee_satoshis : nat64;
+	utxos : vec Utxo
 };
 type SetShowTestnetsRequest = record {
-  current_user_version : opt nat64;
-  show_testnets : bool;
+	current_user_version : opt nat64;
+	show_testnets : bool
 };
 type SetUserShowTestnetsResult = variant {
-  Ok;
-  Err : SaveTestnetsSettingsError;
+	Ok;
+	Err : SaveTestnetsSettingsError
 };
 type Settings = record { networks : NetworksSettings; dapp : DappSettings };
 type SplToken = record {
-  decimals : opt nat8;
-  token_address : text;
-  symbol : opt text;
+	decimals : opt nat8;
+	token_address : text;
+	symbol : opt text
 };
 type Stats = record {
-  user_profile_count : nat64;
-  custom_token_count : nat64;
-  user_timestamps_count : nat64;
-  user_token_count : nat64;
+	user_profile_count : nat64;
+	custom_token_count : nat64;
+	user_timestamps_count : nat64;
+	user_token_count : nat64
 };
 type SupportedCredential = record {
-  ii_canister_id : principal;
-  issuer_origin : text;
-  issuer_canister_id : principal;
-  ii_origin : text;
-  credential_type : CredentialType;
+	ii_canister_id : principal;
+	issuer_origin : text;
+	issuer_canister_id : principal;
+	ii_origin : text;
+	credential_type : CredentialType
 };
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
-  Icrc : IcrcToken;
-  SplDevnet : SplToken;
-  SplMainnet : SplToken;
+	Icrc : IcrcToken;
+	SplDevnet : SplToken;
+	SplMainnet : SplToken
 };
 type TokenAccountId = variant {
-  Btc : BtcAddress;
-  Eth : EthAddress;
-  Sol : text;
-  Icrcv2 : Icrcv2AccountId;
+	Btc : BtcAddress;
+	Eth : EthAddress;
+	Sol : text;
+	Icrcv2 : Icrcv2AccountId
 };
 type TopUpCyclesLedgerError = variant {
-  InvalidArgPercentageOutOfRange : record {
-    max : nat8;
-    min : nat8;
-    percentage : nat8;
-  };
-  CouldNotGetBalanceFromCyclesLedger;
-  CouldNotTopUpCyclesLedger : record { tried_to_send : nat; available : nat };
+	InvalidArgPercentageOutOfRange : record {
+		max : nat8;
+		min : nat8;
+		percentage : nat8
+	};
+	CouldNotGetBalanceFromCyclesLedger;
+	CouldNotTopUpCyclesLedger : record { tried_to_send : nat; available : nat }
 };
 type TopUpCyclesLedgerRequest = record {
-  threshold : opt nat;
-  percentage : opt nat8;
+	threshold : opt nat;
+	percentage : opt nat8
 };
 type TopUpCyclesLedgerResponse = record {
-  backend_cycles : nat;
-  ledger_balance : nat;
-  topped_up : nat;
+	backend_cycles : nat;
+	ledger_balance : nat;
+	topped_up : nat
 };
 type TopUpCyclesLedgerResult = variant {
-  Ok : TopUpCyclesLedgerResponse;
-  Err : TopUpCyclesLedgerError;
+	Ok : TopUpCyclesLedgerResponse;
+	Err : TopUpCyclesLedgerError
 };
 type Transaction = record {
-  transaction_type : TransactionType;
-  network : record {};
-  counterparty : EthAddress;
-  timestamp : nat64;
-  amount : nat64;
+	transaction_type : TransactionType;
+	network : record {};
+	counterparty : EthAddress;
+	timestamp : nat64;
+	amount : nat64
 };
 type TransactionType = variant { Send; Receive };
 type Transaction_1 = record {
-  transaction_type : TransactionType;
-  network : record {};
-  counterparty : BtcAddress;
-  timestamp : nat64;
-  amount : nat64;
+	transaction_type : TransactionType;
+	network : record {};
+	counterparty : BtcAddress;
+	timestamp : nat64;
+	amount : nat64
 };
 type Transaction_2 = record {
-  transaction_type : TransactionType;
-  network : record {};
-  counterparty : text;
-  timestamp : nat64;
-  amount : nat64;
+	transaction_type : TransactionType;
+	network : record {};
+	counterparty : text;
+	timestamp : nat64;
+	amount : nat64
 };
 type Transaction_3 = record {
-  transaction_type : TransactionType;
-  network : record {};
-  counterparty : Icrcv2AccountId;
-  timestamp : nat64;
-  amount : nat64;
+	transaction_type : TransactionType;
+	network : record {};
+	counterparty : Icrcv2AccountId;
+	timestamp : nat64;
+	amount : nat64
 };
 type UserCredential = record {
-  issuer : text;
-  verified_date_timestamp : opt nat64;
-  credential_type : CredentialType;
+	issuer : text;
+	verified_date_timestamp : opt nat64;
+	credential_type : CredentialType
 };
 type UserProfile = record {
-  credentials : vec UserCredential;
-  version : opt nat64;
-  settings : opt Settings;
-  created_timestamp : nat64;
-  updated_timestamp : nat64;
+	credentials : vec UserCredential;
+	version : opt nat64;
+	settings : opt Settings;
+	created_timestamp : nat64;
+	updated_timestamp : nat64
 };
 type UserSnapshot = record {
-  accounts : vec AccountSnapshotFor;
-  timestamp : opt nat64;
+	accounts : vec AccountSnapshotFor;
+	timestamp : opt nat64
 };
 type UserToken = record {
-  decimals : opt nat8;
-  version : opt nat64;
-  enabled : opt bool;
-  chain_id : nat64;
-  contract_address : text;
-  symbol : opt text;
+	decimals : opt nat8;
+	version : opt nat64;
+	enabled : opt bool;
+	chain_id : nat64;
+	contract_address : text;
+	symbol : opt text
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
-  add_user_credential : (AddUserCredentialRequest) -> (AddUserCredentialResult);
-  add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (
-      AddUserHiddenDappIdResult,
-    );
-  allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
-  btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (
-      BtcAddPendingTransactionResult,
-    );
-  btc_get_current_fee_percentiles : (BtcGetFeePercentilesRequest) -> (
-      BtcGetFeePercentilesResult,
-    ) query;
-  btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
-      BtcGetPendingTransactionsResult,
-    );
-  btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
-      BtcSelectUserUtxosFeeResult,
-    );
-  config : () -> (Config) query;
-  create_contact : (CreateContactRequest) -> (CreateContactResult);
-  create_pow_challenge : () -> (CreatePowChallengeResult);
-  create_user_profile : () -> (UserProfile);
-  delete_contact : (nat64) -> (DeleteContactResult);
-  get_account_creation_timestamps : () -> (
-      vec record { principal; nat64 },
-    ) query;
-  get_allowed_cycles : () -> (GetAllowedCyclesResult);
-  get_canister_status : () -> (CanisterStatusResultV2);
-  get_contact : (nat64) -> (GetContactResult) query;
-  get_contacts : () -> (GetContactsResult) query;
-  get_snapshot : () -> (opt UserSnapshot) query;
-  get_user_profile : () -> (GetUserProfileResult) query;
-  has_user_profile : () -> (HasUserProfileResponse) query;
-  http_request : (HttpRequest) -> (HttpResponse) query;
-  list_custom_tokens : () -> (vec CustomToken) query;
-  list_user_tokens : () -> (vec UserToken) query;
-  remove_custom_token : (CustomToken) -> ();
-  remove_user_token : (UserTokenId) -> ();
-  set_custom_token : (CustomToken) -> ();
-  set_many_custom_tokens : (vec CustomToken) -> ();
-  set_many_user_tokens : (vec UserToken) -> ();
-  set_snapshot : (UserSnapshot) -> ();
-  set_user_show_testnets : (SetShowTestnetsRequest) -> (
-      SetUserShowTestnetsResult,
-    );
-  set_user_token : (UserToken) -> ();
-  stats : () -> (Stats) query;
-  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
-      TopUpCyclesLedgerResult,
-    );
-  update_contact : (Contact) -> (GetContactResult);
-  update_user_network_settings : (SaveNetworksSettingsRequest) -> (
-      SetUserShowTestnetsResult,
-    );
+	add_user_credential : (AddUserCredentialRequest) -> (AddUserCredentialResult);
+	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (
+		AddUserHiddenDappIdResult
+	);
+	allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
+	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (
+		BtcAddPendingTransactionResult
+	);
+	btc_get_current_fee_percentiles : (BtcGetFeePercentilesRequest) -> (
+		BtcGetFeePercentilesResult
+	) query;
+	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
+		BtcGetPendingTransactionsResult
+	);
+	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
+		BtcSelectUserUtxosFeeResult
+	);
+	config : () -> (Config) query;
+	create_contact : (CreateContactRequest) -> (CreateContactResult);
+	create_pow_challenge : () -> (CreatePowChallengeResult);
+	create_user_profile : () -> (UserProfile);
+	delete_contact : (nat64) -> (DeleteContactResult);
+	get_account_creation_timestamps : () -> (
+		vec record { principal; nat64 }
+	) query;
+	get_allowed_cycles : () -> (GetAllowedCyclesResult);
+	get_canister_status : () -> (CanisterStatusResultV2);
+	get_contact : (nat64) -> (GetContactResult) query;
+	get_contacts : () -> (GetContactsResult) query;
+	get_snapshot : () -> (opt UserSnapshot) query;
+	get_user_profile : () -> (GetUserProfileResult) query;
+	has_user_profile : () -> (HasUserProfileResponse) query;
+	http_request : (HttpRequest) -> (HttpResponse) query;
+	list_custom_tokens : () -> (vec CustomToken) query;
+	list_user_tokens : () -> (vec UserToken) query;
+	remove_custom_token : (CustomToken) -> ();
+	remove_user_token : (UserTokenId) -> ();
+	set_custom_token : (CustomToken) -> ();
+	set_many_custom_tokens : (vec CustomToken) -> ();
+	set_many_user_tokens : (vec UserToken) -> ();
+	set_snapshot : (UserSnapshot) -> ();
+	set_user_show_testnets : (SetShowTestnetsRequest) -> (
+		SetUserShowTestnetsResult
+	);
+	set_user_token : (UserToken) -> ();
+	stats : () -> (Stats) query;
+	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
+		TopUpCyclesLedgerResult
+	);
+	update_contact : (Contact) -> (GetContactResult);
+	update_user_network_settings : (SaveNetworksSettingsRequest) -> (
+		SetUserShowTestnetsResult
+	)
 }
