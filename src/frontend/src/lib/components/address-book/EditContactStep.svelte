@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
@@ -51,26 +51,11 @@
 			<div class="relative flex">
 				<Avatar name={contact.name} variant="xs" styleClass="md:text-[19.2px]"></Avatar>
 				<span
-					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
-					data-tid={`avatar-badge-${contact.name}`}
-				>
-					<ButtonIcon
-						bind:button={menuButton}
-						onclick={() => (visible = true)}
-						colorStyle="tertiary-alt"
-						transparent
-						link={false}
-						ariaLabel={$i18n.core.text.edit}
-					>
-						{#snippet icon()}
-							<IconPencil />
-						{/snippet}
-					</ButtonIcon>
-					<Popover bind:visible anchor={menuButton} invisibleBackdrop direction="rtl">
-						<div><p>Set contact image</p></div>
-						<!-- LINKS FOR avatar upload -->
-					</Popover>
-				</span>
+				class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+				data-tid={`avatar-badge-${contact.name}`}
+			>
+				<EditAvatar />
+			</span>
 			</div>
 		{/snippet}
 
