@@ -84,7 +84,7 @@ impl From<&Token> for CustomTokenId {
                 token_address,
                 chain_id,
                 ..
-            }) => CustomTokenId::Ethereum(token_address.clone(), chain_id.clone()),
+            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
         }
     }
 }
