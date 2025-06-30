@@ -12,6 +12,8 @@
 	export let blockNumber: number;
 	export let token: Token;
 
+	//TODO: upgrade component to svelte 5 and check if async works properly in onMount component
+
 	let listener: WebSocketListener | undefined = undefined;
 
 	let currentBlockNumber: number | undefined;
@@ -38,8 +40,8 @@
 
 	const debounceLoadCurrentBlockNumber = debounce(loadCurrentBlockNumber);
 
-	onMount(async () => {
-		await loadCurrentBlockNumber();
+	onMount(() => {
+		loadCurrentBlockNumber();
 
 		listener = initMinedTransactionsListener({
 			// eslint-disable-next-line require-await
