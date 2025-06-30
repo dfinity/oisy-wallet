@@ -69,7 +69,7 @@
 	aria-label={ariaLabel}
 >
 	<span
-		class="flex gap-2"
+		class="flex min-w-0 gap-2"
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
