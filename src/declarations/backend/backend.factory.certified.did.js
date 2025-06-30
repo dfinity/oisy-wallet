@@ -531,8 +531,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		btc_get_current_fee_percentiles: IDL.Func(
 			[BtcGetFeePercentilesRequest],
-			[BtcGetFeePercentilesResult],
-			[]
+			[BtcGetFeePercentilesResult]
 		),
 		btc_get_pending_transactions: IDL.Func(
 			[BtcGetPendingTransactionsRequest],
