@@ -22,7 +22,7 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
-	import { groupTogglableTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
 
@@ -102,11 +102,9 @@
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
-	let groupModifiedTokens = $derived(groupTogglableTokens(modifiedTokens));
-
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
 	// We might want to improve this in the future.
-	const save = () => dispatch('icSave', groupModifiedTokens);
+	const save = () => dispatch('icSave', modifiedTokens);
 </script>
 
 {#if nonNullish(infoElement)}
