@@ -12,12 +12,12 @@
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLMainnet
 	} from '$lib/utils/network.utils';
-	import { splTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { initSolWalletWorker as initWalletWorker } from '$sol/services/worker.sol-wallet.services';
+	import { enabledSplTokens } from '$lib/derived/tokens.derived';
 
 	let walletWorkerTokens: Token[];
-	$: walletWorkerTokens = [...$enabledSolanaTokens, ...$splTokens].filter(
+	$: walletWorkerTokens = [...$enabledSolanaTokens, ...$enabledSplTokens].filter(
 		({ network: { id: networkId } }) =>
 			(isNetworkIdSOLLocal(networkId) && nonNullish($solAddressLocal)) ||
 			(isNetworkIdSOLDevnet(networkId) && nonNullish($solAddressDevnet)) ||
