@@ -17,13 +17,13 @@ describe('LanguageDropdown', () => {
 		}));
 	});
 
-	it('should render the language dropdown', async () => {
+	it('should render the language dropdown', () => {
 		const { container } = render(LanguageDropdown, {});
 
 		expect(container.querySelector('.lang-selector')).toBeInTheDocument();
 	});
 
-	it('should display the current language', async () => {
+	it('should display the current language', () => {
 		const { container } = render(LanguageDropdown, {});
 
 		expect(container.querySelector('.dropdown-button')).toContainHTML(
