@@ -11,7 +11,7 @@ import {
 	SUPPORTED_BITCOIN_NETWORK_IDS
 } from '$env/networks/networks.btc.env';
 import { SEPOLIA_NETWORK_ID, SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
@@ -32,7 +32,8 @@ export const isNetworkICP = (network: Network | undefined): boolean => isNetwork
 export const isNetworkSolana = (network: Network | undefined): network is SolanaNetwork =>
 	isNetworkIdSolana(network?.id);
 
-export const isNetworkIdICP: IsNetworkIdUtil = (id) => nonNullish(id) && ICP_NETWORK_ID === id;
+export const isNetworkIdICP: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && (ICP_NETWORK_ID === id || ICP_PSEUDO_TESTNET_NETWORK_ID === id);
 
 export const isNetworkIdEthereum: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_ETHEREUM_NETWORK_IDS.includes(id);
