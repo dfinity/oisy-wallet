@@ -29,7 +29,7 @@
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
-	import { pinEnabledTokensAtTop, saveCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
+	import { pinEnabledTokensAtTop, saveAllCustomTokens, sortTokens } from '$lib/utils/tokens.utils';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 
@@ -116,7 +116,7 @@
 	);
 
 	const onSave = async () => {
-		await saveCustomTokens({ tokens: modifiedTokens, $authIdentity, $i18n });
+		await saveAllCustomTokens({ tokens: modifiedTokens, $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
 		updateFilterList($tokenListStore.filter);

@@ -1,4 +1,3 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
@@ -11,7 +10,6 @@ import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
-import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
@@ -22,7 +20,6 @@ import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
-import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -282,7 +279,7 @@ export const groupTogglableTokens = (
 		{ icrc: [], erc20: [], spl: [] }
 	);
 
-export const saveCustomTokens = async ({
+export const saveAllCustomTokens = async ({
 	tokens,
 	progress,
 	modalNext,
@@ -292,43 +289,13 @@ export const saveCustomTokens = async ({
 	$i18n
 }: {
 	tokens: Record<string, Token>;
-	progress?: () => ProgressStepsAddToken;
+	progress?: (step: ProgressStepsAddToken) => ProgressStepsAddToken;
 	modalNext?: () => void;
 	onSuccess?: () => void;
 	onError?: () => void;
 	$authIdentity: OptionIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
-	const saveIcrc = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
-		saveIcrcCustomTokens({
-			tokens,
-			progress,
-			modalNext,
-			onSuccess,
-			onError,
-			identity: $authIdentity
-		});
-
-	const saveErc20 = (tokens: SaveUserToken[]): Promise<void> =>
-		saveErc20UserTokens({
-			tokens,
-			progress,
-			modalNext,
-			onSuccess,
-			onError,
-			identity: $authIdentity
-		});
-
-	const saveSpl = (tokens: SaveSplCustomToken[]): Promise<void> =>
-		saveSplCustomTokens({
-			tokens,
-			progress,
-			modalNext,
-			onSuccess,
-			onError,
-			identity: $authIdentity
-		});
-
 	const { icrc, erc20, spl } = groupTogglableTokens(tokens);
 
 	if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
@@ -342,8 +309,41 @@ export const saveCustomTokens = async ({
 	}
 
 	await Promise.allSettled([
-		...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
-		...(erc20.length > 0 ? [saveErc20(erc20)] : []),
-		...(spl.length > 0 ? [saveSpl(spl)] : [])
+		...(icrc.length > 0
+			? [
+					saveIcrcCustomTokens({
+						tokens: icrc.map((t) => ({ ...t, networkKey: 'Icrc' })),
+						progress,
+						modalNext,
+						onSuccess,
+						onError,
+						identity: $authIdentity
+					})
+				]
+			: []),
+		...(erc20.length > 0
+			? [
+					saveErc20UserTokens({
+						tokens: erc20,
+						progress,
+						modalNext,
+						onSuccess,
+						onError,
+						identity: $authIdentity
+					})
+				]
+			: []),
+		...(spl.length > 0
+			? [
+					saveSplCustomTokens({
+						tokens: spl,
+						progress,
+						modalNext,
+						onSuccess,
+						onError,
+						identity: $authIdentity
+					})
+				]
+			: [])
 	]);
 };
