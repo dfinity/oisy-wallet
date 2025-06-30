@@ -33,11 +33,11 @@
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
+	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	let {
 		initialSearch,
