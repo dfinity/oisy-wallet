@@ -1,4 +1,36 @@
-import { hashText } from '@dfinity/utils';
+import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { allowance } from '$icp/api/icrc-ledger.api';
+import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
+import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
+import type { OptionIdentity } from '$lib/types/identity';
+import { Principal } from '@dfinity/principal';
+import { assertNonNullish, hashText } from '@dfinity/utils';
+
+export const hasRequiredCycles = async ({
+	identity
+}: {
+	identity: OptionIdentity;
+}): Promise<boolean> => {
+	assertNonNullish(identity);
+	assertNonNullish(SIGNER_CANISTER_ID);
+
+	const allowanceResult = await allowance({
+		identity,
+		certified: false,
+		ledgerCanisterId: IC_CYCLES_LEDGER_CANISTER_ID,
+		owner: {
+			owner: BACKEND_CANISTER_PRINCIPAL,
+			subaccount: undefined
+		},
+		spender: {
+			owner: Principal.fromText(SIGNER_CANISTER_ID),
+			subaccount: getIcrcSubaccount(identity.getPrincipal())
+		}
+	});
+
+	return allowanceResult.allowance >= POW_MIN_CYCLES_THRESHOLD;
+};
 
 /**
  * Solves a Proof-of-Work (PoW) challenge by finding a `nonce` that satisfies the given difficulty level
