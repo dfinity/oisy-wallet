@@ -164,6 +164,8 @@
 		dispatch('icNext');
 
 		try {
+			// here is test send
+
 			await executeSend({
 				from: $ethAddress,
 				to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),

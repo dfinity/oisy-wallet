@@ -421,7 +421,7 @@ const sendTransaction = async ({
 	return await sendTransaction(rawTransaction);
 };
 
-const prepareAndSignApproval = async ({
+export const prepareAndSignApproval = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	gas,
@@ -449,11 +449,15 @@ const prepareAndSignApproval = async ({
 
 	const rawTransaction = await signTransaction({ identity, transaction: approve });
 
+	console.log({ rawTransaction });
+
 	progress?.(ProgressStepsSend.APPROVE);
 
 	const { sendTransaction } = infuraProviders(networkId);
 
 	const { hash } = await sendTransaction(rawTransaction);
+
+	console.log({ hash });
 
 	return { success: true, hash };
 };
@@ -508,7 +512,7 @@ const checkExistingApproval = async ({
 	return 'noExistingApproval';
 };
 
-const approve = async ({
+export const approve = async ({
 	token,
 	from,
 	to,
@@ -533,45 +537,39 @@ const approve = async ({
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	if (
-		isNullish(erc20HelperContractAddress) ||
+	console.log(
+		{ erc20HelperContractAddress },
 		!shouldSendWithApproval({
 			to,
 			tokenId: token.id,
 			erc20HelperContractAddress
 		})
-	) {
-		return { transactionNeededApproval: false, nonce };
-	}
+	);
 
-	// We check if the existing approval (either null or non-null) is enough for the required amount. If it isn't and it's non-null, we reset it to zero.
-	const approvalCheckResult = await checkExistingApproval({
-		token,
-		from,
-		spender: erc20HelperContractAddress,
-		nonce,
-		amount,
-		sourceNetwork,
-		...rest
-	});
+	// if (
+	// 	isNullish(erc20HelperContractAddress) ||
+	// 	!shouldSendWithApproval({
+	// 		to,
+	// 		tokenId: token.id,
+	// 		erc20HelperContractAddress
+	// 	})
+	// ) {
+	// 	console.log('stopped approval');
 
-	if (approvalCheckResult === 'existingApprovalIsEnough') {
-		progress(ProgressStepsSend.APPROVE);
-		return { transactionNeededApproval: false, nonce };
-	}
-
-	// If we needed to reset the allowance (the pre-approved amount was not enough and not zero), we need to increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
-	const nonceApproval = approvalCheckResult === 'approvalNeededReset' ? nonce + 1 : nonce;
+	// 	return { transactionNeededApproval: false, nonce };
+	// }
 
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
 		...rest,
-		nonce: nonceApproval,
+		nonce,
 		amount,
 		token,
 		sourceNetwork,
 		progress,
-		spender: erc20HelperContractAddress
+		spender: to
 	});
 
-	return { transactionNeededApproval: transactionApproved, hash, nonce: nonceApproval };
+	console.log({ hash });
+
+	return { transactionNeededApproval: transactionApproved, hash, nonce };
 };
