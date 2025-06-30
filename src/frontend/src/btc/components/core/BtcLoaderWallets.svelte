@@ -43,9 +43,7 @@
 	const initWalletWorker: InitWalletWorkerFn = ({ token }) =>
 		initBtcWalletWorker({
 			token,
-			...(isNetworkIdBTCMainnet(token.network.id) && {
-				minterCanisterId: ckBtcToken?.minterCanisterId
-			})
+			minterCanisterId: ckBtcToken?.minterCanisterId
 		});
 </script>
 

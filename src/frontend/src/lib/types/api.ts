@@ -138,6 +138,10 @@ export interface ICPSwapAmountReply {
 	receiveAmount: bigint;
 }
 
+export interface BtcGetFeePercentilesParams {
+	network: BitcoinNetwork;
+}
+
 export interface GetContactParams {
 	identity: Identity;
 	contactId: bigint;

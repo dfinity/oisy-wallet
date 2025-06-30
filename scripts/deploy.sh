@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euxo pipefail
-
 dfx canister create --all
 dfx deploy backend
 dfx deploy signer
 dfx deploy icp_ledger
 dfx deploy icp_index
-
+# ./scripts/deploy.bitcoin.sh
+# dfx deploy bitcoin --with-cycles 4000000000000
 ./scripts/download.ckbtc.sh
 ./scripts/deploy.ckbtc.sh
 

@@ -14,6 +14,7 @@ use super::{
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
+    bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
     network::SaveTestnetsSettingsError,
     user_profile::AddUserCredentialError,
@@ -214,6 +215,24 @@ impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelect
         match result {
             Ok(response) => BtcSelectUserUtxosFeeResult::Ok(response),
             Err(err) => BtcSelectUserUtxosFeeResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum BtcGetFeePercentilesResult {
+    /// The fee was selected successfully.
+    Ok(BtcGetFeePercentilesResponse),
+    /// The fee was not selected due to an error.
+    Err(SelectedUtxosFeeError),
+}
+impl From<Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>>
+    for BtcGetFeePercentilesResult
+{
+    fn from(result: Result<BtcGetFeePercentilesResponse, SelectedUtxosFeeError>) -> Self {
+        match result {
+            Ok(response) => BtcGetFeePercentilesResult::Ok(response),
+            Err(err) => BtcGetFeePercentilesResult::Err(err),
         }
     }
 }

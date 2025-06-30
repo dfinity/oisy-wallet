@@ -562,14 +562,22 @@ export const ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS = [
 		: [])
 ];
 
+export const LOCAL_BITCOIN_CANISTER_ID = import.meta.env
+	.VITE_LOCAL_BITCOIN_CANISTER_ID as OptionCanisterIdText;
+
 export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> = {
 	...(nonNullish(STAGING_CKBTC_MINTER_CANISTER_ID) && {
 		[STAGING_CKBTC_MINTER_CANISTER_ID]: 'g4xu7-jiaaa-aaaan-aaaaq-cai'
 	}),
 	...(nonNullish(IC_CKBTC_MINTER_CANISTER_ID) && {
 		[IC_CKBTC_MINTER_CANISTER_ID]: 'ghsi2-tqaaa-aaaan-aaaca-cai'
+	}),
+	...(nonNullish(LOCAL_CKBTC_MINTER_CANISTER_ID) && {
+		[LOCAL_CKBTC_MINTER_CANISTER_ID]: 'aaaaa-aa'
 	})
 };
+
+console.warn('BITCOIN_CANISTER_IDS=', BITCOIN_CANISTER_IDS);
 
 export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	GHOSTNODE_IC_DATA?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';

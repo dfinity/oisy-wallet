@@ -10,7 +10,7 @@ fi
 
 IC_COMMIT="03dd6ee6de80c2202f66948692c69c61eb6af54d"
 
-scripts/download-immutable.sh "https://download.dfinity.systems/ic/$IC_COMMIT/canisters/ic-ckbtc-minter.wasm.gz" /ckbtc_minter.wasm.gz
+scripts/download-immutable.sh "https://download.dfinity.systems/ic/$IC_COMMIT/canisters/ic-ckbtc-minter.wasm.gz" "$DIR/ckbtc_minter.wasm.gz"
 gunzip --keep --force "$DIR"/ckbtc_minter.wasm.gz
 
 scripts/download-immutable.sh "https://download.dfinity.systems/ic/$IC_COMMIT/canisters/ic-icrc1-ledger.wasm.gz" "$DIR"/ckbtc_ledger.wasm.gz

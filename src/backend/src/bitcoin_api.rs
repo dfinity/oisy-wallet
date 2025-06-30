@@ -56,7 +56,7 @@ pub async fn get_all_utxos(
 ///
 /// Relies on the `bitcoin_get_current_fee_percentiles` endpoint.
 /// See [Bitcoin API](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_current_fee_percentiles)
-async fn get_current_fee_percentiles(
+pub async fn get_current_fee_percentiles(
     network: BitcoinNetwork,
 ) -> Result<Vec<MillisatoshiPerByte>, String> {
     let res = bitcoin_get_current_fee_percentiles(GetCurrentFeePercentilesRequest { network })
