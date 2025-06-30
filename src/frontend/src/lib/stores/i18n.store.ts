@@ -1,10 +1,16 @@
 import { I18N_ENABLED } from '$env/i18n';
+import {
+	TRACK_COUNT_CHANGE_LANGUAGE_SIGNED_IN,
+	TRACK_COUNT_CHANGE_LANGUAGE_SIGNED_OUT
+} from '$lib/constants/analytics.contants';
+import { authSignedIn } from '$lib/derived/auth.derived';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
+import { trackEvent } from '$lib/services/analytics.services';
 import { Languages } from '$lib/types/languages';
 import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
 import { get, set } from '$lib/utils/storage.utils';
-import { writable, type Readable } from 'svelte/store';
+import { get as getStore, writable, type Readable } from 'svelte/store';
 
 const enI18n = (): I18n => ({
 	...en,
@@ -38,6 +44,15 @@ const initI18n = (): I18nStore => {
 	const switchLang = async (lang: Languages) => {
 		const bundle = await loadLang(lang);
 		set(bundle);
+
+		trackEvent({
+			name: getStore(authSignedIn)
+				? TRACK_COUNT_CHANGE_LANGUAGE_SIGNED_IN
+				: TRACK_COUNT_CHANGE_LANGUAGE_SIGNED_OUT,
+			metadata: {
+				language: lang
+			}
+		});
 
 		saveLang(lang);
 	};
