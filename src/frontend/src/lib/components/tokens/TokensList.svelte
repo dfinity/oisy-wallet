@@ -20,9 +20,9 @@
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 
-	let tokens: TokenUiOrGroupUi[] | undefined;
+	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
-	let animating = false;
+	let animating = $state(false);
 
 	const handleAnimationStart = () => {
 		animating = true;
@@ -40,17 +40,20 @@
 		}
 	}, 250);
 
-	let loading: boolean;
-	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
+	let loading: boolean = $derived($erc20UserTokensNotInitialized || isNullish(tokens));
 
-	let filteredTokens: TokenUiOrGroupUi[] | undefined;
-	$: filteredTokens = getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] });
+	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
+		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
+	);
 
-	let initialSearch: string | undefined;
-	let message: string | undefined;
-	$: ({ initialSearch, message } = nonNullish($modalManageTokensData)
-		? $modalManageTokensData
-		: { initialSearch: undefined, message: undefined });
+	let {
+		initialSearch,
+		message
+	}: { initialSearch: string | undefined; message?: string | undefined } = $derived(
+		nonNullish($modalManageTokensData)
+			? $modalManageTokensData
+			: { initialSearch: undefined, message: undefined }
+	);
 </script>
 
 <TokensDisplayHandler bind:tokens>
@@ -61,8 +64,8 @@
 					class="overflow-hidden rounded-xl"
 					transition:fade
 					animate:flip={{ duration: 250 }}
-					on:animationstart={handleAnimationStart}
-					on:animationend={handleAnimationEnd}
+					onanimationstart={handleAnimationStart}
+					onanimationend={handleAnimationEnd}
 					class:pointer-events-none={animating}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}

@@ -107,3 +107,12 @@ export const HOME_PAGE_ROUTE = 'home-page';
 export const USER_MENU_ROUTE = 'user-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
+
+// Temporary events
+// We have sudden spikes in the number of getLogs calls to Infura, which is causing issues.
+// However, we are not sure when and how they happen.
+// This event is used to track the number of calls to Infura's getLogs endpoint.
+// TODO: Remove these events once the issue is resolved.
+export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';
+export const TRACK_IC_NETWORK_CONTACTS_GENERATION_ISSUE =
+	'track-ic-network-contacts-generation-issue';

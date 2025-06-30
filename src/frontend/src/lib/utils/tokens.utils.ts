@@ -1,4 +1,7 @@
-import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -11,6 +14,8 @@ import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
+import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -243,4 +248,27 @@ export const defineEnabledTokens = <T extends Token>({
 		...($testnetsEnabled ? [...testnetTokens, ...(LOCAL ? localTokens : [])] : [])
 	].filter(({ network: { id: networkId } }) =>
 		isUserNetworkEnabled({ userNetworks: $userNetworks, networkId })
+	);
+
+export const groupTogglableTokens = (
+	tokens: Record<string, Token>
+): {
+	icrc: IcrcCustomToken[];
+	erc20: Erc20UserToken[];
+	spl: SplTokenToggleable[];
+} =>
+	Object.values(tokens ?? {}).reduce<{
+		icrc: IcrcCustomToken[];
+		erc20: Erc20UserToken[];
+		spl: SplTokenToggleable[];
+	}>(
+		({ icrc, erc20, spl }, token) => ({
+			icrc: [
+				...icrc,
+				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
+			],
+			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
+			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
+		}),
+		{ icrc: [], erc20: [], spl: [] }
 	);

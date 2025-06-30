@@ -53,14 +53,16 @@ const loadDefaultIcrcTokens = async () => {
 
 export const loadCustomTokens = ({
 	identity,
-	useCache = false
+	useCache = false,
+	onQuerySuccess
 }: {
 	identity: OptionIdentity;
 	useCache?: boolean;
+	onQuerySuccess?: () => void;
 }): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
-		onLoad: loadIcrcCustomData,
+		onLoad: (params) => loadIcrcCustomData({ ...params, onQuerySuccess }),
 		onUpdateError: ({ error: err }) => {
 			icrcCustomTokensStore.resetAll();
 
@@ -244,11 +246,15 @@ const loadCustomIcrcTokensData = async ({
 
 const loadIcrcCustomData = ({
 	response: tokens,
-	certified
+	certified,
+	onQuerySuccess
 }: {
 	certified: boolean;
 	response: IcrcCustomToken[];
+	onQuerySuccess?: () => void;
 }) => {
+	!certified && onQuerySuccess?.();
+
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
