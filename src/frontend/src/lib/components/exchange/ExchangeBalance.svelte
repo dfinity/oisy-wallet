@@ -45,7 +45,7 @@
 		class="flex cursor-pointer flex-col items-center gap-4 text-xl font-medium text-brand-secondary-alt"
 		role="button"
 		tabindex="0"
-		ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true })}
+		ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false })}
 	>
 		{#if hideBalance}
 			<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
