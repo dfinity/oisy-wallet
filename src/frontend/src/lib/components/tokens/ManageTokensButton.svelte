@@ -3,14 +3,13 @@
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import { MANAGE_TOKENS_MODAL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
+	import { pseudoNetworkICPTestnet } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { pseudoNetworkICPTestnet } from '$lib/derived/network.derived';
 
-
-
-
-	let disabled = $derived($erc20UserTokensNotInitialized || $authNotSignedIn || $pseudoNetworkICPTestnet)
+	let disabled = $derived(
+		$erc20UserTokensNotInitialized || $authNotSignedIn || $pseudoNetworkICPTestnet
+	);
 
 	const manageTokensId = $state(Symbol());
 </script>
