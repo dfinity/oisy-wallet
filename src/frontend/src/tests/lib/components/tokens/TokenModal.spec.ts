@@ -14,12 +14,14 @@ import * as authServices from '$lib/services/auth.services';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
 import * as navUtils from '$lib/utils/nav.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { MOCK_CANISTER_ID_1 } from '$tests/mocks/exchanges.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
@@ -109,6 +111,15 @@ describe('TokenModal', () => {
 		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
 
 		expect(setCustomTokenMock).toHaveBeenCalledOnce();
+		expect(setCustomTokenMock).toHaveBeenCalledWith({
+			token: toCustomToken({
+				indexCanisterId: MOCK_CANISTER_ID_1,
+				ledgerCanisterId: mockIcToken.ledgerCanisterId,
+				enabled: true,
+				networkKey: 'Icrc'
+			}),
+			identity: mockIdentity
+		});
 		expect(loadCustomTokens).toHaveBeenCalledOnce();
 	});
 
@@ -132,12 +143,20 @@ describe('TokenModal', () => {
 		await fireEvent.click(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON));
 
 		await fireEvent.input(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_INPUT), {
-			target: { value: MOCK_CANISTER_ID_1 }
+			target: { value: '' }
 		});
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
 
 		expect(setCustomTokenMock).toHaveBeenCalledOnce();
+		expect(setCustomTokenMock).toHaveBeenCalledWith({
+			token: toCustomToken({
+				ledgerCanisterId: mockIcToken.ledgerCanisterId,
+				enabled: true,
+				networkKey: 'Icrc'
+			}),
+			identity: mockIdentity
+		});
 		expect(loadCustomTokens).toHaveBeenCalledOnce();
 	});
 

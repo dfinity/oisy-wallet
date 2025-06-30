@@ -220,7 +220,7 @@
 			return;
 		}
 
-		if (isNullish(tokenToEdit) || isNullishOrEmpty(icrcTokenIndexCanisterId)) {
+		if (isNullish(tokenToEdit)) {
 			return;
 		}
 
@@ -231,7 +231,9 @@
 
 				await setCustomToken({
 					token: toCustomToken({
-						indexCanisterId: icrcTokenIndexCanisterId,
+						...(!isNullishOrEmpty(icrcTokenIndexCanisterId) && {
+							indexCanisterId: icrcTokenIndexCanisterId
+						}),
 						ledgerCanisterId: tokenToEdit.ledgerCanisterId,
 						version: tokenToEdit.version,
 						enabled: true,
@@ -244,7 +246,7 @@
 				// Similar as on token "save", we reload all custom tokens for simplicity reason.
 				await loadCustomTokens({
 					identity: $authIdentity,
-					onSuccess: () => {
+					onQuerySuccess: () => {
 						progress(ProgressStepsAddToken.DONE);
 						close();
 
@@ -331,7 +333,7 @@
 					<ButtonBack onclick={() => gotoStep(TokenModalSteps.CONTENT)} />
 
 					<Button
-						disabled={isNullishOrEmpty(icrcTokenIndexCanisterId)}
+						disabled={icrcTokenIndexCanisterId === (token.indexCanisterId ?? '')}
 						onclick={() => onTokenEdit(token)}
 						testId={TOKEN_MODAL_SAVE_BUTTON}
 					>
