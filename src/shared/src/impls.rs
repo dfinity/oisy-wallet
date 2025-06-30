@@ -76,12 +76,10 @@ impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
         match token {
             Token::Icrc(token) => CustomTokenId::Icrc(token.ledger_id),
-            Token::SplMainnet(SplToken { token_address, .. }) => {
-                CustomTokenId::SolMainnet(token_address.clone())
-            }
-            Token::SplDevnet(SplToken { token_address, .. }) => {
-                CustomTokenId::SolDevnet(token_address.clone())
-            }
+            Token::SplMainnet(SplToken { token_address, .. }) =>
+                CustomTokenId::SolMainnet(token_address.clone()),
+            Token::SplDevnet(SplToken { token_address, .. }) =>
+                CustomTokenId::SolDevnet(token_address.clone()),
             Token::Erc20(Erc20Token {
                 token_address,
                 chain_id,
