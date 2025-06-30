@@ -46,7 +46,7 @@ describe('LanguageDropdown', () => {
 
 		SUPPORTED_LANGUAGES.forEach(([, language]) => {
 			expect(getByTestId(LANGUAGE_DROPDOWN)).toContainHTML(
-				LANGUAGES[language as keyof typeof LANGUAGES]
+				LANGUAGES[language]
 			);
 		});
 	});

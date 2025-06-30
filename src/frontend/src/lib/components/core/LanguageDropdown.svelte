@@ -5,9 +5,9 @@
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Languages } from '$lib/types/languages';
-	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
 
 	let dropdown = $state<Dropdown>();
 
