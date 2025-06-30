@@ -8,6 +8,8 @@ import { tokenWithFallback } from '$lib/derived/token.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import type { NetworkContacts } from '$lib/types/contacts';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
+import { AccountIdentifier } from '@dfinity/ledger-icp';
+import { decodeIcrcAccount } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { derived, type Readable } from 'svelte/store';
 
@@ -25,12 +27,18 @@ export const icNetworkContacts: Readable<NetworkContacts> = derived(
 			const { address, contact } = allIcNetworkContacts[key];
 
 			if (isIcrcAddress(address)) {
+				console.log({
+					new: AccountIdentifier.fromHex(address).toHex(),
+					decode: decodeIcrcAccount(address),
+					old: getAccountIdentifier(Principal.fromText(address)).toHex(),
+					address
+				});
 				try {
 					return {
 						...acc,
 						[contact.id.toString()]: [
 							...(acc[contact.id.toString()] ?? []),
-							getAccountIdentifier(Principal.fromText(address)).toHex()
+							AccountIdentifier.fromHex(address).toHex()
 						]
 					};
 				} catch (_: unknown) {
