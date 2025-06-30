@@ -21,7 +21,7 @@ import {
 	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
@@ -34,6 +34,7 @@ import { isNullish } from '@dfinity/utils';
 const networkIdToKey = (networkId: NetworkId): NetworkSettingsFor | undefined => {
 	switch (networkId) {
 		case ICP_NETWORK_ID:
+		case ICP_PSEUDO_TESTNET_NETWORK_ID:
 			return { InternetComputer: null };
 		case ETHEREUM_NETWORK_ID:
 			return { EthereumMainnet: null };
