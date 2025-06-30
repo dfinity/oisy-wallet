@@ -69,7 +69,7 @@
 	let modal: WizardModal | undefined = $state();
 	const close = () => modalStore.close();
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<TokenModalSteps> = [
 		{
 			name: TokenModalSteps.CONTENT,
 			title: $i18n.tokens.details.title

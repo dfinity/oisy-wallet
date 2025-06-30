@@ -2,7 +2,7 @@ import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import type { WizardStepsParams } from '$lib/types/steps';
 import type { WizardSteps } from '@dfinity/gix-components';
 
-export const swapWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps => [
+export const swapWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<WizardStepsSwap> => [
 	{
 		name: WizardStepsSwap.SWAP,
 		title: i18n.swap.text.swap
