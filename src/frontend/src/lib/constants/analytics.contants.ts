@@ -91,7 +91,7 @@ export const TRACK_SPRINKLES_BANNER_CLICK = 'sprinkles_banner_click';
 // Welcome
 export const TRACK_WELCOME_OPEN = 'welcome_open';
 
-// Delete Token
+// Edit/Delete Token
 export const TRACK_DELETE_TOKEN_SUCCESS = 'delete_token_success';
 export const TRACK_EDIT_TOKEN_SUCCESS = 'edit_token_success';
 
