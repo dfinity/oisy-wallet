@@ -14,6 +14,11 @@ pub struct IcrcToken {
     pub index_id: Option<IndexId>,
 }
 
+/// A network-specific unique Solana token identifier.
+#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+#[serde(remote = "Self")]
+pub struct SplTokenId(pub String);
+
 /// A Solana token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[serde(remote = "Self")]
@@ -23,15 +28,17 @@ pub struct SplToken {
     pub decimals: Option<u8>,
 }
 
-/// A network-specific unique Solana token identifier.
+
+/// A network-specific unique ERC20 token identifier.
 #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
 #[serde(remote = "Self")]
-pub struct SplTokenId(pub String);
+pub struct Erc20TokenId(pub String);
 
 /// EVM chain ID
 ///
 /// IDs may be found on: <https://chainlist.org/>
 pub type ChainId = u64;
+
 
 /// An ERC20 compliant token on the Ethereum or EVM-compatible networks.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -43,10 +50,6 @@ pub struct Erc20Token {
     pub decimals: Option<u8>,
 }
 
-/// A network-specific unique ERC20 token identifier.
-#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
-#[serde(remote = "Self")]
-pub struct Erc20TokenId(pub String);
 
 /// A variant describing any token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -55,7 +58,7 @@ pub enum Token {
     Icrc(IcrcToken) = 0,
     SplMainnet(SplToken) = 1,
     SplDevnet(SplToken) = 2,
-    Erc20(Erc20Token) = 3,
+    Erc20(Erc20Token, ChainId) = 3,
 }
 
 /// User preferences for any token
@@ -78,6 +81,6 @@ pub enum CustomTokenId {
     SolMainnet(SplTokenId) = 1,
     /// A Solana token on the Solana devnet.
     SolDevnet(SplTokenId) = 2,
-    /// An ERC20 token on an EVM-compatible network.
-    Erc20(Erc20TokenId) = 3,
+    /// An Ethereum/EVM token on an EVM-compatible network.
+    Ethereum(Erc20TokenId, ChainId) = 3,
 }
