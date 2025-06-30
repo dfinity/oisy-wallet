@@ -49,3 +49,25 @@ export enum TokenModalSteps {
 	EDIT = 'edit',
 	EDIT_PROGRESS = 'edit_progress'
 }
+
+export enum WizardStepsWalletConnect {
+	CONNECT = 'Connect',
+	REVIEW = 'Review'
+}
+
+export enum WizardStepsHideToken {
+	HIDE = 'Hide',
+	HIDING = 'Hiding'
+}
+
+export enum WizardStepsReceiveAddress {
+	RECEIVE = 'Receive',
+	QR_CODE = 'QR code'
+}
+
+export enum WizardStepsManageTokens {
+	MANAGE = 'Manage',
+	IMPORT = 'Import',
+	REVIEW = 'Review',
+	SAVING = 'Saving'
+}
