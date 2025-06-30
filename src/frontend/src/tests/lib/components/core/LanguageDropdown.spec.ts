@@ -1,6 +1,6 @@
 import { LANGUAGES, SUPPORTED_LANGUAGES } from '$env/i18n';
 import LanguageDropdown from '$lib/components/core/LanguageDropdown.svelte';
-import { TRACK_COUNT_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
+import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
 import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -101,7 +101,7 @@ describe('LanguageDropdown', () => {
 		}
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_COUNT_CHANGE_LANGUAGE,
+			name: TRACK_CHANGE_LANGUAGE,
 			metadata: {
 				language: Languages.GERMAN,
 				source: 'landing-page'

@@ -100,7 +100,7 @@ export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation';
 export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog';
 
 // I18n
-export const TRACK_COUNT_CHANGE_LANGUAGE = 'change_language';
+export const TRACK_CHANGE_LANGUAGE = 'change_language';
 
 // Snapshots
 export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
