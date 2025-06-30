@@ -5,17 +5,20 @@
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { pseudoNetworkICPTestnet } from '$lib/derived/network.derived';
 
-	let disabled = true;
-	$: disabled = $erc20UserTokensNotInitialized || $authNotSignedIn;
 
-	const manageTokensId = Symbol();
+
+
+	let disabled = $derived($erc20UserTokensNotInitialized || $authNotSignedIn || $pseudoNetworkICPTestnet)
+
+	const manageTokensId = $state(Symbol());
 </script>
 
 <button
 	class="tertiary"
 	data-tid={MANAGE_TOKENS_MODAL_BUTTON}
-	on:click={() => modalStore.openManageTokens({ id: manageTokensId })}
+	onclick={() => modalStore.openManageTokens({ id: manageTokensId })}
 	{disabled}
 >
 	<IconManage />
