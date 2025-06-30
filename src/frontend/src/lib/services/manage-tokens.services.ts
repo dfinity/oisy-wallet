@@ -21,15 +21,15 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export interface ManageTokensSaveParams {
-	progress: (step: ProgressStepsAddToken) => void;
-	modalNext: () => void;
-	onSuccess: () => void;
-	onError: () => void;
+	progress?: (step: ProgressStepsAddToken) => void;
+	modalNext?: () => void;
+	onSuccess?: () => void;
+	onError?: () => void;
 	identity: OptionIdentity;
 }
 
 export interface SaveTokensParams<T> {
-	progress: (step: ProgressStepsAddToken) => void;
+	progress?: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
 	tokens: NonEmptyArray<T>;
 }
@@ -62,7 +62,7 @@ export const saveTokens = async <
 		return;
 	}
 
-	modalNext();
+	modalNext?.();
 
 	try {
 		await save({
@@ -71,9 +71,11 @@ export const saveTokens = async <
 			tokens: tokens as NonEmptyArray<T>
 		});
 
-		progress(ProgressStepsAddToken.DONE);
+		progress?.(ProgressStepsAddToken.DONE);
 
-		setTimeout(() => onSuccess(), 750);
+		if (nonNullish(onSuccess)) {
+			setTimeout(() => onSuccess(), 750);
+		}
 
 		tokens.forEach((token) => {
 			const { enabled } = token;
@@ -105,7 +107,7 @@ export const saveTokens = async <
 			err
 		});
 
-		onError();
+		onError?.();
 
 		trackEvent({
 			name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,

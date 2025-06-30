@@ -52,6 +52,7 @@ export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect';
 // dApps
 export const TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK = 'dapp_modal_open_hyperlink';
 export const TRACK_COUNT_DAPP_OPEN_INFO_MODAL = 'dapp_open_info_modal';
+export const TRACK_COUNT_DAPP_FILTER_BUTTON = 'dapp_onclick_filter_button';
 
 // Carousel
 export const TRACK_COUNT_CAROUSEL_NEXT = 'carousel_next';
@@ -97,6 +98,9 @@ export const TRACK_DELETE_TOKEN_SUCCESS = 'delete_token_success';
 export const TRACK_COUNT_OPEN_WHY_OISY = 'open_why_oisy';
 export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation';
 export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog';
+
+// I18n
+export const TRACK_CHANGE_LANGUAGE = 'change_language';
 
 // Snapshots
 export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
