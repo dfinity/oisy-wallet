@@ -330,7 +330,7 @@ mod custom_token {
                 TestVector {
                     input: Erc20Token {
                         token_address: Erc20TokenId("0x1234567890123456789012345678901234567890".to_string()),
-                        chain_id: 255,
+                        chain_id: 2^64 - 1,
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(6),
                     },
