@@ -52,6 +52,7 @@ export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect';
 // dApps
 export const TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK = 'dapp_modal_open_hyperlink';
 export const TRACK_COUNT_DAPP_OPEN_INFO_MODAL = 'dapp_open_info_modal';
+export const TRACK_COUNT_DAPP_FILTER_BUTTON = 'dapp_onclick_filter_button';
 
 // Carousel
 export const TRACK_COUNT_CAROUSEL_NEXT = 'carousel_next';

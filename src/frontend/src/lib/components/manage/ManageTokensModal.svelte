@@ -21,6 +21,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -46,28 +47,28 @@
 		infoElement
 	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsManageTokens> = [
 		{
-			name: 'Manage',
+			name: WizardStepsManageTokens.MANAGE,
 			title: $i18n.tokens.manage.text.title
 		},
 		{
-			name: 'Import',
+			name: WizardStepsManageTokens.IMPORT,
 			title: $i18n.tokens.import.text.title
 		},
 		{
-			name: 'Review',
+			name: WizardStepsManageTokens.REVIEW,
 			title: $i18n.tokens.import.text.review
 		},
 		{
-			name: 'Saving',
+			name: WizardStepsManageTokens.SAVING,
 			title: $i18n.tokens.import.text.updating
 		}
 	];
 
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
-	let currentStep: WizardStep | undefined = $state();
+	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal | undefined = $state();
 
 	const saveTokens = async ({
