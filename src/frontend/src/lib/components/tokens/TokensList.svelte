@@ -63,7 +63,7 @@
 		// then we return it as a valid TokenUiOrGroupUi since the displaying cards require that type
 		const reducedTokens = ($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
 			const isModified = nonNullish(
-				Object.values(modifiedTokens).find((modifiedToken) => modifiedToken.id === token.id)
+				modifiedTokens[`${token.network.id.description}-${token.id.description}`]
 			);
 			if (!token.enabled || (token.enabled && isModified)) {
 				acc.push({
