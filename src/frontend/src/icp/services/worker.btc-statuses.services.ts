@@ -31,7 +31,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 			case 'syncBtcStatusesError':
 				onLoadBtcStatusesError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: (data.data).error
 				});
 				return;
 		}

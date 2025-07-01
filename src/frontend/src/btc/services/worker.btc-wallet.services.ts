@@ -41,14 +41,14 @@ export const initBtcWalletWorker = async ({
 			case 'syncBtcWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as BtcPostMessageDataResponseWallet
+					data: data.data
 				});
 				return;
 
 			case 'syncBtcWalletError':
 				syncWalletError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error,
+					error: (data.data).error,
 					/**
 					 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
 					 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.

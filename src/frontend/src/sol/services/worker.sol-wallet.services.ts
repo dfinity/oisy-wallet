@@ -37,14 +37,14 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 			case 'syncSolWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as SolPostMessageDataResponseWallet
+					data: data.data
 				});
 				return;
 
 			case 'syncSolWalletError':
 				syncWalletError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error,
+					error: (data.data).error,
 					hideToast: true
 				});
 				return;
