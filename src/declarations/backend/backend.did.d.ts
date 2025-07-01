@@ -125,6 +125,17 @@ export type BtcAddress =
 	| { P2WSH: string }
 	| { P2SH: string }
 	| { P2TR: string };
+export interface BtcGetFeePercentilesRequest {
+	network: BitcoinNetwork;
+}
+export interface BtcGetFeePercentilesResponse {
+	fee_percentiles: BigUint64Array | bigint[];
+}
+export type BtcGetFeePercentilesResult =
+	| {
+			Ok: BtcGetFeePercentilesResponse;
+	  }
+	| { Err: SelectedUtxosFeeError };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
@@ -472,6 +483,10 @@ export interface _SERVICE {
 	btc_add_pending_transaction: ActorMethod<
 		[BtcAddPendingTransactionRequest],
 		BtcAddPendingTransactionResult
+	>;
+	btc_get_current_fee_percentiles: ActorMethod<
+		[BtcGetFeePercentilesRequest],
+		BtcGetFeePercentilesResult
 	>;
 	btc_get_pending_transactions: ActorMethod<
 		[BtcGetPendingTransactionsRequest],
