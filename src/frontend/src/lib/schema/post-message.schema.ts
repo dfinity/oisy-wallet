@@ -18,7 +18,7 @@ import type { CertifiedData } from '$lib/types/store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 export const POST_MESSAGE_REQUESTS = [
 	'startIdleTimer',

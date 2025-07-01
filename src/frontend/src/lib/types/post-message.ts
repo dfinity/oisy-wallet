@@ -24,8 +24,8 @@ import type {
 	PostMessageSyncStateSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
-import type * as z from 'zod';
-import type { ZodType } from 'zod';
+import type * as z from 'zod/v4';
+import type { ZodType } from 'zod/v4';
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
 export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSchema>;
