@@ -57,6 +57,8 @@ export const getIcrcv2AccountIdString = (accountId: Icrcv2AccountId): string => 
 
 /**
  * Tries to parse an Icrc-1 account string to AccountIdentifier text.
+ * Used for generating account ID from a principal when opening "Contacts" tab in the send flow.
+ * The goal - we to filter out account IDs from the list if the same contact has the matching Principal saved.
  * @param accountString A string that will be decoded into an Icrc-1 compatible account
  * @returns AccountIdentifier text equivalent of the provided accountString or undefined if parsing fails
  */
