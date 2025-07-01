@@ -129,6 +129,12 @@ type BtcAddress = variant {
 	P2SH : text;
 	P2TR : text
 };
+type BtcGetFeePercentilesRequest = record { network : BitcoinNetwork };
+type BtcGetFeePercentilesResponse = record { fee_percentiles : vec nat64 };
+type BtcGetFeePercentilesResult = variant {
+	Ok : BtcGetFeePercentilesResponse;
+	Err : SelectedUtxosFeeError
+};
 type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
@@ -230,6 +236,12 @@ type DefiniteCanisterSettingsArgs = record {
 	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
+type Erc20Token = record {
+	decimals : opt nat8;
+	token_address : text;
+	chain_id : nat64;
+	symbol : opt text
+};
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
@@ -349,6 +361,7 @@ type SupportedCredential = record {
 };
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
+	Erc20 : Erc20Token;
 	Icrc : IcrcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken
@@ -445,6 +458,9 @@ service : (Arg) -> {
 	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (
 		BtcAddPendingTransactionResult
 	);
+	btc_get_current_fee_percentiles : (BtcGetFeePercentilesRequest) -> (
+		BtcGetFeePercentilesResult
+	) query;
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
