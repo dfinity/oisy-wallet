@@ -55,7 +55,7 @@ const initI18n = (): I18nStore => {
 	return {
 		subscribe,
 
-		init: async () => {
+		init: () => {
 			const lang = I18N_ENABLED
 				? (get<Languages>({ key: 'lang' }) ?? getDefaultLang())
 				: Languages.ENGLISH;
@@ -66,7 +66,7 @@ const initI18n = (): I18nStore => {
 				return;
 			}
 
-			await switchLang(lang);
+			switchLang(lang);
 		},
 
 		switchLang
