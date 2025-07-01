@@ -31,7 +31,7 @@ const loadLang = (lang: Languages): I18n => {
 const saveLang = (lang: Languages) => set({ key: 'lang', value: lang });
 
 export interface I18nStore extends Readable<I18n> {
-	init: () => Promise<void>;
+	init: () => void;
 	switchLang: (lang: Languages) => void;
 }
 
