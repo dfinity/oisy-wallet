@@ -57,12 +57,9 @@ const initI18n = (): I18nStore => {
 		subscribe,
 
 		init: async () => {
-			console.log('i18n is ' + (I18N_ENABLED ? 'enabled' : 'not enabled'));
-			console.log(getDefaultLang());
 			const lang = I18N_ENABLED
 				? (get<Languages>({ key: 'lang' }) ?? getDefaultLang())
 				: Languages.ENGLISH;
-			console.log(lang);
 
 			if (lang === getDefaultLang()) {
 				saveLang(lang);
