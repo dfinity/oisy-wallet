@@ -9,6 +9,7 @@ import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
+import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
 
@@ -22,7 +23,8 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	TRUMP_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN,
-	WSOL_TOKEN
+	WSOL_TOKEN,
+	MSTRX_TOKEN
 ];
 
 const SPL_TOKENS_DEVNET: RequiredSplToken[] = [DEVNET_USDC_TOKEN, DEVNET_EURC_TOKEN];
