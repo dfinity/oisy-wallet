@@ -1,4 +1,4 @@
-use std::{cell::RefCell, future::ready, time::Duration};
+use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
 use candid::{candid_method, Principal};
@@ -198,6 +198,10 @@ pub fn init(arg: Arg) {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
@@ -218,6 +222,9 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
