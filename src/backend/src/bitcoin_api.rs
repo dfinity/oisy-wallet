@@ -62,9 +62,13 @@ pub async fn get_all_utxos(
     Ok(all_utxos)
 }
 
-// Initialization function to start the timer that updates the fee percentiles
+/// Sets up periodic refreshing of Bitcoin transaction fee data.
+/// Initializes the cache immediately and configures automatic updates at regular intervals
 pub fn init_fee_percentiles_cache() {
-    ic_cdk::println!("Initializing fee percentiles cache with 1-minute update interval");
+    ic_cdk::println!(
+        "Initializing fee percentiles cache with {}-second update interval",
+        FEE_PERCENTILES_UPDATE_INTERVAL.as_secs()
+    );
 
     // Schedule the initial cache population and timer setup to run after init completes
     set_timer(std::time::Duration::from_secs(0), || {
@@ -82,7 +86,9 @@ pub fn init_fee_percentiles_cache() {
     });
 }
 
-// Function to update the fee percentiles in the cache
+/// Updates fee percentiles for all supported Bitcoin networks (Mainnet, Testnet, Regtest)
+/// in the thread-local cache. Fetches current fee data from the bitcoin canister and stores
+/// it for quick access by other functions.
 async fn update_fee_percentiles_cache() -> Result<(), String> {
     // Update for each network type
     for network in &[
@@ -95,14 +101,9 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
                 FEE_PERCENTILES_CACHE.with(|cache| {
                     cache.borrow_mut().insert(*network, percentiles.clone());
                 });
-                ic_cdk::println!(
-                    "Successfully updated fee percentiles for network {:?}: {:?}",
-                    network,
-                    percentiles
-                );
             }
             Err(err) => {
-                ic_cdk::println!(
+                ic_cdk::eprintln!(
                     "Failed to update fee percentiles for network {:?}: {}",
                     network,
                     err
@@ -114,7 +115,7 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
     Ok(())
 }
 
-// Internal function that actually fetches the fee percentiles from the Bitcoin API
+/// Internal function that actually fetches the fee percentiles from the Bitcoin canister
 async fn fetch_current_fee_percentiles(
     network: BitcoinNetwork,
 ) -> Result<Vec<MillisatoshiPerByte>, String> {
