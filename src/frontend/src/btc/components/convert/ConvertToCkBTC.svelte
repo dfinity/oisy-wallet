@@ -68,7 +68,7 @@
 	testId="convert-to-ckbtc-button"
 >
 	{#snippet icon()}
-		<IconCkConvert size="28" />
+		<IconCkConvert size="24" />
 	{/snippet}
 	{#snippet label()}
 		<span>{BTC_MAINNET_TOKEN.twinTokenSymbol}</span>

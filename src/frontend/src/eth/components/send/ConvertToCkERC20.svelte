@@ -36,7 +36,7 @@
 		$ckErc20: convertToSymbol
 	})}
 >
-	<IconCkConvert size="28" slot="icon" />
+	<IconCkConvert size="24" slot="icon" />
 	<span>{convertToSymbol}</span>
 </ConvertETH>
 

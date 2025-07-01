@@ -19,7 +19,7 @@
 	testId={RECEIVE_TOKENS_MODAL_OPEN_BUTTON}
 >
 	{#snippet icon()}
-		<IconQr size="28" />
+		<IconQr size="24" />
 	{/snippet}
 	{#snippet label()}
 		{$i18n.receive.text.receive}

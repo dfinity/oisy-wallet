@@ -20,7 +20,7 @@
 		$token: $ckEthereumTwinToken.symbol
 	})}
 >
-	<IconCkConvert size="28" slot="icon" />
+	<IconCkConvert size="24" slot="icon" />
 	<span>{$ckEthereumTwinToken.symbol}</span>
 </ConvertETH>
 
