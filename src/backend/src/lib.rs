@@ -1,4 +1,4 @@
-use std::{cell::RefCell, time::Duration};
+use std::{cell::RefCell, future::ready, time::Duration};
 
 use bitcoin_utils::estimate_fee;
 use candid::{candid_method, Principal};
@@ -24,6 +24,7 @@ use shared::{
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
+            BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
@@ -38,10 +39,11 @@ use shared::{
         },
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
-            BtcAddPendingTransactionResult, BtcGetPendingTransactionsResult,
-            BtcSelectUserUtxosFeeResult, CreateContactResult, CreatePowChallengeResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
+            BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
+            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
+            UpdateContactResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -371,6 +373,20 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+
+// TODO replace caller_is_controller with caller_is_not_anonymous
+#[query(guard = "caller_is_controller")]
+#[must_use]
+#[allow(unused_variables)]
+pub async fn btc_get_current_fee_percentiles(
+    params: BtcGetFeePercentilesRequest,
+) -> BtcGetFeePercentilesResult {
+    // TODO replace with real service implementation
+    ready(()).await;
+    // Return an empty vector of fee percentiles
+    let fee_percentiles = Vec::new();
+    Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into()
+}
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
 ///
