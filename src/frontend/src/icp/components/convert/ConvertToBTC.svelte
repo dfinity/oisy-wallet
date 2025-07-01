@@ -44,7 +44,7 @@
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
 	{#snippet icon()}
-		<IconCkConvert size="28" />
+		<IconCkConvert size="24" />
 	{/snippet}
 	{#snippet label()}
 		{BTC_MAINNET_SYMBOL}
