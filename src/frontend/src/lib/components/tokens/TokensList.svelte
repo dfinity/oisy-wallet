@@ -24,7 +24,7 @@
 	import type { Token, TokenUi } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
+	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
@@ -76,29 +76,7 @@
 		// sort alphabetally and apply filter
 		enableMoreTokensList = getFilteredTokenList({
 			filter,
-			list: reducedTokens.sort((a, b) =>
-				!isTokenUiGroup(a) && !isTokenUiGroup(b)
-					? (() => {
-							const aName = a.token.name;
-							const bName = b.token.name;
-
-							// we want non alphanumeric starting items to come last
-							const isAlphaNum = (char: string) => /^[a-zA-Z0-9]$/.test(char);
-
-							const aStartsValid = isAlphaNum(aName.charAt(0));
-							const bStartsValid = isAlphaNum(bName.charAt(0));
-
-							if (aStartsValid && !bStartsValid) {
-								return -1;
-							}
-							if (!aStartsValid && bStartsValid) {
-								return 1;
-							}
-
-							return aName.localeCompare(bName);
-						})()
-					: 1
-			)
+			list: sortTokenOrGroupUi(reducedTokens)
 		});
 
 		// we need to reset modified tokens, since the filter has changed the selected token(s) may not be visible anymore
