@@ -111,6 +111,7 @@
 	};
 
 	let modifiedTokens: Record<string, Token> = $state({});
+	let modifiedTokensLen: number = $derived(Object.keys(modifiedTokens).length);
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
@@ -181,7 +182,8 @@
 								styleClass="py-2"
 								loading={saveLoading}
 							>
-								{$i18n.core.text.apply} ({Object.keys(modifiedTokens).length})
+								{$i18n.core.text.apply}
+								{#if modifiedTokensLen > 0}({modifiedTokensLen}){/if}
 							</Button>
 						</div>
 					</div>
