@@ -24,6 +24,7 @@ use shared::{
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
+            BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
@@ -371,6 +372,19 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+
+#[query(guard = "caller_is_controller")]
+#[must_use]
+pub async fn btc_get_current_fee_percentiles(
+    params: BtcGetFeePercentilesRequest,
+) -> BtcGetFeePercentilesResult {
+    match get_current_fee_percentiles(params.network).await {
+        Ok(fee_percentiles) => Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into(),
+        Err(err) => {
+            BtcGetFeePercentilesResult::Err(SelectedUtxosFeeError::InternalError { msg: err })
+        }
+    }
+}
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
 ///
