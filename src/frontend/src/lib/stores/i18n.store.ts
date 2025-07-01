@@ -39,8 +39,7 @@ const initI18n = (): I18nStore => {
 	const { subscribe, set } = writable<I18n>(I18N_ENABLED ? loadLang(getDefaultLang()) : enI18n());
 
 	const switchLang = async (lang: Languages) => {
-		const bundle = loadLang(lang);
-		set(bundle);
+		set(loadLang(lang));
 
 		trackEvent({
 			name: TRACK_CHANGE_LANGUAGE,
