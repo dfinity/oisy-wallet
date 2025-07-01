@@ -15,23 +15,23 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 	const worker: Worker = new BtcStatusesWorker.default();
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseError>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncBtcStatuses':
 				syncBtcStatuses({
 					tokenId,
-					data: data.data as PostMessageJsonDataResponse
+					data: data as PostMessageJsonDataResponse
 				});
 				return;
 			case 'syncBtcStatusesError':
 				onLoadBtcStatusesError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: (data as PostMessageDataResponseError).error
 				});
 				return;
 		}
