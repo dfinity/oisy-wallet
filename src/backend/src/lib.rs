@@ -1,3 +1,4 @@
+use std::future::ready;
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
@@ -39,10 +40,11 @@ use shared::{
         },
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
-            BtcAddPendingTransactionResult, BtcGetPendingTransactionsResult,
-            BtcSelectUserUtxosFeeResult, CreateContactResult, CreatePowChallengeResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
+            BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
+            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
+            UpdateContactResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -373,17 +375,18 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 
+// TODO replace caller_is_controller with caller_is_not_anonymous
 #[query(guard = "caller_is_controller")]
 #[must_use]
+#[allow(unused_variables)]
 pub async fn btc_get_current_fee_percentiles(
     params: BtcGetFeePercentilesRequest,
 ) -> BtcGetFeePercentilesResult {
-    match get_current_fee_percentiles(params.network).await {
-        Ok(fee_percentiles) => Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into(),
-        Err(err) => {
-            BtcGetFeePercentilesResult::Err(SelectedUtxosFeeError::InternalError { msg: err })
-        }
-    }
+    // TODO replace with real service implementation
+    ready(()).await;
+    // Return an empty vector of fee percentiles
+    let fee_percentiles = Vec::new();
+    Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into()
 }
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
