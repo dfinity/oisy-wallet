@@ -1,4 +1,5 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
+import { ABTX_TOKEN } from '$env/tokens/tokens-spl/tokens.abtx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
@@ -14,17 +15,18 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
+	ABTX_TOKEN,
 	BONK_TOKEN,
 	EURC_TOKEN,
 	JUP_TOKEN,
+	MSTRX_TOKEN,
 	ORCA_TOKEN,
 	POPCAT_TOKEN,
 	RAY_TOKEN,
 	TRUMP_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN,
-	WSOL_TOKEN,
-	MSTRX_TOKEN
+	WSOL_TOKEN
 ];
 
 const SPL_TOKENS_DEVNET: RequiredSplToken[] = [DEVNET_USDC_TOKEN, DEVNET_EURC_TOKEN];
