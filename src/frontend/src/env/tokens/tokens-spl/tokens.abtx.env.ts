@@ -12,14 +12,14 @@ export const ABTX_SYMBOL = 'ABTx';
 export const ABTX_TOKEN_ID: TokenId = parseTokenId(ABTX_SYMBOL);
 
 export const ABTX_TOKEN: RequiredSplToken = {
-        id: ABTX_TOKEN_ID,
-        network: SOLANA_MAINNET_NETWORK,
-        standard: 'spl',
-        category: 'default',
-        name: 'Abbott xStock',
-        symbol: ABTX_SYMBOL,
-        decimals: ABTX_DECIMALS,
-        icon: abtx,
-        address: 'XsHtf5RpxsQ7jeJ9ivNewouZKJHbPxhPoEy6yYvULr7',
-        owner: TOKEN_2022_PROGRAM_ADDRESS
+	id: ABTX_TOKEN_ID,
+	network: SOLANA_MAINNET_NETWORK,
+	standard: 'spl',
+	category: 'default',
+	name: 'Abbott xStock',
+	symbol: ABTX_SYMBOL,
+	decimals: ABTX_DECIMALS,
+	icon: abtx,
+	address: 'XsHtf5RpxsQ7jeJ9ivNewouZKJHbPxhPoEy6yYvULr7',
+	owner: TOKEN_2022_PROGRAM_ADDRESS
 };
