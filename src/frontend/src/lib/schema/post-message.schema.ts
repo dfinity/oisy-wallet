@@ -120,7 +120,7 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncPowProtectionStatus'
 ]);
 
-export const PostMessageErrorResponseSchema = z.enum([
+const PostMessageErrorResponseSchema = z.enum([
 	'syncExchangeError',
 	'syncIcpWalletError',
 	'syncIcrcWalletError',
