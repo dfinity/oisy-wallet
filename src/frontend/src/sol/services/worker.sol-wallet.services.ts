@@ -26,21 +26,23 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	const isDevnetNetwork = isNetworkIdSOLDevnet(networkId);
 	const isLocalNetwork = isNetworkIdSOLLocal(networkId);
 
-	worker.onmessage = ({ data }: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
-		const { msg } = data;
+	worker.onmessage = ({
+		data: dataMsg
+	}: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncSolWallet':
 				syncWallet({
 					tokenId,
-					data: data.data
+					data: data as SolPostMessageDataResponseWallet
 				});
 				return;
 
 			case 'syncSolWalletError':
 				syncWalletError({
 					tokenId,
-					error: data.data.error,
+					error: (data as PostMessageDataResponseError).error,
 					hideToast: true
 				});
 				return;
