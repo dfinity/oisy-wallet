@@ -19,7 +19,7 @@
 	ariaLabel={$i18n.swap.text.swap}
 >
 	{#snippet icon()}
-		<IconCkConvert size="28" />
+		<IconCkConvert size="24" />
 	{/snippet}
 	{#snippet label()}
 		{$i18n.swap.text.swap}

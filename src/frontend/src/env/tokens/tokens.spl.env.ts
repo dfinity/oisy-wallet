@@ -2,6 +2,7 @@ import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
@@ -22,7 +23,8 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	TRUMP_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN,
-	WSOL_TOKEN
+	WSOL_TOKEN,
+	MSTRX_TOKEN
 ];
 
 const SPL_TOKENS_DEVNET: RequiredSplToken[] = [DEVNET_USDC_TOKEN, DEVNET_EURC_TOKEN];
