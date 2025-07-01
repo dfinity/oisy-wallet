@@ -125,6 +125,17 @@ export type BtcAddress =
 	| { P2WSH: string }
 	| { P2SH: string }
 	| { P2TR: string };
+export interface BtcGetFeePercentilesRequest {
+	network: BitcoinNetwork;
+}
+export interface BtcGetFeePercentilesResponse {
+	fee_percentiles: BigUint64Array | bigint[];
+}
+export type BtcGetFeePercentilesResult =
+	| {
+			Ok: BtcGetFeePercentilesResponse;
+	  }
+	| { Err: SelectedUtxosFeeError };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
@@ -228,6 +239,12 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
+export interface Erc20Token {
+	decimals: [] | [number];
+	token_address: string;
+	chain_id: bigint;
+	symbol: [] | [string];
+}
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
@@ -360,7 +377,11 @@ export interface SupportedCredential {
 export interface TestnetsSettings {
 	show_testnets: boolean;
 }
-export type Token = { Icrc: IcrcToken } | { SplDevnet: SplToken } | { SplMainnet: SplToken };
+export type Token =
+	| { Erc20: Erc20Token }
+	| { Icrc: IcrcToken }
+	| { SplDevnet: SplToken }
+	| { SplMainnet: SplToken };
 export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }
@@ -462,6 +483,10 @@ export interface _SERVICE {
 	btc_add_pending_transaction: ActorMethod<
 		[BtcAddPendingTransactionRequest],
 		BtcAddPendingTransactionResult
+	>;
+	btc_get_current_fee_percentiles: ActorMethod<
+		[BtcGetFeePercentilesRequest],
+		BtcGetFeePercentilesResult
 	>;
 	btc_get_pending_transactions: ActorMethod<
 		[BtcGetPendingTransactionsRequest],
