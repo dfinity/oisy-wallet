@@ -32,7 +32,7 @@ const saveLang = (lang: Languages) => set({ key: 'lang', value: lang });
 
 export interface I18nStore extends Readable<I18n> {
 	init: () => Promise<void>;
-	switchLang: (lang: Languages) => Promise<void>;
+	switchLang: (lang: Languages) => void;
 }
 
 const initI18n = (): I18nStore => {
