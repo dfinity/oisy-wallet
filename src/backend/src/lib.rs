@@ -1,5 +1,4 @@
-use std::future::ready;
-use std::{cell::RefCell, time::Duration};
+use std::{cell::RefCell, future::ready, time::Duration};
 
 use bitcoin_utils::estimate_fee;
 use candid::{candid_method, Principal};
