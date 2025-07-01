@@ -120,34 +120,37 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncPowProtectionStatus'
 ]);
 
-export const PostMessageResponseSchema = z.enum([
-	'signOutIdleTimer',
-	'delegationRemainingTime',
-	'syncExchange',
+export const PostMessageErrorResponseSchema = z.enum([
 	'syncExchangeError',
-	'syncIcpWallet',
-	'syncIcrcWallet',
-	'syncDip20Wallet',
-	'syncBtcWallet',
-	'syncSolWallet',
 	'syncIcpWalletError',
 	'syncIcrcWalletError',
 	'syncDip20WalletError',
 	'syncBtcWalletError',
 	'syncSolWalletError',
+	'syncBtcStatusesError',
+	'syncCkMinterInfoError',
+	'syncPowProtectionError'
+]);
+
+export const PostMessageResponseSchema = z.enum([
+	'signOutIdleTimer',
+	'delegationRemainingTime',
+	'syncExchange',
+	'syncIcpWallet',
+	'syncIcrcWallet',
+	'syncDip20Wallet',
+	'syncBtcWallet',
+	'syncSolWallet',
 	'syncIcpWalletCleanUp',
 	'syncIcrcWalletCleanUp',
 	'syncDip20WalletCleanUp',
 	'syncBtcStatuses',
-	'syncBtcStatusesError',
 	'syncCkMinterInfo',
-	'syncCkMinterInfoError',
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
 	'syncPowProgress',
 	'syncPowNextAllowance',
-	'syncPowProtectionError',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -188,6 +191,11 @@ export const PostMessageDataResponseErrorSchema = PostMessageDataResponseSchema.
 	error: z.unknown()
 });
 
+export const PostMessageDataErrorSchema = z.object({
+	msg: PostMessageErrorResponseSchema,
+	data: PostMessageDataResponseErrorSchema
+});
+
 export const PostMessageDataResponseWalletCleanUpSchema = PostMessageDataResponseSchema.extend({
 	transactionIds: z.array(z.string())
 });
@@ -216,7 +224,10 @@ export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
 	});
 
 export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
-	z.object({
-		msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
-		data: dataSchema.optional()
-	});
+	z.union([
+		z.object({
+			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
+			data: dataSchema
+		}),
+		PostMessageDataErrorSchema
+	]);
