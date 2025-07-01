@@ -10,6 +10,11 @@ use shared::types::bitcoin::FEE_PERCENTILES_UPDATE_INTERVAL;
 
 // Store fee percentiles in memory, with a map for each network type
 thread_local! {
+    // We use thread_local! + RefCell for fee percentiles cache because this data is ephemeral
+    // and refreshed every minute via timer. Since fee percentiles become stale quickly, there's
+    // no benefit to persisting them across canister upgrades - they'll be refreshed immediately
+    // after restart. Heap memory also provides faster access for frequent fee calculations during
+    // transaction processing.
     static FEE_PERCENTILES_CACHE: RefCell<HashMap<BitcoinNetwork, Vec<MillisatoshiPerByte>>> = RefCell::new(HashMap::new());
 }
 
