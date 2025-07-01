@@ -159,7 +159,6 @@ export class CkBTCUpdateBalanceScheduler
 		]);
 
 		const allUtxosTxids = allUtxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
-
 		const knownUtxosTxids = knownUtxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
 
 		return allUtxosTxids.some((txid) => !knownUtxosTxids.includes(txid));

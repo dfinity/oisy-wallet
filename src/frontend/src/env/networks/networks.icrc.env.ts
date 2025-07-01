@@ -79,10 +79,16 @@ export const LOCAL_CKBTC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKBTC_IN
 	| CanisterIdText
 	| null
 	| undefined;
+export const LOCAL_CKBTC_MINTER_CANISTER_ID = import.meta.env
+	.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
 
-export const LOCAL_CKBTC_MINTER_CANISTER_ID =
-	(import.meta.env.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText) ??
-	'mqygn-kiaaa-aaaar-qaadq-cai';
+export const CKBTC_MINTER_CANISTER_ID = LOCAL
+	? LOCAL_CKBTC_MINTER_CANISTER_ID
+	: STAGING || BETA || PROD
+		? (STAGING_CKBTC_MINTER_CANISTER_ID ?? IC_CKBTC_MINTER_CANISTER_ID)
+		: IC_CKBTC_MINTER_CANISTER_ID;
+
+console.warn('CKBTC_MINTER_CANISTER_ID=', CKBTC_MINTER_CANISTER_ID);
 
 const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&

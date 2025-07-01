@@ -7,10 +7,7 @@ import type {
 	BitcoinNetwork as BackendBitcoinNetwork,
 	PendingTransaction
 } from '$declarations/backend/backend.did';
-import {
-	BITCOIN_CANISTER_IDS,
-	LOCAL_CKBTC_MINTER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
+import { BITCOIN_CANISTER_IDS, CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
@@ -48,11 +45,13 @@ export const prepareTransactionUtxos = async ({
 	source
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
 	assertNonNullish(identity);
+	assertStringNotEmpty({ value: source, message: 'Source address is required' });
+	assertNonNullish(CKBTC_MINTER_CANISTER_ID);
 
 	// assertAmount({ amount });
-	assertStringNotEmpty({ value: source, message: 'Source address is required' });
+	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[CKBTC_MINTER_CANISTER_ID];
 
-	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[LOCAL_CKBTC_MINTER_CANISTER_ID];
+	console.warn('bitcoinCanisterId=', bitcoinCanisterId);
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);

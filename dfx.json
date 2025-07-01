@@ -311,6 +311,7 @@
 			"candid": "target/ic/ckbtc_minter.did",
 			"wasm": "target/ic/ckbtc_minter.wasm",
 			"init_arg_file": "target/ic/ckbtc_minter.args.did",
+			"specified_id": "ml52i-qqaaa-aaaar-qaaba-cai",
 			"remote": {
 				"id": {
 					"ic": "mqygn-kiaaa-aaaar-qaadq-cai",
@@ -559,10 +560,6 @@
 		}
 	},
 	"defaults": {
-		"bitcoin": {
-			"enabled": true,
-			"nodes": ["127.0.0.1:18444"]
-		},
 		"build": {
 			"args": "",
 			"packtool": ""
