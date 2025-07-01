@@ -64,6 +64,7 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana,
 	isNetworkSolana,
+	isPseudoNetworkIdIcpTestnet,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -86,6 +87,20 @@ describe('network utils', () => {
 
 		it('should return false for non-ICP network', () => {
 			expect(isNetworkSolana(ETHEREUM_NETWORK)).toBeFalsy();
+		});
+	});
+
+	describe('isPseudoNetworkIdIcpTestnet', () => {
+		it('should return false for ICP network ID', () => {
+			expect(isPseudoNetworkIdIcpTestnet(ICP_NETWORK_ID)).toBeFalsy();
+		});
+
+		it('should return true for ICP pseud-network ID', () => {
+			expect(isPseudoNetworkIdIcpTestnet(ICP_PSEUDO_TESTNET_NETWORK_ID)).toBeTruthy();
+		});
+
+		it('should return false for non-ICP network ID', () => {
+			expect(isPseudoNetworkIdIcpTestnet(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 

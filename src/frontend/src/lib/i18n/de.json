@@ -52,7 +52,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Vermögen",
-			"settings": "Einrichten",
+			"settings": "Einstellungen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
 			"airdrops": "Prämien",
@@ -554,7 +554,7 @@
 	},
 	"receive": {
 		"text": {
-			"receive": "Empfang",
+			"receive": "Empfangen",
 			"address": "Empfangsadresse",
 			"receive_token": "$token empfangen"
 		},
@@ -911,7 +911,8 @@
 				"list_settings": "Listen-Einstellungen",
 				"import_token": "Token importieren",
 				"network": "Netzwerk",
-				"all_tokens_zero_balance": "Alle Token haben Nullsaldo."
+				"all_tokens_zero_balance": "Alle Token haben Nullsaldo.",
+				"enable_more_assets": "Mehr Token aktivieren"
 			},
 			"placeholder": {
 				"select_network": "Netzwerk auswählen"

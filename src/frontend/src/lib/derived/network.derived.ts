@@ -13,7 +13,8 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdPolygon,
-	isNetworkIdSolana
+	isNetworkIdSolana,
+	isPseudoNetworkIdIcpTestnet
 } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -29,6 +30,10 @@ export const networkId: Readable<NetworkId | undefined> = derived(
 export const selectedNetwork: Readable<Network | undefined> = derived(
 	[networks, networkId],
 	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId)
+);
+
+export const pseudoNetworkICPTestnet: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isPseudoNetworkIdIcpTestnet($networkId)
 );
 
 export const networkICP: Readable<boolean> = derived([networkId], ([$networkId]) =>
