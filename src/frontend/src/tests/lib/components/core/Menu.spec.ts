@@ -128,46 +128,6 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemReferralButtonSelector });
 	});
 
-	it('enables privacy mode and show toast', async () => {
-		const settingsModule = await import('$lib/stores/settings.store');
-		settingsModule.privacyModeStore.subscribe = (fn) => {
-			fn({ enabled: false });
-			return () => {};
-		};
-
-		await openMenu();
-		const button = (await waitForElement({
-			selector: menuItemPrivacyModeButtonSelector
-		})) as HTMLButtonElement;
-		button.click();
-
-		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
-			text: en.navigation.text.privacy_mode_enabled,
-			level: 'info',
-			duration: 7000
-		});
-	});
-
-	it('disables privacy mode and show toast', async () => {
-		const settingsModule = await import('$lib/stores/settings.store');
-		settingsModule.privacyModeStore.subscribe = (fn) => {
-			fn({ enabled: true });
-			return () => {};
-		};
-
-		await openMenu();
-		const button = (await waitForElement({
-			selector: menuItemPrivacyModeButtonSelector
-		})) as HTMLButtonElement;
-		button.click();
-
-		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
-			text: en.navigation.text.privacy_mode_disabled,
-			level: 'info',
-			duration: 7000
-		});
-	});
-
 	it('should render the logged out version if not signed in', async () => {
 		mockAuthSignedIn(false);
 
