@@ -34,21 +34,23 @@ export const initBtcWalletWorker = async ({
 	const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
 	const isMainnetNetwork = isNetworkIdBTCMainnet(networkId);
 
-	worker.onmessage = ({ data }: MessageEvent<PostMessage<BtcPostMessageDataResponseWallet>>) => {
-		const { msg } = data;
+	worker.onmessage = ({
+		data: dataMsg
+	}: MessageEvent<PostMessage<BtcPostMessageDataResponseWallet>>) => {
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncBtcWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as BtcPostMessageDataResponseWallet
+					data: data as BtcPostMessageDataResponseWallet
 				});
 				return;
 
 			case 'syncBtcWalletError':
 				syncWalletError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error,
+					error: (data as PostMessageDataResponseError).error,
 					/**
 					 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
 					 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.

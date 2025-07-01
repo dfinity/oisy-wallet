@@ -41,7 +41,7 @@ export const initIcrcWalletWorker = async ({
 	};
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<
 			| PostMessageDataResponseWallet
@@ -49,19 +49,19 @@ export const initIcrcWalletWorker = async ({
 			| PostMessageDataResponseWalletCleanUp
 		>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncIcrcWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as PostMessageDataResponseWallet
+					data: data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcrcWalletError':
 				onLoadTransactionsError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: (data as PostMessageDataResponseError).error
 				});
 
 				// In case of error, we start the listener again, but only with the ledgerCanisterId,
@@ -74,7 +74,7 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId,
-					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
+					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
 		}

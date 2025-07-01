@@ -7,16 +7,16 @@ export const initAuthWorker = async () => {
 	const authWorker: Worker = new AuthWorker.default();
 
 	authWorker.onmessage = async ({
-		data
+		data: dataMsg
 	}: MessageEvent<PostMessage<PostMessageDataResponseAuth>>) => {
-		const { msg, data: value } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'signOutIdleTimer':
 				await idleSignOut();
 				return;
 			case 'delegationRemainingTime':
-				authRemainingTimeStore.set(value?.authRemainingTime);
+				authRemainingTimeStore.set(data?.authRemainingTime);
 				return;
 		}
 	};

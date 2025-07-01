@@ -20,7 +20,7 @@ export const initPowProtectorWorker: PowProtectorWorker =
 		const worker: Worker = new PowWorker.default();
 
 		worker.onmessage = ({
-			data
+			data: dataMsg
 		}: MessageEvent<
 			PostMessage<
 				| PostMessageDataResponsePowProtectorProgress
@@ -28,19 +28,19 @@ export const initPowProtectorWorker: PowProtectorWorker =
 				| PostMessageDataResponseError
 			>
 		>) => {
-			const { msg } = data;
+			const { msg, data } = dataMsg;
 
 			switch (msg) {
 				case 'syncPowProgress': {
 					syncPowProgress({
-						data: data.data as PostMessageDataResponsePowProtectorProgress
+						data: data as PostMessageDataResponsePowProtectorProgress
 					});
 					return;
 				}
 				case 'syncPowNextAllowance': {
 					// Check if data.data exists and has proper structure
 					syncPowNextAllowance({
-						data: data.data as PostMessageDataResponsePowProtectorNextAllowance
+						data: data as PostMessageDataResponsePowProtectorNextAllowance
 					});
 					return;
 				}

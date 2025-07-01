@@ -55,27 +55,27 @@ const initCkMinterInfoWorker = async ({
 	const worker: Worker = new CkMinterInfoWorker.default();
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<PostMessageJsonDataResponse | PostMessageDataResponseError | PostMessageSyncState>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncCkMinterInfo':
 				onSyncSuccess({
 					tokenId,
-					data: data.data as PostMessageJsonDataResponse
+					data: data as PostMessageJsonDataResponse
 				});
 				return;
 			case 'syncCkMinterInfoError':
 				onSyncError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: (data as PostMessageDataResponseError).error
 				});
 				return;
 			case 'syncCkMinterInfoStatus':
-				onSyncStatus((data.data as PostMessageSyncState).state);
+				onSyncStatus((data as PostMessageSyncState).state);
 				return;
 		}
 	};
