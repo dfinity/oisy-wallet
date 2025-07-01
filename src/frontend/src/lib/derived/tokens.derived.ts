@@ -6,6 +6,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
@@ -21,6 +22,8 @@ import {
 } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+import type { SplToken } from '$sol/types/spl';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
@@ -79,17 +82,23 @@ export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledT
  */
 export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	[enabledTokens],
-	([$enabledTokens]) =>
-		$enabledTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
+	([$enabledTokens]) => $enabledTokens.filter(isTokenErc20)
 );
 
 /**
- * The following store is used as reference for the list of WalletWorkers that are started/stopped in the main token page.
+ * The following store is used as a reference for the list of WalletWorkers that are started/stopped in the main token page.
  */
 // TODO: The several dependencies of enabledIcTokens are not strictly only IC tokens, but other tokens too.
 //  We should find a better way to handle this, improving the store.
 export const enabledIcTokens: Readable<IcToken[]> = derived([enabledTokens], ([$enabledTokens]) =>
 	$enabledTokens.filter(isTokenIc)
+);
+
+/**
+ * The following store is used as a reference for the list of WalletWorkers that are started/stopped in the main token page.
+ */
+export const enabledSplTokens: Readable<SplToken[]> = derived([enabledTokens], ([$enabledTokens]) =>
+	$enabledTokens.filter(isTokenSpl)
 );
 
 /**
