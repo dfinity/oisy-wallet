@@ -4,11 +4,7 @@ import {
 	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import type { WalletWorker } from '$lib/types/listener';
-import type {
-	PostMessage,
-	PostMessageDataRequestSol,
-	PostMessageDataResponseError
-} from '$lib/types/post-message';
+import type { PostMessage, PostMessageDataRequestSol } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
@@ -30,21 +26,23 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	const isDevnetNetwork = isNetworkIdSOLDevnet(networkId);
 	const isLocalNetwork = isNetworkIdSOLLocal(networkId);
 
-	worker.onmessage = ({ data }: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
-		const { msg } = data;
+	worker.onmessage = ({
+		data: dataMsg
+	}: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncSolWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as SolPostMessageDataResponseWallet
+					data: data as SolPostMessageDataResponseWallet
 				});
 				return;
 
 			case 'syncSolWalletError':
 				syncWalletError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error,
+					error: data.error,
 					hideToast: true
 				});
 				return;
