@@ -8,7 +8,7 @@ import {
 } from '$lib/stores/address.store';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { WalletWorker } from '$lib/types/listener';
-import type { PostMessage } from '$lib/types/post-message';
+import type { PostMessage, PostMessageDataResponseError } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdBTCMainnet,
