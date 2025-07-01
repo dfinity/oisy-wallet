@@ -129,6 +129,12 @@ type BtcAddress = variant {
 	P2SH : text;
 	P2TR : text
 };
+type BtcGetFeePercentilesRequest = record { network : BitcoinNetwork };
+type BtcGetFeePercentilesResponse = record { fee_percentiles : vec nat64 };
+type BtcGetFeePercentilesResult = variant {
+	Ok : BtcGetFeePercentilesResponse;
+	Err : SelectedUtxosFeeError
+};
 type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
@@ -445,6 +451,9 @@ service : (Arg) -> {
 	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (
 		BtcAddPendingTransactionResult
 	);
+	btc_get_current_fee_percentiles : (BtcGetFeePercentilesRequest) -> (
+		BtcGetFeePercentilesResult
+	) query;
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
