@@ -28,7 +28,7 @@
 >
 	<div class="flex min-w-0 flex-col items-center justify-center">
 		{@render icon()}
-		<span class="block w-full truncate text-xs">
+		<span class="block w-full truncate text-xs md:text-sm">
 			{@render label()}
 		</span>
 	</div>
