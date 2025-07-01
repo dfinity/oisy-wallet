@@ -4,6 +4,7 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
+import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
@@ -20,6 +21,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	EURC_TOKEN,
 	JUP_TOKEN,
 	MSTRX_TOKEN,
+	NVDAX_TOKEN,
 	ORCA_TOKEN,
 	POPCAT_TOKEN,
 	RAY_TOKEN,
