@@ -19,7 +19,6 @@ import type {
 	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
-	PostMessageErrorResponseSchema,
 	PostMessageJsonDataResponseSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
@@ -55,8 +54,6 @@ export type PostMessageDataRequestBtc = z.infer<typeof PostMessageDataRequestBtc
 export type PostMessageDataRequestSol = z.infer<typeof PostMessageDataRequestSolSchema>;
 
 export type PostMessageResponseStatus = z.infer<typeof PostMessageResponseStatusSchema>;
-
-export type PostMessageErrorResponse = z.infer<typeof PostMessageErrorResponseSchema>;
 
 export type PostMessageResponse = z.infer<typeof PostMessageResponseSchema>;
 
