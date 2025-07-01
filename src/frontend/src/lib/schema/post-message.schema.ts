@@ -227,7 +227,7 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 	z.union([
 		z.object({
 			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
-			data: dataSchema
+			data: dataSchema.optional()
 		}),
 		PostMessageDataErrorSchema
 	]);
