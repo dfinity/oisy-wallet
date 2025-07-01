@@ -41,7 +41,7 @@ export const initDip20WalletWorker = async ({
 			case 'syncDip20WalletError':
 				onLoadTransactionsError({
 					tokenId,
-					error: (data.data).error
+					error: data.data.error
 				});
 
 				return;

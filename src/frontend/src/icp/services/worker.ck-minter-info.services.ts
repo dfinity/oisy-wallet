@@ -71,7 +71,7 @@ const initCkMinterInfoWorker = async ({
 			case 'syncCkMinterInfoError':
 				onSyncError({
 					tokenId,
-					error: (data.data).error
+					error: data.data.error
 				});
 				return;
 			case 'syncCkMinterInfoStatus':

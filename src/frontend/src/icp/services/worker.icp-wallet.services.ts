@@ -37,7 +37,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			case 'syncIcpWalletError':
 				onLoadTransactionsError({
 					tokenId: ICP_TOKEN_ID,
-					error: (data.data).error
+					error: data.data.error
 				});
 				return;
 			case 'syncIcpWalletCleanUp':

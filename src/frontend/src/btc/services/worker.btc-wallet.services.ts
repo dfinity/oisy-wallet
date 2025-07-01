@@ -8,7 +8,7 @@ import {
 } from '$lib/stores/address.store';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { WalletWorker } from '$lib/types/listener';
-import type { PostMessage, PostMessageDataResponseError } from '$lib/types/post-message';
+import type { PostMessage } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdBTCMainnet,
@@ -48,7 +48,7 @@ export const initBtcWalletWorker = async ({
 			case 'syncBtcWalletError':
 				syncWalletError({
 					tokenId,
-					error: (data.data).error,
+					error: data.data.error,
 					/**
 					 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
 					 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
