@@ -19,12 +19,12 @@ const deI18n = (): I18n => ({
 	lang: Languages.GERMAN
 });
 
-const loadLang = (lang: Languages): Promise<I18n> => {
+const loadLang = (lang: Languages): I18n => {
 	switch (lang) {
 		case Languages.GERMAN:
-			return Promise.resolve(deI18n());
+			return deI18n();
 		default:
-			return Promise.resolve(enI18n());
+			return enI18n();
 	}
 };
 
@@ -36,10 +36,10 @@ export interface I18nStore extends Readable<I18n> {
 }
 
 const initI18n = (): I18nStore => {
-	const { subscribe, set } = writable<I18n>(enI18n());
+	const { subscribe, set } = writable<I18n>(loadLang(getDefaultLang()));
 
 	const switchLang = async (lang: Languages) => {
-		const bundle = await loadLang(lang);
+		const bundle = loadLang(lang);
 		set(bundle);
 
 		trackEvent({
@@ -57,9 +57,12 @@ const initI18n = (): I18nStore => {
 		subscribe,
 
 		init: async () => {
+			console.log('i18n is ' + (I18N_ENABLED ? 'enabled' : 'not enabled'));
+			console.log(getDefaultLang());
 			const lang = I18N_ENABLED
 				? (get<Languages>({ key: 'lang' }) ?? getDefaultLang())
 				: Languages.ENGLISH;
+			console.log(lang);
 
 			if (lang === getDefaultLang()) {
 				saveLang(lang);
