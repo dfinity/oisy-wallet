@@ -1,6 +1,6 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
-import { ABBVX_TOKEN } from '$env/tokens/tokens-spl/tokens.abbvx.env';
 import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
+import { ABBVX_TOKEN } from '$env/tokens/tokens-spl/tokens.abbvx.env';
 import { ABTX_TOKEN } from '$env/tokens/tokens-spl/tokens.abtx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
