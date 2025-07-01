@@ -8,6 +8,7 @@ import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import {
 	JsonTransactionsTextSchema,
 	POST_MESSAGE_REQUESTS,
+	PostMessageDataErrorSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -23,6 +24,7 @@ import {
 	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
+	PostMessageErrorResponseSchema,
 	PostMessageJsonDataResponseSchema,
 	PostMessageRequestSchema,
 	PostMessageResponseSchema,
@@ -348,22 +350,15 @@ describe('post-message.schema', () => {
 			'signOutIdleTimer',
 			'delegationRemainingTime',
 			'syncExchange',
-			'syncExchangeError',
 			'syncIcpWallet',
 			'syncIcrcWallet',
 			'syncDip20Wallet',
 			'syncBtcWallet',
-			'syncIcpWalletError',
-			'syncIcrcWalletError',
-			'syncDip20WalletError',
-			'syncBtcWalletError',
 			'syncIcpWalletCleanUp',
 			'syncIcrcWalletCleanUp',
 			'syncDip20WalletCleanUp',
 			'syncBtcStatuses',
-			'syncBtcStatusesError',
 			'syncCkMinterInfo',
-			'syncCkMinterInfoError',
 			'syncBtcPendingUtxos',
 			'syncCkBTCUpdateOk',
 			'syncBtcAddress',
@@ -599,6 +594,52 @@ describe('post-message.schema', () => {
 		});
 	});
 
+	describe('PostMessageDataErrorSchema', () => {
+		const [validErrorResponseMsg] = PostMessageErrorResponseSchema.options;
+
+		it('should validate when error is provided with any type of value', () => {
+			const validData = {
+				error: 'An error occurred'
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validData })
+			).toEqual({ msg: validErrorResponseMsg, data: validData });
+
+			const validDataNumber = {
+				error: 12345
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataNumber })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataNumber });
+
+			const validDataObject = {
+				error: { message: 'An error occurred' }
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataObject })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataObject });
+
+			const validDataArray = {
+				error: ['Error 1', 'Error 2']
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataArray })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataArray });
+		});
+
+		it('should validate when error is missing, as it’s optional in the base schema', () => {
+			const validData = {};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validData })
+			).toEqual({ msg: validErrorResponseMsg, data: validData });
+		});
+	});
+
 	describe('PostMessageDataResponseWalletCleanUpSchema', () => {
 		it('should validate when transactionIds is provided as an array of strings', () => {
 			const validData = {
@@ -745,6 +786,30 @@ describe('post-message.schema', () => {
 		it('should validate with a valid msg and no data (data is optional)', () => {
 			const validPayload = {
 				msg: validRequestMsg
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = { error: 'mock-error' };
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an optional error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = {};
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
 			};
 
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
