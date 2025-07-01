@@ -8,7 +8,10 @@ use crate::{
     types::{
         backend_config::{Config, InitArg},
         contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
-        custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
+        custom_token::{
+            CustomToken, CustomTokenId, Erc20Token, Erc20TokenId, IcrcToken, SplToken, SplTokenId,
+            Token,
+        },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
             NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
@@ -79,6 +82,11 @@ impl From<&Token> for CustomTokenId {
             Token::SplDevnet(SplToken { token_address, .. }) => {
                 CustomTokenId::SolDevnet(token_address.clone())
             }
+            Token::Erc20(Erc20Token {
+                token_address,
+                chain_id,
+                ..
+            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
         }
     }
 }
@@ -408,14 +416,32 @@ impl Validate for SplTokenId {
     }
 }
 
+impl Erc20TokenId {
+    pub const MAX_LENGTH: usize = 42;
+    pub const MIN_LENGTH: usize = 42;
+}
+
+impl Validate for Erc20TokenId {
+    /// Verifies that an Ethereum/EVM address is valid.
+    fn validate(&self) -> Result<(), candid::Error> {
+        if self.0.len() != 42 {
+            return Err(candid::Error::msg(
+                "Invalid Ethereum/EVM contract address length",
+            ));
+        }
+        Ok(())
+    }
+}
+
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
-            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle we could */
+            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle, we could */
             // check the exact type of principal.
             CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
                 token_address.validate()
             }
+            CustomTokenId::Ethereum(token_address, _) => token_address.validate(),
         }
     }
 }
@@ -431,11 +457,28 @@ impl Validate for Token {
         match self {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
+            Token::Erc20(token) => token.validate(),
         }
     }
 }
 
 impl Validate for SplToken {
+    fn validate(&self) -> Result<(), candid::Error> {
+        use crate::types::MAX_SYMBOL_LENGTH;
+        if let Some(symbol) = &self.symbol {
+            if symbol.chars().count() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg(format!(
+                    "Symbol too long: {} > {}",
+                    symbol.len(),
+                    MAX_SYMBOL_LENGTH
+                )));
+            }
+        }
+        self.token_address.validate()
+    }
+}
+
+impl Validate for Erc20Token {
     fn validate(&self) -> Result<(), candid::Error> {
         use crate::types::MAX_SYMBOL_LENGTH;
         if let Some(symbol) = &self.symbol {
@@ -574,4 +617,6 @@ validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
+validate_on_deserialize!(Erc20Token);
+validate_on_deserialize!(Erc20TokenId);
 validate_on_deserialize!(UserToken);

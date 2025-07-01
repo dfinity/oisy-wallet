@@ -228,6 +228,12 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
+export interface Erc20Token {
+	decimals: [] | [number];
+	token_address: string;
+	chain_id: bigint;
+	symbol: [] | [string];
+}
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
@@ -360,7 +366,11 @@ export interface SupportedCredential {
 export interface TestnetsSettings {
 	show_testnets: boolean;
 }
-export type Token = { Icrc: IcrcToken } | { SplDevnet: SplToken } | { SplMainnet: SplToken };
+export type Token =
+	| { Erc20: Erc20Token }
+	| { Icrc: IcrcToken }
+	| { SplDevnet: SplToken }
+	| { SplMainnet: SplToken };
 export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }
