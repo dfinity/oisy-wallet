@@ -381,18 +381,18 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 
-// TODO replace caller_is_controller with caller_is_not_anonymous
-#[query(guard = "caller_is_controller")]
+
+#[query(guard = "caller_is_not_anonymous")]
 #[must_use]
-#[allow(unused_variables)]
 pub async fn btc_get_current_fee_percentiles(
     params: BtcGetFeePercentilesRequest,
 ) -> BtcGetFeePercentilesResult {
-    // TODO replace with real service implementation
-    ready(()).await;
-    // Return an empty vector of fee percentiles
-    let fee_percentiles = Vec::new();
-    Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into()
+    match get_current_fee_percentiles(params.network).await {
+        Ok(fee_percentiles) => Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into(),
+        Err(err) => {
+            BtcGetFeePercentilesResult::Err(SelectedUtxosFeeError::InternalError { msg: err })
+        }
+    }
 }
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
