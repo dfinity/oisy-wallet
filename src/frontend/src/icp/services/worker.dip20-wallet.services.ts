@@ -21,7 +21,7 @@ export const initDip20WalletWorker = async ({
 	const worker: Worker = new WalletWorker.default();
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<
 			| PostMessageDataResponseWallet
@@ -29,26 +29,26 @@ export const initDip20WalletWorker = async ({
 			| PostMessageDataResponseWalletCleanUp
 		>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncDip20Wallet':
 				syncWallet({
 					tokenId,
-					data: data.data as PostMessageDataResponseWallet
+					data: data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncDip20WalletError':
 				onLoadTransactionsError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: data.error
 				});
 
 				return;
 			case 'syncDip20WalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId,
-					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
+					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
 		}
