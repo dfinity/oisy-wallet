@@ -1,47 +1,59 @@
-<!-- DelayedTooltip.svelte -->
 <script lang="ts">
-    import { Tooltip } from '@dfinity/gix-components';
-    import { onDestroy } from 'svelte';
-  
-    interface Props {
-      text: string;
-      delay?: number;
-      onShow?: () => void;
-      onHide?: () => void;
-    }
-    let { text, delay = 1500, onShow, onHide }: Props = $props();
-  
-    let visible = false;
-    let timeout: ReturnType<typeof setTimeout>;
-  
-    function handleEnter() {
-      timeout = setTimeout(() => {
-        visible = true;
-        onShow?.();
-      }, delay);
-    }
-  
-    function handleLeave() {
-      clearTimeout(timeout);
-      if (visible) {
-        visible = false;
-        onHide?.();
-      }
-    }
-  
-    onDestroy(() => clearTimeout(timeout));
-  </script>
-  
-  <span
-    role="button"
-    tabindex="0"
-    onmouseenter={handleEnter}
-    onmouseleave={handleLeave}
-    onfocus={handleEnter}
-    onblur={handleLeave}
-  >
-    <Tooltip text={text} >
-      <slot />
-    </Tooltip>
-  </span>
-  
+	import { Tooltip } from '@dfinity/gix-components';
+	import { onDestroy } from 'svelte';
+
+	interface TooltipProps {
+		text: string;
+		delay?: number;
+	}
+
+	const props = $props();
+	const { text, delay = 1500 } = props as TooltipProps;
+
+	let timer = $state<ReturnType<typeof setTimeout>>();
+	let tooltipActive = $state(false);
+
+	const handleEnter = () => {
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			tooltipActive = true;
+		}, delay);
+	};
+
+	const handleLeave = () => {
+		clearTimeout(timer);
+		tooltipActive = false;
+	};
+
+	onDestroy(() => clearTimeout(timer));
+</script>
+
+<div class="relative inline-block">
+	{#if tooltipActive}
+		<Tooltip {text}>
+			<span
+				class="inline-block sm:py-1"
+				role="button"
+				tabindex="0"
+				onmouseenter={handleEnter}
+				onmouseleave={handleLeave}
+				onfocus={handleEnter}
+				onblur={handleLeave}
+			>
+				<slot />
+			</span>
+		</Tooltip>
+	{:else}
+		<span
+			class="inline-block sm:py-1"
+			role="button"
+			tabindex="0"
+			onmouseenter={handleEnter}
+			onmouseleave={handleLeave}
+			onfocus={handleEnter}
+			onblur={handleLeave}
+		>
+			<slot />
+		</span>
+	{/if}
+</div>

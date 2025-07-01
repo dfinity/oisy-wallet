@@ -1,8 +1,8 @@
 <script lang="ts">
-	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
@@ -24,7 +24,7 @@
 </script>
 
 <span class="flex flex-col items-center gap-4">
-	<output class="mt-8 inline-block break-all text-5xl font-bold">
+	<output class="mt-7 inline-block break-all text-5xl font-bold">
 		{#if $loaded}
 			{#if hideBalance}
 				<IconDots variant="lg" times={6} styleClass="my-4.25" />
