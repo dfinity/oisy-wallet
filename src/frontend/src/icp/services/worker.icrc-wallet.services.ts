@@ -61,7 +61,7 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWalletError':
 				onLoadTransactionsError({
 					tokenId,
-					error: (data as PostMessageDataResponseError).error
+					error: (data).error
 				});
 
 				// In case of error, we start the listener again, but only with the ledgerCanisterId,
