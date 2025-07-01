@@ -61,7 +61,7 @@ export const POST_MESSAGE_REQUESTS = [
 export const PostMessageRequestSchema = z.enum(POST_MESSAGE_REQUESTS);
 
 export const PostMessageDataRequestSchema = z.never();
-export const PostMessageDataResponseSchema = z.object({}).strict();
+export const PostMessageDataResponseSchema = z.looseObject({});
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
