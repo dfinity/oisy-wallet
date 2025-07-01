@@ -23,6 +23,7 @@ import {
 	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
+	PostMessageErrorResponseSchema,
 	PostMessageJsonDataResponseSchema,
 	PostMessageRequestSchema,
 	PostMessageResponseSchema,
@@ -738,6 +739,30 @@ describe('post-message.schema', () => {
 		it('should validate with a valid msg and no data (data is optional)', () => {
 			const validPayload = {
 				msg: validRequestMsg
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = { error: 'mock-error' };
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an optional error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = {};
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
 			};
 
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
