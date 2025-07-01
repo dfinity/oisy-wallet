@@ -49,7 +49,6 @@ use shared::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
         },
-        snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
@@ -887,19 +886,6 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
             })
             .collect()
     })
-}
-
-/// Saves a snapshot of the user's account.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)] // Canister API methods are always pass by value.
-pub fn set_snapshot(snapshot: UserSnapshot) {
-    todo!("TODO: Set snapshot to: {:?}", snapshot);
-}
-/// Gets the caller's last snapshot.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_snapshot() -> Option<UserSnapshot> {
-    todo!()
 }
 
 /// Creates a new contact for the caller.
