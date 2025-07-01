@@ -138,14 +138,7 @@ pub async fn get_current_fee_percentiles(
         FEE_PERCENTILES_CACHE.with(|cache| cache.borrow().get(&network).cloned());
 
     match cached_percentiles {
-        Some(percentiles) if !percentiles.is_empty() => {
-            ic_cdk::println!(
-                "Using cached fee percentiles for network {:?}: {:?}",
-                network,
-                percentiles
-            );
-            Ok(percentiles)
-        }
+        Some(percentiles) if !percentiles.is_empty() => Ok(percentiles),
         _ => {
             // Return an error instead of fetching directly
             Err(format!(
