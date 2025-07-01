@@ -8,6 +8,7 @@ import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import {
 	JsonTransactionsTextSchema,
 	POST_MESSAGE_REQUESTS,
+	PostMessageDataErrorSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -590,6 +591,52 @@ describe('post-message.schema', () => {
 			const validData = {};
 
 			expect(PostMessageDataResponseErrorSchema.parse(validData)).toEqual(validData);
+		});
+	});
+
+	describe('PostMessageDataErrorSchema', () => {
+		const [validErrorResponseMsg] = PostMessageErrorResponseSchema.options;
+
+		it('should validate when error is provided with any type of value', () => {
+			const validData = {
+				error: 'An error occurred'
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validData })
+			).toEqual({ msg: validErrorResponseMsg, data: validData });
+
+			const validDataNumber = {
+				error: 12345
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataNumber })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataNumber });
+
+			const validDataObject = {
+				error: { message: 'An error occurred' }
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataObject })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataObject });
+
+			const validDataArray = {
+				error: ['Error 1', 'Error 2']
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataArray })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataArray });
+		});
+
+		it('should validate when error is missing, as it’s optional in the base schema', () => {
+			const validData = {};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validData })
+			).toEqual({ msg: validErrorResponseMsg, data: validData });
 		});
 	});
 
