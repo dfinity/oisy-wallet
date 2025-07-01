@@ -1,3 +1,4 @@
+use crate::bitcoin_api::get_current_fee_percentiles;
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;

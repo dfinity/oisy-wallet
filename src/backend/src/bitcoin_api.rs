@@ -8,13 +8,10 @@ use ic_cdk::api::management_canister::bitcoin::{
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::bitcoin::FEE_PERCENTILES_UPDATE_INTERVAL;
 
-// Store fee percentiles in memory, with a map for each network type
 thread_local! {
-    // We use thread_local! + RefCell for fee percentiles cache because this data is ephemeral
-    // and refreshed every minute via timer. Since fee percentiles become stale quickly, there's
-    // no benefit to persisting them across canister upgrades - they'll be refreshed immediately
-    // after restart. Heap memory also provides faster access for frequent fee calculations during
-    // transaction processing.
+    // We use thread_local! + RefCell for fee percentiles cache since the data is refreshed
+    // regularly via timer. Heap memory provides faster access for frequent fee calculations,
+    // and there's no need to persist these quickly-stale values across canister upgrades.
     static FEE_PERCENTILES_CACHE: RefCell<HashMap<BitcoinNetwork, Vec<MillisatoshiPerByte>>> = RefCell::new(HashMap::new());
 }
 
@@ -156,44 +153,6 @@ pub async fn get_current_fee_percentiles(
         }
     }
 }
-
-/*
-/// Returns the 100 fee percentiles measured in millisatoshi/byte.
-/// Percentiles are computed from the last 10,000 transactions (if available).
-///
-/// This function returns the cached values updated by the timer interval.
-/// If there are no cached values, it fetches them directly.
-pub async fn get_current_fee_percentiles(
-    network: BitcoinNetwork,
-) -> Result<Vec<MillisatoshiPerByte>, String> {
-    // Try to get from cache first
-    let cached_percentiles =
-        FEE_PERCENTILES_CACHE.with(|cache| cache.borrow().get(&network).cloned());
-
-    match cached_percentiles {
-        Some(percentiles) if !percentiles.is_empty() => {
-            ic_cdk::println!(
-                "Using cached fee percentiles for network {:?}: {:?}",
-                network,
-                percentiles
-            );
-            Ok(percentiles)
-        }
-        _ => {
-            // Cache miss or empty cache, fetch directly and update cache
-            ic_cdk::println!(
-                "Cache miss or empty cache for network {:?}, fetching percentiles directly",
-                network
-            );
-            let percentiles = fetch_current_fee_percentiles(network).await?;
-            FEE_PERCENTILES_CACHE.with(|cache| {
-                cache.borrow_mut().insert(network, percentiles.clone());
-            });
-            Ok(percentiles)
-        }
-    }
-}
-*/
 
 /// Returns the 50th percentile for sending fees.
 pub async fn get_fee_per_byte(network: BitcoinNetwork) -> Result<u64, String> {
