@@ -62,7 +62,7 @@ const initI18n = (): I18nStore => {
 
 			if (lang === getDefaultLang()) {
 				saveLang(lang);
-				// No need to reload the store, English is already the default
+				// No need to reload the store, store is already initialised with the default
 				return;
 			}
 
