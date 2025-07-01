@@ -13,8 +13,10 @@ type CustomTokenNetworkKeys = Token extends infer T
 type TokenVariant<K extends CustomTokenNetworkKeys, T> = T & { networkKey: K };
 
 export type IcrcSaveCustomToken = Pick<IcrcCustomToken, 'ledgerCanisterId' | 'indexCanisterId'>;
+
 export type Erc20SaveCustomToken = Pick<Erc20Token, 'address' | 'decimals' | 'symbol'> &
 	Pick<Erc20Token['network'], 'chainId'>;
+
 export type SplSaveCustomToken = Pick<SplToken, 'address' | 'decimals' | 'symbol'>;
 
 export type SaveCustomToken = UserTokenState &
