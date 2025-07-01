@@ -32,8 +32,11 @@ export const isNetworkICP = (network: Network | undefined): boolean => isNetwork
 export const isNetworkSolana = (network: Network | undefined): network is SolanaNetwork =>
 	isNetworkIdSolana(network?.id);
 
+export const isPseudoNetworkIdIcpTestnet: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && id === ICP_PSEUDO_TESTNET_NETWORK_ID;
+
 export const isNetworkIdICP: IsNetworkIdUtil = (id) =>
-	nonNullish(id) && (ICP_NETWORK_ID === id || ICP_PSEUDO_TESTNET_NETWORK_ID === id);
+	(nonNullish(id) && ICP_NETWORK_ID === id) || isPseudoNetworkIdIcpTestnet(id);
 
 export const isNetworkIdEthereum: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_ETHEREUM_NETWORK_IDS.includes(id);
