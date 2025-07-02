@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import type { IcCkToken } from '$icp/types/ic-token';
@@ -8,18 +7,19 @@
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
 	let ckEthToken: IcCkToken | undefined;
 	$: (() => {
-		if (nonNullish(ckEthToken)) {
+		if (nonNullish(ckEthToken) || isNullish($pageToken)) {
 			return;
 		}
 
 		ckEthToken = findTwinToken({
-			tokenToPair: ETHEREUM_TOKEN,
+			tokenToPair: $pageToken,
 			tokens: $tokens
 		});
 	})();
