@@ -381,6 +381,21 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 
+/// Retrieves the current fee percentiles for Bitcoin transactions from the cache
+/// for the specified network. Fee percentiles are measured in millisatoshi per byte
+/// and are periodically updated in the background.
+///
+/// # Returns
+/// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
+/// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+///
+/// # Errors
+/// - `InternalError`: If fee percentiles are not available in the cache for the requested network
+///
+/// # Note
+/// This function only returns data from the in-memory cache and doesn't make any calls
+/// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
+/// an error is returned rather than fetching fresh data.
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub async fn btc_get_current_fee_percentiles(
