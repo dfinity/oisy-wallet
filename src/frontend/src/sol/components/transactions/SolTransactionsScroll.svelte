@@ -2,11 +2,11 @@
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
-	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		token: Token;
