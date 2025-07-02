@@ -54,6 +54,7 @@
 	class:md:flex={$authNotSignedIn}
 	class:md:flex-col={$authNotSignedIn}
 	class:md:h-full={$authNotSignedIn}
+	class:h-[100dvh]={$authNotSignedIn}
 >
 	<Header />
 
