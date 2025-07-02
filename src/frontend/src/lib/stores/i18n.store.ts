@@ -3,7 +3,7 @@ import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
 import { authSignedIn } from '$lib/derived/auth.derived';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
-import zh from '$lib/i18n/zh.json';
+import zhcn from '$lib/i18n/zh-cn.json';
 import { trackEvent } from '$lib/services/analytics.services';
 import { Languages } from '$lib/types/languages';
 import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
@@ -20,17 +20,17 @@ const deI18n = (): I18n => ({
 	lang: Languages.GERMAN
 });
 
-const zhI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: zh as I18n }),
-	lang: Languages.CHINESE
+const zhcnI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: zhcn as I18n }),
+	lang: Languages.CHINESE_SIMPLIFIED
 });
 
 const loadLang = (lang: Languages): I18n => {
 	switch (lang) {
 		case Languages.GERMAN:
 			return deI18n();
-		case Languages.CHINESE:
-			return zhI18n();
+		case Languages.CHINESE_SIMPLIFIED:
+			return zhcnI18n();
 		default:
 			return enI18n();
 	}
