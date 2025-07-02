@@ -6,6 +6,7 @@
 	import { last } from '$lib/utils/array.utils';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		token: Token;
@@ -25,6 +26,7 @@
 		}
 
 		await loadNextSolTransactions({
+			identity: $authIdentity,
 			token,
 			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
