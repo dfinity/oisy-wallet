@@ -19,10 +19,17 @@ const deI18n = (): I18n => ({
 	lang: Languages.GERMAN
 });
 
+const zhI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: zh as I18n }),
+	lang: Languages.CHINESE
+});
+
 const loadLang = (lang: Languages): I18n => {
 	switch (lang) {
 		case Languages.GERMAN:
 			return deI18n();
+		case Languages.CHINESE:
+			return zhI18n();
 		default:
 			return enI18n();
 	}
