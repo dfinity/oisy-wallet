@@ -911,7 +911,8 @@
 				"list_settings": "列表设置",
 				"import_token": "导入代币",
 				"network": "网络",
-				"all_tokens_zero_balance": "所有代币余额均为零。"
+				"all_tokens_zero_balance": "所有代币余额均为零。",
+				"enable_more_assets": ""
 			},
 			"placeholder": {
 				"select_network": "选择网络"
