@@ -50,8 +50,6 @@ export const prepareTransactionUtxos = async ({
 	// assertAmount({ amount });
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[CKBTC_MINTER_CANISTER_ID];
 
-	console.warn('bitcoinCanisterId=', bitcoinCanisterId);
-
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
 
@@ -64,8 +62,6 @@ export const prepareTransactionUtxos = async ({
 			identity,
 			network
 		});
-
-		console.warn(`Using fee rate: ${feeRateSatoshisPerByte} sat/byte (from percentiles)`);
 
 		// Step 2: Fetch all available UTXOs using query call (fast and no cycle cost)
 		const allUtxos = await getUtxos({
@@ -98,7 +94,6 @@ export const prepareTransactionUtxos = async ({
 
 		// Step 5: Calculate final fee based on selected UTXOs
 		const feeSatoshis = calculateFinalFee({ selection, amountSatoshis });
-		console.warn('final fee: ', feeSatoshis);
 		return {
 			feeSatoshis,
 			utxos: selection.selectedUtxos,
@@ -162,8 +157,6 @@ const getFeeRateFromPercentiles = async ({
 		// Backend returns values in millisat/byte, frontend uses sat/byte
 		const medianFeeRate = medianFeeRateMillisat / 1000n;
 
-		console.warn('medianFeeRate = ', medianFeeRate);
-
 		// Ensure we have a reasonable minimum fee rate (1 sat/byte)
 		const minFeeRate = 1n;
 		const finalFeeRate = medianFeeRate > minFeeRate ? medianFeeRate : minFeeRate;
@@ -171,8 +164,6 @@ const getFeeRateFromPercentiles = async ({
 		// Add safety cap to prevent extremely high fees (max 100 sat/byte)
 		const maxFeeRate = 100n;
 		const cappedFeeRate = finalFeeRate > maxFeeRate ? maxFeeRate : finalFeeRate;
-
-		console.warn('cappedFeeRate = ', cappedFeeRate);
 		return cappedFeeRate;
 	} catch (error) {
 		console.warn('Failed to get fee percentiles, using default fee rate:', error);
