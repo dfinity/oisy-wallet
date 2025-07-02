@@ -6,7 +6,8 @@ export const SUPPORTED_LANGUAGES = Object.entries(Languages);
 // This is the label that is shown. We don't need to translate it as we always show it in its own language
 export const LANGUAGES = {
 	[Languages.ENGLISH]: 'English',
-	[Languages.GERMAN]: 'Deutsch'
+	[Languages.GERMAN]: 'Deutsch',
+	[Languages.CHINESE]: '中文 (简体)'
 };
 
 // Enabled on Staging and Local if not set
