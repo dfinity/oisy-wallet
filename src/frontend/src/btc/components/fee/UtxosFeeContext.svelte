@@ -5,7 +5,7 @@
 		BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
 		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
 	} from '$btc/constants/btc.constants';
-	import { selectUtxosFeeCompatible } from '$btc/services/btc-review.services';
+	import { prepareTransactionUtxos } from '$btc/services/btc-review.services';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -63,26 +63,29 @@
 
 		const network = mapNetworkIdToBitcoinNetwork(networkId);
 
-		console.warn('loadEstimatedFee->selectUtxosFeeCompatible');
+		console.warn('loadEstimatedFee->prepareTransactionUtxos');
 
-		const utxosFee = nonNullish(network)
-			? await selectUtxosFeeCompatible({
-					amount: parsedAmount,
-					network,
-					identity: $authIdentity,
-					source
-				})
-			: undefined;
+		if (nonNullish(network)) {
+			const result = await prepareTransactionUtxos({
+				amount: parsedAmount,
+				network,
+				identity: $authIdentity,
+				source
+			});
 
-		if (isNullish(utxosFee)) {
+			// Convert BtcReviewResult to UtxosFee format for compatibility
+			const utxosFee = {
+				feeSatoshis: result.feeSatoshis,
+				utxos: result.utxos
+			};
+
+			store.setUtxosFee({
+				utxosFee,
+				amountForFee: parsedAmount
+			});
+		} else {
 			store.reset();
-			return;
 		}
-
-		store.setUtxosFee({
-			utxosFee,
-			amountForFee: parsedAmount
-		});
 	};
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);

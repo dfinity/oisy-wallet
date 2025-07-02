@@ -1,6 +1,5 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { UtxoSelectionResult } from '$btc/types/btc-review.services';
-import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterLockedUtxos, getUtxos } from '$btc/utils/btc-utxos.utils';
 import type {
@@ -33,11 +32,6 @@ export interface BtcReviewResult {
 	totalInputValue: bigint;
 	changeAmount: bigint;
 }
-
-/**
- * Main orchestrator function that replaces the backend btc_select_user_utxos_fee call
- * This function coordinates all the steps needed to select UTXOs and calculate fees
- */
 
 /**
  * Main orchestrator function that replaces the backend btc_select_user_utxos_fee call
@@ -184,21 +178,6 @@ const getFeeRateFromPercentiles = async ({
 		console.warn('Failed to get fee percentiles, using default fee rate:', error);
 		return DEFAULT_FEE_RATE_SATOSHIS_PER_BYTE;
 	}
-};
-
-/**
- * Simplified version that returns the UtxosFee format expected by existing components
- * This maintains compatibility with the current frontend structure
- */
-export const selectUtxosFeeCompatible = async (
-	params: BtcReviewServiceParams
-): Promise<UtxosFee> => {
-	const result = await prepareTransactionUtxos(params);
-
-	return {
-		feeSatoshis: result.feeSatoshis,
-		utxos: result.utxos
-	};
 };
 
 /**
