@@ -13,6 +13,7 @@ import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
+import { TSLAX_TOKEN } from '$env/tokens/tokens-spl/tokens.tslax.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
@@ -20,8 +21,8 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
-	ABBVX_TOKEN,
 	AAPLX_TOKEN,
+	ABBVX_TOKEN,
 	ABTX_TOKEN,
 	BONK_TOKEN,
 	COINX_TOKEN,
@@ -34,6 +35,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	POPCAT_TOKEN,
 	RAY_TOKEN,
 	TRUMP_TOKEN,
+	TSLAX_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN,
 	WSOL_TOKEN
