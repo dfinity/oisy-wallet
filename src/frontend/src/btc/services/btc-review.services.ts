@@ -66,6 +66,8 @@ export const prepareTransactionUtxos = async ({
 			network
 		});
 
+		console.warn(`Using fee rate: ${feeRateSatoshisPerByte} sat/byte (from percentiles)`);
+
 		// Step 2: Fetch all available UTXOs using query call (fast and no cycle cost)
 		const allUtxos = await getUtxos({
 			identity,
