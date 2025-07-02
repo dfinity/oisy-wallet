@@ -55,7 +55,12 @@
 			fullWidth
 			ariaLabel="Set privacy mode on and off"
 			styleClass="bg-transparent p-0 text-xl font-bold"
-			ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true, source: 'Double click on the Balance' })}
+			ondblclick={() =>
+				setPrivacyMode({
+					enabled: !$isPrivacyMode,
+					withToast: true,
+					source: 'Double click on the Balance'
+				})}
 		>
 			{#if !$isPrivacyMode}
 				<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>

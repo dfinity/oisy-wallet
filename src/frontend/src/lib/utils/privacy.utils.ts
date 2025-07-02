@@ -8,7 +8,7 @@ import { get } from 'svelte/store';
 interface SetPrivacyModeOptions {
 	enabled: boolean;
 	withToast?: boolean;
-	source?: string; 
+	source?: string;
 }
 
 export const setPrivacyMode = ({ enabled, withToast = false }: SetPrivacyModeOptions): void => {
