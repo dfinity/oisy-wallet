@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import type { IcCkToken } from '$icp/types/ic-token';
