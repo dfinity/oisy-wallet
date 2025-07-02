@@ -7,7 +7,7 @@ export const SUPPORTED_LANGUAGES = Object.entries(Languages);
 export const LANGUAGES = {
 	[Languages.ENGLISH]: 'English',
 	[Languages.GERMAN]: 'Deutsch',
-	[Languages.CHINESE]: '中文 (简体)'
+	[Languages.CHINESE_SIMPLIFIED]: '中文 (简体)'
 };
 
 // Enabled on Staging and Local if not set
