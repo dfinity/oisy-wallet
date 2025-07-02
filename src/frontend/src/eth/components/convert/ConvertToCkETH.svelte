@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
@@ -11,15 +11,16 @@
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { findTwinToken } from '$lib/utils/token.utils';
+	import { pageToken } from '$lib/derived/page-token.derived';
 
-	let ckEthToken: IcCkToken | undefined;
+	let ckEthToken: IcCkToken | undefined
 	$: (() => {
-		if (nonNullish(ckEthToken)) {
+		if (nonNullish(ckEthToken) || isNullish($pageToken)) {
 			return;
 		}
 
 		ckEthToken = findTwinToken({
-			tokenToPair: ETHEREUM_TOKEN,
+			tokenToPair:  $pageToken,
 			tokens: $tokens
 		});
 	})();
