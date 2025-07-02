@@ -325,106 +325,6 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(Contact),
 		Err: ContactError
 	});
-	const TransactionType = IDL.Variant({
-		Send: IDL.Null,
-		Receive: IDL.Null
-	});
-	const Transaction = IDL.Record({
-		transaction_type: TransactionType,
-		network: IDL.Record({}),
-		counterparty: EthAddress,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
-	const AccountSnapshot = IDL.Record({
-		decimals: IDL.Nat8,
-		token_address: EthAddress,
-		network: IDL.Record({}),
-		approx_usd_per_token: IDL.Float64,
-		last_transactions: IDL.Vec(Transaction),
-		account: EthAddress,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
-	const BtcTokenId = IDL.Variant({ Native: IDL.Null });
-	const Transaction_1 = IDL.Record({
-		transaction_type: TransactionType,
-		network: IDL.Record({}),
-		counterparty: BtcAddress,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
-	const AccountSnapshot_1 = IDL.Record({
-		decimals: IDL.Nat8,
-		token_address: BtcTokenId,
-		network: IDL.Record({}),
-		approx_usd_per_token: IDL.Float64,
-		last_transactions: IDL.Vec(Transaction_1),
-		account: BtcAddress,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
-	const Transaction_2 = IDL.Record({
-		transaction_type: TransactionType,
-		network: IDL.Record({}),
-		counterparty: IDL.Text,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
-	const AccountSnapshot_2 = IDL.Record({
-		decimals: IDL.Nat8,
-		token_address: IDL.Text,
-		network: IDL.Record({}),
-		approx_usd_per_token: IDL.Float64,
-		last_transactions: IDL.Vec(Transaction_2),
-		account: IDL.Text,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
-	const IcrcTokenId = IDL.Variant({
-		Icrc: IDL.Record({
-			ledger: IDL.Principal,
-			index: IDL.Opt(IDL.Principal)
-		}),
-		Native: IDL.Null
-	});
-	const Transaction_3 = IDL.Record({
-		transaction_type: TransactionType,
-		network: IDL.Record({}),
-		counterparty: Icrcv2AccountId,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
-	const AccountSnapshot_3 = IDL.Record({
-		decimals: IDL.Nat8,
-		token_address: IcrcTokenId,
-		network: IDL.Record({}),
-		approx_usd_per_token: IDL.Float64,
-		last_transactions: IDL.Vec(Transaction_3),
-		account: Icrcv2AccountId,
-		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
-	});
-	const AccountSnapshotFor = IDL.Variant({
-		Erc20Sepolia: AccountSnapshot,
-		EthSepolia: AccountSnapshot,
-		BtcMainnet: AccountSnapshot_1,
-		SolDevnet: AccountSnapshot_2,
-		Erc20Mainnet: AccountSnapshot,
-		Icrcv2: AccountSnapshot_3,
-		BtcRegtest: AccountSnapshot_1,
-		SplDevnet: AccountSnapshot_2,
-		EthMainnet: AccountSnapshot,
-		SplMainnet: AccountSnapshot_2,
-		SolLocal: AccountSnapshot_2,
-		BtcTestnet: AccountSnapshot_1,
-		SplLocal: AccountSnapshot_2,
-		SolMainnet: AccountSnapshot_2
-	});
-	const UserSnapshot = IDL.Record({
-		accounts: IDL.Vec(AccountSnapshotFor),
-		timestamp: IDL.Opt(IDL.Nat64)
-	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
 	const GetUserProfileResult = IDL.Variant({
 		Ok: UserProfile,
@@ -442,6 +342,12 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
+	const Erc20Token = IDL.Record({
+		decimals: IDL.Opt(IDL.Nat8),
+		token_address: IDL.Text,
+		chain_id: IDL.Nat64,
+		symbol: IDL.Opt(IDL.Text)
+	});
 	const IcrcToken = IDL.Record({
 		ledger_id: IDL.Principal,
 		index_id: IDL.Opt(IDL.Principal)
@@ -452,6 +358,7 @@ export const idlFactory = ({ IDL }) => {
 		symbol: IDL.Opt(IDL.Text)
 	});
 	const Token = IDL.Variant({
+		Erc20: Erc20Token,
 		Icrc: IcrcToken,
 		SplDevnet: SplToken,
 		SplMainnet: SplToken
@@ -553,7 +460,6 @@ export const idlFactory = ({ IDL }) => {
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult]),
 		get_contacts: IDL.Func([], [GetContactsResult]),
-		get_snapshot: IDL.Func([], [IDL.Opt(UserSnapshot)]),
 		get_user_profile: IDL.Func([], [GetUserProfileResult]),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
@@ -564,7 +470,6 @@ export const idlFactory = ({ IDL }) => {
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
-		set_snapshot: IDL.Func([UserSnapshot], [], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats]),

@@ -1,59 +1,3 @@
-type AccountSnapshot = record {
-	decimals : nat8;
-	token_address : EthAddress;
-	network : record {};
-	approx_usd_per_token : float64;
-	last_transactions : vec Transaction;
-	account : EthAddress;
-	timestamp : nat64;
-	amount : nat64
-};
-type AccountSnapshotFor = variant {
-	Erc20Sepolia : AccountSnapshot;
-	EthSepolia : AccountSnapshot;
-	BtcMainnet : AccountSnapshot_1;
-	SolDevnet : AccountSnapshot_2;
-	Erc20Mainnet : AccountSnapshot;
-	Icrcv2 : AccountSnapshot_3;
-	BtcRegtest : AccountSnapshot_1;
-	SplDevnet : AccountSnapshot_2;
-	EthMainnet : AccountSnapshot;
-	SplMainnet : AccountSnapshot_2;
-	SolLocal : AccountSnapshot_2;
-	BtcTestnet : AccountSnapshot_1;
-	SplLocal : AccountSnapshot_2;
-	SolMainnet : AccountSnapshot_2
-};
-type AccountSnapshot_1 = record {
-	decimals : nat8;
-	token_address : BtcTokenId;
-	network : record {};
-	approx_usd_per_token : float64;
-	last_transactions : vec Transaction_1;
-	account : BtcAddress;
-	timestamp : nat64;
-	amount : nat64
-};
-type AccountSnapshot_2 = record {
-	decimals : nat8;
-	token_address : text;
-	network : record {};
-	approx_usd_per_token : float64;
-	last_transactions : vec Transaction_2;
-	account : text;
-	timestamp : nat64;
-	amount : nat64
-};
-type AccountSnapshot_3 = record {
-	decimals : nat8;
-	token_address : IcrcTokenId;
-	network : record {};
-	approx_usd_per_token : float64;
-	last_transactions : vec Transaction_3;
-	account : Icrcv2AccountId;
-	timestamp : nat64;
-	amount : nat64
-};
 type AddDappSettingsError = variant {
 	MaxHiddenDappIds;
 	VersionMismatch;
@@ -150,7 +94,6 @@ type BtcSelectUserUtxosFeeResult = variant {
 	Ok : SelectedUtxosFeeResponse;
 	Err : SelectedUtxosFeeError
 };
-type BtcTokenId = variant { Native };
 type CanisterStatusResultV2 = record {
 	controller : principal;
 	status : CanisterStatusType;
@@ -236,6 +179,12 @@ type DefiniteCanisterSettingsArgs = record {
 	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
+type Erc20Token = record {
+	decimals : opt nat8;
+	token_address : text;
+	chain_id : nat64;
+	symbol : opt text
+};
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
@@ -266,10 +215,6 @@ type HttpResponse = record {
 	status_code : nat16
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
-type IcrcTokenId = variant {
-	Icrc : record { ledger : principal; index : opt principal };
-	Native
-};
 type Icrcv2AccountId = variant {
 	Account : blob;
 	WithPrincipal : record { owner : principal; subaccount : opt blob }
@@ -355,6 +300,7 @@ type SupportedCredential = record {
 };
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
+	Erc20 : Erc20Token;
 	Icrc : IcrcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken
@@ -387,35 +333,6 @@ type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
-type Transaction = record {
-	transaction_type : TransactionType;
-	network : record {};
-	counterparty : EthAddress;
-	timestamp : nat64;
-	amount : nat64
-};
-type TransactionType = variant { Send; Receive };
-type Transaction_1 = record {
-	transaction_type : TransactionType;
-	network : record {};
-	counterparty : BtcAddress;
-	timestamp : nat64;
-	amount : nat64
-};
-type Transaction_2 = record {
-	transaction_type : TransactionType;
-	network : record {};
-	counterparty : text;
-	timestamp : nat64;
-	amount : nat64
-};
-type Transaction_3 = record {
-	transaction_type : TransactionType;
-	network : record {};
-	counterparty : Icrcv2AccountId;
-	timestamp : nat64;
-	amount : nat64
-};
 type UserCredential = record {
 	issuer : text;
 	verified_date_timestamp : opt nat64;
@@ -427,10 +344,6 @@ type UserProfile = record {
 	settings : opt Settings;
 	created_timestamp : nat64;
 	updated_timestamp : nat64
-};
-type UserSnapshot = record {
-	accounts : vec AccountSnapshotFor;
-	timestamp : opt nat64
 };
 type UserToken = record {
 	decimals : opt nat8;
@@ -472,7 +385,6 @@ service : (Arg) -> {
 	get_canister_status : () -> (CanisterStatusResultV2);
 	get_contact : (nat64) -> (GetContactResult) query;
 	get_contacts : () -> (GetContactsResult) query;
-	get_snapshot : () -> (opt UserSnapshot) query;
 	get_user_profile : () -> (GetUserProfileResult) query;
 	has_user_profile : () -> (HasUserProfileResponse) query;
 	http_request : (HttpRequest) -> (HttpResponse) query;
@@ -483,7 +395,6 @@ service : (Arg) -> {
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
 	set_many_user_tokens : (vec UserToken) -> ();
-	set_snapshot : (UserSnapshot) -> ();
 	set_user_show_testnets : (SetShowTestnetsRequest) -> (
 		SetUserShowTestnetsResult
 	);
