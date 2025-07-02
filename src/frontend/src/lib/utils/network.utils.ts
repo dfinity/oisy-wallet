@@ -91,6 +91,18 @@ const mapper: Record<symbol, BitcoinNetwork> = {
 export const mapNetworkIdToBitcoinNetwork = (networkId: NetworkId): BitcoinNetwork | undefined =>
 	mapper[networkId];
 
+export const showTokenFilteredBySelectedNetwork = ({
+	token,
+	$selectedNetwork,
+	$pseudoNetworkChainFusion
+}: {
+	token: Token;
+	$selectedNetwork: Network | undefined;
+	$pseudoNetworkChainFusion: boolean;
+}): boolean =>
+	($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && token.network.env !== 'testnet') ||
+	$selectedNetwork?.id === token.network.id;
+
 /**
  * Filter the tokens that either lives on the selected network or, if no network is provided, pseud Chain Fusion, then those that are not testnets.
  */
@@ -99,16 +111,9 @@ export const filterTokensForSelectedNetwork = <T extends Token>([
 	$selectedNetwork,
 	$pseudoNetworkChainFusion
 ]: [T[], Network | undefined, boolean]): T[] =>
-	$tokens.filter((token) => {
-		const {
-			network: { id: networkId, env }
-		} = token;
-
-		return (
-			($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && env !== 'testnet') ||
-			$selectedNetwork?.id === networkId
-		);
-	});
+	$tokens.filter((token) =>
+		showTokenFilteredBySelectedNetwork({ token, $selectedNetwork, $pseudoNetworkChainFusion })
+	);
 
 export const mapToSignerBitcoinNetwork = ({
 	network
