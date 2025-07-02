@@ -99,14 +99,19 @@
 			: { initialSearch: undefined, message: undefined }
 	);
 
+	let saveLoading = $state(false);
+
 	const onSave = async () => {
+		saveLoading = true;
 		await saveAllCustomTokens({ tokens: modifiedTokens, $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
 		updateFilterList($tokenListStore.filter);
+		saveLoading = false;
 	};
 
 	let modifiedTokens: Record<string, Token> = $state({});
+	let modifiedTokensLen = $derived(Object.keys(modifiedTokens).length);
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
@@ -171,12 +176,14 @@
 						<div>
 							<Button
 								onclick={onSave}
-								disabled={saveDisabled}
+								disabled={saveDisabled || saveLoading}
 								paddingSmall
 								fullWidth={false}
 								styleClass="py-2"
+								loading={saveLoading}
 							>
-								{$i18n.core.text.apply} ({Object.keys(modifiedTokens).length})
+								{$i18n.core.text.apply}
+								{#if modifiedTokensLen > 0}({modifiedTokensLen}){/if}
 							</Button>
 						</div>
 					</div>
