@@ -3,7 +3,6 @@
 	import { assertNonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
-	import { saveCustomTokens } from '$sol/services/spl-custom-tokens.services';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import {
 		HIDE_TOKEN_MODAL_ROUTE,
@@ -14,6 +13,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { saveCustomTokens } from '$sol/services/spl-custom-tokens.services';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 
 	export let fromRoute: NavigationTarget | undefined;
