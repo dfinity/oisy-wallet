@@ -1,5 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
+import { getAccountInfo } from '$sol/api/sol-rpc.api';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
@@ -7,7 +9,6 @@ import {
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
-import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolInstruction,
@@ -116,12 +117,14 @@ const mapSystemParsedInstruction = ({
 };
 
 const mapTokenParsedInstruction = async ({
+	identity,
 	type,
 	info,
 	network,
 	cumulativeBalances,
 	addressToToken
 }: {
+	identity: OptionIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
@@ -146,16 +149,18 @@ const mapTokenParsedInstruction = async ({
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
 
-		const { getAccountInfo } = solanaHttpRpc(network);
+		const sourceResult = await getAccountInfo({
+			identity,
+			address: address(from),
+			network
+		});
 
-		const { value: sourceResult } = await getAccountInfo(address(from), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
+		if (nonNullish(sourceResult)) {
 			const {
 				data: {
-					parsed: { info: sourceInfo }
+					json: {
+						parsed: { info: sourceInfo }
+					}
 				}
 			} = sourceResult;
 
@@ -164,14 +169,18 @@ const mapTokenParsedInstruction = async ({
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
 
-		const { value: destinationResult } = await getAccountInfo(address(to), {
-			encoding: 'jsonParsed'
-		}).send();
+		const destinationResult = await getAccountInfo({
+			identity,
+			address: address(to),
+			network
+		});
 
-		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
+		if (nonNullish(destinationResult)) {
 			const {
 				data: {
-					parsed: { info: destinationInfo }
+					json: {
+						parsed: { info: destinationInfo }
+					}
 				}
 			} = destinationResult;
 
@@ -280,12 +289,14 @@ const mapTokenParsedInstruction = async ({
 // Solana program Token2022 provides exactly the same instructions as the legacy Token program plus a few more.
 // So the implementation of the mapping of the instructions is the same as the legacy Token program for the instructions that are common.
 const mapToken2022ParsedInstruction = async ({
+	identity,
 	type,
 	info,
 	network,
 	cumulativeBalances,
 	addressToToken
 }: {
+	identity: OptionIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
@@ -304,6 +315,7 @@ const mapToken2022ParsedInstruction = async ({
 		].includes(type)
 	) {
 		return await mapTokenParsedInstruction({
+			identity,
 			type,
 			info,
 			network,
@@ -325,11 +337,13 @@ const mapAssociatedTokenAccountInstruction = ({
 };
 
 export const mapSolParsedInstruction = async ({
+	identity,
 	instruction,
 	network,
 	cumulativeBalances,
 	addressToToken
 }: {
+	identity: OptionIdentity;
 	instruction: SolRpcInstruction;
 	network: SolanaNetworkType;
 	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
@@ -354,6 +368,7 @@ export const mapSolParsedInstruction = async ({
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
 		return await mapTokenParsedInstruction({
+			identity,
 			type,
 			info,
 			network,
@@ -364,6 +379,7 @@ export const mapSolParsedInstruction = async ({
 
 	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
 		return mapToken2022ParsedInstruction({
+			identity,
 			type,
 			info,
 			network,

@@ -1,24 +1,22 @@
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ZERO } from '$lib/constants/app.constants';
+import * as solRpcApi from '$sol/api/sol-rpc.api';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
-import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockAccountInfo } from '$tests/mocks/sol-rpc.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
+import { address, type Base58EncodedBytes } from '@solana/kit';
 import type { MockInstance } from 'vitest';
-
-vi.mock('$sol/providers/sol-rpc.providers', () => ({
-	solanaHttpRpc: vi.fn(),
-	solanaWebSocketRpc: vi.fn()
-}));
 
 describe('sol-instructions.utils', () => {
 	const network: SolanaNetworkType = 'mainnet';
@@ -32,6 +30,8 @@ describe('sol-instructions.utils', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		mockAuthStore();
 	});
 
 	describe('mapSolParsedInstruction', () => {
@@ -44,6 +44,7 @@ describe('sol-instructions.utils', () => {
 			};
 
 			const result = await mapSolParsedInstruction({
+				identity: mockIdentity,
 				instruction,
 				network
 			});
@@ -58,6 +59,7 @@ describe('sol-instructions.utils', () => {
 			};
 
 			const result = await mapSolParsedInstruction({
+				identity: mockIdentity,
 				instruction,
 				network
 			});
@@ -73,6 +75,7 @@ describe('sol-instructions.utils', () => {
 			};
 
 			const result = await mapSolParsedInstruction({
+				identity: mockIdentity,
 				instruction,
 				network
 			});
@@ -100,6 +103,7 @@ describe('sol-instructions.utils', () => {
 				};
 
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: mockCreateAccountInstruction,
 					network
 				});
@@ -126,6 +130,7 @@ describe('sol-instructions.utils', () => {
 				};
 
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: mockTransferInstruction,
 					network
 				});
@@ -139,6 +144,7 @@ describe('sol-instructions.utils', () => {
 
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: {
 						...mockInstruction,
 						programAddress: address(SYSTEM_PROGRAM_ADDRESS),
@@ -170,22 +176,22 @@ describe('sol-instructions.utils', () => {
 			};
 
 			beforeEach(() => {
-				mockGetAccountInfo = vi.fn(() => ({
-					send: vi.fn(() => ({
-						value: {
-							data: { parsed: { info: { mint: mockTokenAddress } } }
+				mockGetAccountInfo = vi.spyOn(solRpcApi, 'getAccountInfo').mockResolvedValue({
+					...mockAccountInfo,
+					data: {
+						json: {
+							space: 1n,
+							program: TOKEN_PROGRAM_ADDRESS,
+							parsed: { info: { mint: mockTokenAddress } }
 						}
-					}))
-				}));
-
-				const mockRpc = { getAccountInfo: mockGetAccountInfo } as unknown as Rpc<SolanaRpcApi>;
-
-				vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
+					}
+				});
 			});
 
 			describe('with `transfer` instruction', () => {
 				it('should map a valid `transfer` instruction', async () => {
 					const result = await mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockTokenInstruction,
 						network
 					});
@@ -197,18 +203,18 @@ describe('sol-instructions.utils', () => {
 						tokenAddress: mockTokenAddress
 					});
 
-					expect(mockGetAccountInfo).toHaveBeenCalledOnce();
-					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, {
-						encoding: 'jsonParsed'
+					expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						address: mockSolAddress,
+						network
 					});
 				});
 
 				it('should fetch token address from destination account info if not provided by source info', async () => {
-					mockGetAccountInfo.mockReturnValueOnce({
-						send: vi.fn(() => ({ value: { data: {} } }))
-					});
+					mockGetAccountInfo.mockReturnValueOnce(undefined);
 
 					const result = await mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockTokenInstruction,
 						network
 					});
@@ -221,17 +227,22 @@ describe('sol-instructions.utils', () => {
 					});
 
 					expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
-					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, {
-						encoding: 'jsonParsed'
+					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, {
+						identity: mockIdentity,
+						address: mockSolAddress,
+						network
 					});
-					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress2, {
-						encoding: 'jsonParsed'
+					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, {
+						identity: mockIdentity,
+						address: mockSolAddress2,
+						network
 					});
 				});
 
 				it('should not call getAccountInfo for `transfer` instruction if token address is already mapped', async () => {
 					await expect(
 						mapSolParsedInstruction({
+							identity: mockIdentity,
 							instruction: mockTokenInstruction,
 							network,
 							addressToToken: { [mockSolAddress]: mockTokenAddress }
@@ -247,6 +258,7 @@ describe('sol-instructions.utils', () => {
 
 					await expect(
 						mapSolParsedInstruction({
+							identity: mockIdentity,
 							instruction: mockTokenInstruction,
 							network,
 							addressToToken: { [mockSolAddress2]: mockTokenAddress }
@@ -277,6 +289,7 @@ describe('sol-instructions.utils', () => {
 				};
 
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: mockTransferCheckedInstruction,
 					network
 				});
@@ -303,6 +316,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockCloseAccountInstruction,
 						network
 					})
@@ -314,6 +328,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockCloseAccountInstruction,
 						network,
 						cumulativeBalances: { [mockSolAddress]: 100n }
@@ -326,6 +341,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockCloseAccountInstruction,
 						network,
 						cumulativeBalances: { [mockSolAddress2]: 100n }
@@ -352,6 +368,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockMintToInstruction,
 						network
 					})
@@ -378,6 +395,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockBurnInstruction,
 						network
 					})
@@ -404,6 +422,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockMintToCheckedInstruction,
 						network
 					})
@@ -430,6 +449,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockBurnCheckedInstruction,
 						network
 					})
@@ -443,6 +463,7 @@ describe('sol-instructions.utils', () => {
 
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: { ...mockTokenInstruction, parsed: { type: 'other-type', info: {} } },
 					network
 				});
@@ -470,22 +491,22 @@ describe('sol-instructions.utils', () => {
 			};
 
 			beforeEach(() => {
-				mockGetAccountInfo = vi.fn(() => ({
-					send: vi.fn(() => ({
-						value: {
-							data: { parsed: { info: { mint: mockTokenAddress } } }
+				mockGetAccountInfo = vi.spyOn(solRpcApi, 'getAccountInfo').mockResolvedValue({
+					...mockAccountInfo,
+					data: {
+						json: {
+							space: 1n,
+							program: TOKEN_2022_PROGRAM_ADDRESS,
+							parsed: { info: { mint: mockTokenAddress } }
 						}
-					}))
-				}));
-
-				const mockRpc = { getAccountInfo: mockGetAccountInfo } as unknown as Rpc<SolanaRpcApi>;
-
-				vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
+					}
+				});
 			});
 
 			describe('with `transfer` instruction', () => {
 				it('should map a valid `transfer` instruction', async () => {
 					const result = await mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockTokenInstruction,
 						network
 					});
@@ -497,18 +518,18 @@ describe('sol-instructions.utils', () => {
 						tokenAddress: mockTokenAddress
 					});
 
-					expect(mockGetAccountInfo).toHaveBeenCalledOnce();
-					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, {
-						encoding: 'jsonParsed'
+					expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith({
+						identity: mockIdentity,
+						address: mockSolAddress,
+						network
 					});
 				});
 
 				it('should fetch token address from destination account info if not provided by source info', async () => {
-					mockGetAccountInfo.mockReturnValueOnce({
-						send: vi.fn(() => ({ value: { data: {} } }))
-					});
+					mockGetAccountInfo.mockReturnValueOnce(undefined);
 
 					const result = await mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockTokenInstruction,
 						network
 					});
@@ -521,17 +542,22 @@ describe('sol-instructions.utils', () => {
 					});
 
 					expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
-					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, {
-						encoding: 'jsonParsed'
+					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, {
+						identity: mockIdentity,
+						address: mockSolAddress,
+						network
 					});
-					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress2, {
-						encoding: 'jsonParsed'
+					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, {
+						identity: mockIdentity,
+						address: mockSolAddress2,
+						network
 					});
 				});
 
 				it('should not call getAccountInfo for `transfer` instruction if token address is already mapped', async () => {
 					await expect(
 						mapSolParsedInstruction({
+							identity: mockIdentity,
 							instruction: mockTokenInstruction,
 							network,
 							addressToToken: { [mockSolAddress]: mockTokenAddress }
@@ -547,6 +573,7 @@ describe('sol-instructions.utils', () => {
 
 					await expect(
 						mapSolParsedInstruction({
+							identity: mockIdentity,
 							instruction: mockTokenInstruction,
 							network,
 							addressToToken: { [mockSolAddress2]: mockTokenAddress }
@@ -577,6 +604,7 @@ describe('sol-instructions.utils', () => {
 				};
 
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: mockTransferCheckedInstruction,
 					network
 				});
@@ -603,6 +631,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockCloseAccountInstruction,
 						network
 					})
@@ -614,6 +643,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockCloseAccountInstruction,
 						network,
 						cumulativeBalances: { [mockSolAddress]: 100n }
@@ -626,6 +656,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockCloseAccountInstruction,
 						network,
 						cumulativeBalances: { [mockSolAddress2]: 100n }
@@ -652,6 +683,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockMintToInstruction,
 						network
 					})
@@ -678,6 +710,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockBurnInstruction,
 						network
 					})
@@ -704,6 +737,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockMintToCheckedInstruction,
 						network
 					})
@@ -730,6 +764,7 @@ describe('sol-instructions.utils', () => {
 
 				await expect(
 					mapSolParsedInstruction({
+						identity: mockIdentity,
 						instruction: mockBurnCheckedInstruction,
 						network
 					})
@@ -743,6 +778,7 @@ describe('sol-instructions.utils', () => {
 
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: { ...mockTokenInstruction, parsed: { type: 'other-type', info: {} } },
 					network
 				});
@@ -760,6 +796,7 @@ describe('sol-instructions.utils', () => {
 
 			it('should map a valid `create` instruction with inner instructions', async () => {
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: mockAtaInstruction,
 					network
 				});
@@ -769,6 +806,7 @@ describe('sol-instructions.utils', () => {
 
 			it('should map a valid `createIdempotent` instruction with inner instructions', async () => {
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: { ...mockAtaInstruction, parsed: { type: 'createIdempotent', info: {} } },
 					network
 				});
@@ -778,6 +816,7 @@ describe('sol-instructions.utils', () => {
 
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
+					identity: mockIdentity,
 					instruction: { ...mockAtaInstruction, parsed: { type: 'other-type', info: {} } },
 					network
 				});

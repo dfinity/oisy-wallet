@@ -78,6 +78,7 @@
 				}
 			} else if (isNetworkIdSolana(networkId)) {
 				const { success: solSuccess } = await loadNextSolTransactionsByOldest({
+					identity: $authIdentity,
 					minTimestamp,
 					transactions: ($solTransactionsStore?.[tokenId] ?? []).map(({ data }) => data),
 					token,

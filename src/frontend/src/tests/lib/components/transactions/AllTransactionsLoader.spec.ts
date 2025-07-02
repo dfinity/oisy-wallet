@@ -412,6 +412,7 @@ describe('AllTransactionsLoader', () => {
 				);
 
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					token,
@@ -433,6 +434,7 @@ describe('AllTransactionsLoader', () => {
 				);
 
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					token,
@@ -541,6 +543,7 @@ describe('AllTransactionsLoader', () => {
 			);
 
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				minTimestamp: mockMinTimestamp,
 				transactions,
 				token,
