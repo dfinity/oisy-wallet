@@ -330,7 +330,7 @@
 			"open_wallet": "前往钱包",
 			"carousel_slide_title": "$oisy_short Sprinkles 第四集现已上线",
 			"carousel_slide_cta": "了解更多",
-			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount! \uD83C\uDF89",
+			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount! 🎉",
 			"youre_eligible": "你符合资格",
 			"ongoing": "进行中",
 			"ended": "已结束（$amount",
@@ -351,7 +351,7 @@
 		"campaigns": {
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles：第 3 期已上线  \uD83C\uDF89",
+				"card_title": "OISY Sprinkles：第 3 期已上线  🎉",
 				"one_liner": "通过保持活跃来赚取 BTC——现在，还可以通过<strong>邀请朋友</strong>来赚取.<br/>登录、进行交易并持有代币，即可获得每日空投资格.推荐朋友，即可在整个活动期间获得其奖励价值的 10%.",
 				"participate_title": "通过保持活跃（现在还可以邀请他人）赚取 BTC.",
 				"description": "满足简单的每周要求.登录、进行两次交易并持有至少价值 20 美元的代币，即可每天有资格获得 50 次 BTC 空投中的一次.<br/><strong>现在还有推荐奖励：</strong>邀请朋友部署钱包，即可在 30 天内获得他们 Sprinkles 的 10%.他们保留 100%——您额外赚取.",
@@ -376,7 +376,7 @@
 			},
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles：第 4 期已上线  \uD83C\uDF89",
+				"card_title": "OISY Sprinkles：第 4 期已上线  🎉",
 				"one_liner": "通过保持活跃来赚取 BTC——现在，通过推荐还可获得<strong>保证</strong>的 Sprinkles.<br/>登录、进行交易并持有代币，即可获得每日空投资格.推荐 4 位朋友即可直接获得奖励.顶级推荐人将赢得更多.",
 				"participate_title": "通过保持活跃（现在还可以邀请他人）赚取 BTC.",
 				"description": "满足简单的每周要求：登录、进行两次交易并持有至少价值 20 美元的代币，即可每天有资格获得高达 50 美元的 BTC 空投.<br>现在还有推荐奖励：邀请朋友设置钱包，你们都将获得保证的 Sprinkles.进入前 4 名推荐人，即可赢得大奖.",
