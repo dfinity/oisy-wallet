@@ -15,18 +15,6 @@ export const PROD = MODE === 'ic';
 
 export const TEST = parseBoolEnvVar(import.meta.env.TEST);
 
-console.warn('Environment mode variables:', {
-	MODE,
-	LOCAL,
-	TEST_FE,
-	AUDIT,
-	E2E,
-	STAGING,
-	BETA,
-	PROD,
-	TEST
-});
-
 const MAINNET_DOMAIN = 'icp0.io';
 
 export const REPLICA_HOST = LOCAL ? 'http://localhost:4943/' : 'https://icp-api.io';
@@ -59,8 +47,6 @@ export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 	: undefined;
 
 export const BACKEND_CANISTER_ID = 'vhcnk-oqaaa-aaaah-araya-cai';
-
-console.warn('BACKEND_CANISTER_ID=', BACKEND_CANISTER_ID);
 
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
