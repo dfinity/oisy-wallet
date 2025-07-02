@@ -51,7 +51,8 @@ export const prepareTransactionUtxos = async ({
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
 	const startTime = performance.now();
 	console.warn('🚀 Starting prepareTransactionUtxos');
-
+	// Step 0: Get pending transactions and convert amount
+	const step0Start = performance.now();
 	assertNonNullish(identity);
 	assertStringNotEmpty({ value: source, message: 'Source address is required' });
 	assertNonNullish(CKBTC_MINTER_CANISTER_ID);
@@ -59,8 +60,6 @@ export const prepareTransactionUtxos = async ({
 	// assertAmount({ amount });
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[CKBTC_MINTER_CANISTER_ID];
 
-	// Step 0: Get pending transactions and convert amount
-	const step0Start = performance.now();
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
 
