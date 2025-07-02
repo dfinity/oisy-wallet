@@ -3,6 +3,7 @@ import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
 import { ABTX_TOKEN } from '$env/tokens/tokens-spl/tokens.abtx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
@@ -21,6 +22,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	ABTX_TOKEN,
 	BONK_TOKEN,
 	EURC_TOKEN,
+	GOOGLX_TOKEN,
 	JUP_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
