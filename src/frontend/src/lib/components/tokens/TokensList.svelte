@@ -73,8 +73,7 @@
 				: true;
 			if (
 				(!token.enabled || (token.enabled && isModified)) &&
-				!isTestnetDisabled &&
-				isNetworkSelected
+				(!isTestnetDisabled || isNetworkSelected)
 			) {
 				acc.push({
 					token: token as TokenUi
