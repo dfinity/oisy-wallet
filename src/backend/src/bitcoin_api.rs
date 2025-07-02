@@ -75,15 +75,6 @@ pub fn init_fee_percentiles_cache() {
         FEE_PERCENTILES_UPDATE_INTERVAL.as_secs()
     );
 
-    // Pre-populate the cache with default values for all networks before async updates
-    for network in &[
-        BitcoinNetwork::Mainnet,
-        BitcoinNetwork::Testnet,
-        BitcoinNetwork::Regtest,
-    ] {
-        initialize_default_fee_percentiles(*network);
-    }
-
     // Schedule the initial cache population and timer setup to run after init completes
     set_timer(std::time::Duration::from_secs(0), || {
         // Set up the recurring timer to update the data
@@ -140,22 +131,28 @@ async fn fetch_current_fee_percentiles(
     Ok(res.0)
 }
 
-/// This function is readonly and only returns data that's already stored in memory.
-/// If the data isn't available in the cache, it returns an error instead of fetching it.
+/// This function returns fee percentiles data from the in-memory cache.
+/// If the data isn't available in the cache, it falls back to default values.
 pub async fn get_current_fee_percentiles(
     network: BitcoinNetwork,
 ) -> Result<Vec<MillisatoshiPerByte>, String> {
-    // Only get from cache, no async fetching
+    // Try to get from cache first
     let cached_percentiles =
         FEE_PERCENTILES_CACHE.with(|cache| cache.borrow().get(&network).cloned());
 
     match cached_percentiles {
-        Some(percentiles) if !percentiles.is_empty() => Ok(percentiles),
+        Some(percentiles) if !percentiles.is_empty() => {
+            // Use cached values
+            ic_cdk::println!("Using cached fee percentiles for network {:?}", network);
+            Ok(percentiles)
+        }
         _ => {
-            // Return an error instead of fetching directly
-            Err(format!(
-                "Fee percentiles not available in cache for network {network:?}"
-            ))
+            // Cache miss or empty cache, use default values
+            ic_cdk::println!("Cache miss for network {:?}, using default values", network);
+
+            // Initialize the default values for this network and return them directly
+            let default_percentiles = initialize_default_fee_percentiles(network);
+            Ok(default_percentiles)
         }
     }
 }
@@ -204,20 +201,22 @@ fn generate_fee_percentiles(default_fee: u64) -> Vec<u64> {
 }
 
 // Helper function to initialize default fee percentiles for a given network
-fn initialize_default_fee_percentiles(network: BitcoinNetwork) {
+fn initialize_default_fee_percentiles(network: BitcoinNetwork) -> Vec<u64> {
     let default_fee = get_default_fee_for_network(network);
 
     // Generate percentiles using the helper function
     let percentiles = generate_fee_percentiles(default_fee);
 
     FEE_PERCENTILES_CACHE.with(|cache| {
-        cache.borrow_mut().insert(network, percentiles);
+        cache.borrow_mut().insert(network, percentiles.clone());
     });
 
     ic_cdk::println!(
         "Initialized default fee percentiles for network {:?}",
         network
     );
+
+    percentiles
 }
 
 /// Returns the 50th percentile for sending fees.
