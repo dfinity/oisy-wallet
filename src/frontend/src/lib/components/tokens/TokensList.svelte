@@ -27,6 +27,8 @@
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -65,7 +67,15 @@
 			const isModified = nonNullish(
 				modifiedTokens[`${token.network.id.description}-${token.id.description}`]
 			);
-			if (!token.enabled || (token.enabled && isModified)) {
+			const isTestnetDisabled = $testnetsEnabled && token.network.env === 'testnet';
+			const isNetworkSelected = nonNullish($selectedNetwork)
+				? $selectedNetwork.id === token.network.id
+				: true;
+			if (
+				(!token.enabled || (token.enabled && isModified)) &&
+				!isTestnetDisabled &&
+				isNetworkSelected
+			) {
 				acc.push({
 					token: token as TokenUi
 				});
