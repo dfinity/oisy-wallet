@@ -44,14 +44,15 @@ export const prepareTransactionUtxos = async ({
 	amount,
 	source
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
+	const startTime = performance.now();
+	console.warn('🚀 Starting prepareTransactionUtxos');
+
 	assertNonNullish(identity);
 	assertStringNotEmpty({ value: source, message: 'Source address is required' });
 	assertNonNullish(CKBTC_MINTER_CANISTER_ID);
 
 	// assertAmount({ amount });
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[CKBTC_MINTER_CANISTER_ID];
-
-	console.warn('bitcoinCanisterId=', bitcoinCanisterId);
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
@@ -61,22 +62,28 @@ export const prepareTransactionUtxos = async ({
 
 	try {
 		// Step 1: Get current fee percentiles from backend
+		const step1Start = performance.now();
 		const feeRateSatoshisPerByte = await getFeeRateFromPercentiles({
 			identity,
 			network
 		});
-
+		const step1End = performance.now();
+		console.warn(`⏱️ Step 1 (Get fee percentiles): ${(step1End - step1Start).toFixed(2)}ms`);
 		console.warn(`Using fee rate: ${feeRateSatoshisPerByte} sat/byte (from percentiles)`);
 
 		// Step 2: Fetch all available UTXOs using query call (fast and no cycle cost)
+		const step2Start = performance.now();
 		const allUtxos = await getUtxos({
 			identity,
 			address: source,
 			network,
 			bitcoinCanisterId
 		});
+		const step2End = performance.now();
+		console.warn(`⏱️ Step 2 (Fetch UTXOs): ${(step2End - step2Start).toFixed(2)}ms`);
 
 		// Step 3: Filter UTXOs based on confirmations and exclude locked ones
+		const step3Start = performance.now();
 		const availableUtxos = filterAvailableUtxos({
 			utxos: allUtxos,
 			options: {
@@ -84,6 +91,8 @@ export const prepareTransactionUtxos = async ({
 				pendingTxIds
 			}
 		});
+		const step3End = performance.now();
+		console.warn(`⏱️ Step 3 (Filter UTXOs): ${(step3End - step3Start).toFixed(2)}ms`);
 
 		assertArrayNotEmpty({
 			array: availableUtxos,
@@ -91,23 +100,39 @@ export const prepareTransactionUtxos = async ({
 		});
 
 		// Step 4: Select UTXOs with fee consideration
+		const step4Start = performance.now();
 		const selection = calculateUtxoSelection({
 			availableUtxos,
 			amountSatoshis,
 			feeRateSatoshisPerByte
 		});
+		const step4End = performance.now();
+		console.warn(`⏱️ Step 4 (Select UTXOs): ${(step4End - step4Start).toFixed(2)}ms`);
 
 		// Step 5: Calculate final fee based on selected UTXOs
+		const step5Start = performance.now();
 		const feeSatoshis = calculateFinalFee({ selection, amountSatoshis });
+		const step5End = performance.now();
+		console.warn(`⏱️ Step 5 (Calculate final fee): ${(step5End - step5Start).toFixed(2)}ms`);
 
-		return {
+		// Step 6: Prepare result
+		const step6Start = performance.now();
+		const result = {
 			feeSatoshis,
 			utxos: selection.selectedUtxos,
 			totalInputValue: selection.totalInputValue,
 			changeAmount: selection.changeAmount
 		};
+		const step6End = performance.now();
+		console.warn(`⏱️ Step 6 (Prepare result): ${(step6End - step6Start).toFixed(2)}ms`);
+
+		const totalTime = performance.now() - startTime;
+		console.warn(`🏁 Total prepareTransactionUtxos execution time: ${totalTime.toFixed(2)}ms`);
+
+		return result;
 	} catch (error) {
-		console.error('Error in selectUtxosFee:', error);
+		const totalTime = performance.now() - startTime;
+		console.error(`❌ Error in prepareTransactionUtxos after ${totalTime.toFixed(2)}ms:`, error);
 		throw error;
 	}
 };
@@ -151,10 +176,6 @@ const getFeeRateFromPercentiles = async ({
 
 		// Get fee percentiles array
 		const feePercentiles = response.fee_percentiles;
-
-		console.warn('feePercentiles=', feePercentiles);
-		console.warn('backendNetwork=', backendNetwork);
-
 		if (isNullish(feePercentiles) || feePercentiles.length === 0) {
 			throw new Error('No fee percentiles available - cannot calculate transaction fee');
 		}

@@ -63,13 +63,15 @@
 
 		const network = mapNetworkIdToBitcoinNetwork(networkId);
 
+		console.warn('loadEstimatedFee->selectUtxosFeeCompatible');
+
 		const utxosFee = nonNullish(network)
 			? await selectUtxosFeeCompatible({
-					amount: parsedAmount,
-					network,
-					identity: $authIdentity,
-					source
-				})
+				amount: parsedAmount,
+				network,
+				identity: $authIdentity,
+				source
+			})
 			: undefined;
 
 		if (isNullish(utxosFee)) {
