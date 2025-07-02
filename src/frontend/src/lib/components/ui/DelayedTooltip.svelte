@@ -7,8 +7,7 @@
 		delay?: number;
 	}
 
-	const props = $props();
-	const { text, delay = 1500 } = props as TooltipProps;
+	const { text, delay = 1500 }: Props = $props()
 
 	let timer = $state<ReturnType<typeof setTimeout>>();
 	let tooltipActive = $state(false);
