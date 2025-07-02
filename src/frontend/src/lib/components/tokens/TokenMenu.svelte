@@ -19,12 +19,18 @@
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import type { Snippet } from 'svelte';
 
-	export let testId: string | undefined = undefined;
+	interface Props {
+		testId?: string;
+		children: Snippet;
+	}
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
-	let fromRoute: NavigationTarget | undefined;
+	const { testId, children }: Props = $props();
+
+	let visible = $state(false);
+	let button: HTMLButtonElement | undefined = $state();
+	let fromRoute: NavigationTarget | undefined = $state();
 
 	afterNavigate(({ from }) => {
 		fromRoute = from ?? undefined;
@@ -65,17 +71,18 @@
 		visible = false;
 	};
 
-	let hideTokenLabel: string;
-	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
-		$token: nonNullish($token) ? getTokenDisplaySymbol($token) : ''
-	});
+	let hideTokenLabel: string = $derived(
+		replacePlaceholders($i18n.tokens.hide.token, {
+			$token: nonNullish($token) ? getTokenDisplaySymbol($token) : ''
+		})
+	);
 </script>
 
 <button
 	data-tid={`${testId}-button`}
 	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	bind:this={button}
-	on:click={() => (visible = true)}
+	onclick={() => (visible = true)}
 	aria-label={$i18n.tokens.alt.context_menu}
 	disabled={$erc20UserTokensNotInitialized}
 >
@@ -90,7 +97,7 @@
 			</ButtonMenu>
 		{/if}
 
-		<slot />
+		{@render children()}
 
 		<ButtonMenu ariaLabel={$i18n.tokens.details.title} onclick={openToken}>
 			{$i18n.tokens.details.title}
