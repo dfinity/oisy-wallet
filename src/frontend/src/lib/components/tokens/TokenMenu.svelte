@@ -34,7 +34,11 @@
 	const openModalId = Symbol();
 
 	const hideToken = () => {
-		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
+		const fn = $networkICP
+			? modalStore.openIcHideToken
+			: $networkSolana
+				? modalStore.openSolHideToken
+				: modalStore.openHideToken;
 		fn({
 			id: hideModalId,
 			data: fromRoute

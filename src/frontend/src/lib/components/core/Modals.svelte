@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import HideTokenModal from '$eth/components/tokens/HideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
+	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
@@ -14,6 +15,8 @@
 		modalDAppDetails,
 		modalHideToken,
 		modalIcHideToken,
+		modalSolHideToken,
+		modalSolHideTokenData,
 		modalVipQrCode,
 		modalSettingsState,
 		modalReferralCode,
@@ -35,6 +38,8 @@
 		<HideTokenModal fromRoute={$modalHideTokenData} />
 	{:else if $modalIcHideToken}
 		<IcHideTokenModal fromRoute={$modalIcHideTokenData} />
+	{:else if $modalSolHideToken}
+		<SolHideTokenModal fromRoute={$modalSolHideTokenData} />
 	{:else if $modalDAppDetails}
 		<DappModalDetails />
 	{:else if $modalVipQrCode && nonNullish($modalVipQrCodeData)}
