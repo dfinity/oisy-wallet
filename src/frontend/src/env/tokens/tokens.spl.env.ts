@@ -13,6 +13,7 @@ import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
+import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
 import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
@@ -38,6 +39,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	NVDAX_TOKEN,
 	ORCA_TOKEN,
 	POPCAT_TOKEN,
+	QQQX_TOKEN,
 	RAY_TOKEN,
 	SPYX_TOKEN,
 	TRUMP_TOKEN,
