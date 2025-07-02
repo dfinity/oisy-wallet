@@ -10,8 +10,8 @@
   
     const { text, delay = 1500, children = () => '' }: Props = $props();
   
-    let timer = $state<NodeJS.Timeout | undefined>();
-    let tooltipActive = $state(false);
+	let timer = $state<NodeJS.Timeout | undefined>();
+	let tooltipActive = $state(false);
   
     const handleEnter = () => {
       clearTimeout(timer);
@@ -24,11 +24,11 @@
       clearTimeout(timer);
       tooltipActive = false;
     };
-  
-    onDestroy(() => clearTimeout(timer));
-  </script>
-  
-  <div class="relative inline-block">
+
+	onDestroy(() => clearTimeout(timer));
+</script>
+
+<div class="relative inline-block">
     {#snippet trigger()}
       <span
         class="inline-block sm:py-1"
