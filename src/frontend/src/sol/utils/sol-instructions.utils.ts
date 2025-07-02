@@ -1,7 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
-import { getAccountInfo } from '$sol/api/sol-rpc.api';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
@@ -9,6 +8,7 @@ import {
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolInstruction,
@@ -117,7 +117,6 @@ const mapSystemParsedInstruction = ({
 };
 
 const mapTokenParsedInstruction = async ({
-	identity,
 	type,
 	info,
 	network,
@@ -149,18 +148,16 @@ const mapTokenParsedInstruction = async ({
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
 
-		const sourceResult = await getAccountInfo({
-			identity,
-			address: address(from),
-			network
-		});
+		const { getAccountInfo } = solanaHttpRpc(network);
 
-		if (nonNullish(sourceResult)) {
+		const { value: sourceResult } = await getAccountInfo(address(from), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
 			const {
 				data: {
-					json: {
-						parsed: { info: sourceInfo }
-					}
+					parsed: { info: sourceInfo }
 				}
 			} = sourceResult;
 
@@ -169,18 +166,14 @@ const mapTokenParsedInstruction = async ({
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
 
-		const destinationResult = await getAccountInfo({
-			identity,
-			address: address(to),
-			network
-		});
+		const { value: destinationResult } = await getAccountInfo(address(to), {
+			encoding: 'jsonParsed'
+		}).send();
 
-		if (nonNullish(destinationResult)) {
+		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
 			const {
 				data: {
-					json: {
-						parsed: { info: destinationInfo }
-					}
+					parsed: { info: destinationInfo }
 				}
 			} = destinationResult;
 
