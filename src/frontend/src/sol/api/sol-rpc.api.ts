@@ -1,9 +1,9 @@
-import type { AccountInfo } from '$declarations/sol_rpc/sol_rpc.did';
 import { SOL_RPC_CANISTER_ID } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { SolRpcCanister } from '$sol/canisters/sol-rpc.canister';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { ParsedAccountInfo } from '$sol/types/sol-rpc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 
@@ -15,7 +15,7 @@ export const getAccountInfo = async ({
 }: CanisterApiFunctionParams<{
 	address: SolAddress;
 	network: SolanaNetworkType;
-}>): Promise<AccountInfo | undefined> => {
+}>): Promise<ParsedAccountInfo | undefined> => {
 	const { getAccountInfo } = await solRpcCanister({ identity });
 
 	const accountInfo = await getAccountInfo(rest);
