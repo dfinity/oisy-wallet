@@ -3,6 +3,7 @@ import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
 import type { SolAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
@@ -37,12 +38,14 @@ const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefine
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
 
 export const fetchSolTransactionsForSignature = async ({
+	identity,
 	signature,
 	network,
 	address,
 	tokenAddress,
 	tokenOwnerAddress
 }: {
+	identity: OptionIdentity;
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
@@ -110,6 +113,7 @@ export const fetchSolTransactionsForSignature = async ({
 			} = await acc;
 
 			const mappedTransaction = await mapSolParsedInstruction({
+				identity,
 				instruction: {
 					...instruction,
 					programAddress: instruction.programId
@@ -290,6 +294,7 @@ export const loadNextSolTransactionsByOldest = async ({
 	transactions,
 	...rest
 }: {
+	identity: OptionIdentity;
 	minTimestamp: number;
 	transactions: SolTransactionUi[];
 	token: Token;

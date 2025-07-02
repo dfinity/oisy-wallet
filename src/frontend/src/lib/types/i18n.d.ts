@@ -304,7 +304,13 @@ interface I18nRewards {
 }
 
 interface I18nFooter {
-	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
+	text: {
+		incubated_with: string;
+		by: string;
+		dfinity_foundation: string;
+		copyright: string;
+		ai_assistant_console_button: string;
+	};
 	alt: { dfinity: string };
 }
 
