@@ -19,11 +19,14 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
+	import type { Network } from '$lib/types/network';
 	import type { Token, TokenUi } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
+	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
@@ -58,14 +61,28 @@
 	// Token list for enabling when filtering
 	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
 
-	const updateFilterList = (filter: string) => {
+	const updateFilterList = ({
+		filter,
+		selectedNetwork
+	}: {
+		filter: string;
+		selectedNetwork?: Network;
+	}) => {
 		// hide enabled initially, but keep enabled (modified) ones that have just been enabled to let the user revert easily
 		// then we return it as a valid TokenUiOrGroupUi since the displaying cards require that type
+		// we also apply the same logic for filtering networks as in manage tokens modal
 		const reducedTokens = ($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
 			const isModified = nonNullish(
 				modifiedTokens[`${token.network.id.description}-${token.id.description}`]
 			);
-			if (!token.enabled || (token.enabled && isModified)) {
+			if (
+				(!token.enabled || (token.enabled && isModified)) &&
+				showTokenFilteredBySelectedNetwork({
+					token,
+					$selectedNetwork: selectedNetwork,
+					$pseudoNetworkChainFusion: isNullish(selectedNetwork)
+				})
+			) {
 				acc.push({
 					token: token as TokenUi
 				});
@@ -84,10 +101,14 @@
 	};
 
 	// we debounce the filter input for updating the enable tokens list
-	const debouncedFilterList = debounce((filter: string) => updateFilterList(filter), 300);
+	const debouncedFilterList = debounce(
+		(params: { filter: string; selectedNetwork?: Network }) => updateFilterList(params),
+		300
+	);
 	$effect(() => {
 		const { filter } = $tokenListStore;
-		untrack(() => debouncedFilterList(filter)); // we untrack the function so it only updates the list on filter change
+		const network = $selectedNetwork;
+		untrack(() => debouncedFilterList({ filter, selectedNetwork: network })); // we untrack the function so it only updates the list on filter change
 	});
 
 	let {
@@ -106,7 +127,7 @@
 		await saveAllCustomTokens({ tokens: modifiedTokens, $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
-		updateFilterList($tokenListStore.filter);
+		updateFilterList({ filter: $tokenListStore.filter, selectedNetwork: $selectedNetwork });
 		saveLoading = false;
 	};
 
