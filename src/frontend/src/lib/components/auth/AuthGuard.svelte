@@ -12,7 +12,9 @@
 </script>
 
 {#if $authNotSignedIn}
-	<LandingPage />
+	<div class="h-[100dvh]">
+		<LandingPage />
+	</div>
 {:else}
 	<div in:fade class="md:block md:overflow-y-auto">
 		{@render children?.()}
