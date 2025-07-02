@@ -365,6 +365,14 @@ export interface UserProfile {
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }
+export interface UserToken {
+	decimals: [] | [number];
+	version: [] | [bigint];
+	enabled: [] | [boolean];
+	chain_id: bigint;
+	contract_address: string;
+	symbol: [] | [string];
+}
 export interface UserTokenId {
 	chain_id: bigint;
 	contract_address: string;
