@@ -52,7 +52,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Vermögen",
-			"settings": "Einrichten",
+			"settings": "Einstellungen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
 			"airdrops": "Prämien",
@@ -554,7 +554,7 @@
 	},
 	"receive": {
 		"text": {
-			"receive": "Empfang",
+			"receive": "Empfangen",
 			"address": "Empfangsadresse",
 			"receive_token": "$token empfangen"
 		},
