@@ -104,7 +104,7 @@ export const prepareTransactionUtxos = async ({
 
 		// Step 5: Calculate final fee based on selected UTXOs
 		const feeSatoshis = calculateFinalFee({ selection, amountSatoshis });
-
+		console.warn('final fee: ', feeSatoshis);
 		return {
 			feeSatoshis,
 			utxos: selection.selectedUtxos,
