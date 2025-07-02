@@ -14,4 +14,4 @@ export const SOL_RPC_CONFIG: [] | [RpcConfig] = toNullable({
 	responseSizeEstimate: toNullable()
 });
 
-export const JSON_PARSED: [GetAccountInfoEncoding] = [{ jsonParsed: null }];
+export const JSON_PARSED: [] | [GetAccountInfoEncoding] = toNullable({ jsonParsed: null });
