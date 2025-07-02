@@ -1,3 +1,4 @@
+import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { getAgent } from '$lib/actors/agents.ic';
 import { BitcoinDirectCanister } from '$lib/canisters/bitcoin.canister';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -33,7 +34,7 @@ export const getUtxosQuery = async ({
 			? await bitcoinDirectCanister({ identity, bitcoinCanisterId })
 			: await bitcoinCanister({ identity, bitcoinCanisterId });
 
-	const minConfirmations = 1;
+	const minConfirmations = BTC_BALANCE_MIN_CONFIRMATIONS;
 
 	return getUtxosQuery({
 		address,
