@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Tooltip } from '@dfinity/gix-components';
-	import type { Snippet , onDestroy } from 'svelte';
-	
+	import type { Snippet, onDestroy } from 'svelte';
+
 	interface Props {
 		text: string;
 		delay?: number;
