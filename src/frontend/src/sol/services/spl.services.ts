@@ -172,13 +172,13 @@ const loadCustomTokensWithMetadata = async ({
 				})
 			);
 
-			const owner = await getTokenOwner({ address, network: solNetwork });
+			const owner = await getTokenOwner({ identity, address, network: solNetwork });
 
 			if (isNullish(owner)) {
 				return acc;
 			}
 
-			const metadata = await getSplMetadata({ address, network: solNetwork });
+			const metadata = await getSplMetadata({ identity, address, network: solNetwork });
 
 			return nonNullish(metadata)
 				? [
@@ -209,13 +209,15 @@ const loadCustomTokenData = ({
 };
 
 export const getSplMetadata = async ({
+	identity,
 	address,
 	network
 }: {
+	identity: OptionIdentity;
 	address: SolAddress;
 	network: SolanaNetworkType;
 }): Promise<TokenMetadata | undefined> => {
-	const decimals = await getTokenDecimals({ address, network });
+	const decimals = await getTokenDecimals({ identity, address, network });
 
 	try {
 		const metadataResult = await splMetadata({ tokenAddress: address, network });

@@ -65,6 +65,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}
 
 	private loadBalance = async ({
+		identity,
 		address,
 		solanaNetwork: network,
 		tokenAddress,
@@ -73,6 +74,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		data:
 			nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
 				? await loadSplTokenBalance({
+						identity,
 						address,
 						network,
 						tokenAddress,
