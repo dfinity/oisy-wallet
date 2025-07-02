@@ -12,7 +12,7 @@
 </script>
 
 {#if $authNotSignedIn}
-	<div class="h-[100dvh]">
+	<div class="h-[90dvh]">
 		<LandingPage />
 	</div>
 {:else}
