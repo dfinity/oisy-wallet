@@ -17,6 +17,7 @@ import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
 import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
+import { TSLAX_TOKEN } from '$env/tokens/tokens-spl/tokens.tslax.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
@@ -42,6 +43,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	RAY_TOKEN,
 	SPYX_TOKEN,
 	TRUMP_TOKEN,
+	TSLAX_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN,
 	WSOL_TOKEN
