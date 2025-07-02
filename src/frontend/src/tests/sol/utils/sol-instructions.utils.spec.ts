@@ -1,22 +1,25 @@
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ZERO } from '$lib/constants/app.constants';
-import * as solRpcApi from '$sol/api/sol-rpc.api';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
-import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockAccountInfo } from '$tests/mocks/sol-rpc.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { address, type Base58EncodedBytes } from '@solana/kit';
+import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
+
+vi.mock('$sol/providers/sol-rpc.providers', () => ({
+	solanaHttpRpc: vi.fn(),
+	solanaWebSocketRpc: vi.fn()
+}));
 
 describe('sol-instructions.utils', () => {
 	const network: SolanaNetworkType = 'mainnet';
@@ -30,8 +33,6 @@ describe('sol-instructions.utils', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-
-		mockAuthStore();
 	});
 
 	describe('mapSolParsedInstruction', () => {
@@ -176,16 +177,17 @@ describe('sol-instructions.utils', () => {
 			};
 
 			beforeEach(() => {
-				mockGetAccountInfo = vi.spyOn(solRpcApi, 'getAccountInfo').mockResolvedValue({
-					...mockAccountInfo,
-					data: {
-						json: {
-							space: 1n,
-							program: TOKEN_PROGRAM_ADDRESS,
-							parsed: { info: { mint: mockTokenAddress } }
+				mockGetAccountInfo = vi.fn(() => ({
+					send: vi.fn(() => ({
+						value: {
+							data: { parsed: { info: { mint: mockTokenAddress } } }
 						}
-					}
-				});
+					}))
+				}));
+
+				const mockRpc = { getAccountInfo: mockGetAccountInfo } as unknown as Rpc<SolanaRpcApi>;
+
+				vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			});
 
 			describe('with `transfer` instruction', () => {
@@ -203,15 +205,15 @@ describe('sol-instructions.utils', () => {
 						tokenAddress: mockTokenAddress
 					});
 
-					expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith({
-						identity: mockIdentity,
-						address: mockSolAddress,
-						network
+					expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockSolAddress, {
+						encoding: 'jsonParsed'
 					});
 				});
 
 				it('should fetch token address from destination account info if not provided by source info', async () => {
-					mockGetAccountInfo.mockReturnValueOnce(undefined);
+					mockGetAccountInfo.mockReturnValueOnce({
+						send: vi.fn(() => ({ value: { data: {} } }))
+					});
 
 					const result = await mapSolParsedInstruction({
 						identity: mockIdentity,
@@ -227,15 +229,11 @@ describe('sol-instructions.utils', () => {
 					});
 
 					expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
-					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, {
-						identity: mockIdentity,
-						address: mockSolAddress,
-						network
+					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, mockSolAddress, {
+						encoding: 'jsonParsed'
 					});
-					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, {
-						identity: mockIdentity,
-						address: mockSolAddress2,
-						network
+					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, mockSolAddress2, {
+						encoding: 'jsonParsed'
 					});
 				});
 
@@ -491,16 +489,17 @@ describe('sol-instructions.utils', () => {
 			};
 
 			beforeEach(() => {
-				mockGetAccountInfo = vi.spyOn(solRpcApi, 'getAccountInfo').mockResolvedValue({
-					...mockAccountInfo,
-					data: {
-						json: {
-							space: 1n,
-							program: TOKEN_2022_PROGRAM_ADDRESS,
-							parsed: { info: { mint: mockTokenAddress } }
+				mockGetAccountInfo = vi.fn(() => ({
+					send: vi.fn(() => ({
+						value: {
+							data: { parsed: { info: { mint: mockTokenAddress } } }
 						}
-					}
-				});
+					}))
+				}));
+
+				const mockRpc = { getAccountInfo: mockGetAccountInfo } as unknown as Rpc<SolanaRpcApi>;
+
+				vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			});
 
 			describe('with `transfer` instruction', () => {
@@ -518,15 +517,15 @@ describe('sol-instructions.utils', () => {
 						tokenAddress: mockTokenAddress
 					});
 
-					expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith({
-						identity: mockIdentity,
-						address: mockSolAddress,
-						network
+					expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockSolAddress, {
+						encoding: 'jsonParsed'
 					});
 				});
 
 				it('should fetch token address from destination account info if not provided by source info', async () => {
-					mockGetAccountInfo.mockReturnValueOnce(undefined);
+					mockGetAccountInfo.mockReturnValueOnce({
+						send: vi.fn(() => ({ value: { data: {} } }))
+					});
 
 					const result = await mapSolParsedInstruction({
 						identity: mockIdentity,
@@ -542,15 +541,11 @@ describe('sol-instructions.utils', () => {
 					});
 
 					expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
-					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, {
-						identity: mockIdentity,
-						address: mockSolAddress,
-						network
+					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, mockSolAddress, {
+						encoding: 'jsonParsed'
 					});
-					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, {
-						identity: mockIdentity,
-						address: mockSolAddress2,
-						network
+					expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, mockSolAddress2, {
+						encoding: 'jsonParsed'
 					});
 				});
 
