@@ -2,7 +2,7 @@
 	import { Tooltip } from '@dfinity/gix-components';
 	import { onDestroy } from 'svelte';
 
-	interface TooltipProps {
+	interface Props {
 		text: string;
 		delay?: number;
 	}
