@@ -45,43 +45,45 @@
 	});
 </script>
 
-<div
-	class="relative min-h-[640px] pb-5 md:pb-0 lg:flex lg:h-full lg:flex-col"
-	class:overflow-hidden={$authNotSignedIn}
-	class:flex={$authSignedIn}
-	class:h-full={$authSignedIn}
-	class:flex-col={$authSignedIn}
-	class:md:flex={$authNotSignedIn}
-	class:md:flex-col={$authNotSignedIn}
-	class:md:h-full={$authNotSignedIn}
->
-	<Header />
+<div class:h-dvh={$authNotSignedIn}>
+	<div
+		class="relative min-h-[640px] pb-5 md:pb-0 lg:flex lg:h-full lg:flex-col"
+		class:overflow-hidden={$authNotSignedIn}
+		class:flex={$authSignedIn}
+		class:h-full={$authSignedIn}
+		class:flex-col={$authSignedIn}
+		class:md:flex={$authNotSignedIn}
+		class:md:flex-col={$authNotSignedIn}
+		class:md:h-full={$authNotSignedIn}
+	>
+		<Header />
 
-	<AuthGuard>
-		<SplitPane>
-			<NavigationMenu slot="menu">
-				{#if tokensRoute}
-					<div transition:fade class="hidden xl:block">
-						<DappsCarousel />
-					</div>
+		<AuthGuard>
+			<SplitPane>
+				<NavigationMenu slot="menu">
+					{#if tokensRoute}
+						<div transition:fade class="hidden xl:block">
+							<DappsCarousel />
+						</div>
+					{/if}
+				</NavigationMenu>
+
+				{#if showHero}
+					<Hero />
 				{/if}
-			</NavigationMenu>
 
-			{#if showHero}
-				<Hero />
-			{/if}
+				<Loaders>
+					<slot />
+				</Loaders>
+			</SplitPane>
 
-			<Loaders>
-				<slot />
-			</Loaders>
-		</SplitPane>
+			<MobileNavigationMenu>
+				<NavigationMenuMainItems testIdPrefix="mobile" />
+			</MobileNavigationMenu>
 
-		<MobileNavigationMenu>
-			<NavigationMenuMainItems testIdPrefix="mobile" />
-		</MobileNavigationMenu>
+			<Modals />
+		</AuthGuard>
 
-		<Modals />
-	</AuthGuard>
-
-	<Footer />
+		<Footer />
+	</div>
 </div>
