@@ -22,7 +22,7 @@ import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	AAPLX_TOKEN,
-  ABBVX_TOKEN,
+	ABBVX_TOKEN,
 	ABTX_TOKEN,
 	BONK_TOKEN,
 	COINX_TOKEN,
