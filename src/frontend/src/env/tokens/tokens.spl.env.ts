@@ -9,9 +9,11 @@ import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
+import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
+import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { TSLAX_TOKEN } from '$env/tokens/tokens-spl/tokens.tslax.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
@@ -31,9 +33,11 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	JUP_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
+	NVDAX_TOKEN,
 	ORCA_TOKEN,
 	POPCAT_TOKEN,
 	RAY_TOKEN,
+	SPYX_TOKEN,
 	TRUMP_TOKEN,
 	TSLAX_TOKEN,
 	USDC_TOKEN,
