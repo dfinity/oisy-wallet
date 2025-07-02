@@ -131,6 +131,7 @@ const convertNetworkType = (network: BitcoinNetwork): BackendBitcoinNetwork => {
 /**
  * Gets fee rate from current fee percentiles, with fallback to default
  * Uses the median fee rate (50th percentile) for balanced speed/cost
+ * IMPORTANT: Converts from millisatoshis per byte (backend) to satoshis per byte (frontend)
  */
 const getFeeRateFromPercentiles = async ({
 	identity,
@@ -159,21 +160,23 @@ const getFeeRateFromPercentiles = async ({
 		}
 
 		// Use the median fee rate (50th percentile) for balanced transaction speed/cost
-		// Fee percentiles are typically returned in order: [10th, 25th, 50th, 75th, 90th]
 		const medianIndex = Math.floor(feePercentiles.length / 2);
-		const medianFeeRate = feePercentiles[medianIndex];
+		const medianFeeRateMillisat = feePercentiles[medianIndex];
 
-		// Ensure we have a reasonable minimum fee rate
-		// TODO add a reasaoble value for the minFeeRate
+		// Convert from millisatoshis per byte to satoshis per byte
+		// Backend returns values in millisat/byte, frontend uses sat/byte
+		const medianFeeRate = medianFeeRateMillisat / 1000n;
+
+		// Ensure we have a reasonable minimum fee rate (1 sat/byte)
 		const minFeeRate = 1n;
-		// make sure to use the minimun fee rate if medianFeeRate is below the minimum rate
 		const finalFeeRate = medianFeeRate > minFeeRate ? medianFeeRate : minFeeRate;
 
-		console.warn(`Using fee rate: ${finalFeeRate} sat/byte (from percentiles)`);
-		return finalFeeRate;
+		// Add safety cap to prevent extremely high fees (max 100 sat/byte)
+		const maxFeeRate = 100n;
+		const cappedFeeRate = finalFeeRate > maxFeeRate ? maxFeeRate : finalFeeRate;
+		return cappedFeeRate;
 	} catch (error) {
 		console.warn('Failed to get fee percentiles, using default fee rate:', error);
-		// TODO should we throw an error instead of using a default fee rateS?
 		return DEFAULT_FEE_RATE_SATOSHIS_PER_BYTE;
 	}
 };
