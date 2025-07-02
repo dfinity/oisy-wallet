@@ -1,4 +1,3 @@
-import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { getAgent } from '$lib/actors/agents.ic';
 import { BitcoinDirectCanister } from '$lib/canisters/bitcoin.canister';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -10,18 +9,20 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 interface BitcoinCanisterParams {
 	identity: OptionIdentity;
-	address: string;
-	network: BitcoinNetwork;
 	bitcoinCanisterId: CanisterIdText;
+	network: BitcoinNetwork;
+	address: string;
+	minConfirmations?: number;
 }
 
 let directCanister: BitcoinDirectCanister | undefined = undefined;
 
 export const getUtxosQuery = async ({
 	identity,
+	bitcoinCanisterId,
 	address,
 	network,
-	bitcoinCanisterId
+	minConfirmations
 }: BitcoinCanisterParams): Promise<get_utxos_response> => {
 	assertNonNullish(identity);
 
@@ -34,12 +35,10 @@ export const getUtxosQuery = async ({
 			? await bitcoinDirectCanister({ identity, bitcoinCanisterId })
 			: await bitcoinCanister({ identity, bitcoinCanisterId });
 
-	const minConfirmations = BTC_BALANCE_MIN_CONFIRMATIONS;
-
 	return getUtxosQuery({
 		address,
 		network,
-		filter: { minConfirmations }
+		...(isNullish(minConfirmations) ? {} : { filter: { minConfirmations } })
 	});
 };
 
