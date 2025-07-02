@@ -8,19 +8,19 @@
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { findTwinToken } from '$lib/utils/token.utils';
-	import { pageToken } from '$lib/derived/page-token.derived';
 
-	let ckEthToken: IcCkToken | undefined
+	let ckEthToken: IcCkToken | undefined;
 	$: (() => {
 		if (nonNullish(ckEthToken) || isNullish($pageToken)) {
 			return;
 		}
 
 		ckEthToken = findTwinToken({
-			tokenToPair:  $pageToken,
+			tokenToPair: $pageToken,
 			tokens: $tokens
 		});
 	})();
