@@ -38,6 +38,11 @@ export interface BtcReviewResult {
  * Main orchestrator function that replaces the backend btc_select_user_utxos_fee call
  * This function coordinates all the steps needed to select UTXOs and calculate fees
  */
+
+/**
+ * Main orchestrator function that replaces the backend btc_select_user_utxos_fee call
+ * This function coordinates all the steps needed to select UTXOs and calculate fees
+ */
 export const prepareTransactionUtxos = async ({
 	identity,
 	network,
@@ -54,11 +59,17 @@ export const prepareTransactionUtxos = async ({
 	// assertAmount({ amount });
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[CKBTC_MINTER_CANISTER_ID];
 
+	// Step 0: Get pending transactions and convert amount
+	const step0Start = performance.now();
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
 
 	// Convert amount to satoshis
 	const amountSatoshis = convertNumberToSatoshis({ amount });
+	const step0End = performance.now();
+	console.warn(
+		`⏱️ Step 0 (Get pending TXs & convert amount): ${(step0End - step0Start).toFixed(2)}ms`
+	);
 
 	try {
 		// Step 1: Get current fee percentiles from backend
