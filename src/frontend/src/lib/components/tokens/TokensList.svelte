@@ -111,7 +111,7 @@
 	};
 
 	let modifiedTokens: Record<string, Token> = $state({});
-	let modifiedTokensLen: number = $derived(Object.keys(modifiedTokens).length);
+	let modifiedTokensLen = $derived(Object.keys(modifiedTokens).length);
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
