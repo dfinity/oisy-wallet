@@ -1,7 +1,9 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
 import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
+import { ABBVX_TOKEN } from '$env/tokens/tokens-spl/tokens.abbvx.env';
 import { ABTX_TOKEN } from '$env/tokens/tokens-spl/tokens.abtx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { CRCLX_TOKEN } from '$env/tokens/tokens-spl/tokens.crclx.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
@@ -20,8 +22,10 @@ import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	AAPLX_TOKEN,
+  ABBVX_TOKEN,
 	ABTX_TOKEN,
 	BONK_TOKEN,
+	COINX_TOKEN,
 	CRCLX_TOKEN,
 	EURC_TOKEN,
 	GOOGLX_TOKEN,
