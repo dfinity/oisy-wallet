@@ -7,7 +7,7 @@
 		delay?: number;
 	}
 
-	const { text, delay = 1500 }: Props = $props()
+	const { text, delay = 1500 }: Props = $props();
 
 	let timer = $state<NodeJS.Timeout | undefined>();
 	let tooltipActive = $state(false);
