@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Tooltip } from '@dfinity/gix-components';
-	import { onDestroy } from 'svelte';
-
+	import type { Snippet , onDestroy } from 'svelte';
+	
 	interface Props {
 		text: string;
 		delay?: number;
-		children?: () => any;
+		children?: Snippet;
 	}
 
-	const { text, delay = 1500, children = () => '' }: Props = $props();
+	const { text, delay = 1500, children }: Props = $props();
 
 	let timer = $state<NodeJS.Timeout | undefined>();
 	let tooltipActive = $state(false);

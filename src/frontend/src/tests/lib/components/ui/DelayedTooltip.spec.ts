@@ -1,24 +1,12 @@
 import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { vi } from 'vitest';
 
 describe('DelayedTooltip', () => {
 	const testId = 'test-content';
 	const children = createMockSnippet(testId);
-
-	const waitForTooltip = async (advanceBy = 1600) => {
-		vi.advanceTimersByTime(advanceBy);
-
-		return await waitFor(() => {
-			const tooltip = document.querySelector('[role="tooltip"]');
-			if (!tooltip) {
-				throw new Error(`Tooltip not found. DOM:\n${  document.body.innerHTML}`);
-			}
-			return tooltip;
-		});
-	};
 
 	beforeEach(() => {
 		vi.useFakeTimers();
