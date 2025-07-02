@@ -44,6 +44,7 @@ export interface Modal<T> {
 		| 'manage-tokens'
 		| 'hide-token'
 		| 'ic-hide-token'
+		| 'sol-hide-token'
 		| 'eth-token'
 		| 'btc-token'
 		| 'ic-token'
@@ -108,6 +109,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
 	openHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openIcHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openSolHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openEthToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openBtcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
 	openIcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
@@ -181,6 +183,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openIcHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('ic-hide-token')
+		),
+		openSolHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('sol-hide-token')
 		),
 		openEthToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
 			setTypeWithData('eth-token')
