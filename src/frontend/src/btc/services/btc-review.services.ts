@@ -151,6 +151,9 @@ const getFeeRateFromPercentiles = async ({
 		// Get fee percentiles array
 		const feePercentiles = response.fee_percentiles;
 
+		console.warn('feePercentiles=', feePercentiles);
+		console.warn('backendNetwork=', backendNetwork);
+
 		if (isNullish(feePercentiles) || feePercentiles.length === 0) {
 			throw new Error('No fee percentiles available - cannot calculate transaction fee');
 		}
