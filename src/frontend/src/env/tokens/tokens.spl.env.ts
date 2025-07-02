@@ -1,8 +1,13 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
+import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
+import { ABBVX_TOKEN } from '$env/tokens/tokens-spl/tokens.abbvx.env';
 import { ABTX_TOKEN } from '$env/tokens/tokens-spl/tokens.abtx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
@@ -16,10 +21,15 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
+	ABBVX_TOKEN,
+	AAPLX_TOKEN,
 	ABTX_TOKEN,
 	BONK_TOKEN,
+	COINX_TOKEN,
 	EURC_TOKEN,
+	GOOGLX_TOKEN,
 	JUP_TOKEN,
+	METAX_TOKEN,
 	MSTRX_TOKEN,
 	NVDAX_TOKEN,
 	ORCA_TOKEN,
