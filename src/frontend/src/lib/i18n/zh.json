@@ -86,7 +86,7 @@
 			"open_twitter": "打开 DFINITY 的 X/Twitter 动态",
 			"vip_qr_code": "生成一个邀请链接",
 			"binance_qr_code": "生成一个 Binance Clubhouse 链接",
-			[cite_start]"refer_a_friend": "为朋友生成一个推荐链接"[cite: 2],
+			"refer_a_friend": "为朋友生成一个推荐链接",
 			"address_book": "打开联系人",
 			"hide_balances": "隐藏当前显示的余额",
 			"show_balances": "显示已隐藏的余额"
@@ -148,13 +148,13 @@
 				"sign_in": "正在登录？"
 			},
 			"alt": {
-				[cite_start]"internet_identity": "新 Internet Identity 的图像"[cite: 3],
-				[cite_start]"identity_learn_more": "了解旧版 Internet Identity"[cite: 3],
-				[cite_start]"other_introduction": "打开 $oisy_short 简介"[cite: 3],
-				[cite_start]"other_docs": "打开 $oisy_short 文档：Internet Identity"[cite: 3],
-				[cite_start]"other_private_key": "了解谁控制原生资产的私钥"[cite: 3],
-				[cite_start]"other_asset_control": "查看 $oisy_short 钱包中的资产控制、恢复和治理信息"[cite: 3],
-				[cite_start]"sign_in": "登录时需要帮助？" [cite: 3]
+				"internet_identity": "新 Internet Identity 的图像",
+				"identity_learn_more": "了解旧版 Internet Identity",
+				"other_introduction": "打开 $oisy_short 简介",
+				"other_docs": "打开 $oisy_short 文档：Internet Identity",
+				"other_private_key": "了解谁控制原生资产的私钥",
+				"other_asset_control": "查看 $oisy_short 钱包中的资产控制、恢复和治理信息",
+				"sign_in": "登录时需要帮助？"
 			}
 		}
 	},
@@ -330,7 +330,7 @@
 			"open_wallet": "前往钱包",
 			"carousel_slide_title": "$oisy_short Sprinkles 第四集现已上线！",
 			"carousel_slide_cta": "了解更多",
-			[cite_start]"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount！🎉"[cite: 4],
+			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount！🎉",
 			"youre_eligible": "你符合资格！",
 			"ongoing": "进行中",
 			"ended": "已结束（$amount）",
@@ -475,8 +475,8 @@
 			"minter_btc": "需要配置铸币人才能获取 BTC。",
 			"minter_ckbtc_info": "需要配置铸币人才能获取 ckBTC 信息",
 			"minter_cketh_info": "需要配置铸币人才能获取 ckETH 信息",
-			[cite_start]"minter_ckbtc_loading_info": "加载 ckBTC 铸币人信息时出错。"[cite: 6],
-			[cite_start]"minter_cketh_loading_info": "加载 ckETH 铸币人信息时出错。"[cite: 6],
+			"minter_ckbtc_loading_info": "加载 ckBTC 铸币人信息时出错。",
+			"minter_cketh_loading_info": "加载 ckETH 铸币人信息时出错。",
 			"btc_fees_estimation": "查询 BTC 手续费预估时出错。",
 			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
 			"transaction_price": "加载交易价格预估时出错。",
@@ -530,7 +530,7 @@
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
-			[cite_start]"github_release": "$oisy_short 在 GitHub 上的版本说明"[cite: 7],
+			"github_release": "$oisy_short 在 GitHub 上的版本说明",
 			"appearance_light": "启用浅色模式",
 			"appearance_dark": "启用深色模式",
 			"appearance_system": "启用操作系统的颜色模式"
@@ -583,7 +583,7 @@
 				"learn_how_to_convert": "了解如何将 $token 转换为 $ckToken",
 				"metamask": "从 Metamask 接收",
 				"ethereum": "以太坊",
-				[cite_start]"ethereum_address": "地址"[cite: 8],
+				"ethereum_address": "地址",
 				"ethereum_address_copied": "以太坊地址已复制到剪贴板。",
 				"display_ethereum_address_qr": "将以太坊地址显示为二维码"
 			},
@@ -665,7 +665,7 @@
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
-			[cite_start]"select_network": "选择网络" [cite: 9]
+			"select_network": "选择网络"
 		},
 		"info": {
 			"ckbtc_certified": "请等待 ckBTC 参数被认证。",
@@ -708,7 +708,7 @@
 			"metamask_no_accounts": "未找到 Metamask 账户。",
 			"metamask_switch_network": "无法请求 Metamask 切换至链 ID $chain_id。你当前是否已连接到 $network_name？",
 			"erc20_data_undefined": "Erc20 交易数据不能为 undefined 或 null。",
-			[cite_start]"data_undefined": "交易数据不能为 undefined 或 null。"[cite: 10],
+			"data_undefined": "交易数据不能为 undefined 或 null。",
 			"no_identity_calculate_fee": "未提供身份，无法为其主体计算手续费。",
 			"invalid_destination": "目标地址无效。请使用有效的钱包地址重试。",
 			"incompatible_token": "代币不兼容。请尝试使用兼容的代币。",
@@ -761,7 +761,7 @@
 			"insufficient_funds": "余额不足"
 		},
 		"error": {
-			[cite_start]"loading_cketh_helper": "加载 ckETH 辅助合约地址出错。未初始化 minter canister ID。"[cite: 11],
+			"loading_cketh_helper": "加载 ckETH 辅助合约地址出错。未初始化 minter canister ID。",
 			"unexpected": "转换代币时发生错误。",
 			"unexpected_missing_data": "初始化转换交易时出错。"
 		}
@@ -844,9 +844,9 @@
 			"source_token_title": "您支付",
 			"destination_token_title": "您接收",
 			"chain_key": "链密钥",
-			[cite_start]"show_more_networks": "显示另外 $number 个网络"[cite: 12],
-			[cite_start]"hide_more_networks": "隐藏更多网络"[cite: 12],
-			[cite_start]"on_network": " 于 $network"[cite: 12],
+			"show_more_networks": "显示另外 $number 个网络",
+			"hide_more_networks": "隐藏更多网络",
+			"on_network": " 于 $network",
 			"delete_token": "删除代币", // NEW
 			"edit_token": "编辑代币" // NEW
 		},
@@ -909,7 +909,7 @@
 				"title": "管理代币",
 				"manage_list": "管理代币",
 				"list_settings": "列表设置", // NEW
-				[cite_start]"import_token": "导入代币"[cite: 13],
+				"import_token": "导入代币",
 				"network": "网络",
 				"all_tokens_zero_balance": "所有代币余额均为零。"
 			},
@@ -989,10 +989,10 @@
 	},
 	"info": {
 		"bitcoin": {
-			[cite_start]"title": "接收 BTC 并转换为 ckBTC"[cite: 14],
-			[cite_start]"description": "将比特币转换为 ckBTC，享受最快和最便宜的比特币交易。转换过程最多可能需要一个小时。"[cite: 14],
-			[cite_start]"note": "您可以随时将 ckBTC 转换回 BTC。"[cite: 14],
-			[cite_start]"how_to": "如何转换为 ckBTC" [cite: 14]
+			"title": "接收 BTC 并转换为 ckBTC",
+			"description": "将比特币转换为 ckBTC，享受最快和最便宜的比特币交易。转换过程最多可能需要一个小时。",
+			"note": "您可以随时将 ckBTC 转换回 BTC。",
+			"how_to": "如何转换为 ckBTC"
 		},
 		"ethereum": {
 			"title": "转换为 $ckToken",
@@ -1049,7 +1049,7 @@
 			"disconnect": "断开钱包连接时发生意外错误。连接已重置。",
 			"connect": "连接钱包时发生意外错误。",
 			"manual_workflow": "请通过打开 WalletConnect 模态框完成已启动的手动操作流程。",
-			[cite_start]"skipping_request": "由于另一个操作正在通过浮层进行，当前 WalletConnect 请求被跳过。"[cite: 15],
+			"skipping_request": "由于另一个操作正在通过浮层进行，当前 WalletConnect 请求被跳过。",
 			"method_not_support": "请求的方法 “$method” 不受支持。",
 			"unexpected_pair": "尝试配对钱包时发生意外错误。",
 			"no_connection_opened": "意外错误：未建立连接。",
@@ -1114,8 +1114,8 @@
 		},
 		"alt": {
 			"open_block_explorer": "在区块浏览器中打开此交易",
-			[cite_start]"open_from_block_explorer": "在区块浏览器中打开“发送自”地址"[cite: 16],
-			[cite_start]"open_to_block_explorer": "在区块浏览器中打开“发送至”地址" [cite: 16]
+			"open_from_block_explorer": "在区块浏览器中打开“发送自”地址",
+			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址"
 		},
 		"error": {
 			"get_block_number": "无法获取区块号。",
@@ -1172,7 +1172,7 @@
 				},
 				"open_source": {
 					"title": "开源透明值得信赖",
-					[cite_start]"description": "$oisy_short 是一个 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">开源项目</a>，由 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY 基金会</a>的专业团队维护，获得超过 200 位世界领先密码学家与工程师的支持。开源确保透明度，让社区能够审查、参与并信任钱包的完整性。" [cite: 17]
+					"description": "$oisy_short 是一个 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">开源项目</a>，由 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY 基金会</a>的专业团队维护，获得超过 200 位世界领先密码学家与工程师的支持。开源确保透明度，让社区能够审查、参与并信任钱包的完整性。"
 				}
 			}
 		}
@@ -1250,7 +1250,7 @@
 			"title": "联系人",
 			"add_address": "添加地址",
 			"show_address_text": "关联地址将在此处显示",
-			[cite_start]"add_first_address": "为 $contactName 添加第一个地址！" [cite: 18]
+			"add_first_address": "为 $contactName 添加第一个地址！"
 		},
 		"create_contact": { // NEW
 			"title": "创建联系人" // NEW
@@ -1355,9 +1355,9 @@
 				"token_without_consent_message": "该代币未提供确认消息，以下信息由 $oisy_short 提取。"
 			},
 			"error": {
-				[cite_start]"no_approve_callback": "无批准确认消息的回调，属意外情况。请关闭钱包并重试。"[cite: 19],
-				[cite_start]"no_reject_callback": "无拒绝确认消息的回调，属意外情况。请关闭钱包并重试。"[cite: 19],
-				[cite_start]"retrieve": "检索确认消息时出错" [cite: 19]
+				"no_approve_callback": "无批准确认消息的回调，属意外情况。请关闭钱包并重试。",
+				"no_reject_callback": "无拒绝确认消息的回调，属意外情况。请关闭钱包并重试。",
+				"retrieve": "检索确认消息时出错"
 			}
 		},
 		"call_canister": {
@@ -1388,19 +1388,19 @@
 			"paragraph_1": "感谢你对 $oisy_name 的兴趣。$oisy_name 是基于浏览器的自托管多链钱包应用，托管于 Internet Computer 公有区块链网络（“$oisy_short”）。关于 $oisy_short 的开源代码和相关许可信息，请参阅此 GitHub 仓库：$oisy_repo_url。",
 			"paragraph_2": "本许可协议规范你（“你”）对 $oisy_short 的使用。使用 $oisy_short 即表示你已阅读、理解并同意受此许可协议约束。如不同意，请勿使用 $oisy_short。",
 			"paragraph_3": "若你选择使用 $oisy_short，代表你与 DFINITY 基金会及其附属公司（统称“DFINITY”）达成如下共识：",
-			[cite_start]"limited_license": "<strong>1. 有限许可。</strong> 根据本协议条款和条件，DFINITY 授予你一项有限的、非独占的、不可转让的、不可再许可的、可撤销的许可，仅限于用于接收、持有和发送代币（如 ICP、ICRC-1、ETH、ERC20 及其他未来支持的代币）。你可根据各开源组件的许可条款创建衍生作品。"[cite: 20],
+			"limited_license": "<strong>1. 有限许可。</strong> 根据本协议条款和条件，DFINITY 授予你一项有限的、非独占的、不可转让的、不可再许可的、可撤销的许可，仅限于用于接收、持有和发送代币（如 ICP、ICRC-1、ETH、ERC20 及其他未来支持的代币）。你可根据各开源组件的许可条款创建衍生作品。",
 			"restrictions": "<strong>2. 使用限制。</strong> 你对自己使用 $oisy_short 的所有活动负全责，无论是否经你授权或由你、你的员工或第三方代表你进行。你明白 DFINITY 对与你的钱包相关的任何活动或交易（无论是否完成）概不负责。你不得歪曲你与 DFINITY 的关系，不得暗示 DFINITY 支持、赞助或背书你或你的业务。未经许可，你不得使用 $oisy_short 名称、logo 或商标。",
-			[cite_start]"applicable_laws": "<strong>3. 适用法律。</strong> 使用 $oisy_short 过程中你应遵守所有适用法律法规（包括但不限于出口管制、反洗钱或经济制裁等法律）。"[cite: 21],
+			"applicable_laws": "<strong>3. 适用法律。</strong> 使用 $oisy_short 过程中你应遵守所有适用法律法规（包括但不限于出口管制、反洗钱或经济制裁等法律）。",
 			"reservation_rights": "<strong>4. 权利保留。</strong> $oisy_short 为 DFINITY 所有，并以许可方式提供。其内容、界面、交互功能、信息、代码和设计等受知识产权保护。DFINITY 保留未明确授予你的所有权利。",
-			[cite_start]"feedback": "<strong>5. 反馈。</strong> 若你向 DFINITY 提供任何反馈（包括建议、bug 报告、改进建议等），即视为非保密性提交，DFINITY 可自由使用该反馈。你授予 DFINITY 永久性、不可撤销、可转让、可再许可、非独占、免版税的全球许可。"[cite: 22],
+			"feedback": "<strong>5. 反馈。</strong> 若你向 DFINITY 提供任何反馈（包括建议、bug 报告、改进建议等），即视为非保密性提交，DFINITY 可自由使用该反馈。你授予 DFINITY 永久性、不可撤销、可转让、可再许可、非独占、免版税的全球许可。",
 			"termination": "<strong>6. 期限与终止。</strong> 本协议在你违反协议时立即终止。你可随时通过清空钱包并停止使用 $oisy_short 来终止协议。DFINITY 可随时基于任何理由终止此协议，包括滥用行为或违反协议。",
-			[cite_start]"warranty_liability": "<strong>7. 免责声明及责任限制。</strong> 在法律允许的最大范围内，$oisy_short 按“现状”提供，不附带任何形式的保证。DFINITY 不保证其始终可用、安全、准确或适合特定目的。在任何情况下，DFINITY 对任何间接、附带、惩罚性或特殊损失不承担责任，其责任总额不超过 100 瑞士法郎。"[cite: 23],
+			"warranty_liability": "<strong>7. 免责声明及责任限制。</strong> 在法律允许的最大范围内，$oisy_short 按“现状”提供，不附带任何形式的保证。DFINITY 不保证其始终可用、安全、准确或适合特定目的。在任何情况下，DFINITY 对任何间接、附带、惩罚性或特殊损失不承担责任，其责任总额不超过 100 瑞士法郎。",
 			"indemnity": "<strong>8. 赔偿条款。</strong> 你同意赔偿 DFINITY 及其相关方，免受因你使用 $oisy_short 或违反本协议引起的任何索赔与损失（包括合理律师费）。",
 			"governing_law": "<strong>9. 适用法律与管辖权。</strong> 本协议适用瑞士法律，任何争议由瑞士苏黎世法院专属管辖，可上诉至瑞士联邦法院。",
-			[cite_start]"entire_agreement": "<strong>10. 完整协议与可分割性。</strong> 本协议为双方之间就此事项的完整协议。如其中任一条款被认定无效，应按法律允许的最小限度修改或分割，其余条款仍具效力。"[cite: 24],
+			"entire_agreement": "<strong>10. 完整协议与可分割性。</strong> 本协议为双方之间就此事项的完整协议。如其中任一条款被认定无效，应按法律允许的最小限度修改或分割，其余条款仍具效力。",
 			"assignment": "<strong>11. 协议转让。</strong> 未经 DFINITY 书面同意，你不得转让本协议，DFINITY 可自由转让本协议。",
 			"no_waiver": "<strong>12. 权利不弃权。</strong> DFINITY 未行使权利不构成放弃，亦不影响未来主张该权利。",
-			[cite_start]"english_version": "<strong>13. 英文版本。</strong> 本协议以英文版本为正式版本，如有冲突，以英文版本为准。" [cite: 25]
+			"english_version": "<strong>13. 英文版本。</strong> 本协议以英文版本为正式版本，如有冲突，以英文版本为准。"
 		},
 		"alt": {
 			"license_agreement": "$oisy_name 许可协议"
