@@ -1,4 +1,5 @@
 import type {
+	PostMessageDataErrorSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestDip20Schema,
 	PostMessageDataRequestExchangeTimerSchema,
@@ -67,6 +68,8 @@ export type PostMessageDataResponseExchangeError = z.infer<
 export type PostMessageDataResponseWallet = z.infer<typeof PostMessageDataResponseWalletSchema>;
 
 export type PostMessageDataResponseError = z.infer<typeof PostMessageDataResponseErrorSchema>;
+
+export type PostMessageDataError = z.infer<typeof PostMessageDataErrorSchema>;
 
 export type PostMessageDataResponseWalletCleanUp = z.infer<
 	typeof PostMessageDataResponseWalletCleanUpSchema

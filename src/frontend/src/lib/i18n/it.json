@@ -416,7 +416,8 @@
 			"incubated_with": "",
 			"by": "",
 			"dfinity_foundation": "",
-			"copyright": ""
+			"copyright": "",
+			"ai_assistant_console_button": ""
 		},
 		"alt": {
 			"dfinity": ""
@@ -497,7 +498,8 @@
 			"unavailable_balance": "",
 			"hidden_balance": "",
 			"top_up": "",
-			"learn_more_about_erc20_icp": ""
+			"learn_more_about_erc20_icp": "",
+			"tooltip_toggle_balance": ""
 		}
 	},
 	"settings": {
@@ -910,7 +912,8 @@
 				"list_settings": "",
 				"import_token": "",
 				"network": "",
-				"all_tokens_zero_balance": ""
+				"all_tokens_zero_balance": "",
+				"enable_more_assets": ""
 			},
 			"placeholder": {
 				"select_network": ""

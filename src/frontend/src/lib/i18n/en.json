@@ -416,7 +416,8 @@
 			"incubated_with": "Incubated with",
 			"by": "by",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": "$oisy_short Assistant"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website"
@@ -497,7 +498,8 @@
 			"unavailable_balance": "$ value is not available",
 			"hidden_balance": "Your balance is hidden",
 			"top_up": "Top up your wallet to start using it!",
-			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
+			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
+			"tooltip_toggle_balance": "Double-click to hide/show balance"
 		}
 	},
 	"settings": {
@@ -910,7 +912,8 @@
 				"list_settings": "List settings",
 				"import_token": "Import token",
 				"network": "Network",
-				"all_tokens_zero_balance": "All tokens have zero balance."
+				"all_tokens_zero_balance": "All tokens have zero balance.",
+				"enable_more_assets": "Enable more assets"
 			},
 			"placeholder": {
 				"select_network": "Select the network"

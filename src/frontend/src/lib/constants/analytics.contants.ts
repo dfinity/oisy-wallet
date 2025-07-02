@@ -52,6 +52,7 @@ export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect';
 // dApps
 export const TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK = 'dapp_modal_open_hyperlink';
 export const TRACK_COUNT_DAPP_OPEN_INFO_MODAL = 'dapp_open_info_modal';
+export const TRACK_COUNT_DAPP_FILTER_BUTTON = 'dapp_onclick_filter_button';
 
 // Carousel
 export const TRACK_COUNT_CAROUSEL_NEXT = 'carousel_next';
@@ -90,13 +91,17 @@ export const TRACK_SPRINKLES_BANNER_CLICK = 'sprinkles_banner_click';
 // Welcome
 export const TRACK_WELCOME_OPEN = 'welcome_open';
 
-// Delete Token
+// Edit/Delete Token
 export const TRACK_DELETE_TOKEN_SUCCESS = 'delete_token_success';
+export const TRACK_EDIT_TOKEN_SUCCESS = 'edit_token_success';
 
 // Navigation
 export const TRACK_COUNT_OPEN_WHY_OISY = 'open_why_oisy';
 export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation';
 export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog';
+
+// I18n
+export const TRACK_CHANGE_LANGUAGE = 'change_language';
 
 // Snapshots
 export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
@@ -109,6 +114,8 @@ export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
 
 // Temporary events
+// We have sudden spikes in the number of getLogs calls to Infura, which is causing issues.
+// However, we are not sure when and how they happen.
+// This event is used to track the number of calls to Infura's getLogs endpoint.
 // TODO: Remove these events once the issue is resolved.
-export const TRACK_IC_NETWORK_CONTACTS_GENERATION_ISSUE =
-	'track-ic-network-contacts-generation-issue';
+export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';

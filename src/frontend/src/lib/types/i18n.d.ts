@@ -304,7 +304,13 @@ interface I18nRewards {
 }
 
 interface I18nFooter {
-	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
+	text: {
+		incubated_with: string;
+		by: string;
+		dfinity_foundation: string;
+		copyright: string;
+		ai_assistant_console_button: string;
+	};
 	alt: { dfinity: string };
 }
 
@@ -377,6 +383,7 @@ interface I18nHero {
 		hidden_balance: string;
 		top_up: string;
 		learn_more_about_erc20_icp: string;
+		tooltip_toggle_balance: string;
 	};
 }
 
@@ -769,6 +776,7 @@ interface I18nTokens {
 			import_token: string;
 			network: string;
 			all_tokens_zero_balance: string;
+			enable_more_assets: string;
 		};
 		placeholder: { select_network: string };
 		info: { no_changes: string };

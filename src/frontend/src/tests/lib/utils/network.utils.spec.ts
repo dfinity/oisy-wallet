@@ -23,7 +23,11 @@ import {
 	SEPOLIA_NETWORK_ID,
 	SUPPORTED_ETHEREUM_NETWORK_IDS
 } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import {
+	ICP_NETWORK,
+	ICP_NETWORK_ID,
+	ICP_PSEUDO_TESTNET_NETWORK_ID
+} from '$env/networks/networks.icp.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import {
 	SOLANA_DEVNET_NETWORK,
@@ -60,6 +64,7 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana,
 	isNetworkSolana,
+	isPseudoNetworkIdIcpTestnet,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -85,9 +90,27 @@ describe('network utils', () => {
 		});
 	});
 
+	describe('isPseudoNetworkIdIcpTestnet', () => {
+		it('should return false for ICP network ID', () => {
+			expect(isPseudoNetworkIdIcpTestnet(ICP_NETWORK_ID)).toBeFalsy();
+		});
+
+		it('should return true for ICP pseud-network ID', () => {
+			expect(isPseudoNetworkIdIcpTestnet(ICP_PSEUDO_TESTNET_NETWORK_ID)).toBeTruthy();
+		});
+
+		it('should return false for non-ICP network ID', () => {
+			expect(isPseudoNetworkIdIcpTestnet(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
 	describe('isNetworkIdICP', () => {
 		it('should return true for ICP network ID', () => {
 			expect(isNetworkIdICP(ICP_NETWORK_ID)).toBeTruthy();
+		});
+
+		it('should return true for ICP pseud-network ID', () => {
+			expect(isNetworkIdICP(ICP_PSEUDO_TESTNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-ICP network ID', () => {

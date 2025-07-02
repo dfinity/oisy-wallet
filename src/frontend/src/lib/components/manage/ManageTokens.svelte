@@ -2,10 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
@@ -27,8 +23,6 @@
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 
 	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
 
@@ -108,27 +102,9 @@
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
-	let groupModifiedTokens = $derived(
-		Object.values(modifiedTokens).reduce<{
-			icrc: IcrcCustomToken[];
-			erc20: Erc20UserToken[];
-			spl: SplTokenToggleable[];
-		}>(
-			({ icrc, erc20, spl }, token) => ({
-				icrc: [
-					...icrc,
-					...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
-				],
-				erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
-				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
-			}),
-			{ icrc: [], erc20: [], spl: [] }
-		)
-	);
-
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
 	// We might want to improve this in the future.
-	const save = () => dispatch('icSave', groupModifiedTokens);
+	const save = () => dispatch('icSave', modifiedTokens);
 </script>
 
 {#if nonNullish(infoElement)}

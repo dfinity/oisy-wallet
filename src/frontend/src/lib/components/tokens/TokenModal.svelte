@@ -22,7 +22,10 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import { TRACK_DELETE_TOKEN_SUCCESS } from '$lib/constants/analytics.contants';
+	import {
+		TRACK_DELETE_TOKEN_SUCCESS,
+		TRACK_EDIT_TOKEN_SUCCESS
+	} from '$lib/constants/analytics.contants';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { TOKEN_MODAL_SAVE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -220,7 +223,7 @@
 			return;
 		}
 
-		if (isNullish(tokenToEdit) || isNullishOrEmpty(icrcTokenIndexCanisterId)) {
+		if (isNullish(tokenToEdit)) {
 			return;
 		}
 
@@ -231,7 +234,9 @@
 
 				await setCustomToken({
 					token: toCustomToken({
-						indexCanisterId: icrcTokenIndexCanisterId,
+						...(!isNullishOrEmpty(icrcTokenIndexCanisterId) && {
+							indexCanisterId: icrcTokenIndexCanisterId
+						}),
 						ledgerCanisterId: tokenToEdit.ledgerCanisterId,
 						version: tokenToEdit.version,
 						enabled: true,
@@ -244,12 +249,22 @@
 				// Similar as on token "save", we reload all custom tokens for simplicity reason.
 				await loadCustomTokens({
 					identity: $authIdentity,
-					onSuccess: () => {
+					onQuerySuccess: () => {
 						progress(ProgressStepsAddToken.DONE);
 						close();
 
 						// the token needs to be reset to restart the worker with indexCanisterId
 						icrcCustomTokensStore.reset(tokenToEdit.ledgerCanisterId);
+
+						trackEvent({
+							name: TRACK_EDIT_TOKEN_SUCCESS,
+							metadata: {
+								tokenId: `${tokenToEdit.id.description}`,
+								tokenSymbol: tokenToEdit.symbol,
+								ledgerCanisterId: tokenToEdit.ledgerCanisterId,
+								networkId: `${tokenToEdit.network.id.description}`
+							}
+						});
 
 						toastsShow({
 							text: replacePlaceholders($i18n.tokens.details.update_confirmation, {
@@ -331,7 +346,7 @@
 					<ButtonBack onclick={() => gotoStep(TokenModalSteps.CONTENT)} />
 
 					<Button
-						disabled={isNullishOrEmpty(icrcTokenIndexCanisterId)}
+						disabled={icrcTokenIndexCanisterId === (token.indexCanisterId ?? '')}
 						onclick={() => onTokenEdit(token)}
 						testId={TOKEN_MODAL_SAVE_BUTTON}
 					>
