@@ -19,17 +19,17 @@
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
+	import type { Network } from '$lib/types/network';
 	import type { Token, TokenUi } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
+	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
-	import { selectedNetwork } from '$lib/derived/network.derived';
-	import type { Network } from '$lib/types/network';
-	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
