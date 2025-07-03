@@ -65,7 +65,7 @@ export const loadCustomTokens = ({
 			splCustomTokensStore.resetAll();
 
 			toastsError({
-				msg: { text: get(i18n).init.error.spl_user_tokens },
+				msg: { text: get(i18n).init.error.spl_custom_tokens },
 				err
 			});
 		},
