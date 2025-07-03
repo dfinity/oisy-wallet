@@ -11,7 +11,11 @@
 	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { toUserToken } from '$icp-eth/services/user-token.services';
 	import { removeCustomToken, removeUserToken, setCustomToken } from '$lib/api/backend.api';
-	import { deleteIdbEthTokenDeprecated, deleteIdbIcToken, deleteIdbSolToken } from '$lib/api/idb-tokens.api';
+	import {
+		deleteIdbEthTokenDeprecated,
+		deleteIdbIcToken,
+		deleteIdbSolToken
+	} from '$lib/api/idb-tokens.api';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
