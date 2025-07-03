@@ -249,7 +249,7 @@
 				"name": "Compound Finance",
 				"one_liner": "Um mercado monetário descentralizado e protocolo de empréstimos criado no Ethereum.",
 				"call_to_action": "Venha conhecer",
-				"description": "O Compound Finance é <b>um mercado monetário descentralizado e protocolo de empréstimos baseado no Ethereum</b>. O seu protocolo Compound III (Comet) permite aos utilizadores contrair ou conceder empréstimos de pools de 'ativos base' com uma garantia única. O Compound III suporta ativos base (por exemplo, USDC, WETH, etc.) em Ethereum, Polygon, Base e Arbitrum."
+				"description": "O Compound Finance é <b>um mercado monetário descentralizado e protocolo de empréstimos baseado no Ethereum</b>. O seu protocolo Compound III (Comet) permite aos utilizadores contrair ou conceder empréstimos de pools de “ativos base“ com uma garantia única. O Compound III suporta ativos base (por exemplo, USDC, WETH, etc.) em Ethereum, Polygon, Base e Arbitrum."
 			},
 			"aave": {
 				"name": "Aave",
@@ -285,7 +285,7 @@
 					"call_to_action": "Abrir o Sonic"
 				}
 			},
-			"raydium":
+			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX e criador de mercado automatizado construído na blockchain Solana, oferecendo um livro central de ordens limite que permite negociações rápidas.",
 				"call_to_action": "Potencialize a evolução do DeFi",
