@@ -1,10 +1,11 @@
-import type { Token } from '$declarations/backend/backend.did';
+import type { Token as BackendToken } from '$declarations/backend/backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import type { UserTokenState } from '$lib/types/token-toggleable';
+import type { Token } from '$lib/types/token';
+import type { TokenToggleable, UserTokenState } from '$lib/types/token-toggleable';
 import type { SplToken } from '$sol/types/spl';
 
-type CustomTokenNetworkKeys = Token extends infer T
+type CustomTokenNetworkKeys = BackendToken extends infer T
 	? T extends Record<string, unknown>
 		? keyof T
 		: never
@@ -28,3 +29,5 @@ export type SaveCustomTokenWithKey = UserTokenState &
 		| TokenVariant<'Erc20', Erc20SaveCustomToken>
 		| TokenVariant<'SplDevnet' | 'SplMainnet', SplSaveCustomToken>
 	);
+
+export type CustomToken<T extends Token> = TokenToggleable<T>;
