@@ -1,7 +1,7 @@
 import {
-	type BtcReviewResult,
 	getFeeRateFromPercentiles,
-	selectUtxosFee
+	selectUtxosFee,
+	type BtcReviewResult
 } from '$btc/services/btc-review.services';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';

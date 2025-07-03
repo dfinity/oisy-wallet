@@ -5,8 +5,8 @@ import {
 } from '$btc/constants/btc.constants';
 import * as btcReviewApi from '$btc/services/btc-review.services';
 import {
-	initUtxosFeeStore,
 	UTXOS_FEE_CONTEXT_KEY,
+	initUtxosFeeStore,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';

@@ -20,12 +20,12 @@ import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 import {
 	CONVERT_CONTEXT_KEY,
-	type ConvertContext,
-	initConvertContext
+	initConvertContext,
+	type ConvertContext
 } from '$lib/stores/convert.store';
 import {
-	initTokenActionValidationErrorsContext,
 	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
 import type { Token } from '$lib/types/token';
