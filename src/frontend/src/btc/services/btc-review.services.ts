@@ -108,7 +108,7 @@ export const prepareTransactionUtxos = async ({
  * Uses the median fee rate (50th percentile) for balanced speed/cost
  * IMPORTANT: Converts from millisatoshis per vbyte (backend) to satoshis per vbyte (frontend)
  */
-const getFeeRateFromPercentiles = async ({
+export const getFeeRateFromPercentiles = async ({
 	identity,
 	network
 }: {
