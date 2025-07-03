@@ -416,7 +416,8 @@
 			"incubated_with": "Incubato con",
 			"by": "da",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": ""
 		},
 		"alt": {
 			"dfinity": "Vai al sito web della DFINITY Foundation"
@@ -482,7 +483,7 @@
 			"transaction_price": "Errore durante il caricamento della stima del prezzo di una transazione.",
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
 			"erc20_user_tokens": "Errore durante il caricamento dei token utente ERC20.",
-			"spl_user_tokens": "Errore durante il caricamento dei token utente SPL.",
+			"spl_custom_tokens": "",
 			"erc20_user_token": "Errore durante l'abilitazione del token gemello ERC20.",
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
@@ -911,7 +912,8 @@
 				"list_settings": "Impostazioni elenco",
 				"import_token": "Importa token",
 				"network": "Rete",
-				"all_tokens_zero_balance": "Tutti i token hanno saldo zero."
+				"all_tokens_zero_balance": "Tutti i token hanno saldo zero.",
+				"enable_more_assets": ""
 			},
 			"placeholder": {
 				"select_network": "Seleziona la rete"
@@ -1215,6 +1217,10 @@
 				"not_referred_yet": "Non hai ancora invitato nessuno",
 				"referred_amount": "Hai già invitato $amount persone",
 				"learn_more": "Scopri di più"
+			},
+			"error": {
+				"loading_referrer_info": "",
+				"setting_referrer": ""
 			}
 		}
 	},
