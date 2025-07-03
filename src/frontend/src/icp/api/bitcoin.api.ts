@@ -8,9 +8,10 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 interface BitcoinCanisterParams {
 	identity: OptionIdentity;
-	address: string;
-	network: BitcoinNetwork;
 	bitcoinCanisterId: CanisterIdText;
+	network: BitcoinNetwork;
+	address: string;
+	minConfirmations?: number;
 }
 
 export const getUtxosQuery = async ({
