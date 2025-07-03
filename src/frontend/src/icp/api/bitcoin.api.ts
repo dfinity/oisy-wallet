@@ -4,7 +4,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import { BitcoinCanister, type BitcoinNetwork, type get_utxos_response } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 interface BitcoinCanisterParams {
 	identity: OptionIdentity;
@@ -15,9 +15,10 @@ interface BitcoinCanisterParams {
 
 export const getUtxosQuery = async ({
 	identity,
+	bitcoinCanisterId,
 	address,
 	network,
-	bitcoinCanisterId
+	minConfirmations
 }: BitcoinCanisterParams): Promise<get_utxos_response> => {
 	assertNonNullish(identity);
 
@@ -25,7 +26,8 @@ export const getUtxosQuery = async ({
 
 	return getUtxosQuery({
 		address,
-		network
+		network,
+		...(isNullish(minConfirmations) ? {} : { filter: { minConfirmations } })
 	});
 };
 
