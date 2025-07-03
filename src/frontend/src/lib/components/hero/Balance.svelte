@@ -54,7 +54,7 @@
 			transparent
 			fullWidth
 			ariaLabel="Set privacy mode on and off"
-			styleClass="bg-transparent p-0 text-xl font-bold"
+			styleClass="bg-transparent p-0 text-xl font-medium"
 			ondblclick={() =>
 				setPrivacyMode({
 					enabled: !$isPrivacyMode,
