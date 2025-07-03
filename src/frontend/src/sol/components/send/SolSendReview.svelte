@@ -1,18 +1,18 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
-	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
-	import { getContext } from 'svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import { ZERO } from '$lib/constants/app.constants';
-	import { balancesStore } from '$lib/stores/balances.store';
+	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {
 		destination: string;
