@@ -12,6 +12,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { hardenMetadata } from '$lib/utils/metadata.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { getTokenDecimals, getTokenOwner } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
@@ -186,7 +187,7 @@ const loadCustomTokensWithMetadata = async ({
 						{
 							...token,
 							owner,
-							...metadata
+							...hardenMetadata(metadata)
 						}
 					]
 				: acc;
