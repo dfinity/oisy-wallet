@@ -56,7 +56,7 @@ export const prepareTransactionUtxos = async ({
 	const amountSatoshis = convertNumberToSatoshis({ amount });
 
 	// Step 1: Get current fee percentiles from backend
-	const feeRateSatoshisPerByte = await getFeeRateFromPercentiles({
+	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
 		identity,
 		network
 	});
@@ -90,7 +90,7 @@ export const prepareTransactionUtxos = async ({
 	const selection = calculateUtxoSelection({
 		availableUtxos,
 		amountSatoshis,
-		feeRateSatoshisPerByte
+		feeRateSatoshisPerVByte
 	});
 
 	// Step 5: Calculate final fee based on selected UTXOs
@@ -106,7 +106,7 @@ export const prepareTransactionUtxos = async ({
 /**
  * Gets fee rate from current fee percentiles, with fallback to default
  * Uses the median fee rate (50th percentile) for balanced speed/cost
- * IMPORTANT: Converts from millisatoshis per byte (backend) to satoshis per byte (frontend)
+ * IMPORTANT: Converts from millisatoshis per vbyte (backend) to satoshis per vbyte (frontend)
  */
 const getFeeRateFromPercentiles = async ({
 	identity,
@@ -131,17 +131,17 @@ const getFeeRateFromPercentiles = async ({
 
 	// Use the median fee rate (50th percentile) for balanced transaction speed/cost
 	const medianIndex = Math.floor(feePercentiles.length / 2);
-	const medianFeeRateMillisat = feePercentiles[medianIndex];
+	const medianFeeRateMillisatPerVByte = feePercentiles[medianIndex];
 
-	// Convert from millisatoshis per byte to satoshis per byte
-	// Backend returns values in millisat/byte, frontend uses sat/byte
-	const medianFeeRate = medianFeeRateMillisat / 1000n;
+	// Convert from millisatoshis per vbyte to satoshis per vbyte
+	// Backend returns values in millisat/vbyte, frontend uses sat/vbyte
+	const medianFeeRatePerVByte = medianFeeRateMillisatPerVByte / 1000n;
 
-	// Ensure we have a reasonable minimum fee rate (1 sat/byte)
+	// Ensure we have a reasonable minimum fee rate (1 sat/vbyte)
 	const minFeeRate = 1n;
-	const finalFeeRate = medianFeeRate > minFeeRate ? medianFeeRate : minFeeRate;
+	const finalFeeRate = medianFeeRatePerVByte > minFeeRate ? medianFeeRatePerVByte : minFeeRate;
 
-	// Add safety cap to prevent extremely high fees (max 100 sat/byte)
+	// Add safety cap to prevent extremely high fees (max 100 sat/vbyte)
 	const maxFeeRate = 100n;
 
 	return finalFeeRate > maxFeeRate ? maxFeeRate : finalFeeRate;
