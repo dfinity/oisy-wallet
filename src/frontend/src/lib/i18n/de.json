@@ -1101,13 +1101,13 @@
 			"unconfirmed": "Unbestätigt"
 		},
 		"type": {
-			"send": "",
-			"receive": "",
-			"withdraw": "",
-			"deposit": "",
-			"approve": "",
-			"burn": "",
-			"mint": ""
+			"send": "Senden",
+			"receive": "Empfang",
+			"withdraw": "Auszahlung",
+			"deposit": "Einzahlung",
+			"approve": "Genehmigung",
+			"burn": "Burn",
+			"mint": "Mint"
 		},
 		"label": {
 			"reimbursement": "Rückerstattung",
