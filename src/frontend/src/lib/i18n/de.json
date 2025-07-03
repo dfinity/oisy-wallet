@@ -1100,6 +1100,15 @@
 			"safe": "Sicher",
 			"unconfirmed": "Unbestätigt"
 		},
+		"type": {
+			"send": "",
+			"receive": "",
+			"withdraw": "",
+			"deposit": "",
+			"approve": "",
+			"burn": "",
+			"mint": ""
+		},
 		"label": {
 			"reimbursement": "Rückerstattung",
 			"twin_token_sent": "$twinToken gesendet",
