@@ -113,6 +113,9 @@ export const USER_MENU_ROUTE = 'user-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
 
+// Privacymode change
+export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
+
 // Temporary events
 // We have sudden spikes in the number of getLogs calls to Infura, which is causing issues.
 // However, we are not sure when and how they happen.
