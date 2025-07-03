@@ -38,6 +38,8 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
+	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
 
 	let {
 		initialSearch,
@@ -114,6 +116,15 @@
 			return;
 		}
 
+		await saveErc20Deprecated([
+			{
+				address: erc20ContractAddress,
+				...erc20Metadata,
+				network: network as EthereumNetwork,
+				enabled: true
+			}
+		]);
+
 		await saveErc20([
 			{
 				address: erc20ContractAddress,
@@ -161,8 +172,18 @@
 			identity: $authIdentity
 		});
 
-	const saveErc20 = (tokens: SaveUserToken[]): Promise<void> =>
+	const saveErc20Deprecated = (tokens: SaveUserToken[]): Promise<void> =>
 		saveErc20UserTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
+	const saveErc20 = (tokens: SaveErc20CustomToken[]): Promise<void> =>
+		saveErc20CustomTokens({
 			tokens,
 			progress,
 			modalNext: () => modal?.set(3),
