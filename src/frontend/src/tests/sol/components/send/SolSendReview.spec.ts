@@ -78,7 +78,7 @@ describe('SolSendReview', () => {
 			context: mockContext
 		});
 
-		waitFor(async () => {
+		waitFor(() => {
 			expect(getByTestId(insufficientFundsForFeeTestId)).toHaveTextContent(
 				en.fee.assertion.insufficient_funds_for_fee
 			);
@@ -99,7 +99,7 @@ describe('SolSendReview', () => {
 			context: mockContext
 		});
 
-		waitFor(async () => {
+		waitFor(() => {
 			expect(getByTestId(insufficientFundsForFeeTestId)).not.toBeInTheDocument();
 			expect(getByTestId(buttonTestId)).not.toHaveAttribute('disabled');
 		});
