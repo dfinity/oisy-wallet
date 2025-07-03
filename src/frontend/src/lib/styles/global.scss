@@ -61,6 +61,7 @@
 	@include meta.load-css('global/links');
 	@include meta.load-css('global/lists');
 	@include meta.load-css('global/scrollbar');
+	@include meta.load-css('global/popover');
 
 	// Themes
 	@include meta.load-css('theme/default-theme');

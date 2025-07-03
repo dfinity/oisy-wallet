@@ -1,0 +1,55 @@
+@use '../mixins/media';
+
+.backdrop {
+    @apply fixed inset-0 z-50 bg-transparent;
+}
+
+/* Fade-in animation */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.animate-fade-in {
+    animation: fade-in 0.15s ease-out;
+}
+
+/* Custom popover wrapper */
+.custom-popover.wrapper {
+    @apply absolute z-50 flex flex-col rounded-lg border shadow-md;
+    background-color: var(--color-background-surface);
+    color: var(--color-foreground-primary);
+    border-color: var(--color-border-basic);
+    top: calc(var(--popover-top) + var(--padding, 0.5rem));
+    left: var(--popover-left);
+    min-width: min(calc(20 * var(--padding, 0.5rem)), calc(100vw - var(--padding, 0.5rem)));
+    max-width: calc(100vw - var(--padding, 0.5rem));
+    max-height: calc(var(--full-vh, 100vh) - var(--popover-top) - 6 * var(--padding, 0.5rem));
+    width: fit-content;
+    padding: var(--padding-2x, 1rem);
+}
+
+/* Right-to-left alignment */
+.custom-popover {
+    left: auto;
+    right: var(--popover-right);
+}
+
+/* Optional border styling class */
+.custom-popover.with-border {
+    border-width: var(--dropdown-border-size, 1px);
+    border-color: var(--dropdown-border-color, var(--color-border-basic));
+}
+
+/* Popover item */
+.popover-item {
+    @apply px-3 py-2 rounded-md cursor-pointer text-sm transition-colors;
+}
+.popover-item:hover {
+    background-color: var(--color-background-secondary-alt);
+}
