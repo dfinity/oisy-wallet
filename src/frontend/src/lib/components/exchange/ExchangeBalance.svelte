@@ -48,7 +48,7 @@
 		ondblclick={() =>
 			setPrivacyMode({
 				enabled: !$isPrivacyMode,
-				withToast: true,
+				withToast: false,
 				source: 'Double click on the ExchangeBalance'
 			})}
 	>
