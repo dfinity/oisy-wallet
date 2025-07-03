@@ -24,7 +24,7 @@
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
-<span class="flex flex-col gap-2">
+<span class="flex flex-col gap-1">
 	<output
 		data-tid={AMOUNT_DATA}
 		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
