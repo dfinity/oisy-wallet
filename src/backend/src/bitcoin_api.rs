@@ -143,7 +143,6 @@ pub async fn get_current_fee_percentiles(
     match cached_percentiles {
         Some(percentiles) if !percentiles.is_empty() => {
             // Use cached values
-            ic_cdk::println!("Using cached fee percentiles for network {:?}", network);
             Ok(percentiles)
         }
         _ => {
