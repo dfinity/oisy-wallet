@@ -55,7 +55,7 @@
 			"settings": "Configurações",
 			"dapp_explorer": "Explorar",
 			"activity": "Atividade",
-			"airdrops": "Airdrops",
+			"airdrops": "Recompensas",
 			"earning": "Ganhar recompensas",
 			"source_code_on_github": "Código-fonte no GitHub",
 			"view_on_explorer": "Ver no explorador",
@@ -913,7 +913,7 @@
 				"import_token": "Importar token",
 				"network": "Rede",
 				"all_tokens_zero_balance": "Todos os tokens têm saldo zero.",
-				"enable_more_assets": ""
+				"enable_more_assets": "Habilitar mais tokens"
 			},
 			"placeholder": {
 				"select_network": "Selecionar a rede"
