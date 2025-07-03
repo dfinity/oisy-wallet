@@ -97,8 +97,8 @@ pub fn init_fee_percentiles_cache() {
 async fn update_fee_percentiles_cache() -> Result<(), String> {
     use futures::future::join_all;
 
-    // Create a vector of network types to fetch
-    let networks = vec![
+    // Create an array of network types to fetch
+    let networks = [
         BitcoinNetwork::Mainnet,
         BitcoinNetwork::Testnet,
         BitcoinNetwork::Regtest,
