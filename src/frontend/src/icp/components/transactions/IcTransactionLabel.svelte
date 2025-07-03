@@ -14,7 +14,9 @@
 
 	const { label, fallback, token }: Props = $props();
 
-	let fallbackLabel: string = $derived(nonNullish(fallback) ? $i18n.transaction.type[fallback] : '');
+	let fallbackLabel: string = $derived(
+		nonNullish(fallback) ? $i18n.transaction.type[fallback] : ''
+	);
 
 	let twinToken: Token | undefined = $derived((token as OptionIcCkToken)?.twinToken);
 
