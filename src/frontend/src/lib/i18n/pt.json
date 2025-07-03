@@ -192,7 +192,7 @@
 		"descriptions": {
 			"kongswap": {
 				"name": "KongSwap",
-				"one_liner": "A loja de tokens completa - Negocie tokens em todas as cadeias com facilidade, utilizando o KongSwap.”,
+				"one_liner": "A loja de tokens completa - Negocie tokens em todas as cadeias com facilidade, utilizando o KongSwap.",
 				"description": "A KongSwap é uma exchange (DEX) totalmente descentralizada que oferece negociação entre cadeias sem pontes (bridgeless) em ICP, Bitcoin, Ethereum e Solana. <br/><br/>Utilizando a tecnologia Chain Fusion e o Internet Computer Protocol (ICP), reduz as taxas, simplifica a experiência do utilizador e evita a fragmentação da liquidez. Tanto o front-end como o back-end operam on-chain através de contratos inteligentes, proporcionando uma experiência DeFi fluida.",
 				"carousel": {
 					"text": "Troque tokens na DEX",
