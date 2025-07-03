@@ -30,6 +30,13 @@
 
 	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	$effect(() => {
+		console.log('fee', $fee ?? 0n);
+		console.log('ataFee', $ataFee ?? 0n);
+		console.log('amount', BigInt(amount ?? 0));
+		console.log('balance', $sendBalance ?? 0n);
+	});
+
 	let insufficientFundsForFee = $derived(
 		($fee ?? 0n) + ($ataFee ?? 0n) + BigInt(amount ?? 0) > ($sendBalance ?? 0n)
 	);
