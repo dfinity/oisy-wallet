@@ -29,8 +29,8 @@
 		feeTokenIdStore: feeTokenId
 	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let balanceForFee = $derived(
-		nonNullish($feeTokenId) ? ($balancesStore?.[$feeTokenId]?.data ?? ZERO) : ZERO
+	let balanceForFee: bigint | undefined = $derived(
+		nonNullish($feeTokenId) ? ($balancesStore?.[$feeTokenId]?.data ?? ZERO) : undefined
 	);
 
 	let insufficientFundsForFee = $derived(
