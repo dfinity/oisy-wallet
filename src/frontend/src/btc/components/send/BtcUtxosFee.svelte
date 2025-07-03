@@ -31,7 +31,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const _selectUtxosFee = async () => {
+	const selectUtxosFee = async () => {
 		try {
 			// all required params should be already defined at this stage
 			if (
