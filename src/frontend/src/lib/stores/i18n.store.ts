@@ -4,6 +4,7 @@ import { authSignedIn } from '$lib/derived/auth.derived';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
 import pt from '$lib/i18n/pt.json';
+import zhcn from '$lib/i18n/zh-CN.json';
 import { trackEvent } from '$lib/services/analytics.services';
 import { Languages } from '$lib/types/languages';
 import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
@@ -25,8 +26,15 @@ const ptI18n = (): I18n => ({
 	lang: Languages.PORTUGUESE
 });
 
+const zhcnI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: zhcn as I18n }),
+	lang: Languages.CHINESE_SIMPLIFIED
+});
+
 const loadLang = (lang: Languages): I18n => {
 	switch (lang) {
+		case Languages.CHINESE_SIMPLIFIED:
+			return zhcnI18n();
 		case Languages.GERMAN:
 			return deI18n();
 		case Languages.PORTUGUESE:
