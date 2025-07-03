@@ -43,7 +43,7 @@ describe('BtcUtxosFee', () => {
 	});
 
 	it('fetches and renders utxos fee if not provided', async () => {
-		vi.spyOn(btcReviewApi, 'prepareTransactionUtxos').mockResolvedValue({
+		vi.spyOn(btcReviewApi, 'selectUtxosFee').mockResolvedValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
 			utxos: mockUtxosFee.utxos,
 			totalInputValue: 500000n,

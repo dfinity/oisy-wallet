@@ -5,7 +5,7 @@
 		BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
 		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
 	} from '$btc/constants/btc.constants';
-	import { prepareTransactionUtxos } from '$btc/services/btc-review.services';
+	import { selectUtxosFee } from '$btc/services/btc-review.services';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -66,7 +66,7 @@
 		console.warn('loadEstimatedFee->prepareTransactionUtxos');
 
 		if (nonNullish(network)) {
-			const result = await prepareTransactionUtxos({
+			const result = await selectUtxosFee({
 				amount: parsedAmount,
 				network,
 				identity: $authIdentity,

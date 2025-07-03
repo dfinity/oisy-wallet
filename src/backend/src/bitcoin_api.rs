@@ -91,20 +91,34 @@ pub fn init_fee_percentiles_cache() {
     });
 }
 
-/// Updates fee percentiles for all supported Bitcoin networks (Mainnet, Testnet, Regtest)
-/// in the thread-local cache. Fetches current fee data from the bitcoin canister and stores
-/// it for quick access by other functions.
+/// Updates the Bitcoin transaction fee percentiles cache for all networks (Mainnet, Testnet,
+/// Regtest) in parallel. in the thread-local cache. Fetches current fee data from the bitcoin
+/// canister and stores it for quick access by other functions.
 async fn update_fee_percentiles_cache() -> Result<(), String> {
-    // Update for each network type
-    for network in &[
+    use futures::future::join_all;
+
+    // Create a vector of network types to fetch
+    let networks = vec![
         BitcoinNetwork::Mainnet,
         BitcoinNetwork::Testnet,
         BitcoinNetwork::Regtest,
-    ] {
-        match fetch_current_fee_percentiles(*network).await {
+    ];
+
+    // Create a vector of futures, each fetching percentiles for a network
+    let futures = networks
+        .iter()
+        .map(|&network| async move { (network, fetch_current_fee_percentiles(network).await) })
+        .collect::<Vec<_>>();
+
+    // Execute all futures concurrently
+    let results = join_all(futures).await;
+
+    // Process the results
+    for (network, result) in results {
+        match result {
             Ok(percentiles) => {
                 FEE_PERCENTILES_CACHE.with(|cache| {
-                    cache.borrow_mut().insert(*network, percentiles.clone());
+                    cache.borrow_mut().insert(network, percentiles.clone());
                 });
             }
             Err(err) => {
@@ -117,6 +131,7 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
             }
         }
     }
+
     Ok(())
 }
 
@@ -143,7 +158,6 @@ pub async fn get_current_fee_percentiles(
     match cached_percentiles {
         Some(percentiles) if !percentiles.is_empty() => {
             // Use cached values
-            ic_cdk::println!("Using cached fee percentiles for network {:?}", network);
             Ok(percentiles)
         }
         _ => {

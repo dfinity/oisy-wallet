@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
-	import { prepareTransactionUtxos } from '$btc/services/btc-review.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -46,12 +45,12 @@
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
 			console.warn('BtcUtxosFee.script');
 			utxosFee = nonNullish(network)
-				? await prepareTransactionUtxos({
-						identity: $authIdentity,
-						network,
-						amount,
-						source
-					})
+				? await selectUtxosFee({
+					identity: $authIdentity,
+					network,
+					amount,
+					source
+				})
 				: undefined;
 		} catch (err: unknown) {
 			console.error('Error selecting utxos fee', err);
