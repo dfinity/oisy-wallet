@@ -47,13 +47,13 @@
 
 	let insufficientFundsForFee = $derived(
 		nonNullish($fee) && nonNullish($ataFee) && nonNullish(amount) && nonNullish($sendBalance)
-			? ($fee ?? 0n) +
-					($ataFee ?? 0n) +
+			? $fee +
+					$ataFee +
 					parseToken({
 						value: `${amount}`,
 						unitName: $sendTokenDecimals
 					}) >
-					($sendBalance ?? 0n)
+					$sendBalance
 			: false
 	);
 
