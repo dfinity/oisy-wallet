@@ -6,7 +6,8 @@
 		children: Snippet;
 	}
 
-	const SPACING_TOP = 24; // since we add pt-6 we need to trigger earlier
+	const SPACING_UNIT = 4;
+	const SPACING_TOP = SPACING_UNIT * 6; // since we add pt-6 we need to trigger earlier
 
 	const { children }: Props = $props();
 
@@ -48,15 +49,17 @@
 <svelte:window on:scroll={handleScroll} on:resize={debounce(() => calcSizes(true), 250)} />
 
 <div bind:this={rootElement} class="relative" style={`height: ${originalHeight ?? 0}px`}>
+	<!-- to avoid lower sticky headers to peek in front when using multiple, we add px-1 and add one SPACING_UNIT to the width below -->
+	<!-- and whitespace-nowrap is needed to ensure when we first calc the height its the correct size which is given if no linebreaks -->
 	<div
-		class="z-2"
+		class="z-2 whitespace-nowrap px-1"
 		bind:this={alignmentElement}
 		class:absolute={nonNullish(originalHeight)}
 		class:bg-page={scrolledSoon}
 		class:fixed={scrolledPast}
 		class:top-0={scrolledPast}
 		class:pt-6={scrolledPast}
-		style={`width: ${originalWidth ?? 0}px`}
+		style={`width: ${(originalWidth ?? 0) + SPACING_UNIT}px`}
 	>
 		{@render children()}
 	</div>
