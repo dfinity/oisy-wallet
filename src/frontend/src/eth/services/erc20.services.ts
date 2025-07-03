@@ -21,7 +21,7 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
-import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
+import { getIdbEthTokensDeprecated, setIdbEthTokensDeprecated } from '$lib/api/idb-tokens.api';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsErrorNoTrace } from '$lib/stores/toasts.store';
@@ -120,7 +120,7 @@ const loadUserTokensFromBackend = async ({
 
 	// Caching the custom tokens in the IDB if update call
 	if (certified && contracts.length > 0) {
-		await setIdbEthTokens({ identity, tokens: contracts });
+		await setIdbEthTokensDeprecated({ identity, tokens: contracts });
 	}
 
 	return contracts;
@@ -141,7 +141,7 @@ const loadNetworkUserTokens = async ({
 	}
 
 	if (useCache && !certified) {
-		const cachedTokens = await getIdbEthTokens(identity.getPrincipal());
+		const cachedTokens = await getIdbEthTokensDeprecated(identity.getPrincipal());
 
 		if (nonNullish(cachedTokens)) {
 			return cachedTokens;
