@@ -133,8 +133,10 @@ export const deleteIdbEthToken = async ({
 			identity,
 			tokens: currentTokens.filter(({ token: savedToken }) =>
 				'Erc20' in savedToken
-					? savedToken.Erc20.token_address !== tokenToDeleteAddress &&
-						savedToken.Erc20.chain_id !== tokenToDeleteChainId
+					? !(
+							savedToken.Erc20.token_address === tokenToDeleteAddress &&
+							savedToken.Erc20.chain_id === tokenToDeleteChainId
+						)
 					: true
 			)
 		});
