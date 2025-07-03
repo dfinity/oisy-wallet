@@ -33,12 +33,12 @@
 	$effect(() => {
 		console.log('fee', $fee ?? 0n);
 		console.log('ataFee', $ataFee ?? 0n);
-		console.log('amount', BigInt(amount ?? 0));
+		console.log('amount', amount);
 		console.log('balance', $sendBalance ?? 0n);
 	});
 
 	let insufficientFundsForFee = $derived(
-		($fee ?? 0n) + ($ataFee ?? 0n) + BigInt(amount ?? 0) > ($sendBalance ?? 0n)
+		false //($fee ?? 0n) + ($ataFee ?? 0n) + BigInt(amount ?? 0) > ($sendBalance ?? 0n)
 	);
 
 	let invalid = $derived(invalidSolAddress(destination) || invalidAmount(amount));
