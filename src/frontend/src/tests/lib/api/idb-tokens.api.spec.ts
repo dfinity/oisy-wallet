@@ -4,18 +4,25 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { toUserToken } from '$icp-eth/services/user-token.services';
 import {
 	deleteIdbEthToken,
+	deleteIdbEthTokenDeprecated,
 	deleteIdbEthTokens,
+	deleteIdbEthTokensDeprecated,
 	deleteIdbIcToken,
 	deleteIdbIcTokens,
 	deleteIdbSolToken,
 	deleteIdbSolTokens,
 	getIdbEthTokens,
+	getIdbEthTokensDeprecated,
 	getIdbIcTokens,
 	getIdbSolTokens,
 	setIdbTokensStore
 } from '$lib/api/idb-tokens.api';
 import * as authServices from '$lib/services/auth.services';
-import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
+import {
+	createMockErc20CustomTokens,
+	createMockErc20UserTokens
+} from '$tests/mocks/erc20-tokens.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
@@ -163,6 +170,17 @@ describe('idb-tokens.api', () => {
 		});
 	});
 
+	describe('getIdbEthTokensDeprecated', () => {
+		it('should get ETH tokens', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbEthTokensDeprecated(mockPrincipal);
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
 	describe('getIdbEthTokens', () => {
 		it('should get ETH tokens', async () => {
 			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
@@ -194,6 +212,15 @@ describe('idb-tokens.api', () => {
 		});
 	});
 
+	describe('deleteIdbEthTokensDeprecated', () => {
+		it('should delete ETH tokens', async () => {
+			await deleteIdbEthTokensDeprecated(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledOnce();
+			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
+		});
+	});
+
 	describe('deleteIdbEthTokens', () => {
 		it('should delete ETH tokens', async () => {
 			await deleteIdbEthTokens(mockPrincipal);
@@ -212,11 +239,61 @@ describe('idb-tokens.api', () => {
 		});
 	});
 
-	describe('deleteIdbEthToken', () => {
+	describe('deleteIdbEthTokenDeprecated', () => {
 		it('should delete provided ETH token', async () => {
 			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
 			const restUserTokens = rest.map(({ data }) => toUserToken(data));
 			const userTokenToDelete = toUserToken(tokenToDelete.data);
+
+			vi.mocked(idbKeyval.get).mockResolvedValue([userTokenToDelete, ...restUserTokens]);
+
+			await deleteIdbEthTokenDeprecated({
+				identity: mockIdentity,
+				token: userTokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				restUserTokens,
+				mockIdbTokensStore
+			);
+		});
+
+		it('should not delete anything if provided ETH token is not in the IDB', async () => {
+			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
+			const restUserTokens = rest.map(({ data }) => toUserToken(data));
+			const userTokenToDelete = toUserToken(tokenToDelete.data);
+
+			vi.mocked(idbKeyval.get).mockResolvedValue(restUserTokens);
+
+			await deleteIdbEthTokenDeprecated({
+				identity: mockIdentity,
+				token: userTokenToDelete
+			});
+
+			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenNthCalledWith(
+				1,
+				mockIdentity.getPrincipal().toText(),
+				restUserTokens,
+				mockIdbTokensStore
+			);
+		});
+	});
+
+	describe('deleteIdbEthToken', () => {
+		it('should delete provided ETH token', async () => {
+			const [tokenToDelete, ...rest] = createMockErc20CustomTokens({ n: 3, networkEnv: 'mainnet' });
+			const restUserTokens = rest.map(({ data }) =>
+				toCustomToken({ ...data, networkKey: 'Erc20', chainId: data.network.chainId })
+			);
+			const userTokenToDelete = toCustomToken({
+				...tokenToDelete.data,
+				networkKey: 'Erc20',
+				chainId: tokenToDelete.data.network.chainId
+			});
 
 			vi.mocked(idbKeyval.get).mockResolvedValue([userTokenToDelete, ...restUserTokens]);
 
@@ -235,9 +312,15 @@ describe('idb-tokens.api', () => {
 		});
 
 		it('should not delete anything if provided ETH token is not in the IDB', async () => {
-			const [tokenToDelete, ...rest] = createMockErc20UserTokens({ n: 3, networkEnv: 'mainnet' });
-			const restUserTokens = rest.map(({ data }) => toUserToken(data));
-			const userTokenToDelete = toUserToken(tokenToDelete.data);
+			const [tokenToDelete, ...rest] = createMockErc20CustomTokens({ n: 3, networkEnv: 'mainnet' });
+			const restUserTokens = rest.map(({ data }) =>
+				toCustomToken({ ...data, networkKey: 'Erc20', chainId: data.network.chainId })
+			);
+			const userTokenToDelete = toCustomToken({
+				...tokenToDelete.data,
+				networkKey: 'Erc20',
+				chainId: tokenToDelete.data.network.chainId
+			});
 
 			vi.mocked(idbKeyval.get).mockResolvedValue(restUserTokens);
 

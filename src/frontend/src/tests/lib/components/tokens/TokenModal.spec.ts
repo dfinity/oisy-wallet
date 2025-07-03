@@ -40,7 +40,7 @@ describe('TokenModal', () => {
 	const mockSetCustomToken = () =>
 		vi.spyOn(backendApi, 'setCustomToken').mockResolvedValue(undefined);
 	const mockIdbTokensApi = () =>
-		vi.spyOn(idbTokensApi, 'deleteIdbEthToken').mockResolvedValue(undefined);
+		vi.spyOn(idbTokensApi, 'deleteIdbEthTokenDeprecated').mockResolvedValue(undefined);
 	const mockIcAddCustomTokensService = (result = true) =>
 		vi.spyOn(icAddCustomTokensService, 'assertIndexLedgerId').mockResolvedValue({ valid: result });
 	const mockToastsShow = () => vi.spyOn(toastsStore, 'toastsShow').mockImplementation(vi.fn());

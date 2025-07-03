@@ -82,7 +82,7 @@ describe('auth.services', () => {
 			await signOut({});
 
 			// addresses + tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(6);
+			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
 		});
 	});
 });
