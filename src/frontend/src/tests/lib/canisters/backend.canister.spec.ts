@@ -1,6 +1,6 @@
 import type {
-	_SERVICE as BackendService,
 	AllowSigningResult,
+	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
 	UserProfile,
