@@ -6,6 +6,7 @@
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import { assertIndexLedgerId } from '$icp/services/ic-add-custom-tokens.service';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -229,8 +230,25 @@
 
 		try {
 			if (icTokenIcrcCustomToken(tokenToEdit)) {
+				loading = true;
 				gotoStep(TokenModalSteps.EDIT_PROGRESS);
 				progress(ProgressStepsAddToken.SAVE);
+
+				const { valid } = !isNullishOrEmpty(icrcTokenIndexCanisterId)
+					? await assertIndexLedgerId({
+							identity: $authIdentity,
+							ledgerCanisterId: tokenToEdit.ledgerCanisterId,
+							indexCanisterId: icrcTokenIndexCanisterId
+						})
+					: { valid: true };
+
+				if (!valid) {
+					loading = false;
+					icrcTokenIndexCanisterId = tokenToEdit.indexCanisterId ?? '';
+					progress(ProgressStepsAddToken.INITIALIZATION);
+					gotoStep(TokenModalSteps.CONTENT);
+					return;
+				}
 
 				await setCustomToken({
 					token: toCustomToken({
@@ -249,7 +267,12 @@
 				// Similar as on token "save", we reload all custom tokens for simplicity reason.
 				await loadCustomTokens({
 					identity: $authIdentity,
-					onQuerySuccess: () => {
+					onSuccess: () => {
+						if (!loading) {
+							return;
+						}
+
+						loading = false;
 						progress(ProgressStepsAddToken.DONE);
 						close();
 
@@ -282,6 +305,10 @@
 				err
 			});
 
+			loading = false;
+			icrcTokenIndexCanisterId = isTokenIcrc(tokenToEdit)
+				? (tokenToEdit.indexCanisterId ?? '')
+				: '';
 			progress(ProgressStepsAddToken.INITIALIZATION);
 			gotoStep(TokenModalSteps.CONTENT);
 		}
