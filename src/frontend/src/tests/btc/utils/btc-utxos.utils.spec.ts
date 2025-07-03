@@ -35,18 +35,21 @@ describe('btc-utxos.utils', () => {
 		it('should convert Uint8Array to hex string', () => {
 			const txid = new Uint8Array([1, 2, 3, 4]);
 			const result = utxoTxIdToString(txid);
+
 			expect(result).toBe('01020304');
 		});
 
 		it('should convert number array to hex string', () => {
 			const txid = [1, 2, 3, 4];
 			const result = utxoTxIdToString(txid);
+
 			expect(result).toBe('01020304');
 		});
 
 		it('should handle empty array', () => {
 			const txid = new Uint8Array([]);
 			const result = utxoTxIdToString(txid);
+
 			expect(result).toBe('');
 		});
 	});
@@ -65,6 +68,7 @@ describe('btc-utxos.utils', () => {
 
 		it('should return empty array for empty input', () => {
 			const result = extractUtxoTxIds([]);
+
 			expect(result).toEqual([]);
 		});
 	});
@@ -274,7 +278,7 @@ describe('btc-utxos.utils', () => {
 
 			// Should exclude the unconfirmed one (height 0)
 			expect(result).toHaveLength(4);
-			expect(result.every((utxo) => utxo.height > 0)).toBe(true);
+			expect(result.every((utxo) => utxo.height > 0)).toBeTruthy();
 		});
 
 		it('should filter out locked UTXOs', () => {
