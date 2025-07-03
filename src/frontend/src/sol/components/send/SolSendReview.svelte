@@ -11,6 +11,8 @@
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { parseToken } from '$lib/utils/parse.utils';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		destination: string;
@@ -28,17 +30,31 @@
 		feeSymbolStore: symbol
 	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendBalance, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$effect(() => {
 		console.log('fee', $fee ?? 0n);
 		console.log('ataFee', $ataFee ?? 0n);
-		console.log('amount', amount);
+		console.log(
+			'amount',
+			parseToken({
+				value: `${amount}`,
+				unitName: $sendTokenDecimals
+			})
+		);
 		console.log('balance', $sendBalance ?? 0n);
 	});
 
 	let insufficientFundsForFee = $derived(
-		false //($fee ?? 0n) + ($ataFee ?? 0n) + BigInt(amount ?? 0) > ($sendBalance ?? 0n)
+		nonNullish($fee) && nonNullish($ataFee) && nonNullish(amount) && nonNullish($sendBalance)
+			? ($fee ?? 0n) +
+					($ataFee ?? 0n) +
+					parseToken({
+						value: `${amount}`,
+						unitName: $sendTokenDecimals
+					}) >
+					($sendBalance ?? 0n)
+			: false
 	);
 
 	let invalid = $derived(invalidSolAddress(destination) || invalidAmount(amount));
