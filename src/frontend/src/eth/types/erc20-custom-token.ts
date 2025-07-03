@@ -1,4 +1,4 @@
 import type { Erc20Token } from '$eth/types/erc20';
-import type { UserToken } from '$lib/types/user-token';
+import type { CustomToken } from '$lib/types/custom-token';
 
-export type Erc20CustomToken = UserToken<Erc20Token>;
+export type Erc20CustomToken = CustomToken<Erc20Token>;
