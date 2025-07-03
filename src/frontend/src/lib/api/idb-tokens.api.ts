@@ -16,6 +16,7 @@ const idbTokensStore = (key: string): UseStore =>
 		: ({} as unknown as UseStore);
 
 const idbIcTokensStore = idbTokensStore(ICP_NETWORK_SYMBOL.toLowerCase());
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 const idbEthTokensStoreDeprecated = idbTokensStore(
 	`${ETHEREUM_NETWORK_SYMBOL.toLowerCase()}-deprecated`
 );
@@ -40,6 +41,7 @@ export const setIdbTokensStore = async <T extends CustomToken | UserToken>({
 export const setIdbIcTokens = (params: SetIdbTokensParams<CustomToken>): Promise<void> =>
 	setIdbTokensStore({ ...params, idbTokensStore: idbIcTokensStore });
 
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 export const setIdbEthTokensDeprecated = (params: SetIdbTokensParams<UserToken>): Promise<void> =>
 	setIdbTokensStore({ ...params, idbTokensStore: idbEthTokensStoreDeprecated });
 
@@ -54,6 +56,7 @@ export const getIdbIcTokens = (
 ): Promise<SetIdbTokensParams<CustomToken>['tokens'] | undefined> =>
 	get(principal.toText(), idbIcTokensStore);
 
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 export const getIdbEthTokensDeprecated = (
 	principal: Principal
 ): Promise<SetIdbTokensParams<UserToken>['tokens'] | undefined> =>
@@ -72,6 +75,7 @@ export const getIdbSolTokens = (
 export const deleteIdbIcTokens = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbIcTokensStore);
 
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 export const deleteIdbEthTokensDeprecated = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbEthTokensStoreDeprecated);
 
@@ -81,6 +85,7 @@ export const deleteIdbEthTokens = (principal: Principal): Promise<void> =>
 export const deleteIdbSolTokens = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbSolTokensStore);
 
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 export const deleteIdbEthTokenDeprecated = async ({
 	identity,
 	token
@@ -128,8 +133,10 @@ export const deleteIdbEthToken = async ({
 			identity,
 			tokens: currentTokens.filter(({ token: savedToken }) =>
 				'Erc20' in savedToken
-					? savedToken.Erc20.token_address !== tokenToDeleteAddress &&
-						savedToken.Erc20.chain_id !== tokenToDeleteChainId
+					? !(
+							savedToken.Erc20.token_address === tokenToDeleteAddress &&
+							savedToken.Erc20.chain_id === tokenToDeleteChainId
+						)
 					: true
 			)
 		});

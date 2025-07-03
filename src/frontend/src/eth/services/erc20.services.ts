@@ -30,6 +30,7 @@ import {
 	setIdbEthTokens,
 	setIdbEthTokensDeprecated
 } from '$lib/api/idb-tokens.api';
+import { getIdbEthTokensDeprecated, setIdbEthTokensDeprecated } from '$lib/api/idb-tokens.api';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
