@@ -154,7 +154,7 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
-		<div class="mb-3 flex flex-col gap-3">
+		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
 					class="overflow-hidden rounded-xl"
@@ -190,7 +190,7 @@
 		{/if}
 
 		{#if $tokenListStore.filter !== '' && enableMoreTokensList.length > 0}
-			<div class="mb-3 mt-12 flex flex-col gap-3">
+			<div class="mb-3 mt-6 flex flex-col gap-3">
 				<StickyHeader>
 					<div class="flex items-center justify-between pb-4">
 						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
