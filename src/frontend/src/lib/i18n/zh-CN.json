@@ -1100,6 +1100,15 @@
 			"safe": "安全",
 			"unconfirmed": "未确认"
 		},
+		"type": {
+			"send": "",
+			"receive": "",
+			"withdraw": "",
+			"deposit": "",
+			"approve": "",
+			"burn": "",
+			"mint": ""
+		},
 		"label": {
 			"reimbursement": "退款",
 			"twin_token_sent": "$twinToken 已发送",
