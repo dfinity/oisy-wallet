@@ -227,7 +227,7 @@
 				"call_to_action": "Conheça o futuro",
 				"description": "O Centro de Finanças Descentralizadas do Futuro!<br/>Reinventando a Exchange como um Hub, a ICPSwap fornece serviços financeiros, de mercado e DAO completos no Internet Computer. Com base na tecnologia subjacente do Internet Computer da DFINITY, a ICPSwap estabelece um ecossistema de finanças genuinamente descentralizadas, reformulando a forma como os utilizadores e os programadores constroem projetos em conjunto."
 			},
-			"nnsdapp": { 
+			"nnsdapp": {
 				"name": "NNS Dapp",
 				"one_liner": "O dapp front-end NNS permite que qualquer pessoa interaja com o Sistema Nervoso da Rede do Internet Computer com um UI amigo do utilizador.",
 				"call_to_action": "Participa",
@@ -239,7 +239,7 @@
 				"call_to_action": "Vamos fazer trocas",
 				"description": "A Uniswap é uma corretora descentralizada de criptomoedas que utiliza um conjunto de contratos inteligentes para criar pools de liquidez para a execução de negociações de criptomoedas. É um projeto de código aberto e se enquadra na categoria de produtos DeFi, pois utiliza contratos inteligentes para facilitar as negociações em vez de uma corretora centralizada."
 			},
-			"oneinch": { 
+			"oneinch": {
 				"name": "1inch",
 				"one_liner": "Otimize suas negociações em centenas de DEXes em diversas redes.",
 				"call_to_action": "Dê uma olhada",
@@ -280,7 +280,7 @@
 				"one_liner": "Libere todo o potencial do DeFi e da negociação simplificada. Troque tokens, ganhe como provedor de liquidez e aproveite o AMM líder da Bitfinity EVM.",
 				"call_to_action": "Abrir o Sonic",
 				"description": "A Sonic, uma exchange descentralizada multichain construída sobre o Protocolo do Internet Computer (ICP), oferece uma ampla gama de serviços DeFi. Os utilizadores podem negociar tokens e perpétuos facilmente, fornecer liquidez e participar na venda de tokens LBP. Os usuários podem participar na governação do DAO, participar em staking por recompensas e votar nas decisões da plataforma.<br/><br/>Totalmente on-chain e de código aberto! Troque tokens como um profissional, acumule taxas como um provedor de liquidez, junte-se à onda de AMMs e seja parte integrante do Sonic DAO.",
-				"carousel": { 
+				"carousel": {
 					"text": "Libere todo o potencial do Defi",
 					"call_to_action": "Abrir o Sonic"
 				}
@@ -351,7 +351,7 @@
 		"campaigns": {
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 3 está no ar \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episode 3 está no ar 🎉",
 				"one_liner": "Ganhe BTC por ser ativo — e agora, por <strong>convidar amigos</strong>. <br/>Faça login, faça transações e guarde tokens para se qualificar para os prêmios diários. Indique um amigo e ganhe 10% do valor das recompensas dele durante toda a campanha.",
 				"participate_title": "Ganhe BTC permanecendo ativo - e agora também por convidar outras pessoas.",
 				"description": "Atenda a requisitos semanais simples. Faça login, faça duas transações e mantenha pelo menos US$ 20 em tokens para continuar elegível para um dos 50 lançamentos de BTC todos os dias.<br/><strong>Agora com recompensas por indicação:</strong> convide um amigo para usar uma carteira e ganhe 10% dos Sprinkles dele por 30 dias. Ele fica com 100% — você ganha um extra.",
@@ -376,7 +376,7 @@
 			},
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episódio 4 está no ar \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episódio 4 está no ar 🎉",
 				"one_liner": "Ganhe BTC por se manter ativo — e agora, ganhe <strong>garantidos</strong> Sprinkles por referências. <br/>Faça login, faça transações e mantenha tokens para se qualificar para os prémios diários. Indique 4 amigos e seja recompensado diretamente. Os melhores referenciadores ganham ainda mais.",
 				"participate_title": "Ganhe BTC mantendo-se ativo - e agora também por convidar outras pessoas.",
 				"description": "Cumpra requisitos semanais simples: inicie sessão, faça duas transações e tenha pelo menos 20 dólares em tokens para continuar elegível para ganhar até 50 dólares em BTC por dia. <br>Agora com recompensas por referência: convide um amigo para criar uma carteira e ambos ganharão Sprinkles garantidos. Esteja entre os 4 melhores nomeados e ganhe um jackpot.",
@@ -416,7 +416,8 @@
 			"incubated_with": "Incubado com",
 			"by": "por",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": ""
 		},
 		"alt": {
 			"dfinity": "Ir para o site da DFINITY Foundation"
@@ -911,7 +912,8 @@
 				"list_settings": "Configurações da lista",
 				"import_token": "Importar token",
 				"network": "Rede",
-				"all_tokens_zero_balance": "Todos os tokens têm saldo zero."
+				"all_tokens_zero_balance": "Todos os tokens têm saldo zero.",
+				"enable_more_assets": ""
 			},
 			"placeholder": {
 				"select_network": "Selecionar a rede"
