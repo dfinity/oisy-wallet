@@ -416,7 +416,8 @@
 			"incubated_with": "Incubated with",
 			"by": "by",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": "$oisy_short Assistant"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website"
@@ -482,7 +483,7 @@
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
-			"spl_user_tokens": "Error while loading the SPL user tokens.",
+			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
@@ -911,7 +912,8 @@
 				"list_settings": "List settings",
 				"import_token": "Import token",
 				"network": "Network",
-				"all_tokens_zero_balance": "All tokens have zero balance."
+				"all_tokens_zero_balance": "All tokens have zero balance.",
+				"enable_more_assets": "Enable more assets"
 			},
 			"placeholder": {
 				"select_network": "Select the network"

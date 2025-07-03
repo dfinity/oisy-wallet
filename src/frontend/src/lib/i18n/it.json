@@ -416,7 +416,8 @@
 			"incubated_with": "",
 			"by": "",
 			"dfinity_foundation": "",
-			"copyright": ""
+			"copyright": "",
+			"ai_assistant_console_button": ""
 		},
 		"alt": {
 			"dfinity": ""
@@ -482,7 +483,7 @@
 			"transaction_price": "",
 			"icrc_canisters": "",
 			"erc20_user_tokens": "",
-			"spl_user_tokens": "",
+			"spl_custom_tokens": "",
 			"erc20_user_token": "",
 			"icrc_custom_token": "",
 			"loading_wallet_timeout": "",
@@ -911,7 +912,8 @@
 				"list_settings": "",
 				"import_token": "",
 				"network": "",
-				"all_tokens_zero_balance": ""
+				"all_tokens_zero_balance": "",
+				"enable_more_assets": ""
 			},
 			"placeholder": {
 				"select_network": ""

@@ -91,7 +91,9 @@
 				)
 			});
 
-			const estimatedGas = await estimateGas(params);
+			// We estimate gas only when it is not a ck-conversion (i.e. target network is not ICP).
+			// Otherwise, we would need to emulate the data that are provided to the minter contract address.
+			const estimatedGas = isNetworkICP(targetNetwork) ? undefined : await estimateGas(params);
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({

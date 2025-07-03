@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
@@ -12,13 +13,23 @@
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
+	import type { Network } from '$lib/types/network';
+	import type { Token, TokenUi } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
+	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
+	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
+	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -42,9 +53,63 @@
 
 	let loading: boolean = $derived($erc20UserTokensNotInitialized || isNullish(tokens));
 
+	// Default token / tokengroup list
 	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
 		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
 	);
+
+	// Token list for enabling when filtering
+	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
+
+	const updateFilterList = ({
+		filter,
+		selectedNetwork
+	}: {
+		filter: string;
+		selectedNetwork?: Network;
+	}) => {
+		// hide enabled initially, but keep enabled (modified) ones that have just been enabled to let the user revert easily
+		// then we return it as a valid TokenUiOrGroupUi since the displaying cards require that type
+		// we also apply the same logic for filtering networks as in manage tokens modal
+		const reducedTokens = ($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
+			const isModified = nonNullish(
+				modifiedTokens[`${token.network.id.description}-${token.id.description}`]
+			);
+			if (
+				(!token.enabled || (token.enabled && isModified)) &&
+				showTokenFilteredBySelectedNetwork({
+					token,
+					$selectedNetwork: selectedNetwork,
+					$pseudoNetworkChainFusion: isNullish(selectedNetwork)
+				})
+			) {
+				acc.push({
+					token: token as TokenUi
+				});
+			}
+			return acc;
+		}, []);
+
+		// sort alphabetally and apply filter
+		enableMoreTokensList = getFilteredTokenList({
+			filter,
+			list: sortTokenOrGroupUi(reducedTokens)
+		});
+
+		// we need to reset modified tokens, since the filter has changed the selected token(s) may not be visible anymore
+		modifiedTokens = {};
+	};
+
+	// we debounce the filter input for updating the enable tokens list
+	const debouncedFilterList = debounce(
+		(params: { filter: string; selectedNetwork?: Network }) => updateFilterList(params),
+		300
+	);
+	$effect(() => {
+		const { filter } = $tokenListStore;
+		const network = $selectedNetwork;
+		untrack(() => debouncedFilterList({ filter, selectedNetwork: network })); // we untrack the function so it only updates the list on filter change
+	});
 
 	let {
 		initialSearch,
@@ -54,6 +119,37 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	let saveLoading = $state(false);
+
+	const onSave = async () => {
+		saveLoading = true;
+		await saveAllCustomTokens({ tokens: modifiedTokens, $authIdentity, $i18n });
+
+		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
+		updateFilterList({ filter: $tokenListStore.filter, selectedNetwork: $selectedNetwork });
+		saveLoading = false;
+	};
+
+	let modifiedTokens: Record<string, Token> = $state({});
+	let modifiedTokensLen = $derived(Object.keys(modifiedTokens).length);
+
+	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
+
+	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+		const { id: networkId } = network;
+		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
+
+		if (nonNullish(current)) {
+			modifiedTokens = { ...tokens };
+			return;
+		}
+
+		modifiedTokens = {
+			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
+			...tokens
+		};
+	};
 </script>
 
 <TokensDisplayHandler bind:tokens>
@@ -91,6 +187,46 @@
 			{:else}
 				<NothingFoundPlaceholder />
 			{/if}
+		{/if}
+
+		{#if $tokenListStore.filter !== '' && enableMoreTokensList.length > 0}
+			<div class="mb-3 mt-12 flex flex-col gap-3">
+				<StickyHeader>
+					<div class="flex items-center justify-between pb-4">
+						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
+						<div>
+							<Button
+								onclick={onSave}
+								disabled={saveDisabled || saveLoading}
+								paddingSmall
+								fullWidth={false}
+								styleClass="py-2"
+								loading={saveLoading}
+							>
+								{$i18n.core.text.apply}
+								{#if modifiedTokensLen > 0}({modifiedTokensLen}){/if}
+							</Button>
+						</div>
+					</div>
+				</StickyHeader>
+
+				{#each enableMoreTokensList as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+					<div
+						class="overflow-hidden rounded-xl"
+						transition:fade
+						animate:flip={{ duration: 250 }}
+						onanimationstart={handleAnimationStart}
+						onanimationend={handleAnimationEnd}
+						class:pointer-events-none={animating}
+					>
+						<div class="transition duration-300 hover:bg-primary">
+							{#if !isTokenUiGroup(tokenOrGroup)}
+								<TokenCard data={tokenOrGroup.token} {onToggle} />
+							{/if}
+						</div>
+					</div>
+				{/each}
+			</div>
 		{/if}
 
 		{#if $modalManageTokens}
