@@ -6,7 +6,9 @@
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
 	import type { Erc20Metadata } from '$eth/types/erc20';
+	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
@@ -38,8 +40,6 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
-	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
 
 	let {
 		initialSearch,
