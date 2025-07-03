@@ -1018,7 +1018,6 @@
 			"events": "Eventos",
 			"message": "Mensagem",
 			"hex_data": "Dados HEX",
-			"base64_data": "Dados Base-64", // THIS IS A KEY CHANGE FROM THE ORIGINAL FILE
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem"
 		},
@@ -1105,7 +1104,6 @@
 			"ck_token_sent": "$ckToken enviado",
 			"twin_token_converted": "$twinToken Convertido",
 			"ck_token_converted": "Convertido de $ckToken",
-			"receiving_twin_token": "Recebendo $twinToken", // KEY CHANGE FROM ORIGINAL
 			"sending_twin_token": "Enviando $twinToken",
 			"sending_twin_token_failed": "Envio de $twinToken falhou",
 			"converting_twin_token": "Convertendo $twinToken para $ckToken",
@@ -1129,7 +1127,6 @@
 			"title": "Transações",
 			"buy_or_receive": "Faça sua primeira transação, e compre ou receba tokens agora!",
 			"transaction_history": "O seu histórico de transações aparecerá aqui",
-			"open_transactions": "Abrir a lista de transações de $token", // KEY CHANGE FROM ORIGINAL
 			"mainnet_btc_transactions_info": "As informações de transação BTC são obtidas a partir de terceiras partes centralizadas e devem ser verificadas independentemente.",
 			"transaction_history_unavailable": "Histórico de transações indisponível",
 			"missing_index_canister_explanation": "Atualmente, $oisy_short não pode exibir seu histórico de transações de tokens porque o emissor ainda não forneceu a função de rastreamento. Ela deve ser adicionada em breve. Enquanto isso, não se preocupe — você ainda pode enviar e receber seus tokens como de costume.",
@@ -1214,7 +1211,7 @@
 			"text": {
 				"title": "Indique um amigo",
 				"referral_link_copied": "Link de referência copiado para a área de transferência.",
-				"information": "Ganhe sprinkles bónus, toda vez que os seus amigos receberem um bónus também!", // KEY CHANGE FROM ORIGINAL
+				"information": "Ganhe sprinkles bónus, toda vez que os seus amigos receberem um bónus também!",
 				"not_referred_yet": "Você ainda não indicou ninguém",
 				"referred_amount": "Você já indicou $amount pessoas",
 				"learn_more": "Saiba mais"
@@ -1222,15 +1219,6 @@
 			"error": {
 				"loading_referrer_info": "Erro ao carregar informações de referência",
 				"setting_referrer": "Erro ao definir o referenciador"
-			}
-		},
-		"reward": {
-			"text": {
-				"title": "Parabéns!",
-				"content_title": "Aqui está um pequeno agradecimento", // KEY CHANGE FROM ORIGINAL
-				"content_text": "Um dos seus usuários indicados acabou de receber alguns sprinkles.",
-				"share": "Compartilhar no X",
-				"open_wallet": "Leve-me para a carteira"
 			}
 		}
 	},
