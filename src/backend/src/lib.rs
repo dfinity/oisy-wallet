@@ -1,4 +1,4 @@
-use std::{cell::RefCell, future::ready, time::Duration};
+use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
 use candid::{candid_method, Principal};
@@ -66,6 +66,7 @@ use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::assert_token_enabled_is_some,
+    bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     types::{ContactMap, PowChallengeMap},
@@ -197,6 +198,10 @@ pub fn init(arg: Arg) {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
@@ -217,6 +222,9 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
@@ -373,18 +381,32 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 
-// TODO replace caller_is_controller with caller_is_not_anonymous
-#[query(guard = "caller_is_controller")]
+/// Retrieves the current fee percentiles for Bitcoin transactions from the cache
+/// for the specified network. Fee percentiles are measured in millisatoshi per byte
+/// and are periodically updated in the background.
+///
+/// # Returns
+/// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
+/// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+///
+/// # Errors
+/// - `InternalError`: If fee percentiles are not available in the cache for the requested network
+///
+/// # Note
+/// This function only returns data from the in-memory cache and doesn't make any calls
+/// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
+/// an error is returned rather than fetching fresh data.
+#[query(guard = "caller_is_not_anonymous")]
 #[must_use]
-#[allow(unused_variables)]
 pub async fn btc_get_current_fee_percentiles(
     params: BtcGetFeePercentilesRequest,
 ) -> BtcGetFeePercentilesResult {
-    // TODO replace with real service implementation
-    ready(()).await;
-    // Return an empty vector of fee percentiles
-    let fee_percentiles = Vec::new();
-    Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into()
+    match get_current_fee_percentiles(params.network).await {
+        Ok(fee_percentiles) => Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into(),
+        Err(err) => {
+            BtcGetFeePercentilesResult::Err(SelectedUtxosFeeError::InternalError { msg: err })
+        }
+    }
 }
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
