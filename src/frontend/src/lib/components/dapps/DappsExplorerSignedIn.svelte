@@ -46,7 +46,8 @@
 			metadata: {
 				tag: nonNullish(btnTag)
 					? resolveText({ i18n: $i18n, path: btnTag })
-					: $i18n.dapps.text.all_dapps
+					: $i18n.dapps.text.all_dapps,
+				id: nonNullish(btnTag) ? btnTag : 'dapps.categories.all_dapps'
 			}
 		});
 
