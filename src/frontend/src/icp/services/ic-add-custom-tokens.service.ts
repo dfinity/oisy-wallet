@@ -206,7 +206,7 @@ const loadIndexBalance = async ({
 	}
 };
 
-const assertIndexLedgerId = async ({
+export const assertIndexLedgerId = async ({
 	identity,
 	indexCanisterId,
 	ledgerCanisterId
