@@ -65,7 +65,7 @@ export const loadCustomTokens = ({
 			splCustomTokensStore.resetAll();
 
 			toastsError({
-				msg: { text: get(i18n).init.error.spl_user_tokens },
+				msg: { text: get(i18n).init.error.spl_custom_tokens },
 				err
 			});
 		},
@@ -180,16 +180,7 @@ const loadCustomTokensWithMetadata = async ({
 
 			const metadata = await getSplMetadata({ address, network: solNetwork });
 
-			return nonNullish(metadata)
-				? [
-						...(await acc),
-						{
-							...token,
-							owner,
-							...metadata
-						}
-					]
-				: acc;
+			return nonNullish(metadata) ? [...(await acc), { ...token, owner, ...metadata }] : acc;
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];
