@@ -13,6 +13,8 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { nonNullish } from '@dfinity/utils';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
 
 	interface Props {
 		destination: string;
@@ -27,33 +29,23 @@
 		feeStore: fee,
 		ataFeeStore: ataFee,
 		feeDecimalsStore: decimals,
-		feeSymbolStore: symbol
+		feeSymbolStore: symbol,
+		feeTokenIdStore: feeTokenId
 	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	const { sendBalance, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	let balanceForFee = $derived(
+		nonNullish($feeTokenId) ? ($balancesStore?.[$feeTokenId]?.data ?? ZERO) : ZERO
+	);
 
 	$effect(() => {
 		console.log('fee', $fee ?? 0n);
 		console.log('ataFee', $ataFee ?? 0n);
-		console.log(
-			'amount',
-			parseToken({
-				value: `${amount}`,
-				unitName: $sendTokenDecimals
-			})
-		);
-		console.log('balance', $sendBalance ?? 0n);
+		console.log('balance', balanceForFee ?? 0n);
 	});
 
 	let insufficientFundsForFee = $derived(
-		nonNullish($fee) && nonNullish($ataFee) && nonNullish(amount) && nonNullish($sendBalance)
-			? $fee +
-					$ataFee +
-					parseToken({
-						value: `${amount}`,
-						unitName: $sendTokenDecimals
-					}) >
-					$sendBalance
+		nonNullish($fee) && nonNullish($ataFee) && nonNullish(balanceForFee)
+			? $fee + $ataFee > balanceForFee
 			: false
 	);
 
