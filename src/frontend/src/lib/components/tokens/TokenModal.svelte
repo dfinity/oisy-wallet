@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
@@ -40,7 +40,6 @@
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -234,7 +233,7 @@
 				gotoStep(TokenModalSteps.EDIT_PROGRESS);
 				progress(ProgressStepsAddToken.SAVE);
 
-				const { valid } = !isNullishOrEmpty(icrcTokenIndexCanisterId)
+				const { valid } = notEmptyString(icrcTokenIndexCanisterId)
 					? await assertIndexLedgerId({
 							identity: $authIdentity,
 							ledgerCanisterId: tokenToEdit.ledgerCanisterId,
@@ -252,7 +251,7 @@
 
 				await setCustomToken({
 					token: toCustomToken({
-						...(!isNullishOrEmpty(icrcTokenIndexCanisterId) && {
+						...(notEmptyString(icrcTokenIndexCanisterId) && {
 							indexCanisterId: icrcTokenIndexCanisterId
 						}),
 						ledgerCanisterId: tokenToEdit.ledgerCanisterId,
