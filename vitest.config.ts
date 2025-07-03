@@ -74,13 +74,14 @@ export default defineConfig(
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
 				include: ['src/frontend'],
-				// TODO: increase the thresholds slowly up to an acceptable 80% at least
+				exclude: ['src/frontend/src/routes/**/+page.ts'],
+				// TODO: increase the thresholds slowly up to an acceptable 90% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 74,
-					branches: 86,
-					functions: 77,
-					lines: 74
+					statements: 88,
+					branches: 91,
+					functions: 79,
+					lines: 88
 				}
 			}
 		}
