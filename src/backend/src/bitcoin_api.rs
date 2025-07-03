@@ -122,8 +122,12 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
                 });
             }
             Err(err) => {
+                ic_cdk::eprintln!(
+                    "Failed to update fee percentiles for network {:?}: {}",
+                    network,
+                    err
+                );
                 // We don't return error here to allow the function to continue for other networks
-                // Note: Removed the disallowed eprintln macro
             }
         }
     }
