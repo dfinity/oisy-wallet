@@ -8,20 +8,35 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
+	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
+	import { getContext } from 'svelte';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let network: Network | undefined = undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		destination: string;
+		amount: OptionAmount;
+		network?: Network;
+		selectedContact?: ContactUi;
+	}
 
-	// TODO: add checks for insufficient funds for fee, when we calculate the fee
-	const insufficientFundsForFee = false;
+	const { destination = '', amount, network, selectedContact }: Props = $props();
 
-	let disableSend: boolean;
-	$: disableSend = insufficientFundsForFee || invalid;
+	const {
+		feeStore: fee,
+		ataFeeStore: ataFee,
+		feeDecimalsStore: decimals,
+		feeSymbolStore: symbol
+	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let invalid = true;
-	$: invalid = invalidSolAddress(destination) || invalidAmount(amount);
+	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let insufficientFundsForFee = $derived(
+		($fee ?? 0n) + ($ataFee ?? 0n) + BigInt(amount ?? 0) > ($sendBalance ?? 0n)
+	);
+
+	let invalid = $derived(invalidSolAddress(destination) || invalidAmount(amount));
+
+	let disableSend = $derived(insufficientFundsForFee || invalid);
 </script>
 
 <SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
