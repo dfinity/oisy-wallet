@@ -365,6 +365,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		erc20_custom_tokens: string;
 		erc20_user_tokens: string;
 		spl_user_tokens: string;
 		erc20_user_token: string;
