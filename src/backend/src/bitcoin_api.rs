@@ -91,9 +91,9 @@ pub fn init_fee_percentiles_cache() {
     });
 }
 
-/// Updates the Bitcoin transaction fee percentiles cache for all networks (Mainnet, Testnet, Regtest) in parallel.
-/// in the thread-local cache. Fetches current fee data from the bitcoin canister and stores
-/// it for quick access by other functions.
+/// Updates the Bitcoin transaction fee percentiles cache for all networks (Mainnet, Testnet,
+/// Regtest) in parallel. in the thread-local cache. Fetches current fee data from the bitcoin
+/// canister and stores it for quick access by other functions.
 async fn update_fee_percentiles_cache() -> Result<(), String> {
     use futures::future::join_all;
 
