@@ -154,7 +154,7 @@
 				"other_docs": "打开 $oisy_short 文档：Internet Identity",
 				"other_private_key": "了解谁控制原生资产的私钥",
 				"other_asset_control": "查看 $oisy_short 钱包中的资产控制、恢复和治理信息",
-				"sign_in": "登录时需要帮助？" 
+				"sign_in": "登录时需要帮助？"
 			}
 		}
 	},
@@ -416,7 +416,8 @@
 			"incubated_with": "孵化支持",
 			"by": "来自",
 			"dfinity_foundation": "DFINITY 基金会",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": ""
 		},
 		"alt": {
 			"dfinity": "访问 DFINITY 基金会官网"
@@ -911,7 +912,8 @@
 				"list_settings": "列表设置",
 				"import_token": "导入代币",
 				"network": "网络",
-				"all_tokens_zero_balance": "所有代币余额均为零。"
+				"all_tokens_zero_balance": "所有代币余额均为零。",
+				"enable_more_assets": ""
 			},
 			"placeholder": {
 				"select_network": "选择网络"
@@ -992,7 +994,7 @@
 			"title": "接收 BTC 并转换为 ckBTC",
 			"description": "将比特币转换为 ckBTC，享受最快和最便宜的比特币交易。转换过程最多可能需要一个小时。",
 			"note": "您可以随时将 ckBTC 转换回 BTC。",
-			"how_to": "如何转换为 ckBTC" 
+			"how_to": "如何转换为 ckBTC"
 		},
 		"ethereum": {
 			"title": "转换为 $ckToken",
@@ -1115,7 +1117,7 @@
 		"alt": {
 			"open_block_explorer": "在区块浏览器中打开此交易",
 			"open_from_block_explorer": "在区块浏览器中打开“发送自”地址",
-			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址" 
+			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址"
 		},
 		"error": {
 			"get_block_number": "无法获取区块号。",
@@ -1172,7 +1174,7 @@
 				},
 				"open_source": {
 					"title": "开源透明值得信赖",
-					"description": "$oisy_short 是一个 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">开源项目</a>，由 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY 基金会</a>的专业团队维护，获得超过 200 位世界领先密码学家与工程师的支持。开源确保透明度，让社区能够审查、参与并信任钱包的完整性。" 
+					"description": "$oisy_short 是一个 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">开源项目</a>，由 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY 基金会</a>的专业团队维护，获得超过 200 位世界领先密码学家与工程师的支持。开源确保透明度，让社区能够审查、参与并信任钱包的完整性。"
 				}
 			}
 		}
@@ -1250,7 +1252,7 @@
 			"title": "联系人",
 			"add_address": "添加地址",
 			"show_address_text": "关联地址将在此处显示",
-			"add_first_address": "为 $contactName 添加第一个地址！" 
+			"add_first_address": "为 $contactName 添加第一个地址！"
 		},
 		"create_contact": {
 			"title": "创建联系人"
@@ -1357,7 +1359,7 @@
 			"error": {
 				"no_approve_callback": "无批准确认消息的回调，属意外情况。请关闭钱包并重试。",
 				"no_reject_callback": "无拒绝确认消息的回调，属意外情况。请关闭钱包并重试。",
-				"retrieve": "检索确认消息时出错" 
+				"retrieve": "检索确认消息时出错"
 			}
 		},
 		"call_canister": {
