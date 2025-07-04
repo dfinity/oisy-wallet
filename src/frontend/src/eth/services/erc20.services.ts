@@ -37,6 +37,7 @@ import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { UserTokenState } from '$lib/types/token-toggleable';
+import type { LoadUserTokenParams } from '$lib/types/user-token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import {
@@ -121,10 +122,7 @@ export const loadCustomTokens = ({
 export const loadErc20UserTokens = ({
 	identity,
 	useCache = false
-}: {
-	identity: OptionIdentity;
-	useCache?: boolean;
-}): Promise<void> =>
+}: Omit<LoadUserTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<Erc20UserToken[]>({
 		request: (params) => loadUserTokens({ ...params, useCache }),
 		onLoad: loadUserTokenData,
@@ -164,11 +162,7 @@ const loadNetworkUserTokens = async ({
 	identity,
 	certified,
 	useCache = false
-}: {
-	identity: OptionIdentity;
-	certified: boolean;
-	useCache?: boolean;
-}): Promise<UserToken[]> => {
+}: LoadUserTokenParams): Promise<UserToken[]> => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
 		return [];
@@ -285,11 +279,7 @@ const loadCustomTokensWithMetadata = async (
 	return await loadCustomContracts();
 };
 
-const loadUserTokens = async (params: {
-	identity: OptionIdentity;
-	certified: boolean;
-	useCache?: boolean;
-}): Promise<Erc20UserToken[]> => {
+const loadUserTokens = async (params: LoadUserTokenParams): Promise<Erc20UserToken[]> => {
 	type ContractData = Erc20Contract &
 		Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
 		Partial<Pick<Erc20Token, 'id'>>;
