@@ -59,7 +59,6 @@ PASSCODE_MANAGER_CID="aaaaa-aa"
 BACKUP_CID="aaaaa-aa"
 FEE_RECEIVER_CID="aaaaa-aa"
 
-
 cat <<EOF >"$ARG_FILE"
 (
   principal "$INFO_CID",
