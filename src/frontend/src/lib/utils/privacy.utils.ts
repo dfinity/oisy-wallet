@@ -11,14 +11,18 @@ interface SetPrivacyModeOptions {
 	withToast?: boolean;
 }
 
-export const setPrivacyMode = ({ enabled, withToast = false, source }: SetPrivacyModeOptions): void => {
+export const setPrivacyMode = ({
+	enabled,
+	withToast = false,
+	source
+}: SetPrivacyModeOptions): void => {
 	trackEvent({
 		name: TRACK_PRIVACY_MODE_CHANGE,
 		metadata: {
 			enabled: String(enabled),
 			source: `${source}`,
-			withToast: withToast ? 'With toast message' : 'Without toast message',
-		},
+			withToast: withToast ? 'With toast message' : 'Without toast message'
+		}
 	});
 
 	privacyModeStore.set({
