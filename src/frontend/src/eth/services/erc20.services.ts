@@ -18,6 +18,7 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import type { Erc20ContractAddress } from '$eth/types/address';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -36,6 +37,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
 import type { UserTokenState } from '$lib/types/token-toggleable';
 import type { LoadUserTokenParams } from '$lib/types/user-token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -260,17 +262,43 @@ const loadCustomTokensWithMetadata = async (
 			[[], []]
 		);
 
+		const safeLoadMetadata = async ({
+			networkId,
+			address
+		}: {
+			networkId: NetworkId;
+			address: Erc20ContractAddress;
+		}) => {
+			try {
+				// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
+				return await infuraErc20Providers(networkId).metadata({ address });
+			} catch (err: unknown) {
+				console.error(
+					`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
+					err
+				);
+				return undefined;
+			}
+		};
+
 		const customTokens: Erc20CustomToken[] = await nonExistingTokens.reduce<
 			Promise<Erc20CustomToken[]>
 		>(async (acc, token) => {
-			const { network, address } = token;
+			const {
+				network: { id: networkId },
+				address
+			} = token;
 
 			// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
-			const metadata = await infuraErc20Providers(network.id).metadata({ address });
+			const metadata = await safeLoadMetadata({ networkId, address });
+
+			if (isNullish(metadata)) {
+				return acc;
+			}
 
 			const icon = mapErc20Icon(metadata.symbol);
 
-			return nonNullish(metadata) ? [...(await acc), { icon, ...token, ...metadata }] : acc;
+			return [...(await acc), { icon, ...token, ...metadata }];
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];
