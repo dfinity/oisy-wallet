@@ -61,7 +61,8 @@ export const POST_MESSAGE_REQUESTS = [
 export const PostMessageRequestSchema = z.enum(POST_MESSAGE_REQUESTS);
 
 export const PostMessageDataRequestSchema = z.never();
-export const PostMessageDataResponseSchema = z.looseObject({});
+export const PostMessageDataResponseSchema = z.strictObject({});
+export const PostMessageDataResponseLooseSchema = z.looseObject({});
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
@@ -227,7 +228,7 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 	z.union([
 		z.object({
 			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
-			data: dataSchema.optional()
+			data: z.strictObject(dataSchema).shape.optional()
 		}),
 		PostMessageDataErrorSchema
 	]);

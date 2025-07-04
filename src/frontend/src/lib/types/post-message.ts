@@ -14,9 +14,9 @@ import type {
 	PostMessageDataResponseErrorSchema,
 	PostMessageDataResponseExchangeErrorSchema,
 	PostMessageDataResponseExchangeSchema,
+	PostMessageDataResponseLooseSchema,
 	PostMessageDataResponsePowProtectorNextAllowanceSchema,
 	PostMessageDataResponsePowProtectorProgressSchema,
-	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
 	PostMessageJsonDataResponseSchema,
@@ -29,7 +29,7 @@ import type * as z from 'zod/v4';
 import type { ZodType } from 'zod/v4';
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
-export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSchema>;
+type PostMessageDataResponseLoose = z.infer<typeof PostMessageDataResponseLooseSchema>;
 
 export type PostMessageDataRequestExchangeTimer = z.infer<
 	typeof PostMessageDataRequestExchangeTimerSchema
@@ -91,6 +91,6 @@ export type PostMessageDataResponsePowProtectorNextAllowance = z.infer<
 	typeof PostMessageDataResponsePowProtectorNextAllowanceSchema
 >;
 
-export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> = z.infer<
+export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponseLoose> = z.infer<
 	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
 >;
