@@ -39,9 +39,7 @@
 			onfocus={handleEnter}
 			onblur={handleLeave}
 		>
-			{#if children}
-				{@render children()}
-			{/if}
+			{@render children?.()}
 		</span>
 	{/snippet}
 
