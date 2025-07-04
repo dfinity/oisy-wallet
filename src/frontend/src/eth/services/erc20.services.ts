@@ -292,13 +292,9 @@ const loadCustomTokensWithMetadata = async (
 			// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
 			const metadata = await safeLoadMetadata({ networkId, address });
 
-			if (isNullish(metadata)) {
-				return acc;
-			}
-
-			const icon = mapErc20Icon(metadata.symbol);
-
-			return [...(await acc), { icon, ...token, ...metadata }];
+			return nonNullish(metadata)
+				? [...(await acc), { icon: mapErc20Icon(metadata.symbol), ...token, ...metadata }]
+				: acc;
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];
