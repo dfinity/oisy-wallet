@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
@@ -17,6 +17,7 @@
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
+	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 
 	interface Props {
 		destination: string;
@@ -63,6 +64,8 @@
 				? $destinationToken?.network.id
 				: undefined
 	);
+
+	let inputElement: HTMLInputElement | undefined = $state();
 
 	let focused: boolean = $state(false);
 	const onFocus = () => (focused = true);
@@ -125,9 +128,20 @@
 			on:focus={onFocus}
 			on:blur={onBlur}
 			on:nnsInput
+			bind:inputElement
 		>
 			{#snippet innerEnd()}
-				<span class="flex">
+				<span class="flex gap-1 bg-primary">
+					{#if notEmptyString(destination)}
+						<ButtonReset
+							onclick={() => {
+								destination = '';
+								if (nonNullish(inputElement)) {
+									inputElement.focus();
+								}
+							}}
+						/>
+					{/if}
 					{#if nonNullish(onQRButtonClick)}
 						<QrButton on:click={onQRButtonClick} />
 					{/if}
