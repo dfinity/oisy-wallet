@@ -28,6 +28,4 @@
 	{/if}
 {/if}
 
-{#if children}
-	{@render children()}
-{/if}
+{@render children?.()}
