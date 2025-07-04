@@ -21,7 +21,7 @@
 			}))
 	);
 
-	onDestroy(() => {worker?.destroy()});
+	onDestroy(() => worker?.destroy());
 
 	const syncTimer = () => {
 		worker?.stop();
