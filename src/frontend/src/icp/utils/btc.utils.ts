@@ -1,6 +1,6 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
-import { isNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -43,6 +43,6 @@ export const getPendingTransactionIds = (address: string): string[] => {
 		}
 
 		// Add to accumulator only if truthy (combines map + filter(Boolean))
-		return txidString ? [...acc, txidString] : acc;
+		return notEmptyString(txidString) ? [...acc, txidString] : acc;
 	}, []);
 };
