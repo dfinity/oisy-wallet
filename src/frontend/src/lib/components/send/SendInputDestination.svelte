@@ -23,7 +23,7 @@
 		networkId?: NetworkId;
 		invalidDestination: boolean;
 		inputPlaceholder: string;
-		isInvalidDestination?: () => boolean;
+		onInvalidDestination?: () => boolean;
 		onQRButtonClick?: () => void;
 		knownDestinations?: KnownDestinations;
 		networkContacts?: NetworkContacts;
@@ -34,13 +34,13 @@
 		networkId,
 		invalidDestination = $bindable(false),
 		inputPlaceholder,
-		isInvalidDestination,
+		onInvalidDestination,
 		onQRButtonClick,
 		knownDestinations,
 		networkContacts
 	}: Props = $props();
 
-	const validate = () => (invalidDestination = isInvalidDestination?.() ?? false);
+	const validate = () => (invalidDestination = onInvalidDestination?.() ?? false);
 
 	const debounceValidate = debounce(validate);
 
@@ -67,7 +67,7 @@
 	$effect(() => {
 		destination;
 		networkId;
-		isInvalidDestination;
+		onInvalidDestination;
 		debounceValidate();
 	});
 
