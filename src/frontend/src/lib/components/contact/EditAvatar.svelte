@@ -1,6 +1,8 @@
 <script lang="ts">
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
+	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
+	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import { onMount } from 'svelte';
   
 	let visible = false;
@@ -51,9 +53,12 @@
 	{#if visible}
 		<div class="backdrop" on:click={() => (visible = false)}></div>
 		<div bind:this={menu} class="custom-popover wrapper animate-fade-in with-border " role="menu" tabindex="-1">
-			<div class="popover-item">Contact image</div>
-			<div class="popover-item">Replace</div>
-			<div class="popover-item">Remove</div>
+			<div class="popover-item popover-">Contact image</div>
+			<div class="popover-item">
+				<IconImage />
+				Replace</div>
+			<div class="popover-item">	
+				<IconTrash />Remove</div>
 		</div>
 	{/if}
 </div>

@@ -27,29 +27,37 @@
     border-color: var(--color-border-basic);
     top: calc(var(--popover-top) + var(--padding, 0.5rem));
     left: var(--popover-left);
-    min-width: min(calc(20 * var(--padding, 0.5rem)), calc(100vw - var(--padding, 0.5rem)));
-    max-width: calc(100vw - var(--padding, 0.5rem));
+    min-width: auto;
+    width: auto;
+    --size: min(calc(20 * var(--padding-2x)), calc(100vw - var(--padding-2x)));
+    min-width: var(--size);
+    max-width: calc(100vw - var(--padding-2x, 0.5rem));
     max-height: calc(var(--full-vh, 100vh) - var(--popover-top) - 6 * var(--padding, 0.5rem));
-    width: fit-content;
-    padding: var(--padding-2x, 1rem);
+    padding: var(--padding-1x, 1rem);
 }
 
-/* Right-to-left alignment */
-.custom-popover {
-    left: auto;
-    right: var(--popover-right);
-}
-
-/* Optional border styling class */
 .custom-popover.with-border {
     border-width: var(--dropdown-border-size, 1px);
     border-color: var(--dropdown-border-color, var(--color-border-basic));
 }
 
-/* Popover item */
 .popover-item {
-    @apply px-3 py-2 rounded-md cursor-pointer text-sm transition-colors;
+	@apply py-2 px-1 rounded-md cursor-pointer text-sm transition-colors flex items-center gap-2 whitespace-nowrap;
+    font-size: var(--font-size-standard);
+}
+
+.popover-item svg {
+	width: 1rem;
+	height: 1rem;
+	flex-shrink: 0;
 }
 .popover-item:hover {
-    background-color: var(--color-background-secondary-alt);
+    color: var(--color-foreground-brand-primary-alt);
+    background-color: var(--color-background-brand-subtle-10);
+}
+.popover-title{
+    @apply pt-0 ; 
+}
+.popover-title:hover {
+    background: none; 
 }
