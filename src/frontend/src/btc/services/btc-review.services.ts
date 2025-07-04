@@ -1,5 +1,6 @@
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 
+import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import {
 	calculateFinalFee,
 	calculateUtxoSelection,
@@ -16,8 +17,6 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
-
-const DEFAULT_MIN_CONFIRMATIONS = 1;
 
 interface BtcReviewServiceParams {
 	identity: Identity;
@@ -68,7 +67,7 @@ export const selectUtxosFee = async ({
 		bitcoinCanisterId,
 		address: source,
 		network,
-		minConfirmations: DEFAULT_MIN_CONFIRMATIONS
+		minConfirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 	});
 
 	const allUtxos = response.utxos;
@@ -77,7 +76,7 @@ export const selectUtxosFee = async ({
 	const availableUtxos = filterAvailableUtxos({
 		utxos: allUtxos,
 		options: {
-			minConfirmations: DEFAULT_MIN_CONFIRMATIONS,
+			minConfirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
 			pendingTxIds
 		}
 	});
