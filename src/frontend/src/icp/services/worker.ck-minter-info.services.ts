@@ -80,6 +80,12 @@ const initCkMinterInfoWorker = async ({
 		}
 	};
 
+	const stop = () => {
+		worker.postMessage({
+			msg: `stop${postMessageKey}MinterInfoTimer`
+		});
+	};
+
 	return {
 		start: () => {
 			worker.postMessage({
@@ -89,11 +95,7 @@ const initCkMinterInfoWorker = async ({
 				}
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: `stop${postMessageKey}MinterInfoTimer`
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: `trigger${postMessageKey}MinterInfoTimer`,
@@ -101,6 +103,10 @@ const initCkMinterInfoWorker = async ({
 					minterCanisterId
 				}
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };
