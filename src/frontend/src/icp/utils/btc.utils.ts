@@ -19,7 +19,7 @@ export const getPendingTransactionIds = (address: string): string[] => {
 	const storeData = get(btcPendingSentTransactionsStore);
 	const pendingTransactions = storeData[address];
 
-	if (isNullish(pendingTransactions) || !pendingTransactions.data) {
+	if (isNullish(pendingTransactions?.data)) {
 		return [];
 	}
 
