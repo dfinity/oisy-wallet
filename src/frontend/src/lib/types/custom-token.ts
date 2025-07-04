@@ -4,6 +4,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable, UserTokenState } from '$lib/types/token-toggleable';
 import type { SplToken } from '$sol/types/spl';
+import type { QueryAndUpdateRequestParams } from '@dfinity/utils';
 
 type CustomTokenNetworkKeys = BackendToken extends infer T
 	? T extends Record<string, unknown>
@@ -31,3 +32,5 @@ export type SaveCustomTokenWithKey = UserTokenState &
 	);
 
 export type CustomToken<T extends Token> = TokenToggleable<T>;
+
+export type LoadCustomTokenParams = QueryAndUpdateRequestParams & { useCache?: boolean };
