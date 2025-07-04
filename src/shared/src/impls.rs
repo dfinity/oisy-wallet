@@ -543,8 +543,15 @@ impl Validate for Contact {
         // Validate name length
         validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
 
-        // Add this line to validate the name
+        // Validate name does not have leading/trailing whitespace
         validate_string_whitespace_padding(&self.name, "Contact.name")?;
+
+        // Reject names that are empty or only whitespace
+        if self.name.trim().is_empty() {
+            return Err(Error::msg(
+                "Contact.name cannot be empty or whitespace only",
+            ));
+        }
 
         // Validate number of addresses
         validate_collection_size(&self.addresses, CONTACT_MAX_ADDRESSES, "Contact.addresses")?;
