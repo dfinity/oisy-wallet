@@ -1,6 +1,6 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
-import { isNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
