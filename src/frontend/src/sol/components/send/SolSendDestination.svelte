@@ -21,7 +21,7 @@
 	bind:invalidDestination
 	{knownDestinations}
 	{networkContacts}
-	{isInvalidDestination}
+	onInvalidDestination={isInvalidDestination}
 	inputPlaceholder={$i18n.send.placeholder.enter_recipient_address}
 	on:icQRCodeScan
 	onQRButtonClick={() => dispatch('icQRCodeScan')}
