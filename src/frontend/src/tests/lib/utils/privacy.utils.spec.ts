@@ -1,10 +1,10 @@
+import { TRACK_PRIVACY_MODE_CHANGE } from '$lib/constants/analytics.contants';
+import * as analytics from '$lib/services/analytics.services';
 import { privacyModeStore } from '$lib/stores/settings.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { vi, type MockInstance } from 'vitest';
-import * as analytics from '$lib/services/analytics.services';
-import { TRACK_PRIVACY_MODE_CHANGE } from '$lib/constants/analytics.contants';
 
 describe('setPrivacyMode', () => {
 	let spyToastsShow: MockInstance;
@@ -57,6 +57,7 @@ describe('setPrivacyMode', () => {
 			duration: 7000
 		});
 	});
+
 	it('should track event when enabling privacy mode with source', () => {
 		const spyTrackEvent = vi.spyOn(analytics, 'trackEvent');
 
@@ -88,5 +89,4 @@ describe('setPrivacyMode', () => {
 			}
 		});
 	});
-
 });
