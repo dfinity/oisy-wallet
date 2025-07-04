@@ -914,7 +914,7 @@
 				"import_token": "Token importieren",
 				"network": "Netzwerk",
 				"all_tokens_zero_balance": "Alle Token haben Nullsaldo.",
-				"enable_more_assets": "Mehr Token aktivieren"
+				"enable_more_assets": "Weitere Token aktivieren"
 			},
 			"placeholder": {
 				"select_network": "Netzwerk auswählen"

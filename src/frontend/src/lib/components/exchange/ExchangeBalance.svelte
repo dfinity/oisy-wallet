@@ -23,7 +23,7 @@
 	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi));
 </script>
 
-<span class="flex flex-col items-center gap-4">
+<span class="flex flex-col items-center gap-1">
 	<output class="mt-7 inline-block break-all text-5xl font-bold">
 		{#if $loaded}
 			{#if hideBalance}
@@ -48,7 +48,7 @@
 		ondblclick={() =>
 			setPrivacyMode({
 				enabled: !$isPrivacyMode,
-				withToast: true,
+				withToast: false,
 				source: 'Double click on the ExchangeBalance'
 			})}
 	>

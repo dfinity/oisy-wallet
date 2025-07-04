@@ -24,7 +24,7 @@
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
-<span class="flex flex-col gap-2">
+<span class="flex flex-col gap-1">
 	<output
 		data-tid={AMOUNT_DATA}
 		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
@@ -54,11 +54,11 @@
 			transparent
 			fullWidth
 			ariaLabel="Set privacy mode on and off"
-			styleClass="bg-transparent p-0 text-xl font-bold"
+			styleClass="bg-transparent p-0 text-xl font-medium"
 			ondblclick={() =>
 				setPrivacyMode({
 					enabled: !$isPrivacyMode,
-					withToast: true,
+					withToast: false,
 					source: 'Double click on the Balance'
 				})}
 		>
