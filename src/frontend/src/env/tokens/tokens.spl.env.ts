@@ -1,11 +1,21 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
+import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
+import { CRCLX_TOKEN } from '$env/tokens/tokens-spl/tokens.crclx.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
+import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
+import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
+import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
+import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
+import { TSLAX_TOKEN } from '$env/tokens/tokens-spl/tokens.tslax.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
@@ -13,13 +23,26 @@ import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
+	AAPLX_TOKEN,
+	// TODO: temporarily disable these 2 tokens, because we don't have a price for them yet. We can enable them once they get traded and habe a price.
+	// ABBVX_TOKEN,
+	// ABTX_TOKEN,
 	BONK_TOKEN,
+	COINX_TOKEN,
+	CRCLX_TOKEN,
 	EURC_TOKEN,
+	GOOGLX_TOKEN,
 	JUP_TOKEN,
+	METAX_TOKEN,
+	MSTRX_TOKEN,
+	NVDAX_TOKEN,
 	ORCA_TOKEN,
 	POPCAT_TOKEN,
+	QQQX_TOKEN,
 	RAY_TOKEN,
+	SPYX_TOKEN,
 	TRUMP_TOKEN,
+	TSLAX_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN,
 	WSOL_TOKEN

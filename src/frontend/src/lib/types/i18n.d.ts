@@ -304,7 +304,13 @@ interface I18nRewards {
 }
 
 interface I18nFooter {
-	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
+	text: {
+		incubated_with: string;
+		by: string;
+		dfinity_foundation: string;
+		copyright: string;
+		ai_assistant_console_button: string;
+	};
 	alt: { dfinity: string };
 }
 
@@ -360,7 +366,7 @@ interface I18nInit {
 		transaction_price: string;
 		icrc_canisters: string;
 		erc20_user_tokens: string;
-		spl_user_tokens: string;
+		spl_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;

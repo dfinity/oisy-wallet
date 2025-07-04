@@ -3,6 +3,7 @@ import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
 import { authSignedIn } from '$lib/derived/auth.derived';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
+import zhcn from '$lib/i18n/zh-CN.json';
 import { trackEvent } from '$lib/services/analytics.services';
 import { Languages } from '$lib/types/languages';
 import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
@@ -19,28 +20,34 @@ const deI18n = (): I18n => ({
 	lang: Languages.GERMAN
 });
 
-const loadLang = (lang: Languages): Promise<I18n> => {
+const zhcnI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: zhcn as I18n }),
+	lang: Languages.CHINESE_SIMPLIFIED
+});
+
+const loadLang = (lang: Languages): I18n => {
 	switch (lang) {
+		case Languages.CHINESE_SIMPLIFIED:
+			return zhcnI18n();
 		case Languages.GERMAN:
-			return Promise.resolve(deI18n());
+			return deI18n();
 		default:
-			return Promise.resolve(enI18n());
+			return enI18n();
 	}
 };
 
 const saveLang = (lang: Languages) => set({ key: 'lang', value: lang });
 
 export interface I18nStore extends Readable<I18n> {
-	init: () => Promise<void>;
-	switchLang: (lang: Languages) => Promise<void>;
+	init: () => void;
+	switchLang: (lang: Languages) => void;
 }
 
 const initI18n = (): I18nStore => {
-	const { subscribe, set } = writable<I18n>(enI18n());
+	const { subscribe, set } = writable<I18n>(I18N_ENABLED ? loadLang(getDefaultLang()) : enI18n());
 
-	const switchLang = async (lang: Languages) => {
-		const bundle = await loadLang(lang);
-		set(bundle);
+	const switchLang = (lang: Languages) => {
+		set(loadLang(lang));
 
 		trackEvent({
 			name: TRACK_CHANGE_LANGUAGE,
@@ -56,18 +63,18 @@ const initI18n = (): I18nStore => {
 	return {
 		subscribe,
 
-		init: async () => {
+		init: () => {
 			const lang = I18N_ENABLED
 				? (get<Languages>({ key: 'lang' }) ?? getDefaultLang())
 				: Languages.ENGLISH;
 
 			if (lang === getDefaultLang()) {
 				saveLang(lang);
-				// No need to reload the store, English is already the default
+				// No need to reload the store, store is already initialised with the default
 				return;
 			}
 
-			await switchLang(lang);
+			switchLang(lang);
 		},
 
 		switchLang
