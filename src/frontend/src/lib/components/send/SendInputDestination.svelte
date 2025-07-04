@@ -49,13 +49,9 @@
 
 	const convertContext = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	const sendTokenNetworkId = $derived(
-		nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined
-	);
+	const sendTokenNetworkId = nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined;
 
-	const destinationToken = $derived(
-		nonNullish(convertContext) ? convertContext.destinationToken : undefined
-	);
+	const destinationToken = nonNullish(convertContext) ? convertContext.destinationToken : undefined;
 
 	let destinationNetworkId: NetworkId | undefined = $derived(
 		nonNullish(sendTokenNetworkId)
