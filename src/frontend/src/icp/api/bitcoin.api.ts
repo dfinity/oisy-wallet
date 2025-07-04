@@ -1,5 +1,4 @@
 import { getAgent } from '$lib/actors/agents.ic';
-import { BitcoinDirectCanister } from '$lib/canisters/bitcoin.canister';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
@@ -15,8 +14,6 @@ interface BitcoinCanisterParams {
 	minConfirmations?: number;
 }
 
-let directCanister: BitcoinDirectCanister | undefined = undefined;
-
 export const getUtxosQuery = async ({
 	identity,
 	bitcoinCanisterId,
@@ -26,19 +23,12 @@ export const getUtxosQuery = async ({
 }: BitcoinCanisterParams): Promise<get_utxos_response> => {
 	assertNonNullish(identity);
 
-	// Workaround: The BitcoinCanister.getUtxosQuery() method from @dfinity/ckbtc
-	// maps 'regtest' network to 'mainnet' in its toGetUtxosParams() function.
-	// Use custom bitcoinDirectCanister for regtest to preserve correct network mapping,
-	// otherwise use the standard bitcoinCanister for mainnet/testnet.
-	const { getUtxosQuery } =
-		network === 'regtest'
-			? await bitcoinDirectCanister({ identity, bitcoinCanisterId })
-			: await bitcoinCanister({ identity, bitcoinCanisterId });
+	const { getUtxosQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
 
 	return getUtxosQuery({
 		address,
 		network,
-		...(isNullish(minConfirmations) ? {} : { filter: { minConfirmations } })
+		...(!isNullish(minConfirmations) && { filter: { minConfirmations } })
 	});
 };
 
@@ -60,25 +50,6 @@ export const getBalanceQuery = async ({
 		network,
 		minConfirmations
 	});
-};
-
-const bitcoinDirectCanister = async ({
-	identity,
-	bitcoinCanisterId
-}: {
-	identity: Identity;
-	bitcoinCanisterId: CanisterIdText;
-}): Promise<BitcoinDirectCanister> => {
-	assertNonNullish(identity);
-
-	if (isNullish(directCanister)) {
-		directCanister = await BitcoinDirectCanister.create({
-			identity,
-			canisterId: Principal.fromText(bitcoinCanisterId)
-		});
-	}
-
-	return directCanister;
 };
 
 const bitcoinCanister = async ({
