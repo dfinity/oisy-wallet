@@ -151,7 +151,7 @@ describe('sol-send.services', () => {
 			vi.mocked(createRecentSignatureConfirmationPromiseFactory).mockReturnValue(() =>
 				Promise.resolve()
 			);
-			vi.mocked(waitForRecentTransactionConfirmation).mockReturnValue(() => Promise.resolve());
+			vi.mocked(waitForRecentTransactionConfirmation).mockResolvedValue();
 			vi.mocked(getComputeUnitEstimateForTransactionMessageFactory).mockReturnValue(() =>
 				Promise.resolve(123)
 			);
