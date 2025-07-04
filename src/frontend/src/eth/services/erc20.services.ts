@@ -289,7 +289,6 @@ const loadCustomTokensWithMetadata = async (
 				address
 			} = token;
 
-			// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
 			const metadata = await safeLoadMetadata({ networkId, address });
 
 			return nonNullish(metadata)
