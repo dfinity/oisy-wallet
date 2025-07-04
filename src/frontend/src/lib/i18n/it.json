@@ -645,6 +645,7 @@
 			"sending": "",
 			"signing": "",
 			"signing_message": "",
+			"confirming": "",
 			"network": "",
 			"source_network": "",
 			"destination_network": "",

@@ -73,6 +73,7 @@ export enum ProgressStepsSendSol {
 	INITIALIZATION = 'initialization',
 	SIGN = 'sign',
 	SEND = 'send',
+	CONFIRM = 'confirm',
 	RELOAD = 'reload',
 	DONE = 'done'
 }

@@ -645,6 +645,7 @@
 			"sending": "发送中...",
 			"signing": "签署中...",
 			"signing_message": "正在签署消息...",
+			"confirming": "",
 			"network": "网络",
 			"source_network": "来源网络",
 			"destination_network": "目标网络",

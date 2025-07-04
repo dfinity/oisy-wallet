@@ -20,7 +20,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
-import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import {
 	sendSignedTransaction,
 	setLifetimeAndFeePayerToTransaction
@@ -211,11 +211,7 @@ export const sign = ({
 					// Even if some DEXs send an only-sign transaction, they do not send it when we return it.
 					// So, for good measure, we will send it anyway. It is not an issue if it is sent twice, since only one will pass.
 					// Plus, if it requires more signatures on the DEX's side, it will be sent again by them and it will fail with us.
-					sendSignedTransaction({
-						rpc,
-						rpcSubscriptions: solanaWebSocketRpc(solNetwork),
-						signedTransaction
-					});
+					sendSignedTransaction({ rpc, signedTransaction });
 				} catch (err: unknown) {
 					// If the transaction requires that we send it, and it fails, we reject the request, otherwise we just log the error
 					if (method !== SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION) {

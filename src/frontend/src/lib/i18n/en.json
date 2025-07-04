@@ -645,6 +645,7 @@
 			"sending": "Sending...",
 			"signing": "Signing...",
 			"signing_message": "Signing message...",
+			"confirming": "Confirming...",
 			"network": "Network",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
