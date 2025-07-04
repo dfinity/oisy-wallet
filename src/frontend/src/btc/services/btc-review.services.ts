@@ -7,11 +7,12 @@ import {
 } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
-import { getPendingTransactionIds, mapToBitcoinNetwork } from '$icp/utils/btc.utils';
+import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { assertArrayNotEmpty, assertStringNotEmpty } from '$lib/utils/asserts';
+import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -116,7 +117,7 @@ export const getFeeRateFromPercentiles = async ({
 	network: BitcoinNetwork;
 }): Promise<bigint> => {
 	// Convert network type to bitcoin canister format
-	const bitcoinNetwork = mapToBitcoinNetwork({ network });
+	const bitcoinNetwork = mapToSignerBitcoinNetwork({ network });
 
 	const response = await getCurrentBtcFeePercentiles({
 		identity,
