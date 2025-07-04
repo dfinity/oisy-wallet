@@ -60,6 +60,12 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 		}
 	};
 
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopCkBTCUpdateBalanceTimer'
+		});
+	};
+
 	return {
 		start: () => {
 			// We can imperatively get the address because the worker fetches it, and we only provide it to reduce the number of calls. By doing so, we can adhere to our standard component abstraction for interacting with workers.
@@ -74,14 +80,14 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 				}
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopCkBTCUpdateBalanceTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			// Do nothing, we do not restart the ckBtc update balance worker for any particular events.
-			// When user execute it manually on the UI side, we display a progression in a modal therefore we do not have to execute it in the background.
+			// When a user executes it manually on the UI side, we display a progression in a modal therefore we do not have to execute it in the background.
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };
