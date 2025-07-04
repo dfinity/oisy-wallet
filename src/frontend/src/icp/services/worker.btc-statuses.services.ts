@@ -37,6 +37,12 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 		}
 	};
 
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopBtcStatusesTimer'
+		});
+	};
+
 	return {
 		start: () => {
 			worker.postMessage({
@@ -46,11 +52,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 				}
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopBtcStatusesTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerBtcStatusesTimer',
@@ -58,6 +60,10 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 					minterCanisterId
 				}
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };
