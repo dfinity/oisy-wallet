@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
+	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
@@ -17,7 +18,6 @@
 	import { getNetworkContact } from '$lib/utils/contacts.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
-	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 
 	interface Props {
 		destination: string;
