@@ -7,7 +7,9 @@ use serde::{de, Deserializer};
 use crate::{
     types::{
         backend_config::{Config, InitArg},
-        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
+        contact::{
+            Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
+        },
         custom_token::{
             CustomToken, CustomTokenId, Erc20Token, Erc20TokenId, IcrcToken, SplToken, SplTokenId,
             Token,
@@ -561,6 +563,17 @@ impl Validate for ContactAddressData {
     }
 }
 
+impl Validate for ContactImage {
+    fn validate(&self) -> Result<(), Error> {
+        // For now, we don't have specific validation rules for ContactImage
+        // In the future, we might want to validate:
+        // - Image size limits
+        // - MIME type consistency with the actual data
+        // - Image dimensions
+        Ok(())
+    }
+}
+
 impl Validate for CreateContactRequest {
     fn validate(&self) -> Result<(), Error> {
         // Validate that string length is not greater than the max allowed
@@ -608,10 +621,8 @@ impl Validate for UpdateContactRequest {
 }
 
 // Apply the validation during deserialization for all types
-validate_on_deserialize!(Contact);
-validate_on_deserialize!(ContactAddressData);
-validate_on_deserialize!(CreateContactRequest);
-validate_on_deserialize!(UpdateContactRequest);
+// Note: Types with #[serde(remote = "Self")] and #[derive(Deserialize)] don't use
+// validate_on_deserialize because they handle deserialization differently
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
@@ -620,3 +631,24 @@ validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(Erc20Token);
 validate_on_deserialize!(Erc20TokenId);
 validate_on_deserialize!(UserToken);
+
+// Validation function for contacts with images count
+///
+/// # Errors
+///
+/// Returns an error if the actual count of contacts with images doesn't match the expected count
+pub fn validate_contacts_with_images_count(
+    contacts: &std::collections::BTreeMap<u64, Contact>,
+    expected_count: usize,
+) -> Result<(), Error> {
+    let actual_count = contacts
+        .values()
+        .filter(|contact| contact.image.is_some())
+        .count();
+    if actual_count != expected_count {
+        return Err(Error::msg(format!(
+            "Contacts with images count mismatch: expected {expected_count}, got {actual_count}"
+        )));
+    }
+    Ok(())
+}
