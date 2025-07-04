@@ -644,6 +644,7 @@
 			"sending": "Sende...",
 			"signing": "Signiere...",
 			"signing_message": "Nachricht wird signiert...",
+			"confirming": "",
 			"network": "Netzwerk",
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",

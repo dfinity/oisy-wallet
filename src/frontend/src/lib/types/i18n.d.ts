@@ -520,6 +520,7 @@ interface I18nSend {
 		sending: string;
 		signing: string;
 		signing_message: string;
+		confirming: string;
 		network: string;
 		source_network: string;
 		destination_network: string;
