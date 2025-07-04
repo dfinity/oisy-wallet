@@ -1,6 +1,11 @@
-import type { UtxoSelectionResult } from '$btc/types/btc-review.services';
 import type { Utxo } from '@dfinity/ckbtc';
 import { uint8ArrayToHexString } from '@dfinity/utils';
+
+export interface UtxoSelectionResult {
+	selectedUtxos: Utxo[];
+	totalInputValue: bigint;
+	changeAmount: bigint;
+}
 
 /**
  * Converts a UTXO transaction ID (Uint8Array) to a hex string

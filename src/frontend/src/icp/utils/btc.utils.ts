@@ -1,8 +1,6 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
-import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { isNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -21,35 +19,30 @@ export const getPendingTransactionIds = (address: string): string[] => {
 	const storeData = get(btcPendingSentTransactionsStore);
 	const pendingTransactions = storeData[address];
 
-	if (isNullish(pendingTransactions) || !pendingTransactions.data) {
+	if (isNullish(pendingTransactions?.data)) {
 		return [];
 	}
 
-	// Extract transaction IDs from pending transactions
-	// txid is always Vec<u8> from backend, which becomes number[] in TypeScript
-	return pendingTransactions.data
-		.map((tx: PendingTransaction) => {
-			// Handle Uint8Array case (txid: Uint8Array )
-			if (tx.txid instanceof Uint8Array) {
-				return Array.from(tx.txid)
-					.map((b: number) => b.toString(16).padStart(2, '0'))
-					.join('');
-			}
+	// Use reduce to map and filter in a single pass
+	return pendingTransactions.data.reduce((acc: string[], tx: PendingTransaction) => {
+		let txidString: string;
 
-			// Handle number array case (txid: number[])
-			if (Array.isArray(tx.txid)) {
-				return tx.txid.map((b: number) => b.toString(16).padStart(2, '0')).join('');
-			}
+		// Handle Uint8Array case (txid: Uint8Array )
+		if (tx.txid instanceof Uint8Array) {
+			txidString = Array.from(tx.txid)
+				.map((b: number) => b.toString(16).padStart(2, '0'))
+				.join('');
+		}
+		// Handle number array case (txid: number[])
+		else if (Array.isArray(tx.txid)) {
+			txidString = tx.txid.map((b: number) => b.toString(16).padStart(2, '0')).join('');
+		}
+		// Fallback, convert to string representation
+		else {
+			txidString = String(tx.txid);
+		}
 
-			// Fallback, convert to string representation
-			return String(tx.txid);
-		})
-		.filter(Boolean);
+		// Add to accumulator only if truthy (combines map + filter(Boolean))
+		return notEmptyString(txidString) ? [...acc, txidString] : acc;
+	}, []);
 };
-
-export const mapToBitcoinNetwork = ({
-	network
-}: {
-	network: BitcoinNetwork;
-}): SignerBitcoinNetwork =>
-	({ mainnet: { mainnet: null }, testnet: { testnet: null }, regtest: { regtest: null } })[network];

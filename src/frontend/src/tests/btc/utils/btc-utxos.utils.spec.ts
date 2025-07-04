@@ -1,4 +1,3 @@
-import type { UtxoSelectionResult } from '$btc/types/btc-review.services';
 import {
 	calculateFinalFee,
 	calculateUtxoSelection,
@@ -6,7 +5,8 @@ import {
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
-	utxoTxIdToString
+	utxoTxIdToString,
+	type UtxoSelectionResult
 } from '$btc/utils/btc-utxos.utils';
 import type { Utxo } from '@dfinity/ckbtc';
 import { describe, expect, it } from 'vitest';
