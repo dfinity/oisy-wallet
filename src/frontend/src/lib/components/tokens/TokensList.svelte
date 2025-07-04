@@ -16,6 +16,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -28,7 +29,6 @@
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
-	import { allTokens } from '$lib/derived/all-tokens.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 

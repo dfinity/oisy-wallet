@@ -114,6 +114,7 @@ describe('token-list.utils', () => {
 				modifiedTokens: {},
 				selectedNetwork: dummyNetwork
 			});
+
 			expect(result).toEqual([]);
 		});
 
