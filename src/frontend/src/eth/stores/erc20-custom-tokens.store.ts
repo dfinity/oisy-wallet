@@ -1,5 +1,5 @@
+import type { Erc20Token } from '$eth/types/erc20';
 import { initCertifiedUserTokensStore } from '$lib/stores/user-tokens.store';
-import type { SplToken } from '$sol/types/spl';
 
 // TODO: UserToken is deprecated - rename this store initCertifiedUserTokensStore
-export const splCustomTokensStore = initCertifiedUserTokensStore<SplToken>();
+export const erc20CustomTokensStore = initCertifiedUserTokensStore<Erc20Token>();
