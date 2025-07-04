@@ -28,7 +28,7 @@ export const getUtxosQuery = async ({
 	return getUtxosQuery({
 		address,
 		network,
-		...(isNullish(minConfirmations) ? {} : { filter: { minConfirmations } })
+		...(!isNullish(minConfirmations) && { filter: { minConfirmations } })
 	});
 };
 
