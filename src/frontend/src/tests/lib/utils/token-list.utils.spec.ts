@@ -14,7 +14,7 @@ import {
 	getFilteredTokenGroup,
 	getFilteredTokenList
 } from '$lib/utils/token-list.utils';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, type Mock } from 'vitest';
 
 // Mock data for tokens
 const token1: TokenUi = BTC_MAINNET_TOKEN;
@@ -123,7 +123,7 @@ describe('token-list.utils', () => {
 				enabled: false
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as any).mockReturnValue(true);
+			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -140,7 +140,7 @@ describe('token-list.utils', () => {
 				enabled: false
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as any).mockReturnValue(false);
+			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(false);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -159,7 +159,7 @@ describe('token-list.utils', () => {
 				enabled: true
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as any).mockReturnValue(true);
+			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -176,7 +176,7 @@ describe('token-list.utils', () => {
 				enabled: true
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as any).mockReturnValue(true);
+			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -193,7 +193,7 @@ describe('token-list.utils', () => {
 				enabled: false
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as any).mockReturnValue(true);
+			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -226,7 +226,7 @@ describe('token-list.utils', () => {
 				} as unknown as TokenToggleable<Token>
 			];
 
-			(showTokenFilteredBySelectedNetwork as any).mockReturnValue(true);
+			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
 
 			const modifiedTokens = {
 				'net-1-b': tokens[1] as Token
@@ -246,7 +246,7 @@ describe('token-list.utils', () => {
 
 		it('gracefully handles null/undefined $allTokens', () => {
 			const result = getDisabledOrModifiedTokens({
-				$allTokens: null as any,
+				$allTokens: null as unknown as TokenToggleable<Token>[],
 				modifiedTokens: {},
 				selectedNetwork: dummyNetwork
 			});
