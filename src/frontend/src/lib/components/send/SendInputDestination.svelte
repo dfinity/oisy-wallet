@@ -18,14 +18,27 @@
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
 
-	export let destination = '';
-	export let networkId: NetworkId | undefined = undefined;
-	export let invalidDestination = false;
-	export let inputPlaceholder: string;
-	export let isInvalidDestination: (() => boolean) | undefined;
-	export let onQRButtonClick: (() => void) | undefined = undefined;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
-	export let networkContacts: NetworkContacts | undefined = undefined;
+	interface Props {
+		destination: string;
+		networkId?: NetworkId;
+		invalidDestination: boolean;
+		inputPlaceholder: string;
+		isInvalidDestination?: () => boolean;
+		onQRButtonClick?: () => void;
+		knownDestinations?: KnownDestinations;
+		networkContacts?: NetworkContacts;
+	}
+
+	let {
+		destination = $bindable(''),
+		networkId,
+		invalidDestination = $bindable(false),
+		inputPlaceholder,
+		isInvalidDestination,
+		onQRButtonClick,
+		knownDestinations,
+		networkContacts
+	}: Props = $props();
 
 	const validate = () => (invalidDestination = isInvalidDestination?.() ?? false);
 
@@ -35,50 +48,60 @@
 
 	const convertContext = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	const sendTokenNetworkId = nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined;
+	const sendTokenNetworkId = $derived(
+		nonNullish(sendContext) ? sendContext.sendTokenNetworkId : undefined
+	);
 
-	const destinationToken = nonNullish(convertContext) ? convertContext.destinationToken : undefined;
+	const destinationToken = $derived(
+		nonNullish(convertContext) ? convertContext.destinationToken : undefined
+	);
 
-	let destinationNetworkId: NetworkId | undefined;
-	$: destinationNetworkId = nonNullish(sendTokenNetworkId)
-		? $sendTokenNetworkId
-		: nonNullish(destinationToken)
-			? $destinationToken?.network.id
-			: undefined;
+	let destinationNetworkId: NetworkId | undefined = $derived(
+		nonNullish(sendTokenNetworkId)
+			? $sendTokenNetworkId
+			: nonNullish(destinationToken)
+				? $destinationToken?.network.id
+				: undefined
+	);
 
-	let focused: boolean;
+	let focused: boolean = $state(false);
 	const onFocus = () => (focused = true);
 	const onBlur = () => (focused = false);
 
-	$: destination, networkId, isInvalidDestination, debounceValidate();
+	$effect(() => {
+		destination;
+		networkId;
+		isInvalidDestination;
+		debounceValidate();
+	});
 
-	let isErrorState = false;
-	$: isErrorState =
-		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
+	let isErrorState = $derived(
+		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
+	);
 
-	let isNotKnownDestination = false;
-	$: isNotKnownDestination =
+	let isNotKnownDestination = $derived(
 		nonNullish(knownDestinations) &&
-		nonNullish(destinationNetworkId) &&
-		isNullish(
-			getKnownDestination({
-				knownDestinations,
-				address: destination,
-				networkId: destinationNetworkId
-			})
-		);
+			nonNullish(destinationNetworkId) &&
+			isNullish(
+				getKnownDestination({
+					knownDestinations,
+					address: destination,
+					networkId: destinationNetworkId
+				})
+			)
+	);
 
-	let isNotNetworkContact = false;
-	$: isNotNetworkContact =
+	let isNotNetworkContact = $derived(
 		nonNullish(networkContacts) &&
-		nonNullish(destinationNetworkId) &&
-		isNullish(
-			getNetworkContact({
-				networkContacts,
-				address: destination,
-				networkId: destinationNetworkId
-			})
-		);
+			nonNullish(destinationNetworkId) &&
+			isNullish(
+				getNetworkContact({
+					networkContacts,
+					address: destination,
+					networkId: destinationNetworkId
+				})
+			)
+	);
 </script>
 
 <div
@@ -104,9 +127,11 @@
 			on:nnsInput
 		>
 			{#snippet innerEnd()}
-				{#if nonNullish(onQRButtonClick)}
-					<QrButton on:click={onQRButtonClick} />
-				{/if}
+				<span class="flex">
+					{#if nonNullish(onQRButtonClick)}
+						<QrButton on:click={onQRButtonClick} />
+					{/if}
+				</span>
 			{/snippet}
 		</InputTextWithAction>
 
