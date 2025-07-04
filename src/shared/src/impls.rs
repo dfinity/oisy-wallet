@@ -543,6 +543,9 @@ impl Validate for Contact {
         // Validate name length
         validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
 
+        // Add this line to validate the name
+        validate_string_whitespace_padding(&self.name, "Contact.name")?;
+
         // Validate number of addresses
         validate_collection_size(&self.addresses, CONTACT_MAX_ADDRESSES, "Contact.addresses")?;
 
