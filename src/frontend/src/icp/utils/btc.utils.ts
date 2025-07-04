@@ -43,6 +43,6 @@ export const getPendingTransactionIds = (address: string): string[] => {
 		}
 
 		// Add to accumulator only if truthy (combines map + filter(Boolean))
-		return txidString ? [...acc, txidString] : acc;
+		return notEmptyString(txidString) ? [...acc, txidString] : acc;
 	}, []);
 };
