@@ -24,12 +24,17 @@ import {
 	appendTransactionMessageInstructions,
 	getComputeUnitEstimateForTransactionMessageFactory,
 	pipe,
-	sendAndConfirmTransactionFactory,
+	sendTransactionWithoutConfirmingFactory,
 	type Rpc,
 	type RpcSubscriptions,
 	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi
 } from '@solana/kit';
+import {
+	createBlockHeightExceedencePromiseFactory,
+	createRecentSignatureConfirmationPromiseFactory,
+	waitForRecentTransactionConfirmation
+} from '@solana/transaction-confirmation';
 import type { MockInstance } from 'vitest';
 
 vi.mock(import('@solana/kit'), async (importOriginal) => {
@@ -44,11 +49,21 @@ vi.mock(import('@solana/kit'), async (importOriginal) => {
 		getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
 		getSignatureFromTransaction: vi.fn(),
 		prependTransactionMessageInstruction: vi.fn(),
-		sendAndConfirmTransactionFactory: vi.fn(),
+		sendTransactionWithoutConfirmingFactory: vi.fn(),
 		setTransactionMessageFeePayer: vi.fn((message) => message),
 		setTransactionMessageFeePayerSigner: vi.fn((message) => message),
 		setTransactionMessageLifetimeUsingBlockhash: vi.fn((message) => message),
 		signTransactionMessageWithSigners: vi.fn()
+	};
+});
+
+vi.mock(import('@solana/transaction-confirmation'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		createBlockHeightExceedencePromiseFactory: vi.fn(),
+		createRecentSignatureConfirmationPromiseFactory: vi.fn(),
+		waitForRecentTransactionConfirmation: vi.fn()
 	};
 });
 
@@ -131,7 +146,12 @@ describe('sol-send.services', () => {
 			vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			vi.mocked(solanaWebSocketRpc).mockReturnValue(mockRpcSubscriptions);
 			vi.mocked(signWithSchnorr).mockResolvedValue(new Uint8Array([0, 1, 2, 3]));
-			vi.mocked(sendAndConfirmTransactionFactory).mockReturnValue(() => Promise.resolve());
+			vi.mocked(sendTransactionWithoutConfirmingFactory).mockReturnValue(() => Promise.resolve());
+			vi.mocked(createBlockHeightExceedencePromiseFactory).mockReturnValue(() => Promise.resolve());
+			vi.mocked(createRecentSignatureConfirmationPromiseFactory).mockReturnValue(() =>
+				Promise.resolve()
+			);
+			vi.mocked(waitForRecentTransactionConfirmation).mockResolvedValue();
 			vi.mocked(getComputeUnitEstimateForTransactionMessageFactory).mockReturnValue(() =>
 				Promise.resolve(123)
 			);
