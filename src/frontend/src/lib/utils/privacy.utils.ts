@@ -7,17 +7,18 @@ import { get } from 'svelte/store';
 
 interface SetPrivacyModeOptions {
 	enabled: boolean;
-	withToast?: boolean;
 	source?: string;
+	withToast?: boolean;
 }
 
-export const setPrivacyMode = ({ enabled, withToast = false }: SetPrivacyModeOptions): void => {
+export const setPrivacyMode = ({ enabled, withToast = false, source }: SetPrivacyModeOptions): void => {
 	trackEvent({
 		name: TRACK_PRIVACY_MODE_CHANGE,
 		metadata: {
 			enabled: String(enabled),
-			source: withToast ? 'with-toast' : 'no-toast'
-		}
+			source: `${source}`,
+			withToast: withToast ? 'With toast message' : 'Without toast message',
+		},
 	});
 
 	privacyModeStore.set({
