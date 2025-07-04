@@ -155,7 +155,7 @@ describe('token-list.utils', () => {
 			const token = {
 				...ICP_TOKEN,
 				id: { description: '2' },
-				network: { id: { description: 'net-1' } },
+				network: dummyNetwork,
 				enabled: true
 			} as unknown as TokenToggleable<Token>;
 
@@ -209,19 +209,19 @@ describe('token-list.utils', () => {
 				{
 					...ICP_TOKEN,
 					id: { description: 'a' },
-					network: { id: { description: 'net-1' } },
+					network: dummyNetwork,
 					enabled: false
 				} as unknown as TokenToggleable<Token>,
 				{
 					...ICP_TOKEN,
 					id: { description: 'b' },
-					network: { id: { description: 'net-1' } },
+					network: dummyNetwork,
 					enabled: true
 				} as unknown as TokenToggleable<Token>,
 				{
 					...ICP_TOKEN,
 					id: { description: 'c' },
-					network: { id: { description: 'net-1' } },
+					network: dummyNetwork,
 					enabled: true
 				} as unknown as TokenToggleable<Token>
 			];
