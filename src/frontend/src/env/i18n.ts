@@ -7,6 +7,7 @@ export const SUPPORTED_LANGUAGES = Object.entries(Languages);
 export const LANGUAGES = {
 	[Languages.ENGLISH]: 'English',
 	[Languages.GERMAN]: 'Deutsch',
+	[Languages.PORTUGUESE]: 'Português',
 	[Languages.CHINESE_SIMPLIFIED]: '中文 (简体)'
 };
 
