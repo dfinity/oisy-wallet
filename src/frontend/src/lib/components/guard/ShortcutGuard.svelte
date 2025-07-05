@@ -19,7 +19,7 @@
 				setPrivacyMode({
 					enabled: !$isPrivacyMode,
 					withToast: true,
-					source: 'Pressing P shortcode'
+					source: 'Keypress P'
 				});
 			}
 		}

@@ -59,7 +59,7 @@
 				setPrivacyMode({
 					enabled: !$isPrivacyMode,
 					withToast: false,
-					source: 'Double click on the Balance'
+					source: 'Hero - Double click on the Balance'
 				})}
 		>
 			{#if !$isPrivacyMode}
