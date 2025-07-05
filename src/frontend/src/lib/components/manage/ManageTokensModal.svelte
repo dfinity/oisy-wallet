@@ -172,6 +172,7 @@
 			identity: $authIdentity
 		});
 
+	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 	const saveErc20Deprecated = (tokens: SaveUserToken[]): Promise<void> =>
 		saveErc20UserTokens({
 			tokens,
