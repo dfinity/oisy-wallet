@@ -23,7 +23,6 @@ import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20'
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
-import { mapErc20CustomToken, mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { mapErc20Icon, mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
 import {
@@ -185,7 +184,6 @@ const loadNetworkUserTokens = async ({
 	});
 };
 
-
 const loadErc20CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
 		...params,
@@ -198,7 +196,7 @@ const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<Erc20CustomToken[]> => {
 	const loadCustomContracts = async (): Promise<Erc20CustomToken[]> => {
-		const erc20CustomTokens = await loadErc20CustomTokens(params)
+		const erc20CustomTokens = await loadErc20CustomTokens(params);
 
 		const [existingTokens, nonExistingTokens] = erc20CustomTokens.reduce<
 			[Erc20CustomToken[], Erc20CustomToken[]]
@@ -264,7 +262,6 @@ const loadCustomTokensWithMetadata = async (
 			[[], []]
 		);
 
-
 		const safeLoadMetadata = async ({
 			networkId,
 			address
@@ -301,7 +298,6 @@ const loadCustomTokensWithMetadata = async (
 
 		return [...existingTokens, ...customTokens];
 	};
-
 
 	return await loadCustomContracts();
 };
