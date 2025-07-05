@@ -29,7 +29,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{Contact, CreateContactRequest, UpdateContactRequest},
+        contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -934,14 +934,7 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    let contact = Contact {
-        id: request.id,
-        name: request.name,
-        addresses: request.addresses,
-        update_timestamp_ns: request.update_timestamp_ns,
-    };
-
-    let result = contacts::update_contact(contact);
+    let result = contacts::update_contact(request);
     result.into()
 }
 

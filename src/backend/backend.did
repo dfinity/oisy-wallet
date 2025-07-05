@@ -131,7 +131,8 @@ type Contact = record {
 	id : nat64;
 	name : text;
 	update_timestamp_ns : nat64;
-	addresses : vec ContactAddressData
+	addresses : vec ContactAddressData;
+	image : opt ContactImage
 };
 type ContactAddressData = record {
 	label : opt text;
@@ -139,9 +140,14 @@ type ContactAddressData = record {
 };
 type ContactError = variant {
 	InvalidContactData;
+	CanisterMemoryNearCapacity;
 	ContactNotFound;
-	RandomnessError
+	ImageTooLarge;
+	RandomnessError;
+	CanisterStatusError;
+	TooManyContactsWithImages
 };
+type ContactImage = record { data : blob; mime_type : ImageMimeType };
 type CreateChallengeError = variant {
 	ChallengeInProgress;
 	MissingUserProfile;
@@ -153,7 +159,7 @@ type CreateChallengeResponse = record {
 	start_timestamp_ms : nat64;
 	expiry_timestamp_ms : nat64
 };
-type CreateContactRequest = record { name : text };
+type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
 type CreatePowChallengeResult = variant {
 	Ok : CreateChallengeResponse;
@@ -218,6 +224,12 @@ type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type Icrcv2AccountId = variant {
 	Account : blob;
 	WithPrincipal : record { owner : principal; subaccount : opt blob }
+};
+type ImageMimeType = variant {
+	"image/gif";
+	"image/png";
+	"image/jpeg";
+	"image/webp"
 };
 type InitArg = record {
 	derivation_origin : opt text;
