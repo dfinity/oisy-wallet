@@ -1102,6 +1102,15 @@
 			"safe": "",
 			"unconfirmed": ""
 		},
+		"type": {
+			"send": "",
+			"receive": "",
+			"withdraw": "",
+			"deposit": "",
+			"approve": "",
+			"burn": "",
+			"mint": ""
+		},
 		"label": {
 			"reimbursement": "",
 			"twin_token_sent": "",
