@@ -32,7 +32,7 @@ import {
 	lamports,
 	pipe,
 	prependTransactionMessageInstruction,
-	sendAndConfirmTransactionFactory,
+	sendTransactionWithoutConfirmingFactory,
 	setTransactionMessageFeePayerSigner,
 	setTransactionMessageLifetimeUsingBlockhash,
 	address as solAddress,
@@ -48,6 +48,11 @@ import {
 	type TransactionSigner,
 	type TransactionVersion
 } from '@solana/kit';
+import {
+	createBlockHeightExceedencePromiseFactory,
+	createRecentSignatureConfirmationPromiseFactory,
+	waitForRecentTransactionConfirmation
+} from '@solana/transaction-confirmation';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
@@ -213,6 +218,22 @@ const createSplTokenTransactionMessage = async ({
 
 export const sendSignedTransaction = async ({
 	rpc,
+	signedTransaction,
+	commitment = 'confirmed'
+}: {
+	rpc: Rpc<SolanaRpcApi>;
+	signedTransaction: SolSignedTransaction;
+	commitment?: Commitment;
+}) => {
+	assertTransactionIsFullySigned(signedTransaction);
+
+	const sendTransaction = sendTransactionWithoutConfirmingFactory({ rpc });
+
+	await sendTransaction(signedTransaction, { commitment });
+};
+
+export const confirmSignedTransaction = async ({
+	rpc,
 	rpcSubscriptions,
 	signedTransaction,
 	commitment = 'confirmed'
@@ -224,9 +245,22 @@ export const sendSignedTransaction = async ({
 }) => {
 	assertTransactionIsFullySigned(signedTransaction);
 
-	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+	const getBlockHeightExceedencePromise = createBlockHeightExceedencePromiseFactory({
+		rpc,
+		rpcSubscriptions
+	});
 
-	await sendAndConfirmTransaction(signedTransaction, { commitment });
+	const getRecentSignatureConfirmationPromise = createRecentSignatureConfirmationPromiseFactory({
+		rpc,
+		rpcSubscriptions
+	});
+
+	return await waitForRecentTransactionConfirmation({
+		transaction: signedTransaction,
+		commitment,
+		getBlockHeightExceedencePromise,
+		getRecentSignatureConfirmationPromise
+	});
 };
 
 /**
@@ -317,6 +351,13 @@ export const sendSol = async ({
 	progress(ProgressStepsSendSol.SEND);
 
 	await sendSignedTransaction({
+		rpc,
+		signedTransaction
+	});
+
+	progress(ProgressStepsSendSol.CONFIRM);
+
+	await confirmSignedTransaction({
 		rpc,
 		rpcSubscriptions,
 		signedTransaction
