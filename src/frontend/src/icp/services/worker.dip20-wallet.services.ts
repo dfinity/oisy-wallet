@@ -54,6 +54,12 @@ export const initDip20WalletWorker = async ({
 		}
 	};
 
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopDip20WalletTimer'
+		});
+	};
+
 	return {
 		start: () => {
 			worker.postMessage({
@@ -64,11 +70,7 @@ export const initDip20WalletWorker = async ({
 				}
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopDip20WalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerDip20WalletTimer',
@@ -77,6 +79,10 @@ export const initDip20WalletWorker = async ({
 					env
 				}
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };

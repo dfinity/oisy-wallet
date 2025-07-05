@@ -49,21 +49,27 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 		}
 	};
 
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopIcpWalletTimer'
+		});
+	};
+
 	return {
 		start: () => {
 			worker.postMessage({
 				msg: 'startIcpWalletTimer'
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopIcpWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerIcpWalletTimer'
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };
