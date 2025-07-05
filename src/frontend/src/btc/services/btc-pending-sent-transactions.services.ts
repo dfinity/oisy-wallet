@@ -18,6 +18,8 @@ export const loadBtcPendingSentTransactions = async ({
 	identity: OptionIdentity;
 	networkId?: NetworkId;
 }): Promise<ResultSuccess> => {
+	console.warn('loadBtcPendingSentTransactions = ', loadBtcPendingSentTransactions);
+
 	try {
 		const copy = get(i18n);
 		if (isNullish(identity)) {
