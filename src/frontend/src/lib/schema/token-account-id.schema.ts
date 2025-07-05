@@ -5,7 +5,7 @@ import {
 	Icrcv2AccountIdObjectSchema,
 	SolAddressSchema
 } from '$lib/schema/address.schema';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const TokenAccountIdSchema = z.union([
 	Icrcv2AccountIdObjectSchema.transform((data) => ({ Icrcv2: data })),

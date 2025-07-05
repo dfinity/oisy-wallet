@@ -1,7 +1,7 @@
-import type { ZodType, ZodTypeDef } from 'zod';
+import type * as z from 'zod/v4';
 
 interface SafeParseParams<T, Fallback> {
-	schema: ZodType<T, ZodTypeDef, unknown>;
+	schema: z.ZodType<T>;
 	value: unknown;
 	fallback?: Fallback;
 }

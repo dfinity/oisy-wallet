@@ -11,7 +11,7 @@ import type {
 import type { OptionBalance } from '$lib/types/balance';
 import type { TokenGroup } from '$lib/types/token-group';
 import type { Option, RequiredExcept } from '$lib/types/utils';
-import type * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export type TokenId = z.infer<typeof TokenIdSchema>;
 

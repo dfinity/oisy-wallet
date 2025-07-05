@@ -16,7 +16,7 @@ import { bn1Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo, mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import type { PendingUtxo } from '@dfinity/ckbtc';
-import type { BRAND } from 'zod';
+import type { BRAND } from 'zod/v4';
 
 export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 	Array.from({ length: n }, () => ({
