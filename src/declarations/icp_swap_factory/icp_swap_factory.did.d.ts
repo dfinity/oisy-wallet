@@ -9,6 +9,16 @@ export interface CreatePoolArgs {
 	token1: Token;
 	subnet: [] | [string];
 }
+export interface CreatePoolRecord {
+	err: [] | [string];
+	fee: bigint;
+	status: string;
+	token0: Token;
+	token1: Token;
+	timestamp: bigint;
+	caller: Principal;
+	poolId: [] | [Principal];
+}
 export interface CycleInfo {
 	balance: bigint;
 	available: bigint;
@@ -119,6 +129,7 @@ export type Result_10 =
 	| {
 			ok: {
 				infoCid: Principal;
+				positionIndexCid: Principal;
 				trustedCanisterManagerCid: Principal;
 				governanceCid: [] | [Principal];
 				passcodeManagerCid: Principal;
@@ -139,24 +150,30 @@ export type Result_7 = { ok: Array<PoolUpgradeTask> } | { err: Error };
 export type Result_8 = { ok: PoolData } | { err: Error };
 export type Result_9 = { ok: Array<Passcode> } | { err: Error };
 export interface SwapFactory {
+	activateWasm: ActorMethod<[], undefined>;
 	addPasscode: ActorMethod<[Principal, Passcode], Result_1>;
-	addPoolControllers: ActorMethod<[Principal, Array<Principal>], undefined>;
 	addPoolInstallers: ActorMethod<[Array<PoolInstaller>], undefined>;
 	addPoolInstallersValidate: ActorMethod<[Array<PoolInstaller>], { Ok: string } | { Err: string }>;
+	batchAddInstallerControllers: ActorMethod<[Array<Principal>], undefined>;
 	batchAddPoolControllers: ActorMethod<[Array<Principal>, Array<Principal>], undefined>;
 	batchClearRemovedPool: ActorMethod<[Array<Principal>], undefined>;
 	batchRemovePoolControllers: ActorMethod<[Array<Principal>, Array<Principal>], undefined>;
 	batchRemovePools: ActorMethod<[Array<Principal>], Result_1>;
+	batchSetInstallerAdmins: ActorMethod<[Array<Principal>], undefined>;
 	batchSetPoolAdmins: ActorMethod<[Array<Principal>, Array<Principal>], undefined>;
 	batchSetPoolAvailable: ActorMethod<[Array<Principal>, boolean], undefined>;
 	batchSetPoolIcrc28TrustedOrigins: ActorMethod<[Array<Principal>, Array<string>], Result_1>;
 	batchSetPoolLimitOrderAvailable: ActorMethod<[Array<Principal>, boolean], undefined>;
+	clearChunks: ActorMethod<[], undefined>;
 	clearPoolUpgradeTaskHis: ActorMethod<[], undefined>;
-	clearRemovedPool: ActorMethod<[Principal], string>;
 	clearUpgradeFailedPoolList: ActorMethod<[], undefined>;
+	combineWasmChunks: ActorMethod<[], undefined>;
 	createPool: ActorMethod<[CreatePoolArgs], Result_8>;
 	deletePasscode: ActorMethod<[Principal, Passcode], Result_1>;
+	getActiveWasm: ActorMethod<[], Uint8Array | number[]>;
 	getAdmins: ActorMethod<[], Array<Principal>>;
+	getCreatePoolRecords: ActorMethod<[], Array<CreatePoolRecord>>;
+	getCreatePoolRecordsByCaller: ActorMethod<[Principal], Array<CreatePoolRecord>>;
 	getCurrentUpgradeTask: ActorMethod<[], Result_13>;
 	getCycleInfo: ActorMethod<[], Result_12>;
 	getGovernanceCid: ActorMethod<[], Result_11>;
@@ -172,16 +189,16 @@ export interface SwapFactory {
 	getPools: ActorMethod<[], Result_4>;
 	getPrincipalPasscodes: ActorMethod<[], Result_5>;
 	getRemovedPools: ActorMethod<[], Result_4>;
+	getStagingWasm: ActorMethod<[], Uint8Array | number[]>;
 	getUpgradeFailedPoolList: ActorMethod<[], Result_3>;
 	getVersion: ActorMethod<[], string>;
+	getWasmActiveStatus: ActorMethod<[], boolean>;
 	icrc10_supported_standards: ActorMethod<[], Array<{ url: string; name: string }>>;
 	icrc21_canister_call_consent_message: ActorMethod<
 		[Icrc21ConsentMessageRequest],
 		Icrc21ConsentMessageResponse
 	>;
 	icrc28_trusted_origins: ActorMethod<[], Icrc28TrustedOriginsResponse>;
-	removePool: ActorMethod<[GetPoolArgs], string>;
-	removePoolControllers: ActorMethod<[Principal, Array<Principal>], undefined>;
 	removePoolInstaller: ActorMethod<[Principal], undefined>;
 	removePoolInstallerValidate: ActorMethod<[Principal], { Ok: string } | { Err: string }>;
 	retryAllFailedUpgrades: ActorMethod<[], Result_1>;
@@ -192,10 +209,11 @@ export interface SwapFactory {
 		[Uint8Array | number[]],
 		{ Ok: string } | { Err: string }
 	>;
-	setPoolAdmins: ActorMethod<[Principal, Array<Principal>], undefined>;
-	setPoolAvailable: ActorMethod<[Principal, boolean], undefined>;
+	setNextPoolVersion: ActorMethod<[string], undefined>;
 	setUpgradePoolList: ActorMethod<[UpgradePoolArgs], Result_1>;
+	setWasmActive: ActorMethod<[boolean], undefined>;
 	upgradePoolTokenStandard: ActorMethod<[Principal, Principal], Result>;
+	uploadWasmChunk: ActorMethod<[Uint8Array | number[]], bigint>;
 }
 export interface Token {
 	address: string;
