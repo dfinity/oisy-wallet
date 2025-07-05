@@ -489,6 +489,7 @@
 			"icrc_custom_token": "",
 			"loading_wallet_timeout": "",
 			"allow_signing": "",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "",
 			"sol_wallet_error": ""
 		}
