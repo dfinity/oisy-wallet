@@ -131,6 +131,7 @@ const createSolTransactionMessage = async ({
 };
 
 const createSplTokenTransactionMessage = async ({
+	identity,
 	signer,
 	destination,
 	amount,
@@ -138,6 +139,7 @@ const createSplTokenTransactionMessage = async ({
 	tokenAddress,
 	tokenOwnerAddress
 }: {
+	identity: OptionIdentity;
 	signer: TransactionSigner;
 	destination: SolAddress;
 	amount: bigint;
@@ -156,7 +158,7 @@ const createSplTokenTransactionMessage = async ({
 		tokenOwnerAddress
 	});
 
-	const destinationIsAtaAddress = await isAtaAddress({ address: destination, network });
+	const destinationIsAtaAddress = await isAtaAddress({ identity, address: destination, network });
 
 	const destinationTokenAccountAddress: OptionSolAddress = destinationIsAtaAddress
 		? destination
@@ -313,6 +315,7 @@ export const sendSol = async ({
 
 	const transactionMessage = isTokenSpl(token)
 		? await createSplTokenTransactionMessage({
+				identity,
 				signer,
 				destination,
 				amount,
