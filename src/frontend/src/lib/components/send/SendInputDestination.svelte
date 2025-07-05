@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
+	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
@@ -59,6 +60,8 @@
 				? $destinationToken?.network.id
 				: undefined
 	);
+
+	let inputElement: HTMLInputElement | undefined = $state();
 
 	let focused: boolean = $state(false);
 	const onFocus = () => (focused = true);
@@ -121,9 +124,20 @@
 			on:focus={onFocus}
 			on:blur={onBlur}
 			on:nnsInput
+			bind:inputElement
 		>
 			{#snippet innerEnd()}
-				<span class="flex">
+				<span class="flex gap-1 bg-primary">
+					{#if notEmptyString(destination)}
+						<ButtonReset
+							onclick={() => {
+								destination = '';
+								if (nonNullish(inputElement)) {
+									inputElement.focus();
+								}
+							}}
+						/>
+					{/if}
 					{#if nonNullish(onQRButtonClick)}
 						<QrButton on:click={onQRButtonClick} />
 					{/if}
