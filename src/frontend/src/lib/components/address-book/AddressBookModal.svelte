@@ -98,7 +98,7 @@
 		)
 	);
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<AddressBookSteps> = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
@@ -144,7 +144,7 @@
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
 		}
-	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
+	];
 
 	let currentStep: WizardStep | undefined = $state();
 
