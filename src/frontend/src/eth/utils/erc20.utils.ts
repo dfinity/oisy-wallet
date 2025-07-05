@@ -1,5 +1,4 @@
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
-import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import icpDark from '$icp/assets/icp-dark.svg';
@@ -17,22 +16,6 @@ export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams
 	name,
 	symbol,
 	icon: mapErc20Icon(symbol),
-	...rest
-});
-
-export const mapErc20CustomToken = ({
-	id,
-	symbol,
-	name,
-	network,
-	...rest
-}: MapErc20TokenParams & UserTokenState): Erc20CustomToken => ({
-	id: id ?? parseTokenId(`user-token#${symbol}#${network.chainId}`),
-	standard: 'erc20',
-	name,
-	symbol,
-	icon: mapErc20Icon(symbol),
-	network,
 	...rest
 });
 
