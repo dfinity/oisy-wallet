@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import type { ZodError } from 'zod';
+	import type { ZodError } from 'zod/v4';
 	import InputAddress from '$lib/components/address/InputAddress.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { CONTACT_MAX_LABEL_LENGTH } from '$lib/constants/app.constants';

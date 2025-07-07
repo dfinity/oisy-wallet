@@ -3,7 +3,7 @@ import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
 import type { OnramperId } from '$lib/types/onramper';
 import type { TokenBuy } from '$lib/types/token';
 import type { AtLeastOne } from '$lib/types/utils';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 

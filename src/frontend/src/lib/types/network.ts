@@ -6,7 +6,7 @@ import type {
 	NetworkIdSchema,
 	NetworkSchema
 } from '$lib/schema/network.schema';
-import type * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export type NetworkId = z.infer<typeof NetworkIdSchema>;
 
