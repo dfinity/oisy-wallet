@@ -3,7 +3,7 @@ import type {
 	EnvIcrcTokenMetadataSchema,
 	EnvIcrcTokenMetadataWithIconSchema
 } from '$env/schema/env-icrc-token.schema';
-import type * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export type EnvIcrcTokenMetadata = z.infer<typeof EnvIcrcTokenMetadataSchema>;
 

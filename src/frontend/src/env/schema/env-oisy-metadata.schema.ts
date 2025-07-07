@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 export const OisyMetadataSchema = z.object({
 	OISY_SHORT: z.string(),
