@@ -37,6 +37,7 @@
 	export let observe: boolean;
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
+	export let data: string | undefined = undefined;
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 	export let nativeEthereumToken: Token;
@@ -93,7 +94,9 @@
 
 			// We estimate gas only when it is not a ck-conversion (i.e. target network is not ICP).
 			// Otherwise, we would need to emulate the data that are provided to the minter contract address.
-			const estimatedGas = isNetworkICP(targetNetwork) ? undefined : await estimateGas(params);
+			const estimatedGas = isNetworkICP(targetNetwork)
+				? undefined
+				: await estimateGas({ ...params, data });
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
