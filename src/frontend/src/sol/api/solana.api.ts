@@ -145,9 +145,6 @@ export const loadTokenAccount = async ({
 	const wallet = solAddress(address);
 	const relevantTokenAddress = solAddress(tokenAddress);
 
-	console.log('wallet', wallet);
-	console.log('relevantTokenAddress', relevantTokenAddress);
-
 	const response = await getTokenAccountsByOwner(
 		wallet,
 		{
@@ -156,11 +153,8 @@ export const loadTokenAccount = async ({
 		{ encoding: 'jsonParsed' }
 	).send();
 
-	console.log('getTokenAccountsByOwner().send() response', response);
-
 	// In case of missing token account, we let the caller handle it.
 	if (response.value.length === 0) {
-		console.log('response.value.length === 0');
 		return undefined;
 	}
 

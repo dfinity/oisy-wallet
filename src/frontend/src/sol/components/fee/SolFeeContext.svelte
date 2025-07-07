@@ -6,6 +6,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
+		checkIfAccountExists,
 		estimatePriorityFee,
 		getSolCreateAccountFee,
 		loadTokenAccount
@@ -17,6 +18,7 @@
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
+	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -67,7 +69,6 @@
 	const updateAtaFee = async () => {
 		if (isNullishOrEmpty(destination) || !isTokenSpl($sendToken)) {
 			ataFeeStore.setFee(undefined);
-			console.log('isNullishOrEmpty(destination) || !isTokenSpl($sendToken)');
 			return;
 		}
 
@@ -80,13 +81,19 @@
 			})
 		);
 
+		if (
+			(await isAtaAddress({ address: destination, network: solNetwork })) &&
+			(await checkIfAccountExists({ address: destination, network: solNetwork }))
+		) {
+			ataFeeStore.setFee(undefined);
+			return;
+		}
+
 		const tokenAccount = await loadTokenAccount({
 			address: destination,
 			network: solNetwork,
 			tokenAddress: $sendToken.address
 		});
-
-		console.log('tokenAccount', tokenAccount);
 
 		if (nonNullish(tokenAccount)) {
 			ataFeeStore.setFee(undefined);
@@ -94,7 +101,6 @@
 		}
 
 		const ataFee = await getSolCreateAccountFee(solNetwork);
-		console.log('ataFee', ataFee);
 
 		ataFeeStore.setFee(ataFee);
 	};
