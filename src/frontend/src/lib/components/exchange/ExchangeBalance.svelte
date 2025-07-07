@@ -49,7 +49,7 @@
 			setPrivacyMode({
 				enabled: !$isPrivacyMode,
 				withToast: false,
-				source: 'Double click on the ExchangeBalance'
+				source: 'Hero - Double click on the ExchangeBalance'
 			})}
 	>
 		{#if hideBalance}
