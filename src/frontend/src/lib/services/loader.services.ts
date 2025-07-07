@@ -108,9 +108,6 @@ export const initLoader = async ({
 		return;
 	}
 
-	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
-	setProgressModal(true);
-
 	const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
 	if (!initSignerAllowanceSuccess) {
@@ -131,6 +128,12 @@ export const initLoader = async ({
 	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>
 		enabledNetworkIds.includes(networkId)
 	);
+
+	// if no addresses need to be loaded, we dont show the progress modal
+	if (networkIds.length > 0) {
+		// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
+		setProgressModal(true);
+	}
 
 	const { success: addressSuccess } = await loadAddresses(networkIds);
 
