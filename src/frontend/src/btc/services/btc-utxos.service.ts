@@ -6,7 +6,7 @@ import {
 	calculateUtxoSelection,
 	filterAvailableUtxos
 } from '$btc/utils/btc-utxos.utils';
-import { BITCOIN_CANISTER_IDS, CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
@@ -44,10 +44,10 @@ export const selectUtxosFee = async ({
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
 	assertNonNullish(identity);
 	assertStringNotEmpty({ value: source, message: 'Source address is required' });
-	assertNonNullish(CKBTC_MINTER_CANISTER_ID);
+	assertNonNullish(IC_CKBTC_MINTER_CANISTER_ID);
 
 	// assertAmount({ amount });
-	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[CKBTC_MINTER_CANISTER_ID];
+	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);

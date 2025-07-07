@@ -1,8 +1,8 @@
 import {
+	type BtcReviewResult,
 	getFeeRateFromPercentiles,
-	selectUtxosFee,
-	type BtcReviewResult
-} from '$btc/services/btc-review.services';
+	selectUtxosFee
+} from '$btc/services/btc-utxos.service';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
 import type { BtcAddress } from '$lib/types/address';
