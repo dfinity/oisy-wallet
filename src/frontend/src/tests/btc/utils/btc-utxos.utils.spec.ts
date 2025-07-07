@@ -5,8 +5,8 @@ import {
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
-	utxoTxIdToString,
-	type UtxoSelectionResult
+	type UtxoSelectionResult,
+	utxoTxIdToString
 } from '$btc/utils/btc-utxos.utils';
 import type { Utxo } from '@dfinity/ckbtc';
 import { describe, expect, it } from 'vitest';
@@ -140,7 +140,7 @@ describe('btc-utxos.utils', () => {
 				amountSatoshis: 100_000n,
 				feeRateSatoshisPerVByte: 1n
 			});
-
+			
 			// Should select the largest UTXO first (300_000)
 			expect(result.selectedUtxos[0].value).toBe(300_000n);
 		});
