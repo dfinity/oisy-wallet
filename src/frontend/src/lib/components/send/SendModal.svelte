@@ -125,8 +125,6 @@
 
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			reset();
-
 			goToStep(WizardStepsSend.DESTINATION);
 		};
 
