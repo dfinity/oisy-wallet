@@ -20,6 +20,11 @@
 }
 
 /* Custom popover wrapper */
+
+.custom-popover-trigger {
+	@apply relative inline-block;
+}
+
 .custom-popover.wrapper {
 	@apply absolute z-50 flex flex-col rounded-lg border shadow-md;
 	background-color: var(--color-background-surface);

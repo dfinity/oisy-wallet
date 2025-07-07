@@ -1,66 +1,50 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import type { SvelteComponent } from 'svelte';
+	import CustomPopoverMenu from '$lib/components/ui/CustomPopoverMenu.svelte';
+	import type { IPopoverItem } from '$lib/components/ui/CustomPopoverMenu.svelte';
 
-	let visible = false;
-	let menuButton: HTMLButtonElement;
-	let menu: HTMLDivElement;
-
-	function toggle() {
-		visible = !visible;
-		if (visible) {positionMenu();}
+	function replaceImage() {
+		console.log('Replace clicked');
 	}
 
-	function positionMenu() {
-		const rect = menuButton.getBoundingClientRect();
-		menu.style.setProperty('--popover-top', `${rect.bottom}px`);
-		menu.style.setProperty('--popover-left', `${rect.right}px`);
-		menu.style.setProperty('--popover-right', `${window.innerWidth - rect.left}px`);
+	function removeImage() {
+		console.log('Remove clicked');
 	}
 
-	function handleClickOutside(e: MouseEvent) {
-		if (visible && !menu.contains(e.target as Node) && !menuButton.contains(e.target as Node)) {
-			visible = false;
+	const items: IPopoverItem[] = [
+		{
+			logo: IconImage as typeof SvelteComponent,
+			title: 'Replace',
+			action: replaceImage
+		},
+		{
+			logo: IconTrash as typeof SvelteComponent,
+			title: 'Remove',
+			action: removeImage
 		}
-	}
+	];
 
-	onMount(() => {
-		document.addEventListener('click', handleClickOutside);
-		window.addEventListener('resize', () => visible && positionMenu());
-		return () => document.removeEventListener('click', handleClickOutside);
-	});
+	let menuButton: HTMLButtonElement;
 </script>
 
-<div style="position: relative; display: inline-block;">
-	<ButtonIcon
-		bind:button={menuButton}
-		onclick={toggle}
-		colorStyle="tertiary-alt"
-		styleClass="w-auto h-auto p-0"
-		transparent
-		link={false}
-		ariaLabel="Edit"
-	>
-		{#snippet icon()}<IconPencil />{/snippet}
-	</ButtonIcon>
-
-	{#if visible}
-		<div class="backdrop" on:click={() => (visible = false)}></div>
-		<div
-			bind:this={menu}
-			class="custom-popover wrapper animate-fade-in with-border"
-			role="menu"
-			tabindex="-1"
+<CustomPopoverMenu title="Contact image" {items}>
+	<svelte:fragment slot="trigger" let:toggle>
+		<ButtonIcon
+			bind:button={menuButton}
+			onclick={toggle}
+			colorStyle="tertiary-alt"
+			styleClass="w-auto h-auto p-0"
+			transparent
+			link={false}
+			ariaLabel="Edit"
 		>
-			<div class="popover-item popover-title">Contact image</div>
-			<div class="popover-item">
-				<IconImage />
-				Replace</div
-			>
-			<div class="popover-item"> <IconTrash />Remove</div>
-		</div>
-	{/if}
-</div>
+			{#snippet icon()}
+				<IconPencil />
+			{/snippet}
+		</ButtonIcon>
+	</svelte:fragment>
+</CustomPopoverMenu>

@@ -1,14 +1,12 @@
 <script lang="ts">
-	import { tick } from 'svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import imageCompression from 'browser-image-compression';
+	import { tick } from 'svelte';
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import imageCompression from 'browser-image-compression';
-
 	import type { AvatarVariants } from '$lib/types/style';
-
 	import { selectColorForName } from '$lib/utils/contact.utils';
 
 	interface AvatarProps {
@@ -51,7 +49,7 @@
 
 	async function handleFileChange(e: Event) {
 		const file = (e.target as HTMLInputElement)?.files?.[0];
-		if (!file) return;
+		if (!file) {return;}
 		try {
 			const options = { maxSizeMB: 1, maxWidthOrHeight: 200, useWebWorker: true };
 			const compressed = await imageCompression(file, options);
@@ -79,9 +77,9 @@
 	onclick={triggerUpload}
 >
 	{#if imageUrl}
-		<img src={imageUrl} alt={ariaLabel} class="object-cover w-full h-full rounded-full" />
+		<img src={imageUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
 	{:else if initials}
-		<span class="text-white font-bold">{initials}</span>
+		<span class="font-bold text-white">{initials}</span>
 	{:else}
 		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
 	{/if}
