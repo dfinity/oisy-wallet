@@ -34,15 +34,13 @@ export class InfuraProvider {
 		try {
 			return await this.estimateGas(params);
 		} catch (err: unknown) {
-			// Log the error to console for debugging purposes
-			console.error(`Error estimating gas for network ${this.network}:`, err);
-
 			trackEvent({
 				name: TRACK_ETH_ESTIMATE_GAS_ERROR,
 				metadata: {
 					error: `${err}`,
 					network: this.network.toString()
-				}
+				},
+				warning: `Error estimating gas for network ${this.network}: ${err}`
 			});
 
 			return undefined;
