@@ -37,11 +37,11 @@
 		try {
 			await registerUserSnapshot();
 		} catch (error: unknown) {
-			console.error('Unexpected error while taking user snapshot:', error);
 
 			trackEvent({
 				name: TRACK_SNAPSHOT_SEND_ERROR,
-				metadata: mapIcErrorMetadata(error)
+				metadata: mapIcErrorMetadata(error),
+				warning: `Unexpected error while taking user snapshot: ${error}`
 			});
 		}
 

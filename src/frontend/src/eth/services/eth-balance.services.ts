@@ -64,17 +64,12 @@ const loadEthBalance = async ({
 				tokenId: `${tokenId.description}`,
 				networkId: `${networkId.description}`,
 				error: `${err}`
-			}
-		});
-
-		// We print the error to console just for debugging purposes
-		console.warn(
-			replacePlaceholders(loading_balance, {
+			},
+			warning: `${replacePlaceholders(loading_balance, {
 				$symbol: tokenId.description ?? ETHEREUM_TOKEN.symbol,
 				$network: networkId.description ?? ETHEREUM_NETWORK.name
-			}),
-			err
-		);
+			})} ${err}`
+		});
 
 		return { success: false };
 	}
@@ -118,17 +113,12 @@ const loadErc20Balance = async ({
 				tokenId: `${contract.id.description}`,
 				networkId: `${contract.network.id.description}`,
 				error: `${err}`
-			}
-		});
-
-		// We print the error to console just for debugging purposes
-		console.warn(
-			replacePlaceholders(loading_balance, {
+			},
+			warning: `${replacePlaceholders(loading_balance, {
 				$symbol: contract.symbol,
 				$network: contract.network.name
-			}),
-			err
-		);
+			})} ${err}`
+		});
 
 		return { success: false };
 	}
