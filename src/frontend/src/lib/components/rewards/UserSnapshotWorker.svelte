@@ -37,7 +37,6 @@
 		try {
 			await registerUserSnapshot();
 		} catch (error: unknown) {
-
 			trackEvent({
 				name: TRACK_SNAPSHOT_SEND_ERROR,
 				metadata: mapIcErrorMetadata(error),
