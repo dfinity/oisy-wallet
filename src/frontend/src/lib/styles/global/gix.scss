@@ -391,9 +391,7 @@ div.select {
 	}
 }
 
-// TOASTS
-// Toasts other than error are not used
-// Also, it seems that gix components dont apply the success and warn classes correctly
+// Toasts
 .toast:has(> .icon.error) {
 	--overlay-background: var(--color-background-error-light);
 	--overlay-background-contrast: var(--color-foreground-error-secondary);
