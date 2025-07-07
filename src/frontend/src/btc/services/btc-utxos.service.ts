@@ -1,11 +1,12 @@
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 
+import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import {
 	calculateFinalFee,
 	calculateUtxoSelection,
 	filterAvailableUtxos
 } from '$btc/utils/btc-utxos.utils';
-import { BITCOIN_CANISTER_IDS, CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
@@ -16,8 +17,6 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
-
-const DEFAULT_MIN_CONFIRMATIONS = 1;
 
 interface BtcReviewServiceParams {
 	identity: Identity;
@@ -37,7 +36,7 @@ export interface BtcReviewResult {
  * Main orchestrator function that replaces the backend btc_select_user_utxos_fee call
  * This function coordinates all the steps needed to select UTXOs and calculate fees
  */
-export const selectUtxosFee = async ({
+export const prepareBtcSend = async ({
 	identity,
 	network,
 	amount,
@@ -45,10 +44,10 @@ export const selectUtxosFee = async ({
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
 	assertNonNullish(identity);
 	assertStringNotEmpty({ value: source, message: 'Source address is required' });
-	assertNonNullish(CKBTC_MINTER_CANISTER_ID);
+	assertNonNullish(IC_CKBTC_MINTER_CANISTER_ID);
 
 	// assertAmount({ amount });
-	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[CKBTC_MINTER_CANISTER_ID];
+	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
@@ -68,7 +67,7 @@ export const selectUtxosFee = async ({
 		bitcoinCanisterId,
 		address: source,
 		network,
-		minConfirmations: DEFAULT_MIN_CONFIRMATIONS
+		minConfirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 	});
 
 	const allUtxos = response.utxos;
@@ -77,7 +76,7 @@ export const selectUtxosFee = async ({
 	const availableUtxos = filterAvailableUtxos({
 		utxos: allUtxos,
 		options: {
-			minConfirmations: DEFAULT_MIN_CONFIRMATIONS,
+			minConfirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
 			pendingTxIds
 		}
 	});
