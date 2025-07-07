@@ -3,6 +3,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnetStore, solAddressMainnetStore } from '$lib/stores/address.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import { getAccountOwner } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -23,6 +24,7 @@ import type {
 } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import {
@@ -424,7 +426,13 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should not load transactions for a non-Solana token', async () => {
-			await loadNextSolTransactions({ ...mockParams, token: ETHEREUM_TOKEN });
+			await expect(
+				loadNextSolTransactions({ ...mockParams, token: ETHEREUM_TOKEN })
+			).rejects.toThrow(
+				replacePlaceholders(en.init.error.no_solana_network, {
+					$network: `${ETHEREUM_TOKEN.network.id.description}`
+				})
+			);
 
 			expect(spyGetTransactions).not.toHaveBeenCalled();
 		});

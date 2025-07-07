@@ -63,13 +63,6 @@ export const decode = async ({
 }: WalletConnectDecodeTransactionParams) => {
 	const solNetwork = mapNetworkIdToNetwork(networkId);
 
-	assertNonNullish(
-		solNetwork,
-		replacePlaceholders(get(i18n).init.error.no_solana_network, {
-			$network: networkId.description ?? ''
-		})
-	);
-
 	const parsedTransactionMessage = await parseSolBase64TransactionMessage({
 		transactionMessage: base64EncodedTransactionMessage,
 		rpc: solanaHttpRpc(solNetwork)
@@ -120,13 +113,6 @@ export const sign = ({
 			}
 
 			const solNetwork = mapNetworkIdToNetwork(networkId);
-
-			assertNonNullish(
-				solNetwork,
-				replacePlaceholders(get(i18n).init.error.no_solana_network, {
-					$network: networkId.description ?? ''
-				})
-			);
 
 			const parsedTransactionMessage = await parseSolBase64TransactionMessage({
 				transactionMessage: base64EncodedTransactionMessage,
