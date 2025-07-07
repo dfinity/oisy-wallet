@@ -66,7 +66,7 @@
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
-			const { getFeeData, estimateGas } = infuraProviders(sendToken.network.id);
+			const { getFeeData, safeEstimateGas } = infuraProviders(sendToken.network.id);
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
@@ -96,7 +96,7 @@
 			// Otherwise, we would need to emulate the data that are provided to the minter contract address.
 			const estimatedGas = isNetworkICP(targetNetwork)
 				? undefined
-				: await estimateGas({ ...params, data });
+				: await safeEstimateGas({ ...params, data });
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
