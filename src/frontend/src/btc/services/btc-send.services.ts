@@ -25,7 +25,7 @@ export type SendBtcParams = BtcSendServiceParams & {
 	utxosFee: UtxosFee;
 	onProgress?: () => void;
 };
-
+// TODO remove this function since it will be replaced with prepareBtcSend once the BTC performance improvements is merged
 export const selectUtxosFee = async ({
 	identity,
 	network,
