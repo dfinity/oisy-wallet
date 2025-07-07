@@ -12,7 +12,7 @@ import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
-import { assertArrayNotEmpty, assertStringNotEmpty } from '$lib/utils/asserts';
+import { assertArrayNotEmpty } from '$lib/utils/asserts';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
@@ -43,10 +43,7 @@ export const prepareBtcSend = async ({
 	source
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
 	assertNonNullish(identity);
-	assertStringNotEmpty({ value: source, message: 'Source address is required' });
-	assertNonNullish(IC_CKBTC_MINTER_CANISTER_ID);
 
-	// assertAmount({ amount });
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
 	// Get pending transactions to exclude locked UTXOs
