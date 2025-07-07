@@ -28,6 +28,16 @@ export class InfuraProvider {
 
 	estimateGas = (params: GetFeeData): Promise<bigint> => this.provider.estimateGas(params);
 
+	safeEstimateGas = async (params: GetFeeData): Promise<bigint | undefined> => {
+		try {
+			return await this.estimateGas(params);
+		} catch (error: unknown) {
+			// Log the error to console for debugging purposes
+			console.error('Error estimating gas:', error);
+			return undefined;
+		}
+	};
+
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
 		this.provider.broadcastTransaction(signedTransaction);
 
