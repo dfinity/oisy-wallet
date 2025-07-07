@@ -67,6 +67,7 @@
 	const updateAtaFee = async () => {
 		if (isNullishOrEmpty(destination) || !isTokenSpl($sendToken)) {
 			ataFeeStore.setFee(undefined);
+			console.log('isNullishOrEmpty(destination) || !isTokenSpl($sendToken)');
 			return;
 		}
 
@@ -85,12 +86,15 @@
 			tokenAddress: $sendToken.address
 		});
 
+		console.log('tokenAccount', tokenAccount);
+
 		if (nonNullish(tokenAccount)) {
 			ataFeeStore.setFee(undefined);
 			return;
 		}
 
 		const ataFee = await getSolCreateAccountFee(solNetwork);
+		console.log('ataFee', ataFee);
 
 		ataFeeStore.setFee(ataFee);
 	};
