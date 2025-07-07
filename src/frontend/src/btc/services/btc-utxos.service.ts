@@ -1,6 +1,5 @@
-import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-
 import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import {
 	calculateFinalFee,
 	calculateUtxoSelection,
