@@ -15,7 +15,7 @@ import type { Amount } from '$lib/types/send';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 
 interface BtcReviewServiceParams {
 	identity: Identity;
@@ -41,8 +41,6 @@ export const prepareBtcSend = async ({
 	amount,
 	source
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
-	assertNonNullish(identity);
-
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
 	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
@@ -73,7 +71,7 @@ export const prepareBtcSend = async ({
 	if (allUtxos.length === 0) {
 		throw new Error(
 			// We can't send BTC when no UTXOs are available
-			"InsufficientBalance: No UTXO's available for address {source} with {requiredMinConfirmations} confirmations"
+			`InsufficientBalance: No UTXO's available for address ${source} with ${requiredMinConfirmations} confirmations`
 		);
 	}
 

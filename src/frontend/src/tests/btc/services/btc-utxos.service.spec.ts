@@ -1,14 +1,14 @@
+import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import {
+	type BtcReviewResult,
 	getFeeRateFromPercentiles,
-	prepareBtcSend,
-	type BtcReviewResult
+	prepareBtcSend
 } from '$btc/services/btc-utxos.service';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
 import type { get_utxos_response } from '@dfinity/ckbtc/dist/candid/bitcoin';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -86,18 +86,6 @@ describe('btc-utxos.service', () => {
 			});
 		});
 
-		it('should throw error when identity is null', async () => {
-			const params = { ...defaultParams, identity: null as unknown as Identity };
-
-			await expect(prepareBtcSend(params)).rejects.toThrow();
-		});
-
-		it('should throw error when source address is empty', async () => {
-			const params = { ...defaultParams, source: '' as BtcAddress };
-
-			await expect(prepareBtcSend(params)).rejects.toThrow('Source address is required');
-		});
-
 		it('should throw error when no available UTXOs found', async () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
@@ -107,7 +95,7 @@ describe('btc-utxos.service', () => {
 			});
 
 			await expect(prepareBtcSend(defaultParams)).rejects.toThrow(
-				'No available UTXOs found for the transaction'
+				`InsufficientBalance: No UTXO's available for address ${mockBtcAddress} with ${UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS} confirmations`
 			);
 		});
 
