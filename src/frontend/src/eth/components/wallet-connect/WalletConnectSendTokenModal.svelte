@@ -37,6 +37,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { isNullish } from '@dfinity/utils';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -141,6 +142,9 @@
 	let amount: bigint;
 	$: amount = BigInt(firstTransaction?.value ?? ZERO);
 
+	let data: string | undefined
+	$: data = firstTransaction?.data
+
 	const send = async () => {
 		const { success } = await sendServices({
 			request,
@@ -170,6 +174,7 @@
 
 	<EthFeeContext
 		amount={amount.toString()}
+		{data}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
 		{destination}
