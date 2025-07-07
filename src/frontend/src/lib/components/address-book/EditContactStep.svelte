@@ -51,11 +51,11 @@
 			<div class="relative flex">
 				<Avatar name={contact.name} variant="xs" styleClass="md:text-[19.2px]"></Avatar>
 				<span
-				class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
-				data-tid={`avatar-badge-${contact.name}`}
-			>
-				<EditAvatar />
-			</span>
+					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+					data-tid={`avatar-badge-${contact.name}`}
+				>
+					<EditAvatar />
+				</span>
 			</div>
 		{/snippet}
 

@@ -1,19 +1,19 @@
 <script lang="ts">
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import { onMount } from 'svelte';
+	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
-	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
-	import { onMount } from 'svelte';
-  
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+
 	let visible = false;
 	let menuButton: HTMLButtonElement;
 	let menu: HTMLDivElement;
-  
+
 	function toggle() {
-	  visible = !visible;
-	  if (visible) positionMenu();
+		visible = !visible;
+		if (visible) {positionMenu();}
 	}
-  
+
 	function positionMenu() {
 		const rect = menuButton.getBoundingClientRect();
 		menu.style.setProperty('--popover-top', `${rect.bottom}px`);
@@ -22,11 +22,7 @@
 	}
 
 	function handleClickOutside(e: MouseEvent) {
-		if (
-			visible &&
-			!menu.contains(e.target as Node) &&
-			!menuButton.contains(e.target as Node)
-		) {
+		if (visible && !menu.contains(e.target as Node) && !menuButton.contains(e.target as Node)) {
 			visible = false;
 		}
 	}
@@ -43,6 +39,7 @@
 		bind:button={menuButton}
 		onclick={toggle}
 		colorStyle="tertiary-alt"
+		styleClass="w-auto h-auto p-0"
 		transparent
 		link={false}
 		ariaLabel="Edit"
@@ -52,13 +49,18 @@
 
 	{#if visible}
 		<div class="backdrop" on:click={() => (visible = false)}></div>
-		<div bind:this={menu} class="custom-popover wrapper animate-fade-in with-border " role="menu" tabindex="-1">
-			<div class="popover-item popover-">Contact image</div>
+		<div
+			bind:this={menu}
+			class="custom-popover wrapper animate-fade-in with-border"
+			role="menu"
+			tabindex="-1"
+		>
+			<div class="popover-item popover-title">Contact image</div>
 			<div class="popover-item">
 				<IconImage />
-				Replace</div>
-			<div class="popover-item">	
-				<IconTrash />Remove</div>
+				Replace</div
+			>
+			<div class="popover-item"> <IconTrash />Remove</div>
 		</div>
 	{/if}
 </div>
