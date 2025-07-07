@@ -1,7 +1,7 @@
 import {
 	type BtcReviewResult,
 	getFeeRateFromPercentiles,
-	selectUtxosFee
+	prepareBtcSend
 } from '$btc/services/btc-utxos.service';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
@@ -63,7 +63,7 @@ describe('btc-review.services', () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
 
-			const result: BtcReviewResult = await selectUtxosFee(defaultParams);
+			const result: BtcReviewResult = await prepareBtcSend(defaultParams);
 
 			expect(result).toEqual({
 				feeSatoshis: expect.any(BigInt),
@@ -89,13 +89,13 @@ describe('btc-review.services', () => {
 		it('should throw error when identity is null', async () => {
 			const params = { ...defaultParams, identity: null as unknown as Identity };
 
-			await expect(selectUtxosFee(params)).rejects.toThrow();
+			await expect(prepareBtcSend(params)).rejects.toThrow();
 		});
 
 		it('should throw error when source address is empty', async () => {
 			const params = { ...defaultParams, source: '' as BtcAddress };
 
-			await expect(selectUtxosFee(params)).rejects.toThrow('Source address is required');
+			await expect(prepareBtcSend(params)).rejects.toThrow('Source address is required');
 		});
 
 		it('should throw error when no available UTXOs found', async () => {
@@ -106,7 +106,7 @@ describe('btc-review.services', () => {
 				utxos: []
 			});
 
-			await expect(selectUtxosFee(defaultParams)).rejects.toThrow(
+			await expect(prepareBtcSend(defaultParams)).rejects.toThrow(
 				'No available UTXOs found for the transaction'
 			);
 		});
@@ -117,7 +117,7 @@ describe('btc-review.services', () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
 
-			await selectUtxosFee(testnetParams);
+			await prepareBtcSend(testnetParams);
 
 			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -131,7 +131,7 @@ describe('btc-review.services', () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
 
-			await selectUtxosFee(regtestParams);
+			await prepareBtcSend(regtestParams);
 
 			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -144,7 +144,7 @@ describe('btc-review.services', () => {
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockRejectedValue(apiError);
 
-			await expect(selectUtxosFee(defaultParams)).rejects.toThrow('Backend API error');
+			await expect(prepareBtcSend(defaultParams)).rejects.toThrow('Backend API error');
 		});
 
 		it('should propagate errors from bitcoin API', async () => {
@@ -153,7 +153,7 @@ describe('btc-review.services', () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockRejectedValue(bitcoinApiError);
 
-			await expect(selectUtxosFee(defaultParams)).rejects.toThrow('Bitcoin API error');
+			await expect(prepareBtcSend(defaultParams)).rejects.toThrow('Bitcoin API error');
 		});
 
 		it('should handle insufficient funds scenario', async () => {
@@ -165,7 +165,7 @@ describe('btc-review.services', () => {
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
 
 			// Should throw when trying to spend more than available
-			await expect(selectUtxosFee(params)).rejects.toThrow();
+			await expect(prepareBtcSend(params)).rejects.toThrow();
 		});
 
 		it('should handle multiple UTXOs correctly', async () => {
@@ -186,7 +186,7 @@ describe('btc-review.services', () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(multipleUtxosResponse);
 
-			const result = await selectUtxosFee(defaultParams);
+			const result = await prepareBtcSend(defaultParams);
 
 			expect(result.utxos.length).toBeGreaterThanOrEqual(1);
 			expect(result.totalInputValue).toBeGreaterThan(0n);
