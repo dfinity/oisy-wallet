@@ -1,5 +1,7 @@
 import type { BaseContract } from 'ethers/contract';
 
+export type Erc20ContractAddress = Awaited<ReturnType<BaseContract['getAddress']>>;
+
 export interface ContractAddress {
-	address: Awaited<ReturnType<BaseContract['getAddress']>>;
+	address: Erc20ContractAddress;
 }
