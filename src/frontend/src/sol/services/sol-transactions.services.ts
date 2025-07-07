@@ -165,12 +165,13 @@ export const fetchSolTransactionsForSignature = async ({
 			}
 
 			const fromOwner: SolTransactionUi['fromOwner'] = await getAccountOwner({
+				identity,
 				address: from,
 				network
 			});
 
 			const toOwner: SolTransactionUi['toOwner'] = nonNullish(to)
-				? await getAccountOwner({ address: to, network })
+				? await getAccountOwner({ identity, address: to, network })
 				: undefined;
 
 			const newTransaction: SolTransactionUi = {
