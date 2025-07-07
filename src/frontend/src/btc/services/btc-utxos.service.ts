@@ -12,11 +12,10 @@ import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
-import { assertArrayNotEmpty, assertStringNotEmpty } from '$lib/utils/asserts';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 
 interface BtcReviewServiceParams {
 	identity: Identity;
@@ -42,12 +41,9 @@ export const prepareBtcSend = async ({
 	amount,
 	source
 }: BtcReviewServiceParams): Promise<BtcReviewResult> => {
-	assertNonNullish(identity);
-	assertStringNotEmpty({ value: source, message: 'Source address is required' });
-	assertNonNullish(IC_CKBTC_MINTER_CANISTER_ID);
-
-	// assertAmount({ amount });
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
+
+	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
@@ -67,33 +63,40 @@ export const prepareBtcSend = async ({
 		bitcoinCanisterId,
 		address: source,
 		network,
-		minConfirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+		minConfirmations: requiredMinConfirmations
 	});
 
 	const allUtxos = response.utxos;
 
+	if (allUtxos.length === 0) {
+		throw new Error(
+			// We can't send BTC when no UTXOs are available
+			`InsufficientBalance: No UTXO's available for address ${source} with ${requiredMinConfirmations} confirmations`
+		);
+	}
+
 	// Step 3: Filter UTXOs based on confirmations and exclude locked ones
-	const availableUtxos = filterAvailableUtxos({
+	const filteredUtxos = filterAvailableUtxos({
 		utxos: allUtxos,
 		options: {
-			minConfirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
+			minConfirmations: requiredMinConfirmations,
 			pendingTxIds
 		}
 	});
 
-	assertArrayNotEmpty({
-		array: availableUtxos,
-		message: 'No available UTXOs found for the transaction'
-	});
+	if (filteredUtxos.length === 0) {
+		// We can't send BTC when no UTXOs are available
+		throw new Error("InsufficientBalance: No UTXO's available after filtering");
+	}
 
 	// Step 4: Select UTXOs with fee consideration
 	const selection = calculateUtxoSelection({
-		availableUtxos,
+		availableUtxos: filteredUtxos,
 		amountSatoshis,
 		feeRateSatoshisPerVByte
 	});
 
-	// Step 5: Calculate final fee based on selected UTXOs
+	// Step 5: Calculate the final fee based on selected UTXOs
 	const feeSatoshis = calculateFinalFee({ selection, amountSatoshis });
 	return {
 		feeSatoshis,
