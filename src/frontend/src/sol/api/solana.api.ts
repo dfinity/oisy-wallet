@@ -1,5 +1,4 @@
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
-import { last } from '$lib/utils/array.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -11,7 +10,6 @@ import type {
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address as solAddress, type Address, type Lamports, type Signature } from '@solana/kit';
-import type { Writeable } from 'zod';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
 export const loadSolLamportsBalance = async ({
@@ -83,7 +81,9 @@ export const fetchSignatures = async ({
 			return accumulatedSignatures.slice(0, limit);
 		}
 
-		const lastSignature = last(fetchedSignatures as Writeable<typeof fetchedSignatures>)?.signature;
+		// We do not use the last utility because fetchedSignatures is of strict type Readonly
+		const [lastFetchedSignature] = fetchedSignatures.slice(-1);
+		const lastSignature = lastFetchedSignature?.signature;
 		return fetchSignaturesBatch(lastSignature);
 	};
 
