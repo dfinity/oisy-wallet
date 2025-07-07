@@ -66,7 +66,7 @@
 	const hidePopover = () => (visible = false);
 
 	const handlePrivacyToggle = () => {
-		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true });
+		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false, source: 'User menu click' });
 	};
 
 	const settingsRoute = $derived(isRouteSettings(page));

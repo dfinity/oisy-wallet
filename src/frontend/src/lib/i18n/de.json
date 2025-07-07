@@ -52,7 +52,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Vermögen",
-			"settings": "Einrichten",
+			"settings": "Einstellungen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
 			"airdrops": "Prämien",
@@ -416,7 +416,8 @@
 			"incubated_with": "Entwickelt mit",
 			"by": "von",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": ""
 		},
 		"alt": {
 			"dfinity": "Zur Website der DFINITY Foundation gehen"
@@ -481,8 +482,9 @@
 			"btc_withdrawal_statuses": "Fehler beim Abrufen der BTC-Auszahlungsstatus.",
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
+			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"erc20_user_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
-			"spl_user_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
+			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
@@ -498,7 +500,8 @@
 			"unavailable_balance": "$ Wert ist nicht verfügbar",
 			"hidden_balance": "Dein Guthaben ist ausgeblendet",
 			"top_up": "Lade dein Wallet auf, um es zu nutzen!",
-			"learn_more_about_erc20_icp": "Erfahre mehr über ERC20 ICP auf Ethereum."
+			"learn_more_about_erc20_icp": "Erfahre mehr über ERC20 ICP auf Ethereum.",
+			"tooltip_toggle_balance": "Doppelklick zum Anzeigen/Ausblenden des Guthabens"
 		}
 	},
 	"settings": {
@@ -554,7 +557,7 @@
 	},
 	"receive": {
 		"text": {
-			"receive": "Empfang",
+			"receive": "Empfangen",
 			"address": "Empfangsadresse",
 			"receive_token": "$token empfangen"
 		},
@@ -643,6 +646,7 @@
 			"sending": "Sende...",
 			"signing": "Signiere...",
 			"signing_message": "Nachricht wird signiert...",
+			"confirming": "",
 			"network": "Netzwerk",
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",
@@ -830,8 +834,8 @@
 			"balance": "Guthaben",
 			"hide_zero_balances": "Nullsalden verbergen",
 			"all_tokens_with_zero_hidden": "Alle Assets mit Nullsaldo sind derzeit verborgen",
-			"filter_nothing_found": "Ups, nichts gefunden",
-			"filter_nothing_found_description": "Gib Token-Ticker oder Namen ein, um die Liste zu filtern",
+			"filter_nothing_found": "Keine aktiven Token gefunden",
+			"filter_nothing_found_description": "Suche unten nach verfügbaren Token oder importiere zusätzliche Token mittels \"Token verwalten\"",
 			"filter_placeholder": "Nach Token oder Symbol filtern",
 			"buy_or_receive": "Kaufe oder empfange jetzt deine ersten Token, um sie in der Liste zu sehen",
 			"initializing": "Initialisiere...",
@@ -911,7 +915,8 @@
 				"list_settings": "Listen-Einstellungen",
 				"import_token": "Token importieren",
 				"network": "Netzwerk",
-				"all_tokens_zero_balance": "Alle Token haben Nullsaldo."
+				"all_tokens_zero_balance": "Alle Token haben Nullsaldo.",
+				"enable_more_assets": "Weitere Token aktivieren"
 			},
 			"placeholder": {
 				"select_network": "Netzwerk auswählen"

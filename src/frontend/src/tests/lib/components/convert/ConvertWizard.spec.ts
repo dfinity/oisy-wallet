@@ -9,11 +9,11 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
-	FEE_CONTEXT_KEY,
-	initFeeContext,
-	initFeeStore,
-	type FeeContext
-} from '$eth/stores/fee.store';
+	ETH_FEE_CONTEXT_KEY,
+	initEthFeeContext,
+	initEthFeeStore,
+	type EthFeeContext
+} from '$eth/stores/eth-fee.store';
 import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 import {
 	BTC_CONVERT_FORM_TEST_ID,
@@ -60,13 +60,13 @@ describe('ConvertWizard', () => {
 	const mockContext = (sourceToken: Token) =>
 		new Map<
 			symbol,
-			ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext | FeeContext
+			ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext | EthFeeContext
 		>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
 			[
-				FEE_CONTEXT_KEY,
-				initFeeContext({
-					feeStore: initFeeStore(),
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore: initEthFeeStore(),
 					feeTokenIdStore: writable(sourceToken.id),
 					feeExchangeRateStore: writable(100),
 					feeSymbolStore: writable(sourceToken.symbol),

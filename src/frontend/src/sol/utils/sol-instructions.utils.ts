@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
@@ -122,6 +123,7 @@ const mapTokenParsedInstruction = async ({
 	cumulativeBalances,
 	addressToToken
 }: {
+	identity: OptionIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
@@ -280,12 +282,14 @@ const mapTokenParsedInstruction = async ({
 // Solana program Token2022 provides exactly the same instructions as the legacy Token program plus a few more.
 // So the implementation of the mapping of the instructions is the same as the legacy Token program for the instructions that are common.
 const mapToken2022ParsedInstruction = async ({
+	identity,
 	type,
 	info,
 	network,
 	cumulativeBalances,
 	addressToToken
 }: {
+	identity: OptionIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
@@ -304,6 +308,7 @@ const mapToken2022ParsedInstruction = async ({
 		].includes(type)
 	) {
 		return await mapTokenParsedInstruction({
+			identity,
 			type,
 			info,
 			network,
@@ -325,11 +330,13 @@ const mapAssociatedTokenAccountInstruction = ({
 };
 
 export const mapSolParsedInstruction = async ({
+	identity,
 	instruction,
 	network,
 	cumulativeBalances,
 	addressToToken
 }: {
+	identity: OptionIdentity;
 	instruction: SolRpcInstruction;
 	network: SolanaNetworkType;
 	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
@@ -354,6 +361,7 @@ export const mapSolParsedInstruction = async ({
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
 		return await mapTokenParsedInstruction({
+			identity,
 			type,
 			info,
 			network,
@@ -364,6 +372,7 @@ export const mapSolParsedInstruction = async ({
 
 	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
 		return mapToken2022ParsedInstruction({
+			identity,
 			type,
 			info,
 			network,

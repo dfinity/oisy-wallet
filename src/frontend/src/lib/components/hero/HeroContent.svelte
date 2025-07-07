@@ -91,7 +91,7 @@
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-pos-0 p-6 text-center text-primary-inverted transition-all duration-500 ease-in-out"
+	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary bg-pos-0 p-3 text-center text-primary-inverted transition-all duration-500 ease-in-out md:rounded-[28px] md:p-5"
 	class:from-default-0={$pseudoNetworkChainFusion}
 	class:to-default-100={$pseudoNetworkChainFusion}
 	class:bg-pos-100={!$pseudoNetworkChainFusion}

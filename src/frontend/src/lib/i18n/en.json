@@ -416,7 +416,8 @@
 			"incubated_with": "Incubated with",
 			"by": "by",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": "$oisy_short Assistant"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website"
@@ -481,8 +482,9 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
-			"spl_user_tokens": "Error while loading the SPL user tokens.",
+			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
@@ -498,7 +500,8 @@
 			"unavailable_balance": "$ value is not available",
 			"hidden_balance": "Your balance is hidden",
 			"top_up": "Top up your wallet to start using it!",
-			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
+			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
+			"tooltip_toggle_balance": "Double-click to hide/show balance"
 		}
 	},
 	"settings": {
@@ -643,6 +646,7 @@
 			"sending": "Sending...",
 			"signing": "Signing...",
 			"signing_message": "Signing message...",
+			"confirming": "Confirming...",
 			"network": "Network",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
@@ -830,8 +834,8 @@
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
 			"all_tokens_with_zero_hidden": "All assets with zero balance are currently hidden",
-			"filter_nothing_found": "Oops, nothing found",
-			"filter_nothing_found_description": "Type token ticker or name to filter list",
+			"filter_nothing_found": "No enabled tokens match",
+			"filter_nothing_found_description": "Search available assets below ot use \"Manage tokens\" to import additional tokens",
 			"filter_placeholder": "Filter by token or symbol",
 			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",
@@ -911,7 +915,8 @@
 				"list_settings": "List settings",
 				"import_token": "Import token",
 				"network": "Network",
-				"all_tokens_zero_balance": "All tokens have zero balance."
+				"all_tokens_zero_balance": "All tokens have zero balance.",
+				"enable_more_assets": "Enable more tokens"
 			},
 			"placeholder": {
 				"select_network": "Select the network"

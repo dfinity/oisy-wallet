@@ -11,7 +11,7 @@ import {
 	SUPPORTED_BITCOIN_NETWORK_IDS
 } from '$env/networks/networks.btc.env';
 import { SEPOLIA_NETWORK_ID, SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
@@ -32,7 +32,11 @@ export const isNetworkICP = (network: Network | undefined): boolean => isNetwork
 export const isNetworkSolana = (network: Network | undefined): network is SolanaNetwork =>
 	isNetworkIdSolana(network?.id);
 
-export const isNetworkIdICP: IsNetworkIdUtil = (id) => nonNullish(id) && ICP_NETWORK_ID === id;
+export const isPseudoNetworkIdIcpTestnet: IsNetworkIdUtil = (id) =>
+	nonNullish(id) && id === ICP_PSEUDO_TESTNET_NETWORK_ID;
+
+export const isNetworkIdICP: IsNetworkIdUtil = (id) =>
+	(nonNullish(id) && ICP_NETWORK_ID === id) || isPseudoNetworkIdIcpTestnet(id);
 
 export const isNetworkIdEthereum: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_ETHEREUM_NETWORK_IDS.includes(id);
@@ -87,6 +91,18 @@ const mapper: Record<symbol, BitcoinNetwork> = {
 export const mapNetworkIdToBitcoinNetwork = (networkId: NetworkId): BitcoinNetwork | undefined =>
 	mapper[networkId];
 
+export const showTokenFilteredBySelectedNetwork = ({
+	token,
+	$selectedNetwork,
+	$pseudoNetworkChainFusion
+}: {
+	token: Token;
+	$selectedNetwork: Network | undefined;
+	$pseudoNetworkChainFusion: boolean;
+}): boolean =>
+	($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && token.network.env !== 'testnet') ||
+	$selectedNetwork?.id === token.network.id;
+
 /**
  * Filter the tokens that either lives on the selected network or, if no network is provided, pseud Chain Fusion, then those that are not testnets.
  */
@@ -95,16 +111,9 @@ export const filterTokensForSelectedNetwork = <T extends Token>([
 	$selectedNetwork,
 	$pseudoNetworkChainFusion
 ]: [T[], Network | undefined, boolean]): T[] =>
-	$tokens.filter((token) => {
-		const {
-			network: { id: networkId, env }
-		} = token;
-
-		return (
-			($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && env !== 'testnet') ||
-			$selectedNetwork?.id === networkId
-		);
-	});
+	$tokens.filter((token) =>
+		showTokenFilteredBySelectedNetwork({ token, $selectedNetwork, $pseudoNetworkChainFusion })
+	);
 
 export const mapToSignerBitcoinNetwork = ({
 	network

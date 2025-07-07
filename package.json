@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.5.4",
+	"version": "1.5.7",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -96,7 +96,7 @@
 		"zod": "^3.25.56"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.1.13",
+		"@dfinity/eslint-config-oisy-wallet": "^0.1.14",
 		"@dfinity/ic-management": "^6.1.1",
 		"@dfinity/identity-secp256k1": "^2.4.0",
 		"@dfinity/internet-identity-playwright": "^0.0.5",
@@ -117,12 +117,12 @@
 		"jsdom": "^26.1.0",
 		"jsqr": "^1.4.0",
 		"pem-file": "^1.0.1",
-		"postcss": "^8.5.4",
+		"postcss": "^8.5.6",
 		"prettier": "^3.5.3",
 		"prettier-plugin-motoko": "^0.11.0",
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"prettier-plugin-svelte": "^3.4.0",
-		"prettier-plugin-tailwindcss": "^0.6.12",
+		"prettier-plugin-tailwindcss": "^0.6.13",
 		"sass": "^1.89.2",
 		"svelte": "^5.33.18",
 		"svelte-check": "^4.2.2",

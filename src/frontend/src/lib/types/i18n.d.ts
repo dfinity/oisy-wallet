@@ -304,7 +304,13 @@ interface I18nRewards {
 }
 
 interface I18nFooter {
-	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
+	text: {
+		incubated_with: string;
+		by: string;
+		dfinity_foundation: string;
+		copyright: string;
+		ai_assistant_console_button: string;
+	};
 	alt: { dfinity: string };
 }
 
@@ -359,8 +365,9 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		erc20_custom_tokens: string;
 		erc20_user_tokens: string;
-		spl_user_tokens: string;
+		spl_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
@@ -378,6 +385,7 @@ interface I18nHero {
 		hidden_balance: string;
 		top_up: string;
 		learn_more_about_erc20_icp: string;
+		tooltip_toggle_balance: string;
 	};
 }
 
@@ -514,6 +522,7 @@ interface I18nSend {
 		sending: string;
 		signing: string;
 		signing_message: string;
+		confirming: string;
 		network: string;
 		source_network: string;
 		destination_network: string;
@@ -770,6 +779,7 @@ interface I18nTokens {
 			import_token: string;
 			network: string;
 			all_tokens_zero_balance: string;
+			enable_more_assets: string;
 		};
 		placeholder: { select_network: string };
 		info: { no_changes: string };

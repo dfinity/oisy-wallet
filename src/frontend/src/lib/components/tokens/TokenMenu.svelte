@@ -2,6 +2,7 @@
 	import { Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
+	import type { Snippet } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
@@ -20,11 +21,16 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let testId: string | undefined = undefined;
+	interface Props {
+		testId?: string;
+		children: Snippet;
+	}
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
-	let fromRoute: NavigationTarget | undefined;
+	const { testId, children }: Props = $props();
+
+	let visible = $state(false);
+	let button: HTMLButtonElement | undefined = $state();
+	let fromRoute: NavigationTarget | undefined = $state();
 
 	afterNavigate(({ from }) => {
 		fromRoute = from ?? undefined;
@@ -34,7 +40,11 @@
 	const openModalId = Symbol();
 
 	const hideToken = () => {
-		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
+		const fn = $networkICP
+			? modalStore.openIcHideToken
+			: $networkSolana
+				? modalStore.openSolHideToken
+				: modalStore.openHideToken;
 		fn({
 			id: hideModalId,
 			data: fromRoute
@@ -61,17 +71,18 @@
 		visible = false;
 	};
 
-	let hideTokenLabel: string;
-	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
-		$token: nonNullish($token) ? getTokenDisplaySymbol($token) : ''
-	});
+	let hideTokenLabel: string = $derived(
+		replacePlaceholders($i18n.tokens.hide.token, {
+			$token: nonNullish($token) ? getTokenDisplaySymbol($token) : ''
+		})
+	);
 </script>
 
 <button
 	data-tid={`${testId}-button`}
 	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	bind:this={button}
-	on:click={() => (visible = true)}
+	onclick={() => (visible = true)}
 	aria-label={$i18n.tokens.alt.context_menu}
 	disabled={$erc20UserTokensNotInitialized}
 >
@@ -86,7 +97,7 @@
 			</ButtonMenu>
 		{/if}
 
-		<slot />
+		{@render children()}
 
 		<ButtonMenu ariaLabel={$i18n.tokens.details.title} onclick={openToken}>
 			{$i18n.tokens.details.title}

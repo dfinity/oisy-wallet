@@ -19,6 +19,7 @@
 		styleClass?: string;
 		transparent?: boolean;
 		onclick?: MouseEventHandler<HTMLButtonElement>;
+		ondblclick?: MouseEventHandler<HTMLButtonElement>;
 		children: Snippet;
 	}
 
@@ -38,6 +39,7 @@
 		styleClass = '',
 		transparent,
 		onclick,
+		ondblclick,
 		children
 	}: Props = $props();
 </script>
@@ -62,11 +64,12 @@
 	class:animate-pulse={loading}
 	class:transparent
 	{onclick}
+	{ondblclick}
 	data-tid={testId}
 	aria-label={ariaLabel}
 >
 	<span
-		class="flex gap-2"
+		class="flex min-w-0 gap-2"
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}

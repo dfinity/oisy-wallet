@@ -1,17 +1,22 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import { assertIndexLedgerId } from '$icp/services/ic-add-custom-tokens.service';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { toUserToken } from '$icp-eth/services/user-token.services';
 	import { removeCustomToken, removeUserToken, setCustomToken } from '$lib/api/backend.api';
-	import { deleteIdbEthToken, deleteIdbIcToken, deleteIdbSolToken } from '$lib/api/idb-tokens.api';
+	import {
+		deleteIdbEthTokenDeprecated,
+		deleteIdbIcToken,
+		deleteIdbSolToken
+	} from '$lib/api/idb-tokens.api';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
@@ -22,7 +27,10 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import { TRACK_DELETE_TOKEN_SUCCESS } from '$lib/constants/analytics.contants';
+	import {
+		TRACK_DELETE_TOKEN_SUCCESS,
+		TRACK_EDIT_TOKEN_SUCCESS
+	} from '$lib/constants/analytics.contants';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { TOKEN_MODAL_SAVE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -36,7 +44,6 @@
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -162,7 +169,7 @@
 				});
 
 				erc20UserTokensStore.reset(tokenToDelete.id);
-				await deleteIdbEthToken({ identity: $authIdentity, token: userToken });
+				await deleteIdbEthTokenDeprecated({ identity: $authIdentity, token: userToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
 			} else if (isTokenIcrc(tokenToDelete)) {
@@ -220,18 +227,37 @@
 			return;
 		}
 
-		if (isNullish(tokenToEdit) || isNullishOrEmpty(icrcTokenIndexCanisterId)) {
+		if (isNullish(tokenToEdit)) {
 			return;
 		}
 
 		try {
 			if (icTokenIcrcCustomToken(tokenToEdit)) {
+				loading = true;
 				gotoStep(TokenModalSteps.EDIT_PROGRESS);
 				progress(ProgressStepsAddToken.SAVE);
 
+				const { valid } = notEmptyString(icrcTokenIndexCanisterId)
+					? await assertIndexLedgerId({
+							identity: $authIdentity,
+							ledgerCanisterId: tokenToEdit.ledgerCanisterId,
+							indexCanisterId: icrcTokenIndexCanisterId
+						})
+					: { valid: true };
+
+				if (!valid) {
+					loading = false;
+					icrcTokenIndexCanisterId = tokenToEdit.indexCanisterId ?? '';
+					progress(ProgressStepsAddToken.INITIALIZATION);
+					gotoStep(TokenModalSteps.CONTENT);
+					return;
+				}
+
 				await setCustomToken({
 					token: toCustomToken({
-						indexCanisterId: icrcTokenIndexCanisterId,
+						...(notEmptyString(icrcTokenIndexCanisterId) && {
+							indexCanisterId: icrcTokenIndexCanisterId
+						}),
 						ledgerCanisterId: tokenToEdit.ledgerCanisterId,
 						version: tokenToEdit.version,
 						enabled: true,
@@ -245,11 +271,26 @@
 				await loadCustomTokens({
 					identity: $authIdentity,
 					onSuccess: () => {
+						if (!loading) {
+							return;
+						}
+
+						loading = false;
 						progress(ProgressStepsAddToken.DONE);
 						close();
 
 						// the token needs to be reset to restart the worker with indexCanisterId
 						icrcCustomTokensStore.reset(tokenToEdit.ledgerCanisterId);
+
+						trackEvent({
+							name: TRACK_EDIT_TOKEN_SUCCESS,
+							metadata: {
+								tokenId: `${tokenToEdit.id.description}`,
+								tokenSymbol: tokenToEdit.symbol,
+								ledgerCanisterId: tokenToEdit.ledgerCanisterId,
+								networkId: `${tokenToEdit.network.id.description}`
+							}
+						});
 
 						toastsShow({
 							text: replacePlaceholders($i18n.tokens.details.update_confirmation, {
@@ -267,6 +308,10 @@
 				err
 			});
 
+			loading = false;
+			icrcTokenIndexCanisterId = isTokenIcrc(tokenToEdit)
+				? (tokenToEdit.indexCanisterId ?? '')
+				: '';
 			progress(ProgressStepsAddToken.INITIALIZATION);
 			gotoStep(TokenModalSteps.CONTENT);
 		}
@@ -331,7 +376,7 @@
 					<ButtonBack onclick={() => gotoStep(TokenModalSteps.CONTENT)} />
 
 					<Button
-						disabled={isNullishOrEmpty(icrcTokenIndexCanisterId)}
+						disabled={icrcTokenIndexCanisterId === (token.indexCanisterId ?? '')}
 						onclick={() => onTokenEdit(token)}
 						testId={TOKEN_MODAL_SAVE_BUTTON}
 					>
