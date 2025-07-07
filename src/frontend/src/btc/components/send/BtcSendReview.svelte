@@ -64,7 +64,7 @@
 <SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
 	<BtcReviewNetwork networkId={$sendTokenNetworkId} slot="network" />
 
-	<BtcUtxosFee slot="fee" bind:utxosFee networkId={$sendTokenNetworkId} {amount} />
+	<BtcUtxosFee slot="fee" bind:utxosFee networkId={$sendTokenNetworkId} {amount} {source} />
 
 	<div class="mt-8" slot="info">
 		{#if insufficientFundsForFee}

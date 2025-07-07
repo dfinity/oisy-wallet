@@ -5,7 +5,7 @@
 		BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
 		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
 	} from '$btc/constants/btc.constants';
-	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
+	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -13,6 +13,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
+	export let source: string;
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let amountError = false;
@@ -43,6 +44,8 @@
 		if (
 			amountError ||
 			isNullish(networkId) ||
+			isNullish(source) ||
+			source === '' ||
 			(nonNullish($store) && $store.amountForFee === parsedAmount)
 		) {
 			return;
@@ -60,28 +63,34 @@
 
 		const network = mapNetworkIdToBitcoinNetwork(networkId);
 
-		const utxosFee = nonNullish(network)
-			? await selectUtxosFeeApi({
-					amount: parsedAmount,
-					network,
-					identity: $authIdentity
-				})
-			: undefined;
+		console.warn('loadEstimatedFee->prepareTransactionUtxos');
 
-		if (isNullish(utxosFee)) {
+		if (nonNullish(network)) {
+			const result = await prepareBtcSend({
+				amount: parsedAmount,
+				network,
+				identity: $authIdentity,
+				source
+			});
+
+			// Convert BtcReviewResult to UtxosFee format for compatibility
+			const utxosFee = {
+				feeSatoshis: result.feeSatoshis,
+				utxos: result.utxos
+			};
+
+			store.setUtxosFee({
+				utxosFee,
+				amountForFee: parsedAmount
+			});
+		} else {
 			store.reset();
-			return;
 		}
-
-		store.setUtxosFee({
-			utxosFee,
-			amountForFee: parsedAmount
-		});
 	};
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	$: amount, networkId, amountError, debounceEstimateFee();
+	$: amount, networkId, amountError, source, debounceEstimateFee();
 </script>
 
 <slot />
