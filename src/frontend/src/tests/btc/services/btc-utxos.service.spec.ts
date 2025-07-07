@@ -1,7 +1,7 @@
 import {
+	type BtcReviewResult,
 	getFeeRateFromPercentiles,
-	prepareBtcSend,
-	type BtcReviewResult
+	prepareBtcSend
 } from '$btc/services/btc-utxos.service';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
@@ -15,13 +15,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock environment variables
 vi.mock('$env/networks/networks.icrc.env', () => ({
-	CKBTC_MINTER_CANISTER_ID: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+	IC_CKBTC_MINTER_CANISTER_ID: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
 	BITCOIN_CANISTER_IDS: {
 		'rdmx6-jaaaa-aaaah-qcaiq-cai': 'ghsi2-tqaaa-aaaan-aaaca-cai'
 	}
 }));
 
-describe('btc-review.services', () => {
+describe('btc-utxos.service', () => {
 	const mockBtcAddress: BtcAddress = 'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4';
 	const mockNetwork: BitcoinNetwork = 'mainnet';
 	const mockAmount: Amount = 0.001;
