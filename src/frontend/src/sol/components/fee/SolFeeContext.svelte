@@ -19,7 +19,6 @@
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 
 	export let observe: boolean;
 	export let destination = '';
