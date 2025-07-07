@@ -6,7 +6,9 @@
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
 	import type { Erc20Metadata } from '$eth/types/erc20';
+	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
@@ -114,6 +116,15 @@
 			return;
 		}
 
+		await saveErc20Deprecated([
+			{
+				address: erc20ContractAddress,
+				...erc20Metadata,
+				network: network as EthereumNetwork,
+				enabled: true
+			}
+		]);
+
 		await saveErc20([
 			{
 				address: erc20ContractAddress,
@@ -161,8 +172,19 @@
 			identity: $authIdentity
 		});
 
-	const saveErc20 = (tokens: SaveUserToken[]): Promise<void> =>
+	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+	const saveErc20Deprecated = (tokens: SaveUserToken[]): Promise<void> =>
 		saveErc20UserTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
+	const saveErc20 = (tokens: SaveErc20CustomToken[]): Promise<void> =>
+		saveErc20CustomTokens({
 			tokens,
 			progress,
 			modalNext: () => modal?.set(3),

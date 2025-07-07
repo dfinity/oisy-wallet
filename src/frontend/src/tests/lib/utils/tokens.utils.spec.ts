@@ -11,7 +11,7 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import * as appContants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
@@ -723,7 +723,8 @@ describe('tokens.utils', () => {
 			}));
 
 			vi.mock('$eth/services/manage-tokens.services', () => ({
-				saveErc20UserTokens: vi.fn().mockResolvedValue(undefined)
+				saveErc20UserTokens: vi.fn().mockResolvedValue(undefined),
+				saveErc20CustomTokens: vi.fn().mockResolvedValue(undefined)
 			}));
 
 			vi.mock('$sol/services/manage-tokens.services', () => ({
@@ -756,6 +757,7 @@ describe('tokens.utils', () => {
 
 			expect(saveIcrcCustomTokens).not.toHaveBeenCalled();
 			expect(saveErc20UserTokens).not.toHaveBeenCalled();
+			expect(saveErc20CustomTokens).not.toHaveBeenCalled();
 			expect(saveSplCustomTokens).not.toHaveBeenCalled();
 		});
 
@@ -786,6 +788,23 @@ describe('tokens.utils', () => {
 			});
 
 			expect(saveErc20UserTokens).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([expect.objectContaining(token)]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveErc20CustomTokens when ERC20 tokens are present', async () => {
+			const token = { ...mockValidErc20Token, enabled: true } as unknown as TokenUi;
+
+			await saveAllCustomTokens({
+				tokens: { erc20: token },
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveErc20CustomTokens).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
 					identity: mockIdentity
