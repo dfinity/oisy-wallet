@@ -21,6 +21,7 @@ const postMessageSpy = vi.fn();
 class MockWorker {
 	postMessage = postMessageSpy;
 	onmessage: ((event: MessageEvent) => void) | null = null;
+	terminate: () => void = vi.fn();
 }
 
 vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
@@ -89,6 +90,17 @@ describe('worker.icrc-wallet.services', () => {
 						env
 					}
 				});
+			});
+
+			it('should destroy the worker', () => {
+				worker.destroy();
+
+				expect(postMessageSpy).toHaveBeenCalledOnce();
+				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+					msg: 'stopIcrcWalletTimer'
+				});
+
+				expect(workerInstance.terminate).toHaveBeenCalledOnce();
 			});
 
 			describe('onmessage', () => {

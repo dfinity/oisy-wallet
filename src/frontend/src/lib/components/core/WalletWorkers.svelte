@@ -26,7 +26,7 @@
 	$: tokens, debounceManageWorkers();
 
 	onDestroy(() => {
-		workers.forEach((worker) => worker.stop());
+		workers.forEach((worker) => worker.destroy());
 		workers.clear();
 	});
 

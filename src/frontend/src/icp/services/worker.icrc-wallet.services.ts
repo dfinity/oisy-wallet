@@ -80,6 +80,12 @@ export const initIcrcWalletWorker = async ({
 		}
 	};
 
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopIcrcWalletTimer'
+		});
+	};
+
 	return {
 		start: () => {
 			worker.postMessage({
@@ -91,11 +97,7 @@ export const initIcrcWalletWorker = async ({
 				}
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopIcrcWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerIcrcWalletTimer',
@@ -105,6 +107,10 @@ export const initIcrcWalletWorker = async ({
 					env
 				}
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };

@@ -77,6 +77,12 @@ export const initBtcWalletWorker = async ({
 		minterCanisterId
 	};
 
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopBtcWalletTimer'
+		});
+	};
+
 	return {
 		start: () => {
 			worker.postMessage({
@@ -84,16 +90,16 @@ export const initBtcWalletWorker = async ({
 				data
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopBtcWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerBtcWalletTimer',
 				data
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };
