@@ -17,6 +17,7 @@
 	} from '$sol/constants/sol.constants';
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 
