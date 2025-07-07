@@ -237,7 +237,7 @@ export const loadNextSolTransactions = async ({
 
 	const network = mapNetworkIdToNetwork(token.network.id);
 
-	if (isNullish(network) || isNullish(address)) {
+	if (isNullish(address)) {
 		return;
 	}
 

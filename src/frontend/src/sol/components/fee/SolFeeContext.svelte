@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { assertNonNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy } from 'svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		checkIfAccountExists,
@@ -36,13 +34,6 @@
 
 		const solNetwork = mapNetworkIdToNetwork($sendTokenNetworkId);
 
-		assertNonNullish(
-			solNetwork,
-			replacePlaceholders($i18n.init.error.no_solana_network, {
-				$network: $sendTokenNetworkId.description ?? ''
-			})
-		);
-
 		const addresses = isTokenSpl($sendToken) ? [$sendToken.address] : undefined;
 		const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
 		const fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS + priorityFee / MICROLAMPORTS_PER_LAMPORT;
@@ -74,12 +65,7 @@
 
 		const solNetwork = mapNetworkIdToNetwork($sendTokenNetworkId);
 
-		assertNonNullish(
-			solNetwork,
-			replacePlaceholders($i18n.init.error.no_solana_network, {
-				$network: $sendTokenNetworkId.description ?? ''
-			})
-		);
+
 
 		// we check if it is an ATA address and if it is not closed, if it isnt an ATA address or has been closed we need to charge the ATA fee
 		if (
@@ -89,6 +75,7 @@
 			ataFeeStore.setFee(undefined);
 			return;
 		}
+
 
 		const tokenAccount = await loadTokenAccount({
 			address: destination,

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { assertNonNullish, isNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -14,7 +14,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { getSplMetadata } from '$sol/services/spl.services';
@@ -59,13 +58,6 @@
 
 		try {
 			const solNetwork = mapNetworkIdToNetwork(network.id);
-
-			assertNonNullish(
-				solNetwork,
-				replacePlaceholders($i18n.init.error.no_solana_network, {
-					$network: network.id.description ?? ''
-				})
-			);
 
 			metadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
 
