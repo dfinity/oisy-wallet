@@ -141,9 +141,6 @@
 	let amount: bigint;
 	$: amount = BigInt(firstTransaction?.value ?? ZERO);
 
-	let data: string | undefined;
-	$: data = firstTransaction?.data;
-
 	const send = async () => {
 		const { success } = await sendServices({
 			request,
