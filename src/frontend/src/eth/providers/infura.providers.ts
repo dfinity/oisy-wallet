@@ -40,7 +40,8 @@ export class InfuraProvider {
 			trackEvent({
 				name: TRACK_ETH_ESTIMATE_GAS_ERROR,
 				metadata: {
-					error: `${err}`
+					error: `${err}`,
+					network: this.network.toString()
 				}
 			});
 
