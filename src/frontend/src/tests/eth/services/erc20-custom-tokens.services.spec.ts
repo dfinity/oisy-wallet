@@ -13,8 +13,13 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
-vi.mock('$lib/api/backend.api');
-vi.mock('$eth/services/erc20.services');
+vi.mock('$lib/api/backend.api', () => ({
+	setManyCustomTokens: vi.fn()
+}));
+
+vi.mock('$eth/services/erc20.services', () => ({
+	loadCustomTokens: vi.fn()
+}));
 
 describe('erc20-custom-tokens.services', () => {
 	describe('saveCustomTokens', () => {
