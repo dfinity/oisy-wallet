@@ -5,8 +5,8 @@ import {
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
-	type UtxoSelectionResult,
-	utxoTxIdToString
+	utxoTxIdToString,
+	type UtxoSelectionResult
 } from '$btc/utils/btc-utxos.utils';
 import type { Utxo } from '@dfinity/ckbtc';
 import { describe, expect, it } from 'vitest';
