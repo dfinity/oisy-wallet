@@ -23,6 +23,10 @@ export interface BtcReviewServiceParams {
 	source: BtcAddress;
 }
 
+/**
+ * Main orchestrator function that replaces the backend btc_select_user_utxos_fee call
+ * This function coordinates all the steps needed to select UTXOs and calculate fees
+ */
 export const prepareBtcSend = async ({
 	identity,
 	network,
