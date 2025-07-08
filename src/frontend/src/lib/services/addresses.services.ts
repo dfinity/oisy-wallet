@@ -6,6 +6,11 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { loadEthAddress, loadIdbEthAddress } from '$eth/services/eth-address.services';
+import {
+	networkBitcoinMainnetEnabled,
+	networkEthereumEnabled,
+	networkSolanaMainnetEnabled
+} from '$lib/derived/networks.derived';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess, ResultSuccessReduced } from '$lib/types/utils';
@@ -14,6 +19,7 @@ import {
 	loadIdbSolAddressMainnet,
 	loadSolAddressMainnet
 } from '$sol/services/sol-address.services';
+import { get } from 'svelte/store';
 
 export const loadAddresses = async (networkIds: NetworkId[]): Promise<ResultSuccess> => {
 	const results = await Promise.all([
@@ -32,13 +38,30 @@ export const loadAddresses = async (networkIds: NetworkId[]): Promise<ResultSucc
 };
 
 export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
-	const results = await Promise.all([
-		loadIdbBtcAddressMainnet(),
-		loadIdbEthAddress(),
-		loadIdbSolAddressMainnet()
-	]);
+	const promisesList: Promise<ResultSuccess<LoadIdbAddressError>>[] = [];
 
-	const { success, err } = reduceResults<LoadIdbAddressError>(results);
+	if (get(networkBitcoinMainnetEnabled)) {
+		promisesList.push(loadIdbBtcAddressMainnet());
+	}
+
+	if (get(networkEthereumEnabled)) {
+		promisesList.push(loadIdbEthAddress());
+	}
+
+	if (get(networkSolanaMainnetEnabled)) {
+		promisesList.push(loadIdbSolAddressMainnet());
+	}
+
+	let results = await Promise.all(promisesList);
+
+	// since reduceResults always expects at least one entry, we return a success result to satisfy the type when no promises need to be resolved
+	if (results.length === 0) {
+		results = [{ success: true, err: undefined }];
+	}
+
+	const { success, err } = reduceResults<LoadIdbAddressError>(
+		results as [ResultSuccess<LoadIdbAddressError>, ...ResultSuccess<LoadIdbAddressError>[]]
+	);
 
 	return { success, err };
 };
