@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
@@ -319,16 +320,14 @@ describe('sol-send.services', () => {
 		});
 
 		it('should throw an error if network is invalid', async () => {
-			spyMapNetworkIdToNetwork.mockReturnValueOnce(undefined);
-
 			await expect(
 				sendSol({
 					...mockParams,
-					token: SOLANA_TOKEN
+					token: { ...SOLANA_TOKEN, network: ETHEREUM_NETWORK }
 				})
 			).rejects.toThrow(
 				replacePlaceholders(en.init.error.no_solana_network, {
-					$network: SOLANA_TOKEN.network.id.description ?? ''
+					$network: ETHEREUM_NETWORK.id.description ?? ''
 				})
 			);
 		});
