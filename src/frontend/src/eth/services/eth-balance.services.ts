@@ -1,5 +1,3 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -66,8 +64,8 @@ const loadEthBalance = async ({
 				error: `${err}`
 			},
 			warning: `${replacePlaceholders(loading_balance, {
-				$symbol: tokenId.description ?? ETHEREUM_TOKEN.symbol,
-				$network: networkId.description ?? ETHEREUM_NETWORK.name
+				$symbol: `${tokenId.description}`,
+				$network: `${networkId.description}`
 			})} ${err}`
 		});
 
