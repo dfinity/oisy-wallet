@@ -48,6 +48,20 @@ pub struct Erc20Token {
     pub decimals: Option<u8>,
 }
 
+/// A network-specific unique ERC721 token identifier.
+#[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+#[serde(remote = "Self")]
+pub struct Erc721TokenId(pub String);
+
+/// An ERC721 compliant token on the Ethereum or EVM-compatible networks.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct Erc721Token {
+    pub token_address: Erc721TokenId,
+    pub chain_id: ChainId,
+    pub symbol: Option<String>,
+}
+
 /// A variant describing any token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[repr(u8)]
@@ -56,6 +70,7 @@ pub enum Token {
     SplMainnet(SplToken) = 1,
     SplDevnet(SplToken) = 2,
     Erc20(Erc20Token) = 3,
+    Erc721(Erc721Token) = 4,
 }
 
 /// User preferences for any token
@@ -78,6 +93,8 @@ pub enum CustomTokenId {
     SolMainnet(SplTokenId) = 1,
     /// A Solana token on the Solana devnet.
     SolDevnet(SplTokenId) = 2,
-    /// An Ethereum/EVM token on an EVM-compatible network.
+    /// An Ethereum/EVM erc20 token on an EVM-compatible network.
     Ethereum(Erc20TokenId, ChainId) = 3,
+    /// An Ethereum/EVM erc721 token on an EVM-compatible network.
+    EthereumErc721(Erc721TokenId, ChainId) = 4,
 }
