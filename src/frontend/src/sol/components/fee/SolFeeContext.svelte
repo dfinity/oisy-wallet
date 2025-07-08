@@ -14,9 +14,9 @@
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
+	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 
 	export let observe: boolean;
 	export let destination = '';
