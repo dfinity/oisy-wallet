@@ -1,15 +1,12 @@
 <script lang="ts">
-	import { type SvelteComponent, tick } from 'svelte';
+	import { tick, type Component } from 'svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import {
-    POPOVER_MENU,
-    POPOVER_MENU_ITEM
-  } from '$lib/constants/test-ids.constants';
+	import { POPOVER_MENU, POPOVER_MENU_ITEM } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		title?: string;
 		items: Array<{
-			logo: typeof SvelteComponent;
+			logo: Component;
 			title: string;
 			action: () => void;
 			testId?: string;
@@ -65,11 +62,7 @@
 	<slot name="trigger" {toggle} bindTrigger={(el: HTMLElement) => (triggerBtn = el)} />
 
 	{#if visible}
-		<button
-			type="button"
-			class="backdrop"
-			aria-label="Close menu"
-			onclick={() => (visible = false)}
+		<button type="button" class="backdrop" aria-label="Close menu" onclick={() => (visible = false)}
 		></button>
 		<div
 			bind:this={menu}
