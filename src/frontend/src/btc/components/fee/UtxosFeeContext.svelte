@@ -63,8 +63,6 @@
 
 		const network = mapNetworkIdToBitcoinNetwork(networkId);
 
-		console.warn('loadEstimatedFee->prepareTransactionUtxos');
-
 		if (nonNullish(network)) {
 			const result = await prepareBtcSend({
 				amount: parsedAmount,
