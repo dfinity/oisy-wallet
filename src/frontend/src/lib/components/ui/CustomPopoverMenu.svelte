@@ -1,16 +1,15 @@
-
 <script context="module" lang="ts">
 	import type { SvelteComponent } from 'svelte';
 	export interface IPopoverItem {
-	  logo: typeof SvelteComponent;
-	  title: string;
-	  action: () => void;
+		logo: typeof SvelteComponent;
+		title: string;
+		action: () => void;
 	}
-  </script>
+</script>
 
 <script lang="ts">
 	import { tick } from 'svelte';
-		import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 
 	let { title = '', items = [] as IPopoverItem[] } = $props<{
 		title?: string;
@@ -21,28 +20,30 @@
 	let triggerBtn: HTMLElement;
 	let menu: HTMLElement;
 
-	function toggle() {
+	const toggle = () => {
 		visible = !visible;
 		if (visible) {
 			tick().then(() => {
-				if (triggerBtn && menu) {positionMenu();}
+				if (triggerBtn && menu) {
+					positionMenu();
+				}
 			});
 		}
-	}
+	};
 
-	function positionMenu() {
-		if (!triggerBtn || !menu) {return;}
+	const positionMenu = () => {
+		if (!triggerBtn || !menu) return;
 		const rect = triggerBtn.getBoundingClientRect();
 		menu.style.setProperty('--popover-top', `${rect.bottom}px`);
 		menu.style.setProperty('--popover-left', `${rect.right}px`);
 		menu.style.setProperty('--popover-right', `${window.innerWidth - rect.left}px`);
-	}
+	};
 
-	function handleClickOutside(e: MouseEvent) {
+	const handleClickOutside = (e: MouseEvent) => {
 		if (visible && !menu.contains(e.target as Node) && !triggerBtn.contains(e.target as Node)) {
 			visible = false;
 		}
-	}
+	};
 
 	$effect(() => {
 		if (visible) {
@@ -71,17 +72,17 @@
 				<div class="popover-item popover-title text-base">{title}</div>
 			{/if}
 
-			{#each items as item}
+			{#each items as item (item.title)}
 				<LogoButton
 					hover
 					rounded={false}
 					condensed
 					styleClass="popover-item w-full px-0"
-					onClick={() => 
+					onClick={() => {
 						item.action();
 						visible = false;
-					}
-					>
+					}}
+				>
 					{#snippet logo()}
 						<svelte:component this={item.logo} />
 					{/snippet}
