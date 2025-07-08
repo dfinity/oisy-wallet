@@ -454,9 +454,7 @@ const ICONFUCIUS_IC_DATA: IcInterface | undefined = nonNullish(
 		}
 	: undefined;
 
-const BITCAT_IC_DATA: IcInterface | undefined = nonNullish(
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.BITCAT
-)
+const BITCAT_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.BITCAT)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.BITCAT,
 			position: 30
