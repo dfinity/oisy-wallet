@@ -40,7 +40,7 @@ const loadNftMetadata = async ({infuraProvider, contractAddress, tokenIds}: {inf
 
 	for (let i = 0; i < tokenIds.length; i++) {
 		await new Promise(resolve => setTimeout(resolve, 100));
-		nfts.push(await infuraProvider.metadata(contractAddress, tokenIds[i]))
+		nfts.push(await infuraProvider.getNftMetadata(contractAddress, tokenIds[i]))
 	}
 
 	return nfts;

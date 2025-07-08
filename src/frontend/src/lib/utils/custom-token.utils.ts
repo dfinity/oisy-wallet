@@ -6,13 +6,14 @@ import type {
 	Token
 } from '$declarations/backend/backend.did';
 import type {
-	Erc20SaveCustomToken,
+	Erc20SaveCustomToken, Erc721SaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
+import type { Erc721Token } from '$eth/types/erc721';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,
@@ -35,6 +36,16 @@ const toErc20CustomToken = ({
 	decimals: toNullable(decimals),
 	symbol: toNullable(symbol)
 });
+
+// const toErc721CustomToken = ({
+// 	address: token_address,
+// 	chainId: chain_id,
+// 	symbol
+// }: Erc721SaveCustomToken): Erc721Token => ({
+// 	token_address,
+// 	chain_id,
+// 	symbol: toNullable(symbol)
+// });
 
 const toSplCustomToken = ({
 	address: token_address,
@@ -61,6 +72,10 @@ export const toCustomToken = ({
 		if (networkKey === 'Erc20') {
 			return { Erc20: toErc20CustomToken(rest) };
 		}
+
+		// if (networkKey === 'Erc721') {
+		// 	// TODO update backend to support Erc721
+		// }
 
 		if (networkKey === 'SplMainnet') {
 			return { SplMainnet: toSplCustomToken(rest) };

@@ -2,7 +2,11 @@ import {InfuraProvider, type Networkish } from 'ethers/providers';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { Contract } from 'ethers';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
-import type { Nft } from '$eth/types/erc721';
+import type { Erc721ContractAddress, Erc721Metadata, Nft } from '$eth/types/erc721';
+import type { NetworkId } from '$lib/types/network';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { assertNonNullish } from '@dfinity/utils';
 
 export class InfuraERC721Provider {
 	private readonly provider: InfuraProvider;
@@ -11,7 +15,21 @@ export class InfuraERC721Provider {
 		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
 	}
 
-	metadata = async (contractAddress: string, tokenId: number): Promise<Nft> => {
+	metadata = async ({address}: Pick<Erc721ContractAddress, 'address'>): Promise<Erc721Metadata> => {
+		const erc721Contract = new Contract(address, ERC721_ABI, this.provider);
+
+		const [name, symbol] = await Promise.all([
+			erc721Contract.name(),
+			erc721Contract.symbol(),
+		]);
+
+		return {
+			name,
+			symbol
+		};
+	}
+
+	getNftMetadata = async (contractAddress: string, tokenId: number): Promise<Nft> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
 		try {
@@ -26,12 +44,12 @@ export class InfuraERC721Provider {
 			const response = await fetch(metadataUrl);
 			const metadata = await response.json();
 
-			let imageUrl = metadata?.image || '';
+			let imageUrl = metadata?.image ?? '';
 			if (imageUrl.startsWith('ipfs://')) {
 				imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
 			}
 
-			const mappedAttributes = (metadata?.attributes || []).map(attr => ({
+			const mappedAttributes = (metadata?.attributes ?? []).map((attr: { trait_type: string, value: string | number }) => ({
 				traitType: attr.trait_type,
 				value: attr.value.toString()
 			}));
@@ -39,7 +57,7 @@ export class InfuraERC721Provider {
 			return {
 				contractName,
 				contractSymbol,
-				name: metadata?.name || '',
+				name: metadata?.name ?? '',
 				attributes: mappedAttributes,
 				imageUrl
 			};
@@ -47,4 +65,23 @@ export class InfuraERC721Provider {
 			throw new Error(`Failed to fetch erc721 token metadata: ${error}`);
 		}
 	}
+}
+
+const providers: Record<NetworkId, InfuraERC721Provider> = [
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
+].reduce<Record<NetworkId, InfuraERC721Provider>>(
+	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraERC721Provider(infura) }),
+	{}
+);
+
+export const infuraErc721Providers = (networkId: NetworkId): InfuraERC721Provider => {
+	const provider = providers[networkId];
+
+	assertNonNullish(
+		provider,
+		"wusch"
+	)
+
+	return provider;
 }

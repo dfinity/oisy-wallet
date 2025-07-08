@@ -1,10 +1,13 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 	import type { Erc20Metadata } from '$eth/types/erc20';
+	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
@@ -20,8 +23,45 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let contractAddress: string | undefined;
-	export let metadata: Erc20Metadata | undefined;
+	export let metadata: Erc20Metadata | Erc721Metadata | undefined;
 	export let network: Network;
+
+	const loadErc20Metadata = async (address: string) => {
+		const { metadata: metadataApi } = infuraErc20Providers(network.id);
+		metadata = await metadataApi({ address });
+	}
+
+	const loadErc721Metadata = async (address: string) => {
+		const {metadata: metadataApi721} = infuraErc721Providers(network.id);
+		metadata = await metadataApi721({address});
+	}
+
+	const handleMetadata = () => {
+		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.incomplete_metadata }
+			});
+
+			dispatch('icBack');
+			return;
+		}
+
+		if (
+			[...$erc20Tokens, ...$erc721Tokens]?.find(
+				({ symbol, name, network: tokenNetwork }) =>
+					(symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
+						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')) &&
+					tokenNetwork.chainId === (network as EthereumNetwork).chainId
+			) !== undefined
+		) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.duplicate_metadata }
+			});
+
+			dispatch('icBack');
+			return;
+		}
+	}
 
 	onMount(async () => {
 		if (isNullish(contractAddress)) {
@@ -43,7 +83,7 @@
 		}
 
 		if (
-			$erc20Tokens?.find(
+			[...$erc20Tokens, ...$erc721Tokens]?.find(
 				({ address, network: tokenNetwork }) =>
 					areAddressesEqual({
 						address1: address,
@@ -61,40 +101,20 @@
 		}
 
 		try {
-			const { metadata: metadataApi } = infuraErc20Providers(network.id);
-			metadata = await metadataApi({ address: contractAddress });
-
-			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
-				toastsError({
-					msg: { text: $i18n.tokens.error.incomplete_metadata }
-				});
-
-				dispatch('icBack');
-				return;
-			}
-
-			if (
-				$erc20Tokens?.find(
-					({ symbol, name, network: tokenNetwork }) =>
-						(symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
-							name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')) &&
-						tokenNetwork.chainId === (network as EthereumNetwork).chainId
-				) !== undefined
-			) {
-				toastsError({
-					msg: { text: $i18n.tokens.error.duplicate_metadata }
-				});
-
-				dispatch('icBack');
-				return;
-			}
+			await loadErc20Metadata(contractAddress);
+			handleMetadata();
 		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.loading_metadata },
-				err
-			});
+			try {
+				await loadErc721Metadata(contractAddress);
+				handleMetadata();
+			} catch (err: unknown) {
+				toastsError({
+					msg: { text: $i18n.tokens.error.loading_metadata },
+					err
+				});
 
-			dispatch('icBack');
+				dispatch('icBack');
+			}
 		}
 	});
 
@@ -145,18 +165,20 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractDecimals" element="div">
-		{#snippet label()}
-			{$i18n.core.text.decimals}
-		{/snippet}
-		{#snippet content()}
-			{#if isNullish(metadata)}
-				&#8203;
-			{:else}
-				<span in:fade>{metadata.decimals}</span>
-			{/if}
-		{/snippet}
-	</Value>
+	{#if nonNullish(metadata?.decimals)}
+		<Value ref="contractDecimals" element="div">
+			{#snippet label()}
+				{$i18n.core.text.decimals}
+			{/snippet}
+			{#snippet content()}
+				{#if isNullish(metadata)}
+					&#8203;
+				{:else}
+					<span in:fade>{metadata.decimals}</span>
+				{/if}
+			{/snippet}
+		</Value>
+	{/if}
 
 	<AddTokenWarning />
 

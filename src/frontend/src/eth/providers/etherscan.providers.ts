@@ -203,7 +203,7 @@ export class EtherscanProvider {
 			params
 		);
 
-		return result.map(({TokenId}) => parseInt(TokenId))
+		return result.map(({TokenId}: {TokenId: string}) => parseInt(TokenId))
 	}
 }
 

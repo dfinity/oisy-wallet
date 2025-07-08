@@ -50,6 +50,7 @@ import {
 	queryAndUpdate
 } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 
 export const loadErc20Tokens = async ({
 	identity
@@ -195,6 +196,9 @@ const loadErc20CustomTokens = async (params: LoadCustomTokenParams): Promise<Cus
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<Erc20CustomToken[]> => {
+
+	console.log("Custom loading")
+
 	const loadCustomContracts = async (): Promise<Erc20CustomToken[]> => {
 		const erc20CustomTokens = await loadErc20CustomTokens(params);
 

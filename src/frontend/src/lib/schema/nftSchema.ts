@@ -1,5 +1,10 @@
 import * as z from 'zod';
 
+export const NftAttributeSchema = z.object({
+	traitType: z.string(),
+	value: z.string()
+})
+
 export const NftSchema = z.object({
 	contractName: z.string(),
 	contractSymbol: z.string(),
@@ -7,8 +12,3 @@ export const NftSchema = z.object({
 	imageUrl: z.string(),
 	attributes: z.array(NftAttributeSchema)
 });
-
-export const NftAttributeSchema = z.object({
-	traitType: z.string(),
-	value: z.string()
-})

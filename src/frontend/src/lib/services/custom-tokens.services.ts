@@ -32,6 +32,9 @@ const loadCustomTokensFromBackend = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
+	console.log("Custom contracts")
+	console.log(tokens)
+
 	// We filter the custom tokens, since the backend "Custom Token" potentially supports other types
 	const filteredTokens = tokens.filter(filterTokens);
 

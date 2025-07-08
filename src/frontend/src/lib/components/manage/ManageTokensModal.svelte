@@ -5,7 +5,7 @@
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
-	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+	import { saveErc20UserTokens, saveErc721CustomTokens } from '$eth/services/manage-tokens.services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
@@ -38,6 +38,8 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import type { Erc721Metadata } from '$eth/types/erc721';
+	import type { SaveErc721CustomToken } from '$eth/services/erc721-custom-tokens.services';
 
 	let {
 		initialSearch,
@@ -114,14 +116,25 @@
 			return;
 		}
 
-		await saveErc20([
-			{
-				address: erc20ContractAddress,
-				...erc20Metadata,
-				network: network as EthereumNetwork,
-				enabled: true
-			}
-		]);
+		if (nonNullish(erc20Metadata.decimals)) {
+			await saveErc20([
+				{
+					address: erc20ContractAddress,
+					...erc20Metadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
+		} else {
+			await saveErc721([
+				{
+					address: erc20ContractAddress,
+					...erc20Metadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
+		}
 	};
 
 	const saveSplToken = () => {
@@ -171,6 +184,16 @@
 			identity: $authIdentity
 		});
 
+	const saveErc721 = (tokens: SaveErc721CustomToken[]): Promise<void> =>
+		saveErc721CustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
 	const saveSpl = (tokens: SaveSplCustomToken[]): Promise<void> =>
 		saveSplCustomTokens({
 			tokens,
@@ -192,7 +215,7 @@
 	let indexCanisterId: string | undefined = $state();
 
 	let erc20ContractAddress: string | undefined = $state();
-	let erc20Metadata: Erc20Metadata | undefined = $state();
+	let erc20Metadata: Erc20Metadata | Erc721Metadata | undefined = $state();
 
 	let splTokenAddress: string | undefined = $state();
 	let splMetadata: TokenMetadata | undefined = $state();

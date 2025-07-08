@@ -7,6 +7,11 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { TokenType } from '$lib/enums/token-type';
+	import Button from '$lib/components/ui/Button.svelte';
+	import NFTsList from '$lib/components/nfts/NFTsList.svelte';
+
+	let selectedTokenType = $state(TokenType.TOKEN);
 </script>
 
 <div>
@@ -15,7 +20,24 @@
 			<div class="grow-1 relative flex justify-between">
 				<TokensFilter>
 					{#snippet overflowableContent()}
-						<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+						<Button
+							paddingSmall
+							ariaLabel="a2sdasd"
+							colorStyle={selectedTokenType === TokenType.TOKEN ? 'primary' : 'tertiary'}
+							onclick={() => selectedTokenType = TokenType.TOKEN}
+						>
+							Tokens
+						</Button>
+						<Button
+							paddingSmall
+							ariaLabel="asdasd"
+							colorStyle={selectedTokenType === TokenType.NFT ? 'primary' : 'tertiary'}
+							onclick={() => selectedTokenType = TokenType.NFT}
+						>
+							NFTs
+						</Button>
+
+<!--						<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>-->
 					{/snippet}
 				</TokensFilter>
 			</div>
@@ -25,7 +47,11 @@
 		</div>
 	</StickyHeader>
 
-	<TokensList />
+	{#if selectedTokenType === TokenType.TOKEN}
+		<TokensList />
+	{:else}
+		<NFTsList />
+	{/if}
 
 	<div in:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
 		<ManageTokensButton />
