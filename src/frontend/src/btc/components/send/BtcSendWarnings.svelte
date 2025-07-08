@@ -32,7 +32,9 @@
 {:else if utxosFee?.error === BtcPrepareSendError.InsufficientBalanceForFee}
 	<div in:fade>
 		<WarningBanner>
-			<span data-tid="btc-send-form-insufficient-funds-for-fee">{$i18n.fee.assertion.insufficient_funds_for_fee}</span>
+			<span data-tid="btc-send-form-insufficient-funds-for-fee"
+				>{$i18n.fee.assertion.insufficient_funds_for_fee}</span
+			>
 		</WarningBanner>
 	</div>
 {:else if utxosFee?.utxos.length === 0}
