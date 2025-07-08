@@ -352,6 +352,11 @@ export const idlFactory = ({ IDL }) => {
 		ledger_id: IDL.Principal,
 		index_id: IDL.Opt(IDL.Principal)
 	});
+	const Erc721Token = IDL.Record({
+		token_address: IDL.Text,
+		chain_id: IDL.Nat64,
+		symbol: IDL.Opt(IDL.Text)
+	});
 	const SplToken = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
 		token_address: IDL.Text,
@@ -360,6 +365,7 @@ export const idlFactory = ({ IDL }) => {
 	const Token = IDL.Variant({
 		Erc20: Erc20Token,
 		Icrc: IcrcToken,
+		Erc721: Erc721Token,
 		SplDevnet: SplToken,
 		SplMainnet: SplToken
 	});
