@@ -52,7 +52,6 @@
 	disabled={invalid}
 >
 	<BtcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
-
 	<!--	TODO: calculate and display transaction fee	-->
 
 	<slot name="cancel" slot="cancel" />
