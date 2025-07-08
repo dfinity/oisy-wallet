@@ -144,5 +144,8 @@
 		"fee": {
 			"__bigint__": "10"
 		}
+	},
+	"DOG.OT": {
+		"ledgerCanisterId": "fmazi-nqaaa-aaaar-qagmq-cai"
 	}
 }
