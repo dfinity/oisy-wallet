@@ -156,5 +156,8 @@
 	},
 	"MIM.OT": {
 		"ledgerCanisterId": "rk7m2-7yaaa-aaaar-qbmta-cai"
+	},
+	"BITCAT": {
+		"ledgerCanisterId": "xlwi6-kyaaa-aaaar-qarya-cai"
 	}
 }
