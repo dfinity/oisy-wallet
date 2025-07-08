@@ -306,7 +306,7 @@ type SupportedCredential = record {
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
 	Erc20 : Erc20Token;
-	Erc721: Erc721Token;
+	Erc721 : Erc721Token;
 	Icrc : IcrcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken
