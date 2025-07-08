@@ -454,6 +454,15 @@ const ICONFUCIUS_IC_DATA: IcInterface | undefined = nonNullish(
 		}
 	: undefined;
 
+const BITCAT_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.BITCAT
+)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.BITCAT,
+			position: 30
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -576,3 +585,6 @@ export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 
 export const ICONFUCIUS_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ICONFUCIUS_IC_DATA?.ledgerCanisterId ?? '5kijx-siaaa-aaaar-qaqda-cai';
+
+export const BITCAT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	BITCAT_IC_DATA?.ledgerCanisterId ?? 'xlwi6-kyaaa-aaaar-qarya-cai';
