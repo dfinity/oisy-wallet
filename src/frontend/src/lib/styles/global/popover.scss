@@ -1,3 +1,5 @@
+@use '../mixins/media';
+
 .backdrop {
 	@apply fixed inset-0 z-50 bg-transparent;
 }

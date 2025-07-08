@@ -247,5 +247,11 @@ export const TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON =
 	'token-modal-index-canister-id-edit-button';
 export const TOKEN_MODAL_SAVE_BUTTON = 'token-modal-save-button';
 
+// Custom popover menu
+
+export const POPOVER_TRIGGER_BUTTON = 'popover-trigger';
+export const POPOVER_MENU = 'popover-menu';
+export const POPOVER_MENU_ITEM = 'popover-menu-item';
+
 // AI Assistant
 export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistanta-console-button';

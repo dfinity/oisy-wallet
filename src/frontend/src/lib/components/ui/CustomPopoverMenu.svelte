@@ -1,6 +1,10 @@
 <script lang="ts">
-	import { type Snippet, type SvelteComponent, tick } from 'svelte';
+	import { type SvelteComponent, tick } from 'svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import {
+    POPOVER_MENU,
+    POPOVER_MENU_ITEM
+  } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		title?: string;
@@ -8,16 +12,13 @@
 			logo: typeof SvelteComponent;
 			title: string;
 			action: () => void;
+			testId?: string;
 		}>;
-		trigger: Snippet<[() => void, (el: HTMLElement) => void]>;
 	}
-
-	let { title, items, trigger }: Props = $props();
-
+	let { title, items }: Props = $props();
 	let visible = $state(false);
 	let triggerBtn: HTMLElement;
 	let menu = $state<HTMLElement | null>(null);
-
 	const toggle = () => {
 		visible = !visible;
 		if (visible) {
@@ -28,7 +29,6 @@
 			});
 		}
 	};
-
 	const positionMenu = () => {
 		if (!triggerBtn || !menu) {
 			return;
@@ -38,7 +38,6 @@
 		menu.style.setProperty('--popover-left', `${rect.right}px`);
 		menu.style.setProperty('--popover-right', `${window.innerWidth - rect.left}px`);
 	};
-
 	const handleClickOutside = (e: MouseEvent) => {
 		if (
 			visible &&
@@ -50,7 +49,6 @@
 			visible = false;
 		}
 	};
-
 	$effect(() => {
 		if (visible) {
 			document.addEventListener('click', handleClickOutside);
@@ -64,7 +62,7 @@
 </script>
 
 <div class="custom-popover-trigger">
-	{@render trigger(toggle, (el: HTMLElement) => (triggerBtn = el))}
+	<slot name="trigger" {toggle} bindTrigger={(el: HTMLElement) => (triggerBtn = el)} />
 
 	{#if visible}
 		<button
@@ -72,13 +70,13 @@
 			class="backdrop"
 			aria-label="Close menu"
 			onclick={() => (visible = false)}
-		>
-		</button>
+		></button>
 		<div
 			bind:this={menu}
 			class="custom-popover wrapper animate-fade-in with-border"
 			role="menu"
 			tabindex="-1"
+			data-tid={POPOVER_MENU}
 		>
 			{#if title}
 				<div class="popover-item popover-title text-base">{title}</div>
@@ -89,13 +87,14 @@
 					rounded={false}
 					condensed
 					styleClass="popover-item w-full px-0"
+					testId={item.testId ?? POPOVER_MENU_ITEM}
 					onClick={() => {
 						item.action();
 						visible = false;
 					}}
 				>
 					{#snippet logo()}
-						<svelte:component this={item.logo} />
+						<item.logo />
 					{/snippet}
 					{#snippet title()}
 						<span class="text-base font-normal">{item.title}</span>
