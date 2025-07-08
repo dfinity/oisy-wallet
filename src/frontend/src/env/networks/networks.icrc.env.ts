@@ -454,9 +454,7 @@ const ICONFUCIUS_IC_DATA: IcInterface | undefined = nonNullish(
 		}
 	: undefined;
 
-const DOG_OT_IC_DATA: IcInterface | undefined = nonNullish(
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.DOG_OT
-)
+const DOG_OT_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.DOG_OT)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.DOG_OT,
 			position: 28
