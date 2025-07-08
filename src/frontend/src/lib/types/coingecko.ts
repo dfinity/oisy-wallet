@@ -6,7 +6,7 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { EthAddress } from '$lib/types/address';
 import type { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
-import type * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export type CoingeckoCoinsId = z.infer<typeof CoingeckoCoinsIdSchema>;
 

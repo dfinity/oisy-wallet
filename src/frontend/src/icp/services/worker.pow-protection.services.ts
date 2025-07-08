@@ -47,21 +47,27 @@ export const initPowProtectorWorker: PowProtectorWorker =
 			}
 		};
 
+		const stop = () => {
+			worker.postMessage({
+				msg: 'stopPowProtectionTimer'
+			});
+		};
+
 		return {
 			start: () => {
 				worker.postMessage({
 					msg: 'startPowProtectionTimer'
 				});
 			},
-			stop: () => {
-				worker.postMessage({
-					msg: 'stopPowProtectionTimer'
-				});
-			},
+			stop,
 			trigger: () => {
 				worker.postMessage({
 					msg: 'triggerPowProtectionTimer'
 				});
+			},
+			destroy: () => {
+				stop();
+				worker.terminate();
 			}
 		};
 	};

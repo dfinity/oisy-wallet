@@ -20,6 +20,7 @@ const postMessageSpy = vi.fn();
 class MockWorker {
 	postMessage = postMessageSpy;
 	onmessage: ((event: MessageEvent) => void) | null = null;
+	terminate: () => void = vi.fn();
 }
 
 vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
@@ -69,6 +70,17 @@ describe('worker.pow-protection.services', () => {
 			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 				msg: 'triggerPowProtectionTimer'
 			});
+		});
+
+		it('should destroy the worker', () => {
+			worker.destroy();
+
+			expect(postMessageSpy).toHaveBeenCalledOnce();
+			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+				msg: 'stopPowProtectionTimer'
+			});
+
+			expect(workerInstance.terminate).toHaveBeenCalledOnce();
 		});
 
 		describe('onmessage', () => {

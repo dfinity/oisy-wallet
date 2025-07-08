@@ -28,8 +28,11 @@
 	</div>
 
 	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
+		{#if $authSignedIn && !isRouteTransactions($page)}
+			<NetworksSwitcher />
+		{/if}
+
 		{#if $authSignedIn}
-			<NetworksSwitcher disabled={isRouteTransactions($page)} />
 			<WalletConnect />
 		{/if}
 
