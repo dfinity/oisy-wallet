@@ -78,7 +78,6 @@
 		} else {
 			store.reset();
 		}
-
 	};
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);

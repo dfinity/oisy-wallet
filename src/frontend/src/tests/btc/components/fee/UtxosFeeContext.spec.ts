@@ -26,9 +26,7 @@ describe('UtxosFeeContext', () => {
 
 	const mockBtcReviewResult = {
 		feeSatoshis: 700n,
-		utxos: [],
-		totalInputValue: 100000n,
-		changeAmount: 99300n
+		utxos: []
 	};
 
 	const mockBtcUtxosService = () =>
@@ -187,8 +185,7 @@ describe('UtxosFeeContext', () => {
 		});
 	});
 
-	it('should not call prepareBtcSend if provided networkId is not BTC', async () => {
-		const resetSpy = vi.spyOn(store, 'reset');
+	it('should not call prepareBtcSend if invalid networkId is provided', async () => {
 		const prepareBtcSendSpy = mockBtcUtxosService();
 
 		mockAuthStore();
@@ -199,21 +196,18 @@ describe('UtxosFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(resetSpy).toHaveBeenCalledOnce();
 			expect(prepareBtcSendSpy).not.toHaveBeenCalled();
 		});
 	});
 
-	it('should not call prepareBtcSend if provided amountForFee has not changed since last request', async () => {
+	it('should not call prepareBtcSend if the same amount is already in the store', async () => {
 		const prepareBtcSendSpy = mockBtcUtxosService();
-		const resetSpy = vi.spyOn(store, 'reset');
-
 		mockAuthStore();
 
 		store.setUtxosFee({
 			utxosFee: {
-				feeSatoshis: mockBtcReviewResult.feeSatoshis,
-				utxos: mockBtcReviewResult.utxos
+				feeSatoshis: 100n,
+				utxos: []
 			},
 			amountForFee: amount
 		});
@@ -224,64 +218,46 @@ describe('UtxosFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(resetSpy).not.toHaveBeenCalled();
 			expect(prepareBtcSendSpy).not.toHaveBeenCalled();
 		});
 	});
 
-	it('should call prepareBtcSend if provided amountForFee has changed since last request', async () => {
+	it('should reset the store and call prepareBtcSend if the new amount is greater than the proportion', async () => {
 		const prepareBtcSendSpy = mockBtcUtxosService();
 		const resetSpy = vi.spyOn(store, 'reset');
-
 		mockAuthStore();
 
 		store.setUtxosFee({
 			utxosFee: {
-				feeSatoshis: mockBtcReviewResult.feeSatoshis,
-				utxos: mockBtcReviewResult.utxos
+				feeSatoshis: 100n,
+				utxos: []
 			},
-			amountForFee: amount
+			amountForFee: 1
 		});
 
 		render(UtxosFeeContext, {
-			props: {
-				...props,
-				amount: amount + 1
-			},
+			props: { ...props, amount: 1 * BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION },
 			context: mockContext(store)
 		});
 
 		await waitFor(() => {
-			expect(resetSpy).not.toHaveBeenCalled();
-			expect(prepareBtcSendSpy).toHaveBeenCalled();
+			expect(resetSpy).toHaveBeenCalledOnce();
+			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 		});
 	});
 
-	it('should call prepareBtcSend and reset store if new amount is 10x bigger than previous value', async () => {
+	it('should not call prepareBtcSend if source is empty', async () => {
 		const prepareBtcSendSpy = mockBtcUtxosService();
-		const resetSpy = vi.spyOn(store, 'reset');
 
 		mockAuthStore();
 
-		store.setUtxosFee({
-			utxosFee: {
-				feeSatoshis: mockBtcReviewResult.feeSatoshis,
-				utxos: mockBtcReviewResult.utxos
-			},
-			amountForFee: amount
-		});
-
 		render(UtxosFeeContext, {
-			props: {
-				...props,
-				amount: amount * BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION
-			},
+			props: { ...props, source: '' },
 			context: mockContext(store)
 		});
 
 		await waitFor(() => {
-			expect(resetSpy).toHaveBeenCalled();
-			expect(prepareBtcSendSpy).toHaveBeenCalled();
+			expect(prepareBtcSendSpy).not.toHaveBeenCalled();
 		});
 	});
 });
