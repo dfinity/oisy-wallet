@@ -73,9 +73,7 @@ describe('BtcConvertTokenWizard', () => {
 	const mockprepareBtcSendApi = () =>
 		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
-			utxos: mockUtxosFee.utxos,
-			totalInputValue: 500000n,
-			changeAmount: 400000n
+			utxos: mockUtxosFee.utxos
 		});
 	const mockBackendApi = () =>
 		vi
