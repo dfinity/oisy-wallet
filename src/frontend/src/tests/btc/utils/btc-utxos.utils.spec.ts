@@ -5,8 +5,8 @@ import {
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
-	utxoTxIdToString,
-	type UtxoSelectionResult
+	type UtxoSelectionResult,
+	utxoTxIdToString
 } from '$btc/utils/btc-utxos.utils';
 import type { Utxo } from '@dfinity/ckbtc';
 import { describe, expect, it } from 'vitest';
@@ -132,6 +132,7 @@ describe('btc-utxos.utils', () => {
 			expect(result.selectedUtxos.length).toBeGreaterThan(0);
 			expect(result.totalInputValue).toBeGreaterThan(250_000n);
 			expect(result.changeAmount).toBeGreaterThanOrEqual(0n);
+			expect(result.sufficientFunds).toBeTruthy();
 		});
 
 		it('should select UTXOs in descending order by value', () => {
@@ -143,6 +144,7 @@ describe('btc-utxos.utils', () => {
 
 			// Should select the largest UTXO first (300_000)
 			expect(result.selectedUtxos[0].value).toBe(300_000n);
+			expect(result.sufficientFunds).toBeTruthy();
 		});
 
 		it('should calculate correct change amount', () => {
@@ -155,28 +157,34 @@ describe('btc-utxos.utils', () => {
 			// With 1 sat/vbyte and estimated tx size of 140 bytes, fee = 140 sats
 			// Change = 500_000 - 100_000 - 140 = 399_860
 			expect(result.changeAmount).toBe(399_860n);
+			expect(result.sufficientFunds).toBeTruthy();
 		});
 
-		it('should throw error when no UTXOs available', () => {
-			expect(() =>
-				calculateUtxoSelection({
-					availableUtxos: [],
-					amountSatoshis: 100_000n,
-					feeRateSatoshisPerVByte: 10n
-				})
-			).toThrow('No UTXOs available for selection');
+		it('should return insufficient funds when no UTXOs available', () => {
+			const result = calculateUtxoSelection({
+				availableUtxos: [],
+				amountSatoshis: 100_000n,
+				feeRateSatoshisPerVByte: 10n
+			});
+
+			expect(result.sufficientFunds).toBeFalsy();
+			expect(result.selectedUtxos).toEqual([]);
+			expect(result.totalInputValue).toBe(0n);
+			expect(result.changeAmount).toBe(0n);
 		});
 
-		it('should throw error when insufficient funds including fees', () => {
+		it('should return insufficient funds when insufficient funds including fees', () => {
 			const smallUtxos = [createMockUtxo({ value: 1000 })];
 
-			expect(() =>
-				calculateUtxoSelection({
-					availableUtxos: smallUtxos,
-					amountSatoshis: 900n,
-					feeRateSatoshisPerVByte: 100n // High fee rate will make it insufficient
-				})
-			).toThrow('Insufficient funds');
+			const result = calculateUtxoSelection({
+				availableUtxos: smallUtxos,
+				amountSatoshis: 900n,
+				feeRateSatoshisPerVByte: 100n // High fee rate will make it insufficient
+			});
+
+			expect(result.sufficientFunds).toBeFalsy();
+			expect(result.selectedUtxos.length).toBeGreaterThan(0);
+			expect(result.changeAmount).toBe(0n);
 		});
 
 		it('should handle zero fee rate', () => {
@@ -187,6 +195,7 @@ describe('btc-utxos.utils', () => {
 			});
 
 			expect(result.changeAmount).toBe(50_000n); // No fees
+			expect(result.sufficientFunds).toBeTruthy();
 		});
 	});
 
@@ -330,7 +339,8 @@ describe('btc-utxos.utils', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 500_000 })],
 				totalInputValue: 500_000n,
-				changeAmount: 300_000n
+				changeAmount: 300_000n,
+				sufficientFunds: true
 			};
 			const amountSatoshis = 150_000n;
 
@@ -347,7 +357,8 @@ describe('btc-utxos.utils', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 200_000 })],
 				totalInputValue: 200_000n,
-				changeAmount: 0n
+				changeAmount: 0n,
+				sufficientFunds: true
 			};
 			const amountSatoshis = 180_000n;
 
@@ -364,7 +375,8 @@ describe('btc-utxos.utils', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 300_000 }), createMockUtxo({ value: 200_000 })],
 				totalInputValue: 500_000n,
-				changeAmount: 100_000n
+				changeAmount: 100_000n,
+				sufficientFunds: true
 			};
 			const amountSatoshis = 350_000n;
 
@@ -381,7 +393,8 @@ describe('btc-utxos.utils', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 100_000 })],
 				totalInputValue: 100_000n,
-				changeAmount: 30_000n
+				changeAmount: 30_000n,
+				sufficientFunds: true
 			};
 			const amountSatoshis = 70_000n;
 

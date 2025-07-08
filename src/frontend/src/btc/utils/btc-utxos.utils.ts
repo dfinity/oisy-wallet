@@ -5,6 +5,7 @@ export interface UtxoSelectionResult {
 	selectedUtxos: Utxo[];
 	totalInputValue: bigint;
 	changeAmount: bigint;
+	sufficientFunds: boolean;
 }
 
 /**
@@ -58,7 +59,12 @@ export const calculateUtxoSelection = ({
 	feeRateSatoshisPerVByte: bigint;
 }): UtxoSelectionResult => {
 	if (availableUtxos.length === 0) {
-		throw new Error('No UTXOs available for selection');
+		return {
+			selectedUtxos: [],
+			totalInputValue: 0n,
+			changeAmount: 0n,
+			sufficientFunds: false
+		};
 	}
 
 	// Sort UTXOs by value in descending order
@@ -92,22 +98,19 @@ export const calculateUtxoSelection = ({
 			return {
 				selectedUtxos,
 				totalInputValue,
-				changeAmount
+				changeAmount,
+				sufficientFunds: true
 			};
 		}
 	}
 
 	// If we get here, we don't have sufficient funds
-	const finalTxSize = estimateTransactionSize({
-		numInputs: selectedUtxos.length,
-		numOutputs: 2
-	});
-	const finalEstimatedFee = BigInt(finalTxSize) * feeRateSatoshisPerVByte;
-	const totalRequired = amountSatoshis + finalEstimatedFee;
-
-	throw new Error(
-		`Insufficient funds: required ${totalRequired} satoshis (${amountSatoshis} and ${finalEstimatedFee} fee), available ${totalInputValue} satoshis`
-	);
+	return {
+		selectedUtxos,
+		totalInputValue,
+		changeAmount: 0n,
+		sufficientFunds: false
+	};
 };
 
 /**

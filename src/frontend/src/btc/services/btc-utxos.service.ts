@@ -88,6 +88,15 @@ export const prepareBtcSend = async ({
 		feeRateSatoshisPerVByte
 	});
 
+	// Check if there were insufficient funds during UTXO selection
+	if (!selection.sufficientFunds) {
+		return {
+			feeSatoshis: 0n,
+			utxos: filteredUtxos,
+			error: BtcPrepareSendError.InsufficientBalanceForFee
+		};
+	}
+
 	// Step 5: Calculate the final fee based on selected UTXOs
 	const feeSatoshis = calculateFinalFee({ selection, amountSatoshis });
 
