@@ -20,6 +20,13 @@ pub enum TokenStandard {
     ///
     /// - [ERC20 Spec](https://eips.ethereum.org/EIPS/eip-20)
     ERC20,
+    /// Standard for the Ethereum blockchain
+    ///
+    /// # Used for:
+    /// - Most tokens on ETH and other EVM networks.
+    ///
+    /// - [ERC721 Spec](https://eips.ethereum.org/EIPS/eip-721)
+    ERC721,
     /// Standard for the Bitcoin blockchain
     ///
     /// # Used for:
