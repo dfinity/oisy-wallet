@@ -21,10 +21,6 @@ export const erc721CustomTokens: Readable<Erc721CustomToken[]> = derived(
 		}, []) ?? []
 );
 
-const erc721CustomTokensToggleable: Readable<Erc721CustomToken[]> = derived(
-	[erc721CustomTokens],
-	([$erc721CustomTokens]) => [])
-
 export const erc721Tokens: Readable<Erc721TokenToggleable[]> = derived(
-	[erc721CustomTokensToggleable],
-	([$erc721CustomTokensToggleable]) => [...$erc721CustomTokensToggleable]);
+	[erc721CustomTokens],
+	([$erc721CustomTokens]) => [...$erc721CustomTokens]);

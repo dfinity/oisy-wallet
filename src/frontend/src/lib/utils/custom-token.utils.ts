@@ -37,15 +37,15 @@ const toErc20CustomToken = ({
 	symbol: toNullable(symbol)
 });
 
-// const toErc721CustomToken = ({
-// 	address: token_address,
-// 	chainId: chain_id,
-// 	symbol
-// }: Erc721SaveCustomToken): Erc721Token => ({
-// 	token_address,
-// 	chain_id,
-// 	symbol: toNullable(symbol)
-// });
+const toErc721CustomToken = ({
+	address: token_address,
+	chainId: chain_id,
+	symbol
+}: Erc721SaveCustomToken): Erc721Token => ({
+	token_address,
+	chain_id,
+	symbol: toNullable(symbol)
+});
 
 const toSplCustomToken = ({
 	address: token_address,
@@ -73,9 +73,9 @@ export const toCustomToken = ({
 			return { Erc20: toErc20CustomToken(rest) };
 		}
 
-		// if (networkKey === 'Erc721') {
-		// 	// TODO update backend to support Erc721
-		// }
+		if (networkKey === 'Erc721') {
+			return { Erc721: toErc721CustomToken(rest) };
+		}
 
 		if (networkKey === 'SplMainnet') {
 			return { SplMainnet: toSplCustomToken(rest) };

@@ -51,6 +51,7 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { loadErc721Tokens } from '$eth/services/erc721.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -83,9 +84,10 @@
 	})();
 
 	const loadData = async () => {
-		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
+		// Load Erc20 and Erc721 contracts and ICRC metadata before loading balances and transactions
 		await Promise.all([
 			loadErc20Tokens({ identity: $authIdentity }),
+			loadErc721Tokens({ identity: $authIdentity }),
 			loadIcrcTokens({ identity: $authIdentity }),
 			loadSplTokens({ identity: $authIdentity })
 		]);

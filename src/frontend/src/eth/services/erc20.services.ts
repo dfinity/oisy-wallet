@@ -196,9 +196,6 @@ const loadErc20CustomTokens = async (params: LoadCustomTokenParams): Promise<Cus
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<Erc20CustomToken[]> => {
-
-	console.log("Custom loading")
-
 	const loadCustomContracts = async (): Promise<Erc20CustomToken[]> => {
 		const erc20CustomTokens = await loadErc20CustomTokens(params);
 

@@ -10,6 +10,7 @@ import { get } from 'svelte/store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { loadCustomTokens } from '$eth/services/erc721.services';
 
 export type SaveErc721CustomToken = Pick<
 	Erc721CustomToken,
@@ -30,17 +31,11 @@ export const saveCustomTokens = async ({
 		networkKey: 'Erc721'
 	}))
 
-	console.log(customTokens)
-
-	// TODO save
-	// const wusch = tokens.map(toCustomToken)
-	// console.log(wusch)
-
-	// await setManyCustomTokens({
-	// 	identity,
-	// 	tokens: tokens.map(toCustomToken),
-	// 	nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-	// });
+	await setManyCustomTokens({
+		identity,
+		tokens: customTokens,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 
 	progress?.(ProgressStepsAddToken.UPDATE_UI);
 
@@ -48,7 +43,6 @@ export const saveCustomTokens = async ({
 	const disabledTokens = tokens.filter(({ enabled, id }) => !enabled && nonNullish(id));
 	disabledTokens.forEach(({id}) => erc721CustomTokensStore.reset(id as TokenId));
 
-	// TODO(GIX-2740): reload only what's needed to spare Infura calls
 	// Reload all user tokens for simplicity reason.
-	// TODO load
+	await loadCustomTokens({identity})
 };

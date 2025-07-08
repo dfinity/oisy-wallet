@@ -1,13 +1,100 @@
 import { InfuraERC721Provider } from '$eth/providers/infura-erc721.providers';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import type { Address } from '$lib/types/address';
 import type { Nft } from '$eth/types/erc721';
 import { nftStore } from '$eth/stores/nft.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { LoadCustomTokenParams } from '$lib/types/custom-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import { get } from 'svelte/store';
+import { i18n } from '$lib/stores/i18n.store';
+import type { OptionIdentity } from '$lib/types/identity';
+import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
+import type { CustomToken } from '$declarations/backend/backend.did';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 
-export const loadErc721Tokens = async () => {
-	await Promise.all([loadNfts()])
+export const loadErc721Tokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
+	await Promise.all([loadCustomTokens({ identity, useCache: true })]);
+}
+
+export const loadCustomTokens = ({
+	identity,
+	useCache = false
+}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> => queryAndUpdate<Erc721CustomToken[]>({
+	request: (params) => loadCustomTokensWithMetadata({...params, useCache}),
+	onLoad: loadCustomTokenData,
+	onUpdateError: ({error: err}) => {
+		erc721CustomTokensStore.resetAll();
+
+		toastsError({
+			msg: { text: get(i18n).init.error.spl_custom_tokens },
+			err
+		});
+	},
+	identity,
+	strategy: 'query'
+});
+
+const loadErc721CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
+	await loadNetworkCustomTokens({
+		...params,
+		filterTokens: ({token}) => 'Erc721' in token,
+		setIdbTokens: setIdbEthTokens,
+		getIdbTokens: getIdbEthTokens
+	})
+
+const loadCustomTokensWithMetadata = async (params: LoadCustomTokenParams): Promise<Erc721CustomToken[]> => {
+	const loadCustomContracts = async (): Promise<Erc721CustomToken[]> => {
+		const erc721CustomTokens: CustomToken[] = await loadErc721CustomTokens(params);
+
+		return erc721CustomTokens.filter((customToken): customToken is CustomToken & { token: { Erc721: any } } => 'Erc721' in customToken.token)
+			.map(({token, enabled, version: versionNullable}) => {
+				const version = fromNullable(versionNullable);
+
+				const {
+					Erc721: { symbol, token_address: tokenAddress, chain_id: tokenChainId }
+				} = token;
+
+				const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
+					({ chainId }) => tokenChainId === chainId
+				);
+
+				// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
+				assertNonNullish(
+					network,
+					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
+				);
+
+				return {
+					id: parseTokenId(`custom-token#${symbol}#${network.chainId}`),
+					name: tokenAddress,
+					address: tokenAddress,
+					network,
+					symbol: fromNullable(symbol) ?? '',
+					standard: 'erc721' as const,
+					category: 'custom' as const,
+					enabled,
+					version
+				}
+			})
+	}
+
+	return await loadCustomContracts();
+}
+
+const loadCustomTokenData = ({
+	response: tokens,
+	certified
+}: {
+	certified: boolean;
+	response: Erc721CustomToken[];
+}) => {
+	erc721CustomTokensStore.setAll(tokens.map((token) => ({data: token, certified})));
 }
 
 const loadNfts = async () => {

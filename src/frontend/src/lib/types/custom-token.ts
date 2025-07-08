@@ -31,7 +31,7 @@ export type SaveCustomTokenWithKey = UserTokenState &
 	(
 		| TokenVariant<'Icrc', IcrcSaveCustomToken>
 		| TokenVariant<'Erc20', Erc20SaveCustomToken>
-		// | TokenVariant<'Erc721', Erc721SaveCustomToken>
+		| TokenVariant<'Erc721', Erc721SaveCustomToken>
 		| TokenVariant<'SplDevnet' | 'SplMainnet', SplSaveCustomToken>
 	);
 
