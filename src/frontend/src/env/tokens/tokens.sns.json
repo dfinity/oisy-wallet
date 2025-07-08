@@ -337,7 +337,7 @@
 			"name": "Motoko",
 			"symbol": "MOTOKO",
 			"fee": {
-				"__bigint__": "10000000"
+				"__bigint__": "1000000"
 			},
 			"alternativeName": "Motoko",
 			"url": "https://2uktw-yiaaa-aaaah-adwxq-cai.icp0.io/"
