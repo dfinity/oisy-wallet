@@ -1,4 +1,5 @@
-import { saveErc20UserTokens, saveErc721CustomTokens } from '$eth/services/manage-tokens.services';
+import { saveErc20CustomTokens, saveErc721CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
@@ -263,7 +264,7 @@ export const groupTogglableTokens = (
 	tokens: Record<string, Token>
 ): {
 	icrc: IcrcCustomToken[];
-	erc20: Erc20UserToken[];
+	erc20: (Erc20UserToken | Erc20CustomToken)[];
 	erc721: Erc721CustomToken[];
 	spl: SplTokenToggleable[];
 } =>
@@ -334,6 +335,10 @@ export const saveAllCustomTokens = async ({
 		...(erc20.length > 0
 			? [
 					saveErc20UserTokens({
+						...commonParams,
+						tokens: erc20
+					}),
+					saveErc20CustomTokens({
 						...commonParams,
 						tokens: erc20
 					})

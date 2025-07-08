@@ -75,6 +75,12 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 		tokenOwnerAddress
 	};
 
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopSolWalletTimer'
+		});
+	};
+
 	return {
 		start: () => {
 			worker.postMessage({
@@ -82,16 +88,16 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 				data
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopSolWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerSolWalletTimer',
 				data
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };
