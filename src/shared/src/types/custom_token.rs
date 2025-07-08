@@ -96,5 +96,5 @@ pub enum CustomTokenId {
     /// An Ethereum/EVM erc20 token on an EVM-compatible network.
     Ethereum(Erc20TokenId, ChainId) = 3,
     /// An Ethereum/EVM erc721 token on an EVM-compatible network.
-    Ethereum(Erc721TokenId, ChainId) = 4,
+    EthereumErc721(Erc721TokenId, ChainId) = 4,
 }
