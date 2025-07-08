@@ -11,6 +11,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	export let source: string;
@@ -44,8 +45,7 @@
 		if (
 			amountError ||
 			isNullish(networkId) ||
-			isNullish(source) ||
-			source === '' ||
+			isNullishOrEmpty(source) ||
 			(nonNullish($store) && $store.amountForFee === parsedAmount)
 		) {
 			return;
