@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { Component } from 'svelte';
 	import CustomPopoverMenu from '$lib/components/ui/CustomPopoverMenu.svelte';
-	import { type Component } from 'svelte';
 
 	export let title: string | undefined;
 	export let items: Array<{

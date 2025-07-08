@@ -44,11 +44,12 @@ describe('CustomPopoverMenu', () => {
 
 		await fireEvent.click(triggerBtn);
 		await tick();
+
 		expect(screen.queryByRole('menu')).toBeNull();
 	});
 
 	it('renders title and executes item action then closes', async () => {
-		const { action } = items[0];
+		const [{ action }] = items;
 		render(TestWrapper, {
 			props: {
 				items,
@@ -84,10 +85,12 @@ describe('CustomPopoverMenu', () => {
 		const triggerBtn = screen.getByText('Test Trigger');
 		await fireEvent.click(triggerBtn);
 		await tick();
+
 		expect(screen.getByRole('menu')).toBeInTheDocument();
 
 		await fireEvent.click(document.body);
 		await tick();
+
 		expect(screen.queryByRole('menu')).toBeNull();
 	});
 });
