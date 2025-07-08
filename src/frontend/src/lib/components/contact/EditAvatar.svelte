@@ -1,11 +1,10 @@
 <script lang="ts">
-	import type { SvelteComponent } from 'svelte';
-	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
+	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import CustomPopoverMenu from '$lib/components/ui/CustomPopoverMenu.svelte';
-
+	import { POPOVER_TRIGGER_BUTTON } from '$lib/constants/test-ids.constants';
 	const replaceImage = () => {
 		// console.log('Replace clicked');
 		// TODO: implement replace logic
@@ -14,20 +13,19 @@
 		// console.log('Remove clicked');
 		// TODO: implement remove logic
 	};
-
 	const items = [
 		{
-			logo: IconImage as typeof SvelteComponent,
+			logo: IconImage,
 			title: 'Replace',
 			action: replaceImage
 		},
 		{
-			logo: IconTrash as typeof SvelteComponent,
+			logo: IconTrash,
 			title: 'Remove',
-			action: removeImage
+			action: removeImage,
+			testId: 'IconTrash'
 		}
 	];
-
 	let menuButton: HTMLButtonElement;
 </script>
 
@@ -41,6 +39,7 @@
 			transparent
 			link={false}
 			ariaLabel="Edit"
+			testId={POPOVER_TRIGGER_BUTTON}
 		>
 			{#snippet icon()}
 				<IconPencil />
