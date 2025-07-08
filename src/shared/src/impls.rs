@@ -9,7 +9,7 @@ use crate::{
         backend_config::{Config, InitArg},
         contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
         custom_token::{
-            CustomToken, CustomTokenId, Erc20Token, Erc20TokenId, Etc721Token, Erc721TokenId, IcrcToken, SplToken, SplTokenId,
+            CustomToken, CustomTokenId, Erc20Token, Erc20TokenId, Erc721Token, Erc721TokenId, IcrcToken, SplToken, SplTokenId,
             Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
