@@ -3,7 +3,8 @@ use std::sync::LazyLock;
 use candid::Principal;
 use shared::types::{
     custom_token::{
-        ChainId, CustomToken, Erc20Token, Erc20TokenId, Erc721Token, Erc721TokenId, IcrcToken, SplToken, SplTokenId, Token,
+        ChainId, CustomToken, Erc20Token, Erc20TokenId, Erc721Token, Erc721TokenId, IcrcToken,
+        SplToken, SplTokenId, Token,
     },
     TokenVersion,
 };
@@ -70,7 +71,7 @@ static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc721(Erc721Token {
         token_address: ERC721_TOKEN_ID.clone(),
         chain_id: ERC721_CHAIN_ID.clone(),
-        symbol: Some("DEGODS".to_string())
+        symbol: Some("DEGODS".to_string()),
     }),
     enabled: true,
     version: None,
