@@ -60,6 +60,7 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	assertNonNullish(address, 'No Solana address provided to start Solana wallet worker.');
 
 	const network = mapNetworkIdToNetwork(token.network.id);
+	assertNonNullish(network, 'No Solana network provided to start Solana wallet worker.');
 
 	// If the token is an SPL token, we need to pass the token address and the owner address to the worker.
 	// Otherwise, we pass undefined, which will be considered as the native SOLANA token.
