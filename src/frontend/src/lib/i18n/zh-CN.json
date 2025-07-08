@@ -1103,13 +1103,13 @@
 			"unconfirmed": "未确认"
 		},
 		"type": {
-			"send": "",
-			"receive": "",
-			"withdraw": "",
-			"deposit": "",
-			"approve": "",
-			"burn": "",
-			"mint": ""
+			"send": "转出",
+			"receive": "收款",
+			"withdraw": "提现",
+			"deposit": "充值",
+			"approve": "同意",
+			"burn": "Burn",
+			"mint": "Mint"
 		},
 		"label": {
 			"reimbursement": "退款",
