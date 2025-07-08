@@ -46,11 +46,11 @@
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
 			utxosFee = nonNullish(network)
 				? await prepareBtcSend({
-					identity: $authIdentity,
-					network,
-					amount,
-					source
-				})
+						identity: $authIdentity,
+						network,
+						amount,
+						source
+					})
 				: undefined;
 		} catch (err: unknown) {
 			console.error('Error selecting utxos fee', err);
