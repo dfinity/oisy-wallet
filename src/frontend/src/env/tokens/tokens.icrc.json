@@ -146,6 +146,12 @@
 		}
 	},
 	"DOG.OT": {
-		"ledgerCanisterId": "fmazi-nqaaa-aaaar-qagmq-cai"
+		"ledgerCanisterId": "fmazi-nqaaa-aaaar-qagmq-cai",
+		"decimals": 5,
+		"name": "DOG•GO•TO•THE•MOON",
+		"symbol": "DOG.OT",
+		"fee": {
+			"__bigint__": "100000"
+		}
 	}
 }
