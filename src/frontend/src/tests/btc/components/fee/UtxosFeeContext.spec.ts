@@ -3,7 +3,7 @@ import {
 	BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
 	DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
 } from '$btc/constants/btc.constants';
-import * as btcUtxosService from '$btc/services/btc-utxos.service';
+import * as btcUtxosApi from '$btc/services/btc-utxos.service';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
 	initUtxosFeeStore,
@@ -32,7 +32,7 @@ describe('UtxosFeeContext', () => {
 	};
 
 	const mockBtcUtxosService = () =>
-		vi.spyOn(btcUtxosService, 'prepareBtcSend').mockResolvedValue(mockBtcReviewResult);
+		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue(mockBtcReviewResult);
 	let store: UtxosFeeStore;
 
 	const props = {

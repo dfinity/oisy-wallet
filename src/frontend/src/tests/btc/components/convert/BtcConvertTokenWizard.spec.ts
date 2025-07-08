@@ -1,6 +1,6 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
 import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
-import * as btcReviewApi from '$btc/services/btc-utxos.service';
+import * as btcUtxosApi from '$btc/services/btc-utxos.service';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
@@ -71,7 +71,7 @@ describe('BtcConvertTokenWizard', () => {
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
 	const mockprepareBtcSendApi = () =>
-		vi.spyOn(btcReviewApi, 'prepareBtcSend').mockResolvedValue({
+		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
 			utxos: mockUtxosFee.utxos,
 			totalInputValue: 500000n,

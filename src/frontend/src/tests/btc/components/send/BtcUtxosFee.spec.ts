@@ -1,5 +1,5 @@
 import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
-import * as btcReviewApi from '$btc/services/btc-utxos.service';
+import * as btcUtxosApi from '$btc/services/btc-utxos.service';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
@@ -43,7 +43,7 @@ describe('BtcUtxosFee', () => {
 	});
 
 	it('fetches and renders utxos fee if not provided', async () => {
-		vi.spyOn(btcReviewApi, 'prepareBtcSend').mockResolvedValue({
+		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
 			utxos: mockUtxosFee.utxos,
 			totalInputValue: 500000n,
