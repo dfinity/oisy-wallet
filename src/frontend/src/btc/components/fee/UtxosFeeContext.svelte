@@ -64,18 +64,12 @@
 		const network = mapNetworkIdToBitcoinNetwork(networkId);
 
 		if (nonNullish(network)) {
-			const result = await prepareBtcSend({
+			const utxosFee = await prepareBtcSend({
 				amount: parsedAmount,
 				network,
 				identity: $authIdentity,
 				source
 			});
-
-			// Convert BtcReviewResult to UtxosFee format for compatibility
-			const utxosFee = {
-				feeSatoshis: result.feeSatoshis,
-				utxos: result.utxos
-			};
 
 			store.setUtxosFee({
 				utxosFee,
@@ -84,6 +78,7 @@
 		} else {
 			store.reset();
 		}
+
 	};
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
