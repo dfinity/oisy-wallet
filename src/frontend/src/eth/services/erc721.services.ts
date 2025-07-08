@@ -32,7 +32,7 @@ export const loadCustomTokens = ({
 		erc721CustomTokensStore.resetAll();
 
 		toastsError({
-			msg: { text: get(i18n).init.error.spl_custom_tokens },
+			msg: { text: get(i18n).init.error.erc721_custom_tokens },
 			err
 		});
 	},

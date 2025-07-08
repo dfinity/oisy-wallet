@@ -368,6 +368,7 @@ interface I18nInit {
 		erc20_custom_tokens: string;
 		erc20_user_tokens: string;
 		spl_custom_tokens: string;
+		erc721_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
