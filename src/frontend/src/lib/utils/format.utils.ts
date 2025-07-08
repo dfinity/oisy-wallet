@@ -34,19 +34,38 @@ export const formatToken = ({
 
 	const maxFractionDigits = Math.min(leadingZeros + 2, MAX_DEFAULT_DISPLAY_DECIMALS);
 	const minFractionDigits = displayDecimals ?? DEFAULT_DISPLAY_DECIMALS;
+	const digitsToShow =
+		displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS);
 
-	const formatted = (+res).toLocaleString('en-US', {
-		useGrouping: false,
-		maximumFractionDigits:
-			displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS),
-		minimumFractionDigits: trailingZeros ? minFractionDigits : undefined
-	}) as `${number}`;
+	const [intPart, fracPartRaw = ''] = res.split('.');
+	const paddedFrac = (fracPartRaw + '0'.repeat(digitsToShow)).slice(0, digitsToShow + 1);
 
-	if (trailingZeros) {
-		return formatted;
-	}
+	const shouldRoundUp = +paddedFrac[digitsToShow] >= 5;
+	const roundedFrac = paddedFrac
+		.slice(0, digitsToShow)
+		.split('')
+		.reverse()
+		.reduce<{ carry: number; digits: string[] }>(
+			(acc, digit, idx) => {
+				const offset = idx === 0 && shouldRoundUp ? 1 : acc.carry;
+				const sum = +digit + offset;
+				acc.carry = sum > 9 ? 1 : 0;
+				acc.digits.push((sum % 10).toString());
+				return acc;
+			},
+			{ carry: 0, digits: [] }
+		);
 
-	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
+	const finalFrac = roundedFrac.digits.reverse().join('');
+	const finalInt = (BigInt(intPart) + BigInt(roundedFrac.carry)).toString();
+
+	const result = finalFrac.length > 0 ? `${finalInt}.${finalFrac}` : finalInt;
+
+	const trimmed = trailingZeros
+		? result.padEnd(result.indexOf('.') + 1 + minFractionDigits, '0')
+		: result.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+
+	return `${showPlusSign && +res > 0 ? '+' : ''}${trimmed as `${number}`}`;
 };
 
 export const formatTokenBigintToNumber = (params: FormatTokenParams): number =>

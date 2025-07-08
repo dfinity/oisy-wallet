@@ -146,6 +146,49 @@ describe('format.utils', () => {
 			expect(formatToken({ value: 1200000000n })).toBe('< 0.00000001');
 			expect(formatToken({ value: 7000000000n })).toBe('< 0.00000001');
 		});
+
+		it('should format correctly for precision above the maximum', () => {
+			expect(formatToken({ value: 999999999999999876n, displayDecimals: 18, unitName: 18 })).toBe(
+				'0.999999999999999876'
+			);
+
+			expect(formatToken({ value: 999999999999999876n, displayDecimals: 17, unitName: 18 })).toBe(
+				'0.99999999999999988'
+			);
+
+			expect(formatToken({ value: 999999999999999871n, displayDecimals: 17, unitName: 18 })).toBe(
+				'0.99999999999999987'
+			);
+
+			expect(
+				formatToken({ value: 9999999999999999999999999876n, displayDecimals: 28, unitName: 28 })
+			).toBe('0.9999999999999999999999999876');
+
+			expect(
+				formatToken({
+					value: 9999999999999999999999999876n,
+					displayDecimals: 4,
+					unitName: 28,
+					trailingZeros: true
+				})
+			).toBe('1.0000');
+
+			expect(formatToken({ value: 9999999999999999999999999876n, unitName: 28 })).toBe('1');
+
+			expect(formatToken({ value: 876n, displayDecimals: 28, unitName: 28 })).toBe(
+				'0.0000000000000000000000000876'
+			);
+
+			expect(formatToken({ value: 876n, unitName: 28 })).toBe('< 0.00000001');
+
+			expect(
+				formatToken({
+					value: 1111119999999999999999999999999876n,
+					displayDecimals: 28,
+					unitName: 28
+				})
+			).toBe('111111.9999999999999999999999999876');
+		});
 	});
 
 	describe('formatSecondsToNormalizedDate', () => {
