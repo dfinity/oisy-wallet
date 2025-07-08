@@ -67,7 +67,7 @@ export const formatToken = ({
 		? result.padEnd(result.indexOf('.') + 1 + minFractionDigits, '0')
 		: result.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
 
-	const prefix = isNegative ? '-' : showPlusSign && value > 0n ? '+' : '';
+	const prefix = isNegative ? '-' : showPlusSign && +res > 0 ? '+' : '';
 
 	return `${prefix}${trimmed as `${number}`}`;
 };
