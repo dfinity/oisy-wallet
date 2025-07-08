@@ -1,5 +1,4 @@
 import {
-	calculateFinalFee,
 	calculateUtxoSelection,
 	estimateTransactionSize,
 	extractUtxoTxIds,
@@ -133,6 +132,7 @@ describe('btc-utxos.utils', () => {
 			expect(result.totalInputValue).toBeGreaterThan(250_000n);
 			expect(result.changeAmount).toBeGreaterThanOrEqual(0n);
 			expect(result.sufficientFunds).toBeTruthy();
+			expect(result.feeSatoshis).toBeGreaterThan(0n);
 		});
 
 		it('should select UTXOs in descending order by value', () => {
@@ -145,6 +145,7 @@ describe('btc-utxos.utils', () => {
 			// Should select the largest UTXO first (300_000)
 			expect(result.selectedUtxos[0].value).toBe(300_000n);
 			expect(result.sufficientFunds).toBeTruthy();
+			expect(result.feeSatoshis).toBeGreaterThan(0n);
 		});
 
 		it('should calculate correct change amount', () => {
@@ -158,22 +159,24 @@ describe('btc-utxos.utils', () => {
 			// Change = 500_000 - 100_000 - 140 = 399_860
 			expect(result.changeAmount).toBe(399_860n);
 			expect(result.sufficientFunds).toBeTruthy();
+			expect(result.feeSatoshis).toBe(140n);
 		});
 
-		it('should return insufficient funds when no UTXOs available', () => {
+		it('should return empty result when no UTXOs available', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: [],
 				amountSatoshis: 100_000n,
 				feeRateSatoshisPerVByte: 10n
 			});
 
-			expect(result.sufficientFunds).toBeFalsy();
-			expect(result.selectedUtxos).toEqual([]);
+			expect(result.selectedUtxos).toHaveLength(0);
 			expect(result.totalInputValue).toBe(0n);
 			expect(result.changeAmount).toBe(0n);
+			expect(result.sufficientFunds).toBeFalsy();
+			expect(result.feeSatoshis).toBe(0n);
 		});
 
-		it('should return insufficient funds when insufficient funds including fees', () => {
+		it('should return insufficient funds when not enough UTXOs', () => {
 			const smallUtxos = [createMockUtxo({ value: 1000 })];
 
 			const result = calculateUtxoSelection({
@@ -183,8 +186,7 @@ describe('btc-utxos.utils', () => {
 			});
 
 			expect(result.sufficientFunds).toBeFalsy();
-			expect(result.selectedUtxos.length).toBeGreaterThan(0);
-			expect(result.changeAmount).toBe(0n);
+			expect(result.feeSatoshis).toBe(0n);
 		});
 
 		it('should handle zero fee rate', () => {
@@ -196,6 +198,7 @@ describe('btc-utxos.utils', () => {
 
 			expect(result.changeAmount).toBe(50_000n); // No fees
 			expect(result.sufficientFunds).toBeTruthy();
+			expect(result.feeSatoshis).toBe(0n);
 		});
 	});
 
@@ -334,23 +337,22 @@ describe('btc-utxos.utils', () => {
 		});
 	});
 
-	describe('calculateFinalFee', () => {
+	describe('calculateUtxoSelection with fees', () => {
 		it('should calculate fee correctly', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 500_000 })],
 				totalInputValue: 500_000n,
 				changeAmount: 300_000n,
-				sufficientFunds: true
+				sufficientFunds: true,
+				feeSatoshis: 50_000n
 			};
 			const amountSatoshis = 150_000n;
 
-			const result = calculateFinalFee({
-				selection,
-				amountSatoshis
-			});
-
 			// Fee = totalInput - (amount + change) = 500_000 - (150_000 + 300_000) = 50_000
-			expect(result).toBe(50_000n);
+			const calculatedFee = selection.totalInputValue - (amountSatoshis + selection.changeAmount);
+
+			expect(calculatedFee).toBe(50_000n);
+			expect(selection.feeSatoshis).toBe(50_000n);
 		});
 
 		it('should handle zero change amount', () => {
@@ -358,17 +360,16 @@ describe('btc-utxos.utils', () => {
 				selectedUtxos: [createMockUtxo({ value: 200_000 })],
 				totalInputValue: 200_000n,
 				changeAmount: 0n,
-				sufficientFunds: true
+				sufficientFunds: true,
+				feeSatoshis: 20_000n
 			};
 			const amountSatoshis = 180_000n;
 
-			const result = calculateFinalFee({
-				selection,
-				amountSatoshis
-			});
-
 			// Fee = 200_000 - (180_000 + 0) = 20_000
-			expect(result).toBe(20_000n);
+			const calculatedFee = selection.totalInputValue - (amountSatoshis + selection.changeAmount);
+
+			expect(calculatedFee).toBe(20_000n);
+			expect(selection.feeSatoshis).toBe(20_000n);
 		});
 
 		it('should handle multiple UTXOs in selection', () => {
@@ -376,17 +377,16 @@ describe('btc-utxos.utils', () => {
 				selectedUtxos: [createMockUtxo({ value: 300_000 }), createMockUtxo({ value: 200_000 })],
 				totalInputValue: 500_000n,
 				changeAmount: 100_000n,
-				sufficientFunds: true
+				sufficientFunds: true,
+				feeSatoshis: 50_000n
 			};
 			const amountSatoshis = 350_000n;
 
-			const result = calculateFinalFee({
-				selection,
-				amountSatoshis
-			});
-
 			// Fee = 500_000 - (350_000 + 100_000) = 50_000
-			expect(result).toBe(50_000n);
+			const calculatedFee = selection.totalInputValue - (amountSatoshis + selection.changeAmount);
+
+			expect(calculatedFee).toBe(50_000n);
+			expect(selection.feeSatoshis).toBe(50_000n);
 		});
 
 		it('should return zero when no fee is applied', () => {
@@ -394,17 +394,16 @@ describe('btc-utxos.utils', () => {
 				selectedUtxos: [createMockUtxo({ value: 100_000 })],
 				totalInputValue: 100_000n,
 				changeAmount: 30_000n,
-				sufficientFunds: true
+				sufficientFunds: true,
+				feeSatoshis: 0n
 			};
 			const amountSatoshis = 70_000n;
 
-			const result = calculateFinalFee({
-				selection,
-				amountSatoshis
-			});
-
 			// Fee = 100_000 - (70_000 + 30_000) = 0
-			expect(result).toBe(0n);
+			const calculatedFee = selection.totalInputValue - (amountSatoshis + selection.changeAmount);
+
+			expect(calculatedFee).toBe(0n);
+			expect(selection.feeSatoshis).toBe(0n);
 		});
 	});
 });

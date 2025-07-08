@@ -1,11 +1,7 @@
 import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import {
-	calculateFinalFee,
-	calculateUtxoSelection,
-	filterAvailableUtxos
-} from '$btc/utils/btc-utxos.utils';
+import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
@@ -101,21 +97,9 @@ export const prepareBtcSend = async ({
 		};
 	}
 
-	// Step 5: Calculate the final fee based on selected UTXOs
-	const feeSatoshis = calculateFinalFee({ selection, amountSatoshis });
-
-	// Step 6: Check if there are sufficient funds for the fee
-	const totalRequired = amountSatoshis + feeSatoshis;
-	if (selection.totalInputValue < totalRequired) {
-		return {
-			feeSatoshis,
-			utxos: selection.selectedUtxos,
-			error: BtcPrepareSendError.InsufficientBalanceForFee
-		};
-	}
-
+	// Fee is already calculated in the selection process
 	return {
-		feeSatoshis,
+		feeSatoshis: selection.feeSatoshis,
 		utxos: selection.selectedUtxos
 	};
 };

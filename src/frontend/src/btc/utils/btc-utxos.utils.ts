@@ -6,6 +6,7 @@ export interface UtxoSelectionResult {
 	totalInputValue: bigint;
 	changeAmount: bigint;
 	sufficientFunds: boolean;
+	feeSatoshis: bigint;
 }
 
 /**
@@ -63,7 +64,8 @@ export const calculateUtxoSelection = ({
 			selectedUtxos: [],
 			totalInputValue: 0n,
 			changeAmount: 0n,
-			sufficientFunds: false
+			sufficientFunds: false,
+			feeSatoshis: 0n
 		};
 	}
 
@@ -99,7 +101,8 @@ export const calculateUtxoSelection = ({
 				selectedUtxos,
 				totalInputValue,
 				changeAmount,
-				sufficientFunds: true
+				sufficientFunds: true,
+				feeSatoshis: estimatedFee
 			};
 		}
 	}
@@ -109,7 +112,8 @@ export const calculateUtxoSelection = ({
 		selectedUtxos,
 		totalInputValue,
 		changeAmount: 0n,
-		sufficientFunds: false
+		sufficientFunds: false,
+		feeSatoshis: 0n
 	};
 };
 
@@ -160,20 +164,4 @@ export const filterAvailableUtxos = ({
 		utxos: confirmedUtxos,
 		pendingTxIds
 	});
-};
-
-/**
- * Calculates the final fee based on the selected UTXOs
- * This ensures the fee calculation is consistent with the UTXO selection
- */
-export const calculateFinalFee = ({
-	selection,
-	amountSatoshis
-}: {
-	selection: UtxoSelectionResult;
-	amountSatoshis: bigint;
-}): bigint => {
-	// The fee is the difference between total input and the amount + change
-	const totalUsed = amountSatoshis + selection.changeAmount;
-	return selection.totalInputValue - totalUsed;
 };
