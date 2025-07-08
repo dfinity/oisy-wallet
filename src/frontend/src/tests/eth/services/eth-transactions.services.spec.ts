@@ -162,15 +162,11 @@ describe('eth-transactions.services', () => {
 						tokenId: mockTokenId.description,
 						networkId: mockNetworkId.description,
 						error: mockError.toString()
-					}
-				});
-
-				expect(console.warn).toHaveBeenCalledWith(
-					replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
+					},
+					warning: `${replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
 						$symbol: mockSymbol
-					}),
-					mockError
-				);
+					})} ${mockError}`
+				});
 			});
 		}, 60000);
 	});

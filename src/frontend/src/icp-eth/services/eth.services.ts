@@ -185,16 +185,11 @@ const loadPendingTransactions = async ({
 			metadata: {
 				tokenId: `${tokenId.description}`,
 				networkId: `${networkId.description}`
-			}
-		});
-
-		// We print the error to console just for debugging purposes
-		console.warn(
-			replacePlaceholders(loading_pending_ck_ethereum_transactions, {
+			},
+			warning: `${replacePlaceholders(loading_pending_ck_ethereum_transactions, {
 				$network: networkName
-			}),
-			err
-		);
+			})} ${err}`
+		});
 	} finally {
 		emit({
 			message: 'oisyCkEthereumPendingTransactions',
