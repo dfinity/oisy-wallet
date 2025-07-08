@@ -14,9 +14,9 @@
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
-	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
+	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -32,7 +32,7 @@
 			return;
 		}
 
-		const solNetwork = mapNetworkIdToNetwork($sendTokenNetworkId);
+		const solNetwork = safeMapNetworkIdToNetwork($sendTokenNetworkId);
 
 		const addresses = isTokenSpl($sendToken) ? [$sendToken.address] : undefined;
 		const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
@@ -63,7 +63,7 @@
 			return;
 		}
 
-		const solNetwork = mapNetworkIdToNetwork($sendTokenNetworkId);
+		const solNetwork = safeMapNetworkIdToNetwork($sendTokenNetworkId);
 
 		// we check if it is an ATA address and if it is not closed, if it isnt an ATA address or has been closed we need to charge the ATA fee
 		if (
