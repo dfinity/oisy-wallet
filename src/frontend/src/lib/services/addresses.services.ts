@@ -16,10 +16,6 @@ import {
 } from '$sol/services/sol-address.services';
 
 export const loadAddresses = async (networkIds: NetworkId[]): Promise<ResultSuccess> => {
-	if (networkIds.length === 0) {
-		return { success: true };
-	}
-
 	const results = await Promise.all([
 		networkIds.includes(BTC_MAINNET_NETWORK_ID)
 			? loadBtcAddressMainnet()
