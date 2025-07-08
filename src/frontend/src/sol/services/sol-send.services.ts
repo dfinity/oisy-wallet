@@ -14,7 +14,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -290,7 +290,7 @@ export const sendSol = async ({
 		network: { id: networkId }
 	} = token;
 
-	const solNetwork = mapNetworkIdToNetwork(networkId);
+	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
 	const rpc = solanaHttpRpc(solNetwork);
 	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);

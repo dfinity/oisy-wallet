@@ -24,7 +24,7 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -235,7 +235,7 @@ export const loadNextSolTransactions = async ({
 			? get(solAddressLocal)
 			: get(solAddressMainnet);
 
-	const network = mapNetworkIdToNetwork(token.network.id);
+	const network = safeMapNetworkIdToNetwork(token.network.id);
 
 	if (isNullish(address)) {
 		return;

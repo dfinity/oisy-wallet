@@ -18,7 +18,7 @@ import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
@@ -134,7 +134,7 @@ const loadCustomTokensWithMetadata = async (
 		>(async (acc, token) => {
 			const { network, address } = token;
 
-			const solNetwork = mapNetworkIdToNetwork(network.id);
+			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
 			const owner = await getTokenOwner({ address, network: solNetwork });
 

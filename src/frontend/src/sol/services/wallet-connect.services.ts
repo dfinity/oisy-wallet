@@ -26,7 +26,7 @@ import {
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
 import { signTransaction } from '$sol/services/sol-sign.services';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
@@ -61,7 +61,7 @@ export const decode = async ({
 	base64EncodedTransactionMessage,
 	networkId
 }: WalletConnectDecodeTransactionParams) => {
-	const solNetwork = mapNetworkIdToNetwork(networkId);
+	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
 	const parsedTransactionMessage = await parseSolBase64TransactionMessage({
 		transactionMessage: base64EncodedTransactionMessage,
@@ -112,7 +112,7 @@ export const sign = ({
 				return { success: false };
 			}
 
-			const solNetwork = mapNetworkIdToNetwork(networkId);
+			const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
 			const parsedTransactionMessage = await parseSolBase64TransactionMessage({
 				transactionMessage: base64EncodedTransactionMessage,
