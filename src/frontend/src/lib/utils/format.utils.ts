@@ -23,7 +23,9 @@ export const formatToken = ({
 	trailingZeros = false,
 	showPlusSign = false
 }: FormatTokenParams): AmountString => {
-	const res = Utils.formatUnits(value, unitName);
+	const resRaw = Utils.formatUnits(value, unitName);
+	const isNegative = resRaw.startsWith('-');
+	const res = isNegative ? resRaw.slice(1) : resRaw;
 
 	const match = res.match(/^0\.0*/);
 	const leadingZeros = match ? match[0].length - 2 : 0;
@@ -65,7 +67,9 @@ export const formatToken = ({
 		? result.padEnd(result.indexOf('.') + 1 + minFractionDigits, '0')
 		: result.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
 
-	return `${showPlusSign && +res > 0 ? '+' : ''}${trimmed as `${number}`}`;
+	const prefix = isNegative ? '-' : showPlusSign && value > 0n ? '+' : '';
+
+	return `${prefix}${trimmed as `${number}`}`;
 };
 
 export const formatTokenBigintToNumber = (params: FormatTokenParams): number =>

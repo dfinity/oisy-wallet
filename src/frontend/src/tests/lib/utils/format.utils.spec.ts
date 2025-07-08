@@ -1,4 +1,5 @@
-import { ZERO } from '$lib/constants/app.constants';
+import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
+import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 import {
 	formatNanosecondsToDate,
 	formatSecondsToDate,
@@ -111,7 +112,20 @@ describe('format.utils', () => {
 
 			expect(formatToken({ value: valueD1, showPlusSign: true })).toBe('+1.2');
 
+			expect(formatToken({ value: ZERO, showPlusSign: true })).toBe('0');
+		});
+
+		it('should format negative value with minus sign', () => {
 			expect(formatToken({ value: negativeValue, showPlusSign: true })).toBe('-1');
+
+			expect(
+				formatToken({
+					value: -40827n,
+					displayDecimals: EIGHT_DECIMALS,
+					unitName: DEFAULT_BITCOIN_TOKEN.decimals,
+					showPlusSign: true
+				})
+			).toBe('-0.00040827');
 		});
 
 		it('should format small values', () => {
