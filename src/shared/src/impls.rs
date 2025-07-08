@@ -91,7 +91,7 @@ impl From<&Token> for CustomTokenId {
                 token_address,
                 chain_id,
                 ..
-            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
+            }) => CustomTokenId::EthereumErc721(token_address.clone(), *chain_id),
         }
     }
 }
@@ -464,6 +464,7 @@ impl Validate for CustomTokenId {
                 token_address.validate()
             }
             CustomTokenId::Ethereum(token_address, _) => token_address.validate(),
+            CustomTokenId::EthereumErc721(token_address, _) => token_address.validate(),
         }
     }
 }
