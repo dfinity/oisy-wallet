@@ -34,22 +34,18 @@
 	const selectUtxosFee = async () => {
 		try {
 			// all required params should be already defined at this stage
-			if (
-				isNullish(amount) ||
-				isNullish(networkId) ||
-				isNullish($authIdentity)
-			) {
+			if (isNullish(amount) || isNullish(networkId) || isNullish($authIdentity)) {
 				return;
 			}
 
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
 			utxosFee = nonNullish(network)
 				? await prepareBtcSend({
-					identity: $authIdentity,
-					network,
-					amount,
-					source
-				})
+						identity: $authIdentity,
+						network,
+						amount,
+						source
+					})
 				: undefined;
 		} catch (err: unknown) {
 			console.error('Error selecting utxos fee', err);
