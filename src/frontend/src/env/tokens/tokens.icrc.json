@@ -144,5 +144,8 @@
 		"fee": {
 			"__bigint__": "10"
 		}
+	},
+	"MIM.OT": {
+		"ledgerCanisterId": "rk7m2-7yaaa-aaaar-qbmta-cai"
 	}
 }
