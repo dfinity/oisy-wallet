@@ -8,7 +8,7 @@ import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.provid
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import type { SolInstruction } from '$sol/types/sol-instructions';
-import * as networkUtils from '$sol/utils/network.utils';
+import * as networkUtils from '$sol/utils/safe-network.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -157,7 +157,7 @@ describe('sol-send.services', () => {
 				Promise.resolve(123)
 			);
 
-			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'mapNetworkIdToNetwork');
+			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'safeMapNetworkIdToNetwork');
 
 			spyCalculateAssociatedTokenAddress = vi
 				.spyOn(accountServices, 'calculateAssociatedTokenAddress')
