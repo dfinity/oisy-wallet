@@ -49,7 +49,9 @@
 
 	async function handleFileChange(e: Event) {
 		const file = (e.target as HTMLInputElement)?.files?.[0];
-		if (!file) {return;}
+		if (!file) {
+			return;
+		}
 		try {
 			const options = { maxSizeMB: 1, maxWidthOrHeight: 200, useWebWorker: true };
 			const compressed = await imageCompression(file, options);

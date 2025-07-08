@@ -1,21 +1,21 @@
 <script lang="ts">
+	import type { SvelteComponent } from 'svelte';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import type { SvelteComponent } from 'svelte';
 	import CustomPopoverMenu from '$lib/components/ui/CustomPopoverMenu.svelte';
-	import type { IPopoverItem } from '$lib/components/ui/CustomPopoverMenu.svelte';
 
-	function replaceImage() {
-		console.log('Replace clicked');
-	}
+	const replaceImage = () => {
+		// console.log('Replace clicked');
+		// TODO: implement replace logic
+	};
+	const removeImage = () => {
+		// console.log('Remove clicked');
+		// TODO: implement remove logic
+	};
 
-	function removeImage() {
-		console.log('Remove clicked');
-	}
-
-	const items: IPopoverItem[] = [
+	const items = [
 		{
 			logo: IconImage as typeof SvelteComponent,
 			title: 'Replace',
@@ -32,7 +32,7 @@
 </script>
 
 <CustomPopoverMenu title="Contact image" {items}>
-	<svelte:fragment slot="trigger" let:toggle>
+	<svelte:fragment slot="trigger" let:toggle let:bindTrigger>
 		<ButtonIcon
 			bind:button={menuButton}
 			onclick={toggle}

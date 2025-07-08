@@ -1,24 +1,21 @@
-<script context="module" lang="ts">
-	import type { SvelteComponent } from 'svelte';
-	export interface IPopoverItem {
-		logo: typeof SvelteComponent;
-		title: string;
-		action: () => void;
-	}
-</script>
-
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { type SvelteComponent, tick } from 'svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 
-	let { title = '', items = [] as IPopoverItem[] } = $props<{
+	interface Props {
 		title?: string;
-		items?: IPopoverItem[];
-	}>();
+		items: Array<{
+			logo: typeof SvelteComponent;
+			title: string;
+			action: () => void;
+		}>;
+	}
+
+	let { title, items }: Props = $props();
 
 	let visible = $state(false);
 	let triggerBtn: HTMLElement;
-	let menu: HTMLElement;
+	let menu = $state<HTMLElement | null>(null);
 
 	const toggle = () => {
 		visible = !visible;
@@ -32,7 +29,9 @@
 	};
 
 	const positionMenu = () => {
-		if (!triggerBtn || !menu) return;
+		if (!triggerBtn || !menu) {
+			return;
+		}
 		const rect = triggerBtn.getBoundingClientRect();
 		menu.style.setProperty('--popover-top', `${rect.bottom}px`);
 		menu.style.setProperty('--popover-left', `${rect.right}px`);
@@ -40,7 +39,13 @@
 	};
 
 	const handleClickOutside = (e: MouseEvent) => {
-		if (visible && !menu.contains(e.target as Node) && !triggerBtn.contains(e.target as Node)) {
+		if (
+			visible &&
+			menu &&
+			!menu.contains(e.target as Node) &&
+			triggerBtn &&
+			!triggerBtn.contains(e.target as Node)
+		) {
 			visible = false;
 		}
 	};
@@ -58,10 +63,15 @@
 </script>
 
 <div class="custom-popover-trigger">
-	<slot name="trigger" {toggle} bindTrigger={(el) => (triggerBtn = el)} />
+	<slot name="trigger" {toggle} bindTrigger={(el: HTMLElement) => (triggerBtn = el)} />
 
 	{#if visible}
-		<div class="backdrop" on:click={() => (visible = false)}></div>
+		<button
+			type="button"
+			class="backdrop"
+			aria-label="Close menu"
+			onclick={() => (visible = false)}
+		/>
 		<div
 			bind:this={menu}
 			class="custom-popover wrapper animate-fade-in with-border"
@@ -71,7 +81,6 @@
 			{#if title}
 				<div class="popover-item popover-title text-base">{title}</div>
 			{/if}
-
 			{#each items as item (item.title)}
 				<LogoButton
 					hover
