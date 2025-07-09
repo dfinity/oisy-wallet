@@ -29,7 +29,13 @@ export class InfuraERC721Provider {
 		};
 	};
 
-	getNftMetadata = async ({contractAddress, tokenId}: { contractAddress: string; tokenId: number }): Promise<Nft> => {
+	getNftMetadata = async ({
+		contractAddress,
+		tokenId
+	}: {
+		contractAddress: string;
+		tokenId: number;
+	}): Promise<Nft> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
 		try {
