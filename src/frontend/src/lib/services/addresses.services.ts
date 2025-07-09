@@ -40,9 +40,7 @@ export const loadIdbAddresses = async (
 		...(networkIds.includes(SOLANA_MAINNET_NETWORK_ID) ? [loadIdbSolAddressMainnet()] : [])
 	]);
 
-	const { success, err } = reduceResults<LoadIdbAddressError>(
-		results
-	);
+	const { success, err } = reduceResults<LoadIdbAddressError>(results);
 
 	return { success, err };
 };
