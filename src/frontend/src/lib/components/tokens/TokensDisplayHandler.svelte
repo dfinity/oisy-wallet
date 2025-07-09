@@ -9,7 +9,9 @@
 	export let tokens: TokenUiOrGroupUi[] | undefined = undefined;
 
 	let groupedTokens: TokenUiOrGroupUi[];
-	$: groupedTokens = groupTokensByTwin($combinedDerivedSortedNetworkTokensUi.filter(token => token.standard !== 'erc721'));
+	$: groupedTokens = groupTokensByTwin(
+		$combinedDerivedSortedNetworkTokensUi.filter((token) => token.standard !== 'erc721')
+	);
 
 	let sortedTokensOrGroups: TokenUiOrGroupUi[];
 	$: sortedTokensOrGroups = filterTokenGroups({

@@ -1,7 +1,13 @@
-import { saveErc20CustomTokens, saveErc721CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+import {
+	saveErc20CustomTokens,
+	saveErc20UserTokens,
+	saveErc721CustomTokens
+} from '$eth/services/manage-tokens.services';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -25,8 +31,6 @@ import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -346,12 +350,12 @@ export const saveAllCustomTokens = async ({
 			: []),
 		...(erc721.length > 0
 			? [
-				saveErc721CustomTokens({
-					...commonParams,
-					tokens: erc721
-				})
-			]
-		: []),
+					saveErc721CustomTokens({
+						...commonParams,
+						tokens: erc721
+					})
+				]
+			: []),
 		...(spl.length > 0
 			? [
 					saveSplCustomTokens({

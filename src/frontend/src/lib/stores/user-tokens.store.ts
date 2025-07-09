@@ -1,5 +1,6 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import type { CertifiedData } from '$lib/types/store';
 import type { Token, TokenId } from '$lib/types/token';
 import type { UserToken } from '$lib/types/user-token';
@@ -7,7 +8,6 @@ import type { Option } from '$lib/types/utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { writable, type Readable } from 'svelte/store';
-import { isTokenErc721 } from '$eth/utils/erc721.utils';
 
 type CertifiedUserTokensData<T extends Token> = Option<CertifiedData<UserToken<T>>[]>;
 

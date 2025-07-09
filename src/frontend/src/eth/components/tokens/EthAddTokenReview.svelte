@@ -29,12 +29,12 @@
 	const loadErc20Metadata = async (address: string) => {
 		const { metadata: metadataApi } = infuraErc20Providers(network.id);
 		metadata = await metadataApi({ address });
-	}
+	};
 
 	const loadErc721Metadata = async (address: string) => {
-		const {metadata: metadataApi721} = infuraErc721Providers(network.id);
-		metadata = await metadataApi721({address});
-	}
+		const { metadata: metadataApi721 } = infuraErc721Providers(network.id);
+		metadata = await metadataApi721({ address });
+	};
 
 	const handleMetadata = () => {
 		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
@@ -61,7 +61,7 @@
 			dispatch('icBack');
 			return;
 		}
-	}
+	};
 
 	onMount(async () => {
 		if (isNullish(contractAddress)) {

@@ -21,8 +21,7 @@ export const enabledNetworkTokens: Readable<Token[]> = derived(
  */
 export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
 	[enabledNetworkTokens, tokensToPin, exchanges],
-	([$tokens, $tokensToPin, $exchanges]) =>
-		sortTokens({ $tokens, $exchanges, $tokensToPin })
+	([$tokens, $tokensToPin, $exchanges]) => sortTokens({ $tokens, $exchanges, $tokensToPin })
 );
 
 /**

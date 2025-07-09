@@ -198,13 +198,10 @@ export class EtherscanProvider {
 			sort: 'desc'
 		};
 
-		const result = await this.provider.fetch(
-			'account',
-			params
-		);
+		const result = await this.provider.fetch('account', params);
 
-		return result.map(({TokenId}: {TokenId: string}) => parseInt(TokenId))
-	}
+		return result.map(({ TokenId }: { TokenId: string }) => parseInt(TokenId));
+	};
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = [

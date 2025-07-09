@@ -1,16 +1,16 @@
-import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import { nonNullish } from '@dfinity/utils';
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import type { TokenId } from '$lib/types/token';
-import { setManyCustomTokens } from '$lib/api/backend.api';
-import { toCustomToken } from '$lib/utils/custom-token.utils';
-import { get } from 'svelte/store';
-import { i18n } from '$lib/stores/i18n.store';
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { loadCustomTokens } from '$eth/services/erc721.services';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { setManyCustomTokens } from '$lib/api/backend.api';
+import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
+import { i18n } from '$lib/stores/i18n.store';
+import type { TokenId } from '$lib/types/token';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export type SaveErc721CustomToken = Pick<
 	Erc721CustomToken,
@@ -25,11 +25,13 @@ export const saveCustomTokens = async ({
 }: SaveTokensParams<SaveErc721CustomToken>) => {
 	progress?.(ProgressStepsAddToken.SAVE);
 
-	const customTokens: CustomToken[] = tokens.map((token) => toCustomToken({
-		...token,
-		chainId: ETHEREUM_NETWORK.chainId,
-		networkKey: 'Erc721'
-	}))
+	const customTokens: CustomToken[] = tokens.map((token) =>
+		toCustomToken({
+			...token,
+			chainId: ETHEREUM_NETWORK.chainId,
+			networkKey: 'Erc721'
+		})
+	);
 
 	await setManyCustomTokens({
 		identity,
@@ -41,8 +43,8 @@ export const saveCustomTokens = async ({
 
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled, id }) => !enabled && nonNullish(id));
-	disabledTokens.forEach(({id}) => erc721CustomTokensStore.reset(id as TokenId));
+	disabledTokens.forEach(({ id }) => erc721CustomTokensStore.reset(id as TokenId));
 
 	// Reload all user tokens for simplicity reason.
-	await loadCustomTokens({identity})
+	await loadCustomTokens({ identity });
 };

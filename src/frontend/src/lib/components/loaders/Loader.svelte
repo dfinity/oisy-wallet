@@ -9,6 +9,7 @@
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
+	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
@@ -51,7 +52,6 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { loadErc721Tokens } from '$eth/services/erc721.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 

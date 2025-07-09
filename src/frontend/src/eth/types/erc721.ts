@@ -1,8 +1,8 @@
-import type { NftSchema } from '$lib/schema/nftSchema';
-import type * as z from 'zod';
 import type { ContractAddress } from '$eth/types/address';
-import type { Token, TokenMetadata } from '$lib/types/token';
 import type { EthereumNetwork } from '$eth/types/network';
+import type { NftSchema } from '$lib/schema/nftSchema';
+import type { Token, TokenMetadata } from '$lib/types/token';
+import type * as z from 'zod';
 
 export type Erc721Token = Erc721Contract & Omit<Token, 'network'> & { network: EthereumNetwork };
 

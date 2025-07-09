@@ -50,7 +50,6 @@ import {
 	queryAndUpdate
 } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 
 export const loadErc20Tokens = async ({
 	identity
