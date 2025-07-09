@@ -11,6 +11,7 @@ import type { Amount } from '$lib/types/send';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import { isNullish } from '@dfinity/utils';
 
 export interface BtcReviewServiceParams {
 	identity: Identity;
@@ -113,14 +114,12 @@ export const getFeeRateFromPercentiles = async ({
 }): Promise<bigint> => {
 	const mappedNetwork = mapToSignerBitcoinNetwork({ network });
 
-	const response = await getCurrentBtcFeePercentiles({
+	const { fee_percentiles } = await getCurrentBtcFeePercentiles({
 		identity,
 		network: mappedNetwork
 	});
 
-	const { fee_percentiles } = response;
-
-	if (!fee_percentiles || fee_percentiles.length === 0) {
+	if (isNullish(fee_percentiles) || fee_percentiles.length === 0) {
 		throw new Error('No fee percentiles available - cannot calculate transaction fee');
 	}
 
