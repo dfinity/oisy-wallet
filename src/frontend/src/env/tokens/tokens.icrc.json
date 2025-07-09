@@ -160,6 +160,9 @@
 	"BITCAT": {
 		"ledgerCanisterId": "xlwi6-kyaaa-aaaar-qarya-cai"
 	},
+	"RSIC.OT": {
+		"ledgerCanisterId": "i44ka-paaaa-aaaar-qbonq-cai"
+	},
 	"BDC.OT": {
 		"ledgerCanisterId": "2ulkl-dqaaa-aaaar-qaijq-cai"
 	},
