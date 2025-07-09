@@ -95,16 +95,11 @@ const loadEthTransactions = async ({
 					tokenId: `${tokenId.description}`,
 					networkId: `${networkId.description}`,
 					error: `${err}`
-				}
-			});
-
-			// We print the error to console just for debugging purposes
-			console.warn(
-				replacePlaceholders(loading_transactions_symbol, {
+				},
+				warning: `${replacePlaceholders(loading_transactions_symbol, {
 					$symbol: ETHEREUM_NETWORK_SYMBOL
-				}),
-				err
-			);
+				})} ${err}`
+			});
 		}
 
 		return { success: false };
@@ -181,16 +176,11 @@ const loadErc20Transactions = async ({
 				tokenId: `${tokenId.description}`,
 				networkId: `${networkId.description}`,
 				error: `${err}`
-			}
-		});
-
-		// We print the error to console just for debugging purposes
-		console.warn(
-			replacePlaceholders(loading_transactions_symbol, {
+			},
+			warning: `${replacePlaceholders(loading_transactions_symbol, {
 				$symbol: token.symbol
-			}),
-			err
-		);
+			})} ${err}`
+		});
 
 		return { success: false };
 	}
