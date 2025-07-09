@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 import { uint8ArrayToHexString } from '@dfinity/utils';
 
@@ -5,6 +6,8 @@ export interface UtxoSelectionResult {
 	selectedUtxos: Utxo[];
 	totalInputValue: bigint;
 	changeAmount: bigint;
+	sufficientFunds: boolean;
+	feeSatoshis: bigint;
 }
 
 /**
@@ -58,7 +61,13 @@ export const calculateUtxoSelection = ({
 	feeRateSatoshisPerVByte: bigint;
 }): UtxoSelectionResult => {
 	if (availableUtxos.length === 0) {
-		throw new Error('No UTXOs available for selection');
+		return {
+			selectedUtxos: [],
+			totalInputValue: ZERO,
+			changeAmount: ZERO,
+			sufficientFunds: false,
+			feeSatoshis: ZERO
+		};
 	}
 
 	// Sort UTXOs by value in descending order
@@ -69,7 +78,7 @@ export const calculateUtxoSelection = ({
 	});
 
 	const selectedUtxos: Utxo[] = [];
-	let totalInputValue = 0n;
+	let totalInputValue = ZERO;
 
 	// Iteratively add UTXOs until we have enough to cover amount and fee
 	for (const utxo of sortedUtxos) {
@@ -92,22 +101,21 @@ export const calculateUtxoSelection = ({
 			return {
 				selectedUtxos,
 				totalInputValue,
-				changeAmount
+				changeAmount,
+				sufficientFunds: true,
+				feeSatoshis: estimatedFee
 			};
 		}
 	}
 
 	// If we get here, we don't have sufficient funds
-	const finalTxSize = estimateTransactionSize({
-		numInputs: selectedUtxos.length,
-		numOutputs: 2
-	});
-	const finalEstimatedFee = BigInt(finalTxSize) * feeRateSatoshisPerVByte;
-	const totalRequired = amountSatoshis + finalEstimatedFee;
-
-	throw new Error(
-		`Insufficient funds: required ${totalRequired} satoshis (${amountSatoshis} and ${finalEstimatedFee} fee), available ${totalInputValue} satoshis`
-	);
+	return {
+		selectedUtxos,
+		totalInputValue,
+		changeAmount: ZERO,
+		sufficientFunds: false,
+		feeSatoshis: ZERO
+	};
 };
 
 /**
@@ -157,20 +165,4 @@ export const filterAvailableUtxos = ({
 		utxos: confirmedUtxos,
 		pendingTxIds
 	});
-};
-
-/**
- * Calculates the final fee based on the selected UTXOs
- * This ensures the fee calculation is consistent with the UTXO selection
- */
-export const calculateFinalFee = ({
-	selection,
-	amountSatoshis
-}: {
-	selection: UtxoSelectionResult;
-	amountSatoshis: bigint;
-}): bigint => {
-	// The fee is the difference between total input and the amount + change
-	const totalUsed = amountSatoshis + selection.changeAmount;
-	return selection.totalInputValue - totalUsed;
 };

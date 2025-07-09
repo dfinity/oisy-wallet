@@ -1,7 +1,14 @@
-import type { SelectedUtxosFeeResponse } from '$declarations/backend/backend.did';
+import type { Utxo } from '@dfinity/ckbtc';
 
 export class BtcAmountAssertionError extends Error {}
 
-export type UtxosFee = Omit<SelectedUtxosFeeResponse, 'fee_satoshis'> & {
-	feeSatoshis: SelectedUtxosFeeResponse['fee_satoshis'];
-};
+export enum BtcPrepareSendError {
+	InsufficientBalance = 'InsufficientBalance',
+	InsufficientBalanceForFee = 'InsufficientBalanceForFee'
+}
+
+export interface UtxosFee {
+	feeSatoshis: bigint;
+	utxos: Utxo[];
+	error?: BtcPrepareSendError;
+}
