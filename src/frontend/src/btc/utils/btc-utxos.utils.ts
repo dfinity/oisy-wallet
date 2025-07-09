@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 import { uint8ArrayToHexString } from '@dfinity/utils';
 
@@ -62,10 +63,10 @@ export const calculateUtxoSelection = ({
 	if (availableUtxos.length === 0) {
 		return {
 			selectedUtxos: [],
-			totalInputValue: 0n,
-			changeAmount: 0n,
+			totalInputValue: ZERO,
+			changeAmount: ZERO,
 			sufficientFunds: false,
-			feeSatoshis: 0n
+			feeSatoshis: ZERO
 		};
 	}
 
@@ -77,7 +78,7 @@ export const calculateUtxoSelection = ({
 	});
 
 	const selectedUtxos: Utxo[] = [];
-	let totalInputValue = 0n;
+	let totalInputValue = ZERO;
 
 	// Iteratively add UTXOs until we have enough to cover amount and fee
 	for (const utxo of sortedUtxos) {
@@ -111,9 +112,9 @@ export const calculateUtxoSelection = ({
 	return {
 		selectedUtxos,
 		totalInputValue,
-		changeAmount: 0n,
+		changeAmount: ZERO,
 		sufficientFunds: false,
-		feeSatoshis: 0n
+		feeSatoshis: ZERO
 	};
 };
 
