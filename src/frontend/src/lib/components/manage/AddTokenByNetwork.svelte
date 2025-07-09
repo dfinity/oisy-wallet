@@ -43,7 +43,7 @@
 	let isSolanaNetwork = false;
 	$: isSolanaNetwork = isNetworkIdSolana(network?.id);
 
-	let { ledgerCanisterId, indexCanisterId, erc20ContractAddress, splTokenAddress } = tokenData;
+	let { ledgerCanisterId, indexCanisterId, ercContractAddress, splTokenAddress } = tokenData;
 
 	// Since we persist the values of relevant variables when switching networks, this ensures that
 	// only the data related to the selected network is passed.
@@ -54,7 +54,7 @@
 				nonNullish(indexCanisterId) && notEmptyString(indexCanisterId) ? indexCanisterId : undefined
 		};
 	} else if (isEthereumNetwork || isEvmNetwork) {
-		tokenData = { erc20ContractAddress };
+		tokenData = { ercContractAddress };
 	} else if (isSolanaNetwork) {
 		tokenData = { splTokenAddress };
 	} else {
@@ -64,7 +64,7 @@
 	const dispatch = createEventDispatcher();
 
 	let invalidErc20 = true;
-	$: invalidErc20 = isNullishOrEmpty(erc20ContractAddress);
+	$: invalidErc20 = isNullishOrEmpty(ercContractAddress);
 
 	let invalidIc = true;
 	$: invalidIc = isNullishOrEmpty(ledgerCanisterId);
@@ -100,7 +100,7 @@
 		{#if isIcpNetwork}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
 		{:else if isEthereumNetwork || isEvmNetwork}
-			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
+			<EthAddTokenForm on:icBack bind:contractAddress={ercContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />
 		{:else if nonNullish($selectedNetwork)}
