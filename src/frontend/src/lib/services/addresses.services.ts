@@ -38,26 +38,13 @@ export const loadAddresses = async (networkIds: NetworkId[]): Promise<ResultSucc
 };
 
 export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
-	const promisesList: Promise<ResultSuccess<LoadIdbAddressError>>[] = [];
-
-	if (get(networkBitcoinMainnetEnabled)) {
-		promisesList.push(loadIdbBtcAddressMainnet());
-	}
-
-	if (get(networkEthereumEnabled)) {
-		promisesList.push(loadIdbEthAddress());
-	}
-
-	if (get(networkSolanaMainnetEnabled)) {
-		promisesList.push(loadIdbSolAddressMainnet());
-	}
+	const promisesList: Promise<ResultSuccess<LoadIdbAddressError>>[] = [
+		...(get(networkBitcoinMainnetEnabled) ? [loadIdbBtcAddressMainnet()] : []),
+		...(get(networkEthereumEnabled) ? [loadIdbEthAddress()] : []),
+		...(get(networkSolanaMainnetEnabled) ? [loadIdbSolAddressMainnet()] : [])
+	];
 
 	let results = await Promise.all(promisesList);
-
-	// since reduceResults always expects at least one entry, we return a success result to satisfy the type when no promises need to be resolved
-	if (results.length === 0) {
-		results = [{ success: true, err: undefined }];
-	}
 
 	const { success, err } = reduceResults<LoadIdbAddressError>(
 		results as [ResultSuccess<LoadIdbAddressError>, ...ResultSuccess<LoadIdbAddressError>[]]
