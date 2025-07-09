@@ -461,7 +461,9 @@ const BITCAT_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODU
 		}
 	: undefined;
 
-const FORSETISCN_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.FORSETISCN)
+const FORSETISCN_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.FORSETISCN
+)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.FORSETISCN,
 			position: 31
