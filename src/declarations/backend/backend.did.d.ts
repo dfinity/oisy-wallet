@@ -192,7 +192,6 @@ export interface Erc20Token {
 export interface Erc721Token {
 	token_address: string;
 	chain_id: bigint;
-	symbol: [] | [string];
 }
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };

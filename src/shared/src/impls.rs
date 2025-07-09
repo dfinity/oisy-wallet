@@ -520,16 +520,6 @@ impl Validate for Erc20Token {
 
 impl Validate for Erc721Token {
     fn validate(&self) -> Result<(), candid::Error> {
-        use crate::types::MAX_SYMBOL_LENGTH;
-        if let Some(symbol) = &self.symbol {
-            if symbol.chars().count() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg(format!(
-                    "Symbol too long: {} > {}",
-                    symbol.len(),
-                    MAX_SYMBOL_LENGTH
-                )));
-            }
-        }
         self.token_address.validate()
     }
 }

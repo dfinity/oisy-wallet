@@ -59,7 +59,6 @@ pub struct Erc721TokenId(pub String);
 pub struct Erc721Token {
     pub token_address: Erc721TokenId,
     pub chain_id: ChainId,
-    pub symbol: Option<String>,
 }
 
 /// A variant describing any token

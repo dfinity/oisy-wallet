@@ -354,8 +354,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Erc721Token = IDL.Record({
 		token_address: IDL.Text,
-		chain_id: IDL.Nat64,
-		symbol: IDL.Opt(IDL.Text)
+		chain_id: IDL.Nat64
 	});
 	const SplToken = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
