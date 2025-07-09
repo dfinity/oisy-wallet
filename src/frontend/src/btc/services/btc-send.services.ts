@@ -1,7 +1,7 @@
 import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
-import { addPendingBtcTransaction } from '$lib/api/backend.api';
+import { addPendingBtcTransaction, selectUserUtxosFee } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
@@ -10,6 +10,8 @@ import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
+
+const DEFAULT_MIN_CONFIRMATIONS = 6;
 
 interface BtcSendServiceParams {
 	identity: Identity;
@@ -22,6 +24,27 @@ export type SendBtcParams = BtcSendServiceParams & {
 	source: BtcAddress;
 	utxosFee: UtxosFee;
 	onProgress?: () => void;
+};
+// TODO remove this function since it will be replaced with prepareBtcSend once the BTC performance improvements is merged
+export const selectUtxosFee = async ({
+	identity,
+	network,
+	amount
+}: Omit<BtcSendServiceParams, 'progress'>): Promise<UtxosFee> => {
+	const satoshisAmount = convertNumberToSatoshis({ amount });
+	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
+
+	const { fee_satoshis, utxos } = await selectUserUtxosFee({
+		identity,
+		network: signerBitcoinNetwork,
+		amountSatoshis: satoshisAmount,
+		minConfirmations: [DEFAULT_MIN_CONFIRMATIONS]
+	});
+
+	return {
+		feeSatoshis: fee_satoshis,
+		utxos
+	};
 };
 
 export const sendBtc = async ({
