@@ -461,7 +461,9 @@ const BITCAT_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODU
 		}
 	: undefined;
 
-const ODINDOG_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.ODINDOG)
+const ODINDOG_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.ODINDOG
+)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.ODINDOG,
 			position: 34
