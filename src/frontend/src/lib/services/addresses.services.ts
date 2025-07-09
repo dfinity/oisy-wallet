@@ -44,7 +44,7 @@ export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAd
 		...(get(networkSolanaMainnetEnabled) ? [loadIdbSolAddressMainnet()] : [])
 	];
 
-	let results = await Promise.all(promisesList);
+	const results = await Promise.all(promisesList);
 
 	if (results.length === 0) {
 		return { success: true };
