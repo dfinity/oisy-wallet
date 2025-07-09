@@ -1,25 +1,13 @@
-import {
-	loadBtcAddressMainnet,
-	loadIdbBtcAddressMainnet
-} from '$btc/services/btc-address.services';
+import { loadBtcAddressMainnet } from '$btc/services/btc-address.services';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import { loadEthAddress, loadIdbEthAddress } from '$eth/services/eth-address.services';
-import {
-	networkBitcoinMainnetEnabled,
-	networkEthereumEnabled,
-	networkSolanaMainnetEnabled
-} from '$lib/derived/networks.derived';
+import { loadEthAddress } from '$eth/services/eth-address.services';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess, ResultSuccessReduced } from '$lib/types/utils';
 import { reduceResults } from '$lib/utils/results.utils';
-import {
-	loadIdbSolAddressMainnet,
-	loadSolAddressMainnet
-} from '$sol/services/sol-address.services';
-import { get } from 'svelte/store';
+import { loadSolAddressMainnet } from '$sol/services/sol-address.services';
 
 export const loadAddresses = async (networkIds: NetworkId[]): Promise<ResultSuccess> => {
 	const results = await Promise.all([
@@ -37,18 +25,22 @@ export const loadAddresses = async (networkIds: NetworkId[]): Promise<ResultSucc
 	return { success: results.every(({ success }) => success) };
 };
 
-export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
-	const promisesList: Promise<ResultSuccess<LoadIdbAddressError>>[] = [
-		...(get(networkBitcoinMainnetEnabled) ? [loadIdbBtcAddressMainnet()] : []),
-		...(get(networkEthereumEnabled) ? [loadIdbEthAddress()] : []),
-		...(get(networkSolanaMainnetEnabled) ? [loadIdbSolAddressMainnet()] : [])
-	];
+export const loadIdbAddresses = async (
+	networkIds: NetworkId[]
+): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
+	const results = await Promise.all([
+		...(networkIds.includes(BTC_MAINNET_NETWORK_ID) ? [loadBtcAddressMainnet()] : []),
+		...(networkIds.includes(ETHEREUM_NETWORK_ID) ? [loadEthAddress()] : []),
+		...(networkIds.includes(SOLANA_MAINNET_NETWORK_ID) ? [loadSolAddressMainnet()] : [])
+	]);
 
-	const results = await Promise.all(promisesList);
+	console.log(results);
 
 	const { success, err } = reduceResults<LoadIdbAddressError>(
-		results as [ResultSuccess<LoadIdbAddressError>, ...ResultSuccess<LoadIdbAddressError>[]]
+		results as ResultSuccess<LoadIdbAddressError>[]
 	);
+
+	console.log(success);
 
 	return { success, err };
 };

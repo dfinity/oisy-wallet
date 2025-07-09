@@ -96,7 +96,14 @@ export const initLoader = async ({
 		return;
 	}
 
-	const { success: addressIdbSuccess, err } = await loadIdbAddresses();
+	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
+	const enabledNetworkIds: NetworkId[] = [
+		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
+		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
+	];
+
+	const { success: addressIdbSuccess, err } = await loadIdbAddresses(enabledNetworkIds);
 
 	if (addressIdbSuccess) {
 		loading.set(false);
@@ -118,18 +125,18 @@ export const initLoader = async ({
 		return;
 	}
 
-	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
-
 	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
-	const enabledNetworkIds: NetworkId[] = [
+	const enabledNetworkIds2: NetworkId[] = [
 		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
 		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
 		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
 	];
 
+	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
+
 	// We don't need to load the addresses of the disabled networks.
 	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>
-		enabledNetworkIds.includes(networkId)
+		enabledNetworkIds2.includes(networkId)
 	);
 
 	const { success: addressSuccess } = await loadAddresses(networkIds);
