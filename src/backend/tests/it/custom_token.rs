@@ -3,7 +3,8 @@ use std::sync::LazyLock;
 use candid::Principal;
 use shared::types::{
     custom_token::{
-        ChainId, CustomToken, Erc20Token, Erc20TokenId, Erc721Token, Erc721TokenId, IcrcToken, SplToken, SplTokenId, Token,
+        ChainId, CustomToken, Erc20Token, Erc20TokenId, Erc721Token, Erc721TokenId, IcrcToken,
+        SplToken, SplTokenId, Token,
     },
     TokenVersion,
 };

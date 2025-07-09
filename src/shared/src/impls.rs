@@ -9,8 +9,8 @@ use crate::{
         backend_config::{Config, InitArg},
         contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
         custom_token::{
-            CustomToken, CustomTokenId, Erc20Token, Erc20TokenId, Erc721Token, Erc721TokenId, IcrcToken, SplToken, SplTokenId,
-            Token,
+            CustomToken, CustomTokenId, Erc20Token, Erc20TokenId, Erc721Token, Erc721TokenId,
+            IcrcToken, SplToken, SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -88,10 +88,10 @@ impl From<&Token> for CustomTokenId {
                 ..
             }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
             Token::Erc721(Erc721Token {
-                  token_address,
-                  chain_id,
-                  ..
-              }) => CustomTokenId::EthereumErc721(token_address.clone(), *chain_id),
+                token_address,
+                chain_id,
+                ..
+            }) => CustomTokenId::EthereumErc721(token_address.clone(), *chain_id),
         }
     }
 }
