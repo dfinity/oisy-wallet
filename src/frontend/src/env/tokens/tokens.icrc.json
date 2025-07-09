@@ -162,5 +162,8 @@
 	},
 	"FORSETISCN": {
 		"ledgerCanisterId": "tta5j-yqaaa-aaaar-qarbq-cai"
+	},
+	"ODINDOG": {
+		"ledgerCanisterId": "eazb6-tqaaa-aaaar-qan2a-cai"
 	}
 }

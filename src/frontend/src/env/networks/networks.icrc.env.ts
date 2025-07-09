@@ -470,6 +470,15 @@ const FORSETISCN_IC_DATA: IcInterface | undefined = nonNullish(
 		}
 	: undefined;
 
+const ODINDOG_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.ODINDOG
+)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.ODINDOG,
+			position: 34
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -598,3 +607,6 @@ export const BITCAT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 
 export const FORSETISCN_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	FORSETISCN_IC_DATA?.ledgerCanisterId ?? 'tta5j-yqaaa-aaaar-qarbq-cai';
+
+export const ODINDOG_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ODINDOG_IC_DATA?.ledgerCanisterId ?? 'eazb6-tqaaa-aaaar-qan2a-cai';
