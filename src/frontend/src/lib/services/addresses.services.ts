@@ -46,10 +46,6 @@ export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAd
 
 	const results = await Promise.all(promisesList);
 
-	if (results.length === 0) {
-		return { success: true };
-	}
-
 	const { success, err } = reduceResults<LoadIdbAddressError>(
 		results as [ResultSuccess<LoadIdbAddressError>, ...ResultSuccess<LoadIdbAddressError>[]]
 	);
