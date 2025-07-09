@@ -482,6 +482,7 @@
 			"btc_withdrawal_statuses": "",
 			"transaction_price": "",
 			"icrc_canisters": "",
+			"erc20_custom_tokens": "",
 			"erc20_user_tokens": "",
 			"spl_custom_tokens": "",
 			"erc20_user_token": "",
@@ -644,6 +645,7 @@
 			"sending": "",
 			"signing": "",
 			"signing_message": "",
+			"confirming": "",
 			"network": "",
 			"source_network": "",
 			"destination_network": "",
@@ -1099,6 +1101,15 @@
 			"pending": "",
 			"safe": "",
 			"unconfirmed": ""
+		},
+		"type": {
+			"send": "",
+			"receive": "",
+			"withdraw": "",
+			"deposit": "",
+			"approve": "",
+			"burn": "",
+			"mint": ""
 		},
 		"label": {
 			"reimbursement": "",
