@@ -3,13 +3,13 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import type { Erc721ContractAddress, Erc721Metadata, Nft } from '$eth/types/erc721';
+import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { get } from 'svelte/store';
-import { i18n } from '$lib/stores/i18n.store';
 
 export class InfuraERC721Provider {
 	private readonly provider: InfuraProvider;
@@ -89,9 +89,12 @@ const providers: Record<NetworkId, InfuraERC721Provider> = [
 export const infuraErc721Providers = (networkId: NetworkId): InfuraERC721Provider => {
 	const provider = providers[networkId];
 
-	assertNonNullish(provider, replacePlaceholders(get(i18n).init.error.no_infura_erc721_provider, {
-		$network: networkId.toString()
-	}));
+	assertNonNullish(
+		provider,
+		replacePlaceholders(get(i18n).init.error.no_infura_erc721_provider, {
+			$network: networkId.toString()
+		})
+	);
 
 	return provider;
 };
