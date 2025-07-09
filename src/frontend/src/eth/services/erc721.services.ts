@@ -20,6 +20,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type { ContractAddress } from '$eth/types/address';
 
 export const loadErc721Tokens = async ({
 	identity
@@ -87,21 +88,21 @@ const loadCustomTokensWithMetadata = async (
 				const metadata = await infuraErc721Providers(network.id).metadata({
 					address: tokenAddress
 				});
-				const { name, symbol } = metadata;
+				const { symbol } = metadata;
 
 				return {
-					...metadata,
 					...{
 						id: parseTokenId(`custom-token#${symbol}#${network.chainId}`),
-						name,
-						address: tokenAddress,
+						name: tokenAddress as ContractAddress,
+						address: tokenAddress as ContractAddress,
 						network,
 						symbol,
 						standard: 'erc721' as const,
 						category: 'custom' as const,
 						enabled,
 						version
-					}
+					},
+					...metadata
 				};
 			});
 	};
