@@ -128,8 +128,8 @@ export const initLoader = async ({
 	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
 
 	// We don't need to load the addresses of the disabled networks.
-	const networkIds: NetworkId[] = enabledNetworkIds.filter((networkId) =>
-		errorNetworkIds.includes(networkId)
+	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>
+		enabledNetworkIds.includes(networkId)
 	);
 
 	const { success: addressSuccess } = await loadAddresses(networkIds);
