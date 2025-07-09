@@ -159,5 +159,8 @@
 	},
 	"BITCAT": {
 		"ledgerCanisterId": "xlwi6-kyaaa-aaaar-qarya-cai"
+	},
+	"FORSETISCN": {
+		"ledgerCanisterId": "tta5j-yqaaa-aaaar-qarbq-cai"
 	}
 }
