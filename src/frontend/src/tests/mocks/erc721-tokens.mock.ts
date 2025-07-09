@@ -1,11 +1,11 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc721Token } from '$eth/types/erc721';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import type { NetworkEnvironment } from '$lib/types/network';
+import type { CertifiedData } from '$lib/types/store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import type { NetworkEnvironment } from '$lib/types/network';
-import type { CertifiedData } from '$lib/types/store';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 
 export const mockValidErc721Token: Erc721Token = {
 	...mockValidToken,
@@ -16,10 +16,10 @@ export const mockValidErc721Token: Erc721Token = {
 };
 
 export const createMockErc721Tokens = ({
-																				n,
-																				networkEnv,
-																				start = 0
-																			}: {
+	n,
+	networkEnv,
+	start = 0
+}: {
 	n: number;
 	networkEnv: NetworkEnvironment;
 	start?: number;
@@ -36,10 +36,10 @@ export const createMockErc721Tokens = ({
 	}));
 
 export const createMockErc721CustomTokens = ({
-																							n,
-																							networkEnv,
-																							start = 0
-																						}: {
+	n,
+	networkEnv,
+	start = 0
+}: {
 	n: number;
 	networkEnv: NetworkEnvironment;
 	start?: number;

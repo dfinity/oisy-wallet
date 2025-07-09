@@ -1,24 +1,24 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { toNullable } from '@dfinity/utils';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mocks';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
-import type { Erc721Metadata } from '$eth/types/erc721';
-import type { MockInstance } from 'vitest';
-import { mockAuthStore } from '$tests/mocks/auth.mock';
-import * as toastsStore from '$lib/stores/toasts.store';
-import { listCustomTokens } from '$lib/api/backend.api';
-import * as infuraProvidersModule from '$eth/providers/infura-erc721.providers';
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import type { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import { loadCustomTokens, loadErc721Tokens } from '$eth/services/erc721.services';
-import { get } from 'svelte/store';
-import en from '$tests/mocks/i18n.mock';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import type { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
+import * as infuraProvidersModule from '$eth/providers/infura-erc721.providers';
+import { loadCustomTokens, loadErc721Tokens } from '$eth/services/erc721.services';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import type { Erc721Metadata } from '$eth/types/erc721';
+import { listCustomTokens } from '$lib/api/backend.api';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
+import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('idb-keyval', () => ({
 	createStore: vi.fn(() => ({
@@ -46,7 +46,7 @@ describe('erc721.services', () => {
 			token: {
 				Erc721: {
 					chain_id: ETHEREUM_NETWORK.chainId,
-					token_address: mockEthAddress,
+					token_address: mockEthAddress
 				}
 			}
 		},
@@ -56,7 +56,7 @@ describe('erc721.services', () => {
 			token: {
 				Erc721: {
 					chain_id: BASE_NETWORK.chainId,
-					token_address: mockEthAddress2.toUpperCase(),
+					token_address: mockEthAddress2.toUpperCase()
 				}
 			}
 		},
@@ -66,7 +66,7 @@ describe('erc721.services', () => {
 			token: {
 				Erc721: {
 					chain_id: POLYGON_AMOY_NETWORK.chainId,
-					token_address: mockEthAddress3,
+					token_address: mockEthAddress3
 				}
 			}
 		}
@@ -341,4 +341,4 @@ describe('erc721.services', () => {
 			);
 		});
 	});
-})
+});

@@ -1,15 +1,18 @@
-import type { EthereumNetwork } from '$eth/types/network';
-import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
-import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { describe, type MockedClass } from 'vitest';
-import { ERC721_ABI } from '$eth/constants/erc721.constants';
-import { InfuraErc721Provider, infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
-import { Contract } from 'ethers/contract';
+import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { ERC721_ABI } from '$eth/constants/erc721.constants';
+import {
+	InfuraErc721Provider,
+	infuraErc721Providers
+} from '$eth/providers/infura-erc721.providers';
+import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
+import { Contract } from 'ethers/contract';
+import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
+import { describe, type MockedClass } from 'vitest';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'

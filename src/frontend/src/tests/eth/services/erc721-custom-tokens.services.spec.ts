@@ -1,16 +1,19 @@
+import { saveCustomTokens } from '$eth/services/erc721-custom-tokens.services';
+import { loadCustomTokens } from '$eth/services/erc721.services';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
-import { createMockErc721CustomTokens, createMockErc721Tokens } from '$tests/mocks/erc721-tokens.mock';
+import { setManyCustomTokens } from '$lib/api/backend.api';
+import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
-import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import { setManyCustomTokens } from '$lib/api/backend.api';
+import {
+	createMockErc721CustomTokens,
+	createMockErc721Tokens
+} from '$tests/mocks/erc721-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
-import { saveCustomTokens } from '$eth/services/erc721-custom-tokens.services';
-import { loadCustomTokens } from '$eth/services/erc721.services';
-import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/backend.api', () => ({
@@ -31,9 +34,9 @@ describe('erc721-custom-tokens.services', () => {
 			})),
 			...createMockErc721Tokens({ n: 1, networkEnv: 'testnet' }).map((token) => ({
 				...token,
-				enabled: true,
+				enabled: true
 			}))
-		]
+		];
 
 		const mockProgress = vi.fn();
 
