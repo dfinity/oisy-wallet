@@ -121,7 +121,7 @@
 			return;
 		}
 
-		if (nonNullish(erc20Metadata.decimals)) {
+		if (erc20Metadata.decimals > 0) {
 			await saveErc20Deprecated([
 				{
 					address: erc20ContractAddress,

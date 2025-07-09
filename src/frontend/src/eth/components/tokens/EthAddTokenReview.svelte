@@ -103,7 +103,7 @@
 		try {
 			await loadErc20Metadata(contractAddress);
 			handleMetadata();
-		} catch (err: unknown) {
+		} catch (_: unknown) {
 			try {
 				await loadErc721Metadata(contractAddress);
 				handleMetadata();
