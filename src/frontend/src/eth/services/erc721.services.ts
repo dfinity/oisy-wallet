@@ -63,7 +63,7 @@ const loadCustomTokensWithMetadata = async (
 	const loadCustomContracts = async (): Promise<Erc721CustomToken[]> => {
 		const erc721CustomTokens: CustomToken[] = await loadErc721CustomTokens(params);
 
-		return erc721CustomTokens
+		const customTokenPromises = erc721CustomTokens
 			.filter(
 				(customToken): customToken is CustomToken & { token: { Erc721: Erc721SaveCustomToken } } =>
 					'Erc721' in customToken.token
@@ -105,6 +105,8 @@ const loadCustomTokensWithMetadata = async (
 					...metadata
 				};
 			});
+
+		return Promise.all(customTokenPromises)
 	};
 
 	const customContracts = await loadCustomContracts();
