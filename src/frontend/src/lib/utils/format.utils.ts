@@ -3,6 +3,7 @@ import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants
 import type { AmountString } from '$lib/types/amount';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
+import Decimal from 'decimal.js';
 import type { BigNumberish } from 'ethers/utils';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
@@ -35,12 +36,13 @@ export const formatToken = ({
 	const maxFractionDigits = Math.min(leadingZeros + 2, MAX_DEFAULT_DISPLAY_DECIMALS);
 	const minFractionDigits = displayDecimals ?? DEFAULT_DISPLAY_DECIMALS;
 
-	const formatted = (+res).toLocaleString('en-US', {
-		useGrouping: false,
-		maximumFractionDigits:
-			displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS),
-		minimumFractionDigits: trailingZeros ? minFractionDigits : undefined
-	}) as `${number}`;
+	const dec = new Decimal(res);
+	const maxDigits =
+		displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS);
+	const decDP = dec.toDecimalPlaces(maxDigits);
+	const minDigits = trailingZeros ? Math.max(minFractionDigits, maxDigits) : undefined;
+
+	const formatted = decDP.toFixed(minDigits) as `${number}`;
 
 	if (trailingZeros) {
 		return formatted;
