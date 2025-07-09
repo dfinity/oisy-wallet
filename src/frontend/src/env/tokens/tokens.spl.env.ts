@@ -1,5 +1,6 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
 import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
+import { AMBRX_TOKEN } from '$env/tokens/tokens-spl/tokens.ambrx.env';
 import { AMZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.amznx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
@@ -30,6 +31,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	// TODO: temporarily disable these 2 tokens, because we don't have a price for them yet. We can enable them once they get traded and habe a price.
 	// ABBVX_TOKEN,
 	// ABTX_TOKEN,
+	AMBRX_TOKEN,
 	AMZNX_TOKEN,
 	BONK_TOKEN,
 	COINX_TOKEN,
