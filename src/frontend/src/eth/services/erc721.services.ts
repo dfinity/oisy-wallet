@@ -1,4 +1,4 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
+import type { CustomToken, Erc721Token } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
@@ -16,7 +16,7 @@ import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Address } from '$lib/types/address';
-import type { Erc721SaveCustomToken, LoadCustomTokenParams } from '$lib/types/custom-token';
+import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
@@ -65,7 +65,7 @@ const loadCustomTokensWithMetadata = async (
 
 		const customTokenPromises = erc721CustomTokens
 			.filter(
-				(customToken): customToken is CustomToken & { token: { Erc721: Erc721SaveCustomToken } } =>
+				(customToken): customToken is CustomToken & { token: { Erc721: Erc721Token } } =>
 					'Erc721' in customToken.token
 			)
 			.map(async ({ token, enabled, version: versionNullable }) => {
