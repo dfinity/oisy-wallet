@@ -41,7 +41,7 @@ export const loadIdbAddresses = async (
 	]);
 
 	const { success, err } = reduceResults<LoadIdbAddressError>(
-		results as ResultSuccess<LoadIdbAddressError>[]
+		results
 	);
 
 	return { success, err };
