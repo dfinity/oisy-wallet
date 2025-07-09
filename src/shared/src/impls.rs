@@ -9,8 +9,8 @@ use crate::{
         backend_config::{Config, InitArg},
         contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
         custom_token::{
-            CustomToken, CustomTokenId, Erc20Token, Erc20TokenId, Erc721Token, Erc721TokenId,
-            IcrcToken, SplToken, SplTokenId, Token,
+            CustomToken, CustomTokenId, Erc20Token, Erc721Token, ErcTokenId, IcrcToken, SplToken,
+            SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -86,12 +86,12 @@ impl From<&Token> for CustomTokenId {
                 token_address,
                 chain_id,
                 ..
-            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
-            Token::Erc721(Erc721Token {
+            })
+            | Token::Erc721(Erc721Token {
                 token_address,
                 chain_id,
                 ..
-            }) => CustomTokenId::EthereumErc721(token_address.clone(), *chain_id),
+            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
         }
     }
 }
@@ -421,29 +421,12 @@ impl Validate for SplTokenId {
     }
 }
 
-impl Erc20TokenId {
+impl ErcTokenId {
     pub const MAX_LENGTH: usize = 42;
     pub const MIN_LENGTH: usize = 42;
 }
 
-impl Validate for Erc20TokenId {
-    /// Verifies that an Ethereum/EVM address is valid.
-    fn validate(&self) -> Result<(), candid::Error> {
-        if self.0.len() != 42 {
-            return Err(candid::Error::msg(
-                "Invalid Ethereum/EVM contract address length",
-            ));
-        }
-        Ok(())
-    }
-}
-
-impl Erc721TokenId {
-    pub const MAX_LENGTH: usize = 42;
-    pub const MIN_LENGTH: usize = 42;
-}
-
-impl Validate for Erc721TokenId {
+impl Validate for ErcTokenId {
     /// Verifies that an Ethereum/EVM address is valid.
     fn validate(&self) -> Result<(), candid::Error> {
         if self.0.len() != 42 {
@@ -464,7 +447,6 @@ impl Validate for CustomTokenId {
                 token_address.validate()
             }
             CustomTokenId::Ethereum(token_address, _) => token_address.validate(),
-            CustomTokenId::EthereumErc721(token_address, _) => token_address.validate(),
         }
     }
 }
@@ -648,7 +630,6 @@ validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(Erc20Token);
-validate_on_deserialize!(Erc20TokenId);
+validate_on_deserialize!(ErcTokenId);
 validate_on_deserialize!(Erc721Token);
-validate_on_deserialize!(Erc721TokenId);
 validate_on_deserialize!(UserToken);
