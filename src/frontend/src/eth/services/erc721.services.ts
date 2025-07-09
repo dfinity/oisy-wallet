@@ -8,7 +8,6 @@ import {
 } from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { nftStore } from '$eth/stores/nft.store';
-import type { ContractAddress } from '$eth/types/address';
 import type { Nft } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
