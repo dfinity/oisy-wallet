@@ -150,6 +150,7 @@ fn test_create_contact_should_fail_with_leading_and_trailing_whitespace_name() {
         "create_contact",
         CreateContactRequest {
             name: "   Leading Whitespace".to_string(),
+            image: None,
         },
     );
     assert!(
@@ -163,6 +164,7 @@ fn test_create_contact_should_fail_with_leading_and_trailing_whitespace_name() {
         "create_contact",
         CreateContactRequest {
             name: "Trailing Whitespace   ".to_string(),
+            image: None,
         },
     );
     assert!(
@@ -176,6 +178,7 @@ fn test_create_contact_should_fail_with_leading_and_trailing_whitespace_name() {
         "create_contact",
         CreateContactRequest {
             name: "   Leading and Trailing Whitespace   ".to_string(),
+            image: None,
         },
     );
     assert!(
@@ -501,6 +504,7 @@ fn test_update_contact_should_fail_with_whitespace_name() {
         name: String::new(), // Empty name should fail
         addresses: vec![],
         update_timestamp_ns: created_contact.update_timestamp_ns,
+        image: None,
     };
 
     // Try to update with empty name
