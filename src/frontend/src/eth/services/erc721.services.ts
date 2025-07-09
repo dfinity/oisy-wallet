@@ -96,6 +96,7 @@ const loadCustomTokensWithMetadata = async (
 						address: tokenAddress,
 						network,
 						symbol,
+						decimals: 1,
 						standard: 'erc721' as const,
 						category: 'custom' as const,
 						enabled,

@@ -24,7 +24,7 @@ export const TokenCategorySchema = z.enum(['default', 'custom']);
 export const TokenMetadataSchema = z.object({
 	name: z.string(),
 	symbol: z.string(),
-	decimals: z.number().optional(),
+	decimals: z.number(),
 	icon: z.string().optional()
 });
 
