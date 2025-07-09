@@ -106,7 +106,7 @@ const loadCustomTokensWithMetadata = async (
 				};
 			});
 
-		return Promise.all(customTokenPromises)
+		return Promise.all(customTokenPromises);
 	};
 
 	const customContracts = await loadCustomContracts();
