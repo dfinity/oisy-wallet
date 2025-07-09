@@ -86,7 +86,8 @@ impl From<&Token> for CustomTokenId {
                 token_address,
                 chain_id,
                 ..
-            }) | Token::Erc721(Erc721Token {
+            })
+            | Token::Erc721(Erc721Token {
                 token_address,
                 chain_id,
                 ..
