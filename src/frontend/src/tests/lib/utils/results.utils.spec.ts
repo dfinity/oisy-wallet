@@ -3,10 +3,7 @@ import { reduceResults } from '$lib/utils/results.utils';
 
 describe('reduceResults', () => {
 	it('should return a successful result when all results are successful', () => {
-		const results: [ResultSuccess<string>, ...ResultSuccess<string>[]] = [
-			{ success: true },
-			{ success: true }
-		];
+		const results: ResultSuccess<string>[] = [{ success: true }, { success: true }];
 
 		const reduced = reduceResults(results);
 
@@ -14,7 +11,7 @@ describe('reduceResults', () => {
 	});
 
 	it('should return a failed result with errors when any result is unsuccessful', () => {
-		const results: [ResultSuccess<string>, ...ResultSuccess<string>[]] = [
+		const results: ResultSuccess<string>[] = [
 			{ success: true, err: undefined },
 			{ success: false, err: 'Error 1' },
 			{ success: true },
@@ -27,7 +24,7 @@ describe('reduceResults', () => {
 	});
 
 	it('should ignore undefined errors', () => {
-		const results: [ResultSuccess<string>, ...ResultSuccess<string>[]] = [
+		const results: ResultSuccess<string>[] = [
 			{ success: true, err: undefined },
 			{ success: false, err: 'Error 1' },
 			{ success: true },
@@ -37,5 +34,11 @@ describe('reduceResults', () => {
 		const reduced = reduceResults(results);
 
 		expect(reduced).toEqual({ success: false, err: ['Error 1'] });
+	});
+
+	it('should handle empty results array', () => {
+		const reduced = reduceResults([]);
+
+		expect(reduced).toEqual({ success: true, err: undefined });
 	});
 });
