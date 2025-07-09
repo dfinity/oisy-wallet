@@ -9,8 +9,8 @@ use crate::{
         backend_config::{Config, InitArg},
         contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
         custom_token::{
-            CustomToken, CustomTokenId, Erc20Token, ErcTokenId, Erc721Token,
-            IcrcToken, SplToken, SplTokenId, Token,
+            CustomToken, CustomTokenId, Erc20Token, Erc721Token, ErcTokenId, IcrcToken, SplToken,
+            SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
