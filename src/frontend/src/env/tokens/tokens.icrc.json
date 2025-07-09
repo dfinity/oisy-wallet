@@ -159,5 +159,8 @@
 	},
 	"BITCAT": {
 		"ledgerCanisterId": "xlwi6-kyaaa-aaaar-qarya-cai"
+	},
+	"BDC.OT": {
+		"ledgerCanisterId": "2ulkl-dqaaa-aaaar-qaijq-cai"
 	}
 }
