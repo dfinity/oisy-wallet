@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { derived } from 'svelte/store';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
@@ -15,8 +14,10 @@
 		avatarUrl = $bindable<string | null>()
 	} = $props();
 
-	const items = derived(avatarUrl, ($avatarUrl) =>
-		$avatarUrl
+	let menuButton = $state<HTMLButtonElement>();
+
+	const items = $derived(
+		avatarUrl
 			? [
 					{
 						logo: IconImage,
@@ -38,11 +39,9 @@
 					}
 				]
 	);
-
-	let menuButton = $state<HTMLButtonElement>();
 </script>
 
-<CustomPopoverMenu title={$i18n.address_book.edit_avatar.menu_title} items={$items}>
+<CustomPopoverMenu title={$i18n.address_book.edit_avatar.menu_title} {items}>
 	<svelte:fragment slot="trigger" let:toggle>
 		<ButtonIcon
 			bind:button={menuButton}
