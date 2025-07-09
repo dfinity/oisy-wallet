@@ -102,7 +102,7 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
 /// * `Ok(Contact)` - The updated contact if successful
 /// * `Err(ContactError::ContactNotFound)` - If no contact with the given ID exists for the user
 /// * `Err(ContactError::InvalidContactData)` - If the contact data is invalid
-pub fn update_contact(contact: Contact) -> Result<Contact, ContactError> {
+pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     let current_time = time();
 
@@ -125,24 +125,23 @@ pub fn update_contact(contact: Contact) -> Result<Contact, ContactError> {
             return Err(ContactError::ContactNotFound);
         };
 
-        // Check if the contact exists
-        if !stored_contacts.contacts.contains_key(&contact.id) {
-            return Err(ContactError::ContactNotFound);
-        }
+        // Check if the contact exists and get the existing contact
+        let existing_contact = stored_contacts.contacts.get(&request.id)
+            .ok_or(ContactError::ContactNotFound)?;
 
         // Create an updated contact with current timestamp
         let updated_contact = Contact {
-            id: contact.id,
-            name: contact.name,
-            addresses: contact.addresses,
+            id: request.id,
+            name: request.name,
+            addresses: request.addresses,
             update_timestamp_ns: current_time,
-            image: existing_contact.image.clone(), // Preserve existing image
+            image: request.image.or_else(|| existing_contact.image.clone()), // Use request image or preserve existing
         };
 
         // Update the contact in the stored contacts
         stored_contacts
             .contacts
-            .insert(contact.id, updated_contact.clone());
+            .insert(request.id, updated_contact.clone());
         stored_contacts.update_timestamp_ns = current_time;
 
         // Update the storage
