@@ -5,7 +5,6 @@
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
-	import type { SaveErc721CustomToken } from '$eth/services/erc721-custom-tokens.services';
 	import {
 		saveErc20UserTokens,
 		saveErc721CustomTokens
@@ -13,6 +12,7 @@
 	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
+	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token.js';
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
