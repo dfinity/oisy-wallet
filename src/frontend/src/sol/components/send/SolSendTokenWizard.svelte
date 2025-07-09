@@ -22,7 +22,7 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import type { ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import  { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -181,6 +181,18 @@
 					token: $sendToken.symbol
 				}
 			});
+
+			if (sendProgressStep === ProgressStepsSendSol.CONFIRM) {
+				toastsError({
+					msg: { text: $i18n.send.error.solana_confirmation_failed },
+					err
+				});
+
+				setTimeout(() => close(), 750);
+
+				return
+			}
+
 
 			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)
 				? $i18n.send.error.solana_transaction_expired

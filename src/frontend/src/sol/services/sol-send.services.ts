@@ -232,7 +232,7 @@ export const sendSignedTransaction = async ({
 	await sendTransaction(signedTransaction, { commitment });
 };
 
-export const confirmSignedTransaction = async ({
+const confirmSignedTransaction = async ({
 	rpc,
 	rpcSubscriptions,
 	signedTransaction,
