@@ -187,7 +187,7 @@ type Erc20Token = record {
 };
 type Erc721Token = record {
 	token_address : text;
-	chain_id : nat64;
+	chain_id : nat64
 };
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
