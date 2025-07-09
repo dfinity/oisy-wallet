@@ -37,8 +37,7 @@ export const loadCustomTokens = ({
 				err
 			});
 		},
-		identity,
-		strategy: 'query'
+		identity
 	});
 
 const loadErc721CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>

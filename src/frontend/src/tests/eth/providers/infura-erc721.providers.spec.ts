@@ -5,7 +5,7 @@ import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { describe, type MockedClass } from 'vitest';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
-import { InfuraERC721Provider, infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
+import { InfuraErc721Provider, infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { Contract } from 'ethers/contract';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -40,7 +40,7 @@ describe('infura-erc721.providers', () => {
 		});
 
 		it('should initialise the provider with the correct network and API key', () => {
-			const provider = new InfuraERC721Provider(infura);
+			const provider = new InfuraErc721Provider(infura);
 
 			expect(provider).toBeDefined();
 			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, INFURA_API_KEY);
@@ -65,7 +65,7 @@ describe('infura-erc721.providers', () => {
 			});
 
 			it('should return the fetched metadata', async () => {
-				const provider = new InfuraERC721Provider(infura);
+				const provider = new InfuraErc721Provider(infura);
 
 				const result = await provider.metadata(mockParams);
 
@@ -77,7 +77,7 @@ describe('infura-erc721.providers', () => {
 			});
 
 			it('should call the metadata methods of the contract', async () => {
-				const provider = new InfuraERC721Provider(infura);
+				const provider = new InfuraErc721Provider(infura);
 
 				await provider.metadata(mockParams);
 
@@ -99,7 +99,7 @@ describe('infura-erc721.providers', () => {
 				const errorMessage = 'Error fetching metadata';
 				mockName.mockRejectedValue(new Error(errorMessage));
 
-				const provider = new InfuraERC721Provider(infura);
+				const provider = new InfuraErc721Provider(infura);
 
 				await expect(provider.metadata(mockParams)).rejects.toThrow(errorMessage);
 			});
@@ -110,7 +110,7 @@ describe('infura-erc721.providers', () => {
 				it(`should return the correct provider for ${name} network`, () => {
 					const provider = infuraErc721Providers(id);
 
-					expect(provider).toBeInstanceOf(InfuraERC721Provider);
+					expect(provider).toBeInstanceOf(InfuraErc721Provider);
 
 					expect(provider).toHaveProperty('network');
 				});

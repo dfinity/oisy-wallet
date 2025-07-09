@@ -11,7 +11,7 @@ import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-export class InfuraERC721Provider {
+export class InfuraErc721Provider {
 	private readonly provider: InfuraProvider;
 
 	constructor(private readonly network: Networkish) {
@@ -78,15 +78,15 @@ export class InfuraERC721Provider {
 	};
 }
 
-const providers: Record<NetworkId, InfuraERC721Provider> = [
+const providers: Record<NetworkId, InfuraErc721Provider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
-].reduce<Record<NetworkId, InfuraERC721Provider>>(
-	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraERC721Provider(infura) }),
+].reduce<Record<NetworkId, InfuraErc721Provider>>(
+	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc721Provider(infura) }),
 	{}
 );
 
-export const infuraErc721Providers = (networkId: NetworkId): InfuraERC721Provider => {
+export const infuraErc721Providers = (networkId: NetworkId): InfuraErc721Provider => {
 	const provider = providers[networkId];
 
 	assertNonNullish(
