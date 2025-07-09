@@ -186,10 +186,10 @@ type Erc20Token = record {
 	symbol : opt text
 };
 type Erc721Token = record {
+	name : opt text;
 	token_address : text;
 	chain_id : nat64;
-	symbol : opt text;
-	name : opt text
+	symbol : opt text
 };
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
