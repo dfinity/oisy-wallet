@@ -633,5 +633,3 @@ validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(Erc20Token);
 validate_on_deserialize!(Erc20TokenId);
 validate_on_deserialize!(UserToken);
-
-
