@@ -162,5 +162,14 @@
 	},
 	"RSIC.OT": {
 		"ledgerCanisterId": "i44ka-paaaa-aaaar-qbonq-cai"
+	},
+	"BDC.OT": {
+		"ledgerCanisterId": "2ulkl-dqaaa-aaaar-qaijq-cai"
+	},
+	"FORSETISCN": {
+		"ledgerCanisterId": "tta5j-yqaaa-aaaar-qarbq-cai"
+	},
+	"ODINDOG": {
+		"ledgerCanisterId": "eazb6-tqaaa-aaaar-qan2a-cai"
 	}
 }
