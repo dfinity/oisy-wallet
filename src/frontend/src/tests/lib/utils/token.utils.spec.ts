@@ -51,7 +51,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(Number(balance - fee) / 10 ** tokenDecimals);
+				expect(result).toBe((Number(balance - fee) / 10 ** tokenDecimals).toString());
 			});
 		});
 
@@ -64,7 +64,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(0);
+				expect(result).toBe('0');
 			});
 		});
 
@@ -77,7 +77,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(0);
+				expect(result).toBe('0');
 			});
 		});
 
@@ -90,7 +90,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(0);
+				expect(result).toBe('0');
 
 				result = getMaxTransactionAmount({
 					balance,
@@ -99,7 +99,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+				expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 			});
 		});
 
@@ -111,7 +111,7 @@ describe('token.utils', () => {
 				tokenStandard: 'erc20'
 			});
 
-			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 		});
 
 		it('should return the untouched amount if the token is SPL', () => {
@@ -122,7 +122,7 @@ describe('token.utils', () => {
 				tokenStandard: 'spl'
 			});
 
-			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 		});
 	});
 

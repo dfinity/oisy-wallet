@@ -18,7 +18,7 @@
 	let isZeroBalance: boolean;
 	$: isZeroBalance = isNullish(balance) || balance === ZERO;
 
-	let maxAmount: number | undefined;
+	let maxAmount: string | undefined;
 	$: maxAmount = nonNullish(token)
 		? getMaxTransactionAmount({
 				balance,
