@@ -40,11 +40,9 @@ const toErc20CustomToken = ({
 const toErc721CustomToken = ({
 	address: token_address,
 	chainId: chain_id,
-	symbol
 }: Erc721SaveCustomToken): Erc721Token => ({
 	token_address,
 	chain_id,
-	symbol: toNullable(symbol)
 });
 
 const toSplCustomToken = ({

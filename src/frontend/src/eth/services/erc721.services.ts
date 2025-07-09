@@ -1,4 +1,4 @@
-import { InfuraERC721Provider } from '$eth/providers/infura-erc721.providers';
+import { InfuraERC721Provider, infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import type { Address } from '$lib/types/address';
@@ -53,11 +53,11 @@ const loadCustomTokensWithMetadata = async (params: LoadCustomTokenParams): Prom
 		const erc721CustomTokens: CustomToken[] = await loadErc721CustomTokens(params);
 
 		return erc721CustomTokens.filter((customToken): customToken is CustomToken & { token: { Erc721: any } } => 'Erc721' in customToken.token)
-			.map(({token, enabled, version: versionNullable}) => {
+			.map(async ({token, enabled, version: versionNullable}) => {
 				const version = fromNullable(versionNullable);
 
 				const {
-					Erc721: { symbol, token_address: tokenAddress, chain_id: tokenChainId }
+					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
 				const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
@@ -70,21 +70,28 @@ const loadCustomTokensWithMetadata = async (params: LoadCustomTokenParams): Prom
 					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
 				);
 
+				const metadata = await infuraErc721Providers(network.id).metadata({address: tokenAddress});
+				const { symbol } = metadata;
+
 				return {
-					id: parseTokenId(`custom-token#${symbol}#${network.chainId}`),
-					name: tokenAddress,
-					address: tokenAddress,
-					network,
-					symbol: fromNullable(symbol) ?? '',
-					standard: 'erc721' as const,
-					category: 'custom' as const,
-					enabled,
-					version
+					...{
+						id: parseTokenId(`custom-token#${symbol}#${network.chainId}`),
+						name: tokenAddress,
+						address: tokenAddress,
+						network,
+						symbol,
+						standard: 'erc721' as const,
+						category: 'custom' as const,
+						enabled,
+						version
+					},
+					...metadata
 				}
 			})
 	}
 
-	return await loadCustomContracts();
+	const customContracts = await loadCustomContracts();
+	return await Promise.all(customContracts);
 }
 
 const loadCustomTokenData = ({
