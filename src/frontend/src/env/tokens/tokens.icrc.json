@@ -159,5 +159,8 @@
 	},
 	"BITCAT": {
 		"ledgerCanisterId": "xlwi6-kyaaa-aaaar-qarya-cai"
+	},
+	"ODINDOG": {
+		"ledgerCanisterId": "eazb6-tqaaa-aaaar-qan2a-cai"
 	}
 }
