@@ -1,11 +1,11 @@
 import type {
 	CustomToken,
 	Erc20Token,
+	Erc721Token,
 	IcrcToken,
 	SplToken,
 	Token
 } from '$declarations/backend/backend.did';
-import type { Erc721Token } from '$eth/types/erc721';
 import type {
 	Erc20SaveCustomToken,
 	Erc721SaveCustomToken,
