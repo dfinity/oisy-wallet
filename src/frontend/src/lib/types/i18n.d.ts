@@ -365,6 +365,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		erc20_custom_tokens: string;
 		erc20_user_tokens: string;
 		spl_custom_tokens: string;
 		erc20_user_token: string;
@@ -520,6 +521,7 @@ interface I18nSend {
 		sending: string;
 		signing: string;
 		signing_message: string;
+		confirming: string;
 		network: string;
 		source_network: string;
 		destination_network: string;
@@ -940,6 +942,15 @@ interface I18nTransaction {
 		pending: string;
 		safe: string;
 		unconfirmed: string;
+	};
+	type: {
+		send: string;
+		receive: string;
+		withdraw: string;
+		deposit: string;
+		approve: string;
+		burn: string;
+		mint: string;
 	};
 	label: {
 		reimbursement: string;

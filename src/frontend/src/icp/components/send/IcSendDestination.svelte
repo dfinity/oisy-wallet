@@ -47,7 +47,7 @@
 	bind:invalidDestination
 	{knownDestinations}
 	{networkContacts}
-	{isInvalidDestination}
+	onInvalidDestination={isInvalidDestination}
 	{inputPlaceholder}
 	on:icQRCodeScan
 	onQRButtonClick={() => dispatch('icQRCodeScan')}

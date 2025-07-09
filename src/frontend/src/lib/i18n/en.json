@@ -482,6 +482,7 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
 			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
@@ -644,6 +645,7 @@
 			"sending": "Sending...",
 			"signing": "Signing...",
 			"signing_message": "Signing message...",
+			"confirming": "Confirming...",
 			"network": "Network",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
@@ -913,7 +915,7 @@
 				"import_token": "Import token",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance.",
-				"enable_more_assets": "Enable more assets"
+				"enable_more_assets": "Enable more tokens"
 			},
 			"placeholder": {
 				"select_network": "Select the network"
@@ -1099,6 +1101,15 @@
 			"pending": "Pending...",
 			"safe": "Safe",
 			"unconfirmed": "Unconfirmed"
+		},
+		"type": {
+			"send": "Send",
+			"receive": "Receive",
+			"withdraw": "Withdraw",
+			"deposit": "Deposit",
+			"approve": "Approve",
+			"burn": "Burn",
+			"mint": "Mint"
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
