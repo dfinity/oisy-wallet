@@ -93,8 +93,8 @@ const loadCustomTokensWithMetadata = async (
 				return {
 					...{
 						id: parseTokenId(`custom-token#${symbol}#${network.chainId}`),
-						name: tokenAddress as ContractAddress,
-						address: tokenAddress as ContractAddress,
+						name: tokenAddress,
+						address: tokenAddress,
 						network,
 						symbol,
 						standard: 'erc721' as const,
