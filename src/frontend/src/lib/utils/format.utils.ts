@@ -3,6 +3,7 @@ import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants
 import type { AmountString } from '$lib/types/amount';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
+import Decimal from 'decimal.js';
 import type { BigNumberish } from 'ethers/utils';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
