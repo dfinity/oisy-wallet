@@ -53,6 +53,15 @@ describe('addresses.services', () => {
 			expect(loadEthAddress).not.toHaveBeenCalled();
 			expect(loadSolAddressMainnet).not.toHaveBeenCalled();
 		});
+
+		it('should handle empty networkIds array', async () => {
+			const result = await loadAddresses([]);
+
+			expect(result).toEqual({ success: true });
+			expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
+			expect(loadEthAddress).not.toHaveBeenCalled();
+			expect(loadSolAddressMainnet).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('loadIdbAddresses', () => {
