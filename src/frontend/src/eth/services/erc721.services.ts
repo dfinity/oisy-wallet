@@ -87,12 +87,13 @@ const loadCustomTokensWithMetadata = async (
 				const metadata = await infuraErc721Providers(network.id).metadata({
 					address: tokenAddress
 				});
-				const { symbol } = metadata;
+				const { name, symbol } = metadata;
 
 				return {
+					...metadata,
 					...{
 						id: parseTokenId(`custom-token#${symbol}#${network.chainId}`),
-						name: tokenAddress,
+						name,
 						address: tokenAddress,
 						network,
 						symbol,
@@ -100,8 +101,7 @@ const loadCustomTokensWithMetadata = async (
 						category: 'custom' as const,
 						enabled,
 						version
-					},
-					...metadata
+					}
 				};
 			});
 	};
