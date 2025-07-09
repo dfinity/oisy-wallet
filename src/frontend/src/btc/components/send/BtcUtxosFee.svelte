@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
-	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
+	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -16,14 +16,11 @@
 		utxosFee?: UtxosFee;
 		amount?: OptionAmount;
 		networkId?: NetworkId;
-		source: string;
 	}
-
 	let {
 		utxosFee = $bindable(undefined),
 		amount = undefined,
-		networkId = undefined,
-		source
+		networkId = undefined
 	}: Props = $props();
 
 	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
@@ -39,16 +36,15 @@
 			}
 
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
+
 			utxosFee = nonNullish(network)
-				? await prepareBtcSend({
-						identity: $authIdentity,
-						network,
+				? await selectUtxosFeeApi({
 						amount,
-						source
+						network,
+						identity: $authIdentity
 					})
 				: undefined;
 		} catch (err: unknown) {
-			console.error('Error selecting utxos fee', err);
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected_utxos_fee },
 				err
