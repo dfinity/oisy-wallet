@@ -41,8 +41,8 @@ impl ImageMimeType {
 pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
 pub type ImageId = u64;
 
-/// This is the DTO for the frontend
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
 pub struct Contact {
     pub id: u64,
     pub name: String,
@@ -58,6 +58,7 @@ pub struct ContactImage {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
 pub struct ContactAddressData {
     pub token_account_id: TokenAccountId,
     pub label: Option<String>,
@@ -70,12 +71,14 @@ pub struct StoredContacts {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
 pub struct CreateContactRequest {
     pub name: String,
     pub image: Option<ContactImage>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
 pub struct UpdateContactRequest {
     pub id: u64,
     pub name: String,

@@ -96,13 +96,13 @@ pub fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
 /// Updates an existing contact with the new information provided.
 ///
 /// # Arguments
-/// * `request` - The update contact request with the new information
+/// * `contact` - The contact with updated information
 ///
 /// # Returns
 /// * `Ok(Contact)` - The updated contact if successful
 /// * `Err(ContactError::ContactNotFound)` - If no contact with the given ID exists for the user
 /// * `Err(ContactError::InvalidContactData)` - If the contact data is invalid
-pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactError> {
+pub fn update_contact(contact: Contact) -> Result<Contact, ContactError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     let current_time = time();
 
@@ -126,21 +126,15 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
         };
 
         // Check if the contact exists
-        if !stored_contacts.contacts.contains_key(&request.id) {
+        if !stored_contacts.contacts.contains_key(&contact.id) {
             return Err(ContactError::ContactNotFound);
         }
 
-        // Get the existing contact to preserve the image
-        let existing_contact = stored_contacts
-            .contacts
-            .get(&request.id)
-            .ok_or(ContactError::ContactNotFound)?;
-
-        // Create an updated contact with current timestamp, preserving the existing image
+        // Create an updated contact with current timestamp
         let updated_contact = Contact {
-            id: request.id,
-            name: request.name,
-            addresses: request.addresses,
+            id: contact.id,
+            name: contact.name,
+            addresses: contact.addresses,
             update_timestamp_ns: current_time,
             image: existing_contact.image.clone(), // Preserve existing image
         };
@@ -148,7 +142,7 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
         // Update the contact in the stored contacts
         stored_contacts
             .contacts
-            .insert(request.id, updated_contact.clone());
+            .insert(contact.id, updated_contact.clone());
         stored_contacts.update_timestamp_ns = current_time;
 
         // Update the storage

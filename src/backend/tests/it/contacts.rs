@@ -109,11 +109,11 @@ fn test_create_contact_should_succeed_with_valid_name() {
 }
 
 #[test]
-fn test_create_contact_accepts_whitespace_name() {
+fn test_create_contact_should_fail_with_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
-    // Test empty string - should be accepted
+    // Test empty string
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
         caller,
         "create_contact",
@@ -122,9 +122,9 @@ fn test_create_contact_accepts_whitespace_name() {
             image: None,
         },
     );
-    assert!(wrapped_result.is_ok(), "Empty string should be accepted");
+    assert!(wrapped_result.is_err(), "Empty string should be rejected");
 
-    // Test two whitespaces - should be accepted
+    // Test two whitespaces
     let wrapped_result = pic_setup.update::<Result<Contact, ContactError>>(
         caller,
         "create_contact",
@@ -134,13 +134,13 @@ fn test_create_contact_accepts_whitespace_name() {
         },
     );
     assert!(
-        wrapped_result.is_ok(),
-        "String with multiples whitespaces should be accepted"
+        wrapped_result.is_err(),
+        "String with multiples whitespaces should be rejected"
     );
 }
 
 #[test]
-fn test_create_contact_accepts_leading_and_trailing_whitespace_name() {
+fn test_create_contact_should_fail_with_leading_and_trailing_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -150,12 +150,11 @@ fn test_create_contact_accepts_leading_and_trailing_whitespace_name() {
         "create_contact",
         CreateContactRequest {
             name: "   Leading Whitespace".to_string(),
-            image: None,
         },
     );
     assert!(
-        wrapped_result.is_ok(),
-        "Leading whitespace should be accepted"
+        wrapped_result.is_err(),
+        "Leading whitespace should be rejected"
     );
 
     // Create a contact with a name that has trailing whitespace
@@ -164,12 +163,11 @@ fn test_create_contact_accepts_leading_and_trailing_whitespace_name() {
         "create_contact",
         CreateContactRequest {
             name: "Trailing Whitespace   ".to_string(),
-            image: None,
         },
     );
     assert!(
-        wrapped_result.is_ok(),
-        "Trailing whitespace should be accepted"
+        wrapped_result.is_err(),
+        "Trailing whitespace should be rejected"
     );
 
     // Create a contact with a name that has both leading and trailing whitespace
@@ -178,12 +176,11 @@ fn test_create_contact_accepts_leading_and_trailing_whitespace_name() {
         "create_contact",
         CreateContactRequest {
             name: "   Leading and Trailing Whitespace   ".to_string(),
-            image: None,
         },
     );
     assert!(
-        wrapped_result.is_ok(),
-        "Leading and trailing whitespace should be accepted"
+        wrapped_result.is_err(),
+        "Leading and trailing whitespace should be rejected"
     );
 
     // Verify that a name with internal whitespace is accepted
@@ -489,7 +486,7 @@ fn test_update_contact_should_succeed_with_valid_data() {
 }
 
 #[test]
-fn test_update_contact_accepts_whitespace_name() {
+fn test_update_contact_should_fail_with_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -501,10 +498,9 @@ fn test_update_contact_accepts_whitespace_name() {
     // Prepare updated contact data with empty name
     let updated_contact_data = Contact {
         id: created_contact.id,
-        name: String::new(), // Empty name should be accepted
+        name: String::new(), // Empty name should fail
         addresses: vec![],
         update_timestamp_ns: created_contact.update_timestamp_ns,
-        image: None,
     };
 
     // Try to update with empty name
@@ -513,12 +509,12 @@ fn test_update_contact_accepts_whitespace_name() {
         "update_contact",
         updated_contact_data,
     );
-    assert!(wrapped_result.is_ok(), "Empty name should be accepted");
+    assert!(wrapped_result.is_err(), "Empty name should be rejected");
 
     // Test with multiple whitespaces
     let whitespace_contact_data = Contact {
         id: created_contact.id,
-        name: "   ".to_string(), // Multiple whitespaces should be accepted
+        name: "   ".to_string(), // Multiple whitespaces should fail
         addresses: vec![],
         update_timestamp_ns: created_contact.update_timestamp_ns,
         image: None,
@@ -529,13 +525,13 @@ fn test_update_contact_accepts_whitespace_name() {
         whitespace_contact_data,
     );
     assert!(
-        whitespace_result.is_ok(),
-        "Name with multiple whitespaces should be accepted"
+        whitespace_result.is_err(),
+        "Name with multiple whitespaces should be rejected"
     );
 }
 
 #[test]
-fn test_update_contact_accepts_leading_and_trailing_whitespace_name() {
+fn test_update_contact_should_fail_with_leading_and_trailing_whitespace_name() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
@@ -560,8 +556,8 @@ fn test_update_contact_accepts_leading_and_trailing_whitespace_name() {
         leading_whitespace_data,
     );
     assert!(
-        wrapped_result.is_ok(),
-        "Leading whitespace should be accepted"
+        wrapped_result.is_err(),
+        "Leading whitespace should be rejected"
     );
 
     // Prepare updated contact data with a name that has trailing whitespace
@@ -580,8 +576,8 @@ fn test_update_contact_accepts_leading_and_trailing_whitespace_name() {
         trailing_whitespace_data,
     );
     assert!(
-        wrapped_result.is_ok(),
-        "Trailing whitespace should be accepted"
+        wrapped_result.is_err(),
+        "Trailing whitespace should be rejected"
     );
 
     // Prepare updated contact data with a name that has both leading and trailing whitespace
@@ -600,8 +596,8 @@ fn test_update_contact_accepts_leading_and_trailing_whitespace_name() {
         both_whitespace_data,
     );
     assert!(
-        wrapped_result.is_ok(),
-        "Leading and trailing whitespace should be accepted"
+        wrapped_result.is_err(),
+        "Leading and trailing whitespace should be rejected"
     );
 
     // Verify a valid update works
