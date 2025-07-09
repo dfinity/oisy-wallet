@@ -8,6 +8,7 @@ import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eur
 import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
@@ -37,6 +38,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	GOOGLX_TOKEN,
 	HOODX_TOKEN,
 	JUP_TOKEN,
+	MCDX_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
 	NVDAX_TOKEN,
