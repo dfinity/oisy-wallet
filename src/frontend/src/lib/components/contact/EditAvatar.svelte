@@ -11,7 +11,7 @@
 		fileInput = $bindable(),
 		replaceImage = $bindable(),
 		removeImage = $bindable(),
-		avatarUrl = $bindable<string | null>()
+		avatarUrl = $bindable()
 	} = $props();
 
 	let menuButton = $state<HTMLButtonElement>();
