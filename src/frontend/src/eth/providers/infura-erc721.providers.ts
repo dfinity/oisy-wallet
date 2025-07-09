@@ -5,7 +5,7 @@ import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import type { Erc721ContractAddress, Erc721Metadata, Nft } from '$eth/types/erc721';
 import type { NetworkId } from '$lib/types/network';
 import { assertNonNullish } from '@dfinity/utils';
-import { Contract } from 'ethers';
+import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 
 export class InfuraERC721Provider {
