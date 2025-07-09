@@ -40,13 +40,13 @@ import {
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import i18nMock from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
 import type { MockedFunction } from 'vitest';
-import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
@@ -704,7 +704,7 @@ describe('tokens.utils', () => {
 			const { icrc, spl, erc20, erc721 } = groupTogglableTokens({
 				SOL: mockToggleableSplToken,
 				ETH: mockToggleableErc20Token,
-				'erc721': mockToggleableErc721Token,
+				erc721: mockToggleableErc721Token,
 				'ICP-t1': mockToggleableIcToken1,
 				'ICP-t2': mockToggleableIcToken2
 			});
