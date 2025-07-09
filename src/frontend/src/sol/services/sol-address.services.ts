@@ -12,6 +12,7 @@ import {
 	updateIdbSolAddressMainnetLastUsage
 } from '$lib/api/idb-addresses.api';
 import { getSchnorrPublicKey } from '$lib/api/signer.api';
+import { deriveSolAddress } from '$lib/ic-pub-key/src/cli';
 import {
 	certifyAddress,
 	loadIdbTokenAddress,
@@ -33,37 +34,72 @@ import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
-import { getAddressDecoder } from '@solana/kit';
+import { getAddressDecoder, getAddressEncoder } from '@solana/kit';
 
-const getSolanaPublicKey = async (
-	params: CanisterApiFunctionParams<{ derivationPath: string[] }>
-): Promise<Uint8Array | number[]> =>
+const getSolanaPublicKey = async ({
+	derivationPath,
+	...rest
+}: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array | number[]> =>
 	await getSchnorrPublicKey({
-		...params,
+		...rest,
 		keyId: SOLANA_KEY_ID,
-		derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...params.derivationPath]
+		derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath]
 	});
 
 const getSolAddress = async ({
 	identity,
-	derivationPath
+	derivationPath,
+	network
 }: {
 	identity: OptionIdentity;
 	derivationPath: string[];
+	network: SolanaNetworkType;
 }): Promise<SolAddress> => {
+	const foo = await deriveSolAddress(
+		'xlmxo-5n3p7-s56nq-7wlbe-nrvij-7veys-thk7y-uuxol-wjzki-rbcqi-aqe',
+		network
+	);
+	const encoder = new TextEncoder();
+	const uint8Array = encoder.encode(foo);
+	const base58StringBytes = Uint8Array.from([...foo].map((c) => c.charCodeAt(0)));
+
+	const decoder2 = getAddressDecoder();
+	const decoder3 = getAddressEncoder();
+	// const av = decoder3.encode(address(foo));
+	// const bar = decoder2.decode(Uint8Array.from(uint8Array));
+	const bar = decoder2.decode(base58StringBytes);
+
+	// 2EQneZBEeL3XGy3YaQAgxwxYvKq2bRPfQVpiGXgpQEfv - mainnet
+	// 3azSdZ7u1LxpxTVE6T4oH9XuTYidD7fNhXmJKhTTczw4 -- devnet
+
 	const publicKey = await getSolanaPublicKey({ identity, derivationPath });
+
+	console.log(`SolAddress for ${network}: ${foo}`, publicKey, base58StringBytes, uint8Array, bar);
+
 	const decoder = getAddressDecoder();
 	return decoder.decode(Uint8Array.from(publicKey));
 };
 
 export const getSolAddressMainnet = async (identity: OptionIdentity): Promise<SolAddress> =>
-	await getSolAddress({ identity, derivationPath: [SolanaNetworks.mainnet] });
+	await getSolAddress({
+		identity,
+		derivationPath: [SolanaNetworks.mainnet],
+		network: SolanaNetworks.mainnet
+	});
 
 export const getSolAddressDevnet = async (identity: OptionIdentity): Promise<SolAddress> =>
-	await getSolAddress({ identity, derivationPath: [SolanaNetworks.devnet] });
+	await getSolAddress({
+		identity,
+		derivationPath: [SolanaNetworks.devnet],
+		network: SolanaNetworks.devnet
+	});
 
 export const getSolAddressLocal = async (identity: OptionIdentity): Promise<SolAddress> =>
-	await getSolAddress({ identity, derivationPath: [SolanaNetworks.local] });
+	await getSolAddress({
+		identity,
+		derivationPath: [SolanaNetworks.local],
+		network: SolanaNetworks.local
+	});
 
 const solanaMapper: Record<
 	SolanaNetworkType,

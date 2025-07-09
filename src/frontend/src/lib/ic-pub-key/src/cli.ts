@@ -2,6 +2,10 @@
 /* istanbul ignore file */
 /* v8 ignore start */
 
+import { schnorr_ed25519_derive } from '$lib/ic-pub-key/src/schnorr/ed25519';
+import { mapDerivationPath } from '$lib/utils/signer.utils';
+import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
+import type { SolanaNetworkType } from '$sol/types/network';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
 import { networks, payments, type Network } from 'bitcoinjs-lib';
@@ -66,6 +70,28 @@ export const deriveBtcAddress = async (user: string, network: BitcoinNetwork): P
 		throw new Error('Failed to derive Bitcoin address from public key.');
 	}
 	return btc_address;
+};
+
+/* istanbul ignore next */
+export const deriveSolAddress = async (
+	user: string,
+	network: SolanaNetworkType
+): Promise<string> => {
+	const pubkey = 'da38b16641af7626e372070ff9f844b7c89d1012850d2198393849d79d3d2d5d';
+	const chaincode = '985be5283a68fc22540930ca02680f86c771419ece571eb838b33eb5604cfbc0';
+
+	const principal = Principal.fromText(user);
+
+	let derivationPath = new DerivationPath([
+		principal.toUint8Array(),
+		...mapDerivationPath([SOLANA_DERIVATION_PATH_PREFIX, network])
+	]);
+
+	const blobString = derivationPath.toBlob();
+
+	let schnorr_address = schnorr_ed25519_derive(pubkey, chaincode, blobString);
+
+	return schnorr_address;
 };
 
 /* v8 ignore stop */
