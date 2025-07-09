@@ -12,8 +12,8 @@
 	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
-	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token.js';
 	import type { Erc721Metadata } from '$eth/types/erc721';
+	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token.js';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
