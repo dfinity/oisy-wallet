@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { derived } from 'svelte/store';
-	import { i18n } from '$lib/stores/i18n.store';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import CustomPopoverMenu from '$lib/components/ui/CustomPopoverMenu.svelte';
 	import { POPOVER_TRIGGER_BUTTON } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const {
 		fileInput = $bindable(),
