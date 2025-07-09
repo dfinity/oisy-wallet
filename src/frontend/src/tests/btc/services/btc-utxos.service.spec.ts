@@ -1,11 +1,8 @@
-import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
-import {
-	getFeeRateFromPercentiles,
-	prepareBtcSend,
-	type BtcReviewResult
-} from '$btc/services/btc-utxos.service';
+import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utxos.service';
+import { BtcPrepareSendError } from '$btc/types/btc-send';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -57,20 +54,20 @@ describe('btc-utxos.service', () => {
 		vi.clearAllMocks();
 	});
 
-	describe('prepareTransactionUtxos', () => {
+	describe('prepareBtcSend', () => {
 		it('should successfully prepare transaction UTXOs', async () => {
-			// Only mock API functions
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
 
-			const result: BtcReviewResult = await prepareBtcSend(defaultParams);
+			const result = await prepareBtcSend(defaultParams);
 
 			expect(result).toEqual({
 				feeSatoshis: expect.any(BigInt),
 				utxos: expect.any(Array),
-				totalInputValue: expect.any(BigInt),
-				changeAmount: expect.any(BigInt)
+				error: undefined
 			});
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
+			expect(result.utxos.length).toBeGreaterThan(ZERO);
 
 			// Verify API functions were called
 			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
@@ -86,17 +83,20 @@ describe('btc-utxos.service', () => {
 			});
 		});
 
-		it('should throw error when no available UTXOs found', async () => {
+		it('should return error when no available UTXOs found', async () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
 				...mockUtxosResponse,
-				// No UTXOs available
 				utxos: []
 			});
 
-			await expect(prepareBtcSend(defaultParams)).rejects.toThrow(
-				`InsufficientBalance: No UTXO's available for address ${mockBtcAddress} with ${UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS} confirmations`
-			);
+			const result = await prepareBtcSend(defaultParams);
+
+			expect(result).toEqual({
+				feeSatoshis: 0n,
+				utxos: [],
+				error: BtcPrepareSendError.InsufficientBalance
+			});
 		});
 
 		it('should handle testnet network correctly', async () => {
@@ -144,16 +144,32 @@ describe('btc-utxos.service', () => {
 			await expect(prepareBtcSend(defaultParams)).rejects.toThrow('Bitcoin API error');
 		});
 
-		it('should handle insufficient funds scenario', async () => {
-			// 10 BTC - larger than available UTXO
-			const largeAmount = 10;
+		it('should handle insufficient balance for fee scenario', async () => {
+			// Mock a scenario where there are UTXOs but insufficient balance for fee
+			const smallUtxo: Utxo = {
+				value: 10000n, // Small UTXO value
+				height: 100,
+				outpoint: {
+					txid: new Uint8Array([1, 2, 3, 4]),
+					vout: 0
+				}
+			};
+
+			const smallUtxosResponse: get_utxos_response = {
+				...mockUtxosResponse,
+				utxos: [smallUtxo]
+			};
+
+			// Large amount that would require more than available
+			const largeAmount = 0.09; // 9,000,000 satoshis, larger than 10,000 satoshi UTXO
 			const params = { ...defaultParams, amount: largeAmount };
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
-			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
+			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(smallUtxosResponse);
 
-			// Should throw when trying to spend more than available
-			await expect(prepareBtcSend(params)).rejects.toThrow();
+			const result = await prepareBtcSend(params);
+
+			expect(result.error).toBe(BtcPrepareSendError.InsufficientBalanceForFee);
 		});
 
 		it('should handle multiple UTXOs correctly', async () => {
@@ -177,7 +193,8 @@ describe('btc-utxos.service', () => {
 			const result = await prepareBtcSend(defaultParams);
 
 			expect(result.utxos.length).toBeGreaterThanOrEqual(1);
-			expect(result.totalInputValue).toBeGreaterThan(0n);
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
+			expect(result.error).toBeUndefined();
 		});
 	});
 
@@ -313,7 +330,7 @@ describe('btc-utxos.service', () => {
 		it('should handle zero fee percentile with minimum fallback', async () => {
 			// Zero fee that should trigger minimum fee rate
 			const zeroFeePercentiles = {
-				fee_percentiles: [0n]
+				fee_percentiles: [ZERO]
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(zeroFeePercentiles);
