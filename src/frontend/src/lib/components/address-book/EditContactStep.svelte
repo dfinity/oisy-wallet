@@ -44,24 +44,28 @@
 		onDeleteAddress
 	}: Props = $props();
 	let imageUrl = $state<string | null>(contact.avatarUrl ?? null);
+	let fileInput = $state<HTMLInputElement>();
 
-	async function handleFileChange(e: Event) {
+	const handleFileChange = async (e: Event): Promise<void> => {
 		const file = (e.target as HTMLInputElement).files?.[0];
-		if (!file) {return;}
+		if (!file) {
+			return;
+		}
 		const options = { maxSizeKB: 100, maxWidthOrHeight: 200, useWebWorker: false };
 		const compressed = await imageCompression(file, options);
 		const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
 		imageUrl = null;
 		await tick();
 		imageUrl = dataUrl;
-	}
-	let fileInput = $state<HTMLInputElement>();
-	function replaceImage() {
+	};
+
+	const replaceImage = (): void => {
 		fileInput?.click();
-	}
-	function removeImage() {
+	};
+
+	const removeImage = (): void => {
 		imageUrl = null;
-	}
+	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
@@ -73,7 +77,7 @@
 					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 					data-tid={`avatar-badge-${contact.name}`}
 				>
-				<EditAvatar bind:fileInput {replaceImage} {removeImage} />
+					<EditAvatar bind:fileInput {replaceImage} {removeImage} />
 				</span>
 			</div>
 		{/snippet}

@@ -16,11 +16,11 @@
 		{ logo: IconImage, title: 'Replace', action: replaceImage },
 		{ logo: IconTrash, title: 'Remove', action: removeImage, testId: 'IconTrash' }
 	];
-	let menuButton: HTMLButtonElement;
+	let menuButton = $state<HTMLButtonElement>();
 </script>
 
 <CustomPopoverMenu title="Contact image" {items}>
-	<svelte:fragment slot="trigger" let:toggle let:bindTrigger>
+	<svelte:fragment slot="trigger" let:toggle>
 		<ButtonIcon
 			bind:button={menuButton}
 			onclick={toggle}

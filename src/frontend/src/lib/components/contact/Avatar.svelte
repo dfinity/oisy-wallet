@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import imageCompression from 'browser-image-compression';
-	import { tick } from 'svelte';
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
@@ -43,8 +41,7 @@
 			.join('')
 			.slice(0, 2)
 			.toUpperCase()
-	); 
-	
+	);
 </script>
 
 <button
