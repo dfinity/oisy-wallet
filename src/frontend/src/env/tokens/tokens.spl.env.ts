@@ -1,6 +1,7 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
 import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
 import { AMBRX_TOKEN } from '$env/tokens/tokens-spl/tokens.ambrx.env';
+import { AMZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.amznx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { CRCLX_TOKEN } from '$env/tokens/tokens-spl/tokens.crclx.env';
@@ -8,6 +9,7 @@ import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eur
 import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
@@ -30,6 +32,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	// ABBVX_TOKEN,
 	// ABTX_TOKEN,
 	AMBRX_TOKEN,
+	AMZNX_TOKEN,
 	BONK_TOKEN,
 	COINX_TOKEN,
 	CRCLX_TOKEN,
@@ -37,6 +40,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	GOOGLX_TOKEN,
 	HOODX_TOKEN,
 	JUP_TOKEN,
+	MCDX_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
 	NVDAX_TOKEN,
