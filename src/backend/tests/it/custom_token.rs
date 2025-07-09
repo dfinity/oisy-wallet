@@ -71,8 +71,6 @@ static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc721(Erc721Token {
         token_address: ERC721_TOKEN_ID.clone(),
         chain_id: ERC721_CHAIN_ID.clone(),
-        symbol: Some("DEGODS".to_string()),
-        name: Some("DEGODS".to_string()),
     }),
     enabled: true,
     version: None,
