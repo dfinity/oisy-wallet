@@ -1,33 +1,24 @@
 import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import {
-	calculateFinalFee,
-	calculateUtxoSelection,
-	filterAvailableUtxos
-} from '$btc/utils/btc-utxos.utils';
+import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
-import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { isNullish } from '@dfinity/utils';
 
-interface BtcReviewServiceParams {
+export interface BtcReviewServiceParams {
 	identity: Identity;
 	network: BitcoinNetwork;
 	amount: Amount;
 	source: BtcAddress;
-}
-
-export interface BtcReviewResult {
-	feeSatoshis: bigint;
-	utxos: Utxo[];
-	totalInputValue: bigint;
-	changeAmount: bigint;
 }
 
 /**
@@ -39,7 +30,7 @@ export const prepareBtcSend = async ({
 	network,
 	amount,
 	source
-}: BtcReviewServiceParams): Promise<BtcReviewResult> => {
+}: BtcReviewServiceParams): Promise<UtxosFee> => {
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
 	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
@@ -68,10 +59,11 @@ export const prepareBtcSend = async ({
 	const allUtxos = response.utxos;
 
 	if (allUtxos.length === 0) {
-		throw new Error(
-			// We can't send BTC when no UTXOs are available
-			`InsufficientBalance: No UTXO's available for address ${source} with ${requiredMinConfirmations} confirmations`
-		);
+		return {
+			feeSatoshis: ZERO,
+			utxos: [],
+			error: BtcPrepareSendError.InsufficientBalance
+		};
 	}
 
 	// Step 3: Filter UTXOs based on confirmations and exclude locked ones
@@ -84,8 +76,11 @@ export const prepareBtcSend = async ({
 	});
 
 	if (filteredUtxos.length === 0) {
-		// We can't send BTC when no UTXOs are available
-		throw new Error("InsufficientBalance: No UTXO's available after filtering");
+		return {
+			feeSatoshis: ZERO,
+			utxos: [],
+			error: BtcPrepareSendError.InsufficientBalance
+		};
 	}
 
 	// Step 4: Select UTXOs with fee consideration
@@ -95,21 +90,22 @@ export const prepareBtcSend = async ({
 		feeRateSatoshisPerVByte
 	});
 
-	// Step 5: Calculate the final fee based on selected UTXOs
-	const feeSatoshis = calculateFinalFee({ selection, amountSatoshis });
+	// Check if there were insufficient funds during UTXO selection
+	if (!selection.sufficientFunds) {
+		return {
+			feeSatoshis: ZERO,
+			utxos: filteredUtxos,
+			error: BtcPrepareSendError.InsufficientBalanceForFee
+		};
+	}
+
+	// Fee is already calculated in the selection process
 	return {
-		feeSatoshis,
-		utxos: selection.selectedUtxos,
-		totalInputValue: selection.totalInputValue,
-		changeAmount: selection.changeAmount
+		feeSatoshis: selection.feeSatoshis,
+		utxos: selection.selectedUtxos
 	};
 };
 
-/**
- * Gets fee rate from current fee percentiles, with fallback to default
- * Uses the median fee rate (50th percentile) for balanced speed/cost
- * IMPORTANT: Converts from millisatoshis per vbyte (backend) to satoshis per vbyte (frontend)
- */
 export const getFeeRateFromPercentiles = async ({
 	identity,
 	network
@@ -117,34 +113,35 @@ export const getFeeRateFromPercentiles = async ({
 	identity: Identity;
 	network: BitcoinNetwork;
 }): Promise<bigint> => {
-	// Convert network type to bitcoin canister format
-	const bitcoinNetwork = mapToSignerBitcoinNetwork({ network });
+	const mappedNetwork = mapToSignerBitcoinNetwork({ network });
 
-	const response = await getCurrentBtcFeePercentiles({
+	const { fee_percentiles } = await getCurrentBtcFeePercentiles({
 		identity,
-		network: bitcoinNetwork
+		network: mappedNetwork
 	});
 
-	// Get fee percentiles array
-	const feePercentiles = response.fee_percentiles;
-	if (isNullish(feePercentiles) || feePercentiles.length === 0) {
+	if (isNullish(fee_percentiles) || fee_percentiles.length === 0) {
 		throw new Error('No fee percentiles available - cannot calculate transaction fee');
 	}
 
-	// Use the median fee rate (50th percentile) for balanced transaction speed/cost
-	const medianIndex = Math.floor(feePercentiles.length / 2);
-	const medianFeeRateMillisatPerVByte = feePercentiles[medianIndex];
+	// Use median fee percentile
+	const medianIndex = Math.floor(fee_percentiles.length / 2);
+	const medianFeeMillisatsPerVByte = fee_percentiles[medianIndex];
 
-	// Convert from millisatoshis per vbyte to satoshis per vbyte
-	// Backend returns values in millisat/vbyte, frontend uses sat/vbyte
-	const medianFeeRatePerVByte = medianFeeRateMillisatPerVByte / 1000n;
+	// Convert from millisats to sats (divide by 1000)
+	const feeRateSatsPerVByte = medianFeeMillisatsPerVByte / 1000n;
 
-	// Ensure we have a reasonable minimum fee rate (1 sat/vbyte)
-	const minFeeRate = 1n;
-	const finalFeeRate = medianFeeRatePerVByte > minFeeRate ? medianFeeRatePerVByte : minFeeRate;
+	// Apply minimum and maximum limits
+	const MIN_FEE_RATE = 1n; // 1 sat/vbyte minimum
+	const MAX_FEE_RATE = 100n; // 100 sat/vbyte maximum
 
-	// Add safety cap to prevent extremely high fees (max 100 sat/vbyte)
-	const maxFeeRate = 100n;
+	if (feeRateSatsPerVByte < MIN_FEE_RATE) {
+		return MIN_FEE_RATE;
+	}
 
-	return finalFeeRate > maxFeeRate ? maxFeeRate : finalFeeRate;
+	if (feeRateSatsPerVByte > MAX_FEE_RATE) {
+		return MAX_FEE_RATE;
+	}
+
+	return feeRateSatsPerVByte;
 };
