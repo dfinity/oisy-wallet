@@ -90,7 +90,10 @@ export const prepareBtcSend = async ({
 		feeRateSatoshisPerVByte
 	});
 
-	console.warn('selection: ', JSON.stringify(selection));
+	console.warn(
+		'selection: ',
+		JSON.stringify(selection, (key, value) => (typeof value === 'bigint' ? Number(value) : value))
+	);
 	console.warn('amount:  ', amount);
 
 	// Check if there were insufficient funds during UTXO selection
