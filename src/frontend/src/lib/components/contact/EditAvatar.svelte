@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { derived } from 'svelte/store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
@@ -9,17 +11,38 @@
 	const {
 		fileInput = $bindable(),
 		replaceImage = $bindable(),
-		removeImage = $bindable()
+		removeImage = $bindable(),
+		avatarUrl = $bindable<string | null>()
 	} = $props();
 
-	const items = [
-		{ logo: IconImage, title: 'Replace', action: replaceImage },
-		{ logo: IconTrash, title: 'Remove', action: removeImage, testId: 'IconTrash' }
-	];
+	const items = derived(avatarUrl, ($avatarUrl) =>
+		$avatarUrl
+			? [
+					{
+						logo: IconImage,
+						title: $i18n.address_book.edit_avatar.replace_image,
+						action: replaceImage
+					},
+					{
+						logo: IconTrash,
+						title: $i18n.address_book.edit_avatar.remove_image,
+						action: removeImage,
+						testId: 'IconTrash'
+					}
+				]
+			: [
+					{
+						logo: IconImage,
+						title: $i18n.address_book.edit_avatar.upload_image,
+						action: replaceImage
+					}
+				]
+	);
+
 	let menuButton = $state<HTMLButtonElement>();
 </script>
 
-<CustomPopoverMenu title="Contact image" {items}>
+<CustomPopoverMenu title={$i18n.address_book.edit_avatar.menu_title} items={$items}>
 	<svelte:fragment slot="trigger" let:toggle>
 		<ButtonIcon
 			bind:button={menuButton}

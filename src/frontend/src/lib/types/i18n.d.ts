@@ -1071,6 +1071,12 @@ interface I18nAddress_book {
 	alt: { show_addresses_of_contact: string; hide_addresses: string };
 	edit_contact: { title: string; add_address: string; delete_contact: string };
 	avatar: { default: string; avatar_for: string };
+	edit_avatar: {
+		menu_title: string;
+		upload_image: string;
+		replace_image: string;
+		remove_image: string;
+	};
 	show_contact: {
 		title: string;
 		add_address: string;
