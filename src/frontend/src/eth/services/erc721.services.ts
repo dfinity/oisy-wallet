@@ -5,7 +5,7 @@ import type { Address } from '$lib/types/address';
 import type { Nft } from '$eth/types/erc721';
 import { nftStore } from '$eth/stores/nft.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { LoadCustomTokenParams } from '$lib/types/custom-token';
+import type { Erc721SaveCustomToken, LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
@@ -52,7 +52,7 @@ const loadCustomTokensWithMetadata = async (params: LoadCustomTokenParams): Prom
 	const loadCustomContracts = async (): Promise<Erc721CustomToken[]> => {
 		const erc721CustomTokens: CustomToken[] = await loadErc721CustomTokens(params);
 
-		return erc721CustomTokens.filter((customToken): customToken is CustomToken & { token: { Erc721: any } } => 'Erc721' in customToken.token)
+		return erc721CustomTokens.filter((customToken): customToken is CustomToken & { token: { Erc721: Erc721SaveCustomToken } } => 'Erc721' in customToken.token)
 			.map(async ({token, enabled, version: versionNullable}) => {
 				const version = fromNullable(versionNullable);
 
