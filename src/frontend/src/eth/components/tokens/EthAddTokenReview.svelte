@@ -165,7 +165,7 @@
 		{/snippet}
 	</Value>
 
-	{#if nonNullish(metadata?.decimals)}
+	{#if metadata.decimals > 0}
 		<Value ref="contractDecimals" element="div">
 			{#snippet label()}
 				{$i18n.core.text.decimals}
