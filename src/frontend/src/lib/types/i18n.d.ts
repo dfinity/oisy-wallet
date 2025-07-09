@@ -944,6 +944,15 @@ interface I18nTransaction {
 		safe: string;
 		unconfirmed: string;
 	};
+	type: {
+		send: string;
+		receive: string;
+		withdraw: string;
+		deposit: string;
+		approve: string;
+		burn: string;
+		mint: string;
+	};
 	label: {
 		reimbursement: string;
 		twin_token_sent: string;

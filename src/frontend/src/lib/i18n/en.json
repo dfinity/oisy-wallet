@@ -1103,6 +1103,15 @@
 			"safe": "Safe",
 			"unconfirmed": "Unconfirmed"
 		},
+		"type": {
+			"send": "Send",
+			"receive": "Receive",
+			"withdraw": "Withdraw",
+			"deposit": "Deposit",
+			"approve": "Approve",
+			"burn": "Burn",
+			"mint": "Mint"
+		},
 		"label": {
 			"reimbursement": "Reimbursement",
 			"twin_token_sent": "$twinToken sent",
