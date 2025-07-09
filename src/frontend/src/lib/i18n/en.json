@@ -947,7 +947,7 @@
 			"filter_button": "Open/close filter"
 		},
 		"placeholder": {
-			"enter_contract_address": "Enter an ERC20 contract address",
+			"enter_contract_address": "Enter an ERC20 or ERC721 contract address",
 			"enter_token_address": "Enter an SPL token address",
 			"search_token": "Search for the token"
 		},
