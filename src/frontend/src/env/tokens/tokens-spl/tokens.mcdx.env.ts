@@ -16,7 +16,7 @@ export const MCDX_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',
 	category: 'default',
-	name: 'McDonald\'s xStock',
+	name: "McDonald's xStock",
 	symbol: MCDX_SYMBOL,
 	decimals: MCDX_DECIMALS,
 	icon: mcdx,
