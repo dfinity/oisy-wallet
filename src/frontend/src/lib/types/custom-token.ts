@@ -20,7 +20,7 @@ export type IcrcSaveCustomToken = Pick<IcrcCustomToken, 'ledgerCanisterId' | 'in
 export type Erc20SaveCustomToken = Pick<Erc20Token, 'address' | 'decimals' | 'symbol'> &
 	Pick<Erc20Token['network'], 'chainId'>;
 
-export type Erc721SaveCustomToken = Pick<Erc721Token, 'address' | 'symbol'> &
+export type Erc721SaveCustomToken = Pick<Erc721Token, 'address'> &
 	Pick<Erc721Token['network'], 'chainId'>;
 
 export type SplSaveCustomToken = Pick<SplToken, 'address' | 'decimals' | 'symbol'>;
