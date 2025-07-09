@@ -482,9 +482,9 @@
 			"btc_withdrawal_statuses": "Erro ao buscar os status de retirada de BTC.",
 			"transaction_price": "Erro ao carregar a estimativa do preço de uma transação.",
 			"icrc_canisters": "Erro ao carregar os canisters ICRC.",
-			"erc20_custom_tokens": "",
+			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
 			"erc20_user_tokens": "Erro ao carregar os tokens de usuário ERC20.",
-			"spl_custom_tokens": "",
+			"spl_custom_tokens": "Erro ao carregar o token personalizado SPL.",
 			"erc20_user_token": "Erro ao habilitar o token gêmeo ERC20.",
 			"icrc_custom_token": "Erro ao carregar o token personalizado ICRC.",
 			"loading_wallet_timeout": "Sua carteira requer alguns dados iniciais que ainda não foram carregados. Por favor, tente novamente.",
@@ -645,7 +645,7 @@
 			"sending": "Enviando...",
 			"signing": "Assinando...",
 			"signing_message": "Assinando mensagem...",
-			"confirming": "",
+			"confirming": "Confirmando...",
 			"network": "Rede",
 			"source_network": "Rede de origem",
 			"destination_network": "Rede de destino",
@@ -1103,13 +1103,13 @@
 			"unconfirmed": "Não confirmado"
 		},
 		"type": {
-			"send": "",
-			"receive": "",
-			"withdraw": "",
-			"deposit": "",
-			"approve": "",
-			"burn": "",
-			"mint": ""
+			"send": "Enviar",
+			"receive": "Receber",
+			"withdraw": "Retirar",
+			"deposit": "Depositar",
+			"approve": "Aprovar",
+			"burn": "Burn",
+			"mint": "Mint"
 		},
 		"label": {
 			"reimbursement": "Reembolso",
