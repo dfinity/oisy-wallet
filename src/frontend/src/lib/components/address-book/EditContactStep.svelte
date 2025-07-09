@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import imageCompression from 'browser-image-compression';
+	import { tick } from 'svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
@@ -41,20 +43,37 @@
 		onDeleteContact,
 		onDeleteAddress
 	}: Props = $props();
-	let visible = $state(false);
-	let menuButton = $state<HTMLButtonElement | undefined>();
+	let imageUrl = $state<string | null>(contact.avatarUrl ?? null);
+
+	async function handleFileChange(e: Event) {
+		const file = (e.target as HTMLInputElement).files?.[0];
+		if (!file) {return;}
+		const options = { maxSizeKB: 100, maxWidthOrHeight: 200, useWebWorker: false };
+		const compressed = await imageCompression(file, options);
+		const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+		imageUrl = null;
+		await tick();
+		imageUrl = dataUrl;
+	}
+	let fileInput = $state<HTMLInputElement>();
+	function replaceImage() {
+		fileInput?.click();
+	}
+	function removeImage() {
+		imageUrl = null;
+	}
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
 	<LogoButton hover={false} condensed={true}>
 		{#snippet logo()}
 			<div class="relative flex">
-				<Avatar name={contact.name} variant="xs" styleClass="md:text-[19.2px]"></Avatar>
+				<Avatar name={contact.name} {imageUrl} variant="xs" styleClass="md:text-[19.2px]" />
 				<span
 					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 					data-tid={`avatar-badge-${contact.name}`}
 				>
-					<EditAvatar />
+				<EditAvatar bind:fileInput {replaceImage} {removeImage} />
 				</span>
 			</div>
 		{/snippet}
@@ -132,3 +151,12 @@
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
+
+<!-- hidden Input -->
+<input
+	bind:this={fileInput}
+	type="file"
+	accept="image/*"
+	class="hidden"
+	onchange={handleFileChange}
+/>

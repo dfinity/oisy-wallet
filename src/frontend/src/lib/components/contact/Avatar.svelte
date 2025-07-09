@@ -12,12 +12,10 @@
 	interface AvatarProps {
 		name?: string;
 		variant?: AvatarVariants;
+		imageUrl?: string | null;
 		styleClass?: string;
 	}
-
-	const { name, variant = 'md', styleClass }: AvatarProps = $props();
-
-	let imageUrl = $state<string | null>(null);
+	const { name, imageUrl = null, variant = 'md', styleClass }: AvatarProps = $props();
 
 	const font = $derived(
 		{
@@ -45,38 +43,14 @@
 			.join('')
 			.slice(0, 2)
 			.toUpperCase()
-	);
-
-	async function handleFileChange(e: Event) {
-		const file = (e.target as HTMLInputElement)?.files?.[0];
-		if (!file) {
-			return;
-		}
-		try {
-			const options = { maxSizeMB: 1, maxWidthOrHeight: 200, useWebWorker: true };
-			const compressed = await imageCompression(file, options);
-			const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
-			imageUrl = null;
-			await tick();
-			imageUrl = dataUrl;
-			console.log('Preview imageUrl:', imageUrl);
-		} catch (err) {
-			console.error('Image compression failed:', err);
-		}
-	}
-
-	function triggerUpload() {
-		document.getElementById('avatarUpload')?.click();
-	}
+	); 
+	
 </script>
-
-<input id="avatarUpload" type="file" accept="image/*" class="hidden" onchange={handleFileChange} />
 
 <button
 	type="button"
 	class={`${commonClasses} flex items-center justify-center ${!imageUrl ? bgColor : ''}`}
 	aria-label={ariaLabel}
-	onclick={triggerUpload}
 >
 	{#if imageUrl}
 		<img src={imageUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />

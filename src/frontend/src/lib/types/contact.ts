@@ -10,4 +10,5 @@ export interface ContactAddressUi {
 export interface ContactUi extends Omit<Contact, 'addresses' | 'update_timestamp_ns'> {
 	addresses: ContactAddressUi[];
 	updateTimestampNs: bigint;
+	avatarUrl?: string | null;
 }

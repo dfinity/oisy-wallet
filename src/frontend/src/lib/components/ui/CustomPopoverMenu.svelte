@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	import { tick, type Component } from 'svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { POPOVER_MENU, POPOVER_MENU_ITEM } from '$lib/constants/test-ids.constants';
