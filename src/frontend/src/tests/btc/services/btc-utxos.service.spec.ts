@@ -2,6 +2,7 @@ import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utx
 import { BtcPrepareSendError } from '$btc/types/btc-send';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -65,8 +66,8 @@ describe('btc-utxos.service', () => {
 				utxos: expect.any(Array),
 				error: undefined
 			});
-			expect(result.feeSatoshis).toBeGreaterThan(0n);
-			expect(result.utxos.length).toBeGreaterThan(0);
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
+			expect(result.utxos.length).toBeGreaterThan(ZERO);
 
 			// Verify API functions were called
 			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
@@ -192,7 +193,7 @@ describe('btc-utxos.service', () => {
 			const result = await prepareBtcSend(defaultParams);
 
 			expect(result.utxos.length).toBeGreaterThanOrEqual(1);
-			expect(result.feeSatoshis).toBeGreaterThan(0n);
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 			expect(result.error).toBeUndefined();
 		});
 	});
@@ -329,7 +330,7 @@ describe('btc-utxos.service', () => {
 		it('should handle zero fee percentile with minimum fallback', async () => {
 			// Zero fee that should trigger minimum fee rate
 			const zeroFeePercentiles = {
-				fee_percentiles: [0n]
+				fee_percentiles: [ZERO]
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(zeroFeePercentiles);

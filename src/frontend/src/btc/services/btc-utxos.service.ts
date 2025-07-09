@@ -6,6 +6,7 @@ import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
@@ -59,7 +60,7 @@ export const prepareBtcSend = async ({
 
 	if (allUtxos.length === 0) {
 		return {
-			feeSatoshis: 0n,
+			feeSatoshis: ZERO,
 			utxos: [],
 			error: BtcPrepareSendError.InsufficientBalance
 		};
@@ -76,7 +77,7 @@ export const prepareBtcSend = async ({
 
 	if (filteredUtxos.length === 0) {
 		return {
-			feeSatoshis: 0n,
+			feeSatoshis: ZERO,
 			utxos: [],
 			error: BtcPrepareSendError.InsufficientBalance
 		};
@@ -92,7 +93,7 @@ export const prepareBtcSend = async ({
 	// Check if there were insufficient funds during UTXO selection
 	if (!selection.sufficientFunds) {
 		return {
-			feeSatoshis: 0n,
+			feeSatoshis: ZERO,
 			utxos: filteredUtxos,
 			error: BtcPrepareSendError.InsufficientBalanceForFee
 		};
