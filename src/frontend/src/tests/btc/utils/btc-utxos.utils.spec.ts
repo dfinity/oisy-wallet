@@ -4,9 +4,10 @@ import {
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
-	utxoTxIdToString,
-	type UtxoSelectionResult
+	type UtxoSelectionResult,
+	utxoTxIdToString
 } from '$btc/utils/btc-utxos.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 import { describe, expect, it } from 'vitest';
 
@@ -93,7 +94,7 @@ describe('btc-utxos.utils', () => {
 			expect(result).toBe(109);
 		});
 
-		it('should handle zero inputs and outputs', () => {
+		it('should handle 0n inputs and outputs', () => {
 			const result = estimateTransactionSize({
 				numInputs: 0,
 				numOutputs: 0
@@ -130,9 +131,9 @@ describe('btc-utxos.utils', () => {
 
 			expect(result.selectedUtxos.length).toBeGreaterThan(0);
 			expect(result.totalInputValue).toBeGreaterThan(250_000n);
-			expect(result.changeAmount).toBeGreaterThanOrEqual(0n);
+			expect(result.changeAmount).toBeGreaterThanOrEqual(ZERO);
 			expect(result.sufficientFunds).toBeTruthy();
-			expect(result.feeSatoshis).toBeGreaterThan(0n);
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 		});
 
 		it('should select UTXOs in descending order by value', () => {
@@ -145,7 +146,7 @@ describe('btc-utxos.utils', () => {
 			// Should select the largest UTXO first (300_000)
 			expect(result.selectedUtxos[0].value).toBe(300_000n);
 			expect(result.sufficientFunds).toBeTruthy();
-			expect(result.feeSatoshis).toBeGreaterThan(0n);
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 		});
 
 		it('should calculate correct change amount', () => {
@@ -170,10 +171,10 @@ describe('btc-utxos.utils', () => {
 			});
 
 			expect(result.selectedUtxos).toHaveLength(0);
-			expect(result.totalInputValue).toBe(0n);
-			expect(result.changeAmount).toBe(0n);
+			expect(result.totalInputValue).toBe(ZERO);
+			expect(result.changeAmount).toBe(ZERO);
 			expect(result.sufficientFunds).toBeFalsy();
-			expect(result.feeSatoshis).toBe(0n);
+			expect(result.feeSatoshis).toBe(ZERO);
 		});
 
 		it('should return insufficient funds when not enough UTXOs', () => {
@@ -186,19 +187,19 @@ describe('btc-utxos.utils', () => {
 			});
 
 			expect(result.sufficientFunds).toBeFalsy();
-			expect(result.feeSatoshis).toBe(0n);
+			expect(result.feeSatoshis).toBe(ZERO);
 		});
 
-		it('should handle zero fee rate', () => {
+		it('should handle 0n fee rate', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: [createMockUtxo({ value: 100_000 })],
 				amountSatoshis: 50_000n,
-				feeRateSatoshisPerVByte: 0n
+				feeRateSatoshisPerVByte: ZERO
 			});
 
 			expect(result.changeAmount).toBe(50_000n); // No fees
 			expect(result.sufficientFunds).toBeTruthy();
-			expect(result.feeSatoshis).toBe(0n);
+			expect(result.feeSatoshis).toBe(ZERO);
 		});
 	});
 
@@ -355,11 +356,11 @@ describe('btc-utxos.utils', () => {
 			expect(selection.feeSatoshis).toBe(50_000n);
 		});
 
-		it('should handle zero change amount', () => {
+		it('should handle ZERO change amount', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 200_000 })],
 				totalInputValue: 200_000n,
-				changeAmount: 0n,
+				changeAmount: ZERO,
 				sufficientFunds: true,
 				feeSatoshis: 20_000n
 			};
@@ -389,21 +390,21 @@ describe('btc-utxos.utils', () => {
 			expect(selection.feeSatoshis).toBe(50_000n);
 		});
 
-		it('should return zero when no fee is applied', () => {
+		it('should return ZERO when no fee is applied', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 100_000 })],
 				totalInputValue: 100_000n,
 				changeAmount: 30_000n,
 				sufficientFunds: true,
-				feeSatoshis: 0n
+				feeSatoshis: ZERO
 			};
 			const amountSatoshis = 70_000n;
 
 			// Fee = 100_000 - (70_000 + 30_000) = 0
 			const calculatedFee = selection.totalInputValue - (amountSatoshis + selection.changeAmount);
 
-			expect(calculatedFee).toBe(0n);
-			expect(selection.feeSatoshis).toBe(0n);
+			expect(calculatedFee).toBe(ZERO);
+			expect(selection.feeSatoshis).toBe(ZERO);
 		});
 	});
 });
