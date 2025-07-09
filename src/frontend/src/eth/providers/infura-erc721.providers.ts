@@ -24,7 +24,8 @@ export class InfuraERC721Provider {
 
 		return {
 			name,
-			symbol
+			symbol,
+			decimals: 1
 		};
 	};
 
