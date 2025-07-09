@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 use candid::Principal;
 use shared::types::{
     custom_token::{
-        ChainId, CustomToken, Erc20Token, Erc20TokenId, Erc721Token, Erc721TokenId, IcrcToken,
+        ChainId, CustomToken, Erc20Token, ErcTokenId, Erc721Token, IcrcToken,
         SplToken, SplTokenId, Token,
     },
     TokenVersion,
@@ -51,8 +51,8 @@ static SPL_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     enabled: true,
     version: None,
 });
-static ERC20_TOKEN_ID: LazyLock<Erc20TokenId> =
-    LazyLock::new(|| Erc20TokenId("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string()));
+static ERC20_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string()));
 static ERC20_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
 static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc20(Erc20Token {
@@ -64,8 +64,8 @@ static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     enabled: true,
     version: None,
 });
-static ERC721_TOKEN_ID: LazyLock<Erc721TokenId> =
-    LazyLock::new(|| Erc721TokenId("0x8821bee2ba0df28761afff119d66390d594cd280".to_string()));
+static ERC721_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x8821bee2ba0df28761afff119d66390d594cd280".to_string()));
 static ERC721_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
 static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc721(Erc721Token {
