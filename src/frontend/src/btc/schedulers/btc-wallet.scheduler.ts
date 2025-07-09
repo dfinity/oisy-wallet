@@ -4,6 +4,7 @@ import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-messa
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
+import { getPendingTransactionsBalance } from '$icp/utils/btc.utils';
 import { getBtcBalance } from '$lib/api/signer.api'; // Remove non-existent getBtcPendingTransactions
 import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
@@ -148,9 +149,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			};
 		}
 
-		// For now, assume no pending transactions until backend API is implemented
-		// In the future, this will calculate: available = total - pending
-		const pendingAmount = 0n; // TODO: Calculate from pending transactions API
+		const pendingAmount = getPendingTransactionsBalance(btcAddress);
 
 		return {
 			data: {
