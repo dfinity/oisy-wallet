@@ -3,7 +3,7 @@ import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
 import type { OnramperId } from '$lib/types/onramper';
 import type { TokenBuy } from '$lib/types/token';
 import type { AtLeastOne } from '$lib/types/utils';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 
@@ -12,6 +12,7 @@ export const TokenStandardSchema = z.enum([
 	'erc20',
 	'icp',
 	'icrc',
+	'dip20',
 	'bitcoin',
 	'solana',
 	'spl'
@@ -37,7 +38,8 @@ const TokenOisyNameSchema = z.object({
 
 export const TokenAppearanceSchema = z.object({
 	oisySymbol: TokenOisySymbolSchema.optional(),
-	oisyName: TokenOisyNameSchema.optional()
+	oisyName: TokenOisyNameSchema.optional(),
+	alwaysShowInTokenGroup: z.boolean().optional()
 });
 
 // TODO: use Zod to validate the OnramperId

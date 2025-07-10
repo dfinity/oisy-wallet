@@ -11,6 +11,7 @@ import type {
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
+import { nonNullish } from '@dfinity/utils';
 
 export const initIcrcWalletWorker = async ({
 	indexCanisterId,
@@ -21,7 +22,15 @@ export const initIcrcWalletWorker = async ({
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
-	const restartWorkerWithLedgerOnly = () =>
+	let restartedWithLedgerOnly = false;
+
+	const restartWorkerWithLedgerOnly = () => {
+		if (restartedWithLedgerOnly) {
+			return;
+		}
+
+		restartedWithLedgerOnly = true;
+
 		worker.postMessage({
 			msg: 'startIcrcWalletTimer',
 			data: {
@@ -29,9 +38,10 @@ export const initIcrcWalletWorker = async ({
 				env
 			}
 		});
+	};
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<
 			| PostMessageDataResponseWallet
@@ -39,36 +49,43 @@ export const initIcrcWalletWorker = async ({
 			| PostMessageDataResponseWalletCleanUp
 		>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncIcrcWallet':
 				syncWallet({
 					tokenId,
-					networkId,
-					data: data.data as PostMessageDataResponseWallet
+            	networkId,
+					data: data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcrcWalletError':
 				onLoadTransactionsError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error,
-					silent: true
+					error: data.error
 				});
 
 				// In case of error, we start the listener again, but only with the ledgerCanisterId,
 				// to make it request only the balance and not the transactions
-				restartWorkerWithLedgerOnly();
+				if (nonNullish(indexCanisterId)) {
+					restartWorkerWithLedgerOnly();
+				}
 
 				return;
 			case 'syncIcrcWalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId,
-					networkId,
-					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
+            	networkId,
+					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
 		}
+	};
+
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopIcrcWalletTimer'
+		});
 	};
 
 	return {
@@ -82,11 +99,7 @@ export const initIcrcWalletWorker = async ({
 				}
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopIcrcWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerIcrcWalletTimer',
@@ -96,6 +109,10 @@ export const initIcrcWalletWorker = async ({
 					env
 				}
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };

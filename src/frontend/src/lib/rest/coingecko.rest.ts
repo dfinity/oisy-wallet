@@ -59,7 +59,7 @@ const fetchCoingecko = async <T extends CoingeckoSimplePrice | CoingeckoSimpleTo
 	endpointPath: string;
 	queryParams: string;
 }): Promise<CoingeckoResponse<T> | null> => {
-	const response = await fetch(`${COINGECKO_API_URL}/${endpointPath}?${queryParams}`, {
+	const response = await fetch(`${COINGECKO_API_URL}${endpointPath}?${queryParams}`, {
 		headers: {
 			...(nonNullish(COINGECKO_API_KEY) && { ['x-cg-pro-api-key']: COINGECKO_API_KEY })
 		}

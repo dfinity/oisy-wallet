@@ -1,17 +1,19 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
-import type { VipRewardStateData } from '$lib/types/reward';
+import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction';
 import type { Option } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { WalletKitTypes } from '@reown/walletkit';
+import type { NavigationTarget } from '@sveltejs/kit';
 import { writable, type Readable } from 'svelte/store';
 
 export interface Modal<T> {
@@ -42,6 +44,7 @@ export interface Modal<T> {
 		| 'manage-tokens'
 		| 'hide-token'
 		| 'ic-hide-token'
+		| 'sol-hide-token'
 		| 'eth-token'
 		| 'btc-token'
 		| 'ic-token'
@@ -56,6 +59,7 @@ export interface Modal<T> {
 		| 'vip-reward-state'
 		| 'reward-details'
 		| 'reward-state'
+		| 'welcome'
 		| 'settings'
 		| 'auth-help';
 	data?: T;
@@ -64,10 +68,19 @@ export interface Modal<T> {
 
 export type ModalData<T> = Option<Modal<T>>;
 
-type SetWithDataParams<D> = { id: symbol; data: D };
-type SetWithOptionalDataParams<D> = { id: symbol; data?: D };
+interface SetWithDataParams<D> {
+	id: symbol;
+	data: D;
+}
+interface SetWithOptionalDataParams<D> {
+	id: symbol;
+	data?: D;
+}
 
-type OpenTransactionParams<T extends AnyTransactionUi> = { transaction: T; token: Token };
+export interface OpenTransactionParams<T extends AnyTransactionUi> {
+	transaction: T;
+	token: Token;
+}
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthReceive: (id: symbol) => void;
@@ -81,12 +94,12 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openSend: (id: symbol) => void;
 	openBuy: (id: symbol) => void;
 	openSwap: (id: symbol) => void;
-	openConvertCkBTCToBTC: () => void;
-	openConvertBTCToCkBTC: () => void;
-	openConvertToTwinTokenCkEth: () => void;
-	openConvertToTwinTokenEth: () => void;
-	openHowToConvertToTwinTokenEth: () => void;
-	openWalletConnectAuth: () => void;
+	openConvertCkBTCToBTC: (id: symbol) => void;
+	openConvertBTCToCkBTC: (id: symbol) => void;
+	openConvertToTwinTokenCkEth: (id: symbol) => void;
+	openConvertToTwinTokenEth: (id: symbol) => void;
+	openHowToConvertToTwinTokenEth: (id: symbol) => void;
+	openWalletConnectAuth: (id: symbol) => void;
 	openWalletConnectSign: (params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void;
 	openWalletConnectSend: (params: SetWithDataParams<WalletKitTypes.SessionRequest>) => void;
 	openEthTransaction: (params: SetWithDataParams<OpenTransactionParams<EthTransactionUi>>) => void;
@@ -94,22 +107,23 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openBtcTransaction: (params: SetWithDataParams<OpenTransactionParams<BtcTransactionUi>>) => void;
 	openSolTransaction: (params: SetWithDataParams<OpenTransactionParams<SolTransactionUi>>) => void;
 	openManageTokens: (params: SetWithOptionalDataParams<ManageTokensData>) => void;
-	openHideToken: () => void;
-	openIcHideToken: () => void;
-	openEthToken: () => void;
-	openBtcToken: () => void;
-	openIcToken: () => void;
-	openSolToken: () => void;
-	openReceiveBitcoin: () => void;
-	openAboutWhyOisy: () => void;
+	openHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openIcHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openSolHideToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openEthToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openBtcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openIcToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openSolToken: (params: SetWithDataParams<NavigationTarget | undefined>) => void;
+	openReceiveBitcoin: (id: symbol) => void;
+	openAboutWhyOisy: (id: symbol) => void;
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
-	openReferralCode: () => void;
-	openAddressBook: () => void;
-	openReferralState: () => void;
+	openReferralCode: (id: symbol) => void;
+	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
-	openRewardDetails: (params: SetWithDataParams<RewardDescription>) => void;
-	openRewardState: (params: SetWithDataParams<boolean>) => void;
+	openRewardDetails: (params: SetWithDataParams<RewardCampaignDescription>) => void;
+	openRewardState: (params: SetWithDataParams<RewardStateData>) => void;
+	openWelcome: (id: symbol) => void;
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	close: () => void;
@@ -118,9 +132,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
-	const setType = (type: Modal<T>['type']) => () => set({ type });
-
-	const setTypeWithId = (type: Modal<T>['type']) => (id: symbol) => set({ type, id });
+	const setType = (type: Modal<T>['type']) => (id: symbol) => set({ type, id });
 
 	const setTypeWithData =
 		(type: Modal<T>['type']) =>
@@ -128,17 +140,17 @@ const initModalStore = <T>(): ModalStore<T> => {
 			set({ type, id, data });
 
 	return {
-		openEthReceive: setTypeWithId('eth-receive'),
-		openIcpReceive: setTypeWithId('icp-receive'),
-		openIcrcReceive: setTypeWithId('icrc-receive'),
-		openCkBTCReceive: setTypeWithId('ckbtc-receive'),
-		openCkETHReceive: setTypeWithId('cketh-receive'),
-		openBtcReceive: setTypeWithId('btc-receive'),
-		openSolReceive: setTypeWithId('sol-receive'),
-		openReceive: setTypeWithId('receive'),
-		openSend: setTypeWithId('send'),
-		openBuy: setTypeWithId('buy'),
-		openSwap: setTypeWithId('swap'),
+		openEthReceive: setType('eth-receive'),
+		openIcpReceive: setType('icp-receive'),
+		openIcrcReceive: setType('icrc-receive'),
+		openCkBTCReceive: setType('ckbtc-receive'),
+		openCkETHReceive: setType('cketh-receive'),
+		openBtcReceive: setType('btc-receive'),
+		openSolReceive: setType('sol-receive'),
+		openReceive: setType('receive'),
+		openSend: setType('send'),
+		openBuy: setType('buy'),
+		openSwap: setType('swap'),
 		openConvertCkBTCToBTC: setType('convert-ckbtc-btc'),
 		openConvertBTCToCkBTC: setType('convert-btc-ckbtc'),
 		openConvertToTwinTokenCkEth: setType('convert-to-twin-token-cketh'),
@@ -166,28 +178,47 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openManageTokens: <(params: SetWithOptionalDataParams<ManageTokensData>) => void>(
 			setTypeWithData('manage-tokens')
 		),
-		openHideToken: setType('hide-token'),
-		openIcHideToken: setType('ic-hide-token'),
-		openEthToken: setType('eth-token'),
-		openBtcToken: setType('btc-token'),
-		openIcToken: setType('ic-token'),
-		openSolToken: setType('sol-token'),
+		openHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('hide-token')
+		),
+		openIcHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('ic-hide-token')
+		),
+		openSolHideToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('sol-hide-token')
+		),
+		openEthToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('eth-token')
+		),
+		openBtcToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('btc-token')
+		),
+		openIcToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('ic-token')
+		),
+		openSolToken: <(params: SetWithDataParams<NavigationTarget | undefined>) => void>(
+			setTypeWithData('sol-token')
+		),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: <(params: SetWithDataParams<QrCodeType>) => void>setTypeWithData('vip-qr-code'),
 		openReferralCode: setType('referral-code'),
-		openAddressBook: setType('address-book'),
-		openReferralState: setType('referral-state'),
+		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
+			setTypeWithData('address-book')
+		),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
 			setTypeWithData('dapp-details')
 		),
 		openVipRewardState: <(params: SetWithDataParams<VipRewardStateData>) => void>(
 			setTypeWithData('vip-reward-state')
 		),
-		openRewardDetails: <(params: SetWithDataParams<RewardDescription>) => void>(
+		openRewardDetails: <(params: SetWithDataParams<RewardCampaignDescription>) => void>(
 			setTypeWithData('reward-details')
 		),
-		openRewardState: <(params: SetWithDataParams<boolean>) => void>setTypeWithData('reward-state'),
+		openRewardState: <(params: SetWithDataParams<RewardStateData>) => void>(
+			setTypeWithData('reward-state')
+		),
+		openWelcome: setType('welcome'),
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
 			setTypeWithData('settings')
 		),

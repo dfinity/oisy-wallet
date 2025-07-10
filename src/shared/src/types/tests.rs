@@ -246,6 +246,127 @@ mod custom_token {
         );
     }
 
+    mod erc20 {
+        //! Tests for the erc20 module.
+        use super::*;
+        use crate::{
+            types::MAX_SYMBOL_LENGTH,
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
+
+        test_validate_on_deserialize!(
+            Erc20Token,
+            vec![
+                TestVector {
+                    input: Erc20Token {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 1,
+                        symbol: Some("☃☃☃ ☃ ☃☃☃".to_string()),
+                        decimals: Some(6),
+                    },
+                    valid: true,
+                    description: "Valid Erc20Token",
+                },
+                TestVector {
+                    input: Erc20Token {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 1,
+                        symbol: None,
+                        decimals: None,
+                    },
+                    valid: true,
+                    description: "Erc20Token without a symbol or decimals",
+                },
+                TestVector {
+                    input: Erc20Token {
+                        token_address: ErcTokenId(
+                            "0x12345678901234567890123456789012345678".to_string()
+                        ),
+                        chain_id: 1,
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(6),
+                    },
+                    valid: false,
+                    description: "Erc20Token with a token address that is too short",
+                },
+                TestVector {
+                    input: Erc20Token {
+                        token_address: ErcTokenId("1".repeat(99)),
+                        chain_id: 1,
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(6),
+                    },
+                    valid: false,
+                    description: "Erc20Token with a token address that is too long",
+                },
+                TestVector {
+                    input: Erc20Token {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 1,
+                        symbol: Some("B".repeat(MAX_SYMBOL_LENGTH + 1)),
+                        decimals: Some(6),
+                    },
+                    valid: false,
+                    description: "Too long symbol",
+                },
+                TestVector {
+                    input: Erc20Token {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 1,
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(255),
+                    },
+                    valid: true,
+                    description: "Maximum decimals",
+                },
+                TestVector {
+                    input: Erc20Token {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 1,
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(0),
+                    },
+                    valid: true,
+                    description: "Minimum decimals",
+                },
+                TestVector {
+                    input: Erc20Token {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 2 ^ 64 - 1,
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(6),
+                    },
+                    valid: true,
+                    description: "Maximum chain ID",
+                },
+                TestVector {
+                    input: Erc20Token {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 0,
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(6),
+                    },
+                    valid: true,
+                    description: "Minimum chain ID",
+                },
+            ]
+        );
+    }
+
     mod icrc {
         //! Tests for the icrc module.
         use candid::Principal;
@@ -352,4 +473,222 @@ mod custom_token {
             ]
         );
     }
+}
+
+mod token {
+    use candid::{Decode, Encode};
+
+    use crate::{
+        types::{token::UserToken, MAX_SYMBOL_LENGTH},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    test_validate_on_deserialize!(
+        UserToken,
+        vec![
+            TestVector {
+                description: "UserToken with valid contract address",
+                input: UserToken {
+                    contract_address: "0x1234567890123456789012345678901234567890".to_string(),
+                    chain_id: 1,
+                    symbol: Some("Bouncy Castle".to_string()),
+                    decimals: Some(6),
+                    version: None,
+                    enabled: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "UserToken with contract address too long",
+                input: UserToken {
+                    contract_address: "0x12345678901234567890123456789012345678901".to_string(),
+                    chain_id: 1,
+                    symbol: Some("Bouncy Castle".to_string()),
+                    decimals: Some(6),
+                    version: None,
+                    enabled: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "UserToken with contract address too short",
+                input: UserToken {
+                    contract_address: "0x123456789012345678901234567890123456789".to_string(),
+                    chain_id: 1,
+                    symbol: Some("Bouncy Castle".to_string()),
+                    decimals: Some(6),
+                    version: None,
+                    enabled: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "UserToken with symbol too long",
+                input: UserToken {
+                    contract_address: "0x1234567890123456789012345678901234567890".to_string(),
+                    chain_id: 1,
+                    symbol: Some("B".repeat(MAX_SYMBOL_LENGTH + 1)),
+                    decimals: Some(6),
+                    version: None,
+                    enabled: None,
+                },
+                valid: false,
+            },
+        ]
+    );
+}
+
+mod user_profile {
+    //! Tests for the `user_profile` types.
+    use std::collections::HashMap;
+
+    use candid::{Decode, Encode, Principal};
+    use ic_verifiable_credentials::issuer_api::{ArgumentValue, CredentialSpec};
+
+    use crate::{
+        types::{
+            user_profile::{
+                AddUserCredentialRequest, UserCredential, UserProfile, MAX_ISSUER_LENGTH,
+            },
+            verifiable_credential::CredentialType,
+        },
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    test_validate_on_deserialize!(
+        UserCredential,
+        vec![
+            TestVector {
+                description: "UserCredential with max length issuer",
+                input: UserCredential {
+                    credential_type: CredentialType::ProofOfUniqueness,
+                    issuer: "1".repeat(MAX_ISSUER_LENGTH),
+                    verified_date_timestamp: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "UserCredential with issuer too long",
+                input: UserCredential {
+                    credential_type: CredentialType::ProofOfUniqueness,
+                    issuer: "1".repeat(MAX_ISSUER_LENGTH + 1),
+                    verified_date_timestamp: None,
+                },
+                valid: false,
+            },
+        ]
+    );
+
+    fn sample_user_credential() -> UserCredential {
+        UserCredential {
+            credential_type: CredentialType::ProofOfUniqueness,
+            issuer: "1".repeat(MAX_ISSUER_LENGTH),
+            verified_date_timestamp: None,
+        }
+    }
+
+    test_validate_on_deserialize!(
+        UserProfile,
+        vec![
+            TestVector {
+                description: "UserProfile with max length credentials",
+                input: UserProfile {
+                    credentials: vec![sample_user_credential(); UserProfile::MAX_CREDENTIALS],
+                    created_timestamp: 0,
+                    updated_timestamp: 0,
+                    version: None,
+                    settings: None,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "UserProfile with too many credentials",
+                input: UserProfile {
+                    credentials: vec![sample_user_credential(); UserProfile::MAX_CREDENTIALS + 1],
+                    created_timestamp: 0,
+                    updated_timestamp: 0,
+                    version: None,
+                    settings: None,
+                },
+                valid: false,
+            },
+        ]
+    );
+
+    test_validate_on_deserialize!(
+        AddUserCredentialRequest,
+        vec![
+            TestVector {
+                description: "AddUserCredentialRequest with credential_type too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(10),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH + 1),
+                        arguments: None,
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with too many arguments",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(10),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: Some({
+                            let mut args = HashMap::new();
+                            for i in 0..AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENTS + 1
+                            {
+                                args.insert(i.to_string(), ArgumentValue::Int(i as i32));
+                            }
+                            args
+                        }),
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with argument key too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(10),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: Some({
+                            let mut args = HashMap::new();
+                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH + 1), ArgumentValue::Int(0));
+                            args
+                        }),
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+            TestVector {
+                description: "AddUserCredentialRequest with argument value too long",
+                input: AddUserCredentialRequest {
+                    credential_jwt: "1".repeat(10),
+                    credential_spec: CredentialSpec {
+                        credential_type: "1"
+                            .repeat(AddUserCredentialRequest::MAX_CREDENTIAL_TYPE_LENGTH),
+                        arguments: Some({
+                            let mut args = HashMap::new();
+                            args.insert("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_KEY_LENGTH), ArgumentValue::String("1".repeat(AddUserCredentialRequest::MAX_CREDENTIAL_SPEC_ARGUMENT_VALUE_LENGTH + 1)));
+                            args
+                        }),
+                    },
+                    issuer_canister_id: Principal::anonymous(),
+                    current_user_version: None,
+                },
+                valid: false,
+            },
+        ]
+    );
 }

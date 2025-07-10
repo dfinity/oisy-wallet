@@ -195,6 +195,8 @@ describe('loader.services', () => {
 									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ ArbitrumMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
 								]
 							}

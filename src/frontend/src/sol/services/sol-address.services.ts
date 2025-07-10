@@ -2,15 +2,13 @@ import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_KEY_ID,
 	SOLANA_LOCAL_NETWORK_ID,
-	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_TESTNET_NETWORK_ID
+	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
 import {
 	getIdbSolAddressMainnet,
 	setIdbSolAddressDevnet,
 	setIdbSolAddressLocal,
 	setIdbSolAddressMainnet,
-	setIdbSolAddressTestnet,
 	updateIdbSolAddressMainnetLastUsage
 } from '$lib/api/idb-addresses.api';
 import { getSchnorrPublicKey } from '$lib/api/signer.api';
@@ -25,7 +23,6 @@ import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
 	solAddressMainnetStore,
-	solAddressTestnetStore,
 	type StorageAddressData
 } from '$lib/stores/address.store';
 import type { SolAddress } from '$lib/types/address';
@@ -62,9 +59,6 @@ const getSolAddress = async ({
 export const getSolAddressMainnet = async (identity: OptionIdentity): Promise<SolAddress> =>
 	await getSolAddress({ identity, derivationPath: [SolanaNetworks.mainnet] });
 
-export const getSolAddressTestnet = async (identity: OptionIdentity): Promise<SolAddress> =>
-	await getSolAddress({ identity, derivationPath: [SolanaNetworks.testnet] });
-
 export const getSolAddressDevnet = async (identity: OptionIdentity): Promise<SolAddress> =>
 	await getSolAddress({ identity, derivationPath: [SolanaNetworks.devnet] });
 
@@ -79,11 +73,6 @@ const solanaMapper: Record<
 		addressStore: solAddressMainnetStore,
 		getAddress: getSolAddressMainnet,
 		setIdbAddress: setIdbSolAddressMainnet
-	},
-	testnet: {
-		addressStore: solAddressTestnetStore,
-		getAddress: getSolAddressTestnet,
-		setIdbAddress: setIdbSolAddressTestnet
 	},
 	devnet: {
 		addressStore: solAddressDevnetStore,
@@ -113,12 +102,6 @@ export const loadSolAddressMainnet = (): Promise<ResultSuccess> =>
 	loadSolAddress({
 		networkId: SOLANA_MAINNET_NETWORK_ID,
 		network: SolanaNetworks.mainnet
-	});
-
-export const loadSolAddressTestnet = (): Promise<ResultSuccess> =>
-	loadSolAddress({
-		networkId: SOLANA_TESTNET_NETWORK_ID,
-		network: SolanaNetworks.testnet
 	});
 
 export const loadSolAddressDevnet = (): Promise<ResultSuccess> =>

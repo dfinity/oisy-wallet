@@ -4,17 +4,17 @@
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
-		FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
-		initFeeStore
-	} from '$eth/stores/fee.store';
+		ETH_FEE_CONTEXT_KEY,
+		type EthFeeContext as FeeContextType,
+		initEthFeeContext,
+		initEthFeeStore
+	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
@@ -55,20 +55,20 @@
 	 * Fee context store
 	 */
 
-	let feeStore = initFeeStore();
+	const feeStore = initEthFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set($sendToken.symbol);
 
-	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	$: feeTokenIdStore.set($sendToken.id);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set($sendToken.decimals);
 
 	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
-		initFeeContext({
+		ETH_FEE_CONTEXT_KEY,
+		initEthFeeContext({
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,
@@ -168,8 +168,9 @@
 		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
 	>
 
-	<FeeContext
+	<EthFeeContext
 		amount={amount.toString()}
+		{data}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
 		{destination}
@@ -196,5 +197,5 @@
 				/>
 			{/if}
 		</CkEthLoader>
-	</FeeContext>
+	</EthFeeContext>
 </WizardModal>

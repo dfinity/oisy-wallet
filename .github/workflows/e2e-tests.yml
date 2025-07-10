@@ -11,10 +11,6 @@ on:
     - cron: '30 3 * * *'
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions: {}
 
 jobs:
@@ -76,28 +72,40 @@ jobs:
         with:
           network: local
 
+  define-matrix:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      os-matrix: ${{ steps.set-matrix.outputs.os-matrix }}
+    steps:
+      - name: Set OS Matrix
+        id: set-matrix
+        run: |
+          MATRIX='["ubuntu-24.04"]'
+          if [[ "$ALL_RUNNERS" == "true" ]]; then
+            MATRIX='["ubuntu-24.04", "macos-14"]'
+          fi
+          echo "os-matrix=$MATRIX" >> $GITHUB_OUTPUT
+        env:
+          ALL_RUNNERS: ${{ contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+
   e2e:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-    needs: ['oisy-backend-wasm', 'check-e2e-changes']
+    needs: ['oisy-backend-wasm', 'check-e2e-changes', 'define-matrix']
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
-    env:
-      MATRIX_OS: ${{ matrix.os }}
+        os: ${{ fromJson(needs.define-matrix.outputs.os-matrix) }}
+        shardIndex: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        shardTotal: [10]
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
-    outputs:
-      ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
-      macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.shardIndex }}
+      cancel-in-progress: true
 
     steps:
-      - name: Run macOS only on dispatch, schedule or label
-        if: runner.os == 'macOS' && github.event_name != 'workflow_dispatch' && github.event_name != 'schedule' && !contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots')
-        run: |
-          echo "Skipping macOS: not a dispatch/schedule and PR not labeled accordingly."
-          exit 0
-
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
         id: app-token
@@ -131,7 +139,9 @@ jobs:
         uses: ./.github/actions/prepare-macos
 
       - name: Set Environment Variables
-        run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
+        run: |
+          echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
+          echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_E2E }}" >> $GITHUB_ENV
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
@@ -140,13 +150,13 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Test
-        run: npm run e2e:ci
+        run: npm run e2e:ci -- --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: playwright-report-${{ matrix.os }}
+          name: playwright-report-${{ matrix.os }}-${{ matrix.shardIndex }}
           path: playwright-report/
           retention-days: 3
 
@@ -154,7 +164,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: test-results-${{ matrix.os }}
+          name: test-results-${{ matrix.os }}-${{ matrix.shardIndex }}
           path: test-results/
           retention-days: 3
 
@@ -171,10 +181,8 @@ jobs:
         id: set_snapshot_output
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
-            echo "ubuntu_status=$CHANGES" >> $GITHUB_OUTPUT
             echo "os_suffix=linux" >> $GITHUB_OUTPUT
           elif [ "$RUNNER_OS" = "macOS" ]; then
-            echo "macos_status=$CHANGES" >> $GITHUB_OUTPUT
             echo "os_suffix=darwin" >> $GITHUB_OUTPUT
           fi
         env:
@@ -184,7 +192,7 @@ jobs:
         if: steps.check_snapshots.outputs.CHANGES == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: snapshots-${{ matrix.os }}
+          name: snapshots-${{ matrix.os }}-${{ matrix.shardIndex }}
           path: e2e/snapshots/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
           retention-days: 3
 
@@ -221,26 +229,11 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
 
-      - name: Set snapshot status from previous jobs
-        run: |
-          echo "ubuntu_status=$ubuntu_status" >> $GITHUB_ENV
-          echo "macos_status=$macos_status" >> $GITHUB_ENV
-        env:
-          ubuntu_status: ${{ needs.e2e.outputs.ubuntu_status }}
-          macos_status: ${{ needs.e2e.outputs.macos_status }}
-
-      - name: Download Ubuntu Snapshots
-        if: env.ubuntu_status == 'true'
+      - name: Download All Snapshot Artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: snapshots-ubuntu-24.04
-          path: e2e/snapshots
-
-      - name: Download macOS Snapshots
-        if: env.macos_status == 'true'
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          name: snapshots-macos-14
+          pattern: snapshots-*
+          merge-multiple: true
           path: e2e/snapshots
 
       - name: Check for Final Changes

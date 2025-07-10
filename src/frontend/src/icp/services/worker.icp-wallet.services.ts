@@ -18,7 +18,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 	const worker: Worker = new WalletWorker.default();
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<
 			| PostMessageDataResponseWallet
@@ -26,30 +26,36 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			| PostMessageDataResponseWalletCleanUp
 		>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncIcpWallet':
 				syncWallet({
 					tokenId: ICP_TOKEN_ID,
-					networkId: ICP_NETWORK_ID,
-					data: data.data as PostMessageDataResponseWallet
+            networkId: ICP_NETWORK_ID,
+					data: data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcpWalletError':
 				onLoadTransactionsError({
 					tokenId: ICP_TOKEN_ID,
-					error: (data.data as PostMessageDataResponseError).error
+					error: data.error
 				});
 				return;
 			case 'syncIcpWalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId: ICP_TOKEN_ID,
-					networkId: ICP_NETWORK_ID,
-					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
+            		networkId: ICP_NETWORK_ID,
+					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
 		}
+	};
+
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopIcpWalletTimer'
+		});
 	};
 
 	return {
@@ -58,15 +64,15 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 				msg: 'startIcpWalletTimer'
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopIcpWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerIcpWalletTimer'
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };

@@ -13,22 +13,26 @@
 </script>
 
 <ModalValue>
-	<svelte:fragment slot="label">{$i18n.core.text.destination}</svelte:fragment>
+	{#snippet label()}
+		{$i18n.core.text.destination}
+	{/snippet}
 
-	<div class="flex items-center gap-2" slot="main-value">
-		{#if !isDestinationCustom}
-			<div
-				class="flex items-center justify-center"
-				style={`width: ${logoSizes['xxs']}; height: ${logoSizes['xxs']};`}
-			>
-				<IconAstronautHelmet />
-			</div>
-			<span>{$i18n.convert.text.default_destination}</span>
-		{:else}
-			<NetworkLogo network={token.network} color="off-white" />
-			<span>{shortenWithMiddleEllipsis({ text: destination ?? '' })}</span>
-		{/if}
+	{#snippet mainValue()}
+		<div class="flex items-center gap-2">
+			{#if !isDestinationCustom}
+				<div
+					class="flex items-center justify-center"
+					style={`width: ${logoSizes['xxs']}; height: ${logoSizes['xxs']};`}
+				>
+					<IconAstronautHelmet />
+				</div>
+				<span>{$i18n.convert.text.default_destination}</span>
+			{:else}
+				<NetworkLogo network={token.network} color="off-white" />
+				<span>{shortenWithMiddleEllipsis({ text: destination ?? '' })}</span>
+			{/if}
 
-		<slot />
-	</div>
+			<slot />
+		</div>
+	{/snippet}
 </ModalValue>

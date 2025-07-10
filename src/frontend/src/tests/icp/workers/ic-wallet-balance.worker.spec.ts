@@ -43,13 +43,16 @@ describe('ic-wallet-balance.worker', () => {
 		...rest
 	}: {
 		certified: boolean;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}) => ({
 		msg,
 		data: mockPostMessageData(rest)
 	});
 
 	const postMessageMock = vi.fn();
+
+	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	const awaitJobExecution = () => vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
 
 	beforeAll(() => {
 		originalPostmessage = window.postMessage;
@@ -80,7 +83,7 @@ describe('ic-wallet-balance.worker', () => {
 		initScheduler: (
 			data: PostMessageDataRequest | undefined
 		) => IcWalletScheduler<PostMessageDataRequest>;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 		startData?: PostMessageDataRequest | undefined;
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
@@ -135,6 +138,8 @@ describe('ic-wallet-balance.worker', () => {
 				it('should not trigger postMessage again if no changes', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					// query + update = 2
 					expect(postMessageMock).toHaveBeenCalledTimes(4);
 
@@ -161,6 +166,8 @@ describe('ic-wallet-balance.worker', () => {
 				it('should postMessage with status of the worker', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
@@ -168,6 +175,8 @@ describe('ic-wallet-balance.worker', () => {
 
 				it('should postMessage with balance', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
 
@@ -188,7 +197,7 @@ describe('ic-wallet-balance.worker', () => {
 		) => IcWalletScheduler<PostMessageDataRequest>;
 		startData?: PostMessageDataRequest | undefined;
 		initErrorMock: (err: Error) => void;
-		msg: 'syncIcpWallet' | 'syncIcrcWallet';
+		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
@@ -207,6 +216,8 @@ describe('ic-wallet-balance.worker', () => {
 					initErrorMock(err);
 
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					// idle and in_progress
 					// error

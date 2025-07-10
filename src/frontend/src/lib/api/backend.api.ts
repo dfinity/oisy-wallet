@@ -1,13 +1,16 @@
 import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
+	BtcGetFeePercentilesResponse,
+	Contact,
 	CreateChallengeResponse,
 	CustomToken,
 	GetAllowedCyclesResponse,
 	PendingTransaction,
 	SelectedUtxosFeeResponse,
 	UserProfile,
-	UserToken
+	UserToken,
+	UserTokenId
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
@@ -16,11 +19,16 @@ import type {
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
+	CreateContactParams,
+	DeleteContactParams,
+	GetContactParams,
 	GetUserProfileResponse,
 	SaveUserNetworksSettings,
-	SetUserShowTestnetsParams
+	SetUserShowTestnetsParams,
+	UpdateContactParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
@@ -66,6 +74,24 @@ export const setCustomToken = async ({
 	const { setCustomToken } = await backendCanister({ identity });
 
 	return setCustomToken({ token });
+};
+
+export const removeUserToken = async ({
+	identity,
+	...restParams
+}: CanisterApiFunctionParams<UserTokenId>): Promise<void> => {
+	const { removeUserToken } = await backendCanister({ identity });
+
+	return removeUserToken(restParams);
+};
+
+export const removeCustomToken = async ({
+	identity,
+	...restParams
+}: CanisterApiFunctionParams<{ token: CustomToken }>): Promise<void> => {
+	const { removeCustomToken } = await backendCanister({ identity });
+
+	return removeCustomToken(restParams);
 };
 
 export const setManyUserTokens = async ({
@@ -141,6 +167,15 @@ export const selectUserUtxosFee = async ({
 	return btcSelectUserUtxosFee(params);
 };
 
+export const getCurrentBtcFeePercentiles = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetFeePercentilesParams>): Promise<BtcGetFeePercentilesResponse> => {
+	const { btcGetCurrentFeePercentiles } = await backendCanister({ identity });
+
+	return btcGetCurrentFeePercentiles(params);
+};
+
 export const createPowChallenge = async ({
 	identity
 }: CanisterApiFunctionParams): Promise<CreateChallengeResponse> => {
@@ -190,6 +225,45 @@ export const updateUserNetworkSettings = async ({
 	const { updateUserNetworkSettings } = await backendCanister({ identity });
 
 	return updateUserNetworkSettings(params);
+};
+
+export const getContact = async ({
+	contactId,
+	identity
+}: CanisterApiFunctionParams<GetContactParams>): Promise<Contact> => {
+	const { getContact } = await backendCanister({ identity });
+	return getContact(contactId);
+};
+
+export const getContacts = async ({
+	identity
+}: CanisterApiFunctionParams<QueryParams>): Promise<Contact[]> => {
+	const { getContacts } = await backendCanister({ identity });
+	return getContacts();
+};
+
+export const createContact = async ({
+	name,
+	identity
+}: CanisterApiFunctionParams<CreateContactParams>): Promise<Contact> => {
+	const { createContact } = await backendCanister({ identity });
+	return createContact(name);
+};
+
+export const updateContact = async ({
+	contact,
+	identity
+}: CanisterApiFunctionParams<UpdateContactParams>): Promise<Contact> => {
+	const { updateContact } = await backendCanister({ identity });
+	return updateContact(contact);
+};
+
+export const deleteContact = async ({
+	contactId,
+	identity
+}: CanisterApiFunctionParams<DeleteContactParams>): Promise<bigint> => {
+	const { deleteContact } = await backendCanister({ identity });
+	return deleteContact(contactId);
 };
 
 const backendCanister = async ({

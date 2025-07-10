@@ -25,6 +25,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
+	const modalId = Symbol();
+
 	let ckBtcToken: IcCkToken | undefined;
 	$: ckBtcToken = findTwinToken({
 		tokenToPair: BTC_MAINNET_TOKEN,
@@ -50,7 +52,7 @@
 			identity: $authIdentity
 		});
 
-		modalStore.openConvertBTCToCkBTC();
+		modalStore.openConvertBTCToCkBTC(modalId);
 	};
 
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
@@ -66,7 +68,7 @@
 	testId="convert-to-ckbtc-button"
 >
 	{#snippet icon()}
-		<IconCkConvert size="28" />
+		<IconCkConvert size="24" />
 	{/snippet}
 	{#snippet label()}
 		<span>{BTC_MAINNET_TOKEN.twinTokenSymbol}</span>

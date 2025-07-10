@@ -5,16 +5,23 @@ import {
 	SOLANA_TESTNET_TOKEN,
 	SOLANA_TOKEN
 } from '$env/tokens/tokens.sol.env';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
 import type { SolAddress } from '$lib/types/address';
-import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import type { OptionIdentity } from '$lib/types/identity';
+import type { Token } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
+import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+import { findOldestTransaction } from '$lib/utils/transactions.utils';
+import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
-import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
-import type { GetSolTransactionsParams, LoadNextSolTransactionsParams } from '$sol/types/sol-api';
+import type { SolanaNetworkType } from '$sol/types/network';
+import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,
@@ -23,10 +30,13 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { address as solAddress } from '@solana/kit';
+import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
@@ -34,12 +44,14 @@ const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefine
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
 
 export const fetchSolTransactionsForSignature = async ({
+	identity,
 	signature,
 	network,
 	address,
 	tokenAddress,
 	tokenOwnerAddress
 }: {
+	identity: OptionIdentity;
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
@@ -107,6 +119,7 @@ export const fetchSolTransactionsForSignature = async ({
 			} = await acc;
 
 			const mappedTransaction = await mapSolParsedInstruction({
+				identity,
 				instruction: {
 					...instruction,
 					programAddress: instruction.programId
@@ -157,6 +170,15 @@ export const fetchSolTransactionsForSignature = async ({
 				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
 
+			const fromOwner: SolTransactionUi['fromOwner'] = await getAccountOwner({
+				address: from,
+				network
+			});
+
+			const toOwner: SolTransactionUi['toOwner'] = nonNullish(to)
+				? await getAccountOwner({ address: to, network })
+				: undefined;
+
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
@@ -164,7 +186,9 @@ export const fetchSolTransactionsForSignature = async ({
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,
+				...(nonNullish(fromOwner) && { fromOwner }),
 				to,
+				...(nonNullish(toOwner) && { toOwner }),
 				status,
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
@@ -203,15 +227,44 @@ export const fetchSolTransactionsForSignature = async ({
 };
 
 export const loadNextSolTransactions = async ({
+	token,
 	signalEnd,
 	...rest
 }: LoadNextSolTransactionsParams): Promise<void> => {
-	const transactions = await loadSolTransactions(rest);
+	const {
+		network: { id: networkId }
+	} = token;
+
+	const address = isNetworkIdSOLDevnet(networkId)
+		? get(solAddressDevnet)
+		: isNetworkIdSOLLocal(networkId)
+			? get(solAddressLocal)
+			: get(solAddressMainnet);
+
+	const network = mapNetworkIdToNetwork(token.network.id);
+
+	if (isNullish(network) || isNullish(address)) {
+		return;
+	}
+
+	const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
+		? token
+		: { address: undefined, owner: undefined };
+
+	const transactions = await loadSolTransactions({
+		token,
+		network,
+		address,
+		tokenAddress,
+		tokenOwnerAddress,
+		...rest
+	});
 
 	if (transactions.length === 0) {
 		signalEnd();
 	}
 };
+
 
 const networkToSolTokenMap = {
 	[SolanaNetworks.mainnet]: SOLANA_TOKEN,
@@ -220,10 +273,12 @@ const networkToSolTokenMap = {
 	[SolanaNetworks.local]: SOLANA_LOCAL_TOKEN
 };
 
+
 const loadSolTransactions = async ({
+	token: { id: tokenId },
 	network,
 	...rest
-}: GetSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
+}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	const {
 		id: tokenId,
 		network: { id: networkId }
@@ -253,4 +308,39 @@ const loadSolTransactions = async ({
 		console.error(`Failed to load transactions for ${tokenId.description}:`, error);
 		return [];
 	}
+};
+
+export const loadNextSolTransactionsByOldest = async ({
+	minTimestamp,
+	transactions,
+	...rest
+}: {
+	identity: OptionIdentity;
+	minTimestamp: number;
+	transactions: SolTransactionUi[];
+	token: Token;
+	signalEnd: () => void;
+}): Promise<ResultSuccess> => {
+	// If there are no transactions, we let the worker load the first ones
+	if (transactions.length === 0) {
+		return { success: false };
+	}
+
+	const lastTransaction = findOldestTransaction(transactions);
+
+	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
+
+	if (
+		nonNullish(minIcTimestamp) &&
+		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
+	) {
+		return { success: false };
+	}
+
+	await loadNextSolTransactions({
+		...rest,
+		before: lastSignature
+	});
+
+	return { success: true };
 };

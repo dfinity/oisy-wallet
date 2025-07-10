@@ -3,17 +3,23 @@ import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.a
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCanistersStrict, IcToken } from '$icp/types/ic-token';
 import type { IcTransaction, IcTransactionUi } from '$icp/types/ic-transaction';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
+import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
+import { mapIcErrorMetadata } from '$lib/utils/error.utils';
+import { findOldestTransaction } from '$lib/utils/transactions.utils';
 import type { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -91,28 +97,27 @@ const loadNextIcTransactionsRequest = ({
 
 export const onLoadTransactionsError = ({
 	tokenId,
-	error: err,
-	silent = false
+	error: err
 }: {
 	tokenId: TokenId;
 	error: unknown;
-	silent?: boolean;
 }) => {
 	icTransactionsStore.reset(tokenId);
 
 	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
 	balancesStore.reset(tokenId);
 
-	if (silent) {
-		// We print the error to console just for debugging purposes
-		console.warn(`${get(i18n).transactions.error.loading_transactions}:`, err);
-		return;
-	}
-
-	toastsError({
-		msg: { text: get(i18n).transactions.error.loading_transactions },
-		err
+	trackEvent({
+		name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
+		metadata: {
+			tokenId: tokenId.description ?? '',
+			...(mapIcErrorMetadata(err) ?? {})
+		}
 	});
+
+	// We print the error to console just for debugging purposes
+	console.warn(`${get(i18n).transactions.error.loading_transactions}:`, err);
+	return;
 };
 
 export const onTransactionsCleanUp = (data: {
@@ -169,4 +174,41 @@ export const loadNextIcTransactions = async ({
 		token,
 		...rest
 	});
+};
+
+export const loadNextIcTransactionsByOldest = async ({
+	minTimestamp,
+	transactions,
+	...rest
+}: {
+	minTimestamp: number;
+	transactions: IcTransactionUi[];
+	owner: Principal;
+	identity: OptionIdentity;
+	maxResults?: bigint;
+	token: Token;
+	signalEnd: () => void;
+}): Promise<ResultSuccess> => {
+	// If there are no transactions, we let the worker load the first ones
+	if (transactions.length === 0) {
+		return { success: false };
+	}
+
+	const lastTransaction = findOldestTransaction(transactions);
+
+	const { timestamp: minIcTimestamp, id: lastId } = lastTransaction ?? {};
+
+	if (
+		nonNullish(minIcTimestamp) &&
+		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
+	) {
+		return { success: false };
+	}
+
+	await loadNextIcTransactions({
+		...rest,
+		lastId
+	});
+
+	return { success: true };
 };

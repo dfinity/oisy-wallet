@@ -56,16 +56,18 @@
 
 	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
-	<svelte:fragment slot="title">{$i18n.networks.filter}</svelte:fragment>
+	{#snippet title()}
+		{$i18n.networks.filter}
+	{/snippet}
 
-	<div slot="items">
+	{#snippet items()}
 		<NetworkSwitcherList on:icSelected={onNetworkSelect} selectedNetworkId={$networkId} />
 
 		<div class="mb-3 ml-2 mt-6 flex flex-row justify-between text-nowrap">
 			<span class="flex">
 				<Button
 					link
-					on:click={() => {
+					onclick={() => {
 						dropdown?.close();
 						modalStore.openSettings({ id: modalId, data: SettingsModalType.ENABLED_NETWORKS });
 					}}><IconManage />{$i18n.networks.manage}</Button
@@ -80,5 +82,5 @@
 				</span>
 			{/if}
 		</div>
-	</div>
+	{/snippet}
 </Dropdown>

@@ -90,6 +90,50 @@ describe('fetchSwapAmounts', () => {
 		expect(result).toHaveLength(1);
 		expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
 	});
+
+	it('should filter out providers with receiveAmount = 0', async () => {
+		const kongSwapResponse = { receive_amount: 0n, slippage: 0.5 } as SwapAmountsReply;
+		const icpSwapResponse = {
+			receiveAmount: 950n,
+			slippage: 0.5
+		} as unknown as ICPSwapAmountReply;
+
+		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+		vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+		const result = await fetchSwapAmounts({
+			identity: mockIdentity,
+			sourceToken,
+			destinationToken,
+			amount,
+			tokens: mockTokens,
+			slippage
+		});
+
+		expect(result).toHaveLength(1);
+		expect(result[0].provider).toBe(SwapProvider.ICP_SWAP);
+	});
+
+	it('should sort results by receiveAmount in descending order', async () => {
+		const kongSwapResponse = { receive_amount: 800n, slippage: 0.5 } as SwapAmountsReply;
+		const icpSwapResponse = { receiveAmount: 950n, slippage: 0.5 } as unknown as ICPSwapAmountReply;
+
+		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+		vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+		const result = await fetchSwapAmounts({
+			identity: mockIdentity,
+			sourceToken,
+			destinationToken,
+			amount,
+			tokens: mockTokens,
+			slippage
+		});
+
+		expect(result).toHaveLength(2);
+		expect(result[0].provider).toBe(SwapProvider.ICP_SWAP);
+		expect(result[1].provider).toBe(SwapProvider.KONG_SWAP);
+	});
 });
 
 describe('loadKongSwapTokens', () => {

@@ -2,11 +2,9 @@ import {
 	SOLANA_RPC_HTTP_URL_DEVNET,
 	SOLANA_RPC_HTTP_URL_LOCAL,
 	SOLANA_RPC_HTTP_URL_MAINNET,
-	SOLANA_RPC_HTTP_URL_TESTNET,
 	SOLANA_RPC_WS_URL_DEVNET,
 	SOLANA_RPC_WS_URL_LOCAL,
-	SOLANA_RPC_WS_URL_MAINNET,
-	SOLANA_RPC_WS_URL_TESTNET
+	SOLANA_RPC_WS_URL_MAINNET
 } from '$env/networks/networks.sol.env';
 import {
 	SolanaNetworks,
@@ -26,10 +24,6 @@ const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
 	[SolanaNetworks.mainnet]: {
 		httpUrl: SOLANA_RPC_HTTP_URL_MAINNET,
 		websocketUrl: SOLANA_RPC_WS_URL_MAINNET
-	},
-	[SolanaNetworks.testnet]: {
-		httpUrl: SOLANA_RPC_HTTP_URL_TESTNET,
-		websocketUrl: SOLANA_RPC_WS_URL_TESTNET
 	},
 	[SolanaNetworks.devnet]: {
 		httpUrl: SOLANA_RPC_HTTP_URL_DEVNET,

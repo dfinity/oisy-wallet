@@ -17,11 +17,7 @@ import {
 	createMockEtherscanTransactions
 } from '$tests/mocks/etherscan.mock';
 import en from '$tests/mocks/i18n.mock';
-import {
-	EtherscanPlugin,
-	EtherscanProvider as EtherscanProviderLib,
-	Network
-} from 'ethers/providers';
+import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
 import type { MockedClass } from 'vitest';
 
 vi.mock('$env/rest/etherscan.env', () => ({
@@ -42,16 +38,6 @@ describe('etherscan.providers', () => {
 				new Network(name, chainId),
 				ETHERSCAN_API_KEY
 			);
-		});
-	});
-
-	it('should attach the custom plugin to the providers', () => {
-		const ETHERSCAN_PLUGIN = new EtherscanPlugin('https://api.etherscan.io/v2');
-
-		expect(Network.prototype.attachPlugin).toHaveBeenCalledTimes(networks.length);
-
-		networks.forEach((_, index) => {
-			expect(Network.prototype.attachPlugin).toHaveBeenNthCalledWith(index + 1, ETHERSCAN_PLUGIN);
 		});
 	});
 
@@ -165,7 +151,6 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(1, 'account', {
-					chainId,
 					action: 'txlist',
 					address,
 					startblock: 0,
@@ -183,7 +168,6 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(2, 'account', {
-					chainId,
 					action: 'txlistinternal',
 					address,
 					startblock: 0,
@@ -253,7 +237,7 @@ describe('etherscan.providers', () => {
 
 					expect(provider).toBeDefined();
 
-					expect(mockFetch).toHaveBeenCalledTimes(1);
+					expect(mockFetch).toHaveBeenCalledOnce();
 
 					expect(result).toStrictEqual(expectedTransactions);
 				});
@@ -268,26 +252,26 @@ describe('etherscan.providers', () => {
 				});
 			});
 		});
+	});
 
-		describe('etherscanProviders', () => {
-			networks.forEach(({ id, name }) => {
-				it(`should return the correct provider for ${name} network`, () => {
-					const provider = etherscanProviders(id);
+	describe('etherscanProviders', () => {
+		networks.forEach(({ id, name }) => {
+			it(`should return the correct provider for ${name} network`, () => {
+				const provider = etherscanProviders(id);
 
-					expect(provider).toBeInstanceOf(EtherscanProvider);
+				expect(provider).toBeInstanceOf(EtherscanProvider);
 
-					expect(provider).toHaveProperty('network');
-					expect(provider).toHaveProperty('chainId');
-				});
+				expect(provider).toHaveProperty('network');
+				expect(provider).toHaveProperty('chainId');
 			});
+		});
 
-			it('should throw an error for an unsupported network ID', () => {
-				expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
-					replacePlaceholders(en.init.error.no_etherscan_provider, {
-						$network: ICP_NETWORK_ID.toString()
-					})
-				);
-			});
+		it('should throw an error for an unsupported network ID', () => {
+			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
+				replacePlaceholders(en.init.error.no_etherscan_provider, {
+					$network: ICP_NETWORK_ID.toString()
+				})
+			);
 		});
 	});
 });
