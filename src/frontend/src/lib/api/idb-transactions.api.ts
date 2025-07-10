@@ -16,7 +16,7 @@ import type {
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
-import { createStore, del, set as idbSet, type UseStore } from 'idb-keyval';
+import { createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
 const idbTransactionsStore = (key: string): UseStore =>
@@ -83,6 +83,38 @@ export const setIdbSolTransactions = (
 	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<SolTransactionUi>>>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbSolTransactionsStore });
+
+export const getIdbBtcTransactions = (
+	principal: Principal
+): Promise<
+	| SetIdbTransactionsParams<
+			CertifiedStoreData<TransactionsData<BtcTransactionUi>>
+	  >['transactionsStoreData']
+	| undefined
+> => get(principal.toText(), idbBtcTransactionsStore);
+
+export const getIdbEthTransactions = (
+	principal: Principal
+): Promise<SetIdbTransactionsParams<EthTransactionsData>['transactionsStoreData'] | undefined> =>
+	get(principal.toText(), idbEthTransactionsStore);
+
+export const getIdbIcTransactions = (
+	principal: Principal
+): Promise<
+	| SetIdbTransactionsParams<
+			CertifiedStoreData<TransactionsData<IcTransactionUi>>
+	  >['transactionsStoreData']
+	| undefined
+> => get(principal.toText(), idbIcTransactionsStore);
+
+export const getIdbSolTransactions = (
+	principal: Principal
+): Promise<
+	| SetIdbTransactionsParams<
+			CertifiedStoreData<TransactionsData<SolTransactionUi>>
+	  >['transactionsStoreData']
+	| undefined
+> => get(principal.toText(), idbSolTransactionsStore);
 
 export const deleteIdbBtcTransactions = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbBtcTransactionsStore);
