@@ -36,8 +36,8 @@ describe('getIcExtendedTransactions', () => {
 
 	it('should return 3 transactions', () => {
 		setupIcTransactionsStore({
-			tokenId: parseTokenId(MOCK_CKETH_TOKEN.id?.description ?? ''),
-			networkId: parseNetworkId(MOCK_CKETH_TOKEN.network?.id.description ?? '')
+			tokenId: MOCK_CKETH_TOKEN.id ?? parseTokenId(''),
+			networkId: MOCK_CKETH_TOKEN.network?.id ?? parseNetworkId('')
 		});
 
 		const result = getIcExtendedTransactions({
