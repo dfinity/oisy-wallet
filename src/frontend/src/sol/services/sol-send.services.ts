@@ -1,10 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
-import { i18n } from '$lib/stores/i18n.store';
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
@@ -16,11 +14,11 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
@@ -53,7 +51,6 @@ import {
 	createRecentSignatureConfirmationPromiseFactory,
 	waitForRecentTransactionConfirmation
 } from '@solana/transaction-confirmation';
-import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
 	transactionMessage,
@@ -293,14 +290,7 @@ export const sendSol = async ({
 		network: { id: networkId }
 	} = token;
 
-	const solNetwork = mapNetworkIdToNetwork(networkId);
-
-	assertNonNullish(
-		solNetwork,
-		replacePlaceholders(get(i18n).init.error.no_solana_network, {
-			$network: networkId.description ?? ''
-		})
-	);
+	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
 	const rpc = solanaHttpRpc(solNetwork);
 	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
