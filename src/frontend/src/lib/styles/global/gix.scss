@@ -392,9 +392,9 @@ div.select {
 }
 
 // Toasts
-.toast:has(> .icon.error) {
-	--overlay-background: var(--color-background-error-light);
-	--overlay-background-contrast: var(--color-foreground-error-secondary);
+.toast {
+	--toast-error-background: var(--color-background-error-light);
+	--toast-error-color: var(--color-foreground-error-secondary);
 }
 
 // Tooltip
