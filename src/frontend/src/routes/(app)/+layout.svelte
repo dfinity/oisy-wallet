@@ -13,12 +13,12 @@
 	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	let tokensRoute: boolean;
 	$: tokensRoute = isRouteTokens($page);
@@ -64,9 +64,9 @@
 				<NavigationMenu slot="menu">
 					{#if tokensRoute}
 						<Responsive up="xl">
-						<div transition:fade class="hidden xl:block">
-							<DappsCarousel />
-						</div>
+							<div transition:fade class="hidden xl:block">
+								<DappsCarousel />
+							</div>
 						</Responsive>
 					{/if}
 				</NavigationMenu>
