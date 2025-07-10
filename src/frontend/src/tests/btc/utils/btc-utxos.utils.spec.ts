@@ -4,8 +4,8 @@ import {
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
-	type UtxoSelectionResult,
-	utxoTxIdToString
+	utxoTxIdToString,
+	type UtxoSelectionResult
 } from '$btc/utils/btc-utxos.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
