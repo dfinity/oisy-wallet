@@ -599,6 +599,7 @@ interface I18nSend {
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
 		solana_transaction_expired: string;
+		solana_confirmation_failed: string;
 	};
 }
 

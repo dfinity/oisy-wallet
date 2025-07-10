@@ -722,7 +722,8 @@
 			"no_pending_bitcoin_transaction": "",
 			"unexpected_utxos_fee": "",
 			"unable_to_retrieve_amount": "",
-			"solana_transaction_expired": ""
+			"solana_transaction_expired": "",
+			"solana_confirmation_failed": ""
 		}
 	},
 	"convert": {
