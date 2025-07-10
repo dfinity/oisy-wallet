@@ -48,11 +48,9 @@ const getSolanaPublicKey = async ({
 
 const getSolAddress = async ({
 	identity,
-	derivationPath,
 	network
 }: {
 	identity: OptionIdentity;
-	derivationPath: string[];
 	network: SolanaNetworkType;
 }): Promise<SolAddress> => {
 	const foo = await deriveSolAddress(
@@ -72,6 +70,7 @@ const getSolAddress = async ({
 	// 2EQneZBEeL3XGy3YaQAgxwxYvKq2bRPfQVpiGXgpQEfv - mainnet
 	// 3azSdZ7u1LxpxTVE6T4oH9XuTYidD7fNhXmJKhTTczw4 -- devnet
 
+	const derivationPath: string[] = [network];
 	const publicKey = await getSolanaPublicKey({ identity, derivationPath });
 
 	console.log(`SolAddress for ${network}: ${foo}`, publicKey, base58StringBytes, uint8Array, bar);
@@ -81,25 +80,13 @@ const getSolAddress = async ({
 };
 
 export const getSolAddressMainnet = async (identity: OptionIdentity): Promise<SolAddress> =>
-	await getSolAddress({
-		identity,
-		derivationPath: [SolanaNetworks.mainnet],
-		network: SolanaNetworks.mainnet
-	});
+	await getSolAddress({ identity, network: SolanaNetworks.mainnet });
 
 export const getSolAddressDevnet = async (identity: OptionIdentity): Promise<SolAddress> =>
-	await getSolAddress({
-		identity,
-		derivationPath: [SolanaNetworks.devnet],
-		network: SolanaNetworks.devnet
-	});
+	await getSolAddress({ identity, network: SolanaNetworks.devnet });
 
 export const getSolAddressLocal = async (identity: OptionIdentity): Promise<SolAddress> =>
-	await getSolAddress({
-		identity,
-		derivationPath: [SolanaNetworks.local],
-		network: SolanaNetworks.local
-	});
+	await getSolAddress({ identity, network: SolanaNetworks.local });
 
 const solanaMapper: Record<
 	SolanaNetworkType,
