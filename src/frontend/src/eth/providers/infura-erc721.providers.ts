@@ -19,8 +19,8 @@ export class InfuraErc721Provider {
 	}
 
 	metadata = async ({
-											address
-										}: Pick<Erc721ContractAddress, 'address'>): Promise<Erc721Metadata> => {
+		address
+	}: Pick<Erc721ContractAddress, 'address'>): Promise<Erc721Metadata> => {
 		const erc721Contract = new Contract(address, ERC721_ABI, this.provider);
 
 		const [name, symbol] = await Promise.all([erc721Contract.name(), erc721Contract.symbol()]);
