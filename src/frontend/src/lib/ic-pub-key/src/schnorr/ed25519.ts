@@ -222,8 +222,6 @@ export function schnorr_ed25519_derive(
 	const parsed_derivationpath = DerivationPath.fromBlob(derivationpath);
 	const derived_pubkey = pubkey_with_chain_code.deriveSubkeyWithChainCode(parsed_derivationpath);
 
-	// derived_pubkey.public_key.key
-
 	return JSON.stringify(derived_pubkey.public_key.key);
 }
 
