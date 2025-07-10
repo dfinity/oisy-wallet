@@ -8,8 +8,10 @@ import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 export type IdbTransactionsStoreData =
+	| CertifiedStoreData<TransactionsData<BtcTransactionUi>>
 	| EthTransactionsData
-	| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>;
+	| CertifiedStoreData<TransactionsData<IcTransactionUi>>
+	| CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 
 export interface SetIdbTransactionsParams<T extends IdbTransactionsStoreData> {
 	identity: OptionIdentity;
