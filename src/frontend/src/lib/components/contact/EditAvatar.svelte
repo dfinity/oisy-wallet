@@ -5,8 +5,12 @@
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { POPOVER_TRIGGER_BUTTON , POPOVER_MENU, POPOVER_MENU_ITEM } from '$lib/constants/test-ids.constants';
-		import { i18n } from '$lib/stores/i18n.store';
+	import {
+		POPOVER_TRIGGER_BUTTON,
+		POPOVER_MENU,
+		POPOVER_MENU_ITEM
+	} from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 	const {
 		fileInput = $bindable(),
 		replaceImage = $bindable(),
