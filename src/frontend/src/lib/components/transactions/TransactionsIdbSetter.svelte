@@ -22,6 +22,7 @@
 	// We separate the reactivity to avoid triggering the effects for independent stores
 	// We don't need to track identity and tokens changes for every store, since we are interested in the final result of the transactions store.
 	// And the transactions store will be updated when the identity or tokens change too.
+	// TODO: split it by single token to avoid unnecessary updates. This should happen directly
 
 	$effect(() => {
 		setIdbBtcTransactions({
