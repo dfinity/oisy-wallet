@@ -81,8 +81,8 @@ describe('auth.services', () => {
 
 			await signOut({});
 
-			// addresses + tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
+			// 4 addresses + 3 tokens + 4 transactions
+			expect(idbKeyval.del).toHaveBeenCalledTimes(11);
 		});
 	});
 });

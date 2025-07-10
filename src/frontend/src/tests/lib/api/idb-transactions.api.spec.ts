@@ -2,10 +2,16 @@ import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import { setIdbTransactionsStore } from '$lib/api/idb-transactions.api';
+import {
+	deleteIdbBtcTransactions,
+	deleteIdbEthTransactions,
+	deleteIdbIcTransactions,
+	deleteIdbSolTransactions,
+	setIdbTransactionsStore
+} from '$lib/api/idb-transactions.api';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -147,6 +153,50 @@ describe('idb-transactions.api', () => {
 			});
 
 			expect(idbKeyval.set).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('deleteIdbBtcTransactions', () => {
+		it('should delete IC tokens', async () => {
+			await deleteIdbBtcTransactions(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('deleteIdbEthTransactions', () => {
+		it('should delete ETH transactions', async () => {
+			await deleteIdbEthTransactions(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('deleteIdbIcTransactions', () => {
+		it('should delete IC transactions', async () => {
+			await deleteIdbIcTransactions(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('deleteIdbSolTransactions', () => {
+		it('should delete BTC transactions', async () => {
+			await deleteIdbSolTransactions(mockPrincipal);
+
+			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
 		});
 	});
 });
