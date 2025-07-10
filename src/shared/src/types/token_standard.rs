@@ -23,7 +23,7 @@ pub enum TokenStandard {
     /// Standard for the Ethereum blockchain
     ///
     /// # Used for:
-    /// - Most tokens on ETH and other EVM networks.
+    /// - Most NFTs on ETH and other EVM networks.
     ///
     /// - [ERC721 Spec](https://eips.ethereum.org/EIPS/eip-721)
     ERC721,
