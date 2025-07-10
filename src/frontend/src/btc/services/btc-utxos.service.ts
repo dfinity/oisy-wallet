@@ -8,7 +8,7 @@ import {
 	processNextUtxoPage
 } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import { getUtxosQueryPaged } from '$icp/api/bitcoin.api';
+import { getUtxosQuery, getUtxosQueryPaged } from '$icp/api/bitcoin.api';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -169,12 +169,25 @@ export const getAllUtxos = async ({
 	// Array to accumulate all UTXOs from paginated responses
 	const allUtxos: Utxo[] = [];
 
-	// Initialize with empty page for first request
-	let currentPage: Uint8Array | undefined = new Uint8Array();
+	// Start with the first page using the non-paginated query
+	// This avoids the MalformedPage error when passing an empty Uint8Array
+	const firstPageResponse = await getUtxosQuery({
+		identity,
+		bitcoinCanisterId,
+		address,
+		network,
+		minConfirmations
+	});
 
-	// Continue fetching pages until no more pages are available
-	do {
-		// Fetch current page of UTXOs
+	// Add UTXOs from the first page
+	allUtxos.push(...firstPageResponse.utxos);
+
+	// Check if there are more pages to fetch
+	let currentPage = processNextUtxoPage(firstPageResponse.next_page?.[0]);
+
+	// Continue fetching additional pages if available
+	while (currentPage) {
+		// Fetch current page of UTXOs using the paginated query
 		const response = await getUtxosQueryPaged({
 			identity,
 			bitcoinCanisterId,
@@ -188,7 +201,7 @@ export const getAllUtxos = async ({
 
 		// Process next page information for subsequent requests
 		currentPage = processNextUtxoPage(response.next_page?.[0]);
-	} while (currentPage); // Continue while there are more pages
+	}
 
 	// Apply minimum confirmations filter if specified
 	// Note: This filtering is done client-side since the Bitcoin canister
