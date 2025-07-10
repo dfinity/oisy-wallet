@@ -462,6 +462,7 @@
 			"no_infura_provider": "",
 			"no_infura_cketh_provider": "",
 			"no_infura_erc20_provider": "",
+			"no_infura_erc721_provider": "",
 			"no_infura_erc20_icp_provider": "",
 			"no_solana_network": "",
 			"eth_address_unknown": "",
