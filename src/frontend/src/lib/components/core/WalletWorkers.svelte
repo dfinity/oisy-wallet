@@ -11,8 +11,10 @@
 	const workers: Map<TokenId, WalletWorker> = new Map<TokenId, WalletWorker>();
 
 	const manageWorkers = async () => {
+		console.log('Clearing wallet workers');
 		cleanWorkers({ workers, tokens });
 
+		console.log('Init wallet workers');
 		await Promise.allSettled(
 			tokens.map(async (token) => await loadWorker({ workers, token, initWalletWorker }))
 		);
