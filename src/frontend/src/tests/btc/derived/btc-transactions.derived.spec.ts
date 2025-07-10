@@ -1,6 +1,7 @@
 import { btcKnownDestinations, sortedBtcTransactions } from '$btc/derived/btc-transactions.derived';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { BTC_MAINNET_TOKEN, BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { token } from '$lib/stores/token.store';
@@ -19,6 +20,7 @@ describe('btc-transactions.derived', () => {
 
 	describe('sortedBtcTransactions', () => {
 		const tokenId = BTC_MAINNET_TOKEN_ID;
+		const networkId = BTC_MAINNET_NETWORK_ID;
 
 		beforeEach(() => {
 			vi.useFakeTimers();
@@ -43,6 +45,7 @@ describe('btc-transactions.derived', () => {
 
 			btcTransactionsStore.append({
 				tokenId,
+				networkId,
 				transactions: [
 					{
 						data: transaction1,
@@ -104,6 +107,7 @@ describe('btc-transactions.derived', () => {
 		it('should return known destinations if transactions store has some data', () => {
 			btcTransactionsStore.append({
 				tokenId: BTC_MAINNET_TOKEN_ID,
+				networkId: BTC_MAINNET_NETWORK_ID,
 				transactions
 			});
 

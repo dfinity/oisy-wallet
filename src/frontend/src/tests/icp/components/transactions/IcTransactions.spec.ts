@@ -1,3 +1,4 @@
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
@@ -19,6 +20,7 @@ describe('IcTransactions', () => {
 	it('should render no transactions placeholder when the transactions are empty', () => {
 		icTransactionsStore.append({
 			tokenId: ICP_TOKEN_ID,
+			networkId: ICP_NETWORK_ID,
 			transactions: []
 		});
 
