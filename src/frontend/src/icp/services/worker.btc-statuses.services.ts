@@ -42,6 +42,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 			msg: 'stopBtcStatusesTimer'
 		});
 	};
+	console.log('[Worker Init] Spawning new worker btcstatuses');
 
 	return {
 		start: () => {

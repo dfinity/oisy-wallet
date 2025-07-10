@@ -55,6 +55,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 		});
 	};
 
+	console.log('[Worker Init] Spawning new worker icp');
 	return {
 		start: () => {
 			worker.postMessage({

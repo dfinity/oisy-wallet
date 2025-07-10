@@ -66,6 +66,8 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 		});
 	};
 
+	console.log('[Worker Init] Spawning new worker ckbtc');
+
 	return {
 		start: () => {
 			// We can imperatively get the address because the worker fetches it, and we only provide it to reduce the number of calls. By doing so, we can adhere to our standard component abstraction for interacting with workers.

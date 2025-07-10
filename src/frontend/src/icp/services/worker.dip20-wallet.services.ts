@@ -60,6 +60,7 @@ export const initDip20WalletWorker = async ({
 		});
 	};
 
+	console.log('[Worker Init] Spawning new worker dip20');
 	return {
 		start: () => {
 			worker.postMessage({

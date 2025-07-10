@@ -86,6 +86,7 @@ export const initIcrcWalletWorker = async ({
 		});
 	};
 
+	console.log('[Worker Init] Spawning new worker icrc');
 	return {
 		start: () => {
 			worker.postMessage({

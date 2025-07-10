@@ -85,6 +85,7 @@ const initCkMinterInfoWorker = async ({
 			msg: `stop${postMessageKey}MinterInfoTimer`
 		});
 	};
+	console.log('[Worker Init] Spawning new worker ckminter');
 
 	return {
 		start: () => {

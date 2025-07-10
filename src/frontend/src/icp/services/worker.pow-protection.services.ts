@@ -53,6 +53,7 @@ export const initPowProtectorWorker: PowProtectorWorker =
 			});
 		};
 
+		console.log('[Worker Init] Spawning new worker pow');
 		return {
 			start: () => {
 				worker.postMessage({
