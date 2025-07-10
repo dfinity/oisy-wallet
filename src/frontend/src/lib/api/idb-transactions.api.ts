@@ -14,7 +14,7 @@ import type {
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import { Principal } from '@dfinity/principal';
+import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { createStore, del, set as idbSet, type UseStore } from 'idb-keyval';
 
