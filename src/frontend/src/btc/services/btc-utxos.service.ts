@@ -1,17 +1,23 @@
 import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
+import {
+	calculateUtxoSelection,
+	filterAvailableUtxos,
+	hasUtxoMinConfirmations,
+	processNextUtxoPage
+} from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import { getUtxosQuery } from '$icp/api/bitcoin.api';
+import { getUtxosQueryPaged } from '$icp/api/bitcoin.api';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
 import { isNullish } from '@dfinity/utils';
 
 export interface BtcReviewServiceParams {
@@ -31,8 +37,6 @@ export const prepareBtcSend = async ({
 	amount,
 	source
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
-	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
-
 	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 	// Get pending transactions to exclude locked UTXOs
@@ -48,15 +52,12 @@ export const prepareBtcSend = async ({
 	});
 
 	// Step 2: Fetch all available UTXOs using query call (fast and no cycle cost)
-	const response = await getUtxosQuery({
+	const allUtxos = await getAllUtxos({
 		identity,
-		bitcoinCanisterId,
 		address: source,
 		network,
 		minConfirmations: requiredMinConfirmations
 	});
-
-	const allUtxos = response.utxos;
 
 	if (allUtxos.length === 0) {
 		return {
@@ -144,4 +145,57 @@ export const getFeeRateFromPercentiles = async ({
 	}
 
 	return feeRateSatsPerVByte;
+};
+
+/**
+ * Fetches all UTXOs for a Bitcoin address using pagination
+ * Since the Bitcoin canister returns paginated results, this function
+ * automatically handles pagination to retrieve all available UTXOs
+ */
+export const getAllUtxos = async ({
+	identity,
+	address,
+	network,
+	minConfirmations
+}: {
+	identity: OptionIdentity;
+	network: BitcoinNetwork;
+	address: string;
+	minConfirmations?: number;
+}): Promise<Utxo[]> => {
+	// Get the Bitcoin canister ID for the current network
+	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
+
+	// Array to accumulate all UTXOs from paginated responses
+	const allUtxos: Utxo[] = [];
+
+	// Initialize with empty page for first request
+	let currentPage: Uint8Array | undefined = new Uint8Array();
+
+	// Continue fetching pages until no more pages are available
+	do {
+		// Fetch current page of UTXOs
+		const response = await getUtxosQueryPaged({
+			identity,
+			bitcoinCanisterId,
+			address,
+			network,
+			page: currentPage
+		});
+
+		// Add retrieved UTXOs to our collection
+		allUtxos.push(...response.utxos);
+
+		// Process next page information for subsequent requests
+		currentPage = processNextUtxoPage(response.next_page?.[0]);
+	} while (currentPage); // Continue while there are more pages
+
+	// Apply minimum confirmations filter if specified
+	// Note: This filtering is done client-side since the Bitcoin canister
+	// cannot combine pagination with minConfirmations filtering
+	if (minConfirmations !== undefined) {
+		return allUtxos.filter((utxo) => hasUtxoMinConfirmations({ utxo, minConfirmations }));
+	}
+
+	return allUtxos;
 };

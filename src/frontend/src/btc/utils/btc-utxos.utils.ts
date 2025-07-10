@@ -166,3 +166,40 @@ export const filterAvailableUtxos = ({
 		pendingTxIds
 	});
 };
+
+/**
+ * Checks if a UTXO meets the minimum confirmation requirements
+ * Bitcoin transactions with height 0 are considered unconfirmed
+ */
+
+export const hasUtxoMinConfirmations = ({
+	utxo,
+	minConfirmations
+}: {
+	utxo: Utxo;
+	minConfirmations: number;
+}): boolean => {
+	// Unconfirmed transactions have height 0
+	if (utxo.height === 0) {
+		return false;
+	}
+	// Check if it has enough confirmations
+	return utxo.height >= minConfirmations;
+};
+
+/**
+ * Processes and converts the next page information from Bitcoin canister response
+ * Handles both Uint8Array and number[] formats that may be returned by the canister
+ * Note: An empty array indicates we have reached the last page
+ */
+export const processNextUtxoPage = (
+	rawNextPage: Uint8Array | number[] | undefined
+): Uint8Array | undefined => {
+	// Return undefined if no next page data is provided
+	if (!rawNextPage) {
+		return undefined;
+	}
+
+	// Return if already a Uint8Array, otherwise convert from number array
+	return rawNextPage instanceof Uint8Array ? rawNextPage : new Uint8Array(rawNextPage);
+};
