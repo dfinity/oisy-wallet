@@ -17,8 +17,12 @@ import type { Token } from '$lib/types/token';
 import type { UserToken } from '$lib/types/user-token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import {
+	AZUKI_ELEMENTAL_BEANS_TOKEN,
+	DE_GODS_TOKEN,
+	mockValidErc721Token
+} from '$tests/mocks/erc721-tokens.mock';
 import { get } from 'svelte/store';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN, mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 
 describe('user-token.store', () => {
 	const certified = false;
