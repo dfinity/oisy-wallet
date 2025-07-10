@@ -82,6 +82,7 @@ export const initDip20WalletWorker = async ({
 			});
 		},
 		destroy: () => {
+			console.log('Destroying worker dip20');
 			stop();
 			worker.terminate();
 		}

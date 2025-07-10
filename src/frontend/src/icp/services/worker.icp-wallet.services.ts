@@ -69,6 +69,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			});
 		},
 		destroy: () => {
+			console.log('Destroying worker icp');
 			stop();
 			worker.terminate();
 		}

@@ -67,6 +67,7 @@ export const initPowProtectorWorker: PowProtectorWorker =
 				});
 			},
 			destroy: () => {
+				console.log('Destroying worker pow');
 				stop();
 				worker.terminate();
 			}

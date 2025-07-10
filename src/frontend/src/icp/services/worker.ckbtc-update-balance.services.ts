@@ -88,6 +88,7 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 			// When a user executes it manually on the UI side, we display a progression in a modal therefore we do not have to execute it in the background.
 		},
 		destroy: () => {
+			console.log('Destroying worker ckbtc');
 			stop();
 			worker.terminate();
 		}

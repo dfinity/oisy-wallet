@@ -110,6 +110,7 @@ export const initIcrcWalletWorker = async ({
 			});
 		},
 		destroy: () => {
+			console.log('Destroying worker icrc');
 			stop();
 			worker.terminate();
 		}
