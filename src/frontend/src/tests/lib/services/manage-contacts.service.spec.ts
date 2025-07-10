@@ -68,7 +68,8 @@ describe('manage-contacts.service', () => {
 					id: BigInt(1),
 					name: 'Empty Contact',
 					update_timestamp_ns: BigInt(Date.now()),
-					addresses: []
+					addresses: [],
+					image: []
 				}
 			];
 
