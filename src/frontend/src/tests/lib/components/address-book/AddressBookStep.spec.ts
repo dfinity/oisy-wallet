@@ -30,14 +30,14 @@ describe('AddressBookStep', () => {
 				}
 			],
 			updateTimestampNs: BigInt(Date.now()),
-			image: []
+			image: [] as []
 		},
 		{
 			id: 2n,
 			name: 'Test Contact_2',
 			addresses: [],
 			updateTimestampNs: BigInt(Date.now()),
-			image: []
+			image: [] as []
 		},
 		{
 			id: 3n,
@@ -54,7 +54,8 @@ describe('AddressBookStep', () => {
 					addressType: 'Eth'
 				}
 			],
-			updateTimestampNs: BigInt(Date.now())
+			updateTimestampNs: BigInt(Date.now()),
+			image: [] as []
 		}
 	];
 	const mockAddContact = vi.fn();
@@ -306,7 +307,7 @@ describe('AddressBookStep', () => {
 					{ address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ', addressType: 'Sol' }
 				],
 				updateTimestampNs: BigInt(Date.now()),
-				image: []
+				image: [] as []
 			}
 		];
 

@@ -32,7 +32,7 @@ describe('manage-contacts.service', () => {
 						mockBackendContactAddressBtc, // Btc should come first
 						mockBackendContactAddressEth // Eth should come second
 					],
-					image: []
+					image: [] as []
 				}
 			];
 
@@ -69,7 +69,7 @@ describe('manage-contacts.service', () => {
 					name: 'Empty Contact',
 					update_timestamp_ns: BigInt(Date.now()),
 					addresses: [],
-					image: []
+					image: [] as []
 				}
 			];
 
