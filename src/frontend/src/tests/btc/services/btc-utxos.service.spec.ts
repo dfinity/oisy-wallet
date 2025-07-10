@@ -57,7 +57,7 @@ describe('btc-utxos.service', () => {
 	describe('prepareBtcSend', () => {
 		it('should successfully prepare transaction UTXOs', async () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
-			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged').mockResolvedValue(mockUtxosResponse);
 
 			const result = await prepareBtcSend(defaultParams);
 
@@ -74,18 +74,18 @@ describe('btc-utxos.service', () => {
 				identity: mockIdentity,
 				network: { mainnet: null }
 			});
-			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledWith({
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				bitcoinCanisterId: 'ghsi2-tqaaa-aaaan-aaaca-cai',
 				address: mockBtcAddress,
 				network: mockNetwork,
-				minConfirmations: 1
+				page: new Uint8Array()
 			});
 		});
 
 		it('should return error when no available UTXOs found', async () => {
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
-			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged').mockResolvedValue({
 				...mockUtxosResponse,
 				utxos: []
 			});
@@ -103,7 +103,7 @@ describe('btc-utxos.service', () => {
 			const testnetParams = { ...defaultParams, network: 'testnet' as BitcoinNetwork };
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
-			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged').mockResolvedValue(mockUtxosResponse);
 
 			await prepareBtcSend(testnetParams);
 
@@ -117,7 +117,7 @@ describe('btc-utxos.service', () => {
 			const regtestParams = { ...defaultParams, network: 'regtest' as BitcoinNetwork };
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
-			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged').mockResolvedValue(mockUtxosResponse);
 
 			await prepareBtcSend(regtestParams);
 
@@ -139,7 +139,7 @@ describe('btc-utxos.service', () => {
 			const bitcoinApiError = new Error('Bitcoin API error');
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
-			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockRejectedValue(bitcoinApiError);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged').mockRejectedValue(bitcoinApiError);
 
 			await expect(prepareBtcSend(defaultParams)).rejects.toThrow('Bitcoin API error');
 		});
@@ -165,7 +165,7 @@ describe('btc-utxos.service', () => {
 			const params = { ...defaultParams, amount: largeAmount };
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
-			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(smallUtxosResponse);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged').mockResolvedValue(smallUtxosResponse);
 
 			const result = await prepareBtcSend(params);
 
@@ -188,13 +188,142 @@ describe('btc-utxos.service', () => {
 			};
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
-			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(multipleUtxosResponse);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged').mockResolvedValue(multipleUtxosResponse);
 
 			const result = await prepareBtcSend(defaultParams);
 
 			expect(result.utxos.length).toBeGreaterThanOrEqual(1);
 			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 			expect(result.error).toBeUndefined();
+		});
+
+		// New pagination test scenarios
+		it('should handle single page UTXO response', async () => {
+			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged').mockResolvedValue(mockUtxosResponse);
+
+			const result = await prepareBtcSend(defaultParams);
+
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledTimes(1);
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledWith(
+				expect.objectContaining({
+					page: new Uint8Array() // First page should be empty
+				})
+			);
+			expect(result.utxos.length).toBeGreaterThan(0);
+		});
+
+		it('should handle multiple pages of UTXOs', async () => {
+			const firstPageUtxo: Utxo = {
+				value: 100000n,
+				height: 100,
+				outpoint: { txid: new Uint8Array([1, 2, 3, 4]), vout: 0 }
+			};
+
+			const secondPageUtxo: Utxo = {
+				value: 200000n,
+				height: 101,
+				outpoint: { txid: new Uint8Array([5, 6, 7, 8]), vout: 1 }
+			};
+
+			const firstPageResponse: get_utxos_response = {
+				utxos: [firstPageUtxo],
+				tip_block_hash: new Uint8Array([5, 6, 7, 8]),
+				tip_height: 150,
+				next_page: [new Uint8Array([1, 2, 3])] // Has next page
+			};
+
+			const secondPageResponse: get_utxos_response = {
+				utxos: [secondPageUtxo],
+				tip_block_hash: new Uint8Array([5, 6, 7, 8]),
+				tip_height: 150,
+				next_page: [] // No more pages
+			};
+
+			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged')
+				.mockResolvedValueOnce(firstPageResponse)
+				.mockResolvedValueOnce(secondPageResponse);
+
+			const result = await prepareBtcSend(defaultParams);
+
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledTimes(2);
+
+			// First call should use empty page
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenNthCalledWith(
+				1,
+				expect.objectContaining({ page: new Uint8Array() })
+			);
+
+			// Second call should use pagination token
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenNthCalledWith(
+				2,
+				expect.objectContaining({ page: new Uint8Array([1, 2, 3]) })
+			);
+
+			expect(result.utxos.length).toBeGreaterThan(0);
+		});
+
+		it('should handle empty pages correctly', async () => {
+			const emptyPageResponse: get_utxos_response = {
+				utxos: [],
+				tip_block_hash: new Uint8Array([5, 6, 7, 8]),
+				tip_height: 150,
+				next_page: []
+			};
+
+			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged').mockResolvedValue(emptyPageResponse);
+
+			const result = await prepareBtcSend(defaultParams);
+
+			expect(result.error).toBe(BtcPrepareSendError.InsufficientBalance);
+			expect(result.utxos).toHaveLength(0);
+		});
+
+		it('should handle pagination with number array format', async () => {
+			const firstPageUtxo: Utxo = {
+				value: 100000n,
+				height: 100,
+				outpoint: { txid: new Uint8Array([1, 2, 3, 4]), vout: 0 }
+			};
+
+			const secondPageUtxo: Utxo = {
+				value: 200000n,
+				height: 101,
+				outpoint: { txid: new Uint8Array([5, 6, 7, 8]), vout: 1 }
+			};
+
+			const firstPageResponse: get_utxos_response = {
+				utxos: [firstPageUtxo],
+				tip_block_hash: new Uint8Array([5, 6, 7, 8]),
+				tip_height: 150,
+				next_page: [[1, 2, 3, 4]] // Array of numbers format
+			};
+
+			const secondPageResponse: get_utxos_response = {
+				utxos: [secondPageUtxo],
+				tip_block_hash: new Uint8Array([5, 6, 7, 8]),
+				tip_height: 150,
+				next_page: []
+			};
+
+			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
+			vi.spyOn(bitcoinApi, 'getUtxosQueryPaged')
+				.mockResolvedValueOnce(firstPageResponse)
+				.mockResolvedValueOnce(secondPageResponse);
+
+			const result = await prepareBtcSend(defaultParams);
+
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledTimes(2);
+
+			// Second call should convert number array to Uint8Array
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenNthCalledWith(
+				2,
+				expect.objectContaining({ page: new Uint8Array([1, 2, 3, 4]) })
+			);
+
+			expect(result.utxos.length).toBeGreaterThan(0);
 		});
 	});
 
