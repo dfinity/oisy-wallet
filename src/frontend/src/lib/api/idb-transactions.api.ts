@@ -89,35 +89,19 @@ export const setIdbSolTransactions = (
 
 export const getIdbBtcTransactions = (
 	params: GetIdbTransactionsParams
-): Promise<
-	| SetIdbTransactionsParams<
-			CertifiedStoreData<TransactionsData<BtcTransactionUi>>
-	  >['transactionsStoreData']
-	| undefined
-> => get(toKey(params), idbBtcTransactionsStore);
+): Promise<BtcTransactionUi[] | undefined> => get(toKey(params), idbBtcTransactionsStore);
 
 export const getIdbEthTransactions = (
 	params: GetIdbTransactionsParams
-): Promise<SetIdbTransactionsParams<EthTransactionsData>['transactionsStoreData'] | undefined> =>
-	get(toKey(params), idbEthTransactionsStore);
+): Promise<EthTransactionsData[] | undefined> => get(toKey(params), idbEthTransactionsStore);
 
 export const getIdbIcTransactions = (
 	params: GetIdbTransactionsParams
-): Promise<
-	| SetIdbTransactionsParams<
-			CertifiedStoreData<TransactionsData<IcTransactionUi>>
-	  >['transactionsStoreData']
-	| undefined
-> => get(toKey(params), idbIcTransactionsStore);
+): Promise<IcTransactionUi[] | undefined> => get(toKey(params), idbIcTransactionsStore);
 
 export const getIdbSolTransactions = (
 	params: GetIdbTransactionsParams
-): Promise<
-	| SetIdbTransactionsParams<
-			CertifiedStoreData<TransactionsData<SolTransactionUi>>
-	  >['transactionsStoreData']
-	| undefined
-> => get(toKey(params), idbSolTransactionsStore);
+): Promise<SolTransactionUi[] | undefined> => get(toKey(params), idbSolTransactionsStore);
 
 export const deleteIdbBtcTransactions = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbBtcTransactionsStore);
