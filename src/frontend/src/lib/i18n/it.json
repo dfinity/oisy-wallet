@@ -720,7 +720,8 @@
 			"no_pending_bitcoin_transaction": "Si è verificato un errore durante il caricamento delle transazioni Bitcoin in sospeso. Riprova più tardi.",
 			"unexpected_utxos_fee": "Qualcosa è andato storto durante il calcolo della fee di transazione.",
 			"unable_to_retrieve_amount": "n/d (impossibile recuperare)",
-			"solana_transaction_expired": "La tua transazione di invio non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la fee di priorità fornita non era sufficiente. L'abbiamo aggiornata all'ultimo importo consigliato, quindi prova a inviarla di nuovo."
+			"solana_transaction_expired": "La tua transazione di invio non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la fee di priorità fornita non era sufficiente. L'abbiamo aggiornata all'ultimo importo consigliato, quindi prova a inviarla di nuovo.",
+			"solana_confirmation_failed": ""
 		}
 	},
 	"convert": {

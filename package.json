@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.5.8",
+	"version": "1.5.10",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -69,10 +69,10 @@
 		"@dfinity/candid": "^2.4.0",
 		"@dfinity/ckbtc": "^3.1.12",
 		"@dfinity/cketh": "^3.4.9",
-		"@dfinity/gix-components": "^6.0.0-next-2025-05-22",
+		"@dfinity/gix-components": "^6.0.0-next-2025-07-10",
 		"@dfinity/ledger-icp": "^2.6.13",
 		"@dfinity/ledger-icrc": "^2.8.1",
-		"@dfinity/oisy-wallet-signer": "^0.1.8",
+		"@dfinity/oisy-wallet-signer": "^0.2.1",
 		"@dfinity/principal": "^2.4.0",
 		"@dfinity/utils": "^2.13.0",
 		"@dfinity/verifiable-credentials": "^0.0.4",
