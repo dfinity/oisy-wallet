@@ -203,10 +203,17 @@ describe('idb-transactions.api', () => {
 		it('should get BTC transactions', async () => {
 			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
 
-			const result = await getIdbBtcTransactions(mockPrincipal);
+			const result = await getIdbBtcTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
 
 			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
 		});
 	});
 
@@ -214,10 +221,17 @@ describe('idb-transactions.api', () => {
 		it('should get ETH transactions', async () => {
 			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
 
-			const result = await getIdbEthTransactions(mockPrincipal);
+			const result = await getIdbEthTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
 
 			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
 		});
 	});
 
@@ -225,10 +239,17 @@ describe('idb-transactions.api', () => {
 		it('should get IC transactions', async () => {
 			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
 
-			const result = await getIdbIcTransactions(mockPrincipal);
+			const result = await getIdbIcTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
 
 			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
 		});
 	});
 
@@ -236,10 +257,17 @@ describe('idb-transactions.api', () => {
 		it('should get SOL transactions', async () => {
 			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
 
-			const result = await getIdbSolTransactions(mockPrincipal);
+			const result = await getIdbSolTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
 
 			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
 		});
 	});
 

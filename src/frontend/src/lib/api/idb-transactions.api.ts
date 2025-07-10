@@ -10,6 +10,7 @@ import { nullishSignOut } from '$lib/services/auth.services';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type {
+	GetIdbTransactionsParams,
 	IdbTransactionsStoreData,
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
@@ -28,6 +29,12 @@ const idbBtcTransactionsStore = idbTransactionsStore(BTC_MAINNET_NETWORK_SYMBOL.
 const idbEthTransactionsStore = idbTransactionsStore(ETHEREUM_NETWORK_SYMBOL.toLowerCase());
 const idbIcTransactionsStore = idbTransactionsStore(ICP_NETWORK_SYMBOL.toLowerCase());
 const idbSolTransactionsStore = idbTransactionsStore(SOLANA_MAINNET_NETWORK_SYMBOL.toLowerCase());
+
+const toKey = ({ principal, tokenId, networkId }: GetIdbTransactionsParams): IDBValidKey[] => [
+	principal.toText(),
+	`${tokenId.description}`,
+	`${networkId.description}`
+];
 
 export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData>({
 	identity,
@@ -49,11 +56,7 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 				return;
 			}
 
-			const key: IDBValidKey[] = [
-				identity.getPrincipal().toText(),
-				`${tokenId.description}`,
-				`${networkId.description}`
-			];
+			const key: IDBValidKey[] = toKey({ principal: identity.getPrincipal(), tokenId, networkId });
 
 			await idbSet(
 				key,
@@ -85,36 +88,36 @@ export const setIdbSolTransactions = (
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbSolTransactionsStore });
 
 export const getIdbBtcTransactions = (
-	principal: Principal
+	params: GetIdbTransactionsParams
 ): Promise<
 	| SetIdbTransactionsParams<
 			CertifiedStoreData<TransactionsData<BtcTransactionUi>>
 	  >['transactionsStoreData']
 	| undefined
-> => get(principal.toText(), idbBtcTransactionsStore);
+> => get(toKey(params), idbBtcTransactionsStore);
 
 export const getIdbEthTransactions = (
-	principal: Principal
+	params: GetIdbTransactionsParams
 ): Promise<SetIdbTransactionsParams<EthTransactionsData>['transactionsStoreData'] | undefined> =>
-	get(principal.toText(), idbEthTransactionsStore);
+	get(toKey(params), idbEthTransactionsStore);
 
 export const getIdbIcTransactions = (
-	principal: Principal
+	params: GetIdbTransactionsParams
 ): Promise<
 	| SetIdbTransactionsParams<
 			CertifiedStoreData<TransactionsData<IcTransactionUi>>
 	  >['transactionsStoreData']
 	| undefined
-> => get(principal.toText(), idbIcTransactionsStore);
+> => get(toKey(params), idbIcTransactionsStore);
 
 export const getIdbSolTransactions = (
-	principal: Principal
+	params: GetIdbTransactionsParams
 ): Promise<
 	| SetIdbTransactionsParams<
 			CertifiedStoreData<TransactionsData<SolTransactionUi>>
 	  >['transactionsStoreData']
 	| undefined
-> => get(principal.toText(), idbSolTransactionsStore);
+> => get(toKey(params), idbSolTransactionsStore);
 
 export const deleteIdbBtcTransactions = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbBtcTransactionsStore);
