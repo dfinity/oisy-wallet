@@ -46,6 +46,9 @@ import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
+import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { erc721Tokens } from '$eth/derived/erc721.derived';
 
 describe('all-tokens.derived', () => {
 	const mockIcrcToken: IcrcCustomToken = {
@@ -79,6 +82,13 @@ describe('all-tokens.derived', () => {
 		enabled: false
 	};
 
+	const mockErc721Token: Erc721TokenToggleable = {
+		...mockValidErc721Token,
+		id: parseTokenId('KUM'),
+		address: mockEthAddress,
+		enabled: false
+	};
+
 	const mockSplToken: SplTokenToggleable = {
 		...mockValidSplToken,
 		enabled: true
@@ -93,6 +103,12 @@ describe('all-tokens.derived', () => {
 
 		// Mock the store subscriptions with empty arrays by default
 		vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+			fn([]);
+			return () => {};
+		});
+
+		// Mock the store subscriptions with empty arrays by default
+		vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
 			fn([]);
 			return () => {};
 		});
@@ -115,6 +131,11 @@ describe('all-tokens.derived', () => {
 		it('should merge all tokens into a single array', () => {
 			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
 				fn([mockErc20Token]);
+				return () => {};
+			});
+
+			vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc721Token]);
 				return () => {};
 			});
 
@@ -144,6 +165,7 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
 				mockErc20Token.id.description,
+				mockErc721Token.id.description,
 				mockDip20Token.id.description,
 				mockIcrcToken2.id.description,
 				mockIcrcToken.id.description,
@@ -158,6 +180,12 @@ describe('all-tokens.derived', () => {
 				return () => {};
 			});
 
+			const disabledErc721Token = { ...mockErc721Token, enabled: false };
+			vi.spyOn(erc721Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledErc721Token]);
+				return () => {};
+			});
+
 			const disabledSplToken = { ...mockSplToken, enabled: false };
 			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
 				fn([disabledSplToken]);
@@ -168,6 +196,7 @@ describe('all-tokens.derived', () => {
 			const tokenSymbols = tokens.map((token) => token.id.description);
 
 			expect(tokenSymbols).toContain(disabledErc20Token.id.description);
+			expect(tokenSymbols).toContain(disabledErc721Token.id.description);
 			expect(tokenSymbols).toContain(disabledSplToken.id.description);
 		});
 

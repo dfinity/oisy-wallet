@@ -99,6 +99,10 @@ vi.mock('$lib/services/erc20.services', () => ({
 	loadErc20Tokens: vi.fn(() => Promise.resolve())
 }));
 
+vi.mock('$lib/services/erc721.services', () => ({
+	loadErc721Tokes: vi.fn(() => Promise.resolve())
+}));
+
 vi.mock('$lib/services/icrc.services', () => ({
 	loadIcrcTokens: vi.fn(() => Promise.resolve())
 }));
