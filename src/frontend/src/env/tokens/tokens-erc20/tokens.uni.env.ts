@@ -23,5 +23,6 @@ export const UNI_TOKEN: RequiredErc20Token = {
 	address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUNI',
-	groupData: UNI_TOKEN_GROUP
+	groupData: UNI_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true
 };

@@ -6,6 +6,7 @@ import {
 	REWARDS_FILTER,
 	REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 } from '$lib/constants/test-ids.constants';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
@@ -22,6 +23,8 @@ describe('AllRewardsList', () => {
 		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(
 			() => mockRewardCampaigns
 		);
+
+		mockAuthStore();
 	});
 
 	it('should render reward filter and ongoing campaigns', () => {

@@ -5,7 +5,7 @@ import { emit } from '$lib/utils/events.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 
 /**
- * Wait few seconds and trigger the wallet to fetch optimistically new transactions twice.
+ * Wait a few seconds and trigger the wallet to fetch optimistically new transactions twice.
  */
 export const waitAndTriggerWallet = async () => {
 	await waitForMilliseconds(INDEX_RELOAD_DELAY);

@@ -4,6 +4,8 @@ export class UserProfileNotFoundError extends Error {}
 
 export class UserNotVipError extends Error {}
 
+export class EligibilityError extends Error {}
+
 export class InvalidCodeError extends Error {}
 
 export class AlreadyClaimedError extends Error {}

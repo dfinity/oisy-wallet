@@ -5,7 +5,9 @@ import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { ethAddress } from '$lib/derived/address.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
-import type { Transaction } from '$lib/types/transaction';
+import { tokens } from '$lib/derived/tokens.derived';
+import type { TokenId } from '$lib/types/token';
+import type { AnyTransactionUiWithToken, Transaction } from '$lib/types/transaction';
 import type { KnownDestinations } from '$lib/types/transactions';
 import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -51,8 +53,22 @@ export const ethTransactionsNotInitialized: Readable<boolean> = derived(
 );
 
 export const ethKnownDestinations: Readable<KnownDestinations> = derived(
-	[sortedEthTransactions, ckEthMinterInfoStore, ethereumTokenId, ethAddress],
-	([$sortedEthTransactions, $ckEthMinterInfoStore, $ethereumTokenId, $ethAddress]) => {
+	[
+		ethTransactionsStore,
+		ckEthMinterInfoStore,
+		ethereumTokenId,
+		ethAddress,
+		tokens,
+		tokenWithFallback
+	],
+	([
+		$ethTransactionsStore,
+		$ckEthMinterInfoStore,
+		$ethereumTokenId,
+		$ethAddress,
+		$tokens,
+		$tokenWithFallback
+	]) => {
 		const ckMinterInfoAddresses = toCkMinterInfoAddresses(
 			$ckEthMinterInfoStore?.[$ethereumTokenId]
 		);
@@ -61,13 +77,23 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 			return {};
 		}
 
-		const mappedTransactions = $sortedEthTransactions.map((transaction) =>
-			mapEthTransactionUi({
-				transaction,
-				ckMinterInfoAddresses,
-				$ethAddress
-			})
-		);
+		const mappedTransactions: AnyTransactionUiWithToken[] = [];
+		Object.getOwnPropertySymbols($ethTransactionsStore ?? {}).forEach((tokenId) => {
+			const token = $tokens.find(({ id }) => id === tokenId);
+
+			if (nonNullish(token) && token.network.id === $tokenWithFallback.network.id) {
+				($ethTransactionsStore[tokenId as TokenId] ?? []).forEach((transaction) => {
+					mappedTransactions.push({
+						...mapEthTransactionUi({
+							transaction,
+							ckMinterInfoAddresses,
+							$ethAddress
+						}),
+						token
+					});
+				});
+			}
+		});
 
 		return getKnownDestinations(mappedTransactions);
 	}

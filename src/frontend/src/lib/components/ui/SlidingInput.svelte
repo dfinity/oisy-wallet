@@ -16,7 +16,7 @@
 		ariaLabel,
 		testIdPrefix = 'sliding-input',
 		disabled = false,
-		icon,
+		icon: slidingIcon,
 		overflowableContent
 	}: {
 		inputValue: string;
@@ -111,11 +111,13 @@
 						<ButtonIcon
 							ariaLabel={$i18n.core.text.clear_filter}
 							colorStyle="muted"
-							on:click={handleClear}
+							onclick={handleClear}
 							link={false}
 							testId={`${testIdPrefix}-clear-btn`}
 						>
-							<IconClose slot="icon" size="18" />
+							{#snippet icon()}
+								<IconClose size="18" />
+							{/snippet}
 						</ButtonIcon>
 					</div>
 				{/if}
@@ -123,7 +125,7 @@
 		{/if}
 		<ButtonIcon
 			bind:button
-			on:click={handleToggle}
+			onclick={handleToggle}
 			{disabled}
 			link={false}
 			colorStyle="muted"
@@ -131,11 +133,11 @@
 			{ariaLabel}
 			testId={`${testIdPrefix}-open-btn`}
 		>
-			<span slot="icon">
-				{#if nonNullish(icon)}
-					{@render icon()}
-				{/if}
-			</span>
+			{#snippet icon()}
+				<span>
+					{@render slidingIcon()}
+				</span>
+			{/snippet}
 		</ButtonIcon>
 	</div>
 </div>

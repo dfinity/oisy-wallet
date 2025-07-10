@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 export const EnvIcrcTokenMetadataSchema = z.object({
 	decimals: z.number(),
@@ -18,5 +18,5 @@ export const EnvIcrcTokenMetadataWithIconSchema =
 
 export const EnvIcTokenSchema = z.object({
 	ledgerCanisterId: z.string(),
-	indexCanisterId: z.string()
+	indexCanisterId: z.string().optional()
 });

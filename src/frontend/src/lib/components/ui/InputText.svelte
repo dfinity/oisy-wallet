@@ -1,12 +1,27 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 
-	export let value = '';
-	export let name: string;
-	export let placeholder: string;
-	export let showResetButton = false;
-	export let required = true;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		value: string;
+		name: string;
+		placeholder: string;
+		showResetButton?: boolean;
+		required?: boolean;
+		testId?: string;
+		autofocus?: boolean;
+		disabled?: boolean;
+	}
+
+	let {
+		value = $bindable(''),
+		name,
+		placeholder,
+		showResetButton = false,
+		required = true,
+		testId,
+		autofocus = false,
+		disabled
+	}: Props = $props();
 </script>
 
 <Input
@@ -18,5 +33,7 @@
 	{showResetButton}
 	spellcheck={false}
 	autocomplete="off"
+	{autofocus}
 	{testId}
+	{disabled}
 />

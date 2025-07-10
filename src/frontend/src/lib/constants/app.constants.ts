@@ -7,7 +7,9 @@ export const APP_VERSION = VITE_APP_VERSION;
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
 export const TEST_FE = MODE.startsWith('test_fe_');
-export const STAGING = MODE === 'staging' || TEST_FE || MODE === 'audit' || MODE === 'e2e';
+export const AUDIT = MODE === 'audit';
+export const E2E = MODE === 'e2e';
+export const STAGING = MODE === 'staging' || TEST_FE || AUDIT || E2E;
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
@@ -46,9 +48,14 @@ export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 
 export const BACKEND_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_BACKEND_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
-		: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
+	: TEST_FE || AUDIT || E2E
+		? (import.meta.env[`VITE_${MODE.toUpperCase()}_BACKEND_CANISTER_ID`] ??
+			import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID)
+		: STAGING
+			? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
+			: BETA
+				? import.meta.env.VITE_BETA_BACKEND_CANISTER_ID
+				: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
 
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
@@ -76,13 +83,29 @@ export const KONG_BACKEND_CANISTER_ID = LOCAL
 			? import.meta.env.VITE_BETA_KONG_BACKEND_CANISTER_ID
 			: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
 
-export const ICP_SWAP_CANISTER_ID = LOCAL
-	? import.meta.env.VITE_LOCAL_ICP_SWAP_CANISTER_ID
+export const ICP_SWAP_FACTORY_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_ICP_SWAP_FACTORY_CANISTER_ID
 	: STAGING
-		? import.meta.env.VITE_STAGING_ICP_SWAP_CANISTER_ID
+		? import.meta.env.VITE_STAGING_ICP_SWAP_FACTORY_CANISTER_ID
 		: BETA
-			? import.meta.env.VITE_BETA_ICP_SWAP_CANISTER_ID
-			: import.meta.env.VITE_IC_ICP_SWAP_CANISTER_ID;
+			? import.meta.env.VITE_BETA_ICP_SWAP_FACTORY_CANISTER_ID
+			: import.meta.env.VITE_IC_ICP_SWAP_FACTORY_CANISTER_ID;
+
+export const XTC_LEDGER_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_XTC_LEDGER_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_XTC_LEDGER_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_XTC_LEDGER_CANISTER_ID
+			: import.meta.env.VITE_IC_XTC_LEDGER_CANISTER_ID;
+
+export const SOL_RPC_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_SOL_RPC_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_SOL_RPC_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_SOL_RPC_CANISTER_ID
+			: import.meta.env.VITE_IC_SOL_RPC_CANISTER_ID;
 
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
@@ -159,3 +182,12 @@ export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;
 
 // Known destinations
 export const MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS = 3;
+
+// Send destination
+export const MIN_DESTINATION_LENGTH_FOR_ERROR_STATE = 10;
+
+// Contact validation
+export const CONTACT_MAX_LABEL_LENGTH = 50;
+
+// Contact validation
+export const CONTACT_MAX_NAME_LENGTH = 100;

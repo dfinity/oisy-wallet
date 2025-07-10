@@ -4,7 +4,7 @@ import type { Identity } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
 import type { CanisterOptions } from '@dfinity/utils';
 import { PrincipalTextSchema } from '@dfinity/zod-schemas';
-import type * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export const CanisterIdTextSchema = PrincipalTextSchema;
 

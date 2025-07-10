@@ -16,7 +16,7 @@
 
 	let loading = false;
 
-	const load = async () => {
+	const onLoad = async () => {
 		if (loading) {
 			return;
 		}
@@ -43,11 +43,11 @@
 		loading = false;
 	};
 
-	const debounceLoad = debounce(load, 1000);
+	const debounceLoad = debounce(onLoad, 1000);
 
 	$: $enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad();
 </script>
 
-<IntervalLoader {load} interval={WALLET_TIMER_INTERVAL_MILLIS}>
+<IntervalLoader {onLoad} interval={WALLET_TIMER_INTERVAL_MILLIS}>
 	<slot />
 </IntervalLoader>

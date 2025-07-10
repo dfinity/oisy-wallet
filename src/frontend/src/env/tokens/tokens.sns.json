@@ -325,7 +325,7 @@
 				"__bigint__": "100000"
 			},
 			"alternativeName": "EstateDAO",
-			"url": "https://wbdy5-yyaaa-aaaap-abysq-cai.icp0.io/"
+			"url": "https://estatedao.org/"
 		}
 	},
 	{
@@ -337,7 +337,7 @@
 			"name": "Motoko",
 			"symbol": "MOTOKO",
 			"fee": {
-				"__bigint__": "10000000"
+				"__bigint__": "1000000"
 			},
 			"alternativeName": "Motoko",
 			"url": "https://2uktw-yiaaa-aaaah-adwxq-cai.icp0.io/"
@@ -349,7 +349,7 @@
 		"indexCanisterId": "ldv2p-dqaaa-aaaaq-aadga-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "SWAMPDAO",
+			"name": "Swampies",
 			"symbol": "SWAMP",
 			"fee": {
 				"__bigint__": "10000"
@@ -411,7 +411,7 @@
 			"name": "Poked",
 			"symbol": "POKED",
 			"fee": {
-				"__bigint__": "100000000000"
+				"__bigint__": "100000000"
 			},
 			"alternativeName": "PokedBots",
 			"url": "https://www.pokedbots.com"
@@ -565,6 +565,21 @@
 			},
 			"alternativeName": "ICPEx",
 			"url": "https://icpex.org/"
+		}
+	},
+	{
+		"ledgerCanisterId": "kknbx-zyaaa-aaaaq-aae4a-cai",
+		"rootCanisterId": "lacdn-3iaaa-aaaaq-aae3a-cai",
+		"indexCanisterId": "kepm7-ciaaa-aaaaq-aae5a-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "TACO DAO Token",
+			"symbol": "TACO",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "TACO DAO",
+			"url": "https://tacodao.com"
 		}
 	}
 ]

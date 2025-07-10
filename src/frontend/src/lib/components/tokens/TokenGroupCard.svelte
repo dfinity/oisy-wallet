@@ -35,7 +35,7 @@
 
 	const headerData: CardData = $derived(mapHeaderData(tokenGroup));
 
-	const isNativeToken = (token: TokenUi) => tokenGroup.nativeToken.id === token.id;
+	const showTokenInGroup = (token: TokenUi) => token.alwaysShowInTokenGroup;
 	const isCkToken = (token: TokenUi) => nonNullish(token.oisyName?.prefix); // logic taken from old ck badge
 
 	// list of filtered tokens, filtered by string input
@@ -53,8 +53,8 @@
 			// Only include tokens with a balance
 			return (
 				(token.usdBalance ?? 0) > 0 ||
-				// If the total balance is 0, only include CK or Native tokens
-				(totalBalance === 0 && (isCkToken(token) || isNativeToken(token)))
+				// If the total balance is 0, show all
+				totalBalance === 0
 			);
 		})
 	);
@@ -72,7 +72,7 @@
 				return 1;
 			}
 			// if same balance order by Native > CK > others
-			return isNativeToken(a) ? -1 : isCkToken(a) && !isNativeToken(b) ? -1 : 1;
+			return showTokenInGroup(a) ? -1 : isCkToken(a) && !showTokenInGroup(b) ? -1 : 1;
 		})
 	);
 
@@ -110,7 +110,7 @@
 				<Button
 					styleClass="font-normal text-sm justify-start py-2"
 					link
-					on:click={() => toggleHideZeros(!hideZeros)}
+					onclick={() => toggleHideZeros(!hideZeros)}
 				>
 					{hideZeros
 						? replacePlaceholders($i18n.tokens.text.show_more_networks, {

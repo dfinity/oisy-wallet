@@ -6,7 +6,7 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { EthAddress } from '$lib/types/address';
 import type { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
-import type * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export type CoingeckoCoinsId = z.infer<typeof CoingeckoCoinsIdSchema>;
 
@@ -17,7 +17,9 @@ export type CoingeckoPlatformId =
 	| 'internet-computer'
 	| 'solana'
 	| 'base'
-	| 'binance-smart-chain';
+	| 'binance-smart-chain'
+	| 'polygon-pos'
+	| 'arbitrum-one';
 
 // We only support conversion in USD for now, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/simple/supported_vs_currencies
@@ -76,7 +78,7 @@ export type CoingeckoPriceResponse =
 	| CoingeckoSimplePriceResponse
 	| CoingeckoSimpleTokenPriceResponse;
 
-export type CoingeckoErc20PriceParams = {
+export interface CoingeckoErc20PriceParams {
 	coingeckoPlatformId: CoingeckoPlatformId;
 	contractAddresses: Erc20ContractAddress[];
-};
+}

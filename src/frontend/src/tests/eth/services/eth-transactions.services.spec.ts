@@ -11,6 +11,8 @@ import {
 } from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -24,9 +26,12 @@ vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn()
 }));
 
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
+
 describe('eth-transactions.services', () => {
 	let spyToastsError: MockInstance;
-	let spyToastsErrorNoTrace: MockInstance;
 
 	const mockErc20UserTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
 		data: { ...token, enabled: true },
@@ -37,7 +42,6 @@ describe('eth-transactions.services', () => {
 		vi.clearAllMocks();
 
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
-		spyToastsErrorNoTrace = vi.spyOn(toastsStore, 'toastsErrorNoTrace');
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		erc20UserTokensStore.setAll(mockErc20UserTokens);
@@ -151,13 +155,17 @@ describe('eth-transactions.services', () => {
 
 				expect(result).toEqual({ success: false });
 				expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: null });
-				expect(spyToastsErrorNoTrace).toHaveBeenCalledWith({
-					err: mockError,
-					msg: {
-						text: replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
-							$symbol: mockSymbol
-						})
-					}
+
+				expect(trackEvent).toHaveBeenCalledWith({
+					name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
+					metadata: {
+						tokenId: mockTokenId.description,
+						networkId: mockNetworkId.description,
+						error: mockError.toString()
+					},
+					warning: `${replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
+						$symbol: mockSymbol
+					})} ${mockError}`
 				});
 			});
 		}, 60000);

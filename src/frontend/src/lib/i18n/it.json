@@ -1,0 +1,1469 @@
+{
+	"core": {
+		"text": {
+			"cancel": "",
+			"next": "",
+			"save": "",
+			"back": "",
+			"done": "",
+			"close": "",
+			"change": "",
+			"apply": "",
+			"refresh": "",
+			"name": "",
+			"symbol": "",
+			"decimals": "",
+			"amount": "",
+			"max": "",
+			"destination": "",
+			"reject": "",
+			"approve": "",
+			"view": "",
+			"copy": "",
+			"delete": "",
+			"create": "",
+			"clear_filter": "",
+			"not_available": "",
+			"new": "",
+			"edit": "",
+			"no_results": "",
+			"paste": "",
+			"to": "",
+			"add": "",
+			"more_items": "",
+			"select": "",
+			"language": ""
+		},
+		"info": {
+			"test_banner": ""
+		},
+		"alt": {
+			"logo": "",
+			"go_to_home": "",
+			"back": "",
+			"open_details": "",
+			"close_details": "",
+			"switch_language": ""
+		},
+		"warning": {
+			"do_not_close": ""
+		}
+	},
+	"navigation": {
+		"text": {
+			"tokens": "",
+			"settings": "",
+			"dapp_explorer": "",
+			"activity": "",
+			"airdrops": "",
+			"earning": "",
+			"source_code_on_github": "",
+			"view_on_explorer": "",
+			"source_code": "",
+			"changelog": "",
+			"documentation": "",
+			"support": "",
+			"confirm_navigate": "",
+			"vip_qr_code": "",
+			"binance_qr_code": "",
+			"refer_a_friend": "",
+			"address_book": "",
+			"hide_balances": "",
+			"show_balances": "",
+			"privacy_mode_enabled": "",
+			"privacy_mode_disabled": ""
+		},
+		"alt": {
+			"tokens": "",
+			"settings": "",
+			"dapp_explorer": "",
+			"activity": "",
+			"airdrops": "",
+			"menu": "",
+			"changelog": "",
+			"documentation": "",
+			"support": "",
+			"open_twitter": "",
+			"vip_qr_code": "",
+			"binance_qr_code": "",
+			"refer_a_friend": "",
+			"address_book": "",
+			"hide_balances": "",
+			"show_balances": ""
+		},
+		"short": {
+			"documentation": ""
+		}
+	},
+	"auth": {
+		"text": {
+			"title_part_1": "",
+			"title_part_2": "",
+			"logout": "",
+			"authenticate": "",
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
+		},
+		"alt": {
+			"preview": ""
+		},
+		"warning": {
+			"not_signed_in": "",
+			"session_expired": ""
+		},
+		"error": {
+			"no_internet_identity": "",
+			"invalid_pouh_credential": "",
+			"error_validating_pouh_credential_oisy": "",
+			"error_validating_pouh_credential": "",
+			"error_requesting_pouh_credential": "",
+			"missing_pouh_issuer_origin": "",
+			"no_pouh_credential": "",
+			"error_while_signing_in": "",
+			"unexpected_issue_with_syncing": ""
+		},
+		"help": {
+			"text": {
+				"title": "",
+				"description": "",
+				"subtitle": "",
+				"lost_identity": "",
+				"security": "",
+				"got_confused": "",
+				"other": "",
+				"feedback_text": "",
+				"thanks_text": "",
+				"identity_new_identity": "",
+				"identity_legacy_description": "",
+				"identity_legacy_sign_in": "",
+				"identity_learn_more": "",
+				"other_title": "",
+				"other_description": "",
+				"other_introduction": "",
+				"other_docs": "",
+				"other_private_key": "",
+				"other_asset_control": "",
+				"need_help": "",
+				"sign_in": ""
+			},
+			"alt": {
+				"internet_identity": "",
+				"identity_learn_more": "",
+				"other_introduction": "",
+				"other_docs": "",
+				"other_private_key": "",
+				"other_asset_control": "",
+				"sign_in": ""
+			}
+		}
+	},
+	"dapps": {
+		"text": {
+			"all_dapps": "",
+			"featured": "",
+			"sign_in": "",
+			"title": "",
+			"open_dapp": "",
+			"submit_your_dapp": ""
+		},
+		"alt": {
+			"learn_more": "",
+			"logo": "",
+			"show_all": "",
+			"show_tag": "",
+			"open_dapp": "",
+			"open_telegram": "",
+			"open_open_chat": "",
+			"open_twitter": "",
+			"source_code_on_github": "",
+			"submit_your_dapp": "",
+			"tags": "",
+			"website": ""
+		},
+		"categories": {
+			"defi": "",
+			"social_media": "",
+			"verifiable_credentials": "",
+			"staking": "",
+			"walletconnect": "",
+			"game": ""
+		},
+		"descriptions": {
+			"kongswap": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"openchat": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"stats": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"decideid": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"stats": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"icpswap": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"nnsdapp": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"uniswap": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"oneinch": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"compound_finance": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"aave": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"eigenlayer": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"curve_finance": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"zkpoker": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"sonic": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"raydium": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"jupiter": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"waterneuron": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"taggr": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			}
+		}
+	},
+	"rewards": {
+		"text": {
+			"title": "",
+			"upcoming_campaigns": "",
+			"active_date": "",
+			"ended_date": "",
+			"share": "",
+			"learn_more": "",
+			"check_status": "",
+			"view_details": "",
+			"modal_button_text": "",
+			"activity_button_text": "",
+			"activity_button_text_short": "",
+			"open_wallet": "",
+			"carousel_slide_title": "",
+			"carousel_slide_cta": "",
+			"sprinkles_earned": "",
+			"youre_eligible": "",
+			"ongoing": "",
+			"ended": "",
+			"banner_text": ""
+		},
+		"requirements": {
+			"requirements_title": "",
+			"min_logins": "",
+			"min_transactions": "",
+			"min_total_assets_usd": "",
+			"hangover": ""
+		},
+		"alt": {
+			"upcoming_campaigns": "",
+			"coming_soon": "",
+			"reward_banner": ""
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referrer": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referee": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
+			}
+		}
+	},
+	"footer": {
+		"text": {
+			"incubated_with": "",
+			"by": "",
+			"dfinity_foundation": "",
+			"copyright": "",
+			"ai_assistant_console_button": ""
+		},
+		"alt": {
+			"dfinity": ""
+		}
+	},
+	"wallet": {
+		"text": {
+			"address": "",
+			"wallet_address": "",
+			"your_addresses": "",
+			"address_copied": "",
+			"wallet_address_copied": "",
+			"display_wallet_address_qr": "",
+			"icp_deposits": "",
+			"use_address_from_to": ""
+		},
+		"alt": {
+			"open_etherscan": "",
+			"open_solscan": "",
+			"qrcode_address": ""
+		}
+	},
+	"init": {
+		"text": {
+			"initializing_wallet": "",
+			"securing_session": "",
+			"retrieving_public_keys": "",
+			"done": ""
+		},
+		"alt": {
+			"loader_banner": ""
+		},
+		"info": {
+			"hold_loading": "",
+			"hold_loading_wallet": ""
+		},
+		"error": {
+			"no_alchemy_config": "",
+			"no_alchemy_provider": "",
+			"no_alchemy_erc20_provider": "",
+			"no_etherscan_provider": "",
+			"no_infura_provider": "",
+			"no_infura_cketh_provider": "",
+			"no_infura_erc20_provider": "",
+			"no_infura_erc20_icp_provider": "",
+			"no_solana_network": "",
+			"eth_address_unknown": "",
+			"loading_address": "",
+			"loading_balance": "",
+			"erc20_contracts": "",
+			"spl_tokens": "",
+			"minter_ckbtc_btc": "",
+			"minter_cketh_eth": "",
+			"minter_ckerc20_erc20": "",
+			"ledger_cketh_eth": "",
+			"minter_btc": "",
+			"minter_ckbtc_info": "",
+			"minter_cketh_info": "",
+			"minter_ckbtc_loading_info": "",
+			"minter_cketh_loading_info": "",
+			"btc_fees_estimation": "",
+			"btc_withdrawal_statuses": "",
+			"transaction_price": "",
+			"icrc_canisters": "",
+			"erc20_custom_tokens": "",
+			"erc20_user_tokens": "",
+			"spl_custom_tokens": "",
+			"erc20_user_token": "",
+			"icrc_custom_token": "",
+			"loading_wallet_timeout": "",
+			"allow_signing": "",
+			"btc_wallet_error": "",
+			"sol_wallet_error": ""
+		}
+	},
+	"hero": {
+		"text": {
+			"available_balance": "",
+			"unavailable_balance": "",
+			"hidden_balance": "",
+			"top_up": "",
+			"learn_more_about_erc20_icp": "",
+			"tooltip_toggle_balance": ""
+		}
+	},
+	"settings": {
+		"text": {
+			"title": "",
+			"principal": "",
+			"principal_copied": "",
+			"principal_description": "",
+			"session_duration": "",
+			"session_expires_in": "",
+			"networks": "",
+			"enable_testnets": "",
+			"active_networks": "",
+			"active_networks_description": "",
+			"enable_network": "",
+			"disable_network": "",
+			"credentials_title": "",
+			"pouh_credential": "",
+			"pouh_credential_description": "",
+			"present_pouh_credential": "",
+			"pouh_credential_verified": "",
+			"appearance": "",
+			"appearance_light": "",
+			"appearance_dark": "",
+			"appearance_system": "",
+			"git_disclaimer": "",
+			"git_branch_name": "",
+			"git_commit_hash": ""
+		},
+		"alt": {
+			"testnets_toggle": "",
+			"github_release": "",
+			"appearance_light": "",
+			"appearance_dark": "",
+			"appearance_system": ""
+		},
+		"error": {
+			"loading_profile": ""
+		}
+	},
+	"shortcuts": {
+		"privacy_mode": ""
+	},
+	"networks": {
+		"title": "",
+		"test_networks": "",
+		"chain_fusion": "",
+		"network": "",
+		"testnet": "",
+		"number_of_enabled": "",
+		"filter": "",
+		"manage": ""
+	},
+	"receive": {
+		"text": {
+			"receive": "",
+			"address": "",
+			"receive_token": ""
+		},
+		"icp": {
+			"text": {
+				"account_id": "",
+				"use_for_all_tokens": "",
+				"use_for_icrc_deposit": "",
+				"use_for_icp_deposit": "",
+				"your_private_eth_address": "",
+				"display_account_id_qr": "",
+				"account_id_copied": "",
+				"principal": "",
+				"internet_computer_principal_copied": "",
+				"display_internet_computer_principal_qr": "",
+				"icp_account": "",
+				"icp_account_copied": "",
+				"display_icp_account_qr": ""
+			}
+		},
+		"ethereum": {
+			"text": {
+				"checking_status": "",
+				"from_network": "",
+				"eth_to_cketh_description": "",
+				"learn_how_to_convert": "",
+				"metamask": "",
+				"ethereum": "",
+				"ethereum_address": "",
+				"ethereum_address_copied": "",
+				"display_ethereum_address_qr": ""
+			},
+			"error": {
+				"no_metamask": ""
+			}
+		},
+		"bitcoin": {
+			"text": {
+				"bitcoin": "",
+				"checking_status": "",
+				"refresh_status": "",
+				"initializing": "",
+				"checking_incoming": "",
+				"refreshing_wallet": "",
+				"bitcoin_address": "",
+				"bitcoin_testnet_address": "",
+				"bitcoin_regtest_address": "",
+				"display_bitcoin_address_qr": "",
+				"bitcoin_address_copied": "",
+				"from_network": "",
+				"fee_applied": ""
+			},
+			"info": {
+				"no_new_btc": "",
+				"check_btc_progress": ""
+			},
+			"error": {
+				"unexpected_btc": ""
+			}
+		},
+		"solana": {
+			"text": {
+				"solana_address": "",
+				"solana_devnet_address": "",
+				"solana_local_address": "",
+				"solana_address_copied": "",
+				"display_solana_address_qr": ""
+			}
+		}
+	},
+	"send": {
+		"text": {
+			"send": "",
+			"destination": "",
+			"source": "",
+			"balance": "",
+			"review": "",
+			"signing_approval": "",
+			"approving": "",
+			"approving_fees": "",
+			"approving_transfer": "",
+			"approving_wallet_connect": "",
+			"refreshing_ui": "",
+			"initializing": "",
+			"signing_transaction": "",
+			"sending": "",
+			"signing": "",
+			"signing_message": "",
+			"confirming": "",
+			"network": "",
+			"source_network": "",
+			"destination_network": "",
+			"initializing_transaction": "",
+			"convert_to_native_icp": "",
+			"open_qr_modal": "",
+			"scan_qr": "",
+			"select_token": "",
+			"select_network_filter": "",
+			"send_again": "",
+			"recently_used_tab": "",
+			"contacts_tab": "",
+			"recently_used_empty_state_title": "",
+			"recently_used_empty_state_description": "",
+			"contacts_empty_state_title": "",
+			"contacts_empty_state_description": "",
+			"send_review_subtitle": ""
+		},
+		"placeholder": {
+			"enter_eth_address": "",
+			"enter_recipient_address": "",
+			"enter_wallet_address": "",
+			"select_network": ""
+		},
+		"info": {
+			"ckbtc_certified": "",
+			"cketh_certified": "",
+			"pending_bitcoin_transaction": "",
+			"no_available_utxos": "",
+			"unknown_destination": "",
+			"fee_info": ""
+		},
+		"assertion": {
+			"invalid_destination_address": "",
+			"insufficient_funds": "",
+			"unknown_minimum_ckbtc_amount": "",
+			"unknown_minimum_cketh_amount": "",
+			"minimum_ckbtc_amount": "",
+			"minimum_cketh_amount": "",
+			"minimum_amount": "",
+			"minimum_ledger_fees": "",
+			"minimum_cketh_balance": "",
+			"unknown_cketh": "",
+			"destination_address_invalid": "",
+			"amount_invalid": "",
+			"insufficient_funds_for_gas": "",
+			"insufficient_funds_for_amount": "",
+			"insufficient_ethereum_funds_to_cover_the_fees": "",
+			"insufficient_solana_funds_to_cover_the_fees": "",
+			"not_enough_tokens_for_gas": "",
+			"gas_fees_not_defined": "",
+			"max_gas_fee_per_gas_undefined": "",
+			"address_unknown": "",
+			"minter_info_not_loaded": "",
+			"minter_info_not_certified": "",
+			"cketh_max_transaction_fee_missing": "",
+			"utxos_fee_missing": ""
+		},
+		"error": {
+			"unexpected": "",
+			"destination_address_unknown": "",
+			"metamask_connected": "",
+			"metamask_no_accounts": "",
+			"metamask_switch_network": "",
+			"erc20_data_undefined": "",
+			"data_undefined": "",
+			"no_identity_calculate_fee": "",
+			"invalid_destination": "",
+			"incompatible_token": "",
+			"no_btc_network_id": "",
+			"no_solana_network_id": "",
+			"no_pending_bitcoin_transaction": "",
+			"unexpected_utxos_fee": "",
+			"unable_to_retrieve_amount": "",
+			"solana_transaction_expired": "",
+			"solana_confirmation_failed": ""
+		}
+	},
+	"convert": {
+		"text": {
+			"converting": "",
+			"conversion_destination": "",
+			"default_destination": "",
+			"convert_to_btc": "",
+			"convert_to_ckbtc": "",
+			"convert_to_token": "",
+			"convert_to_cketh": "",
+			"convert_to_ckerc20": "",
+			"convert_eth_to_cketh": "",
+			"cketh_conversions_may_take": "",
+			"ckerc20_conversions_may_take": "",
+			"how_to_convert_eth_to_cketh": "",
+			"send_eth": "",
+			"wait_eth_current_balance": "",
+			"set_amount": "",
+			"check_balance_for_fees": "",
+			"fees_explanation": "",
+			"current_balance": "",
+			"review_button": "",
+			"convert_button": "",
+			"input_reset_button": "",
+			"swap_to_token": "",
+			"review": "",
+			"max_balance": "",
+			"source_network": "",
+			"destination_network": "",
+			"conversion_may_take": "",
+			"executing_transaction": "",
+			"initializing": "",
+			"refreshing_ui": "",
+			"unsupported_token_conversion": "",
+			"calculating_max_amount": "",
+			"send_to": "",
+			"custom_destination": ""
+		},
+		"assertion": {
+			"insufficient_funds": ""
+		},
+		"error": {
+			"loading_cketh_helper": "",
+			"unexpected": "",
+			"unexpected_missing_data": ""
+		}
+	},
+	"swap": {
+		"text": {
+			"swap": "",
+			"select_destination_token": "",
+			"select_source_token": "",
+			"switch_tokens_button": "",
+			"review": "",
+			"review_button": "",
+			"max_slippage": "",
+			"value_difference": "",
+			"total_fee": "",
+			"network_fee": "",
+			"approval_fee": "",
+			"gas_fee": "",
+			"lp_fee": "",
+			"max_slippage_info": "",
+			"max_slippage_warning": "",
+			"max_slippage_error": "",
+			"swap_button": "",
+			"swap_is_not_offered": "",
+			"executing_transaction": "",
+			"initializing": "",
+			"swapping": "",
+			"refreshing_ui": "",
+			"swap_provider": "",
+			"swap_provider_website": "",
+			"swap_route": "",
+			"included_network_fees": "",
+			"included_liquidity_fees": "",
+			"best_rate": "",
+			"expected_minimum": "",
+			"you_receive": "",
+			"select": "",
+			"select_swap_provider": "",
+			"open_icp_swap": ""
+		},
+		"error": {
+			"kong_not_available": "",
+			"unexpected": "",
+			"unexpected_missing_data": "",
+			"slippage_exceeded": "",
+			"pool_not_found": "",
+			"deposit_error": "",
+			"withdraw_failed": "",
+			"swap_failed_withdraw_success": ""
+		}
+	},
+	"buy": {
+		"text": {
+			"buy": "",
+			"buy_dev": ""
+		},
+		"onramper": {
+			"title": ""
+		}
+	},
+	"tokens": {
+		"text": {
+			"title": "",
+			"contract_address": "",
+			"token_address": "",
+			"balance": "",
+			"hide_zero_balances": "",
+			"all_tokens_with_zero_hidden": "",
+			"filter_nothing_found": "",
+			"filter_nothing_found_description": "",
+			"filter_placeholder": "",
+			"buy_or_receive": "",
+			"initializing": "",
+			"updating_ui": "",
+			"show_token": "",
+			"hide_token": "",
+			"select_token": "",
+			"exchange_is_not_available": "",
+			"exchange_is_not_available_short": "",
+			"source_token_title": "",
+			"destination_token_title": "",
+			"chain_key": "",
+			"show_more_networks": "",
+			"hide_more_networks": "",
+			"on_network": "",
+			"delete_token": "",
+			"edit_token": ""
+		},
+		"details": {
+			"title": "",
+			"token": "",
+			"network": "",
+			"contract_address_copied": "",
+			"token_address_copied": "",
+			"twin_token": "",
+			"standard": "",
+			"confirm_deletion_description": "",
+			"deletion_confirmation": "",
+			"update_confirmation": "",
+			"missing_index_canister_id_label": "",
+			"missing_index_canister_id_warning": "",
+			"missing_index_canister_id_button": ""
+		},
+		"balance": {
+			"error": {
+				"not_applicable": ""
+			}
+		},
+		"import": {
+			"text": {
+				"title": "",
+				"review": "",
+				"saving": "",
+				"updating": "",
+				"ledger_canister_id": "",
+				"index_canister_id": "",
+				"minter_canister_id": "",
+				"ledger_canister_id_copied": "",
+				"index_canister_id_copied": "",
+				"minter_canister_id_copied": "",
+				"verifying": "",
+				"add_the_token": "",
+				"info": "",
+				"info_index": "",
+				"custom_tokens_not_supported": ""
+			},
+			"error": {
+				"loading_metadata": "",
+				"no_metadata": "",
+				"unexpected_ledger": "",
+				"unexpected_index": "",
+				"unexpected_index_ledger": "",
+				"invalid_ledger_id": "",
+				"missing_ledger_id": "",
+				"missing_contract_address": "",
+				"missing_token_address": "",
+				"no_network": ""
+			},
+			"warning": {
+				"do_not_close_manage": ""
+			}
+		},
+		"manage": {
+			"text": {
+				"title": "",
+				"manage_list": "",
+				"list_settings": "",
+				"import_token": "",
+				"network": "",
+				"all_tokens_zero_balance": "",
+				"enable_more_assets": ""
+			},
+			"placeholder": {
+				"select_network": ""
+			},
+			"info": {
+				"no_changes": ""
+			},
+			"error": {
+				"unexpected_build": "",
+				"empty": ""
+			}
+		},
+		"hide": {
+			"title": "",
+			"token": "",
+			"info": "",
+			"confirm": "",
+			"hiding": ""
+		},
+		"alt": {
+			"context_menu": "",
+			"open_etherscan": "",
+			"open_blockstream": "",
+			"open_dashboard": "",
+			"open_contract_address_block_explorer": "",
+			"open_token_address_block_explorer": "",
+			"token_group_number": "",
+			"filter_button": ""
+		},
+		"placeholder": {
+			"enter_contract_address": "",
+			"enter_token_address": "",
+			"search_token": ""
+		},
+		"warning": {
+			"trust_token": ""
+		},
+		"error": {
+			"invalid_contract_address": "",
+			"invalid_token_address": "",
+			"invalid_ledger": "",
+			"no_metadata": "",
+			"unexpected": "",
+			"unexpected_hiding": "",
+			"already_available": "",
+			"loading_metadata": "",
+			"not_toggleable": "",
+			"incomplete_metadata": "",
+			"duplicate_metadata": "",
+			"unexpected_undefined": "",
+			"unexpected_error_on_token_delete": "",
+			"unexpected_error_on_token_update": ""
+		}
+	},
+	"fee": {
+		"text": {
+			"fee": "",
+			"estimated_btc": "",
+			"estimated_inter_network": "",
+			"estimated_eth": "",
+			"max_fee_eth": "",
+			"convert_fee": "",
+			"convert_inter_network_fee": "",
+			"convert_btc_network_fee": "",
+			"zero_fee": "",
+			"total_fee": "",
+			"ata_fee": ""
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": ""
+		},
+		"error": {
+			"cannot_fetch_gas_fee": ""
+		}
+	},
+	"info": {
+		"bitcoin": {
+			"title": "",
+			"description": "",
+			"note": "",
+			"how_to": ""
+		},
+		"ethereum": {
+			"title": "",
+			"description": "",
+			"note": "",
+			"how_to": "",
+			"how_to_short": ""
+		}
+	},
+	"wallet_connect": {
+		"text": {
+			"name": "",
+			"session_proposal": "",
+			"connect": "",
+			"connecting": "",
+			"disconnect": "",
+			"scan_qr": "",
+			"or_use_link": "",
+			"proposer": "",
+			"review": "",
+			"method": "",
+			"methods": "",
+			"events": "",
+			"message": "",
+			"hex_data": "",
+			"raw_copied": "",
+			"sign_message": ""
+		},
+		"alt": {
+			"connect_input": ""
+		},
+		"domain": {
+			"title": "",
+			"valid": "",
+			"valid_description": "",
+			"invalid": "",
+			"invalid_description": "",
+			"security_risk": "",
+			"security_risk_description": "",
+			"unknown": "",
+			"unknown_description": ""
+		},
+		"info": {
+			"disconnected": "",
+			"session_ended": "",
+			"connected": "",
+			"eth_transaction_executed": "",
+			"sol_transaction_executed": "",
+			"sign_executed": ""
+		},
+		"error": {
+			"qr_code_read": "",
+			"missing_uri": "",
+			"disconnect": "",
+			"connect": "",
+			"manual_workflow": "",
+			"skipping_request": "",
+			"method_not_support": "",
+			"unexpected_pair": "",
+			"no_connection_opened": "",
+			"no_session_approval": "",
+			"unexpected": "",
+			"request_rejected": "",
+			"unknown_parameter": "",
+			"wallet_not_initialized": "",
+			"from_address_not_wallet": "",
+			"unknown_destination": "",
+			"request_not_defined": "",
+			"unexpected_processing_request": ""
+		}
+	},
+	"transaction": {
+		"text": {
+			"details": "",
+			"hash": "",
+			"hash_copied": "",
+			"id": "",
+			"id_copied": "",
+			"timestamp": "",
+			"type": "",
+			"from": "",
+			"from_copied": "",
+			"received_from": "",
+			"from_ata": "",
+			"from_ata_copied": "",
+			"to": "",
+			"to_copied": "",
+			"sent_to": "",
+			"to_ata": "",
+			"to_ata_copied": "",
+			"block": "",
+			"interacted_with": "",
+			"status": "",
+			"confirmations": ""
+		},
+		"status": {
+			"confirmed": "",
+			"included": "",
+			"finalised": "",
+			"finalized": "",
+			"processed": "",
+			"pending": "",
+			"safe": "",
+			"unconfirmed": ""
+		},
+		"type": {
+			"send": "",
+			"receive": "",
+			"withdraw": "",
+			"deposit": "",
+			"approve": "",
+			"burn": "",
+			"mint": ""
+		},
+		"label": {
+			"reimbursement": "",
+			"twin_token_sent": "",
+			"ck_token_sent": "",
+			"twin_token_converted": "",
+			"ck_token_converted": "",
+			"sending_twin_token": "",
+			"sending_twin_token_failed": "",
+			"converting_twin_token": "",
+			"converting_ck_token": "",
+			"twin_network": "",
+			"no_date_available": "",
+			"pending": ""
+		},
+		"alt": {
+			"open_block_explorer": "",
+			"open_from_block_explorer": "",
+			"open_to_block_explorer": ""
+		},
+		"error": {
+			"get_block_number": "",
+			"failed_get_transaction": ""
+		}
+	},
+	"transactions": {
+		"text": {
+			"title": "",
+			"buy_or_receive": "",
+			"transaction_history": "",
+			"mainnet_btc_transactions_info": "",
+			"transaction_history_unavailable": "",
+			"missing_index_canister_explanation": "",
+			"index_canister_not_working_explanation": "",
+			"token_needs_enabling": ""
+		},
+		"error": {
+			"loading_transactions": "",
+			"loading_transactions_symbol": "",
+			"no_token_loading_transaction": "",
+			"uncertified_transactions_removed": "",
+			"loading_pending_ck_ethereum_transactions": "",
+			"get_transaction_for_hash": "",
+			"unexpected_transaction_for_hash": "",
+			"loading_token_with_network": "",
+			"loading_token": ""
+		}
+	},
+	"about": {
+		"why_oisy": {
+			"text": {
+				"label": "",
+				"title": "",
+				"hold_crypto": {
+					"title": "",
+					"description": ""
+				},
+				"network_custody": {
+					"title": "",
+					"description": ""
+				},
+				"fully_on_chain": {
+					"title": "",
+					"description": ""
+				},
+				"cross_device": {
+					"title": "",
+					"description": ""
+				},
+				"verifiable_credentials": {
+					"title": "",
+					"description": ""
+				},
+				"open_source": {
+					"title": "",
+					"description": ""
+				}
+			}
+		}
+	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "",
+				"title_successful": "",
+				"title_failed": "",
+				"reward_received": "",
+				"reward_failed": "",
+				"reward_received_description": "",
+				"reward_failed_description": ""
+			},
+			"error": {
+				"loading_reward": "",
+				"loading_user_data": "",
+				"claiming_reward": "",
+				"loading_eligibility": ""
+			}
+		},
+		"invitation": {
+			"text": {
+				"title": "",
+				"binance_title": "",
+				"invitation_link_copied": "",
+				"generate_new_link": "",
+				"generating_new_code": "",
+				"regenerate_countdown_text": ""
+			}
+		}
+	},
+	"referral": {
+		"invitation": {
+			"text": {
+				"title": "",
+				"referral_link_copied": "",
+				"information": "",
+				"not_referred_yet": "",
+				"referred_amount": "",
+				"learn_more": ""
+			},
+			"error": {
+				"loading_referrer_info": "",
+				"setting_referrer": ""
+			}
+		}
+	},
+	"address_book": {
+		"text": {
+			"title": "",
+			"empty_title": "",
+			"empty_text": "",
+			"add_new_contact": "",
+			"add_contact": "",
+			"search_contact": "",
+			"no_address_found": "",
+			"no_contact_found": ""
+		},
+		"alt": {
+			"show_addresses_of_contact": "",
+			"hide_addresses": ""
+		},
+		"edit_contact": {
+			"title": "",
+			"add_address": "",
+			"delete_contact": ""
+		},
+		"avatar": {
+			"default": "",
+			"avatar_for": ""
+		},
+		"show_contact": {
+			"title": "",
+			"add_address": "",
+			"show_address_text": "",
+			"add_first_address": ""
+		},
+		"create_contact": {
+			"title": ""
+		}
+	},
+	"contact": {
+		"form": {
+			"edit_contact": "",
+			"add_new_contact": ""
+		},
+		"fields": {
+			"name": ""
+		},
+		"delete": {
+			"title": "",
+			"delete_contact": "",
+			"content_text": ""
+		},
+		"error": {
+			"create": "",
+			"update": "",
+			"delete": "",
+			"name_too_long": ""
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "",
+			"Btc": "",
+			"Eth": "",
+			"Sol": ""
+		},
+		"form": {
+			"new_address": "",
+			"address_placeholder": "",
+			"label_placeholder": "",
+			"invalid_address": "",
+			"valid_for_networks": "",
+			"error": {
+				"label_too_long": ""
+			}
+		},
+		"fields": {
+			"label": "",
+			"address": ""
+		},
+		"delete": {
+			"title": "",
+			"delete_address": "",
+			"content_text": ""
+		},
+		"save": {
+			"title": "",
+			"add_to_existing_contact": "",
+			"create_contact": ""
+		},
+		"qr": {
+			"title": ""
+		}
+	},
+	"signer": {
+		"sign_in": {
+			"text": {
+				"access_your_wallet": "",
+				"open_or_create": ""
+			}
+		},
+		"idle": {
+			"text": {
+				"waiting": ""
+			},
+			"alt": {
+				"img_placeholder": ""
+			}
+		},
+		"permissions": {
+			"text": {
+				"title": "",
+				"requested_permissions": "",
+				"your_wallet_address": "",
+				"icrc27_accounts": "",
+				"icrc49_call_canister": ""
+			},
+			"error": {
+				"no_confirm_callback": ""
+			}
+		},
+		"origin": {
+			"text": {
+				"request_from": "",
+				"invalid_origin": ""
+			},
+			"alt": {
+				"link_to_dapp": ""
+			}
+		},
+		"consent_message": {
+			"text": {
+				"loading": ""
+			},
+			"warning": {
+				"token_without_consent_message": ""
+			},
+			"error": {
+				"no_approve_callback": "",
+				"no_reject_callback": "",
+				"retrieve": ""
+			}
+		},
+		"call_canister": {
+			"text": {
+				"processing": "",
+				"executed": "",
+				"close_window": "",
+				"error": "",
+				"try_again": ""
+			},
+			"error": {
+				"cannot_call": ""
+			}
+		}
+	},
+	"carousel": {
+		"text": {
+			"next_slide": "",
+			"prev_slide": "",
+			"indicator": ""
+		}
+	},
+	"license_agreement": {
+		"text": {
+			"accept_terms": "",
+			"accept_terms_link": "",
+			"title": "",
+			"paragraph_1": "",
+			"paragraph_2": "",
+			"paragraph_3": "",
+			"limited_license": "",
+			"restrictions": "",
+			"applicable_laws": "",
+			"reservation_rights": "",
+			"feedback": "",
+			"termination": "",
+			"warranty_liability": "",
+			"indemnity": "",
+			"governing_law": "",
+			"entire_agreement": "",
+			"assignment": "",
+			"no_waiver": "",
+			"english_version": ""
+		},
+		"alt": {
+			"license_agreement": ""
+		}
+	},
+	"activity": {
+		"text": {
+			"title": ""
+		},
+		"info": {
+			"btc_transactions": ""
+		},
+		"warning": {
+			"no_index_canister": "",
+			"unavailable_index_canister": ""
+		}
+	},
+	"earning": {
+		"text": {
+			"title": ""
+		},
+		"cards": {
+			"gold_title": "",
+			"gold_description": "",
+			"stablecoins_title": "",
+			"stablecoins_description": "",
+			"sprinkles_title": "",
+			"sprinkles_description": ""
+		}
+	},
+	"welcome": {
+		"title": "",
+		"subtitle": "",
+		"description": ""
+	},
+	"temporal": {
+		"seconds_to_duration": {
+			"year": "",
+			"year_plural": "",
+			"month": "",
+			"month_plural": "",
+			"day": "",
+			"day_plural": "",
+			"hour": "",
+			"hour_plural": "",
+			"minute": "",
+			"minute_plural": "",
+			"second": "",
+			"second_plural": ""
+		}
+	}
+}

@@ -14,7 +14,11 @@
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { modalBtcToken, modalBtcTransaction } from '$lib/derived/modal.derived';
+	import {
+		modalBtcToken,
+		modalBtcTokenData,
+		modalBtcTransaction
+	} from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import type { OptionToken } from '$lib/types/token';
@@ -46,5 +50,5 @@
 {#if $modalBtcTransaction && nonNullish(selectedTransaction)}
 	<BtcTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalBtcToken}
-	<BtcTokenModal />
+	<BtcTokenModal fromRoute={$modalBtcTokenData} />
 {/if}

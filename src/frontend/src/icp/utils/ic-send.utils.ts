@@ -41,12 +41,12 @@ export const isNetworkIdETH = (networkId: NetworkId | undefined): boolean =>
 
 export const isInvalidDestinationIc = ({
 	destination,
-	networkId,
-	tokenStandard
+	tokenStandard,
+	networkId
 }: {
 	destination: string;
-	networkId: NetworkId | undefined;
 	tokenStandard: TokenStandard;
+	networkId?: NetworkId;
 }): boolean => {
 	if (isNullishOrEmpty(destination)) {
 		return false;

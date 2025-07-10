@@ -12,9 +12,10 @@
 		usdAmount: number;
 		token: IcToken | undefined;
 		loading?: boolean;
+		testId?: string;
 	}
 
-	let { amount, usdAmount, token, loading = true }: Props = $props();
+	let { amount, usdAmount, token, loading = true, testId }: Props = $props();
 
 	const displayAmount = $derived(
 		formatToken({
@@ -34,6 +35,7 @@
 		class:duration-500={loading}
 		class:ease-in-out={loading}
 		class:animate-pulse={loading}
+		data-tid={testId}
 	>
 		{#if amount > ZERO}
 			<Sprinkles type="box" />
