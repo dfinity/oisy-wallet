@@ -189,6 +189,10 @@ export interface Erc20Token {
 	chain_id: bigint;
 	symbol: [] | [string];
 }
+export interface Erc721Token {
+	token_address: string;
+	chain_id: bigint;
+}
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
@@ -319,6 +323,7 @@ export interface TestnetsSettings {
 export type Token =
 	| { Erc20: Erc20Token }
 	| { Icrc: IcrcToken }
+	| { Erc721: Erc721Token }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken };
 export type TokenAccountId =
