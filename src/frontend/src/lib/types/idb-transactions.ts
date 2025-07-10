@@ -4,8 +4,7 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { NetworkId } from '$lib/types/network';
-import type { TokenId } from '$lib/types/token';
+import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 export type IdbTransactionsStoreData =
@@ -14,7 +13,6 @@ export type IdbTransactionsStoreData =
 
 export interface SetIdbTransactionsParams<T extends IdbTransactionsStoreData> {
 	identity: OptionIdentity;
-	tokenId: TokenId;
-	networkId: NetworkId;
+	tokens: Token[];
 	transactionsStoreData: T;
 }

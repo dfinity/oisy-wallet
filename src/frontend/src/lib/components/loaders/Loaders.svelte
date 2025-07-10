@@ -12,6 +12,7 @@
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
+	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
 </script>
 
 <LoaderUserProfile>
@@ -26,7 +27,9 @@
 									<LoaderMetamask>
 										<UserSnapshotWorker>
 											<LoaderContacts>
-												<slot />
+												<TransactionsIdbSetter>
+													<slot />
+												</TransactionsIdbSetter>
 											</LoaderContacts>
 										</UserSnapshotWorker>
 									</LoaderMetamask>
