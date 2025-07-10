@@ -30,34 +30,36 @@ const idbSolTransactionsStore = idbTransactionsStore(SOLANA_MAINNET_NETWORK_SYMB
 
 export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData>({
 	identity,
-	tokenId,
-	networkId,
+	tokens,
 	transactionsStoreData,
 	idbTransactionsStore
-}: SetIdbTransactionsParams<T> & {
-	idbTransactionsStore: UseStore;
-}) => {
+}: SetIdbTransactionsParams<T> & { idbTransactionsStore: UseStore }) => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
 		return;
 	}
 
-	const transactions = transactionsStoreData?.[tokenId];
+	// We don't necessarily need this function to work, it is just a cache-saving service. Useful but not critical. We can ignore errors.
+	await Promise.allSettled(
+		tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
+			const transactions = transactionsStoreData?.[tokenId];
 
-	if (isNullish(transactions)) {
-		return;
-	}
+			if (isNullish(transactions)) {
+				return;
+			}
 
-	const key: IDBValidKey[] = [
-		identity.getPrincipal().toText(),
-		tokenId.description ?? '',
-		networkId.description ?? ''
-	];
+			const key: IDBValidKey[] = [
+				identity.getPrincipal().toText(),
+				tokenId.description ?? '',
+				networkId.description ?? ''
+			];
 
-	await idbSet(
-		key,
-		transactions.map((transaction) => ('data' in transaction ? transaction.data : transaction)),
-		idbTransactionsStore
+			await idbSet(
+				key,
+				transactions.map((transaction) => ('data' in transaction ? transaction.data : transaction)),
+				idbTransactionsStore
+			);
+		})
 	);
 };
 
