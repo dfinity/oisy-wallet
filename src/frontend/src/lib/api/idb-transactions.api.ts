@@ -50,8 +50,8 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 
 			const key: IDBValidKey[] = [
 				identity.getPrincipal().toText(),
-				tokenId.description ?? '',
-				networkId.description ?? ''
+				`${tokenId.description}`,
+				`${networkId.description}`
 			];
 
 			await idbSet(
