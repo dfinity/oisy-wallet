@@ -10,10 +10,10 @@
 	interface AvatarProps {
 		name?: string;
 		variant?: AvatarVariants;
+		imageUrl?: string | null;
 		styleClass?: string;
 	}
-
-	const { name, variant = 'md', styleClass }: AvatarProps = $props();
+	const { name, imageUrl = null, variant = 'md', styleClass }: AvatarProps = $props();
 
 	const font = $derived(
 		{
@@ -27,7 +27,9 @@
 
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
 	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
-	let commonClasses = $derived(`${font} ${size} ${bgColor} relative z-0 rounded-full`);
+	const commonClasses = $derived(
+		`${font} ${size} ${bgColor} rounded-full overflow-hidden relative ${styleClass}`
+	);
 	let ariaLabel = $derived(
 		name ? `${$i18n.address_book.avatar.avatar_for} ${name}` : $i18n.address_book.avatar.default
 	);
@@ -42,20 +44,16 @@
 	);
 </script>
 
-{#if !initials}
-	<div
-		class={`${commonClasses} text-brand-primary ${styleClass}`}
-		role="img"
-		aria-label={ariaLabel}
-	>
+<button
+	type="button"
+	class={`${commonClasses} flex items-center justify-center ${!imageUrl ? bgColor : ''}`}
+	aria-label={ariaLabel}
+>
+	{#if imageUrl}
+		<img src={imageUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
+	{:else if initials}
+		<span class="font-bold text-white">{initials}</span>
+	{:else}
 		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
-	</div>
-{:else}
-	<span
-		class={`${commonClasses} inline-block inline-flex items-center justify-center font-bold text-white transition-colors duration-1000 ${styleClass}`}
-		role="img"
-		aria-label={ariaLabel}
-	>
-		{initials}
-	</span>
-{/if}
+	{/if}
+</button>

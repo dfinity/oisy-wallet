@@ -1260,6 +1260,12 @@
 			"default": "",
 			"avatar_for": ""
 		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
+		},
 		"show_contact": {
 			"title": "",
 			"add_address": "",

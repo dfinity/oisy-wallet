@@ -1260,6 +1260,12 @@
 			"default": "Avatar padrão",
 			"avatar_for": "Avatar para"
 		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
+		},
 		"show_contact": {
 			"title": "Contato",
 			"add_address": "Adicionar endereço",
