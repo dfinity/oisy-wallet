@@ -186,7 +186,7 @@ describe('IcCkListener', () => {
 		const token = mockValidIcCkToken;
 		const { twinToken } = mockValidIcCkToken;
 
-		const { component } = render(IcCkListener, {
+		render(IcCkListener, {
 			initFn,
 			token,
 			twinToken,
