@@ -187,7 +187,10 @@ describe('btc-utxos.utils', () => {
 			});
 
 			expect(result.sufficientFunds).toBeFalsy();
-			expect(result.feeSatoshis).toBe(ZERO);
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO); // Should have calculated fee even when insufficient
+			// With 1 input and 2 outputs, tx size = 10 + 1*68 + 2*31 = 140 bytes
+			// Fee = 140 * 100 = 14000 satoshis
+			expect(result.feeSatoshis).toBe(14000n);
 		});
 
 		it('should handle 0n fee rate', () => {

@@ -79,6 +79,7 @@ export const calculateUtxoSelection = ({
 
 	const selectedUtxos: Utxo[] = [];
 	let totalInputValue = ZERO;
+	let estimatedFee = ZERO;
 
 	// Iteratively add UTXOs until we have enough to cover amount and fee
 	for (const utxo of sortedUtxos) {
@@ -91,7 +92,7 @@ export const calculateUtxoSelection = ({
 			numInputs: selectedUtxos.length,
 			numOutputs: 2
 		});
-		const estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
+		estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
 		const totalRequired = amountSatoshis + estimatedFee;
 
 		// Check if we have enough to cover amount and fee
@@ -114,7 +115,7 @@ export const calculateUtxoSelection = ({
 		totalInputValue,
 		changeAmount: ZERO,
 		sufficientFunds: false,
-		feeSatoshis: ZERO
+		feeSatoshis: estimatedFee
 	};
 };
 
