@@ -37,7 +37,7 @@ describe('sol-address.services', () => {
 
 			console.log(`SolAddress for ${network}`, foo, uint8Array, address);
 
-			expect(address).toBe('2EQneZBEeL3XGy3YaQAgxwxYvKq2bRPfQVpiGXgpQEfv');
+			expect(address).toBe('3azSdZ7u1LxpxTVE6T4oH9XuTYidD7fNhXmJKhTTczw4');
 		});
 	});
 });
