@@ -185,6 +185,7 @@ type Erc20Token = record {
 	chain_id : nat64;
 	symbol : opt text
 };
+type Erc721Token = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
@@ -302,6 +303,7 @@ type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
 	Erc20 : Erc20Token;
 	Icrc : IcrcToken;
+	Erc721 : Erc721Token;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken
 };

@@ -259,7 +259,7 @@ mod custom_token {
             vec![
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId(
+                        token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 1,
@@ -271,7 +271,7 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId(
+                        token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 1,
@@ -283,7 +283,7 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId(
+                        token_address: ErcTokenId(
                             "0x12345678901234567890123456789012345678".to_string()
                         ),
                         chain_id: 1,
@@ -295,7 +295,7 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId("1".repeat(99)),
+                        token_address: ErcTokenId("1".repeat(99)),
                         chain_id: 1,
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(6),
@@ -305,7 +305,7 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId(
+                        token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 1,
@@ -317,7 +317,7 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId(
+                        token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 1,
@@ -329,7 +329,7 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId(
+                        token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 1,
@@ -341,7 +341,7 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId(
+                        token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 2 ^ 64 - 1,
@@ -353,7 +353,7 @@ mod custom_token {
                 },
                 TestVector {
                     input: Erc20Token {
-                        token_address: Erc20TokenId(
+                        token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 0,
