@@ -1,4 +1,5 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import * as icpIndexApi from '$icp/api/icp-index.api';
@@ -40,6 +41,7 @@ vi.mock('$icp/api/icrc-index-ng.api', () => ({
 describe('ic-transactions.services', () => {
 	describe('onLoadTransactionsError', () => {
 		const tokenId = ICP_TOKEN_ID;
+		const networkId = ICP_NETWORK_ID;
 		const mockError = new Error('Test error');
 		const mockTransactions = createMockIcTransactionsUi(5).map((transaction) => ({
 			data: transaction,
@@ -53,7 +55,7 @@ describe('ic-transactions.services', () => {
 
 			spyAnalytics = vi.spyOn(analytics, 'trackEvent');
 
-			icTransactionsStore.append({ tokenId, transactions: mockTransactions });
+			icTransactionsStore.append({ tokenId, networkId, transactions: mockTransactions });
 			balancesStore.set({ id: tokenId, data: { data: bn1Bi, certified: false } });
 		});
 
@@ -124,6 +126,7 @@ describe('ic-transactions.services', () => {
 
 	describe('onTransactionsCleanUp', () => {
 		const tokenId = ICP_TOKEN_ID;
+		const networkId = ICP_NETWORK_ID;
 		const mockTransactions = createMockIcTransactionsUi(5).map((transaction) => ({
 			data: transaction,
 			certified: false
@@ -132,7 +135,7 @@ describe('ic-transactions.services', () => {
 		const mockTransactionsIds = mockTransactions
 			.slice(0, n)
 			.map((transaction) => transaction.data.id);
-		const mockData = { tokenId, transactionIds: mockTransactionsIds };
+		const mockData = { tokenId, networkId, transactionIds: mockTransactionsIds };
 
 		let spyToastsError: MockInstance;
 
@@ -141,7 +144,7 @@ describe('ic-transactions.services', () => {
 
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
-			icTransactionsStore.append({ tokenId, transactions: mockTransactions });
+			icTransactionsStore.append({ tokenId, networkId, transactions: mockTransactions });
 		});
 
 		it('should reset transactions store', () => {
@@ -339,7 +342,11 @@ describe('ic-transactions.services', () => {
 				data: transaction,
 				certified: false
 			}));
-			icTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
+			icTransactionsStore.append({
+				tokenId: mockToken.id,
+				networkId: mockToken.network.id,
+				transactions: initialTransactions
+			});
 
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
 				transactions: [] as TransactionWithId[]
@@ -366,7 +373,11 @@ describe('ic-transactions.services', () => {
 				data: transaction,
 				certified: false
 			}));
-			icTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
+			icTransactionsStore.append({
+				tokenId: mockToken.id,
+				networkId: mockToken.network.id,
+				transactions: initialTransactions
+			});
 
 			const mockError = new Error('Test error');
 			vi.spyOn(icpIndexApi, 'getTransactions').mockRejectedValue(mockError);

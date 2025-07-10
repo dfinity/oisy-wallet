@@ -56,6 +56,7 @@ describe('idb-transactions.api', () => {
 
 		btcTransactionsStore.append({
 			tokenId: mockToken2.id,
+			networkId: mockToken2.network.id,
 			transactions: mockCertifiedTransactions2
 		});
 	});

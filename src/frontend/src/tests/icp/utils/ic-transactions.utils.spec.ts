@@ -7,6 +7,8 @@ import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.u
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
 import { getAllIcTransactions, getIcExtendedTransactions } from '$icp/utils/ic-transactions.utils';
 import type { Token } from '$lib/types/token';
+import { parseNetworkId } from '$lib/validation/network.validation';
+import { parseTokenId } from '$lib/validation/token.validation';
 import {
 	MOCK_CKBTC_TOKEN,
 	MOCK_CKETH_TOKEN,
@@ -34,7 +36,8 @@ describe('getIcExtendedTransactions', () => {
 
 	it('should return 3 transactions', () => {
 		setupIcTransactionsStore({
-			tokenId: MOCK_CKETH_TOKEN.id as unknown as symbol & BRAND<'TokenId'>
+			tokenId: parseTokenId(MOCK_CKETH_TOKEN.id?.description ?? ''),
+			networkId: parseNetworkId(MOCK_CKETH_TOKEN.network?.id.description ?? '')
 		});
 
 		const result = getIcExtendedTransactions({
@@ -84,7 +87,7 @@ describe('getAllIcTransactions', () => {
 	it('should return all transactions for a token', () => {
 		const ckEthToken = MOCK_CKETH_TOKEN as Token;
 
-		setupIcTransactionsStore({ tokenId: ckEthToken.id });
+		setupIcTransactionsStore({ tokenId: ckEthToken.id, networkId: ckEthToken.network.id });
 		setupCkBtcPendingStores();
 		setupCkEthPendingStore();
 

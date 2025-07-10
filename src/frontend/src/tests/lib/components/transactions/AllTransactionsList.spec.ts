@@ -1,7 +1,9 @@
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import * as btcEnv from '$env/networks/networks.btc.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
@@ -87,6 +89,7 @@ describe('AllTransactionsList', () => {
 
 			btcTransactionsStore.append({
 				tokenId: BTC_MAINNET_TOKEN_ID,
+				networkId: BTC_MAINNET_NETWORK_ID,
 				transactions: createMockBtcTransactionsUi(btcTransactionsNumber).map((transaction) => ({
 					data: { ...transaction, timestamp: BigInt(todayTimestamp) },
 					certified: false
@@ -103,6 +106,7 @@ describe('AllTransactionsList', () => {
 
 			icTransactionsStore.append({
 				tokenId: ICP_TOKEN_ID,
+				networkId: ICP_NETWORK_ID,
 				transactions: createMockIcTransactionsUi(icTransactionsNumber).map((transaction) => ({
 					data: { ...transaction, timestamp: BigInt(todayTimestamp) },
 					certified: false
