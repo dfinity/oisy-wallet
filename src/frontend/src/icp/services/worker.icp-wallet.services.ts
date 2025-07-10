@@ -32,7 +32,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			case 'syncIcpWallet':
 				syncWallet({
 					tokenId: ICP_TOKEN_ID,
-            networkId: ICP_NETWORK_ID,
+					networkId: ICP_NETWORK_ID,
 					data: data as PostMessageDataResponseWallet
 				});
 				return;
@@ -45,7 +45,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			case 'syncIcpWalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId: ICP_TOKEN_ID,
-            		networkId: ICP_NETWORK_ID,
+					networkId: ICP_NETWORK_ID,
 					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;

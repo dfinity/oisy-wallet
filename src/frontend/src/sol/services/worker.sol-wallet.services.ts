@@ -35,7 +35,7 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 			case 'syncSolWallet':
 				syncWallet({
 					tokenId,
-            	networkId,
+					networkId,
 					data: data as SolPostMessageDataResponseWallet
 				});
 				return;

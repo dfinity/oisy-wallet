@@ -265,14 +265,12 @@ export const loadNextSolTransactions = async ({
 	}
 };
 
-
 const networkToSolTokenMap = {
 	[SolanaNetworks.mainnet]: SOLANA_TOKEN,
 	[SolanaNetworks.testnet]: SOLANA_TESTNET_TOKEN,
 	[SolanaNetworks.devnet]: SOLANA_DEVNET_TOKEN,
 	[SolanaNetworks.local]: SOLANA_LOCAL_TOKEN
 };
-
 
 const loadSolTransactions = async ({
 	token: { id: tokenId },
