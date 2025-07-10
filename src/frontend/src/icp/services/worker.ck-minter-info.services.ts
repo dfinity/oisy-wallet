@@ -106,6 +106,7 @@ const initCkMinterInfoWorker = async ({
 			});
 		},
 		destroy: () => {
+			console.log('Destroying worker ckminter');
 			stop();
 			worker.terminate();
 		}

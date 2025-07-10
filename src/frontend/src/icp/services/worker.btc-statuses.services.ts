@@ -63,6 +63,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 			});
 		},
 		destroy: () => {
+			console.log('Destroying worker btcstatuses');
 			stop();
 			worker.terminate();
 		}
