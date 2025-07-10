@@ -66,7 +66,7 @@ static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
 });
 static ERC721_TOKEN_ID: LazyLock<ErcTokenId> =
     LazyLock::new(|| ErcTokenId("0x8821bee2ba0df28761afff119d66390d594cd280".to_string()));
-static ERC721_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
+static ERC721_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 137);
 static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc721(Erc721Token {
         token_address: ERC721_TOKEN_ID.clone(),
