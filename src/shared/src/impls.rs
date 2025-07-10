@@ -11,8 +11,8 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, Erc20Token, Erc20TokenId, IcrcToken, SplToken, SplTokenId,
-            Token,
+            CustomToken, CustomTokenId, Erc20Token, Erc721Token, ErcTokenId, IcrcToken, SplToken,
+            SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -85,6 +85,11 @@ impl From<&Token> for CustomTokenId {
                 CustomTokenId::SolDevnet(token_address.clone())
             }
             Token::Erc20(Erc20Token {
+                token_address,
+                chain_id,
+                ..
+            })
+            | Token::Erc721(Erc721Token {
                 token_address,
                 chain_id,
                 ..
@@ -418,12 +423,12 @@ impl Validate for SplTokenId {
     }
 }
 
-impl Erc20TokenId {
+impl ErcTokenId {
     pub const MAX_LENGTH: usize = 42;
     pub const MIN_LENGTH: usize = 42;
 }
 
-impl Validate for Erc20TokenId {
+impl Validate for ErcTokenId {
     /// Verifies that an Ethereum/EVM address is valid.
     fn validate(&self) -> Result<(), candid::Error> {
         if self.0.len() != 42 {
@@ -460,6 +465,7 @@ impl Validate for Token {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
             Token::Erc20(token) => token.validate(),
+            Token::Erc721(token) => token.validate(),
         }
     }
 }
@@ -492,6 +498,12 @@ impl Validate for Erc20Token {
                 )));
             }
         }
+        self.token_address.validate()
+    }
+}
+
+impl Validate for Erc721Token {
+    fn validate(&self) -> Result<(), candid::Error> {
         self.token_address.validate()
     }
 }
@@ -631,5 +643,6 @@ validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(Erc20Token);
-validate_on_deserialize!(Erc20TokenId);
+validate_on_deserialize!(ErcTokenId);
+validate_on_deserialize!(Erc721Token);
 validate_on_deserialize!(UserToken);
