@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
@@ -7,7 +8,7 @@ import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.provid
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import type { SolInstruction } from '$sol/types/sol-instructions';
-import * as networkUtils from '$sol/utils/network.utils';
+import * as networkUtils from '$sol/utils/safe-network.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
@@ -156,7 +157,7 @@ describe('sol-send.services', () => {
 				Promise.resolve(123)
 			);
 
-			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'mapNetworkIdToNetwork');
+			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'safeMapNetworkIdToNetwork');
 
 			spyCalculateAssociatedTokenAddress = vi
 				.spyOn(accountServices, 'calculateAssociatedTokenAddress')
@@ -319,16 +320,14 @@ describe('sol-send.services', () => {
 		});
 
 		it('should throw an error if network is invalid', async () => {
-			spyMapNetworkIdToNetwork.mockReturnValueOnce(undefined);
-
 			await expect(
 				sendSol({
 					...mockParams,
-					token: SOLANA_TOKEN
+					token: { ...SOLANA_TOKEN, network: ETHEREUM_NETWORK }
 				})
 			).rejects.toThrow(
 				replacePlaceholders(en.init.error.no_solana_network, {
-					$network: SOLANA_TOKEN.network.id.description ?? ''
+					$network: ETHEREUM_NETWORK.id.description ?? ''
 				})
 			);
 		});

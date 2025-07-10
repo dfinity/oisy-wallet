@@ -11,7 +11,6 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { getTokenDecimals, getTokenOwner } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
@@ -19,14 +18,8 @@ import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import {
-	assertNonNullish,
-	fromNullable,
-	isNullish,
-	nonNullish,
-	queryAndUpdate
-} from '@dfinity/utils';
+import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
+import { fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
@@ -141,14 +134,7 @@ const loadCustomTokensWithMetadata = async (
 		>(async (acc, token) => {
 			const { network, address } = token;
 
-			const solNetwork = mapNetworkIdToNetwork(network.id);
-
-			assertNonNullish(
-				solNetwork,
-				replacePlaceholders(get(i18n).init.error.no_solana_network, {
-					$network: network.id.description ?? ''
-				})
-			);
+			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
 			const owner = await getTokenOwner({ address, network: solNetwork });
 
