@@ -29,13 +29,15 @@ describe('AddressBookStep', () => {
 					addressType: 'Eth'
 				}
 			],
-			updateTimestampNs: BigInt(Date.now())
+			updateTimestampNs: BigInt(Date.now()),
+			image: []
 		},
 		{
 			id: 2n,
 			name: 'Test Contact_2',
 			addresses: [],
-			updateTimestampNs: BigInt(Date.now())
+			updateTimestampNs: BigInt(Date.now()),
+			image: []
 		},
 		{
 			id: 3n,
@@ -303,7 +305,8 @@ describe('AddressBookStep', () => {
 				addresses: [
 					{ address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ', addressType: 'Sol' }
 				],
-				updateTimestampNs: BigInt(Date.now())
+				updateTimestampNs: BigInt(Date.now()),
+				image: []
 			}
 		];
 

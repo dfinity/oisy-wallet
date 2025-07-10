@@ -31,7 +31,8 @@ describe('manage-contacts.service', () => {
 						mockBackendContactAddressSol, // Sol should come last
 						mockBackendContactAddressBtc, // Btc should come first
 						mockBackendContactAddressEth // Eth should come second
-					]
+					],
+					image: []
 				}
 			];
 
