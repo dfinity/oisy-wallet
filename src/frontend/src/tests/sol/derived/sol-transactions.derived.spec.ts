@@ -1,3 +1,4 @@
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { token } from '$lib/stores/token.store';
 import {
@@ -36,6 +37,7 @@ describe('sol-transactions.derived', () => {
 		it('should return empty array when transactions is nullish', () => {
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
 				transactions
 			});
 
@@ -50,6 +52,7 @@ describe('sol-transactions.derived', () => {
 		it('should return transactions for the current token', () => {
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
 				transactions
 			});
 
@@ -70,6 +73,7 @@ describe('sol-transactions.derived', () => {
 		it('should return false when transactions are nullish', () => {
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
 				transactions
 			});
 
@@ -83,6 +87,7 @@ describe('sol-transactions.derived', () => {
 		it('should return true when transactions are initialized', () => {
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
 				transactions
 			});
 
@@ -103,6 +108,7 @@ describe('sol-transactions.derived', () => {
 		it('should return true when transactions are nullish', () => {
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
 				transactions
 			});
 
@@ -116,6 +122,7 @@ describe('sol-transactions.derived', () => {
 		it('should return false when transactions are initialized', () => {
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
 				transactions
 			});
 
@@ -133,6 +140,7 @@ describe('sol-transactions.derived', () => {
 		it('should return known destinations if transactions store has some data', () => {
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
 				transactions
 			});
 
@@ -159,6 +167,7 @@ describe('sol-transactions.derived', () => {
 
 			solTransactionsStore.append({
 				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
 				transactions: mockTransactions
 			});
 

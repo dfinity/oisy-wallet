@@ -1,3 +1,4 @@
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { SOL_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 import { token } from '$lib/stores/token.store';
@@ -35,6 +36,7 @@ describe('SolTransactionsSkeletons', () => {
 		token.set(SOLANA_TOKEN);
 		solTransactionsStore.append({
 			tokenId: SOLANA_TOKEN_ID,
+			networkId: SOLANA_MAINNET_NETWORK_ID,
 			transactions: []
 		});
 
