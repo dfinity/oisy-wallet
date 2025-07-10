@@ -28,7 +28,7 @@
 										<UserSnapshotWorker>
 											<LoaderContacts>
 												<TransactionsIdbSetter>
-												<slot />
+													<slot />
 												</TransactionsIdbSetter>
 											</LoaderContacts>
 										</UserSnapshotWorker>
