@@ -1,20 +1,18 @@
 <script lang="ts">
+	import { Popover } from '@dfinity/gix-components';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-    import LogoButton from '$lib/components/ui/LogoButton.svelte';
-    import { Popover } from '@dfinity/gix-components';
-	import { POPOVER_TRIGGER_BUTTON } from '$lib/constants/test-ids.constants';
-    import { POPOVER_MENU, POPOVER_MENU_ITEM } from '$lib/constants/test-ids.constants';
-	import { i18n } from '$lib/stores/i18n.store';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { POPOVER_TRIGGER_BUTTON , POPOVER_MENU, POPOVER_MENU_ITEM } from '$lib/constants/test-ids.constants';
+		import { i18n } from '$lib/stores/i18n.store';
 	const {
 		fileInput = $bindable(),
 		replaceImage = $bindable(),
 		removeImage = $bindable(),
 		imageUrl = $bindable()
 	} = $props();
-
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -44,7 +42,6 @@
 	);
 </script>
 
-
 <ButtonIcon
 	bind:button
 	onclick={() => (visible = true)}
@@ -61,32 +58,33 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} invisibleBackdrop>
-    <div  
-    class="avatar-edit-popover min-w-60 max-w-[60%] text-left"
-    role="menu"
-    data-tid={POPOVER_MENU}>
-		<h3 class="popover-title text-base pt-1 pb-2">{$i18n.address_book.edit_avatar.menu_title}</h3>
-        <ul class="flex flex-col">
+	<div
+		class="avatar-edit-popover min-w-60 max-w-[60%] text-left"
+		role="menu"
+		data-tid={POPOVER_MENU}
+	>
+		<h3 class="popover-title pb-2 pt-1 text-base">{$i18n.address_book.edit_avatar.menu_title}</h3>
+		<ul class="flex flex-col">
 			{#each items as item (item.title)}
-            <li class="logo-button-list-item">
-				<LogoButton
-					hover
-					styleClass="w-full"
-					testId={item.testId ?? POPOVER_MENU_ITEM}
-					onClick={() => {
-						item.action();
-						visible = false;
-					}}
-				>
-					{#snippet logo()}
-						<item.logo />
-					{/snippet}
-					{#snippet title()}
-						<span class="text-base font-normal">{item.title}</span>
-					{/snippet}
-				</LogoButton>
-                </li>
+				<li class="logo-button-list-item">
+					<LogoButton
+						hover
+						styleClass="w-full"
+						testId={item.testId ?? POPOVER_MENU_ITEM}
+						onClick={() => {
+							item.action();
+							visible = false;
+						}}
+					>
+						{#snippet logo()}
+							<item.logo />
+						{/snippet}
+						{#snippet title()}
+							<span class="text-base font-normal">{item.title}</span>
+						{/snippet}
+					</LogoButton>
+				</li>
 			{/each}
-        </ul>
-</div>
+		</ul>
+	</div>
 </Popover>
