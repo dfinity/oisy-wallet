@@ -18,13 +18,10 @@ describe('sol-address.services', () => {
 			const foo = await deriveSolAddress(p, network);
 			const encoder = new TextEncoder();
 			const uint8Array = encoder.encode(foo);
-			const base58StringBytes = Uint8Array.from([...foo].map((c) => c.charCodeAt(0)));
-			const decoder2 = getAddressDecoder();
-			const bar = decoder2.decode(base58StringBytes);
 
 			const address = decoder.decode(Uint8Array.from(uint8Array));
 
-			console.log(`SolAddress for ${network}`, foo, base58StringBytes, uint8Array, bar, address);
+			console.log(`SolAddress for ${network}`, foo, uint8Array, address);
 
 			expect(address).toBe('2EQneZBEeL3XGy3YaQAgxwxYvKq2bRPfQVpiGXgpQEfv');
 		});
@@ -35,13 +32,10 @@ describe('sol-address.services', () => {
 			const foo = await deriveSolAddress(p, network);
 			const encoder = new TextEncoder();
 			const uint8Array = encoder.encode(foo);
-			const base58StringBytes = Uint8Array.from([...foo].map((c) => c.charCodeAt(0)));
-			const decoder2 = getAddressDecoder();
-			const bar = decoder2.decode(base58StringBytes);
 
 			const address = decoder.decode(Uint8Array.from(uint8Array));
 
-			console.log(`SolAddress for ${network}`, foo, base58StringBytes, uint8Array, bar, address);
+			console.log(`SolAddress for ${network}`, foo, uint8Array, address);
 
 			expect(address).toBe('2EQneZBEeL3XGy3YaQAgxwxYvKq2bRPfQVpiGXgpQEfv');
 		});
