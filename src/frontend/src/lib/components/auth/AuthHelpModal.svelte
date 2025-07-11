@@ -20,8 +20,8 @@
 
 	let currentStep: WizardStep<WizardStepsAuthHelp> | undefined;
 
-	let title: string;
-	$: title = currentStep?.title ?? $i18n.auth.help.text.title;
+	let titleString: string;
+	$: titleString = currentStep?.title ?? $i18n.auth.help.text.title;
 
 	onMount(() => {
 		if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {
@@ -42,7 +42,7 @@
 
 <WizardModal {steps} bind:this={modal} bind:currentStep onClose={close}>
 	{#snippet title()}
-		<span class="text-xl">{title}</span>
+		<span class="text-xl">{titleString}</span>
 	{/snippet}
 
 	{#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}

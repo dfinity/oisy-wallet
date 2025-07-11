@@ -22,8 +22,8 @@ describe('goToWizardStep', () => {
 		mockSteps.forEach((step, index) => {
 			mockModal.set.mockClear();
 			goToWizardStep({
-				modal: mockModal as unknown as WizardModal,
-				steps: mockSteps,
+				modal: mockModal as unknown as WizardModal<WizardStepsSend>,
+				steps: mockSteps as WizardSteps<WizardStepsSend>,
 				stepName: step.name as WizardStepsSend
 			});
 
@@ -33,8 +33,8 @@ describe('goToWizardStep', () => {
 
 	it('should set the modal to 0 if step name is not found', () => {
 		goToWizardStep({
-			modal: mockModal as unknown as WizardModal,
-			steps: mockSteps,
+			modal: mockModal as unknown as WizardModal<WizardStepsSend>,
+			steps: mockSteps as WizardSteps<WizardStepsSend>,
 			stepName: 'nonExistentStep' as WizardStepsSend
 		});
 

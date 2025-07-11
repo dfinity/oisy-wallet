@@ -77,7 +77,7 @@
 		closeTokenList();
 	};
 
-	let title = $derived(
+	let titleString = $derived(
 		selectTokenType === 'source'
 			? $i18n.swap.text.select_source_token
 			: selectTokenType === 'destination'
@@ -119,7 +119,7 @@
 	onClose={close}
 	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
 >
-	{#snippet title()}{title}{/snippet}
+	{#snippet title()}{titleString}{/snippet}
 
 	{#if nonNullish(selectTokenType)}
 		<SwapTokensList on:icSelectToken={selectToken} on:icCloseTokensList={closeTokenList} />
