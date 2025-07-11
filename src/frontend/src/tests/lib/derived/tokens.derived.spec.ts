@@ -28,8 +28,10 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
@@ -41,6 +43,7 @@ import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SplToken } from '$sol/types/spl';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
@@ -60,6 +63,15 @@ describe('tokens.derived', () => {
 		id: parseTokenId('Erc20UserTokenId'),
 		symbol: 'EUTK',
 		address: `${mockValidErc20Token.address}2`,
+		version: undefined,
+		enabled: true
+	};
+
+	const mockErc721CustomToken: Erc721CustomToken = {
+		...mockValidErc721Token,
+		id: parseTokenId('Erc721DefaultTokenId'),
+		symbol: 'DQH',
+		address: `${mockValidErc721Token.address}1`,
 		version: undefined,
 		enabled: true
 	};
@@ -88,6 +100,7 @@ describe('tokens.derived', () => {
 
 			erc20DefaultTokensStore.reset();
 			erc20UserTokensStore.resetAll();
+			erc721CustomTokensStore.resetAll();
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
@@ -102,6 +115,7 @@ describe('tokens.derived', () => {
 		it('should return all the non-testnet tokens by default', () => {
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
 			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
+			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
 			splDefaultTokensStore.add(mockSplDefaultToken);
@@ -120,8 +134,9 @@ describe('tokens.derived', () => {
 				ARBITRUM_ETH_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
-				{ ...mockIcrcCustomToken, id: result[11].id },
+				{ ...mockErc721CustomToken, id: result[10].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[11].id },
+				{ ...mockIcrcCustomToken, id: result[12].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);

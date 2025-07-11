@@ -5,10 +5,15 @@
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
-	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+	import {
+		saveErc20UserTokens,
+		saveErc721CustomTokens
+	} from '$eth/services/manage-tokens.services';
 	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
+	import type { Erc721Metadata } from '$eth/types/erc721';
+	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token.js';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
@@ -102,37 +107,48 @@
 	};
 
 	const saveErc20Token = async () => {
-		if (isNullishOrEmpty(erc20ContractAddress)) {
+		if (isNullishOrEmpty(ercContractAddress)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.invalid_contract_address }
 			});
 			return;
 		}
 
-		if (isNullish(erc20Metadata)) {
+		if (isNullish(ercTokenMetadata)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.no_metadata }
 			});
 			return;
 		}
 
-		await saveErc20Deprecated([
-			{
-				address: erc20ContractAddress,
-				...erc20Metadata,
-				network: network as EthereumNetwork,
-				enabled: true
-			}
-		]);
+		if (ercTokenMetadata.decimals > 0) {
+			await saveErc20Deprecated([
+				{
+					address: ercContractAddress,
+					...ercTokenMetadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
 
-		await saveErc20([
-			{
-				address: erc20ContractAddress,
-				...erc20Metadata,
-				network: network as EthereumNetwork,
-				enabled: true
-			}
-		]);
+			await saveErc20([
+				{
+					address: ercContractAddress,
+					...ercTokenMetadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
+		} else {
+			await saveErc721([
+				{
+					address: ercContractAddress,
+					...ercTokenMetadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
+		}
 	};
 
 	const saveSplToken = () => {
@@ -193,6 +209,16 @@
 			identity: $authIdentity
 		});
 
+	const saveErc721 = (tokens: SaveErc721CustomToken[]): Promise<void> =>
+		saveErc721CustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
 	const saveSpl = (tokens: SaveSplCustomToken[]): Promise<void> =>
 		saveSplCustomTokens({
 			tokens,
@@ -213,8 +239,8 @@
 	let ledgerCanisterId: string | undefined = $state();
 	let indexCanisterId: string | undefined = $state();
 
-	let erc20ContractAddress: string | undefined = $state();
-	let erc20Metadata: Erc20Metadata | undefined = $state();
+	let ercContractAddress: string | undefined = $state();
+	let ercTokenMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
 
 	let splTokenAddress: string | undefined = $state();
 	let splMetadata: TokenMetadata | undefined = $state();
@@ -223,7 +249,7 @@
 	let tokenData: Partial<AddTokenData> = $state({});
 
 	$effect(() => {
-		({ ledgerCanisterId, indexCanisterId, erc20ContractAddress, splTokenAddress } = tokenData);
+		({ ledgerCanisterId, indexCanisterId, ercContractAddress, splTokenAddress } = tokenData);
 	});
 </script>
 
@@ -249,9 +275,9 @@
 			<EthAddTokenReview
 				on:icBack={modal.back}
 				on:icSave={saveErc20Token}
-				contractAddress={erc20ContractAddress}
+				contractAddress={ercContractAddress}
 				{network}
-				bind:metadata={erc20Metadata}
+				bind:metadata={ercTokenMetadata}
 			/>
 		{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
 			<SolAddTokenReview

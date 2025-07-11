@@ -9,6 +9,7 @@
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
+	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
@@ -83,9 +84,10 @@
 	})();
 
 	const loadData = async () => {
-		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
+		// Load Erc20 and Erc721 contracts and ICRC metadata before loading balances and transactions
 		await Promise.all([
 			loadErc20Tokens({ identity: $authIdentity }),
+			loadErc721Tokens({ identity: $authIdentity }),
 			loadIcrcTokens({ identity: $authIdentity }),
 			loadSplTokens({ identity: $authIdentity })
 		]);

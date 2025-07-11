@@ -2,7 +2,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
-import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
+import type { Erc721ContractAddress, Erc721Metadata, Nft } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -30,6 +30,51 @@ export class InfuraErc721Provider {
 			symbol,
 			decimals: 0 // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 		};
+	};
+
+	getNftMetadata = async ({
+		contractAddress,
+		tokenId
+	}: {
+		contractAddress: string;
+		tokenId: number;
+	}): Promise<Nft> => {
+		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
+
+		try {
+			const [contractName, contractSymbol, tokenUri] = await Promise.all([
+				erc721Contract.name(),
+				erc721Contract.symbol(),
+				erc721Contract.tokenURI(tokenId)
+			]);
+
+			const metadataUrl = tokenUri.replace('ipfs://', 'https://ipfs.io/ipfs/');
+
+			const response = await fetch(metadataUrl);
+			const metadata = await response.json();
+
+			let imageUrl = metadata?.image ?? '';
+			if (imageUrl.startsWith('ipfs://')) {
+				imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+			}
+
+			const mappedAttributes = (metadata?.attributes ?? []).map(
+				(attr: { trait_type: string; value: string | number }) => ({
+					traitType: attr.trait_type,
+					value: attr.value.toString()
+				})
+			);
+
+			return {
+				contractName,
+				contractSymbol,
+				name: metadata?.name ?? '',
+				attributes: mappedAttributes,
+				imageUrl
+			};
+		} catch (error: unknown) {
+			throw new Error(`Failed to fetch erc721 token metadata: ${error}`);
+		}
 	};
 }
 
