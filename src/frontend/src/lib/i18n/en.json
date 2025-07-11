@@ -486,6 +486,7 @@
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
 			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
+			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
@@ -1045,8 +1046,7 @@
 			"disconnected": "WalletConnect disconnected.",
 			"session_ended": "WalletConnect session was ended.",
 			"connected": "WalletConnect connected.",
-			"eth_transaction_executed": "WalletConnect eth_sendTransaction request executed.",
-			"sol_transaction_executed": "WalletConnect \"$method\" request executed.",
+			"transaction_executed": "WalletConnect \"$method\" request executed.",
 			"sign_executed": "WalletConnect sign request executed."
 		},
 		"error": {
