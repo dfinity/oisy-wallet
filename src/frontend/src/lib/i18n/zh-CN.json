@@ -462,6 +462,7 @@
 			"no_infura_provider": "没有 $network 网络的 Infura 提供商",
 			"no_infura_cketh_provider": "没有 $network 网络的 Infura CkETH 提供商",
 			"no_infura_erc20_provider": "没有 $network 网络的 Infura ERC20 提供商",
+			"no_infura_erc721_provider": "没有 $network 网络的 Infura ERC721 提供商",
 			"no_infura_erc20_icp_provider": "没有 $network 网络的 Infura ERC20 ICP 提供商",
 			"no_solana_network": "没有 $network 网络的 Solana 网络配置",
 			"eth_address_unknown": "ETH 地址未知。",

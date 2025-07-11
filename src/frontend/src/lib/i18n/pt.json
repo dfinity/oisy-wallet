@@ -462,6 +462,7 @@
 			"no_infura_provider": "Nenhum provedor Infura para a rede $network",
 			"no_infura_cketh_provider": "Nenhum provedor Infura CkETH para a rede $network",
 			"no_infura_erc20_provider": "Nenhum provedor Infura ERC20 para a rede $network",
+			"no_infura_erc721_provider": "Nenhum provedor Infura ERC721 para a rede $network",
 			"no_infura_erc20_icp_provider": "Nenhum provedor Infura ERC20 ICP para a rede $network",
 			"no_solana_network": "Nenhuma rede Solana para a rede $network",
 			"eth_address_unknown": "Endereço ETH desconhecido.",

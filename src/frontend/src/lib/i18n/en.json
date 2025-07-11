@@ -462,6 +462,7 @@
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
+			"no_infura_erc721_provider": "No Infura ERC721 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
