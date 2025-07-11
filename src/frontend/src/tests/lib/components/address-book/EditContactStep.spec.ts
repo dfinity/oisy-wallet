@@ -1,20 +1,44 @@
 import EditContactStep from '$lib/components/address-book/EditContactStep.svelte';
+import { vi } from 'vitest';
+import imageCompression from 'browser-image-compression';
+import { render, fireEvent, waitFor } from '@testing-library/svelte';
 import {
-	ADDRESS_LIST_ITEM_DELETE_BUTTON,
-	ADDRESS_LIST_ITEM_EDIT_BUTTON,
-	CONTACT_EDIT_ADD_ADDRESS_BUTTON,
-	CONTACT_EDIT_DELETE_CONTACT_BUTTON,
-	CONTACT_HEADER_EDITING_EDIT_BUTTON,
-	CONTACT_SHOW_CLOSE_BUTTON
+  ADDRESS_LIST_ITEM_DELETE_BUTTON,
+  ADDRESS_LIST_ITEM_EDIT_BUTTON,
+  CONTACT_EDIT_ADD_ADDRESS_BUTTON,
+  CONTACT_EDIT_DELETE_CONTACT_BUTTON,
+  CONTACT_HEADER_EDITING_EDIT_BUTTON,
+  CONTACT_SHOW_CLOSE_BUTTON,
+  AVATAR_IMAGE
 } from '$lib/constants/test-ids.constants';
 import type { ContactUi } from '$lib/types/contact';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
-import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('EditContactStep', () => {
+	
+vi.mock('browser-image-compression', () => {
+  const mockFn = vi.fn((file: File, opts: any) => Promise.resolve(file)); 
+  (mockFn as any).getDataUrlFromFile = vi.fn(() => 
+    Promise.resolve('data:image/png;base64,MOCK')
+  );
+  return {
+    __esModule: true,
+    default: mockFn
+  };
+});
+it('compresses an image', async () => {
+	// define the variable in scope:
+	const file = new File(['👍'], 'avatar.png', { type: 'image/png' });
+  
+	// now both calls work and use our mock:
+	const compressed = await imageCompression(file, { maxSizeMB: 0.1 });
+	const dataUrl    = await imageCompression.getDataUrlFromFile(compressed);
+  
+	expect(dataUrl).toBe('data:image/png;base64,MOCK');
+  });
+  
 	const mockContact: ContactUi = {
 		id: 1n,
 		name: 'Test Contact',
@@ -39,6 +63,21 @@ describe('EditContactStep', () => {
 	const mockAddAddress = vi.fn();
 	const mockDeleteContact = vi.fn();
 	const mockDeleteAddress = vi.fn();
+
+
+	function renderComponent(contact = mockContact) {
+	  return render(EditContactStep, {
+		props: {
+		  contact,
+		  onClose: mockClose,
+		  onEdit: mockEdit,
+		  onEditAddress: mockEditAddress,
+		  onAddAddress: mockAddAddress,
+		  onDeleteContact: mockDeleteContact,
+		  onDeleteAddress: mockDeleteAddress
+		}
+	  });
+	}
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -206,4 +245,85 @@ describe('EditContactStep', () => {
 
 		expect(addAddressButton).toBeDisabled();
 	});
+	it('compresses an image', async () => {
+		// define the variable in scope:
+		const file = new File(['👍'], 'avatar.png', { type: 'image/png' });
+	  
+		// now both calls work and use our mock:
+		const compressed = await imageCompression(file, { maxSizeMB: 0.1 });
+		const dataUrl    = await imageCompression.getDataUrlFromFile(compressed);
+	  
+		expect(dataUrl).toBe('data:image/png;base64,MOCK');
+	  });
+	  
+
+
+	  it('should render the contact name and addresses', () => {
+		const { getByText } = renderComponent();
+		expect(getByText(mockContact.name)).toBeInTheDocument();
+		expect(getByText(en.address.types.Eth)).toBeInTheDocument();
+		expect(getByText('My ETH Address')).toBeInTheDocument();
+		expect(getByText(en.address.types.Btc)).toBeInTheDocument();
+		expect(getByText('My BTC Address')).toBeInTheDocument();
+	  });
+	
+	  it('should call edit function when edit button is clicked', async () => {
+		const { getByTestId } = renderComponent();
+		await fireEvent.click(getByTestId(CONTACT_HEADER_EDITING_EDIT_BUTTON));
+		expect(mockEdit).toHaveBeenCalledOnce();
+		expect(mockEdit).toHaveBeenCalledWith(mockContact);
+	  });
+	
+	  it('should call addAddress function when add address button is clicked', async () => {
+		const { getByTestId } = renderComponent();
+		await fireEvent.click(getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON));
+		expect(mockAddAddress).toHaveBeenCalledOnce();
+	  });
+	
+	  it('should call deleteContact function when delete contact button is clicked', async () => {
+		const { getByTestId } = renderComponent();
+		await fireEvent.click(getByTestId(CONTACT_EDIT_DELETE_CONTACT_BUTTON));
+		expect(mockDeleteContact).toHaveBeenCalledOnce();
+		expect(mockDeleteContact).toHaveBeenCalledWith(mockContact.id);
+	  });
+	
+	  it('should call close function when close button is clicked', async () => {
+		const { getByTestId } = renderComponent();
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
+		expect(mockClose).toHaveBeenCalledOnce();
+	  });
+	
+	  it('should call editAddress function when edit address button is clicked', async () => {
+		const { getAllByTestId } = renderComponent();
+		await fireEvent.click(getAllByTestId(ADDRESS_LIST_ITEM_EDIT_BUTTON)[0]);
+		expect(mockEditAddress).toHaveBeenCalledOnce();
+		expect(mockEditAddress).toHaveBeenCalledWith(0);
+	  });
+	
+	  it('should call deleteAddress function when delete address button is clicked', async () => {
+		const { getAllByTestId } = renderComponent();
+		await fireEvent.click(getAllByTestId(ADDRESS_LIST_ITEM_DELETE_BUTTON)[0]);
+		expect(mockDeleteAddress).toHaveBeenCalledOnce();
+		expect(mockDeleteAddress).toHaveBeenCalledWith(0);
+	  });
+	
+	  it('should disable add-address button when onAddAddress is null', () => {
+		const { getByTestId } = render(
+		  EditContactStep,
+		  {
+			props: {
+			  contact: mockContact,
+			  onClose: mockClose,
+			  onEdit: mockEdit,
+			  onEditAddress: mockEditAddress,
+			  onAddAddress: null as any,
+			  onDeleteContact: mockDeleteContact,
+			  onDeleteAddress: mockDeleteAddress
+			}
+		  }
+		);
+		expect(getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON)).toBeDisabled();
+	  });
+
+	  
 });

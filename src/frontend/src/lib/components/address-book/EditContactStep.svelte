@@ -51,7 +51,7 @@
 		if (!file) {
 			return;
 		}
-		const options = { maxSizeKB: 100, maxWidthOrHeight: 200, useWebWorker: false };
+		const options = { maxSizeMB: 0.1, maxWidthOrHeight: 200, useWebWorker: false };
 		const compressed = await imageCompression(file, options);
 		const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
 		imageUrl = null;

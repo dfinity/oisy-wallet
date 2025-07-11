@@ -6,6 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
 	import { selectColorForName } from '$lib/utils/contact.utils';
+	import { AVATAR_IMAGE } from '$lib/constants/test-ids.constants';
 
 	interface AvatarProps {
 		name?: string;
@@ -44,11 +45,12 @@
 	);
 </script>
 
-<button
-	type="button"
-	class={`${commonClasses} flex items-center justify-center ${!imageUrl ? bgColor : ''}`}
-	aria-label={ariaLabel}
->
+<div
+		class={`${commonClasses} flex items-center justify-center ${!imageUrl ? bgColor : ''}`}
+		role="img"
+		aria-label={ariaLabel}
+		data-tid={AVATAR_IMAGE}
+	>
 	{#if imageUrl}
 		<img src={imageUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
 	{:else if initials}
@@ -56,4 +58,4 @@
 	{:else}
 		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
 	{/if}
-</button>
+</div>
