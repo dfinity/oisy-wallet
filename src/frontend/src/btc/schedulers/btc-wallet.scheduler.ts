@@ -9,7 +9,7 @@ import { getBtcBalance } from '$lib/api/signer.api'; // Remove non-existent getB
 import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
-import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
@@ -109,9 +109,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}: Omit<LoadBtcWalletParams, 'shouldFetchTransactions'>): Promise<
 		CertifiedData<BtcBalanceData>
 	> => {
+		const pendingBalance = getPendingTransactionsBalance(btcAddress);
+
 		if (!certified) {
 			// For uncertified calls, calculate simple balance structure
-			const simpleBalance =
+			const totalBalance =
 				nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]
 					? await getBalanceQuery({
 							identity,
@@ -123,11 +125,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					: null;
 
 			return {
-				data: simpleBalance
+				data: totalBalance
 					? {
-							available: simpleBalance,
-							pending: 0n,
-							total: simpleBalance
+							available: totalBalance - pendingBalance,
+							pending: pendingBalance,
+							total: totalBalance
 						}
 					: null,
 				certified: false
@@ -135,7 +137,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		}
 
 		// For certified calls, get total balance
-		// TODO: Implement pending transaction detection once backend API is available
 		const totalBalance = await getBtcBalance({
 			identity,
 			network: mapToSignerBitcoinNetwork({ network: bitcoinNetwork }),
@@ -149,14 +150,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			};
 		}
 
-		const pendingAmount = getPendingTransactionsBalance(btcAddress);
-
-		console.warn('pendingAmount = ', pendingAmount.toString());
-
 		return {
 			data: {
-				available: totalBalance - pendingAmount,
-				pending: pendingAmount,
+				available: totalBalance - pendingBalance,
+				pending: pendingBalance,
 				total: totalBalance
 			},
 			certified: true
