@@ -3,6 +3,7 @@ import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
 import { authSignedIn } from '$lib/derived/auth.derived';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
+import it from '$lib/i18n/it.json';
 import pt from '$lib/i18n/pt.json';
 import zhcn from '$lib/i18n/zh-CN.json';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -21,6 +22,11 @@ const deI18n = (): I18n => ({
 	lang: Languages.GERMAN
 });
 
+const itI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: it as I18n }),
+	lang: Languages.ITALIAN
+});
+
 const ptI18n = (): I18n => ({
 	...mergeWithFallback({ refLang: enI18n(), targetLang: pt as I18n }),
 	lang: Languages.PORTUGUESE
@@ -37,6 +43,8 @@ const loadLang = (lang: Languages): I18n => {
 			return zhcnI18n();
 		case Languages.GERMAN:
 			return deI18n();
+		case Languages.ITALIAN:
+			return itI18n();
 		case Languages.PORTUGUESE:
 			return ptI18n();
 		default:
