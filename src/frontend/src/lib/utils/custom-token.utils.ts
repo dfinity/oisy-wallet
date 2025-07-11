@@ -1,12 +1,14 @@
 import type {
 	CustomToken,
 	Erc20Token,
+	Erc721Token,
 	IcrcToken,
 	SplToken,
 	Token
 } from '$declarations/backend/backend.did';
 import type {
 	Erc20SaveCustomToken,
+	Erc721SaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
@@ -36,6 +38,14 @@ const toErc20CustomToken = ({
 	symbol: toNullable(symbol)
 });
 
+const toErc721CustomToken = ({
+	address: token_address,
+	chainId: chain_id
+}: Erc721SaveCustomToken): Erc721Token => ({
+	token_address,
+	chain_id
+});
+
 const toSplCustomToken = ({
 	address: token_address,
 	decimals,
@@ -60,6 +70,10 @@ export const toCustomToken = ({
 
 		if (networkKey === 'Erc20') {
 			return { Erc20: toErc20CustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc721') {
+			return { Erc721: toErc721CustomToken(rest) };
 		}
 
 		if (networkKey === 'SplMainnet') {
