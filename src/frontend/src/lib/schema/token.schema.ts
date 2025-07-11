@@ -10,6 +10,7 @@ export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 export const TokenStandardSchema = z.enum([
 	'ethereum',
 	'erc20',
+	'erc721',
 	'icp',
 	'icrc',
 	'dip20',
