@@ -1,6 +1,6 @@
 import { Cbor } from '@dfinity/agent';
 import { arrayOfNumberToUint8Array } from '@dfinity/utils';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 // Mint
 

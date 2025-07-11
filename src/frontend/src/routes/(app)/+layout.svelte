@@ -13,6 +13,7 @@
 	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -45,43 +46,47 @@
 	});
 </script>
 
-<div
-	class="relative min-h-[640px] pb-5 md:pb-0 lg:flex lg:h-full lg:flex-col"
-	class:overflow-hidden={$authNotSignedIn}
-	class:flex={$authSignedIn}
-	class:h-full={$authSignedIn}
-	class:flex-col={$authSignedIn}
-	class:md:flex={$authNotSignedIn}
-	class:md:flex-col={$authNotSignedIn}
-	class:md:h-full={$authNotSignedIn}
->
-	<Header />
+<div class:h-dvh={$authNotSignedIn}>
+	<div
+		class="relative min-h-[640px] pb-5 md:pb-0 lg:flex lg:h-full lg:flex-col"
+		class:overflow-hidden={$authNotSignedIn}
+		class:flex={$authSignedIn}
+		class:h-full={$authSignedIn}
+		class:flex-col={$authSignedIn}
+		class:md:flex={$authNotSignedIn}
+		class:md:flex-col={$authNotSignedIn}
+		class:md:h-full={$authNotSignedIn}
+	>
+		<Header />
 
-	<AuthGuard>
-		<SplitPane>
-			<NavigationMenu slot="menu">
-				{#if tokensRoute}
-					<div transition:fade class="hidden xl:block">
-						<DappsCarousel />
-					</div>
+		<AuthGuard>
+			<SplitPane>
+				<NavigationMenu slot="menu">
+					{#if tokensRoute}
+						<Responsive up="xl">
+							<div transition:fade class="hidden xl:block">
+								<DappsCarousel />
+							</div>
+						</Responsive>
+					{/if}
+				</NavigationMenu>
+
+				{#if showHero}
+					<Hero />
 				{/if}
-			</NavigationMenu>
 
-			{#if showHero}
-				<Hero />
-			{/if}
+				<Loaders>
+					<slot />
+				</Loaders>
+			</SplitPane>
 
-			<Loaders>
-				<slot />
-			</Loaders>
-		</SplitPane>
+			<MobileNavigationMenu>
+				<NavigationMenuMainItems testIdPrefix="mobile" />
+			</MobileNavigationMenu>
 
-		<MobileNavigationMenu>
-			<NavigationMenuMainItems testIdPrefix="mobile" />
-		</MobileNavigationMenu>
+			<Modals />
+		</AuthGuard>
 
-		<Modals />
-	</AuthGuard>
-
-	<Footer />
+		<Footer />
+	</div>
 </div>

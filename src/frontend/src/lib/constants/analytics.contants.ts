@@ -21,6 +21,7 @@ export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR = 'eth_to_cketh_convert_erro
 export const TRACK_COUNT_ETH_LOADING_BALANCE_ERROR = 'eth_loading_balance_error';
 export const TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR = 'eth_loading_transactions_error';
 export const TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR = 'eth_pending_transactions_error';
+export const TRACK_ETH_ESTIMATE_GAS_ERROR = 'eth_estimate_gas_error';
 
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success';
@@ -52,6 +53,7 @@ export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect';
 // dApps
 export const TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK = 'dapp_modal_open_hyperlink';
 export const TRACK_COUNT_DAPP_OPEN_INFO_MODAL = 'dapp_open_info_modal';
+export const TRACK_COUNT_DAPP_FILTER_BUTTON = 'dapp_onclick_filter_button';
 
 // Carousel
 export const TRACK_COUNT_CAROUSEL_NEXT = 'carousel_next';
@@ -90,13 +92,17 @@ export const TRACK_SPRINKLES_BANNER_CLICK = 'sprinkles_banner_click';
 // Welcome
 export const TRACK_WELCOME_OPEN = 'welcome_open';
 
-// Delete Token
+// Edit/Delete Token
 export const TRACK_DELETE_TOKEN_SUCCESS = 'delete_token_success';
+export const TRACK_EDIT_TOKEN_SUCCESS = 'edit_token_success';
 
 // Navigation
 export const TRACK_COUNT_OPEN_WHY_OISY = 'open_why_oisy';
 export const TRACK_COUNT_OPEN_DOCUMENTATION = 'open_documentation';
 export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog';
+
+// I18n
+export const TRACK_CHANGE_LANGUAGE = 'change_language';
 
 // Snapshots
 export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
@@ -108,11 +114,12 @@ export const USER_MENU_ROUTE = 'user-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
 
+// Privacymode change
+export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
+
 // Temporary events
 // We have sudden spikes in the number of getLogs calls to Infura, which is causing issues.
 // However, we are not sure when and how they happen.
 // This event is used to track the number of calls to Infura's getLogs endpoint.
 // TODO: Remove these events once the issue is resolved.
 export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';
-export const TRACK_IC_NETWORK_CONTACTS_GENERATION_ISSUE =
-	'track-ic-network-contacts-generation-issue';

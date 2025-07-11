@@ -1,14 +1,15 @@
 name: E2E Tests
 
 on:
-  push:
-    branches:
-      - main
+  # TODO: Re-enable the E2E test CIs when the E2E tests are stable and not failing frequently.
+  #  push:
+  #    branches:
+  #      - main
   pull_request:
     types: [opened, synchronize, labeled]
   merge_group:
-  schedule:
-    - cron: '30 3 * * *'
+  #  schedule:
+  #    - cron: '30 3 * * *'
   workflow_dispatch:
 
 permissions: {}

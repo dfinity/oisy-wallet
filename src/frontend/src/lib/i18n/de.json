@@ -52,7 +52,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Vermögen",
-			"settings": "Einrichten",
+			"settings": "Einstellungen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
 			"airdrops": "Prämien",
@@ -416,7 +416,8 @@
 			"incubated_with": "Entwickelt mit",
 			"by": "von",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": ""
 		},
 		"alt": {
 			"dfinity": "Zur Website der DFINITY Foundation gehen"
@@ -461,6 +462,7 @@
 			"no_infura_provider": "Kein Infura-Anbieter für Netzwerk $network",
 			"no_infura_cketh_provider": "Kein Infura CkETH-Anbieter für Netzwerk $network",
 			"no_infura_erc20_provider": "Kein Infura-ERC20-Anbieter für Netzwerk $network",
+			"no_infura_erc721_provider": "Kein Infura-ERC721-Anbieter für Netzwerk $network",
 			"no_infura_erc20_icp_provider": "Kein Infura-ERC20-ICP-Anbieter für Netzwerk $network",
 			"no_solana_network": "Kein Solana-Netzwerk für Netzwerk $network",
 			"eth_address_unknown": "ETH-Adresse ist unbekannt.",
@@ -481,8 +483,10 @@
 			"btc_withdrawal_statuses": "Fehler beim Abrufen der BTC-Auszahlungsstatus.",
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
+			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"erc20_user_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
-			"spl_user_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
+			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
+			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
@@ -554,7 +558,7 @@
 	},
 	"receive": {
 		"text": {
-			"receive": "Empfang",
+			"receive": "Empfangen",
 			"address": "Empfangsadresse",
 			"receive_token": "$token empfangen"
 		},
@@ -643,6 +647,7 @@
 			"sending": "Sende...",
 			"signing": "Signiere...",
 			"signing_message": "Nachricht wird signiert...",
+			"confirming": "",
 			"network": "Netzwerk",
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",
@@ -717,7 +722,8 @@
 			"no_pending_bitcoin_transaction": "Fehler beim Laden ausstehender Bitcoin-Transaktionen. Bitte später erneut versuchen.",
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist etwas schiefgelaufen.",
 			"unable_to_retrieve_amount": "k. A. (konnte nicht abgerufen werden)",
-			"solana_transaction_expired": "Deine Send-Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, wahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichte. Wir haben sie auf den zuletzt empfohlenen Betrag aktualisiert, bitte versuche es erneut."
+			"solana_transaction_expired": "Deine Send-Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, wahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichte. Wir haben sie auf den zuletzt empfohlenen Betrag aktualisiert, bitte versuche es erneut.",
+			"solana_confirmation_failed": "Wir konnten keine gültige Bestätigung der soeben getätigten Transaktion erhalten. Bitte warte ein paar Sekunden und überprüfe in der Transaktionsliste des Tokens, ob die Transaktion korrekt getätigt wurde."
 		}
 	},
 	"convert": {
@@ -830,8 +836,8 @@
 			"balance": "Guthaben",
 			"hide_zero_balances": "Nullsalden verbergen",
 			"all_tokens_with_zero_hidden": "Alle Assets mit Nullsaldo sind derzeit verborgen",
-			"filter_nothing_found": "Ups, nichts gefunden",
-			"filter_nothing_found_description": "Gib Token-Ticker oder Namen ein, um die Liste zu filtern",
+			"filter_nothing_found": "Keine aktiven Token gefunden",
+			"filter_nothing_found_description": "Suche unten nach verfügbaren Token oder importiere zusätzliche Token mittels \"Token verwalten\"",
 			"filter_placeholder": "Nach Token oder Symbol filtern",
 			"buy_or_receive": "Kaufe oder empfange jetzt deine ersten Token, um sie in der Liste zu sehen",
 			"initializing": "Initialisiere...",
@@ -911,7 +917,8 @@
 				"list_settings": "Listen-Einstellungen",
 				"import_token": "Token importieren",
 				"network": "Netzwerk",
-				"all_tokens_zero_balance": "Alle Token haben Nullsaldo."
+				"all_tokens_zero_balance": "Alle Token haben Nullsaldo.",
+				"enable_more_assets": "Weitere Token aktivieren"
 			},
 			"placeholder": {
 				"select_network": "Netzwerk auswählen"
@@ -1039,8 +1046,7 @@
 			"disconnected": "WalletConnect getrennt.",
 			"session_ended": "WalletConnect-Sitzung wurde beendet.",
 			"connected": "WalletConnect verbunden.",
-			"eth_transaction_executed": "WalletConnect eth_sendTransaction-Anfrage ausgeführt.",
-			"sol_transaction_executed": "WalletConnect \"$method\"-Anfrage ausgeführt.",
+			"transaction_executed": "WalletConnect \"$method\"-Anfrage ausgeführt.",
 			"sign_executed": "WalletConnect-Signaturanfrage ausgeführt."
 		},
 		"error": {
@@ -1097,6 +1103,15 @@
 			"pending": "Ausstehend...",
 			"safe": "Sicher",
 			"unconfirmed": "Unbestätigt"
+		},
+		"type": {
+			"send": "Senden",
+			"receive": "Empfang",
+			"withdraw": "Auszahlung",
+			"deposit": "Einzahlung",
+			"approve": "Genehmigung",
+			"burn": "Burn",
+			"mint": "Mint"
 		},
 		"label": {
 			"reimbursement": "Rückerstattung",

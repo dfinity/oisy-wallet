@@ -1,4 +1,8 @@
-import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services';
+import {
+	syncWallet,
+	syncWalletError,
+	syncWalletFromCache
+} from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { STAGING } from '$lib/constants/app.constants';
 import {
@@ -8,7 +12,7 @@ import {
 } from '$lib/stores/address.store';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { WalletWorker } from '$lib/types/listener';
-import type { PostMessage, PostMessageDataResponseError } from '$lib/types/post-message';
+import type { PostMessage } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdBTCMainnet,
@@ -34,21 +38,25 @@ export const initBtcWalletWorker = async ({
 	const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
 	const isMainnetNetwork = isNetworkIdBTCMainnet(networkId);
 
-	worker.onmessage = ({ data }: MessageEvent<PostMessage<BtcPostMessageDataResponseWallet>>) => {
-		const { msg } = data;
+	await syncWalletFromCache({ tokenId, networkId });
+
+	worker.onmessage = ({
+		data: dataMsg
+	}: MessageEvent<PostMessage<BtcPostMessageDataResponseWallet>>) => {
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncBtcWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as BtcPostMessageDataResponseWallet
+					data: data as BtcPostMessageDataResponseWallet
 				});
 				return;
 
 			case 'syncBtcWalletError':
 				syncWalletError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error,
+					error: data.error,
 					/**
 					 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
 					 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
@@ -75,6 +83,12 @@ export const initBtcWalletWorker = async ({
 		minterCanisterId
 	};
 
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopBtcWalletTimer'
+		});
+	};
+
 	return {
 		start: () => {
 			worker.postMessage({
@@ -82,16 +96,16 @@ export const initBtcWalletWorker = async ({
 				data
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopBtcWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerBtcWalletTimer',
 				data
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };

@@ -170,6 +170,7 @@
 
 	<EthFeeContext
 		amount={amount.toString()}
+		{data}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
 		{destination}

@@ -6,12 +6,12 @@
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
 	import type { Erc20Metadata } from '$eth/types/erc20';
-	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
@@ -24,10 +24,10 @@
 	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import type { Network } from '$lib/types/network';
-	import type { TokenMetadata } from '$lib/types/token';
+	import type { Token, TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdEthereum,
@@ -35,11 +35,11 @@
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
+	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
 	let {
 		initialSearch,
@@ -71,28 +71,16 @@
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal | undefined = $state();
 
-	const saveTokens = async ({
-		detail: { icrc, erc20, spl }
-	}: CustomEvent<{
-		icrc: IcrcCustomToken[];
-		erc20: Erc20UserToken[];
-		spl: SplTokenToggleable[];
-	}>) => {
-		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
-			toastsShow({
-				text: $i18n.tokens.manage.info.no_changes,
-				level: 'info',
-				duration: 5000
-			});
-
-			return;
-		}
-
-		await Promise.allSettled([
-			...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
-			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
-			...(spl.length > 0 ? [saveSpl(spl)] : [])
-		]);
+	const saveTokens = async ({ detail: tokens }: CustomEvent<Record<string, Token>>) => {
+		await saveAllCustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			$authIdentity,
+			$i18n
+		});
 	};
 
 	const addIcrcToken = async () => {
@@ -127,6 +115,15 @@
 			});
 			return;
 		}
+
+		await saveErc20Deprecated([
+			{
+				address: erc20ContractAddress,
+				...erc20Metadata,
+				network: network as EthereumNetwork,
+				enabled: true
+			}
+		]);
 
 		await saveErc20([
 			{
@@ -175,8 +172,19 @@
 			identity: $authIdentity
 		});
 
-	const saveErc20 = (tokens: SaveUserToken[]): Promise<void> =>
+	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+	const saveErc20Deprecated = (tokens: SaveUserToken[]): Promise<void> =>
 		saveErc20UserTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
+	const saveErc20 = (tokens: SaveErc20CustomToken[]): Promise<void> =>
+		saveErc20CustomTokens({
 			tokens,
 			progress,
 			modalNext: () => modal?.set(3),

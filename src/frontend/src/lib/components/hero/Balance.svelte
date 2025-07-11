@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Tooltip } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -7,6 +6,7 @@
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
@@ -24,7 +24,7 @@
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
-<span class="flex flex-col gap-2">
+<span class="flex flex-col gap-1">
 	<output
 		data-tid={AMOUNT_DATA}
 		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
@@ -54,24 +54,29 @@
 			transparent
 			fullWidth
 			ariaLabel="Set privacy mode on and off"
-			styleClass="bg-transparent p-0 text-xl font-bold"
-			ondblclick={() => setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true })}
+			styleClass="bg-transparent p-0 text-xl font-medium"
+			ondblclick={() =>
+				setPrivacyMode({
+					enabled: !$isPrivacyMode,
+					withToast: false,
+					source: 'Hero - Double click on the Balance'
+				})}
 		>
 			{#if !$isPrivacyMode}
-				<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+				<DelayedTooltip text={$i18n.hero.text.tooltip_toggle_balance}>
 					<TokenExchangeBalance
 						balance={token?.balance}
 						usdBalance={token?.usdBalance}
 						nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
 					/>
-				</Tooltip>
+				</DelayedTooltip>
 			{:else}
-				<Tooltip text={$i18n.hero.text.tooltip_toggle_balance}>
+				<DelayedTooltip text={$i18n.hero.text.tooltip_toggle_balance}>
 					<span class="flex items-center justify-center gap-2">
 						<IconEyeOff />
 						{$i18n.hero.text.hidden_balance}
 					</span>
-				</Tooltip>
+				</DelayedTooltip>
 			{/if}
 		</Button>
 	</div>

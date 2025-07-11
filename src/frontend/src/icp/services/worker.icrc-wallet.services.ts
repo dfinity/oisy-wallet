@@ -1,4 +1,4 @@
-import { syncWallet } from '$icp/services/ic-listener.services';
+import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
@@ -17,10 +17,12 @@ export const initIcrcWalletWorker = async ({
 	indexCanisterId,
 	ledgerCanisterId,
 	id: tokenId,
-	network: { env }
+	network: { env, id: networkId }
 }: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
+
+	await syncWalletFromCache({ tokenId, networkId });
 
 	let restartedWithLedgerOnly = false;
 
@@ -41,7 +43,7 @@ export const initIcrcWalletWorker = async ({
 	};
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<
 			| PostMessageDataResponseWallet
@@ -49,19 +51,19 @@ export const initIcrcWalletWorker = async ({
 			| PostMessageDataResponseWalletCleanUp
 		>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncIcrcWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as PostMessageDataResponseWallet
+					data: data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcrcWalletError':
 				onLoadTransactionsError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: data.error
 				});
 
 				// In case of error, we start the listener again, but only with the ledgerCanisterId,
@@ -74,10 +76,16 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId,
-					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
+					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
 		}
+	};
+
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopIcrcWalletTimer'
+		});
 	};
 
 	return {
@@ -91,11 +99,7 @@ export const initIcrcWalletWorker = async ({
 				}
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopIcrcWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerIcrcWalletTimer',
@@ -105,6 +109,10 @@ export const initIcrcWalletWorker = async ({
 					env
 				}
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };

@@ -91,7 +91,7 @@
 	).filter(({ id }) => !isNetworkIdBitcoin(id));
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
+<form on:submit|preventDefault={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
 			<AddTokenByNetworkDropdown bind:networkName {availableNetworks} />

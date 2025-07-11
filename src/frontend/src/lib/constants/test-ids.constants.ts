@@ -9,6 +9,8 @@ export const NAVIGATION_MENU_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button
 export const NAVIGATION_MENU_DOC_BUTTON = 'navigation-documentation-button';
 export const NAVIGATION_MENU_SUPPORT_BUTTON = 'navigation-support-button';
 
+export const LANGUAGE_DROPDOWN = 'language-dropdown';
+
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
 export const MAX_BUTTON = 'max-button';
@@ -244,3 +246,6 @@ export const TOKEN_MODAL_INDEX_CANISTER_ID_INPUT = 'token-modal-index-canister-i
 export const TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON =
 	'token-modal-index-canister-id-edit-button';
 export const TOKEN_MODAL_SAVE_BUTTON = 'token-modal-save-button';
+
+// AI Assistant
+export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistanta-console-button';

@@ -2,7 +2,10 @@ use std::sync::LazyLock;
 
 use candid::Principal;
 use shared::types::{
-    custom_token::{CustomToken, IcrcToken, SplToken, SplTokenId, Token},
+    custom_token::{
+        ChainId, CustomToken, Erc20Token, Erc721Token, ErcTokenId, IcrcToken, SplToken, SplTokenId,
+        Token,
+    },
     TokenVersion,
 };
 
@@ -48,11 +51,37 @@ static SPL_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     enabled: true,
     version: None,
 });
+static ERC20_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string()));
+static ERC20_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
+static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc20(Erc20Token {
+        token_address: ERC20_TOKEN_ID.clone(),
+        chain_id: ERC20_CHAIN_ID.clone(),
+        symbol: Some("USDC".to_string()),
+        decimals: Some(u8::MAX),
+    }),
+    enabled: true,
+    version: None,
+});
+static ERC721_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x8821bee2ba0df28761afff119d66390d594cd280".to_string()));
+static ERC721_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 137);
+static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc721(Erc721Token {
+        token_address: ERC721_TOKEN_ID.clone(),
+        chain_id: ERC721_CHAIN_ID.clone(),
+    }),
+    enabled: true,
+    version: None,
+});
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
         USER_TOKEN.clone(),
         ANOTHER_USER_TOKEN.clone(),
         SPL_TOKEN.clone(),
+        ERC20_TOKEN.clone(),
+        ERC721_TOKEN.clone(),
     ]
 });
 
@@ -85,6 +114,16 @@ fn test_add_custom_token(user_token: &CustomToken) {
 #[test]
 fn test_remove_custom_spl_token() {
     test_remove_custom_token(&SPL_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_erc20_token() {
+    test_remove_custom_token(&ERC20_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_erc721_token() {
+    test_remove_custom_token(&ERC721_TOKEN)
 }
 
 #[test]

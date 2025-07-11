@@ -1,4 +1,4 @@
-import { syncWallet } from '$icp/services/ic-listener.services';
+import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
@@ -15,13 +15,15 @@ import type {
 export const initDip20WalletWorker = async ({
 	ledgerCanisterId,
 	id: tokenId,
-	network: { env }
+	network: { env, id: networkId }
 }: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
+	await syncWalletFromCache({ tokenId, networkId });
+
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<
 			| PostMessageDataResponseWallet
@@ -29,29 +31,35 @@ export const initDip20WalletWorker = async ({
 			| PostMessageDataResponseWalletCleanUp
 		>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncDip20Wallet':
 				syncWallet({
 					tokenId,
-					data: data.data as PostMessageDataResponseWallet
+					data: data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncDip20WalletError':
 				onLoadTransactionsError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: data.error
 				});
 
 				return;
 			case 'syncDip20WalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId,
-					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
+					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
 		}
+	};
+
+	const stop = () => {
+		worker.postMessage({
+			msg: 'stopDip20WalletTimer'
+		});
 	};
 
 	return {
@@ -64,11 +72,7 @@ export const initDip20WalletWorker = async ({
 				}
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopDip20WalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
 			worker.postMessage({
 				msg: 'triggerDip20WalletTimer',
@@ -77,6 +81,10 @@ export const initDip20WalletWorker = async ({
 					env
 				}
 			});
+		},
+		destroy: () => {
+			stop();
+			worker.terminate();
 		}
 	};
 };
