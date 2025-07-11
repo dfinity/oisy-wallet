@@ -1,13 +1,13 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import usdc from '$eth/assets/usdc.svg';
+import type { Erc721Token } from '$eth/types/erc721';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { RequiredEvmErc721Token } from '$evm/types/erc721';
+import type { NetworkEnvironment } from '$lib/types/network';
+import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import type { NetworkEnvironment } from '$lib/types/network';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import type { Erc721Token } from '$eth/types/erc721';
-import type { CertifiedData } from '$lib/types/store';
 
 export const AZUKI_ELEMENTAL_BEANS_SYMBOL = 'MBeans';
 
@@ -42,10 +42,10 @@ export const DE_GODS_TOKEN: RequiredEvmErc721Token = {
 };
 
 export const createMockErc721Tokens = ({
-																				 n,
-																				 networkEnv,
-																				 start = 0
-																			 }: {
+	n,
+	networkEnv,
+	start = 0
+}: {
 	n: number;
 	networkEnv: NetworkEnvironment;
 	start?: number;
@@ -62,10 +62,10 @@ export const createMockErc721Tokens = ({
 	}));
 
 export const createMockErc721CustomTokens = ({
-																							 n,
-																							 networkEnv,
-																							 start = 0
-																						 }: {
+	n,
+	networkEnv,
+	start = 0
+}: {
 	n: number;
 	networkEnv: NetworkEnvironment;
 	start?: number;

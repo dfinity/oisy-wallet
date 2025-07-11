@@ -1,12 +1,14 @@
 import type {
 	CustomToken,
-	Erc20Token, Erc721Token,
+	Erc20Token,
+	Erc721Token,
 	IcrcToken,
 	SplToken,
 	Token
 } from '$declarations/backend/backend.did';
 import type {
-	Erc20SaveCustomToken, Erc721SaveCustomToken,
+	Erc20SaveCustomToken,
+	Erc721SaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
@@ -37,9 +39,9 @@ const toErc20CustomToken = ({
 });
 
 const toErc721CustomToken = ({
-															 address: token_address,
-															 chainId: chain_id
-														 }: Erc721SaveCustomToken): Erc721Token => ({
+	address: token_address,
+	chainId: chain_id
+}: Erc721SaveCustomToken): Erc721Token => ({
 	token_address,
 	chain_id
 });

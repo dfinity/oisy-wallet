@@ -13,10 +13,10 @@ import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const saveCustomTokens = async ({
-																				 progress,
-																				 identity,
-																				 tokens
-																			 }: SaveTokensParams<SaveErc721CustomToken>) => {
+	progress,
+	identity,
+	tokens
+}: SaveTokensParams<SaveErc721CustomToken>) => {
 	progress?.(ProgressStepsAddToken.SAVE);
 
 	const customTokens: CustomToken[] = tokens.map((token) =>
