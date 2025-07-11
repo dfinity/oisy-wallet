@@ -28,7 +28,7 @@ export class InfuraErc721Provider {
 		return {
 			name,
 			symbol,
-			decimals: 0
+			decimals: 0 // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 		};
 	};
 }
