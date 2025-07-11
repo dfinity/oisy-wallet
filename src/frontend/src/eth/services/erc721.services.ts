@@ -88,7 +88,7 @@ const loadCustomTokensWithMetadata = async (
 						address: tokenAddress,
 						network,
 						symbol,
-						decimals: 0,
+						decimals: 0, // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 						standard: 'erc721' as const,
 						category: 'custom' as const,
 						enabled,
