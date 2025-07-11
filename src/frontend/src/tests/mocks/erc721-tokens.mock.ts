@@ -1,8 +1,8 @@
-import type { TokenId } from '$lib/types/token';
-import { parseTokenId } from '$lib/validation/token.validation';
-import type { RequiredEvmErc721Token } from '$evm/types/erc721';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import usdc from '$eth/assets/usdc.svg';
+import type { RequiredEvmErc721Token } from '$evm/types/erc721';
+import type { TokenId } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
 
 export const AZUKI_ELEMENTAL_BEANS_SYMBOL = 'MBeans';
 
