@@ -64,7 +64,7 @@ export const getPendingTransactionIds = (address: string): string[] => {
  */
 export const getPendingTransactionsBalance = (address: string): bigint => {
 	const pendingTransactions = getPendingTransactions(address);
-
+	console.warn('pendingTransactions: ', pendingTransactions?.data);
 	if (isNullish(pendingTransactions?.data)) {
 		return 0n;
 	}

@@ -41,6 +41,7 @@ export const loadBtcPendingSentTransactions = async ({
 			address,
 			network: mapToSignerBitcoinNetwork({ network })
 		});
+		console.warn('Storing Pending transactions', pendingTransactions);
 		btcPendingSentTransactionsStore.setPendingTransactions({
 			address,
 			pendingTransactions
