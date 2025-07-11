@@ -1046,8 +1046,7 @@
 			"disconnected": "WalletConnect disconnesso.",
 			"session_ended": "La sessione WalletConnect è terminata.",
 			"connected": "WalletConnect connesso.",
-			"eth_transaction_executed": "Richiesta WalletConnect eth_sendTransaction eseguita.",
-			"sol_transaction_executed": "Richiesta WalletConnect \"$method\" eseguita.",
+			"transaction_executed": "Richiesta WalletConnect \"$method\" eseguita.",
 			"sign_executed": "Richiesta di firma WalletConnect eseguita."
 		},
 		"error": {
