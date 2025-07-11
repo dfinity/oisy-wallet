@@ -7,6 +7,7 @@
 	// export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
 	export let utxosFee: UtxosFee | undefined = undefined;
 </script>
+
 <!--
 {#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
 	<div class="w-full" in:fade>
@@ -32,7 +33,7 @@
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
 			<span data-tid="btc-send-form-insufficient-funds-for-fee"
-			>{$i18n.fee.assertion.insufficient_funds_for_fee}</span
+				>{$i18n.fee.assertion.insufficient_funds_for_fee}</span
 			>
 		</MessageBox>
 	</div>
