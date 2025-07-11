@@ -1044,8 +1044,7 @@
 			"disconnected": "WalletConnect 已断开连接。",
 			"session_ended": "WalletConnect 会话已结束。",
 			"connected": "WalletConnect 已连接。",
-			"eth_transaction_executed": "WalletConnect eth_sendTransaction 请求已执行。",
-			"sol_transaction_executed": "WalletConnect “$method” 请求已执行。",
+			"transaction_executed": "WalletConnect “$method” 请求已执行。",
 			"sign_executed": "WalletConnect 签名请求已执行。"
 		},
 		"error": {

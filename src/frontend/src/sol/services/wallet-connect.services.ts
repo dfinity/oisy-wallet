@@ -236,7 +236,7 @@ export const sign = ({
 				throw err;
 			}
 		},
-		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.sol_transaction_executed, {
+		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {
 			$method: params.request.params.request.method
 		})
 	});
