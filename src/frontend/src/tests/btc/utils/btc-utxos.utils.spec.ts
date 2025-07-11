@@ -1,5 +1,4 @@
 import {
-	calculateFinalFee,
 	calculateUtxoSelection,
 	estimateTransactionSize,
 	extractUtxoTxIds,
@@ -8,6 +7,7 @@ import {
 	utxoTxIdToString,
 	type UtxoSelectionResult
 } from '$btc/utils/btc-utxos.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 import { describe, expect, it } from 'vitest';
 
@@ -94,7 +94,7 @@ describe('btc-utxos.utils', () => {
 			expect(result).toBe(109);
 		});
 
-		it('should handle zero inputs and outputs', () => {
+		it('should handle 0n inputs and outputs', () => {
 			const result = estimateTransactionSize({
 				numInputs: 0,
 				numOutputs: 0
@@ -131,7 +131,9 @@ describe('btc-utxos.utils', () => {
 
 			expect(result.selectedUtxos.length).toBeGreaterThan(0);
 			expect(result.totalInputValue).toBeGreaterThan(250_000n);
-			expect(result.changeAmount).toBeGreaterThanOrEqual(0n);
+			expect(result.changeAmount).toBeGreaterThanOrEqual(ZERO);
+			expect(result.sufficientFunds).toBeTruthy();
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 		});
 
 		it('should select UTXOs in descending order by value', () => {
@@ -143,6 +145,8 @@ describe('btc-utxos.utils', () => {
 
 			// Should select the largest UTXO first (300_000)
 			expect(result.selectedUtxos[0].value).toBe(300_000n);
+			expect(result.sufficientFunds).toBeTruthy();
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
 		});
 
 		it('should calculate correct change amount', () => {
@@ -155,38 +159,50 @@ describe('btc-utxos.utils', () => {
 			// With 1 sat/vbyte and estimated tx size of 140 bytes, fee = 140 sats
 			// Change = 500_000 - 100_000 - 140 = 399_860
 			expect(result.changeAmount).toBe(399_860n);
+			expect(result.sufficientFunds).toBeTruthy();
+			expect(result.feeSatoshis).toBe(140n);
 		});
 
-		it('should throw error when no UTXOs available', () => {
-			expect(() =>
-				calculateUtxoSelection({
-					availableUtxos: [],
-					amountSatoshis: 100_000n,
-					feeRateSatoshisPerVByte: 10n
-				})
-			).toThrow('No UTXOs available for selection');
+		it('should return empty result when no UTXOs available', () => {
+			const result = calculateUtxoSelection({
+				availableUtxos: [],
+				amountSatoshis: 100_000n,
+				feeRateSatoshisPerVByte: 10n
+			});
+
+			expect(result.selectedUtxos).toHaveLength(0);
+			expect(result.totalInputValue).toBe(ZERO);
+			expect(result.changeAmount).toBe(ZERO);
+			expect(result.sufficientFunds).toBeFalsy();
+			expect(result.feeSatoshis).toBe(ZERO);
 		});
 
-		it('should throw error when insufficient funds including fees', () => {
+		it('should return insufficient funds when not enough UTXOs', () => {
 			const smallUtxos = [createMockUtxo({ value: 1000 })];
 
-			expect(() =>
-				calculateUtxoSelection({
-					availableUtxos: smallUtxos,
-					amountSatoshis: 900n,
-					feeRateSatoshisPerVByte: 100n // High fee rate will make it insufficient
-				})
-			).toThrow('Insufficient funds');
+			const result = calculateUtxoSelection({
+				availableUtxos: smallUtxos,
+				amountSatoshis: 900n,
+				feeRateSatoshisPerVByte: 100n // High fee rate will make it insufficient
+			});
+
+			expect(result.sufficientFunds).toBeFalsy();
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO); // Should have calculated fee even when insufficient
+			// With 1 input and 2 outputs, tx size = 10 + 1*68 + 2*31 = 140 bytes
+			// Fee = 140 * 100 = 14000 satoshis
+			expect(result.feeSatoshis).toBe(14000n);
 		});
 
-		it('should handle zero fee rate', () => {
+		it('should handle 0n fee rate', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: [createMockUtxo({ value: 100_000 })],
 				amountSatoshis: 50_000n,
-				feeRateSatoshisPerVByte: 0n
+				feeRateSatoshisPerVByte: ZERO
 			});
 
 			expect(result.changeAmount).toBe(50_000n); // No fees
+			expect(result.sufficientFunds).toBeTruthy();
+			expect(result.feeSatoshis).toBe(ZERO);
 		});
 	});
 
@@ -325,73 +341,73 @@ describe('btc-utxos.utils', () => {
 		});
 	});
 
-	describe('calculateFinalFee', () => {
+	describe('calculateUtxoSelection with fees', () => {
 		it('should calculate fee correctly', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 500_000 })],
 				totalInputValue: 500_000n,
-				changeAmount: 300_000n
+				changeAmount: 300_000n,
+				sufficientFunds: true,
+				feeSatoshis: 50_000n
 			};
 			const amountSatoshis = 150_000n;
 
-			const result = calculateFinalFee({
-				selection,
-				amountSatoshis
-			});
-
 			// Fee = totalInput - (amount + change) = 500_000 - (150_000 + 300_000) = 50_000
-			expect(result).toBe(50_000n);
+			const calculatedFee = selection.totalInputValue - (amountSatoshis + selection.changeAmount);
+
+			expect(calculatedFee).toBe(50_000n);
+			expect(selection.feeSatoshis).toBe(50_000n);
 		});
 
-		it('should handle zero change amount', () => {
+		it('should handle ZERO change amount', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 200_000 })],
 				totalInputValue: 200_000n,
-				changeAmount: 0n
+				changeAmount: ZERO,
+				sufficientFunds: true,
+				feeSatoshis: 20_000n
 			};
 			const amountSatoshis = 180_000n;
 
-			const result = calculateFinalFee({
-				selection,
-				amountSatoshis
-			});
-
 			// Fee = 200_000 - (180_000 + 0) = 20_000
-			expect(result).toBe(20_000n);
+			const calculatedFee = selection.totalInputValue - (amountSatoshis + selection.changeAmount);
+
+			expect(calculatedFee).toBe(20_000n);
+			expect(selection.feeSatoshis).toBe(20_000n);
 		});
 
 		it('should handle multiple UTXOs in selection', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 300_000 }), createMockUtxo({ value: 200_000 })],
 				totalInputValue: 500_000n,
-				changeAmount: 100_000n
+				changeAmount: 100_000n,
+				sufficientFunds: true,
+				feeSatoshis: 50_000n
 			};
 			const amountSatoshis = 350_000n;
 
-			const result = calculateFinalFee({
-				selection,
-				amountSatoshis
-			});
-
 			// Fee = 500_000 - (350_000 + 100_000) = 50_000
-			expect(result).toBe(50_000n);
+			const calculatedFee = selection.totalInputValue - (amountSatoshis + selection.changeAmount);
+
+			expect(calculatedFee).toBe(50_000n);
+			expect(selection.feeSatoshis).toBe(50_000n);
 		});
 
-		it('should return zero when no fee is applied', () => {
+		it('should return ZERO when no fee is applied', () => {
 			const selection: UtxoSelectionResult = {
 				selectedUtxos: [createMockUtxo({ value: 100_000 })],
 				totalInputValue: 100_000n,
-				changeAmount: 30_000n
+				changeAmount: 30_000n,
+				sufficientFunds: true,
+				feeSatoshis: ZERO
 			};
 			const amountSatoshis = 70_000n;
 
-			const result = calculateFinalFee({
-				selection,
-				amountSatoshis
-			});
-
 			// Fee = 100_000 - (70_000 + 30_000) = 0
-			expect(result).toBe(0n);
+			const calculatedFee = selection.totalInputValue - (amountSatoshis + selection.changeAmount);
+
+			expect(calculatedFee).toBe(ZERO);
+			expect(selection.feeSatoshis).toBe(ZERO);
 		});
 	});
 });

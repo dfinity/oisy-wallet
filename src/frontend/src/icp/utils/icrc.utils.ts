@@ -1,7 +1,10 @@
 import { ICP_NETWORK, ICP_PSEUDO_TESTNET_NETWORK } from '$env/networks/networks.icp.env';
 import {
+	BITCAT_LEDGER_CANISTER_ID,
+	FORSETISCN_LEDGER_CANISTER_ID,
 	GHOSTNODE_LEDGER_CANISTER_ID,
-	ICONFUCIUS_LEDGER_CANISTER_ID
+	ICONFUCIUS_LEDGER_CANISTER_ID,
+	ODINDOG_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
@@ -30,8 +33,11 @@ export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 };
 
 const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
+	[BITCAT_LEDGER_CANISTER_ID]: 'BITCAT',
+	[FORSETISCN_LEDGER_CANISTER_ID]: 'FORSETISCN',
 	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE',
-	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS'
+	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS',
+	[ODINDOG_LEDGER_CANISTER_ID]: 'ODINDOG'
 };
 
 /**

@@ -1,4 +1,5 @@
-import { ZERO } from '$lib/constants/app.constants';
+import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
+import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 import {
 	formatNanosecondsToDate,
 	formatSecondsToDate,
@@ -111,7 +112,20 @@ describe('format.utils', () => {
 
 			expect(formatToken({ value: valueD1, showPlusSign: true })).toBe('+1.2');
 
+			expect(formatToken({ value: ZERO, showPlusSign: true })).toBe('0');
+		});
+
+		it('should format negative value with minus sign', () => {
 			expect(formatToken({ value: negativeValue, showPlusSign: true })).toBe('-1');
+
+			expect(
+				formatToken({
+					value: -40827n,
+					displayDecimals: EIGHT_DECIMALS,
+					unitName: DEFAULT_BITCOIN_TOKEN.decimals,
+					showPlusSign: true
+				})
+			).toBe('-0.00040827');
 		});
 
 		it('should format small values', () => {
@@ -145,6 +159,49 @@ describe('format.utils', () => {
 		it('should format too small value with default displayDecimals', () => {
 			expect(formatToken({ value: 1200000000n })).toBe('< 0.00000001');
 			expect(formatToken({ value: 7000000000n })).toBe('< 0.00000001');
+		});
+
+		it('should format correctly for precision above the maximum', () => {
+			expect(formatToken({ value: 999999999999999876n, displayDecimals: 18, unitName: 18 })).toBe(
+				'0.999999999999999876'
+			);
+
+			expect(formatToken({ value: 999999999999999876n, displayDecimals: 17, unitName: 18 })).toBe(
+				'0.99999999999999988'
+			);
+
+			expect(formatToken({ value: 999999999999999871n, displayDecimals: 17, unitName: 18 })).toBe(
+				'0.99999999999999987'
+			);
+
+			expect(
+				formatToken({ value: 9999999999999999999999999876n, displayDecimals: 28, unitName: 28 })
+			).toBe('0.9999999999999999999999999876');
+
+			expect(
+				formatToken({
+					value: 9999999999999999999999999876n,
+					displayDecimals: 4,
+					unitName: 28,
+					trailingZeros: true
+				})
+			).toBe('1.0000');
+
+			expect(formatToken({ value: 9999999999999999999999999876n, unitName: 28 })).toBe('1');
+
+			expect(formatToken({ value: 876n, displayDecimals: 28, unitName: 28 })).toBe(
+				'0.0000000000000000000000000876'
+			);
+
+			expect(formatToken({ value: 876n, unitName: 28 })).toBe('< 0.00000001');
+
+			expect(
+				formatToken({
+					value: 1111119999999999999999999999999876n,
+					displayDecimals: 28,
+					unitName: 28
+				})
+			).toBe('111111.9999999999999999999999999876');
 		});
 	});
 
