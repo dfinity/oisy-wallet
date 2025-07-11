@@ -7,7 +7,9 @@ use serde::{de, Deserializer};
 use crate::{
     types::{
         backend_config::{Config, InitArg},
-        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
+        contact::{
+            Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
+        },
         custom_token::{
             CustomToken, CustomTokenId, Erc20Token, Erc721Token, ErcTokenId, IcrcToken, SplToken,
             SplTokenId, Token,
@@ -569,6 +571,17 @@ impl Validate for ContactAddressData {
             validate_string_length(label, CONTACT_MAX_LABEL_LENGTH, "ContactAddressData.label")?;
         }
 
+        Ok(())
+    }
+}
+
+impl Validate for ContactImage {
+    fn validate(&self) -> Result<(), Error> {
+        // For now, we don't have specific validation rules for ContactImage
+        // In the future, we might want to validate:
+        // - Image size limits
+        // - MIME type consistency with the actual data
+        // - Image dimensions
         Ok(())
     }
 }

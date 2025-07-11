@@ -31,7 +31,8 @@ describe('manage-contacts.service', () => {
 						mockBackendContactAddressSol, // Sol should come last
 						mockBackendContactAddressBtc, // Btc should come first
 						mockBackendContactAddressEth // Eth should come second
-					]
+					],
+					image: [] as []
 				}
 			];
 
@@ -67,7 +68,8 @@ describe('manage-contacts.service', () => {
 					id: BigInt(1),
 					name: 'Empty Contact',
 					update_timestamp_ns: BigInt(Date.now()),
-					addresses: []
+					addresses: [],
+					image: [] as []
 				}
 			];
 
