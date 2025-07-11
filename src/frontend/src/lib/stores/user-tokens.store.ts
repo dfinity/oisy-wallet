@@ -7,6 +7,7 @@ import type { Option } from '$lib/types/utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { writable, type Readable } from 'svelte/store';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
 
 type CertifiedUserTokensData<T extends Token> = Option<CertifiedData<UserToken<T>>[]>;
 
@@ -25,7 +26,7 @@ export const initCertifiedUserTokensStore = <T extends Token>(): CertifiedUserTo
 	): TokenId | Erc20ContractAddress['address'] | SplTokenAddress =>
 		isTokenSpl(token)
 			? token.address
-			: isTokenErc20(token)
+			: isTokenErc20(token) || isTokenErc721(token)
 				? `${token.address}#${token.network.chainId}`
 				: token.id;
 
