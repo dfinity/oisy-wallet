@@ -28,7 +28,6 @@
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
 
-
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
 	$: invalid =
@@ -46,8 +45,6 @@
 		utxosFee?.utxos.length === 0 ||
 		nonNullish(utxosFee?.error) ||
 		invalid;
-
-
 </script>
 
 <SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
