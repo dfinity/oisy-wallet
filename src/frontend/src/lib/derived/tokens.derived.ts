@@ -25,10 +25,12 @@ import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { derived, type Readable } from 'svelte/store';
+import { erc721Tokens } from '$eth/derived/erc721.derived';
 
 export const tokens: Readable<Token[]> = derived(
 	[
 		erc20Tokens,
+		erc721Tokens,
 		sortedIcrcTokens,
 		splTokens,
 		enabledEthereumTokens,
@@ -38,6 +40,7 @@ export const tokens: Readable<Token[]> = derived(
 	],
 	([
 		$erc20Tokens,
+		$erc721Tokens,
 		$icrcTokens,
 		$splTokens,
 		$enabledEthereumTokens,
@@ -51,6 +54,7 @@ export const tokens: Readable<Token[]> = derived(
 		...$enabledSolanaTokens,
 		...$enabledEvmTokens,
 		...$erc20Tokens,
+		...$erc721Tokens,
 		...$icrcTokens,
 		...$splTokens
 	]

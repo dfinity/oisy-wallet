@@ -14,6 +14,7 @@ import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
+import { erc721Tokens } from '$eth/derived/erc721.derived';
 
 // The entire list of ICRC tokens to display to the user:
 // This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled),
@@ -58,6 +59,8 @@ export const allTokens = derived(
 	[
 		// The entire list of Erc20 tokens to display to the user.
 		erc20Tokens,
+		// The entire list of Erc721 tokens to display to the user.
+		erc721Tokens,
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		allIcrcTokens,
@@ -67,6 +70,7 @@ export const allTokens = derived(
 	],
 	([
 		$erc20Tokens,
+		$erc721Tokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$allIcrcTokens,
@@ -83,6 +87,7 @@ export const allTokens = derived(
 		...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
 		...$erc20Tokens,
+		...$erc721Tokens,
 		...$allIcrcTokens,
 		...$splTokens
 	]

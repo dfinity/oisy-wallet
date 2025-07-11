@@ -46,6 +46,9 @@ import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.m
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 
 describe('tokens.derived', () => {
 	const mockErc20DefaultToken: Erc20Token = {
@@ -60,6 +63,15 @@ describe('tokens.derived', () => {
 		id: parseTokenId('Erc20UserTokenId'),
 		symbol: 'EUTK',
 		address: `${mockValidErc20Token.address}2`,
+		version: undefined,
+		enabled: true
+	};
+
+	const mockErc721CustomToken: Erc721CustomToken = {
+		...mockValidErc721Token,
+		id: parseTokenId('Erc721DefaultTokenId'),
+		symbol: 'DQH',
+		address: `${mockValidErc721Token.address}1`,
 		version: undefined,
 		enabled: true
 	};
@@ -88,6 +100,7 @@ describe('tokens.derived', () => {
 
 			erc20DefaultTokensStore.reset();
 			erc20UserTokensStore.resetAll();
+			erc721CustomTokensStore.resetAll();
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
 			splDefaultTokensStore.reset();
@@ -102,6 +115,7 @@ describe('tokens.derived', () => {
 		it('should return all the non-testnet tokens by default', () => {
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
 			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
+			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
 			splDefaultTokensStore.add(mockSplDefaultToken);
@@ -120,8 +134,9 @@ describe('tokens.derived', () => {
 				ARBITRUM_ETH_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
-				{ ...mockIcrcCustomToken, id: result[11].id },
+				{ ...mockErc721CustomToken, id: result[10].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[11].id },
+				{ ...mockIcrcCustomToken, id: result[12].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
