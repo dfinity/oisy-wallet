@@ -711,7 +711,7 @@
 			"metamask_connected": "无法获取你的账户。你的 Metamask 是否已开启并已连接？",
 			"metamask_no_accounts": "未找到 Metamask 账户。",
 			"metamask_switch_network": "无法请求 Metamask 切换至链 ID $chain_id。你当前是否已连接到 $network_name？",
-			"erc20_data_undefined": "Erc20 交易数据不能为 undefined 或 null。",
+			"erc20_data_undefined": "ERC20 交易数据不能为 undefined 或 null。",
 			"data_undefined": "交易数据不能为 undefined 或 null。",
 			"no_identity_calculate_fee": "未提供身份，无法为其主体计算手续费。",
 			"invalid_destination": "目标地址无效。请使用有效的钱包地址重试。",
@@ -958,7 +958,7 @@
 		"error": {
 			"invalid_contract_address": "合约地址无效。",
 			"invalid_token_address": "代币地址无效。",
-			"invalid_ledger": "所选代币未链接至 Icrc Ledger Canister。",
+			"invalid_ledger": "所选代币未链接至 ICRC Ledger Canister。",
 			"no_metadata": "未获取到任何元数据。",
 			"unexpected": "保存代币时发生错误。",
 			"unexpected_hiding": "隐藏代币时发生错误。",
