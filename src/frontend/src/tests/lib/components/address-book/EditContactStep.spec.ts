@@ -45,7 +45,8 @@ describe('EditContactStep', () => {
 				addressType: 'Btc'
 			}
 		],
-		updateTimestampNs: BigInt(Date.now())
+		updateTimestampNs: BigInt(Date.now()),
+		image: []
 	};
 
 	const mockClose = vi.fn();
