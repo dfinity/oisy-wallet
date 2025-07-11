@@ -6,10 +6,10 @@
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
 	import {
-		BtcPendingSentTransactionsStatus,
+		type BtcPendingSentTransactionsStatus,
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
-	import type { UtxosFee } from '$btc/types/btc-send';
+	import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -28,13 +28,6 @@
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
 
-	let disableSend: boolean;
-	// We want to disable send if pending transactions or UTXOs fee isn't available yet, there was an error or there are pending transactions.
-	$: disableSend =
-		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
-		isNullish(utxosFee) ||
-		(nonNullish(utxosFee) && (utxosFee.utxos.length === 0 || nonNullish(utxosFee.error))) ||
-		invalid;
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
@@ -43,6 +36,18 @@
 			destination,
 			networkId: $sendTokenNetworkId
 		}) || invalidAmount(amount);
+
+	let disableSend: boolean;
+	// We want to disable send if pending transactions or UTXOs fee isn't available yet, there was an error or there are pending transactions.
+	$: disableSend =
+		isNullish(utxosFee) ||
+		utxosFee?.error === BtcPrepareSendError.InsufficientBalance ||
+		utxosFee?.error === BtcPrepareSendError.InsufficientBalanceForFee ||
+		utxosFee?.utxos.length === 0 ||
+		nonNullish(utxosFee?.error) ||
+		invalid;
+
+
 </script>
 
 <SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
