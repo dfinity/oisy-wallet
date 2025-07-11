@@ -1,4 +1,8 @@
-import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services';
+import {
+	syncWallet,
+	syncWalletError,
+	syncWalletFromCache
+} from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { STAGING } from '$lib/constants/app.constants';
 import {
@@ -33,6 +37,8 @@ export const initBtcWalletWorker = async ({
 	const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);
 	const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
 	const isMainnetNetwork = isNetworkIdBTCMainnet(networkId);
+
+	await syncWalletFromCache({ tokenId, networkId });
 
 	worker.onmessage = ({
 		data: dataMsg

@@ -7,7 +7,11 @@ import type { WalletWorker } from '$lib/types/listener';
 import type { PostMessage, PostMessageDataRequestSol } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
-import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
+import {
+	syncWallet,
+	syncWalletError,
+	syncWalletFromCache
+} from '$sol/services/sol-listener.services';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -25,6 +29,8 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 
 	const isDevnetNetwork = isNetworkIdSOLDevnet(networkId);
 	const isLocalNetwork = isNetworkIdSOLLocal(networkId);
+
+	await syncWalletFromCache({ tokenId, networkId });
 
 	worker.onmessage = ({
 		data: dataMsg
