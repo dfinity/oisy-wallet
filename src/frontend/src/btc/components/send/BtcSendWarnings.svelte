@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
+	// export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
 	export let utxosFee: UtxosFee | undefined = undefined;
 </script>
-
+<!--
 {#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
@@ -22,7 +21,7 @@
 		</MessageBox>
 	</div>
 {/if}
-
+-->
 {#if utxosFee?.error === BtcPrepareSendError.InsufficientBalance}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
@@ -33,7 +32,7 @@
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
 			<span data-tid="btc-send-form-insufficient-funds-for-fee"
-				>{$i18n.fee.assertion.insufficient_funds_for_fee}</span
+			>{$i18n.fee.assertion.insufficient_funds_for_fee}</span
 			>
 		</MessageBox>
 	</div>

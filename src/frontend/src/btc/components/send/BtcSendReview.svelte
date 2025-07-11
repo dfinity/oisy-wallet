@@ -56,6 +56,6 @@
 	<BtcUtxosFee slot="fee" bind:utxosFee networkId={$sendTokenNetworkId} {amount} {source} />
 
 	<div class="mt-8" slot="info">
-		<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
+		<BtcSendWarnings {utxosFee} />
 	</div>
 </SendReview>
