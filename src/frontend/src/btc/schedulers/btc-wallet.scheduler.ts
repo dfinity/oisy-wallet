@@ -226,7 +226,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 
 		const newBalance =
 			isNullish(this.store.balance) ||
-			JSON.stringify(this.store.balance.data) !== JSON.stringify(balance.data) ||
+			JSON.stringify(this.store.balance.data, jsonReplacer) !==
+				JSON.stringify(balance.data, jsonReplacer) ||
 			(!this.store.balance.certified && balance.certified);
 
 		const newTransactions = uncertifiedTransactions.length > 0;
