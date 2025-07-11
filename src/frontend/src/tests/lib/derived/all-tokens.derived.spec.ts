@@ -25,7 +25,9 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { erc721Tokens } from '$eth/derived/erc721.derived';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
+import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import * as dip20TokensServices from '$icp/services/dip20-tokens.services';
 import * as icrcCustomTokensServices from '$icp/services/icrc-custom-tokens.services';
@@ -40,15 +42,13 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
-import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
-import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { erc721Tokens } from '$eth/derived/erc721.derived';
 
 describe('all-tokens.derived', () => {
 	const mockIcrcToken: IcrcCustomToken = {

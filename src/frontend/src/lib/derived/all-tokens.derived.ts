@@ -1,6 +1,7 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
@@ -14,7 +15,6 @@ import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-import { erc721Tokens } from '$eth/derived/erc721.derived';
 
 // The entire list of ICRC tokens to display to the user:
 // This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled),

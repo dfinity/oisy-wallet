@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 
 	// We start it as undefined to avoid showing an empty list before the first update.
 	export let tokens: TokenUiOrGroupUi[] | undefined = undefined;
 
 	let groupedTokens: TokenUiOrGroupUi[];
-	$: groupedTokens = groupTokensByTwin($combinedDerivedSortedNetworkTokensUi.filter((token) => !isTokenErc721(token)));
+	$: groupedTokens = groupTokensByTwin(
+		$combinedDerivedSortedNetworkTokensUi.filter((token) => !isTokenErc721(token))
+	);
 
 	let sortedTokensOrGroups: TokenUiOrGroupUi[];
 	$: sortedTokensOrGroups = filterTokenGroups({
