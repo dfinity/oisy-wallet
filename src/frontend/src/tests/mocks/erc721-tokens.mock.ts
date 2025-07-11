@@ -1,8 +1,12 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import usdc from '$eth/assets/usdc.svg';
+import type { Erc721Token } from '$eth/types/erc721';
 import type { RequiredEvmErc721Token } from '$evm/types/erc721';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 export const AZUKI_ELEMENTAL_BEANS_SYMBOL = 'MBeans';
 
@@ -34,4 +38,12 @@ export const DE_GODS_TOKEN: RequiredEvmErc721Token = {
 	decimals: 0,
 	icon: usdc,
 	address: '0x41E54Eb019C0762f9Bfcf9Fb1E58925BfB0e7582'
+};
+
+export const mockValidErc721Token: Erc721Token = {
+	...mockValidToken,
+	id: parseTokenId('Erc721TokenId'),
+	network: ETHEREUM_NETWORK,
+	standard: 'erc721',
+	address: mockEthAddress
 };
