@@ -15,17 +15,17 @@ import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadErc721Tokens = async ({
-																				 identity
-																			 }: {
+	identity
+}: {
 	identity: OptionIdentity;
 }): Promise<void> => {
 	await Promise.all([loadCustomTokens({ identity, useCache: true })]);
 };
 
 export const loadCustomTokens = ({
-																	 identity,
-																	 useCache = false
-																 }: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
+	identity,
+	useCache = false
+}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<Erc721CustomToken[]>({
 		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
@@ -106,9 +106,9 @@ const loadCustomTokensWithMetadata = async (
 };
 
 const loadCustomTokenData = ({
-															 response: tokens,
-															 certified
-														 }: {
+	response: tokens,
+	certified
+}: {
 	certified: boolean;
 	response: Erc721CustomToken[];
 }) => {
