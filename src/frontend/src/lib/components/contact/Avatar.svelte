@@ -3,10 +3,10 @@
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
+	import { AVATAR_IMAGE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
 	import { selectColorForName } from '$lib/utils/contact.utils';
-	import { AVATAR_IMAGE } from '$lib/constants/test-ids.constants';
 
 	interface AvatarProps {
 		name?: string;
@@ -46,11 +46,11 @@
 </script>
 
 <div
-		class={`${commonClasses} flex items-center justify-center ${!imageUrl ? bgColor : ''}`}
-		role="img"
-		aria-label={ariaLabel}
-		data-tid={AVATAR_IMAGE}
-	>
+	class={`${commonClasses} flex items-center justify-center ${!imageUrl ? bgColor : ''}`}
+	role="img"
+	aria-label={ariaLabel}
+	data-tid={AVATAR_IMAGE}
+>
 	{#if imageUrl}
 		<img src={imageUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
 	{:else if initials}

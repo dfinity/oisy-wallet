@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import imageCompression from 'browser-image-compression';
 	import { tick } from 'svelte';
+	import { AVATAR_ENABLED } from '$env/avatar.env';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
@@ -73,12 +74,14 @@
 		{#snippet logo()}
 			<div class="relative flex">
 				<Avatar name={contact.name} {imageUrl} variant="xs" styleClass="md:text-[19.2px]" />
-				<span
-					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
-					data-tid={`avatar-badge-${contact.name}`}
-				>
-					<EditAvatar bind:fileInput bind:imageUrl {replaceImage} {removeImage} />
-				</span>
+				{#if AVATAR_ENABLED}
+					<span
+						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+						data-tid={`avatar-badge-${contact.name}`}
+					>
+						<EditAvatar bind:fileInput bind:imageUrl {replaceImage} {removeImage} />
+					</span>
+				{/if}
 			</div>
 		{/snippet}
 
@@ -156,11 +159,12 @@
 	{/snippet}
 </ContentWithToolbar>
 
-<!-- hidden Input -->
-<input
-	bind:this={fileInput}
-	type="file"
-	accept="image/*"
-	class="hidden"
-	onchange={handleFileChange}
-/>
+{#if AVATAR_ENABLED}
+	<input
+		bind:this={fileInput}
+		type="file"
+		accept="image/*"
+		class="hidden"
+		onchange={handleFileChange}
+	/>
+{/if}
