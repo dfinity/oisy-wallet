@@ -26,7 +26,8 @@ export const syncWallet = ({
 		balancesStore.set({
 			id: tokenId,
 			data: {
-				data: balanceData.total, // Extract total balance for balancesStore
+				// Extract total balance for balancesStore
+				data: balanceData.total,
 				certified
 			}
 		});

@@ -9,7 +9,7 @@ import { getBtcBalance } from '$lib/api/signer.api'; // Remove non-existent getB
 import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
-import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
@@ -222,7 +222,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}: {
 		response: BtcWalletData;
 	}) => {
-		console.warn('balance = ', JSON.stringify(balance));
+		console.warn('balance = ', JSON.stringify(balance, jsonReplacer));
 
 		const newBalance =
 			isNullish(this.store.balance) ||
