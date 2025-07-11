@@ -7,6 +7,7 @@ import type { NetworkEnvironment } from '$lib/types/network';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { Erc721Token } from '$eth/types/erc721';
+import type { CertifiedData } from '$lib/types/store';
 
 export const AZUKI_ELEMENTAL_BEANS_SYMBOL = 'MBeans';
 
