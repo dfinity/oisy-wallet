@@ -1,6 +1,6 @@
 import type { ContractAddress } from '$eth/types/address';
-import type { Token, TokenMetadata } from '$lib/types/token';
 import type { EthereumNetwork } from '$eth/types/network';
+import type { Token, TokenMetadata } from '$lib/types/token';
 
 export type Erc721Token = Erc721Contract & Omit<Token, 'network'> & { network: EthereumNetwork };
 
