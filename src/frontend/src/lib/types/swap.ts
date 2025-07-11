@@ -13,7 +13,8 @@ export type DisplayUnit = 'token' | 'usd';
 
 export enum SwapProvider {
 	ICP_SWAP = 'icpSwap',
-	KONG_SWAP = 'kongSwap'
+	KONG_SWAP = 'kongSwap',
+	VELORA = 'velora'
 }
 export interface ProviderFee {
 	fee: bigint;
@@ -24,11 +25,13 @@ export interface ICPSwapResult {
 	receiveAmount: bigint;
 }
 
+export interface VeloraDeltaQuoteResult {}
+
 export interface FetchSwapAmountsParams {
 	identity: Identity;
-	sourceToken: IcToken;
-	destinationToken: IcToken;
-	amount: string | number;
+	sourceToken: Token & { address?: string };
+	destinationToken: Token & { address?: string };
+	amount: string | number | bigint;
 	tokens: Token[];
 	slippage: string | number;
 }
@@ -50,6 +53,12 @@ export type SwapMappedResult =
 			liquidityFees: ProviderFee[];
 			networkFee?: ProviderFee;
 			swapDetails: SwapAmountsReply;
+	  }
+	| {
+			provider: SwapProvider.VELORA;
+			receiveAmount: bigint;
+			receiveOutMinimum?: bigint;
+			swapDetails?: any;
 	  };
 
 export interface KongQuoteResult {

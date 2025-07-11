@@ -52,7 +52,7 @@
 >
 	<button onclick={onClick} class="flex w-full border-0 px-2" data-tid={testId}>
 		<span
-			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
+			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-l-0 border-r-0"
 			class:py-3={!condensed}
 			class:py-1={condensed}
 			class:border-brand-subtle-20={dividers}

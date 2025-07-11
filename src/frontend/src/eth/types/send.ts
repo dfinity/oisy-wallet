@@ -15,7 +15,7 @@ export interface SendParams {
 	sourceNetwork: EthereumNetwork;
 	targetNetwork?: Network | undefined;
 	identity: OptionIdentity;
-	minterInfo: OptionCertifiedMinterInfo;
+	minterInfo?: OptionCertifiedMinterInfo;
 }
 
 export type ApproveParams = Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &

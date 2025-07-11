@@ -15,12 +15,23 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext as SwapAmountsContextType
+	} from '$lib/stores/swap-amounts.store';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
-	export let swapAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let slippageValue: OptionAmount;
+	interface Props {
+		swapAmount: OptionAmount;
+		receiveAmount?: number;
+		slippageValue: OptionAmount;
+	}
+
+	let { swapAmount, receiveAmount, slippageValue }: Props = $props();
 
 	const dispatch = createEventDispatcher();
+
+	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	const {
 		sourceToken,
@@ -34,6 +45,21 @@
 		failedSwapError.set(undefined);
 		dispatch('icBack');
 	};
+
+	$effect(() => {
+		if (
+			nonNullish($destinationToken) &&
+			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			receiveAmount = formatTokenBigintToNumber({
+				value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			});
+		} else {
+			receiveAmount = undefined;
+		}
+	});
 </script>
 
 <ContentWithToolbar>
@@ -70,7 +96,7 @@
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
-		<SwapFees />
+		<!-- <SwapFees /> -->
 	</div>
 
 	{#if nonNullish($failedSwapError)}

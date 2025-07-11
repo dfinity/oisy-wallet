@@ -9,7 +9,7 @@ export const icpSwapAmounts = async ({
 	destinationToken,
 	sourceAmount,
 	fee = ICP_SWAP_POOL_FEE // The only supported pool fee on ICPSwap at the moment (0.3%)
-}: ICPSwapQuoteParams): Promise<ICPSwapAmountReply> => {
+}: ICPSwapQuoteParams): Promise<ICPSwapAmountReply> => {	
 	const pool = await getPoolCanister({
 		identity,
 		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },

@@ -24,7 +24,9 @@ export enum WizardStepsConvert {
 export enum WizardStepsSwap {
 	SWAP = 'Swap',
 	REVIEW = 'Review',
-	SWAPPING = 'Swapping'
+	SWAPPING = 'Swapping',
+	TOKENS_LIST = 'Tokens List',
+	FILTER_NETWORKS = 'Filter Networks'
 }
 
 export enum WizardStepsAuthHelp {

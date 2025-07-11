@@ -9,7 +9,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="absolute bottom-0 left-0 right-0 top-0 m-auto h-9 w-9 rounded-lg bg-surface shadow-sm">
+<div class="absolute bottom-0 left-0 right-0 top-0 m-auto h-9 w-9 rounded-lg bg-surface shadow-sm z-1">
 	<Button
 		onclick={() => dispatch('icSwitchTokens')}
 		colorStyle="primary"

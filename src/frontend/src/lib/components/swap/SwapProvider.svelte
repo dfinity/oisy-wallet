@@ -24,20 +24,23 @@
 	interface Props {
 		slippageValue: OptionAmount;
 		showSelectButton?: boolean;
+		provider?: any;
 	}
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let { showSelectButton = false, slippageValue }: Props = $props();
+	let { showSelectButton = false, slippageValue, provider }: Props = $props();
 
 	let displayURL = $state<OptionString>(null);
 
 	let selectedProvider = $derived($swapAmountsStore?.selectedProvider);
 	let isBestRate = $derived(selectedProvider?.provider === $swapAmountsStore?.swaps[0]?.provider);
 	let swapDApp = $derived(
-		dAppDescriptions.find(
-			({ id }) => id === $swapAmountsStore?.selectedProvider?.provider.toLowerCase()
-		)
+		nonNullish(provider)
+			? provider
+			: dAppDescriptions.find(
+					({ id }) => id === $swapAmountsStore?.selectedProvider?.provider.toLowerCase()
+				)
 	);
 
 	$effect(() => {
@@ -110,6 +113,8 @@
 				<SwapDetailsKong provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.ICP_SWAP}
 				<SwapDetailsIcp provider={selectedProvider} {slippageValue} />
+			<!-- {:else if selectedProvider.provider === SwapProvider.VELORA}
+				<SwapDetailsIcp provider={selectedProvider} {slippageValue} /> -->
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}

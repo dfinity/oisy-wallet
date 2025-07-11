@@ -115,6 +115,22 @@ export const filterTokensForSelectedNetwork = <T extends Token>([
 		showTokenFilteredBySelectedNetwork({ token, $selectedNetwork, $pseudoNetworkChainFusion })
 	);
 
+export const filterTokensForSelectedNetworks = <T extends Token>([
+	$tokens,
+	$selectedNetworks,
+	$pseudoNetworkChainFusion
+]: [T[], NetworkId[] | undefined, boolean]): T[] =>
+	$tokens.filter((token) => {
+		const {
+			network: { id: networkId, env }
+		} = token;
+
+		return (
+			($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && env !== 'testnet') ||
+			$selectedNetworks?.includes(networkId)
+		);
+	});
+
 export const mapToSignerBitcoinNetwork = ({
 	network
 }: {

@@ -1,10 +1,15 @@
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+import { nonNullish } from '@dfinity/utils';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
+
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
+
 import type { Balance } from '$lib/types/balance';
-import { nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable, type Writable } from 'svelte/store';
+import type { Network, NetworkId } from '$lib/types/network';
+import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+import type { IcToken } from '$icp/types/ic-token';
 
 export interface SwapError {
 	variant: 'error' | 'warning' | 'info';
@@ -13,85 +18,153 @@ export interface SwapError {
 }
 
 export interface SwapData {
-	sourceToken?: IcTokenToggleable;
-	destinationToken?: IcTokenToggleable;
+	sourceToken?: Token;
+	destinationToken?: Token;
 }
 
-export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
-	const data = writable<SwapData>(swapData);
-	const { update } = data;
+export const initSwapContext = (initialData: SwapData = {}): SwapContext => {
+	const swapData = writable<SwapData>(initialData);
+	const { update } = swapData;
 
-	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
-	const destinationToken = derived([data], ([{ destinationToken }]) => destinationToken);
+	// Tokens
+	const sourceToken = derived(swapData, ({ sourceToken }) => sourceToken);
+	const destinationToken = derived(swapData, ({ destinationToken }) => destinationToken);
 
+	// Metadata
+	const sourceTokenId = derived(sourceToken, (token) => token?.id);
+	const destinationTokenId = derived(destinationToken, (token) => token?.id);
+
+	const sourceTokenSymbol = derived(sourceToken, (token) => token && getTokenDisplaySymbol(token));
+	const destinationTokenSymbol = derived(
+		destinationToken,
+		(token) => token && getTokenDisplaySymbol(token)
+	);
+
+	const sourceTokenStandard = derived(sourceToken, (token) => token?.standard);
+	const destinationTokenStandard = derived(destinationToken, (token) => token?.standard);
+
+	const sourceTokenNetworkId = derived(sourceToken, (token) => token?.network.id);
+	const destinationTokenNetworkId = derived(destinationToken, (token) => token?.network.id);
+
+	const sourceTokenNetwork = derived(sourceToken, (token) => token?.network);
+	const destinationTokenNetwork = derived(destinationToken, (token) => token?.network);
+
+	// Balances
 	const sourceTokenBalance = derived(
-		[balancesStore, sourceToken],
-		([$balancesStore, $sourceToken]) =>
-			nonNullish($sourceToken) ? $balancesStore?.[$sourceToken.id]?.data : undefined
+		[balancesStore, sourceTokenId],
+		([$balancesStore, $sourceTokenId]) =>
+			$sourceTokenId ? $balancesStore?.[$sourceTokenId]?.data : undefined
 	);
 	const destinationTokenBalance = derived(
-		[balancesStore, destinationToken],
-		([$balancesStore, $destinationToken]) =>
-			nonNullish($destinationToken) ? $balancesStore?.[$destinationToken.id]?.data : undefined
+		[balancesStore, destinationTokenId],
+		([$balancesStore, $destinationTokenId]) =>
+			$destinationTokenId ? $balancesStore?.[$destinationTokenId]?.data : undefined
 	);
 
-	const sourceTokenExchangeRate = derived([exchanges, sourceToken], ([$exchanges, $sourceToken]) =>
-		nonNullish($sourceToken) ? $exchanges?.[$sourceToken.id]?.usd : undefined
+	// Exchange Rates
+	const sourceTokenExchangeRate = derived(
+		[exchanges, sourceTokenId],
+		([$exchanges, $sourceTokenId]) =>
+			$sourceTokenId ? $exchanges?.[$sourceTokenId]?.usd : undefined
 	);
 	const destinationTokenExchangeRate = derived(
-		[exchanges, destinationToken],
-		([$exchanges, $destinationToken]) =>
-			nonNullish($destinationToken) ? $exchanges?.[$destinationToken.id]?.usd : undefined
+		[exchanges, destinationTokenId],
+		([$exchanges, $destinationTokenId]) =>
+			$destinationTokenId ? $exchanges?.[$destinationTokenId]?.usd : undefined
 	);
 
+	// ICP-only feature
 	const isSourceTokenIcrc2 = derived(
-		[kongSwapTokensStore, sourceToken],
-		([$kongSwapTokensStore, $sourceToken]) =>
-			nonNullish($sourceToken) &&
-			nonNullish($kongSwapTokensStore) &&
-			nonNullish($kongSwapTokensStore[$sourceToken.symbol]) &&
-			$kongSwapTokensStore[$sourceToken.symbol].icrc2
+		[kongSwapTokensStore, sourceTokenSymbol],
+		([$kongSwapTokensStore, $sourceTokenSymbol]) =>
+			nonNullish($sourceTokenSymbol) &&
+			nonNullish($kongSwapTokensStore?.[$sourceTokenSymbol]) &&
+			$kongSwapTokensStore[$sourceTokenSymbol].icrc2 === true
 	);
 
+	// Cross-chain check
+	const isCrossChainSwap = derived(
+		[sourceTokenNetworkId, destinationTokenNetworkId],
+		([$sourceNetworkId, $destinationNetworkId]) =>
+			nonNullish($sourceNetworkId) &&
+			nonNullish($destinationNetworkId) &&
+			$sourceNetworkId !== $destinationNetworkId
+	);
+
+	// Final context
 	return {
 		sourceToken,
 		destinationToken,
+
+		sourceTokenId,
+		destinationTokenId,
+		sourceTokenSymbol,
+		destinationTokenSymbol,
+		sourceTokenStandard,
+		destinationTokenStandard,
+		sourceTokenNetworkId,
+		destinationTokenNetworkId,
+		sourceTokenNetwork,
+		destinationTokenNetwork,
+
 		sourceTokenBalance,
 		destinationTokenBalance,
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
+
 		isSourceTokenIcrc2,
-		failedSwapError: writable<SwapError | undefined>(undefined),
-		setSourceToken: (token: IcTokenToggleable) =>
-			update((state) => ({
-				...state,
+		isCrossChainSwap,
+
+		setSourceToken: (token: Token) =>
+			update((currentState) => ({
+				...currentState,
 				sourceToken: token
 			})),
-		setDestinationToken: (token: IcTokenToggleable) =>
-			update((state) => ({
-				...state,
+
+		setDestinationToken: (token: Token | undefined) =>
+			update((currentState) => ({
+				...currentState,
 				destinationToken: token
 			})),
+
 		switchTokens: () =>
-			update((state) => ({
-				sourceToken: state.destinationToken,
-				destinationToken: state.sourceToken
-			}))
+			update((currentState) => ({
+				sourceToken: currentState.destinationToken,
+				destinationToken: currentState.sourceToken
+			})),
+
+		failedSwapError: writable<SwapError | undefined>(undefined)
 	};
 };
 
 export interface SwapContext {
-	sourceToken: Readable<IcTokenToggleable | undefined>;
-	destinationToken: Readable<IcTokenToggleable | undefined>;
+	sourceToken: Readable<Token | IcToken |undefined>;
+	destinationToken: Readable<Token | IcToken| undefined>;
+
+	sourceTokenId: Readable<TokenId | undefined>;
+	destinationTokenId: Readable<TokenId | undefined>;
+	sourceTokenSymbol: Readable<string | undefined>;
+	destinationTokenSymbol: Readable<string | undefined>;
+	sourceTokenStandard: Readable<TokenStandard | undefined>;
+	destinationTokenStandard: Readable<TokenStandard | undefined>;
+	sourceTokenNetworkId: Readable<NetworkId | undefined>;
+	destinationTokenNetworkId: Readable<NetworkId | undefined>;
+	sourceTokenNetwork: Readable<Network | undefined>;
+	destinationTokenNetwork: Readable<Network | undefined>;
+
 	sourceTokenBalance: Readable<Balance | undefined>;
 	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
+
 	isSourceTokenIcrc2: Readable<boolean>;
-	failedSwapError: Writable<SwapError | undefined>;
-	setSourceToken: (token: IcTokenToggleable) => void;
-	setDestinationToken: (token: IcTokenToggleable) => void;
+	isCrossChainSwap: Readable<boolean>;
+
+	setSourceToken: (token: Token) => void;
+	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;
+
+	failedSwapError: Writable<SwapError | undefined>;
 }
 
 export const SWAP_CONTEXT_KEY = Symbol('swap');

@@ -9,29 +9,46 @@
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
-	import type { NetworkId } from '$lib/types/network';
+	import type { NetworkId, Network as NetworkType } from '$lib/types/network';
 
-	export let selectedNetworkId: NetworkId | undefined = undefined;
-	export let delayOnNetworkSelect = true;
-	export let labelsSize: LabelSize = 'md';
+	interface Props {
+		selectedNetworkId?: NetworkId;
+		delayOnNetworkSelect?: boolean;
+		labelsSize?: LabelSize;
+		supportedNeworks?: NetworkType[];
+		allNetworksEnabled?: boolean;
+	}
 
-	let mainnetTokensUsdBalance: number;
-	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
-		(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
-		0
+	let {
+		selectedNetworkId,
+		delayOnNetworkSelect = true,
+		labelsSize = 'md',
+		supportedNeworks,
+		allNetworksEnabled = true
+	}: Props = $props();
+
+	let enabledNetworks = $derived(supportedNeworks ?? $networksMainnets);
+
+	let mainnetTokensUsdBalance = $derived<number>(
+		enabledNetworks.reduce(
+			(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
+			0
+		)
 	);
 </script>
 
-<NetworkButton
-	usdBalance={mainnetTokensUsdBalance}
-	{selectedNetworkId}
-	{delayOnNetworkSelect}
-	{labelsSize}
-	on:icSelected
-/>
+{#if allNetworksEnabled}
+	<NetworkButton
+		usdBalance={mainnetTokensUsdBalance}
+		{selectedNetworkId}
+		{delayOnNetworkSelect}
+		{labelsSize}
+		on:icSelected
+	/>
+{/if}
 
 <ul class="flex list-none flex-col">
-	{#each $networksMainnets as network (network.id)}
+	{#each enabledNetworks as network (network.id)}
 		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
 			><MainnetNetwork
 				{network}

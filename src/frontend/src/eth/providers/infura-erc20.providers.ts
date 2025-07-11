@@ -99,6 +99,9 @@ export class InfuraErc20Provider implements Erc20Provider {
 		amount: bigint;
 	}): Promise<ContractTransaction> => {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+
+		console.log('here3', { erc20Contract, spender, amount });
+
 		return erc20Contract.approve.populateTransaction(spender, amount);
 	};
 
@@ -112,6 +115,9 @@ export class InfuraErc20Provider implements Erc20Provider {
 		spender: EthAddress;
 	}): Promise<bigint> => {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+
+		console.log();
+		
 		return erc20Contract.allowance(owner, spender);
 	};
 }

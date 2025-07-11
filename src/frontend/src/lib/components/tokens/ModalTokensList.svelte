@@ -13,6 +13,7 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import { IconExpandMore } from '@dfinity/gix-components';
 
 	let {
 		networkSelectorViewOnly = false,
@@ -42,8 +43,8 @@
 	let noTokensMatch = $derived($filteredTokens.length === 0);
 </script>
 
-<div class="flex items-end justify-between">
-	<div class="mr-3 flex-1">
+<div>
+	<div class="input-field condensed mb-3 flex-1">
 		<InputSearch
 			bind:filter
 			showResetButton={notEmptyString(filter)}
@@ -52,20 +53,22 @@
 		/>
 	</div>
 
-	<button
-		class="dropdown-button h-[3.375rem] rounded-lg border border-solid border-primary"
-		class:hover:border-brand-primary={!networkSelectorViewOnly}
-		disabled={networkSelectorViewOnly}
-		onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
-		aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
-	>
-		<NetworkSwitcherLogo network={$filterNetwork} />
-
-		<span class="hidden md:block">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
-	</button>
+	<div class="flex items-center gap-2">
+		<button
+			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
+			class:hover:border-brand-primary={networkSelectorViewOnly}
+			disabled={networkSelectorViewOnly}
+			onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
+			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+		>
+			<span class="font-medium md:block">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span
+			>
+			<IconExpandMore size="24" />
+		</button>
+	</div>
 </div>
 
-<div class="my-6 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
+<div class="my-4 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
 	<div class="gap-6 overflow-y-auto overscroll-contain">
 		<TokensSkeletons {loading}>
 			{#if noTokensMatch}

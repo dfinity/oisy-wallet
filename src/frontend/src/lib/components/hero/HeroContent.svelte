@@ -33,7 +33,8 @@
 		networkPolygon,
 		networkICP,
 		networkSolana,
-		pseudoNetworkChainFusion
+		pseudoNetworkChainFusion,
+		networkArbitrum
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
@@ -111,6 +112,8 @@
 	class:to-base-100={$networkBase}
 	class:from-bsc-0={$networkBsc}
 	class:to-bsc-100={$networkBsc}
+	class:from-arbitrum-0={$networkArbitrum}
+	class:to-arbitrum-100={$networkArbitrum}
 	class:from-polygon-0={$networkPolygon}
 	class:to-polygon-100={$networkPolygon}
 	class:from-sol-0={$networkSolana && !isTrumpToken}

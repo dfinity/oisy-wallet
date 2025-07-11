@@ -102,6 +102,27 @@ export const mapKongSwapResult = ({
 	swapDetails: swap
 });
 
+export const mapVeloraSwapResult = (swap: any): SwapMappedResult => {
+	console.log(swap);
+
+	return {
+		provider: SwapProvider.VELORA,
+		receiveAmount: 'bridge' in swap ? BigInt(swap.destAmountAfterBridge) : BigInt(swap.destAmount),
+		// receiveOutMinimum: BigInt(swap.destAmountAfterBridge),
+		swapDetails: swap
+	};
+};
+
+export const mapVeloraMarketSwapResult = (swap: any): SwapMappedResult => {
+	console.log(swap);
+
+	return {
+		provider: SwapProvider.VELORA,
+		receiveAmount: BigInt(swap.destAmount),
+		swapDetails: swap
+	};
+};
+
 /**
  * Calculates the minimum acceptable amount after applying slippage tolerance.
  *

@@ -18,6 +18,11 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import NetworkLogo from '../networks/NetworkLogo.svelte';
+	import TokenInputWrapper from '$lib/components/tokens/TokenInputWrapper.svelte';
+	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
@@ -34,7 +39,10 @@
 	export let isSelectable = true;
 	export let autofocus = false;
 	export let customValidate: (userAmount: bigint) => TokenActionErrorType = () => undefined;
+	export let showErrorMessage: boolean = true;
 	export let customErrorValidate: (userAmount: bigint) => Error | undefined = () => undefined;
+	export let tokenNetwork: any = undefined;
+	export let supportCrossChain: boolean = false;
 
 	const dispatch = createEventDispatcher();
 
@@ -67,14 +75,21 @@
 </script>
 
 <div
-	class="rounded-lg border border-solid p-5 text-left duration-300"
-	class:bg-brand-subtle-10={focused}
-	class:border-brand-subtle-20={focused}
+	class="rounded-xl p-5 text-left duration-300"
 	class:bg-secondary={!focused}
-	class:border-secondary={!focused}
+	class:border-secondary={!focused && !supportCrossChain}
+	class:bg-brand-subtle-10={focused}
+	class:border-brand-subtle-20={focused && !supportCrossChain}
+	class:border={!supportCrossChain}
 >
-	<div class="mb-2 text-sm font-bold">
+	<div class="space-between mb-2 flex justify-between text-sm font-bold">
 		<slot name="title" />
+		{#if nonNullish(tokenNetwork)}
+			<div class="flex text-xs font-normal text-tertiary">
+				<span class="mr-1 text-sm">On {tokenNetwork.name}</span>
+				<NetworkLogo network={tokenNetwork} />
+			</div>
+		{/if}
 	</div>
 
 	<TokenInputContainer
@@ -149,6 +164,6 @@
 	</div>
 </div>
 
-{#if nonNullish(error)}
+{#if nonNullish(error) && showErrorMessage}
 	<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{error.message}</p>
 {/if}

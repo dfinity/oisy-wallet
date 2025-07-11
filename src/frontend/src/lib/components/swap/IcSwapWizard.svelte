@@ -7,8 +7,6 @@
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
 	} from '$icp/stores/ic-token-fee.store';
-	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
-	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -32,6 +30,8 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { type IcToken } from '$icp/types/ic-token';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import IcSwapForm from './IcSwapForm.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -94,8 +94,8 @@
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
 				progress,
-				sourceToken: $sourceToken,
-				destinationToken: $destinationToken,
+				sourceToken: $sourceToken as IcTokenToggleable,
+				destinationToken: $destinationToken as IcTokenToggleable,
 				swapAmount,
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
@@ -166,29 +166,25 @@
 
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icBack');
+
+	$effect(() => console.log({ receiveAmount }, 'in wizard'));
 </script>
 
 <IcTokenFeeContext token={$sourceToken as IcToken}>
-	<SwapAmountsContext
-		amount={swapAmount}
-		sourceToken={$sourceToken}
-		destinationToken={$destinationToken}
-		{slippageValue}
-	>
-		{#if currentStep?.name === WizardStepsSwap.SWAP}
-			<SwapForm
-				on:icClose
-				on:icNext
-				on:icShowTokensList
-				on:icShowProviderList
-				bind:swapAmount
-				bind:receiveAmount
-				bind:slippageValue
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
-		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress bind:swapProgressStep />
-		{/if}
-	</SwapAmountsContext>
+	{#if currentStep?.name === WizardStepsSwap.SWAP}
+		<IcSwapForm
+			on:icClose
+			on:icNext
+			on:icShowTokensList
+			on:icShowProviderList
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+			{sourceTokenFee}
+		/>
+	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
+		<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
+	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
+		<SwapProgress bind:swapProgressStep />
+	{/if}
 </IcTokenFeeContext>

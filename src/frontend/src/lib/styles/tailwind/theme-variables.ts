@@ -176,6 +176,10 @@ export const themeVariables = {
 		'trump-0': '#232BCC',
 		'trump-100': '#000797',
 		'gold-0': '#CCA055',
-		'gold-100': '#EBD27F'
+		'gold-100': '#EBD27F',
+		'arbitrum-0': '#11AAFF',
+		'arbitrum-100': '#203147',
+		'chainfusion-0': '#6C00F6',
+		'chainfusion-100': '#7014A4'
 	}
 };

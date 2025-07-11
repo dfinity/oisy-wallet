@@ -16,3 +16,15 @@ export const swapWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps => [
 		title: i18n.swap.text.executing_transaction
 	}
 ];
+
+export const allSwapWizardSteps = (params: WizardStepsParams): WizardSteps => [
+	...swapWizardSteps(params),
+	{
+		name: WizardStepsSwap.TOKENS_LIST,
+		title: params.i18n.send.text.select_token
+	},
+	{
+		name: WizardStepsSwap.FILTER_NETWORKS,
+		title: params.i18n.send.text.select_network_filter
+	}
+];
