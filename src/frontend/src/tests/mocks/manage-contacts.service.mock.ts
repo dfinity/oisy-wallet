@@ -11,7 +11,8 @@ export const mockManageContactsService = () => {
 				id: BigInt(Date.now()),
 				name,
 				updateTimestampNs: BigInt(Date.now()),
-				addresses: []
+				addresses: [],
+				image: []
 			};
 
 			contactsStore.addContact(newContact);

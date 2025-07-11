@@ -1166,7 +1166,7 @@ describe('backend.canister', () => {
 
 			const res = await createContact('John');
 
-			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John' });
+			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John', image: [] });
 			expect(res).toEqual(mockContact);
 		});
 

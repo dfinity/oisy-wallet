@@ -40,7 +40,8 @@ export const getMockContacts = ({
 					id: BigInt(i),
 					name: names?.[i] ?? 'Testname',
 					update_timestamp_ns: 12,
-					addresses: nonNullish(addresses?.[i]) ? addresses[i] : []
+					addresses: nonNullish(addresses?.[i]) ? addresses[i] : [],
+					image: []
 				}) as unknown as Contact
 		);
 
@@ -82,6 +83,7 @@ export const getMockContactsUi = ({
 					id: BigInt(i),
 					name: name ?? 'Testname',
 					updateTimestampNs: 12,
-					addresses
+					addresses,
+					image: []
 				}) as unknown as Contact
 		);
