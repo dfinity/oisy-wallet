@@ -345,6 +345,7 @@ interface I18nInit {
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
+		no_infura_erc721_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_network: string;
 		eth_address_unknown: string;
@@ -368,6 +369,7 @@ interface I18nInit {
 		erc20_custom_tokens: string;
 		erc20_user_tokens: string;
 		spl_custom_tokens: string;
+		erc721_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
@@ -884,8 +886,7 @@ interface I18nWallet_connect {
 		disconnected: string;
 		session_ended: string;
 		connected: string;
-		eth_transaction_executed: string;
-		sol_transaction_executed: string;
+		transaction_executed: string;
 		sign_executed: string;
 	};
 	error: {
