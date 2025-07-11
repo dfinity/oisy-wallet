@@ -13,6 +13,7 @@
 	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -62,9 +63,11 @@
 			<SplitPane>
 				<NavigationMenu slot="menu">
 					{#if tokensRoute}
-						<div transition:fade class="hidden xl:block">
-							<DappsCarousel />
-						</div>
+						<Responsive up="xl">
+							<div transition:fade class="hidden xl:block">
+								<DappsCarousel />
+							</div>
+						</Responsive>
 					{/if}
 				</NavigationMenu>
 
