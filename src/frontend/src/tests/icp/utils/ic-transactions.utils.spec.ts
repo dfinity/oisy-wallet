@@ -21,7 +21,6 @@ import {
 } from '$tests/mocks/ic-transactions.mock';
 import { get } from 'svelte/store';
 import { expect } from 'vitest';
-import type { BRAND } from 'zod/v4';
 
 describe('getIcExtendedTransactions', () => {
 	it('should return no transactions if the stores are empty', () => {
@@ -49,7 +48,7 @@ describe('getIcExtendedTransactions', () => {
 		expect(result).toHaveLength(3);
 
 		cleanupIcTransactionsStore({
-			tokenId: MOCK_CKETH_TOKEN.id as unknown as symbol & BRAND<'TokenId'>
+			tokenId: MOCK_CKETH_TOKEN.id ?? parseTokenId('')
 		});
 	});
 });

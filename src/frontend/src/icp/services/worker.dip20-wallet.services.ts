@@ -1,4 +1,4 @@
-import { syncWallet } from '$icp/services/ic-listener.services';
+import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
@@ -19,6 +19,8 @@ export const initDip20WalletWorker = async ({
 }: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
+
+	await syncWalletFromCache({ tokenId, networkId });
 
 	worker.onmessage = ({
 		data: dataMsg

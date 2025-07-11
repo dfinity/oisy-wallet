@@ -1,7 +1,10 @@
+import { getIdbSolTransactions } from '$lib/api/idb-transactions.api';
+import { syncWalletFromIdbCache } from '$lib/services/listener.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
+import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { TokenId } from '$lib/types/token';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
@@ -67,3 +70,10 @@ export const syncWalletError = ({
 		err
 	});
 };
+
+export const syncWalletFromCache = (params: Omit<GetIdbTransactionsParams, 'principal'>) =>
+	syncWalletFromIdbCache({
+		...params,
+		getIdbTransactions: getIdbSolTransactions,
+		transactionsStore: solTransactionsStore
+	});
