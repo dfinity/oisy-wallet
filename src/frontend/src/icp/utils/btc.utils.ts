@@ -19,7 +19,12 @@ export const getPendingTransactions = (
 	certified: true;
 } => {
 	const storeData = get(btcPendingSentTransactionsStore);
+	console.warn('Retrieving pending transactions for address:', address);
+	console.warn('Store data:', storeData);
+	console.warn('Available addresses in store:', Object.keys(storeData));
+	console.warn('Looking for address:', address);
 	const pendingTransactions = storeData[address];
+	console.warn('Found pending transactions:', pendingTransactions);
 	return pendingTransactions;
 };
 
