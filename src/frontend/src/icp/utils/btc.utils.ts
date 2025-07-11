@@ -69,6 +69,8 @@ export const getPendingTransactionsBalance = (address: string): bigint => {
 		return 0n;
 	}
 
+	console.warn('pendingTransactions: ', pendingTransactions.data);
+
 	// Calculate total pending amount by summing all UTXO values in pending transactions
 	return pendingTransactions.data.reduce(
 		(sum: bigint, tx: PendingTransaction) =>
