@@ -885,8 +885,7 @@ interface I18nWallet_connect {
 		disconnected: string;
 		session_ended: string;
 		connected: string;
-		eth_transaction_executed: string;
-		sol_transaction_executed: string;
+		transaction_executed: string;
 		sign_executed: string;
 	};
 	error: {
