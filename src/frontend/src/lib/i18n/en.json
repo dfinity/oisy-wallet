@@ -377,7 +377,7 @@
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
 				"card_title": "OISY Sprinkles: Episode 4 is Live \uD83C\uDF89",
-				"one_liner": "Earn BTC for staying active—and now, earn <strong>guaranteed</strong> Sprinkles for referrals.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer 4 friends and get rewarded directly. Top referrers win even more.",
+				"one_liner": "Earn BTC for staying active — and now, earn <strong>guaranteed</strong> Sprinkles for referrals.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer 4 friends and get rewarded directly. Top referrers win even more.",
 				"participate_title": "Earn BTC by staying active - and now by inviting others.",
 				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Now with referral rewards: invite a friend to set up a wallet and you’ll both earn guaranteed Sprinkles. Land in the top 4 referrers and win a jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
@@ -463,7 +463,7 @@
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc721_provider": "No Infura ERC721 provider for network $network",
-			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
+			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
 			"loading_address": "Error while loading the $symbol address.",
@@ -472,8 +472,8 @@
 			"spl_tokens": "Error while loading the SPL tokens.",
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
 			"minter_cketh_eth": "A configured minter is required to convert ckETH to ETH.",
-			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to Erc20.",
-			"ledger_cketh_eth": "A configured ckETH ledger is required to convert ckErc20 to Erc20.",
+			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to ERC20.",
+			"ledger_cketh_eth": "A configured ckETH ledger is required to convert ckERC20 to ERC20.",
 			"minter_btc": "A configured minter is required to retrieve BTC.",
 			"minter_ckbtc_info": "A configured minter is required to fetch the ckBTC info",
 			"minter_cketh_info": "A configured minter is required to fetch the ckETH info",
@@ -711,7 +711,7 @@
 			"metamask_connected": "Cannot get your accounts. Is your Metamask open and already connected?",
 			"metamask_no_accounts": "No Metamask accounts found.",
 			"metamask_switch_network": "Cannot request Metamask to switch to chain ID $chain_id. Is your Metamask using $network_name?",
-			"erc20_data_undefined": "Erc20 transaction Data cannot be undefined or null.",
+			"erc20_data_undefined": "ERC20 transaction Data cannot be undefined or null.",
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
@@ -958,7 +958,7 @@
 		"error": {
 			"invalid_contract_address": "Contract address is invalid.",
 			"invalid_token_address": "Token address is invalid.",
-			"invalid_ledger": "The selected token is not linked with an Icrc Ledger canister.",
+			"invalid_ledger": "The selected token is not linked with an ICRC Ledger canister.",
 			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
@@ -1171,7 +1171,7 @@
 				},
 				"network_custody": {
 					"title": "No more private key anxiety with Network Custody",
-					"description": "$oisy_name implements network custody, an innovative approach that leverages the Internet Computer's advanced cryptography to eliminate the need for you to handle private keys directly. This provides a secure and user-friendly alternative to traditional methods, aligning with the “Onchain is the New Online“ movement — a shift toward solutions that enhance security and resilience against cyber attacks by running on a distributed network."
+					"description": "$oisy_name implements Network Custody, an innovative approach that leverages the Internet Computer's advanced cryptography to eliminate the need for you to handle private keys directly. This provides a secure and user-friendly alternative to traditional methods, aligning with the “Onchain is the New Online“ movement — a shift toward solutions that enhance security and resilience against cyber attacks by running on a distributed network."
 				},
 				"fully_on_chain": {
 					"title": "Tamper-Proof Security with a Fully On-Chain Wallet",
