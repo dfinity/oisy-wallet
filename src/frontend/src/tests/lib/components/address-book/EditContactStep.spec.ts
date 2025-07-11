@@ -14,10 +14,7 @@ import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import imageCompression from 'browser-image-compression';
 import { vi } from 'vitest';
-vi.mock('$env/avatar.env', () => ({
-	__esModule: true,
-	AVATAR_ENABLED: true
-}));
+
 vi.mock('browser-image-compression', () => {
 	const mockFn = vi.fn((file: File, _opts: unknown): Promise<File> => Promise.resolve(file));
 	(
