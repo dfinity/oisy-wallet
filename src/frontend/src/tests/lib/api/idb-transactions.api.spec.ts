@@ -8,6 +8,10 @@ import {
 	deleteIdbEthTransactions,
 	deleteIdbIcTransactions,
 	deleteIdbSolTransactions,
+	getIdbBtcTransactions,
+	getIdbEthTransactions,
+	getIdbIcTransactions,
+	getIdbSolTransactions,
 	setIdbTransactionsStore
 } from '$lib/api/idb-transactions.api';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
@@ -16,6 +20,7 @@ import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
+import { expect, vi } from 'vitest';
 
 vi.mock('idb-keyval', () => ({
 	createStore: vi.fn(() => ({
@@ -194,8 +199,80 @@ describe('idb-transactions.api', () => {
 		});
 	});
 
+	describe('getIdbBtcTransactions', () => {
+		it('should get BTC transactions', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbBtcTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('getIdbEthTransactions', () => {
+		it('should get ETH transactions', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbEthTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('getIdbIcTransactions', () => {
+		it('should get IC transactions', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbIcTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
+		});
+	});
+
+	describe('getIdbSolTransactions', () => {
+		it('should get SOL transactions', async () => {
+			vi.mocked(idbKeyval.get).mockResolvedValue(mockTokens);
+
+			const result = await getIdbSolTransactions({
+				principal: mockPrincipal,
+				tokenId: mockToken1.id,
+				networkId: mockToken1.network.id
+			});
+
+			expect(result).toEqual(mockTokens);
+			expect(idbKeyval.get).toHaveBeenCalledWith(
+				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
+				expect.any(Object)
+			);
+		});
+	});
+
 	describe('deleteIdbBtcTransactions', () => {
-		it('should delete IC tokens', async () => {
+		it('should delete BTC tokens', async () => {
 			await deleteIdbBtcTransactions(mockPrincipal);
 
 			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
@@ -228,7 +305,7 @@ describe('idb-transactions.api', () => {
 	});
 
 	describe('deleteIdbSolTransactions', () => {
-		it('should delete BTC transactions', async () => {
+		it('should delete SOL transactions', async () => {
 			await deleteIdbSolTransactions(mockPrincipal);
 
 			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(

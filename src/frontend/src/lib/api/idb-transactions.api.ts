@@ -10,13 +10,14 @@ import { nullishSignOut } from '$lib/services/auth.services';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type {
+	GetIdbTransactionsParams,
 	IdbTransactionsStoreData,
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
-import { createStore, del, set as idbSet, type UseStore } from 'idb-keyval';
+import { createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
 const idbTransactionsStore = (key: string): UseStore =>
@@ -28,6 +29,12 @@ const idbBtcTransactionsStore = idbTransactionsStore(BTC_MAINNET_NETWORK_SYMBOL.
 const idbEthTransactionsStore = idbTransactionsStore(ETHEREUM_NETWORK_SYMBOL.toLowerCase());
 const idbIcTransactionsStore = idbTransactionsStore(ICP_NETWORK_SYMBOL.toLowerCase());
 const idbSolTransactionsStore = idbTransactionsStore(SOLANA_MAINNET_NETWORK_SYMBOL.toLowerCase());
+
+const toKey = ({ principal, tokenId, networkId }: GetIdbTransactionsParams): IDBValidKey[] => [
+	principal.toText(),
+	`${tokenId.description}`,
+	`${networkId.description}`
+];
 
 export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData>({
 	identity,
@@ -49,11 +56,7 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 				return;
 			}
 
-			const key: IDBValidKey[] = [
-				identity.getPrincipal().toText(),
-				`${tokenId.description}`,
-				`${networkId.description}`
-			];
+			const key: IDBValidKey[] = toKey({ principal: identity.getPrincipal(), tokenId, networkId });
 
 			await idbSet(
 				key,
@@ -83,6 +86,22 @@ export const setIdbSolTransactions = (
 	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<SolTransactionUi>>>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbSolTransactionsStore });
+
+export const getIdbBtcTransactions = (
+	params: GetIdbTransactionsParams
+): Promise<BtcTransactionUi[] | undefined> => get(toKey(params), idbBtcTransactionsStore);
+
+export const getIdbEthTransactions = (
+	params: GetIdbTransactionsParams
+): Promise<EthTransactionsData[] | undefined> => get(toKey(params), idbEthTransactionsStore);
+
+export const getIdbIcTransactions = (
+	params: GetIdbTransactionsParams
+): Promise<IcTransactionUi[] | undefined> => get(toKey(params), idbIcTransactionsStore);
+
+export const getIdbSolTransactions = (
+	params: GetIdbTransactionsParams
+): Promise<SolTransactionUi[] | undefined> => get(toKey(params), idbSolTransactionsStore);
 
 export const deleteIdbBtcTransactions = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbBtcTransactionsStore);
