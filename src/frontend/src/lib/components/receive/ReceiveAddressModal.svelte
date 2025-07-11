@@ -12,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
+	import { createEventDispatcher } from 'svelte';
 
 	export let infoCmp:
 		| typeof ReceiveAddresses
@@ -30,8 +31,8 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsReceiveAddress> | undefined;
+	let modal: WizardModal<WizardStepsReceiveAddress>;
 
 	let address: undefined | string;
 	let addressLabel: undefined | string;
@@ -50,16 +51,18 @@
 		addressToken = undefined;
 		copyAriaLabel = undefined;
 	};
+
+	const dispatch = createEventDispatcher();
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose testId={RECEIVE_TOKENS_MODAL}>
-	<svelte:fragment slot="title">
+<WizardModal {steps} bind:currentStep bind:this={modal} onClose={() => dispatch('nnsClose')} testId={RECEIVE_TOKENS_MODAL}>
+	{#snippet title()}
 		{#if currentStep?.name === steps[1].name}
 			<ReceiveTitle title={addressToken?.network.name} />
 		{:else}
 			{$i18n.receive.text.receive}
-		{/if}</svelte:fragment
-	>
+		{/if}
+	{/snippet}
 
 	{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
 		<ReceiveAddressQrCode
