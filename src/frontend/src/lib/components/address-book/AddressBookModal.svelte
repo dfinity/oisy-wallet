@@ -173,7 +173,7 @@
 		modalStore.close();
 	};
 
-	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let currentStepName = $derived(currentStep?.name);
 	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
 	let editContactNameTitle = $state($i18n.contact.form.add_new_contact);

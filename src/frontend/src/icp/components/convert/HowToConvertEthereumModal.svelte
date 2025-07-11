@@ -3,7 +3,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
 	import HowToConvertEthereumWizardSteps from '$icp/components/convert/HowToConvertEthereumWizardSteps.svelte';
-	import { howToConvertWizardSteps, type WizardStepsHowToConvertComplete } from '$icp-eth/config/how-to-convert.config';
+	import {
+		howToConvertWizardSteps,
+		type WizardStepsHowToConvertComplete
+	} from '$icp-eth/config/how-to-convert.config';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsHowToConvert, WizardStepsConvert } from '$lib/enums/wizard-steps';

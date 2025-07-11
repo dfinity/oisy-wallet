@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher } from 'svelte';
 	import type IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
 	import type IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
 	import type IcReceiveInfoIcrc from '$icp/components/receive/IcReceiveInfoIcrc.svelte';
@@ -12,7 +13,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
-	import { createEventDispatcher } from 'svelte';
 
 	export let infoCmp:
 		| typeof ReceiveAddresses
@@ -55,7 +55,13 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} onClose={() => dispatch('nnsClose')} testId={RECEIVE_TOKENS_MODAL}>
+<WizardModal
+	{steps}
+	bind:currentStep
+	bind:this={modal}
+	onClose={() => dispatch('nnsClose')}
+	testId={RECEIVE_TOKENS_MODAL}
+>
 	{#snippet title()}
 		{#if currentStep?.name === steps[1].name}
 			<ReceiveTitle title={addressToken?.network.name} />

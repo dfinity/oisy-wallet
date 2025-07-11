@@ -95,7 +95,7 @@
 		}
 	];
 	let currentStep: WizardStep<TokenModalSteps> | undefined = $state();
-	let currentStepName = $derived(currentStep?.name as TokenModalSteps | undefined);
+	let currentStepName = $derived(currentStep?.name);
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
