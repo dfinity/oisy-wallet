@@ -12,7 +12,22 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import imageCompression from 'browser-image-compression';
 import { vi } from 'vitest';
+
+vi.mock('browser-image-compression', () => {
+	const mockFn = vi.fn((file: File, _opts: unknown): Promise<File> => Promise.resolve(file));
+	(
+		mockFn as unknown as {
+			getDataUrlFromFile(file: File): Promise<string>;
+		}
+	).getDataUrlFromFile = vi.fn(() => Promise.resolve('data:image/png;base64,MOCK'));
+
+	return {
+		__esModule: true,
+		default: mockFn
+	};
+});
 
 describe('EditContactStep', () => {
 	const mockContact: ContactUi = {
@@ -41,8 +56,32 @@ describe('EditContactStep', () => {
 	const mockDeleteContact = vi.fn();
 	const mockDeleteAddress = vi.fn();
 
+	const renderComponent = (contact = mockContact) =>
+		render(EditContactStep, {
+			props: {
+				contact,
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress
+			}
+		});
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+	});
+
+	it('compresses an image', async () => {
+		// define the variable in scope:
+		const file = new File(['👍'], 'avatar.png', { type: 'image/png' });
+
+		// now both calls work and use our mock:
+		const compressed = await imageCompression(file, { maxSizeMB: 0.1 });
+		const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+
+		expect(dataUrl).toBe('data:image/png;base64,MOCK');
 	});
 
 	it('should render the contact name and addresses', () => {
@@ -206,5 +245,61 @@ describe('EditContactStep', () => {
 		const addAddressButton = getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON);
 
 		expect(addAddressButton).toBeDisabled();
+	});
+
+	it('renders contact name and addresses', () => {
+		const { getByText } = renderComponent();
+
+		expect(getByText(mockContact.name)).toBeInTheDocument();
+		expect(getByText(en.address.types.Eth)).toBeInTheDocument();
+		expect(getByText('My ETH Address')).toBeInTheDocument();
+		expect(getByText(en.address.types.Btc)).toBeInTheDocument();
+		expect(getByText('My BTC Address')).toBeInTheDocument();
+	});
+
+	it('calls onEdit when edit button clicked', async () => {
+		const { getByTestId } = renderComponent();
+		await fireEvent.click(getByTestId(CONTACT_HEADER_EDITING_EDIT_BUTTON));
+
+		expect(mockEdit).toHaveBeenCalledOnce();
+		expect(mockEdit).toHaveBeenCalledWith(mockContact);
+	});
+
+	it('calls onAddAddress when add-address clicked', async () => {
+		const { getByTestId } = renderComponent();
+		await fireEvent.click(getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON));
+
+		expect(mockAddAddress).toHaveBeenCalledOnce();
+	});
+
+	it('calls onDeleteContact when delete-contact clicked', async () => {
+		const { getByTestId } = renderComponent();
+		await fireEvent.click(getByTestId(CONTACT_EDIT_DELETE_CONTACT_BUTTON));
+
+		expect(mockDeleteContact).toHaveBeenCalledOnce();
+		expect(mockDeleteContact).toHaveBeenCalledWith(mockContact.id);
+	});
+
+	it('calls onClose when close button clicked', async () => {
+		const { getByTestId } = renderComponent();
+		await fireEvent.click(getByTestId(CONTACT_SHOW_CLOSE_BUTTON));
+
+		expect(mockClose).toHaveBeenCalledOnce();
+	});
+
+	it('calls onEditAddress when edit-address clicked', async () => {
+		const { getAllByTestId } = renderComponent();
+		await fireEvent.click(getAllByTestId(ADDRESS_LIST_ITEM_EDIT_BUTTON)[0]);
+
+		expect(mockEditAddress).toHaveBeenCalledOnce();
+		expect(mockEditAddress).toHaveBeenCalledWith(0);
+	});
+
+	it('calls onDeleteAddress when delete-address clicked', async () => {
+		const { getAllByTestId } = renderComponent();
+		await fireEvent.click(getAllByTestId(ADDRESS_LIST_ITEM_DELETE_BUTTON)[0]);
+
+		expect(mockDeleteAddress).toHaveBeenCalledOnce();
+		expect(mockDeleteAddress).toHaveBeenCalledWith(0);
 	});
 });
