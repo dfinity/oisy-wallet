@@ -6,6 +6,7 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { CRCLX_TOKEN } from '$env/tokens/tokens-spl/tokens.crclx.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
 import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
@@ -37,6 +38,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	COINX_TOKEN,
 	CRCLX_TOKEN,
 	EURC_TOKEN,
+	GMEX_TOKEN,
 	GOOGLX_TOKEN,
 	HOODX_TOKEN,
 	JUP_TOKEN,
