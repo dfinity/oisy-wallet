@@ -359,12 +359,12 @@
 				"win": {
 					"default": {
 						"title": "恭喜您赢得今天的 OISY Sprinkles！",
-						"description": "在 Twitter 上分享您的胜利，以获得另一次获胜的机会。",
+						"description": "在 X/Twitter 上分享您的胜利，以获得另一次获胜的机会。",
 						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
 					},
 					"jackpot": {
 						"title": "恭喜您赢得今天最大的 OISY Sprinkles！",
-						"description": "在 Twitter 上分享您的胜利，以获得另一次获胜的机会。",
+						"description": "在 X/Twitter 上分享您的胜利，以获得另一次获胜的机会。",
 						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
 					},
 					"referral": {
