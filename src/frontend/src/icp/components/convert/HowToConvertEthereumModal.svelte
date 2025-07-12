@@ -10,7 +10,6 @@
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import {
-		type WizardStepsSend,
 		WizardStepsHowToConvert,
 		WizardStepsConvert
 	} from '$lib/enums/wizard-steps';
