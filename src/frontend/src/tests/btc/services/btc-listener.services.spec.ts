@@ -32,7 +32,14 @@ describe('btc-listener', () => {
 		wallet: {
 			balance: {
 				certified: true,
-				data: balance
+				data:
+					balance !== null
+						? {
+								available: balance,
+								pending: 0n,
+								total: balance
+							}
+						: null
 			},
 			newTransactions: JSON.stringify(mockCertifiedTransactions(transactions), jsonReplacer)
 		}

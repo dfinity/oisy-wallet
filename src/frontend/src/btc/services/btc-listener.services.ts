@@ -19,16 +19,18 @@ export const syncWallet = ({
 }) => {
 	const {
 		wallet: {
-			balance: { certified, data: balance },
+			balance: { certified, data: balanceData },
 			newTransactions
 		}
 	} = data;
 
-	if (nonNullish(balance)) {
+	if (nonNullish(balanceData)) {
+		// Map balance.total to maintain compatibility with existing Balance type
 		balancesStore.set({
 			id: tokenId,
 			data: {
-				data: balance,
+				// Extract total balance for balancesStore
+				data: balanceData.total,
 				certified
 			}
 		});
