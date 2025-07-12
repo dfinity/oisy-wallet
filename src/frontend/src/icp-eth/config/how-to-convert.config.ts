@@ -1,9 +1,3 @@
-import { convertWizardSteps, type ConvertWizardStepsParams } from '$lib/config/convert.config';
-import {
-	WizardStepsHowToConvert,
-	type WizardStepsConvert,
-	type WizardStepsSend
-} from '$lib/enums/wizard-steps';
 import {
 	convertWizardSteps,
 	type ConvertWizardStepsParams,

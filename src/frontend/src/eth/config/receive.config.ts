@@ -3,12 +3,7 @@ import {
 	type WizardStepsHowToConvertComplete
 } from '$icp-eth/config/how-to-convert.config';
 import type { ConvertWizardStepsParams } from '$lib/config/convert.config';
-import {
-	WizardStepsReceive,
-	type WizardStepsConvert,
-	type WizardStepsHowToConvert,
-	type WizardStepsSend
-} from '$lib/enums/wizard-steps';
+import { WizardStepsReceive } from '$lib/enums/wizard-steps';
 import type { WizardSteps } from '@dfinity/gix-components';
 
 export type WizardStepsReceiveComplete = WizardStepsReceive | WizardStepsHowToConvertComplete;

@@ -31,8 +31,8 @@
 		}
 	];
 
-	let currentStep: WizardStep<WizardStepsSign> | undefined
-	let modal: WizardModal<WizardStepsSign>
+	let currentStep: WizardStep<WizardStepsSign> | undefined;
+	let modal: WizardModal<WizardStepsSign>;
 
 	const close = () => modalStore.close();
 
