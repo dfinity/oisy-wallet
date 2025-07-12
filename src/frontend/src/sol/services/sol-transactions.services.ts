@@ -1,3 +1,8 @@
+import {
+	SOLANA_DEVNET_NETWORK,
+	SOLANA_LOCAL_NETWORK,
+	SOLANA_MAINNET_NETWORK
+} from '$env/networks/networks.sol.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -14,7 +19,7 @@ import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
-import type { SolanaNetworkType } from '$sol/types/network';
+import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
@@ -259,11 +264,19 @@ export const loadNextSolTransactions = async ({
 	}
 };
 
+const networkToSolNetworkMap = {
+	[SolanaNetworks.mainnet]: SOLANA_MAINNET_NETWORK,
+	[SolanaNetworks.devnet]: SOLANA_DEVNET_NETWORK,
+	[SolanaNetworks.local]: SOLANA_LOCAL_NETWORK
+};
+
 const loadSolTransactions = async ({
 	token: { id: tokenId },
 	network,
 	...rest
 }: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
+	const { id: networkId } = networkToSolNetworkMap[network];
+
 	try {
 		const transactions = await getSolTransactions({
 			network,
@@ -277,6 +290,7 @@ const loadSolTransactions = async ({
 
 		solTransactionsStore.append({
 			tokenId,
+			networkId,
 			transactions: certifiedTransactions
 		});
 

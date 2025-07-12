@@ -6,16 +6,19 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
+import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const syncWallet = ({
 	data,
-	tokenId
+	tokenId,
+	networkId
 }: {
 	data: BtcPostMessageDataResponseWallet;
 	tokenId: TokenId;
+	networkId: NetworkId;
 }) => {
 	const {
 		wallet: {
@@ -38,6 +41,7 @@ export const syncWallet = ({
 
 	btcTransactionsStore.prepend({
 		tokenId,
+		networkId,
 		transactions: JSON.parse(newTransactions, jsonReviver)
 	});
 };

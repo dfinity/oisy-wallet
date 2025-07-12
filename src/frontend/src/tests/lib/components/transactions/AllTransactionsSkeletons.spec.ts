@@ -1,6 +1,9 @@
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import * as btcEnv from '$env/networks/networks.btc.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
@@ -45,9 +48,17 @@ describe('AllTransactionsSkeletons', () => {
 			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
 			icTransactionsStore.reset(ICP_TOKEN_ID);
 
-			btcTransactionsStore.append({ tokenId: BTC_MAINNET_TOKEN_ID, transactions: [] });
+			btcTransactionsStore.append({
+				tokenId: BTC_MAINNET_TOKEN_ID,
+				networkId: BTC_MAINNET_NETWORK_ID,
+				transactions: []
+			});
 			ethTransactionsStore.add({ tokenId: ETHEREUM_TOKEN_ID, transactions: [] });
-			icTransactionsStore.append({ tokenId: ICP_TOKEN_ID, transactions: [] });
+			icTransactionsStore.append({
+				tokenId: ICP_TOKEN_ID,
+				networkId: ICP_NETWORK_ID,
+				transactions: []
+			});
 		});
 
 		it('should render the skeleton when at least one store is empty', () => {
@@ -79,7 +90,11 @@ describe('AllTransactionsSkeletons', () => {
 				expect(skeleton).toBeDefined();
 			});
 
-			solTransactionsStore.append({ tokenId: SOLANA_TOKEN_ID, transactions: [] });
+			solTransactionsStore.append({
+				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
+				transactions: []
+			});
 
 			await tick();
 
@@ -104,7 +119,11 @@ describe('AllTransactionsSkeletons', () => {
 				}
 			});
 
-			solTransactionsStore.append({ tokenId: SOLANA_TOKEN_ID, transactions: [] });
+			solTransactionsStore.append({
+				tokenId: SOLANA_TOKEN_ID,
+				networkId: SOLANA_MAINNET_NETWORK_ID,
+				transactions: []
+			});
 
 			await tick();
 

@@ -37,6 +37,7 @@ export const initDip20WalletWorker = async ({
 			case 'syncDip20Wallet':
 				syncWallet({
 					tokenId,
+					networkId,
 					data: data as PostMessageDataResponseWallet
 				});
 				return;
@@ -50,6 +51,7 @@ export const initDip20WalletWorker = async ({
 			case 'syncDip20WalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId,
+					networkId,
 					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;

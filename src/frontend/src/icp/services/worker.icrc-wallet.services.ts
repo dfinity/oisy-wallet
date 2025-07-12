@@ -57,6 +57,7 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWallet':
 				syncWallet({
 					tokenId,
+					networkId,
 					data: data as PostMessageDataResponseWallet
 				});
 				return;
@@ -76,6 +77,7 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId,
+					networkId,
 					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;

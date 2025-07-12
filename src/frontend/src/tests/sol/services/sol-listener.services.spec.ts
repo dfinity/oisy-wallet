@@ -1,5 +1,7 @@
 import { balancesStore } from '$lib/stores/balances.store';
+import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
+import { parseNetworkId } from '$lib/validation/network.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -13,6 +15,7 @@ import { get } from 'svelte/store';
 describe('sol-listener.services', () => {
 	describe('sol-listener', () => {
 		const tokenId: TokenId = parseTokenId('testTokenId');
+		const networkId: NetworkId = parseNetworkId('testNetworkId');
 		const mockBalance = lamports(1000n);
 
 		const mockPostMessage = ({
@@ -39,7 +42,7 @@ describe('sol-listener.services', () => {
 
 		describe('syncWallet', () => {
 			it('should set the balance in balancesStore', () => {
-				syncWallet({ data: mockPostMessage({}), tokenId });
+				syncWallet({ data: mockPostMessage({}), tokenId, networkId });
 
 				const balance = get(balancesStore);
 
@@ -50,7 +53,7 @@ describe('sol-listener.services', () => {
 			});
 
 			it('should reset balanceStore if balance is empty', () => {
-				syncWallet({ data: mockPostMessage({ balance: null }), tokenId });
+				syncWallet({ data: mockPostMessage({ balance: null }), tokenId, networkId });
 
 				const balance = get(balancesStore);
 
@@ -59,7 +62,7 @@ describe('sol-listener.services', () => {
 
 			it('should prepend new transactions to solTransactionsStore', () => {
 				const newTransactions = JSON.stringify(mockSolCertifiedTransactions, jsonReplacer);
-				syncWallet({ data: mockPostMessage({ newTransactions }), tokenId });
+				syncWallet({ data: mockPostMessage({ newTransactions }), tokenId, networkId });
 
 				const transactions = get(solTransactionsStore);
 
@@ -69,7 +72,7 @@ describe('sol-listener.services', () => {
 
 		describe('syncWalletError', () => {
 			it('should reset balanceStore on error', () => {
-				syncWallet({ data: mockPostMessage({}), tokenId });
+				syncWallet({ data: mockPostMessage({}), tokenId, networkId });
 
 				syncWalletError({ error: 'test error', tokenId, hideToast: true });
 
@@ -80,7 +83,7 @@ describe('sol-listener.services', () => {
 
 			it('should reset transactionsStore on error', () => {
 				const newTransactions = JSON.stringify(mockSolCertifiedTransactions, jsonReplacer);
-				syncWallet({ data: mockPostMessage({ newTransactions }), tokenId });
+				syncWallet({ data: mockPostMessage({ newTransactions }), tokenId, networkId });
 
 				syncWalletError({ error: 'test error', tokenId, hideToast: true });
 

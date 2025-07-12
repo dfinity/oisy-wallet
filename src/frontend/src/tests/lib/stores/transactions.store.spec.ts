@@ -1,3 +1,5 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -6,6 +8,7 @@ import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-st
 
 describe('transactions.store', () => {
 	const tokenId = ICP_TOKEN_ID;
+	const networkId = ICP_NETWORK_ID;
 
 	describe('prepend', () => {
 		it('should add transactions at the beginning of the list', () =>
@@ -13,10 +16,10 @@ describe('transactions.store', () => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
 				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
-				store.prepend({ tokenId, transactions: initialTx });
+				store.prepend({ tokenId, networkId, transactions: initialTx });
 
 				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
-				store.prepend({ tokenId, transactions: newTx });
+				store.prepend({ tokenId, networkId, transactions: newTx });
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(2);
@@ -32,12 +35,12 @@ describe('transactions.store', () => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
 				const tx = createCertifiedIcTransactionUiMock('tx1');
-				store.prepend({ tokenId, transactions: [tx] });
+				store.prepend({ tokenId, networkId, transactions: [tx] });
 
 				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
-				store.prepend({ tokenId, transactions: newTx });
+				store.prepend({ tokenId, networkId, transactions: newTx });
 
-				store.prepend({ tokenId, transactions: [tx] });
+				store.prepend({ tokenId, networkId, transactions: [tx] });
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(2);
@@ -53,10 +56,10 @@ describe('transactions.store', () => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
 				const tx1 = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId, transactions: tx1 });
+				store.append({ tokenId, networkId, transactions: tx1 });
 
 				const tx2 = [createCertifiedIcTransactionUiMock('tx2')];
-				store.append({ tokenId, transactions: tx2 });
+				store.append({ tokenId, networkId, transactions: tx2 });
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(2);
@@ -72,12 +75,12 @@ describe('transactions.store', () => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
 				const tx = createCertifiedIcTransactionUiMock('tx1');
-				store.append({ tokenId, transactions: [tx] });
+				store.append({ tokenId, networkId, transactions: [tx] });
 
 				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
-				store.append({ tokenId, transactions: newTx });
+				store.append({ tokenId, networkId, transactions: newTx });
 
-				store.append({ tokenId, transactions: [tx] });
+				store.append({ tokenId, networkId, transactions: [tx] });
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(2);
@@ -101,8 +104,8 @@ describe('transactions.store', () => {
 					createCertifiedIcTransactionUiMock('tx3')
 				];
 
-				store.append({ tokenId, transactions });
-				store.cleanUp({ tokenId, transactionIds: ['tx1', 'tx3'] });
+				store.append({ tokenId, networkId, transactions });
+				store.cleanUp({ tokenId, networkId, transactionIds: ['tx1', 'tx3'] });
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(1);
@@ -122,8 +125,8 @@ describe('transactions.store', () => {
 					createCertifiedIcTransactionUiMock('tx3')
 				];
 
-				store.append({ tokenId, transactions });
-				store.cleanUp({ tokenId, transactionIds: ['tx4', 'tx5'] });
+				store.append({ tokenId, networkId, transactions });
+				store.cleanUp({ tokenId, networkId, transactionIds: ['tx4', 'tx5'] });
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(3);
@@ -139,7 +142,7 @@ describe('transactions.store', () => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
 				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId, transactions });
+				store.append({ tokenId, networkId, transactions });
 				store.reset(tokenId);
 
 				store.subscribe((state) => {
@@ -154,7 +157,7 @@ describe('transactions.store', () => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
 				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId, transactions });
+				store.append({ tokenId, networkId, transactions });
 				store.reset(ETHEREUM_TOKEN_ID);
 
 				store.subscribe((state) => {
@@ -184,7 +187,7 @@ describe('transactions.store', () => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
 				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId: ETHEREUM_TOKEN_ID, transactions });
+				store.append({ tokenId: ETHEREUM_TOKEN_ID, networkId: ETHEREUM_NETWORK_ID, transactions });
 				store.nullify(tokenId);
 
 				store.subscribe((state) => {
@@ -201,7 +204,7 @@ describe('transactions.store', () => {
 				store.nullify(tokenId);
 
 				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
-				store.prepend({ tokenId, transactions: initialTx });
+				store.prepend({ tokenId, networkId, transactions: initialTx });
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(1);
@@ -218,7 +221,7 @@ describe('transactions.store', () => {
 				store.nullify(tokenId);
 
 				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId, transactions: initialTx });
+				store.append({ tokenId, networkId, transactions: initialTx });
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(1);

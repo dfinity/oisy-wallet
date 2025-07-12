@@ -46,6 +46,7 @@ describe('SolTransactionsScroll', () => {
 
 		solTransactionsStore.prepend({
 			tokenId: mockToken.id,
+			networkId: mockToken.network.id,
 			transactions: mockTransactions.map((transaction) => ({
 				data: transaction,
 				certified: false
@@ -85,7 +86,11 @@ describe('SolTransactionsScroll', () => {
 
 		it('should not load next transactions if the transactions store is empty', () => {
 			solTransactionsStore.reset(mockToken.id);
-			solTransactionsStore.prepend({ tokenId: mockToken.id, transactions: [] });
+			solTransactionsStore.prepend({
+				tokenId: mockToken.id,
+				networkId: mockToken.network.id,
+				transactions: []
+			});
 
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 

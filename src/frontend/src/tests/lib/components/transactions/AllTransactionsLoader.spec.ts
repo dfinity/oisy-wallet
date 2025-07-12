@@ -187,12 +187,21 @@ describe('AllTransactionsLoader', () => {
 		btcTransactions.forEach(({ token: { id: tokenId } }) => {
 			btcTransactionsStore.reset(tokenId);
 		});
-		btcTransactions.forEach(({ transaction, token: { id: tokenId } }) => {
-			btcTransactionsStore.append({
-				tokenId,
-				transactions: [{ data: transaction as BtcTransactionUi, certified: false }]
-			});
-		});
+		btcTransactions.forEach(
+			({
+				transaction,
+				token: {
+					id: tokenId,
+					network: { id: networkId }
+				}
+			}) => {
+				btcTransactionsStore.append({
+					tokenId,
+					networkId,
+					transactions: [{ data: transaction as BtcTransactionUi, certified: false }]
+				});
+			}
+		);
 
 		ethTransactions.forEach(({ token: { id: tokenId } }) => {
 			ethTransactionsStore.nullify(tokenId);
@@ -207,22 +216,40 @@ describe('AllTransactionsLoader', () => {
 		icTransactions.forEach(({ token: { id: tokenId } }) => {
 			icTransactionsStore.reset(tokenId);
 		});
-		icTransactions.forEach(({ transaction, token: { id: tokenId } }) => {
-			icTransactionsStore.append({
-				tokenId,
-				transactions: [{ data: transaction as IcTransactionUi, certified: false }]
-			});
-		});
+		icTransactions.forEach(
+			({
+				transaction,
+				token: {
+					id: tokenId,
+					network: { id: networkId }
+				}
+			}) => {
+				icTransactionsStore.append({
+					tokenId,
+					networkId,
+					transactions: [{ data: transaction as IcTransactionUi, certified: false }]
+				});
+			}
+		);
 
 		solTransactions.forEach(({ token: { id: tokenId } }) => {
 			solTransactionsStore.reset(tokenId);
 		});
-		solTransactions.forEach(({ transaction, token: { id: tokenId } }) => {
-			solTransactionsStore.append({
-				tokenId,
-				transactions: [{ data: transaction as SolTransactionUi, certified: false }]
-			});
-		});
+		solTransactions.forEach(
+			({
+				transaction,
+				token: {
+					id: tokenId,
+					network: { id: networkId }
+				}
+			}) => {
+				solTransactionsStore.append({
+					tokenId,
+					networkId,
+					transactions: [{ data: transaction as SolTransactionUi, certified: false }]
+				});
+			}
+		);
 	});
 
 	it('should not load transactions if transactions store are not loaded', () => {
@@ -378,12 +405,20 @@ describe('AllTransactionsLoader', () => {
 			spyLoadNextIcTransactions.mockImplementation(
 				async ({ signalEnd }: { signalEnd: () => void }) => {
 					if (Math.random() > 0.3 || counter < 10) {
-						icTokens.forEach(([{ id: tokenId }]) => {
-							icTransactionsStore.append({
-								tokenId,
-								transactions: [{ data: newTransaction, certified: false }]
-							});
-						});
+						icTokens.forEach(
+							([
+								{
+									id: tokenId,
+									network: { id: networkId }
+								}
+							]) => {
+								icTransactionsStore.append({
+									tokenId,
+									networkId,
+									transactions: [{ data: newTransaction, certified: false }]
+								});
+							}
+						);
 						counter++;
 					} else {
 						signalEnd();
@@ -493,12 +528,20 @@ describe('AllTransactionsLoader', () => {
 			spyLoadNextSolTransactions.mockImplementation(
 				async ({ signalEnd }: { signalEnd: () => void }) => {
 					if (Math.random() > 0.3 || counter < 10) {
-						solTokens.forEach(([{ id: tokenId }]) => {
-							solTransactionsStore.append({
-								tokenId,
-								transactions: [{ data: newTransaction, certified: false }]
-							});
-						});
+						solTokens.forEach(
+							([
+								{
+									id: tokenId,
+									network: { id: networkId }
+								}
+							]) => {
+								solTransactionsStore.append({
+									tokenId,
+									networkId,
+									transactions: [{ data: newTransaction, certified: false }]
+								});
+							}
+						);
 						counter++;
 					} else {
 						signalEnd();

@@ -49,6 +49,7 @@ export const initBtcWalletWorker = async ({
 			case 'syncBtcWallet':
 				syncWallet({
 					tokenId,
+					networkId,
 					data: data as BtcPostMessageDataResponseWallet
 				});
 				return;

@@ -54,6 +54,7 @@ describe('IcTransactionsScroll', () => {
 
 		icTransactionsStore.append({
 			tokenId: mockToken.id,
+			networkId: mockToken.network.id,
 			transactions: mockTransactions.map((transaction) => ({
 				data: transaction,
 				certified: false
@@ -106,7 +107,11 @@ describe('IcTransactionsScroll', () => {
 
 		it('should not load next transactions if the transactions store is empty', () => {
 			icTransactionsStore.reset(mockToken.id);
-			icTransactionsStore.prepend({ tokenId: mockToken.id, transactions: [] });
+			icTransactionsStore.prepend({
+				tokenId: mockToken.id,
+				networkId: mockToken.network.id,
+				transactions: []
+			});
 
 			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 

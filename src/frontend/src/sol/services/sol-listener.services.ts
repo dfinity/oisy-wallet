@@ -4,6 +4,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
+import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
@@ -12,10 +13,12 @@ import { get } from 'svelte/store';
 
 export const syncWallet = ({
 	data,
-	tokenId
+	tokenId,
+	networkId
 }: {
 	data: SolPostMessageDataResponseWallet;
 	tokenId: TokenId;
+	networkId: NetworkId;
 }) => {
 	const {
 		wallet: {
@@ -38,6 +41,7 @@ export const syncWallet = ({
 
 	solTransactionsStore.prepend({
 		tokenId,
+		networkId,
 		transactions: JSON.parse(newTransactions, jsonReviver)
 	});
 };

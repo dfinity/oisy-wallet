@@ -1,8 +1,10 @@
 import { syncWallet } from '$icp/services/ic-listener.services';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { NetworkId } from '$lib/types/network';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import { parseNetworkId } from '$lib/validation/network.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { jsonReplacer } from '@dfinity/utils';
@@ -11,6 +13,7 @@ import { get } from 'svelte/store';
 describe('ic-listener', () => {
 	describe('syncWallet', () => {
 		const tokenId: TokenId = parseTokenId('test');
+		const networkId: NetworkId = parseNetworkId('test-network');
 
 		const mockBalance = 1256n;
 
@@ -42,7 +45,7 @@ describe('ic-listener', () => {
 		});
 
 		it('should set the balance in balancesStore', () => {
-			syncWallet({ data: mockPostMessage, tokenId });
+			syncWallet({ data: mockPostMessage, tokenId, networkId });
 
 			const balance = get(balancesStore);
 
@@ -54,7 +57,7 @@ describe('ic-listener', () => {
 
 		describe('with transactions', () => {
 			it('should set the transactions in icTransactionsStore', () => {
-				syncWallet({ data: mockPostMessage, tokenId });
+				syncWallet({ data: mockPostMessage, tokenId, networkId });
 
 				const transactions = get(icTransactionsStore);
 
@@ -62,7 +65,7 @@ describe('ic-listener', () => {
 			});
 
 			it('should prepend the transactions in icTransactionsStore', () => {
-				syncWallet({ data: mockPostMessage, tokenId });
+				syncWallet({ data: mockPostMessage, tokenId, networkId });
 
 				const mockMoreCertifiedTransactions = mockTransactions.map((data, i) => ({
 					data: {
@@ -82,7 +85,7 @@ describe('ic-listener', () => {
 					}
 				};
 
-				syncWallet({ data: mockMorePostMessage, tokenId });
+				syncWallet({ data: mockMorePostMessage, tokenId, networkId });
 
 				const transactions = get(icTransactionsStore);
 
@@ -105,7 +108,7 @@ describe('ic-listener', () => {
 					}
 				};
 
-				syncWallet({ data: mockPostMessage, tokenId });
+				syncWallet({ data: mockPostMessage, tokenId, networkId });
 
 				const transactions = get(icTransactionsStore);
 
@@ -122,7 +125,7 @@ describe('ic-listener', () => {
 					}
 				};
 
-				syncWallet({ data: mockPostMessage, tokenId });
+				syncWallet({ data: mockPostMessage, tokenId, networkId });
 
 				const transactions = get(icTransactionsStore);
 
@@ -130,7 +133,7 @@ describe('ic-listener', () => {
 			});
 
 			it('should nullify the transactions of icTransactionsStore even if there were transactions in store', () => {
-				syncWallet({ data: mockPostMessage, tokenId });
+				syncWallet({ data: mockPostMessage, tokenId, networkId });
 
 				const transactions = get(icTransactionsStore);
 
@@ -146,7 +149,7 @@ describe('ic-listener', () => {
 					}
 				};
 
-				syncWallet({ data: mockPostMessageNoTransactions, tokenId });
+				syncWallet({ data: mockPostMessageNoTransactions, tokenId, networkId });
 
 				const transactionsNull = get(icTransactionsStore);
 

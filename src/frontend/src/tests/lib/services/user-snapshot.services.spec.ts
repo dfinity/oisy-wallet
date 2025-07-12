@@ -312,6 +312,7 @@ describe('user-snapshot.services', () => {
 
 			icTransactionsStore.prepend({
 				tokenId: ICP_TOKEN.id,
+				networkId: ICP_TOKEN.network.id,
 				transactions: mockIcTransactions.map((transaction) => ({
 					data: transaction,
 					certified
@@ -319,6 +320,7 @@ describe('user-snapshot.services', () => {
 			});
 			solTransactionsStore.prepend({
 				tokenId: mockValidSplToken.id,
+				networkId: mockValidSplToken.network.id,
 				transactions: mockSolTransactions.map((transaction) => ({
 					data: transaction,
 					certified

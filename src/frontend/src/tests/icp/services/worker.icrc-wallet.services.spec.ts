@@ -122,6 +122,7 @@ describe('worker.icrc-wallet.services', () => {
 					expect(syncWallet).toHaveBeenCalledOnce();
 					expect(syncWallet).toHaveBeenCalledWith({
 						tokenId: mockToken.id,
+						networkId: mockToken.network.id,
 						data: payload.data
 					});
 				});
@@ -150,6 +151,7 @@ describe('worker.icrc-wallet.services', () => {
 					expect(onTransactionsCleanUp).toHaveBeenCalledOnce();
 					expect(onTransactionsCleanUp).toHaveBeenNthCalledWith(1, {
 						tokenId: mockToken.id,
+						networkId: mockToken.network.id,
 						transactionIds: payload.data.transactionIds
 					});
 				});
@@ -253,6 +255,7 @@ describe('worker.icrc-wallet.services', () => {
 					expect(syncWallet).toHaveBeenCalledOnce();
 					expect(syncWallet).toHaveBeenCalledWith({
 						tokenId: mockToken.id,
+						networkId: mockToken.network.id,
 						data: payload.data
 					});
 				});
@@ -281,6 +284,7 @@ describe('worker.icrc-wallet.services', () => {
 					expect(onTransactionsCleanUp).toHaveBeenCalledOnce();
 					expect(onTransactionsCleanUp).toHaveBeenNthCalledWith(1, {
 						tokenId: mockToken.id,
+						networkId: mockToken.network.id,
 						transactionIds: payload.data.transactionIds
 					});
 				});

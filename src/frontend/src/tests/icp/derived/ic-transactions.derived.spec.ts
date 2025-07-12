@@ -1,3 +1,4 @@
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	IC_CKETH_INDEX_CANISTER_ID,
 	IC_CKETH_LEDGER_CANISTER_ID,
@@ -10,7 +11,9 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { token } from '$lib/stores/token.store';
+import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
+import { parseNetworkId } from '$lib/validation/network.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
 import { setupCkBTCStores } from '$tests/utils/ckbtc-stores.test-utils';
@@ -34,6 +37,7 @@ describe('ic-transactions.derived', () => {
 
 		icTransactionsStore.append({
 			tokenId: ICP_TOKEN_ID,
+			networkId: ICP_NETWORK_ID,
 			transactions
 		});
 
@@ -53,6 +57,7 @@ describe('ic-transactions.derived', () => {
 		it('should derived ic transactions and ckBTC pending', () => {
 			icTransactionsStore.append({
 				tokenId: ICP_TOKEN_ID,
+				networkId: ICP_NETWORK_ID,
 				transactions
 			});
 
@@ -64,9 +69,10 @@ describe('ic-transactions.derived', () => {
 
 	describe('with ckBTC pending data', () => {
 		let tokenId: TokenId;
+		let networkId: NetworkId;
 
 		beforeEach(() => {
-			tokenId = setupCkBTCStores();
+			({ tokenId, networkId } = setupCkBTCStores());
 		});
 
 		it('should derive only pending ckBTC', () => {
@@ -83,6 +89,7 @@ describe('ic-transactions.derived', () => {
 		it('should derive ic transactions and ckBTC pending', () => {
 			icTransactionsStore.append({
 				tokenId,
+				networkId,
 				transactions
 			});
 
@@ -107,6 +114,7 @@ describe('ic-transactions.derived', () => {
 		};
 
 		const tokenId: TokenId = parseTokenId('ckTest');
+		const networkId: NetworkId = parseNetworkId('ckTestNetwork');
 
 		beforeEach(() => {
 			const mockToken: IcCkToken = {
@@ -144,6 +152,7 @@ describe('ic-transactions.derived', () => {
 		it('should derive ic transactions and ckETH pending', () => {
 			icTransactionsStore.append({
 				tokenId,
+				networkId,
 				transactions
 			});
 
@@ -168,6 +177,7 @@ describe('ic-transactions.derived', () => {
 			token.set(ICP_TOKEN);
 			icTransactionsStore.append({
 				tokenId: ICP_TOKEN_ID,
+				networkId: ICP_NETWORK_ID,
 				transactions
 			});
 
