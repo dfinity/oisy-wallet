@@ -73,10 +73,10 @@
 		nonNullish(token) && isTokenIcrc(token) ? (token.indexCanisterId ?? '') : ''
 	);
 
-	let modal: WizardModal | undefined = $state();
+	let modal: WizardModal<TokenModalSteps> | undefined = $state();
 	const close = () => modalStore.close();
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<TokenModalSteps> = [
 		{
 			name: TokenModalSteps.CONTENT,
 			title: $i18n.tokens.details.title
@@ -94,8 +94,8 @@
 			title: $i18n.tokens.import.text.updating
 		}
 	];
-	let currentStep: WizardStep | undefined = $state();
-	let currentStepName = $derived(currentStep?.name as TokenModalSteps | undefined);
+	let currentStep: WizardStep<TokenModalSteps> | undefined = $state();
+	let currentStepName = $derived(currentStep?.name);
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
@@ -323,9 +323,9 @@
 	bind:currentStep
 	bind:this={modal}
 	disablePointerEvents={loading || currentStepName === TokenModalSteps.EDIT_PROGRESS}
-	on:nnsClose={close}
+	onClose={close}
 >
-	<svelte:fragment slot="title">{currentStep?.title}</svelte:fragment>
+	{#snippet title()}{currentStep?.title}{/snippet}
 
 	{#if currentStepName === TokenModalSteps.CONTENT}
 		<Responsive up="md">

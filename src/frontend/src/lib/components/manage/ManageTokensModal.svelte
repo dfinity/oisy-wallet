@@ -69,7 +69,7 @@
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
-	let modal: WizardModal | undefined = $state();
+	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 
 	const saveTokens = async ({ detail: tokens }: CustomEvent<Record<string, Token>>) => {
 		await saveAllCustomTokens({
@@ -231,11 +231,11 @@
 	{steps}
 	bind:currentStep
 	bind:this={modal}
-	on:nnsClose={close}
+	onClose={close}
 	disablePointerEvents={currentStep?.name === 'Saving'}
 	testId={MANAGE_TOKENS_MODAL}
 >
-	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 	{#if currentStep?.name === 'Review'}
 		{#if isNetworkIdICP(network?.id)}
