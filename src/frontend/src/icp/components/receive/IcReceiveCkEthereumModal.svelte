@@ -5,7 +5,7 @@
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
-	import { receiveWizardSteps } from '$eth/config/receive.config';
+	import { receiveWizardSteps, type WizardStepsReceiveComplete } from '$eth/config/receive.config';
 	import HowToConvertEthereumWizardSteps from '$icp/components/convert/HowToConvertEthereumWizardSteps.svelte';
 	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -34,12 +34,10 @@
 	let sendAmount: OptionAmount = $state();
 	let receiveAmount: number | undefined = $state();
 	let convertProgressStep: string = $state(ProgressStepsConvert.INITIALIZATION);
-	let currentStep: WizardStep | undefined = $state();
-	let modal: WizardModal | undefined = $state();
+	let currentStep: WizardStep<WizardStepsReceiveComplete> | undefined = $state();
+	let modal: WizardModal<WizardStepsReceiveComplete> | undefined = $state();
 
-	let steps: WizardSteps<
-		WizardStepsReceive | WizardStepsHowToConvert | WizardStepsConvert | WizardStepsSend
-	> = $derived(
+	let steps: WizardSteps<WizardStepsReceiveComplete> = $derived(
 		receiveWizardSteps({
 			i18n: $i18n,
 			sourceToken: sourceToken.symbol,
@@ -79,10 +77,10 @@
 		{steps}
 		bind:currentStep
 		bind:this={modal}
-		on:nnsClose={close}
+		onClose={close}
 		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
-		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		<EthConvertTokenWizard
 			{currentStep}

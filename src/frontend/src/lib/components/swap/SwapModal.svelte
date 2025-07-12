@@ -46,15 +46,15 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let modal = $state<WizardModal>();
+	let modal = $state<WizardModal<WizardStepsSwap>>();
 
-	let steps: WizardSteps<WizardStepsSwap> = $derived(swapWizardSteps({ i18n: $i18n }));
+	let steps = $derived<WizardSteps<WizardStepsSwap>>(swapWizardSteps({ i18n: $i18n }));
 
 	let swapAmount = $state<OptionAmount>();
 	let receiveAmount = $state<number | undefined>();
 	let slippageValue = $state<OptionAmount>(SWAP_DEFAULT_SLIPPAGE_VALUE);
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
-	let currentStep = $state<WizardStep | undefined>();
+	let currentStep = $state<WizardStep<WizardStepsSwap> | undefined>();
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
 	let showSelectProviderModal = $state<boolean>(false);
 
@@ -77,7 +77,7 @@
 		closeTokenList();
 	};
 
-	let title = $derived(
+	let titleString = $derived(
 		selectTokenType === 'source'
 			? $i18n.swap.text.select_source_token
 			: selectTokenType === 'destination'
@@ -116,10 +116,10 @@
 	testId={SWAP_TOKENS_MODAL}
 	bind:this={modal}
 	bind:currentStep
-	on:nnsClose={close}
+	onClose={close}
 	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
 >
-	<svelte:fragment slot="title">{title}</svelte:fragment>
+	{#snippet title()}{titleString}{/snippet}
 
 	{#if nonNullish(selectTokenType)}
 		<SwapTokensList on:icSelectToken={selectToken} on:icCloseTokensList={closeTokenList} />

@@ -23,7 +23,7 @@ export const goToWizardStep = <T extends StepName>({
 	steps,
 	stepName
 }: {
-	modal: WizardModal;
+	modal: WizardModal<T>;
 	steps: WizardSteps<T>;
 	stepName: StepName;
 }) => {

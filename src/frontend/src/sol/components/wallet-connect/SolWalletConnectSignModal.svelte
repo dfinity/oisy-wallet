@@ -92,8 +92,8 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsSign> | undefined;
+	let modal: WizardModal<WizardStepsSign>;
 
 	const close = () => modalStore.close();
 
@@ -132,10 +132,12 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	<WalletConnectModalTitle slot="title"
-		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
-	>
+<WizardModal {steps} bind:currentStep bind:this={modal} onClose={reject}>
+	{#snippet title()}
+		<WalletConnectModalTitle>
+			{$i18n.wallet_connect.text.sign_message}
+		</WalletConnectModalTitle>
+	{/snippet}
 
 	{#if currentStep?.name === WizardStepsSign.SIGNING}
 		<InProgressWizard

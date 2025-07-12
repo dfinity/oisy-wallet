@@ -381,14 +381,16 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={resetAndClose}>
-		<WalletConnectModalTitle slot="title">
-			{`${
-				currentStep?.name === 'Review' && nonNullish(proposal)
-					? $i18n.wallet_connect.text.session_proposal
-					: $i18n.wallet_connect.text.name
-			}`}
-		</WalletConnectModalTitle>
+	<WizardModal {steps} bind:currentStep bind:this={modal} onClose={resetAndClose}>
+		{#snippet title()}
+			<WalletConnectModalTitle>
+				{`${
+					currentStep?.name === 'Review' && nonNullish(proposal)
+						? $i18n.wallet_connect.text.session_proposal
+						: $i18n.wallet_connect.text.name
+				}`}
+			</WalletConnectModalTitle>
+		{/snippet}
 
 		{#if currentStep?.name === 'Review'}
 			<WalletConnectReview

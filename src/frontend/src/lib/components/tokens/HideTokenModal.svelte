@@ -105,8 +105,8 @@
 
 	let hideProgressStep: string = ProgressStepsHideToken.INITIALIZATION;
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsHideToken> | undefined;
+	let modal: WizardModal<WizardStepsHideToken>;
 
 	const close = () => {
 		modalStore.close();
@@ -123,10 +123,10 @@
 	{steps}
 	bind:currentStep
 	bind:this={modal}
-	on:nnsClose={close}
+	onClose={close}
 	disablePointerEvents={currentStep?.name === 'Hiding'}
 >
-	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 	{#if currentStep?.name === 'Hiding'}
 		<InProgressWizard
