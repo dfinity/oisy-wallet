@@ -35,13 +35,14 @@ import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import { getAddressDecoder } from '@solana/kit';
 
-const getSolanaPublicKey = async (
-	params: CanisterApiFunctionParams<{ derivationPath: string[] }>
-): Promise<Uint8Array | number[]> =>
+const getSolanaPublicKey = async ({
+	derivationPath,
+	...rest
+}: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array | number[]> =>
 	await getSchnorrPublicKey({
-		...params,
+		...rest,
 		keyId: SOLANA_KEY_ID,
-		derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...params.derivationPath]
+		derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath]
 	});
 
 const getSolAddress = async ({
