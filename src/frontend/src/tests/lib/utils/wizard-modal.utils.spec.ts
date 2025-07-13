@@ -23,8 +23,8 @@ describe('goToWizardStep', () => {
 			mockModal.set.mockClear();
 			goToWizardStep({
 				modal: mockModal as unknown as WizardModal<WizardStepsSend>,
-				steps: mockSteps as WizardSteps<WizardStepsSend>,
-				stepName: step.name as WizardStepsSend
+				steps: mockSteps,
+				stepName: step.name
 			});
 
 			expect(mockModal.set).toHaveBeenCalledWith(index);
@@ -34,7 +34,7 @@ describe('goToWizardStep', () => {
 	it('should set the modal to 0 if step name is not found', () => {
 		goToWizardStep({
 			modal: mockModal as unknown as WizardModal<WizardStepsSend>,
-			steps: mockSteps as WizardSteps<WizardStepsSend>,
+			steps: mockSteps,
 			stepName: 'nonExistentStep' as WizardStepsSend
 		});
 
