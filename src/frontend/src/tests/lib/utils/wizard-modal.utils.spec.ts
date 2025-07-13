@@ -6,7 +6,6 @@ const mockModal = {
 	set: vi.fn()
 };
 
-describe('wizard-modal.utils', () => {
 	describe('goToWizardStep', () => {
 		const mockSteps: WizardSteps<WizardStepsSend> = [
 			{ name: 'step1', title: 'Step 1' },
