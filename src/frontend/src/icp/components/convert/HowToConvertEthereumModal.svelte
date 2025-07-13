@@ -10,8 +10,7 @@
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import {
-		WizardStepsHowToConvert,
-		WizardStepsConvert
+		WizardStepsHowToConvert,WizardStepsConvert
 	} from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
