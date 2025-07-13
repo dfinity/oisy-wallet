@@ -3,7 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
-	import { convertWizardSteps } from '$lib/config/convert.config';
+	import { convertWizardSteps, type WizardStepsConvertComplete } from '$lib/config/convert.config';
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 	import { type WizardStepsSend, WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -19,10 +19,10 @@
 	let receiveAmount: number | undefined = undefined;
 	let customDestination = '';
 	let convertProgressStep: string = ProgressStepsConvert.INITIALIZATION;
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsConvertComplete> | undefined;
+	let modal: WizardModal<WizardStepsConvertComplete>;
 
-	let steps: WizardSteps<WizardStepsConvert | WizardStepsSend>;
+	let steps: WizardSteps<WizardStepsConvertComplete>;
 	$: steps = convertWizardSteps({
 		i18n: $i18n,
 		sourceToken: sourceToken.symbol,
@@ -57,10 +57,10 @@
 		{steps}
 		bind:currentStep
 		bind:this={modal}
-		on:nnsClose={close}
+		onClose={close}
 		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
-		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		<ConvertWizard
 			{currentStep}

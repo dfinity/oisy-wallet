@@ -111,8 +111,8 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsSend> | undefined;
+	let modal: WizardModal<WizardStepsSend>;
 
 	const close = () => modalStore.close();
 
@@ -161,12 +161,14 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
+<WizardModal {steps} bind:currentStep bind:this={modal} onClose={reject}>
 	{@const { data } = firstTransaction}
 
-	<WalletConnectModalTitle slot="title"
-		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
-	>
+	{#snippet title()}
+		<WalletConnectModalTitle
+			>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
+		>
+	{/snippet}
 
 	<EthFeeContext
 		amount={amount.toString()}

@@ -3,7 +3,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
 	import HowToConvertEthereumWizardSteps from '$icp/components/convert/HowToConvertEthereumWizardSteps.svelte';
-	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
+	import {
+		howToConvertWizardSteps,
+		type WizardStepsHowToConvertComplete
+	} from '$icp-eth/config/how-to-convert.config';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import {
@@ -27,17 +30,16 @@
 	let sendAmount: OptionAmount = $state();
 	let receiveAmount: number | undefined = $state();
 	let convertProgressStep: string = $state(ProgressStepsConvert.INITIALIZATION);
-	let currentStep: WizardStep | undefined = $state();
-	let modal: WizardModal | undefined = $state();
+	let currentStep: WizardStep<WizardStepsHowToConvertComplete> | undefined = $state();
+	let modal: WizardModal<WizardStepsHowToConvertComplete> | undefined = $state();
 
-	const steps: WizardSteps<WizardStepsHowToConvert | WizardStepsConvert | WizardStepsSend> =
-		$derived(
-			howToConvertWizardSteps({
-				i18n: $i18n,
-				sourceToken: sourceToken.symbol,
-				destinationToken: destinationToken.symbol
-			})
-		);
+	const steps: WizardSteps<WizardStepsHowToConvertComplete> = $derived(
+		howToConvertWizardSteps({
+			i18n: $i18n,
+			sourceToken: sourceToken.symbol,
+			destinationToken: destinationToken.symbol
+		})
+	);
 
 	const close = () =>
 		closeModal(() => {
@@ -65,10 +67,10 @@
 		{steps}
 		bind:currentStep
 		bind:this={modal}
-		on:nnsClose={close}
+		onClose={close}
 		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
-		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		<EthConvertTokenWizard
 			{currentStep}

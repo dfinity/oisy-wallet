@@ -18,13 +18,13 @@ type StepName =
 	| AddressBookSteps
 	| TokenModalSteps;
 
-export const goToWizardStep = <T extends StepName>({
+export const goToWizardStep = ({
 	modal,
 	steps,
 	stepName
 }: {
-	modal: WizardModal;
-	steps: WizardSteps<T>;
+	modal: WizardModal<StepName>;
+	steps: WizardSteps<StepName>;
 	stepName: StepName;
 }) => {
 	const stepNumber = steps.findIndex(({ name }) => name === stepName);
