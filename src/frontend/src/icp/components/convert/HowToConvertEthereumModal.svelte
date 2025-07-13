@@ -9,9 +9,7 @@
 	} from '$icp-eth/config/how-to-convert.config';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
-	import {
-		WizardStepsHowToConvert,WizardStepsConvert
-	} from '$lib/enums/wizard-steps';
+	import { WizardStepsHowToConvert, WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
