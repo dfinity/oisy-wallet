@@ -13,7 +13,6 @@
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import {
-		type WizardStepsSend,
 		WizardStepsConvert,
 		WizardStepsHowToConvert,
 		WizardStepsReceive
