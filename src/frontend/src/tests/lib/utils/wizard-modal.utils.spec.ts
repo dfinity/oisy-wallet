@@ -42,4 +42,3 @@ describe('wizard-modal.utils', () => {
 			expect(mockModal.set).toHaveBeenCalledWith(0);
 		});
 	});
-});
