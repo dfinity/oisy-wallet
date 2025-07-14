@@ -16,7 +16,7 @@ export const ARB_TOKEN: RequiredEvmErc20Token = {
 	network: ARBITRUM_MAINNET_NETWORK,
 	standard: 'erc20',
 	category: 'default',
-	name: 'ARB',
+	name: 'Arbitrum',
 	symbol: ARB_SYMBOL,
 	decimals: ARB_DECIMALS,
 	icon: arb,
