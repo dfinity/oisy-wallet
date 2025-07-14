@@ -188,7 +188,7 @@
 			"staking": "Participar no stake de ativos",
 			"walletconnect": "Conexão de carteira",
 			"game": "Jogo",
-			"tools": ""
+			"tools": "Ferramentas"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -314,9 +314,9 @@
 				}
 			},
 			"toolkit": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Toolkit",
+				"one_liner": "Onde a governança encontra a colaboração para impulsionar a inovação.",
+				"description": "O Toolkit é um conjunto versátil para gerenciar Service Nervous Systems (SNS) e projetos no Internet Computer. De propostas de governança à implantação de contêineres, ele capacita os usuários a inovar, colaborar e descentralizar perfeitamente."
 			}
 		}
 	},
