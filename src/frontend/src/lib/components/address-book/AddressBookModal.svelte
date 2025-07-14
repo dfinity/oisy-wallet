@@ -144,7 +144,7 @@
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
 		}
-	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps<AddressBookSteps>;
+	];
 
 	let currentStep: WizardStep<AddressBookSteps> | undefined = $state();
 
