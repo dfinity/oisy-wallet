@@ -369,6 +369,7 @@ interface I18nInit {
 		erc20_custom_tokens: string;
 		erc20_user_tokens: string;
 		spl_custom_tokens: string;
+		erc721_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
@@ -885,8 +886,7 @@ interface I18nWallet_connect {
 		disconnected: string;
 		session_ended: string;
 		connected: string;
-		eth_transaction_executed: string;
-		sol_transaction_executed: string;
+		transaction_executed: string;
 		sign_executed: string;
 	};
 	error: {

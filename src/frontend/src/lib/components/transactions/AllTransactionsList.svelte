@@ -26,7 +26,7 @@
 		modalIcTransaction,
 		modalSolTransaction
 	} from '$lib/derived/modal.derived';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
@@ -38,7 +38,7 @@
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
-		tokens: $enabledNetworkTokens,
+		tokens: $enabledFungibleNetworkTokens,
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
