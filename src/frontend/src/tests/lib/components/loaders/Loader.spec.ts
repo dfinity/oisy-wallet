@@ -95,15 +95,15 @@ vi.mock('$sol/services/sol-address.services', () => ({
 	})
 }));
 
-vi.mock('$lib/services/erc20.services', () => ({
+vi.mock('$eth/services/erc20.services', () => ({
 	loadErc20Tokens: vi.fn(() => Promise.resolve())
 }));
 
-vi.mock('$lib/services/erc721.services', () => ({
-	loadErc721Tokes: vi.fn(() => Promise.resolve())
+vi.mock('$eth/services/erc721.services', () => ({
+	loadErc721Tokens: vi.fn(() => Promise.resolve())
 }));
 
-vi.mock('$lib/services/icrc.services', () => ({
+vi.mock('$icp/services/icrc.services', () => ({
 	loadIcrcTokens: vi.fn(() => Promise.resolve())
 }));
 
