@@ -11,6 +11,8 @@ import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
+const ERC721_INTERFACE_ID = '0x80ac58cd';
+
 export class InfuraErc721Provider {
 	private readonly provider: InfuraProvider;
 
@@ -30,6 +32,20 @@ export class InfuraErc721Provider {
 			symbol,
 			decimals: 0 // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 		};
+	};
+
+	isErc721 = async ({ contractAddress }: { contractAddress: string }): Promise<boolean> => {
+		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
+
+		try {
+			const [supportsInterface] = await Promise.all([
+				erc721Contract.supportsInterface(ERC721_INTERFACE_ID)
+			]);
+
+			return supportsInterface;
+		} catch (_: unknown) {
+			return false;
+		}
 	};
 }
 
