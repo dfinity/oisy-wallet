@@ -41,6 +41,8 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 			address: Address;
 			pendingTransactions: Array<PendingTransaction>;
 		}) => {
+			console.warn('');
+
 			update((state) => ({
 				...state,
 				[address]: {

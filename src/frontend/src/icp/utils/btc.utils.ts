@@ -1,7 +1,7 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import type { CertifiedData } from '$lib/types/store';
-import { isNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, jsonReplacer, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -21,9 +21,9 @@ export const getPendingTransactions = (
 	const storeData = get(btcPendingSentTransactionsStore);
 	const pendingTransactions = storeData[address];
 	console.warn(
-		`Retrieving pending transactions for address ${address} from store`,
-		pendingTransactions
+		`Retrieved pending transactions for address ${address} from store: ${JSON.stringify(pendingTransactions, jsonReplacer, 2)}`
 	);
+
 	return pendingTransactions;
 };
 
