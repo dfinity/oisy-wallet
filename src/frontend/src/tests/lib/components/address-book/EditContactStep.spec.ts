@@ -12,16 +12,19 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import imageCompression from 'browser-image-compression';
 import { vi } from 'vitest';
 
 vi.mock('browser-image-compression', () => {
-	const mockFn = vi.fn((file: File, _opts: unknown): Promise<File> => Promise.resolve(file));
+	const mockFn = vi.fn(
+		({ file, options }: { file: File; options: unknown }): Promise<File> => Promise.resolve(file)
+	);
 	(
 		mockFn as unknown as {
-			getDataUrlFromFile(file: File): Promise<string>;
+			getDataUrlFromFile(params: { file: File }): Promise<string>;
 		}
-	).getDataUrlFromFile = vi.fn(() => Promise.resolve('data:image/png;base64,MOCK'));
+	).getDataUrlFromFile = vi.fn(
+		({ file }: { file: File }): Promise<string> => Promise.resolve('data:image/png;base64,MOCK')
+	);
 
 	return {
 		__esModule: true,
@@ -71,17 +74,6 @@ describe('EditContactStep', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-	});
-
-	it('compresses an image', async () => {
-		// define the variable in scope:
-		const file = new File(['👍'], 'avatar.png', { type: 'image/png' });
-
-		// now both calls work and use our mock:
-		const compressed = await imageCompression(file, { maxSizeMB: 0.1 });
-		const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
-
-		expect(dataUrl).toBe('data:image/png;base64,MOCK');
 	});
 
 	it('should render the contact name and addresses', () => {
