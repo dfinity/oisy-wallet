@@ -14,7 +14,7 @@ describe('eth-transactions.store', () => {
 	const store = ethTransactionsStore;
 
 	beforeEach(() => {
-		store.reset();
+		store.resetAll();
 	});
 
 	describe('set', () => {
@@ -56,7 +56,7 @@ describe('eth-transactions.store', () => {
 		});
 
 		it('should add transactions even if the list is empty', () => {
-			store.reset();
+			store.resetAll();
 			store.add({ tokenId, transactions: mockOtherTransactions });
 
 			const state = get(store);
@@ -145,7 +145,7 @@ describe('eth-transactions.store', () => {
 				[SEPOLIA_TOKEN_ID]: mockOtherTransactions
 			});
 
-			store.reset();
+			store.resetAll();
 
 			expect(get(store)).toEqual({});
 		});

@@ -25,7 +25,7 @@ interface TransactionsStore<T extends TransactionTypes>
 	add: (params: TransactionsStoreParams<T>) => void;
 	update: (params: { tokenId: TokenId; transaction: CertifiedTransaction<T> }) => void;
 	nullify: (tokenId: TokenId) => void;
-	reset: () => void;
+	resetAll: () => void;
 }
 
 export type EthCertifiedTransaction = CertifiedTransaction<Transaction>;
@@ -69,7 +69,7 @@ const initEthTransactionsStore = (): TransactionsStore<Transaction> => {
 				...(nonNullish(state) && state),
 				[tokenId]: null
 			})),
-		reset: () => set(INITIAL),
+		resetAll: () => set(INITIAL),
 		subscribe
 	};
 };
