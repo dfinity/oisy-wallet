@@ -35,7 +35,7 @@ import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
-import { tokens } from '$lib/derived/tokens.derived';
+import { fungibleTokens, tokens } from '$lib/derived/tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -46,6 +46,9 @@ import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.m
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 
 describe('tokens.derived', () => {
 	const mockErc20DefaultToken: Erc20Token = {
@@ -60,6 +63,15 @@ describe('tokens.derived', () => {
 		id: parseTokenId('Erc20UserTokenId'),
 		symbol: 'EUTK',
 		address: `${mockValidErc20Token.address}2`,
+		version: undefined,
+		enabled: true
+	};
+
+	const mockErc721CustomToken: Erc721CustomToken = {
+		...mockValidErc721Token,
+		id: parseTokenId('Erc721DefaultTokenId'),
+		symbol: 'DQH',
+		address: `${mockValidErc721Token.address}1`,
 		version: undefined,
 		enabled: true
 	};
