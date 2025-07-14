@@ -15,6 +15,7 @@ import {
 	ARBITRUM_MAINNET_NETWORK,
 	ARBITRUM_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK, BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 
 describe('erc721.derived', () => {
 	const mockErc721CustomEthereumToken: Erc721CustomToken = {
