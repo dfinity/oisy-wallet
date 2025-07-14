@@ -23,6 +23,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { saveContact, contactImageToDataUrl } from '$lib/utils/contact.utils';
 
 	interface Props {
 		contact: ContactUi;
@@ -43,32 +44,83 @@
 		onDeleteContact,
 		onDeleteAddress
 	}: Props = $props();
-	let imageUrl = $state<string | null>(contact.image ?? null);
+
+	const [firstImage] = contact.image;
+
+	const initialImageUrl: string | null = firstImage ? contactImageToDataUrl(firstImage) : null;
+
+	let imageUrl = $state<string | null>(initialImageUrl);
 	let fileInput = $state<HTMLInputElement>();
+	let isSaving = $state(false);
+	let saveError = $state<string | null>(null);
 
 	const handleFileChange = async (e: Event): Promise<void> => {
 		const file = (e.target as HTMLInputElement).files?.[0];
 		if (!file) {
 			return;
 		}
-		const options = { maxSizeMB: 0.1, maxWidthOrHeight: 200, useWebWorker: false };
-		const compressed = await imageCompression(file, options);
-		const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
-		imageUrl = null;
-		await tick();
-		imageUrl = dataUrl;
+
+		isSaving = true;
+		try {
+			const options = { maxSizeMB: 0.1, maxWidthOrHeight: 200, useWebWorker: false };
+			const compressed = await imageCompression(file, options);
+			const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+
+			await saveContact({
+				...contact,
+				name: contact.name,
+				addresses: contact.addresses,
+				updateTimestampNs: contact.updateTimestampNs,
+				id: contact.id,
+				imageUrl: dataUrl
+			});
+
+			imageUrl = dataUrl;
+		} catch (error) {
+			console.error('Failed to save image:', error);
+			saveError = error instanceof Error ? error.message : 'Failed to save image';
+		} finally {
+			isSaving = false;
+		}
 	};
 
 	const replaceImage = (): void => {
 		fileInput?.click();
 	};
 
-	const removeImage = (): void => {
-		imageUrl = null;
+	const removeImage = async (): Promise<void> => {
+		isSaving = true;
+		try {
+			await saveContact({
+				...contact,
+				name: contact.name,
+				addresses: contact.addresses,
+				updateTimestampNs: contact.updateTimestampNs,
+				id: contact.id,
+				imageUrl: null
+			});
+
+			imageUrl = null;
+			onEdit({
+				...contact,
+				image: []
+			});
+		} catch (error) {
+			console.error('Failed to remove image:', error);
+			saveError = error instanceof Error ? error.message : 'Failed to remove image';
+		} finally {
+			isSaving = false;
+		}
 	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
+	{#if saveError}
+		<div class="bg-error mb-2 rounded p-2 text-white">
+			{saveError}
+		</div>
+	{/if}
+
 	<LogoButton hover={false} condensed={true}>
 		{#snippet logo()}
 			<div class="relative flex">
