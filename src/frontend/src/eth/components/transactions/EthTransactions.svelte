@@ -36,7 +36,7 @@
 		mapEthTransactionUi({
 			transaction,
 			ckMinterInfoAddresses,
-			$ethAddress
+			ethAddress:$ethAddress
 		})
 	);
 
