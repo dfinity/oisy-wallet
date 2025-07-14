@@ -72,7 +72,7 @@ describe('custom-token.utils', () => {
 			});
 		});
 
-		it('should return correct type for Ethereum/EVM network', () => {
+		it('should return correct type for Ethereum/EVM erc20 network', () => {
 			expect(
 				toCustomToken({
 					...mockParams,
@@ -90,6 +90,25 @@ describe('custom-token.utils', () => {
 						chain_id: 123n,
 						decimals: [8],
 						symbol: ['mock-symbol']
+					}
+				}
+			});
+		});
+
+		it('should return correct type for Ethereum/EVM erc721 network', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'Erc721',
+					address: 'mock-token-address',
+					chainId: 123n
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					Erc721: {
+						token_address: 'mock-token-address',
+						chain_id: 123n
 					}
 				}
 			});
