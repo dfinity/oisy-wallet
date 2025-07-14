@@ -8,11 +8,13 @@ export interface ConvertWizardStepsParams extends WizardStepsParams {
 	destinationToken: string;
 }
 
+export type WizardStepsConvertComplete = WizardStepsConvert | WizardStepsSend;
+
 export const convertWizardSteps = ({
 	i18n,
 	sourceToken,
 	destinationToken
-}: ConvertWizardStepsParams): WizardSteps => [
+}: ConvertWizardStepsParams): WizardSteps<WizardStepsConvertComplete> => [
 	{
 		name: WizardStepsConvert.CONVERT,
 		title: replacePlaceholders(i18n.convert.text.swap_to_token, {
