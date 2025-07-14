@@ -188,7 +188,7 @@
 			"staking": "Beteiligungen",
 			"walletconnect": "Wallet Connect",
 			"game": "Spiele",
-			"tools": ""
+			"tools": "Tools"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -314,9 +314,9 @@
 				}
 			},
 			"toolkit": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Toolkit",
+				"one_liner": "Wo Governance auf Zusammenarbeit trifft, und Inovation entfacht.",
+				"description": "Toolkit ist eine vielseitige Suite zur Verwaltung von Service Nervous Systems (SNS) und Projekten im Internet-Computer. Von Governance-Vorschlägen bis zur Kanisterbereitstellung ermöglicht es Nutzern nahtlose Innovation, Zusammenarbeit und Dezentralisierung."
 			}
 		}
 	},
