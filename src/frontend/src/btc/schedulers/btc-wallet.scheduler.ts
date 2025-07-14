@@ -8,7 +8,7 @@ import { getBtcBalance } from '$lib/api/signer.api';
 import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
-import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
@@ -185,7 +185,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					minterCanisterId: data?.minterCanisterId
 				}),
 			onLoad: ({ certified: _, ...rest }) => {
-				this.syncWalletData(rest);
+				this.syncWalletData({ ...rest, bitcoinNetwork });
 				this.failedSyncCounter = 0;
 			},
 			identity,
@@ -200,9 +200,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	};
 
 	private syncWalletData = ({
-		response: { balance, uncertifiedTransactions }
+		response: { balance, uncertifiedTransactions },
+		bitcoinNetwork
 	}: {
 		response: BtcWalletData;
+		bitcoinNetwork: BitcoinNetwork;
 	}) => {
 		const newBalance =
 			isNullish(this.store.balance) ||
@@ -236,7 +238,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			wallet: {
 				balance,
 				newTransactions: JSON.stringify(uncertifiedTransactions, jsonReplacer),
-				address: this.currentBtcAddress
+				address: this.currentBtcAddress,
+				network: bitcoinNetwork
 			}
 		});
 	};

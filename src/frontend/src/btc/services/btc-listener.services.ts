@@ -1,7 +1,9 @@
+import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { getPendingTransactionsBalance } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
+import { authIdentity } from '$lib/derived/auth.derived';
 import { syncWalletFromIdbCache } from '$lib/services/listener.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -22,7 +24,8 @@ export const syncWallet = ({
 		wallet: {
 			balance: { certified, data: totalBalance },
 			newTransactions,
-			address
+			address,
+			network
 		}
 	} = data;
 
@@ -35,6 +38,13 @@ export const syncWallet = ({
 		 * The worker provides the confirmed balance from the Bitcoin canister, and we calculate the structured
 		 * balance (available, pending, total) here where we have access to the pending transactions data.
 		 */
+		const identity = get(authIdentity);
+		loadBtcPendingSentTransactions({
+			identity,
+			networkId: network.id,
+			address
+		});
+
 		const pendingBalance = getPendingTransactionsBalance(address);
 
 		// Calculate the structured balance

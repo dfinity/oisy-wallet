@@ -1,3 +1,18 @@
 {
-	"extends": "../../../../tsconfig.spec.json"
+  "extends": "../../../../tsconfig.spec.json",
+  "compilerOptions": {
+    "baseUrl": "../../../..",
+    "types": [
+      "vitest/globals",
+      "@testing-library/jest-dom",
+      "@testing-library/svelte"
+    ]
+  },
+  "include": [
+    "./**/*.js",
+    "./**/*.ts",
+    "./**/*.svelte",
+    "../../../../ambient.d.ts",
+    "../../../../vitest.setup.ts"
+  ]
 }
