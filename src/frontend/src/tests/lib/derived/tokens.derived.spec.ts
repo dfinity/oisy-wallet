@@ -82,23 +82,23 @@ describe('tokens.derived', () => {
 		symbol: 'SplDefaultTokenId1'
 	};
 
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		erc20DefaultTokensStore.reset();
+		erc20UserTokensStore.resetAll();
+		icrcDefaultTokensStore.resetAll();
+		icrcCustomTokensStore.resetAll();
+		splDefaultTokensStore.reset();
+		splCustomTokensStore.resetAll();
+
+		setupTestnetsStore('reset');
+		setupUserNetworksStore('allEnabled');
+
+		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
+	});
+
 	describe('tokens', () => {
-		beforeEach(() => {
-			vi.resetAllMocks();
-
-			erc20DefaultTokensStore.reset();
-			erc20UserTokensStore.resetAll();
-			icrcDefaultTokensStore.resetAll();
-			icrcCustomTokensStore.resetAll();
-			splDefaultTokensStore.reset();
-			splCustomTokensStore.resetAll();
-
-			setupTestnetsStore('reset');
-			setupUserNetworksStore('allEnabled');
-
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
-		});
-
 		it('should return all the non-testnet tokens by default', () => {
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
 			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
@@ -198,6 +198,37 @@ describe('tokens.derived', () => {
 				POL_AMOY_TOKEN,
 				ARBITRUM_ETH_TOKEN,
 				ARBITRUM_SEPOLIA_ETH_TOKEN
+			]);
+		});
+	});
+
+	describe('fungibleTokens', () => {
+		it('should return all fungible tokens', () => {
+			erc20DefaultTokensStore.add(mockErc20DefaultToken);
+			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
+			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
+			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
+			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
+			splDefaultTokensStore.add(mockSplDefaultToken);
+			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
+
+			const result = get(fungibleTokens);
+
+			expect(result).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				ETHEREUM_TOKEN,
+				SOLANA_TOKEN,
+				BASE_ETH_TOKEN,
+				BNB_MAINNET_TOKEN,
+				POL_MAINNET_TOKEN,
+				ARBITRUM_ETH_TOKEN,
+				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
+				mockEr20UserToken,
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
+				{ ...mockIcrcCustomToken, id: result[11].id },
+				{ ...mockSplDefaultToken, enabled: false, version: undefined },
+				mockSplCustomToken
 			]);
 		});
 	});
