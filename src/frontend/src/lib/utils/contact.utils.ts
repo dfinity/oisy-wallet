@@ -15,7 +15,6 @@ import { AuthClient } from '@dfinity/auth-client';
 import { fromNullable, isEmptyString, isNullish, notEmptyString, toNullable } from '@dfinity/utils';
 
 export interface SaveContactParams extends Omit<ContactUi, 'image'> {
-	/** data‐URL preview or null */
 	imageUrl?: string | null;
 }
 
@@ -55,6 +54,7 @@ export const mapToFrontendContact = (contact: Contact): ContactUi => {
 
 export const mapToBackendContact = (contact: ContactUi): Contact => {
 	const { updateTimestampNs, image, ...rest } = contact;
+
 	return {
 		...rest,
 		update_timestamp_ns: updateTimestampNs,
@@ -139,9 +139,9 @@ export const getNetworkContactKey = ({
 }: {
 	contact: ContactUi;
 	address: Address;
-}) => `${address}-${contact.id.toString()}`;
+}): string => `${address}-${contact.id.toString()}`;
 
-function parseDataUrl(dataUrl: string): { mime: string; data: Uint8Array } {
+const parseDataUrl = (dataUrl: string): { mime: string; data: Uint8Array } => {
 	const [header, b64] = dataUrl.split(',');
 	const mime = header.match(/data:(.*);base64/)?.[1]!;
 	const bin = atob(b64);
@@ -150,26 +150,22 @@ function parseDataUrl(dataUrl: string): { mime: string; data: Uint8Array } {
 		arr[i] = bin.charCodeAt(i);
 	}
 	return { mime, data: arr };
-}
+};
 
-export function dataUrlToContactImage(dataUrl: string): ContactImage {
+export const dataUrlToContactImage = (dataUrl: string): ContactImage => {
 	const { mime, data } = parseDataUrl(dataUrl);
 	const subtype = mime.split('/')[1];
 	const mimeType = { [`image/${subtype}`]: null } as ImageMimeType;
 	return { mime_type: mimeType, data };
-}
+};
 
-export function contactImageToDataUrl(img: ContactImage): string {
-	const mime = Object.keys(img.mime_type)[0];
+export const contactImageToDataUrl = (img: ContactImage): string => {
+	const [mime] = Object.keys(img.mime_type);
 	const b64 = btoa(String.fromCharCode(...img.data));
 	return `data:${mime};base64,${b64}`;
-}
+};
 
-export interface SaveContactParams extends Omit<ContactUi, 'image'> {
-	imageUrl?: string | null;
-}
-
-export async function saveContact(params: SaveContactParams): Promise<void> {
+export const saveContact = async (params: SaveContactParams): Promise<void> => {
 	const { imageUrl, ...rest } = params;
 
 	const contactUi: ContactUi = {
@@ -181,4 +177,4 @@ export async function saveContact(params: SaveContactParams): Promise<void> {
 	const authClient = await AuthClient.create();
 	const identity: Identity = await authClient.getIdentity();
 	await apiUpdateContact({ contact: beContact, identity });
-}
+};
