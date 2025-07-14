@@ -32,7 +32,7 @@
 	$: ckMinterInfoAddresses = toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId]);
 
 	let sortedTransactionsUi: EthTransactionUi[];
-	$: sortedTransactionsUi = $sortedEthTransactions.map(({ data:transaction }) =>
+	$: sortedTransactionsUi = $sortedEthTransactions.map(({ data: transaction }) =>
 		mapEthTransactionUi({
 			transaction,
 			ckMinterInfoAddresses,
