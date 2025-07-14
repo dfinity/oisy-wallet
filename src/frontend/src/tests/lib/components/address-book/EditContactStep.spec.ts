@@ -16,14 +16,17 @@ import { vi } from 'vitest';
 
 vi.mock('browser-image-compression', () => {
 	const mockFn = vi.fn(
-		({ file, options }: { file: File; options: unknown }): Promise<File> => Promise.resolve(file)
+		({ file, options: _options }: { file: File; options: unknown }): Promise<File> =>
+			Promise.resolve(file)
 	);
+
 	(
 		mockFn as unknown as {
 			getDataUrlFromFile(params: { file: File }): Promise<string>;
 		}
 	).getDataUrlFromFile = vi.fn(
-		({ file }: { file: File }): Promise<string> => Promise.resolve('data:image/png;base64,MOCK')
+		({ file: _file }: { file: File }): Promise<string> =>
+			Promise.resolve('data:image/png;base64,MOCK')
 	);
 
 	return {
