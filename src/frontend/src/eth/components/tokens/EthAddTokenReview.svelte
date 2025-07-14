@@ -26,15 +26,6 @@
 	export let metadata: Erc20Metadata | Erc721Metadata | undefined;
 	export let network: Network;
 
-	const loadErc20Metadata = async (address: string) => {
-		const { metadata: metadataApi } = infuraErc20Providers(network.id);
-		metadata = await metadataApi({ address });
-	};
-	const loadErc721Metadata = async (address: string) => {
-		const { metadata: metadataApi } = infuraErc721Providers(network.id);
-		metadata = await metadataApi({ address });
-	};
-
 	const handleMetadata = () => {
 		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
 			toastsError({
@@ -43,6 +34,7 @@
 			dispatch('icBack');
 			return;
 		}
+
 		if (
 			[...$erc20Tokens, ...$erc721Tokens]?.find(
 				({ symbol, name, network: tokenNetwork }) =>
@@ -54,6 +46,7 @@
 			toastsError({
 				msg: { text: $i18n.tokens.error.duplicate_metadata }
 			});
+
 			dispatch('icBack');
 			return;
 		}
@@ -96,20 +89,24 @@
 			return;
 		}
 
+		const { metadata: metadataApiErc721, isErc721 } = infuraErc721Providers(network.id);
 		try {
-			await loadErc20Metadata(contractAddress);
-			handleMetadata();
-		} catch (_: unknown) {
-			try {
-				await loadErc721Metadata(contractAddress);
-				handleMetadata();
-			} catch (err: unknown) {
-				toastsError({
-					msg: { text: $i18n.tokens.error.loading_metadata },
-					err
-				});
-				dispatch('icBack');
+			if (await isErc721({ contractAddress })) {
+				console.log('is erc721');
+				metadata = await metadataApiErc721({ address: contractAddress });
+			} else {
+				console.log('is erc20');
+				const { metadata: metadataApiErc20 } = infuraErc20Providers(network.id);
+				metadata = await metadataApiErc20({ address: contractAddress });
 			}
+			handleMetadata();
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.loading_metadata },
+				err
+			});
+
+			dispatch('icBack');
 		}
 	});
 
