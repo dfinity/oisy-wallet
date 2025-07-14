@@ -92,10 +92,8 @@
 		const { metadata: metadataApiErc721, isErc721 } = infuraErc721Providers(network.id);
 		try {
 			if (await isErc721({ contractAddress })) {
-				console.log('is erc721');
 				metadata = await metadataApiErc721({ address: contractAddress });
 			} else {
-				console.log('is erc20');
 				const { metadata: metadataApiErc20 } = infuraErc20Providers(network.id);
 				metadata = await metadataApiErc20({ address: contractAddress });
 			}
