@@ -188,7 +188,7 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Gioco",
-			"tools": ""
+			"tools": "Utensili"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -314,9 +314,9 @@
 				}
 			},
 			"toolkit": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Toolkit",
+				"one_liner": "Dove la governance incontra la collaborazione per stimolare l'innovazione.",
+				"description": "Toolkit è una suite versatile per la gestione dei Service Neutron Systems (SNS) e dei progetti su Internet Computer. Dalle proposte di governance all'implementazione di canister, consente agli utenti di innovare, collaborare e decentralizzare senza problemi."
 			}
 		}
 	},
