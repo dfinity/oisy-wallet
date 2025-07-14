@@ -284,7 +284,7 @@
 		"usesInternetIdentity": true,
 		"display": "Large",
 		"stats": "",
-		"logo": "/images/dapps/toolkit.svg",
+		"logo": "/images/dapps/toolkit-logo.svg",
 		"screenshots": ["/images/dapps/toolkit-screenshot.webp"]
 	}
 ]
