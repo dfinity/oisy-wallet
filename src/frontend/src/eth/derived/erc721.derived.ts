@@ -5,6 +5,9 @@ import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
 import { enabledEvmNetworksIds } from '$evm/derived/networks.derived';
 import { derived, type Readable } from 'svelte/store';
 
+/**
+ * The list of ERC721 tokens the user has added, enabled or disabled.
+ */
 export const erc721CustomTokens: Readable<Erc721CustomToken[]> = derived(
 	[erc721CustomTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
 	([$erc721CustomTokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
@@ -21,6 +24,9 @@ export const erc721CustomTokens: Readable<Erc721CustomToken[]> = derived(
 		}, []) ?? []
 );
 
+/**
+ * The list of all ERC721 tokens.
+ */
 export const erc721Tokens: Readable<Erc721TokenToggleable[]> = derived(
 	[erc721CustomTokens],
 	([$erc721CustomTokens]) => [...$erc721CustomTokens]
