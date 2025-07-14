@@ -37,14 +37,6 @@ export const syncWallet = async ({
 	} = data;
 
 	if (nonNullish(totalBalance)) {
-		/*
-		 * Balance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
-		 * because the pending transactions store (btcPendingSentTransactionsStore) is not accessible from the worker context.
-		 * Web Workers have isolated execution contexts and cannot directly access Svelte stores from the main thread.
-		 *
-		 * The worker provides the confirmed balance from the Bitcoin canister, and we calculate the structured
-		 * balance (available, pending, total) here where we have access to the pending transactions data.
-		 */
 		const identity = get(authIdentity);
 
 		// Wait for pending transactions to be loaded before calculating balance
@@ -53,22 +45,28 @@ export const syncWallet = async ({
 			networkId: mapBitcoinNetworkToNetworkId(network),
 			address
 		});
-
+		/*
+		 * Balance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
+		 * because the pending transactions store (btcPendingSentTransactionsStore) is not accessible from the worker context.
+		 * Web Workers have isolated execution contexts and cannot directly access Svelte stores from the main thread.
+		 *
+		 * The worker provides the confirmed balance from the Bitcoin canister, and we calculate the structured
+		 * balance (available, pending, total) here where we have access to the pending transactions data.
+		 */
 		const pendingBalance = getPendingTransactionsBalance(address);
 
-		// Calculate the structured balance
-		const structuredBalance = {
+		const balance = {
 			available: totalBalance - pendingBalance,
 			pending: pendingBalance,
 			total: totalBalance
 		};
 
-		console.warn('Storing BTC balance:', JSON.stringify(structuredBalance, jsonReplacer));
+		console.warn('Storing BTC balance:', JSON.stringify(balance, jsonReplacer));
 
 		balancesStore.set({
 			id: tokenId,
 			data: {
-				data: structuredBalance.total, // Use total for compatibility with existing Balance type
+				data: balance,
 				certified
 			}
 		});

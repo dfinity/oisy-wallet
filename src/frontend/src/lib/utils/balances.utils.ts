@@ -1,6 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import type { Balance, LegacyBalance } from '$lib/types/balance';
 import type { TokenId } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -11,7 +12,7 @@ export const checkAnyNonZeroBalance = ($balancesStore: CertifiedStoreData<Balanc
 		(tokenId) =>
 			!(
 				isNullish($balancesStore[tokenId as TokenId]?.data) ||
-				$balancesStore[tokenId as TokenId]?.data === ZERO
+				$balancesStore[tokenId as TokenId]?.data?.total === ZERO
 			)
 	);
 
@@ -38,5 +39,41 @@ export const checkAllBalancesZero = ({
 	Object.getOwnPropertySymbols($balancesStore).every((tokenId) => {
 		const balance: Option<BalancesData> = $balancesStore[tokenId as TokenId];
 
-		return balance === null || balance?.data === ZERO || balance?.data === null;
+		return balance === null || balance?.data?.total === ZERO || balance?.data === null;
 	});
+
+/**
+ * Extracts the total balance from a Balance object for backward compatibility
+ * @param balance - The structured balance object
+ * @returns The total balance as a bigint
+ */
+export const getBalanceTotal = (balance: Balance): bigint => balance.total;
+
+/**
+ * Converts a legacy balance to the new structured format
+ * @param legacyBalance - The legacy balance (bigint)
+ * @returns The structured balance object
+ */
+export const convertLegacyBalance = (legacyBalance: LegacyBalance): Balance => ({
+	total: legacyBalance
+});
+
+/**
+ * Checks if a balance is a legacy balance (bigint) or new structured balance
+ * @param balance - The balance to check
+ * @returns True if it's a legacy balance, false if it's a structured balance
+ */
+export const isLegacyBalance = (balance: Balance | LegacyBalance): balance is LegacyBalance =>
+	typeof balance === 'bigint';
+
+/**
+ * Normalizes a balance to the new structured format
+ * @param balance - Either a legacy balance or structured balance
+ * @returns The structured balance object
+ */
+export const normalizeBalance = (balance: Balance | LegacyBalance): Balance => {
+	if (isLegacyBalance(balance)) {
+		return convertLegacyBalance(balance);
+	}
+	return balance;
+};

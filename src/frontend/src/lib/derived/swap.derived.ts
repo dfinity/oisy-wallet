@@ -50,7 +50,7 @@ export const swappableTokens: Readable<SwappableTokens> = derived(
 			return { sourceToken: undefined, destinationToken: undefined };
 		}
 
-		if (balance > ZERO) {
+		if ((balance?.total ?? ZERO) > ZERO) {
 			return { sourceToken: selectedToken, destinationToken: undefined };
 		}
 		return { sourceToken: undefined, destinationToken: selectedToken };

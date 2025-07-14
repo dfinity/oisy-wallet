@@ -117,7 +117,7 @@ export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams):
 			[tokenGroup, token].map(({ balance, decimals }) =>
 				nonNullish(balance)
 					? normalizeTokenToDecimals({
-							value: balance,
+							value: balance.total,
 							oldUnitName: decimals,
 							newUnitName: newDecimals
 						})

@@ -19,10 +19,7 @@
 	<IconWallet size="14" />
 
 	<div class="ml-1 font-semibold">
-		{formatToken({
-			value: balance ?? ZERO,
-			unitName: token.decimals
-		})}
+		{formatToken({ value: balance?.total ?? ZERO, unitName: token.decimals })}
 		{getTokenDisplaySymbol(token)}
 	</div>
 </div>

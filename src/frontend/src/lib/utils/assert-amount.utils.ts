@@ -21,7 +21,7 @@ interface CommonParamsWithBalanceForFee extends CommonParams {
 }
 
 const assertBalance = ({ userAmount, balance }: CommonParams): TokenActionErrorType => {
-	if (userAmount > balance) {
+	if (userAmount > balance.total) {
 		return 'insufficient-funds';
 	}
 };
@@ -31,7 +31,7 @@ const assertUserAmountWithFee = ({
 	balance,
 	fee
 }: CommonParams): TokenActionErrorType => {
-	if (nonNullish(fee) && userAmount + fee > balance) {
+	if (nonNullish(fee) && userAmount + fee > balance.total) {
 		return 'insufficient-funds-for-fee';
 	}
 };
@@ -76,7 +76,7 @@ export const assertErc20Amount = ({
 		return assertBalanceError;
 	}
 
-	if (nonNullish(fee) && balanceForFee < fee) {
+	if (nonNullish(fee) && balanceForFee.total < fee) {
 		return 'insufficient-funds-for-fee';
 	}
 };
@@ -131,7 +131,7 @@ export const assertCkErc20Amount = ({
 	if (
 		nonNullish(balanceForFee) &&
 		nonNullish(ethereumEstimateFee) &&
-		balanceForFee < ethereumEstimateFee
+		balanceForFee.total < ethereumEstimateFee
 	) {
 		return 'insufficient-funds-for-fee';
 	}

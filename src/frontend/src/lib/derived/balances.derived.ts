@@ -20,7 +20,7 @@ export const balanceZero: Readable<boolean> = derived(
 		nonNullish($balanceStore) &&
 		nonNullish($token) &&
 		nonNullish($balanceStore?.[$token.id]) &&
-		$balanceStore[$token.id]?.data === ZERO
+		$balanceStore[$token.id]?.data?.total === ZERO
 );
 
 // TODO: Create tests for this store

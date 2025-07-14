@@ -21,7 +21,7 @@ export const usdValue = ({
 	nonNullish(balance)
 		? Number(
 				formatToken({
-					value: balance,
+					value: balance.total,
 					unitName: decimals,
 					displayDecimals: decimals
 				})

@@ -6,7 +6,7 @@ import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
 import { isNullish } from '@dfinity/utils';
-import { derived, writable, type Readable } from 'svelte/store';
+import { derived, type Readable, writable } from 'svelte/store';
 
 export interface ModalTokensListData {
 	tokens: Token[];
@@ -66,7 +66,7 @@ export const initModalTokensListContext = (
 			});
 
 			return $filterZeroBalance
-				? pinnedWithBalance.filter(({ balance }) => (balance ?? ZERO) > ZERO)
+				? pinnedWithBalance.filter(({ balance }) => (balance?.total ?? ZERO) > ZERO)
 				: pinnedWithBalance;
 		}
 	);
