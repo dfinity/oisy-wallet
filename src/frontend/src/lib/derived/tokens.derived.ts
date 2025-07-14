@@ -8,6 +8,7 @@ import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
@@ -60,6 +61,10 @@ export const tokens: Readable<Token[]> = derived(
 	]
 );
 
+export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
+	$tokens.filter((token) => !isTokenErc721(token))
+);
+
 export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
 	$tokens.filter((token) => isDefaultEthereumToken(token))
 );
@@ -80,6 +85,14 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
  * All user-enabled tokens.
  */
 export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);
+
+/**
+ * All user-enabled fungible tokens.
+ */
+export const enabledFungibleTokens: Readable<Token[]> = derived(
+	[fungibleTokens],
+	filterEnabledTokens
+);
 
 /**
  * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's code wise convenient to avoid duplication of logic.
