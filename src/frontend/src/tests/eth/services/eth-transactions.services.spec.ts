@@ -118,7 +118,12 @@ describe('eth-transactions.services', () => {
 				});
 
 				expect(result).toEqual({ success: true });
-				expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: mockTransactions });
+				expect(get(ethTransactionsStore)).toEqual({
+					[mockTokenId]: mockTransactions.map((data) => ({
+						data,
+						certified: false
+					}))
+				});
 			});
 
 			it('should handle ERC20 token transactions correctly when it is update only', async () => {
@@ -127,7 +132,10 @@ describe('eth-transactions.services', () => {
 				const existingTransactions = createMockEthTransactions(5);
 				ethTransactionsStore.set({
 					tokenId: mockTokenId,
-					transactions: [...existingTransactions, mockTransactions[0]]
+					transactions: [...existingTransactions, mockTransactions[0]].map((data) => ({
+						data,
+						certified: false
+					}))
 				});
 
 				const result = await loadEthereumTransactions({
@@ -138,12 +146,21 @@ describe('eth-transactions.services', () => {
 
 				expect(result).toEqual({ success: true });
 				expect(get(ethTransactionsStore)).toEqual({
-					[mockTokenId]: [...existingTransactions, ...mockTransactions]
+					[mockTokenId]: [...existingTransactions, ...mockTransactions].map((data) => ({
+						data,
+						certified: false
+					}))
 				});
 			});
 
 			it('should handle errors during transaction fetching gracefully', async () => {
-				ethTransactionsStore.set({ tokenId: mockTokenId, transactions: mockTransactions });
+				ethTransactionsStore.set({
+					tokenId: mockTokenId,
+					transactions: mockTransactions.map((data) => ({
+						data,
+						certified: false
+					}))
+				});
 
 				const mockError = new Error('Mock Error');
 				mockErc20Transactions.mockRejectedValue(mockError);
@@ -197,7 +214,10 @@ describe('eth-transactions.services', () => {
 			const existingTransactions = createMockEthTransactions(5);
 			ethTransactionsStore.set({
 				tokenId: mockTokenId,
-				transactions: [...existingTransactions, mockTransactions[0]]
+				transactions: [...existingTransactions, mockTransactions[0]].map((data) => ({
+					data,
+					certified: false
+				}))
 			});
 
 			const result = await reloadEthereumTransactions({
@@ -207,7 +227,10 @@ describe('eth-transactions.services', () => {
 
 			expect(result).toEqual({ success: true });
 			expect(get(ethTransactionsStore)).toEqual({
-				[mockTokenId]: [...existingTransactions, ...mockTransactions]
+				[mockTokenId]: [...existingTransactions, ...mockTransactions].map((data) => ({
+					data,
+					certified: false
+				}))
 			});
 		});
 	});
