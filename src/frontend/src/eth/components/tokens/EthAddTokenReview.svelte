@@ -3,8 +3,11 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 	import type { Erc20Metadata } from '$eth/types/erc20';
+	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
@@ -18,9 +21,6 @@
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import type { Erc721Metadata } from '$eth/types/erc721';
-	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
-	import { erc721Tokens } from '$eth/derived/erc721.derived';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | Erc721Metadata | undefined;
@@ -97,7 +97,7 @@
 		}
 
 		try {
-			await loadErc20Metadata(contractAddress)
+			await loadErc20Metadata(contractAddress);
 			handleMetadata();
 		} catch (_: unknown) {
 			try {
