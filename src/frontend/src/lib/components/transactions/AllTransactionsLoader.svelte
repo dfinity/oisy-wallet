@@ -6,7 +6,7 @@
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { transactionsStoreWithTokens } from '$lib/derived/transactions.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { Token, TokenId } from '$lib/types/token';
@@ -94,7 +94,7 @@
 			}
 		};
 
-		await Promise.allSettled($enabledNetworkTokens.map(loadNextTransactions));
+		await Promise.allSettled($enabledFungibleNetworkTokens.map(loadNextTransactions));
 	};
 
 	let allStoresAreLoaded = $derived(areTransactionsStoresLoaded($transactionsStoreWithTokens));

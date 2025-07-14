@@ -7,14 +7,14 @@
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
+	$: enabledTokensWithoutTransaction = $enabledFungibleNetworkTokens
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
 		.map((token: TokenUi) => token as IcToken);
 
