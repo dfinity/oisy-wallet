@@ -16,6 +16,7 @@ import { get } from 'svelte/store';
 import type { Nft } from '$eth/types/erc721';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import { nftStore } from '$eth/stores/nft.store';
+import type { EthAddress } from '$lib/types/address';
 
 export const loadErc721Tokens = async ({
 	identity
@@ -153,8 +154,8 @@ const loadNftMetadata = async ({
 	contractAddress,
 	tokenIds
 }: {
-	infuraProvider: InfuraERC721Provider;
-	contractAddress: Address;
+	infuraProvider: InfuraErc721Provider;
+	contractAddress: EthAddress;
 	tokenIds: number[];
 }) => {
 	const nfts: Nft[] = [];
