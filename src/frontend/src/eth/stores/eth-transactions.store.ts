@@ -1,39 +1,66 @@
+import type { CertifiedStore, CertifiedStoreData } from '$lib/stores/certified.store';
+import type { NullableCertifiedTransactions } from '$lib/stores/transactions.store';
+import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import { nonNullish } from '@dfinity/utils';
-import { writable, type Readable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
-export type EthTransactionsData = Record<TokenId, Transaction[]>;
+type TransactionTypes = Transaction;
 
-export interface EthTransactionsStore extends Readable<EthTransactionsData> {
-	set: (params: { tokenId: TokenId; transactions: Transaction[] }) => void;
-	add: (params: { tokenId: TokenId; transactions: Transaction[] }) => void;
-	update: (params: { tokenId: TokenId; transaction: Transaction }) => void;
+export type CertifiedTransaction<T extends TransactionTypes> = CertifiedData<T>;
+
+export interface TransactionsStoreParams<T extends TransactionTypes> {
+	tokenId: TokenId;
+	transactions: CertifiedTransaction<T>[];
+}
+
+export type TransactionsData<T extends TransactionTypes> =
+	| CertifiedTransaction<T>[]
+	| NullableCertifiedTransactions;
+
+interface TransactionsStore<T extends TransactionTypes>
+	extends CertifiedStore<TransactionsData<T>> {
+	set: (params: TransactionsStoreParams<T>) => void;
+	add: (params: TransactionsStoreParams<T>) => void;
+	update: (params: { tokenId: TokenId; transaction: CertifiedTransaction<T> }) => void;
 	nullify: (tokenId: TokenId) => void;
 	reset: () => void;
 }
 
-const initEthTransactionsStore = (): EthTransactionsStore => {
-	const INITIAL: EthTransactionsData = {} as Record<TokenId, Transaction[]>;
+export type EthCertifiedTransaction = CertifiedTransaction<Transaction>;
+
+export type EthTransactionsData = CertifiedStoreData<TransactionsData<Transaction>>;
+
+const initEthTransactionsStore = (): TransactionsStore<Transaction> => {
+	const INITIAL: EthTransactionsData = {} as EthTransactionsData;
 
 	const { subscribe, update, set } = writable<EthTransactionsData>(INITIAL);
 
 	return {
-		set: ({ tokenId, transactions }: { tokenId: TokenId; transactions: Transaction[] }) =>
+		set: ({ tokenId, transactions }: TransactionsStoreParams<Transaction>) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: transactions
 			})),
-		add: ({ tokenId, transactions }: { tokenId: TokenId; transactions: Transaction[] }) =>
+		add: ({ tokenId, transactions }: TransactionsStoreParams<Transaction>) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
-				[tokenId]: [...(state[tokenId] ?? []), ...transactions]
+				[tokenId]: [...(state?.[tokenId] ?? []), ...transactions]
 			})),
-		update: ({ tokenId, transaction }: { tokenId: TokenId; transaction: Transaction }) =>
+		update: ({
+			tokenId,
+			transaction
+		}: {
+			tokenId: TokenId;
+			transaction: CertifiedTransaction<Transaction>;
+		}) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: [
-					...(state[tokenId] ?? []).filter(({ hash }) => hash !== transaction.hash),
+					...(state?.[tokenId] ?? []).filter(
+						({ data: { hash } }) => hash !== transaction.data.hash
+					),
 					transaction
 				]
 			})),
@@ -48,3 +75,7 @@ const initEthTransactionsStore = (): EthTransactionsStore => {
 };
 
 export const ethTransactionsStore = initEthTransactionsStore();
+
+const foo = get(ethTransactionsStore);
+
+console.log(foo);
