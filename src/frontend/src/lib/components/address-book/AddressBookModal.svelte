@@ -98,7 +98,7 @@
 		)
 	);
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<AddressBookSteps> = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
@@ -144,9 +144,9 @@
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
 		}
-	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
+	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps<AddressBookSteps>;
 
-	let currentStep: WizardStep | undefined = $state();
+	let currentStep: WizardStep<AddressBookSteps> | undefined = $state();
 
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 
@@ -164,7 +164,7 @@
 		addressBookStore.reset();
 	});
 
-	let modal: WizardModal | undefined = $state();
+	let modal: WizardModal<AddressBookSteps> | undefined = $state();
 	const close = () => {
 		if (nonNullish(modalData?.entrypoint?.onComplete)) {
 			modalData.entrypoint.onComplete();
@@ -173,7 +173,7 @@
 		modalStore.close();
 	};
 
-	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let currentStepName = $derived(currentStep?.name);
 	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
 	let editContactNameTitle = $state($i18n.contact.form.add_new_contact);
@@ -296,9 +296,9 @@
 	bind:this={modal}
 	disablePointerEvents={loading}
 	testId={ADDRESS_BOOK_MODAL}
-	on:nnsClose={close}
+	onClose={close}
 >
-	<svelte:fragment slot="title">
+	{#snippet title()}
 		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentContact?.name)}
 			<div class="flex flex-wrap items-center gap-2">
 				<Avatar
@@ -317,7 +317,7 @@
 		{:else}
 			{currentStep?.title}
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
