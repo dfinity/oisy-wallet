@@ -8,7 +8,7 @@ import { get, writable } from 'svelte/store';
 
 type TransactionTypes = Transaction;
 
-export type CertifiedTransaction<T extends TransactionTypes> = CertifiedData<T>;
+type CertifiedTransaction<T extends TransactionTypes> = CertifiedData<T>;
 
 export interface TransactionsStoreParams<T extends TransactionTypes> {
 	tokenId: TokenId;
