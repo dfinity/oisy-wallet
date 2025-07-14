@@ -1,6 +1,11 @@
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
 import { getPendingTransactionsBalance } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
 import { authIdentity } from '$lib/derived/auth.derived';
@@ -9,7 +14,9 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
+import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -41,7 +48,7 @@ export const syncWallet = ({
 		const identity = get(authIdentity);
 		loadBtcPendingSentTransactions({
 			identity,
-			networkId: network.id,
+			networkId: mapBitcoinNetworkToNetworkId(network),
 			address
 		});
 
@@ -106,3 +113,23 @@ export const syncWalletFromCache = (params: Omit<GetIdbTransactionsParams, 'prin
 		getIdbTransactions: getIdbBtcTransactions,
 		transactionsStore: btcTransactionsStore
 	});
+
+/**
+ * Maps a BitcoinNetwork string to its corresponding NetworkId
+ * @param bitcoinNetwork - The bitcoin network string ('mainnet', 'testnet', or 'regtest')
+ * @returns The corresponding NetworkId or undefined if not found
+ */
+export const mapBitcoinNetworkToNetworkId = (
+	bitcoinNetwork: BitcoinNetwork
+): NetworkId | undefined => {
+	switch (bitcoinNetwork) {
+		case 'mainnet':
+			return BTC_MAINNET_NETWORK_ID;
+		case 'testnet':
+			return BTC_TESTNET_NETWORK_ID;
+		case 'regtest':
+			return BTC_REGTEST_NETWORK_ID;
+		default:
+			return undefined;
+	}
+};
