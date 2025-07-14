@@ -187,7 +187,8 @@
 			"verifiable_credentials": "Credenziali Verificabili",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
-			"game": "Gioco"
+			"game": "Gioco",
+			"tools": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "Social media decentralizzato - pubblica, guadagna, possiedi.",
 					"call_to_action": "Scopri di più"
 				}
+			},
+			"toolkit": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},

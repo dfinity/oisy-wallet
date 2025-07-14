@@ -187,7 +187,8 @@
 			"verifiable_credentials": "可验证凭证",
 			"staking": "质押",
 			"walletconnect": "WalletConnect",
-			"game": "游戏"
+			"game": "游戏",
+			"tools": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "去中心化社交媒体 - 发布、赚取、拥有。",
 					"call_to_action": "了解更多"
 				}
+			},
+			"toolkit": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},

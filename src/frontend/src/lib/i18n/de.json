@@ -187,7 +187,8 @@
 			"verifiable_credentials": "Bescheinigungen",
 			"staking": "Beteiligungen",
 			"walletconnect": "Wallet Connect",
-			"game": "Spiele"
+			"game": "Spiele",
+			"tools": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "Dezentrale soziale Medien",
 					"call_to_action": "Mehr erfahren"
 				}
+			},
+			"toolkit": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
