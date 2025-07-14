@@ -97,13 +97,13 @@ describe('tokens.derived', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 
-			erc20DefaultTokensStore.reset();
-			erc20UserTokensStore.resetAll();
-			erc721CustomTokensStore.resetAll();
-			icrcDefaultTokensStore.resetAll();
-			icrcCustomTokensStore.resetAll();
-			splDefaultTokensStore.reset();
-			splCustomTokensStore.resetAll();
+		erc20DefaultTokensStore.reset();
+		erc20UserTokensStore.resetAll();
+		erc721CustomTokensStore.resetAll();
+		icrcDefaultTokensStore.resetAll();
+		icrcCustomTokensStore.resetAll();
+		splDefaultTokensStore.reset();
+		splCustomTokensStore.resetAll();
 
 		setupTestnetsStore('reset');
 		setupUserNetworksStore('allEnabled');
