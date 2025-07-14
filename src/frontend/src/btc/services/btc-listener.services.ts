@@ -1,5 +1,6 @@
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
+import { getPendingTransactionsBalance } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
 import { syncWalletFromIdbCache } from '$lib/services/listener.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -19,18 +20,34 @@ export const syncWallet = ({
 }) => {
 	const {
 		wallet: {
-			balance: { certified, data: balanceData },
-			newTransactions
+			balance: { certified, data: balance },
+			newTransactions,
+			address
 		}
 	} = data;
 
-	if (nonNullish(balanceData)) {
-		// Map balance.total to maintain compatibility with existing Balance type
+	if (nonNullish(balance)) {
+		/*
+		 * Balance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
+		 * because the pending transactions store (btcPendingSentTransactionsStore) is not accessible from the worker context.
+		 * Web Workers have isolated execution contexts and cannot directly access Svelte stores from the main thread.
+		 *
+		 * The worker provides the confirmed balance from the Bitcoin canister, and we calculate the structured
+		 * balance (available, pending, total) here where we have access to the pending transactions data.
+		 */
+		const pendingBalance = getPendingTransactionsBalance(address);
+
+		// Calculate the structured balance
+		const structuredBalance = {
+			available: balance - pendingBalance,
+			pending: pendingBalance,
+			total: balance
+		};
+
 		balancesStore.set({
 			id: tokenId,
 			data: {
-				// Extract total balance for balancesStore
-				data: balanceData.total,
+				data: structuredBalance.total, // Use total for compatibility with existing Balance type
 				certified
 			}
 		});
