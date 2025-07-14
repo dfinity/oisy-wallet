@@ -41,6 +41,7 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
+	import type { Erc721Metadata } from '$eth/types/erc721';
 
 	let {
 		initialSearch,
@@ -236,7 +237,7 @@
 	let indexCanisterId: string | undefined = $state();
 
 	let ethContractAddress: string | undefined = $state();
-	let ethMetadata: Erc20Metadata | undefined = $state();
+	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
 
 	let splTokenAddress: string | undefined = $state();
 	let splMetadata: TokenMetadata | undefined = $state();
