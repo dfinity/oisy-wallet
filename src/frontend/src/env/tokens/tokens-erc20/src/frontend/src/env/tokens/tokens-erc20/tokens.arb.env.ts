@@ -21,5 +21,5 @@ export const ARB_TOKEN: RequiredAdditionalErc20Token = {
 	icon: arb,
 	address: '0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1',
 	exchange: 'erc20',
-  groupData: ARB_TOKEN_GROUP
+	groupData: ARB_TOKEN_GROUP
 };
