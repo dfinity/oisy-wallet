@@ -1,7 +1,7 @@
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import type { AlwaysCertifiedData } from '$lib/types/store';
 import { jsonReplacer } from '@dfinity/utils';
-import { type Readable, writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 type Address = string;
 type BtcPendingSentTransactionsStoreData = Record<
