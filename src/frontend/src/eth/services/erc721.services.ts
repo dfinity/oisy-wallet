@@ -119,8 +119,6 @@ const loadCustomTokenData = ({
 	certified: boolean;
 	response: Erc721CustomToken[];
 }) => {
-	loadNfts(tokens);
-
 	erc721CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
