@@ -1,21 +1,24 @@
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { parseTokenId } from '$lib/validation/token.validation';
-import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import {
-	POLYGON_MAINNET_NETWORK,
-	POLYGON_MAINNET_NETWORK_ID
-} from '$env/networks/networks-evm/networks.evm.polygon.env';
-import { get } from 'svelte/store';
-import { userNetworks } from '$lib/derived/user-networks.derived';
-import { erc721CustomTokens } from '$eth/derived/erc721.derived';
-import { BSC_MAINNET_NETWORK, BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import {
 	ARBITRUM_MAINNET_NETWORK,
 	ARBITRUM_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK, BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_MAINNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
+	POLYGON_MAINNET_NETWORK,
+	POLYGON_MAINNET_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { erc721CustomTokens } from '$eth/derived/erc721.derived';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { userNetworks } from '$lib/derived/user-networks.derived';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { get } from 'svelte/store';
 
 describe('erc721.derived', () => {
 	const mockErc721CustomEthereumToken: Erc721CustomToken = {
@@ -83,11 +86,15 @@ describe('erc721.derived', () => {
 	});
 
 	it('should return all erc721 custom tokens', () => {
-		const result = get(erc721CustomTokens)
+		const result = get(erc721CustomTokens);
 
 		expect(result).toEqual([
-			mockErc721CustomEthereumToken, mockErc721CustomBaseToken, mockErc721CustomBscToken, mockErc721CustomPolygonToken, mockErc721CustomArbitrumToken
-		])
+			mockErc721CustomEthereumToken,
+			mockErc721CustomBaseToken,
+			mockErc721CustomBscToken,
+			mockErc721CustomPolygonToken,
+			mockErc721CustomArbitrumToken
+		]);
 	});
 
 	it('should return enabled ethereum tokens', () => {
@@ -100,13 +107,11 @@ describe('erc721.derived', () => {
 				[ARBITRUM_MAINNET_NETWORK_ID]: { enabled: false, isTestnet: false }
 			});
 			return () => {};
-		})
+		});
 
-		const result = get(erc721CustomTokens)
+		const result = get(erc721CustomTokens);
 
-		expect(result).toEqual([
-			mockErc721CustomEthereumToken
-		])
+		expect(result).toEqual([mockErc721CustomEthereumToken]);
 	});
 
 	it('should return enabled evm tokens', () => {
@@ -119,12 +124,15 @@ describe('erc721.derived', () => {
 				[ARBITRUM_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false }
 			});
 			return () => {};
-		})
+		});
 
-		const result = get(erc721CustomTokens)
+		const result = get(erc721CustomTokens);
 
 		expect(result).toEqual([
-			mockErc721CustomBaseToken, mockErc721CustomBscToken, mockErc721CustomPolygonToken, mockErc721CustomArbitrumToken
-		])
+			mockErc721CustomBaseToken,
+			mockErc721CustomBscToken,
+			mockErc721CustomPolygonToken,
+			mockErc721CustomArbitrumToken
+		]);
 	});
 });
