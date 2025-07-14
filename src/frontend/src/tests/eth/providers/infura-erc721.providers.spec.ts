@@ -108,6 +108,48 @@ describe('infura-erc721.providers', () => {
 			});
 		});
 
+		describe('isErc721 method', () => {
+			const mockSupportsInterface = vi.fn() as unknown as typeof mockContract.prototype.supportsInterface;
+
+			const mockParams = {
+				contractAddress
+			};
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				mockSupportsInterface.mockResolvedValue(true);
+
+				mockContract.prototype.supportsInterface = mockSupportsInterface;
+			});
+
+			it('should return true if contract is erc721', async () => {
+				const provider = new InfuraErc721Provider(infura);
+
+				const result = await provider.isErc721(mockParams);
+
+				expect(result).toStrictEqual(true);
+			});
+
+			it('should call the supportsInterface method of the contract', async () => {
+				const provider = new InfuraErc721Provider(infura);
+
+				await provider.isErc721(mockParams);
+
+				expect(provider).toBeDefined();
+
+				expect(mockContract).toHaveBeenCalledOnce();
+
+				expect(mockContract).toHaveBeenNthCalledWith(
+					1,
+					...expectedContractParams,
+					new mockProvider()
+				);
+
+				expect(mockSupportsInterface).toHaveBeenCalledOnce();
+			});
+		});
+
 		describe('infuraErc721Providers', () => {
 			networks.forEach(({ id, name }) => {
 				it(`should return the correct provider for ${name} network`, () => {
