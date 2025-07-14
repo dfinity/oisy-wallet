@@ -38,11 +38,7 @@ export class InfuraErc721Provider {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
 		try {
-			const [supportsInterface] = await Promise.all([
-				erc721Contract.supportsInterface(ERC721_INTERFACE_ID)
-			]);
-
-			return supportsInterface;
+			return await erc721Contract.supportsInterface(ERC721_INTERFACE_ID);
 		} catch (_: unknown) {
 			return false;
 		}
