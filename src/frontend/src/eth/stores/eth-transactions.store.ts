@@ -10,7 +10,7 @@ export interface EthTransactionsStore extends Readable<EthTransactionsData> {
 	add: (params: { tokenId: TokenId; transactions: Transaction[] }) => void;
 	update: (params: { tokenId: TokenId; transaction: Transaction }) => void;
 	nullify: (tokenId: TokenId) => void;
-	reset: () => void;
+	resetAll: () => void;
 }
 
 const initEthTransactionsStore = (): EthTransactionsStore => {
@@ -42,7 +42,7 @@ const initEthTransactionsStore = (): EthTransactionsStore => {
 				...(nonNullish(state) && state),
 				[tokenId]: null
 			})),
-		reset: () => set(INITIAL),
+		resetAll: () => set(INITIAL),
 		subscribe
 	};
 };
