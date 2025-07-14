@@ -246,6 +246,5 @@ describe('tokens.derived', () => {
 				mockSplCustomToken
 			]);
 		});
-
 	});
 });
