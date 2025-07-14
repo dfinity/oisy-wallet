@@ -99,6 +99,7 @@ describe('tokens.derived', () => {
 
 		erc20DefaultTokensStore.reset();
 		erc20UserTokensStore.resetAll();
+		erc721CustomTokensStore.resetAll();
 		icrcDefaultTokensStore.resetAll();
 		icrcCustomTokensStore.resetAll();
 		splDefaultTokensStore.reset();
@@ -114,6 +115,7 @@ describe('tokens.derived', () => {
 		it('should return all the non-testnet tokens by default', () => {
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
 			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
+			erc721CustomTokensStore.setAll([{ data: mockErc721CustomToken, certified: false }]);
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 			icrcCustomTokensStore.set({ data: mockIcrcCustomToken, certified: false });
 			splDefaultTokensStore.add(mockSplDefaultToken);
@@ -132,8 +134,9 @@ describe('tokens.derived', () => {
 				ARBITRUM_ETH_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[10].id },
-				{ ...mockIcrcCustomToken, id: result[11].id },
+				{ ...mockErc721CustomToken, id: result[10].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[11].id },
+				{ ...mockIcrcCustomToken, id: result[12].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
