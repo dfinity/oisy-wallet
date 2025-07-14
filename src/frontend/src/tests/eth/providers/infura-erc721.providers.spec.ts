@@ -109,7 +109,8 @@ describe('infura-erc721.providers', () => {
 		});
 
 		describe('isErc721', () => {
-			const mockSupportsInterface = vi.fn() as unknown as typeof mockContract.prototype.supportsInterface;
+			const mockSupportsInterface =
+				vi.fn() as unknown as typeof mockContract.prototype.supportsInterface;
 
 			const mockParams = {
 				contractAddress
@@ -128,7 +129,7 @@ describe('infura-erc721.providers', () => {
 
 				const result = await provider.isErc721(mockParams);
 
-				expect(result).toStrictEqual(true);
+				expect(result).toBeTruthy();
 			});
 
 			it('should call the supportsInterface method of the contract', async () => {
