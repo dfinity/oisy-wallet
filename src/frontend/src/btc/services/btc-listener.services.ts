@@ -20,7 +20,7 @@ import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const syncWallet = ({
+export const syncWallet = async ({
 	data,
 	tokenId
 }: {
@@ -46,7 +46,9 @@ export const syncWallet = ({
 		 * balance (available, pending, total) here where we have access to the pending transactions data.
 		 */
 		const identity = get(authIdentity);
-		loadBtcPendingSentTransactions({
+
+		// Wait for pending transactions to be loaded before calculating balance
+		await loadBtcPendingSentTransactions({
 			identity,
 			networkId: mapBitcoinNetworkToNetworkId(network),
 			address
