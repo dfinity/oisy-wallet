@@ -109,19 +109,19 @@ const loadCustomTokensWithMetadata = async (
 	return await Promise.all(customContracts);
 };
 
-const loadCustomTokenData = async ({
+const loadCustomTokenData = ({
 	response: tokens,
 	certified
 }: {
 	certified: boolean;
 	response: Erc721CustomToken[];
 }) => {
-	await loadNfts(tokens)
+	loadNfts(tokens)
 
 	erc721CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
-const loadNfts = async (tokens: Erc721CustomToken[]) => {
+const loadNfts = (tokens: Erc721CustomToken[]) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura);
 
