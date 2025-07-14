@@ -1,6 +1,6 @@
+import arb from '$eth/assets/arb.svg';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
-import arb from '$eth/assets/arb.svg';
 
 const ARB_TOKEN_GROUP_SYMBOL = 'ARB';
 
