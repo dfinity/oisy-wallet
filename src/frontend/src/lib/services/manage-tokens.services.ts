@@ -19,6 +19,7 @@ import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 
 export interface ManageTokensSaveParams {
 	progress?: (step: ProgressStepsAddToken) => void;
@@ -35,7 +36,7 @@ export interface SaveTokensParams<T> {
 }
 
 export const saveTokens = async <
-	T extends SaveUserToken | SaveCustomTokenWithKey | SaveSplCustomToken | TokenToggleable<Token>
+	T extends SaveUserToken | SaveCustomTokenWithKey | SaveSplCustomToken | SaveErc721CustomToken | TokenToggleable<Token>
 >({
 	tokens,
 	save,
