@@ -8,7 +8,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { TokenId } from '$lib/types/token';
-import { jsonReviver, nonNullish } from '@dfinity/utils';
+import { jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const syncWallet = ({
@@ -43,6 +43,8 @@ export const syncWallet = ({
 			pending: pendingBalance,
 			total: balance
 		};
+
+		console.warn('Storing BTC balance:', JSON.stringify(structuredBalance, jsonReplacer));
 
 		balancesStore.set({
 			id: tokenId,
