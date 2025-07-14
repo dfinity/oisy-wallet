@@ -4,7 +4,7 @@ import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import { nonNullish } from '@dfinity/utils';
-import { get, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 type TransactionTypes = Transaction;
 
@@ -75,7 +75,3 @@ const initEthTransactionsStore = (): TransactionsStore<Transaction> => {
 };
 
 export const ethTransactionsStore = initEthTransactionsStore();
-
-const foo = get(ethTransactionsStore);
-
-console.log(foo);
