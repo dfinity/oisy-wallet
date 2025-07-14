@@ -132,6 +132,17 @@ describe('infura-erc721.providers', () => {
 				expect(result).toBeTruthy();
 			});
 
+			it('should return false on error', async () => {
+				const errorMessage = 'Error fetching metadata';
+				mockSupportsInterface.mockRejectedValue(new Error(errorMessage));
+
+				const provider = new InfuraErc721Provider(infura);
+
+				const result = await provider.isErc721(mockParams);
+
+				expect(result).toBeFalsy();
+			});
+
 			it('should call the supportsInterface method of the contract', async () => {
 				const provider = new InfuraErc721Provider(infura);
 
