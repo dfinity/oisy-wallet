@@ -24,7 +24,10 @@ export const getPendingTransactions = (
 	console.warn('Available addresses in store:', Object.keys(storeData));
 	console.warn('Looking for address:', address);
 	const pendingTransactions = storeData[address];
-	console.warn('Found pending transactions:', pendingTransactions);
+	console.warn(
+		`Retrieving pending transactions for address ${address} from store`,
+		pendingTransactions
+	);
 	return pendingTransactions;
 };
 
