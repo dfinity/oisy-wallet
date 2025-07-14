@@ -83,7 +83,7 @@
 			"changelog": "Änderungsprotokoll von $oisy_name auf GitHub öffnen, um die neuesten Updates zu sehen",
 			"documentation": "Dokumentation von $oisy_name öffnen",
 			"support": "Support-Bereich der $oisy_name-Dokumentation öffnen",
-			"open_twitter": "Twitter-Feed von DFINITY X öffnen",
+			"open_twitter": "X/Twitter-Feed von DFINITY X öffnen",
 			"vip_qr_code": "Einladungslink generieren",
 			"binance_qr_code": "Binance Clubhouse-Link generieren",
 			"refer_a_friend": "Empfehlungslink für einen Freund erstellen",
@@ -359,12 +359,12 @@
 				"win": {
 					"default": {
 						"title": "Gratulation zum Erhalt von OISY Sprinkles!",
-						"description": "Teile deinen Sieg auf Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
+						"description": "Teile deinen Sieg auf X/Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
 						"share_href": "https://x.com/intent/post?text=Habe%20soeben%20gratis%20Bitcoin%20von%20%40OISY%20Wallet%20bekommen%20%F0%9F%AA%82%0ASie%20verteilen%20%24BTC%20Sprinkles%20non-stop.%0AFalls%20du%20noch%20nicht%20auf%20OISY.com%20bist%2C%20jetzt%20ist%20der%20beste%20Zeitpunkt."
 					},
 					"jackpot": {
 						"title": "Gratulation zum Erhalt von OISY Jackpot Sprinkles!",
-						"description": "Teile deinen Sieg auf Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
+						"description": "Teile deinen Sieg auf X/Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
 						"share_href": "https://x.com/intent/post?text=Habe%20soeben%20die%20Super%20Sprinkles%20%40OISY%20Wallet%20bekommen%20%F0%9F%AA%82%0AKleine%20Streusel%20den%20ganzen%20Tag%20%2B%205%20grosse%20%24BTC%20jeden%20Tag.%0ARegistriere%20dich%20auf%20OISY.com%2C%20und%20erhalte%20gratis%20Bitcoin."
 					},
 					"referral": {
@@ -462,6 +462,7 @@
 			"no_infura_provider": "Kein Infura-Anbieter für Netzwerk $network",
 			"no_infura_cketh_provider": "Kein Infura CkETH-Anbieter für Netzwerk $network",
 			"no_infura_erc20_provider": "Kein Infura-ERC20-Anbieter für Netzwerk $network",
+			"no_infura_erc721_provider": "Kein Infura-ERC721-Anbieter für Netzwerk $network",
 			"no_infura_erc20_icp_provider": "Kein Infura-ERC20-ICP-Anbieter für Netzwerk $network",
 			"no_solana_network": "Kein Solana-Netzwerk für Netzwerk $network",
 			"eth_address_unknown": "ETH-Adresse ist unbekannt.",
@@ -485,6 +486,7 @@
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"erc20_user_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
+			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
@@ -1044,8 +1046,7 @@
 			"disconnected": "WalletConnect getrennt.",
 			"session_ended": "WalletConnect-Sitzung wurde beendet.",
 			"connected": "WalletConnect verbunden.",
-			"eth_transaction_executed": "WalletConnect eth_sendTransaction-Anfrage ausgeführt.",
-			"sol_transaction_executed": "WalletConnect \"$method\"-Anfrage ausgeführt.",
+			"transaction_executed": "WalletConnect \"$method\"-Anfrage ausgeführt.",
 			"sign_executed": "WalletConnect-Signaturanfrage ausgeführt."
 		},
 		"error": {

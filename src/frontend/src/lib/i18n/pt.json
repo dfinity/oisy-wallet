@@ -359,12 +359,12 @@
 				"win": {
 					"default": {
 						"title": "Parabéns por ter ganho o prémio hoje de OISY Sprinkles!",
-						"description": "Partilhe sua vitória no Twitter para se qualificar para outra chance de ganhar.",
+						"description": "Partilhe sua vitória no X/Twitter para se qualificar para outra chance de ganhar.",
 						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
 					},
 					"jackpot": {
 						"title": "Parabéns por ganhar o maior OISY Sprinkles de hoje!",
-						"description": "Compartilhe sua vitória no Twitter para se qualificar para outra chance de ganhar.",
+						"description": "Compartilhe sua vitória no X/Twitter para se qualificar para outra chance de ganhar.",
 						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
 					},
 					"referral": {
@@ -462,6 +462,7 @@
 			"no_infura_provider": "Nenhum provedor Infura para a rede $network",
 			"no_infura_cketh_provider": "Nenhum provedor Infura CkETH para a rede $network",
 			"no_infura_erc20_provider": "Nenhum provedor Infura ERC20 para a rede $network",
+			"no_infura_erc721_provider": "Nenhum provedor Infura ERC721 para a rede $network",
 			"no_infura_erc20_icp_provider": "Nenhum provedor Infura ERC20 ICP para a rede $network",
 			"no_solana_network": "Nenhuma rede Solana para a rede $network",
 			"eth_address_unknown": "Endereço ETH desconhecido.",
@@ -471,8 +472,8 @@
 			"spl_tokens": "Erro ao carregar os tokens SPL.",
 			"minter_ckbtc_btc": "É necessário um minter configurado para converter ckBTC para BTC.",
 			"minter_cketh_eth": "É necessário um minter configurado para converter ckETH para ETH.",
-			"minter_ckerc20_erc20": "É necessário um minter configurado para converter ckERC20 para Erc20.",
-			"ledger_cketh_eth": "É necessário um ledger ckETH configurado para converter ckErc20 para Erc20.",
+			"minter_ckerc20_erc20": "É necessário um minter configurado para converter ckERC20 para ERC20.",
+			"ledger_cketh_eth": "É necessário um ledger ckETH configurado para converter ckERC20 para ERC20.",
 			"minter_btc": "É necessário um minter configurado para recuperar BTC.",
 			"minter_ckbtc_info": "É necessário um minter configurado para buscar as informações do ckBTC",
 			"minter_cketh_info": "É necessário um minter configurado para buscar as informações do ckETH",
@@ -485,6 +486,7 @@
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
 			"erc20_user_tokens": "Erro ao carregar os tokens de usuário ERC20.",
 			"spl_custom_tokens": "Erro ao carregar o token personalizado SPL.",
+			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",
 			"erc20_user_token": "Erro ao habilitar o token gêmeo ERC20.",
 			"icrc_custom_token": "Erro ao carregar o token personalizado ICRC.",
 			"loading_wallet_timeout": "Sua carteira requer alguns dados iniciais que ainda não foram carregados. Por favor, tente novamente.",
@@ -957,7 +959,7 @@
 		"error": {
 			"invalid_contract_address": "Endereço do contrato inválido.",
 			"invalid_token_address": "Endereço do token inválido.",
-			"invalid_ledger": "O token selecionado não está vinculado a um canister Ledger do Icrc.",
+			"invalid_ledger": "O token selecionado não está vinculado a um canister Ledger do ICRC.",
 			"no_metadata": "Nenhum metadado foi encontrado.",
 			"unexpected": "Algo deu errado ao salvar o token.",
 			"unexpected_hiding": "Algo deu errado ao ocultar o token.",
@@ -1044,8 +1046,7 @@
 			"disconnected": "WalletConnect desconectado.",
 			"session_ended": "A sessão WalletConnect foi encerrada.",
 			"connected": "WalletConnect conectado.",
-			"eth_transaction_executed": "Solicitação WalletConnect eth_sendTransaction executada.",
-			"sol_transaction_executed": "Solicitação WalletConnect \"$method\" executada.",
+			"transaction_executed": "Solicitação WalletConnect \"$method\" executada.",
 			"sign_executed": "Solicitação de assinatura WalletConnect executada."
 		},
 		"error": {
