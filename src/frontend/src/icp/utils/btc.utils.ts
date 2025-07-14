@@ -19,10 +19,6 @@ export const getPendingTransactions = (
 	certified: true;
 } => {
 	const storeData = get(btcPendingSentTransactionsStore);
-	console.warn('Retrieving pending transactions for address:', address);
-	console.warn('Store data:', storeData);
-	console.warn('Available addresses in store:', Object.keys(storeData));
-	console.warn('Looking for address:', address);
 	const pendingTransactions = storeData[address];
 	console.warn(
 		`Retrieving pending transactions for address ${address} from store`,
@@ -72,14 +68,11 @@ export const getPendingTransactionIds = (address: string): string[] => {
  */
 export const getPendingTransactionsBalance = (address: string): bigint => {
 	const pendingTransactions = getPendingTransactions(address);
-	console.warn('pendingTransactions: ', pendingTransactions?.data);
 	if (isNullish(pendingTransactions?.data)) {
 		return 0n;
 	}
 
-	console.warn('pendingTransactions: ', pendingTransactions.data);
-
-	// Calculate total pending amount by summing all UTXO values in pending transactions
+	// Calculate the total pending amount by summing all UTXO values in pending transactions
 	return pendingTransactions.data.reduce(
 		(sum: bigint, tx: PendingTransaction) =>
 			sum + tx.utxos.reduce((utxoSum: bigint, utxo) => utxoSum + BigInt(utxo.value), 0n),

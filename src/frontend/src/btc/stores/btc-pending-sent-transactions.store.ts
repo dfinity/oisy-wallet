@@ -1,6 +1,6 @@
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import type { AlwaysCertifiedData } from '$lib/types/store';
-import { writable, type Readable } from 'svelte/store';
+import { type Readable, writable } from 'svelte/store';
 
 type Address = string;
 type BtcPendingSentTransactionsStoreData = Record<
@@ -59,6 +59,7 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 			}));
 		},
 		reset: () => {
+			console.warn('Resetting BtcPendingSentTransactionsStore');
 			set({});
 		}
 	};
