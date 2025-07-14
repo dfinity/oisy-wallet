@@ -50,7 +50,7 @@ import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
-import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
@@ -89,7 +89,7 @@ describe('network-tokens.derived', () => {
 		});
 
 		it('should return all non-testnet tokens when no network is selected and testnets are disabled', () => {
-			expect(get(enabledNetworkTokens)).toEqual([
+			expect(get(enabledFungibleNetworkTokens)).toEqual([
 				ICP_TOKEN,
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
@@ -195,7 +195,7 @@ describe('network-tokens.derived', () => {
 			});
 
 			it('should not return testnet tokens when no network is selected', () => {
-				expect(get(enabledNetworkTokens)).toEqual([
+				expect(get(enabledFungibleNetworkTokens)).toEqual([
 					ICP_TOKEN,
 					BTC_MAINNET_TOKEN,
 					ETHEREUM_TOKEN,
@@ -214,7 +214,7 @@ describe('network-tokens.derived', () => {
 				({ network, tokens }) => {
 					mockPage.mock({ network: network.id.description });
 
-					expect(get(enabledNetworkTokens)).toEqual(tokens);
+					expect(get(enabledFungibleNetworkTokens)).toEqual(tokens);
 				}
 			);
 		});
