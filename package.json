@@ -86,7 +86,7 @@
 		"@solana-program/token": "^0.5.1",
 		"@solana/kit": "^2.1.1",
 		"@walletconnect/auth-client": "^2.1.2",
-		"alchemy-sdk": "3.6.0",
+		"alchemy-sdk": "3.6.1",
 		"bitcoinjs-lib": "^6.1.7",
 		"buffer": "^6.0.3",
 		"decimal.js": "^10.6.0",
