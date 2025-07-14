@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ARB_TOKEN_GROUP } from '$env/tokens/groups/groups.arb.env';
 import arb from '$eth/assets/arb.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
