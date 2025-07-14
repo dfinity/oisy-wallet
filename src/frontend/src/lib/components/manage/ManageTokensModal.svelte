@@ -5,7 +5,7 @@
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
-	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+	import { saveErc20UserTokens, saveErc721CustomTokens } from '$eth/services/manage-tokens.services';
 	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
@@ -40,6 +40,7 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 
 	let {
 		initialSearch,
@@ -116,23 +117,34 @@
 			return;
 		}
 
-		await saveErc20Deprecated([
-			{
-				address: erc20ContractAddress,
-				...erc20Metadata,
-				network: network as EthereumNetwork,
-				enabled: true
-			}
-		]);
+		if (erc20Metadata.decimals > 0) {
+			await saveErc20Deprecated([
+				{
+					address: erc20ContractAddress,
+					...erc20Metadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
 
-		await saveErc20([
-			{
-				address: erc20ContractAddress,
-				...erc20Metadata,
-				network: network as EthereumNetwork,
-				enabled: true
-			}
-		]);
+			await saveErc20([
+				{
+					address: erc20ContractAddress,
+					...erc20Metadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
+		} else {
+			await saveErc721([
+				{
+					address: erc20ContractAddress,
+					...erc20Metadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
+		}
 	};
 
 	const saveSplToken = () => {
@@ -185,6 +197,16 @@
 
 	const saveErc20 = (tokens: SaveErc20CustomToken[]): Promise<void> =>
 		saveErc20CustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
+	const saveErc721 = (tokens: SaveErc721CustomToken[]): Promise<void> =>
+		saveErc721CustomTokens({
 			tokens,
 			progress,
 			modalNext: () => modal?.set(3),
