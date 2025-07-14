@@ -1,22 +1,25 @@
 import type { CustomToken, Erc721Token } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { InfuraErc721Provider, infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
+import { type EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
+import {
+	InfuraErc721Provider,
+	infuraErc721Providers
+} from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import { nftStore } from '$eth/stores/nft.store';
+import type { Nft } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { EthAddress } from '$lib/types/address';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { Nft } from '$eth/types/erc721';
-import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
-import { nftStore } from '$eth/stores/nft.store';
-import type { EthAddress } from '$lib/types/address';
 
 export const loadErc721Tokens = async ({
 	identity
@@ -116,7 +119,7 @@ const loadCustomTokenData = ({
 	certified: boolean;
 	response: Erc721CustomToken[];
 }) => {
-	loadNfts(tokens)
+	loadNfts(tokens);
 
 	erc721CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
@@ -125,20 +128,30 @@ const loadNfts = (tokens: Erc721CustomToken[]) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura);
 
-	tokens.forEach((token) => loadNftsForContract({ etherscanProvider, infuraProvider, contractAddress: token.address }))
-}
+	tokens.forEach((token) =>
+		loadNftsForContract({ etherscanProvider, infuraProvider, contractAddress: token.address })
+	);
+};
 
-const loadNftsForContract = async ({ etherscanProvider, infuraProvider, contractAddress }: {etherscanProvider: EtherscanProvider, infuraProvider: InfuraErc721Provider, contractAddress: string}) => {
+const loadNftsForContract = async ({
+	etherscanProvider,
+	infuraProvider,
+	contractAddress
+}: {
+	etherscanProvider: EtherscanProvider;
+	infuraProvider: InfuraErc721Provider;
+	contractAddress: string;
+}) => {
 	const myWalletAddress = '0x29469395eaf6f95920e59f858042f0e28d98a20b';
 
 	try {
-			const tokenIds = await etherscanProvider.erc721TokenInventory({
-				address: myWalletAddress,
-				contractAddress
-			});
+		const tokenIds = await etherscanProvider.erc721TokenInventory({
+			address: myWalletAddress,
+			contractAddress
+		});
 
-			const nfts: Nft[] = await loadNftMetadata({ infuraProvider, contractAddress, tokenIds });
-			nftStore.addAll(nfts);
+		const nfts: Nft[] = await loadNftMetadata({ infuraProvider, contractAddress, tokenIds });
+		nftStore.addAll(nfts);
 	} catch (err: unknown) {
 		nftStore.resetAll();
 
