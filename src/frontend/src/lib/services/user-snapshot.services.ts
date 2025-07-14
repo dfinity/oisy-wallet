@@ -136,7 +136,7 @@ const getLastTransactionsByToken = ({
 			return [];
 		}
 
-		return (get(ethTransactionsStore)?.[tokenId] ?? []).map((transaction) =>
+		return (get(ethTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) =>
 			mapEthTransactionUi({
 				transaction,
 				ckMinterInfoAddresses,

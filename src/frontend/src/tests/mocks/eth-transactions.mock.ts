@@ -1,3 +1,4 @@
+import type { EthCertifiedTransaction } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
@@ -20,6 +21,9 @@ export const createMockEthTransactions = (n: number): Transaction[] =>
 		...mockEthTransaction,
 		hash: Math.random().toString(36).substring(7)
 	}));
+
+export const createMockEthCertifiedTransactions = (n: number): EthCertifiedTransaction[] =>
+	createMockEthTransactions(n).map((data) => ({ data, certified: false }));
 
 export const createMockEthTransactionsUi = (n: number): EthTransactionUi[] =>
 	Array.from({ length: n }, () => ({

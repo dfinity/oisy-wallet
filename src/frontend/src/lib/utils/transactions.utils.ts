@@ -114,7 +114,7 @@ export const mapAllTransactionsUi = ({
 
 			return [
 				...acc,
-				...($ethTransactions[tokenId] ?? []).map((transaction) => ({
+				...($ethTransactions?.[tokenId] ?? []).map(({ data: transaction }) => ({
 					transaction: mapEthTransactionUi({
 						transaction,
 						ckMinterInfoAddresses: isSepoliaNetwork

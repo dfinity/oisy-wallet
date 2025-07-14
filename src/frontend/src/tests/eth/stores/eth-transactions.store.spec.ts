@@ -1,15 +1,15 @@
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { bn3Bi } from '$tests/mocks/balances.mock';
-import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
+import { createMockEthCertifiedTransactions } from '$tests/mocks/eth-transactions.mock';
 import { get } from 'svelte/store';
 
 describe('eth-transactions.store', () => {
 	const tokenId = ETHEREUM_TOKEN_ID;
 
-	const mockTransactions = createMockEthTransactions(5);
+	const mockTransactions = createMockEthCertifiedTransactions(5);
 
-	const mockOtherTransactions = createMockEthTransactions(3);
+	const mockOtherTransactions = createMockEthCertifiedTransactions(3);
 
 	const store = ethTransactionsStore;
 
@@ -78,7 +78,7 @@ describe('eth-transactions.store', () => {
 	describe('update', () => {
 		const updatedTransaction = {
 			...mockTransactions[0],
-			value: mockTransactions[0].value + bn3Bi
+			value: mockTransactions[0].data.value + bn3Bi
 		};
 
 		beforeEach(() => {
