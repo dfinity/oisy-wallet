@@ -162,11 +162,7 @@ describe('transactions.utils', () => {
 		it('should map to "withdraw" when the "from" address is in ckMinterInfoAddresses', () => {
 			const ckMinterInfoAddresses: EthAddress[] = ['0x1234'];
 
-			const result = mapEthTransactionUi({
-				transaction,
-				ckMinterInfoAddresses,
-				ethAddress
-			});
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).toBe('withdraw');
 		});
@@ -174,11 +170,7 @@ describe('transactions.utils', () => {
 		it('should map to "deposit" when the "to" address is in ckMinterInfoAddresses', () => {
 			const ckMinterInfoAddresses: EthAddress[] = ['0xabcd'];
 
-			const result = mapEthTransactionUi({
-				transaction,
-				ckMinterInfoAddresses,
-				ethAddress
-			});
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).toBe('deposit');
 		});
@@ -194,11 +186,7 @@ describe('transactions.utils', () => {
 		});
 
 		it('should map to "receive" when none of the other conditions match', () => {
-			const result = mapEthTransactionUi({
-				transaction,
-				ckMinterInfoAddresses,
-				ethAddress
-			});
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).toBe('receive');
 		});
@@ -216,11 +204,7 @@ describe('transactions.utils', () => {
 		it('should not map to "withdraw" or to "deposit" when the MinterInfoAddresses are empty', () => {
 			const ckMinterInfoAddresses: EthAddress[] = [];
 
-			const result = mapEthTransactionUi({
-				transaction,
-				ckMinterInfoAddresses,
-				ethAddress
-			});
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).not.toBe('withdraw');
 			expect(result.type).not.toBe('deposit');
@@ -237,11 +221,7 @@ describe('transactions.utils', () => {
 		});
 
 		it('should map an ID to empty string if the transaction hash does not exist', () => {
-			const result = mapEthTransactionUi({
-				transaction,
-				ckMinterInfoAddresses,
-				ethAddress
-			});
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.id).toBe('');
 		});
