@@ -71,68 +71,70 @@ describe('erc721.derived', () => {
 		enabled: true
 	};
 
-	beforeEach(() => {
-		vi.resetAllMocks();
+	describe('erc721CustomTokens', () => {
+		beforeEach(() => {
+			vi.resetAllMocks();
 
-		erc721CustomTokensStore.resetAll();
+			erc721CustomTokensStore.resetAll();
 
-		erc721CustomTokensStore.setAll([
-			{ data: mockErc721CustomEthereumToken, certified: false },
-			{ data: mockErc721CustomBaseToken, certified: false },
-			{ data: mockErc721CustomBscToken, certified: false },
-			{ data: mockErc721CustomPolygonToken, certified: false },
-			{ data: mockErc721CustomArbitrumToken, certified: false }
-		]);
-	});
-
-	it('should return all erc721 custom tokens', () => {
-		const result = get(erc721CustomTokens);
-
-		expect(result).toEqual([
-			mockErc721CustomEthereumToken,
-			mockErc721CustomBaseToken,
-			mockErc721CustomBscToken,
-			mockErc721CustomPolygonToken,
-			mockErc721CustomArbitrumToken
-		]);
-	});
-
-	it('should return enabled ethereum tokens', () => {
-		vi.spyOn(userNetworks, 'subscribe').mockImplementation((fn) => {
-			fn({
-				[ETHEREUM_NETWORK_ID]: { enabled: true, isTestnet: false },
-				[BASE_NETWORK_ID]: { enabled: false, isTestnet: false },
-				[BSC_MAINNET_NETWORK_ID]: { enabled: false, isTestnet: false },
-				[POLYGON_MAINNET_NETWORK_ID]: { enabled: false, isTestnet: false },
-				[ARBITRUM_MAINNET_NETWORK_ID]: { enabled: false, isTestnet: false }
-			});
-			return () => {};
+			erc721CustomTokensStore.setAll([
+				{ data: mockErc721CustomEthereumToken, certified: false },
+				{ data: mockErc721CustomBaseToken, certified: false },
+				{ data: mockErc721CustomBscToken, certified: false },
+				{ data: mockErc721CustomPolygonToken, certified: false },
+				{ data: mockErc721CustomArbitrumToken, certified: false }
+			]);
 		});
 
-		const result = get(erc721CustomTokens);
+		it('should return all erc721 custom tokens', () => {
+			const result = get(erc721CustomTokens);
 
-		expect(result).toEqual([mockErc721CustomEthereumToken]);
-	});
-
-	it('should return enabled evm tokens', () => {
-		vi.spyOn(userNetworks, 'subscribe').mockImplementation((fn) => {
-			fn({
-				[ETHEREUM_NETWORK_ID]: { enabled: false, isTestnet: false },
-				[BASE_NETWORK_ID]: { enabled: true, isTestnet: false },
-				[BSC_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
-				[POLYGON_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
-				[ARBITRUM_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false }
-			});
-			return () => {};
+			expect(result).toEqual([
+				mockErc721CustomEthereumToken,
+				mockErc721CustomBaseToken,
+				mockErc721CustomBscToken,
+				mockErc721CustomPolygonToken,
+				mockErc721CustomArbitrumToken
+			]);
 		});
 
-		const result = get(erc721CustomTokens);
+		it('should return enabled ethereum tokens', () => {
+			vi.spyOn(userNetworks, 'subscribe').mockImplementation((fn) => {
+				fn({
+					[ETHEREUM_NETWORK_ID]: { enabled: true, isTestnet: false },
+					[BASE_NETWORK_ID]: { enabled: false, isTestnet: false },
+					[BSC_MAINNET_NETWORK_ID]: { enabled: false, isTestnet: false },
+					[POLYGON_MAINNET_NETWORK_ID]: { enabled: false, isTestnet: false },
+					[ARBITRUM_MAINNET_NETWORK_ID]: { enabled: false, isTestnet: false }
+				});
+				return () => {};
+			});
 
-		expect(result).toEqual([
-			mockErc721CustomBaseToken,
-			mockErc721CustomBscToken,
-			mockErc721CustomPolygonToken,
-			mockErc721CustomArbitrumToken
-		]);
+			const result = get(erc721CustomTokens);
+
+			expect(result).toEqual([mockErc721CustomEthereumToken]);
+		});
+
+		it('should return enabled evm tokens', () => {
+			vi.spyOn(userNetworks, 'subscribe').mockImplementation((fn) => {
+				fn({
+					[ETHEREUM_NETWORK_ID]: { enabled: false, isTestnet: false },
+					[BASE_NETWORK_ID]: { enabled: true, isTestnet: false },
+					[BSC_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
+					[POLYGON_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
+					[ARBITRUM_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false }
+				});
+				return () => {};
+			});
+
+			const result = get(erc721CustomTokens);
+
+			expect(result).toEqual([
+				mockErc721CustomBaseToken,
+				mockErc721CustomBscToken,
+				mockErc721CustomPolygonToken,
+				mockErc721CustomArbitrumToken
+			]);
+		});
 	});
 });
