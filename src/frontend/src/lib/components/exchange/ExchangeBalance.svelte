@@ -4,7 +4,7 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
-	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,7 +20,7 @@
 
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi));
+	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedFungibleNetworkTokensUi));
 </script>
 
 <span class="flex flex-col items-center gap-1">
