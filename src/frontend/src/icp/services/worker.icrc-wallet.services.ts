@@ -20,7 +20,7 @@ export const initIcrcWalletWorker = async ({
 	network: { env, id: networkId }
 }: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new WalletWorker.default();
+	let worker: Worker | null = new WalletWorker.default();
 
 	await syncWalletFromCache({ tokenId, networkId });
 
@@ -33,7 +33,7 @@ export const initIcrcWalletWorker = async ({
 
 		restartedWithLedgerOnly = true;
 
-		worker.postMessage({
+		worker?.postMessage({
 			msg: 'startIcrcWalletTimer',
 			data: {
 				ledgerCanisterId,
@@ -83,14 +83,16 @@ export const initIcrcWalletWorker = async ({
 	};
 
 	const stop = () => {
-		worker.postMessage({
+		worker?.postMessage({
 			msg: 'stopIcrcWalletTimer'
 		});
 	};
 
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startIcrcWalletTimer',
 				data: {
 					indexCanisterId,
@@ -101,7 +103,7 @@ export const initIcrcWalletWorker = async ({
 		},
 		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'triggerIcrcWalletTimer',
 				data: {
 					indexCanisterId,
@@ -111,8 +113,14 @@ export const initIcrcWalletWorker = async ({
 			});
 		},
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stop();
-			worker.terminate();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };
