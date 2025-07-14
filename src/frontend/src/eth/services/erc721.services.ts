@@ -140,7 +140,7 @@ const loadNftsForContract = async ({
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
 }) => {
-	const myWalletAddress = '0x29469395eaf6f95920e59f858042f0e28d98a20b';
+	const myWalletAddress = '0x29469395eaf6f95920e59f858042f0e28d98a20b'; // TODO remove this and load on wallet address
 
 	try {
 		const tokenIds = await etherscanProvider.erc721TokenInventory({
