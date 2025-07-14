@@ -121,7 +121,7 @@
 			return;
 		}
 
-		if (ethTokenMetadata.decimals > 0) {
+		if (ethMetadata.decimals > 0) {
 			await saveErc20Deprecated([
 				{
 					address: ethContractAddress,
