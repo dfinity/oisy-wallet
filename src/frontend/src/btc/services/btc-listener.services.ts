@@ -20,13 +20,13 @@ export const syncWallet = ({
 }) => {
 	const {
 		wallet: {
-			balance: { certified, data: balance },
+			balance: { certified, data: totalBalance },
 			newTransactions,
 			address
 		}
 	} = data;
 
-	if (nonNullish(balance)) {
+	if (nonNullish(totalBalance)) {
 		/*
 		 * Balance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
 		 * because the pending transactions store (btcPendingSentTransactionsStore) is not accessible from the worker context.
@@ -39,9 +39,9 @@ export const syncWallet = ({
 
 		// Calculate the structured balance
 		const structuredBalance = {
-			available: balance - pendingBalance,
+			available: totalBalance - pendingBalance,
 			pending: pendingBalance,
-			total: balance
+			total: totalBalance
 		};
 
 		console.warn('Storing BTC balance:', JSON.stringify(structuredBalance, jsonReplacer));

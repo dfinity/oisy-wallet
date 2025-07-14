@@ -22,7 +22,10 @@
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
-	$: initPendingSentTransactionsStatus(source);
+	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
+
+	$: console.warn('hasPendingTransactionsStore changed:', $hasPendingTransactionsStore);
+
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
