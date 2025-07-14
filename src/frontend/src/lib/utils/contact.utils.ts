@@ -12,7 +12,14 @@ import {
 } from '$lib/utils/token-account-id.utils';
 import type { Identity } from '@dfinity/agent';
 import { AuthClient } from '@dfinity/auth-client';
-import { fromNullable, isEmptyString, isNullish, notEmptyString, toNullable } from '@dfinity/utils';
+import {
+	fromNullable,
+	isEmptyString,
+	isNullish,
+	nonNullish,
+	notEmptyString,
+	toNullable
+} from '@dfinity/utils';
 
 export interface SaveContactParams extends Omit<ContactUi, 'image'> {
 	imageUrl?: string | null;
@@ -43,7 +50,7 @@ export const mapToFrontendContact = (contact: Contact): ContactUi => {
 	return {
 		...rest,
 		updateTimestampNs: update_timestamp_ns,
-		image: image.length > 0 ? [image[0]!] : [],
+		image: nonNullish(image[0]) ? ([image[0]] as [ContactImage]) : [],
 		addresses: contact.addresses.map((address) => ({
 			address: getTokenAccountIdAddressString(address.token_account_id),
 			label: fromNullable(address.label),
@@ -77,7 +84,7 @@ export const getContactForAddress = ({
 
 export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi | undefined => {
 	const tokenAccountIdParseResult = TokenAccountIdSchema.safeParse(address);
-	const currentAddressType = tokenAccountIdParseResult?.success
+	const currentAddressType = tokenAccountIdParseResult.success
 		? getDiscriminatorForTokenAccountId(tokenAccountIdParseResult.data)
 		: undefined;
 
@@ -143,7 +150,13 @@ export const getNetworkContactKey = ({
 
 const parseDataUrl = (dataUrl: string): { mime: string; data: Uint8Array } => {
 	const [header, b64] = dataUrl.split(',');
-	const mime = header.match(/data:(.*);base64/)?.[1]!;
+
+	const match = header.match(/data:(.*);base64/);
+	if (!match) {
+		throw new Error(`Invalid data URL: ${header}`);
+	}
+	const [, mime] = match;
+
 	const bin = atob(b64);
 	const arr = new Uint8Array(bin.length);
 	for (let i = 0; i < bin.length; i++) {
@@ -154,7 +167,7 @@ const parseDataUrl = (dataUrl: string): { mime: string; data: Uint8Array } => {
 
 export const dataUrlToContactImage = (dataUrl: string): ContactImage => {
 	const { mime, data } = parseDataUrl(dataUrl);
-	const subtype = mime.split('/')[1];
+	const [, subtype] = mime.split('/');
 	const mimeType = { [`image/${subtype}`]: null } as ImageMimeType;
 	return { mime_type: mimeType, data };
 };
@@ -167,10 +180,9 @@ export const contactImageToDataUrl = (img: ContactImage): string => {
 
 export const saveContact = async (params: SaveContactParams): Promise<void> => {
 	const { imageUrl, ...rest } = params;
-
 	const contactUi: ContactUi = {
 		...rest,
-		image: imageUrl ? [dataUrlToContactImage(imageUrl)] : []
+		image: imageUrl ? ([dataUrlToContactImage(imageUrl)] as [ContactImage]) : []
 	};
 
 	const beContact = mapToBackendContact(contactUi);

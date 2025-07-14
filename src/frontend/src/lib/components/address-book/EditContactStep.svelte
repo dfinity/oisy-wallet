@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import imageCompression from 'browser-image-compression';
-	import { tick } from 'svelte';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
@@ -51,7 +50,6 @@
 
 	let imageUrl = $state<string | null>(initialImageUrl);
 	let fileInput = $state<HTMLInputElement>();
-	let isSaving = $state(false);
 	let saveError = $state<string | null>(null);
 
 	const handleFileChange = async (e: Event): Promise<void> => {
@@ -60,7 +58,6 @@
 			return;
 		}
 
-		isSaving = true;
 		try {
 			const options = { maxSizeMB: 0.1, maxWidthOrHeight: 200, useWebWorker: false };
 			const compressed = await imageCompression(file, options);
@@ -79,8 +76,6 @@
 		} catch (error) {
 			console.error('Failed to save image:', error);
 			saveError = error instanceof Error ? error.message : 'Failed to save image';
-		} finally {
-			isSaving = false;
 		}
 	};
 
@@ -89,7 +84,6 @@
 	};
 
 	const removeImage = async (): Promise<void> => {
-		isSaving = true;
 		try {
 			await saveContact({
 				...contact,
@@ -108,8 +102,6 @@
 		} catch (error) {
 			console.error('Failed to remove image:', error);
 			saveError = error instanceof Error ? error.message : 'Failed to remove image';
-		} finally {
-			isSaving = false;
 		}
 	};
 </script>
