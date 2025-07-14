@@ -25,7 +25,7 @@ const initialState = {
 } as AiAssistant;
 
 const initAiAssistantStore = (): AiAssistantStore => {
-	const { subscribe, update } = writable<AiAssistant>(initialState);
+	const { subscribe, update, set } = writable<AiAssistant>(initialState);
 
 	return {
 		subscribe,
@@ -39,7 +39,7 @@ const initAiAssistantStore = (): AiAssistantStore => {
 		},
 
 		reset: () => {
-			update(() => initialState);
+			set(initialState);
 		},
 
 		appendMessage: (message: ChatMessage) => {

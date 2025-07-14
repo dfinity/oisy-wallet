@@ -2,6 +2,7 @@ import type { chat_message_v1 } from '$declarations/llm/llm.did';
 import { AI_ASSISTANT_SYSTEM_PROMPT } from '$lib/constants/ai-assistant.constants';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import type { ChatMessage } from '$lib/types/ai-assistant';
+import { toNullable } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const aiAssistantConsoleOpen: Readable<boolean> = derived(
@@ -41,8 +42,8 @@ export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 					...acc,
 					{
 						assistant: {
-							content: [content],
-							tool_calls: []
+							content: toNullable(content),
+							tool_calls: toNullable()
 						}
 					}
 				];
