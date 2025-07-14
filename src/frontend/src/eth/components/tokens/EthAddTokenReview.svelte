@@ -26,16 +26,6 @@
 	export let metadata: Erc20Metadata | Erc721Metadata | undefined;
 	export let network: Network;
 
-	const loadErc20Metadata = async (address: string) => {
-		const { metadata: metadataApi } = infuraErc20Providers(network.id);
-		metadata = await metadataApi({ address });
-	};
-
-	const loadErc721Metadata = async (address: string) => {
-		const { metadata: metadataApi721 } = infuraErc721Providers(network.id);
-		metadata = await metadataApi721({ address });
-	};
-
 	const handleMetadata = () => {
 		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
 			toastsError({
@@ -100,21 +90,22 @@
 			return;
 		}
 
+		const { metadata: metadataApiErc721, isErc721 } = infuraErc721Providers(network.id);
 		try {
-			await loadErc20Metadata(contractAddress);
-			handleMetadata();
-		} catch (_: unknown) {
-			try {
-				await loadErc721Metadata(contractAddress);
-				handleMetadata();
-			} catch (err: unknown) {
-				toastsError({
-					msg: { text: $i18n.tokens.error.loading_metadata },
-					err
-				});
-
-				dispatch('icBack');
+			if (await isErc721({ contractAddress })) {
+				metadata = await metadataApiErc721({ address: contractAddress });
+			} else {
+				const { metadata: metadataApiErc20 } = infuraErc20Providers(network.id);
+				metadata = await metadataApiErc20({ address: contractAddress });
 			}
+			handleMetadata();
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.loading_metadata },
+				err
+			});
+
+			dispatch('icBack');
 		}
 	});
 
