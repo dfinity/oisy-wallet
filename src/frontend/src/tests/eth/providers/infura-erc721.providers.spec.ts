@@ -49,7 +49,7 @@ describe('infura-erc721.providers', () => {
 			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, INFURA_API_KEY);
 		});
 
-		describe('metadata method', () => {
+		describe('metadata', () => {
 			const mockName = vi.fn() as unknown as typeof mockContract.prototype.name;
 			const mockSymbol = vi.fn() as unknown as typeof mockContract.prototype.symbol;
 
@@ -108,7 +108,7 @@ describe('infura-erc721.providers', () => {
 			});
 		});
 
-		describe('isErc721 method', () => {
+		describe('isErc721', () => {
 			const mockSupportsInterface = vi.fn() as unknown as typeof mockContract.prototype.supportsInterface;
 
 			const mockParams = {
