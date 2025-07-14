@@ -10,7 +10,7 @@ type TransactionTypes = Transaction;
 
 type CertifiedTransaction<T extends TransactionTypes> = CertifiedData<T>;
 
-export interface TransactionsStoreParams<T extends TransactionTypes> {
+interface TransactionsStoreParams<T extends TransactionTypes> {
 	tokenId: TokenId;
 	transactions: CertifiedTransaction<T>[];
 }
