@@ -102,7 +102,6 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 		},
 		stopExchangeTimer: stopTimer,
 		destroy: () => {
-			stopTimer();
 			if (isDestroying) {
 				return;
 			}
