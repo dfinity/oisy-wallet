@@ -79,6 +79,13 @@ describe('currency.utils', () => {
 					language: 'invalid' as unknown as Languages
 				})
 			).toBe('US Dollar');
+
+			expect(
+				getCurrencyName({
+					currency: Currencies.CHF,
+					language: 'invalid' as unknown as Languages
+				})
+			).toBe('Swiss Franc');
 		});
 	});
 });
