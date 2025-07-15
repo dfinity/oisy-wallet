@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { I18N_ENABLED } from '$env/i18n';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
@@ -211,19 +210,15 @@
 		{/if}
 	</div>
 
-	{#if I18N_ENABLED || $authSignedIn}
-		<Hr />
+	<Hr />
 
-		<div class="flex max-w-80 flex-col gap-5 py-5">
-			{#if I18N_ENABLED}
-				<MenuLanguageSelector />
-			{/if}
+	<div class="flex max-w-80 flex-col gap-5 py-5">
+		<MenuLanguageSelector />
 
-			{#if $authSignedIn}
-				<MenuThemeSelector />
-			{/if}
-		</div>
-	{/if}
+		{#if $authSignedIn}
+			<MenuThemeSelector />
+		{/if}
+	</div>
 
 	{#if $authSignedIn}
 		<Hr />
