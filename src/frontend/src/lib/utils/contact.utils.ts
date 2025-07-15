@@ -1,4 +1,4 @@
-import type { Contact, ContactImage, ImageMimeType } from '$declarations/backend/backend.did';
+import type { Contact, ContactImage } from '$declarations/backend/backend.did';
 import { updateContact as apiUpdateContact } from '$lib/api/backend.api';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 import type { Address, OptionAddress } from '$lib/types/address';
@@ -6,6 +6,7 @@ import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { areAddressesEqual, areAddressesPartiallyEqual } from '$lib/utils/address.utils';
+import { dataUrlToImage } from '$lib/utils/contact-image.utils';
 import {
 	getDiscriminatorForTokenAccountId,
 	getTokenAccountIdAddressString
@@ -61,7 +62,6 @@ export const mapToFrontendContact = (contact: Contact): ContactUi => {
 
 export const mapToBackendContact = (contact: ContactUi): Contact => {
 	const { updateTimestampNs, image, ...rest } = contact;
-
 	return {
 		...rest,
 		update_timestamp_ns: updateTimestampNs,
@@ -83,19 +83,16 @@ export const getContactForAddress = ({
 	contactList.find((c) => filterAddressFromContact({ contact: c, address: addressString }));
 
 export const mapAddressToContactAddressUi = (address: Address): ContactAddressUi | undefined => {
-	const tokenAccountIdParseResult = TokenAccountIdSchema.safeParse(address);
-	const currentAddressType = tokenAccountIdParseResult.success
-		? getDiscriminatorForTokenAccountId(tokenAccountIdParseResult.data)
-		: undefined;
-
-	if (isNullish(currentAddressType)) {
+	const result = TokenAccountIdSchema.safeParse(address);
+	if (!result.success) {
+		return;
+	}
+	const addressType = getDiscriminatorForTokenAccountId(result.data);
+	if (isNullish(addressType)) {
 		return;
 	}
 
-	return {
-		address,
-		addressType: currentAddressType
-	};
+	return { address, addressType };
 };
 
 export const isContactMatchingFilter = ({
@@ -110,19 +107,12 @@ export const isContactMatchingFilter = ({
 	networkId: NetworkId;
 }): boolean =>
 	notEmptyString(filterValue) &&
-	(areAddressesPartiallyEqual({
-		address1: address,
-		address2: filterValue,
-		networkId
-	}) ||
+	(areAddressesPartiallyEqual({ address1: address, address2: filterValue, networkId }) ||
 		contact.name.toLowerCase().includes(filterValue.toLowerCase()) ||
 		contact.addresses.some(
 			({ label, address: innerAddress }) =>
-				areAddressesEqual({
-					address1: address,
-					address2: innerAddress,
-					networkId
-				}) && label?.toLowerCase().includes(filterValue.toLowerCase())
+				areAddressesEqual({ address1: address, address2: innerAddress, networkId }) &&
+				label?.toLowerCase().includes(filterValue.toLowerCase())
 		));
 
 export const filterAddressFromContact = <T extends Address>({
@@ -133,11 +123,7 @@ export const filterAddressFromContact = <T extends Address>({
 	address: OptionAddress<T>;
 }): ContactAddressUi | undefined =>
 	contact?.addresses.find(({ address, addressType }) =>
-		areAddressesEqual({
-			address1: address,
-			address2: filterAddress,
-			addressType
-		})
+		areAddressesEqual({ address1: address, address2: filterAddress, addressType })
 	);
 
 export const getNetworkContactKey = ({
@@ -148,41 +134,12 @@ export const getNetworkContactKey = ({
 	address: Address;
 }): string => `${address}-${contact.id.toString()}`;
 
-const parseDataUrl = (dataUrl: string): { mime: string; data: Uint8Array } => {
-	const [header, b64] = dataUrl.split(',');
-
-	const match = header.match(/data:(.*);base64/);
-	if (!match) {
-		throw new Error(`Invalid data URL: ${header}`);
-	}
-	const [, mime] = match;
-
-	const bin = atob(b64);
-	const arr = new Uint8Array(bin.length);
-	for (let i = 0; i < bin.length; i++) {
-		arr[i] = bin.charCodeAt(i);
-	}
-	return { mime, data: arr };
-};
-
-export const dataUrlToContactImage = (dataUrl: string): ContactImage => {
-	const { mime, data } = parseDataUrl(dataUrl);
-	const [, subtype] = mime.split('/');
-	const mimeType = { [`image/${subtype}`]: null } as ImageMimeType;
-	return { mime_type: mimeType, data };
-};
-
-export const contactImageToDataUrl = (img: ContactImage): string => {
-	const [mime] = Object.keys(img.mime_type);
-	const b64 = btoa(String.fromCharCode(...img.data));
-	return `data:${mime};base64,${b64}`;
-};
-
 export const saveContact = async (params: SaveContactParams): Promise<void> => {
 	const { imageUrl, ...rest } = params;
+
 	const contactUi: ContactUi = {
 		...rest,
-		image: imageUrl ? ([dataUrlToContactImage(imageUrl)] as [ContactImage]) : []
+		image: imageUrl ? ([dataUrlToImage(imageUrl)] as [ContactImage]) : []
 	};
 
 	const beContact = mapToBackendContact(contactUi);

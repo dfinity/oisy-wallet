@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import imageCompression from 'browser-image-compression';
+	import type { ContactImage } from '$declarations/backend/backend.did';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
@@ -22,7 +23,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import { saveContact, contactImageToDataUrl } from '$lib/utils/contact.utils';
+	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
+	import { saveContact } from '$lib/utils/contact.utils';
 
 	interface Props {
 		contact: ContactUi;
@@ -44,13 +46,24 @@
 		onDeleteAddress
 	}: Props = $props();
 
-	const [firstImage] = contact.image;
+	let _lastBeImage: ContactImage | null = contact.image[0] ?? null;
 
-	const initialImageUrl: string | null = firstImage ? contactImageToDataUrl(firstImage) : null;
+	let imageUrl = $state<string | null>(_lastBeImage ? imageToDataUrl(_lastBeImage) : null);
 
-	let imageUrl = $state<string | null>(initialImageUrl);
 	let fileInput = $state<HTMLInputElement>();
 	let saveError = $state<string | null>(null);
+
+	$effect(() => {
+		const beImage = contact.image[0] ?? null;
+		if (
+			beImage &&
+			beImage !== _lastBeImage &&
+			imageUrl === (_lastBeImage ? imageToDataUrl(_lastBeImage) : null)
+		) {
+			imageUrl = imageToDataUrl(beImage);
+			_lastBeImage = beImage;
+		}
+	});
 
 	const handleFileChange = async (e: Event): Promise<void> => {
 		const file = (e.target as HTMLInputElement).files?.[0];
@@ -59,23 +72,24 @@
 		}
 
 		try {
-			const options = { maxSizeMB: 0.1, maxWidthOrHeight: 200, useWebWorker: false };
+			const options = {
+				maxSizeMB: 0.1,
+				maxWidthOrHeight: 200,
+				useWebWorker: false
+			};
 			const compressed = await imageCompression(file, options);
 			const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
 
 			await saveContact({
 				...contact,
-				name: contact.name,
-				addresses: contact.addresses,
-				updateTimestampNs: contact.updateTimestampNs,
-				id: contact.id,
 				imageUrl: dataUrl
 			});
 
 			imageUrl = dataUrl;
-		} catch (error) {
-			console.error('Failed to save image:', error);
-			saveError = error instanceof Error ? error.message : 'Failed to save image';
+			_lastBeImage = null;
+		} catch (err) {
+			console.error('Failed to save image:', err);
+			saveError = err instanceof Error ? err.message : 'Failed to save image';
 		}
 	};
 
@@ -87,21 +101,14 @@
 		try {
 			await saveContact({
 				...contact,
-				name: contact.name,
-				addresses: contact.addresses,
-				updateTimestampNs: contact.updateTimestampNs,
-				id: contact.id,
 				imageUrl: null
 			});
-
 			imageUrl = null;
-			onEdit({
-				...contact,
-				image: []
-			});
-		} catch (error) {
-			console.error('Failed to remove image:', error);
-			saveError = error instanceof Error ? error.message : 'Failed to remove image';
+			_lastBeImage = null;
+			onEdit({ ...contact, image: [] });
+		} catch (err) {
+			console.error('Failed to remove image:', err);
+			saveError = err instanceof Error ? err.message : 'Failed to remove image';
 		}
 	};
 </script>
