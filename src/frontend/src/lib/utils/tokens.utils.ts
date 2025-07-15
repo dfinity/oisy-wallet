@@ -30,6 +30,7 @@ import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
