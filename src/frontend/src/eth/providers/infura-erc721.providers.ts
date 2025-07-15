@@ -3,15 +3,14 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
-import type { Nft } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
+import type { NftMetadata } from '$lib/types/nft';
 
 const ERC721_INTERFACE_ID = '0x80ac58cd';
 
@@ -47,16 +46,16 @@ export class InfuraErc721Provider {
 	};
 
 	getNftMetadata = async ({
-		token,
+		contractAddress,
 		tokenId
 	}: {
-		token: Erc721CustomToken;
+		contractAddress: string;
 		tokenId: number;
-	}): Promise<Nft> => {
-		const erc721Contract = new Contract(token.address, ERC721_ABI, this.provider);
+	}): Promise<NftMetadata> => {
+		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
 		try {
-			const tokenUri = await erc721Contract.tokenURI(tokenId);
+			const tokenUri = await erc721Contract.tokenURI(tokenId)
 
 			const metadataUrl = tokenUri.replace('ipfs://', 'https://ipfs.io/ipfs/');
 
@@ -79,8 +78,7 @@ export class InfuraErc721Provider {
 				name: metadata?.name ?? '',
 				id: tokenId,
 				attributes: mappedAttributes,
-				imageUrl,
-				contract: token
+				imageUrl
 			};
 		} catch (error: unknown) {
 			throw new Error(`Failed to fetch erc721 token metadata: ${error}`);

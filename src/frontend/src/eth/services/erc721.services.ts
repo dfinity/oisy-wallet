@@ -180,12 +180,12 @@ const loadNftMetadataBatch = async ({
 
 	for (let i = 0; i < tokenIds.length; i++) {
 		await new Promise((resolve) => setTimeout(resolve, 200));
+
+		const nftMetadata = await infuraProvider.getNftMetadata({contractAddress: token.address, tokenId: tokenIds[i]});
 		const nft: Nft = {
-			...(await infuraProvider.getNftMetadata({
-				token,
-				tokenId: tokenIds[i]
-			}))
-		};
+			...nftMetadata,
+			contract: token
+		}
 		nfts.push(nft);
 	}
 
