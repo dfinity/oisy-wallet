@@ -18,6 +18,26 @@ export const waitAndTriggerWallet = async () => {
 };
 
 /**
+ * Properly destroy a worker and remove it from the workers map.
+ *
+ * @param workers The map of workers defined as `Map<TokenId, WalletWorker>`.
+ * @param tokenId The token ID of the worker to destroy.
+ */
+export const destroyWorker = ({
+	workers,
+	tokenId
+}: {
+	workers: Map<TokenId, WalletWorker>;
+	tokenId: TokenId;
+}) => {
+	const worker = workers.get(tokenId);
+	if (worker) {
+		worker.destroy();
+		workers.delete(tokenId);
+	}
+};
+
+/**
  * Clean the workers that are not used anymore based on a given list of tokens.
  *
  * @param workers The map of workers defined as `Map<TokenId, WalletWorker>`.
@@ -33,9 +53,10 @@ export const cleanWorkers = ({
 	Array.from(workers.keys())
 		.filter((workerTokenId) => !tokens.some(({ id: tokenId }) => workerTokenId === tokenId))
 		.forEach((tokenId) => {
-			// TODO: use a more functional approach instead of deleting the worker from the map.
+			// Trigger the stop event to properly cleanup the worker thread
 			workers.get(tokenId)?.stop();
-			workers.delete(tokenId);
+			// terminate and clean up worker
+			destroyWorker({ workers, tokenId });
 		});
 
 /**
