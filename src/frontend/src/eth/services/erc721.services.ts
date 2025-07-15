@@ -116,6 +116,7 @@ const loadCustomTokenData = ({
 	response: Erc721CustomToken[];
 }) => {
 	erc721CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+	loadNfts(tokens);
 };
 
 const loadNfts = (tokens: Erc721CustomToken[]) => {
@@ -144,11 +145,20 @@ const loadNftsForContract = async ({
 			contractAddress: token.address,
 		});
 
-		const nfts: Nft[] = await loadNftMetadata({ infuraProvider, token, tokenIds });
-		nftStore.addAll(nfts);
-	} catch (err: unknown) {
-		nftStore.resetAll();
+		const loadedTokenIds = nftStore.getTokenIds(token.address);
+		const tokenIdsToLoad = tokenIds.filter(id => !loadedTokenIds.includes(id));
 
+		const batchSize = 10;
+		const tokenIdBatches = Array.from(
+			{ length: Math.ceil(tokenIdsToLoad.length / batchSize) },
+			(_, index) => tokenIdsToLoad.slice(index * batchSize, (index + 1) * batchSize)
+		);
+
+		for (const tokenIds of tokenIdBatches) {
+			const nfts: Nft[] = await loadNftMetadataBatch({ infuraProvider, token, tokenIds });
+			nftStore.addAll(nfts);
+		}
+	} catch (err: unknown) {
 		toastsError({
 			msg: { text: get(i18n).init.error.nft_loading },
 			err
@@ -156,11 +166,7 @@ const loadNftsForContract = async ({
 	}
 };
 
-const loadNftMetadata = async ({
-	infuraProvider,
-	token,
-	tokenIds
-}: {
+const loadNftMetadataBatch = async ({infuraProvider, token, tokenIds}: {
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
 	tokenIds: number[];
@@ -168,7 +174,7 @@ const loadNftMetadata = async ({
 	const nfts: Nft[] = [];
 
 	for (let i = 0; i < tokenIds.length; i++) {
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		await new Promise((resolve) => setTimeout(resolve, 200));
 		const nft: Nft = {
 			...await infuraProvider.getNftMetadata({ contractAddress: token.address, tokenId: tokenIds[i] }),
 			contract: token
@@ -177,4 +183,4 @@ const loadNftMetadata = async ({
 	}
 
 	return nfts;
-};
+}

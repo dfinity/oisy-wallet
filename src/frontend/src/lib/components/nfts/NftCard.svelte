@@ -10,21 +10,21 @@
 </script>
 
 <div>
-	<div class="rounded-lg overflow-hidden shadow-md relative">
+	<div class="rounded-lg overflow-hidden relative">
 		<img
 			src={nft.imageUrl}
-			alt={nft.name ?? 'NFT'}
-			class="w-full h-48 object-cover"
+			alt={nft.name}
+			class="h-48"
 			loading="lazy"
 		/>
 
 		<div class="absolute bottom-2 right-2">
-			<NetworkLogo network={nft.contract.network} color="white" />
+			<NetworkLogo network={nft.contract.network} size="xs" color="white" />
 		</div>
-
 	</div>
 
-	<div class="p-2">
-		<h3 class="text-xs font-semibold text-tertiary">{nft.name || 'Untitled NFT'}</h3>
+	<div class="px-2 pt-2">
+		<h3 class="text-xs font-semibold text-tertiary">{nft.contract.name}</h3>
+		<span class="text-xs text-tertiary">{`#${nft.id}`}</span>
 	</div>
 </div>
