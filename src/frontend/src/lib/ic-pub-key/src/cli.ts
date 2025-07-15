@@ -83,6 +83,7 @@ export const deriveSolAddress = async (
 	const principal = Principal.fromText(user);
 
 	let derivationPath = new DerivationPath([
+		Uint8Array.from([0xfe]),
 		principal.toUint8Array(),
 		...mapDerivationPath([SOLANA_DERIVATION_PATH_PREFIX, network])
 	]);
