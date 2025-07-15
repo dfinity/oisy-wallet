@@ -6,8 +6,9 @@
 	import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
 
-	export let token: EthereumUserToken | SplTokenToggleable;
+	export let token: EthereumUserToken | SplTokenToggleable | Erc721TokenToggleable;
 	export let testIdPrefix = MANAGE_TOKENS_MODAL_TOKEN_TOGGLE;
 
 	let disabled = false;
