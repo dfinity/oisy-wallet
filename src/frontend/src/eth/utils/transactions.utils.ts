@@ -88,11 +88,11 @@ export const mapAddressToName = ({
 export const mapEthTransactionUi = ({
 	transaction,
 	ckMinterInfoAddresses,
-	$ethAddress
+	ethAddress
 }: {
 	transaction: Transaction;
 	ckMinterInfoAddresses: EthAddress[];
-	$ethAddress: OptionEthAddress;
+	ethAddress: OptionEthAddress;
 }): EthTransactionUi => {
 	const { from, to } = transaction;
 
@@ -103,7 +103,7 @@ export const mapEthTransactionUi = ({
 			? 'withdraw'
 			: nonNullish(to) && ckMinterInfoAddresses.includes(to.toLowerCase())
 				? 'deposit'
-				: from?.toLowerCase() === $ethAddress?.toLowerCase()
+				: from?.toLowerCase() === ethAddress?.toLowerCase()
 					? 'send'
 					: 'receive'
 	};

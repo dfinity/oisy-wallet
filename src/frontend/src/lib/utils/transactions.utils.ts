@@ -112,7 +112,7 @@ export const mapAllTransactionsUi = ({
 						ckMinterInfoAddresses: isSepoliaNetwork
 							? ckEthMinterInfoAddressesSepolia
 							: ckEthMinterInfoAddressesMainnet,
-						$ethAddress
+						ethAddress: $ethAddress
 					}),
 					token,
 					component: 'ethereum' as const
