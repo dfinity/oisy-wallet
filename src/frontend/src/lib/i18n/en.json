@@ -187,7 +187,8 @@
 			"verifiable_credentials": "Verifiable Credentials",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
-			"game": "Game"
+			"game": "Game",
+			"tools": "Tools"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "Decentr. social media - post, earn, own.",
 					"call_to_action": "Learn more"
 				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "Where governance meets collaboration to ignite innovation.",
+				"description": "Toolkit is a versatile suite for managing Service Nervous Systems (SNS) and projects on the Internet Computer. From governance proposals to canister deployment, it empowers users to innovate, collaborate, and decentralize seamlessly."
 			}
 		}
 	},
@@ -1476,7 +1482,8 @@
 	"ai_assistant": {
 		"text": {
 			"send_message": "Send message",
-			"send_message_input_placeholder": "What do you want to do?"
+			"send_message_input_placeholder": "What do you want to do?",
+			"loading": "Thinking..."
 		}
 	}
 }

@@ -187,7 +187,8 @@
 			"verifiable_credentials": "可验证凭证",
 			"staking": "质押",
 			"walletconnect": "WalletConnect",
-			"game": "游戏"
+			"game": "游戏",
+			"tools": "工具包"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "去中心化社交媒体 - 发布、赚取、拥有。",
 					"call_to_action": "了解更多"
 				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "治理与协作相遇，激发创新。",
+				"description": "Toolkit 是一款多功能套件，用于管理 Service Nervous System (SNS) 和互联网计算机上的项目。从治理提案到容器部署，它使用户能够无缝地进行创新、协作和去中心化。"
 			}
 		}
 	},
@@ -1476,7 +1482,8 @@
 	"ai_assistant": {
 		"text": {
 			"send_message": "",
-			"send_message_input_placeholder": ""
+			"send_message_input_placeholder": "",
+			"loading": ""
 		}
 	}
 }
