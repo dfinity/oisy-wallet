@@ -23,7 +23,7 @@ export const waitAndTriggerWallet = async () => {
  * @param workers The map of workers defined as `Map<TokenId, WalletWorker>`.
  * @param tokenId The token ID of the worker to destroy.
  */
-export const destroyWorker = ({
+const destroyWorker = ({
 	workers,
 	tokenId
 }: {
