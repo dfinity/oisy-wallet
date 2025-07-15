@@ -140,7 +140,7 @@ const getLastTransactionsByToken = ({
 			mapEthTransactionUi({
 				transaction,
 				ckMinterInfoAddresses,
-				$ethAddress: account
+				ethAddress: account
 			})
 		);
 	}
