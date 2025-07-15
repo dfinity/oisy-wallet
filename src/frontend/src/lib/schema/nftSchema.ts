@@ -1,4 +1,3 @@
-import { TokenSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
 
 export const NftAttributeSchema = z.object({
@@ -10,6 +9,5 @@ export const NftSchema = z.object({
 	name: z.string(),
 	id: z.number(),
 	imageUrl: z.string().url(),
-	attributes: z.array(NftAttributeSchema),
-	contract: TokenSchema
+	attributes: z.array(NftAttributeSchema)
 });
