@@ -5,9 +5,9 @@ import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
 import * as tokenToggleUtils from '$lib/utils/token-toggle.utils';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 
 describe('EnableTokenToggle', () => {
 	const getTestIdForToggle = (token: Token) =>
