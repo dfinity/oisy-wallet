@@ -182,10 +182,9 @@ const loadNftMetadataBatch = async ({
 		await new Promise((resolve) => setTimeout(resolve, 200));
 		const nft: Nft = {
 			...(await infuraProvider.getNftMetadata({
-				contractAddress: token.address,
+				token,
 				tokenId: tokenIds[i]
-			})),
-			contract: token
+			}))
 		};
 		nfts.push(nft);
 	}

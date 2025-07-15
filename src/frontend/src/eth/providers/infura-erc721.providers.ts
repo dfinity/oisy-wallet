@@ -11,6 +11,7 @@ import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 
 const ERC721_INTERFACE_ID = '0x80ac58cd';
 
@@ -46,13 +47,13 @@ export class InfuraErc721Provider {
 	};
 
 	getNftMetadata = async ({
-		contractAddress,
+		token,
 		tokenId
 	}: {
-		contractAddress: string;
+		token: Erc721CustomToken;
 		tokenId: number;
 	}): Promise<Nft> => {
-		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
+		const erc721Contract = new Contract(token.address, ERC721_ABI, this.provider);
 
 		try {
 			const tokenUri = await erc721Contract.tokenURI(tokenId);
@@ -78,7 +79,8 @@ export class InfuraErc721Provider {
 				name: metadata?.name ?? '',
 				id: tokenId,
 				attributes: mappedAttributes,
-				imageUrl
+				imageUrl,
+				contract: token
 			};
 		} catch (error: unknown) {
 			throw new Error(`Failed to fetch erc721 token metadata: ${error}`);
