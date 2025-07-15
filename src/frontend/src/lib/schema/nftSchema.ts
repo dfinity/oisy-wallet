@@ -1,5 +1,5 @@
-import * as z from 'zod';
 import { TokenSchema } from '$lib/schema/token.schema';
+import * as z from 'zod';
 
 export const NftAttributeSchema = z.object({
 	traitType: z.string(),

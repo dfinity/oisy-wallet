@@ -1,5 +1,5 @@
-import { writable, type Readable, get } from 'svelte/store';
 import type { Nft } from '$lib/types/nft';
+import { get, writable, type Readable } from 'svelte/store';
 
 export type NftStoreData = Nft[] | undefined;
 
@@ -24,7 +24,8 @@ const initNftStore = (): NftStore => {
 					(newNft) =>
 						!currentNfts.some(
 							(existingNft) =>
-								existingNft.name === newNft.name && existingNft.contract.address === newNft.contract.address
+								existingNft.name === newNft.name &&
+								existingNft.contract.address === newNft.contract.address
 						)
 				);
 
@@ -32,14 +33,15 @@ const initNftStore = (): NftStore => {
 			});
 		},
 		getTokenIds: (contractAddress: string) => {
-			const currentNfts = get(nftStore)
+			const currentNfts = get(nftStore);
 
 			if (!currentNfts) {
 				return [];
 			}
 
-			return currentNfts.filter((nft) => nft.contract.address.toLowerCase() === contractAddress.toLowerCase())
-				.map((nft) => nft.id)
+			return currentNfts
+				.filter((nft) => nft.contract.address.toLowerCase() === contractAddress.toLowerCase())
+				.map((nft) => nft.id);
 		},
 		resetAll: () => set(undefined)
 	};

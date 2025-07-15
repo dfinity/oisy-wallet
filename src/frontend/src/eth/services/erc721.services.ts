@@ -1,21 +1,24 @@
 import type { CustomToken, Erc721Token } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { InfuraErc721Provider, infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
+import { type EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
+import {
+	InfuraErc721Provider,
+	infuraErc721Providers
+} from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
+import { nftStore } from '$lib/stores/nft.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { Nft } from '$lib/types/nft';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
-import { nftStore } from '$lib/stores/nft.store';
-import type { Nft } from '$lib/types/nft';
 
 export const loadErc721Tokens = async ({
 	identity
@@ -123,9 +126,7 @@ const loadNfts = (tokens: Erc721CustomToken[]) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura);
 
-	tokens.forEach((token) =>
-		loadNftsForContract({ etherscanProvider, infuraProvider, token })
-	);
+	tokens.forEach((token) => loadNftsForContract({ etherscanProvider, infuraProvider, token }));
 };
 
 const loadNftsForContract = async ({
@@ -142,7 +143,7 @@ const loadNftsForContract = async ({
 	try {
 		const tokenIds = await etherscanProvider.erc721TokenInventory({
 			address: myWalletAddress,
-			contractAddress: token.address,
+			contractAddress: token.address
 		});
 
 		const loadedTokenIds = nftStore.getTokenIds(token.address);
@@ -166,7 +167,11 @@ const loadNftsForContract = async ({
 	}
 };
 
-const loadNftMetadataBatch = async ({infuraProvider, token, tokenIds}: {
+const loadNftMetadataBatch = async ({
+	infuraProvider,
+	token,
+	tokenIds
+}: {
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
 	tokenIds: number[];
@@ -176,11 +181,14 @@ const loadNftMetadataBatch = async ({infuraProvider, token, tokenIds}: {
 	for (let i = 0; i < tokenIds.length; i++) {
 		await new Promise((resolve) => setTimeout(resolve, 200));
 		const nft: Nft = {
-			...await infuraProvider.getNftMetadata({ contractAddress: token.address, tokenId: tokenIds[i] }),
+			...(await infuraProvider.getNftMetadata({
+				contractAddress: token.address,
+				tokenId: tokenIds[i]
+			})),
 			contract: token
-		}
+		};
 		nfts.push(nft);
 	}
 
 	return nfts;
-}
+};
