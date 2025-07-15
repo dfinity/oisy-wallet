@@ -105,7 +105,15 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 				exchangeWorker.terminate();
 				exchangeWorker = null;
 			}
-			errorMessages = [];
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
+			stopTimer();
+			exchangeWorker?.terminate();
+			exchangeWorker = null;
+			isDestroying = false;
+errorMessages = [];
 		}
 	};
 };
