@@ -15,7 +15,7 @@ import { nftStore } from '$lib/stores/nft.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Nft } from '$lib/types/nft';
+import type { Nft, NftMetadata } from '$lib/types/nft';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -119,7 +119,7 @@ const loadCustomTokenData = ({
 	response: Erc721CustomToken[];
 }) => {
 	erc721CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
-	loadNfts(tokens);
+	loadNfts(tokens); // TODO remove this
 };
 
 const loadNfts = (tokens: Erc721CustomToken[]) => {
@@ -156,7 +156,14 @@ const loadNftsForContract = async ({
 		);
 
 		for (const tokenIds of tokenIdBatches) {
-			const nfts: Nft[] = await loadNftMetadataBatch({ infuraProvider, token, tokenIds });
+			const nftMetadata: NftMetadata[] = await loadNftMetadataBatch({ infuraProvider, contractAddress: token.address, tokenIds });
+
+			const nfts: Nft[] = nftMetadata.map((nftMetadata) => {
+				return {
+					...nftMetadata,
+					contract: token
+				}
+			})
 			nftStore.addAll(nfts);
 		}
 	} catch (err: unknown) {
@@ -169,28 +176,23 @@ const loadNftsForContract = async ({
 
 const loadNftMetadataBatch = async ({
 	infuraProvider,
-	token,
+																			contractAddress,
 	tokenIds
 }: {
 	infuraProvider: InfuraErc721Provider;
-	token: Erc721CustomToken;
+	contractAddress: string;
 	tokenIds: number[];
 }) => {
-	const nfts: Nft[] = [];
+	const nftMetadata: NftMetadata[] = [];
 
 	for (let i = 0; i < tokenIds.length; i++) {
 		await new Promise((resolve) => setTimeout(resolve, 200));
 
-		const nftMetadata = await infuraProvider.getNftMetadata({
-			contractAddress: token.address,
+		nftMetadata.push(await infuraProvider.getNftMetadata({
+			contractAddress,
 			tokenId: tokenIds[i]
-		});
-		const nft: Nft = {
-			...nftMetadata,
-			contract: token
-		};
-		nfts.push(nft);
+		}));
 	}
 
-	return nfts;
+	return nftMetadata;
 };
