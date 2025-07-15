@@ -8,6 +8,7 @@ export const NftAttributeSchema = z.object({
 export const NftSchema = z.object({
 	contractName: z.string(),
 	contractSymbol: z.string(),
+	contractAddress: z.string(),
 	name: z.string(),
 	imageUrl: z.string(),
 	attributes: z.array(NftAttributeSchema)

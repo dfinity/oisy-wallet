@@ -1,5 +1,5 @@
-import type { Nft } from '$eth/types/erc721';
 import { writable, type Readable } from 'svelte/store';
+import type { Nft } from '$lib/types/nft';
 
 export type NftStoreData = Nft[] | undefined;
 
