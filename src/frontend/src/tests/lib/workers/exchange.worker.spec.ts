@@ -1,6 +1,7 @@
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
+import { Currencies } from '$lib/enums/currencies';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import type {
 	CoingeckoSimplePriceParams,
@@ -102,20 +103,29 @@ describe('exchange.worker', () => {
 				await onExchangeMessage(event);
 
 				expect(simplePrice).toHaveBeenCalledTimes(6);
-				expect(simplePrice).toHaveBeenNthCalledWith(1, { ids: 'ethereum', vs_currencies: 'usd' });
-				expect(simplePrice).toHaveBeenNthCalledWith(2, { ids: 'bitcoin', vs_currencies: 'usd' });
+				expect(simplePrice).toHaveBeenNthCalledWith(1, {
+					ids: 'ethereum',
+					vs_currencies: Currencies.USD
+				});
+				expect(simplePrice).toHaveBeenNthCalledWith(2, {
+					ids: 'bitcoin',
+					vs_currencies: Currencies.USD
+				});
 				expect(simplePrice).toHaveBeenNthCalledWith(3, {
 					ids: 'internet-computer',
-					vs_currencies: 'usd'
+					vs_currencies: Currencies.USD
 				});
-				expect(simplePrice).toHaveBeenNthCalledWith(4, { ids: 'solana', vs_currencies: 'usd' });
+				expect(simplePrice).toHaveBeenNthCalledWith(4, {
+					ids: 'solana',
+					vs_currencies: Currencies.USD
+				});
 				expect(simplePrice).toHaveBeenNthCalledWith(5, {
 					ids: 'binancecoin',
-					vs_currencies: 'usd'
+					vs_currencies: Currencies.USD
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(6, {
 					ids: 'polygon-ecosystem-token',
-					vs_currencies: 'usd'
+					vs_currencies: Currencies.USD
 				});
 			});
 
@@ -227,19 +237,19 @@ describe('exchange.worker', () => {
 					expect(simpleTokenPrice).toHaveBeenCalledTimes(3);
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
 						id: 'ethereum',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: ['0x123', '0xabc'],
 						include_market_cap: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'polygon-pos',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: ['0x456'],
 						include_market_cap: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: ['0x789'],
 						include_market_cap: true
 					});
@@ -264,7 +274,7 @@ describe('exchange.worker', () => {
 					expect(simpleTokenPrice).toHaveBeenCalledOnce();
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
 						id: 'internet-computer',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: mockIcrcLedgerCanisterIds,
 						include_market_cap: true
 					});
@@ -291,7 +301,7 @@ describe('exchange.worker', () => {
 					expect(simpleTokenPrice).toHaveBeenCalledOnce();
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
 						id: 'solana',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: mockSplTokenAddresses,
 						include_market_cap: true
 					});
@@ -307,33 +317,33 @@ describe('exchange.worker', () => {
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
 						id: 'ethereum',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: ['0x123', '0xabc'],
 						include_market_cap: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(2, {
 						id: 'polygon-pos',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: ['0x456'],
 						include_market_cap: true
 					});
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(3, {
 						id: 'binance-smart-chain',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: ['0x789'],
 						include_market_cap: true
 					});
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(4, {
 						id: 'internet-computer',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: mockIcrcLedgerCanisterIds,
 						include_market_cap: true
 					});
 
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(5, {
 						id: 'solana',
-						vs_currencies: 'usd',
+						vs_currencies: Currencies.USD,
 						contract_addresses: mockSplTokenAddresses,
 						include_market_cap: true
 					});
