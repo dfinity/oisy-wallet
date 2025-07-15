@@ -31,7 +31,8 @@ const destroyWorker = ({
 	tokenId: TokenId;
 }) => {
 	const worker = workers.get(tokenId);
-	if (worker) {
+	if (nonNullish(worker)) {
+	worker.stop()
 		worker.destroy();
 		workers.delete(tokenId);
 	}
