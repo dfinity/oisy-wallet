@@ -1472,5 +1472,11 @@
 			"second": "second",
 			"second_plural": "seconds"
 		}
+	},
+	"ai_assistant": {
+		"text": {
+			"send_message": "Send message",
+			"send_message_input_placeholder": "What do you want to do?"
+		}
 	}
 }

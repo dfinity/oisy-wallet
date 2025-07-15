@@ -255,4 +255,5 @@ export const POPOVER_MENU = 'popover-menu';
 export const POPOVER_MENU_ITEM = 'popover-menu-item';
 
 // AI Assistant
-export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistanta-console-button';
+export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';
+export const AI_ASSISTANT_SEND_MESSAGE_BUTTON = 'ai-assistant-send-message-button';
