@@ -121,7 +121,7 @@ export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams):
 							oldUnitName: decimals,
 							newUnitName: newDecimals
 						})
-					: balance
+					: undefined
 			)
 		),
 		usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance])

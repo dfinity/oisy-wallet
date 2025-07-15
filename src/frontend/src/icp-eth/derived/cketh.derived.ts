@@ -6,10 +6,7 @@ import { ethereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-import {
-	toCkErc20HelperContractAddress,
-	toCkEthHelperContractAddress
-} from '$icp-eth/utils/cketh.utils';
+import { toCkErc20HelperContractAddress, toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
@@ -58,7 +55,7 @@ export const ckEthereumNativeTokenId: Readable<TokenId> = derived(
 
 export const ckEthereumNativeTokenBalance: Readable<OptionBalance> = derived(
 	[balancesStore, ckEthereumNativeToken],
-	([$balanceStore, { id }]) => $balanceStore?.[id]?.data
+	([$balanceStore, { id }]) => $balanceStore?.[id]?.data ?? null
 );
 
 export const ckEthereumNativeTokenEnabledNetwork: Readable<EthereumNetwork | undefined> = derived(

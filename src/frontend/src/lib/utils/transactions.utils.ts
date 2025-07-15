@@ -13,22 +13,14 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-import {
-	extendIcTransaction,
-	getAllIcTransactions,
-	getIcExtendedTransactions
-} from '$icp/utils/ic-transactions.utils';
+import { extendIcTransaction, getAllIcTransactions, getIcExtendedTransactions } from '$icp/utils/ic-transactions.utils';
 import { MICRO_TRANSACTION_USD_THRESHOLD, ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
-import type {
-	AllTransactionUiWithCmp,
-	AnyTransactionUi,
-	AnyTransactionUiWithToken
-} from '$lib/types/transaction';
+import type { AllTransactionUiWithCmp, AnyTransactionUi, AnyTransactionUiWithToken } from '$lib/types/transaction';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
@@ -227,7 +219,7 @@ const isMicroTransaction = ({
 		if (nonNullish(exchangeRate)) {
 			const usdAmount = usdValue({
 				decimals: token.decimals,
-				balance: transaction.value,
+				balance: { total: transaction.value },
 				exchangeRate
 			});
 			return usdAmount < MICRO_TRANSACTION_USD_THRESHOLD;

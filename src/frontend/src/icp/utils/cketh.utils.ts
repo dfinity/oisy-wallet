@@ -114,7 +114,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 
 	const estimatedFee = feeStoreData?.maxTransactionFee ?? ZERO;
 
-	if (estimatedFee > ethBalance) {
+	if (estimatedFee > ethBalance.total) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_cketh_balance, {
 				$amount: formatToken({

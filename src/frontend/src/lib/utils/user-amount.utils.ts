@@ -42,18 +42,20 @@ export const validateUserAmount = ({
 	isSwapFlow?: boolean;
 }): TokenActionErrorType => {
 	// We should align balance and userAmount to avoid issues caused by comparing formatted and unformatted BN
-	const parsedSendBalance = nonNullish(balance)
-		? parseToken({
-				value: formatToken({
-					value: balance,
-					unitName: token.decimals,
-					displayDecimals: token.decimals
-				}),
-				unitName: token.decimals
-			})
-		: ZERO;
+	const parsedSendBalance: Balance = nonNullish(balance)
+		? {
+				total: parseToken({
+					value: formatToken({
+						value: balance.total,
+						unitName: token.decimals,
+						displayDecimals: token.decimals
+					}),
+					unitName: token.decimals
+				})
+			}
+		: { total: ZERO };
 
-	// if the function called in the swap flow, we only need to check the basic assertAmount condition
+	// if the function is called in the swap flow, we only need to check the basic assertAmount condition
 	// if convert or send - we identify token type and check some network-specific conditions
 	if (isSwapFlow) {
 		return assertAmount({
@@ -67,7 +69,7 @@ export const validateUserAmount = ({
 		return assertErc20Amount({
 			userAmount,
 			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? ZERO,
+			balanceForFee: balanceForFee ?? { total: ZERO },
 			fee
 		});
 	}
@@ -94,7 +96,7 @@ export const validateUserAmount = ({
 		return assertCkErc20Amount({
 			userAmount,
 			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? ZERO,
+			balanceForFee: balanceForFee ?? { total: ZERO },
 			ethereumEstimateFee,
 			fee
 		});

@@ -5,7 +5,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable } from 'svelte/store';
+import { derived, type Readable, writable } from 'svelte/store';
 
 export type SendData = Token;
 
@@ -36,7 +36,7 @@ export const initSendContext = ({ token }: { token: Token }): SendContext => {
 
 	const sendBalance = derived(
 		[balancesStore, sendTokenId],
-		([$balanceStore, $sendTokenId]) => $balanceStore?.[$sendTokenId]?.data
+		([$balanceStore, $sendTokenId]) => $balanceStore?.[$sendTokenId]?.data ?? null
 	);
 
 	const sendTokenExchangeRate = derived([exchanges, sendToken], ([$exchanges, $sendToken]) =>

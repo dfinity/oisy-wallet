@@ -24,7 +24,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * Calculates the maximum amount for a transaction.
  *
  * @param {Object} params
- * @param {bigint | undefined} params.balance The balance of the account.
+ * @param {OptionBalance} params.balance The balance of the account.
  * @param {bigint | undefined} params.fee The fee of the transaction.
  * @param {number} params.tokenDecimals The decimals of the token.
  * @param {string} params.tokenStandard The standard of the token.
@@ -41,8 +41,8 @@ export const getMaxTransactionAmount = ({
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): string => {
-	const value =
-		(balance ?? ZERO) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO);
+	const balanceTotal = balance?.total ?? ZERO;
+	const value = balanceTotal - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO);
 
 	return value <= ZERO
 		? ZERO.toString()
@@ -113,7 +113,7 @@ export const calculateTokenUsdBalance = ({
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
 }): number | undefined =>
-	calculateTokenUsdAmount({ amount: $balances?.[token.id]?.data, $exchanges, token });
+	calculateTokenUsdAmount({ amount: $balances?.[token.id]?.data?.total, $exchanges, token });
 
 /**
  * Calculates USD amount for the provided token and token amount.
@@ -134,8 +134,8 @@ export const calculateTokenUsdAmount = ({
 	$exchanges: ExchangesData;
 }): number | undefined => {
 	const exchangeRate = $exchanges?.[token.id]?.usd;
-	return nonNullish(exchangeRate)
-		? usdValue({ decimals: token.decimals, balance: amount, exchangeRate })
+	return nonNullish(exchangeRate) && nonNullish(amount)
+		? usdValue({ decimals: token.decimals, balance: { total: amount }, exchangeRate })
 		: undefined;
 };
 
@@ -167,12 +167,20 @@ export const mapTokenUi = <T extends Token>({
 	})
 });
 
-export const sumBalances = ([balance1, balance2]: TokenUi['balance'][]): TokenUi['balance'] =>
-	nonNullish(balance1) && nonNullish(balance2)
-		? balance1 + balance2
-		: balance1 === undefined || balance2 === undefined
-			? undefined
-			: (balance2 ?? balance1);
+export const sumBalances = (balances: (bigint | undefined)[]): TokenUi['balance'] => {
+	const [balance1, balance2] = balances;
+
+	if (balance1 === undefined || balance2 === undefined) {
+		return undefined;
+	}
+	
+	if (balance1 === null || balance2 === null) {
+		const nonNullBalance = balance2 ?? balance1;
+		return nonNullBalance ? { total: nonNullBalance } : null;
+	}
+
+	return { total: balance1 + balance2 };
+};
 
 /** Function to sum the USD balances of two tokens.
  *
