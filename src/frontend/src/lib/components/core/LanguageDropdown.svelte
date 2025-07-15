@@ -6,9 +6,9 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Languages } from '$lib/types/languages';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
 
 	let dropdown = $state<Dropdown>();
 
@@ -48,7 +48,7 @@
 							transparent
 						>
 							<span class="pt-0.75 w-[20px] text-brand-primary">
-								{#if $currentLanguage=== langVal}
+								{#if $currentLanguage === langVal}
 									<IconCheck size="20" />
 								{/if}
 							</span>
