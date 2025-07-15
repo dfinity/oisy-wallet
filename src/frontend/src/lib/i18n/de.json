@@ -1466,5 +1466,11 @@
 			"second": "Sekunde",
 			"second_plural": "Sekunden"
 		}
+	},
+	"ai_assistant": {
+		"text": {
+			"send_message": "",
+			"send_message_input_placeholder": ""
+		}
 	}
 }

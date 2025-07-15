@@ -1466,5 +1466,11 @@
 			"second": "secondo",
 			"second_plural": "secondi"
 		}
+	},
+	"ai_assistant": {
+		"text": {
+			"send_message": "",
+			"send_message_input_placeholder": ""
+		}
 	}
 }
