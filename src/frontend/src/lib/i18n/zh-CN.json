@@ -1467,5 +1467,11 @@
 			"second": "秒（单数）",
 			"second_plural": "秒（复数）"
 		}
+	},
+	"ai_assistant": {
+		"text": {
+			"send_message": "",
+			"send_message_input_placeholder": ""
+		}
 	}
 }
