@@ -1,15 +1,21 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import NFTsDisplayHandler from '$lib/components/nfts/NFTsDisplayHandler.svelte';
+	import type { Nft } from '$lib/types/nft';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
 
-	onMount(async () => {
-		// const provider = new InfuraERC721Provider(ETHEREUM_NETWORK.providers.infura)
-		// const data = await provider.metadata("0xED5AF388653567Af2F388E6224dC7C4b3241C544", 6694)
-		// await provider.balanceOf("0xED5AF388653567Af2F388E6224dC7C4b3241C544", "0xde5ae63a348c4d63343c8e20fb6286909418c8a4")
-		// await provider.ownerOf("0xED5AF388653567Af2F388E6224dC7C4b3241C544", 6694)
-		// console.log(data)
-		// await loadErc721Tokens()
-	});
+	let nfts: Nft[] = $state([]);
+
+	$effect(() => {
+		console.log(nfts)
+	})
+
 </script>
 
-<NFTsDisplayHandler>wulll</NFTsDisplayHandler>
+<NFTsDisplayHandler bind:nfts>
+	<div class="grid grid-cols-3 gap-4">
+		{#each nfts as nft}
+			<NftCard {nft}/>
+		{/each}
+	</div>
+
+</NFTsDisplayHandler>

@@ -55,11 +55,7 @@ export class InfuraErc721Provider {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
 		try {
-			const [contractName, contractSymbol, tokenUri] = await Promise.all([
-				erc721Contract.name(),
-				erc721Contract.symbol(),
-				erc721Contract.tokenURI(tokenId)
-			]);
+			const tokenUri = await erc721Contract.tokenURI(tokenId)
 
 			const metadataUrl = tokenUri.replace('ipfs://', 'https://ipfs.io/ipfs/');
 
@@ -79,9 +75,6 @@ export class InfuraErc721Provider {
 			);
 
 			return {
-				contractName,
-				contractSymbol,
-				contractAddress,
 				name: metadata?.name ?? '',
 				attributes: mappedAttributes,
 				imageUrl
