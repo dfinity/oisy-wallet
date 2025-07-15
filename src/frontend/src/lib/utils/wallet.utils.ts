@@ -32,7 +32,7 @@ const destroyWorker = ({
 }) => {
 	const worker = workers.get(tokenId);
 	if (nonNullish(worker)) {
-	worker.stop()
+		worker.stop();
 		worker.destroy();
 		workers.delete(tokenId);
 	}
