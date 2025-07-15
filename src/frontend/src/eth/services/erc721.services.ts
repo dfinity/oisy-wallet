@@ -163,9 +163,9 @@ const loadNftsForContract = async ({
 			});
 
 			const nfts: Nft[] = nftMetadata.map((nftMetadata) => ({
-					...nftMetadata,
-					contract: token
-				}));
+				...nftMetadata,
+				contract: token
+			}));
 			nftStore.addAll(nfts);
 		}
 	} catch (err: unknown) {
