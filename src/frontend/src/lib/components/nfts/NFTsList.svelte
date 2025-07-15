@@ -4,11 +4,6 @@
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 
 	let nfts: Nft[] = $state([]);
-
-	$effect(() => {
-		console.log(nfts)
-	})
-
 </script>
 
 <NFTsDisplayHandler bind:nfts>
