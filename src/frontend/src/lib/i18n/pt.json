@@ -187,7 +187,8 @@
 			"verifiable_credentials": "Credentiais verificáveis",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
-			"game": "Jogo"
+			"game": "Jogo",
+			"tools": "Ferramentas"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "Mídias social descentralizada - publique, ganhe, possua.",
 					"call_to_action": "Aprender mais"
 				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "Onde a governança encontra a colaboração para impulsionar a inovação.",
+				"description": "O Toolkit é um conjunto versátil para gerenciar Service Nervous Systems (SNS) e projetos no Internet Computer. De propostas de governança à implantação de contêineres, ele capacita os usuários a inovar, colaborar e descentralizar perfeitamente."
 			}
 		}
 	},
