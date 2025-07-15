@@ -26,12 +26,11 @@
 	export let metadata: Erc20Metadata | Erc721Metadata | undefined;
 	export let network: Network;
 
-	const handleMetadata = () => {
+	const validateMetadata = () => {
 		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.incomplete_metadata }
 			});
-
 			dispatch('icBack');
 			return;
 		}
@@ -98,7 +97,7 @@
 				const { metadata: metadataApiErc20 } = infuraErc20Providers(network.id);
 				metadata = await metadataApiErc20({ address: contractAddress });
 			}
-			handleMetadata();
+			validateMetadata();
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.loading_metadata },
