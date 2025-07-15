@@ -55,7 +55,6 @@ export const cleanWorkers = ({
 		.forEach((tokenId) => {
 			// Trigger the stop event to properly cleanup the worker thread
 			workers.get(tokenId)?.stop();
-			// terminate and clean up worker
 			destroyWorker({ workers, tokenId });
 		});
 
