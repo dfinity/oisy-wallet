@@ -1,11 +1,23 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { Erc20Token } from '$eth/types/erc20';
+import type { EthereumNetwork } from '$eth/types/network';
+import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
+import type {
+	BridgePrice,
+	DeltaPrice,
+	OptimalRate,
+	QuoteParams,
+	SimpleFetchSDK
+} from '@velora-dex/sdk';
+import type { EthAddress, OptionEthAddress } from './address';
 import type { OptionIdentity } from './identity';
 import type { Amount, OptionAmount } from './send';
+import type { RequiredTransactionFeeData } from './transaction';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
@@ -15,6 +27,11 @@ export enum SwapProvider {
 	ICP_SWAP = 'icpSwap',
 	KONG_SWAP = 'kongSwap',
 	VELORA = 'velora'
+}
+
+export enum VeloraSwapTypes {
+	DELTA = 'delta',
+	MARKET = 'market'
 }
 export interface ProviderFee {
 	fee: bigint;
@@ -44,6 +61,7 @@ export type SwapMappedResult =
 			receiveAmount: bigint;
 			receiveOutMinimum: bigint;
 			swapDetails: ICPSwapResult;
+			type?: string;
 	  }
 	| {
 			provider: SwapProvider.KONG_SWAP;
@@ -53,12 +71,14 @@ export type SwapMappedResult =
 			liquidityFees: ProviderFee[];
 			networkFee?: ProviderFee;
 			swapDetails: SwapAmountsReply;
+			type?: string;
 	  }
 	| {
 			provider: SwapProvider.VELORA;
 			receiveAmount: bigint;
 			receiveOutMinimum?: bigint;
-			swapDetails?: any;
+			swapDetails: VeloraSwapDetails;
+			type: string;
 	  };
 
 export interface KongQuoteResult {
@@ -116,4 +136,39 @@ export interface FormatSlippageParams {
 	slippageValue: OptionAmount;
 	receiveAmount: bigint;
 	decimals: number;
+}
+
+export interface GetQuoteParams extends QuoteParams<'all'> {
+	destChainId?: number;
+}
+
+export interface CheckDeltaOrderStatusParams {
+	sdk: SimpleFetchSDK;
+	auctionId: string;
+	onExecuted?: () => void;
+	timeoutMs?: number;
+	intervalMs?: number;
+}
+
+export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
+
+export interface SwapVeloraParams extends RequiredTransactionFeeData {
+	identity: OptionIdentity;
+	progress: (step: ProgressStep) => void;
+	sourceToken: Erc20Token;
+	destinationToken: Erc20Token;
+	swapAmount: Amount;
+	receiveAmount: bigint;
+	slippageValue: Amount;
+	sourceNetwork: EthereumNetwork;
+	destinationNetwork: EthereumNetwork;
+	userAddress: EthAddress;
+	swapDetails: VeloraSwapDetails;
+}
+
+export interface VeloraQuoteParams {
+	sourceToken: Erc20Token;
+	destinationToken: Erc20Token;
+	amount: string;
+	userAddress: OptionEthAddress;
 }

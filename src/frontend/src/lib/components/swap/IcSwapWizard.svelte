@@ -18,7 +18,7 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { swapService } from '$lib/services/swap.services';
+	import { fetchIcpSwap, fetchKongSwap, swapService } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -32,6 +32,8 @@
 	import { type IcToken } from '$icp/types/ic-token';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import IcSwapForm from './IcSwapForm.svelte';
+	import { SwapProvider } from '$lib/types/swap';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -88,20 +90,26 @@
 
 		dispatch('icNext');
 
+		const params = {
+			identity: $authIdentity,
+			progress,
+			sourceToken: $sourceToken as IcTokenToggleable,
+			destinationToken: $destinationToken as IcTokenToggleable,
+			swapAmount,
+			receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
+			slippageValue,
+			sourceTokenFee,
+			isSourceTokenIcrc2: $isSourceTokenIcrc2
+		};
+
 		try {
 			failedSwapError.set(undefined);
 
-			await swapService[$swapAmountsStore.selectedProvider.provider]({
-				identity: $authIdentity,
-				progress,
-				sourceToken: $sourceToken as IcTokenToggleable,
-				destinationToken: $destinationToken as IcTokenToggleable,
-				swapAmount,
-				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
-				slippageValue,
-				sourceTokenFee,
-				isSourceTokenIcrc2: $isSourceTokenIcrc2
-			});
+			if ($swapAmountsStore.selectedProvider.provider === SwapProvider.KONG_SWAP) {
+				await fetchKongSwap(params);
+			} else {
+				await fetchIcpSwap(params);
+			}
 
 			progress(ProgressStepsSwap.DONE);
 
@@ -136,7 +144,10 @@
 					message: errorDetail,
 					variant: 'error',
 					url: {
-						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+						url:
+							isIcToken($sourceToken) && isIcToken($destinationToken)
+								? `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`
+								: `https://app.icpswap.com/swap`,
 						text: 'icpswap.com'
 					}
 				});

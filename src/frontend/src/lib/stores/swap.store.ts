@@ -5,11 +5,11 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 
+import type { IcToken } from '$icp/types/ic-token';
 import type { Balance } from '$lib/types/balance';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-import type { IcToken } from '$icp/types/ic-token';
 
 export interface SwapError {
 	variant: 'error' | 'warning' | 'info';
@@ -138,8 +138,8 @@ export const initSwapContext = (initialData: SwapData = {}): SwapContext => {
 };
 
 export interface SwapContext {
-	sourceToken: Readable<Token | IcToken |undefined>;
-	destinationToken: Readable<Token | IcToken| undefined>;
+	sourceToken: Readable<Token | IcToken | undefined>;
+	destinationToken: Readable<Token | IcToken | undefined>;
 
 	sourceTokenId: Readable<TokenId | undefined>;
 	destinationTokenId: Readable<TokenId | undefined>;

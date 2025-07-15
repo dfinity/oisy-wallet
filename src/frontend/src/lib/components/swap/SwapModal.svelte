@@ -292,7 +292,6 @@
 					on:icNext={modal.next}
 					on:icClose={close}
 					on:icShowTokensList={showTokensList}
-					on:icShowProviderList={openSelectProviderModal}
 				/>
 			{/if}
 		</SwapAmountsContext>

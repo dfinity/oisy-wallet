@@ -11,6 +11,8 @@
 	export let zeroAmountLabel: string | undefined = undefined;
 
 	let formattedFeeAmount: string | undefined;
+
+	$: console.log('hello2',feeAmount)
 	$: formattedFeeAmount = nonNullish(feeAmount)
 		? formatToken({ value: feeAmount, unitName: decimals, displayDecimals: decimals })
 		: undefined;

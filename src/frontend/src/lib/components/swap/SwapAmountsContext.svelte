@@ -91,7 +91,7 @@
 	onMount(() => {
 		intervalId = setInterval(() => {
 			loadSwapAmounts();
-		}, 5000);
+		}, 7000);
 	});
 
 	onDestroy(() => {

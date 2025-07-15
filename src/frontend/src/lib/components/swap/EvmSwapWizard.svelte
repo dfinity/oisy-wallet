@@ -38,8 +38,10 @@
 	} from '$lib/constants/analytics.contants';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { SwapProvider } from '$lib/types/swap';
+	import { SwapProvider, VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import SwapProgress from './SwapProgress.svelte';
+	import type { ProgressStep } from '$eth/types/send';
+	import type { Erc20Token } from '$eth/types/erc20';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -56,8 +58,13 @@
 		currentStep
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, failedSwapError } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		failedSwapError,
+		sourceTokenNetwork,
+		destinationTokenNetwork
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -132,6 +139,8 @@
 
 		if (
 			isNullish($sourceToken) ||
+			isNullish($sourceTokenNetwork) ||
+			isNullish($destinationTokenNetwork) ||
 			isNullish($destinationToken) ||
 			isNullish(slippageValue) ||
 			isNullish(swapAmount) ||
@@ -153,42 +162,28 @@
 		try {
 			failedSwapError.set(undefined);
 
-			// await fetchVeloraDeltaSwap({
-			// 	identity: $authIdentity,
-			// 	progress,
-			// 	sourceToken: { ...$sourceToken, address: '0x4200000000000000000000000000000000000006' },
-			// 	destinationToken: {
-			// 		...$destinationToken,
-			// 		address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-			// 	},
-			// 	swapAmount,
-			// 	receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
-			// 	slippageValue,
-			// 	sourceNetwork: $sourceToken.network,
-			// 	destinationNetwork: $destinationToken.network,
-			// 	userAddress: $ethAddress,
-			// 	gas,
-			// 	maxFeePerGas,
-			// 	maxPriorityFeePerGas,
-			// 	swapDetails: $swapAmountsStore.swaps[0].swapDetails
-			// });
-
-			await fetchVeloraMarketSwap({
+			const params = {
 				identity: $authIdentity,
-				progress,
-				sourceToken: { ...$sourceToken, address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' },
-				destinationToken: $destinationToken,
+				progress: (step: ProgressStep) => (swapProgressStep = step),
+				sourceToken: $sourceToken as Erc20Token,
+				destinationToken: $destinationToken as Erc20Token,
 				swapAmount,
-				sourceNetwork: $sourceToken.network,
-				receiveAmount,
+				sourceNetwork: $sourceTokenNetwork as EthereumNetwork,
+				receiveAmount: $swapAmountsStore?.selectedProvider?.receiveAmount,
 				slippageValue,
-				destinationNetwork: $destinationToken.network,
+				destinationNetwork: $destinationTokenNetwork as EthereumNetwork,
 				userAddress: $ethAddress,
 				gas,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
-				swapDetails: $swapAmountsStore.swaps[0].swapDetails
-			});
+				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
+			};
+
+			if ($swapAmountsStore.swaps[0].type === VeloraSwapTypes.DELTA) {
+				await fetchVeloraDeltaSwap(params);
+			} else {
+				await fetchVeloraMarketSwap(params);
+			}
 
 			progress(ProgressStepsSwap.DONE);
 

@@ -74,6 +74,22 @@ export class InfuraErc20Provider implements Erc20Provider {
 		}, ZERO);
 	};
 
+	getApprovalFeeData = ({
+		contract: { address: contractAddress },
+		to,
+		from,
+		amount
+	}: {
+		contract: Erc20ContractAddress;
+		from: EthAddress;
+		to: EthAddress;
+		amount: bigint;
+	}): Promise<bigint> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+
+		return erc20Contract.approve.estimateGas(to, amount, { from });
+	};
+
 	// Transaction send: https://ethereum.stackexchange.com/a/131944
 
 	populateTransaction = ({
@@ -100,8 +116,6 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}): Promise<ContractTransaction> => {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
 
-		console.log('here3', { erc20Contract, spender, amount });
-
 		return erc20Contract.approve.populateTransaction(spender, amount);
 	};
 
@@ -116,8 +130,6 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}): Promise<bigint> => {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
 
-		console.log();
-		
 		return erc20Contract.allowance(owner, spender);
 	};
 }

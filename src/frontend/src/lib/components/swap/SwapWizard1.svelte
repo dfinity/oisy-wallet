@@ -42,6 +42,18 @@
 	$: evmNativeEthereumToken = $evmNativeToken ?? fallbackEvmToken;
 </script>
 
+
+{currentStep}
+		bind:swapAmount
+		bind:receiveAmount
+		bind:slippageValue
+		bind:swapProgressStep
+		on:icBack={modal.back}
+		on:icNext={modal.next}
+		on:icClose={close}
+		on:icShowTokensList={showTokensList}
+		on:icShowProviderList={openSelectProviderModal}
+
 <SendTokenContext token={$sendToken}>
 	{#if isNetworkIdEthereum($sendToken.network.id) || (isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken))}
 		<EthSendTokenWizard
@@ -50,7 +62,8 @@
 			nativeEthereumToken={$ethereumToken}
 			{destination}
 			{selectedContact}
-			bind:amount
+			bind:swapAmount
+            bind:receiveAmount
 			bind:sendProgressStep
 			on:icBack
 			on:icSendBack

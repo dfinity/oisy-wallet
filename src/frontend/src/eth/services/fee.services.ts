@@ -69,6 +69,36 @@ export const getErc20FeeData = async ({
 	}
 };
 
+export const getErc20approvalFeeData = async ({
+	targetNetwork,
+	sourceNetwork: { id: sourceNetworkId },
+	contract,
+	amount,
+	...rest
+}: GetFeeData & {
+	contract: Erc20Token;
+	amount: bigint;
+	sourceNetwork: EthereumNetwork;
+	targetNetwork: Network | undefined;
+}): Promise<bigint> => {
+	try {
+		const targetNetworkId: NetworkId | undefined = targetNetwork?.id;
+
+		const { getApprovalFeeData } = infuraErc20Providers(targetNetworkId ?? sourceNetworkId);
+		const fee = await getApprovalFeeData({ ...rest, contract, amount });
+
+		return fee;
+	
+	} catch (err: unknown) {
+		// We silence the error on purpose.
+		// The queries above often produce errors on mainnet, even when all parameters are correctly set.
+		// Additionally, it's possible that the queries are executed with inaccurate parameters, such as when a user enters an incorrect address or an address that is not supported by the selected function (e.g., an ICP account identifier on the Ethereum network rather than for the burn contract).
+		console.warn(err);
+
+		return ERC20_FALLBACK_FEE;
+	}
+};
+
 export const getCkErc20FeeData = async ({
 	erc20HelperContractAddress,
 	to,

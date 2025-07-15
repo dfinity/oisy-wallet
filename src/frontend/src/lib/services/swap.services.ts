@@ -1,7 +1,6 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import { approve as approveToken } from '$eth/services/swap.services';
-import { VeloraSwapService } from '$eth/services/velora-swap.services';
+import { approve as approveToken } from '$eth/services/send.services';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -14,28 +13,43 @@ import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
-import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
-import { ProgressStepsSwap, type ProgressStepsSend } from '$lib/enums/progress-steps';
+import {
+	ICP_SWAP_POOL_FEE,
+	SWAP_DELTA_INTERVAL_MS,
+	SWAP_DELTA_TIMEOUT_MS,
+	SWAP_MODE,
+	SWAP_SIDE
+} from '$lib/constants/swap.constants';
+import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { i18n } from '$lib/stores/i18n.store';
 
+import { swap } from '$eth/services/swap.services';
+import type { Erc20Token } from '$eth/types/erc20';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/swap.utils';
 import { signPrehash } from '$lib/api/signer.api';
 import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { OptionEthAddress } from '$lib/types/address';
 import {
 	SwapProvider,
+	type CheckDeltaOrderStatusParams,
 	type FetchSwapAmountsParams,
+	type GetQuoteParams,
 	type ICPSwapResult,
 	type SwapMappedResult,
-	type SwapParams
+	type SwapParams,
+	type SwapVeloraParams,
+	type VeloraQuoteParams
 } from '$lib/types/swap';
-import type { Token } from '$lib/types/token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
+	getTokenAddress,
 	mapVeloraMarketSwapResult,
 	mapVeloraSwapResult
 } from '$lib/utils/swap.utils';
@@ -43,8 +57,13 @@ import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { constructSimpleSDK } from '@velora-dex/sdk';
-import { Signature, TypedDataEncoder, parseUnits } from 'ethers';
+import {
+	constructSimpleSDK,
+	type BridgePrice,
+	type DeltaAuction,
+	type DeltaPrice,
+	type OptimalRate
+} from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 import { autoLoadSingleToken } from './token.services';
 
@@ -142,35 +161,27 @@ export const fetchSwapAmounts = async ({
 	tokens,
 	slippage,
 	userAddress
-}: FetchSwapAmountsParams & { userAddress: any }): Promise<SwapMappedResult[]> => {
+}: FetchSwapAmountsParams & { userAddress: OptionEthAddress }): Promise<SwapMappedResult[]> => {
 	const sourceAmount: bigint = parseToken({
 		value: `${amount}`,
 		unitName: sourceToken.decimals
 	});
 
-	const data =
-		sourceToken.network.id === ICP_NETWORK_ID
-			? await fetchSwapAmountsICP({
-					identity,
-					sourceToken,
-					destinationToken,
-					amount: sourceAmount,
-					tokens,
-					slippage
-				})
-			: await fetchSwapAmountsEVM({
-					sourceToken: sourceToken as Token & { address?: string } & {
-						network: { chainId: string };
-					},
-					destinationToken: destinationToken as Token & { address?: string } & {
-						network: { chainId: string };
-					},
-					amount: `${sourceAmount}`,
-					slippage,
-					userAddress
-				});
-
-	return data;
+	return sourceToken.network.id === ICP_NETWORK_ID
+		? await fetchSwapAmountsICP({
+				identity,
+				sourceToken,
+				destinationToken,
+				amount: sourceAmount,
+				tokens,
+				slippage
+			})
+		: await fetchSwapAmountsEVM({
+				sourceToken: sourceToken as Erc20Token,
+				destinationToken: destinationToken as Erc20Token,
+				amount: `${sourceAmount}`,
+				userAddress
+			});
 };
 
 export const fetchIcpSwap = async ({
@@ -321,8 +332,7 @@ export const fetchIcpSwap = async ({
 
 export const swapService = {
 	[SwapProvider.ICP_SWAP]: fetchIcpSwap,
-	[SwapProvider.KONG_SWAP]: fetchKongSwap,
-	[SwapProvider.VELORA]: fetchIcpSwap
+	[SwapProvider.KONG_SWAP]: fetchKongSwap
 };
 
 const fetchSwapAmountsICP = async ({
@@ -372,8 +382,6 @@ const fetchSwapAmountsICP = async ({
 		[]
 	);
 
-	console.log({ mappedProvidersResults });
-
 	return mappedProvidersResults.sort((a, b) => Number(b.receiveAmount) - Number(a.receiveAmount));
 };
 
@@ -381,44 +389,40 @@ const fetchSwapAmountsEVM = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	slippage,
 	userAddress
-}: {
-	sourceToken: Token & { address?: string } & { network: { chainId: string } };
-	destinationToken: Token & { address?: string } & { network: { chainId: string } };
-	amount: string;
-	userAddress?: string;
-	destTokenChainId?: number;
-	srcTokenChainId?: number;
-	slippage: any;
-}): Promise<any> => {
-	const service = VeloraSwapService.create({ chainId: Number(sourceToken?.network.chainId) });
+}: VeloraQuoteParams): Promise<SwapMappedResult[]> => {
+	if (isNullish(userAddress)) {
+		return [];
+	}
+	const {
+		network: { chainId: destChainId }
+	} = destinationToken;
 
-	const data = await service.getQuote({
-		amount,
-		srcToken: sourceToken.address ?? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-		destToken: destinationToken?.address ?? '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-		srcDecimals: sourceToken.decimals,
-		destDecimals: destinationToken.decimals,
-		destChainId:
-			sourceToken.network.chainId !== destinationToken?.network.chainId ||
-			nonNullish(sourceToken.address) ||
-			// Add considiton to check is it ETH native token as well
-			Number(sourceToken.network.chainId) === 1 ||
-			Number(sourceToken.network.chainId) === 8453
-				? Number(destinationToken?.network.chainId)
-				: undefined,
-		mode: 'all',
-		side: 'SELL',
-		// network: Number(sourceToken?.network.chainId),
-		// chainId: Number(sourceToken?.network.chainId),
-		userAddress
-		// slippage: Number(slippage) * 100,
+	const {
+		network: { chainId: srcChainId }
+	} = sourceToken;
+
+	const sdk = constructSimpleSDK({
+		chainId: Number(srcChainId),
+		fetch: window.fetch
 	});
 
-	if ('delta' in data) {
-		console.log('here', data);
+	const baseParams: GetQuoteParams = {
+		amount,
+		srcToken: getTokenAddress(sourceToken),
+		destToken: getTokenAddress(destinationToken),
+		srcDecimals: sourceToken.decimals,
+		destDecimals: destinationToken.decimals,
+		mode: SWAP_MODE,
+		side: SWAP_SIDE,
+		userAddress
+	};
 
+	const data = await sdk.quote.getQuote(
+		srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
+	);
+
+	if ('delta' in data) {
 		return [mapVeloraSwapResult(data.delta)];
 	}
 
@@ -426,13 +430,7 @@ const fetchSwapAmountsEVM = async ({
 		return [mapVeloraMarketSwapResult(data.market)];
 	}
 
-	// console.log({ data }, 'VeloraSwapService.getDeltaPrice result');
-
-	// console.log('Mapping Velora swap result...', [data]);
-
-	// console.log({ data: [mapVeloraSwapResult(data)] });
-
-	// return [mapVeloraSwapResult(data)];
+	return [];
 };
 
 export const fetchVeloraDeltaSwap = async ({
@@ -450,8 +448,13 @@ export const fetchVeloraDeltaSwap = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	swapDetails
-}: any): Promise<void> => {
-	progress(ProgressStepsSwap.SWAP);
+}: SwapVeloraParams): Promise<void> => {
+	// progress(ProgressStepsSwap.SWAP);
+
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
 
 	const sdk = constructSimpleSDK({
 		chainId: Number(sourceNetwork?.chainId),
@@ -465,112 +468,52 @@ export const fetchVeloraDeltaSwap = async ({
 		slippagePercentage: Number(slippageValue)
 	});
 
-	const approve = await approveToken({
-		token: { ...sourceToken, address: '0x4200000000000000000000000000000000000006' },
+	if (isNullish(deltaContract)) {
+		return;
+	}
+
+	await approveToken({
+		token: sourceToken,
 		from: userAddress,
-		to: deltaContract ?? '0x0000000000bbf5c5fd284e657f01bd000933c96d',
-		amount: parseToken({ value: swapAmount, unitName: sourceToken.decimals }),
+		to: deltaContract,
+		amount: parsedSwapAmount,
 		sourceNetwork,
 		identity,
 		gas,
 		maxFeePerGas,
+		approveNeeded: true,
 		maxPriorityFeePerGas,
-		progress: (step: ProgressStepsSend) => {
-			console.log('🌀 Approve step:', step);
-		}
+		progress
 	});
 
-	// const WETH_ADDRESSES: Record<number, string> = {
-	// 	10: '0x4200000000000000000000000000000000000006', // Optimism
-	// 	8453: '0x4200000000000000000000000000000000000006', // Base
-	// 	42161: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // Arbitrum
-	// 	137: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619', // Polygon
-	// 	1: '0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2' // Mainnet
-	// };
-
-	// // eslint-disable-next-line local-rules/prefer-object-params
-	// const getMulticallHandler = async (
-	// 	destTokenDestChain: string,
-	// 	beneficiaryType: BeneficiaryType
-	// ) => {
-	// 	const shouldReturnMulticall =
-	// 		(beneficiaryType === 'EOA' &&
-	// 			destTokenDestChain === WETH_ADDRESSES[Number(destTokenDestChain)]) ||
-	// 		(beneficiaryType === 'SmartContract' &&
-	// 			destTokenDestChain === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
-
-	// 	if (!shouldReturnMulticall) {
-	// 		return ethers.ZeroAddress;
-	// 	}
-
-	// 	const multicallHandlers = await sdk.delta.getMulticallHandlers();
-
-	// 	return multicallHandlers[Number(destTokenDestChain)];
-	// };
-
 	const signableOrderData = await sdk.delta.buildDeltaOrder({
-		deltaPrice: swapDetails,
+		deltaPrice: swapDetails as DeltaPrice | BridgePrice,
 		owner: userAddress,
 		srcToken: sourceToken?.address,
 		destToken: destinationToken?.address,
-		srcAmount: parseUnits(swapAmount, sourceToken.decimals).toString(),
-		destAmount: slippageMinimum.toString(10),
+		srcAmount: `${parsedSwapAmount}`,
+		destAmount: `${slippageMinimum}`,
 		destChainId: Number(destinationNetwork?.chainId)
-		// bridge: {
-		// 	maxRelayerFee, destinationChainId: Number(destinationNetwork?.chainId), outputToken: destinationToken?.address, multiCallHandler:getMulticallHandler()
-		// }
 	});
 
-	const { domain: orderDomain, types: orderTypes, data } = signableOrderData;
-	const eip712OrderHash = TypedDataEncoder.hash(orderDomain, orderTypes, data);
-	const orderSignature = await signPrehash({
-		hash: eip712OrderHash,
+	const hash = getSignParamsEIP712(signableOrderData);
+
+	const signature = await signPrehash({
+		hash,
 		identity
 	});
-	const compactOrderSig = Signature.from(orderSignature).compactSerialized;
+
+	const compactSignature = getCompactSignature(signature);
 
 	const deltaAuction = await sdk.delta.postDeltaOrder({
 		order: signableOrderData.data,
-		signature: compactOrderSig
+		signature: compactSignature
 	});
 
-	// eslint-disable-next-line local-rules/prefer-object-params
-	const isExecutedDeltaAuction = (
-		auction: Omit<any, 'signature'>,
-		waitForCrosschain = true // only consider executed when destChain work is done
-	) => {
-		if (auction.status !== 'EXECUTED') {
-			return false;
-		}
-
-		// crosschain Order is executed on destChain if bridgeStatus is filled
-		if (waitForCrosschain && auction.order.bridge.destinationChainId !== 0) {
-			return auction.bridgeStatus === 'filled';
-		}
-
-		return true;
-	};
-
-	const fetchOrderPeriodically = (auctionId: string) => {
-		const intervalId = setInterval(async () => {
-			const auction = await sdk.delta.getDeltaOrderById(auctionId);
-			console.log('checks: ', auction); // Handle or log the fetched auction as needed
-
-			if (isExecutedDeltaAuction(auction)) {
-				clearInterval(intervalId); // Stop interval if completed
-				console.log('Order completed');
-			}
-		}, 3000);
-		console.log('Order Pending');
-		return intervalId;
-	};
-
-	const startStatusCheck = (auctionId: string) => {
-		const intervalId = fetchOrderPeriodically(auctionId);
-		setTimeout(() => clearInterval(intervalId), 60000 * 5); // Stop after 5 minutes
-	};
-
-	startStatusCheck(deltaAuction.id);
+	await checkDeltaOrderStatus({
+		sdk,
+		auctionId: deltaAuction.id
+	});
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
@@ -584,135 +527,106 @@ export const fetchVeloraMarketSwap = async ({
 	destinationToken,
 	swapAmount,
 	sourceNetwork,
-	receiveAmount,
 	slippageValue,
-	destinationNetwork,
 	userAddress,
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	swapDetails
-}: any): Promise<void> => {
-	progress(ProgressStepsSwap.SWAP);
+}: SwapVeloraParams): Promise<void> => {
+	// progress(ProgressStepsSwap.SWAP);
 
-	// 	  const priceRoute = quote.market;
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
 
 	const sdk = constructSimpleSDK({
 		chainId: Number(sourceNetwork?.chainId),
 		fetch: window.fetch
 	});
 
-	// const TokenTransferProxy = await sdk.swap.getSpender();
+	const TokenTransferProxy = await sdk.swap.getSpender();
 
-	// console.log({ TokenTransferProxy });
-
-	// const approve = await approveToken({
-	// 	token: sourceToken,
-	// 	from: userAddress,
-	// 	to: TokenTransferProxy,
-	// 	amount: parseToken({ value: swapAmount, unitName: sourceToken.decimals }),
-	// 	sourceNetwork,
-	// 	identity,
-	// 	gas,
-	// 	maxFeePerGas,
-	// 	maxPriorityFeePerGas,
-	// 	progress: (step: ProgressStepsSend) => {
-	// 		console.log('🌀 Approve step:', step);
-	// 	}
-	// });
-
-	console.log('approve', { approve });
+	if (!isDefaultEthereumToken(sourceToken)) {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: TokenTransferProxy,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			maxPriorityFeePerGas,
+			approveNeeded: true,
+			progress
+		});
+	}
 
 	const txParams = await sdk.swap.buildTx({
-		srcToken: sourceToken?.address,
-		destToken: destinationToken?.address,
-		srcAmount: parseUnits(swapAmount, sourceToken.decimals).toString(),
-		slippage: slippageValue * 100,
-		priceRoute: swapDetails,
+		srcToken: getTokenAddress(sourceToken),
+		destToken: getTokenAddress(destinationToken),
+		srcAmount: swapDetails.srcAmount,
+		slippage: Number(slippageValue) * 100,
+		priceRoute: swapDetails as OptimalRate,
 		userAddress
 	});
 
-	console.log(txParams, 'txParams');
-
-	console.log({
+	await swap({
 		from: userAddress,
-		identity,
 		to: txParams.to,
+		transaction: txParams,
+		identity,
 		token: sourceToken,
-		amount: parseToken({
-			value: `${txParams.value}`,
-			unitName: sourceToken.decimals
-		}),
-		data: txParams.data,
-		gas,
 		sourceNetwork,
 		maxFeePerGas,
 		maxPriorityFeePerGas,
-		progress: (step: ProgressStepsSend) => {
-			console.log('🌀 Approve step:', step);
-		}
+		progress
 	});
-
-	// from: $ethAddress,
-	// 			to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),
-	// 			progress: (step: ProgressStepsSend) => (sendProgressStep = step),
-	// 			token: $sendToken,
-	// 			amount: parseToken({
-	// 				value: `${amount}`,
-	// 				unitName: $sendTokenDecimals
-	// 			}),
-
-	// await executeSend({
-	// 			from: $ethAddress,
-	// 			to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),
-	// 			progress: (step: ProgressStepsSend) => (sendProgressStep = step),
-	// 			token: $sendToken,
-	// 			amount: parseToken({
-	// 				value: `${amount}`,
-	// 				unitName: $sendTokenDecimals
-	// 			}),
-	// 			maxFeePerGas,
-	// 			maxPriorityFeePerGas,
-	// 			gas,
-	// 			sourceNetwork,
-	// 			identity: $authIdentity,
-	// 			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
-	// 		});
-
-	// const swap = await send({
-	// 	from: userAddress,
-	// 	identity,
-	// 	to: txParams.to,
-	// 	token: sourceToken,
-	// 	amount: parseToken({
-	// 		value: `${txParams.value}`,
-	// 		unitName: sourceToken.decimals
-	// 	}),
-	// 	data: txParams.data,
-	// 	gas,
-	// 	sourceNetwork,
-	// 	maxFeePerGas,
-	// 	maxPriorityFeePerGas,
-	// 	progress: (step: ProgressStepsSend) => {
-	// 		console.log('🌀 Approve step:', step);
-	// 	}
-	// });
-
-	// 	  to: string;
-	//   from: string;
-	//   value: string;
-	//   data: string;
-	//   gas?: string;
-	//   chainId: number;
-	//   // either gasPrice or maxFeePerGas & maxPriorityFeePerGas will be present
-	//   gasPrice?: string;
-	//   maxFeePerGas?: string;
-	//   maxPriorityFeePerGas?: string;
-
-	//   const swapTx = await signer.sendTransaction(txParams);
-	// }
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
 	await waitAndTriggerWallet();
+};
+
+export const checkDeltaOrderStatus = async ({
+	sdk,
+	auctionId,
+	timeoutMs = SWAP_DELTA_TIMEOUT_MS,
+	intervalMs = SWAP_DELTA_INTERVAL_MS
+}: CheckDeltaOrderStatusParams): Promise<void> => {
+	const deadline = Date.now() + timeoutMs;
+
+	while (Date.now() < deadline) {
+		try {
+			const auction = await sdk.delta.getDeltaOrderById(auctionId);
+
+			if (isExecutedDeltaAuction({ auction })) {
+				return;
+			}
+		} catch (error) {
+			console.error('Failed to fetch delta order status:', error);
+		}
+
+		await new Promise((r) => setTimeout(r, intervalMs));
+	}
+};
+
+const isExecutedDeltaAuction = ({
+	auction,
+	waitForCrosschain = true
+}: {
+	auction: Omit<DeltaAuction, 'signature'>;
+	waitForCrosschain?: boolean;
+}): boolean => {
+	if (auction.status !== 'EXECUTED') {
+		return false;
+	}
+
+	if (waitForCrosschain && auction.order.bridge.destinationChainId !== 0) {
+		return auction.bridgeStatus === 'filled';
+	}
+
+	return true;
 };

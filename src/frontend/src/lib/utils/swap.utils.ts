@@ -2,21 +2,29 @@ import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
 } from '$declarations/kong_backend/kong_backend.did';
+import type { Erc20Token } from '$eth/types/erc20';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
-import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
+import {
+	SWAP_DEFAULT_SLIPPAGE_VALUE,
+	SWAP_ETH_TOKEN_PLACEHOLDER
+} from '$lib/constants/swap.constants';
 import type { AmountString } from '$lib/types/amount';
 import {
 	SwapProvider,
+	VeloraSwapTypes,
 	type FormatSlippageParams,
 	type ICPSwapResult,
 	type ProviderFee,
 	type Slippage,
-	type SwapMappedResult
+	type SwapMappedResult,
+	type VeloraSwapDetails
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
 import { formatToken } from './format.utils';
 import { isNullishOrEmpty } from './input.utils';
 
@@ -102,27 +110,27 @@ export const mapKongSwapResult = ({
 	swapDetails: swap
 });
 
-export const mapVeloraSwapResult = (swap: any): SwapMappedResult => {
-	console.log(swap);
+export const mapVeloraSwapResult = (swap: DeltaPrice | BridgePrice): SwapMappedResult => ({
+	provider: SwapProvider.VELORA,
+	receiveAmount: 'bridge' in swap ? BigInt(swap.destAmountAfterBridge) : BigInt(swap.destAmount),
+	swapDetails: swap as VeloraSwapDetails,
+	type: VeloraSwapTypes.DELTA
+});
 
-	return {
-		provider: SwapProvider.VELORA,
-		receiveAmount: 'bridge' in swap ? BigInt(swap.destAmountAfterBridge) : BigInt(swap.destAmount),
-		// receiveOutMinimum: BigInt(swap.destAmountAfterBridge),
-		swapDetails: swap
-	};
+export const mapVeloraMarketSwapResult = (swap: OptimalRate): SwapMappedResult => ({
+	provider: SwapProvider.VELORA,
+	receiveAmount: BigInt(swap.destAmount),
+	swapDetails: swap as VeloraSwapDetails,
+	type: VeloraSwapTypes.MARKET
+});
+
+export const getTokenAddress = (token: Erc20Token) => {
+	if (isDefaultEthereumToken(token)) {
+		return SWAP_ETH_TOKEN_PLACEHOLDER;
+	}
+
+	return token.address;
 };
-
-export const mapVeloraMarketSwapResult = (swap: any): SwapMappedResult => {
-	console.log(swap);
-
-	return {
-		provider: SwapProvider.VELORA,
-		receiveAmount: BigInt(swap.destAmount),
-		swapDetails: swap
-	};
-};
-
 /**
  * Calculates the minimum acceptable amount after applying slippage tolerance.
  *
