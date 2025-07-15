@@ -187,7 +187,8 @@
 			"verifiable_credentials": "Ověřitelné Přihlašovací Údaje",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
-			"game": "Hra"
+			"game": "Hra",
+			"tools": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
 					"call_to_action": "Zjistit více"
 				}
+			},
+			"toolkit": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -416,7 +422,8 @@
 			"incubated_with": "Inkubováno s",
 			"by": "od",
 			"dfinity_foundation": "Nadace DFINITY",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": ""
 		},
 		"alt": {
 			"dfinity": "Přejít na webové stránky Nadace DFINITY"
@@ -461,6 +468,7 @@
 			"no_infura_provider": "Žádný poskytovatel Infura pro síť $network",
 			"no_infura_cketh_provider": "Žádný poskytovatel Infura CkETH pro síť $network",
 			"no_infura_erc20_provider": "Žádný poskytovatel Infura ERC20 pro síť $network",
+			"no_infura_erc721_provider": "",
 			"no_infura_erc20_icp_provider": "Žádný poskytovatel Infura ERC20 ICP pro síť $network",
 			"no_solana_network": "Žádná síť Solana pro síť $network",
 			"eth_address_unknown": "Adresa ETH je neznámá.",
@@ -481,8 +489,10 @@
 			"btc_withdrawal_statuses": "Chyba při načítání stavů výběru BTC.",
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
+			"erc20_custom_tokens": "",
 			"erc20_user_tokens": "Chyba při načítání uživatelských tokenů ERC20.",
-			"spl_user_tokens": "Chyba při načítání uživatelských tokenů SPL.",
+			"spl_custom_tokens": "",
+			"erc721_custom_tokens": "",
 			"erc20_user_token": "Chyba při povolování dvojitého tokenu ERC20.",
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
@@ -643,6 +653,7 @@
 			"sending": "Odesílání...",
 			"signing": "Podepisování...",
 			"signing_message": "Podepisování zprávy...",
+			"confirming": "",
 			"network": "Síť",
 			"source_network": "Zdrojová síť",
 			"destination_network": "Cílová síť",
@@ -717,7 +728,8 @@
 			"no_pending_bitcoin_transaction": "Při načítání čekajících transakcí Bitcoin došlo k chybě. Zkuste to prosím později znovu.",
 			"unexpected_utxos_fee": "Při výpočtu transakčního poplatku se něco pokazilo.",
 			"unable_to_retrieve_amount": "není k dispozici (nelze načíst)",
-			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu."
+			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
+			"solana_confirmation_failed": ""
 		}
 	},
 	"convert": {
@@ -911,7 +923,8 @@
 				"list_settings": "Nastavení seznamu",
 				"import_token": "Importovat token",
 				"network": "Síť",
-				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek."
+				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek.",
+				"enable_more_assets": ""
 			},
 			"placeholder": {
 				"select_network": "Vybrat síť"
@@ -1039,8 +1052,7 @@
 			"disconnected": "WalletConnect odpojen.",
 			"session_ended": "Relace WalletConnect byla ukončena.",
 			"connected": "WalletConnect připojen.",
-			"eth_transaction_executed": "Požadavek WalletConnect eth_sendTransaction byl proveden.",
-			"sol_transaction_executed": "Požadavek WalletConnect \"$method\" byl proveden.",
+			"transaction_executed": "",
 			"sign_executed": "Požadavek na podpis WalletConnect byl proveden."
 		},
 		"error": {
@@ -1097,6 +1109,15 @@
 			"pending": "Čeká na vyřízení...",
 			"safe": "Bezpečné",
 			"unconfirmed": "Nepotvrzeno"
+		},
+		"type": {
+			"send": "",
+			"receive": "",
+			"withdraw": "",
+			"deposit": "",
+			"approve": "",
+			"burn": "",
+			"mint": ""
 		},
 		"label": {
 			"reimbursement": "Náhrada",
@@ -1450,6 +1471,12 @@
 			"minute_plural": "minuty",
 			"second": "sekunda",
 			"second_plural": "sekundy"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"send_message": "",
+			"send_message_input_placeholder": ""
 		}
 	}
 }
