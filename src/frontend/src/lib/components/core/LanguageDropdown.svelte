@@ -8,10 +8,11 @@
 	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Languages } from '$lib/types/languages';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 
 	let dropdown = $state<Dropdown>();
 
-	const currentLang: string = $derived(LANGUAGES[$i18n.lang as Languages]);
+	const currentLang: string = $derived(LANGUAGES[$currentLanguage]);
 
 	const handleLangChange = (lang: string) => {
 		i18n.switchLang(Languages[lang as keyof typeof Languages]);
@@ -47,7 +48,7 @@
 							transparent
 						>
 							<span class="pt-0.75 w-[20px] text-brand-primary">
-								{#if $i18n.lang === langVal}
+								{#if $currentLanguage=== langVal}
 									<IconCheck size="20" />
 								{/if}
 							</span>
