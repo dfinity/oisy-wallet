@@ -156,14 +156,16 @@ const loadNftsForContract = async ({
 		);
 
 		for (const tokenIds of tokenIdBatches) {
-			const nftMetadata: NftMetadata[] = await loadNftMetadataBatch({ infuraProvider, contractAddress: token.address, tokenIds });
+			const nftMetadata: NftMetadata[] = await loadNftMetadataBatch({
+				infuraProvider,
+				contractAddress: token.address,
+				tokenIds
+			});
 
-			const nfts: Nft[] = nftMetadata.map((nftMetadata) => {
-				return {
+			const nfts: Nft[] = nftMetadata.map((nftMetadata) => ({
 					...nftMetadata,
 					contract: token
-				}
-			})
+				}));
 			nftStore.addAll(nfts);
 		}
 	} catch (err: unknown) {
@@ -176,7 +178,7 @@ const loadNftsForContract = async ({
 
 const loadNftMetadataBatch = async ({
 	infuraProvider,
-																			contractAddress,
+	contractAddress,
 	tokenIds
 }: {
 	infuraProvider: InfuraErc721Provider;
@@ -188,10 +190,12 @@ const loadNftMetadataBatch = async ({
 	for (let i = 0; i < tokenIds.length; i++) {
 		await new Promise((resolve) => setTimeout(resolve, 200));
 
-		nftMetadata.push(await infuraProvider.getNftMetadata({
-			contractAddress,
-			tokenId: tokenIds[i]
-		}));
+		nftMetadata.push(
+			await infuraProvider.getNftMetadata({
+				contractAddress,
+				tokenId: tokenIds[i]
+			})
+		);
 	}
 
 	return nftMetadata;
