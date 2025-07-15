@@ -18,7 +18,7 @@ export const NftSchema = z.object({
 	contract: z.object({
 		address: z.string(),
 		enabled: z.boolean(),
-		id: TokenIdSchema,
+		id: z.symbol().brand<'TokenId'>(),
 		name: z.string(),
 		network: NetworkSchema,
 		standard: TokenStandardSchema
