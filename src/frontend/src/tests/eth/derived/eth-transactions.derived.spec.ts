@@ -30,13 +30,13 @@ describe('eth-transactions.derived', () => {
 		});
 		ethTransactionsStore.add({
 			tokenId: ETHEREUM_TOKEN_ID,
-			transactions
+			transactions: transactions.map((data) => ({ data, certified: false }))
 		});
 	};
 
 	describe('ethKnownDestinations', () => {
 		beforeEach(() => {
-			ethTransactionsStore.reset();
+			ethTransactionsStore.resetAll();
 			token.reset();
 			ethAddressStore.set({ certified: true, data: mockEthAddress });
 		});
