@@ -61,15 +61,21 @@ describe('idb-transactions.api', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		ethTransactionsStore.reset();
+		ethTransactionsStore.resetAll();
 
 		ethTransactionsStore.set({
 			tokenId: mockToken1.id,
-			transactions: mockTransactions1
+			transactions: mockTransactions1.map((data) => ({
+				data,
+				certified: false
+			}))
 		});
 		ethTransactionsStore.set({
 			tokenId: mockToken3.id,
-			transactions: mockTransactions3
+			transactions: mockTransactions3.map((data) => ({
+				data,
+				certified: false
+			}))
 		});
 
 		btcTransactionsStore.reset(mockToken2.id);

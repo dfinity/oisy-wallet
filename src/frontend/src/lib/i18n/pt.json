@@ -183,10 +183,10 @@
 		},
 		"categories": {
 			"defi": "DeFi",
-			"social_media": "Meios de comunicação social",
+			"social_media": "Mídias sociais",
 			"verifiable_credentials": "Credentiais verificáveis",
-			"staking": "Participar no stake de ativos",
-			"walletconnect": "Conexão de carteira",
+			"staking": "Staking",
+			"walletconnect": "WalletConnect",
 			"game": "Jogo",
 			"tools": "Ferramentas"
 		},
@@ -1471,6 +1471,12 @@
 			"minute_plural": "minutos",
 			"second": "segundo",
 			"second_plural": "segundos"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"send_message": "",
+			"send_message_input_placeholder": ""
 		}
 	}
 }

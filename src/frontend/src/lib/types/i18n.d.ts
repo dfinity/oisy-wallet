@@ -1208,6 +1208,10 @@ interface I18nTemporal {
 	};
 }
 
+interface I18nAi_assistant {
+	text: { send_message: string; send_message_input_placeholder: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -1246,4 +1250,5 @@ interface I18n {
 	earning: I18nEarning;
 	welcome: I18nWelcome;
 	temporal: I18nTemporal;
+	ai_assistant: I18nAi_assistant;
 }
