@@ -3,6 +3,7 @@ import type { InitWalletWorkerFn, WalletWorker } from '$lib/types/listener';
 import type { Token, TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
+import { nonNullish } from '@dfinity/utils';
 
 /**
  * Wait a few seconds and trigger the wallet to fetch optimistically new transactions twice.
