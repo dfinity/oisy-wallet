@@ -91,6 +91,8 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 			msg: 'stopExchangeTimer'
 		});
 
+	let isDestroying = false;
+
 	return {
 		startExchangeTimer: (data: PostMessageDataRequestExchangeTimer) => {
 			exchangeWorker?.postMessage({
@@ -101,10 +103,6 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 		stopExchangeTimer: stopTimer,
 		destroy: () => {
 			stopTimer();
-			if (exchangeWorker) {
-				exchangeWorker.terminate();
-				exchangeWorker = null;
-			}
 			if (isDestroying) {
 				return;
 			}
