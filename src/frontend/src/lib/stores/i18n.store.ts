@@ -1,6 +1,7 @@
 import { I18N_ENABLED } from '$env/i18n';
 import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
 import { authSignedIn } from '$lib/derived/auth.derived';
+import cs from '$lib/i18n/de.json';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
 import it from '$lib/i18n/it.json';
@@ -15,6 +16,11 @@ import { get as getStore, writable, type Readable } from 'svelte/store';
 const enI18n = (): I18n => ({
 	...en,
 	lang: Languages.ENGLISH
+});
+
+const csI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: cs as I18n }),
+	lang: Languages.CZECH
 });
 
 const deI18n = (): I18n => ({
@@ -41,6 +47,8 @@ const loadLang = (lang: Languages): I18n => {
 	switch (lang) {
 		case Languages.CHINESE_SIMPLIFIED:
 			return zhcnI18n();
+		case Languages.CZECH:
+			return csI18n();
 		case Languages.GERMAN:
 			return deI18n();
 		case Languages.ITALIAN:
