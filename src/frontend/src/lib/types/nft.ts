@@ -1,4 +1,4 @@
-import { NftMetadataSchema, type NftSchema } from '$lib/schema/nftSchema';
+import type { NftMetadataSchema, NftSchema } from '$lib/schema/nftSchema';
 import type * as z from 'zod';
 
 export type NftMetadata = z.infer<typeof NftMetadataSchema>;
