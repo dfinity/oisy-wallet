@@ -1,7 +1,7 @@
 import type { CustomToken, Erc721Token } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { type EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
+import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
 import {
 	InfuraErc721Provider,
 	infuraErc721Providers
