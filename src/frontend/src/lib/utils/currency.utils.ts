@@ -12,3 +12,21 @@ export const getCurrencyName = ({
 
 	return currencyNames.of(currency.toUpperCase());
 };
+
+export const getCurrencySymbol = ({
+	currency,
+	language
+}: {
+	currency: Currencies;
+	language: Languages;
+}): string | undefined =>
+	(0)
+		.toLocaleString(language, {
+			style: 'currency',
+			currency,
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0,
+			currencyDisplay: 'symbol'
+		})
+		.replace(/\d/g, '')
+		.trim();
