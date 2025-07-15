@@ -14,15 +14,12 @@ export const NftMetadataSchema = z.object({
 	attributes: z.array(NftAttributeSchema)
 });
 
-export const NftSchema = z
-	.object({
-		contract: z.object({
-			address: z.string(),
-			enabled: z.boolean(),
-			id: z.symbol().brand<'TokenId'>(),
-			name: z.string(),
-			network: NetworkSchema,
-			standard: TokenStandardSchema
-		})
+export const NftSchema = z.object({
+	contract: z.object({
+		address: z.string(),
+		enabled: z.boolean(),
+		name: z.string(),
+		network: NetworkSchema,
+		standard: TokenStandardSchema
 	})
 	.merge(NftMetadataSchema);
