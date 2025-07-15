@@ -12,4 +12,4 @@ export const NftSchema = z.object({
 	imageUrl: z.string().url(),
 	attributes: z.array(NftAttributeSchema),
 	contract: TokenSchema
-}).strict();
+});

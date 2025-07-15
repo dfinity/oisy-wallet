@@ -25,6 +25,8 @@ export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
 export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
+export const NFT_CARD = 'nft-card';
+
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
 

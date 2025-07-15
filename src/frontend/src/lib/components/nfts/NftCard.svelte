@@ -3,13 +3,14 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	interface Props {
-		nft: Nft
+		nft: Nft;
+		testId?: string;
 	}
 
-	let {nft}: Props = $props();
+	let {nft, testId}: Props = $props();
 </script>
 
-<div>
+<div data-tid={testId}>
 	<div class="rounded-lg overflow-hidden relative">
 		<img
 			src={nft.imageUrl}
