@@ -119,7 +119,7 @@ const loadCustomTokenData = ({
 	response: Erc721CustomToken[];
 }) => {
 	erc721CustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
-	loadNfts(tokens); // TODO remove this
+	// loadNfts(tokens); // TODO remove this
 };
 
 const loadNfts = (tokens: Erc721CustomToken[]) => {
@@ -140,21 +140,21 @@ const loadNftsForContract = async ({
 }) => {
 	const myWalletAddress = '0x29469395eaf6f95920e59f858042f0e28d98a20b'; // TODO remove this and load own wallet address
 
+	const tokenIds = await etherscanProvider.erc721TokenInventory({
+		address: myWalletAddress,
+		contractAddress: token.address
+	});
+
+	const loadedTokenIds = nftStore.getTokenIds(token.address);
+	const tokenIdsToLoad = tokenIds.filter((id: number) => !loadedTokenIds.includes(id));
+
+	const batchSize = 10;
+	const tokenIdBatches = Array.from(
+		{ length: Math.ceil(tokenIdsToLoad.length / batchSize) },
+		(_, index) => tokenIdsToLoad.slice(index * batchSize, (index + 1) * batchSize)
+	);
+
 	try {
-		const tokenIds = await etherscanProvider.erc721TokenInventory({
-			address: myWalletAddress,
-			contractAddress: token.address
-		});
-
-		const loadedTokenIds = nftStore.getTokenIds(token.address);
-		const tokenIdsToLoad = tokenIds.filter((id: number) => !loadedTokenIds.includes(id));
-
-		const batchSize = 10;
-		const tokenIdBatches = Array.from(
-			{ length: Math.ceil(tokenIdsToLoad.length / batchSize) },
-			(_, index) => tokenIdsToLoad.slice(index * batchSize, (index + 1) * batchSize)
-		);
-
 		for (const tokenIds of tokenIdBatches) {
 			const nftMetadata: NftMetadata[] = await loadNftMetadataBatch({
 				infuraProvider,
