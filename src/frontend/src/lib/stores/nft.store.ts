@@ -5,7 +5,7 @@ export type NftStoreData = Nft[] | undefined;
 
 export interface NftStore extends Readable<NftStoreData> {
 	addAll: (nfts: Nft[]) => void;
-	getTokenIds: (contractAddress: string) => string[];
+	getTokenIds: (contractAddress: string) => number[];
 	resetAll: () => void;
 }
 

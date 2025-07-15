@@ -11,7 +11,7 @@
 	let { children, nfts = $bindable([]) }: Props = $props();
 
 	$effect(() => {
-		nfts = $nftStore
+		nfts = $nftStore ?? []
 	})
 </script>
 

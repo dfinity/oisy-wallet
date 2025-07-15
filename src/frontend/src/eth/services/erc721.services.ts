@@ -13,7 +13,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { etherscanProviders } from '$eth/providers/etherscan.providers';
+import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft } from '$lib/types/nft';
 
@@ -146,7 +146,7 @@ const loadNftsForContract = async ({
 		});
 
 		const loadedTokenIds = nftStore.getTokenIds(token.address);
-		const tokenIdsToLoad = tokenIds.filter(id => !loadedTokenIds.includes(id));
+		const tokenIdsToLoad = tokenIds.filter((id: number) => !loadedTokenIds.includes(id));
 
 		const batchSize = 10;
 		const tokenIdBatches = Array.from(
