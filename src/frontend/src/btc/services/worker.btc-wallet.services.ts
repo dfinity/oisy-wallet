@@ -32,7 +32,7 @@ export const initBtcWalletWorker = async ({
 	minterCanisterId?: OptionCanisterIdText;
 }): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new WalletWorker.default();
+	let worker: Worker | null = new WalletWorker.default();
 
 	const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);
 	const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
@@ -84,28 +84,36 @@ export const initBtcWalletWorker = async ({
 	};
 
 	const stop = () => {
-		worker.postMessage({
+		worker?.postMessage({
 			msg: 'stopBtcWalletTimer'
 		});
 	};
 
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startBtcWalletTimer',
 				data
 			});
 		},
 		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'triggerBtcWalletTimer',
 				data
 			});
 		},
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stop();
-			worker.terminate();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };
