@@ -25,7 +25,7 @@
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isMobile } from '$lib/utils/device.utils';
-	import { formatUSD } from '$lib/utils/format.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
@@ -128,7 +128,7 @@
 			class:animate-pulse={loading}
 			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
 				$noOfSprinkles: amountOfRewards.toString(),
-				$amount: formatUSD({ value: totalRewardUsd })
+				$amount: formatCurrency({ value: totalRewardUsd })
 			})}
 		</div>
 

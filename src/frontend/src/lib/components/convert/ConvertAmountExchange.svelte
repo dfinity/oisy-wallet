@@ -8,7 +8,7 @@
 		CONVERT_AMOUNT_EXCHANGE_VALUE
 	} from '$lib/constants/test-ids.constants';
 	import type { OptionAmount } from '$lib/types/send';
-	import { formatUSD } from '$lib/utils/format.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let exchangeRate: number | undefined = undefined;
@@ -19,7 +19,7 @@
 
 	let displayValue: string | undefined;
 	$: displayValue = nonNullish(usdValue)
-		? formatUSD({
+		? formatCurrency({
 				value:
 					usdValue === 0 || usdValue > EXCHANGE_USD_AMOUNT_THRESHOLD
 						? usdValue

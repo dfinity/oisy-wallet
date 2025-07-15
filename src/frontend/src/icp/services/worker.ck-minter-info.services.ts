@@ -52,7 +52,7 @@ const initCkMinterInfoWorker = async ({
 		onSyncStatus: (state: SyncState) => void;
 	}): Promise<IcCkWorkerInitResult> => {
 	const CkMinterInfoWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new CkMinterInfoWorker.default();
+	let worker: Worker | null = new CkMinterInfoWorker.default();
 
 	worker.onmessage = ({
 		data: dataMsg
@@ -81,14 +81,16 @@ const initCkMinterInfoWorker = async ({
 	};
 
 	const stop = () => {
-		worker.postMessage({
+		worker?.postMessage({
 			msg: `stop${postMessageKey}MinterInfoTimer`
 		});
 	};
 
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: `start${postMessageKey}MinterInfoTimer`,
 				data: {
 					minterCanisterId
@@ -97,7 +99,7 @@ const initCkMinterInfoWorker = async ({
 		},
 		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: `trigger${postMessageKey}MinterInfoTimer`,
 				data: {
 					minterCanisterId
@@ -105,8 +107,14 @@ const initCkMinterInfoWorker = async ({
 			});
 		},
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stop();
-			worker.terminate();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

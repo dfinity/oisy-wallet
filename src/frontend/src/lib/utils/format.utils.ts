@@ -162,7 +162,7 @@ export const formatSecondsToNormalizedDate = ({
 	});
 };
 
-export const formatUSD = ({
+export const formatCurrency = ({
 	value,
 	options
 }: {

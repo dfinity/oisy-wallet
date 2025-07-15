@@ -183,6 +183,7 @@ interface I18nDapps {
 		staking: string;
 		walletconnect: string;
 		game: string;
+		tools: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -238,6 +239,7 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
+		toolkit: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -1207,7 +1209,7 @@ interface I18nTemporal {
 }
 
 interface I18nAi_assistant {
-	text: { send_message: string; send_message_input_placeholder: string };
+	text: { send_message: string; send_message_input_placeholder: string; loading: string };
 }
 
 interface I18n {
