@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import imageCompression from 'browser-image-compression';
+	import type { ContactImage } from '$declarations/backend/backend.did';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
@@ -20,6 +23,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { imageToDataUrl, saveContact } from '$lib/utils/contact.utils';
 
 	interface Props {
 		contact: ContactUi;
@@ -40,12 +44,92 @@
 		onDeleteContact,
 		onDeleteAddress
 	}: Props = $props();
+
+	let _lastBeImage: ContactImage | null = contact.image[0] ?? null;
+
+	let imageUrl = $state<string | null>(_lastBeImage ? imageToDataUrl(_lastBeImage) : null);
+
+	let fileInput = $state<HTMLInputElement>();
+	let saveError = $state<string | null>(null);
+
+	$effect(() => {
+		const beImage = contact.image[0] ?? null;
+		if (
+			beImage &&
+			beImage !== _lastBeImage &&
+			imageUrl === (_lastBeImage ? imageToDataUrl(_lastBeImage) : null)
+		) {
+			imageUrl = imageToDataUrl(beImage);
+			_lastBeImage = beImage;
+		}
+	});
+
+	const handleFileChange = async (e: Event): Promise<void> => {
+		const file = (e.target as HTMLInputElement).files?.[0];
+		if (!file) {
+			return;
+		}
+
+		try {
+			const options = {
+				maxSizeMB: 0.1,
+				maxWidthOrHeight: 200,
+				useWebWorker: false
+			};
+			const compressed = await imageCompression(file, options);
+			const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+
+			await saveContact({
+				...contact,
+				imageUrl: dataUrl
+			});
+
+			imageUrl = dataUrl;
+			_lastBeImage = null;
+		} catch (err) {
+			console.error('Failed to save image:', err);
+			saveError = err instanceof Error ? err.message : 'Failed to save image';
+		}
+	};
+
+	const replaceImage = (): void => {
+		fileInput?.click();
+	};
+
+	const removeImage = async (): Promise<void> => {
+		try {
+			await saveContact({
+				...contact,
+				imageUrl: null
+			});
+			imageUrl = null;
+			_lastBeImage = null;
+			onEdit({ ...contact, image: [] });
+		} catch (err) {
+			console.error('Failed to remove image:', err);
+			saveError = err instanceof Error ? err.message : 'Failed to remove image';
+		}
+	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
+	{#if saveError}
+		<div class="bg-error mb-2 rounded p-2 text-white">
+			{saveError}
+		</div>
+	{/if}
+
 	<LogoButton hover={false} condensed={true}>
 		{#snippet logo()}
-			<Avatar name={contact.name} variant="xs" styleClass="md:text-[19.2px]"></Avatar>
+			<div class="relative flex">
+				<Avatar name={contact.name} {imageUrl} variant="xs" styleClass="md:text-[19.2px]" />
+				<span
+					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+					data-tid={`avatar-badge-${contact.name}`}
+				>
+					<EditAvatar bind:fileInput bind:imageUrl {replaceImage} {removeImage} />
+				</span>
+			</div>
 		{/snippet}
 
 		{#snippet title()}
@@ -121,3 +205,11 @@
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
+
+<input
+	bind:this={fileInput}
+	type="file"
+	accept="image/*"
+	class="hidden"
+	onchange={handleFileChange}
+/>

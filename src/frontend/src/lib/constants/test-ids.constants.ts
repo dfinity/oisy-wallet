@@ -232,6 +232,7 @@ export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleto
 
 export const SEND_FEE_INFO = 'send-fee-info';
 
+export const AVATAR_IMAGE = 'avatar-image';
 export const AVATAR_WITH_BADGE_FALLBACK_IMAGE = 'avatar-with-badge-fallback-image';
 
 // Contact Card test IDs
@@ -246,6 +247,12 @@ export const TOKEN_MODAL_INDEX_CANISTER_ID_INPUT = 'token-modal-index-canister-i
 export const TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON =
 	'token-modal-index-canister-id-edit-button';
 export const TOKEN_MODAL_SAVE_BUTTON = 'token-modal-save-button';
+
+// Custom popover menu
+
+export const POPOVER_TRIGGER_BUTTON = 'popover-trigger';
+export const POPOVER_MENU = 'popover-menu';
+export const POPOVER_MENU_ITEM = 'popover-menu-item';
 
 // AI Assistant
 export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';
