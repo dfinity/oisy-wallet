@@ -1209,7 +1209,7 @@ interface I18nTemporal {
 }
 
 interface I18nAi_assistant {
-	text: { send_message: string; send_message_input_placeholder: string };
+	text: { send_message: string; send_message_input_placeholder: string; loading: string };
 }
 
 interface I18n {
