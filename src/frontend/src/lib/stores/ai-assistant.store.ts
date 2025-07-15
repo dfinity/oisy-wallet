@@ -10,19 +10,22 @@ export interface AiAssistant {
 export interface AiAssistantStore extends Readable<AiAssistant | undefined> {
 	open: () => void;
 	close: () => void;
+	reset: () => void;
 	appendMessage: (message: ChatMessage) => void;
 }
 
+const initialState = {
+	isOpen: false,
+	chatHistory: [
+		{
+			role: 'system',
+			content: AI_ASSISTANT_SYSTEM_PROMPT
+		}
+	]
+} as AiAssistant;
+
 const initAiAssistantStore = (): AiAssistantStore => {
-	const { subscribe, update } = writable<AiAssistant>({
-		isOpen: false,
-		chatHistory: [
-			{
-				role: 'system',
-				content: AI_ASSISTANT_SYSTEM_PROMPT
-			}
-		]
-	});
+	const { subscribe, update, set } = writable<AiAssistant>(initialState);
 
 	return {
 		subscribe,
@@ -33,6 +36,10 @@ const initAiAssistantStore = (): AiAssistantStore => {
 
 		close: () => {
 			update((state) => ({ ...state, isOpen: false }));
+		},
+
+		reset: () => {
+			set(initialState);
 		},
 
 		appendMessage: (message: ChatMessage) => {
