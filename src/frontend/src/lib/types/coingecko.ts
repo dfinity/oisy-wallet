@@ -65,7 +65,7 @@ export type CoingeckoSimplePrice = {
 	usd_24h_change?: number;
 	last_updated_at?: number;
 } & {
-	[K in Exclude<`${Currencies}`, 'usd'>]?: number;
+	[K in Exclude<`${Currencies}`, Currencies.USD>]?: number;
 };
 
 export type CoingeckoSimpleTokenPrice = Omit<CoingeckoSimplePrice, 'usd_market_cap'> &
