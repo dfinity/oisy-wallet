@@ -7,7 +7,7 @@
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { Languages } from '$lib/types/languages';
+	import { Languages } from '$lib/enums/languages';
 
 	let dropdown = $state<Dropdown>();
 
