@@ -21,7 +21,7 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 	twinToken
 }: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
 	const CkBTCUpdateBalanceWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new CkBTCUpdateBalanceWorker.default();
+	let worker: Worker | null = new CkBTCUpdateBalanceWorker.default();
 
 	worker.onmessage = async ({
 		data: dataMsg
@@ -61,17 +61,19 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 	};
 
 	const stop = () => {
-		worker.postMessage({
+		worker?.postMessage({
 			msg: 'stopCkBTCUpdateBalanceTimer'
 		});
 	};
+
+	let isDestroying = false;
 
 	return {
 		start: () => {
 			// We can imperatively get the address because the worker fetches it, and we only provide it to reduce the number of calls. By doing so, we can adhere to our standard component abstraction for interacting with workers.
 			const btcAddress = get(btcAddressStore)?.[tokenId]?.data;
 
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startCkBTCUpdateBalanceTimer',
 				data: {
 					minterCanisterId,
@@ -86,8 +88,14 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 			// When a user executes it manually on the UI side, we display a progression in a modal therefore we do not have to execute it in the background.
 		},
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stop();
-			worker.terminate();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };
