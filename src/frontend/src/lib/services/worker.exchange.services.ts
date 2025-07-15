@@ -113,7 +113,7 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 			exchangeWorker?.terminate();
 			exchangeWorker = null;
 			isDestroying = false;
-errorMessages = [];
+			errorMessages = [];
 		}
 	};
 };
