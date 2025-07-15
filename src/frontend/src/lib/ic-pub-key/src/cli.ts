@@ -3,8 +3,8 @@
 /* v8 ignore start */
 
 import { schnorr_ed25519_derive } from '$lib/ic-pub-key/src/schnorr/ed25519';
-import { mapDerivationPath } from '$lib/utils/signer.utils';
-import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
+import { mapDerivationPath } from '$lib/utils/signer.utils.js';
+import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants.js';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
@@ -77,12 +77,13 @@ export const deriveSolAddress = async (
 	user: string,
 	network: SolanaNetworkType
 ): Promise<string> => {
-	const pubkey = 'da38b16641af7626e372070ff9f844b7c89d1012850d2198393849d79d3d2d5d';
-	const chaincode = '985be5283a68fc22540930ca02680f86c771419ece571eb838b33eb5604cfbc0';
+	const pubkey = '476374d9df3a8af28d3164dc2422cff894482eadd1295290b6d9ad92b2eeaa5c';
+	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
 
 	const principal = Principal.fromText(user);
 
 	let derivationPath = new DerivationPath([
+		Uint8Array.from([0, 0, 0, 0, 2, 48, 0, 113, 1, 1]),
 		Uint8Array.from([0xfe]),
 		principal.toUint8Array(),
 		...mapDerivationPath([SOLANA_DERIVATION_PATH_PREFIX, network])

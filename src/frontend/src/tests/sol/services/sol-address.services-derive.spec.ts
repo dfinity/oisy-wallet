@@ -16,12 +16,10 @@ describe('sol-address.services', () => {
 			const network = SolanaNetworks.mainnet;
 
 			const foo = await deriveSolAddress(p, network);
-			const encoder = new TextEncoder();
-			const uint8Array = encoder.encode(foo);
 
-			const address = decoder.decode(Uint8Array.from(uint8Array));
+			const bytes = Buffer.from(foo, 'hex');
 
-			console.log(`SolAddress for ${network}`, foo, uint8Array, address);
+			const address = decoder.decode(bytes);
 
 			expect(address).toBe('2EQneZBEeL3XGy3YaQAgxwxYvKq2bRPfQVpiGXgpQEfv');
 		});
@@ -30,12 +28,10 @@ describe('sol-address.services', () => {
 			const network = SolanaNetworks.devnet;
 
 			const foo = await deriveSolAddress(p, network);
-			const encoder = new TextEncoder();
-			const uint8Array = encoder.encode(foo);
 
-			const address = decoder.decode(Uint8Array.from(uint8Array));
+			const bytes = Buffer.from(foo, 'hex');
 
-			console.log(`SolAddress for ${network}`, foo, uint8Array, address);
+			const address = decoder.decode(bytes);
 
 			expect(address).toBe('3azSdZ7u1LxpxTVE6T4oH9XuTYidD7fNhXmJKhTTczw4');
 		});
