@@ -22,4 +22,5 @@ export const NftSchema = z.object({
 		network: NetworkSchema,
 		standard: TokenStandardSchema
 	})
+})
 	.merge(NftMetadataSchema);
