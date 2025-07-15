@@ -174,13 +174,11 @@ describe('EthAddTokenReview', () => {
 
 		const mockErc721Provider = {
 			isErc721: vi.fn().mockResolvedValue(true),
-			metadata: vi
-				.fn()
-				.mockResolvedValue({
-					name: mockErc721CustomToken.name,
-					symbol: mockErc721CustomToken.symbol,
-					decimals: 0
-				}),
+			metadata: vi.fn().mockResolvedValue({
+				name: mockErc721CustomToken.name,
+				symbol: mockErc721CustomToken.symbol,
+				decimals: 0
+			}),
 			provider: new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura),
 			network: ETHEREUM_NETWORK
 		} as unknown as InfuraErc721Provider;
