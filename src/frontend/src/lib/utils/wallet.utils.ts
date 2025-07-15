@@ -56,7 +56,6 @@ export const cleanWorkers = ({
 		.forEach((tokenId) => {
 			// Trigger the stop event to properly cleanup the worker thread
 			// TODO: use a more functional approach instead of deleting the worker from the map.
-			workers.get(tokenId)?.stop();
 			destroyWorker({ workers, tokenId });
 		});
 
