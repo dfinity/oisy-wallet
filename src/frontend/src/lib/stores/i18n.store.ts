@@ -1,4 +1,3 @@
-import { I18N_ENABLED } from '$env/i18n';
 import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
 import { authSignedIn } from '$lib/derived/auth.derived';
 import cs from '$lib/i18n/cs.json';
@@ -68,7 +67,7 @@ export interface I18nStore extends Readable<I18n> {
 }
 
 const initI18n = (): I18nStore => {
-	const { subscribe, set } = writable<I18n>(I18N_ENABLED ? loadLang(getDefaultLang()) : enI18n());
+	const { subscribe, set } = writable<I18n>(loadLang(getDefaultLang()));
 
 	const switchLang = (lang: Languages) => {
 		set(loadLang(lang));
@@ -88,9 +87,7 @@ const initI18n = (): I18nStore => {
 		subscribe,
 
 		init: () => {
-			const lang = I18N_ENABLED
-				? (get<Languages>({ key: 'lang' }) ?? getDefaultLang())
-				: Languages.ENGLISH;
+			const lang = get<Languages>({ key: 'lang' }) ?? getDefaultLang();
 
 			if (lang === getDefaultLang()) {
 				saveLang(lang);
