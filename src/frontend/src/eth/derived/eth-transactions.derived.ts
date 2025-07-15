@@ -87,7 +87,7 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 						...mapEthTransactionUi({
 							transaction,
 							ckMinterInfoAddresses,
-							$ethAddress
+							ethAddress: $ethAddress
 						}),
 						token
 					});
