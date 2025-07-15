@@ -5,11 +5,16 @@
 	import { NFT_CARD } from '$lib/constants/test-ids.constants';
 
 	let nfts: Nft[] = $state([]);
+
+	// $effect(() => {
+	// 	console.log(nfts)
+	// })
+
 </script>
 
 <NFTsDisplayHandler bind:nfts>
 	<div class="grid grid-cols-3 gap-4">
-		{#each nfts as nft}
+		{#each nfts as nft, index (`${nft.id}-${index}`)}
 			<NftCard {nft} testId={`${NFT_CARD}_${nft.id}`}/>
 		{/each}
 	</div>
