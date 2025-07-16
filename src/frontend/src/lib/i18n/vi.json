@@ -979,6 +979,11 @@
 			"unexpected_error_on_token_update": "Đã xảy ra lỗi khi cập nhật token."
 		}
 	},
+	"nfts": {
+		"error": {
+			"fetch_metadata": ""
+		}
+	},
 	"fee": {
 		"text": {
 			"fee": "Phí",

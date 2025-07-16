@@ -979,6 +979,11 @@
 			"unexpected_error_on_token_update": "Si è verificato un errore durante l'aggiornamento del token."
 		}
 	},
+	"nfts": {
+		"error": {
+			"fetch_metadata": ""
+		}
+	},
 	"fee": {
 		"text": {
 			"fee": "Fee",

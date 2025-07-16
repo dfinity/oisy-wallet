@@ -825,9 +825,7 @@ interface I18nTokens {
 }
 
 interface I18nNfts {
-	error: {
-		fetch_metadata: string;
-	}
+	error: { fetch_metadata: string };
 }
 
 interface I18nFee {
