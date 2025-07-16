@@ -1,9 +1,5 @@
 import type { ContactImage, ImageMimeType } from '$declarations/backend/backend.did';
-import { updateContact as apiUpdateContact } from '$lib/api/backend.api';
-import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
-import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
-import { AuthClient } from '@dfinity/auth-client';
 
 export interface SaveContactParams extends Omit<ContactUi, 'image'> {
 	image?: ContactImage;
