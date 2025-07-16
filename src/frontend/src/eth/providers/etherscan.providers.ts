@@ -20,6 +20,7 @@ import {
 	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
+import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 
 interface TransactionsParams {
 	address: EthAddress;
@@ -183,9 +184,9 @@ export class EtherscanProvider {
 	};
 
 	erc721TokenInventory = async ({
-		address,
-		contractAddress
-	}: {
+																	address,
+																	contractAddress
+																}: {
 		address: EthAddress;
 		contractAddress: Address;
 	}): Promise<number[]> => {
@@ -198,9 +199,13 @@ export class EtherscanProvider {
 			sort: 'desc'
 		};
 
-		const result = await this.provider.fetch('account', params);
+		const result: EtherscanProviderTokenId[] | string = await this.provider.fetch('account', params);
 
-		return result.map(({ TokenId }: { TokenId: string }) => parseInt(TokenId));
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseInt(TokenId));
 	};
 }
 
