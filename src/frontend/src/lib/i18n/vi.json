@@ -1475,9 +1475,18 @@
 	},
 	"ai_assistant": {
 		"text": {
+			"title": "",
+			"welcome_message": "",
+			"action_button_contacts_title": "",
+			"action_button_contacts_subtitle": "",
+			"action_button_contacts_prompt": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
 			"loading": ""
+		},
+		"errors": {
+			"unknown": "",
+			"no_response": ""
 		}
 	}
 }
