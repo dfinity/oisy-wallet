@@ -23,7 +23,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import { imageToDataUrl, saveContact } from '$lib/utils/contact.utils';
+	import { imageToDataUrl, saveContact } from '$lib/utils/contact-image.utils';
 
 	interface Props {
 		contact: ContactUi;
