@@ -12,11 +12,15 @@ export interface SaveContactParams extends Omit<ContactUi, 'image'> {
 const parseDataUrl = (dataUrl: string): { mime: string; data: Uint8Array } => {
 	const [header, b64] = dataUrl.split(',');
 	const match = header.match(/data:(.*);base64/);
-	if (!match) {throw new Error(`Invalid data URL: ${header}`);}
+	if (!match) {
+		throw new Error(`Invalid data URL: ${header}`);
+	}
 	const [, mime] = match;
 	const bin = atob(b64);
 	const arr = new Uint8Array(bin.length);
-	for (let i = 0; i < bin.length; i++) {arr[i] = bin.charCodeAt(i);}
+	for (let i = 0; i < bin.length; i++) {
+		arr[i] = bin.charCodeAt(i);
+	}
 	return { mime, data: arr };
 };
 
