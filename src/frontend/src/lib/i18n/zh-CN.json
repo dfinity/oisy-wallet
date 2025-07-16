@@ -979,11 +979,6 @@
 			"unexpected_error_on_token_update": "更新代币时发生错误。"
 		}
 	},
-	"nfts": {
-		"error": {
-			"fetch_metadata": ""
-		}
-	},
 	"fee": {
 		"text": {
 			"fee": "手续费",
