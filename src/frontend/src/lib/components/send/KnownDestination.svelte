@@ -15,6 +15,7 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 
 	interface Props {
 		destination: Address;
@@ -74,7 +75,7 @@
 				{formatSecondsToNormalizedDate({
 					seconds: normalizeTimestampToSeconds(timestamp),
 					currentDate,
-					i18n: $i18n
+					language: $currentLanguage
 				})}
 			{/if}
 		</div>
