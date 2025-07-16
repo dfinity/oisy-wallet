@@ -183,11 +183,12 @@
 		},
 		"categories": {
 			"defi": "DeFi",
-			"social_media": "Meios de comunicação social",
+			"social_media": "Mídias sociais",
 			"verifiable_credentials": "Credentiais verificáveis",
-			"staking": "Participar no stake de ativos",
-			"walletconnect": "Conexão de carteira",
-			"game": "Jogo"
+			"staking": "Staking",
+			"walletconnect": "WalletConnect",
+			"game": "Jogo",
+			"tools": "Ferramentas"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "Mídias social descentralizada - publique, ganhe, possua.",
 					"call_to_action": "Aprender mais"
 				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "Onde a governança encontra a colaboração para impulsionar a inovação.",
+				"description": "O Toolkit é um conjunto versátil para gerenciar Service Nervous Systems (SNS) e projetos no Internet Computer. De propostas de governança à implantação de contêineres, ele capacita os usuários a inovar, colaborar e descentralizar perfeitamente."
 			}
 		}
 	},
@@ -1475,8 +1481,18 @@
 	},
 	"ai_assistant": {
 		"text": {
+			"title": "",
+			"welcome_message": "",
+			"action_button_contacts_title": "",
+			"action_button_contacts_subtitle": "",
+			"action_button_contacts_prompt": "",
 			"send_message": "",
-			"send_message_input_placeholder": ""
+			"send_message_input_placeholder": "",
+			"loading": ""
+		},
+		"errors": {
+			"unknown": "",
+			"no_response": ""
 		}
 	}
 }
