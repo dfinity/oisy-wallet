@@ -87,7 +87,9 @@ export class InfuraErc721Provider {
 				imageUrl
 			};
 		} catch (error: unknown) {
-			throw new Error(`Failed to fetch erc721 token metadata: ${error}`);
+			throw new Error(replacePlaceholders(get(i18n).nfts.error.fetch_metadata, {
+				$address: contractAddress
+			}), { cause: error });
 		}
 	};
 }

@@ -979,6 +979,11 @@
 			"unexpected_error_on_token_update": "Something went wrong while updating the token."
 		}
 	},
+	"nfts": {
+		"error": {
+			"fetch_metadata": "Error while fetching metadata of contract: $address"
+		}
+	},
 	"fee": {
 		"text": {
 			"fee": "Fee",
