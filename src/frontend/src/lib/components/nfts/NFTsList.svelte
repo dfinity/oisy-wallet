@@ -5,10 +5,6 @@
 	import type { Nft } from '$lib/types/nft';
 
 	let nfts: Nft[] = $state([]);
-
-	// $effect(() => {
-	// 	console.log(nfts)
-	// })
 </script>
 
 <NFTsDisplayHandler bind:nfts>

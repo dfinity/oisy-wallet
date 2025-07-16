@@ -52,6 +52,8 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { loadNfts } from '$lib/services/nft.services';
+	import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -149,6 +151,15 @@
 				}
 			}
 		}
+	}
+
+	const debounceLoadNfts = debounce(() => {
+		const tokensList = Array.from($erc721CustomTokensStore).map(tokenEntry => tokenEntry.data);
+		loadNfts(tokensList)
+	})
+
+	$: if ($erc721CustomTokensStore) {
+		debounceLoadNfts();
 	}
 
 	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });
