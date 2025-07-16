@@ -1,13 +1,13 @@
 import { nftStore } from '$lib/stores/nft.store';
-import { get } from 'svelte/store';
-import { mockValidNft } from '$tests/mocks/nfts.mock';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
 import type { Nft } from '$lib/types/nft';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
+import { mockValidNft } from '$tests/mocks/nfts.mock';
+import { get } from 'svelte/store';
 
 describe('nftStore', () => {
 	beforeEach(() => {
 		nftStore.resetAll();
-	})
+	});
 
 	it('should initialize store with undefined', () => {
 		expect(get(nftStore)).toBeUndefined();
@@ -24,7 +24,7 @@ describe('nftStore', () => {
 		});
 
 		it('should not add duplicate NFTs to store', () => {
-			const duplicateNft = {...mockValidNft};
+			const duplicateNft = { ...mockValidNft };
 
 			nftStore.addAll([mockValidNft, duplicateNft]);
 
@@ -32,7 +32,7 @@ describe('nftStore', () => {
 		});
 
 		it('should not add already existing NFTs to store', () => {
-			const duplicateNft = {...mockValidNft};
+			const duplicateNft = { ...mockValidNft };
 
 			nftStore.addAll([mockValidNft]);
 
@@ -44,7 +44,10 @@ describe('nftStore', () => {
 		});
 
 		it('should add NFT with same token id but different contract address', () => {
-			const similarNft: Nft = {...mockValidNft, contract: { ...mockValidNft.contract, address: mockEthAddress2}};
+			const similarNft: Nft = {
+				...mockValidNft,
+				contract: { ...mockValidNft.contract, address: mockEthAddress2 }
+			};
 
 			nftStore.addAll([mockValidNft, similarNft]);
 
@@ -58,16 +61,16 @@ describe('nftStore', () => {
 
 		beforeEach(() => {
 			nftStore.addAll([mockNft1, mockNft2]);
-		})
+		});
 
 		it('should return empty list when no NFT is matching contract address', () => {
-			const tokenIds = nftStore.getTokenIds(mockEthAddress2)
+			const tokenIds = nftStore.getTokenIds(mockEthAddress2);
 
 			expect(tokenIds).toEqual([]);
-		})
+		});
 
 		it('should return token Ids for matching contract address', () => {
-			const tokenIds = nftStore.getTokenIds(mockEthAddress)
+			const tokenIds = nftStore.getTokenIds(mockEthAddress);
 
 			expect(tokenIds).toEqual([mockNft1.id, mockNft2.id]);
 		});

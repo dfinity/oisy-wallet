@@ -16,7 +16,11 @@ const initNftStore = (): NftStore => {
 		subscribe,
 		addAll: (nfts: Nft[]) => {
 			const uniqueNfts = nfts.reduce<Nft[]>((acc, current) => {
-				if (!acc.some(nft => nft.id === current.id && nft.contract.address === current.contract.address)) {
+				if (
+					!acc.some(
+						(nft) => nft.id === current.id && nft.contract.address === current.contract.address
+					)
+				) {
 					acc.push(current);
 				}
 				return acc;
