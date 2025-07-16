@@ -208,7 +208,7 @@
 						{$i18n.transaction.text.timestamp}
 					</span>
 
-					<output>{formatSecondsToDate({ seconds: Number(timestamp), i18n: $i18n })}</output>
+					<output>{formatSecondsToDate({ seconds: Number(timestamp), language: $i18n })}</output>
 				</ListItem>
 			{/if}
 

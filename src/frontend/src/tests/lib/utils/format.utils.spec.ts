@@ -1,5 +1,6 @@
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
+import { Languages } from '$lib/types/languages';
 import {
 	formatNanosecondsToDate,
 	formatSecondsToDate,
@@ -458,14 +459,14 @@ describe('format.utils', () => {
 		it('formats date in German locale when i18n.lang is de', () => {
 			const result = formatSecondsToDate({
 				seconds: 1672531200,
-				i18n: { lang: 'de' } as unknown as I18n
+				language: Languages.GERMAN
 			});
 
 			expect(result).toMatch('1. Jan. 2023');
 		});
 
 		it('falls back to en locale when i18n.lang is not provided', () => {
-			const result = formatSecondsToDate({ seconds: 1672531200, i18n: {} as unknown as I18n });
+			const result = formatSecondsToDate({ seconds: 1672531200 });
 
 			expect(result).toMatch('Jan 1, 2023');
 		});
