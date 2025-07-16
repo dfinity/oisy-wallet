@@ -46,9 +46,9 @@ export class InfuraErc721Provider {
 	};
 
 	getNftMetadata = async ({
-														contractAddress,
-														tokenId
-													}: {
+		contractAddress,
+		tokenId
+	}: {
 		contractAddress: string;
 		tokenId: number;
 	}): Promise<NftMetadata> => {
