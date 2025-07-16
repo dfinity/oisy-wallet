@@ -1,7 +1,10 @@
+import type { BtcTransactionUi } from '$btc/types/btc';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransaction, Transaction } from '$lib/types/transaction';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
 
 type TransactionTypes = AnyTransaction;
@@ -38,12 +41,24 @@ export interface TransactionsStore<T extends TransactionTypes>
 	add: (params: TransactionsStoreParams<T>) => void;
 	prepend: (params: TransactionsStoreParams<T>) => void;
 	append: (params: TransactionsStoreParams<T>) => void;
+	update: (params: { tokenId: TokenId; transaction: CertifiedTransaction<T> }) => void;
 	cleanUp: (params: TransactionsStoreIdParams<T>) => void;
 	nullify: (tokenId: TokenId) => void;
 }
 
 export const initTransactionsStore = <T extends UiTransactionTypes>(): TransactionsStore<T> => {
 	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
+
+	const isTransactionUi = (transaction: TransactionTypes): transaction is UiTransactionTypes =>
+		'id' in transaction;
+
+	const getIdentifier = (
+		transaction: TransactionTypes
+	):
+		| IcTransactionUi['id']
+		| BtcTransactionUi['id']
+		| SolTransactionUi['id']
+		| Transaction['hash'] => (isTransactionUi(transaction) ? transaction.id : transaction.hash);
 
 	return {
 		set: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>
@@ -83,6 +98,22 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 				[tokenId]: ((state ?? {})[tokenId] ?? []).filter(
 					({ data: { id } }) => !transactionIds.includes(`${id}`)
 				)
+			})),
+		update: ({
+			tokenId,
+			transaction
+		}: {
+			tokenId: TokenId;
+			transaction: CertifiedTransaction<T>;
+		}) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: [
+					...(state?.[tokenId] ?? []).filter(
+						({ data }) => getIdentifier(data) !== getIdentifier(transaction.data)
+					),
+					transaction
+				]
 			})),
 		nullify: (tokenId) =>
 			update((state) => ({
