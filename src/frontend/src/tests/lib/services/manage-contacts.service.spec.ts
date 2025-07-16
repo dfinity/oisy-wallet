@@ -108,7 +108,7 @@ describe('manage-contacts.service', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 			contactsStore.reset();
-		
+
 			updateContactSpy = vi
 				.spyOn(contactsStore, 'updateContact')
 				.mockImplementation((_contact: ContactUi) => {
@@ -202,7 +202,7 @@ describe('manage-contacts.service', () => {
 				name: 'Existing Contact',
 				updateTimestampNs: BigInt(Date.now()),
 				addresses: [],
-				image: undefined as unknown as ContactImage | null, 
+				image: undefined as unknown as ContactImage | null,
 				identity: mockIdentity
 			});
 
