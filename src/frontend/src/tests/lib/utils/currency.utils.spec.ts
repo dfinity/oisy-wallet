@@ -1,5 +1,5 @@
 import { Currencies } from '$lib/enums/currencies';
-import { Languages } from '$lib/enum/languages';
+import { Languages } from '$lib/enums/languages';
 import { getCurrencyName } from '$lib/utils/currency.utils';
 
 describe('currency.utils', () => {
