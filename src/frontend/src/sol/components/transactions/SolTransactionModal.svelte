@@ -9,6 +9,7 @@
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
@@ -21,7 +22,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -209,7 +209,12 @@
 						{$i18n.transaction.text.timestamp}
 					</span>
 
-					<output>{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}</output>
+					<output
+						>{formatSecondsToDate({
+							seconds: Number(timestamp),
+							language: $currentLanguage
+						})}</output
+					>
 				</ListItem>
 			{/if}
 

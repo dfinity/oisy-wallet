@@ -17,6 +17,7 @@
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionString } from '$lib/types/string';
@@ -29,7 +30,6 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -164,7 +164,12 @@
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
-					<output>{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}</output>
+					<output
+						>{formatSecondsToDate({
+							seconds: Number(timestamp),
+							language: $currentLanguage
+						})}</output
+					>
 				</ListItem>
 			{/if}
 
