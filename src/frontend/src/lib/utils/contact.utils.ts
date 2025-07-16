@@ -1,4 +1,4 @@
-import type { Contact, ContactImage } from '$declarations/backend/backend.did';
+import type { Contact } from '$declarations/backend/backend.did';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 import type { Address, OptionAddress } from '$lib/types/address';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
@@ -9,14 +9,7 @@ import {
 	getDiscriminatorForTokenAccountId,
 	getTokenAccountIdAddressString
 } from '$lib/utils/token-account-id.utils';
-import {
-	fromNullable,
-	isEmptyString,
-	isNullish,
-	nonNullish,
-	notEmptyString,
-	toNullable
-} from '@dfinity/utils';
+import { fromNullable, isEmptyString, isNullish, notEmptyString, toNullable } from '@dfinity/utils';
 
 export const selectColorForName = <T>({
 	colors,
@@ -43,7 +36,7 @@ export const mapToFrontendContact = (contact: Contact): ContactUi => {
 	return {
 		...rest,
 		updateTimestampNs: update_timestamp_ns,
-		image: nonNullish(image[0]) ? ([image[0]] as [ContactImage]) : [],
+		image: fromNullable(image),
 		addresses: contact.addresses.map((address) => ({
 			address: getTokenAccountIdAddressString(address.token_account_id),
 			label: fromNullable(address.label),
@@ -57,7 +50,7 @@ export const mapToBackendContact = (contact: ContactUi): Contact => {
 	return {
 		...rest,
 		update_timestamp_ns: updateTimestampNs,
-		image: image ?? [],
+		image: image ? [image] : [],
 		addresses: contact.addresses.map((address) => ({
 			token_account_id: TokenAccountIdSchema.parse(address.address),
 			label: toNullable(address.label)

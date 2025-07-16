@@ -30,14 +30,14 @@ describe('AddressBookStep', () => {
 				}
 			],
 			updateTimestampNs: BigInt(Date.now()),
-			image: [] as []
+			image: undefined
 		},
 		{
 			id: 2n,
 			name: 'Test Contact_2',
 			addresses: [],
 			updateTimestampNs: BigInt(Date.now()),
-			image: [] as []
+			image: undefined
 		},
 		{
 			id: 3n,
@@ -55,7 +55,7 @@ describe('AddressBookStep', () => {
 				}
 			],
 			updateTimestampNs: BigInt(Date.now()),
-			image: [] as []
+			image: undefined
 		}
 	];
 	const mockAddContact = vi.fn();
@@ -251,7 +251,8 @@ describe('AddressBookStep', () => {
 				id: 3n,
 				name: 'Jane Smith',
 				addresses: [],
-				updateTimestampNs: BigInt(Date.now())
+				updateTimestampNs: BigInt(Date.now()),
+				image: undefined
 			}
 		];
 
@@ -278,7 +279,8 @@ describe('AddressBookStep', () => {
 				id: 4n,
 				name: 'Case Insensitive',
 				addresses: [],
-				updateTimestampNs: BigInt(Date.now())
+				updateTimestampNs: BigInt(Date.now()),
+				image: undefined
 			}
 		];
 
@@ -304,10 +306,14 @@ describe('AddressBookStep', () => {
 				id: 4n,
 				name: 'Case Sensitive',
 				addresses: [
-					{ address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ', addressType: 'Sol' }
+					{
+						address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ',
+						addressType: 'Sol' as const,
+						label: 'Sol Address'
+					}
 				],
 				updateTimestampNs: BigInt(Date.now()),
-				image: [] as []
+				image: undefined
 			}
 		];
 
