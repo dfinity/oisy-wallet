@@ -10,6 +10,7 @@ import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
+import type { NftMetadata } from '$lib/types/nft';
 
 const ERC721_INTERFACE_ID = '0x80ac58cd';
 
@@ -41,6 +42,52 @@ export class InfuraErc721Provider {
 			return await erc721Contract.supportsInterface(ERC721_INTERFACE_ID);
 		} catch (_: unknown) {
 			return false;
+		}
+	};
+
+	getNftMetadata = async ({
+		contractAddress,
+		tokenId
+	}: {
+		contractAddress: string;
+		tokenId: number;
+	}): Promise<NftMetadata> => {
+		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
+
+		const resolveResourceUrl = (url: string): string => {
+			const IPFS_PREFIX = 'ipfs://';
+			if (url.startsWith(IPFS_PREFIX)) {
+				return url.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/');
+			}
+
+			return url;
+		}
+
+		try {
+			const tokenUri = await erc721Contract.tokenURI(tokenId);
+
+			const metadataUrl = resolveResourceUrl(tokenUri);
+
+			const response = await fetch(metadataUrl);
+			const metadata = await response.json();
+
+			const imageUrl = resolveResourceUrl(metadata?.image ?? '');
+
+			const mappedAttributes = (metadata?.attributes ?? []).map(
+				(attr: { trait_type: string; value: string | number }) => ({
+					traitType: attr.trait_type,
+					value: attr.value.toString()
+				})
+			);
+
+			return {
+				name: metadata?.name ?? '',
+				id: tokenId,
+				attributes: mappedAttributes,
+				imageUrl
+			};
+		} catch (error: unknown) {
+			throw new Error(`Failed to fetch erc721 token metadata: ${error}`);
 		}
 	};
 }
