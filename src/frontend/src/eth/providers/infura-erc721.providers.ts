@@ -70,7 +70,7 @@ export class InfuraErc721Provider {
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
 
-		const imageUrl = resolveResourceUrl(metadata?.image ?? '');
+		const imageUrl = resolveResourceUrl(new URL(metadata?.image ?? ''));
 
 		const mappedAttributes = (metadata?.attributes ?? []).map(
 			(attr: { trait_type: string; value: string | number }) => ({
@@ -83,7 +83,7 @@ export class InfuraErc721Provider {
 			name: metadata?.name ?? '',
 			id: tokenId,
 			attributes: mappedAttributes,
-			imageUrl
+			imageUrl: imageUrl.href
 		};
 	};
 }
