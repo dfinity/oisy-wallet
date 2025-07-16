@@ -22,6 +22,7 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 
 	interface Props {
 		transaction: BtcTransactionUi;
@@ -156,7 +157,7 @@
 						{$i18n.transaction.text.timestamp}
 					</span>
 
-					<output>{formatSecondsToDate({ seconds: Number(timestamp), language: $i18n })}</output>
+					<output>{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage})}</output>
 				</ListItem>
 			{/if}
 

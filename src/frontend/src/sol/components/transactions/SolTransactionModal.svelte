@@ -21,6 +21,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -208,7 +209,7 @@
 						{$i18n.transaction.text.timestamp}
 					</span>
 
-					<output>{formatSecondsToDate({ seconds: Number(timestamp), language: $i18n })}</output>
+					<output>{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}</output>
 				</ListItem>
 			{/if}
 

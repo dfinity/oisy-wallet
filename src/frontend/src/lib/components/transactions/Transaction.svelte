@@ -19,6 +19,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 
 	interface Props {
 		amount?: bigint;
@@ -111,7 +112,7 @@
 			{#snippet description()}
 				<span data-tid="receive-tokens-modal-transaction-timestamp">
 					{#if nonNullish(timestamp)}
-						{formatSecondsToDate({ seconds: Number(timestamp), language: $i18n })}
+						{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}
 					{/if}
 				</span>
 				<TransactionStatusComponent {status} />
