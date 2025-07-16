@@ -7,8 +7,8 @@ export interface ContactAddressUi {
 	addressType: TokenAccountIdTypes;
 }
 
-export interface ContactUi extends Omit<Contact, 'addresses' | 'update_timestamp_ns'> {
+export interface ContactUi extends Omit<Contact, 'addresses' | 'update_timestamp_ns' | 'image'> {
 	addresses: ContactAddressUi[];
 	updateTimestampNs: bigint;
-	image: [] | [ContactImage];
+	image?: ContactImage;
 }
