@@ -42,6 +42,7 @@
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { attachImageToContact } from '$lib/services/manage-contacts.service';
 
 	let loading = $state(false);
 

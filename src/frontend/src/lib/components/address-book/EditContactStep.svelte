@@ -23,7 +23,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import { imageToDataUrl, saveContact } from '$lib/utils/contact.utils';
+	import { imageToDataUrl, saveContact } from '$lib/utils/contact-image.utils';
 
 	interface Props {
 		contact: ContactUi;
@@ -79,13 +79,14 @@
 			const compressed = await imageCompression(file, options);
 			const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
 
-			await saveContact({
+			const updated = await saveContact({
 				...contact,
 				imageUrl: dataUrl
 			});
 
 			imageUrl = dataUrl;
-			_lastBeImage = null;
+			contact = updated;
+
 		} catch (err) {
 			console.error('Failed to save image:', err);
 			saveError = err instanceof Error ? err.message : 'Failed to save image';
@@ -98,13 +99,13 @@
 
 	const removeImage = async (): Promise<void> => {
 		try {
-			await saveContact({
+			const updated = await saveContact({
 				...contact,
 				imageUrl: null
 			});
 			imageUrl = null;
 			_lastBeImage = null;
-			onEdit({ ...contact, image: [] });
+			contact = updated;
 		} catch (err) {
 			console.error('Failed to remove image:', err);
 			saveError = err instanceof Error ? err.message : 'Failed to remove image';
