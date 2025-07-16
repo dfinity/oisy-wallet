@@ -1481,9 +1481,18 @@
 	},
 	"ai_assistant": {
 		"text": {
+			"title": "$oisy_short AI Assistant",
+			"welcome_message": "Hello there! \uD83D\uDC4B I'm OISY, your personal AI concierge. Here's how I can help you:",
+			"action_button_contacts_title": "Show contacts",
+			"action_button_contacts_subtitle": "Display your saved contacts",
+			"action_button_contacts_prompt": "Show me my contacts.",
 			"send_message": "Send message",
 			"send_message_input_placeholder": "What do you want to do?",
 			"loading": "Thinking..."
+		},
+		"errors": {
+			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
+			"no_response": "Sorry, I didn't get a response from the LLM."
 		}
 	}
 }

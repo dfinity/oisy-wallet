@@ -3,7 +3,8 @@ import {
 	saveErc20UserTokens,
 	saveErc721CustomTokens
 } from '$eth/services/manage-tokens.services';
-import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import type { Erc20CustomToken, SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
@@ -31,6 +32,7 @@ import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -327,6 +329,27 @@ export const saveAllCustomTokens = async ({
 		identity: $authIdentity
 	};
 
+	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+	const customTokens = get(erc20CustomTokensStore) ?? [];
+	const erc20CustomTokens = erc20.reduce<SaveErc20CustomToken[]>((acc, token) => {
+		const customToken = customTokens.find(
+			({
+				data: {
+					address,
+					network: { chainId }
+				}
+			}) => address === token.address && chainId === token.network.chainId
+		);
+
+		return [
+			...acc,
+			{
+				...token,
+				...(nonNullish(customToken) ? { version: customToken.data.version } : {})
+			}
+		];
+	}, []);
+
 	await Promise.allSettled([
 		...(icrc.length > 0
 			? [
@@ -338,13 +361,14 @@ export const saveAllCustomTokens = async ({
 			: []),
 		...(erc20.length > 0
 			? [
+					// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 					saveErc20UserTokens({
 						...commonParams,
 						tokens: erc20
 					}),
 					saveErc20CustomTokens({
 						...commonParams,
-						tokens: erc20
+						tokens: erc20CustomTokens
 					})
 				]
 			: []),
