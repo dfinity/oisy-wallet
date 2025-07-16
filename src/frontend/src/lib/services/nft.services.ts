@@ -2,11 +2,8 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
 import { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { Nft, NftMetadata } from '$lib/types/nft';
-import { get } from 'svelte/store';
 
 export const loadNfts = (tokens: Erc721CustomToken[]) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
@@ -76,7 +73,7 @@ const loadNftMetadataBatch = async ({
 				tokenId: tokenIds[i]
 			});
 		} catch (_: unknown) {
-			metadata = { id: tokenIds[i] }
+			metadata = { id: tokenIds[i] };
 		}
 
 		nftMetadata.push(metadata);
