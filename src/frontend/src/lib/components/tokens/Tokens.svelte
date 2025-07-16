@@ -1,17 +1,17 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NFTsList from '$lib/components/nfts/NFTsList.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
-	import { TokenType } from '$lib/enums/token-type';
-	import { nonNullish } from '@dfinity/utils';
-	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
-	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { TokenType } from '$lib/enums/token-type';
 
 	let selectedTokenType = $state(TokenType.TOKEN);
 
