@@ -20,13 +20,6 @@ export const getCurrencySymbol = ({
 	currency: Currencies;
 	language: Languages;
 }): string | undefined =>
-	(0)
-		.toLocaleString(language, {
-			style: 'currency',
-			currency,
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0,
-			currencyDisplay: 'symbol'
-		})
-		.replace(/\d/g, '')
-		.trim();
+	new Intl.NumberFormat(language, { style: 'currency', currency })
+		.formatToParts(0)
+		.find((p) => p.type === 'currency')?.value;
