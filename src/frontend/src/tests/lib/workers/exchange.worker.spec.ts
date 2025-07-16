@@ -79,9 +79,11 @@ describe('exchange.worker', () => {
 		describe('with message startExchangeTimer', () => {
 			const mockErc20ContractAddresses: Erc20ContractAddressWithNetwork[] = [
 				{ address: '0x123', coingeckoId: 'ethereum' },
-				{ address: '0x456', coingeckoId: 'polygon-pos' },
+				{ address: '0x456', coingeckoId: 'base' },
 				{ address: '0x789', coingeckoId: 'binance-smart-chain' },
-				{ address: '0xabc', coingeckoId: 'ethereum' }
+				{ address: '0xabc', coingeckoId: 'ethereum' },
+				{ address: '0xdef', coingeckoId: 'polygon-pos' },
+				{ address: '0xghi', coingeckoId: 'arbitrum-one' }
 			];
 			const mockIcrcLedgerCanisterIds: LedgerCanisterIdText[] = ['icrc1', 'icrc2'];
 			const mockSplTokenAddresses: SplTokenAddress[] = ['spl1', 'spl2'];
