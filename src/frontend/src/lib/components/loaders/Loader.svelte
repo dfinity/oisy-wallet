@@ -154,7 +154,7 @@
 	}
 
 	const debounceLoadNfts = debounce(() => {
-		const tokensList = Array.from($erc721CustomTokensStore).map((tokenEntry) => tokenEntry.data);
+		const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data);
 		loadNfts(tokensList);
 	});
 
