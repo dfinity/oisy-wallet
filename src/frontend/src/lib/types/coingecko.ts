@@ -28,7 +28,7 @@ export type CoingeckoCurrency = `${Currencies}`;
 
 export interface CoingeckoSimpleParams {
 	// vs_currency of coins, comma-separated if querying more than 1 vs_currency
-	vs_currencies: CoingeckoCurrency;
+	vs_currencies: CoingeckoCurrency | `${CoingeckoCurrency},${CoingeckoCurrency}`;
 
 	// true/false to include market_cap, default: false
 	include_market_cap?: boolean;
@@ -58,13 +58,15 @@ export interface CoingeckoSimpleTokenPriceParams extends CoingeckoSimpleParams {
 	contract_addresses: string | string[];
 }
 
-export interface CoingeckoSimplePrice {
+export type CoingeckoSimplePrice = {
 	usd: number;
 	usd_market_cap?: number;
 	usd_24h_vol?: number;
 	usd_24h_change?: number;
 	last_updated_at?: number;
-}
+} & {
+	[K in Exclude<`${Currencies}`, Currencies.USD>]?: number;
+};
 
 export type CoingeckoSimpleTokenPrice = Omit<CoingeckoSimplePrice, 'usd_market_cap'> &
 	Required<Pick<CoingeckoSimplePrice, 'usd_market_cap'>>;
