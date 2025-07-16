@@ -36,7 +36,9 @@
 		labelsSize="lg"
 	/>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={back} />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={back} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

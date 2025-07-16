@@ -11,6 +11,7 @@
 		asMenuItemCondensed?: boolean;
 		shortTextOnMobile?: boolean;
 		trackEventSource?: string;
+		testId?: string;
 	}
 
 	// We display an alternative "Docs" text instead of "Documentation" to avoid design breaks on small screens
@@ -18,7 +19,8 @@
 		asMenuItem = false,
 		asMenuItemCondensed = false,
 		shortTextOnMobile = false,
-		trackEventSource
+		trackEventSource,
+		testId
 	}: Props = $props();
 </script>
 
@@ -33,6 +35,7 @@
 		name: TRACK_COUNT_OPEN_DOCUMENTATION,
 		metadata: { source: trackEventSource ?? '' }
 	}}
+	{testId}
 >
 	{#if asMenuItem}
 		<IconBook />

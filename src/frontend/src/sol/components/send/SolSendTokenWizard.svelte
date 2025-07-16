@@ -7,7 +7,6 @@
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -20,11 +19,10 @@
 	import {
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
-		solAddressTestnet
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import type { ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -40,8 +38,7 @@
 	import {
 		isNetworkIdSolana,
 		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
+		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
@@ -72,13 +69,11 @@
 
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
-	$: [source, solanaNativeToken] = isNetworkIdSOLTestnet(networkId)
-		? [$solAddressTestnet, SOLANA_TESTNET_TOKEN]
-		: isNetworkIdSOLDevnet(networkId)
-			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
-			: isNetworkIdSOLLocal(networkId)
-				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
-				: [$solAddressMainnet, SOLANA_TOKEN];
+	$: [source, solanaNativeToken] = isNetworkIdSOLDevnet(networkId)
+		? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
+		: isNetworkIdSOLLocal(networkId)
+			? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+			: [$solAddressMainnet, SOLANA_TOKEN];
 
 	/**
 	 * Fee context store
@@ -186,6 +181,17 @@
 					token: $sendToken.symbol
 				}
 			});
+
+			if (sendProgressStep === ProgressStepsSendSol.CONFIRM) {
+				toastsError({
+					msg: { text: $i18n.send.error.solana_confirmation_failed },
+					err
+				});
+
+				setTimeout(() => close(), 750);
+
+				return;
+			}
 
 			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)
 				? $i18n.send.error.solana_transaction_expired

@@ -1,16 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
-	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
-	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-	import { isTokenErc20UserToken, isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
-	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
+	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -30,10 +23,6 @@
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
-	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
-	import { isSolanaToken } from '$sol/utils/token.utils';
 
 	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
 
@@ -113,27 +102,9 @@
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
-	let groupModifiedTokens = $derived(
-		Object.values(modifiedTokens).reduce<{
-			icrc: IcrcCustomToken[];
-			erc20: Erc20UserToken[];
-			spl: SplTokenToggleable[];
-		}>(
-			({ icrc, erc20, spl }, token) => ({
-				icrc: [
-					...icrc,
-					...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
-				],
-				erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
-				spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
-			}),
-			{ icrc: [], erc20: [], spl: [] }
-		)
-	);
-
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
 	// We might want to improve this in the future.
-	const save = () => dispatch('icSave', groupModifiedTokens);
+	const save = () => dispatch('icSave', modifiedTokens);
 </script>
 
 {#if nonNullish(infoElement)}
@@ -171,15 +142,7 @@
 				{/snippet}
 
 				{#snippet action()}
-					{#if icTokenIcrcCustomToken(token)}
-						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
-						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
-					{:else if isBitcoinToken(token)}
-						<BtcManageTokenToggle />
-					{:else if isSolanaToken(token)}
-						<SolManageTokenToggle />
-					{/if}
+					<EnableTokenToggle {token} {onToggle} />
 				{/snippet}
 			</LogoButton>
 		{/snippet}

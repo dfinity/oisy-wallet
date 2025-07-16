@@ -7,6 +7,7 @@ import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
@@ -73,6 +74,10 @@ describe('sol-wallet.scheduler', () => {
 
 	let originalPostMessage: unknown;
 
+	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	const awaitJobExecution = () =>
+		vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 	beforeAll(() => {
 		originalPostMessage = window.postMessage;
 		window.postMessage = postMessageMock;
@@ -81,6 +86,8 @@ describe('sol-wallet.scheduler', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
+
+		mockAuthStore();
 
 		spyLoadSolBalance = vi
 			.spyOn(solanaApi, 'loadSolLamportsBalance')
@@ -132,6 +139,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger postMessage with correct data', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(
@@ -162,8 +171,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyLoadBalance).toHaveBeenCalledTimes(1);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
+					expect(spyLoadBalance).toHaveBeenCalledOnce();
+					expect(spyLoadTransactions).toHaveBeenCalledOnce();
 				});
 
 				it('should stop the scheduler', () => {
@@ -175,8 +184,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger syncWallet periodically', async () => {
 					await scheduler.start(startData);
 
-					expect(spyLoadBalance).toHaveBeenCalledTimes(1);
-					expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
+					expect(spyLoadBalance).toHaveBeenCalledOnce();
+					expect(spyLoadTransactions).toHaveBeenCalledOnce();
 
 					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
@@ -192,6 +201,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should postMessage with status of the worker', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
 				});
@@ -201,6 +212,8 @@ describe('sol-wallet.scheduler', () => {
 					spyLoadBalance.mockRejectedValue(err);
 
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					// first time + 10 retries
 					expect(spyLoadBalance).toHaveBeenCalledTimes(11);
@@ -220,6 +233,9 @@ describe('sol-wallet.scheduler', () => {
 
 				it('should not post message when no new transactions or balance changes', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
+
 					postMessageMock.mockClear();
 
 					// Mock no changes in transactions and balance
@@ -237,6 +253,8 @@ describe('sol-wallet.scheduler', () => {
 
 				it('should update store with new transactions', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					expect(scheduler['store'].transactions).toEqual(
 						expectedSoLTransactions.reduce(
@@ -264,6 +282,7 @@ describe('sol-wallet.scheduler', () => {
 					await scheduler.start(startData);
 
 					expect(spyLoadTransactions).toHaveBeenCalledWith({
+						identity: mockIdentity,
 						address: mockSolAddress,
 						network: startData?.solanaNetwork,
 						tokenAddress: startData?.tokenAddress,

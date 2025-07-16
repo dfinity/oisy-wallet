@@ -29,13 +29,15 @@ describe('AddressBookStep', () => {
 					addressType: 'Eth'
 				}
 			],
-			updateTimestampNs: BigInt(Date.now())
+			updateTimestampNs: BigInt(Date.now()),
+			image: [] as []
 		},
 		{
 			id: 2n,
 			name: 'Test Contact_2',
 			addresses: [],
-			updateTimestampNs: BigInt(Date.now())
+			updateTimestampNs: BigInt(Date.now()),
+			image: [] as []
 		},
 		{
 			id: 3n,
@@ -52,7 +54,8 @@ describe('AddressBookStep', () => {
 					addressType: 'Eth'
 				}
 			],
-			updateTimestampNs: BigInt(Date.now())
+			updateTimestampNs: BigInt(Date.now()),
+			image: [] as []
 		}
 	];
 	const mockAddContact = vi.fn();
@@ -114,7 +117,7 @@ describe('AddressBookStep', () => {
 		const addButton = getByText(en.address_book.text.add_new_contact);
 		await fireEvent.click(addButton);
 
-		expect(mockAddContact).toHaveBeenCalledTimes(1);
+		expect(mockAddContact).toHaveBeenCalledOnce();
 	});
 
 	it('should render contacts list when there are contacts', () => {
@@ -154,7 +157,7 @@ describe('AddressBookStep', () => {
 		const addButton = getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON);
 		await fireEvent.click(addButton);
 
-		expect(mockAddContact).toHaveBeenCalledTimes(1);
+		expect(mockAddContact).toHaveBeenCalledOnce();
 	});
 
 	it('should call showContact with the correct contact when ContactCard is clicked', async () => {
@@ -303,7 +306,8 @@ describe('AddressBookStep', () => {
 				addresses: [
 					{ address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ', addressType: 'Sol' }
 				],
-				updateTimestampNs: BigInt(Date.now())
+				updateTimestampNs: BigInt(Date.now()),
+				image: [] as []
 			}
 		];
 

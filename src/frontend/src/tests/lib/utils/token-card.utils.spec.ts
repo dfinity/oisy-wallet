@@ -1,9 +1,11 @@
 import { ETH_TOKEN_GROUP } from '$env/tokens/groups/groups.eth.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type { Token } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenUiGroup } from '$lib/types/token-group';
-import { mapHeaderData } from '$lib/utils/token-card.utils';
+import { isCardDataTogglableToken, mapHeaderData } from '$lib/utils/token-card.utils';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 
 describe('mapHeaderData', () => {
@@ -15,7 +17,6 @@ describe('mapHeaderData', () => {
 	const tokenGroup: TokenUiGroup = {
 		id: mockGroup.id,
 		decimals: mockToken.decimals,
-		nativeToken: mockToken,
 		groupData: mockGroup,
 		tokens: [mockToken, ICP_TOKEN],
 		balance: bn1Bi,
@@ -28,7 +29,6 @@ describe('mapHeaderData', () => {
 			symbol: mockGroup.symbol,
 			decimals: mockToken.decimals,
 			icon: mockGroup.icon,
-			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: mockGroup.symbol },
 			balance: bn1Bi,
@@ -47,12 +47,44 @@ describe('mapHeaderData', () => {
 			symbol: mockGroup.symbol,
 			decimals: mockToken.decimals,
 			icon: mockGroup.icon,
-			network: mockToken.network,
 			oisyName: { oisyName: `${mockToken.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: mockGroup.symbol },
 			tokenCount: 2
 		};
 
 		expect(mapHeaderData(rest)).toEqual(expected);
+	});
+});
+
+describe('isCardDataTogglableToken', () => {
+	it('should correctly return a valid token', () => {
+		const token: IcrcCustomToken = { ...ICP_TOKEN, enabled: false };
+		const result = isCardDataTogglableToken(token);
+
+		expect(result).toBeTruthy();
+	});
+
+	it('should return undefined if no togglable token is passed', () => {
+		const token: Token = ICP_TOKEN;
+		const result = isCardDataTogglableToken(token);
+
+		expect(result).toBeFalsy();
+	});
+
+	it('should return undefined if no parsable token is passed', () => {
+		const token = { ...ICP_TOKEN, standard: undefined, network: null };
+		const result = isCardDataTogglableToken(token as unknown as Token);
+
+		expect(result).toBeFalsy();
+	});
+
+	it('should return undefined if no valid input', () => {
+		const result1 = isCardDataTogglableToken(null as unknown as Token);
+		const result2 = isCardDataTogglableToken({} as unknown as Token);
+		const result3 = isCardDataTogglableToken(undefined as unknown as Token);
+
+		expect(result1).toBeFalsy();
+		expect(result2).toBeFalsy();
+		expect(result3).toBeFalsy();
 	});
 });

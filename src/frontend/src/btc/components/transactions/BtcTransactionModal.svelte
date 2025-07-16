@@ -12,8 +12,9 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -47,6 +48,13 @@
 	let fromExplorerUrl: string | undefined = $derived(
 		nonNullish(explorerUrl) && nonNullish(from) ? `${explorerUrl}/address/${from}` : undefined
 	);
+
+	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
+		modalStore.openBtcTransaction({
+			id: Symbol(),
+			data: data as OpenTransactionParams<BtcTransactionUi>
+		});
+	};
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -87,6 +95,7 @@
 					{from}
 					toExplorerUrl={nonNullish(explorerUrl) ? `${explorerUrl}/address/${address}` : undefined}
 					{fromExplorerUrl}
+					{onSaveAddressComplete}
 				/>
 			{/each}
 		{/if}
@@ -147,7 +156,7 @@
 						{$i18n.transaction.text.timestamp}
 					</span>
 
-					<output>{formatSecondsToDate(Number(timestamp))}</output>
+					<output>{formatSecondsToDate({ seconds: Number(timestamp), i18n: $i18n })}</output>
 				</ListItem>
 			{/if}
 
@@ -167,6 +176,8 @@
 			{/if}
 		</List>
 
-		<ButtonCloseModal slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonCloseModal />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

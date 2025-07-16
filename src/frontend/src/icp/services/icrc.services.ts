@@ -27,7 +27,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
-import { replaceIcErrorFields } from '$lib/utils/error.utils';
+import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
 import {
 	fromNullable,
@@ -53,22 +53,22 @@ const loadDefaultIcrcTokens = async () => {
 
 export const loadCustomTokens = ({
 	identity,
-	useCache = false
+	useCache = false,
+	onSuccess
 }: {
 	identity: OptionIdentity;
 	useCache?: boolean;
+	onSuccess?: () => void;
 }): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
-		onLoad: loadIcrcCustomData,
+		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
 		onUpdateError: ({ error: err }) => {
 			icrcCustomTokensStore.resetAll();
 
 			trackEvent({
 				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: {
-					error: replaceIcErrorFields(err) ?? `${err}`
-				}
+				metadata: mapIcErrorMetadata(err)
 			});
 
 			toastsError({
@@ -94,9 +94,7 @@ const loadDefaultIcrc = ({
 
 			trackEvent({
 				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: {
-					error: replaceIcErrorFields(err) ?? `${err}`
-				}
+				metadata: mapIcErrorMetadata(err)
 			});
 
 			toastsError({
@@ -248,11 +246,15 @@ const loadCustomIcrcTokensData = async ({
 
 const loadIcrcCustomData = ({
 	response: tokens,
-	certified
+	certified,
+	onSuccess
 }: {
 	certified: boolean;
 	response: IcrcCustomToken[];
+	onSuccess?: () => void;
 }) => {
+	onSuccess?.();
+
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 

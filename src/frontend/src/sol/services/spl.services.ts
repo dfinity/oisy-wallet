@@ -3,11 +3,11 @@ import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/net
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { getIdbSolTokens, setIdbSolTokens } from '$lib/api/idb-tokens.api';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { SolAddress } from '$lib/types/address';
+import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -20,14 +20,8 @@ import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import {
-	assertNonNullish,
-	fromNullable,
-	isNullish,
-	nonNullish,
-	queryAndUpdate
-} from '@dfinity/utils';
+import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
+import { fromNullable, isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
@@ -55,18 +49,15 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 export const loadCustomTokens = ({
 	identity,
 	useCache = false
-}: {
-	identity: OptionIdentity;
-	useCache?: boolean;
-}): Promise<void> =>
+}: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<SplCustomToken[]>({
-		request: () => loadCustomTokensWithMetadata({ identity, useCache }),
+		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
 			splCustomTokensStore.resetAll();
 
 			toastsError({
-				msg: { text: get(i18n).init.error.spl_user_tokens },
+				msg: { text: get(i18n).init.error.spl_custom_tokens },
 				err
 			});
 		},
@@ -74,38 +65,19 @@ export const loadCustomTokens = ({
 		strategy: 'query'
 	});
 
-const loadSplCustomTokens = async ({
-	identity,
-	certified,
-	useCache = false
-}: {
-	identity: OptionIdentity;
-	certified: boolean;
-	useCache?: boolean;
-}): Promise<CustomToken[]> =>
+const loadSplCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
-		identity,
-		certified,
+		...params,
 		filterTokens: ({ token }) => 'SplMainnet' in token || 'SplDevnet' in token,
 		setIdbTokens: setIdbSolTokens,
-		getIdbTokens: getIdbSolTokens,
-		useCache
+		getIdbTokens: getIdbSolTokens
 	});
 
-const loadCustomTokensWithMetadata = async ({
-	identity,
-	useCache = false
-}: {
-	identity: OptionIdentity;
-	useCache?: boolean;
-}): Promise<SplCustomToken[]> => {
+const loadCustomTokensWithMetadata = async (
+	params: LoadCustomTokenParams
+): Promise<SplCustomToken[]> => {
 	const loadCustomContracts = async (): Promise<SplCustomToken[]> => {
-		if (isNullish(identity)) {
-			await nullishSignOut();
-			return [];
-		}
-
-		const splCustomTokens = await loadSplCustomTokens({ identity, certified: true, useCache });
+		const splCustomTokens = await loadSplCustomTokens(params);
 
 		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
 			[SplCustomToken[], SplCustomToken[]]
@@ -164,14 +136,7 @@ const loadCustomTokensWithMetadata = async ({
 		>(async (acc, token) => {
 			const { network, address } = token;
 
-			const solNetwork = mapNetworkIdToNetwork(network.id);
-
-			assertNonNullish(
-				solNetwork,
-				replacePlaceholders(get(i18n).init.error.no_solana_network, {
-					$network: network.id.description ?? ''
-				})
-			);
+			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
 			const owner = await getTokenOwner({ address, network: solNetwork });
 
@@ -181,16 +146,7 @@ const loadCustomTokensWithMetadata = async ({
 
 			const metadata = await getSplMetadata({ address, network: solNetwork });
 
-			return nonNullish(metadata)
-				? [
-						...(await acc),
-						{
-							...token,
-							owner,
-							...hardenMetadata(metadata)
-						}
-					]
-				: acc;
+			return nonNullish(metadata) ? [...(await acc), { ...token, owner, ...hardenMetadata(metadata) }] : acc;
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];

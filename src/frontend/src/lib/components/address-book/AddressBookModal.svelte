@@ -3,8 +3,9 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
-	import AddressBookQrCodeScan from '$lib/components/address-book/AddressBookQrCodeScan.svelte';
+	import AddressBookQrCodeStep from '$lib/components/address-book/AddressBookQrCodeStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
+	import CreateContactStep from '$lib/components/address-book/CreateContactStep.svelte';
 	import DeleteAddressConfirmBottomSheet from '$lib/components/address-book/DeleteAddressConfirmBottomSheet.svelte';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
 	import DeleteContactConfirmBottomSheet from '$lib/components/address-book/DeleteContactConfirmBottomSheet.svelte';
@@ -97,7 +98,7 @@
 		)
 	);
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<AddressBookSteps> = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
@@ -105,6 +106,10 @@
 		{
 			name: AddressBookSteps.SAVE_ADDRESS,
 			title: $i18n.address.save.title
+		},
+		{
+			name: AddressBookSteps.CREATE_CONTACT,
+			title: $i18n.address_book.create_contact.title
 		},
 		{
 			name: AddressBookSteps.SHOW_CONTACT,
@@ -139,9 +144,9 @@
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
 		}
-	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
+	];
 
-	let currentStep: WizardStep | undefined = $state();
+	let currentStep: WizardStep<AddressBookSteps> | undefined = $state();
 
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 
@@ -159,12 +164,19 @@
 		addressBookStore.reset();
 	});
 
-	let modal: WizardModal | undefined = $state();
-	const close = () => modalStore.close();
+	let modal: WizardModal<AddressBookSteps> | undefined = $state();
+	const close = () => {
+		if (nonNullish(modalData?.entrypoint?.onComplete)) {
+			modalData.entrypoint.onComplete();
+			return;
+		}
+		modalStore.close();
+	};
 
-	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let currentStepName = $derived(currentStep?.name);
 	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
+	let editContactNameTitle = $state($i18n.contact.form.add_new_contact);
 
 	let isDeletingContact = $state<boolean>(false);
 
@@ -227,7 +239,7 @@
 			nonNullish(modalData?.entrypoint) &&
 			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
 		) {
-			modalStore.close();
+			close();
 			return;
 		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
@@ -284,9 +296,9 @@
 	bind:this={modal}
 	disablePointerEvents={loading}
 	testId={ADDRESS_BOOK_MODAL}
-	on:nnsClose={close}
+	onClose={close}
 >
-	<svelte:fragment slot="title">
+	{#snippet title()}
 		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentContact?.name)}
 			<div class="flex flex-wrap items-center gap-2">
 				<Avatar
@@ -301,11 +313,11 @@
 		{:else if currentStepName === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
 			{replacePlaceholders($i18n.contact.delete.title, { $contact: currentContact.name })}
 		{:else if currentStepName === AddressBookSteps.EDIT_CONTACT_NAME && nonNullish(editContactNameStep)}
-			{editContactNameStep.title}
+			{editContactNameTitle}
 		{:else}
 			{currentStep?.title}
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
@@ -357,7 +369,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
-				onEditAddress={(index: number) => {
+				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
@@ -382,7 +394,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
-				onEditAddress={(index: number) => {
+				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
@@ -397,6 +409,7 @@
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
 		<EditContactNameStep
 			bind:this={editContactNameStep}
+			bind:title={editContactNameTitle}
 			contact={currentContact}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
 				const createdContact = await callCreateContact({ name: contact.name });
@@ -478,20 +491,36 @@
 		<SaveAddressStep
 			onCreateContact={() => {
 				currentContact = undefined;
-				gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				gotoStep(AddressBookSteps.CREATE_CONTACT);
 			}}
 			onSelectContact={(contact: ContactUi) => {
 				currentContact = contact;
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
+			onClose={close}
+		/>
+	{:else if currentStep?.name === AddressBookSteps.CREATE_CONTACT}
+		<CreateContactStep
+			onSave={async (contact: ContactUi) => {
+				loading = true;
+				currentContact = contact;
+				currentAddressIndex = undefined;
+				const createdContact = await callCreateContact({ name: contact.name });
+				await callUpdateContact({ contact: { ...createdContact, ...contact } });
+				close();
+			}}
+			onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
+			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
-		<AddressBookQrCodeScan
-			onClose={() =>
+		<AddressBookQrCodeStep
+			onCancel={() =>
 				nonNullish(modal) &&
 				goToWizardStep({ modal, steps, stepName: AddressBookSteps.EDIT_ADDRESS })}
-			bind:address={qrCodeAddress}
+			onScan={({ code }) => {
+				qrCodeAddress = code;
+			}}
 		/>
 	{/if}
 </WizardModal>

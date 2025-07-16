@@ -28,9 +28,11 @@
 	</div>
 
 	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
+		{#if $authSignedIn && !isRouteTransactions($page)}
+			<NetworksSwitcher />
+		{/if}
+
 		{#if $authSignedIn}
-			<NetworksSwitcher disabled={isRouteTransactions($page)} />
-			<ThemeSwitchButton />
 			<WalletConnect />
 		{/if}
 
@@ -41,6 +43,7 @@
 				<AboutWhyOisy trackEventSource={LANDING_PAGE_ROUTE} />
 				<DocumentationLink shortTextOnMobile trackEventSource={LANDING_PAGE_ROUTE} />
 				<ThemeSwitchButton />
+				<Menu />
 			</div>
 		{/if}
 	</div>

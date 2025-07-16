@@ -33,7 +33,9 @@
 		on:click
 	/>
 
-	<Button colorStyle="secondary-light" fullWidth onclick={() => dispatch('icBack')} slot="toolbar">
-		{$i18n.core.text.back}
-	</Button>
+	{#snippet toolbar()}
+		<Button colorStyle="secondary-light" fullWidth onclick={() => dispatch('icBack')}>
+			{$i18n.core.text.back}
+		</Button>
+	{/snippet}
 </ContentWithToolbar>

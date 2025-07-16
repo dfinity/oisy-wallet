@@ -19,7 +19,7 @@ print_help() {
 KONG_BUILDENV="$DFX_NETWORK"
 export KONG_BUILDENV
 
-KONG_REPO_URL="https://raw.githubusercontent.com/KongSwap/kong/refs/heads/main/wasm"
+KONG_REPO_URL="https://raw.githubusercontent.com/KongSwap/kong/bea79b2f2259e5bd5a29739297d4a9f5db4fb19a/wasm"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${KONG_REPO_URL}/kong_backend.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.

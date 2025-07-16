@@ -1,5 +1,7 @@
 import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
+import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import {
+	MANAGE_TOKENS_MODAL_ROUTE,
 	TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR
@@ -20,21 +22,26 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export interface ManageTokensSaveParams {
-	progress: (step: ProgressStepsAddToken) => void;
-	modalNext: () => void;
-	onSuccess: () => void;
-	onError: () => void;
+	progress?: (step: ProgressStepsAddToken) => void;
+	modalNext?: () => void;
+	onSuccess?: () => void;
+	onError?: () => void;
 	identity: OptionIdentity;
 }
 
 export interface SaveTokensParams<T> {
-	progress: (step: ProgressStepsAddToken) => void;
+	progress?: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
 	tokens: NonEmptyArray<T>;
 }
 
 export const saveTokens = async <
-	T extends SaveUserToken | SaveCustomTokenWithKey | SaveSplCustomToken | TokenToggleable<Token>
+	T extends
+		| SaveUserToken
+		| SaveCustomTokenWithKey
+		| SaveSplCustomToken
+		| SaveErc721CustomToken
+		| TokenToggleable<Token>
 >({
 	tokens,
 	save,
@@ -61,7 +68,7 @@ export const saveTokens = async <
 		return;
 	}
 
-	modalNext();
+	modalNext?.();
 
 	try {
 		await save({
@@ -70,9 +77,11 @@ export const saveTokens = async <
 			tokens: tokens as NonEmptyArray<T>
 		});
 
-		progress(ProgressStepsAddToken.DONE);
+		progress?.(ProgressStepsAddToken.DONE);
 
-		setTimeout(() => onSuccess(), 750);
+		if (nonNullish(onSuccess)) {
+			setTimeout(() => onSuccess(), 750);
+		}
 
 		tokens.forEach((token) => {
 			const { enabled } = token;
@@ -93,7 +102,8 @@ export const saveTokens = async <
 					...(nonNullish(indexCanisterId) && { indexCanisterId }),
 					...(nonNullish(tokenId) && { tokenId: `${tokenId.description}` }),
 					...(nonNullish(tokenSymbol) && { tokenSymbol }),
-					...(nonNullish(network) && { networkId: `${network.id.description}` })
+					...(nonNullish(network) && { networkId: `${network.id.description}` }),
+					...{ source: MANAGE_TOKENS_MODAL_ROUTE }
 				}
 			});
 		});
@@ -103,7 +113,7 @@ export const saveTokens = async <
 			err
 		});
 
-		onError();
+		onError?.();
 
 		trackEvent({
 			name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,

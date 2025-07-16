@@ -1,4 +1,5 @@
 import type { ContactUi } from '$lib/types/contact';
+import { getNetworkContactKey } from '$lib/utils/contact.utils';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
 import {
 	getMockContactsUi,
@@ -9,24 +10,54 @@ import {
 describe('contacts.utils', () => {
 	describe('getNetworkContacts', () => {
 		const contactWithIcrcAddress = getMockContactsUi({
-			n: 3,
+			n: 2,
 			name: 'Multiple Addresses Contact',
 			addresses: [mockContactIcrcAddressUi]
 		}) as unknown as ContactUi[];
 		const contactWithBtcAddress = getMockContactsUi({
-			n: 3,
+			n: 2,
 			name: 'Multiple Addresses Contact',
 			addresses: [mockContactBtcAddressUi]
 		}) as unknown as ContactUi[];
 
-		it('returns one contact per address for the provided addressType', () => {
+		it('returns both contacts with the same addresses for the provided addressType', () => {
 			expect(
 				getNetworkContacts({
 					addressType: 'Btc',
 					contacts: [...contactWithIcrcAddress, ...contactWithBtcAddress]
 				})
 			).toStrictEqual({
-				[mockContactBtcAddressUi.address]: contactWithBtcAddress[0]
+				[getNetworkContactKey({
+					contact: contactWithBtcAddress[0],
+					address: mockContactBtcAddressUi.address
+				})]: {
+					address: mockContactBtcAddressUi.address,
+					contact: contactWithBtcAddress[0]
+				},
+				[getNetworkContactKey({
+					contact: contactWithBtcAddress[1],
+					address: mockContactBtcAddressUi.address
+				})]: {
+					address: mockContactBtcAddressUi.address,
+					contact: contactWithBtcAddress[1]
+				}
+			});
+		});
+
+		it('returns a single contact for the provided addressType', () => {
+			expect(
+				getNetworkContacts({
+					addressType: 'Icrcv2',
+					contacts: [contactWithIcrcAddress[0], ...contactWithBtcAddress]
+				})
+			).toStrictEqual({
+				[getNetworkContactKey({
+					contact: contactWithIcrcAddress[0],
+					address: mockContactIcrcAddressUi.address
+				})]: {
+					address: mockContactIcrcAddressUi.address,
+					contact: contactWithIcrcAddress[0]
+				}
 			});
 		});
 

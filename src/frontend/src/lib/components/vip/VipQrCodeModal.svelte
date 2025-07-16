@@ -134,18 +134,20 @@
 			<span class="w-full"><SkeletonText /></span>
 		{/if}
 
-		<ButtonGroup slot="toolbar">
-			<ButtonCloseModal />
-			<Button
-				paddingSmall
-				colorStyle="primary"
-				type="button"
-				fullWidth
-				onclick={regenerateCode}
-				testId={VIP_CODE_REGENERATE_BUTTON}
-			>
-				{$i18n.vip.invitation.text.generate_new_link}
-			</Button>
-		</ButtonGroup>
+		{#snippet toolbar()}
+			<ButtonGroup>
+				<ButtonCloseModal />
+				<Button
+					paddingSmall
+					colorStyle="primary"
+					type="button"
+					fullWidth
+					onclick={regenerateCode}
+					testId={VIP_CODE_REGENERATE_BUTTON}
+				>
+					{$i18n.vip.invitation.text.generate_new_link}
+				</Button>
+			</ButtonGroup>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

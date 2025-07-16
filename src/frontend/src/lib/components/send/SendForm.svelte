@@ -17,7 +17,7 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST">
+<form on:submit|preventDefault={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
 		<slot name="amount" />
 
@@ -32,10 +32,12 @@
 
 		<slot name="info" />
 
-		<ButtonGroup slot="toolbar" testId="toolbar">
-			<slot name="cancel" />
+		{#snippet toolbar()}
+			<ButtonGroup testId="toolbar">
+				<slot name="cancel" />
 
-			<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
-		</ButtonGroup>
+				<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
+			</ButtonGroup>
+		{/snippet}
 	</ContentWithToolbar>
 </form>

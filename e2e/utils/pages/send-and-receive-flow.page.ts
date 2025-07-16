@@ -1,8 +1,11 @@
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	AMOUNT_DATA,
 	DESTINATION_INPUT,
 	IN_PROGRESS_MODAL,
 	MAX_BUTTON,
+	NAVIGATION_ITEM_ACTIVITY,
+	NAVIGATION_ITEM_TOKENS,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_DONE_BUTTON,
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
@@ -80,6 +83,41 @@ export class FlowPage extends HomepageLoggedIn {
 		const progressModalDoesNotExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
 
 		expect(progressModalDoesNotExists).toBeFalsy();
+
+		await this.mockSelectorAll({
+			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
+		});
+	}
+
+	async navigateToActivity(): Promise<void> {
+		await this.navigateTo({ testId: NAVIGATION_ITEM_ACTIVITY, expectedPath: AppPath.Activity });
+
+		await new Promise((resolve) => setTimeout(resolve, 5000));
+
+		await this.mockSelectorAll({
+			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
+		});
+	}
+
+	async navigateToAssets(): Promise<void> {
+		await this.navigateTo({ testId: NAVIGATION_ITEM_TOKENS, expectedPath: AppPath.Tokens });
+
+		await this.waitForContentReady();
+	}
+
+	async navigateToTransactionsPage({
+		tokenSymbol,
+		networkSymbol
+	}: {
+		tokenSymbol: string;
+		networkSymbol: string;
+	}): Promise<void> {
+		await this.navigateTo({
+			testId: this.getTokenCardTestId({ tokenSymbol, networkSymbol }),
+			expectedPath: AppPath.Transactions
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'

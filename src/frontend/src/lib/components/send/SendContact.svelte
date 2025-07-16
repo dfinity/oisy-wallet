@@ -2,6 +2,7 @@
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import SendContactName from '$lib/components/send/SendContactName.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { SEND_DESTINATION_WIZARD_CONTACT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
@@ -16,7 +17,11 @@
 	let { contact, address, onClick }: Props = $props();
 </script>
 
-<LogoButton styleClass="group" {onClick}>
+<LogoButton
+	styleClass="group"
+	{onClick}
+	testId={`${SEND_DESTINATION_WIZARD_CONTACT}-${contact.name}`}
+>
 	{#snippet logo()}
 		<div class="mr-2">
 			<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} variant="sm" />

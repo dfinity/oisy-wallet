@@ -8,7 +8,7 @@ import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { derived, type Readable } from 'svelte/store';
 
-const splDefaultTokens: Readable<SplToken[]> = derived(
+export const splDefaultTokens: Readable<SplToken[]> = derived(
 	[splDefaultTokensStore, enabledSolanaNetworksIds],
 	([$splTokensStore, $enabledSolanaNetworksIds]) =>
 		($splTokensStore ?? []).filter(({ network: { id: networkId } }) =>

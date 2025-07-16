@@ -21,7 +21,8 @@ describe('ShowContactStep', () => {
 		id: 1n,
 		name: 'Test Contact',
 		addresses: [],
-		updateTimestampNs: BigInt(Date.now())
+		updateTimestampNs: BigInt(Date.now()),
+		image: []
 	};
 
 	const mockContactWithAddresses: ContactUi = {
@@ -39,7 +40,8 @@ describe('ShowContactStep', () => {
 				addressType: 'Btc'
 			}
 		],
-		updateTimestampNs: BigInt(Date.now())
+		updateTimestampNs: BigInt(Date.now()),
+		image: []
 	};
 
 	const mockClose = vi.fn();
@@ -110,7 +112,7 @@ describe('ShowContactStep', () => {
 		const closeButton = getByTestId(CONTACT_SHOW_CLOSE_BUTTON);
 		await fireEvent.click(closeButton);
 
-		expect(mockClose).toHaveBeenCalledTimes(1);
+		expect(mockClose).toHaveBeenCalledOnce();
 	});
 
 	it('should call addAddress function when add address button is clicked', async () => {
@@ -126,7 +128,7 @@ describe('ShowContactStep', () => {
 		const addAddressButton = getByTestId(CONTACT_SHOW_ADD_ADDRESS_BUTTON);
 		await fireEvent.click(addAddressButton);
 
-		expect(mockAddAddress).toHaveBeenCalledTimes(1);
+		expect(mockAddAddress).toHaveBeenCalledOnce();
 	});
 
 	it('should render addresses when contact has addresses', () => {
@@ -178,7 +180,7 @@ describe('ShowContactStep', () => {
 		await fireEvent.click(infoButtons[0]);
 
 		// Check that showAddress was called with the correct index
-		expect(mockShowAddress).toHaveBeenCalledTimes(1);
+		expect(mockShowAddress).toHaveBeenCalledOnce();
 		expect(mockShowAddress).toHaveBeenCalledWith(0);
 	});
 
@@ -197,7 +199,7 @@ describe('ShowContactStep', () => {
 		const editButton = getByTestId(CONTACT_HEADER_EDIT_BUTTON);
 		await fireEvent.click(editButton);
 
-		expect(mockEdit).toHaveBeenCalledTimes(1);
+		expect(mockEdit).toHaveBeenCalledOnce();
 		expect(mockEdit).toHaveBeenCalledWith(mockContact);
 	});
 

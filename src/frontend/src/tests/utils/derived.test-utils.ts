@@ -19,8 +19,8 @@ import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import {
-	combinedDerivedSortedNetworkTokens,
-	combinedDerivedSortedNetworkTokensUi
+	combinedDerivedSortedFungibleNetworkTokens,
+	combinedDerivedSortedFungibleNetworkTokensUi
 } from '$lib/derived/network-tokens.derived';
 import {
 	networkAddress,
@@ -63,8 +63,8 @@ const derivedList: Record<string, Readable<unknown>> = {
 	balanceZero,
 	btcAddressMainnet,
 	btcAddressTestnet,
-	combinedDerivedSortedNetworkTokens,
-	combinedDerivedSortedNetworkTokensUi,
+	combinedDerivedSortedFungibleNetworkTokens,
+	combinedDerivedSortedFungibleNetworkTokensUi,
 	enabledErc20Tokens,
 	enabledIcTokens,
 	enabledMainnetTokensUsdBalancesPerNetwork,
@@ -119,7 +119,7 @@ export const testDerivedUpdates = async (changeStore: () => void) => {
 
 	try {
 		// Initialization call
-		derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledTimes(1));
+		derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledOnce());
 
 		changeStore();
 

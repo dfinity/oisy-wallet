@@ -1,4 +1,4 @@
-import { isNullish, jsonReplacer } from '@dfinity/utils';
+import { isEmptyString, isNullish, jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const errorDetailToString = (err: unknown): string | undefined =>
 	typeof err === 'string'
@@ -35,6 +35,7 @@ const buildTextPattern = (key: string): RegExp => {
 	const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	return new RegExp(`"?${escapedKey}"?\\s*:\\s*("?[^"\\n,]+"?)`, 'gi');
 };
+
 const cleanTrailingCommasAndLines = (text: string): string =>
 	text
 		.replace(/,\s*,/g, ',') // ", ,"
@@ -98,3 +99,77 @@ export const replaceErrorFields = ({
 
 export const replaceIcErrorFields = (err: unknown): string | undefined =>
 	replaceErrorFields({ err, keysToRemove: ['Request ID'] });
+
+export const parseIcErrorMessage = (err: unknown): Record<string, string> | undefined => {
+	if (isNullish(err)) {
+		return;
+	}
+
+	if (!(err instanceof Error)) {
+		return;
+	}
+
+	const { message } = err;
+
+	if (isEmptyString(message)) {
+		return;
+	}
+
+	try {
+		const messageParts = message
+			.replace(/\\n/g, '\n')
+			.replace(/\\'/g, "'")
+			.replace(/\\"/g, '"')
+			.split('\n')
+			// The first part is just the "Call failed" initial text, we skip it
+			.slice(1);
+
+		if (messageParts.length === 0) {
+			return;
+		}
+
+		const cleanRegex = /^\s*['"]?([^'":]+)['"]?\s*:\s*['"]?(.+?)['"]?\s*$/;
+
+		const errObj: Record<string, string> = messageParts.reduce<Record<string, string>>(
+			(acc, part) => {
+				const match = part.match(cleanRegex);
+				if (nonNullish(match)) {
+					const [, rawKey, rawValue] = match;
+
+					return {
+						...acc,
+						...(notEmptyString(rawKey?.trim()) && nonNullish(rawValue)
+							? {
+									[rawKey.trim()]: rawValue.trim()
+								}
+							: {})
+					};
+				}
+
+				return acc;
+			},
+			{}
+		);
+
+		// Remove the "Request ID" key if it exists, since it is unique per request, so not useful for general error handling
+		const {
+			['Request ID']: _,
+			['Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation']:
+				__,
+			...rest
+		} = errObj;
+
+		return rest;
+	} catch (_: unknown) {
+		// If parsing fails, we return undefined. We do not need to throw an error here.
+		return;
+	}
+};
+
+export const mapIcErrorMetadata = (err: unknown): Record<string, string> | undefined => {
+	if (isNullish(err)) {
+		return;
+	}
+
+	return parseIcErrorMessage(err) ?? { error: replaceIcErrorFields(err) ?? `${err}` };
+};

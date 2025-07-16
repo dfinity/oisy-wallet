@@ -3,7 +3,18 @@ import {
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
-import { deleteIdbEthTokens, deleteIdbIcTokens, deleteIdbSolTokens } from '$lib/api/idb-tokens.api';
+import {
+	deleteIdbEthTokens,
+	deleteIdbEthTokensDeprecated,
+	deleteIdbIcTokens,
+	deleteIdbSolTokens
+} from '$lib/api/idb-tokens.api';
+import {
+	deleteIdbBtcTransactions,
+	deleteIdbEthTransactions,
+	deleteIdbIcTransactions,
+	deleteIdbSolTransactions
+} from '$lib/api/idb-transactions.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -118,9 +129,21 @@ const emptyIdbSolAddress = (): Promise<void> => emptyIdbStore(deleteIdbSolAddres
 
 const emptyIdbIcTokens = (): Promise<void> => emptyIdbStore(deleteIdbIcTokens);
 
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+const emptyIdbEthTokensDeprecated = (): Promise<void> =>
+	emptyIdbStore(deleteIdbEthTokensDeprecated);
+
 const emptyIdbEthTokens = (): Promise<void> => emptyIdbStore(deleteIdbEthTokens);
 
 const emptyIdbSolTokens = (): Promise<void> => emptyIdbStore(deleteIdbSolTokens);
+
+const emptyIdbBtcTransactions = (): Promise<void> => emptyIdbStore(deleteIdbBtcTransactions);
+
+const emptyIdbEthTransactions = (): Promise<void> => emptyIdbStore(deleteIdbEthTransactions);
+
+const emptyIdbIcTransactions = (): Promise<void> => emptyIdbStore(deleteIdbIcTransactions);
+
+const emptyIdbSolTransactions = (): Promise<void> => emptyIdbStore(deleteIdbSolTransactions);
 
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
@@ -145,8 +168,13 @@ const logout = async ({
 			emptyIdbEthAddress(),
 			emptyIdbSolAddress(),
 			emptyIdbIcTokens(),
+			emptyIdbEthTokensDeprecated(),
 			emptyIdbEthTokens(),
-			emptyIdbSolTokens()
+			emptyIdbSolTokens(),
+			emptyIdbBtcTransactions(),
+			emptyIdbEthTransactions(),
+			emptyIdbIcTransactions(),
+			emptyIdbSolTransactions()
 		]);
 	}
 
@@ -178,6 +206,10 @@ const PARAM_LEVEL = 'level';
  * If a message was provided to the logout process - e.g. a message informing the logout happened because the session timed-out - append the information to the url as query params
  */
 const appendMsgToUrl = (msg: ToastMsg) => {
+	if (typeof window === 'undefined') {
+		return;
+	}
+
 	const { text, level } = msg;
 
 	const url: URL = new URL(window.location.href);

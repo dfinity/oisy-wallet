@@ -7,12 +7,16 @@
 	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
-	import { TRACK_COUNT_DAPP_OPEN_INFO_MODAL } from '$lib/constants/analytics.contants';
+	import {
+		TRACK_COUNT_DAPP_FILTER_BUTTON,
+		TRACK_COUNT_DAPP_OPEN_INFO_MODAL
+	} from '$lib/constants/analytics.contants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 
 	// For the moment only the first featured dapp is highlighted
 	const selectFirstFeaturedDapp = (): FeaturedOisyDappDescription | undefined =>
@@ -35,6 +39,20 @@
 	);
 
 	const modalId = Symbol();
+
+	const onClickFilterBtn = (btnTag: string | undefined = undefined) => {
+		trackEvent({
+			name: TRACK_COUNT_DAPP_FILTER_BUTTON,
+			metadata: {
+				tag: nonNullish(btnTag)
+					? resolveText({ i18n: $i18n, path: btnTag })
+					: $i18n.dapps.text.all_dapps,
+				id: nonNullish(btnTag) ? btnTag : 'dapps.categories.all_dapps'
+			}
+		});
+
+		selectedTag = btnTag;
+	};
 </script>
 
 <PageTitle>{$i18n.dapps.text.title}</PageTitle>
@@ -52,7 +70,7 @@
 	<Button
 		paddingSmall
 		ariaLabel={$i18n.dapps.alt.show_all}
-		onclick={() => (selectedTag = undefined)}
+		onclick={() => onClickFilterBtn()}
 		styleClass="text-nowrap max-w-fit text-sm"
 		colorStyle={selectedTag === undefined ? 'primary' : 'tertiary'}
 	>
@@ -61,10 +79,13 @@
 	{#each uniqueTags as tag (tag)}
 		<Button
 			paddingSmall
-			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, { $tag: tag })}
-			onclick={() => (selectedTag = tag)}
+			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, {
+				$tag: resolveText({ i18n: $i18n, path: tag })
+			})}
+			onclick={() => onClickFilterBtn(tag)}
 			styleClass="text-nowrap max-w-fit text-sm"
-			colorStyle={selectedTag === tag ? 'primary' : 'tertiary'}>{tag}</Button
+			colorStyle={selectedTag === tag ? 'primary' : 'tertiary'}
+			>{resolveText({ i18n: $i18n, path: tag })}</Button
 		>
 	{/each}
 </div>

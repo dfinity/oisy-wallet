@@ -4,8 +4,8 @@
 	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import { mapAddressToName } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
@@ -18,9 +18,10 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -38,14 +39,16 @@
 
 	let { from, value, timestamp, hash, blockNumber, to, type } = $derived(transaction);
 
+	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
+
 	let explorerUrl: string | undefined = $derived(
-		notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined
+		notEmptyString(hash) ? `${explorerBaseUrl}/tx/${hash}` : undefined
 	);
 
-	let fromExplorerUrl: string = $derived(`${$explorerUrlStore}/address/${from}`);
+	let fromExplorerUrl: string = $derived(`${explorerBaseUrl}/address/${from}`);
 
 	let toExplorerUrl: string | undefined = $derived(
-		notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined
+		notEmptyString(to) ? `${explorerBaseUrl}/address/${to}` : undefined
 	);
 
 	let ckMinterInfo: OptionCertifiedMinterInfo = $derived(
@@ -75,6 +78,13 @@
 				}) ?? to)
 			: to
 	);
+
+	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
+		modalStore.openEthTransaction({
+			id: Symbol(),
+			data: data as OpenTransactionParams<EthTransactionUi>
+		});
+	};
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -114,6 +124,7 @@
 				{from}
 				{toExplorerUrl}
 				{fromExplorerUrl}
+				{onSaveAddressComplete}
 			/>
 		{/if}
 
@@ -136,7 +147,7 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(blockNumber)}
+			{#if nonNullish(blockNumber) && nonNullish(token)}
 				<ListItem>
 					<span>{$i18n.transaction.text.block}</span>
 					<span>
@@ -145,14 +156,14 @@
 				</ListItem>
 
 				<ListItem>
-					<EthTransactionStatus {blockNumber} />
+					<EthTransactionStatus {blockNumber} {token} />
 				</ListItem>
 			{/if}
 
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
-					<output>{formatSecondsToDate(timestamp)}</output>
+					<output>{formatSecondsToDate({ seconds: Number(timestamp), i18n: $i18n })}</output>
 				</ListItem>
 			{/if}
 
@@ -204,6 +215,8 @@
 			{/if}
 		</List>
 
-		<ButtonCloseModal slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonCloseModal />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

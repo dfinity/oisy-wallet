@@ -86,7 +86,9 @@ describe('exchange.worker', () => {
 			const mockIcrcLedgerCanisterIds: LedgerCanisterIdText[] = ['icrc1', 'icrc2'];
 			const mockSplTokenAddresses: SplTokenAddress[] = ['spl1', 'spl2'];
 
-			const event = createEvent('startExchangeTimer');
+			const msg = 'startExchangeTimer' as const;
+
+			const event = createEvent(msg);
 
 			const mockEventData = {
 				data: {
@@ -198,7 +200,7 @@ describe('exchange.worker', () => {
 			});
 
 			it('should handle empty payload', async () => {
-				const mockEvent = { ...event, data: { ...event.data, data: undefined } };
+				const mockEvent = { ...event, data: { ...event.data, msg, data: undefined } };
 
 				await onExchangeMessage(mockEvent);
 
@@ -211,6 +213,7 @@ describe('exchange.worker', () => {
 						...event,
 						data: {
 							...event.data,
+							msg,
 							data: {
 								erc20Addresses: mockErc20ContractAddresses,
 								icrcCanisterIds: [],
@@ -247,6 +250,7 @@ describe('exchange.worker', () => {
 						...event,
 						data: {
 							...event.data,
+							msg,
 							data: {
 								erc20Addresses: [],
 								icrcCanisterIds: mockIcrcLedgerCanisterIds,
@@ -273,6 +277,7 @@ describe('exchange.worker', () => {
 						...event,
 						data: {
 							...event.data,
+							msg,
 							data: {
 								erc20Addresses: [],
 								icrcCanisterIds: [],
@@ -293,7 +298,7 @@ describe('exchange.worker', () => {
 				});
 
 				it('should sync prices for all tokens', async () => {
-					const mockEvent = { ...event, data: { ...event.data, ...mockEventData } };
+					const mockEvent = { ...event, data: { ...event.data, ...mockEventData, msg } };
 
 					await onExchangeMessage(mockEvent);
 
@@ -335,7 +340,7 @@ describe('exchange.worker', () => {
 				});
 
 				it('should post a message with synced token prices', async () => {
-					const mockEvent = { ...event, data: { ...event.data, ...mockEventData } };
+					const mockEvent = { ...event, data: { ...event.data, ...mockEventData, msg } };
 
 					await onExchangeMessage(mockEvent);
 

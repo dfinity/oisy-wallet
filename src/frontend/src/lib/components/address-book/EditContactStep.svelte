@@ -115,7 +115,9 @@
 
 	<div class="flex-grow"></div>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={onClose} testId={CONTACT_SHOW_CLOSE_BUTTON} />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={onClose} testId={CONTACT_SHOW_CLOSE_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

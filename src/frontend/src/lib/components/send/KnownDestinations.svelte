@@ -1,14 +1,17 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { KnownDestinations } from '$lib/types/transactions';
+	import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
+	import { getNetworkContact } from '$lib/utils/contacts.utils';
 
 	interface Props {
 		destination: string;
@@ -25,6 +28,8 @@
 
 	const dispatch = createEventDispatcher();
 
+	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let sortedKnownDestinations = $derived(
 		nonNullish(knownDestinations)
 			? Object.values(knownDestinations).sort(
@@ -35,15 +40,32 @@
 	);
 
 	let filteredKnownDestinations = $derived(
-		sortedKnownDestinations.filter(({ address }) =>
-			nonNullish(networkContacts?.[address])
-				? isContactMatchingFilter({
-						address,
-						contact: networkContacts[address],
-						filterValue: destination
-					})
-				: address.includes(destination)
-		)
+		isEmptyString(destination)
+			? sortedKnownDestinations
+			: sortedKnownDestinations.filter(({ address }) => {
+					const networkContact = nonNullish(networkContacts)
+						? getNetworkContact({
+								networkContacts,
+								address,
+								networkId: $sendTokenNetworkId
+							})
+						: undefined;
+
+					if (nonNullish(networkContact)) {
+						return isContactMatchingFilter({
+							address,
+							contact: networkContact,
+							filterValue: destination,
+							networkId: $sendTokenNetworkId
+						});
+					}
+
+					return areAddressesPartiallyEqual({
+						address1: address,
+						address2: destination,
+						networkId: $sendTokenNetworkId
+					});
+				})
 	);
 </script>
 
@@ -52,16 +74,24 @@
 		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
+					{@const networkContact = nonNullish(networkContacts)
+						? getNetworkContact({
+								networkContacts,
+								address,
+								networkId: $sendTokenNetworkId
+							})
+						: undefined}
+
 					<li>
 						<KnownDestination
 							destination={address}
-							contact={networkContacts?.[address]}
+							contact={networkContact}
 							{...rest}
 							onClick={() => {
 								destination = address;
 
-								if (nonNullish(networkContacts?.[address])) {
-									selectedContact = networkContacts[address];
+								if (nonNullish(networkContact)) {
+									selectedContact = networkContact;
 								}
 
 								dispatch('icNext');

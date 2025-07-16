@@ -2,6 +2,7 @@ import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import {
+	DEFAULT_ARBITRUM_TOKEN,
 	DEFAULT_BASE_TOKEN,
 	DEFAULT_BITCOIN_TOKEN,
 	DEFAULT_BSC_TOKEN,
@@ -10,6 +11,7 @@ import {
 	DEFAULT_SOLANA_TOKEN
 } from '$lib/constants/tokens.constants';
 import {
+	networkArbitrum,
 	networkBase,
 	networkBitcoin,
 	networkBsc,
@@ -20,18 +22,28 @@ import {
 import { token } from '$lib/stores/token.store';
 import type { OptionTokenId, OptionTokenStandard, Token } from '$lib/types/token';
 import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
+import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const defaultFallbackToken: Readable<Token> = derived(
-	[networkBitcoin, networkEthereum, networkBase, networkBsc, networkPolygon, networkSolana],
+	[
+		networkBitcoin,
+		networkEthereum,
+		networkBase,
+		networkBsc,
+		networkPolygon,
+		networkSolana,
+		networkArbitrum
+	],
 	([
 		$networkBitcoin,
 		$networkEthereum,
 		$networkBase,
 		$networkBsc,
 		$networkPolygon,
-		$networkSolana
+		$networkSolana,
+		$networkArbitrum
 	]) => {
 		if ($networkBitcoin) {
 			return DEFAULT_BITCOIN_TOKEN;
@@ -50,6 +62,9 @@ export const defaultFallbackToken: Readable<Token> = derived(
 		}
 		if ($networkPolygon) {
 			return DEFAULT_POLYGON_TOKEN;
+		}
+		if ($networkArbitrum) {
+			return DEFAULT_ARBITRUM_TOKEN;
 		}
 
 		return DEFAULT_ETHEREUM_TOKEN;
@@ -77,7 +92,9 @@ export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) =>
 			? isIcrcTokenToggleEnabled($token)
 			: isTokenEthereumUserToken($token)
 				? isNotDefaultEthereumToken($token)
-				: false;
+				: isTokenSpl($token)
+					? isTokenSplToggleable($token)
+					: false;
 	}
 
 	return false;

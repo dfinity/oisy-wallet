@@ -12,6 +12,7 @@ This document lists a couple of useful information for development and deploymen
 - [Bitcoin](#bitcoin)
 - [Routes Styles](#routes-styles)
 - [Add EVM Networks](#add-evm-networks)
+- [Build Frontend locally with Docker](#build-frontend-locally-with-docker)
 
 ## Deployment
 
@@ -295,14 +296,41 @@ Below a summary of how to add a new EVM network (side-chains or layer-2).
 
 ### Pre-requisites
 
-- Chain ID is required for mainnet and testnet(s), if any.
-- The third-party providers must support the new network: [Alchemy](https://www.alchemy.com/), [Infura](https://www.infura.io/), and [Etherscan](https://docs.etherscan.io/etherscan-v2).
-- Verify that the network is already integrated by the [`ethers` library](https://github.com/ethers-io/ethers.js) in the previous providers, or open a request for it.
+Before starting the integration, ensure the following:
+
+- You have the **Chain ID** for both **mainnet** and any **testnet(s)**.
+- The network is supported by key infrastructure providers:
+  - [Alchemy](https://www.alchemy.com/)
+  - [Infura](https://www.infura.io/)
+  - [Etherscan](https://docs.etherscan.io/etherscan-v2)
+- The network is already integrated in the [`ethers.js`](https://github.com/ethers-io/ethers.js) library.  
+  If not, submit a request to the library maintainers or implement a custom extension as needed.
 
 ### Create network object(s)
 
-Under the `src/frontend/src/env/networks/networks-evm` folder, create a new file named `networks.<network>.env.ts`.
-Copy the content of `networks.<network>.env.ts` from another EVM network.
+Location: `src/frontend/src/env/networks/networks-evm/`
+
+#### Steps
+
+- Create a new file: `networks.<network>.env.ts`
+- Copy contents from an existing EVM network file (e.g., `networks.bsc.env.ts`)
+- Update the following fields:
+
+  - `SYMBOL` – short identifier (e.g., `'BSC'`, `'ARB'`)
+  - `NAME` – name of the network
+  - `CHAIN ID` - chainId of the network
+  - `ICONS` – for all themes &rarr; They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
+  - `EXPLORER URL` – to have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
+  - `PROVIDERS`:
+    - `infura`
+    - `alchemy`
+    - `alchemyJsonRpcUrl`
+  - `EXCHANGE` (Coingecko ID) - Update the `CoingeckoPlatformId` type if needed
+  - `BUY` (Onramper ID) - Update the `OnramperNetworkId` type if needed
+
+- Add testnet object(s): if there are testnets, create a similar object for each one.
+
+Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTED_<network>_NETWORK_IDS` exist and are accordingly updated, at the end of the file.
 
 For example, this is the mainnet object of `networks.bsc.env.ts`:
 
@@ -329,60 +357,48 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 };
 ```
 
-Then, update the content accordingly, renaming the objects appropriately.
-
-- **Symbol**
-- **Name**
-- **Chain ID**
-- **Icons** for all themes &rarr; They should be in SVG format and placed in the `src/frontend/src/lib/assets/networks/{light,dark}` folder.
-- **Explorer URL** &rarr; To have these values, the `src/frontend/src/env/explorers.env.ts` file should be updated.
-- **Providers** &rarr; The correct values for all the providers should be set here.
-- **Exchange** &rarr; Remember to update type the appropriate types (for example, if a Coingecko ID is provided, type `CoingeckoPlatformId` should be updated).
-- **Buy** &rarr; Remember to update type the appropriate types (for example, if an Onramper ID is provided, type `OnramperNetworkId` should be updated).
-
-If there are testnets, create a similar object for each one.
-
-Finally, make sure that the objects `SUPPORTED_<network>_NETWORKS` and `SUPPORTED_<network>_NETWORK_IDS` exist and are accordingly updated, at the end of the file.
-
 ### Create native token object(s)
 
-Under the `src/frontend/src/env/tokens/tokens-evm` folder, create a new folder named `tokens-<network>`.
-Inside it, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
+Location: `src/frontend/src/env/tokens/tokens-evm/`
 
-For example, this is the mainnet object of `tokens.pol.env.ts`:
+#### Steps:
 
-```typescript
-const POL_DECIMALS = 18;
+- Create a new folder: `tokens-<network>`
+- Inside the folder, create a new file: `tokens.<token>.env.ts`
+- Copy contents from another EVM network’s token file (e.g., `tokens.pol.env.ts`)
 
-const POL_MAINNET_SYMBOL = 'POL';
+  ```typescript
+  const POL_DECIMALS = 18;
 
-export const POL_MAINNET_TOKEN_ID: TokenId = parseTokenId(POL_MAINNET_SYMBOL);
+  const POL_MAINNET_SYMBOL = 'POL';
 
-export const POL_MAINNET_TOKEN: RequiredToken = {
-	id: POL_MAINNET_TOKEN_ID,
-	network: POLYGON_MAINNET_NETWORK,
-	standard: 'ethereum',
-	category: 'default',
-	name: 'POL (prev. MATIC)',
-	symbol: POL_MAINNET_SYMBOL,
-	decimals: POL_DECIMALS,
-	icon: pol,
-	buy: {
-		onramperId: 'pol_polygon'
-	}
-};
-```
+  export const POL_MAINNET_TOKEN_ID: TokenId = parseTokenId(POL_MAINNET_SYMBOL);
 
-Then, update the content accordingly:
+  export const POL_MAINNET_TOKEN: RequiredToken = {
+  	id: POL_MAINNET_TOKEN_ID,
+  	network: POLYGON_MAINNET_NETWORK,
+  	standard: 'ethereum',
+  	category: 'default',
+  	name: 'POL (prev. MATIC)',
+  	symbol: POL_MAINNET_SYMBOL,
+  	decimals: POL_DECIMALS,
+  	icon: pol,
+  	buy: {
+  		onramperId: 'pol_polygon'
+  	}
+  };
+  ```
 
-- **Decimals**
-- **Symbol**
-- **Network** &rarr; This is the network object(s) created in the previous step.
-- **Name**
-- **Icons** &rarr; They should be in SVG format and placed in the `src/frontend/src/evm/<network>/assets` folder.
-- **Buy**
+- Update the following fields:
 
-If there are testnet tokens, create a similar object for each one.
+  - **Decimals** – token precision (e.g., `18`)
+  - **Symbol** – short token symbol (e.g., `'POL'`, `'ARB'`)
+  - **Network** – reference the network object created in the previous step
+  - **Name** – display name of the token
+  - **Icon** – SVG format, placed in `src/frontend/src/evm/<network>/assets` folder.
+  - **Buy** – Onramper ID if applicable (e.g., `'pol_polygon'`)
+
+- If the network includes testnet tokens, repeat the process for each testnet.
 
 Finally, make sure that the object `SUPPORTED_<network>_TOKENS` exists and is accordingly updated, at the end of the file.
 
@@ -399,8 +415,37 @@ This process will generate new bindings. Once generated, the mapping of user net
 
 ### Include network(s) and token(s) in EVM List
 
-- The list `SUPPORTED_<network>_NETWORKS` created in the first step needs to be included in the list of EVM networks that is `SUPPORTED_EVM_NETWORKS`, in file `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`.
-- The list `SUPPORTED_<network>_TOKENS` created in the second step needs to be included in the list of EVM tokens that is `SUPPORTED_EVM_TOKENS`, in file `src/frontend/src/env/tokens/tokens-evm/tokens.evm.env.ts`.
+After creating your network and token objects, make sure they are registered in the global EVM lists.
+
+#### 1. Add the Network to `SUPPORTED_EVM_NETWORKS`
+
+Location: `src/frontend/src/env/networks/networks-evm/networks.evm.env.ts`
+
+Action: Add your constant to the `SUPPORTED_EVM_NETWORKS` list:
+
+```ts
+export const SUPPORTED_EVM_NETWORKS = [
+	...SUPPORTED_BASE_NETWORKS,
+	...SUPPORTED_BSC_NETWORKS,
+	...SUPPORTED_POLYGON_NETWORKS,
+	...(SUPPORTED_ < NETWORK > _NETWORKS)
+];
+```
+
+#### 2. Add the Token to `SUPPORTED_EVM_TOKENS`
+
+Location: `src/frontend/src/env/tokens/tokens-evm/tokens.evm.env.ts`
+
+Action: Include your network's token list in the main EVM token array:
+
+```ts
+export const SUPPORTED_EVM_TOKENS = [
+	...SUPPORTED_BASE_TOKENS,
+	...SUPPORTED_BSC_TOKENS,
+	...SUPPORTED_POLYGON_TOKENS,
+	...(SUPPORTED_ < NETWORK > _TOKENS)
+];
+```
 
 ### Create derived store for enabled network(s)
 
@@ -502,9 +547,18 @@ If the new network supports ERC-20 tokens, they can be included among the suppor
 
 To do this, the following steps are required:
 
-- Create a new folder in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/` named `tokens-erc20`.
-- FOr each new token, create a new file named `tokens.<token>.env.ts` and copy the content of `tokens.<token>.env.ts` from another EVM network.
-- Adapt the content accordingly, renaming the objects appropriately, modifying the token name, symbol, decimals, network and icon.
+- Create a folder in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/` named `tokens-erc20`
+- For each token:
+
+  - Create a file named: `tokens.<token>.env.ts`
+  - Copy content from a similar token file in another EVM network.
+  - Update the following fields:
+    - `name`
+    - `symbol`
+    - `decimals`
+    - `network` (reference the correct network object)
+    - `icon` (SVG format, placed in `evm/<network>/assets/`)
+
 - If the token has similar bridged tokens on the other EVM networks or on IC, add the `groupData` property, similar to existing ones (for example USDC, USDT, etc.).
 
 Once all the new ERC20 tokens are created, they need to be added to the list of supported tokens:
@@ -557,3 +611,32 @@ It must be updated to include the new network providers' URLs (and any other req
 
 > [!NOTE]
 > Remember to adapt all the existing tests and create new ones where needed, including E2E tests.
+
+## Build Frontend Locally with Docker
+
+To test building the frontend locally with Docker and inspect the results, follow these steps:
+
+### 1. Build the Docker image
+
+```bash
+docker build . --file Dockerfile.frontend -t oisy-wallet --progress=plain
+```
+
+2. Copy the build output to your machine
+
+```bash
+docker create --name oisy-wallet oisy-wallet /bin/true
+docker cp oisy-wallet:/frontend ./tmp/frontend-output
+docker rm oisy-wallet
+```
+
+> Notes:
+>
+> - Our final image uses `FROM scratch`, it has no default command or shell. To work around this, we specify a dummy command (`/bin/true`) when creating the container.
+> - Run `mkdir -p ./tmp` to ensure the folder exists before copying files into it.
+
+3. Serve the results locally (optional)
+
+```bash
+npx serve ./tmp/frontend-output
+```

@@ -5,6 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type {
 		CampaignCriterion,
+		HangoverCriterion,
 		MinLoginsCriterion,
 		MinTotalAssetsUsdCriterion,
 		MinTransactionsCriterion
@@ -40,6 +41,13 @@
 
 			return replacePlaceholders($i18n.rewards.requirements.min_total_assets_usd, {
 				$usd: minTotalAssetsUsdCriterion.usd.toString()
+			});
+		}
+		if (RewardCriterionType.HANGOVER === criterion.type) {
+			const hangoverCriterion = criterion as HangoverCriterion;
+
+			return replacePlaceholders($i18n.rewards.requirements.hangover, {
+				$days: hangoverCriterion.days.toString()
 			});
 		}
 	};
