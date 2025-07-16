@@ -3,7 +3,7 @@ import { etherscanProviders, type EtherscanProvider } from '$eth/providers/ether
 import { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
-import type { Nft, NftMetadata } from '$lib/types/nft';
+import type { NftMetadata } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 
 export const loadNfts = (tokens: Erc721CustomToken[]) => {
@@ -32,24 +32,28 @@ const loadNftsOfToken = async ({
 	const loadedTokenIds = nftStore.getTokenIds(token.address);
 	const tokenIdsToLoad = tokenIds.filter((id: number) => !loadedTokenIds.includes(id));
 
-	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10});
+	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
 	for (const tokenIds of tokenIdBatches) {
 		const nfts = await loadNftsOfBatch({ infuraProvider, token, tokenIds });
 
-		nftStore.addAll(nfts)
+		nftStore.addAll(nfts);
 	}
 };
 
 const loadNftsOfBatch = async ({
-																	infuraProvider,
-																	token,
-																	tokenIds
-																}: {
+	infuraProvider,
+	token,
+	tokenIds
+}: {
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
 	tokenIds: number[];
 }) => {
-	const nftsMetadata: NftMetadata[] = await loadNftsMetadata({infuraProvider, contractAddress: token.address, tokenIds});
+	const nftsMetadata: NftMetadata[] = await loadNftsMetadata({
+		infuraProvider,
+		contractAddress: token.address,
+		tokenIds
+	});
 
 	return nftsMetadata.map((nftMetadata) => ({
 		...nftMetadata,
@@ -58,47 +62,43 @@ const loadNftsOfBatch = async ({
 };
 
 const loadNftsMetadata = async ({
-																 infuraProvider,
-																 contractAddress,
-																 tokenIds
-															 }: {
+	infuraProvider,
+	contractAddress,
+	tokenIds
+}: {
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
 	tokenIds: number[];
 }) => {
 	const nftsMetadata: NftMetadata[] = [];
 	for (const tokenId of tokenIds) {
-		nftsMetadata.push(await loadNftMetadata({infuraProvider, contractAddress, tokenId}))
+		nftsMetadata.push(await loadNftMetadata({ infuraProvider, contractAddress, tokenId }));
 	}
 
 	return nftsMetadata;
 };
 
 const loadNftMetadata = async ({
-																			infuraProvider,
-																			contractAddress,
-																			tokenId
-																		}: {
+	infuraProvider,
+	contractAddress,
+	tokenId
+}: {
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
 	tokenId: number;
 }) => {
-		await new Promise((resolve) => setTimeout(resolve, 200));
+	await new Promise((resolve) => setTimeout(resolve, 200));
 
-		try {
-			return await infuraProvider.getNftMetadata({
-				contractAddress,
-				tokenId
-			});
-		} catch (_: unknown) {
-			return { id: parseNftId(tokenId) };
-		}
+	try {
+		return await infuraProvider.getNftMetadata({
+			contractAddress,
+			tokenId
+		});
+	} catch (_: unknown) {
+		return { id: parseNftId(tokenId) };
+	}
 };
 
-const createBatches = ({tokenIds, batchSize}:{tokenIds: number[], batchSize: number}) => {
-	return Array.from(
-		{ length: Math.ceil(tokenIds.length / batchSize) },
-		(_, index) => tokenIds.slice(index * batchSize, (index + 1) * batchSize)
+const createBatches = ({ tokenIds, batchSize }: { tokenIds: number[]; batchSize: number }) => Array.from({ length: Math.ceil(tokenIds.length / batchSize) }, (_, index) =>
+		tokenIds.slice(index * batchSize, (index + 1) * batchSize)
 	);
-}
-
