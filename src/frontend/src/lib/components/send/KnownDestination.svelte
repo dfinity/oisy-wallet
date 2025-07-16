@@ -6,6 +6,7 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
@@ -74,7 +75,7 @@
 				{formatSecondsToNormalizedDate({
 					seconds: normalizeTimestampToSeconds(timestamp),
 					currentDate,
-					i18n: $i18n
+					language: $currentLanguage
 				})}
 			{/if}
 		</div>
