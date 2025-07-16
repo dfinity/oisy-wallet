@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import type { Nft } from '$lib/types/nft';
-	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		nft: Nft;
@@ -16,7 +16,7 @@
 		{#if nonNullish(nft.imageUrl)}
 			<img src={nft.imageUrl} alt={nft.name ?? ''} class="h-48" loading="lazy" />
 		{:else}
-			<div class="h-48 bg-black/16 rounded-lg"></div>
+			<div class="bg-black/16 h-48 rounded-lg"></div>
 		{/if}
 
 		<div class="absolute bottom-2 right-2">
