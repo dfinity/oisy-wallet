@@ -14,7 +14,7 @@
 		imageUrl?: string | null;
 		styleClass?: string;
 	}
-	const { name, imageUrl = null, variant = 'md', styleClass }: AvatarProps = $props();
+	const { name, imageUrl, variant = 'md', styleClass }: AvatarProps = $props();
 
 	const font = $derived(
 		{

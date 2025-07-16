@@ -369,6 +369,9 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
+				 onAvatarEdit={(contact: ContactUi) => {
+					currentContact = contact;
+				}}
 				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
@@ -393,6 +396,9 @@
 				onEdit={(contact) => {
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				}}
+				onAvatarEdit={(contact: ContactUi) => {
+					currentContact = contact;
 				}}
 				onEditAddress={(index) => {
 					currentAddressIndex = index;

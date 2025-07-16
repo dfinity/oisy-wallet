@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import imageCompression from 'browser-image-compression';
 	import type { ContactImage } from '$declarations/backend/backend.did';
+	import type { Identity } from '@dfinity/agent';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
@@ -23,12 +24,15 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import { imageToDataUrl, saveContact } from '$lib/utils/contact-image.utils';
-
+	import {dataUrlToImage } from '$lib/utils/contact-image.utils';
+	import { saveContactWithImage } from '$lib/services/manage-contacts.service';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	
 	interface Props {
 		contact: ContactUi;
 		onClose: () => void;
 		onEdit: (contact: ContactUi) => void;
+		onAvatarEdit: (contact: ContactUi) => void;
 		onEditAddress: (index: number) => void;
 		onAddAddress: () => void;
 		onDeleteContact: (id: bigint) => void;
@@ -39,76 +43,54 @@
 		contact,
 		onClose,
 		onEdit,
+		onAvatarEdit,
 		onEditAddress,
 		onAddAddress,
 		onDeleteContact,
 		onDeleteAddress
 	}: Props = $props();
 
-	let _lastBeImage: ContactImage | null = contact.image[0] ?? null;
-
-	let imageUrl = $state<string | null>(_lastBeImage ? imageToDataUrl(_lastBeImage) : null);
-
 	let fileInput = $state<HTMLInputElement>();
 	let saveError = $state<string | null>(null);
-
-	$effect(() => {
-		const beImage = contact.image[0] ?? null;
-		if (
-			beImage &&
-			beImage !== _lastBeImage &&
-			imageUrl === (_lastBeImage ? imageToDataUrl(_lastBeImage) : null)
-		) {
-			imageUrl = imageToDataUrl(beImage);
-			_lastBeImage = beImage;
-		}
-	});
-
-	const handleFileChange = async (e: Event): Promise<void> => {
-		const file = (e.target as HTMLInputElement).files?.[0];
-		if (!file) {
-			return;
-		}
-
-		try {
-			const options = {
-				maxSizeMB: 0.1,
-				maxWidthOrHeight: 200,
-				useWebWorker: false
-			};
-			const compressed = await imageCompression(file, options);
-			const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
-
-			await saveContact({
-				...contact,
-				imageUrl: dataUrl
-			});
-
-			imageUrl = dataUrl;
-			_lastBeImage = null;
-		} catch (err) {
-			console.error('Failed to save image:', err);
-			saveError = err instanceof Error ? err.message : 'Failed to save image';
-		}
+	let imageUrl = $state<string | null>( null);
+  
+	const handleFileChange = async (e: Event) => {
+	  const file = (e.target as HTMLInputElement).files?.[0];
+	  if (!file) return;
+  
+	  try {
+		const options = { maxSizeMB: 0.1, maxWidthOrHeight: 200, useWebWorker: false };
+		const compressed = await imageCompression(file, options);
+		const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+		const img: ContactImage = dataUrlToImage(dataUrl);
+  
+		const updated = await saveContactWithImage({
+		  ...contact,
+		  image: img,
+		  identity: $authIdentity as Identity
+		});
+		onAvatarEdit(updated);
+  
+	  } catch (err) {
+		saveError = err instanceof Error ? err.message : 'Failed to save image';
+	  }
 	};
-
+  
 	const replaceImage = (): void => {
 		fileInput?.click();
 	};
 
-	const removeImage = async (): Promise<void> => {
-		try {
-			await saveContact({
-				...contact,
-				imageUrl: null
-			});
-			imageUrl = null;
-			_lastBeImage = null;
-			onEdit({ ...contact, image: [] });
-		} catch (err) {
-			console.error('Failed to remove image:', err);
-			saveError = err instanceof Error ? err.message : 'Failed to remove image';
-		}
+	const removeImage = async () => {
+	  try {
+		const updated = await saveContactWithImage({
+		  ...contact,
+		  image: null,
+		  identity: $authIdentity as Identity
+		});
+	  } catch (err) {
+		console.error('Failed to remove image:', err);
+		saveError = err instanceof Error ? err.message : 'Failed to remove image';
+	  }
 	};
 </script>
 
@@ -122,7 +104,7 @@
 	<LogoButton hover={false} condensed={true}>
 		{#snippet logo()}
 			<div class="relative flex">
-				<Avatar name={contact.name} {imageUrl} variant="xs" styleClass="md:text-[19.2px]" />
+				<Avatar name={contact.name} imageUrl={imageUrl} variant="xs" styleClass="md:text-[19.2px]" />
 				<span
 					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 					data-tid={`avatar-badge-${contact.name}`}
