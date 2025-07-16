@@ -376,7 +376,6 @@ interface I18nInit {
 		allow_signing: string;
 		btc_wallet_error: string;
 		sol_wallet_error: string;
-		nft_loading: string;
 	};
 }
 

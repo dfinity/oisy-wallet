@@ -40,25 +40,18 @@ const loadNftsForContract = async ({
 		(_, index) => tokenIdsToLoad.slice(index * batchSize, (index + 1) * batchSize)
 	);
 
-	try {
-		for (const tokenIds of tokenIdBatches) {
-			const nftMetadata: NftMetadata[] = await loadNftMetadataBatch({
-				infuraProvider,
-				contractAddress: token.address,
-				tokenIds
-			});
-
-			const nfts: Nft[] = nftMetadata.map((nftMetadata) => ({
-				...nftMetadata,
-				contract: token
-			}));
-			nftStore.addAll(nfts);
-		}
-	} catch (err: unknown) {
-		toastsError({
-			msg: { text: get(i18n).init.error.nft_loading },
-			err
+	for (const tokenIds of tokenIdBatches) {
+		const nftMetadata: NftMetadata[] = await loadNftMetadataBatch({
+			infuraProvider,
+			contractAddress: token.address,
+			tokenIds
 		});
+
+		const nfts: Nft[] = nftMetadata.map((nftMetadata) => ({
+			...nftMetadata,
+			contract: token
+		}));
+		nftStore.addAll(nfts);
 	}
 };
 
@@ -76,12 +69,17 @@ const loadNftMetadataBatch = async ({
 	for (let i = 0; i < tokenIds.length; i++) {
 		await new Promise((resolve) => setTimeout(resolve, 200));
 
-		nftMetadata.push(
-			await infuraProvider.getNftMetadata({
+		let metadata: NftMetadata;
+		try {
+			metadata = await infuraProvider.getNftMetadata({
 				contractAddress,
 				tokenId: tokenIds[i]
-			})
-		);
+			});
+		} catch (err: unknown) {
+			metadata = { id: tokenIds[i] }
+		}
+
+		nftMetadata.push(metadata);
 	}
 
 	return nftMetadata;

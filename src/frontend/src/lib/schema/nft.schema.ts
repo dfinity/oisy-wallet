@@ -6,10 +6,10 @@ export const NftAttributeSchema = z.object({
 });
 
 export const NftMetadataSchema = z.object({
-	name: z.string(),
+	name: z.string().optional(),
 	id: z.number(),
-	imageUrl: z.string().url(),
-	attributes: z.array(NftAttributeSchema)
+	imageUrl: z.string().url().optional(),
+	attributes: z.array(NftAttributeSchema).optional()
 });
 
 export const NftSchema = z

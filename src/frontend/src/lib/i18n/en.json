@@ -492,8 +492,7 @@
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
 			"btc_wallet_error": "Error while loading BTC wallet information.",
-			"sol_wallet_error": "Error while loading SOL wallet information.",
-			"nft_loading": "Error while loading nfts for token $symbol"
+			"sol_wallet_error": "Error while loading SOL wallet information."
 		}
 	},
 	"hero": {
