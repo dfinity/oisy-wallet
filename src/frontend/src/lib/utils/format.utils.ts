@@ -86,13 +86,13 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 
 export const formatSecondsToDate = ({
 	seconds,
-	i18n
+	language
 }: {
 	seconds: number;
-	i18n?: I18n;
+	language?: Languages;
 }): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToDate = ({
