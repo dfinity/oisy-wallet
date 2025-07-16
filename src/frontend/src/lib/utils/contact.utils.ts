@@ -43,7 +43,7 @@ export const mapToFrontendContact = (contact: Contact): ContactUi => {
 	return {
 		...rest,
 		updateTimestampNs: update_timestamp_ns,
-		image: nonNullish(image[0]) ? image[0] : undefined,
+		image: fromNullable(image),
 		addresses: contact.addresses.map((address) => ({
 			address: getTokenAccountIdAddressString(address.token_account_id),
 			label: fromNullable(address.label),
