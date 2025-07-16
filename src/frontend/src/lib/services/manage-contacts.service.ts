@@ -14,7 +14,7 @@ import type { Identity } from '@dfinity/agent';
 export interface SaveContactWithImageParams extends Omit<ContactUi, 'image'> {
 	image: ContactImage | null;
 	identity: Identity;
-  }
+}
 
 export const loadContacts = async (identity: Identity): Promise<void> => {
 	contactsStore.reset();
@@ -77,15 +77,15 @@ export const saveContactWithImage = async ({
 	image,
 	identity,
 	...rest
-  }: SaveContactWithImageParams): Promise<ContactUi> => {
+}: SaveContactWithImageParams): Promise<ContactUi> => {
 	const contactUi: ContactUi = {
-	  ...rest,
-	  image: image === null ? undefined : image
+		...rest,
+		image: image === null ? undefined : image
 	};
-  
+
 	const beContact = mapToBackendContact(contactUi);
 	const updatedBe = await updateContactApi({ contact: beContact, identity });
 	const updatedUi = mapToFrontendContact(updatedBe);
 	contactsStore.updateContact(updatedUi);
 	return updatedUi;
-  };
+};

@@ -369,7 +369,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
-				 onAvatarEdit={(contact: ContactUi) => {
+				onAvatarEdit={(contact: ContactUi) => {
 					currentContact = contact;
 				}}
 				onEditAddress={(index) => {
