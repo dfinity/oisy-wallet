@@ -8,12 +8,10 @@ import {
 	infuraErc721Providers
 } from '$eth/providers/infura-erc721.providers';
 import type { EthereumNetwork } from '$eth/types/network';
-import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import { get } from 'svelte/store';
 import { describe, type MockedClass } from 'vitest';
 
 vi.mock('$env/rest/infura.env', () => ({
