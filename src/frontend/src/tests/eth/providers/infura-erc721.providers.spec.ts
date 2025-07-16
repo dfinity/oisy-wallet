@@ -211,10 +211,7 @@ describe('infura-erc721.providers', () => {
 
 				const provider = new InfuraErc721Provider(infura);
 
-				await expect(provider.getNftMetadata(mockParams)).rejects.toThrow(replacePlaceholders(get(i18n).nfts.error.fetch_metadata, {
-					$address: contractAddress,
-					$tokenId: '123456'
-				}));
+				await expect(provider.getNftMetadata(mockParams)).rejects.toThrow(errorMessage);
 			});
 
 			it('should call the tokenURI method of the contract', async () => {

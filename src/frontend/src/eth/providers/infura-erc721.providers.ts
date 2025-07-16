@@ -63,38 +63,28 @@ export class InfuraErc721Provider {
 			return url;
 		};
 
-		try {
-			const tokenUri = await erc721Contract.tokenURI(tokenId);
+		const tokenUri = await erc721Contract.tokenURI(tokenId);
 
-			const metadataUrl = resolveResourceUrl(tokenUri);
+		const metadataUrl = resolveResourceUrl(tokenUri);
 
-			const response = await fetch(metadataUrl);
-			const metadata = await response.json();
+		const response = await fetch(metadataUrl);
+		const metadata = await response.json();
 
-			const imageUrl = resolveResourceUrl(metadata?.image ?? '');
+		const imageUrl = resolveResourceUrl(metadata?.image ?? '');
 
-			const mappedAttributes = (metadata?.attributes ?? []).map(
-				(attr: { trait_type: string; value: string | number }) => ({
-					traitType: attr.trait_type,
-					value: attr.value.toString()
-				})
-			);
+		const mappedAttributes = (metadata?.attributes ?? []).map(
+			(attr: { trait_type: string; value: string | number }) => ({
+				traitType: attr.trait_type,
+				value: attr.value.toString()
+			})
+		);
 
-			return {
-				name: metadata?.name ?? '',
-				id: tokenId,
-				attributes: mappedAttributes,
-				imageUrl
-			};
-		} catch (error: unknown) {
-			throw new Error(
-				replacePlaceholders(get(i18n).nfts.error.fetch_metadata, {
-					$address: contractAddress,
-					$tokenId: tokenId.toString()
-				}),
-				{ cause: error }
-			);
-		}
+		return {
+			name: metadata?.name ?? '',
+			id: tokenId,
+			attributes: mappedAttributes,
+			imageUrl
+		};
 	};
 }
 
