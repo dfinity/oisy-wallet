@@ -8,8 +8,21 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { TokenType } from '$lib/enums/token-type';
+	import { nonNullish } from '@dfinity/utils';
+	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 
 	let selectedTokenType = $state(TokenType.TOKEN);
+
+	let {
+		initialSearch,
+		message
+	}: { initialSearch: string | undefined; message?: string | undefined } = $derived(
+		nonNullish($modalManageTokensData)
+			? $modalManageTokensData
+			: { initialSearch: undefined, message: undefined }
+	);
 </script>
 
 <div>
@@ -55,3 +68,15 @@
 		<ManageTokensButton />
 	</div>
 </div>
+
+{#if $modalManageTokens}
+	<ManageTokensModal {initialSearch}>
+		{#snippet infoElement()}
+			{#if nonNullish(message)}
+				<MessageBox level="info">
+					{message}
+				</MessageBox>
+			{/if}
+		{/snippet}
+	</ManageTokensModal>
+{/if}
