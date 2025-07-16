@@ -1,5 +1,5 @@
 import type { Currencies } from '$lib/enums/currencies';
-import type { Languages } from '$lib/types/languages';
+import type { Languages } from '$lib/enums/languages';
 
 export const getCurrencyName = ({
 	currency,
