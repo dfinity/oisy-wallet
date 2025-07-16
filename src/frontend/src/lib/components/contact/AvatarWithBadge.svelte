@@ -11,6 +11,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { AvatarVariants } from '$lib/types/style';
 	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
+	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -40,11 +41,17 @@
 	let mappedAddress = $derived(
 		nonNullish(address) ? mapAddressToContactAddressUi(address) : undefined
 	);
+
+	let imageUrl = $derived(
+		nonNullish(contact) && contact.image.length > 0 && contact.image[0]
+			? imageToDataUrl(contact.image[0]) 
+			: null
+	);
 </script>
 
 <div class="relative flex">
 	{#if nonNullish(contact)}
-		<Avatar name={contact.name} {variant} />
+		<Avatar name={contact.name} {variant} {imageUrl} />
 
 		{#if nonNullish(badge)}
 			<AddressesBadge

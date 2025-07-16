@@ -43,7 +43,8 @@
 	<LogoButton {onClick} hover={false} condensed testId={CONTACT_CARD_BUTTON} styleClass="group">
 		{#snippet logo()}
 			<span class="pr-2">
-				<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm" />
+				<AvatarWithBadge {contact} badge={{ type: 'addressTypeOrCount' }} variant="sm"
+				/>
 			</span>
 		{/snippet}
 

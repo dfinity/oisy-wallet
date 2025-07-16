@@ -10,6 +10,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
+	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 	import {
 		ADDRESS_BOOK_ADD_CONTACT_BUTTON,
 		ADDRESS_BOOK_SEARCH_CONTACT_INPUT
@@ -35,6 +36,7 @@
 	let { contacts, onAddContact, onShowContact, onShowAddress }: Props = $props();
 
 	let searchTerm = $state('');
+
 
 	let filteredContacts = $derived(
 		contacts.filter(({ name: contactName, addresses }) => {
