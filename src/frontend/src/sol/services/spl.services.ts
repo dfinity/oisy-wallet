@@ -11,7 +11,6 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { hardenMetadata } from '$lib/utils/metadata.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { getTokenDecimals, getTokenOwner } from '$sol/api/solana.api';
@@ -146,7 +145,9 @@ const loadCustomTokensWithMetadata = async (
 
 			const metadata = await getSplMetadata({ address, network: solNetwork });
 
-			return nonNullish(metadata) ? [...(await acc), { ...token, owner, ...hardenMetadata(metadata) }] : acc;
+			return nonNullish(metadata)
+				? [...(await acc), { ...token, owner, ...hardenMetadata(metadata) }]
+				: acc;
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];
