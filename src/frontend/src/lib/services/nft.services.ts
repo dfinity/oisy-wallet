@@ -99,6 +99,7 @@ const loadNftMetadata = async ({
 	}
 };
 
-const createBatches = ({ tokenIds, batchSize }: { tokenIds: number[]; batchSize: number }) => Array.from({ length: Math.ceil(tokenIds.length / batchSize) }, (_, index) =>
+const createBatches = ({ tokenIds, batchSize }: { tokenIds: number[]; batchSize: number }) =>
+	Array.from({ length: Math.ceil(tokenIds.length / batchSize) }, (_, index) =>
 		tokenIds.slice(index * batchSize, (index + 1) * batchSize)
 	);
