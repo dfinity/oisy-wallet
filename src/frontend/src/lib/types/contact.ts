@@ -1,4 +1,4 @@
-import type { Contact } from '$declarations/backend/backend.did';
+import type { Contact, ContactImage } from '$declarations/backend/backend.did';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 
 export interface ContactAddressUi {
@@ -10,4 +10,5 @@ export interface ContactAddressUi {
 export interface ContactUi extends Omit<Contact, 'addresses' | 'update_timestamp_ns'> {
 	addresses: ContactAddressUi[];
 	updateTimestampNs: bigint;
+	image: [] | [ContactImage];
 }
