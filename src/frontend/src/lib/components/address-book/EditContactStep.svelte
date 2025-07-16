@@ -24,7 +24,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import {dataUrlToImage } from '$lib/utils/contact-image.utils';
+	import {dataUrlToImage, imageToDataUrl } from '$lib/utils/contact-image.utils';
 	import { saveContactWithImage } from '$lib/services/manage-contacts.service';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	
@@ -52,8 +52,18 @@
 
 	let fileInput = $state<HTMLInputElement>();
 	let saveError = $state<string | null>(null);
-	let imageUrl = $state<string | null>( null);
-  
+	let imageUrl = $state<string | null>(
+		contact.image
+			? imageToDataUrl(contact.image)
+			: null
+	);
+
+	$effect(() => {
+		imageUrl = contact.image
+			? imageToDataUrl(contact.image)
+			: null;
+	});
+
 	const handleFileChange = async (e: Event) => {
 	  const file = (e.target as HTMLInputElement).files?.[0];
 	  if (!file) return;
@@ -88,7 +98,6 @@
 		  identity: $authIdentity as Identity
 		});
 	  } catch (err) {
-		console.error('Failed to remove image:', err);
 		saveError = err instanceof Error ? err.message : 'Failed to remove image';
 	  }
 	};
