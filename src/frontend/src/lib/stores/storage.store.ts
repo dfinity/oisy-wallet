@@ -1,16 +1,21 @@
-import type { Option } from '$lib/types/utils';
 import { del, get, set as setStorage } from '$lib/utils/storage.utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type StorageStoreData<T> = Option<T>;
+type StorageStoreData<T> = T;
 
 export interface StorageStore<T> extends Readable<StorageStoreData<T>> {
 	set: (params: { key: string; value: T }) => void;
 	reset: (params: { key: string }) => void;
 }
 
-export const initStorageStore = <T>({ key }: { key: string }): StorageStore<T> => {
-	const initialValue = get<T>({ key });
+export const initStorageStore = <T>({
+	key,
+	defaultValue
+}: {
+	key: string;
+	defaultValue: T;
+}): StorageStore<T> => {
+	const initialValue = get<T>({ key }) ?? defaultValue;
 
 	const { set, subscribe } = writable<StorageStoreData<T>>(initialValue);
 
@@ -22,7 +27,7 @@ export const initStorageStore = <T>({ key }: { key: string }): StorageStore<T> =
 		subscribe,
 		reset: (params) => {
 			del(params);
-			set(null);
+			set(defaultValue);
 		}
 	};
 };
