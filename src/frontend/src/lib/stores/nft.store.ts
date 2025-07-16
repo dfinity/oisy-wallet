@@ -15,16 +15,27 @@ const initNftStore = (): NftStore => {
 	return {
 		subscribe,
 		addAll: (nfts: Nft[]) => {
+			const uniqueNfts = nfts.reduce<Nft[]>((acc, current) => {
+				if (
+					!acc.some(
+						(nft) => nft.id === current.id && nft.contract.address === current.contract.address
+					)
+				) {
+					acc.push(current);
+				}
+				return acc;
+			}, []);
+
 			update((currentNfts) => {
 				if (!currentNfts) {
-					return nfts;
+					return uniqueNfts;
 				}
 
-				const newNfts = nfts.filter(
+				const newNfts = uniqueNfts.filter(
 					(newNft) =>
 						!currentNfts.some(
 							(existingNft) =>
-								existingNft.name === newNft.name &&
+								existingNft.id === newNft.id &&
 								existingNft.contract.address === newNft.contract.address
 						)
 				);
