@@ -4,6 +4,7 @@ import { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NftMetadata } from '$lib/types/nft';
+import { parseNftId } from '$lib/validation/nft.validation';
 
 export const loadNfts = (tokens: Erc721CustomToken[]) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
@@ -73,7 +74,7 @@ const loadNftMetadataBatch = async ({
 				tokenId: tokenIds[i]
 			});
 		} catch (_: unknown) {
-			metadata = { id: tokenIds[i] };
+			metadata = { id: parseNftId(tokenIds[i]) };
 		}
 
 		nftMetadata.push(metadata);
