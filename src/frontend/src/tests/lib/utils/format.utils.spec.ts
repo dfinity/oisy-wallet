@@ -490,7 +490,7 @@ describe('format.utils', () => {
 			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
 			const result = formatNanosecondsToDate({
 				nanoseconds: jan1_2023_ns,
-				i18n: { lang: 'de' } as unknown as I18n
+				language: Languages.GERMAN
 			});
 
 			expect(result).toMatch('1. Jan. 2023');
@@ -498,10 +498,7 @@ describe('format.utils', () => {
 
 		it('falls back to en locale when i18n.lang is not provided', () => {
 			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
-			const result = formatNanosecondsToDate({
-				nanoseconds: jan1_2023_ns,
-				i18n: {} as unknown as I18n
-			});
+			const result = formatNanosecondsToDate({ nanoseconds: jan1_2023_ns });
 
 			expect(result).toMatch('Jan 1, 2023');
 		});
