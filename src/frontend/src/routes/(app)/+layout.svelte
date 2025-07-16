@@ -3,6 +3,8 @@
 	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
+	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
+	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
@@ -15,6 +17,7 @@
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
+	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
@@ -80,6 +83,12 @@
 				</Loaders>
 			</SplitPane>
 
+			<Responsive down="md">
+				<div class="z-2 fixed bottom-16 right-2 block md:hidden">
+					<AiAssistantConsoleButton styleClass="mb-2" size="60" />
+				</div>
+			</Responsive>
+
 			<MobileNavigationMenu>
 				<NavigationMenuMainItems testIdPrefix="mobile" />
 			</MobileNavigationMenu>
@@ -87,6 +96,10 @@
 			<Modals />
 		</AuthGuard>
 
-		<Footer />
+		{#if $aiAssistantConsoleOpen}
+			<AiAssistantConsole />
+		{:else}
+			<Footer />
+		{/if}
 	</div>
 </div>
