@@ -80,7 +80,7 @@ export const saveContactWithImage = async ({
 }: SaveContactWithImageParams): Promise<ContactUi> => {
 	const contactUi: ContactUi = {
 		...rest,
-		image: image === null ? undefined : image
+		image: image ?? undefined
 	};
 
 	const beContact = mapToBackendContact(contactUi);

@@ -1,8 +1,8 @@
 <script lang="ts">
+	import type { Identity } from '@dfinity/agent';
 	import { isNullish } from '@dfinity/utils';
 	import imageCompression from 'browser-image-compression';
 	import type { ContactImage } from '$declarations/backend/backend.did';
-	import type { Identity } from '@dfinity/agent';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
@@ -22,11 +22,11 @@
 		CONTACT_EDIT_ADD_ADDRESS_BUTTON,
 		CONTACT_HEADER_EDITING_EDIT_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { saveContactWithImage } from '$lib/services/manage-contacts.service';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import { dataUrlToImage, imageToDataUrl } from '$lib/utils/contact-image.utils';
-	import { saveContactWithImage } from '$lib/services/manage-contacts.service';
-	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		contact: ContactUi;
@@ -52,15 +52,13 @@
 
 	let fileInput = $state<HTMLInputElement>();
 	let saveError = $state<string | null>(null);
-	let imageUrl = $state<string | null>(contact.image ? imageToDataUrl(contact.image) : null);
-
-	$effect(() => {
-		imageUrl = contact.image ? imageToDataUrl(contact.image) : null;
-	});
+	let imageUrl = $derived(contact.image ? imageToDataUrl(contact.image) : null);
 
 	const handleFileChange = async (e: Event) => {
 		const file = (e.target as HTMLInputElement).files?.[0];
-		if (!file) return;
+		if (!file) {
+			return;
+		}
 
 		try {
 			const options = { maxSizeMB: 0.1, maxWidthOrHeight: 200, useWebWorker: false };
@@ -76,7 +74,8 @@
 			onAvatarEdit(updated);
 		} catch (err) {
 			saveError =
-				err instanceof Error ? err.message : $i18n.address_book.edit_contact.failed_save_image;
+				(err instanceof Error ? err.message : null) ??
+				$i18n.address_book.edit_contact.failed_save_image;
 		}
 	};
 
@@ -93,7 +92,8 @@
 			});
 		} catch (err) {
 			saveError =
-				err instanceof Error ? err.message : $i18n.address_book.edit_contact.failed_remove_image;
+				(err instanceof Error ? err.message : null) ??
+				$i18n.address_book.edit_contact.failed_remove_image;
 		}
 	};
 </script>
@@ -113,7 +113,7 @@
 					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 					data-tid={`avatar-badge-${contact.name}`}
 				>
-					<EditAvatar bind:fileInput bind:imageUrl {replaceImage} {removeImage} />
+					<EditAvatar bind:fileInput {imageUrl} {replaceImage} {removeImage} />
 				</span>
 			</div>
 		{/snippet}
