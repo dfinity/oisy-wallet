@@ -103,7 +103,7 @@ export const formatNanosecondsToDate = ({
 	i18n?: I18n;
 }): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
-	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
@@ -112,10 +112,10 @@ export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 };
 
 export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
-	date.toLocaleDateString(i18n?.lang ?? 'en', { month: 'long' });
+	date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, { month: 'long' });
 
 const getRelativeTimeFormatter = (i18n?: I18n) =>
-	new Intl.RelativeTimeFormat(i18n?.lang ?? 'en', { numeric: 'auto' });
+	new Intl.RelativeTimeFormat(i18n?.lang ?? Languages.ENGLISH, { numeric: 'auto' });
 
 /** Formats a number of seconds to a normalized date string.
  *
@@ -152,11 +152,14 @@ export const formatSecondsToNormalizedDate = ({
 
 	// Same year, return day and month name
 	if (date.getFullYear() === today.getFullYear()) {
-		return date.toLocaleDateString(i18n?.lang ?? 'en', { day: 'numeric', month: 'long' });
+		return date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, {
+			day: 'numeric',
+			month: 'long'
+		});
 	}
 
 	// Different year, return day, month, and year
-	return date.toLocaleDateString(i18n?.lang ?? 'en', {
+	return date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, {
 		day: 'numeric',
 		month: 'long',
 		year: 'numeric'
