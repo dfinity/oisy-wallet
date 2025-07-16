@@ -5,6 +5,7 @@ import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
 import { currentLanguage } from '$lib/derived/i18n.derived';
+import { Languages } from '$lib/enums/languages';
 import { i18n } from '$lib/stores/i18n.store';
 import type { ModalData } from '$lib/stores/modal.store';
 import type { OptionToken } from '$lib/types/token';
@@ -75,7 +76,7 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 		const date = formatSecondsToNormalizedDate({
 			seconds: normalizeTimestampToSeconds(transaction.transaction.timestamp),
 			currentDate,
-			language: get(currentLanguage)
+			language: get(currentLanguage) ?? Languages.ENGLISH
 		});
 
 		return { ...acc, [date]: [...(acc[date] ?? []), transaction] };
