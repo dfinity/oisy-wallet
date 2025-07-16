@@ -1,4 +1,4 @@
-import { Languages } from '$lib/types/languages';
+import { Languages } from '$lib/enums/languages';
 
 export const SUPPORTED_LANGUAGES = Object.entries(Languages);
 

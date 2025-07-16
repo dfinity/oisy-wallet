@@ -6,7 +6,7 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
-import { Languages } from '$lib/types/languages';
+import { Languages } from '$lib/enums/languages';
 import {
 	getDefaultLang,
 	mergeWithFallback,

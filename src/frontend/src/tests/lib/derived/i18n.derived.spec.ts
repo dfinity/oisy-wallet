@@ -1,6 +1,6 @@
 import { currentLanguage } from '$lib/derived/i18n.derived';
+import { Languages } from '$lib/enums/languages';
 import { i18n } from '$lib/stores/i18n.store';
-import { Languages } from '$lib/types/languages';
 import { get } from 'svelte/store';
 
 vi.mock('idb-keyval', () => ({
