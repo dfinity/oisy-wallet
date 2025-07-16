@@ -1261,7 +1261,9 @@
 		"edit_contact": {
 			"title": "Modifica contatto",
 			"add_address": "Aggiungi indirizzo",
-			"delete_contact": "Elimina contatto"
+			"delete_contact": "Elimina contatto",
+			"failed_save_image": "",
+			"failed_remove_image": ""
 		},
 		"avatar": {
 			"default": "Avatar predefinito",

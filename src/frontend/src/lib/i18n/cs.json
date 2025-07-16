@@ -1261,7 +1261,9 @@
 		"edit_contact": {
 			"title": "Upravit kontakt",
 			"add_address": "Přidat adresu",
-			"delete_contact": "Smazat kontakt"
+			"delete_contact": "Smazat kontakt",
+			"failed_save_image": "",
+			"failed_remove_image": ""
 		},
 		"avatar": {
 			"default": "Výchozí avatar",
