@@ -5,5 +5,6 @@ export enum Currencies {
 	EUR = 'eur',
 	CHF = 'chf',
 	GBP = 'gbp',
-	JPY = 'jpy'
+	JPY = 'jpy',
+	CNY = 'cny'
 }
