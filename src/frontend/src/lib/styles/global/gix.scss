@@ -395,6 +395,9 @@ div.select {
 .toast {
 	--toast-error-background: var(--color-background-error-light);
 	--toast-error-color: var(--color-foreground-error-secondary);
+
+	--toast-warn-background: var(--color-background-error-light);
+	--toast-warn-color: var(--color-foreground-error-secondary);
 }
 
 // Tooltip
