@@ -82,7 +82,7 @@
 		onAvatarEdit(updated);
   
 	  } catch (err) {
-		saveError = err instanceof Error ? err.message : 'Failed to save image';
+		saveError = err instanceof Error ? err.message : $i18n.address_book.edit_contact.failed_save_image;
 	  }
 	};
   
@@ -98,7 +98,7 @@
 		  identity: $authIdentity as Identity
 		});
 	  } catch (err) {
-		saveError = err instanceof Error ? err.message : 'Failed to remove image';
+		saveError = err instanceof Error ? err.message : $i18n.address_book.edit_contact.failed_remove_image;
 	  }
 	};
 </script>
