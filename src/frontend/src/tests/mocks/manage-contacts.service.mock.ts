@@ -12,7 +12,7 @@ export const mockManageContactsService = () => {
 				name,
 				updateTimestampNs: BigInt(Date.now()),
 				addresses: [],
-				image: []
+				image: undefined
 			};
 
 			contactsStore.addContact(newContact);

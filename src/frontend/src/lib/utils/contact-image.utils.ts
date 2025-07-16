@@ -31,29 +31,3 @@ export const imageToDataUrl = (img: ContactImage): string => {
   const b64 = btoa(String.fromCharCode(...img.data));
   return `data:${mime};base64,${b64}`;
 };
-
-export const fileToContactImage = async (file: File): Promise<ContactImage> => {
-  const buf = await file.arrayBuffer();
-  const data = new Uint8Array(buf);
-  const mimeType = { [file.type]: null } as ImageMimeType;
-  return { data, mime_type: mimeType };
-};
-
-export const saveContact = async (params: SaveContactParams): Promise<ContactUi> => {
-  const { image, ...rest } = params;
-
-  const contactUi: ContactUi = {
-    ...rest,
-    image 
-  };
-
-  const beContact = mapToBackendContact(contactUi);
-
-  const authClient = await AuthClient.create();
-  const identity = await authClient.getIdentity();
-  const updatedBe = await apiUpdateContact({ contact: beContact, identity });
-
-  const updatedUi = mapToFrontendContact(updatedBe);
-  contactsStore.updateContact(updatedUi);
-  return updatedUi;
-};

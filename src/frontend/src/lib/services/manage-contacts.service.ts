@@ -1,68 +1,103 @@
+// src/lib/services/manage-contacts.service.ts
 import {
 	createContact as createContactApi,
 	deleteContact as deleteContactApi,
 	getContacts,
 	updateContact as updateContactApi
-} from '$lib/api/backend.api';
-import { contactsStore } from '$lib/stores/contacts.store';
-import type { ContactUi } from '$lib/types/contact';
-import { compareContactAddresses } from '$lib/utils/contact-address.utils';
-import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
-import type { Identity } from '@dfinity/agent';
-
-export const loadContacts = async (identity: Identity): Promise<void> => {
+  } from '$lib/api/backend.api';
+  import { contactsStore } from '$lib/stores/contacts.store';
+  import type { ContactUi } from '$lib/types/contact';
+  import { compareContactAddresses } from '$lib/utils/contact-address.utils';
+  import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
+  import type { Identity } from '@dfinity/agent';
+  import type { ContactImage } from '$declarations/backend/backend.did';
+  
+  export interface saveContactWithImage extends Omit<ContactUi, 'image'> {
+	/** supply a new image, or null to remove */
+	image: ContactImage | null;
+	/** identity must be passed in */
+	identity: Identity;
+  }
+  
+  export const loadContacts = async (identity: Identity): Promise<void> => {
 	contactsStore.reset();
 	const result = await getContacts({ identity });
 	const contactsWithSortedAddresses = result.map((contact) => {
-		const contactUi = mapToFrontendContact(contact);
-		return {
-			...contactUi,
-			addresses: contactUi.addresses.sort((a, b) => compareContactAddresses({ a, b }))
-		};
+	  const contactUi = mapToFrontendContact(contact);
+	  return {
+		...contactUi,
+		addresses: contactUi.addresses.sort((a, b) =>
+		  compareContactAddresses({ a, b })
+		)
+	  };
 	});
 	contactsStore.set(contactsWithSortedAddresses);
-};
-
-export const createContact = async ({
+  };
+  
+  export const createContact = async ({
 	name,
 	identity
-}: {
+  }: {
 	name: string;
 	identity: Identity;
-}): Promise<ContactUi> => {
+  }): Promise<ContactUi> => {
 	const result = await createContactApi({ name, identity });
 	const contactUi = mapToFrontendContact(result);
 	contactsStore.addContact(contactUi);
 	return contactUi;
-};
-
-export const updateContact = async ({
+  };
+  
+  export const updateContact = async ({
 	contact,
 	identity
-}: {
+  }: {
 	contact: ContactUi;
 	identity: Identity;
-}): Promise<ContactUi> => {
+  }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
-		...contact,
-		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
+	  ...contact,
+	  addresses: contact.addresses.sort((a, b) =>
+		compareContactAddresses({ a, b })
+	  )
 	};
-	const result = await updateContactApi({
-		contact: mapToBackendContact(contactWithSortedAddresses),
-		identity
+	const updatedBe = await updateContactApi({
+	  contact: mapToBackendContact(contactWithSortedAddresses),
+	  identity
 	});
-	const contactUi = mapToFrontendContact(result);
-	contactsStore.updateContact(contactUi);
-	return contactUi;
-};
-
-export const deleteContact = async ({
+	const updatedUi = mapToFrontendContact(updatedBe);
+	contactsStore.updateContact(updatedUi);
+	return updatedUi;
+  };
+  
+  export const deleteContact = async ({
 	id,
 	identity
-}: {
+  }: {
 	id: ContactUi['id'];
 	identity: Identity;
-}): Promise<void> => {
+  }): Promise<void> => {
 	await deleteContactApi({ contactId: id, identity });
 	contactsStore.removeContact(id);
-};
+  };
+
+  export const saveContactWithImage = async (
+	params: saveContactWithImage
+  ): Promise<ContactUi> => {
+	const { image, identity, ...rest } = params;
+  
+	const contactUi: ContactUi = {
+	  ...rest,
+	  image: image ?? undefined
+	};
+  
+	const beContact = mapToBackendContact(contactUi);
+  
+	const updatedBe = await updateContactApi({
+	  contact: beContact,
+	  identity
+	});
+  
+	const updatedUi = mapToFrontendContact(updatedBe);
+	contactsStore.updateContact(updatedUi);
+	return updatedUi;
+  };
