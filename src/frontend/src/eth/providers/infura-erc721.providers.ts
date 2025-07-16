@@ -87,9 +87,12 @@ export class InfuraErc721Provider {
 				imageUrl
 			};
 		} catch (error: unknown) {
-			throw new Error(replacePlaceholders(get(i18n).nfts.error.fetch_metadata, {
-				$address: contractAddress
-			}), { cause: error });
+			throw new Error(
+				replacePlaceholders(get(i18n).nfts.error.fetch_metadata, {
+					$address: contractAddress
+				}),
+				{ cause: error }
+			);
 		}
 	};
 }
