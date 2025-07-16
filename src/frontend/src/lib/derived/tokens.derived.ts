@@ -4,9 +4,11 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
@@ -29,6 +31,7 @@ import { derived, type Readable } from 'svelte/store';
 export const tokens: Readable<Token[]> = derived(
 	[
 		erc20Tokens,
+		erc721Tokens,
 		sortedIcrcTokens,
 		splTokens,
 		enabledEthereumTokens,
@@ -38,6 +41,7 @@ export const tokens: Readable<Token[]> = derived(
 	],
 	([
 		$erc20Tokens,
+		$erc721Tokens,
 		$icrcTokens,
 		$splTokens,
 		$enabledEthereumTokens,
@@ -51,9 +55,14 @@ export const tokens: Readable<Token[]> = derived(
 		...$enabledSolanaTokens,
 		...$enabledEvmTokens,
 		...$erc20Tokens,
+		...$erc721Tokens,
 		...$icrcTokens,
 		...$splTokens
 	]
+);
+
+export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
+	$tokens.filter((token) => !isTokenErc721(token))
 );
 
 export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
@@ -76,6 +85,14 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
  * All user-enabled tokens.
  */
 export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);
+
+/**
+ * All user-enabled fungible tokens.
+ */
+export const enabledFungibleTokens: Readable<Token[]> = derived(
+	[fungibleTokens],
+	filterEnabledTokens
+);
 
 /**
  * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's code wise convenient to avoid duplication of logic.

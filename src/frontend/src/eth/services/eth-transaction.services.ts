@@ -87,12 +87,16 @@ const processPendingTransaction = async ({
 		tokenId,
 		transactions: [
 			{
-				...rest,
-				// For ERC20 pending transactions we noticed that the `to` field is not correct, since it shows the token address instead of the recipient address.
-				// To avoid confusions on the user side, we prefer not to display the `to` field for ERC20 pending transactions.
-				...(!isTokenErc20(token) && { to }),
-				pendingTimestamp: Date.now(),
-				...(nonNullish(value) && { value })
+				data: {
+					...rest,
+					// For ERC20 pending transactions, we noticed that the `to` field is not correct, since it shows the token address instead of the recipient address.
+					// To avoid confusion on the user side, we prefer not to display the `to` field for ERC20 pending transactions.
+					...(!isTokenErc20(token) && { to }),
+					pendingTimestamp: Date.now(),
+					...(nonNullish(value) && { value })
+				},
+				// We set the certified property to false because we don't have a way to certify ERC20 transactions for now.
+				certified: false
 			}
 		]
 	});
