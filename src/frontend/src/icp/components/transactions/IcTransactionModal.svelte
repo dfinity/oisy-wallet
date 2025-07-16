@@ -16,6 +16,7 @@
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 
 	interface Props {
 		transaction: IcTransactionUi;
@@ -80,7 +81,7 @@
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
-					<output>{formatNanosecondsToDate({ nanoseconds: timestamp, language: $i18n })}</output>
+					<output>{formatNanosecondsToDate({ nanoseconds: timestamp, language: $currentLanguage })}</output>
 				</ListItem>
 			{/if}
 
