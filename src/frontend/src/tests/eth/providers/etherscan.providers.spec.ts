@@ -11,6 +11,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mocks';
 import {
 	createMockEtherscanInternalTransactions,
@@ -19,7 +20,6 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
 import type { MockedClass } from 'vitest';
-import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 
 vi.mock('$env/rest/etherscan.env', () => ({
 	ETHERSCAN_API_KEY: 'test-api-key'
@@ -268,9 +268,9 @@ describe('etherscan.providers', () => {
 					TokenAddress: mockEthAddress3,
 					TokenId: '3'
 				}
-				]
+			];
 
-			const expectedTokenIds = [1, 2, 3]
+			const expectedTokenIds = [1, 2, 3];
 
 			beforeEach(() => {
 				vi.clearAllMocks();
@@ -281,7 +281,10 @@ describe('etherscan.providers', () => {
 			it('should fetch and map token ids correctly', async () => {
 				const provider = new EtherscanProvider(network, chainId);
 
-				const tokenIds = await provider.erc721TokenInventory({address: mockEthAddress, contractAddress: mockValidErc721Token.address})
+				const tokenIds = await provider.erc721TokenInventory({
+					address: mockEthAddress,
+					contractAddress: mockValidErc721Token.address
+				});
 
 				expect(mockFetch).toHaveBeenCalledOnce();
 
@@ -293,7 +296,10 @@ describe('etherscan.providers', () => {
 				mockFetch.mockRejectedValue(new Error('Network error'));
 
 				await expect(
-					provider.erc721TokenInventory({ address: mockEthAddress, contractAddress: mockValidErc721Token.address })
+					provider.erc721TokenInventory({
+						address: mockEthAddress,
+						contractAddress: mockValidErc721Token.address
+					})
 				).rejects.toThrow('Network error');
 			});
 		});
