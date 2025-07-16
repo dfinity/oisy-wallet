@@ -75,7 +75,7 @@ const loadNftMetadataBatch = async ({
 				contractAddress,
 				tokenId: tokenIds[i]
 			});
-		} catch (err: unknown) {
+		} catch (_: unknown) {
 			metadata = { id: tokenIds[i] }
 		}
 
