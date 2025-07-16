@@ -13,7 +13,7 @@ import type { Identity } from '@dfinity/agent';
 
 export interface saveContactWithImage extends Omit<ContactUi, 'image'> {
 	/** supply a new image, null to remove, or undefined to maintain existing */
-	image: ContactImage | null | undefined;
+	image: Option<ContactImage>;
 	/** identity must be passed in */
 	identity: Identity;
 }
