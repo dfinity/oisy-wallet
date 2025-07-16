@@ -9,14 +9,7 @@ import {
 	getDiscriminatorForTokenAccountId,
 	getTokenAccountIdAddressString
 } from '$lib/utils/token-account-id.utils';
-import {
-	fromNullable,
-	isEmptyString,
-	isNullish,
-	nonNullish,
-	notEmptyString,
-	toNullable
-} from '@dfinity/utils';
+import { fromNullable, isEmptyString, isNullish, notEmptyString, toNullable } from '@dfinity/utils';
 
 export const selectColorForName = <T>({
 	colors,
