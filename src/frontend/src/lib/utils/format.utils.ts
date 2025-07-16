@@ -1,5 +1,6 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
@@ -91,7 +92,7 @@ export const formatSecondsToDate = ({
 	i18n?: I18n;
 }): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToDate = ({
@@ -102,7 +103,7 @@ export const formatNanosecondsToDate = ({
 	i18n?: I18n;
 }): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
-	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
@@ -111,10 +112,10 @@ export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 };
 
 export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
-	date.toLocaleDateString(i18n?.lang ?? 'en', { month: 'long' });
+	date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, { month: 'long' });
 
 const getRelativeTimeFormatter = (i18n?: I18n) =>
-	new Intl.RelativeTimeFormat(i18n?.lang ?? 'en', { numeric: 'auto' });
+	new Intl.RelativeTimeFormat(i18n?.lang ?? Languages.ENGLISH, { numeric: 'auto' });
 
 /** Formats a number of seconds to a normalized date string.
  *
@@ -151,11 +152,14 @@ export const formatSecondsToNormalizedDate = ({
 
 	// Same year, return day and month name
 	if (date.getFullYear() === today.getFullYear()) {
-		return date.toLocaleDateString(i18n?.lang ?? 'en', { day: 'numeric', month: 'long' });
+		return date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, {
+			day: 'numeric',
+			month: 'long'
+		});
 	}
 
 	// Different year, return day, month, and year
-	return date.toLocaleDateString(i18n?.lang ?? 'en', {
+	return date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, {
 		day: 'numeric',
 		month: 'long',
 		year: 'numeric'
