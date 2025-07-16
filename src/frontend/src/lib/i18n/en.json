@@ -1485,7 +1485,7 @@
 			"loading": "Thinking..."
 		},
 		"errors": {
-			"unknown": "Sorry, something went wrong:",
+			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
 			"no_response": "Sorry, I didn't get a response from the LLM."
 		}
 	}
