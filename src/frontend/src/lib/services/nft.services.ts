@@ -1,12 +1,12 @@
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { type EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
 import { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
-import { nftStore } from '$lib/stores/nft.store';
-import type { Nft, NftMetadata } from '$lib/types/nft';
-import { toastsError } from '$lib/stores/toasts.store';
-import { get } from 'svelte/store';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { i18n } from '$lib/stores/i18n.store';
+import { nftStore } from '$lib/stores/nft.store';
+import { toastsError } from '$lib/stores/toasts.store';
+import type { Nft, NftMetadata } from '$lib/types/nft';
+import { get } from 'svelte/store';
 
 export const loadNfts = (tokens: Erc721CustomToken[]) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
@@ -16,10 +16,10 @@ export const loadNfts = (tokens: Erc721CustomToken[]) => {
 };
 
 const loadNftsForContract = async ({
-																		 etherscanProvider,
-																		 infuraProvider,
-																		 token
-																	 }: {
+	etherscanProvider,
+	infuraProvider,
+	token
+}: {
 	etherscanProvider: EtherscanProvider;
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
@@ -63,10 +63,10 @@ const loadNftsForContract = async ({
 };
 
 const loadNftMetadataBatch = async ({
-																			infuraProvider,
-																			contractAddress,
-																			tokenIds
-																		}: {
+	infuraProvider,
+	contractAddress,
+	tokenIds
+}: {
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
 	tokenIds: number[];

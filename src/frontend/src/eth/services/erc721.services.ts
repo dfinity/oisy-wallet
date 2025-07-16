@@ -1,9 +1,7 @@
 import type { CustomToken, Erc721Token } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import {
-	infuraErc721Providers
-} from '$eth/providers/infura-erc721.providers';
+import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
