@@ -981,7 +981,7 @@
 	},
 	"nfts": {
 		"error": {
-			"fetch_metadata": "Error while fetching metadata of contract: $address"
+			"fetch_metadata": "Error while fetching metadata of contract: $address."
 		}
 	},
 	"fee": {
