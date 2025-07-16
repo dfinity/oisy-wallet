@@ -1,6 +1,6 @@
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
-import { Languages } from '$lib/types/languages';
+import { Languages } from '$lib/enums/languages';
 import {
 	formatNanosecondsToDate,
 	formatSecondsToDate,
