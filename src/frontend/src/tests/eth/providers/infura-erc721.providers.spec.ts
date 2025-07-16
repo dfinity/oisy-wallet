@@ -8,13 +8,13 @@ import {
 	infuraErc721Providers
 } from '$eth/providers/infura-erc721.providers';
 import type { EthereumNetwork } from '$eth/types/network';
+import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import { describe, type MockedClass } from 'vitest';
-import { i18n } from '$lib/stores/i18n.store';
 import { get } from 'svelte/store';
+import { describe, type MockedClass } from 'vitest';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
@@ -175,19 +175,19 @@ describe('infura-erc721.providers', () => {
 			const mockMetadata = {
 				name: 'Elemental Bean #123456',
 				image: 'https://elementals-images.azuki.com/2.gif',
-				attributes: [
-					{ trait_type: 'Color', value: 'Blue' }
-				]
+				attributes: [{ trait_type: 'Color', value: 'Blue' }]
 			};
 
 			beforeEach(() => {
 				vi.clearAllMocks();
 
-				mockTokenUri.mockResolvedValue('ipfs://bafybeig4s66nv3qbczmjxekn4tjk7pjdhcqbbshjj4kxwgdruvzym3rsbm/27');
+				mockTokenUri.mockResolvedValue(
+					'ipfs://bafybeig4s66nv3qbczmjxekn4tjk7pjdhcqbbshjj4kxwgdruvzym3rsbm/27'
+				);
 
 				global.fetch = vi.fn().mockResolvedValue({
 					json: () => Promise.resolve(mockMetadata)
-				})
+				});
 
 				mockContract.prototype.tokenURI = mockTokenUri;
 			});
@@ -200,10 +200,10 @@ describe('infura-erc721.providers', () => {
 				expect(metadata).toStrictEqual({
 					name: 'Elemental Bean #123456',
 					id: 123456,
-					attributes: [{traitType: 'Color', value: 'Blue'}],
+					attributes: [{ traitType: 'Color', value: 'Blue' }],
 					imageUrl: 'https://elementals-images.azuki.com/2.gif'
 				});
-			})
+			});
 
 			it('should handle errors gracefully', async () => {
 				const errorMessage = 'Error fetching metadata';
