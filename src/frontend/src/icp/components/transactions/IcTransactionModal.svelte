@@ -80,7 +80,7 @@
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
-					<output>{formatNanosecondsToDate({ nanoseconds: timestamp, i18n: $i18n })}</output>
+					<output>{formatNanosecondsToDate({ nanoseconds: timestamp, language: $i18n })}</output>
 				</ListItem>
 			{/if}
 

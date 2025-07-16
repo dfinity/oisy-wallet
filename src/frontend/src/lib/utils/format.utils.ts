@@ -97,13 +97,13 @@ export const formatSecondsToDate = ({
 
 export const formatNanosecondsToDate = ({
 	nanoseconds,
-	i18n
+	language
 }: {
 	nanoseconds: bigint;
-	i18n?: I18n;
+	language?: Languages;
 }): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
-	return date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
