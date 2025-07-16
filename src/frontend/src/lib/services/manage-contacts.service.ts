@@ -7,14 +7,13 @@ import {
 } from '$lib/api/backend.api';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
+import type { Option } from '$lib/types/utils';
 import { compareContactAddresses } from '$lib/utils/contact-address.utils';
 import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
 import type { Identity } from '@dfinity/agent';
 
 export interface saveContactWithImage extends Omit<ContactUi, 'image'> {
-	/** supply a new image, null to remove, or undefined to maintain existing */
 	image: Option<ContactImage>;
-	/** identity must be passed in */
 	identity: Identity;
 }
 
