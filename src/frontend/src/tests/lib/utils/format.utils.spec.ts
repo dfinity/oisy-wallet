@@ -366,8 +366,8 @@ describe('format.utils', () => {
 		});
 
 		describe('when i18n passed or not passed', () => {
-			const i18nEn = { lang: 'en' } as unknown as I18n;
-			const i18nDe = { lang: 'de' } as unknown as I18n;
+			const i18nEn = Languages.ENGLISH;
+			const i18nDe = Languages.GERMAN;
 
 			const getSecondsFromDate = (date: Date) => Math.floor(date.getTime() / 1000);
 
@@ -376,7 +376,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2023-06-12T00:00:00Z')),
 					currentDate: now,
-					i18n: i18nEn
+					language: i18nEn
 				});
 
 				expect(result).toBe('today');
@@ -387,7 +387,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2023-06-11T12:00:00Z')),
 					currentDate: now,
-					i18n: i18nEn
+					language: i18nEn
 				});
 
 				expect(result).toBe('yesterday');
@@ -398,7 +398,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2022-12-25')),
 					currentDate: now,
-					i18n: i18nEn
+					language: i18nEn
 				});
 
 				expect(result).toMatch('December 25, 2022');
@@ -409,7 +409,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2023-03-15')),
 					currentDate: now,
-					i18n: i18nEn
+					language: i18nEn
 				});
 
 				expect(result).toMatch('March 15');
@@ -420,7 +420,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2022-12-25')),
 					currentDate: now,
-					i18n: i18nDe
+					language: i18nDe
 				});
 
 				expect(result).toMatch('25. Dezember 2022');
@@ -431,7 +431,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2023-06-11')),
 					currentDate: now,
-					i18n: i18nDe
+					language: i18nDe
 				});
 
 				expect(result.toLowerCase()).toBe('gestern'); // "yesterday" in German
@@ -490,7 +490,7 @@ describe('format.utils', () => {
 			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
 			const result = formatNanosecondsToDate({
 				nanoseconds: jan1_2023_ns,
-				i18n: { lang: 'de' } as unknown as I18n
+				language: Languages.GERMAN
 			});
 
 			expect(result).toMatch('1. Jan. 2023');
@@ -498,10 +498,7 @@ describe('format.utils', () => {
 
 		it('falls back to en locale when i18n.lang is not provided', () => {
 			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
-			const result = formatNanosecondsToDate({
-				nanoseconds: jan1_2023_ns,
-				i18n: {} as unknown as I18n
-			});
+			const result = formatNanosecondsToDate({ nanoseconds: jan1_2023_ns });
 
 			expect(result).toMatch('Jan 1, 2023');
 		});
