@@ -13,8 +13,8 @@ import {
   import type { ContactImage } from '$declarations/backend/backend.did';
   
   export interface saveContactWithImage extends Omit<ContactUi, 'image'> {
-	/** supply a new image, or null to remove */
-	image: ContactImage | null;
+	/** supply a new image, null to remove, or undefined to maintain existing */
+	image: ContactImage | null | undefined;
 	/** identity must be passed in */
 	identity: Identity;
   }
