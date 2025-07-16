@@ -18,7 +18,7 @@ let errorMessages: { msg: string; timestamp: number }[] = [];
 
 export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 	const ExchangeWorker = await import('$lib/workers/workers?worker');
-	const exchangeWorker: Worker = new ExchangeWorker.default();
+	let exchangeWorker: Worker | null = new ExchangeWorker.default();
 
 	exchangeWorker.onmessage = ({
 		data: dataMsg
@@ -87,20 +87,29 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 	};
 
 	const stopTimer = () =>
-		exchangeWorker.postMessage({
+		exchangeWorker?.postMessage({
 			msg: 'stopExchangeTimer'
 		});
 
+	let isDestroying = false;
+
 	return {
 		startExchangeTimer: (data: PostMessageDataRequestExchangeTimer) => {
-			exchangeWorker.postMessage({
+			exchangeWorker?.postMessage({
 				msg: 'startExchangeTimer',
 				data
 			});
 		},
 		stopExchangeTimer: stopTimer,
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stopTimer();
+			exchangeWorker?.terminate();
+			exchangeWorker = null;
+			isDestroying = false;
 			errorMessages = [];
 		}
 	};
