@@ -54,16 +54,16 @@ export class InfuraErc721Provider {
 	}): Promise<NftMetadata> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
-		const resolveResourceUrl = (url: string): string => {
+		const resolveResourceUrl = (url: URL): URL => {
 			const IPFS_PREFIX = 'ipfs://';
-			if (url.startsWith(IPFS_PREFIX)) {
-				return url.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/');
+			if (url.href.startsWith(IPFS_PREFIX)) {
+				return new URL(url.href.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/'));
 			}
 
 			return url;
 		};
 
-		const tokenUri = await erc721Contract.tokenURI(tokenId);
+		const tokenUri = new URL(await erc721Contract.tokenURI(tokenId));
 
 		const metadataUrl = resolveResourceUrl(tokenUri);
 
