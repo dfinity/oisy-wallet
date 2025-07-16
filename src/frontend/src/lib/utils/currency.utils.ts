@@ -30,4 +30,3 @@ export const getCurrencySymbol = ({
 		})
 		.replace(/\d/g, '')
 		.trim();
-
