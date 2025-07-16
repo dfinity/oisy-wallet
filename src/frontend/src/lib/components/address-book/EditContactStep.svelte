@@ -90,6 +90,7 @@
 				image: null,
 				identity: $authIdentity as Identity
 			});
+			onAvatarEdit(updated);
 		} catch (err) {
 			saveError =
 				(err instanceof Error ? err.message : null) ??
