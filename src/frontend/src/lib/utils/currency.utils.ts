@@ -12,3 +12,14 @@ export const getCurrencyName = ({
 
 	return currencyNames.of(currency.toUpperCase());
 };
+
+export const getCurrencySymbol = ({
+	currency,
+	language
+}: {
+	currency: Currencies;
+	language: Languages;
+}): string | undefined =>
+	new Intl.NumberFormat(language, { style: 'currency', currency })
+		.formatToParts(0)
+		.find((p) => p.type === 'currency')?.value;
