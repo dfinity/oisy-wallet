@@ -46,31 +46,31 @@ export class InfuraErc721Provider {
 	};
 
 	getNftMetadata = async ({
-		contractAddress,
-		tokenId
-	}: {
+														contractAddress,
+														tokenId
+													}: {
 		contractAddress: string;
 		tokenId: number;
 	}): Promise<NftMetadata> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
-		const resolveResourceUrl = (url: string): string => {
+		const resolveResourceUrl = (url: URL): URL => {
 			const IPFS_PREFIX = 'ipfs://';
-			if (url.startsWith(IPFS_PREFIX)) {
-				return url.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/');
+			if (url.href.startsWith(IPFS_PREFIX)) {
+				return new URL(url.href.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/'));
 			}
 
 			return url;
 		};
 
-		const tokenUri = await erc721Contract.tokenURI(tokenId);
+		const tokenUri = new URL(await erc721Contract.tokenURI(tokenId));
 
 		const metadataUrl = resolveResourceUrl(tokenUri);
 
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
 
-		const imageUrl = resolveResourceUrl(metadata?.image ?? '');
+		const imageUrl = resolveResourceUrl(new URL(metadata?.image ?? ''));
 
 		const mappedAttributes = (metadata?.attributes ?? []).map(
 			(attr: { trait_type: string; value: string | number }) => ({
@@ -83,7 +83,7 @@ export class InfuraErc721Provider {
 			name: metadata?.name ?? '',
 			id: tokenId,
 			attributes: mappedAttributes,
-			imageUrl
+			imageUrl: imageUrl.href
 		};
 	};
 }
