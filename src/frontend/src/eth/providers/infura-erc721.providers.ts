@@ -54,35 +54,37 @@ export class InfuraErc721Provider {
 	}): Promise<NftMetadata> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
-		try {
-			const tokenUri = await erc721Contract.tokenURI(tokenId);
-
-			const metadataUrl = tokenUri.replace('ipfs://', 'https://ipfs.io/ipfs/');
-
-			const response = await fetch(metadataUrl);
-			const metadata = await response.json();
-
-			let imageUrl = metadata?.image ?? '';
-			if (imageUrl.startsWith('ipfs://')) {
-				imageUrl = imageUrl.replace('ipfs://', 'https://ipfs.io/ipfs/');
+		const resolveResourceUrl = (url: string): string => {
+			const IPFS_PREFIX = 'ipfs://';
+			if (url.startsWith(IPFS_PREFIX)) {
+				return url.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/');
 			}
 
-			const mappedAttributes = (metadata?.attributes ?? []).map(
-				(attr: { trait_type: string; value: string | number }) => ({
-					traitType: attr.trait_type,
-					value: attr.value.toString()
-				})
-			);
+			return url;
+		};
 
-			return {
-				name: metadata?.name ?? '',
-				id: tokenId,
-				attributes: mappedAttributes,
-				imageUrl
-			};
-		} catch (error: unknown) {
-			throw new Error(`Failed to fetch erc721 token metadata: ${error}`);
-		}
+		const tokenUri = await erc721Contract.tokenURI(tokenId);
+
+		const metadataUrl = resolveResourceUrl(tokenUri);
+
+		const response = await fetch(metadataUrl);
+		const metadata = await response.json();
+
+		const imageUrl = resolveResourceUrl(metadata?.image ?? '');
+
+		const mappedAttributes = (metadata?.attributes ?? []).map(
+			(attr: { trait_type: string; value: string | number }) => ({
+				traitType: attr.trait_type,
+				value: attr.value.toString()
+			})
+		);
+
+		return {
+			name: metadata?.name ?? '',
+			id: tokenId,
+			attributes: mappedAttributes,
+			imageUrl
+		};
 	};
 }
 

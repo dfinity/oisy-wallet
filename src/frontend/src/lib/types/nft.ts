@@ -1,4 +1,4 @@
-import type { NftMetadataSchema, NftSchema } from '$lib/schema/nftSchema';
+import type { NftMetadataSchema, NftSchema } from '$lib/schema/nft.schema';
 import type { Network } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import type * as z from 'zod';
