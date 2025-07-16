@@ -89,7 +89,8 @@ export class InfuraErc721Provider {
 		} catch (error: unknown) {
 			throw new Error(
 				replacePlaceholders(get(i18n).nfts.error.fetch_metadata, {
-					$address: contractAddress
+					$address: contractAddress,
+					$tokenId: tokenId.toString()
 				}),
 				{ cause: error }
 			);
