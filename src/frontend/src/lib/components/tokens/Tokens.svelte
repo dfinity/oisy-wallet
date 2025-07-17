@@ -34,12 +34,11 @@
 				<TokensFilter>
 					{#snippet overflowableContent()}
 						{#if NFTS_ENABLED}
-<!--							TODO add tests from i18n-->
 							<Tabs
 								bind:activeTab
 								tabs={[
-									{ label: 'Tokens', id: 'tokens' },
-									{ label: 'NFTs', id: 'nfts' }
+									{ label: $i18n.tokens.text.title, id: 'tokens' },
+									{ label: $i18n.nfts.text.title, id: 'nfts' }
 								]}
 								tabVariant="menu"
 							/>
