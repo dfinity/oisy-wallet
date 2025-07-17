@@ -9,9 +9,9 @@ import {
 	mockBackendContactAddressSol
 } from '$tests/mocks/contacts.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import { vi } from 'vitest';
-import { toNullable } from '@dfinity/utils';
 
 const mockContactImage: ContactImage = {
 	data: new Uint8Array([1, 2, 3]),
@@ -201,7 +201,7 @@ describe('manage-contacts.service', () => {
 
 			const result = await updateContact({
 				contact,
-				identity: mockIdentity,
+				identity: mockIdentity
 			});
 
 			expect(mockUpdateContact).toHaveBeenCalledWith(
