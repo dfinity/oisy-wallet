@@ -36,6 +36,10 @@ vi.mock('$app/environment', () => ({
 	browser: true
 }));
 
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
+
 describe('idb-transactions.api', () => {
 	const mockIdbTransactionsStore = createStore('mock-store', 'mock-store');
 
