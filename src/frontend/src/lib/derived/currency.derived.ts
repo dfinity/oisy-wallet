@@ -6,3 +6,8 @@ export const currentCurrency: Readable<Currencies> = derived(
 	[currencyStore],
 	([{ currency }]) => currency
 );
+
+export const currentCurrencyExchangeRate: Readable<number | null> = derived(
+	[currencyStore],
+	([{ exchangeRateToUsd }]) => exchangeRateToUsd
+);

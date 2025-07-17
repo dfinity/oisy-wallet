@@ -28,7 +28,10 @@ export const initCurrencyStore = (): CurrencyStore => {
 	return {
 		switchCurrency: (currency: CurrencyData['currency']) =>
 			// When the currency changes, we reset the exchange rate to null to avoid showing wrong data in the UI
-			set({ key: CURRENCY_STORAGE_KEY, value: { currency, exchangeRateToUsd: null } }),
+			set({
+				key: CURRENCY_STORAGE_KEY,
+				value: { currency, exchangeRateToUsd: currency === Currencies.USD ? 1 : null }
+			}),
 		setExchangeRate: (exchangeRate: CurrencyData['exchangeRateToUsd']) =>
 			update((state) => ({ ...state, exchangeRateToUsd: exchangeRate })),
 		subscribe
