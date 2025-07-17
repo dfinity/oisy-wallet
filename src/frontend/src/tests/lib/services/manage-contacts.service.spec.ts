@@ -139,9 +139,7 @@ describe('manage-contacts.service', () => {
 			vi.resetAllMocks();
 			contactsStore.reset();
 
-			updateContactSpy = vi
-				.spyOn(contactsStore, 'updateContact')
-
+			updateContactSpy = vi.spyOn(contactsStore, 'updateContact');
 		});
 
 		it('should update contact with image', async () => {
@@ -168,7 +166,7 @@ describe('manage-contacts.service', () => {
 				image: mockContactImage
 			});
 
-			expect(mockUpdateContact).toHaveBeenCalledOnce()
+			expect(mockUpdateContact).toHaveBeenCalledOnce();
 			expect(updateContactSpy).toHaveBeenCalledWith(
 				expect.objectContaining({
 					image: mockContactImage
