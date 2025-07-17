@@ -323,7 +323,6 @@ describe('AddressBookModal', () => {
 			name: 'Pre-existing Contact',
 			updateTimestampNs: BigInt(Date.now()),
 			addresses: [],
-			image: undefined
 		};
 
 		contactsStore.set([contact]);
