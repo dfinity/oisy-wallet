@@ -30,7 +30,7 @@ export type ApproveParams = Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFe
 	Omit<SendParams, 'targetNetwork' | 'lastProgressStep' | 'progress'> &
 	RequiredTransactionFeeData &
 	Omit<WithProgress, 'progressSteps'> & {
-		approveRequired?: boolean;
+		shouldSwapWithApproval?: boolean;
 	};
 
 export type SignAndApproveParams = Omit<

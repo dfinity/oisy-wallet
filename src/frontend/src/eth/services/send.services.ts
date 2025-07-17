@@ -519,7 +519,7 @@ export const approve = async ({
 	sourceNetwork,
 	// TODO: Refactor to accept an `onProgress(step)` callback instead of requiring manual `progress(progressSteps.step)` calls
 	progress,
-	approveRequired,
+	shouldSwapWithApproval,
 	progressSteps = ProgressStepsSend,
 	...rest
 }: ApproveParams): Promise<{
@@ -538,8 +538,8 @@ export const approve = async ({
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	const shouldSkipApproval = nonNullish(approveRequired)
-		? !approveRequired
+	const shouldSkipApproval = nonNullish(shouldSwapWithApproval)
+		? !shouldSwapWithApproval
 		: isNullish(erc20HelperContractAddress) ||
 			!shouldSendWithApproval({
 				to,
@@ -551,7 +551,7 @@ export const approve = async ({
 		return { transactionNeededApproval: false, nonce };
 	}
 
-	const spender = approveRequired ? to : erc20HelperContractAddress;
+	const spender = shouldSwapWithApproval ? to : erc20HelperContractAddress;
 
 	if (isNullish(spender)) {
 		return { transactionNeededApproval: false, nonce };
