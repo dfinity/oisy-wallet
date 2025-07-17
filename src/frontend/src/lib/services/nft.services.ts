@@ -24,12 +24,17 @@ const loadNftsOfToken = async ({
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
 }) => {
-	const walletAddress = get(ethAddressStore)?.data
+	const walletAddress = get(ethAddressStore)?.data // 0x29469395eaf6f95920e59f858042f0e28d98a20b
 
-	const tokenIds = await etherscanProvider.erc721TokenInventory({
-		address: walletAddress,
-		contractAddress: token.address
-	});
+	let tokenIds: number[];
+	try {
+		tokenIds = await etherscanProvider.erc721TokenInventory({
+			address: walletAddress,
+			contractAddress: token.address
+		});
+	} catch (_: unknown) {
+		tokenIds = [];
+	}
 
 	const loadedTokenIds = nftStore.getTokenIds(token.address);
 	const tokenIdsToLoad = tokenIds.filter((id: number) => !loadedTokenIds.includes(id));
