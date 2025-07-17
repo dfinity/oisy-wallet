@@ -599,7 +599,8 @@ describe('format.utils', () => {
 			{ value: 12345, currency: Currencies.GBP, expected: '£12’345.00' },
 
 			{ value: 1000000.99, currency: Currencies.JPY, expected: '¥1’000’001' },
-			{ value: 1000000.4, currency: Currencies.JPY, expected: '¥1’000’000' }
+			{ value: 1000000.4, currency: Currencies.JPY, expected: '¥1’000’000' },
+			{ value: 123456789.12345, currency: Currencies.CHF, expected: 'CHF 123’456’789.12' }
 		];
 
 		it.each(testCases)(
