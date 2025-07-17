@@ -30,7 +30,6 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -41,6 +40,7 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import type { ProgressStep } from '$eth/types/send';
 
 	export let currentStep: WizardStep | undefined;
 
@@ -167,7 +167,7 @@
 			await executeSend({
 				from: $ethAddress,
 				to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),
-				progress: (step: ProgressStepsSend) => (sendProgressStep = step),
+				progress: (step: ProgressStep) => (sendProgressStep = step),
 				token: $sendToken,
 				amount: parseToken({
 					value: `${amount}`,

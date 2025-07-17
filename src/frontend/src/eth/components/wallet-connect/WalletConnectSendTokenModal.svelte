@@ -37,6 +37,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type { ProgressStep } from '$eth/types/send';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -150,7 +151,7 @@
 			fee: $feeStore,
 			modalNext: modal.next,
 			token: $sendToken,
-			progress: (step: ProgressStepsSend) => (sendProgressStep = step),
+			progress: (step: ProgressStep) => (sendProgressStep = step),
 			identity: $authIdentity,
 			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			sourceNetwork,

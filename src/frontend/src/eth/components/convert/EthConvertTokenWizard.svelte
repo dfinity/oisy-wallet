@@ -30,7 +30,6 @@
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -40,6 +39,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import type { ProgressStep } from '$eth/types/send';
 
 	export let currentStep: WizardStep | undefined;
 	export let sendAmount: OptionAmount;
@@ -123,7 +123,7 @@
 			await executeSend({
 				from: $ethAddress,
 				to: isErc20Icp($sourceToken) ? destination : mapAddressStartsWith0x(destination),
-				progress: (step: ProgressStepsSend) => (convertProgressStep = step),
+				progress: (step: ProgressStep) => (convertProgressStep = step),
 				token: $sourceToken,
 				amount: parseToken({
 					value: `${sendAmount}`,
