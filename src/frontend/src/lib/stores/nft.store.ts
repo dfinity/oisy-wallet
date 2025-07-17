@@ -34,15 +34,22 @@ const initNftStore = (): NftStore => {
 			});
 		},
 		getTokenIds: (contractAddress: string) => {
-			const currentNfts = get(nftStore);
+			let tokenIds = [];
 
-			if (!currentNfts) {
-				return [];
-			}
+			update((nfts) => {
+				if (isNullish(nfts)) {
+					tokenIds = [];
+					return nfts;
+				}
 
-			return currentNfts
-				.filter((nft) => nft.contract.address.toLowerCase() === contractAddress.toLowerCase())
-				.map((nft) => nft.id);
+				tokenIds = nfts
+					.filter((nft) => nft.contract.address.toLowerCase() === contractAddress.toLowerCase())
+					.map((nft) => nft.id);
+
+				return nfts;
+			})
+
+			return tokenIds;
 		},
 		resetAll: () => set(undefined)
 	};
