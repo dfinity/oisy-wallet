@@ -34,6 +34,7 @@
 				<TokensFilter>
 					{#snippet overflowableContent()}
 						{#if NFTS_ENABLED}
+<!--							TODO add tests from i18n-->
 							<Tabs
 								bind:activeTab
 								tabs={[
