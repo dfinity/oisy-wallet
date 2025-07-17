@@ -42,7 +42,7 @@ const initNftStore = (): NftStore => {
 					return nfts;
 				}
 
-				tokenIds = nfts.reduce<number[]>((acc, nft) => {
+				tokenIds = nfts.reduce<NftId[]>((acc, nft) => {
 					if (nft.contract.address.toLowerCase() === contractAddress.toLowerCase()) {
 						acc.push(nft.id);
 					}
