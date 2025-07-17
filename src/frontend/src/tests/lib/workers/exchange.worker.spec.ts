@@ -139,6 +139,7 @@ describe('exchange.worker', () => {
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: 'syncExchange',
 					data: {
+						currentExchangeRate: 1,
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentBtcPrice: { bitcoin: { usd: 1 } },
 						currentErc20Prices: {},
@@ -345,7 +346,7 @@ describe('exchange.worker', () => {
 					// Native tokens + BTCUSD/BTCXXX
 					expect(simplePrice).toHaveBeenCalledTimes(6 + 1);
 
-					expect(simplePrice).toHaveBeenNthCalledWith(7, {
+					expect(simplePrice).toHaveBeenNthCalledWith(1, {
 						ids: 'bitcoin',
 						vs_currencies: `${Currencies.USD},${Currencies.JPY}`
 					});
@@ -434,6 +435,7 @@ describe('exchange.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 						msg: 'syncExchange',
 						data: {
+							currentExchangeRate: 1,
 							currentBnbPrice: { binancecoin: { usd: 1 } },
 							currentBtcPrice: { bitcoin: { usd: 1 } },
 							currentErc20Prices: {
