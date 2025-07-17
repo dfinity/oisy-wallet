@@ -27,9 +27,11 @@
 			aria-label={label}
 			class="justify-center rounded-none border-0 text-sm font-semibold transition hover:border-brand-primary sm:text-base"
 			class:ml-4={index !== 0}
+			class:p-2={tabVariant === 'default'}
 			class:w-full={tabVariant === 'default'}
 			class:h-6={tabVariant === 'menu'}
-			class:text-tertiary={activeTab !== id}
+			class:text-tertiary-inverted={activeTab !== id && tabVariant === 'default'}
+			class:text-tertiary={activeTab !== id && tabVariant === 'menu'}
 			class:border-b-2={activeTab === id || tabVariant === 'default'}
 			class:border-primary={activeTab !== id}
 			class:text-brand-primary={activeTab === id && tabVariant === 'default'}
