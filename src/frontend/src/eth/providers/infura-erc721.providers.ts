@@ -92,8 +92,8 @@ export class InfuraErc721Provider {
 		return {
 			id: tokenId,
 			imageUrl: imageUrl.href,
-			...(metadata?.name && {name: metadata.name}),
-			...(mappedAttributes.length > 0 && { attributes: mappedAttributes})
+			...(metadata?.name && { name: metadata.name }),
+			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
 		};
 	};
 }
