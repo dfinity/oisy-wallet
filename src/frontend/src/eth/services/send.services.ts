@@ -279,6 +279,7 @@ export const send = async ({
 
 	const { transactionNeededApproval, nonce } = await approve({
 		progress,
+		progressSteps: ProgressStepsSend,
 		token,
 		...rest
 	});
@@ -427,6 +428,7 @@ const prepareAndSignApproval = async ({
 	gas,
 	sourceNetwork,
 	identity,
+	progressSteps = ProgressStepsSend,
 	progress,
 	...rest
 }: SignAndApproveParams): Promise<
@@ -445,11 +447,11 @@ const prepareAndSignApproval = async ({
 		networkId
 	});
 
-	progress?.(ProgressStepsSend.SIGN_APPROVE);
+	progress?.(progressSteps.SIGN_APPROVE);
 
 	const rawTransaction = await signTransaction({ identity, transaction: approve });
 
-	progress?.(ProgressStepsSend.APPROVE);
+	progress?.(progressSteps.APPROVE);
 
 	const { sendTransaction } = infuraProviders(networkId);
 
@@ -477,7 +479,7 @@ const checkExistingApproval = async ({
 	amount,
 	sourceNetwork,
 	...rest
-}: Omit<ApproveParams, 'to' | 'minterInfo' | 'progress'> & {
+}: Omit<ApproveParams, 'to' | 'minterInfo'> & {
 	nonce: number;
 	spender: EthAddress;
 }): Promise<'existingApprovalIsEnough' | 'approvalNeededReset' | 'noExistingApproval'> => {
@@ -508,7 +510,7 @@ const checkExistingApproval = async ({
 	return 'noExistingApproval';
 };
 
-const approve = async ({
+export const approve = async ({
 	token,
 	from,
 	to,
@@ -516,6 +518,8 @@ const approve = async ({
 	amount,
 	sourceNetwork,
 	progress,
+	approveRequired,
+	progressSteps = ProgressStepsSend,
 	...rest
 }: ApproveParams): Promise<{
 	transactionNeededApproval: boolean;
@@ -533,14 +537,22 @@ const approve = async ({
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	if (
-		isNullish(erc20HelperContractAddress) ||
-		!shouldSendWithApproval({
-			to,
-			tokenId: token.id,
-			erc20HelperContractAddress
-		})
-	) {
+	const shouldSkipApproval = nonNullish(approveRequired)
+		? !approveRequired
+		: isNullish(erc20HelperContractAddress) ||
+			!shouldSendWithApproval({
+				to,
+				tokenId: token.id,
+				erc20HelperContractAddress
+			});
+
+	if (shouldSkipApproval) {
+		return { transactionNeededApproval: false, nonce };
+	}
+
+	const spender = approveRequired ? to : erc20HelperContractAddress;
+
+	if (isNullish(spender)) {
 		return { transactionNeededApproval: false, nonce };
 	}
 
@@ -548,15 +560,16 @@ const approve = async ({
 	const approvalCheckResult = await checkExistingApproval({
 		token,
 		from,
-		spender: erc20HelperContractAddress,
+		spender,
 		nonce,
 		amount,
 		sourceNetwork,
+		progress,
 		...rest
 	});
 
 	if (approvalCheckResult === 'existingApprovalIsEnough') {
-		progress(ProgressStepsSend.APPROVE);
+		progress(progressSteps.APPROVE);
 		return { transactionNeededApproval: false, nonce };
 	}
 
@@ -570,7 +583,7 @@ const approve = async ({
 		token,
 		sourceNetwork,
 		progress,
-		spender: erc20HelperContractAddress
+		spender
 	});
 
 	return { transactionNeededApproval: transactionApproved, hash, nonce: nonceApproval };
