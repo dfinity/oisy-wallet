@@ -2,6 +2,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 import type {
 	EtherscanProviderInternalTransaction,
 	EtherscanProviderTokenTransferTransaction,
@@ -9,7 +10,7 @@ import type {
 } from '$eth/types/etherscan-transaction';
 import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
-import type { EthAddress } from '$lib/types/address';
+import type { Address, EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -180,6 +181,34 @@ export class EtherscanProvider {
 				chainId: this.chainId
 			})
 		);
+	};
+
+	erc721TokenInventory = async ({
+		address,
+		contractAddress
+	}: {
+		address: EthAddress;
+		contractAddress: Address;
+	}): Promise<number[]> => {
+		const params = {
+			action: 'addresstokennftinventory',
+			address,
+			contractaddress: contractAddress,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderTokenId[] | string = await this.provider.fetch(
+			'account',
+			params
+		);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseInt(TokenId));
 	};
 }
 
