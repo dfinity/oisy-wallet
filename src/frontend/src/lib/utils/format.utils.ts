@@ -3,7 +3,7 @@ import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants
 import type { Currencies } from '$lib/enums/currencies';
 import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import Decimal from 'decimal.js';
 import type { BigNumberish } from 'ethers/utils';
@@ -169,26 +169,14 @@ export const formatSecondsToNormalizedDate = ({
 
 export const formatCurrency = ({
 	value,
-	currency,
-	options
+	currency
 }: {
 	value: number;
 	currency: Currencies;
-	options?: {
-		minFraction?: number;
-		maxFraction?: number;
-		maximumSignificantDigits?: number;
-		symbol?: boolean;
-	};
-}): string => {
-	const { minFraction, maxFraction, maximumSignificantDigits, symbol = true } = options ?? {};
-
-	return new Intl.NumberFormat('en-US', {
-		...(symbol && { style: 'currency', currency: currency.toUpperCase() }),
-		minimumFractionDigits: minFraction,
-		maximumFractionDigits: maxFraction,
-		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })
+}): string =>
+	new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: currency.toUpperCase()
 	})
 		.format(value)
 		.replace(/,/g, '’');
-};
