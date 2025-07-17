@@ -71,9 +71,7 @@ export class InfuraErc721Provider {
 			throw new InvalidTokenUri(tokenId, contractAddress);
 		}
 
-		const tokenUri = new URL(parsedTokenUri.data);
-
-		const metadataUrl = resolveResourceUrl(tokenUri);
+		const metadataUrl = resolveResourceUrl(new URL(parsedTokenUri.data));
 
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
