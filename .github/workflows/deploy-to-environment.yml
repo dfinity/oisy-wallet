@@ -117,7 +117,7 @@ on:
       VITE_VELORA_SWAP_ENABLED_BETA:
         required: true
       VITE_NFTS_ENABLED_BETA:
-        required: false
+        required: true
       VITE_FRONTEND_DERIVATION_ENABLED_BETA:
         required: true
       VITE_AI_ASSISTANT_CONSOLE_ENABLED_BETA:
