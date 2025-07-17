@@ -9,7 +9,7 @@ import {
 	crossChainSwapNetworks,
 	crossChainSwapNetworksMainnets,
 	crossChainSwapNetworksMainnetsIds
-} from '$lib/derived/networks.derived';
+} from '$lib/derived/cross-chain-networks.derived';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';

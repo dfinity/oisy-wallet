@@ -17,7 +17,7 @@ import {
 } from '$env/networks/networks.sol.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { enabledEvmNetworks } from '$evm/derived/networks.derived';
-import type { Network, NetworkId } from '$lib/types/network';
+import type { Network } from '$lib/types/network';
 import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 import { derived, type Readable } from 'svelte/store';
 
@@ -119,35 +119,4 @@ export const networkSolanaDevnetEnabled: Readable<boolean> = derived([networks],
 
 export const networkSolanaLocalEnabled: Readable<boolean> = derived([networks], ([$networks]) =>
 	$networks.some(({ id }) => id === SOLANA_LOCAL_NETWORK_ID)
-);
-
-export const crossChainSwapNetworks: Readable<Network[]> = derived(
-	[enabledEthereumNetworks, enabledEvmNetworks],
-	([$enabledEthereumNetworks, $enabledEvmNetworks]) => [
-		ICP_NETWORK,
-		...$enabledEthereumNetworks,
-		...$enabledEvmNetworks
-	]
-);
-
-export const crossChainSwapNetwoksEnvs: Readable<NetworksEnvs> = derived(
-	[crossChainSwapNetworks],
-	([$crossChainSwapNetworks]) =>
-		$crossChainSwapNetworks.reduce<NetworksEnvs>(
-			({ mainnets, testnets }, network) => ({
-				mainnets: [...mainnets, ...(network.env === 'mainnet' ? [network] : [])],
-				testnets: [...testnets, ...(network.env === 'testnet' ? [network] : [])]
-			}),
-			{ mainnets: [], testnets: [] }
-		)
-);
-
-export const crossChainSwapNetworksMainnets: Readable<Network[]> = derived(
-	[crossChainSwapNetwoksEnvs],
-	([{ mainnets }]) => mainnets
-);
-
-export const crossChainSwapNetworksMainnetsIds: Readable<NetworkId[]> = derived(
-	[crossChainSwapNetwoksEnvs],
-	([{ mainnets }]) => mainnets.map((mainnet) => mainnet.id)
 );
