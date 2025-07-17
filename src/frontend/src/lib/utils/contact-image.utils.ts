@@ -25,9 +25,3 @@ export const dataUrlToImage = (dataUrl: string): ContactImage => {
 	const mimeType = { [mime]: null } as ImageMimeType;
 	return { mime_type: mimeType, data };
 };
-
-export const imageToDataUrl = (img: ContactImage): string => {
-	const [mime] = Object.keys(img.mime_type);
-	const b64 = btoa(String.fromCharCode(...img.data));
-	return `data:${mime};base64,${b64}`;
-};
