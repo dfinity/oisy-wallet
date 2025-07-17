@@ -11,7 +11,8 @@ import type { EthereumNetwork } from '$eth/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mocks';
 import {
 	createMockEtherscanInternalTransactions,
 	createMockEtherscanTransactions
@@ -250,6 +251,56 @@ describe('etherscan.providers', () => {
 						provider.erc20Transactions({ address: mockEthAddress, contract: mockValidErc20Token })
 					).rejects.toThrow('Network error');
 				});
+			});
+		});
+
+		describe('erc721TokenInventory', () => {
+			const mockApiResponse = [
+				{
+					TokenAddress: mockEthAddress,
+					TokenId: '1'
+				},
+				{
+					TokenAddress: mockEthAddress2,
+					TokenId: '2'
+				},
+				{
+					TokenAddress: mockEthAddress3,
+					TokenId: '3'
+				}
+			];
+
+			const expectedTokenIds = [1, 2, 3];
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				mockFetch.mockResolvedValue(mockApiResponse);
+			});
+
+			it('should fetch and map token ids correctly', async () => {
+				const provider = new EtherscanProvider(network, chainId);
+
+				const tokenIds = await provider.erc721TokenInventory({
+					address: mockEthAddress,
+					contractAddress: mockValidErc721Token.address
+				});
+
+				expect(mockFetch).toHaveBeenCalledOnce();
+
+				expect(tokenIds).toStrictEqual(expectedTokenIds);
+			});
+
+			it('should throw an error if the API call fails', async () => {
+				const provider = new EtherscanProvider(network, chainId);
+				mockFetch.mockRejectedValue(new Error('Network error'));
+
+				await expect(
+					provider.erc721TokenInventory({
+						address: mockEthAddress,
+						contractAddress: mockValidErc721Token.address
+					})
+				).rejects.toThrow('Network error');
 			});
 		});
 	});

@@ -1,5 +1,6 @@
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { syncWallet } from '$icp/services/ic-listener.services';
+import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
@@ -14,7 +15,9 @@ import type {
 
 export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new WalletWorker.default();
+	let worker: Worker | null = new WalletWorker.default();
+
+	await syncWalletFromCache({ tokenId: ICP_TOKEN_ID, networkId: ICP_NETWORK_ID });
 
 	worker.onmessage = ({
 		data: dataMsg
@@ -50,26 +53,34 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 	};
 
 	const stop = () => {
-		worker.postMessage({
+		worker?.postMessage({
 			msg: 'stopIcpWalletTimer'
 		});
 	};
 
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startIcpWalletTimer'
 			});
 		},
 		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'triggerIcpWalletTimer'
 			});
 		},
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stop();
-			worker.terminate();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

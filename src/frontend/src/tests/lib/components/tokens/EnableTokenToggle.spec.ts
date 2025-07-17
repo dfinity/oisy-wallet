@@ -5,6 +5,7 @@ import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
 import * as tokenToggleUtils from '$lib/utils/token-toggle.utils';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
@@ -13,6 +14,7 @@ describe('EnableTokenToggle', () => {
 		`${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${token.symbol}-${token.network.id.description}`;
 
 	const mockToggleableIcToken = { ...mockValidIcrcToken, enabled: true };
+	const mockToggleableErc721Token = { ...mockValidErc721Token, enabled: true };
 	const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 	const mockToggleableBtcToken = { ...BTC_MAINNET_TOKEN, enabled: true };
 	const mockToggleableSolToken = { ...SOLANA_TOKEN, enabled: true };
@@ -39,6 +41,14 @@ describe('EnableTokenToggle', () => {
 		});
 
 		expect(getByTestId(getTestIdForToggle(mockToggleableSplToken))).toBeInTheDocument();
+	});
+
+	it('renders toggle Erc721 token', () => {
+		const { getByTestId } = render(EnableTokenToggle, {
+			props: { token: mockToggleableErc721Token, onToggle: mockOnToggle }
+		});
+
+		expect(getByTestId(getTestIdForToggle(mockToggleableErc721Token))).toBeInTheDocument();
 	});
 
 	it('should call onToggle on clicking it', async () => {
@@ -84,7 +94,7 @@ describe('EnableTokenToggle', () => {
 			props: { token: mockToggleableBtcToken, onToggle: mockOnToggle }
 		});
 
-		const toggleElement = getByTestId('toggle');
+		const toggleElement = getByTestId('gix-cmp-toggle');
 
 		expect(toggleElement).toBeInTheDocument();
 
@@ -102,7 +112,7 @@ describe('EnableTokenToggle', () => {
 			props: { token: mockToggleableSolToken, onToggle: mockOnToggle }
 		});
 
-		const toggleElement = getByTestId('toggle');
+		const toggleElement = getByTestId('gix-cmp-toggle');
 
 		expect(toggleElement).toBeInTheDocument();
 

@@ -187,7 +187,8 @@
 			"verifiable_credentials": "Credenziali Verificabili",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
-			"game": "Gioco"
+			"game": "Gioco",
+			"tools": "Strumenti"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "Social media decentralizzato - pubblica, guadagna, possiedi.",
 					"call_to_action": "Scopri di più"
 				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "Dove la governance incontra la collaborazione per stimolare l'innovazione.",
+				"description": "Toolkit è una suite versatile per la gestione dei Service Nervous Systems (SNS) e dei progetti su Internet Computer. Dalle proposte di governance all'implementazione di canister, consente agli utenti di innovare, collaborare e decentralizzare senza problemi."
 			}
 		}
 	},
@@ -462,6 +468,7 @@
 			"no_infura_provider": "Nessun provider Infura per la rete $network",
 			"no_infura_cketh_provider": "Nessun provider Infura CkETH per la rete $network",
 			"no_infura_erc20_provider": "Nessun provider Infura ERC20 per la rete $network",
+			"no_infura_erc721_provider": "Nessun provider Infura ERC721 per la rete $network",
 			"no_infura_erc20_icp_provider": "Nessun provider Infura ERC20 ICP per la rete $network",
 			"no_solana_network": "Nessuna rete Solana per la rete $network",
 			"eth_address_unknown": "L'indirizzo ETH è sconosciuto.",
@@ -485,6 +492,7 @@
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
 			"erc20_user_tokens": "Errore durante il caricamento dei token utente ERC20.",
 			"spl_custom_tokens": "Errore durante il caricamento del token personalizzato SPL.",
+			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
 			"erc20_user_token": "Errore durante l'abilitazione del token gemello ERC20.",
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
@@ -1044,8 +1052,7 @@
 			"disconnected": "WalletConnect disconnesso.",
 			"session_ended": "La sessione WalletConnect è terminata.",
 			"connected": "WalletConnect connesso.",
-			"eth_transaction_executed": "Richiesta WalletConnect eth_sendTransaction eseguita.",
-			"sol_transaction_executed": "Richiesta WalletConnect \"$method\" eseguita.",
+			"transaction_executed": "Richiesta WalletConnect \"$method\" eseguita.",
 			"sign_executed": "Richiesta di firma WalletConnect eseguita."
 		},
 		"error": {
@@ -1105,7 +1112,7 @@
 		},
 		"type": {
 			"send": "Invio",
-			"receive": "Ricezione",
+			"receive": "Ricevi",
 			"withdraw": "Prelievo",
 			"deposit": "Deposito",
 			"approve": "Approvazione",
@@ -1464,6 +1471,22 @@
 			"minute_plural": "minuti",
 			"second": "secondo",
 			"second_plural": "secondi"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "",
+			"welcome_message": "",
+			"action_button_contacts_title": "",
+			"action_button_contacts_subtitle": "",
+			"action_button_contacts_prompt": "",
+			"send_message": "",
+			"send_message_input_placeholder": "",
+			"loading": ""
+		},
+		"errors": {
+			"unknown": "",
+			"no_response": ""
 		}
 	}
 }

@@ -187,7 +187,8 @@
 			"verifiable_credentials": "可验证凭证",
 			"staking": "质押",
 			"walletconnect": "WalletConnect",
-			"game": "游戏"
+			"game": "游戏",
+			"tools": "工具包"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +312,11 @@
 					"text": "去中心化社交媒体 - 发布、赚取、拥有。",
 					"call_to_action": "了解更多"
 				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "治理与协作相遇，激发创新。",
+				"description": "Toolkit 是一款多功能套件，用于管理 Service Nervous System (SNS) 和互联网计算机上的项目。从治理提案到容器部署，它使用户能够无缝地进行创新、协作和去中心化。"
 			}
 		}
 	},
@@ -359,12 +365,12 @@
 				"win": {
 					"default": {
 						"title": "恭喜您赢得今天的 OISY Sprinkles！",
-						"description": "在 Twitter 上分享您的胜利，以获得另一次获胜的机会。",
+						"description": "在 X/Twitter 上分享您的胜利，以获得另一次获胜的机会。",
 						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
 					},
 					"jackpot": {
 						"title": "恭喜您赢得今天最大的 OISY Sprinkles！",
-						"description": "在 Twitter 上分享您的胜利，以获得另一次获胜的机会。",
+						"description": "在 X/Twitter 上分享您的胜利，以获得另一次获胜的机会。",
 						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
 					},
 					"referral": {
@@ -462,6 +468,7 @@
 			"no_infura_provider": "没有 $network 网络的 Infura 提供商",
 			"no_infura_cketh_provider": "没有 $network 网络的 Infura CkETH 提供商",
 			"no_infura_erc20_provider": "没有 $network 网络的 Infura ERC20 提供商",
+			"no_infura_erc721_provider": "没有 $network 网络的 Infura ERC721 提供商",
 			"no_infura_erc20_icp_provider": "没有 $network 网络的 Infura ERC20 ICP 提供商",
 			"no_solana_network": "没有 $network 网络的 Solana 网络配置",
 			"eth_address_unknown": "ETH 地址未知。",
@@ -485,6 +492,7 @@
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc20_user_tokens": "加载 ERC20 用户代币时出错。",
 			"spl_custom_tokens": "加载 SPL 用户代币时出错。",
+			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc20_user_token": "启用 ERC20 双生代币时出错。",
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
@@ -710,7 +718,7 @@
 			"metamask_connected": "无法获取你的账户。你的 Metamask 是否已开启并已连接？",
 			"metamask_no_accounts": "未找到 Metamask 账户。",
 			"metamask_switch_network": "无法请求 Metamask 切换至链 ID $chain_id。你当前是否已连接到 $network_name？",
-			"erc20_data_undefined": "Erc20 交易数据不能为 undefined 或 null。",
+			"erc20_data_undefined": "ERC20 交易数据不能为 undefined 或 null。",
 			"data_undefined": "交易数据不能为 undefined 或 null。",
 			"no_identity_calculate_fee": "未提供身份，无法为其主体计算手续费。",
 			"invalid_destination": "目标地址无效。请使用有效的钱包地址重试。",
@@ -957,7 +965,7 @@
 		"error": {
 			"invalid_contract_address": "合约地址无效。",
 			"invalid_token_address": "代币地址无效。",
-			"invalid_ledger": "所选代币未链接至 Icrc Ledger Canister。",
+			"invalid_ledger": "所选代币未链接至 ICRC Ledger Canister。",
 			"no_metadata": "未获取到任何元数据。",
 			"unexpected": "保存代币时发生错误。",
 			"unexpected_hiding": "隐藏代币时发生错误。",
@@ -1044,8 +1052,7 @@
 			"disconnected": "WalletConnect 已断开连接。",
 			"session_ended": "WalletConnect 会话已结束。",
 			"connected": "WalletConnect 已连接。",
-			"eth_transaction_executed": "WalletConnect eth_sendTransaction 请求已执行。",
-			"sol_transaction_executed": "WalletConnect “$method” 请求已执行。",
+			"transaction_executed": "WalletConnect “$method” 请求已执行。",
 			"sign_executed": "WalletConnect 签名请求已执行。"
 		},
 		"error": {
@@ -1464,6 +1471,22 @@
 			"minute_plural": "分钟（复数）",
 			"second": "秒（单数）",
 			"second_plural": "秒（复数）"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "",
+			"welcome_message": "",
+			"action_button_contacts_title": "",
+			"action_button_contacts_subtitle": "",
+			"action_button_contacts_prompt": "",
+			"send_message": "",
+			"send_message_input_placeholder": "",
+			"loading": ""
+		},
+		"errors": {
+			"unknown": "",
+			"no_response": ""
 		}
 	}
 }

@@ -183,6 +183,7 @@ interface I18nDapps {
 		staking: string;
 		walletconnect: string;
 		game: string;
+		tools: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -238,6 +239,7 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
+		toolkit: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -345,6 +347,7 @@ interface I18nInit {
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
+		no_infura_erc721_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_network: string;
 		eth_address_unknown: string;
@@ -368,6 +371,7 @@ interface I18nInit {
 		erc20_custom_tokens: string;
 		erc20_user_tokens: string;
 		spl_custom_tokens: string;
+		erc721_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
@@ -884,8 +888,7 @@ interface I18nWallet_connect {
 		disconnected: string;
 		session_ended: string;
 		connected: string;
-		eth_transaction_executed: string;
-		sol_transaction_executed: string;
+		transaction_executed: string;
 		sign_executed: string;
 	};
 	error: {
@@ -1205,6 +1208,20 @@ interface I18nTemporal {
 	};
 }
 
+interface I18nAi_assistant {
+	text: {
+		title: string;
+		welcome_message: string;
+		action_button_contacts_title: string;
+		action_button_contacts_subtitle: string;
+		action_button_contacts_prompt: string;
+		send_message: string;
+		send_message_input_placeholder: string;
+		loading: string;
+	};
+	errors: { unknown: string; no_response: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -1243,4 +1260,5 @@ interface I18n {
 	earning: I18nEarning;
 	welcome: I18nWelcome;
 	temporal: I18nTemporal;
+	ai_assistant: I18nAi_assistant;
 }
