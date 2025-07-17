@@ -23,6 +23,7 @@
 	const syncTimer = () => {
 		worker?.stopExchangeTimer();
 		worker?.startExchangeTimer({
+			currentCurrency: $currentCurrency,
 			erc20Addresses: $enabledMergedErc20TokensAddresses,
 			icrcCanisterIds: $enabledIcrcLedgerCanisterIdsNoCk,
 			splAddresses: $enabledSplTokenAddresses
@@ -32,6 +33,7 @@
 	const debounceSyncTimer = debounce(syncTimer, 1000);
 
 	$: worker,
+		$currentCurrency,
 		$enabledMergedErc20TokensAddresses,
 		$enabledIcrcLedgerCanisterIdsNoCk,
 		$enabledSplTokenAddresses,

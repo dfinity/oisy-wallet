@@ -1,6 +1,7 @@
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
+import { Currencies } from '$lib/enums/currencies';
 import {
 	exchangeRateBNBToUsd,
 	exchangeRateBTCToUsd,
@@ -10,7 +11,8 @@ import {
 	exchangeRateICRCToUsd,
 	exchangeRatePOLToUsd,
 	exchangeRateSOLToUsd,
-	exchangeRateSPLToUsd
+	exchangeRateSPLToUsd,
+	exchangeRateUsdToCurrency
 } from '$lib/services/exchange.services';
 import type { CoingeckoErc20PriceParams, CoingeckoPlatformId } from '$lib/types/coingecko';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
@@ -43,6 +45,7 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 
 	const sync = async () =>
 		await syncExchange({
+			currentCurrency: data?.currentCurrency ?? Currencies.USD,
 			erc20ContractAddresses: data?.erc20Addresses ?? [],
 			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
 			splTokenAddresses: data?.splAddresses ?? []
@@ -66,10 +69,12 @@ const stopTimer = () => {
 let syncInProgress = false;
 
 const syncExchange = async ({
+	currentCurrency,
 	erc20ContractAddresses,
 	icrcLedgerCanisterIds,
 	splTokenAddresses
 }: {
+	currentCurrency: Currencies;
 	erc20ContractAddresses: Erc20ContractAddressWithNetwork[];
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
 	splTokenAddresses: SplTokenAddress[];
@@ -115,6 +120,7 @@ const syncExchange = async ({
 		);
 
 		const [
+			currentExchangeRate,
 			currentEthPrice,
 			currentBtcPrice,
 			currentErc20Prices,
@@ -125,6 +131,7 @@ const syncExchange = async ({
 			currentBnbPrice,
 			currentPolPrice
 		] = await Promise.all([
+			exchangeRateUsdToCurrency(currentCurrency),
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
 			erc20Prices.reduce((acc, prices) => ({ ...acc, ...prices }), {}),

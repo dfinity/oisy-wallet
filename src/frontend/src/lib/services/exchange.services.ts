@@ -146,15 +146,20 @@ export const exchangeRateSPLToUsd = async (
 	});
 };
 
-export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
-	exchangeStore.set([
-		...(nonNullish(data) ? [data.currentEthPrice] : []),
-		...(nonNullish(data) ? [data.currentBtcPrice] : []),
-		...(nonNullish(data) ? [data.currentIcpPrice] : []),
-		...(nonNullish(data) ? [data.currentSolPrice] : []),
-		...(nonNullish(data) ? [data.currentBnbPrice] : []),
-		...(nonNullish(data) ? [data.currentPolPrice] : []),
-		...(nonNullish(data) ? [data.currentErc20Prices] : []),
-		...(nonNullish(data) ? [data.currentIcrcPrices] : []),
-		...(nonNullish(data) ? [data.currentSplPrices] : [])
-	]);
+export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
+	if (nonNullish(data)) {
+		exchangeStore.set([
+			data.currentEthPrice,
+			data.currentBtcPrice,
+			data.currentIcpPrice,
+			data.currentSolPrice,
+			data.currentBnbPrice,
+			data.currentPolPrice,
+			data.currentErc20Prices,
+			data.currentIcrcPrices,
+			data.currentSplPrices
+		]);
+
+		currencyStore.setExchangeRateUsdToCurrency(data.currentExchangeRate);
+	}
+};
