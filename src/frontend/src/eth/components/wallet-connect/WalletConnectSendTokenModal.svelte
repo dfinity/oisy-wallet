@@ -16,6 +16,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
@@ -150,7 +151,7 @@
 			fee: $feeStore,
 			modalNext: modal.next,
 			token: $sendToken,
-			progress: (step: ProgressStepsSend) => (sendProgressStep = step),
+			progress: (step: ProgressStep) => (sendProgressStep = step),
 			identity: $authIdentity,
 			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			sourceNetwork,

@@ -13,3 +13,13 @@ export const NftMetadataSchema = z.object({
 	imageUrl: z.string().url().optional(),
 	attributes: z.array(NftAttributeSchema).optional()
 });
+
+export const NftSchema = z
+	.object({
+		contract: z.object({
+			address: z.string(),
+			enabled: z.boolean(),
+			name: z.string()
+		})
+	})
+	.merge(NftMetadataSchema);
