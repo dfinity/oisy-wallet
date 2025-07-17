@@ -325,7 +325,6 @@ describe('contact.utils', () => {
 			id: BigInt(1),
 			updateTimestampNs: 123456789n,
 			addresses: mockAddresses,
-			image: undefined
 		};
 
 		it('should return undefined if contact is nullish', () => {
