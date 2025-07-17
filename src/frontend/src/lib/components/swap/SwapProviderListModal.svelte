@@ -6,6 +6,7 @@
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -14,7 +15,6 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { SwapMappedResult } from '$lib/types/swap';
 	import { formatTokenBigintToNumber, formatCurrency } from '$lib/utils/format.utils';
-	import { currentCurrency } from '$lib/derived/currency.derived';
 
 	const dispatch = createEventDispatcher<{
 		icSelectProvider: SwapMappedResult;
