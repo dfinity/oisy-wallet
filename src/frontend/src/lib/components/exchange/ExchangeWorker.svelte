@@ -6,6 +6,7 @@
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
 	import { type ExchangeWorker, initExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 
 	let worker: ExchangeWorker | undefined;
 
