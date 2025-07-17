@@ -418,19 +418,33 @@ const fetchSwapAmountsEVM = async ({
 		userAddress
 	};
 
-	const data = await sdk.quote.getQuote(
-		srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
-	);
+	try {
+		const data = await sdk.quote.getQuote(
+			srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
+		);
 
-	if ('delta' in data) {
-		return [mapVeloraSwapResult(data.delta)];
+		if ('delta' in data) {
+			return [mapVeloraSwapResult(data.delta)];
+		}
+
+		if ('market' in data) {
+			return [mapVeloraMarketSwapResult(data.market)];
+		}
+
+		return [];
+	} catch (error: unknown) {
+		if (error && typeof error === 'object' && 'response' in error) {
+			const axiosError = error as {
+				response?: { data?: { details?: string } };
+			};
+
+			const errorMessage = axiosError.response?.data?.details;
+
+			throw new Error(errorMessage);
+		}
+
+		throw new Error('Unknown error occurred');
 	}
-
-	if ('market' in data) {
-		return [mapVeloraMarketSwapResult(data.market)];
-	}
-
-	return [];
 };
 
 export const fetchVeloraDeltaSwap = async ({
@@ -449,8 +463,6 @@ export const fetchVeloraDeltaSwap = async ({
 	maxPriorityFeePerGas,
 	swapDetails
 }: SwapVeloraParams): Promise<void> => {
-	// progress(ProgressStepsSwap.SWAP);
-
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
@@ -483,8 +495,11 @@ export const fetchVeloraDeltaSwap = async ({
 		maxFeePerGas,
 		approveNeeded: true,
 		maxPriorityFeePerGas,
-		progress
+		progress,
+		progressSteps: ProgressStepsSwap
 	});
+
+	progress(ProgressStepsSwap.SWAP);
 
 	const signableOrderData = await sdk.delta.buildDeltaOrder({
 		deltaPrice: swapDetails as DeltaPrice | BridgePrice,
@@ -534,8 +549,6 @@ export const fetchVeloraMarketSwap = async ({
 	maxPriorityFeePerGas,
 	swapDetails
 }: SwapVeloraParams): Promise<void> => {
-	// progress(ProgressStepsSwap.SWAP);
-
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
@@ -560,9 +573,12 @@ export const fetchVeloraMarketSwap = async ({
 			maxFeePerGas,
 			maxPriorityFeePerGas,
 			approveNeeded: true,
-			progress
+			progress,
+			progressSteps: ProgressStepsSwap
 		});
 	}
+
+	progress(ProgressStepsSwap.SWAP);
 
 	const txParams = await sdk.swap.buildTx({
 		srcToken: getTokenAddress(sourceToken),
@@ -599,14 +615,10 @@ export const checkDeltaOrderStatus = async ({
 	const deadline = Date.now() + timeoutMs;
 
 	while (Date.now() < deadline) {
-		try {
-			const auction = await sdk.delta.getDeltaOrderById(auctionId);
+		const auction = await sdk.delta.getDeltaOrderById(auctionId);
 
-			if (isExecutedDeltaAuction({ auction })) {
-				return;
-			}
-		} catch (error) {
-			console.error('Failed to fetch delta order status:', error);
+		if (isExecutedDeltaAuction({ auction })) {
+			return;
 		}
 
 		await new Promise((r) => setTimeout(r, intervalMs));

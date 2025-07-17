@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
@@ -10,14 +10,49 @@
 	import type { Token, TokenUi } from '$lib/types/token';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import ButtonCancel from '../ui/ButtonCancel.svelte';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import {
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
+	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import {
+		allEthSwapTokens,
+		allKongSwapCompatibleIcrcTokens
+	} from '$lib/derived/all-tokens.derived';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 
 	const dispatch = createEventDispatcher();
 
 	let loading = $derived<boolean>($erc20UserTokensNotInitialized);
 
-	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<TokenUi<IcTokenToggleable>>) => {
+	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<TokenUi<Token>>) => {
 		dispatch('icSelectToken', token);
 	};
+
+	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+
+	let tokens: TokenUi<Token>[] = $derived(
+		pinTokensWithBalanceAtTop({
+			$tokens: [
+				{ ...ICP_TOKEN, enabled: true },
+				...$allKongSwapCompatibleIcrcTokens,
+				...$allEthSwapTokens
+			].filter(
+				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
+			),
+			$exchanges,
+			$balances: $balancesStore
+		})
+	);
+
+	$effect(() => {
+		setTokens(tokens);
+	});
 </script>
 
 <ModalTokensList

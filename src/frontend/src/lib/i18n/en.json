@@ -782,9 +782,9 @@
 			"approval_fee": "Approval fee",
 			"gas_fee": "Gas fee",
 			"lp_fee": "LP fee",
-			"max_slippage_info": "Enter value between 0% and 50%",
+			"max_slippage_info": "Enter value between 0% and $maxSlippage%",
 			"max_slippage_warning": "Risk warning: high slippage may lead to losses due to market volatility",
-			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed 50%",
+			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed $maxSlippage%",
 			"swap_button": "Swap now",
 			"swap_is_not_offered": "This swap is currently not offered.",
 			"executing_transaction": "Executing transaction...",
@@ -811,7 +811,9 @@
 			"pool_not_found": "Swap failed. Pool not found.",
 			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
 			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
-			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance."
+			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance.",
+			"gas_cost_exceeds_trade_amount": "Gas cost exceeds trade amount",
+			"sent_amount_is_low": "Sent amount is too low relative to fees"
 		}
 	},
 	"buy": {

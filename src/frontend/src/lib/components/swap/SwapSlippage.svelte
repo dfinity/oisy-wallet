@@ -6,26 +6,27 @@
 	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
-		SWAP_SLIPPAGE_INVALID_VALUE,
 		SWAP_SLIPPAGE_PRESET_VALUES,
 		SWAP_SLIPPAGE_VALUE_DECIMALS,
 		SWAP_SLIPPAGE_WARNING_VALUE
 	} from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let slippageValue: OptionAmount;
 	export let name = 'swap-slippage';
+	export let maxSlippageInvalidValue: number;
 
 	let parsedValue: number;
 	$: parsedValue = nonNullish(slippageValue) ? Number(slippageValue) : 0;
 
 	let slippageValueWarning: boolean;
 	$: slippageValueWarning =
-		parsedValue < SWAP_SLIPPAGE_INVALID_VALUE && parsedValue >= SWAP_SLIPPAGE_WARNING_VALUE;
+		parsedValue < maxSlippageInvalidValue && parsedValue >= SWAP_SLIPPAGE_WARNING_VALUE;
 
 	let slippageValueError: boolean;
-	$: slippageValueError = parsedValue >= SWAP_SLIPPAGE_INVALID_VALUE || parsedValue <= 0;
+	$: slippageValueError = parsedValue >= maxSlippageInvalidValue || parsedValue <= 0;
 
 	let toggleContent: () => void;
 	let expanded = false;
@@ -111,14 +112,22 @@
 				class:text-error-primary={slippageValueError}
 			>
 				{#if slippageValueError}
-					<div in:fade>{$i18n.swap.text.max_slippage_error}</div>
+					<div in:fade
+						>{replacePlaceholders($i18n.swap.text.max_slippage_error, {
+							$maxSlippage: maxSlippageInvalidValue.toString()
+						})}</div
+					>
 				{:else if slippageValueWarning}
 					<div in:fade class="flex gap-1">
 						<IconWarning />
 						<span>{$i18n.swap.text.max_slippage_warning}</span>
 					</div>
 				{:else}
-					<div in:fade>{$i18n.swap.text.max_slippage_info}</div>
+					<div in:fade>
+						{replacePlaceholders($i18n.swap.text.max_slippage_info, {
+							$maxSlippage: maxSlippageInvalidValue.toString()
+						})}</div
+					>
 				{/if}
 			</div>
 		</div>

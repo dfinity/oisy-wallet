@@ -87,3 +87,12 @@ export const allTokens = derived(
 		...$splTokens
 	]
 );
+
+export const allEthSwapTokens = derived(
+	[erc20Tokens, enabledEthereumTokens, enabledEvmTokens],
+	([$erc20Tokens, $enabledEthereumTokens, $enabledEvmTokens]) => [
+		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
+		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
+		...$erc20Tokens.map((token) => ({ ...token, enabled: true }))
+	]
+);

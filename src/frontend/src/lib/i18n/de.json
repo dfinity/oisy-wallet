@@ -811,7 +811,9 @@
 			"pool_not_found": "Tausch fehlgeschlagen. Pool nicht gefunden.",
 			"deposit_error": "Tausch fehlgeschlagen. Wir konnten deine Token nicht in den Pool einzahlen. Bitte versuche es erneut.",
 			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
-			"swap_failed_withdraw_success": "Tausch fehlgeschlagen. Deine Token wurden erfolgreich zurückerstattet. Du kannst es erneut versuchen oder die Slippage-Toleranz erhöhen."
+			"swap_failed_withdraw_success": "Tausch fehlgeschlagen. Deine Token wurden erfolgreich zurückerstattet. Du kannst es erneut versuchen oder die Slippage-Toleranz erhöhen.",
+			"gas_cost_exceeds_trade_amount": "",
+			"sent_amount_is_low": ""
 		}
 	},
 	"buy": {

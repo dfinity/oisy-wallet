@@ -275,7 +275,7 @@ export const send = async ({
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
 	RequiredTransactionFeeData): Promise<{ hash: string }> => {
-	progress(ProgressStepsSend.INITIALIZATION);
+	progress?.(ProgressStepsSend.INITIALIZATION);
 
 	const { transactionNeededApproval, nonce } = await approve({
 		progress,
@@ -297,7 +297,7 @@ export const send = async ({
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	processTransactionSent({ token, transaction: transactionSent });
 
-	progress(lastProgressStep);
+	progress?.(lastProgressStep);
 
 	return { hash: transactionSent.hash };
 };
@@ -409,7 +409,7 @@ const sendTransaction = async ({
 							: infuraErc20Providers(networkId).populateTransaction
 				}));
 
-	progress(ProgressStepsSend.SIGN_TRANSFER);
+	progress?.(ProgressStepsSend.SIGN_TRANSFER);
 
 	const rawTransaction = await signTransaction({
 		identity,
@@ -417,7 +417,7 @@ const sendTransaction = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	progress(ProgressStepsSend.TRANSFER);
+	progress?.(ProgressStepsSend.TRANSFER);
 
 	return await sendTransaction(rawTransaction);
 };
@@ -446,7 +446,6 @@ const prepareAndSignApproval = async ({
 		chainId,
 		networkId
 	});
-
 	progress?.(progressSteps.SIGN_APPROVE);
 
 	const rawTransaction = await signTransaction({ identity, transaction: approve });
@@ -538,13 +537,13 @@ export const approve = async ({
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
 	if (
-		isNullish(erc20HelperContractAddress) ||
-		!shouldSendWithApproval({
+		(isNullish(erc20HelperContractAddress) && !approveNeeded) ||
+		(!shouldSendWithApproval({
 			to,
 			tokenId: token.id,
 			erc20HelperContractAddress
-		}) ||
-		!approveNeeded
+		}) &&
+			!approveNeeded)
 	) {
 		return { transactionNeededApproval: false, nonce };
 	}
@@ -553,7 +552,8 @@ export const approve = async ({
 	const approvalCheckResult = await checkExistingApproval({
 		token,
 		from,
-		spender: approveNeeded ? to : erc20HelperContractAddress,
+		spender:
+			approveNeeded || isNullish(erc20HelperContractAddress) ? to : erc20HelperContractAddress,
 		nonce,
 		amount,
 		sourceNetwork,
@@ -562,7 +562,7 @@ export const approve = async ({
 	});
 
 	if (approvalCheckResult === 'existingApprovalIsEnough') {
-		progress(progressSteps.APPROVE);
+		progress?.(progressSteps.APPROVE);
 		return { transactionNeededApproval: false, nonce };
 	}
 
@@ -576,7 +576,9 @@ export const approve = async ({
 		token,
 		sourceNetwork,
 		progress,
-		spender: approveNeeded ? to : erc20HelperContractAddress
+		spender:
+			approveNeeded || isNullish(erc20HelperContractAddress) ? to : erc20HelperContractAddress,
+		approveNeeded
 	});
 
 	return { transactionNeededApproval: transactionApproved, hash, nonce: nonceApproval };

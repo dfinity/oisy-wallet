@@ -137,6 +137,8 @@
 
 		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $feeStore;
 
+		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
+
 		if (
 			isNullish($sourceToken) ||
 			isNullish($sourceTokenNetwork) ||
@@ -207,6 +209,7 @@
 				}
 			});
 
+			dispatch('icStartTrigger');
 			back();
 		}
 	};
@@ -218,7 +221,7 @@
 <EthFeeContext
 	bind:this={feeContext}
 	sendToken={$sourceToken as Token}
-	sendTokenId={$sourceToken?.id!}
+	sendTokenId={($sourceToken as Token).id}
 	amount={swapAmount}
 	observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
 	sourceNetwork={$sourceToken?.network as EthereumNetwork}
@@ -236,8 +239,15 @@
 			{nativeEthereumToken}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-		<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
+		<SwapReview
+			on:icSwap={swap}
+			on:icBack
+			on:icStopTrigger
+			{slippageValue}
+			{swapAmount}
+			{receiveAmount}
+		/>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<SwapProgress bind:swapProgressStep />
+		<SwapProgress bind:swapProgressStep sendWithApproval={true} />
 	{/if}
 </EthFeeContext>

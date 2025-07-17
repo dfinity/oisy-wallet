@@ -23,6 +23,13 @@
 	import MaxBalanceButton from '../common/MaxBalanceButton.svelte';
 	import SwapSlippage from './SwapSlippage.svelte';
 	import TokenInputWrapper from '../tokens/TokenInputWrapper.svelte';
+	import {
+		SUPPORTED_CROSS_SWAP_NETWORKS,
+		SWAP_SLIPPAGE_INVALID_VALUE,
+		SWAP_SLIPPAGE_VELORA_INVALID_VALUE
+	} from '$lib/constants/swap.constants';
+	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -66,9 +73,23 @@
 	let exchangeValueUnit: DisplayUnit = $state<DisplayUnit>('usd');
 	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	let disableSwitchTokens = $derived(
-		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading
-	);
+	let disableSwitchTokens = $derived(() => {
+		if (isNullish($destinationToken?.network.id) || isNullish($sourceToken?.network.id)) {
+			return true;
+		}
+
+		const condition1 = (nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
+
+		const condition2 = !SUPPORTED_CROSS_SWAP_NETWORKS[$destinationToken.network.id]?.includes(
+			$sourceToken.network.id
+		);
+
+		const condition3 =
+			isDefaultEthereumToken($destinationToken) &&
+			$destinationToken.network.id !== $sourceToken.network.id;
+
+		return condition1 || condition2 || condition3;
+	});
 
 	const onTokensSwitch = () => {
 		const tempAmount = receiveAmount;
@@ -77,7 +98,7 @@
 		swapAmount = tempAmount;
 		switchTokens();
 	};
-	
+
 	$effect(() => {
 		if (
 			nonNullish($destinationToken) &&
@@ -93,24 +114,27 @@
 		}
 	});
 
+	console.log($swapAmountsStore?.customErrors, 'here here here');
 </script>
 
 <div class="relative">
-	<TokenInputWrapper tokenNetworkId={$sourceToken?.network?.id}>
+	<TokenInputWrapper
+		tokenNetworkId={$sourceToken?.network?.id}
+		showWrapper={nonNullish($sourceToken) &&
+			nonNullish($destinationToken) &&
+			$sourceToken?.network?.id !== $destinationToken?.network.id}
+	>
 		{#snippet tokenInput()}
 			<TokenInput
 				bind:amount={swapAmount}
 				bind:amountSetToMax
 				bind:errorType
-				bind:error
 				{customValidate}
-				{customErrorValidate}
 				token={$sourceToken}
 				showErrorMessage={false}
 				autofocus={nonNullish($sourceToken)}
 				displayUnit={inputUnit}
 				exchangeRate={$sourceTokenExchangeRate}
-				supportCrossChain={true}
 				tokenNetwork={$sourceToken?.network}
 				on:click={() => {
 					dispatch('icShowTokensList', 'source');
@@ -147,8 +171,11 @@
 		{/snippet}
 	</TokenInputWrapper>
 
-	<SwapSwitchTokensButton disabled={disableSwitchTokens} on:icSwitchTokens={onTokensSwitch} />
-	<TokenInputWrapper tokenNetworkId={$destinationToken?.network?.id}>
+	<SwapSwitchTokensButton disabled={disableSwitchTokens()} on:icSwitchTokens={onTokensSwitch} />
+	<TokenInputWrapper
+		tokenNetworkId={$destinationToken?.network?.id}
+		showWrapper={$sourceToken?.network?.id !== $destinationToken?.network.id}
+	>
 		{#snippet tokenInput()}
 			<TokenInput
 				token={$destinationToken}
@@ -157,7 +184,6 @@
 				exchangeRate={$destinationTokenExchangeRate}
 				loading={swapAmountsLoading}
 				disabled={true}
-				supportCrossChain={true}
 				tokenNetwork={$destinationToken?.network}
 				on:click={() => {
 					dispatch('icShowTokensList', 'destination');
@@ -166,10 +192,16 @@
 				<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
 
 				<svelte:fragment slot="amount-info">
-					{#if nonNullish($destinationToken)}
+					{#if nonNullish($destinationToken) && !swapAmountsLoading}
 						{#if $swapAmountsStore?.swaps.length === 0}
-							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
-								>{$i18n.swap.text.swap_is_not_offered}</div
+							<div transition:slide={SLIDE_DURATION} class="text-error-primary">
+								{nonNullish($swapAmountsStore.customErrors) &&
+								$swapAmountsStore.customErrors.startsWith('Sent amount is too low relative to fees')
+									? $i18n.swap.error.sent_amount_is_low
+									: nonNullish($swapAmountsStore.customErrors) &&
+										  $swapAmountsStore?.customErrors.startsWith('Gas cost exceeds trade amount')
+										? $i18n.swap.error.gas_cost_exceeds_trade_amount
+										: $i18n.swap.text.swap_is_not_offered}</div
 							>
 						{:else}
 							<div class="flex gap-3 text-tertiary">
@@ -196,4 +228,9 @@
 	</TokenInputWrapper>
 </div>
 
-<SwapSlippage bind:slippageValue />
+<SwapSlippage
+	bind:slippageValue
+	maxSlippageInvalidValue={$sourceToken?.network.id === ICP_NETWORK_ID
+		? SWAP_SLIPPAGE_INVALID_VALUE
+		: SWAP_SLIPPAGE_VELORA_INVALID_VALUE}
+/>

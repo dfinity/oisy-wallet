@@ -8,6 +8,7 @@ export interface SwapAmountsStoreData {
 	swaps: SwapMappedResult[];
 	amountForSwap: OptionAmount;
 	selectedProvider?: SwapMappedResult;
+	customErrors?: string;
 }
 
 export interface SwapAmountsStore extends Readable<Option<SwapAmountsStoreData>> {
@@ -15,9 +16,11 @@ export interface SwapAmountsStore extends Readable<Option<SwapAmountsStoreData>>
 		swaps: SwapMappedResult[];
 		amountForSwap: OptionAmount;
 		selectedProvider?: SwapMappedResult;
+		customErrors?: string;
 	}) => void;
 	reset: () => void;
 	setSelectedProvider: (provider: SwapMappedResult | undefined) => void;
+	setCustomErrors: (error: string) => void;
 }
 
 export const initSwapAmountsStore = (): SwapAmountsStore => {
@@ -30,11 +33,12 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 			set(null);
 		},
 
-		setSwaps: ({ swaps, amountForSwap, selectedProvider }) => {
+		setSwaps: ({ swaps, amountForSwap, selectedProvider, customErrors }) => {
 			set({
 				swaps,
 				amountForSwap,
-				selectedProvider
+				selectedProvider,
+				customErrors
 			});
 		},
 
@@ -44,6 +48,15 @@ export const initSwapAmountsStore = (): SwapAmountsStore => {
 					return data;
 				}
 				return { ...data, selectedProvider: provider };
+			});
+		},
+
+		setCustomErrors: (error) => {
+			update((data) => {
+				if (isNullish(data)) {
+					return data;
+				}
+				return { ...data, customErrors: error };
 			});
 		}
 	};

@@ -20,6 +20,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 	import { UrlSchema } from '$lib/validation/url.validation';
+	import SwapDetailsVelora from './SwapDetailsVelora.svelte';
 
 	interface Props {
 		slippageValue: OptionAmount;
@@ -113,8 +114,8 @@
 				<SwapDetailsKong provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.ICP_SWAP}
 				<SwapDetailsIcp provider={selectedProvider} {slippageValue} />
-			<!-- {:else if selectedProvider.provider === SwapProvider.VELORA}
-				<SwapDetailsIcp provider={selectedProvider} {slippageValue} /> -->
+			{:else if selectedProvider.provider === SwapProvider.VELORA}
+				<SwapDetailsVelora provider={selectedProvider} {slippageValue} />
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}

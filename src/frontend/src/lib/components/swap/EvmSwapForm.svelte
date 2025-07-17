@@ -50,9 +50,9 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let error = $state<Error | undefined>();
+	let errorType: TokenActionErrorType = $state<TokenActionErrorType | undefined>(undefined);
 
-	let insufficientFunds = $derived(nonNullish(error));
+	let insufficientFunds = $derived(nonNullish(errorType));
 
 	const {
 		feeStore: storeFeeData,
@@ -78,18 +78,14 @@
 			Number(swapAmount) <= 0 ||
 			isNullish(receiveAmount) ||
 			swapAmountsLoading ||
-			// nonNullish(insufficientFunds) ||
+			nonNullish(insufficientFunds) ||
 			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
 	);
 
 	const dispatch = createEventDispatcher();
 
-	const customErrorValidate = (userAmount: bigint): Error | undefined => {
-		if (
-			isNullish($storeFeeData) ||
-			isNullish($sourceTokenId) ||
-			isNullish($balancesStore?.[$sourceTokenId]?.data)
-		) {
+	const customErrorValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
+		if (isNullish($storeFeeData) || isNullish($sourceTokenId)) {
 			return;
 		}
 
@@ -111,23 +107,19 @@
 			const total = userAmount + ($minGasFee ?? ZERO);
 
 			if (total > parsedSendBalance) {
-				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
+				return 'insufficient-funds-for-fee';
 			}
-
-			return;
 		}
 
 		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the user
 		if (userAmount > parsedSendBalance) {
-			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount);
+			return 'insufficient-funds';
 		}
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
 		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
 		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
-			return new InsufficientFundsError(
-				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees
-			);
+			return 'insufficient-funds-for-fee';
 		}
 	};
 
@@ -147,9 +139,9 @@
 		bind:swapAmount
 		bind:receiveAmount
 		bind:slippageValue
-		{customErrorValidate}
+		customValidate={customErrorValidate}
+		{errorType}
 		fee={$maxGasFee}
-		{error}
 		{swapAmountsLoading}
 	/>
 

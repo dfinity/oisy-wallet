@@ -684,6 +684,8 @@ interface I18nSwap {
 		deposit_error: string;
 		withdraw_failed: string;
 		swap_failed_withdraw_success: string;
+		gas_cost_exceeds_trade_amount: string;
+		sent_amount_is_low: string;
 	};
 }
 

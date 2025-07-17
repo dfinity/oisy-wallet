@@ -23,9 +23,16 @@ export const shouldSendWithApproval = ({
 }): boolean => {
 	// Approve happens before send currently only for ckERC20 -> ERC20.
 	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc
+
+
+	console.log('here');
+	
 	if (isNotSupportedErc20TwinTokenId(tokenId)) {
 		return false;
 	}
+
+	console.log('here2');
+	
 
 	const destinationCkErc20 =
 		nonNullish(erc20HelperContractAddress) &&

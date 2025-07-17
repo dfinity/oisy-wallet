@@ -20,6 +20,9 @@
 		type SwapAmountsContext as SwapAmountsContextType
 	} from '$lib/stores/swap-amounts.store';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { Html } from '@dfinity/gix-components';
+	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -96,8 +99,24 @@
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
-		<!-- <SwapFees /> -->
+		{#if $sourceToken?.network.id === ICP_NETWORK_ID}
+			<SwapFees />
+		{:else}
+			<EthFeeDisplay>
+				<Html slot="label" text="Total estimated fee" />
+			</EthFeeDisplay>
+
+			<MessageBox styleClass="sm:text-sm">
+				<Html text={`You move tokens from <b>Ethereum</b> to <b>Base</b> network`} />
+			</MessageBox>
+		{/if}
 	</div>
+
+	{#if $sourceToken?.network.id !== $destinationToken?.network.id}
+		<MessageBox styleClass="sm:text-sm">
+			<Html text={`You move tokens from <b>Ethereum</b> to <b>Base</b> network`} />
+		</MessageBox>
+	{/if}
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
@@ -116,7 +135,12 @@
 		<ButtonGroup>
 			<ButtonBack onclick={onClick} />
 
-			<Button onclick={() => dispatch('icSwap')}>
+			<Button
+				onclick={() => {
+					dispatch('icStopTrigger');
+					dispatch('icSwap');
+				}}
+			>
 				{$i18n.swap.text.swap_button}
 			</Button>
 		</ButtonGroup>

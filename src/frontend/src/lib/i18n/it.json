@@ -811,7 +811,9 @@
 			"pool_not_found": "",
 			"deposit_error": "",
 			"withdraw_failed": "",
-			"swap_failed_withdraw_success": ""
+			"swap_failed_withdraw_success": "",
+			"gas_cost_exceeds_trade_amount": "",
+			"sent_amount_is_low": ""
 		}
 	},
 	"buy": {
