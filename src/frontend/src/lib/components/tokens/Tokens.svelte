@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
-	import NFTsList from '$lib/components/nfts/NFTsList.svelte';
+	import NftsList from '$lib/components/nfts/NftsList.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
@@ -51,7 +51,7 @@
 	{#if selectedTokenType === TokenType.TOKEN}
 		<TokensList />
 	{:else}
-		<NFTsList />
+		<NftsList />
 	{/if}
 
 	<div in:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
