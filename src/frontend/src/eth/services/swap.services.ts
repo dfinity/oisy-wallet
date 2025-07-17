@@ -5,7 +5,6 @@ import type { SwapParams } from '$eth/types/swap';
 import { signTransaction } from '$lib/api/signer.api';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
-
 import type { TransferParams } from '$lib/types/send';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
