@@ -24,5 +24,5 @@
 {/each}
 
 {#if loading}
-	<div class="text-sm" in:fade>{$i18n.ai_assistant.text.loading}</div>
+	<div class="animate-pulse text-sm" in:fade>{$i18n.ai_assistant.text.loading}</div>
 {/if}
