@@ -517,6 +517,7 @@ export const approve = async ({
 	minterInfo,
 	amount,
 	sourceNetwork,
+	// TODO: Refactor to accept an `onProgress(step)` callback instead of requiring manual `progress(progressSteps.step)` calls
 	progress,
 	approveRequired,
 	progressSteps = ProgressStepsSend,
