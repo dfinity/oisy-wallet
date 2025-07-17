@@ -30,7 +30,6 @@ describe('AddressBookStep', () => {
 				}
 			],
 			updateTimestampNs: BigInt(Date.now()),
-			image: undefined
 		},
 		{
 			id: 2n,
