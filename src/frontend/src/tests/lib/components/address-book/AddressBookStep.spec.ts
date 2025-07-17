@@ -301,7 +301,10 @@ describe('AddressBookStep', () => {
 				id: 4n,
 				name: 'Case Sensitive',
 				addresses: [
-					{ address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ', addressType: 'Sol' }
+					{
+						address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ',
+						addressType: 'Sol' as const
+					}
 				],
 				updateTimestampNs: BigInt(Date.now())
 			}
