@@ -4,9 +4,9 @@
 	import { EXCHANGE_DISABLED } from '$env/exchange.env';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { type ExchangeWorker, initExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
-	import { currentCurrency } from '$lib/derived/currency.derived';
 
 	let worker: ExchangeWorker | undefined;
 
