@@ -21,8 +21,7 @@ describe('ShowContactStep', () => {
 		id: 1n,
 		name: 'Test Contact',
 		addresses: [],
-		updateTimestampNs: BigInt(Date.now()),
-		image: []
+		updateTimestampNs: BigInt(Date.now())
 	};
 
 	const mockContactWithAddresses: ContactUi = {
@@ -40,8 +39,7 @@ describe('ShowContactStep', () => {
 				addressType: 'Btc'
 			}
 		],
-		updateTimestampNs: BigInt(Date.now()),
-		image: []
+		updateTimestampNs: BigInt(Date.now())
 	};
 
 	const mockClose = vi.fn();

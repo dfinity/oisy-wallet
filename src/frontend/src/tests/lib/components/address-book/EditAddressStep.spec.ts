@@ -15,8 +15,7 @@ describe('EditAddressStep', () => {
 		id: 1n,
 		name: 'Test Contact',
 		addresses: [],
-		updateTimestampNs: BigInt(Date.now()),
-		image: []
+		updateTimestampNs: BigInt(Date.now())
 	};
 
 	const onQRCodeScan = vi.fn(); // ✅ NEW SHARED MOCK
