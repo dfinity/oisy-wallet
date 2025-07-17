@@ -813,7 +813,7 @@
 			"select": "Selecionar >",
 			"select_swap_provider": "Selecionar provedor de troca",
 			"open_icp_swap": "Abrir site do ICP Swap",
-			"select_token": "",
+			"select_token": "Selecionar token",
 			"select_network_filter": ""
 		},
 		"error": {
