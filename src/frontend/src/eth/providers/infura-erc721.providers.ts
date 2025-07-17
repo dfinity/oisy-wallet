@@ -11,6 +11,8 @@ import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
+import { UrlSchema } from '$lib/validation/url.validation';
+import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
 
 const ERC721_INTERFACE_ID = '0x80ac58cd';
 
@@ -46,9 +48,9 @@ export class InfuraErc721Provider {
 	};
 
 	getNftMetadata = async ({
-		contractAddress,
-		tokenId
-	}: {
+														contractAddress,
+														tokenId
+													}: {
 		contractAddress: string;
 		tokenId: number;
 	}): Promise<NftMetadata> => {
@@ -63,14 +65,24 @@ export class InfuraErc721Provider {
 			return url;
 		};
 
-		const tokenUri = new URL(await erc721Contract.tokenURI(tokenId));
+		const parsedTokenUri = UrlSchema.safeParse(await erc721Contract.tokenURI(tokenId));
+		if (!parsedTokenUri.success) {
+			throw new InvalidTokenUri(tokenId, contractAddress);
+		}
+
+		const tokenUri = new URL(parsedTokenUri.data);
 
 		const metadataUrl = resolveResourceUrl(tokenUri);
 
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
 
-		const imageUrl = resolveResourceUrl(new URL(metadata?.image ?? ''));
+		const parsedMetadataUrl = UrlSchema.safeParse(metadata.image);
+		if (!parsedMetadataUrl.success) {
+			throw new InvalidMetadataImageUrl(tokenId, contractAddress);
+		}
+
+		const imageUrl = resolveResourceUrl(new URL(parsedMetadataUrl.data));
 
 		const mappedAttributes = (metadata?.attributes ?? []).map(
 			(attr: { trait_type: string; value: string | number }) => ({
