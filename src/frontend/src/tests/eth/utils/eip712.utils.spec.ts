@@ -77,8 +77,8 @@ describe('EIP - 712 utils methods', () => {
 
 			const result = getSignParamsEIP712(inputParams);
 
-			expect(mockTypedDataEncoder.hash).toHaveBeenCalledOnce();
-			expect(mockTypedDataEncoder.hash).toHaveBeenCalledWith(
+			expect(mockTypedDataEncoder.hash).toHaveBeenNthCalledWith(
+				1,
 				inputParams.domain,
 				inputParams.types,
 				inputParams.data
@@ -127,8 +127,8 @@ describe('EIP - 712 utils methods', () => {
 
 			const result = getSignParamsEIP712(inputParams);
 
-			expect(mockTypedDataEncoder.hash).toHaveBeenCalledOnce();
-			expect(mockTypedDataEncoder.hash).toHaveBeenCalledWith(
+			expect(mockTypedDataEncoder.hash).toHaveBeenNthCalledWith(
+				1,
 				inputParams.domain,
 				inputParams.types,
 				inputParams.data
@@ -156,8 +156,8 @@ describe('EIP - 712 utils methods', () => {
 
 			const result = getSignParamsEIP712(inputParams);
 
-			expect(mockTypedDataEncoder.hash).toHaveBeenCalledOnce();
-			expect(mockTypedDataEncoder.hash).toHaveBeenCalledWith(
+			expect(mockTypedDataEncoder.hash).toHaveBeenNthCalledWith(
+				1,
 				inputParams.domain,
 				inputParams.types,
 				inputParams.data
@@ -180,8 +180,7 @@ describe('EIP - 712 utils methods', () => {
 
 			const result = getCompactSignature(inputSignature);
 
-			expect(mockSignature.from).toHaveBeenCalledOnce();
-			expect(mockSignature.from).toHaveBeenCalledWith(inputSignature);
+			expect(mockSignature.from).toHaveBeenNthCalledWith(1, inputSignature);
 			expect(result).toBe(expectedCompactSerialized);
 		});
 
@@ -196,8 +195,7 @@ describe('EIP - 712 utils methods', () => {
 
 			const result = getCompactSignature(inputSignature);
 
-			expect(mockSignature.from).toHaveBeenCalledOnce();
-			expect(mockSignature.from).toHaveBeenCalledWith(inputSignature);
+			expect(mockSignature.from).toHaveBeenNthCalledWith(1, inputSignature);
 			expect(result).toBe(expectedCompactSerialized);
 		});
 
@@ -212,8 +210,7 @@ describe('EIP - 712 utils methods', () => {
 
 			const result = getCompactSignature(inputSignature);
 
-			expect(mockSignature.from).toHaveBeenCalledOnce();
-			expect(mockSignature.from).toHaveBeenCalledWith(inputSignature);
+			expect(mockSignature.from).toHaveBeenNthCalledWith(1, inputSignature);
 			expect(result).toBe(expectedCompactSerialized);
 		});
 
@@ -240,8 +237,6 @@ describe('EIP - 712 utils methods', () => {
 
 				expect(mockSignature.from).toHaveBeenCalledWith(input);
 				expect(result).toBe(expectedOutput);
-
-				mockSignature.from.mockClear();
 			});
 		});
 	});
@@ -296,16 +291,15 @@ describe('EIP - 712 utils methods', () => {
 			const hash = getSignParamsEIP712(orderData);
 			const compactSig = getCompactSignature(signatureString);
 
-			expect(mockTypedDataEncoder.hash).toHaveBeenCalledOnce();
-			expect(mockTypedDataEncoder.hash).toHaveBeenCalledWith(
+			expect(mockTypedDataEncoder.hash).toHaveBeenNthCalledWith(
+				1,
 				orderData.domain,
 				orderData.types,
 				orderData.data
 			);
 			expect(hash).toBe(expectedHash);
 
-			expect(mockSignature.from).toHaveBeenCalledOnce();
-			expect(mockSignature.from).toHaveBeenCalledWith(signatureString);
+			expect(mockSignature.from).toHaveBeenNthCalledWith(1, signatureString);
 			expect(compactSig).toBe(expectedCompactSignature);
 		});
 	});
