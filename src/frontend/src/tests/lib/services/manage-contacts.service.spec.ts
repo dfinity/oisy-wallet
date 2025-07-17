@@ -11,6 +11,7 @@ import {
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 import { vi } from 'vitest';
+import { toNullable } from '@dfinity/utils';
 
 const mockContactImage: ContactImage = {
 	data: new Uint8Array([1, 2, 3]),
@@ -201,13 +202,12 @@ describe('manage-contacts.service', () => {
 			const result = await updateContact({
 				contact,
 				identity: mockIdentity,
-				image: null
 			});
 
 			expect(mockUpdateContact).toHaveBeenCalledWith(
 				expect.objectContaining({
 					contact: expect.objectContaining({
-						image: [] // should be empty array when removing image
+						image: toNullable(null)
 					})
 				})
 			);
@@ -230,7 +230,7 @@ describe('manage-contacts.service', () => {
 				name: 'Existing Contact',
 				update_timestamp_ns: BigInt(Date.now()),
 				addresses: [],
-				image: [mockContactImage] as [ContactImage]
+				image: toNullable(mockContactImage)
 			};
 
 			mockUpdateContact.mockResolvedValue(mockUpdatedContact);
