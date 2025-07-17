@@ -1,16 +1,26 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let activeTab = $state('tokens');
+
+	let { initialSearch, message } = $derived(
+		nonNullish($modalManageTokensData)
+			? $modalManageTokensData
+			: { initialSearch: undefined, message: undefined }
+	);
 </script>
 
 <div>
@@ -50,3 +60,15 @@
 		<ManageTokensButton />
 	</div>
 </div>
+
+{#if $modalManageTokens}
+	<ManageTokensModal {initialSearch}>
+		{#snippet infoElement()}
+			{#if nonNullish(message)}
+				<MessageBox level="info">
+					{message}
+				</MessageBox>
+			{/if}
+		{/snippet}
+	</ManageTokensModal>
+{/if}

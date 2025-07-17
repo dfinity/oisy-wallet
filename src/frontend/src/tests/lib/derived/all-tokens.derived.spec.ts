@@ -26,14 +26,17 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
+import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
+import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import * as dip20TokensServices from '$icp/services/dip20-tokens.services';
 import * as icrcCustomTokensServices from '$icp/services/icrc-custom-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
 import {
+	allCrossChainSwapTokens,
 	allDisabledKongSwapCompatibleIcrcTokens,
 	allKongSwapCompatibleIcrcTokens,
 	allTokens
@@ -332,6 +335,111 @@ describe('all-tokens.derived', () => {
 			});
 
 			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([]);
+		});
+	});
+
+	describe('allCrossChainSwapTokens', () => {
+		const mockErc20Token: Erc20TokenToggleable = {
+			...mockValidErc20Token,
+			id: parseTokenId('MOCK'),
+			address: mockEthAddress,
+			enabled: false
+		};
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+
+			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+
+			vi.spyOn(enabledEvmTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+		});
+
+		it('should return empty array when all stores are empty', () => {
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([]);
+		});
+
+		it('should include enabled Ethereum tokens with enabled: true', () => {
+			vi.spyOn(enabledEthereumTokens, 'subscribe').mockImplementation((fn) => {
+				fn([ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([
+				{ ...ETHEREUM_TOKEN, enabled: true },
+				{ ...SEPOLIA_TOKEN, enabled: true }
+			]);
+		});
+
+		it('should include enabled EVM tokens with enabled: true', () => {
+			const mockEvmToken = { ...ETHEREUM_TOKEN, id: parseTokenId('BASE_ETH') };
+
+			vi.spyOn(enabledEvmTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockEvmToken]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([{ ...mockEvmToken, enabled: true }]);
+		});
+
+		it('should include ERC20 tokens with enabled: true', () => {
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc20Token]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([{ ...mockErc20Token, enabled: true }]);
+		});
+
+		it('should set enabled: true for all tokens regardless of original enabled state', () => {
+			const disabledErc20Token = { ...mockErc20Token, enabled: false };
+
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledErc20Token]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([{ ...disabledErc20Token, enabled: true }]);
+		});
+
+		it('should handle multiple tokens of the same type', () => {
+			const mockErc20Token2 = {
+				...mockErc20Token,
+				id: parseTokenId('MOCK2'),
+				symbol: 'MOCK2'
+			};
+
+			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockErc20Token, mockErc20Token2]);
+				return () => {};
+			});
+
+			const result = get(allCrossChainSwapTokens);
+
+			expect(result).toEqual([
+				{ ...mockErc20Token, enabled: true },
+				{ ...mockErc20Token2, enabled: true }
+			]);
 		});
 	});
 });
