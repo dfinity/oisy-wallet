@@ -34,7 +34,7 @@ const initNftStore = (): NftStore => {
 			});
 		},
 		getTokenIds: (contractAddress: string) => {
-			let tokenIds = [];
+			let tokenIds: NftId = [];
 
 			update((nfts) => {
 				if (isNullish(nfts)) {
