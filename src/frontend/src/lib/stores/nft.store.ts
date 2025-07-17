@@ -1,6 +1,6 @@
 import type { Nft, NftId } from '$lib/types/nft';
-import { writable, type Readable } from 'svelte/store';
 import { isNullish } from '@dfinity/utils';
+import { writable, type Readable } from 'svelte/store';
 
 export type NftStoreData = Nft[] | undefined;
 
@@ -47,7 +47,7 @@ const initNftStore = (): NftStore => {
 					.map((nft) => nft.id);
 
 				return nfts;
-			})
+			});
 
 			return tokenIds;
 		},
