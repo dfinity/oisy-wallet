@@ -812,7 +812,9 @@
 			"you_receive": "Você recebe",
 			"select": "Selecionar >",
 			"select_swap_provider": "Selecionar provedor de troca",
-			"open_icp_swap": "Abrir site do ICP Swap"
+			"open_icp_swap": "Abrir site do ICP Swap",
+			"select_token": "",
+			"select_network_filter": ""
 		},
 		"error": {
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",

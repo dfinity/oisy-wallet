@@ -812,7 +812,9 @@
 			"you_receive": "Bạn nhận được",
 			"select": "Chọn >",
 			"select_swap_provider": "Chọn nhà cung cấp hoán đổi",
-			"open_icp_swap": "Mở trang web ICP Swap"
+			"open_icp_swap": "Mở trang web ICP Swap",
+			"select_token": "",
+			"select_network_filter": ""
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
