@@ -1,5 +1,6 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import type { Currencies } from '$lib/enums/currencies';
 import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -168,9 +169,11 @@ export const formatSecondsToNormalizedDate = ({
 
 export const formatCurrency = ({
 	value,
+	currency,
 	options
 }: {
 	value: number;
+	currency: Currencies;
 	options?: {
 		minFraction?: number;
 		maxFraction?: number;
@@ -178,15 +181,10 @@ export const formatCurrency = ({
 		symbol?: boolean;
 	};
 }): string => {
-	const {
-		minFraction = 2,
-		maxFraction = 2,
-		maximumSignificantDigits,
-		symbol = true
-	} = options ?? {};
+	const { minFraction, maxFraction, maximumSignificantDigits, symbol = true } = options ?? {};
 
 	return new Intl.NumberFormat('en-US', {
-		...(symbol && { style: 'currency', currency: 'USD' }),
+		...(symbol && { style: 'currency', currency: currency.toUpperCase() }),
 		minimumFractionDigits: minFraction,
 		maximumFractionDigits: maxFraction,
 		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })
