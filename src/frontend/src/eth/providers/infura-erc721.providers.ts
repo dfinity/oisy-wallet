@@ -90,10 +90,10 @@ export class InfuraErc721Provider {
 		);
 
 		return {
-			name: metadata?.name ?? '',
 			id: tokenId,
-			attributes: mappedAttributes,
-			imageUrl: imageUrl.href
+			imageUrl: imageUrl.href,
+			...(metadata?.name && {name: metadata.name}),
+			...(mappedAttributes.length > 0 && { attributes: mappedAttributes})
 		};
 	};
 }
