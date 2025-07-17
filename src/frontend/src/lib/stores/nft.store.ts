@@ -44,7 +44,7 @@ const initNftStore = (): NftStore => {
 
 				tokenIds = nfts
 					.filter((nft) => nft.contract.address.toLowerCase() === contractAddress.toLowerCase())
-					.map((nft: Nft) => nft.id);
+					.map((nft) => nft.id);
 
 				return nfts;
 			});
