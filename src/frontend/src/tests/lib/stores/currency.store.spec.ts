@@ -71,7 +71,7 @@ describe('currency.store', () => {
 				expect(get(mockStore).currency).toEqual(Currencies.USD);
 			});
 
-			it('should set the exchange rate to null', () => {
+			it('should set the exchange rate to null for non-USD currencies', () => {
 				expect(get(mockStore).exchangeRateToUsd).toBe(1);
 
 				mockStore.switchCurrency(Currencies.CHF);
@@ -81,10 +81,18 @@ describe('currency.store', () => {
 				mockStore.switchCurrency(Currencies.JPY);
 
 				expect(get(mockStore).exchangeRateToUsd).toBeNull();
+			});
+
+			it('should set the exchange rate to 1 for USD', () => {
+				expect(get(mockStore).exchangeRateToUsd).toBe(1);
+
+				mockStore.switchCurrency(Currencies.CHF);
+
+				expect(get(mockStore).exchangeRateToUsd).toBeNull();
 
 				mockStore.switchCurrency(Currencies.USD);
 
-				expect(get(mockStore).exchangeRateToUsd).toBeNull();
+				expect(get(mockStore).exchangeRateToUsd).toBe(1);
 			});
 		});
 
