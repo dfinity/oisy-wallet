@@ -33,7 +33,7 @@ const initNftStore = (): NftStore => {
 				return [...currentNfts, ...newNfts];
 			});
 		},
-		getTokenIds: (contractAddress: string) => {
+		getTokenIds: (contractAddress: string): NftId[] => {
 			let tokenIds: NftId = [];
 
 			update((nfts) => {
@@ -44,7 +44,7 @@ const initNftStore = (): NftStore => {
 
 				tokenIds = nfts
 					.filter((nft) => nft.contract.address.toLowerCase() === contractAddress.toLowerCase())
-					.map((nft) => nft.id);
+					.map((nft: Nft) => nft.id);
 
 				return nfts;
 			})
