@@ -573,7 +573,7 @@
 		"indexCanisterId": "kepm7-ciaaa-aaaaq-aae5a-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "TACO DAO Token",
+			"name": "TACO",
 			"symbol": "TACO",
 			"fee": {
 				"__bigint__": "10000"
