@@ -8,15 +8,14 @@
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
-	import TokensTabMenu from '$lib/components/tokens/TokensTabMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
-	import { TokenType } from '$lib/enums/token-type';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let selectedTokenType = $state(TokenType.TOKEN);
+	let activeTab = $state('tokens');
 
 	let {
 		initialSearch,
@@ -35,7 +34,14 @@
 				<TokensFilter>
 					{#snippet overflowableContent()}
 						{#if NFTS_ENABLED}
-							<TokensTabMenu bind:selectedTokenType />
+							<Tabs
+								bind:activeTab
+								tabs={[
+									{ label: 'Tokens', id: 'tokens' },
+									{ label: 'NFTs', id: 'nfts' }
+								]}
+								tabVariant="menu"
+							/>
 						{:else}
 							<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
 						{/if}
@@ -48,7 +54,7 @@
 		</div>
 	</StickyHeader>
 
-	{#if selectedTokenType === TokenType.TOKEN}
+	{#if activeTab === 'tokens'}
 		<TokensList />
 	{:else}
 		<NftsList />
