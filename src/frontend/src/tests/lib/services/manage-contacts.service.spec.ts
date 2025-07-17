@@ -116,7 +116,7 @@ describe('manage-contacts.service', () => {
 				name: 'New Contact',
 				update_timestamp_ns: BigInt(Date.now()),
 				addresses: [],
-				image: [] as []
+				image: toNullable()
 			};
 
 			mockCreateContact.mockResolvedValue(mockNewContact);
