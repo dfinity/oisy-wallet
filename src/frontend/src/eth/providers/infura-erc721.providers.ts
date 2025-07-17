@@ -4,8 +4,11 @@ import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
+import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
+import type { NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { UrlSchema } from '$lib/validation/url.validation';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
@@ -42,6 +45,56 @@ export class InfuraErc721Provider {
 		} catch (_: unknown) {
 			return false;
 		}
+	};
+
+	getNftMetadata = async ({
+		contractAddress,
+		tokenId
+	}: {
+		contractAddress: string;
+		tokenId: number;
+	}): Promise<NftMetadata> => {
+		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
+
+		const resolveResourceUrl = (url: URL): URL => {
+			const IPFS_PREFIX = 'ipfs://';
+			if (url.href.startsWith(IPFS_PREFIX)) {
+				return new URL(url.href.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/'));
+			}
+
+			return url;
+		};
+
+		const parsedTokenUri = UrlSchema.safeParse(await erc721Contract.tokenURI(tokenId));
+		if (!parsedTokenUri.success) {
+			throw new InvalidTokenUri(tokenId, contractAddress);
+		}
+
+		const metadataUrl = resolveResourceUrl(new URL(parsedTokenUri.data));
+
+		const response = await fetch(metadataUrl);
+		const metadata = await response.json();
+
+		const parsedMetadataUrl = UrlSchema.safeParse(metadata.image);
+		if (!parsedMetadataUrl.success) {
+			throw new InvalidMetadataImageUrl(tokenId, contractAddress);
+		}
+
+		const imageUrl = resolveResourceUrl(new URL(parsedMetadataUrl.data));
+
+		const mappedAttributes = (metadata?.attributes ?? []).map(
+			(attr: { trait_type: string; value: string | number }) => ({
+				traitType: attr.trait_type,
+				value: attr.value.toString()
+			})
+		);
+
+		return {
+			name: metadata?.name ?? '',
+			id: tokenId,
+			attributes: mappedAttributes,
+			imageUrl: imageUrl.href
+		};
 	};
 }
 
