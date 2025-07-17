@@ -139,7 +139,6 @@ describe('exchange.worker', () => {
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: 'syncExchange',
 					data: {
-						currentExchangeRate: 1,
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentBtcPrice: { bitcoin: { usd: 1 } },
 						currentErc20Prices: {},
@@ -346,10 +345,31 @@ describe('exchange.worker', () => {
 					// Native tokens + BTCUSD/BTCXXX
 					expect(simplePrice).toHaveBeenCalledTimes(6 + 1);
 
-					expect(simplePrice).toHaveBeenNthCalledWith(1, {
+					expect(simplePrice).toHaveBeenNthCalledWith(7, {
 						ids: 'bitcoin',
 						vs_currencies: `${Currencies.USD},${Currencies.JPY}`
 					});
+				});
+
+				it('should not sync prices for current currency if it is USD', async () => {
+					const mockEvent = {
+						...event,
+						data: {
+							...event.data,
+							msg,
+							data: {
+								currentCurrency: Currencies.USD,
+								erc20Addresses: [],
+								icrcCanisterIds: [],
+								splAddresses: []
+							}
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					// Native tokens ONLY
+					expect(simplePrice).toHaveBeenCalledTimes(6);
 				});
 
 				it('should sync prices for all tokens and for the current currency', async () => {
@@ -411,11 +431,61 @@ describe('exchange.worker', () => {
 
 					await onExchangeMessage(mockEvent);
 
-					expect(postMessageMock).toHaveBeenCalledOnce();
-					expect(postMessageMock).toHaveBeenNthCalledWith(1, {
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 						msg: 'syncExchange',
 						data: {
-							currentExchangeRate: 1,
+							currentBnbPrice: { binancecoin: { usd: 1 } },
+							currentBtcPrice: { bitcoin: { usd: 1 } },
+							currentErc20Prices: {
+								'0x123': { usd: 1 },
+								'0x456': { usd: 1 },
+								'0x789': { usd: 1 },
+								'0xabc': { usd: 1 },
+								'0xdef': { usd: 1 },
+								'0xghi': { usd: 1 }
+							},
+							currentEthPrice: { ethereum: { usd: 1 } },
+							currentIcpPrice: { 'internet-computer': { usd: 1 } },
+							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
+							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+							currentSolPrice: { solana: { usd: 1 } },
+							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } }
+						}
+					});
+				});
+
+				it('should post a message with synced token prices and current currency exchange rate', async () => {
+					vi.mocked(simplePrice).mockImplementation(
+						({
+							ids,
+							vs_currencies
+						}: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse> =>
+							Promise.resolve(
+								(Array.isArray(ids) ? ids : ids.split(',')).reduce(
+									(acc, id) => ({
+										...acc,
+										[id]: { usd: 1, ...(vs_currencies.includes(',') ? { jpy: 3 } : {}) }
+									}),
+									{}
+								)
+							)
+					);
+
+					const mockEvent = {
+						...event,
+						data: {
+							...event.data,
+							data: { ...mockEventData.data, currentCurrency: Currencies.JPY },
+							msg
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
+						msg: 'syncExchange',
+						data: {
+							currentExchangeRate: 1 / 3,
 							currentBnbPrice: { binancecoin: { usd: 1 } },
 							currentBtcPrice: { bitcoin: { usd: 1 } },
 							currentErc20Prices: {
