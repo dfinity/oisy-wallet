@@ -237,8 +237,7 @@ describe('manage-contacts.service', () => {
 
 			const result = await updateContact({
 				contact: existingContact,
-				identity: mockIdentity,
-				image: undefined
+				identity: mockIdentity
 			});
 
 			expect(result.image).toEqual(mockContactImage);
