@@ -15,6 +15,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
@@ -30,7 +31,6 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -167,7 +167,7 @@
 			await executeSend({
 				from: $ethAddress,
 				to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),
-				progress: (step: ProgressStepsSend) => (sendProgressStep = step),
+				progress: (step: ProgressStep) => (sendProgressStep = step),
 				token: $sendToken,
 				amount: parseToken({
 					value: `${amount}`,
