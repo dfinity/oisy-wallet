@@ -51,13 +51,13 @@ export const updateContact = async ({
 		image: image ?? undefined,
 		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
 	};
-	const updatedBe = await updateContactApi({
+	const result = await updateContactApi({
 		contact: mapToBackendContact(contactWithSortedAddresses),
 		identity
 	});
-	const updatedUi = mapToFrontendContact(updatedBe);
-	contactsStore.updateContact(updatedUi);
-	return updatedUi;
+	const contactUi = mapToFrontendContact(result);
+	contactsStore.updateContact(contactUi);
+	return contactUi;
 };
 
 export const deleteContact = async ({
