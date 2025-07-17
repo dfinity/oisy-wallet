@@ -9,7 +9,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
@@ -75,12 +75,15 @@ export class InfuraErc721Provider {
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
 
-		const parsedMetadataUrl = UrlSchema.safeParse(metadata.image);
-		if (!parsedMetadataUrl.success) {
-			throw new InvalidMetadataImageUrl(tokenId, contractAddress);
-		}
+		let imageUrl;
+		if (nonNullish(metadata.image)) {
+			const parsedMetadataUrl = UrlSchema.safeParse(metadata.image);
+			if (!parsedMetadataUrl.success) {
+				throw new InvalidMetadataImageUrl(tokenId, contractAddress);
+			}
 
-		const imageUrl = resolveResourceUrl(new URL(parsedMetadataUrl.data));
+			imageUrl = resolveResourceUrl(new URL(parsedMetadataUrl.data));
+		}
 
 		const mappedAttributes = (metadata?.attributes ?? []).map(
 			(attr: { trait_type: string; value: string | number }) => ({
@@ -91,7 +94,7 @@ export class InfuraErc721Provider {
 
 		return {
 			id: tokenId,
-			imageUrl: imageUrl.href,
+			...(nonNullish(imageUrl) && {imageUrl: imageUrl.href}),
 			...(metadata?.name && { name: metadata.name }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
 		};
