@@ -163,7 +163,7 @@ export const PostMessageDataResponseAuthSchema = PostMessageDataResponseSchema.e
 
 // TODO: generate zod schema for Coingecko
 export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSchema.extend({
-	currentExchangeRate: z.custom<CoingeckoSimplePriceResponse>(),
+	currentExchangeRate: z.number().optional(),
 	currentEthPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentBtcPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentErc20Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),

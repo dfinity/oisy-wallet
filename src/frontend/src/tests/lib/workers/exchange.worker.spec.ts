@@ -95,6 +95,7 @@ describe('exchange.worker', () => {
 
 			const mockEventData = {
 				data: {
+					currentCurrency: Currencies.USD,
 					erc20Addresses: mockErc20ContractAddresses,
 					icrcCanisterIds: mockIcrcLedgerCanisterIds,
 					splAddresses: mockSplTokenAddresses
@@ -138,6 +139,7 @@ describe('exchange.worker', () => {
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: 'syncExchange',
 					data: {
+						currentExchangeRate: 1,
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentBtcPrice: { bitcoin: { usd: 1 } },
 						currentErc20Prices: {},
@@ -227,6 +229,7 @@ describe('exchange.worker', () => {
 							...event.data,
 							msg,
 							data: {
+								currentCurrency: Currencies.JPY,
 								erc20Addresses: mockErc20ContractAddresses,
 								icrcCanisterIds: [],
 								splAddresses: []
@@ -276,6 +279,7 @@ describe('exchange.worker', () => {
 							...event.data,
 							msg,
 							data: {
+								currentCurrency: Currencies.CHF,
 								erc20Addresses: [],
 								icrcCanisterIds: mockIcrcLedgerCanisterIds,
 								splAddresses: []
@@ -303,6 +307,7 @@ describe('exchange.worker', () => {
 							...event.data,
 							msg,
 							data: {
+								currentCurrency: Currencies.EUR,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
 								splAddresses: mockSplTokenAddresses
@@ -321,7 +326,33 @@ describe('exchange.worker', () => {
 					});
 				});
 
-				it('should sync prices for all tokens', async () => {
+				it('should sync prices for current currency', async () => {
+					const mockEvent = {
+						...event,
+						data: {
+							...event.data,
+							msg,
+							data: {
+								currentCurrency: Currencies.JPY,
+								erc20Addresses: [],
+								icrcCanisterIds: [],
+								splAddresses: []
+							}
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					// Native tokens + BTCUSD/BTCXXX
+					expect(simplePrice).toHaveBeenCalledTimes(6 + 1);
+
+					expect(simplePrice).toHaveBeenNthCalledWith(1, {
+						ids: 'bitcoin',
+						vs_currencies: `${Currencies.USD},${Currencies.JPY}`
+					});
+				});
+
+				it('should sync prices for all tokens and for the current currency', async () => {
 					const mockEvent = { ...event, data: { ...event.data, ...mockEventData, msg } };
 
 					await onExchangeMessage(mockEvent);
@@ -384,6 +415,7 @@ describe('exchange.worker', () => {
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 						msg: 'syncExchange',
 						data: {
+							currentExchangeRate: 1,
 							currentBnbPrice: { binancecoin: { usd: 1 } },
 							currentBtcPrice: { bitcoin: { usd: 1 } },
 							currentErc20Prices: {

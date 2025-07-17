@@ -146,6 +146,7 @@ const syncExchange = async ({
 		postMessage({
 			msg: 'syncExchange',
 			data: {
+				currentExchangeRate,
 				currentEthPrice,
 				currentBtcPrice,
 				currentErc20Prices,

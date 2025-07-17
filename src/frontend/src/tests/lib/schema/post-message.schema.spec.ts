@@ -405,6 +405,7 @@ describe('post-message.schema', () => {
 
 		it('should validate with all valid price fields', () => {
 			const validData = {
+				currentExchangeRate: 1.5,
 				currentEthPrice: mockValidPrice,
 				currentBtcPrice: mockValidPrice,
 				currentErc20Prices: mockValidPrice,
