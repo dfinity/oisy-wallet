@@ -5,6 +5,8 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
 import type { NftMetadata } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { ethAddressStore } from '$lib/stores/address.store';
+import { get } from 'svelte/store';
 
 export const loadNfts = (tokens: Erc721CustomToken[]) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
@@ -22,10 +24,10 @@ const loadNftsOfToken = async ({
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
 }) => {
-	const myWalletAddress = '0x29469395eaf6f95920e59f858042f0e28d98a20b'; // TODO remove this and load own wallet address
+	const walletAddress = get(ethAddressStore)?.data
 
 	const tokenIds = await etherscanProvider.erc721TokenInventory({
-		address: myWalletAddress,
+		address: walletAddress,
 		contractAddress: token.address
 	});
 
