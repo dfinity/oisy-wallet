@@ -52,8 +52,7 @@ describe('AddressBookStep', () => {
 					addressType: 'Eth'
 				}
 			],
-			updateTimestampNs: BigInt(Date.now()),
-			image: undefined
+			updateTimestampNs: BigInt(Date.now())
 		}
 	];
 	const mockAddContact = vi.fn();
@@ -310,8 +309,7 @@ describe('AddressBookStep', () => {
 						label: 'Sol Address'
 					}
 				],
-				updateTimestampNs: BigInt(Date.now()),
-				image: undefined
+				updateTimestampNs: BigInt(Date.now())
 			}
 		];
 
