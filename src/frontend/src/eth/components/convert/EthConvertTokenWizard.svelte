@@ -12,6 +12,7 @@
 	import { send as executeSend } from '$eth/services/send.services';
 	import { ETH_FEE_CONTEXT_KEY } from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
@@ -39,7 +40,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { ProgressStep } from '$eth/types/send';
 
 	export let currentStep: WizardStep | undefined;
 	export let sendAmount: OptionAmount;
