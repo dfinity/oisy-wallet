@@ -34,6 +34,28 @@ const fetchIcrcPricesFromKongSwap = async (
 	return formatKongSwapToCoingeckoPrices(tokens);
 };
 
+// To calculate an FX rate for a currency vs USD, we cross-reference a very liquid asset (BTC) with the currency and with the USD.
+// In this way, we can easily calculate the cross USDXXX rate as BTCUSD / BTCXXX.
+// We will use it to convert the USD amounts to the currency amounts in the frontend.
+// Until we find a proper IC solution (like the exchange canister, for example), we use this workaround.
+export const exchangeRateUsdToCurrency = async (
+	currency: Currencies
+): Promise<number | undefined> => {
+	if (currency === Currencies.USD) {
+		return 1;
+	}
+
+	const prices = await simplePrice({
+		ids: 'bitcoin',
+		vs_currencies: `${Currencies.USD},${currency}`
+	});
+
+	const btcToUsd = prices?.bitcoin?.usd;
+	const btcToCurrency = prices?.bitcoin?.[currency];
+
+	return nonNullish(btcToUsd) && nonNullish(btcToCurrency) ? btcToUsd / btcToCurrency : undefined;
+};
+
 export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'ethereum',
