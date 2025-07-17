@@ -1,8 +1,10 @@
 import { NftIdSchema } from '$lib/schema/nft.schema';
 import type { NftId } from '$lib/types/nft';
-import type * as z from 'zod/v4';
+import * as z from 'zod/v4';
 
-export const parseNftId = (nftIdNumber: z.infer<typeof NftIdSchema>): NftId => {
-	const validNumber = NftIdSchema.parse(nftIdNumber);
+const NftIdNumberSchema = z.number();
+
+export const parseNftId = (nftIdNumber: z.infer<typeof NftIdNumberSchema>): NftId => {
+	const validNumber = NftIdNumberSchema.parse(nftIdNumber);
 	return NftIdSchema.parse(Number(validNumber));
 };
