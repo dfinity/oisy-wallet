@@ -1261,11 +1261,19 @@
 		"edit_contact": {
 			"title": "Chỉnh sửa liên hệ",
 			"add_address": "Thêm địa chỉ",
-			"delete_contact": "Xóa liên hệ"
+			"delete_contact": "Xóa liên hệ",
+			"failed_save_image": "",
+			"failed_remove_image": ""
 		},
 		"avatar": {
 			"default": "Ảnh đại diện mặc định",
 			"avatar_for": "Ảnh đại diện cho"
+		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
 		},
 		"show_contact": {
 			"title": "Liên hệ",

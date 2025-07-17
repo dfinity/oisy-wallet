@@ -1261,11 +1261,19 @@
 		"edit_contact": {
 			"title": "编辑联系人",
 			"add_address": "添加地址",
-			"delete_contact": "删除联系人"
+			"delete_contact": "删除联系人",
+			"failed_save_image": "",
+			"failed_remove_image": ""
 		},
 		"avatar": {
 			"default": "默认头像",
 			"avatar_for": "$contact 的头像"
+		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
 		},
 		"show_contact": {
 			"title": "联系人",
