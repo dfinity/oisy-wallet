@@ -16,6 +16,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
@@ -37,7 +38,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import type { ProgressStep } from '$eth/types/send';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;

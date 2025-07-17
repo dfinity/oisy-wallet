@@ -15,6 +15,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
@@ -40,7 +41,6 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { ProgressStep } from '$eth/types/send';
 
 	export let currentStep: WizardStep | undefined;
 
