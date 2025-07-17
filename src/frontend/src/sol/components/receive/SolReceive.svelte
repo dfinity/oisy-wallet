@@ -9,7 +9,7 @@
 		solAddressDevnetStore,
 		solAddressLocalnetStore,
 		solAddressMainnetStore,
-		type StorageAddressData
+		type AddressStoreData
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -19,7 +19,7 @@
 
 	export let token: Token;
 
-	let addressData: StorageAddressData<SolAddress>;
+	let addressData: AddressStoreData<SolAddress>;
 	//TODO consolidate this logic together with btc into $networkAddress like it's done for ICP and ETH
 	$: addressData = isNetworkIdSOLDevnet($networkId)
 		? $solAddressDevnetStore

@@ -25,7 +25,7 @@ import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
 	solAddressMainnetStore,
-	type StorageAddressData
+	type AddressStoreData
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SolAddress } from '$lib/types/address';
@@ -156,7 +156,7 @@ const certifySolAddressMainnet = (address: SolAddress): Promise<ResultSuccess<st
 		addressStore: solAddressMainnetStore
 	});
 
-export const validateSolAddressMainnet = async ($addressStore: StorageAddressData<SolAddress>) =>
+export const validateSolAddressMainnet = async ($addressStore: AddressStoreData<SolAddress>) =>
 	await validateAddress<SolAddress>({
 		$addressStore,
 		certifyAddress: certifySolAddressMainnet
