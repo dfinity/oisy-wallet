@@ -34,6 +34,8 @@ export type TransactionsData<T extends TransactionTypes> =
 
 export interface TransactionsStore<T extends TransactionTypes>
 	extends CertifiedStore<TransactionsData<T>> {
+	set: (params: TransactionsStoreParams<T>) => void;
+	add: (params: TransactionsStoreParams<T>) => void;
 	prepend: (params: TransactionsStoreParams<T>) => void;
 	append: (params: TransactionsStoreParams<T>) => void;
 	cleanUp: (params: TransactionsStoreIdParams<T>) => void;
@@ -44,6 +46,16 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
 
 	return {
+		set: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: transactions
+			})),
+		add: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: [...(state?.[tokenId] ?? []), ...transactions]
+			})),
 		prepend: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
