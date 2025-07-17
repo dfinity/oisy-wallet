@@ -7,11 +7,14 @@
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { TokenType } from '$lib/enums/token-type';
+	import TokensTabMenu from '$lib/components/tokens/TokensTabMenu.svelte';
+	import Header from '$lib/components/ui/Header.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { NFTS_ENABLED } from '$env/nft.env';
 
 	let selectedTokenType = $state(TokenType.TOKEN);
 
@@ -31,24 +34,11 @@
 			<div class="grow-1 relative flex justify-between">
 				<TokensFilter>
 					{#snippet overflowableContent()}
-						<Button
-							paddingSmall
-							ariaLabel="a2sdasd"
-							colorStyle={selectedTokenType === TokenType.TOKEN ? 'primary' : 'tertiary'}
-							onclick={() => (selectedTokenType = TokenType.TOKEN)}
-						>
-							Tokens
-						</Button>
-						<Button
-							paddingSmall
-							ariaLabel="asdasd"
-							colorStyle={selectedTokenType === TokenType.NFT ? 'primary' : 'tertiary'}
-							onclick={() => (selectedTokenType = TokenType.NFT)}
-						>
-							NFTs
-						</Button>
-
-						<!--						<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header> -->
+						{#if NFTS_ENABLED}
+							<TokensTabMenu bind:selectedTokenType />
+						{:else}
+							<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+						{/if}
 					{/snippet}
 				</TokensFilter>
 			</div>
