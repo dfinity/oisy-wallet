@@ -14,6 +14,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { SwapMappedResult } from '$lib/types/swap';
 	import { formatTokenBigintToNumber, formatCurrency } from '$lib/utils/format.utils';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 
 	const dispatch = createEventDispatcher<{
 		icSelectProvider: SwapMappedResult;
@@ -44,7 +45,7 @@
 				displayDecimals: token.decimals
 			}) * exchangeRate;
 
-		return formatCurrency({ value: usdValue });
+		return formatCurrency({ value: usdValue, currency: $currentCurrency });
 	};
 </script>
 
