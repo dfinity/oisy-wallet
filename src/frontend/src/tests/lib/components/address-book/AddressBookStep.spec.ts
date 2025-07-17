@@ -36,7 +36,6 @@ describe('AddressBookStep', () => {
 			name: 'Test Contact_2',
 			addresses: [],
 			updateTimestampNs: BigInt(Date.now()),
-			image: undefined
 		},
 		{
 			id: 3n,
