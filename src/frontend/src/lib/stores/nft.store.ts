@@ -1,5 +1,6 @@
 import type { Nft } from '$lib/types/nft';
 import { get, writable, type Readable } from 'svelte/store';
+import { isNullish } from '@dfinity/utils';
 
 export type NftStoreData = Nft[] | undefined;
 
@@ -15,23 +16,12 @@ const initNftStore = (): NftStore => {
 	return {
 		subscribe,
 		addAll: (nfts: Nft[]) => {
-			const uniqueNfts = nfts.reduce<Nft[]>((acc, current) => {
-				if (
-					!acc.some(
-						(nft) => nft.id === current.id && nft.contract.address === current.contract.address
-					)
-				) {
-					acc.push(current);
-				}
-				return acc;
-			}, []);
-
 			update((currentNfts) => {
-				if (!currentNfts) {
-					return uniqueNfts;
+				if (isNullish(currentNfts)) {
+					return nfts;
 				}
 
-				const newNfts = uniqueNfts.filter(
+				const newNfts = nfts.filter(
 					(newNft) =>
 						!currentNfts.some(
 							(existingNft) =>
