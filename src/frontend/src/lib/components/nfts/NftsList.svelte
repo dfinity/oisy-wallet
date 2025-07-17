@@ -1,6 +1,6 @@
 <script lang="ts">
-	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
+	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
 	import { NFT_CARD } from '$lib/constants/test-ids.constants';
 	import type { Nft } from '$lib/types/nft';
 
