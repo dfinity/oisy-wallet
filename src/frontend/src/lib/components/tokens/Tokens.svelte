@@ -1,16 +1,16 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
-	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
-	import { nonNullish } from '@dfinity/utils';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let {
 		initialSearch,
