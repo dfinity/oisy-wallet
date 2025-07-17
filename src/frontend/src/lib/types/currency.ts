@@ -1,4 +1,4 @@
-import { CurrencyExchangeDataSchema, type CurrencyDataSchema } from '$lib/schema/currency.schema';
+import type { CurrencyExchangeDataSchema, CurrencyDataSchema } from '$lib/schema/currency.schema';
 import type * as z from 'zod/v4';
 
 export type CurrencyData = z.infer<typeof CurrencyDataSchema>;
