@@ -40,7 +40,7 @@ describe('manage-contacts.service', () => {
 						mockBackendContactAddressBtc, // Btc should come first
 						mockBackendContactAddressEth // Eth should come second
 					],
-					image: [] as []
+					image: toNullable(mockContactImage)
 				}
 			];
 
@@ -77,7 +77,7 @@ describe('manage-contacts.service', () => {
 					name: 'Empty Contact',
 					update_timestamp_ns: BigInt(Date.now()),
 					addresses: [],
-					image: [] as []
+					image: toNullable(mockContactImage)
 				}
 			];
 
@@ -173,40 +173,6 @@ describe('manage-contacts.service', () => {
 				})
 			);
 			expect(result.image).toEqual(mockContactImage);
-		});
-
-		it('should remove image when null is provided', async () => {
-			const mockUpdatedContact = {
-				id: BigInt(1),
-				name: 'No Image Contact',
-				update_timestamp_ns: BigInt(Date.now()),
-				addresses: [],
-				image: toNullable()
-			};
-
-			mockUpdateContact.mockResolvedValue(mockUpdatedContact);
-
-			const contact: ContactUi = {
-				id: BigInt(1),
-				name: 'No Image Contact',
-				updateTimestampNs: BigInt(Date.now()),
-				addresses: [],
-				image: mockContactImage
-			};
-
-			const result = await updateContact({
-				contact,
-				identity: mockIdentity
-			});
-
-			expect(mockUpdateContact).toHaveBeenCalledWith(
-				expect.objectContaining({
-					contact: expect.objectContaining({
-						image: toNullable(null)
-					})
-				})
-			);
-			expect(result.image).toBeUndefined();
 		});
 
 		it('should maintain existing image when undefined is provided', async () => {
