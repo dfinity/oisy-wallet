@@ -48,7 +48,7 @@ export const updateContact = async ({
 }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
 		...contact,
-		image: image ?? undefined,
+		image,
 		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
 	};
 	const result = await updateContactApi({
