@@ -2,6 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import type { Nft } from '$lib/types/nft';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		nft: Nft;
@@ -14,7 +16,9 @@
 <div data-tid={testId}>
 	<div class="relative overflow-hidden rounded-lg">
 		{#if nonNullish(nft.imageUrl)}
-			<img src={nft.imageUrl} alt={nft.name ?? ''} class="h-48" loading="lazy" />
+			<img src={nft.imageUrl} alt={replacePlaceholders($i18n.nfts.alt.image, {
+				$tokenId: nft.id.toString()
+			})} class="h-48" loading="lazy" />
 		{:else}
 			<div class="bg-black/16 h-48 rounded-lg"></div>
 		{/if}
