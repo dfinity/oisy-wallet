@@ -49,6 +49,7 @@
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
+	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -216,6 +217,8 @@
 		<MenuLanguageSelector />
 
 		{#if $authSignedIn}
+			<MenuCurrencySelector />
+
 			<MenuThemeSelector />
 		{/if}
 	</div>

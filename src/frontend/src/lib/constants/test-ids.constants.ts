@@ -11,6 +11,8 @@ export const NAVIGATION_MENU_SUPPORT_BUTTON = 'navigation-support-button';
 
 export const LANGUAGE_DROPDOWN = 'language-dropdown';
 
+export const CURRENCY_DROPDOWN = 'currency-dropdown';
+
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
 export const MAX_BUTTON = 'max-button';
