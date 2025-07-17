@@ -29,13 +29,13 @@ describe('AddressBookStep', () => {
 					addressType: 'Eth'
 				}
 			],
-			updateTimestampNs: BigInt(Date.now()),
+			updateTimestampNs: BigInt(Date.now())
 		},
 		{
 			id: 2n,
 			name: 'Test Contact_2',
 			addresses: [],
-			updateTimestampNs: BigInt(Date.now()),
+			updateTimestampNs: BigInt(Date.now())
 		},
 		{
 			id: 3n,
