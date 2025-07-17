@@ -14,6 +14,27 @@ import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
 
+vi.mock('browser-image-compression', () => {
+	const mockFn = vi.fn(
+		(file: File, options: unknown): Promise<File> =>
+			Promise.resolve(file)
+	);
+
+	(
+		mockFn as unknown as {
+			getDataUrlFromFile(file: File): Promise<string>;
+		}
+	).getDataUrlFromFile = vi.fn(
+		(file: File): Promise<string> =>
+			Promise.resolve('data:image/png;base64,MOCK')
+	);
+
+	return {
+		__esModule: true,
+		default: mockFn
+	};
+});
+
 describe('EditContactStep', () => {
 	const mockContact: ContactUi = {
 		id: 1n,
@@ -35,6 +56,7 @@ describe('EditContactStep', () => {
 
 	const mockClose = vi.fn();
 	const mockEdit = vi.fn();
+	const onAvatarEdit = vi.fn();
 	const mockEditAddress = vi.fn();
 	const mockAddAddress = vi.fn();
 	const mockDeleteContact = vi.fn();
@@ -53,14 +75,12 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit: onAvatarEdit
 			}
 		});
 
-		// Check that the contact name is displayed
 		expect(getByText(mockContact.name)).toBeInTheDocument();
-
-		// Check that addresses are displayed
 		expect(getByText(en.address.types.Eth)).toBeInTheDocument();
 		expect(getByText('My ETH Address')).toBeInTheDocument();
 		expect(getByText(en.address.types.Btc)).toBeInTheDocument();
@@ -76,7 +96,8 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit: onAvatarEdit
 			}
 		});
 
@@ -96,7 +117,8 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit: onAvatarEdit
 			}
 		});
 
@@ -115,7 +137,8 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit: onAvatarEdit
 			}
 		});
 
@@ -135,7 +158,8 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit: onAvatarEdit
 			}
 		});
 
@@ -154,7 +178,8 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit: onAvatarEdit
 			}
 		});
 
@@ -176,7 +201,8 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit: onAvatarEdit
 			}
 		});
 
@@ -198,7 +224,8 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: null as unknown as () => void,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit: onAvatarEdit
 			}
 		});
 
@@ -206,4 +233,31 @@ describe('EditContactStep', () => {
 
 		expect(addAddressButton).toBeDisabled();
 	});
+
+	it('calls onAvatarEdit with a ContactImage when a file is selected', async () => {
+		const { container } = render(EditContactStep, {
+			props: {
+				contact: mockContact,
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit: onAvatarEdit
+			}
+		});
+
+		const input = container.querySelector('input[type="file"]');
+		expect(input).toBeTruthy();
+		
+		const file = new File(['x'], 'avatar.png', { type: 'image/png' });
+		
+		await fireEvent.change(input!, { target: { files: [file] } });
+
+		expect(onAvatarEdit).toHaveBeenCalledTimes(1);
+		const arg = (onAvatarEdit as any).mock.calls[0][0];
+		expect(arg).toHaveProperty('data');
+	});
+
 });
