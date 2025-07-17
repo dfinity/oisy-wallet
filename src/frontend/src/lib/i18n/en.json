@@ -1261,11 +1261,19 @@
 		"edit_contact": {
 			"title": "Edit contact",
 			"add_address": "Add address",
-			"delete_contact": "Delete contact"
+			"delete_contact": "Delete contact",
+			"failed_save_image": "Failed to save image",
+			"failed_remove_image": "Failed to remove image"
 		},
 		"avatar": {
 			"default": "Default avatar",
 			"avatar_for": "Avatar for"
+		},
+		"edit_avatar": {
+			"menu_title": "Contact Image",
+			"upload_image": "Upload",
+			"replace_image": "Replace",
+			"remove_image": "Remove"
 		},
 		"show_contact": {
 			"title": "Contact",

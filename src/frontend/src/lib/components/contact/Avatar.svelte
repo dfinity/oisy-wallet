@@ -3,6 +3,7 @@
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
+	import { AVATAR_IMAGE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
 	import { selectColorForName } from '$lib/utils/contact.utils';
@@ -10,10 +11,11 @@
 	interface AvatarProps {
 		name?: string;
 		variant?: AvatarVariants;
+		imageUrl?: string | null;
 		styleClass?: string;
 	}
 
-	const { name, variant = 'md', styleClass }: AvatarProps = $props();
+	const { name, imageUrl, variant = 'md', styleClass }: AvatarProps = $props();
 
 	const font = $derived(
 		{
@@ -27,7 +29,9 @@
 
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
 	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
-	let commonClasses = $derived(`${font} ${size} ${bgColor} relative z-0 rounded-full`);
+	const commonClasses = $derived(
+		`${font} ${size} ${bgColor} rounded-full overflow-hidden relative ${styleClass}`
+	);
 	let ariaLabel = $derived(
 		name ? `${$i18n.address_book.avatar.avatar_for} ${name}` : $i18n.address_book.avatar.default
 	);
@@ -42,20 +46,17 @@
 	);
 </script>
 
-{#if !initials}
-	<div
-		class={`${commonClasses} text-brand-primary ${styleClass}`}
-		role="img"
-		aria-label={ariaLabel}
-	>
+<div
+	class={`${commonClasses} flex items-center justify-center ${!imageUrl ? bgColor : ''}`}
+	role="img"
+	aria-label={ariaLabel}
+	data-tid={AVATAR_IMAGE}
+>
+	{#if imageUrl}
+		<img src={imageUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
+	{:else if initials}
+		<span class="font-bold text-white">{initials}</span>
+	{:else}
 		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
-	</div>
-{:else}
-	<span
-		class={`${commonClasses} inline-block inline-flex items-center justify-center font-bold text-white transition-colors duration-1000 ${styleClass}`}
-		role="img"
-		aria-label={ariaLabel}
-	>
-		{initials}
-	</span>
-{/if}
+	{/if}
+</div>

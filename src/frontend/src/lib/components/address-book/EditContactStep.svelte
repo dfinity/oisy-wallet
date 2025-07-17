@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import imageCompression from 'browser-image-compression';
+	import type { ContactImage } from '$declarations/backend/backend.did';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
@@ -20,11 +23,13 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { dataUrlToImage, imageToDataUrl } from '$lib/utils/contact-image.utils';
 
 	interface Props {
 		contact: ContactUi;
 		onClose: () => void;
 		onEdit: (contact: ContactUi) => void;
+		onAvatarEdit: (image: ContactImage) => void;
 		onEditAddress: (index: number) => void;
 		onAddAddress: () => void;
 		onDeleteContact: (id: bigint) => void;
@@ -35,17 +40,46 @@
 		contact,
 		onClose,
 		onEdit,
+		onAvatarEdit,
 		onEditAddress,
 		onAddAddress,
 		onDeleteContact,
 		onDeleteAddress
 	}: Props = $props();
+
+	let fileInput = $state<HTMLInputElement>();
+	let imageUrl = $derived(contact.image ? imageToDataUrl(contact.image) : null);
+
+	const handleFileChange = async (e: Event) => {
+		const file = (e.target as HTMLInputElement).files?.[0];
+		if (!file) {
+			return;
+		}
+		const options = { maxSizeMB: 0.1, maxWidthOrHeight: 200, useWebWorker: false };
+		const compressed = await imageCompression(file, options);
+		const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+		const img: ContactImage = dataUrlToImage(dataUrl);
+
+		onAvatarEdit(img);
+	};
+
+	const replaceImage = (): void => {
+		fileInput?.click();
+	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
 	<LogoButton hover={false} condensed={true}>
 		{#snippet logo()}
-			<Avatar name={contact.name} variant="xs" styleClass="md:text-[19.2px]"></Avatar>
+			<div class="relative flex">
+				<Avatar name={contact.name} {imageUrl} variant="xs" styleClass="md:text-[19.2px]" />
+				<span
+					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+					data-tid={`avatar-badge-${contact.name}`}
+				>
+					<EditAvatar bind:fileInput {imageUrl} {replaceImage} />
+				</span>
+			</div>
 		{/snippet}
 
 		{#snippet title()}
@@ -121,3 +155,10 @@
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
+<input
+	bind:this={fileInput}
+	type="file"
+	accept="image/*"
+	class="hidden"
+	onchange={handleFileChange}
+/>
