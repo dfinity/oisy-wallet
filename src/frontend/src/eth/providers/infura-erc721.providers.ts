@@ -77,7 +77,7 @@ export class InfuraErc721Provider {
 			}
 
 			return resolveResourceUrl(new URL(parsedMetadataUrl.data));
-		}
+		};
 
 		const parsedTokenUri = UrlSchema.safeParse(await erc721Contract.tokenURI(tokenId));
 		if (!parsedTokenUri.success) {
@@ -89,7 +89,7 @@ export class InfuraErc721Provider {
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
 
-		let imageUrl = extractImageUrl(metadata.image);
+		const imageUrl = extractImageUrl(metadata.image);
 
 		const mappedAttributes = (metadata?.attributes ?? []).map(
 			(attr: { trait_type: string; value: string | number }) => ({
