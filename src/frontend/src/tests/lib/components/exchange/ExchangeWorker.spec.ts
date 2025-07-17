@@ -5,6 +5,7 @@ import {
 	initExchangeWorker,
 	type ExchangeWorker as ExchangeWorkerType
 } from '$lib/services/worker.exchange.services';
+import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { currencyStore } from '$lib/stores/currency.store';
 import { render } from '@testing-library/svelte';
 
@@ -106,14 +107,14 @@ describe('ExchangeWorker', () => {
 		expect(stopExchangeTimer).toHaveBeenCalledOnce();
 		expect(startExchangeTimer).toHaveBeenCalledOnce();
 
-		currencyStore.setExchangeRate(1.5);
+		currencyExchangeStore.setExchangeRate(1.5);
 
 		await waitTimer();
 
 		expect(stopExchangeTimer).toHaveBeenCalledOnce();
 		expect(startExchangeTimer).toHaveBeenCalledOnce();
 
-		currencyStore.setExchangeRate(101);
+		currencyExchangeStore.setExchangeRate(101);
 
 		await waitTimer();
 
