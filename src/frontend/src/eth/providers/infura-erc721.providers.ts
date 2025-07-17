@@ -8,8 +8,9 @@ import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
 import type { NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
@@ -65,6 +66,19 @@ export class InfuraErc721Provider {
 			return url;
 		};
 
+		const extractImageUrl = (imageUrl: string | undefined): URL | undefined => {
+			if (isNullish(imageUrl)) {
+				return undefined;
+			}
+
+			const parsedMetadataUrl = UrlSchema.safeParse(imageUrl);
+			if (!parsedMetadataUrl.success) {
+				throw new InvalidMetadataImageUrl(tokenId, contractAddress);
+			}
+
+			return resolveResourceUrl(new URL(parsedMetadataUrl.data));
+		};
+
 		const parsedTokenUri = UrlSchema.safeParse(await erc721Contract.tokenURI(tokenId));
 		if (!parsedTokenUri.success) {
 			throw new InvalidTokenUri(tokenId, contractAddress);
@@ -75,12 +89,7 @@ export class InfuraErc721Provider {
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
 
-		const parsedMetadataUrl = UrlSchema.safeParse(metadata.image);
-		if (!parsedMetadataUrl.success) {
-			throw new InvalidMetadataImageUrl(tokenId, contractAddress);
-		}
-
-		const imageUrl = resolveResourceUrl(new URL(parsedMetadataUrl.data));
+		const imageUrl = extractImageUrl(metadata.image);
 
 		const mappedAttributes = (metadata?.attributes ?? []).map(
 			(attr: { trait_type: string; value: string | number }) => ({
@@ -90,10 +99,10 @@ export class InfuraErc721Provider {
 		);
 
 		return {
-			name: metadata?.name ?? '',
-			id: tokenId,
-			attributes: mappedAttributes,
-			imageUrl: imageUrl.href
+			id: parseNftId(tokenId),
+			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
+			...(nonNullish(metadata.name) && { name: metadata.name }),
+			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
 		};
 	};
 }
