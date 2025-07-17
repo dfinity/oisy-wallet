@@ -248,8 +248,7 @@ describe('AddressBookStep', () => {
 				id: 3n,
 				name: 'Jane Smith',
 				addresses: [],
-				updateTimestampNs: BigInt(Date.now()),
-				image: undefined
+				updateTimestampNs: BigInt(Date.now())
 			}
 		];
 
@@ -276,8 +275,7 @@ describe('AddressBookStep', () => {
 				id: 4n,
 				name: 'Case Insensitive',
 				addresses: [],
-				updateTimestampNs: BigInt(Date.now()),
-				image: undefined
+				updateTimestampNs: BigInt(Date.now())
 			}
 		];
 

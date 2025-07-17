@@ -116,7 +116,7 @@ describe('manage-contacts.service', () => {
 				name: 'New Contact',
 				update_timestamp_ns: BigInt(Date.now()),
 				addresses: [],
-				image: toNullable()
+				image: toNullable(mockContactImage)
 			};
 
 			mockCreateContact.mockResolvedValue(mockNewContact);
@@ -141,9 +141,7 @@ describe('manage-contacts.service', () => {
 
 			updateContactSpy = vi
 				.spyOn(contactsStore, 'updateContact')
-				.mockImplementation((_contact: ContactUi) => {
-					// Mock implementation
-				});
+
 		});
 
 		it('should update contact with image', async () => {
@@ -152,7 +150,7 @@ describe('manage-contacts.service', () => {
 				name: 'Updated Contact',
 				update_timestamp_ns: BigInt(Date.now()),
 				addresses: [],
-				image: [mockContactImage] as [ContactImage]
+				image: toNullable(mockContactImage)
 			};
 
 			mockUpdateContact.mockResolvedValue(mockUpdatedContact);
@@ -161,8 +159,7 @@ describe('manage-contacts.service', () => {
 				id: BigInt(1),
 				name: 'Updated Contact',
 				updateTimestampNs: BigInt(Date.now()),
-				addresses: [],
-				image: undefined
+				addresses: []
 			};
 
 			const result = await updateContact({
@@ -171,7 +168,7 @@ describe('manage-contacts.service', () => {
 				image: mockContactImage
 			});
 
-			expect(mockUpdateContact).toHaveBeenCalled();
+			expect(mockUpdateContact).toHaveBeenCalledOnce()
 			expect(updateContactSpy).toHaveBeenCalledWith(
 				expect.objectContaining({
 					image: mockContactImage
