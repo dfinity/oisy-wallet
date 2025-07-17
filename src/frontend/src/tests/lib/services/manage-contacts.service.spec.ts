@@ -1,6 +1,6 @@
 import type { ContactImage } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
-import { loadContacts, saveContactWithImage } from '$lib/services/manage-contacts.service';
+import { createContact, loadContacts, updateContact } from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import {
@@ -101,7 +101,36 @@ describe('manage-contacts.service', () => {
 		});
 	});
 
-	describe('saveContactWithImage', () => {
+	describe('createContact', () => {
+		const mockCreateContact = vi.spyOn(backendApi, 'createContact');
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+			contactsStore.reset();
+		});
+
+		it('should create a new contact', async () => {
+			const mockNewContact = {
+				id: BigInt(1),
+				name: 'New Contact',
+				update_timestamp_ns: BigInt(Date.now()),
+				addresses: [],
+				image: [] as []
+			};
+
+			mockCreateContact.mockResolvedValue(mockNewContact);
+
+			const result = await createContact({
+				name: 'New Contact',
+				identity: mockIdentity
+			});
+
+			expect(mockCreateContact).toHaveBeenCalled();
+			expect(result.name).toBe('New Contact');
+		});
+	});
+
+	describe('updateContact', () => {
 		const mockUpdateContact = vi.spyOn(backendApi, 'updateContact');
 		let updateContactSpy: ReturnType<typeof vi.spyOn>;
 
@@ -112,11 +141,11 @@ describe('manage-contacts.service', () => {
 			updateContactSpy = vi
 				.spyOn(contactsStore, 'updateContact')
 				.mockImplementation((_contact: ContactUi) => {
-					// Mock implementation - just return void as the original method does
+					// Mock implementation
 				});
 		});
 
-		it('should save contact with image', async () => {
+		it('should update contact with image', async () => {
 			const mockUpdatedContact = {
 				id: BigInt(1),
 				name: 'Updated Contact',
@@ -127,13 +156,18 @@ describe('manage-contacts.service', () => {
 
 			mockUpdateContact.mockResolvedValue(mockUpdatedContact);
 
-			const result = await saveContactWithImage({
+			const contact: ContactUi = {
 				id: BigInt(1),
 				name: 'Updated Contact',
 				updateTimestampNs: BigInt(Date.now()),
 				addresses: [],
-				image: mockContactImage,
-				identity: mockIdentity
+				image: undefined
+			};
+
+			const result = await updateContact({
+				contact,
+				identity: mockIdentity,
+				image: mockContactImage
 			});
 
 			expect(mockUpdateContact).toHaveBeenCalled();
@@ -156,13 +190,18 @@ describe('manage-contacts.service', () => {
 
 			mockUpdateContact.mockResolvedValue(mockUpdatedContact);
 
-			const result = await saveContactWithImage({
+			const contact: ContactUi = {
 				id: BigInt(1),
 				name: 'No Image Contact',
 				updateTimestampNs: BigInt(Date.now()),
 				addresses: [],
-				image: null, // explicitly removing image
-				identity: mockIdentity
+				image: mockContactImage
+			};
+
+			const result = await updateContact({
+				contact,
+				identity: mockIdentity,
+				image: null
 			});
 
 			expect(mockUpdateContact).toHaveBeenCalledWith(
@@ -176,16 +215,15 @@ describe('manage-contacts.service', () => {
 		});
 
 		it('should maintain existing image when undefined is provided', async () => {
-			// First set up a contact with an image in the store
-			contactsStore.set([
-				{
-					id: BigInt(1),
-					name: 'Existing Contact',
-					updateTimestampNs: BigInt(Date.now()),
-					addresses: [],
-					image: mockContactImage
-				}
-			]);
+			const existingContact: ContactUi = {
+				id: BigInt(1),
+				name: 'Existing Contact',
+				updateTimestampNs: BigInt(Date.now()),
+				addresses: [],
+				image: mockContactImage
+			};
+
+			contactsStore.set([existingContact]);
 
 			const mockUpdatedContact = {
 				id: BigInt(1),
@@ -197,13 +235,10 @@ describe('manage-contacts.service', () => {
 
 			mockUpdateContact.mockResolvedValue(mockUpdatedContact);
 
-			const result = await saveContactWithImage({
-				id: BigInt(1),
-				name: 'Existing Contact',
-				updateTimestampNs: BigInt(Date.now()),
-				addresses: [],
-				image: undefined as unknown as ContactImage | null,
-				identity: mockIdentity
+			const result = await updateContact({
+				contact: existingContact,
+				identity: mockIdentity,
+				image: undefined
 			});
 
 			expect(result.image).toEqual(mockContactImage);

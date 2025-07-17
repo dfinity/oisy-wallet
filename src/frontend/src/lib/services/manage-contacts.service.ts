@@ -11,11 +11,6 @@ import { compareContactAddresses } from '$lib/utils/contact-address.utils';
 import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
 import type { Identity } from '@dfinity/agent';
 
-export interface SaveContactWithImageParams extends Omit<ContactUi, 'image'> {
-	image: ContactImage | null;
-	identity: Identity;
-}
-
 export const loadContacts = async (identity: Identity): Promise<void> => {
 	contactsStore.reset();
 	const result = await getContacts({ identity });
@@ -44,13 +39,16 @@ export const createContact = async ({
 
 export const updateContact = async ({
 	contact,
-	identity
+	identity,
+	image
 }: {
 	contact: ContactUi;
 	identity: Identity;
+	image?: ContactImage | null;
 }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
 		...contact,
+		image: image ?? undefined,
 		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
 	};
 	const updatedBe = await updateContactApi({
@@ -71,21 +69,4 @@ export const deleteContact = async ({
 }): Promise<void> => {
 	await deleteContactApi({ contactId: id, identity });
 	contactsStore.removeContact(id);
-};
-
-export const saveContactWithImage = async ({
-	image,
-	identity,
-	...rest
-}: SaveContactWithImageParams): Promise<ContactUi> => {
-	const contactUi: ContactUi = {
-		...rest,
-		image: image ?? undefined
-	};
-
-	const beContact = mapToBackendContact(contactUi);
-	const updatedBe = await updateContactApi({ contact: beContact, identity });
-	const updatedUi = mapToFrontendContact(updatedBe);
-	contactsStore.updateContact(updatedUi);
-	return updatedUi;
 };
