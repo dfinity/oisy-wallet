@@ -12,10 +12,7 @@
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let {
-		initialSearch,
-		message
-	} = $derived(
+	let { initialSearch, message } = $derived(
 		nonNullish($modalManageTokensData)
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
