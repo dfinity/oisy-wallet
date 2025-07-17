@@ -7,6 +7,10 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { NFTS_ENABLED } from '$env/nft.env';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
+
+	let activeTab = $state('tokens');
 </script>
 
 <div>
@@ -15,7 +19,18 @@
 			<div class="grow-1 relative flex justify-between">
 				<TokensFilter>
 					{#snippet overflowableContent()}
-						<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+						{#if NFTS_ENABLED}
+							<Tabs
+								bind:activeTab
+								tabs={[
+									{ label: $i18n.tokens.text.title, id: 'tokens' },
+									{ label: $i18n.nfts.text.title, id: 'nfts' }
+								]}
+								tabVariant="menu"
+							/>
+						{:else}
+							<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+						{/if}
 					{/snippet}
 				</TokensFilter>
 			</div>
@@ -25,7 +40,11 @@
 		</div>
 	</StickyHeader>
 
-	<TokensList />
+	{#if activeTab === 'tokens'}
+		<TokensList />
+	{:else}
+<!--		TODO render NFTs list -->
+	{/if}
 
 	<div in:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
 		<ManageTokensButton />
