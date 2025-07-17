@@ -1,4 +1,4 @@
-import type { Nft, NftId } from '$lib/types/nft';
+import type { Nft } from '$lib/types/nft';
 import { isNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
