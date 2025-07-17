@@ -9,7 +9,6 @@ import {
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { compareContactAddresses } from '$lib/utils/contact-address.utils';
-import { fileToContactImage } from '$lib/utils/contact-image.utils';
 import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
 import type { Identity } from '@dfinity/agent';
 
@@ -86,31 +85,3 @@ export const deleteContact = async ({
 	contactsStore.removeContact(id);
 };
 
-export async function attachImageToContact(options: {
-	contactId: bigint;
-	imageFile: File;
-	identity: Identity;
-  }): Promise<ContactUi> {
-	const { contactId, imageFile, identity } = options;
-  
-	const backend = await getContact({ contactId, identity });
-	let ui = mapToFrontendContact(backend);
-  
-	const img = await fileToContactImage(imageFile);
-	ui = {
-	  ...ui,
-	  image: [img],
-	  addresses: ui.addresses.sort((a, b) =>
-		compareContactAddresses({ a, b })
-	  )
-	};
-
-	const updated = await updateContactApi({
-	  contact: mapToBackendContact(ui),
-	  identity
-	});
-  
-	const finalUi = mapToFrontendContact(updated);
-	contactsStore.updateContact(finalUi);
-	return finalUi;
-  }

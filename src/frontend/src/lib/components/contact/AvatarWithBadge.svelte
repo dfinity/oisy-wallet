@@ -43,8 +43,8 @@
 	);
 
 	let imageUrl = $derived(
-		nonNullish(contact) && contact.image.length > 0 && contact.image[0]
-			? imageToDataUrl(contact.image[0]) 
+		nonNullish(contact) && nonNullish(contact.image)
+			? imageToDataUrl(contact.image) 
 			: null
 	);
 </script>

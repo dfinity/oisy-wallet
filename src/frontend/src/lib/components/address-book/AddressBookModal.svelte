@@ -199,13 +199,13 @@
 	let contacts = $derived($sortedContacts);
 
 	let currentAvatarUrl = $derived(
-		currentContact?.image?.[0] ? imageToDataUrl(currentContact.image[0]) : null
+		currentContact?.image ? imageToDataUrl(currentContact.image) : null
 	);
 
 	let contactsWithAvatars = $derived(
 		contacts.map((c: ContactUi) => ({
 			...c,
-			avatarUrl: c.image?.[0] ? imageToDataUrl(c.image[0]) : null
+			avatarUrl: c.image ? imageToDataUrl(c.image) : null
 		}))
 	);
 
