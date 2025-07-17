@@ -12,6 +12,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 
 	export let amount: OptionAmount;
 	export let exchangeRate: number | undefined;
@@ -25,7 +26,8 @@
 
 	let formattedUSDAmount: string | undefined;
 	$: formattedUSDAmount = formatCurrency({
-		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0
+		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
+		currency : $currentCurrency
 	});
 
 	let formattedTokenAmount: string | undefined;
