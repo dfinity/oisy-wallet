@@ -15,7 +15,7 @@
 	let {
 		initialSearch,
 		message
-	}: { initialSearch: string | undefined; message?: string | undefined } = $derived(
+	} = $derived(
 		nonNullish($modalManageTokensData)
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
