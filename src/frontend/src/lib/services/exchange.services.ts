@@ -2,7 +2,7 @@ import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { Currencies } from '$lib/enums/currencies';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
-import { currencyStore } from '$lib/stores/currency.store';
+import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
 	CoingeckoErc20PriceParams,
@@ -162,7 +162,7 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 		]);
 
 		if (nonNullish(data.currentExchangeRate)) {
-			currencyStore.setExchangeRate(data.currentExchangeRate);
+			currencyExchangeStore.setExchangeRate(data.currentExchangeRate);
 		}
 	}
 };
