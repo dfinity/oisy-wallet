@@ -32,7 +32,8 @@
 			"add": "Hinzufügen",
 			"more_items": "+$items mehr",
 			"select": "Auswählen",
-			"language": "Sprache"
+			"language": "Sprache",
+			"currency": ""
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!"
@@ -43,7 +44,8 @@
 			"back": "Zurück zur vorherigen Seite",
 			"open_details": "Details öffnen",
 			"close_details": "Details schließen",
-			"switch_language": "Sprache wechseln"
+			"switch_language": "Sprache wechseln",
+			"switch_currency": ""
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist"
