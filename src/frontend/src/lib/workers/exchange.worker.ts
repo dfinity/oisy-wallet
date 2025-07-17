@@ -114,14 +114,13 @@ const syncExchange = async ({
 		)
 	);
 
-	const currencyIsNotUsd = currentCurrency !== Currencies.USD;
-
 	try {
 		const erc20Prices = await Promise.all(
 			erc20PriceParams.map((params) => exchangeRateERC20ToUsd(params))
 		);
 
 		const [
+			currentExchangeRate,
 			currentEthPrice,
 			currentBtcPrice,
 			currentErc20Prices,
@@ -132,6 +131,7 @@ const syncExchange = async ({
 			currentBnbPrice,
 			currentPolPrice
 		] = await Promise.all([
+			exchangeRateUsdToCurrency(currentCurrency),
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
 			erc20Prices.reduce((acc, prices) => ({ ...acc, ...prices }), {}),
@@ -143,14 +143,10 @@ const syncExchange = async ({
 			exchangeRatePOLToUsd()
 		]);
 
-		const currentExchangeRate = currencyIsNotUsd
-			? await exchangeRateUsdToCurrency(currentCurrency)
-			: undefined;
-
 		postMessage({
 			msg: 'syncExchange',
 			data: {
-				...(currencyIsNotUsd ? { currentExchangeRate } : {}),
+				currentExchangeRate,
 				currentEthPrice,
 				currentBtcPrice,
 				currentErc20Prices,
