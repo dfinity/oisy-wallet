@@ -1120,7 +1120,7 @@
 		},
 		"type": {
 			"send": "Invio",
-			"receive": "Ricezione",
+			"receive": "Ricevi",
 			"withdraw": "Prelievo",
 			"deposit": "Deposito",
 			"approve": "Approvazione",

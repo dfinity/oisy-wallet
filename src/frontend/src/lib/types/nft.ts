@@ -1,9 +1,11 @@
-import type { NftIdSchema, NftMetadataSchema, NftSchema } from '$lib/schema/nft.schema';
+import type { NftIdSchema, NftAttributeSchema, NftMetadataSchema, NftSchema } from '$lib/schema/nft.schema';
 import type { Network } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import type * as z from 'zod';
 
 export type NftId = z.infer<typeof NftIdSchema>;
+
+export type NftAttributes = z.infer<typeof NftAttributeSchema>;
 
 export type NftMetadata = z.infer<typeof NftMetadataSchema>;
 
