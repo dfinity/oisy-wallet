@@ -1,4 +1,5 @@
 import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { Currencies } from '$lib/enums/currencies';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -20,7 +21,7 @@ const fetchIcrcPricesFromCoingecko = (
 ): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({
 		id: 'internet-computer',
-		vs_currencies: 'usd',
+		vs_currencies: Currencies.USD,
 		contract_addresses: ledgerCanisterIds,
 		include_market_cap: true
 	});
@@ -33,40 +34,62 @@ const fetchIcrcPricesFromKongSwap = async (
 	return formatKongSwapToCoingeckoPrices(tokens);
 };
 
+// To calculate an FX rate for a currency vs USD, we cross-reference a very liquid asset (BTC) with the currency and with the USD.
+// In this way, we can easily calculate the cross USDXXX rate as BTCUSD / BTCXXX.
+// We will use it to convert the USD amounts to the currency amounts in the frontend.
+// Until we find a proper IC solution (like the exchange canister, for example), we use this workaround.
+export const exchangeRateUsdToCurrency = async (
+	currency: Currencies
+): Promise<number | undefined> => {
+	if (currency === Currencies.USD) {
+		return 1;
+	}
+
+	const prices = await simplePrice({
+		ids: 'bitcoin',
+		vs_currencies: `${Currencies.USD},${currency}`
+	});
+
+	const btcToUsd = prices?.bitcoin?.usd;
+	const btcToCurrency = prices?.bitcoin?.[currency];
+
+	return nonNullish(btcToUsd) && nonNullish(btcToCurrency) ? btcToUsd / btcToCurrency : undefined;
+};
+
 export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'ethereum',
-		vs_currencies: 'usd'
+		vs_currencies: Currencies.USD
 	});
 
 export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'bitcoin',
-		vs_currencies: 'usd'
+		vs_currencies: Currencies.USD
 	});
 
 export const exchangeRateICPToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'internet-computer',
-		vs_currencies: 'usd'
+		vs_currencies: Currencies.USD
 	});
 
 export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'solana',
-		vs_currencies: 'usd'
+		vs_currencies: Currencies.USD
 	});
 
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'binancecoin',
-		vs_currencies: 'usd'
+		vs_currencies: Currencies.USD
 	});
 
 export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'polygon-ecosystem-token',
-		vs_currencies: 'usd'
+		vs_currencies: Currencies.USD
 	});
 
 export const exchangeRateERC20ToUsd = async ({
@@ -79,7 +102,7 @@ export const exchangeRateERC20ToUsd = async ({
 
 	return await simpleTokenPrice({
 		id,
-		vs_currencies: 'usd',
+		vs_currencies: Currencies.USD,
 		contract_addresses: contractAddresses.map(({ address }) => address),
 		include_market_cap: true
 	});
@@ -117,7 +140,7 @@ export const exchangeRateSPLToUsd = async (
 
 	return await simpleTokenPrice({
 		id: 'solana',
-		vs_currencies: 'usd',
+		vs_currencies: Currencies.USD,
 		contract_addresses: tokenAddresses,
 		include_market_cap: true
 	});
