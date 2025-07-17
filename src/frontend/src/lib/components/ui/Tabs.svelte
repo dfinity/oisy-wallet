@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { NonEmptyArray } from '$lib/types/utils';
 	import type { TabVariant } from '$lib/types/style';
+	import type { NonEmptyArray } from '$lib/types/utils';
 
 	interface Props {
 		tabs: NonEmptyArray<{ label: string; id: string }>;
@@ -11,7 +11,13 @@
 		tabVariant?: TabVariant;
 	}
 
-	let { children, activeTab = $bindable(), tabs, styleClass, tabVariant = 'default' }: Props = $props();
+	let {
+		children,
+		activeTab = $bindable(),
+		tabs,
+		styleClass,
+		tabVariant = 'default'
+	}: Props = $props();
 </script>
 
 <div class={`flex items-center ${styleClass ?? ''}`}>
