@@ -52,7 +52,7 @@ describe('EditContactStep', () => {
 			}
 		],
 		updateTimestampNs: BigInt(Date.now()),
-		image: []
+		image: undefined
 	};
 
 	const mockClose = vi.fn();

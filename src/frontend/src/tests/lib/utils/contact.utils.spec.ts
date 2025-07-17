@@ -87,7 +87,7 @@ describe('contact.utils', () => {
 					addressType: 'Eth'
 				}
 			],
-			image: []
+			image: undefined
 		};
 
 		it('should map backend contact to frontend contact', () => {
@@ -325,7 +325,7 @@ describe('contact.utils', () => {
 			id: BigInt(1),
 			updateTimestampNs: 123456789n,
 			addresses: mockAddresses,
-			image: []
+			image: undefined
 		};
 
 		it('should return undefined if contact is nullish', () => {
