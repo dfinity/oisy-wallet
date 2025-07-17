@@ -162,7 +162,9 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 		]);
 
 		if (nonNullish(data.currentExchangeRate)) {
-			currencyExchangeStore.setExchangeRate(data.currentExchangeRate);
+			// We set the reference currency for the exchange rate to avoid possible race condition where the user changes the current currency while the value is being uploaded, leading to inconsistent data in the UI.
+			currencyExchangeStore.setExchangeRateCurrency(data.currentExchangeRate.currency);
+			currencyExchangeStore.setExchangeRate(data.currentExchangeRate.exchangeRateToUsd);
 		}
 	}
 };

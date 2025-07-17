@@ -408,7 +408,10 @@ describe('post-message.schema', () => {
 
 		it('should validate with all valid price fields', () => {
 			const validData = {
-				currentExchangeRate: 1.5,
+				currentExchangeRate: {
+					exchangeRateToUsd: 1.5,
+					currency: Currencies.EUR
+				},
 				currentEthPrice: mockValidPrice,
 				currentBtcPrice: mockValidPrice,
 				currentErc20Prices: mockValidPrice,

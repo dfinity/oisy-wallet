@@ -15,7 +15,11 @@ import {
 	exchangeRateUsdToCurrency
 } from '$lib/services/exchange.services';
 import type { CoingeckoErc20PriceParams, CoingeckoPlatformId } from '$lib/types/coingecko';
-import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataRequestExchangeTimer,
+	PostMessageDataResponseExchange
+} from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -146,7 +150,10 @@ const syncExchange = async ({
 		postMessage({
 			msg: 'syncExchange',
 			data: {
-				currentExchangeRate,
+				currentExchangeRate: {
+					exchangeRateToUsd: currentExchangeRate,
+					currency: currentCurrency
+				},
 				currentEthPrice,
 				currentBtcPrice,
 				currentErc20Prices,
@@ -157,7 +164,7 @@ const syncExchange = async ({
 				currentBnbPrice,
 				currentPolPrice
 			}
-		});
+		} as PostMessage<PostMessageDataResponseExchange>);
 	} catch (err: unknown) {
 		console.error('Unexpected error while fetching symbol average price:', err);
 		stopTimer();

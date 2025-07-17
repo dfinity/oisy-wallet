@@ -81,7 +81,7 @@ describe('worker.exchange.services', () => {
 		describe('onmessage', () => {
 			it('should handle syncExchange message', () => {
 				const mockData: PostMessageDataResponseExchange = {
-					currentExchangeRate: 1.5,
+					currentExchangeRate: { exchangeRateToUsd: 1.5, currency: Currencies.EUR },
 					currentEthPrice: { ethereum: { usd: 1 } },
 					currentBtcPrice: { bitcoin: { usd: 50000 } },
 					currentErc20Prices: {},

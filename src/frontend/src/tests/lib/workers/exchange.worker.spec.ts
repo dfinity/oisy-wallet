@@ -139,7 +139,10 @@ describe('exchange.worker', () => {
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: 'syncExchange',
 					data: {
-						currentExchangeRate: 1,
+						currentExchangeRate: {
+							exchangeRateToUsd: 1,
+							currency: Currencies.USD
+						},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentBtcPrice: { bitcoin: { usd: 1 } },
 						currentErc20Prices: {},
@@ -435,7 +438,10 @@ describe('exchange.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 						msg: 'syncExchange',
 						data: {
-							currentExchangeRate: 1,
+							currentExchangeRate: {
+								exchangeRateToUsd: 1,
+								currency: Currencies.USD
+							},
 							currentBnbPrice: { binancecoin: { usd: 1 } },
 							currentBtcPrice: { bitcoin: { usd: 1 } },
 							currentErc20Prices: {
@@ -487,7 +493,10 @@ describe('exchange.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 						msg: 'syncExchange',
 						data: {
-							currentExchangeRate: 1 / 3,
+							currentExchangeRate: {
+								exchangeRateToUsd: 1 / 3,
+								currency: Currencies.JPY
+							},
 							currentBnbPrice: { binancecoin: { usd: 1 } },
 							currentBtcPrice: { bitcoin: { usd: 1 } },
 							currentErc20Prices: {
