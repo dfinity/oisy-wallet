@@ -38,5 +38,5 @@ export const crossChainSwapNetworksMainnets: Readable<Network[]> = derived(
 
 export const crossChainSwapNetworksMainnetsIds: Readable<NetworkId[]> = derived(
 	[crossChainSwapNetwoksEnvs],
-	([{ mainnets }]) => mainnets.map((mainnet) => mainnet.id)
+	([{ mainnets }]) => mainnets.map(({id}) => id)
 );
