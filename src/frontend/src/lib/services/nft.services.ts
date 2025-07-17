@@ -25,6 +25,8 @@ const loadNftsOfToken = async ({
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
 }) => {
+	// TODO get walletAddress and already loaded TokenIds as param from Loader component
+
 	const walletAddress = get(ethAddressStore)?.data; // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
 	if (isNullish(walletAddress)) {
 		return;
