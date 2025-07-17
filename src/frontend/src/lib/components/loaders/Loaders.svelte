@@ -13,6 +13,8 @@
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
+	import Balance from '$lib/components/hero/Balance.svelte';
+	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
 </script>
 
 <LoaderUserProfile>
@@ -28,7 +30,9 @@
 										<UserSnapshotWorker>
 											<LoaderContacts>
 												<TransactionsIdbSetter>
+													<BalancesIdbSetter >
 													<slot />
+													</BalancesIdbSetter>
 												</TransactionsIdbSetter>
 											</LoaderContacts>
 										</UserSnapshotWorker>
