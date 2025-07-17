@@ -87,7 +87,6 @@ describe('contact.utils', () => {
 					addressType: 'Eth'
 				}
 			],
-			image: undefined
 		};
 
 		it('should map backend contact to frontend contact', () => {
