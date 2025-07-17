@@ -2,7 +2,7 @@
 	interface Props {
 		size?: string;
 	}
-	const { size = '24' }: Props = $props();
+	const { size = '20' }: Props = $props();
 </script>
 
 <svg width={size} height={size} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

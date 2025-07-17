@@ -6,10 +6,10 @@
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import type { Currencies } from '$lib/enums/currencies';
 	import {
-		CURRENCY_SWITCHER_BUTTON, CURRENCY_SWITCHER_DROPDOWN, CURRENCY_SWITCHER_DROPDOWN_BUTTON
+		CURRENCY_SWITCHER_BUTTON,
+		CURRENCY_SWITCHER_DROPDOWN,
+		CURRENCY_SWITCHER_DROPDOWN_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
