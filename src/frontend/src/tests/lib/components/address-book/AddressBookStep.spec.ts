@@ -303,8 +303,7 @@ describe('AddressBookStep', () => {
 				addresses: [
 					{
 						address: 'F5Zrs17FG5R8rcTmujgVknGqTgGB6HMkNPtt43bw4RhJ',
-						addressType: 'Sol' as const,
-						label: 'Sol Address'
+						addressType: 'Sol' as const
 					}
 				],
 				updateTimestampNs: BigInt(Date.now())
