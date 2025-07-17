@@ -1,9 +1,7 @@
 import type { ContactImage, ImageMimeType } from '$declarations/backend/backend.did';
 import type { ContactUi } from '$lib/types/contact';
 
-export interface SaveContactParams extends Omit<ContactUi, 'image'> {
-	image?: ContactImage;
-}
+export interface SaveContactParams extends ContactUi  {}
 
 const parseDataUrl = (dataUrl: string): { mime: string; data: Uint8Array } => {
 	const [header, b64] = dataUrl.split(',');
