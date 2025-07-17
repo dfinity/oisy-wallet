@@ -90,6 +90,7 @@
 		"@walletconnect/auth-client": "^2.1.2",
 		"alchemy-sdk": "3.6.1",
 		"bitcoinjs-lib": "^6.1.7",
+		"browser-image-compression": "^2.0.2",
 		"buffer": "^6.0.3",
 		"decimal.js": "^10.6.0",
 		"ethers": "^6.15.0",
