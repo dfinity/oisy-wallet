@@ -23,14 +23,6 @@ describe('nftStore', () => {
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2]);
 		});
 
-		it('should not add duplicate NFTs to store', () => {
-			const duplicateNft = { ...mockValidNft };
-
-			nftStore.addAll([mockValidNft, duplicateNft]);
-
-			expect(get(nftStore)).toEqual([mockValidNft]);
-		});
-
 		it('should not add already existing NFTs to store', () => {
 			const duplicateNft = { ...mockValidNft };
 

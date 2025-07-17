@@ -1,5 +1,6 @@
 import type { Nft } from '$lib/types/nft';
-import { get, writable, type Readable } from 'svelte/store';
+import { isNullish } from '@dfinity/utils';
+import { writable, type Readable } from 'svelte/store';
 
 export type NftStoreData = Nft[] | undefined;
 
@@ -15,23 +16,12 @@ const initNftStore = (): NftStore => {
 	return {
 		subscribe,
 		addAll: (nfts: Nft[]) => {
-			const uniqueNfts = nfts.reduce<Nft[]>((acc, current) => {
-				if (
-					!acc.some(
-						(nft) => nft.id === current.id && nft.contract.address === current.contract.address
-					)
-				) {
-					acc.push(current);
-				}
-				return acc;
-			}, []);
-
 			update((currentNfts) => {
-				if (!currentNfts) {
-					return uniqueNfts;
+				if (isNullish(currentNfts)) {
+					return nfts;
 				}
 
-				const newNfts = uniqueNfts.filter(
+				const newNfts = nfts.filter(
 					(newNft) =>
 						!currentNfts.some(
 							(existingNft) =>
@@ -43,16 +33,23 @@ const initNftStore = (): NftStore => {
 				return [...currentNfts, ...newNfts];
 			});
 		},
-		getTokenIds: (contractAddress: string) => {
-			const currentNfts = get(nftStore);
+		getTokenIds: (contractAddress: string): number[] => {
+			let tokenIds: number[] = [];
 
-			if (!currentNfts) {
-				return [];
-			}
+			update((nfts) => {
+				if (isNullish(nfts)) {
+					tokenIds = [];
+					return nfts;
+				}
 
-			return currentNfts
-				.filter((nft) => nft.contract.address.toLowerCase() === contractAddress.toLowerCase())
-				.map((nft) => nft.id);
+				tokenIds = nfts
+					.filter((nft) => nft.contract.address.toLowerCase() === contractAddress.toLowerCase())
+					.map((nft) => nft.id);
+
+				return nfts;
+			});
+
+			return tokenIds;
 		},
 		resetAll: () => set(undefined)
 	};
