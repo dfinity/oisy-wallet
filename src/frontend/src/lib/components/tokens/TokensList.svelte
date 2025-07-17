@@ -90,15 +90,6 @@
 		untrack(() => debouncedFilterList({ filter, selectedNetwork: network })); // we untrack the function so it only updates the list on filter change
 	});
 
-	let {
-		initialSearch,
-		message
-	}: { initialSearch: string | undefined; message?: string | undefined } = $derived(
-		nonNullish($modalManageTokensData)
-			? $modalManageTokensData
-			: { initialSearch: undefined, message: undefined }
-	);
-
 	let saveLoading = $state(false);
 
 	const onSave = async () => {
@@ -206,18 +197,6 @@
 					</div>
 				{/each}
 			</div>
-		{/if}
-
-		{#if $modalManageTokens}
-			<ManageTokensModal {initialSearch}>
-				{#snippet infoElement()}
-					{#if nonNullish(message)}
-						<MessageBox level="info">
-							{message}
-						</MessageBox>
-					{/if}
-				{/snippet}
-			</ManageTokensModal>
 		{/if}
 	</TokensSkeletons>
 </TokensDisplayHandler>

@@ -7,6 +7,19 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+
+	let {
+		initialSearch,
+		message
+	}: { initialSearch: string | undefined; message?: string | undefined } = $derived(
+		nonNullish($modalManageTokensData)
+			? $modalManageTokensData
+			: { initialSearch: undefined, message: undefined }
+	);
 </script>
 
 <div>
@@ -31,3 +44,15 @@
 		<ManageTokensButton />
 	</div>
 </div>
+
+{#if $modalManageTokens}
+	<ManageTokensModal {initialSearch}>
+		{#snippet infoElement()}
+			{#if nonNullish(message)}
+				<MessageBox level="info">
+					{message}
+				</MessageBox>
+			{/if}
+		{/snippet}
+	</ManageTokensModal>
+{/if}
