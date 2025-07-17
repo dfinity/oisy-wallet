@@ -14,6 +14,7 @@ import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
+import { NFLXX_TOKEN } from '$env/tokens/tokens-spl/tokens.nflxx.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
@@ -47,6 +48,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	MCDX_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
+	NFLXX_TOKEN,
 	NVDAX_TOKEN,
 	ORCA_TOKEN,
 	POPCAT_TOKEN,
