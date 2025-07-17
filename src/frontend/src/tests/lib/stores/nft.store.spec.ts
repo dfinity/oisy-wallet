@@ -1,9 +1,9 @@
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft } from '$lib/types/nft';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
 import { mockValidNft } from '$tests/mocks/nfts.mock';
 import { get } from 'svelte/store';
-import { parseNftId } from '$lib/validation/nft.validation';
 
 describe('nftStore', () => {
 	beforeEach(() => {
