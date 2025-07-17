@@ -13,7 +13,10 @@ export class AlreadyClaimedError extends Error {}
 export class InvalidCampaignError extends Error {}
 
 export class NftError extends Error {
-	constructor(private readonly _tokenUri: number, private readonly _contractAddress: string) {
+	constructor(
+		private readonly _tokenUri: number,
+		private readonly _contractAddress: string
+	) {
 		super();
 	}
 

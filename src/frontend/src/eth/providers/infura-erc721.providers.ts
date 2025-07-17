@@ -4,17 +4,16 @@ import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
+import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
 import type { NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { UrlSchema } from '$lib/validation/url.validation';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
-import { safeParse } from '$lib/validation/utils.validation';
-import { UrlSchema } from '$lib/validation/url.validation';
-import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
 
 const ERC721_INTERFACE_ID = '0x80ac58cd';
 
@@ -81,7 +80,7 @@ export class InfuraErc721Provider {
 
 		const parsedMetadataUrl = UrlSchema.safeParse(metadata.image);
 		if (!parsedMetadataUrl.success) {
-			throw new InvalidMetadataImageUrl(tokenId, contractAddress)
+			throw new InvalidMetadataImageUrl(tokenId, contractAddress);
 		}
 
 		const imageUrl = resolveResourceUrl(new URL(parsedMetadataUrl.data));
