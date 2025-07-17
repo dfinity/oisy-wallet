@@ -3,6 +3,7 @@ import type { Nft } from '$lib/types/nft';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
 import { mockValidNft } from '$tests/mocks/nfts.mock';
 import { get } from 'svelte/store';
+import { parseNftId } from '$lib/validation/nft.validation';
 
 describe('nftStore', () => {
 	beforeEach(() => {
@@ -16,7 +17,7 @@ describe('nftStore', () => {
 	describe('addAll', () => {
 		it('should add NFTs to store', () => {
 			const mockNft1 = mockValidNft;
-			const mockNft2 = { ...mockValidNft, id: 837364 };
+			const mockNft2 = { ...mockValidNft, id: parseNftId(837364) };
 
 			nftStore.addAll([mockNft1, mockNft2]);
 
@@ -49,7 +50,7 @@ describe('nftStore', () => {
 
 	describe('getTokenIds', () => {
 		const mockNft1 = mockValidNft;
-		const mockNft2 = { ...mockValidNft, id: 837364 };
+		const mockNft2 = { ...mockValidNft, id: parseNftId(837364) };
 
 		beforeEach(() => {
 			nftStore.addAll([mockNft1, mockNft2]);
