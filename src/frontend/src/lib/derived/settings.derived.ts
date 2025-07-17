@@ -3,7 +3,7 @@ import { derived, type Readable } from 'svelte/store';
 
 export const hideZeroBalances: Readable<boolean> = derived(
 	[hideZeroBalancesStore],
-	([$hideZeroBalancesStore]) => $hideZeroBalancesStore?.enabled ?? false
+	([$hideZeroBalancesStore]) => $hideZeroBalancesStore.enabled
 );
 
 export const showZeroBalances: Readable<boolean> = derived(
@@ -13,5 +13,5 @@ export const showZeroBalances: Readable<boolean> = derived(
 
 export const isPrivacyMode: Readable<boolean> = derived(
 	[privacyModeStore],
-	([$privacyModeStore]) => $privacyModeStore?.enabled ?? false
+	([$privacyModeStore]) => $privacyModeStore.enabled
 );
