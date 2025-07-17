@@ -11,6 +11,8 @@ export interface CurrencyExchangeStore extends Readable<CurrencyExchangeData> {
 	setExchangeRate: (exchangeRate: CurrencyExchangeData['exchangeRateToUsd']) => void;
 }
 
+// Since the currencyStore is a type of storage store, we cannot use it in the workers (no browser API support), especially in the one that updates the exchange rate of the current currency.
+// So we split the currency store into two separate stores: one for the currency and another for the exchange rate.
 export const initCurrencyExchangeStore = (): CurrencyExchangeStore => {
 	const DEFAULT: CurrencyExchangeData = {
 		currency: Currencies.USD,
