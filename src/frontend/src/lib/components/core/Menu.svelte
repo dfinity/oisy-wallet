@@ -9,6 +9,7 @@
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
+	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
@@ -49,7 +50,6 @@
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
-	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();

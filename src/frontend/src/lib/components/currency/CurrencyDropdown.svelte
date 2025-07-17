@@ -1,16 +1,16 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { SUPPORTED_CURRENCIES } from '$env/currency.env';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { CURRENCY_DROPDOWN } from '$lib/constants/test-ids.constants';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { SUPPORTED_CURRENCIES } from '$env/currency.env';
-	import type { Currencies } from '$lib/enums/currencies';
-	import { getCurrencyName, getCurrencySymbol } from '$lib/utils/currency.utils';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { nonNullish } from '@dfinity/utils';
+	import type { Currencies } from '$lib/enums/currencies';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { getCurrencyName, getCurrencySymbol } from '$lib/utils/currency.utils';
 
 	let dropdown = $state<Dropdown>();
 
@@ -30,9 +30,8 @@
 		buttonFullWidth
 		buttonBorder
 	>
-		<!--{currentCurrency}-->
-		{'ciao'}
-
+		<!-- {currentCurrency} -->
+		ciao
 
 		{#snippet title()}
 			{$i18n.core.alt.switch_currency}
@@ -41,9 +40,9 @@
 		{#snippet items()}
 			<List noPadding condensed testId={CURRENCY_DROPDOWN}>
 				{#each SUPPORTED_CURRENCIES as [currencyKey, currencyVal], index (index + currencyKey)}
-					{@const name = getCurrencyName({currency: currencyVal, language: $currentLanguage})}
-					{@const symbol =  getCurrencySymbol({currency: currencyVal, language: $currentLanguage})}
-					{@const symbolString = `${nonNullish(symbol) && symbol?.toLowerCase() !==currencyVal ? `${symbol} - ` : ''}${currencyVal.toUpperCase()}`}
+					{@const name = getCurrencyName({ currency: currencyVal, language: $currentLanguage })}
+					{@const symbol = getCurrencySymbol({ currency: currencyVal, language: $currentLanguage })}
+					{@const symbolString = `${nonNullish(symbol) && symbol?.toLowerCase() !== currencyVal ? `${symbol} - ` : ''}${currencyVal.toUpperCase()}`}
 					<ListItem>
 						<Button
 							onclick={() => handleCurrencyChange(currencyVal)}
@@ -55,9 +54,9 @@
 							transparent
 						>
 							<span class="pt-0.75 w-[20px] text-brand-primary">
-								<!--{#if $currentCurrency === currencyVal}-->
-								<!--	<IconCheck size="20" />-->
-								<!--{/if}-->
+								<!-- {#if $currentCurrency === currencyVal} -->
+								<!--	<IconCheck size="20" /> -->
+								<!-- {/if} -->
 							</span>
 							{name}
 							{symbolString}
