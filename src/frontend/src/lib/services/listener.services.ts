@@ -7,6 +7,35 @@ import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
+const syncTransactionsFromCache = async <
+	T extends BtcTransactionUi | IcTransactionUi | SolTransactionUi
+>({
+	tokenId,
+	getIdbTransactions,
+	transactionsStore,
+	...params
+}: GetIdbTransactionsParams & {
+	getIdbTransactions: (params: GetIdbTransactionsParams) => Promise<T[] | undefined>;
+	transactionsStore: TransactionsStore<T>;
+}) => {
+	const transactions = await getIdbTransactions({
+		...params,
+		tokenId
+	});
+
+	if (isNullish(transactions)) {
+		return;
+	}
+
+	transactionsStore.append({
+		tokenId,
+		transactions: transactions.map((transaction) => ({
+			data: transaction,
+			certified: false
+		}))
+	});
+};
+
 export const syncWalletFromIdbCache = async <
 	T extends BtcTransactionUi | IcTransactionUi | SolTransactionUi
 >({
@@ -26,21 +55,13 @@ export const syncWalletFromIdbCache = async <
 		return;
 	}
 
-	const transactions = await getIdbTransactions({
-		...params,
-		tokenId,
-		principal: identity.getPrincipal()
-	});
+	const principal = identity.getPrincipal();
 
-	if (isNullish(transactions)) {
-		return;
-	}
-
-	transactionsStore.append({
+	await syncTransactionsFromCache<T>({
 		tokenId,
-		transactions: transactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}))
+		getIdbTransactions,
+		transactionsStore,
+		principal,
+		...params
 	});
 };
