@@ -11,11 +11,11 @@ export const getLoadedNftsByTokens = ({
 }): NftsByNetwork => {
 	const nftsByToken: NftsByNetwork = {};
 
-	tokens.forEach(({ address, network: { id } }) => {
-		if (isNullish(nftsByToken[id])) {
-			nftsByToken[id] = {};
+	tokens.forEach(({ address, network: { id: networkId } }) => {
+		if (isNullish(nftsByToken[networkId])) {
+			nftsByToken[networkId] = {};
 		}
-		nftsByToken[id][address.toLowerCase()] = [];
+		nftsByToken[networkId][address.toLowerCase()] = [];
 	});
 
 	loadedNfts.forEach((nft) => {
