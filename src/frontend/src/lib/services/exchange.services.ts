@@ -2,6 +2,7 @@ import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
+import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
 	CoingeckoErc20PriceParams,
@@ -146,15 +147,24 @@ export const exchangeRateSPLToUsd = async (
 	});
 };
 
-export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
-	exchangeStore.set([
-		...(nonNullish(data) ? [data.currentEthPrice] : []),
-		...(nonNullish(data) ? [data.currentBtcPrice] : []),
-		...(nonNullish(data) ? [data.currentIcpPrice] : []),
-		...(nonNullish(data) ? [data.currentSolPrice] : []),
-		...(nonNullish(data) ? [data.currentBnbPrice] : []),
-		...(nonNullish(data) ? [data.currentPolPrice] : []),
-		...(nonNullish(data) ? [data.currentErc20Prices] : []),
-		...(nonNullish(data) ? [data.currentIcrcPrices] : []),
-		...(nonNullish(data) ? [data.currentSplPrices] : [])
-	]);
+export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
+	if (nonNullish(data)) {
+		exchangeStore.set([
+			data.currentEthPrice,
+			data.currentBtcPrice,
+			data.currentIcpPrice,
+			data.currentSolPrice,
+			data.currentBnbPrice,
+			data.currentPolPrice,
+			data.currentErc20Prices,
+			data.currentIcrcPrices,
+			data.currentSplPrices
+		]);
+
+		if (nonNullish(data.currentExchangeRate)) {
+			// We set the reference currency for the exchange rate to avoid possible race condition where the user changes the current currency while the value is being uploaded, leading to inconsistent data in the UI.
+			currencyExchangeStore.setExchangeRateCurrency(data.currentExchangeRate.currency);
+			currencyExchangeStore.setExchangeRate(data.currentExchangeRate.exchangeRateToUsd);
+		}
+	}
+};
