@@ -4,6 +4,7 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
+import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
 import type { OptionIdentity } from './identity';
 import type { Amount, OptionAmount } from './send';
 
@@ -13,7 +14,13 @@ export type DisplayUnit = 'token' | 'usd';
 
 export enum SwapProvider {
 	ICP_SWAP = 'icpSwap',
-	KONG_SWAP = 'kongSwap'
+	KONG_SWAP = 'kongSwap',
+	VELORA = 'velora'
+}
+
+export enum VeloraSwapTypes {
+	DELTA = 'delta',
+	MARKET = 'market'
 }
 export interface ProviderFee {
 	fee: bigint;
@@ -41,6 +48,7 @@ export type SwapMappedResult =
 			receiveAmount: bigint;
 			receiveOutMinimum: bigint;
 			swapDetails: ICPSwapResult;
+			type?: string;
 	  }
 	| {
 			provider: SwapProvider.KONG_SWAP;
@@ -50,6 +58,14 @@ export type SwapMappedResult =
 			liquidityFees: ProviderFee[];
 			networkFee?: ProviderFee;
 			swapDetails: SwapAmountsReply;
+			type?: string;
+	  }
+	| {
+			provider: SwapProvider.VELORA;
+			receiveAmount: bigint;
+			receiveOutMinimum?: bigint;
+			swapDetails: VeloraSwapDetails;
+			type: string;
 	  };
 
 export interface KongQuoteResult {
@@ -108,3 +124,5 @@ export interface FormatSlippageParams {
 	receiveAmount: bigint;
 	decimals: number;
 }
+
+export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
