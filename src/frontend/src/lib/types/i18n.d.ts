@@ -36,6 +36,7 @@ interface I18nCore {
 		more_items: string;
 		select: string;
 		language: string;
+		currency: string;
 	};
 	info: { test_banner: string };
 	alt: {
@@ -45,6 +46,7 @@ interface I18nCore {
 		open_details: string;
 		close_details: string;
 		switch_language: string;
+		switch_currency: string;
 	};
 	warning: { do_not_close: string };
 }
@@ -390,6 +392,7 @@ interface I18nHero {
 		learn_more_about_erc20_icp: string;
 		tooltip_toggle_balance: string;
 	};
+	alt: { toggle_privacy_mode: string };
 }
 
 interface I18nSettings {
@@ -681,6 +684,8 @@ interface I18nSwap {
 		select: string;
 		select_swap_provider: string;
 		open_icp_swap: string;
+		select_token: string;
+		select_network_filter: string;
 	};
 	error: {
 		kong_not_available: string;

@@ -13,14 +13,12 @@
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let activeTab = $state('tokens');
+	let activeTab = $state(TokenTypes.TOKENS);
 
-	let {
-		initialSearch,
-		message
-	}: { initialSearch: string | undefined; message?: string | undefined } = $derived(
+	let { initialSearch, message } = $derived(
 		nonNullish($modalManageTokensData)
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
@@ -37,8 +35,8 @@
 							<Tabs
 								bind:activeTab
 								tabs={[
-									{ label: $i18n.tokens.text.title, id: 'tokens' },
-									{ label: $i18n.nfts.text.title, id: 'nfts' }
+									{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS },
+									{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS }
 								]}
 								tabVariant="menu"
 							/>
@@ -54,7 +52,7 @@
 		</div>
 	</StickyHeader>
 
-	{#if activeTab === 'tokens'}
+	{#if activeTab === TokenTypes.TOKENS}
 		<TokensList />
 	{:else}
 		<NftsList />
