@@ -1,8 +1,8 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import type { Nft } from '$lib/types/nft';
-import { getLoadedNftsByTokens, type NftsByNetwork } from '$lib/utils/nfts.utils';
+import type { Nft, NftsByNetwork } from '$lib/types/nft';
+import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';

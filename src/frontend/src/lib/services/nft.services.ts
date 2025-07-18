@@ -6,8 +6,7 @@ import {
 } from '$eth/providers/infura-erc721.providers';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
-import type { Nft, NftId, NftMetadata } from '$lib/types/nft';
-import type { NftsByNetwork } from '$lib/utils/nfts.utils';
+import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { nonNullish } from '@dfinity/utils';
 
