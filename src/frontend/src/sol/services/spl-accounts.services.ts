@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import { checkIfAccountExists, loadTokenBalance } from '$sol/api/solana.api';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolInstruction } from '$sol/types/sol-instructions';
@@ -51,17 +52,19 @@ export const createAtaInstruction = async ({
  * Fetches the SPL token balance for a wallet.
  */
 export const loadSplTokenBalance = async ({
+	identity,
 	address,
 	network,
 	tokenAddress,
 	tokenOwnerAddress
 }: {
+	identity: OptionIdentity;
 	address: SolAddress;
 	network: SolanaNetworkType;
 	tokenAddress: SplTokenAddress;
 	tokenOwnerAddress: SolAddress;
 }): Promise<bigint> => {
-	const isAta = await isAtaAddress({ address, network });
+	const isAta = await isAtaAddress({ identity, address, network });
 
 	const ataAddress: SolAddress = isAta
 		? address
@@ -71,7 +74,7 @@ export const loadSplTokenBalance = async ({
 				tokenOwnerAddress
 			});
 
-	const accountExists = await checkIfAccountExists({ address: ataAddress, network });
+	const accountExists = await checkIfAccountExists({ identity, address: ataAddress, network });
 
 	if (!accountExists) {
 		return 0n;
