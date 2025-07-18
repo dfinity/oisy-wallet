@@ -47,11 +47,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { NftsByNetwork } from '$lib/types/nft';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
@@ -160,13 +158,9 @@
 	const debounceLoadNfts = debounce(() => {
 		if (nonNullish($ethAddressStore?.data)) {
 			const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
+			const loadedNfts = $nftStore ?? [];
 
-			const loadedNftsByNetwork: NftsByNetwork = getLoadedNftsByTokens({
-				tokens: tokensList,
-				loadedNfts: $nftStore ?? []
-			});
-
-			loadNfts({ tokens: tokensList, loadedNftsByNetwork, walletAddress: $ethAddressStore.data }); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
+			loadNfts({ tokens: tokensList, loadedNfts, walletAddress: $ethAddressStore.data }); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
 		}
 	});
 

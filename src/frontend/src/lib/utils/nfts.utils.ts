@@ -2,7 +2,7 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export const getLoadedNftsByTokens = ({
+export const getLoadedNftsByNetworkAndToken = ({
 	tokens,
 	loadedNfts
 }: {

@@ -9,25 +9,28 @@ import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { nonNullish } from '@dfinity/utils';
+import { getLoadedNftsByNetworkAndToken } from '$lib/utils/nfts.utils';
 
 export const loadNfts = ({
 	tokens,
-	loadedNftsByNetwork,
+	loadedNfts,
 	walletAddress
 }: {
 	tokens: Erc721CustomToken[];
-	loadedNftsByNetwork: NftsByNetwork;
+	loadedNfts: Nft[];
 	walletAddress: string;
 }) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = infuraErc721Providers(ETHEREUM_NETWORK.id);
 
+	const loadedNftsByNetwork: NftsByNetwork = getLoadedNftsByNetworkAndToken({tokens, loadedNfts});
+
 	return Promise.all(
 		tokens.map((token) => {
 			let loadedNfts: Nft[] = [];
-			const nftsByNetwork = loadedNftsByNetwork[token.network.id];
-			if (nonNullish(nftsByNetwork)) {
-				loadedNfts = nftsByNetwork[token.address.toLowerCase()] ?? [];
+			const tokensByNetwork = loadedNftsByNetwork[token.network.id];
+			if (nonNullish(tokensByNetwork)) {
+				loadedNfts = tokensByNetwork[token.address.toLowerCase()] ?? [];
 			}
 
 			return loadNftsOfToken({
