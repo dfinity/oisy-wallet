@@ -1,6 +1,5 @@
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
-import { Currencies } from '$lib/enums/currencies';
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import {
