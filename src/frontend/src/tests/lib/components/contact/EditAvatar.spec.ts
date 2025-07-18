@@ -64,7 +64,7 @@ describe('EditAvatar', () => {
 			const { getByTestId, getByText } = render(EditAvatar, {
 				props: {
 					onReplaceImage: mockReplaceImage,
-					onRemoveImage: mockRemoveImage,
+					onRemoveImage: mockRemoveImage
 				}
 			});
 
