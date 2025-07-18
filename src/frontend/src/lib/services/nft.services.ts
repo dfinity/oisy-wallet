@@ -6,13 +6,21 @@ import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NftId, NftMetadata } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 
-export const loadNfts = ({ tokens, nftsByToken, walletAddress }:{ tokens: Erc721CustomToken[], nftsByToken: Map<string, Nft[]> , walletAddress: string }) => {
+export const loadNfts = ({
+	tokens,
+	nftsByToken,
+	walletAddress
+}: {
+	tokens: Erc721CustomToken[];
+	nftsByToken: Map<string, Nft[]>;
+	walletAddress: string;
+}) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura);
 
 	tokens.forEach((token) => {
 		const loadedNfts = nftsByToken.get(token.address.toLowerCase()) ?? [];
-		loadNftsOfToken({ etherscanProvider, infuraProvider, token, loadedNfts, walletAddress })
+		loadNftsOfToken({ etherscanProvider, infuraProvider, token, loadedNfts, walletAddress });
 	});
 };
 

@@ -43,20 +43,20 @@
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { initLoader } from '$lib/services/loader.services';
 	import { loadNfts } from '$lib/services/nft.services';
+	import { ethAddressStore } from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { ethAddressStore } from '$lib/stores/address.store';
-	import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
-	import { nftStore } from '$lib/stores/nft.store';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -160,9 +160,12 @@
 		if (nonNullish($ethAddressStore?.data)) {
 			const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
 
-			const nftsByToken = getLoadedNftsByTokens({tokens: tokensList, loadedNfts: $nftStore ?? []})
+			const nftsByToken = getLoadedNftsByTokens({
+				tokens: tokensList,
+				loadedNfts: $nftStore ?? []
+			});
 
-			loadNfts({tokens: tokensList, nftsByToken, walletAddress: $ethAddressStore.data}); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
+			loadNfts({ tokens: tokensList, nftsByToken, walletAddress: $ethAddressStore.data }); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
 		}
 	});
 
