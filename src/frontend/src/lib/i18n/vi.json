@@ -511,6 +511,9 @@
 			"top_up": "Nạp tiền vào ví của bạn để bắt đầu sử dụng!",
 			"learn_more_about_erc20_icp": "Tìm hiểu thêm về ERC20 ICP trên Ethereum.",
 			"tooltip_toggle_balance": "Nhấp đúp để ẩn/hiện số dư"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {
