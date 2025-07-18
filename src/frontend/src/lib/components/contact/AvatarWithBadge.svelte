@@ -42,14 +42,11 @@
 		nonNullish(address) ? mapAddressToContactAddressUi(address) : undefined
 	);
 
-	let imageUrl = $derived(
-		nonNullish(contact) && nonNullish(contact.image) ? imageToDataUrl(contact.image) : null
-	);
 </script>
 
 <div class="relative flex">
 	{#if nonNullish(contact)}
-		<Avatar name={contact.name} {variant} {imageUrl} />
+		<Avatar name={contact.name} {variant} image={contact.image} />
 
 		{#if nonNullish(badge)}
 			<AddressesBadge

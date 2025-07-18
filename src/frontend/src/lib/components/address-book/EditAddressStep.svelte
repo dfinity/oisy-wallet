@@ -41,7 +41,6 @@
 	}: Props = $props();
 
 	let editingAddress = $state(address ? { ...address } : {});
-	const imageUrl: string | null = nonNullish(contact.image) ? imageToDataUrl(contact.image) : null;
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
 	let modalDataAddress: string | undefined = $derived(
@@ -89,7 +88,7 @@
 
 <form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-		<Avatar variant="xl" name={contact.name} {imageUrl} />
+		<Avatar variant="xl" name={contact.name} image={contact.image} />
 
 		<div class="text-2xl font-bold text-primary md:text-3xl">
 			{contact.name}

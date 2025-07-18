@@ -18,20 +18,19 @@
 
 	interface Props {
 		contact: ContactUi;
-		imageUrl?: string | null;
 		onClose: () => void;
 		onAddAddress: () => void;
 		onShowAddress: (index: number) => void;
 		onEdit?: (contact: ContactUi) => void;
 	}
 
-	let { contact, imageUrl, onClose, onEdit, onAddAddress, onShowAddress }: Props = $props();
+	let { contact, onClose, onEdit, onAddAddress, onShowAddress }: Props = $props();
 
 	let hasAddresses = $derived(contact?.addresses && contact.addresses.length > 0);
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-5">
-	<ContactHeader name={contact.name} {imageUrl} onEdit={() => onEdit?.(contact)}></ContactHeader>
+	<ContactHeader name={contact.name} image={contact.image} onEdit={() => onEdit?.(contact)}></ContactHeader>
 
 	{#if hasAddresses}
 		<div class="flex flex-col gap-1">
