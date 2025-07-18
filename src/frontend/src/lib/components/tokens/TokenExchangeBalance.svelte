@@ -4,6 +4,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenFinancialData } from '$lib/types/token';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
 	export let balance: TokenFinancialData['balance'];
@@ -16,7 +17,8 @@
 		{formatCurrency({
 			value: usdBalance,
 			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
 		})}
 	{:else if isNullish(balance) || isNullish(usdBalance)}
 		<span class="animate-pulse">{nullishBalanceMessage ?? '-'}</span>

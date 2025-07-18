@@ -4,6 +4,7 @@
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
@@ -126,7 +127,8 @@
 		formatCurrency({
 			value: totalRewardUsd,
 			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
 		})
 	);
 
