@@ -987,6 +987,11 @@
 			"unexpected_error_on_token_update": "Při aktualizaci tokenu došlo k chybě."
 		}
 	},
+	"nfts": {
+		"text": {
+			"title": ""
+		}
+	},
 	"fee": {
 		"text": {
 			"fee": "Poplatek",

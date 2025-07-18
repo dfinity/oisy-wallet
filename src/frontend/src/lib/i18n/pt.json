@@ -987,6 +987,11 @@
 			"unexpected_error_on_token_update": "Algo falhou ao atualizar o token."
 		}
 	},
+	"nfts": {
+		"text": {
+			"title": "NFT"
+		}
+	},
 	"fee": {
 		"text": {
 			"fee": "Taxa",
