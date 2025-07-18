@@ -11,13 +11,13 @@
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { networkBitcoin, networkEthereum, networkSolana } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
-	import { currentCurrency } from '$lib/derived/currency.derived';
 
 	let defaultCrypto = $derived(
 		$token?.buy?.onramperId ??
