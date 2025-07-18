@@ -14,16 +14,16 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		fileInput: HTMLInputElement;
+		fileInput?: HTMLInputElement;
 		onReplaceImage: () => void;
 		onRemoveImage: () => void;
 		imageUrl?: string;
 	}
 
 	const {
-		fileInput = $bindable<HTMLInputElement>(),
-		onReplaceImage,
-		onRemoveImage,
+		fileInput = $bindable<HTMLInputElement | undefined>(),
+		onReplaceImage = () => {},
+		onRemoveImage = () => {},
 		imageUrl
 	}: Props = $props();
 
