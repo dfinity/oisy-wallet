@@ -1,5 +1,5 @@
 import { currentCurrency, currentCurrencyExchangeRate } from '$lib/derived/currency.derived';
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { currencyStore } from '$lib/stores/currency.store';
 import { get } from 'svelte/store';
@@ -17,25 +17,25 @@ vi.mock('idb-keyval', () => ({
 describe('currency.derived', () => {
 	describe('currentCurrency', () => {
 		it('should initialize with the default currency', () => {
-			expect(get(currentCurrency)).toEqual(Currencies.USD);
+			expect(get(currentCurrency)).toEqual(Currency.USD);
 		});
 
 		it('should return the current currency from the currency store', () => {
-			expect(get(currentCurrency)).toEqual(Currencies.USD);
+			expect(get(currentCurrency)).toEqual(Currency.USD);
 
-			currencyStore.switchCurrency(Currencies.CHF);
+			currencyStore.switchCurrency(Currency.CHF);
 
-			expect(get(currentCurrency)).toEqual(Currencies.CHF);
+			expect(get(currentCurrency)).toEqual(Currency.CHF);
 
-			currencyStore.switchCurrency(Currencies.EUR);
+			currencyStore.switchCurrency(Currency.EUR);
 
-			expect(get(currentCurrency)).toEqual(Currencies.EUR);
+			expect(get(currentCurrency)).toEqual(Currency.EUR);
 		});
 	});
 
 	describe('currentCurrencyExchangeRate', () => {
 		beforeEach(() => {
-			currencyExchangeStore.setExchangeRateCurrency(Currencies.USD);
+			currencyExchangeStore.setExchangeRateCurrency(Currency.USD);
 		});
 
 		it('should initialize with the default value', () => {
@@ -69,7 +69,7 @@ describe('currency.derived', () => {
 
 			expect(get(currentCurrencyExchangeRate)).toEqual(1.2);
 
-			currencyExchangeStore.setExchangeRateCurrency(Currencies.CHF);
+			currencyExchangeStore.setExchangeRateCurrency(Currency.CHF);
 
 			expect(get(currentCurrencyExchangeRate)).toBeNull();
 		});
@@ -79,7 +79,7 @@ describe('currency.derived', () => {
 
 			expect(get(currentCurrencyExchangeRate)).toEqual(1.2);
 
-			currencyStore.switchCurrency(Currencies.CHF);
+			currencyStore.switchCurrency(Currency.CHF);
 
 			expect(get(currentCurrencyExchangeRate)).toBeNull();
 		});

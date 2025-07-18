@@ -590,7 +590,7 @@ if (
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'binancecoin',
-		vs_currencies: Currencies.USD
+		vs_currencies: Currency.USD
 	});
 ```
 

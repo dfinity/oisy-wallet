@@ -1,10 +1,10 @@
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { initStorageStore } from '$lib/stores/storage.store';
 import type { Readable } from 'svelte/store';
 
 export interface CurrencyData {
-	currency: Currencies;
+	currency: Currency;
 }
 
 export interface CurrencyStore extends Readable<CurrencyData> {
@@ -14,7 +14,7 @@ export interface CurrencyStore extends Readable<CurrencyData> {
 const CURRENCY_STORAGE_KEY = 'currency';
 
 export const initCurrencyStore = (): CurrencyStore => {
-	const DEFAULT: CurrencyData = { currency: Currencies.USD };
+	const DEFAULT: CurrencyData = { currency: Currency.USD };
 
 	const { set, subscribe } = initStorageStore<CurrencyData>({
 		key: CURRENCY_STORAGE_KEY,

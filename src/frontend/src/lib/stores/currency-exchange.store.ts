@@ -1,4 +1,4 @@
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import type { CurrencyData } from '$lib/stores/currency.store';
 import { writable, type Readable } from 'svelte/store';
 
@@ -15,7 +15,7 @@ export interface CurrencyExchangeStore extends Readable<CurrencyExchangeData> {
 // So we split the currency store into two separate stores: one for the currency and another for the exchange rate.
 export const initCurrencyExchangeStore = (): CurrencyExchangeStore => {
 	const DEFAULT: CurrencyExchangeData = {
-		currency: Currencies.USD,
+		currency: Currency.USD,
 		exchangeRateToUsd: 1
 	};
 
@@ -24,7 +24,7 @@ export const initCurrencyExchangeStore = (): CurrencyExchangeStore => {
 	return {
 		setExchangeRateCurrency: (currency: CurrencyExchangeData['currency']) => {
 			// When the currency changes, we reset the exchange rate to null to avoid showing wrong data in the UI
-			set({ currency, exchangeRateToUsd: currency === Currencies.USD ? 1 : null });
+			set({ currency, exchangeRateToUsd: currency === Currency.USD ? 1 : null });
 		},
 		setExchangeRate: (exchangeRate: CurrencyExchangeData['exchangeRateToUsd']) =>
 			update((state) => ({ ...state, exchangeRateToUsd: exchangeRate })),

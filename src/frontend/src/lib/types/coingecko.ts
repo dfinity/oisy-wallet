@@ -4,7 +4,7 @@
 // *refers to curl -l https://api.coingecko.com/api/v3/coins/list
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { Currencies } from '$lib/enums/currencies';
+import type { Currency } from '$lib/enums/currency';
 import type { EthAddress } from '$lib/types/address';
 import type { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
 import type * as z from 'zod/v4';
@@ -24,7 +24,7 @@ export type CoingeckoPlatformId =
 
 // Please, cross-reference the OISY supported currencies with the Coingecko API for supported currencies.
 // *refers to curl -l https://api.coingecko.com/api/v3/simple/supported_vs_currencies
-export type CoingeckoCurrency = `${Currencies}`;
+export type CoingeckoCurrency = `${Currency}`;
 
 export interface CoingeckoSimpleParams {
 	// vs_currency of coins, comma-separated if querying more than 1 vs_currency
@@ -65,7 +65,7 @@ export type CoingeckoSimplePrice = {
 	usd_24h_change?: number;
 	last_updated_at?: number;
 } & {
-	[K in Exclude<`${Currencies}`, Currencies.USD>]?: number;
+	[K in Exclude<`${Currency}`, Currency.USD>]?: number;
 };
 
 export type CoingeckoSimpleTokenPrice = Omit<CoingeckoSimplePrice, 'usd_market_cap'> &
