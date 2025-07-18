@@ -7,13 +7,13 @@ import {
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { loadNfts } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
+import type { NftsByNetwork } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { waitFor } from '@testing-library/svelte';
 import { Network } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { NftsByNetwork } from '$lib/types/nft';
 
 vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn(),
