@@ -7,7 +7,6 @@
 	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 	import ShortcutGuard from '$lib/components/guard/ShortcutGuard.svelte';
 	import UrlGuard from '$lib/components/guard/UrlGuard.svelte';
-	import Balance from '$lib/components/hero/Balance.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
