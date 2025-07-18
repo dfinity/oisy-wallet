@@ -7,7 +7,7 @@ import {
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { loadNfts } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
-import type { NftsByNetwork } from '$lib/types/nft';
+import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
@@ -59,9 +59,8 @@ describe('nft.services', () => {
 
 		it('should not load NFTs if no tokens were provided', async () => {
 			const tokens: Erc721CustomToken[] = [];
-			const loadedNftsByNetwork = {};
 
-			await loadNfts({ tokens, loadedNftsByNetwork, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
 			expect(mockEtherscanProvider.erc721TokenInventory).not.toHaveBeenCalled();
 			expect(mockInfuraErc721Provider.getNftMetadata).not.toHaveBeenCalled();
@@ -69,7 +68,6 @@ describe('nft.services', () => {
 
 		it('should load NFTs of tokens', async () => {
 			const tokens: Erc721CustomToken[] = [erc721AzukiToken];
-			const loadedNftsByNetwork = {};
 			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
@@ -81,7 +79,7 @@ describe('nft.services', () => {
 				})
 			);
 
-			await loadNfts({ tokens, loadedNftsByNetwork, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
 			const expectedNfts = tokenIds.map((tokenId) => ({
 				id: parseNftId(tokenId),
@@ -110,16 +108,11 @@ describe('nft.services', () => {
 			const loadedTokenIds = [1, 2, 3, 4, 5, 6];
 			const notLoadedTokenIds = [7, 8, 9, 10, 11, 12];
 
-			const loadedNftsByNetwork: NftsByNetwork = {
-				[POLYGON_AMOY_NETWORK.id]: {
-					[AZUKI_ELEMENTAL_BEANS_TOKEN.address.toLowerCase()]: loadedTokenIds.map((tokenId) => ({
-						id: parseNftId(tokenId),
-						name: `Test NFT #${tokenId}`,
-						imageUrl: `https://test.com/image-${tokenId}.png`,
-						contract: erc721AzukiToken
-					}))
-				}
-			};
+			const loadedNfts: Nft[] = loadedTokenIds.map((tokenId) => ({
+				id: parseNftId(tokenId),
+				contract: erc721AzukiToken
+			}))
+
 			const tokenIds = [...loadedTokenIds, ...notLoadedTokenIds];
 
 			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
@@ -131,7 +124,7 @@ describe('nft.services', () => {
 				})
 			);
 
-			await loadNfts({ tokens, loadedNftsByNetwork, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, loadedNfts, walletAddress: mockWalletAddress });
 
 			const expectedNfts = notLoadedTokenIds.map((tokenId) => ({
 				id: parseNftId(tokenId),
@@ -165,13 +158,12 @@ describe('nft.services', () => {
 
 		it('should handle token inventory loading error gracefully', async () => {
 			const tokens: Erc721CustomToken[] = [erc721AzukiToken];
-			const loadedNftsByNetwork: NftsByNetwork = {};
 
 			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockRejectedValueOnce(
 				new Error('Inventory Error')
 			);
 
-			await loadNfts({ tokens, loadedNftsByNetwork, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
 			expect(mockEtherscanProvider.erc721TokenInventory).toHaveBeenCalled();
 			expect(mockInfuraErc721Provider.getNftMetadata).not.toHaveBeenCalled();
@@ -179,7 +171,6 @@ describe('nft.services', () => {
 
 		it('should handle metadata fetch error gracefully', async () => {
 			const tokens: Erc721CustomToken[] = [erc721AzukiToken];
-			const loadedNftsByNetwork: NftsByNetwork = {};
 			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
@@ -187,7 +178,7 @@ describe('nft.services', () => {
 				new Error('Metadata Error')
 			);
 
-			await loadNfts({ tokens, loadedNftsByNetwork, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
 			const expectedNfts = tokenIds.map((tokenId) => ({
 				id: parseNftId(tokenId),
