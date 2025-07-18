@@ -1,7 +1,8 @@
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
+import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
 	CoingeckoErc20PriceParams,
@@ -21,7 +22,7 @@ const fetchIcrcPricesFromCoingecko = (
 ): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({
 		id: 'internet-computer',
-		vs_currencies: Currencies.USD,
+		vs_currencies: Currency.USD,
 		contract_addresses: ledgerCanisterIds,
 		include_market_cap: true
 	});
@@ -39,15 +40,15 @@ const fetchIcrcPricesFromKongSwap = async (
 // We will use it to convert the USD amounts to the currency amounts in the frontend.
 // Until we find a proper IC solution (like the exchange canister, for example), we use this workaround.
 export const exchangeRateUsdToCurrency = async (
-	currency: Currencies
+	currency: Currency
 ): Promise<number | undefined> => {
-	if (currency === Currencies.USD) {
+	if (currency === Currency.USD) {
 		return 1;
 	}
 
 	const prices = await simplePrice({
 		ids: 'bitcoin',
-		vs_currencies: `${Currencies.USD},${currency}`
+		vs_currencies: `${Currency.USD},${currency}`
 	});
 
 	const btcToUsd = prices?.bitcoin?.usd;
@@ -59,37 +60,37 @@ export const exchangeRateUsdToCurrency = async (
 export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'ethereum',
-		vs_currencies: Currencies.USD
+		vs_currencies: Currency.USD
 	});
 
 export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'bitcoin',
-		vs_currencies: Currencies.USD
+		vs_currencies: Currency.USD
 	});
 
 export const exchangeRateICPToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'internet-computer',
-		vs_currencies: Currencies.USD
+		vs_currencies: Currency.USD
 	});
 
 export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'solana',
-		vs_currencies: Currencies.USD
+		vs_currencies: Currency.USD
 	});
 
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'binancecoin',
-		vs_currencies: Currencies.USD
+		vs_currencies: Currency.USD
 	});
 
 export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'polygon-ecosystem-token',
-		vs_currencies: Currencies.USD
+		vs_currencies: Currency.USD
 	});
 
 export const exchangeRateERC20ToUsd = async ({
@@ -102,7 +103,7 @@ export const exchangeRateERC20ToUsd = async ({
 
 	return await simpleTokenPrice({
 		id,
-		vs_currencies: Currencies.USD,
+		vs_currencies: Currency.USD,
 		contract_addresses: contractAddresses.map(({ address }) => address),
 		include_market_cap: true
 	});
@@ -140,21 +141,30 @@ export const exchangeRateSPLToUsd = async (
 
 	return await simpleTokenPrice({
 		id: 'solana',
-		vs_currencies: Currencies.USD,
+		vs_currencies: Currency.USD,
 		contract_addresses: tokenAddresses,
 		include_market_cap: true
 	});
 };
 
-export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
-	exchangeStore.set([
-		...(nonNullish(data) ? [data.currentEthPrice] : []),
-		...(nonNullish(data) ? [data.currentBtcPrice] : []),
-		...(nonNullish(data) ? [data.currentIcpPrice] : []),
-		...(nonNullish(data) ? [data.currentSolPrice] : []),
-		...(nonNullish(data) ? [data.currentBnbPrice] : []),
-		...(nonNullish(data) ? [data.currentPolPrice] : []),
-		...(nonNullish(data) ? [data.currentErc20Prices] : []),
-		...(nonNullish(data) ? [data.currentIcrcPrices] : []),
-		...(nonNullish(data) ? [data.currentSplPrices] : [])
-	]);
+export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
+	if (nonNullish(data)) {
+		exchangeStore.set([
+			data.currentEthPrice,
+			data.currentBtcPrice,
+			data.currentIcpPrice,
+			data.currentSolPrice,
+			data.currentBnbPrice,
+			data.currentPolPrice,
+			data.currentErc20Prices,
+			data.currentIcrcPrices,
+			data.currentSplPrices
+		]);
+
+		if (nonNullish(data.currentExchangeRate)) {
+			// We set the reference currency for the exchange rate to avoid possible race condition where the user changes the current currency while the value is being uploaded, leading to inconsistent data in the UI.
+			currencyExchangeStore.setExchangeRateCurrency(data.currentExchangeRate.currency);
+			currencyExchangeStore.setExchangeRate(data.currentExchangeRate.exchangeRateToUsd);
+		}
+	}
+};

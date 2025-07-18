@@ -8,6 +8,8 @@
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
@@ -59,11 +61,15 @@
 					{sourceTokenTransferFee + sourceTokenApproveFee} {getTokenDisplaySymbol($sourceToken)}
 				{:else if sourceTokenTotalFeeUSD < EXCHANGE_USD_AMOUNT_THRESHOLD}
 					{`< ${formatCurrency({
-						value: EXCHANGE_USD_AMOUNT_THRESHOLD
+						value: EXCHANGE_USD_AMOUNT_THRESHOLD,
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore
 					})}`}
 				{:else}
 					{formatCurrency({
-						value: sourceTokenTotalFeeUSD
+						value: sourceTokenTotalFeeUSD,
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore
 					})}
 				{/if}
 			{/snippet}
