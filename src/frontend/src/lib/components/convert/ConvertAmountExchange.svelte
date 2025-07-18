@@ -29,7 +29,7 @@
 						: EXCHANGE_USD_AMOUNT_THRESHOLD,
 				currency: $currentCurrency,
 				exchangeRate: $currencyExchangeStore,
-			language: $currentLanguage
+				language: $currentLanguage
 			})
 		: undefined;
 </script>

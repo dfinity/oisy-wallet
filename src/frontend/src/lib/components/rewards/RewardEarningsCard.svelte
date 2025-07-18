@@ -2,11 +2,11 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 
