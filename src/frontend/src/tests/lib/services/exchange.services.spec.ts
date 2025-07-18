@@ -2,7 +2,7 @@ import { exchangeRateICRCToUsd, exchangeRateUsdToCurrency } from '$lib/services/
 import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import {
@@ -37,33 +37,33 @@ describe('exchange.services', () => {
 		});
 
 		it('should return 1 for USD', async () => {
-			await expect(exchangeRateUsdToCurrency(Currencies.USD)).resolves.toBe(1);
+			await expect(exchangeRateUsdToCurrency(Currency.USD)).resolves.toBe(1);
 
 			expect(simplePrice).not.toHaveBeenCalled();
 		});
 
 		it('should query the price for BTC to USD and BTC to currency', async () => {
-			await exchangeRateUsdToCurrency(Currencies.EUR);
+			await exchangeRateUsdToCurrency(Currency.EUR);
 
 			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
 				ids: 'bitcoin',
-				vs_currencies: `${Currencies.USD},${Currencies.EUR}`
+				vs_currencies: `${Currency.USD},${Currency.EUR}`
 			});
 
 			vi.clearAllMocks();
 
-			await exchangeRateUsdToCurrency(Currencies.CHF);
+			await exchangeRateUsdToCurrency(Currency.CHF);
 
 			expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
 				ids: 'bitcoin',
-				vs_currencies: `${Currencies.USD},${Currencies.CHF}`
+				vs_currencies: `${Currency.USD},${Currency.CHF}`
 			});
 		});
 
 		it('should return the correct exchange rate for a valid currency', async () => {
 			vi.mocked(simplePrice).mockResolvedValue({ bitcoin: { usd: 10000, eur: 5000 } });
 
-			const rate = await exchangeRateUsdToCurrency(Currencies.EUR);
+			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
 
 			expect(rate).toBe(2); // 10000 / 5000
 		});
@@ -71,7 +71,7 @@ describe('exchange.services', () => {
 		it('should return undefined for a nullish response', async () => {
 			vi.mocked(simplePrice).mockResolvedValue(null);
 
-			const rate = await exchangeRateUsdToCurrency(Currencies.EUR);
+			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
 
 			expect(rate).toBeUndefined();
 		});
@@ -79,7 +79,7 @@ describe('exchange.services', () => {
 		it('should return undefined for a nullish price for BTC', async () => {
 			vi.mocked(simplePrice).mockResolvedValue({});
 
-			const rate = await exchangeRateUsdToCurrency(Currencies.EUR);
+			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
 
 			expect(rate).toBeUndefined();
 		});
@@ -87,7 +87,7 @@ describe('exchange.services', () => {
 		it('should return undefined for a nullish price for BTC to currency', async () => {
 			vi.mocked(simplePrice).mockResolvedValue({ bitcoin: { usd: 10000 } });
 
-			const rate = await exchangeRateUsdToCurrency(Currencies.EUR);
+			const rate = await exchangeRateUsdToCurrency(Currency.EUR);
 
 			expect(rate).toBeUndefined();
 		});
@@ -95,7 +95,7 @@ describe('exchange.services', () => {
 		it('should throw an error if the price query throws', async () => {
 			vi.mocked(simplePrice).mockRejectedValue(new Error('API error'));
 
-			await expect(exchangeRateUsdToCurrency(Currencies.EUR)).rejects.toThrow('API error');
+			await expect(exchangeRateUsdToCurrency(Currency.EUR)).rejects.toThrow('API error');
 		});
 	});
 

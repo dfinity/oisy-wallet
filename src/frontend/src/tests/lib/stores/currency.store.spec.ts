@@ -1,4 +1,5 @@
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
+import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import {
 	initCurrencyStore,
 	type CurrencyData,
@@ -15,7 +16,7 @@ vi.mock('$lib/utils/storage.utils', () => ({
 
 describe('currency.store', () => {
 	describe('initCurrencyStore', () => {
-		const mockData: CurrencyData = { currency: Currencies.CHF, exchangeRateToUsd: 1.5 };
+		const mockData: CurrencyData = { currency: Currency.CHF };
 
 		let mockStore: CurrencyStore;
 
@@ -25,6 +26,8 @@ describe('currency.store', () => {
 			vi.mocked(getStorage).mockImplementation(() => {});
 
 			mockStore = initCurrencyStore();
+
+			vi.spyOn(currencyExchangeStore, 'setExchangeRateCurrency');
 		});
 
 		it('should initialize with the value from storage', () => {
@@ -40,85 +43,70 @@ describe('currency.store', () => {
 
 			const store = initCurrencyStore();
 
-			expect(get(store)).toEqual({
-				currency: Currencies.USD,
-				exchangeRateToUsd: 1
-			});
+			expect(get(store)).toEqual({ currency: Currency.USD });
 		});
 
 		describe('switchCurrency', () => {
 			it('should switch the currency', () => {
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(mockStore).currency).toEqual(Currency.USD);
 
-				mockStore.switchCurrency(Currencies.CHF);
+				mockStore.switchCurrency(Currency.CHF);
 
-				expect(get(mockStore).currency).toEqual(Currencies.CHF);
+				expect(get(mockStore).currency).toEqual(Currency.CHF);
 			});
 
 			it('should switch the currency back and forth', () => {
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(mockStore).currency).toEqual(Currency.USD);
 
-				mockStore.switchCurrency(Currencies.CHF);
+				mockStore.switchCurrency(Currency.CHF);
 
-				expect(get(mockStore).currency).toEqual(Currencies.CHF);
+				expect(get(mockStore).currency).toEqual(Currency.CHF);
 
-				mockStore.switchCurrency(Currencies.JPY);
+				mockStore.switchCurrency(Currency.JPY);
 
-				expect(get(mockStore).currency).toEqual(Currencies.JPY);
+				expect(get(mockStore).currency).toEqual(Currency.JPY);
 
-				mockStore.switchCurrency(Currencies.USD);
+				mockStore.switchCurrency(Currency.USD);
 
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(mockStore).currency).toEqual(Currency.USD);
 			});
 
 			it('should set the exchange rate to null for non-USD currencies', () => {
-				expect(get(mockStore).exchangeRateToUsd).toBe(1);
+				expect(get(currencyExchangeStore).exchangeRateToUsd).toBe(1);
 
-				mockStore.switchCurrency(Currencies.CHF);
+				mockStore.switchCurrency(Currency.CHF);
 
-				expect(get(mockStore).exchangeRateToUsd).toBeNull();
+				expect(get(currencyExchangeStore).exchangeRateToUsd).toBeNull();
+				expect(currencyExchangeStore.setExchangeRateCurrency).toHaveBeenCalledExactlyOnceWith(
+					Currency.CHF
+				);
 
-				mockStore.switchCurrency(Currencies.JPY);
+				mockStore.switchCurrency(Currency.JPY);
 
-				expect(get(mockStore).exchangeRateToUsd).toBeNull();
+				expect(get(currencyExchangeStore).exchangeRateToUsd).toBeNull();
+				expect(currencyExchangeStore.setExchangeRateCurrency).toHaveBeenCalledTimes(2);
+				expect(currencyExchangeStore.setExchangeRateCurrency).toHaveBeenNthCalledWith(
+					2,
+					Currency.JPY
+				);
 			});
 
 			it('should set the exchange rate to 1 for USD', () => {
-				expect(get(mockStore).exchangeRateToUsd).toBe(1);
+				mockStore.switchCurrency(Currency.CHF);
 
-				mockStore.switchCurrency(Currencies.CHF);
+				expect(get(currencyExchangeStore).exchangeRateToUsd).toBeNull();
+				expect(currencyExchangeStore.setExchangeRateCurrency).toHaveBeenCalledExactlyOnceWith(
+					Currency.CHF
+				);
 
-				expect(get(mockStore).exchangeRateToUsd).toBeNull();
+				mockStore.switchCurrency(Currency.USD);
 
-				mockStore.switchCurrency(Currencies.USD);
-
-				expect(get(mockStore).exchangeRateToUsd).toBe(1);
-			});
-		});
-
-		describe('setExchangeRate', () => {
-			it('should set the exchange rate', () => {
-				expect(get(mockStore).exchangeRateToUsd).toBe(1);
-
-				mockStore.setExchangeRate(1.5);
-
-				expect(get(mockStore).exchangeRateToUsd).toBe(1.5);
-
-				mockStore.setExchangeRate(101);
-
-				expect(get(mockStore).exchangeRateToUsd).toBe(101);
-			});
-
-			it('should not change the currency', () => {
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
-
-				mockStore.setExchangeRate(1.5);
-
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
-
-				mockStore.setExchangeRate(101);
-
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(currencyExchangeStore).exchangeRateToUsd).toBe(1);
+				expect(currencyExchangeStore.setExchangeRateCurrency).toHaveBeenCalledTimes(2);
+				expect(currencyExchangeStore.setExchangeRateCurrency).toHaveBeenNthCalledWith(
+					2,
+					Currency.USD
+				);
 			});
 		});
 	});
