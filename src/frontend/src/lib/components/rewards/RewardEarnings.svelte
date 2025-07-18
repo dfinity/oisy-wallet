@@ -96,8 +96,6 @@
 			return;
 		}
 
-
-
 		({ ckBtcReward, ckUsdcReward, icpReward, amountOfRewards } = await getUserRewardsTokenAmounts({
 			ckBtcToken,
 			ckUsdcToken,
@@ -132,11 +130,9 @@
 		})
 	);
 
-	let loadingAmount = $derived(isNullish(amount))
+	let loadingAmount = $derived(isNullish(amount));
 
-		let loading = $derived(loadingRewards || loadingAmount);
-
-
+	let loading = $derived(loadingRewards || loadingAmount);
 </script>
 
 {#if amountOfRewards > 0}
