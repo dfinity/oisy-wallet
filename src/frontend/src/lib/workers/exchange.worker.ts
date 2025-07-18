@@ -1,7 +1,7 @@
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import {
 	exchangeRateBNBToUsd,
 	exchangeRateBTCToUsd,
@@ -49,7 +49,7 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 
 	const sync = async () =>
 		await syncExchange({
-			currentCurrency: data?.currentCurrency ?? Currencies.USD,
+			currentCurrency: data?.currentCurrency ?? Currency.USD,
 			erc20ContractAddresses: data?.erc20Addresses ?? [],
 			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
 			splTokenAddresses: data?.splAddresses ?? []
@@ -78,7 +78,7 @@ const syncExchange = async ({
 	icrcLedgerCanisterIds,
 	splTokenAddresses
 }: {
-	currentCurrency: Currencies;
+	currentCurrency: Currency;
 	erc20ContractAddresses: Erc20ContractAddressWithNetwork[];
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
 	splTokenAddresses: SplTokenAddress[];

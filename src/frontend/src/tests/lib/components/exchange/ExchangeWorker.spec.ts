@@ -1,5 +1,5 @@
 import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import * as exchangeServices from '$lib/services/worker.exchange.services';
 import {
 	initExchangeWorker,
@@ -49,7 +49,7 @@ describe('ExchangeWorker', () => {
 		expect(stopExchangeTimer).toHaveBeenCalledOnce();
 
 		expect(startExchangeTimer).toHaveBeenCalledExactlyOnceWith({
-			currentCurrency: Currencies.USD,
+			currentCurrency: Currency.USD,
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: []
@@ -64,13 +64,13 @@ describe('ExchangeWorker', () => {
 		expect(stopExchangeTimer).toHaveBeenCalledOnce();
 
 		expect(startExchangeTimer).toHaveBeenCalledExactlyOnceWith({
-			currentCurrency: Currencies.USD,
+			currentCurrency: Currency.USD,
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: []
 		});
 
-		currencyStore.switchCurrency(Currencies.CHF);
+		currencyStore.switchCurrency(Currency.CHF);
 
 		await waitTimer();
 
@@ -78,13 +78,13 @@ describe('ExchangeWorker', () => {
 
 		expect(startExchangeTimer).toHaveBeenCalledTimes(2);
 		expect(startExchangeTimer).toHaveBeenNthCalledWith(2, {
-			currentCurrency: Currencies.CHF,
+			currentCurrency: Currency.CHF,
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: []
 		});
 
-		currencyStore.switchCurrency(Currencies.USD);
+		currencyStore.switchCurrency(Currency.USD);
 
 		await waitTimer();
 
@@ -92,7 +92,7 @@ describe('ExchangeWorker', () => {
 
 		expect(startExchangeTimer).toHaveBeenCalledTimes(3);
 		expect(startExchangeTimer).toHaveBeenNthCalledWith(3, {
-			currentCurrency: Currencies.USD,
+			currentCurrency: Currency.USD,
 			erc20Addresses: [],
 			icrcCanisterIds: [],
 			splAddresses: []

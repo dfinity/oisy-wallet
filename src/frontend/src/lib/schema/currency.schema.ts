@@ -1,7 +1,7 @@
-import { Currencies } from '$lib/enums/currencies';
 import * as z from 'zod/v4';
+import { Currency } from '$lib/enums/currency';
 
-export const CurrencySchema = z.enum(Currencies);
+export const CurrencySchema = z.enum(Currency);
 
 export const CurrencyDataSchema = z.object({
 	currency: CurrencySchema
