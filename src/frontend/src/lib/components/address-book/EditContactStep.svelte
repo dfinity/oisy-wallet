@@ -48,7 +48,7 @@
 	}: Props = $props();
 
 	let fileInput = $state<HTMLInputElement>();
-	let imageUrl = $derived(contact.image ? imageToDataUrl(contact.image) : null);
+	let imageUrl = $derived(contact.image ? imageToDataUrl(contact.image) : undefined);
 
 	const handleFileChange = async (e: Event) => {
 		const selected = (e.target as HTMLInputElement).files?.[0];
@@ -80,7 +80,7 @@
 					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 					data-tid={`avatar-badge-${contact.name}`}
 				>
-					<EditAvatar bind:fileInput {imageUrl} {replaceImage} />
+					<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={() => {}} />
 				</span>
 			</div>
 		{/snippet}
