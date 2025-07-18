@@ -66,13 +66,13 @@
 	{$i18n.transactions.text.title}
 
 	{#snippet end()}
-	<IcIndexCanisterStatus>
-		{#if $tokenCkBtcLedger}
-			<IcTransactionsBitcoinStatus />
-		{:else if ckEthereum}
-			<IcTransactionsEthereumStatus />
-		{/if}
-    </IcIndexCanisterStatus>
+		<IcIndexCanisterStatus>
+			{#if $tokenCkBtcLedger}
+				<IcTransactionsBitcoinStatus />
+			{:else if ckEthereum}
+				<IcTransactionsEthereumStatus />
+			{/if}
+		</IcIndexCanisterStatus>
 	{/snippet}
 </Header>
 
