@@ -3,6 +3,7 @@ import {
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
+import { deleteIdbBalances } from '$lib/api/idb-balances.api';
 import {
 	deleteIdbEthTokens,
 	deleteIdbEthTokensDeprecated,
@@ -145,6 +146,8 @@ const emptyIdbIcTransactions = (): Promise<void> => emptyIdbStore(deleteIdbIcTra
 
 const emptyIdbSolTransactions = (): Promise<void> => emptyIdbStore(deleteIdbSolTransactions);
 
+const emptyIdbBalances = (): Promise<void> => emptyIdbStore(deleteIdbBalances);
+
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
 	sessionStorage.clear();
@@ -174,7 +177,8 @@ const logout = async ({
 			emptyIdbBtcTransactions(),
 			emptyIdbEthTransactions(),
 			emptyIdbIcTransactions(),
-			emptyIdbSolTransactions()
+			emptyIdbSolTransactions(),
+			emptyIdbBalances()
 		]);
 	}
 
