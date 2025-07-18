@@ -18,6 +18,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
@@ -128,7 +129,7 @@
 			class:animate-pulse={loading}
 			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
 				$noOfSprinkles: amountOfRewards.toString(),
-				$amount: formatCurrency({ value: totalRewardUsd })
+				$amount: formatCurrency({ value: totalRewardUsd, currency: $currentCurrency })
 			})}
 		</div>
 
