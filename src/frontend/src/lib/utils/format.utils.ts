@@ -3,6 +3,7 @@ import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants
 import type { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
+import type { CurrencyExchangeData } from '$lib/types/currency';
 import { isNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import Decimal from 'decimal.js';
@@ -169,14 +170,29 @@ export const formatSecondsToNormalizedDate = ({
 
 export const formatCurrency = ({
 	value,
-	currency
+	currency,
+	exchangeRate: { exchangeRateToUsd, currency: exchangeRateCurrency }
 }: {
 	value: number;
 	currency: Currency;
-}): string =>
-	new Intl.NumberFormat('en-US', {
+	exchangeRate: CurrencyExchangeData;
+}): string | undefined => {
+	if (currency !== exchangeRateCurrency) {
+		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
+		return;
+	}
+
+	if (isNullish(exchangeRateToUsd) || exchangeRateToUsd === 0) {
+		// If the exchange rate is not available (probably right after a currency switch), we cannot format the currency
+		return;
+	}
+
+	const convertedValue = value / exchangeRateToUsd;
+
+	return new Intl.NumberFormat('en-US', {
 		style: 'currency',
 		currency: currency.toUpperCase()
 	})
-		.format(value)
+		.format(convertedValue)
 		.replace(/,/g, '’');
+};
