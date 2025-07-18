@@ -1,4 +1,4 @@
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import { syncExchange } from '$lib/services/exchange.services';
 import { initExchangeWorker, type ExchangeWorker } from '$lib/services/worker.exchange.services';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -43,7 +43,7 @@ describe('worker.exchange.services', () => {
 		let worker: ExchangeWorker;
 
 		const mockData: PostMessageDataRequestExchangeTimer = {
-			currentCurrency: Currencies.EUR,
+			currentCurrency: Currency.EUR,
 			erc20Addresses: [{ address: mockEthAddress, coingeckoId: 'ethereum' }],
 			icrcCanisterIds: [mockIcrcCustomToken.ledgerCanisterId],
 			splAddresses: [mockSplAddress]
@@ -81,7 +81,7 @@ describe('worker.exchange.services', () => {
 		describe('onmessage', () => {
 			it('should handle syncExchange message', () => {
 				const mockData: PostMessageDataResponseExchange = {
-					currentExchangeRate: { exchangeRateToUsd: 1.5, currency: Currencies.EUR },
+					currentExchangeRate: { exchangeRateToUsd: 1.5, currency: Currency.EUR },
 					currentEthPrice: { ethereum: { usd: 1 } },
 					currentBtcPrice: { bitcoin: { usd: 50000 } },
 					currentErc20Prices: {},

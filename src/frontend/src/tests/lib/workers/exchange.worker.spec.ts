@@ -95,7 +95,7 @@ describe('exchange.worker', () => {
 
 			const mockEventData = {
 				data: {
-					currentCurrency: Currencies.USD,
+					currentCurrency: Currency.USD,
 					erc20Addresses: mockErc20ContractAddresses,
 					icrcCanisterIds: mockIcrcLedgerCanisterIds,
 					splAddresses: mockSplTokenAddresses
@@ -141,7 +141,7 @@ describe('exchange.worker', () => {
 					data: {
 						currentExchangeRate: {
 							exchangeRateToUsd: 1,
-							currency: Currencies.USD
+							currency: Currency.USD
 						},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentBtcPrice: { bitcoin: { usd: 1 } },
@@ -232,7 +232,7 @@ describe('exchange.worker', () => {
 							...event.data,
 							msg,
 							data: {
-								currentCurrency: Currencies.JPY,
+								currentCurrency: Currency.JPY,
 								erc20Addresses: mockErc20ContractAddresses,
 								icrcCanisterIds: [],
 								splAddresses: []
@@ -282,7 +282,7 @@ describe('exchange.worker', () => {
 							...event.data,
 							msg,
 							data: {
-								currentCurrency: Currencies.CHF,
+								currentCurrency: Currency.CHF,
 								erc20Addresses: [],
 								icrcCanisterIds: mockIcrcLedgerCanisterIds,
 								splAddresses: []
@@ -310,7 +310,7 @@ describe('exchange.worker', () => {
 							...event.data,
 							msg,
 							data: {
-								currentCurrency: Currencies.EUR,
+								currentCurrency: Currency.EUR,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
 								splAddresses: mockSplTokenAddresses
@@ -336,7 +336,7 @@ describe('exchange.worker', () => {
 							...event.data,
 							msg,
 							data: {
-								currentCurrency: Currencies.JPY,
+								currentCurrency: Currency.JPY,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
 								splAddresses: []
@@ -351,7 +351,7 @@ describe('exchange.worker', () => {
 
 					expect(simplePrice).toHaveBeenNthCalledWith(1, {
 						ids: 'bitcoin',
-						vs_currencies: `${Currencies.USD},${Currencies.JPY}`
+						vs_currencies: `${Currency.USD},${Currency.JPY}`
 					});
 				});
 
@@ -362,7 +362,7 @@ describe('exchange.worker', () => {
 							...event.data,
 							msg,
 							data: {
-								currentCurrency: Currencies.USD,
+								currentCurrency: Currency.USD,
 								erc20Addresses: [],
 								icrcCanisterIds: [],
 								splAddresses: []
@@ -440,7 +440,7 @@ describe('exchange.worker', () => {
 						data: {
 							currentExchangeRate: {
 								exchangeRateToUsd: 1,
-								currency: Currencies.USD
+								currency: Currency.USD
 							},
 							currentBnbPrice: { binancecoin: { usd: 1 } },
 							currentBtcPrice: { bitcoin: { usd: 1 } },
@@ -483,7 +483,7 @@ describe('exchange.worker', () => {
 						...event,
 						data: {
 							...event.data,
-							data: { ...mockEventData.data, currentCurrency: Currencies.JPY },
+							data: { ...mockEventData.data, currentCurrency: Currency.JPY },
 							msg
 						}
 					};
@@ -495,7 +495,7 @@ describe('exchange.worker', () => {
 						data: {
 							currentExchangeRate: {
 								exchangeRateToUsd: 1 / 3,
-								currency: Currencies.JPY
+								currency: Currency.JPY
 							},
 							currentBnbPrice: { binancecoin: { usd: 1 } },
 							currentBtcPrice: { bitcoin: { usd: 1 } },
