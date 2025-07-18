@@ -18,10 +18,12 @@ export const loadNfts = ({
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = infuraErc721Providers(ETHEREUM_NETWORK.id);
 
-	tokens.forEach((token) => {
-		const loadedNfts = loadedNftsByToken.get(token.address.toLowerCase()) ?? [];
-		loadNftsOfToken({ etherscanProvider, infuraProvider, token, loadedNfts, walletAddress });
-	});
+	return Promise.all(
+		tokens.map((token) => {
+			const loadedNfts = loadedNftsByToken.get(token.address.toLowerCase()) ?? [];
+			return loadNftsOfToken({ etherscanProvider, infuraProvider, token, loadedNfts, walletAddress });
+		})
+	);
 };
 
 const loadNftsOfToken = async ({
