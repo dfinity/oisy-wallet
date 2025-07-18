@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
-import { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
+import { type InfuraErc721Provider, infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NftId, NftMetadata } from '$lib/types/nft';
@@ -16,7 +16,7 @@ export const loadNfts = ({
 	walletAddress: string;
 }) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
-	const infuraProvider = new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura);
+	const infuraProvider = infuraErc721Providers(ETHEREUM_NETWORK.id);
 
 	tokens.forEach((token) => {
 		const loadedNfts = loadedNftsByToken.get(token.address.toLowerCase()) ?? [];
