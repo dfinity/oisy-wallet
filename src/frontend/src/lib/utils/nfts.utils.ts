@@ -2,12 +2,12 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export const getLoadedNftsByTokens = ({
+export const getNftsByNetworks = ({
 	tokens,
-	loadedNfts
+	nfts
 }: {
 	tokens: Erc721CustomToken[];
-	loadedNfts: Nft[];
+	nfts: Nft[];
 }): NftsByNetwork => {
 	const nftsByToken: NftsByNetwork = {};
 
@@ -18,7 +18,7 @@ export const getLoadedNftsByTokens = ({
 		nftsByToken[networkId][address.toLowerCase()] = [];
 	});
 
-	loadedNfts.forEach((nft) => {
+	nfts.forEach((nft) => {
 		const {
 			contract: {
 				network: { id: networkId },
