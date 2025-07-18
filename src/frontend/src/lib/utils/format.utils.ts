@@ -195,4 +195,3 @@ export const formatCurrency = ({
 	})
 		.format(convertedValue)
 		.replace(/,/g, '’');
-};
