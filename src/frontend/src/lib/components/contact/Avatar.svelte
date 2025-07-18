@@ -51,7 +51,7 @@
 	let blobUrl: string | null = $state(null);
 
 	$effect(() => {
-		if (image) {
+		if (nonNullish(image)) {
 			blobUrl = imageToDataUrl(image);
 		} else {
 			blobUrl = null;
