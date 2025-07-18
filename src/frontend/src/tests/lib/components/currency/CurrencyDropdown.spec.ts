@@ -6,7 +6,7 @@ import {
 	CURRENCY_SWITCHER_DROPDOWN_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { currentCurrency } from '$lib/derived/currency.derived';
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import { currencyStore } from '$lib/stores/currency.store';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
@@ -15,7 +15,7 @@ import { expect } from 'vitest';
 
 describe('CurrencyDropdown', () => {
 	beforeEach(() => {
-		currencyStore.switchCurrency(Currencies.USD);
+		currencyStore.switchCurrency(Currency.USD);
 	});
 
 	it('should render the dropdown switcher with the current currency', async () => {
@@ -25,13 +25,13 @@ describe('CurrencyDropdown', () => {
 
 		expect(getByText('$ - USD')).toBeInTheDocument();
 
-		currencyStore.switchCurrency(Currencies.CHF);
+		currencyStore.switchCurrency(Currency.CHF);
 
 		await tick();
 
 		expect(getByText('CHF')).toBeInTheDocument();
 
-		currencyStore.switchCurrency(Currencies.EUR);
+		currencyStore.switchCurrency(Currency.EUR);
 
 		await tick();
 
@@ -80,13 +80,13 @@ describe('CurrencyDropdown', () => {
 		const dropdownButton = getByTestId(CURRENCY_SWITCHER_BUTTON);
 		await fireEvent.click(dropdownButton);
 
-		const button = getByTestId(`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${Currencies.CHF}`);
+		const button = getByTestId(`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${Currency.CHF}`);
 
 		expect(button).toBeInTheDocument();
 
 		await fireEvent.click(button);
 
-		expect(get(currentCurrency)).toBe(Currencies.CHF);
+		expect(get(currentCurrency)).toBe(Currency.CHF);
 	});
 
 	it('should close the dropdown when a currency is selected', async () => {
@@ -95,7 +95,7 @@ describe('CurrencyDropdown', () => {
 		const dropdownButton = getByTestId(CURRENCY_SWITCHER_BUTTON);
 		await fireEvent.click(dropdownButton);
 
-		const button = getByTestId(`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${Currencies.EUR}`);
+		const button = getByTestId(`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${Currency.EUR}`);
 
 		expect(button).toBeInTheDocument();
 
