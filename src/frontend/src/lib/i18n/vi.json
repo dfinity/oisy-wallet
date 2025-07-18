@@ -32,7 +32,8 @@
 			"add": "Thêm",
 			"more_items": "+$items mục khác",
 			"select": "Chọn",
-			"language": "Ngôn ngữ"
+			"language": "Ngôn ngữ",
+			"currency": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!"
@@ -43,7 +44,8 @@
 			"back": "Quay lại trang trước",
 			"open_details": "Mở chi tiết",
 			"close_details": "Đóng chi tiết",
-			"switch_language": "Chuyển đổi ngôn ngữ"
+			"switch_language": "Chuyển đổi ngôn ngữ",
+			"switch_currency": ""
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất"
@@ -509,6 +511,9 @@
 			"top_up": "Nạp tiền vào ví của bạn để bắt đầu sử dụng!",
 			"learn_more_about_erc20_icp": "Tìm hiểu thêm về ERC20 ICP trên Ethereum.",
 			"tooltip_toggle_balance": "Nhấp đúp để ẩn/hiện số dư"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {

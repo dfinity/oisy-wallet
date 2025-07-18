@@ -32,7 +32,8 @@
 			"add": "Přidat",
 			"more_items": "+$items další",
 			"select": "Vybrat",
-			"language": "Jazyk"
+			"language": "Jazyk",
+			"currency": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!"
@@ -43,7 +44,8 @@
 			"back": "Vrátit se na předchozí stránku",
 			"open_details": "Otevřít podrobnosti",
 			"close_details": "Zavřít podrobnosti",
-			"switch_language": "Přepnout jazyk"
+			"switch_language": "Přepnout jazyk",
+			"switch_currency": ""
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena"
@@ -509,6 +511,9 @@
 			"top_up": "Doplňte si peněženku a začněte ji používat!",
 			"learn_more_about_erc20_icp": "Více se dozvíte o ERC20 ICP na Ethereu.",
 			"tooltip_toggle_balance": "Dvojitým kliknutím skryjete/zobrazíte zůstatek"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {

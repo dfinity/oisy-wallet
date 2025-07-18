@@ -32,7 +32,8 @@
 			"add": "添加",
 			"more_items": "+$items 更多",
 			"select": "选择",
-			"language": "语言"
+			"language": "语言",
+			"currency": ""
 		},
 		"info": {
 			"test_banner": "仅供测试使用！"
@@ -43,7 +44,8 @@
 			"back": "返回上一页",
 			"open_details": "打开详情",
 			"close_details": "关闭详情",
-			"switch_language": "切换语言"
+			"switch_language": "切换语言",
+			"switch_currency": ""
 		},
 		"warning": {
 			"do_not_close": "交易完成前请勿关闭此标签页"
@@ -509,6 +511,9 @@
 			"top_up": "充值你的钱包以开始使用！",
 			"learn_more_about_erc20_icp": "了解更多关于以太坊上的 ERC20 ICP。",
 			"tooltip_toggle_balance": "双击隐藏/显示余额"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {

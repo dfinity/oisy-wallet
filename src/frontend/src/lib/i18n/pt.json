@@ -32,7 +32,8 @@
 			"add": "Adicionar",
 			"more_items": "+$items mais",
 			"select": "Selecionar",
-			"language": "Linguagem"
+			"language": "Linguagem",
+			"currency": "Moeda"
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!"
@@ -43,7 +44,8 @@
 			"back": "Voltar para a página anterior",
 			"open_details": "Abrir detalhes",
 			"close_details": "Fechar detalhes",
-			"switch_language": "Mudar linguagem"
+			"switch_language": "Mudar linguagem",
+			"switch_currency": "Mudar moeda"
 		},
 		"warning": {
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída"
@@ -509,6 +511,9 @@
 			"top_up": "Carregue sua carteira para começar a usá-la!",
 			"learn_more_about_erc20_icp": "Saiba mais sobre ERC20 ICP no Ethereum.",
 			"tooltip_toggle_balance": "Clique duas vezes para ocultar/mostrar o saldo"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Ativar e desativar o modo de privacidade"
 		}
 	},
 	"settings": {
