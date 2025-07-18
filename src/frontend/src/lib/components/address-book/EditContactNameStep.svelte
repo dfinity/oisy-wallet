@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import InputContactName from '$lib/components/address-book/InputContactName.svelte';
-	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -13,6 +12,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 
 	interface Props {
 		contact?: Partial<ContactUi>;
@@ -36,8 +36,7 @@
 
 	let editingContact = $state(contact ? { ...contact } : {});
 
-	const imageUrl: string | null = nonNullish(contact.image)
-	  ? imageToDataUrl(contact.image) : null;
+	const imageUrl: string | null = nonNullish(contact.image) ? imageToDataUrl(contact.image) : null;
 
 	const handleSave = (event: Event) => {
 		event.preventDefault();
