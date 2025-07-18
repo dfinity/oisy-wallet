@@ -586,32 +586,88 @@ describe('format.utils', () => {
 	});
 
 	describe('formatCurrency', () => {
-		const testCases: { value: number; currency: Currency; expected: string }[] = [
-			{ value: 1234.56, currency: Currency.USD, expected: '$1,234.56' },
-			{ value: 987654321.12, currency: Currency.EUR, expected: '€987,654,321.12' },
-			{ value: 0.99, currency: Currency.GBP, expected: '£0.99' },
-			{ value: 1000000, currency: Currency.JPY, expected: '¥1,000,000' },
-			{ value: 123456789.99, currency: Currency.CNY, expected: 'CN¥123,456,789.99' },
+		const testCases: {
+			value: number;
+			currency: Currency;
+			language: Languages;
+			expected: string;
+		}[] = [
+			{
+				value: 1234.56,
+				currency: Currency.USD,
+				language: Languages.ENGLISH,
+				expected: '$1,234.56'
+			},
+			{
+				value: 987654321.12,
+				currency: Currency.EUR,
+				language: Languages.ENGLISH,
+				expected: '€987,654,321.12'
+			},
+			{ value: 0.99, currency: Currency.GBP, language: Languages.ENGLISH, expected: '£0.99' },
+			{
+				value: 1000000,
+				currency: Currency.JPY,
+				language: Languages.ENGLISH,
+				expected: '¥1,000,000'
+			},
+			{
+				value: 123456789.99,
+				currency: Currency.CNY,
+				language: Languages.ENGLISH,
+				expected: 'CN¥123,456,789.99'
+			},
 
-			{ value: 123456789.99, currency: Currency.CHF, expected: 'CHF 123’456’789.99' },
-			{ value: 0, currency: Currency.USD, expected: '$0.00' },
-			{ value: -1234.56, currency: Currency.USD, expected: '-$1,234.56' },
-			{ value: -987654321.12, currency: Currency.EUR, expected: '-€987,654,321.12' },
-			{ value: 12345, currency: Currency.GBP, expected: '£12,345.00' },
+			{
+				value: 123456789.99,
+				currency: Currency.CHF,
+				language: Languages.ENGLISH,
+				expected: 'CHF 123’456’789.99'
+			},
+			{ value: 0, currency: Currency.USD, language: Languages.ENGLISH, expected: '$0.00' },
+			{
+				value: -1234.56,
+				currency: Currency.USD,
+				language: Languages.ENGLISH,
+				expected: '-$1,234.56'
+			},
+			{
+				value: -987654321.12,
+				currency: Currency.EUR,
+				language: Languages.ENGLISH,
+				expected: '-€987,654,321.12'
+			},
+			{ value: 12345, currency: Currency.GBP, language: Languages.ENGLISH, expected: '£12,345.00' },
 
-			{ value: 1000000.99, currency: Currency.JPY, expected: '¥1,000,001' },
-			{ value: 1000000.4, currency: Currency.JPY, expected: '¥1,000,000' },
-			{ value: 123456789.12345, currency: Currency.CHF, expected: 'CHF 123’456’789.12' }
+			{
+				value: 1000000.99,
+				currency: Currency.JPY,
+				language: Languages.ENGLISH,
+				expected: '¥1,000,001'
+			},
+			{
+				value: 1000000.4,
+				currency: Currency.JPY,
+				language: Languages.ENGLISH,
+				expected: '¥1,000,000'
+			},
+			{
+				value: 123456789.12345,
+				currency: Currency.CHF,
+				language: Languages.ENGLISH,
+				expected: 'CHF 123’456’789.12'
+			}
 		];
 
 		it.each(testCases)(
-			`should format value $value for currency $currency as expected`,
-			({ value, currency, expected }) => {
+			`should format value $value for currency $currency in language $language as expected`,
+			({ value, currency, language, expected }) => {
 				expect(
 					formatCurrency({
 						value,
 						currency,
-						exchangeRate: { currency, exchangeRateToUsd: 1 }
+						exchangeRate: { currency, exchangeRateToUsd: 1 },
+						language
 					})
 				).toBe(expected);
 			}
@@ -622,7 +678,8 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1234.56,
 					currency: Currency.EUR,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 }
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH
 				})
 			).toBeUndefined();
 		});
@@ -632,7 +689,8 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1234.56,
 					currency: Currency.EUR,
-					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: null }
+					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: null },
+					language: Languages.ENGLISH
 				})
 			).toBeUndefined();
 		});
@@ -642,7 +700,8 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 0,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 }
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH
 				})
 			).toBe('$0.00');
 
@@ -650,7 +709,8 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1234.56,
 					currency: Currency.USD,
-					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 0 }
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 0 },
+					language: Languages.ENGLISH
 				})
 			).toBeUndefined();
 		});
@@ -660,7 +720,8 @@ describe('format.utils', () => {
 				formatCurrency({
 					value: 1000,
 					currency: Currency.CHF,
-					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1.2 }
+					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1.2 },
+					language: Languages.ENGLISH
 				})
 			).toBe('CHF 833.33'); // 1000 / 1.2 = 833.33
 		});
