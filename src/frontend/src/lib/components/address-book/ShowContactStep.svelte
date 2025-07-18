@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ContactHeader from '$lib/components/address-book/ContactHeader.svelte';
+	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import IconEmptyAddresses from '$lib/components/icons/IconEmptyAddresses.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
@@ -12,42 +12,56 @@
 		CONTACT_SHOW_CLOSE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Address, Contact } from '$lib/types/contact';
+	import type { ContactUi } from '$lib/types/contact';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		contact: Contact;
-		close: () => void;
-		addAddress?: () => void;
-		showAddress?: (address: Address) => void;
-		edit?: (contact: Contact) => void;
+		contact: ContactUi;
+		onClose: () => void;
+		onAddAddress: () => void;
+		onShowAddress: (index: number) => void;
+		onEdit?: (contact: ContactUi) => void;
 	}
 
-	let { contact, close, edit, addAddress, showAddress }: Props = $props();
+	let { contact, onClose, onEdit, onAddAddress, onShowAddress }: Props = $props();
 
 	let hasAddresses = $derived(contact?.addresses && contact.addresses.length > 0);
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-5">
-	<ContactHeader name={contact.name} edit={() => edit?.(contact)}></ContactHeader>
+	<ContactHeader name={contact.name} onEdit={() => onEdit?.(contact)}></ContactHeader>
 
 	{#if hasAddresses}
-		<!--
-		TODO: Render AddressListItems here
-		https://github.com/dfinity/oisy-wallet/pull/6243 
-		-->
-		<div>
-			{#each contact.addresses as address (address.id)}
-				<div class="flex items-center">
-					<div class="grow">ADDRESS: {address.address} {address.alias}</div>
-					{#if nonNullish(showAddress)}
-						<Button styleClass="flex-none" on:click={() => showAddress(address)}>Show</Button>
-					{/if}
-				</div>
+		<div class="flex flex-col gap-1">
+			{#each contact.addresses as address, index (index)}
+				<AddressListItem
+					{address}
+					addressItemActionsProps={{
+						onInfo: () => onShowAddress(index)
+					}}
+					onClick={async () =>
+						await copyToClipboard({
+							value: address.address,
+							text: $i18n.wallet.text.address_copied
+						})}
+				/>
 			{/each}
 		</div>
+		<div class="flex justify-start">
+			<Button
+				alignLeft
+				ariaLabel={$i18n.address_book.edit_contact.add_address}
+				colorStyle="secondary-light"
+				transparent
+				onclick={onAddAddress}
+			>
+				<IconPlus />
+				{$i18n.address_book.edit_contact.add_address}
+			</Button>
+		</div>
 	{:else}
-		<div class="my-5 flex flex-col items-center gap-5">
+		<div class="mb-5 flex flex-col items-center gap-5">
 			<div class="text-secondary-inverted">
 				<IconEmptyAddresses />
 			</div>
@@ -64,22 +78,21 @@
 			</div>
 
 			<Button
-				styleClass="py-0"
 				ariaLabel={$i18n.address_book.show_contact.add_address}
-				colorStyle="tertiary-main-card"
+				colorStyle="secondary-light"
+				transparent
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
-				disabled={isNullish(addAddress)}
-				on:click={() => addAddress?.()}
+				onclick={onAddAddress}
 			>
-				<span class="flex items-center">
-					<IconPlus />
-				</span>
+				<IconPlus />
 				{$i18n.address_book.show_contact.add_address}
 			</Button>
 		</div>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => close()} testId={CONTACT_SHOW_CLOSE_BUTTON}></ButtonCancel>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={() => onClose()} testId={CONTACT_SHOW_CLOSE_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

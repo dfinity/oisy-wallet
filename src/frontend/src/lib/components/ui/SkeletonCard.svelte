@@ -9,7 +9,11 @@
 <Card {testId}>
 	<span class="inline-block w-[120px] max-w-full sm:w-[200px]"><slot><SkeletonText /></slot></span>
 
-	<span class="inline-block w-full max-w-[100px]" slot="amount"><SkeletonText /></span>
+	{#snippet amount()}
+		<span class="inline-block w-full max-w-[100px]"><SkeletonText /></span>
+	{/snippet}
 
-	<SkeletonLogo slot="icon" />
+	{#snippet icon()}
+		<SkeletonLogo />
+	{/snippet}
 </Card>

@@ -145,7 +145,7 @@ dependencies = [
  "futures",
  "getrandom",
  "hex",
- "ic-cdk 0.16.0",
+ "ic-cdk 0.16.1",
  "ic-cdk-macros 0.16.0",
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
@@ -280,9 +280,9 @@ checksum = "349f9b6a179ed607305526ca489b34ad0a41aed5f7980fa90eb03160b69598fb"
 
 [[package]]
 name = "bitcoin"
-version = "0.32.5"
+version = "0.32.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce6bc65742dea50536e35ad42492b234c27904a27f0abdcbce605015cb4ea026"
+checksum = "ad8929a18b8e33ea6b3c09297b687baaa71fb1b97353243a3f1029fad5c59c5b"
 dependencies = [
  "base58ck",
  "bech32",
@@ -448,9 +448,9 @@ dependencies = [
 
 [[package]]
 name = "candid"
-version = "0.10.13"
+version = "0.10.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a253bab4a9be502c82332b60cbeee6202ad0692834efeec95fae9f29db33d692"
+checksum = "f9d90f5a1426d0489283a0bd5da9ed406fb3e69597e0d823dcb88a1965bb58d2"
 dependencies = [
  "anyhow",
  "binread",
@@ -1560,16 +1560,23 @@ dependencies = [
 
 [[package]]
 name = "ic-cdk"
-version = "0.16.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd8ecacd682fa05a985253592963306cb9799622d7b1cce4b1edb89c6ec85be1"
+checksum = "a50afd39a4c2022ca6cbdf15dbd653b33eeaae9010748b74006bbd717aa7c51a"
 dependencies = [
  "candid",
+ "ic-cdk-executor",
  "ic-cdk-macros 0.16.0",
  "ic0",
  "serde",
  "serde_bytes",
 ]
+
+[[package]]
+name = "ic-cdk-executor"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "903057edd3d4ff4b3fe44a64eaee1ceb73f579ba29e3ded372b63d291d7c16c2"
 
 [[package]]
 name = "ic-cdk-macros"
@@ -1656,7 +1663,7 @@ name = "ic-cycles-ledger-client"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.16.0",
+ "ic-cdk 0.16.1",
  "ic-cycles-ledger-types",
  "serde",
  "serde_bytes",
@@ -1667,7 +1674,7 @@ name = "ic-cycles-ledger-pic"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.16.0",
+ "ic-cdk 0.16.1",
  "ic-cycles-ledger-types",
  "pocket-ic",
  "serde",
@@ -1679,7 +1686,7 @@ name = "ic-cycles-ledger-types"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.16.0",
+ "ic-cdk 0.16.1",
  "serde",
  "serde_bytes",
 ]
@@ -1693,7 +1700,7 @@ dependencies = [
  "candid",
  "crc32fast",
  "hex",
- "ic-cdk 0.16.0",
+ "ic-cdk 0.16.1",
  "serde",
  "serde_bytes",
  "sha2 0.10.9",
@@ -1733,9 +1740,9 @@ dependencies = [
 
 [[package]]
 name = "ic-stable-structures"
-version = "0.6.8"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0f5684f577e0146738cd11afed789109c4f51ba963c75823c48c1501dc53278"
+checksum = "4d30d4cf17aff1024e13133897048bcba580e063c9000571ab766ca37e2996f4"
 dependencies = [
  "ic_principal",
 ]
@@ -3632,7 +3639,7 @@ dependencies = [
  "getrandom",
  "hex",
  "ic-canister-sig-creation",
- "ic-cdk 0.16.0",
+ "ic-cdk 0.16.1",
  "ic-cdk-macros 0.16.0",
  "ic-cdk-timers",
  "ic-cycles-ledger-client",

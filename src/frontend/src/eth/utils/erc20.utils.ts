@@ -1,12 +1,3 @@
-import oneInch from '$eth/assets/1inch.svg';
-import dai from '$eth/assets/dai.svg';
-import dmail from '$eth/assets/dmail.svg';
-import floki from '$eth/assets/floki.svg';
-import jasmy from '$eth/assets/jasmy.svg';
-import matic from '$eth/assets/matic.svg';
-import rndr from '$eth/assets/rndr.svg';
-import weeth from '$eth/assets/weeth.svg';
-import weth from '$eth/assets/weth.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -44,26 +35,8 @@ export const mapErc20UserToken = ({
 	...rest
 });
 
-const mapErc20Icon = (symbol: string): string | undefined => {
+export const mapErc20Icon = (symbol: string): string | undefined => {
 	switch (symbol.toLowerCase()) {
-		case 'dai':
-			return dai;
-		case 'dmail':
-			return dmail;
-		case 'floki':
-			return floki;
-		case 'jasmy':
-			return jasmy;
-		case 'matic':
-			return matic;
-		case 'rndr':
-			return rndr;
-		case 'weeth':
-			return weeth;
-		case 'weth':
-			return weth;
-		case '1inch':
-			return oneInch;
 		// ICP in production. ckICP was used on staging because the definitive name and symbol had not been decided.
 		case 'icp':
 		case 'ckicp':

@@ -1,4 +1,6 @@
-import type { RewardDescription } from '$env/types/env-reward';
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
+import oisyEpisodeFour from '$lib/assets/oisy-episode-four-coming.svg';
 import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
 import {
 	initRewardEligibilityContext,
@@ -11,14 +13,15 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
 describe('RewardsGroups', () => {
-	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
-		({ id }) => id === 'OISY Airdrop #1'
+	const mockRewardCampaign: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
+		({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 	assertNonNullish(mockRewardCampaign);
 
 	const title = 'Active campaigns';
 	const groupTitle = 'campaign';
 	const activeGroupSelector = `button[data-tid="${groupTitle}-${mockRewardCampaign.id}"]`;
+	const altImageSelector = `img[data-tid="${groupTitle}-alt-img"]`;
 
 	const mockContext = new Map([]);
 	const store = initRewardEligibilityStore();
@@ -63,6 +66,24 @@ describe('RewardsGroups', () => {
 		expect(activeGroup).not.toBeInTheDocument();
 	});
 
+	it('should render alternative image', () => {
+		const { container, getByText } = render(RewardsGroup, {
+			props: {
+				title,
+				rewards: [],
+				testId: groupTitle,
+				altImg: oisyEpisodeFour
+			},
+			context: mockContext
+		});
+
+		expect(getByText(title)).toBeInTheDocument();
+
+		const altImage: HTMLImageElement | null = container.querySelector(altImageSelector);
+
+		expect(altImage).toBeInTheDocument();
+	});
+
 	it('should render campaigns even if alternative text is defined', () => {
 		const altText = 'Stay tuned';
 
@@ -71,7 +92,8 @@ describe('RewardsGroups', () => {
 				title,
 				rewards: mockRewardCampaigns,
 				testId: groupTitle,
-				altText
+				altText,
+				altImg: oisyEpisodeFour
 			},
 			context: mockContext
 		});
@@ -82,5 +104,9 @@ describe('RewardsGroups', () => {
 		const activeGroup: HTMLButtonElement | null = container.querySelector(activeGroupSelector);
 
 		expect(activeGroup).toBeInTheDocument();
+
+		const altImage: HTMLImageElement | null = container.querySelector(altImageSelector);
+
+		expect(altImage).not.toBeInTheDocument();
 	});
 });

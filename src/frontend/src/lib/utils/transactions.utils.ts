@@ -114,13 +114,13 @@ export const mapAllTransactionsUi = ({
 
 			return [
 				...acc,
-				...($ethTransactions[tokenId] ?? []).map((transaction) => ({
+				...($ethTransactions?.[tokenId] ?? []).map(({ data: transaction }) => ({
 					transaction: mapEthTransactionUi({
 						transaction,
 						ckMinterInfoAddresses: isSepoliaNetwork
 							? ckEthMinterInfoAddressesSepolia
 							: ckEthMinterInfoAddressesMainnet,
-						$ethAddress
+						ethAddress: $ethAddress
 					}),
 					token,
 					component: 'ethereum' as const
@@ -291,6 +291,14 @@ export const areTransactionsStoresLoading = (
 	return (someNullish || someNotInitialized) && allEmpty;
 };
 
+export const areTransactionsStoresLoaded = (
+	transactionsStores: TransactionsStoreCheckParams[]
+): boolean =>
+	transactionsStores.length > 0 &&
+	transactionsStores.every((transactionsStore) =>
+		isTransactionsStoreInitialized(transactionsStore)
+	);
+
 export const getKnownDestinations = (
 	transactions: AnyTransactionUiWithToken[]
 ): KnownDestinations =>
@@ -312,7 +320,8 @@ export const getKnownDestinations = (
 											? Math.max(Number(acc[address].timestamp), Number(timestamp))
 											: nonNullish(timestamp)
 												? Number(timestamp)
-												: acc[address].timestamp
+												: acc[address].timestamp,
+									address
 								}
 							}),
 							{}

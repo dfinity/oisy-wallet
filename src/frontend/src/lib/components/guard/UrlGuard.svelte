@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
-	import VipRewardStateModal from '$lib/components/qr/VipRewardStateModal.svelte';
+	import VipRewardStateModal from '$lib/components/vip/VipRewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipRewardState, modalVipRewardStateData } from '$lib/derived/modal.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';

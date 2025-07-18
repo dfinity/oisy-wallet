@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { UrlSchema } from '@dfinity/zod-schemas';
+	import { createEventDispatcher } from 'svelte';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
@@ -11,6 +12,7 @@
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionAmount } from '$lib/types/send';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 
 	interface Props {
 		amount: bigint;
@@ -45,40 +47,45 @@
 			displayURL = null;
 		}
 	});
-	// TODO: Migrate to Svelte 5, remove legacy slot usage and use render composition instead
+
+	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(dapp)}
-	<LogoButton on:click dividers>
-		<span slot="title">{dapp.name}</span>
+	<LogoButton onClick={() => dispatch('click')} dividers>
+		{#snippet title()}
+			{resolveText({ i18n: $i18n, path: dapp.name })}
+		{/snippet}
 
-		<span slot="description">
+		{#snippet description()}
 			{#if nonNullish(displayURL)}
 				{displayURL}
 			{/if}
-		</span>
+		{/snippet}
 
-		<Logo
-			slot="logo"
-			src={dapp.logo}
-			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dapp.name })}
-			size={logoSize}
-		/>
+		{#snippet logo()}
+			<Logo
+				src={dapp.logo}
+				alt={replacePlaceholders($i18n.dapps.alt.logo, {
+					$dAppName: resolveText({ i18n: $i18n, path: dapp.name })
+				})}
+				size={logoSize}
+			/>
+		{/snippet}
 
-		<Amount
-			{amount}
-			decimals={destinationToken.decimals}
-			symbol={destinationToken.symbol}
-			slot="title-end"
-		/>
+		{#snippet titleEnd()}
+			<Amount {amount} decimals={destinationToken.decimals} symbol={destinationToken.symbol} />
+		{/snippet}
 
-		<div class="flex items-center justify-end gap-2" slot="description-end">
-			{#if isBestRate}
-				<SwapBestRateBadge />
-			{/if}
-			<span class="mt-1">
-				{usdBalance}
-			</span>
-		</div>
+		{#snippet descriptionEnd()}
+			<div class="flex items-center justify-end gap-2">
+				{#if isBestRate}
+					<SwapBestRateBadge />
+				{/if}
+				<span class="mt-1">
+					{usdBalance ?? $i18n.tokens.text.exchange_is_not_available_short}
+				</span>
+			</div>
+		{/snippet}
 	</LogoButton>
 {/if}

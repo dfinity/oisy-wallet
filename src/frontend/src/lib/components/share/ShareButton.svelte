@@ -3,17 +3,23 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { canShare, shareText } from '$lib/utils/share.utils';
 
-	export let shareAriaLabel: string;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		shareAriaLabel: string;
+		testId?: string;
+	}
+
+	let { shareAriaLabel, testId }: Props = $props();
 </script>
 
 {#if canShare()}
 	<ButtonIcon
 		ariaLabel={shareAriaLabel}
-		on:click={async () => await shareText(shareAriaLabel)}
+		onclick={async () => await shareText(shareAriaLabel)}
 		{testId}
 		link={false}
 	>
-		<IconShareArrow size="24" slot="icon" />
+		{#snippet icon()}
+			<IconShareArrow size="24" />
+		{/snippet}
 	</ButtonIcon>
 {/if}

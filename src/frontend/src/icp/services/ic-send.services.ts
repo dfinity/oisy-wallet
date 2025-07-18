@@ -35,7 +35,7 @@ export const sendIc = async ({
 	...rest
 }: IcTransferParams & {
 	token: IcToken;
-	targetNetworkId: NetworkId | undefined;
+	targetNetworkId?: NetworkId;
 	sendCompleted: () => void;
 }): Promise<void> => {
 	await send({
@@ -56,7 +56,7 @@ const send = async ({
 	...rest
 }: IcTransferParams & {
 	token: IcToken;
-	targetNetworkId: NetworkId | undefined;
+	targetNetworkId?: NetworkId;
 }): Promise<void> => {
 	if (isNetworkIdBitcoin(targetNetworkId)) {
 		await convertCkBTCToBtc({

@@ -13,7 +13,9 @@ import {
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
+import * as analytics from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -44,12 +46,12 @@ describe('ic-transactions.services', () => {
 			certified: false
 		}));
 
-		let spyToastsError: MockInstance;
+		let spyAnalytics: MockInstance;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+			spyAnalytics = vi.spyOn(analytics, 'trackEvent');
 
 			icTransactionsStore.append({ tokenId, transactions: mockTransactions });
 			balancesStore.set({ id: tokenId, data: { data: bn1Bi, certified: false } });
@@ -62,41 +64,58 @@ describe('ic-transactions.services', () => {
 			expect(get(balancesStore)?.[tokenId]).toBeNull();
 		});
 
-		it('should call not display a toast if silent', () => {
-			onLoadTransactionsError({ tokenId, error: mockError, silent: true });
+		it('should track events', () => {
+			const mockError = new Error('Test error, Request ID: 423, status: rejected');
+			onLoadTransactionsError({ tokenId, error: mockError });
 
-			expect(spyToastsError).not.toHaveBeenCalled();
+			expect(spyAnalytics).toHaveBeenCalledOnce();
+			expect(spyAnalytics).toHaveBeenNthCalledWith(1, {
+				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
+				metadata: {
+					tokenId: tokenId.description,
+					error: 'Test error, status: rejected'
+				}
+			});
 		});
 
-		it('should log error to console when silent', () => {
-			onLoadTransactionsError({ tokenId, error: mockError, silent: true });
+		it('should log error to console', () => {
+			onLoadTransactionsError({ tokenId, error: mockError });
 
-			expect(console.warn).toHaveBeenCalledWith(
+			expect(console.warn).toHaveBeenCalledOnce();
+			expect(console.warn).toHaveBeenNthCalledWith(
+				1,
 				`${get(i18n).transactions.error.loading_transactions}:`,
 				mockError
 			);
 		});
 
-		it('should call toastsError by default', () => {
-			onLoadTransactionsError({ tokenId, error: mockError });
-
-			expect(spyToastsError).toHaveBeenCalledWith({
-				msg: { text: get(i18n).transactions.error.loading_transactions },
-				err: mockError
-			});
-		});
-
 		it('should handle a nullish error', () => {
 			onLoadTransactionsError({ tokenId, error: null });
 
-			expect(spyToastsError).toHaveBeenCalledWith({
-				msg: { text: get(i18n).transactions.error.loading_transactions },
-				err: null
+			onLoadTransactionsError({ tokenId, error: undefined });
+
+			expect(spyAnalytics).toHaveBeenCalledTimes(2);
+			expect(spyAnalytics).toHaveBeenNthCalledWith(1, {
+				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
+				metadata: {
+					tokenId: tokenId.description
+				}
+			});
+			expect(spyAnalytics).toHaveBeenNthCalledWith(2, {
+				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
+				metadata: {
+					tokenId: tokenId.description
+				}
 			});
 
-			onLoadTransactionsError({ tokenId, error: undefined, silent: true });
-
-			expect(console.warn).toHaveBeenCalledWith(
+			expect(console.warn).toHaveBeenCalledTimes(2);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				1,
+				`${get(i18n).transactions.error.loading_transactions}:`,
+				null
+			);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				2,
 				`${get(i18n).transactions.error.loading_transactions}:`,
 				undefined
 			);
@@ -365,17 +384,20 @@ describe('ic-transactions.services', () => {
 
 		const mockToken = ICP_TOKEN;
 
+		const mockMinTimestamp = 1_000_000_000;
+		const timestampBuffer = BigInt(mockMinTimestamp) + 500_000_000n;
+
 		const mockTransactions: IcTransactionUi[] = createMockIcTransactionsUi(17).map(
 			(transaction, index) => ({
 				...transaction,
-				timestamp: 100n + BigInt(index)
+				timestamp: timestampBuffer + BigInt(index)
 			})
 		);
 		const [expectedOldestTransaction] = mockTransactions;
 		const { id: mockLastId } = expectedOldestTransaction;
 
 		const mockParams = {
-			minTimestamp: 1n,
+			minTimestamp: mockMinTimestamp,
 			transactions: mockTransactions,
 			owner: mockIdentity.getPrincipal(),
 			identity: mockIdentity,
@@ -400,7 +422,10 @@ describe('ic-transactions.services', () => {
 		});
 
 		it('should not load transactions if the minStamp is newer than all the transactions', async () => {
-			const result = await loadNextIcTransactionsByOldest({ ...mockParams, minTimestamp: 10_000n });
+			const result = await loadNextIcTransactionsByOldest({
+				...mockParams,
+				minTimestamp: Number(timestampBuffer) * 10
+			});
 
 			expect(result).toEqual({ success: false });
 
@@ -451,6 +476,50 @@ describe('ic-transactions.services', () => {
 			});
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
 				start: BigInt(lastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: true
+			});
+		});
+
+		it('should handle minimum timestamp correctly in different units', async () => {
+			const resultWithNano = await loadNextIcTransactionsByOldest(mockParams);
+
+			expect(resultWithNano).toEqual({ success: true });
+
+			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				start: BigInt(mockLastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: false
+			});
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				start: BigInt(mockLastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: true
+			});
+
+			vi.clearAllMocks();
+
+			const resultWithMillis = await loadNextIcTransactionsByOldest(mockParams);
+
+			expect(resultWithMillis).toEqual({ success: true });
+
+			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				start: BigInt(mockLastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: false
+			});
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
 				maxResults: WALLET_PAGINATION,

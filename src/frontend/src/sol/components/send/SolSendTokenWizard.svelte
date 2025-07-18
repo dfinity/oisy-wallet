@@ -7,7 +7,6 @@
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -20,11 +19,10 @@
 	import {
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
-		solAddressTestnet
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import type { ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -32,15 +30,15 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionSolAddress } from '$lib/types/address';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdSolana,
 		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
+		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
@@ -59,6 +57,7 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -70,26 +69,27 @@
 
 	let source: OptionSolAddress;
 	let solanaNativeToken: Token;
-	$: [source, solanaNativeToken] = isNetworkIdSOLTestnet(networkId)
-		? [$solAddressTestnet, SOLANA_TESTNET_TOKEN]
-		: isNetworkIdSOLDevnet(networkId)
-			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
-			: isNetworkIdSOLLocal(networkId)
-				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
-				: [$solAddressMainnet, SOLANA_TOKEN];
+	$: [source, solanaNativeToken] = isNetworkIdSOLDevnet(networkId)
+		? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
+		: isNetworkIdSOLLocal(networkId)
+			? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+			: [$solAddressMainnet, SOLANA_TOKEN];
 
 	/**
 	 * Fee context store
 	 */
 
-	let feeStore = initFeeStore();
-	let prioritizationFeeStore = initFeeStore();
-	let ataFeeStore = initFeeStore();
+	const feeStore = initFeeStore();
+	const prioritizationFeeStore = initFeeStore();
+	const ataFeeStore = initFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(solanaNativeToken.symbol);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	$: feeTokenIdStore.set(solanaNativeToken.id);
+
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(solanaNativeToken.decimals);
 
 	setContext<FeeContextType>(
@@ -99,7 +99,8 @@
 			prioritizationFeeStore,
 			ataFeeStore,
 			feeSymbolStore,
-			feeDecimalsStore
+			feeDecimalsStore,
+			feeTokenIdStore
 		})
 	);
 
@@ -181,6 +182,17 @@
 				}
 			});
 
+			if (sendProgressStep === ProgressStepsSendSol.CONFIRM) {
+				toastsError({
+					msg: { text: $i18n.send.error.solana_confirmation_failed },
+					err
+				});
+
+				setTimeout(() => close(), 750);
+
+				return;
+			}
+
 			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)
 				? $i18n.send.error.solana_transaction_expired
 				: $i18n.send.error.unexpected;
@@ -197,7 +209,7 @@
 
 <SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview on:icBack on:icSend={send} {destination} {amount} {network} />
+		<SolSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} {network} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
@@ -206,9 +218,9 @@
 			on:icClose
 			on:icTokensList
 			on:icBack
+			{selectedContact}
 			bind:destination
 			bind:amount
-			source={source ?? ''}
 		>
 			<ButtonBack onclick={back} slot="cancel" />
 		</SolSendForm>

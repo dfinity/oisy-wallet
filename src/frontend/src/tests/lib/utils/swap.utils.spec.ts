@@ -12,8 +12,10 @@ import {
 	SWAP_DEFAULT_SLIPPAGE_VALUE
 } from '$lib/constants/swap.constants';
 import type { ICPSwapResult } from '$lib/types/swap';
+import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
+	formatReceiveOutMinimum,
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
 	getNetworkFee,
@@ -245,6 +247,70 @@ describe('swap utils', () => {
 
 		it('returns 0 for full slippage (100%)', () => {
 			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(0n);
+		});
+	});
+
+	describe('formatReceiveOutMinimum', () => {
+		it('formats valid number slippage', () => {
+			const result = formatReceiveOutMinimum({
+				slippageValue: 5,
+				receiveAmount: 1000n,
+				decimals: 2
+			});
+
+			const expectedMinimum = calculateSlippage({
+				quoteAmount: 1000n,
+				slippagePercentage: 5
+			});
+
+			const expectedFormatted = formatToken({
+				value: expectedMinimum,
+				unitName: 2,
+				displayDecimals: 2
+			});
+
+			expect(result).toBe(expectedFormatted);
+		});
+
+		it('formats valid string slippage', () => {
+			const result = formatReceiveOutMinimum({
+				slippageValue: '1',
+				receiveAmount: 1000n,
+				decimals: 2
+			});
+
+			const expectedMinimum = calculateSlippage({
+				quoteAmount: 1000n,
+				slippagePercentage: 1
+			});
+
+			const expectedFormatted = formatToken({
+				value: expectedMinimum,
+				unitName: 2,
+				displayDecimals: 2
+			});
+
+			expect(result).toBe(expectedFormatted);
+		});
+
+		it('returns null for empty slippage string', () => {
+			const result = formatReceiveOutMinimum({
+				slippageValue: '',
+				receiveAmount: 1000n,
+				decimals: 2
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('returns null for undefined slippage', () => {
+			const result = formatReceiveOutMinimum({
+				slippageValue: undefined,
+				receiveAmount: 1000n,
+				decimals: 2
+			});
+
+			expect(result).toBeUndefined();
 		});
 	});
 });

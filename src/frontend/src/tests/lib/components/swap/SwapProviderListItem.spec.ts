@@ -1,5 +1,6 @@
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
@@ -95,5 +96,19 @@ describe('SwapProviderListItem', () => {
 		});
 
 		expect(getByText('$12.34')).toBeInTheDocument();
+	});
+
+	it('renders fallback text if usdBalance is undefined', () => {
+		const dapp = createDapp();
+
+		const { getByText } = render(SwapProviderListItem, {
+			props: {
+				...baseProps,
+				usdBalance: undefined,
+				dapp
+			}
+		});
+
+		expect(getByText(en.tokens.text.exchange_is_not_available_short)).toBeInTheDocument();
 	});
 });

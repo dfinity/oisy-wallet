@@ -26,13 +26,15 @@
 	$: tokens, debounceManageWorkers();
 
 	onDestroy(() => {
-		workers.forEach((worker) => worker.stop());
+		workers.forEach((worker) => worker.destroy());
 		workers.clear();
 	});
 
 	const triggerTimer = () => workers.forEach((worker) => worker.trigger());
+
+	const debounceTriggerTimer = debounce(triggerTimer, 1000);
 </script>
 
-<svelte:window on:oisyTriggerWallet={triggerTimer} />
+<svelte:window on:oisyTriggerWallet={debounceTriggerTimer} />
 
 <slot />

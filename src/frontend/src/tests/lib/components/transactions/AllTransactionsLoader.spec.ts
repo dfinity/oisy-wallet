@@ -12,10 +12,12 @@ import * as icTransactionsServices from '$icp/services/ic-transactions.services'
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, Transaction } from '$lib/types/transaction';
+import * as transactionsUtils from '$lib/utils/transactions.utils';
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
@@ -31,7 +33,9 @@ import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock'
 import { mockSplCustomToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
+import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -47,15 +51,19 @@ describe('AllTransactionsLoader', () => {
 	let spyLoadNextIcTransactions: MockInstance;
 	let spyLoadNextSolTransactions: MockInstance;
 
+	const mockMinTimestampStart = 1_000_000_000n;
+	const timestampBuffer = mockMinTimestampStart + 500_000_000n;
+	const mockMaxTimestamp = timestampBuffer + 200_000_000n;
+
 	// Oldest transactions
 	const btcTransactions: AllTransactionUiWithCmp[] = [
 		...createMockBtcTransactionsUi(3).map((transaction, index) => ({
-			transaction: { ...transaction, timestamp: 1n + BigInt(index) },
+			transaction: { ...transaction, timestamp: mockMinTimestampStart + 1n + BigInt(index) },
 			component: 'bitcoin' as const,
 			token: BTC_MAINNET_TOKEN
 		})),
 		...createMockBtcTransactionsUi(4).map((transaction, index) => ({
-			transaction: { ...transaction, timestamp: 2n + BigInt(index) },
+			transaction: { ...transaction, timestamp: mockMinTimestampStart + 2n + BigInt(index) },
 			component: 'bitcoin' as const,
 			token: BTC_TESTNET_TOKEN
 		}))
@@ -64,17 +72,17 @@ describe('AllTransactionsLoader', () => {
 	// Newest transactions
 	const ethTransactions: AllTransactionUiWithCmp[] = [
 		...createMockEthTransactionsUi(5).map((transaction, index) => ({
-			transaction: { ...transaction, timestamp: 10_000 + index },
+			transaction: { ...transaction, timestamp: Number(mockMaxTimestamp) + index },
 			component: 'ethereum' as const,
 			token: ETHEREUM_TOKEN
 		})),
 		...createMockEthTransactionsUi(6).map((transaction, index) => ({
-			transaction: { ...transaction, timestamp: 20_000 + index },
+			transaction: { ...transaction, timestamp: Number(mockMaxTimestamp) * 2 + index },
 			component: 'ethereum' as const,
 			token: BNB_MAINNET_TOKEN
 		})),
 		...createMockEthTransactionsUi(7).map((transaction, index) => ({
-			transaction: { ...transaction, timestamp: 30_000 + index },
+			transaction: { ...transaction, timestamp: Number(mockMaxTimestamp) * 3 + index },
 			component: 'ethereum' as const,
 			token: BASE_SEPOLIA_ETH_TOKEN
 		}))
@@ -83,8 +91,8 @@ describe('AllTransactionsLoader', () => {
 	// Transactions to be checked for IC tokens
 	const mockIcToken = { ...mockIcrcCustomToken, enabled: true };
 	const icTokens: [Token, number, bigint][] = [
-		[ICP_TOKEN, 8, 100n],
-		[mockIcToken, 9, 200n]
+		[ICP_TOKEN, 8, timestampBuffer + 100n],
+		[mockIcToken, 9, timestampBuffer + 200n]
 	];
 	const icTransactions: AllTransactionUiWithCmp[] = icTokens.reduce<AllTransactionUiWithCmp[]>(
 		(acc, [token, n, buffer]) => {
@@ -102,9 +110,9 @@ describe('AllTransactionsLoader', () => {
 	const mockSplToken = { ...mockSplCustomToken, enabled: true };
 	const mockSplDefaultToken = { ...BONK_TOKEN, enabled: true };
 	const solTokens: [Token, number, bigint][] = [
-		[SOLANA_TOKEN, 10, 300n],
-		[mockSplDefaultToken, 11, 400n],
-		[mockSplToken, 12, 500n]
+		[SOLANA_TOKEN, 10, timestampBuffer + 300n],
+		[mockSplDefaultToken, 11, timestampBuffer + 400n],
+		[mockSplToken, 12, timestampBuffer + 500n]
 	];
 	const solTransactions: AllTransactionUiWithCmp[] = solTokens.reduce<AllTransactionUiWithCmp[]>(
 		(acc, [token, n, buffer]) => {
@@ -125,8 +133,12 @@ describe('AllTransactionsLoader', () => {
 		...solTransactions
 	];
 
-	const mockMinTimestamp = BigInt(
-		Math.min(...mockTransactions.map(({ transaction }) => Number(transaction.timestamp)))
+	const mockMinTimestamp = Math.min(
+		...mockTransactions.map(({ transaction }) =>
+			nonNullish(transaction.timestamp)
+				? normalizeTimestampToSeconds(transaction.timestamp)
+				: Infinity
+		)
 	);
 
 	const props = { transactions: mockTransactions };
@@ -138,6 +150,8 @@ describe('AllTransactionsLoader', () => {
 
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
+
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(true);
 
 		spyLoadNextIcTransactions = vi.spyOn(icTransactionsServices, 'loadNextIcTransactionsByOldest');
 		spyLoadNextSolTransactions = vi.spyOn(
@@ -186,7 +200,7 @@ describe('AllTransactionsLoader', () => {
 		ethTransactions.forEach(({ transaction, token: { id: tokenId } }) => {
 			ethTransactionsStore.add({
 				tokenId,
-				transactions: [transaction as Transaction]
+				transactions: [{ data: transaction as Transaction, certified: false }]
 			});
 		});
 
@@ -209,6 +223,15 @@ describe('AllTransactionsLoader', () => {
 				transactions: [{ data: transaction as SolTransactionUi, certified: false }]
 			});
 		});
+	});
+
+	it('should not load transactions if transactions store are not loaded', () => {
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(false);
+
+		render(AllTransactionsLoader, { props: { transactions: [] } });
+
+		expect(spyLoadNextIcTransactions).not.toHaveBeenCalled();
+		expect(spyLoadNextSolTransactions).not.toHaveBeenCalled();
 	});
 
 	it('should not load transactions if identity is nullish', () => {
@@ -349,7 +372,7 @@ describe('AllTransactionsLoader', () => {
 
 			const newTransaction: IcTransactionUi = {
 				...createMockIcTransactionsUi(1)[0],
-				timestamp: 1n
+				timestamp: mockMinTimestampStart + 1n
 			};
 
 			spyLoadNextIcTransactions.mockImplementation(
@@ -389,6 +412,7 @@ describe('AllTransactionsLoader', () => {
 				);
 
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					token,
@@ -410,6 +434,7 @@ describe('AllTransactionsLoader', () => {
 				);
 
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					token,
@@ -462,7 +487,7 @@ describe('AllTransactionsLoader', () => {
 
 			const newTransaction: SolTransactionUi = {
 				...createMockSolTransactionsUi(1)[0],
-				timestamp: 1n
+				timestamp: mockMinTimestampStart + 1n
 			};
 
 			spyLoadNextSolTransactions.mockImplementation(
@@ -518,6 +543,7 @@ describe('AllTransactionsLoader', () => {
 			);
 
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				minTimestamp: mockMinTimestamp,
 				transactions,
 				token,
@@ -533,6 +559,39 @@ describe('AllTransactionsLoader', () => {
 		);
 
 		render(AllTransactionsLoader, { props });
+
+		expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
+		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+	});
+
+	it('should not load transactions more than once after mounting', async () => {
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(false);
+
+		render(AllTransactionsLoader, { props });
+
+		await tick();
+
+		expect(spyLoadNextIcTransactions).not.toHaveBeenCalled();
+		expect(spyLoadNextSolTransactions).not.toHaveBeenCalled();
+
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(true);
+		splDefaultTokensStore.reset();
+		await tick();
+		splDefaultTokensStore.add(BONK_TOKEN);
+		await tick();
+
+		expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
+		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);
+
+		vi.spyOn(transactionsUtils, 'areTransactionsStoresLoaded').mockReturnValue(false);
+		splDefaultTokensStore.reset();
+		await tick();
+		splDefaultTokensStore.add(BONK_TOKEN);
+		await tick();
+		splDefaultTokensStore.reset();
+		await tick();
+		splDefaultTokensStore.add(BONK_TOKEN);
+		await tick();
 
 		expect(spyLoadNextIcTransactions).toHaveBeenCalledTimes(icTokens.length);
 		expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length);

@@ -38,10 +38,6 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 				throw new Error(`Ledger canister ID is missing for token symbol ${key}.`);
 			}
 
-			if (isNullish(savedIndexCanisterId)) {
-				throw new Error(`Index canister ID is missing for token symbol ${key}.`);
-			}
-
 			const { tokens: accTokens, icons: accIcons } = await acc;
 
 			const { ledgerCanisterId, ...rest } = token;

@@ -1,9 +1,9 @@
 import type { CampaignEligibility } from '$lib/types/reward';
 import { derived, writable, type Readable } from 'svelte/store';
 
-export type RewardEligibilityData = {
+export interface RewardEligibilityData {
 	campaignEligibilities?: CampaignEligibility[] | undefined;
-};
+}
 
 export interface RewardEligibilityStore extends Readable<RewardEligibilityData> {
 	setCampaignEligibilities: (campaignEligibilities: CampaignEligibility[]) => void;

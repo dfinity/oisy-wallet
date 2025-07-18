@@ -1,4 +1,8 @@
 import {
+	ARBITRUM_MAINNET_NETWORK,
+	ARBITRUM_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
 	BASE_NETWORK,
 	BASE_SEPOLIA_NETWORK
 } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -6,19 +10,23 @@ import {
 	BSC_MAINNET_NETWORK,
 	BSC_TESTNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
+	POLYGON_AMOY_NETWORK,
+	POLYGON_MAINNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.polygon.env';
 import * as btcEnv from '$env/networks/networks.btc.env';
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import * as solEnv from '$env/networks/networks.sol.env';
-import {
-	SOLANA_DEVNET_NETWORK,
-	SOLANA_MAINNET_NETWORK,
-	SOLANA_TESTNET_NETWORK
-} from '$env/networks/networks.sol.env';
+import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import {
+	ARBITRUM_ETH_TOKEN,
+	ARBITRUM_SEPOLIA_ETH_TOKEN
+} from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import {
 	BASE_ETH_TOKEN,
 	BASE_SEPOLIA_ETH_TOKEN
@@ -27,22 +35,24 @@ import {
 	BNB_MAINNET_TOKEN,
 	BNB_TESTNET_TOKEN
 } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import {
+	POL_AMOY_TOKEN,
+	POL_MAINNET_TOKEN
+} from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import {
-	SOLANA_DEVNET_TOKEN,
-	SOLANA_TESTNET_TOKEN,
-	SOLANA_TOKEN
-} from '$env/tokens/tokens.sol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
-import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+import type { Network } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -79,13 +89,15 @@ describe('network-tokens.derived', () => {
 		});
 
 		it('should return all non-testnet tokens when no network is selected and testnets are disabled', () => {
-			expect(get(enabledNetworkTokens)).toEqual([
+			expect(get(enabledFungibleNetworkTokens)).toEqual([
 				ICP_TOKEN,
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
 				BASE_ETH_TOKEN,
-				BNB_MAINNET_TOKEN
+				BNB_MAINNET_TOKEN,
+				POL_MAINNET_TOKEN,
+				ARBITRUM_ETH_TOKEN
 			]);
 		});
 
@@ -110,7 +122,7 @@ describe('network-tokens.derived', () => {
 				...toggleProps
 			};
 
-			const networkMap = [
+			const networkMap: { network: Network; tokens: Token[] }[] = [
 				{
 					network: ICP_NETWORK,
 					tokens: [ICP_TOKEN]
@@ -132,10 +144,6 @@ describe('network-tokens.derived', () => {
 					tokens: [SOLANA_TOKEN, mockSplCustomToken]
 				},
 				{
-					network: SOLANA_TESTNET_NETWORK,
-					tokens: [SOLANA_TESTNET_TOKEN]
-				},
-				{
 					network: SOLANA_DEVNET_NETWORK,
 					tokens: [SOLANA_DEVNET_TOKEN, mockSplDevnetCustomToken]
 				},
@@ -154,6 +162,22 @@ describe('network-tokens.derived', () => {
 				{
 					network: BSC_TESTNET_NETWORK,
 					tokens: [BNB_TESTNET_TOKEN]
+				},
+				{
+					network: POLYGON_MAINNET_NETWORK,
+					tokens: [POL_MAINNET_TOKEN]
+				},
+				{
+					network: POLYGON_AMOY_NETWORK,
+					tokens: [POL_AMOY_TOKEN]
+				},
+				{
+					network: ARBITRUM_MAINNET_NETWORK,
+					tokens: [ARBITRUM_ETH_TOKEN]
+				},
+				{
+					network: ARBITRUM_SEPOLIA_NETWORK,
+					tokens: [ARBITRUM_SEPOLIA_ETH_TOKEN]
 				}
 			];
 
@@ -171,13 +195,15 @@ describe('network-tokens.derived', () => {
 			});
 
 			it('should not return testnet tokens when no network is selected', () => {
-				expect(get(enabledNetworkTokens)).toEqual([
+				expect(get(enabledFungibleNetworkTokens)).toEqual([
 					ICP_TOKEN,
 					BTC_MAINNET_TOKEN,
 					ETHEREUM_TOKEN,
 					SOLANA_TOKEN,
 					BASE_ETH_TOKEN,
 					BNB_MAINNET_TOKEN,
+					POL_MAINNET_TOKEN,
+					ARBITRUM_ETH_TOKEN,
 					mockErc20UserToken,
 					mockSplCustomToken
 				]);
@@ -188,7 +214,7 @@ describe('network-tokens.derived', () => {
 				({ network, tokens }) => {
 					mockPage.mock({ network: network.id.description });
 
-					expect(get(enabledNetworkTokens)).toEqual(tokens);
+					expect(get(enabledFungibleNetworkTokens)).toEqual(tokens);
 				}
 			);
 		});

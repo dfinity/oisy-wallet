@@ -4,6 +4,7 @@ import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/
 import { ZERO } from '$lib/constants/app.constants';
 import { solAddressDevnetStore, solAddressMainnetStore } from '$lib/stores/address.store';
 import * as solanaApi from '$sol/api/solana.api';
+import { getAccountOwner } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import {
@@ -21,6 +22,8 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import {
 	createMockSolTransactionsUi,
@@ -35,11 +38,19 @@ import {
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
 import { get } from 'svelte/store';
-import type { MockInstance } from 'vitest';
+import { vi, type MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
 }));
+
+vi.mock(import('$sol/api/solana.api'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		getAccountOwner: vi.fn()
+	};
+});
 
 describe('sol-transactions.services', () => {
 	let spyGetTransactions: MockInstance;
@@ -61,6 +72,8 @@ describe('sol-transactions.services', () => {
 		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');
 		spyFindAssociatedTokenPda = vi.spyOn(solProgramToken, 'findAssociatedTokenPda');
 		spyFindAssociatedTokenPda.mockResolvedValue([mockSplAddress]);
+
+		mockAuthStore();
 	});
 
 	describe('fetchSolTransactionsForSignature', () => {
@@ -82,6 +95,7 @@ describe('sol-transactions.services', () => {
 		};
 
 		const mockParams = {
+			identity: mockIdentity,
 			signature: mockSignature,
 			network,
 			address: mockSolAddress
@@ -174,6 +188,7 @@ describe('sol-transactions.services', () => {
 
 			mockAllInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
+					identity: mockIdentity,
 					instruction: { ...instruction, programAddress: instruction.programId },
 					network,
 					cumulativeBalances:
@@ -210,6 +225,7 @@ describe('sol-transactions.services', () => {
 
 			innerInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
+					identity: mockIdentity,
 					instruction: { ...instruction, programAddress: instruction.programId },
 					network,
 					cumulativeBalances:
@@ -341,6 +357,7 @@ describe('sol-transactions.services', () => {
 
 			mockAllInstructions.forEach((instruction, index) => {
 				expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(index + 1, {
+					identity: mockIdentity,
 					instruction: { ...instruction, programAddress: instruction.programId },
 					network,
 					cumulativeBalances:
@@ -362,17 +379,34 @@ describe('sol-transactions.services', () => {
 				});
 			});
 		});
+
+		it('should map the owner address if it exists', async () => {
+			vi.mocked(getAccountOwner).mockResolvedValue('mock-owner-address');
+
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(
+				expectedResults.map((transaction) => ({
+					...transaction,
+					fromOwner: 'mock-owner-address',
+					toOwner: 'mock-owner-address'
+				}))
+			);
+		});
 	});
 
 	describe('loadNextSolTransactions', () => {
 		const mockToken = SOLANA_TOKEN;
 
 		const mockParams: LoadNextSolTransactionsParams = {
+			identity: mockIdentity,
 			token: mockToken,
 			signalEnd
 		};
 
 		beforeEach(() => {
+			vi.clearAllMocks();
+
+			mockAuthStore();
+
 			solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
 			solAddressDevnetStore.set({ data: mockSolAddress2, certified: false });
 
@@ -402,6 +436,7 @@ describe('sol-transactions.services', () => {
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -414,6 +449,7 @@ describe('sol-transactions.services', () => {
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				tokenAddress: BONK_TOKEN.address,
@@ -433,6 +469,7 @@ describe('sol-transactions.services', () => {
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				before,
@@ -475,6 +512,7 @@ describe('sol-transactions.services', () => {
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
 				address: mockSolAddress2,
 				network: SolanaNetworks.devnet
 			});
@@ -486,17 +524,21 @@ describe('sol-transactions.services', () => {
 
 		const mockToken = SOLANA_TOKEN;
 
+		const mockMinTimestamp = 1_000_000_000;
+		const timestampBuffer = BigInt(mockMinTimestamp) + 500_000_000n;
+
 		const mockTransactions: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
 			(transaction, index) => ({
 				...transaction,
-				timestamp: 100n + BigInt(index)
+				timestamp: timestampBuffer + BigInt(index)
 			})
 		);
 		const [expectedOldestTransaction] = mockTransactions;
 		const { signature: mockLastSignature } = expectedOldestTransaction;
 
 		const mockParams = {
-			minTimestamp: 1n,
+			identity: mockIdentity,
+			minTimestamp: mockMinTimestamp,
 			transactions: mockTransactions,
 			token: mockToken,
 			signalEnd
@@ -504,6 +546,8 @@ describe('sol-transactions.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			mockAuthStore();
 
 			solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
 		});
@@ -516,10 +560,10 @@ describe('sol-transactions.services', () => {
 			expect(spyGetTransactions).not.toHaveBeenCalled();
 		});
 
-		it('should not load transactions if the minStamp is newer than all the transactions', async () => {
+		it('should not load transactions if the minimum timestamp is newer than all the transactions', async () => {
 			const result = await loadNextSolTransactionsByOldest({
 				...mockParams,
-				minTimestamp: 10_000n
+				minTimestamp: Number(timestampBuffer) * 10
 			});
 
 			expect(result).toEqual({ success: false });
@@ -534,6 +578,7 @@ describe('sol-transactions.services', () => {
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				before: mockLastSignature
@@ -555,9 +600,44 @@ describe('sol-transactions.services', () => {
 
 			expect(spyGetTransactions).toHaveBeenCalledOnce();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				before: lastSignature
+			});
+		});
+
+		it('should handle minimum timestamp correctly in different units', async () => {
+			const resultWithNano = await loadNextSolTransactionsByOldest({
+				...mockParams,
+				minTimestamp: mockMinTimestamp * 1_000_000_000 + 1
+			});
+
+			expect(resultWithNano).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: mockLastSignature
+			});
+
+			vi.clearAllMocks();
+
+			const resultWithMillis = await loadNextSolTransactionsByOldest({
+				...mockParams,
+				minTimestamp: mockMinTimestamp * 1_000 + 1
+			});
+
+			expect(resultWithMillis).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: mockLastSignature
 			});
 		});
 	});

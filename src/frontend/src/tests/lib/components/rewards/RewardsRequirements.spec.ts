@@ -1,4 +1,5 @@
-import type { RewardDescription } from '$env/types/env-reward';
+import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
 import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
@@ -9,8 +10,8 @@ import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('RewardsRequirements', () => {
-	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
-		({ id }) => id === 'OISY Airdrop #1'
+	const mockRewardCampaign: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
+		({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 	assertNonNullish(mockRewardCampaign);
 

@@ -12,7 +12,7 @@
 
 	interface Props {
 		token: Token;
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { token, children }: Props = $props();
@@ -47,6 +47,6 @@
 	};
 </script>
 
-<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
-	{@render children?.()}
+<InfiniteScroll {onIntersect} disabled={disableInfiniteScroll}>
+	{@render children()}
 </InfiniteScroll>

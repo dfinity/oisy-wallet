@@ -16,7 +16,6 @@ export const isTokenUiGroup = (
 ): tokenUiOrGroupUi is { group: TokenUiGroup } =>
 	typeof tokenUiOrGroupUi === 'object' &&
 	'group' in tokenUiOrGroupUi &&
-	'nativeToken' in tokenUiOrGroupUi.group &&
 	'tokens' in tokenUiOrGroupUi.group;
 
 /**
@@ -79,7 +78,6 @@ export const filterTokenGroups = ({
 const mapNewTokenGroup = (token: TokenUiGroupable): TokenUiGroup => ({
 	id: token.groupData.id,
 	decimals: token.decimals,
-	nativeToken: token,
 	groupData: token.groupData,
 	tokens: [token],
 	balance: token.balance,
@@ -188,3 +186,25 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 
 	return Object.getOwnPropertySymbols(tokenGroupsMap).map((id) => tokenGroupsMap[id as TokenId]);
 };
+
+export const sortTokenOrGroupUi = (tokenOrGroup: TokenUiOrGroupUi[]) =>
+	tokenOrGroup.sort(
+		(a, b) =>
+			!isTokenUiGroup(a) && !isTokenUiGroup(b)
+				? (() => {
+						const aName = a.token.name;
+						const bName = b.token.name;
+						// we want non alphanumeric starting items to come last
+						const isAlphaNum = (char: string) => /^[a-zA-Z0-9]$/.test(char);
+						const aStartsValid = isAlphaNum(aName.charAt(0));
+						const bStartsValid = isAlphaNum(bName.charAt(0));
+						if (aStartsValid && !bStartsValid) {
+							return -1;
+						}
+						if (!aStartsValid && bStartsValid) {
+							return 1;
+						}
+						return aName.localeCompare(bName);
+					})()
+				: 1 // Todo: currently we have no plans to sort groups alphabetically so we fallback to not sorting it
+	);

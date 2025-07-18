@@ -1,5 +1,6 @@
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
 import { SUPPORTED_NETWORK_IDS, SUPPORTED_TESTNET_NETWORK_IDS } from '$env/networks/networks.env';
 import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
@@ -7,6 +8,9 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SUPPORTED_SOLANA_NETWORK_IDS } from '$env/networks/networks.sol.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BNB_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens.bnb.env';
+import { POL_MAINNET_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
+import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -15,6 +19,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { defaultFallbackToken, tokenToggleable } from '$lib/derived/token.derived';
 import { token } from '$lib/stores/token.store';
 import { parseTokenId } from '$lib/validation/token.validation';
+import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -100,6 +105,15 @@ describe('token.derived', () => {
 			}
 		);
 
+		it.each(SUPPORTED_POLYGON_NETWORK_IDS)(
+			`should return default token for Polygon network %s`,
+			(networkId) => {
+				mockPage.mock({ network: networkId.description });
+
+				expect(get(defaultFallbackToken)).toEqual(POL_MAINNET_TOKEN);
+			}
+		);
+
 		it('should return ETH for ICP network', () => {
 			mockPage.mock({ network: ICP_NETWORK_ID.description });
 
@@ -133,14 +147,11 @@ describe('token.derived', () => {
 				setupUserNetworksStore('allDisabled');
 			});
 
-			it.each(SUPPORTED_NETWORK_IDS)(
-				`should return default token for Bitcoin network %s`,
-				(networkId) => {
-					mockPage.mock({ network: networkId.description });
+			it.each(SUPPORTED_NETWORK_IDS)(`should return default token for network %s`, (networkId) => {
+				mockPage.mock({ network: networkId.description });
 
-					expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
-				}
-			);
+				expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
+			});
 		});
 	});
 
@@ -193,6 +204,30 @@ describe('token.derived', () => {
 
 		it('should return false if sepolia token is toggleable', () => {
 			token.set(SEPOLIA_TOKEN);
+
+			expect(get(tokenToggleable)).toBeFalsy();
+		});
+
+		it('should return true if BONK token is toggleable', () => {
+			token.set({ ...BONK_TOKEN, enabled: true } as SplCustomToken);
+
+			expect(get(tokenToggleable)).toBeTruthy();
+		});
+
+		it('should return true if Trump token is toggleable', () => {
+			token.set({ ...TRUMP_TOKEN, enabled: true } as SplCustomToken);
+
+			expect(get(tokenToggleable)).toBeTruthy();
+		});
+
+		it('should return true if Trump token is toggleable but not enabled', () => {
+			token.set({ ...TRUMP_TOKEN, enabled: false } as SplCustomToken);
+
+			expect(get(tokenToggleable)).toBeTruthy();
+		});
+
+		it('should return false if Solana token is toggleable', () => {
+			token.set({ ...SOLANA_TOKEN, enabled: true } as SplCustomToken);
 
 			expect(get(tokenToggleable)).toBeFalsy();
 		});

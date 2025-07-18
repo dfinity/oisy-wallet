@@ -14,60 +14,60 @@ describe('AutoLoader', () => {
 	});
 
 	it('should call load function once on mount', async () => {
-		const load = vi.fn();
+		const onLoad = vi.fn();
 
 		render(IntervalLoader, {
 			props: {
-				load,
+				onLoad,
 				interval
 			}
 		});
 
 		await tick();
 
-		expect(load).toHaveBeenCalledOnce();
+		expect(onLoad).toHaveBeenCalledOnce();
 	});
 
 	it('should call load function repeatedly on interval', async () => {
-		const load = vi.fn();
+		const onLoad = vi.fn();
 		const interval = 1000;
 
 		render(IntervalLoader, {
 			props: {
-				load,
+				onLoad,
 				interval
 			}
 		});
 
 		await tick();
 
-		expect(load).toHaveBeenCalledOnce();
+		expect(onLoad).toHaveBeenCalledOnce();
 
 		const n = 5;
 
 		vi.advanceTimersByTime(interval * 5 + interval / 2);
 
-		expect(load).toHaveBeenCalledTimes(n + 1);
+		expect(onLoad).toHaveBeenCalledTimes(n + 1);
 	});
 
 	it('should stop timer on destroy', async () => {
-		const load = vi.fn();
+		const onLoad = vi.fn();
 
 		const { unmount } = render(IntervalLoader, {
 			props: {
-				load,
+				onLoad,
 				interval
 			}
 		});
 
 		await tick();
 
-		expect(load).toHaveBeenCalledOnce();
+		expect(onLoad).toHaveBeenCalledOnce();
 
 		unmount();
 
 		vi.advanceTimersByTime(interval * 5);
 
-		expect(load).toHaveBeenCalledOnce();
+		expect(onLoad).toHaveBeenCalledOnce();
 	});
 });

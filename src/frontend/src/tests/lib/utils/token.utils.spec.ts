@@ -18,6 +18,7 @@ import {
 	calculateTokenUsdBalance,
 	findTwinToken,
 	getMaxTransactionAmount,
+	getTokenDisplaySymbol,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
 	sumUsdBalances
@@ -25,6 +26,7 @@ import {
 import { bn3Bi, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import type { MockedFunction } from 'vitest';
 
@@ -49,7 +51,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(Number(balance - fee) / 10 ** tokenDecimals);
+				expect(result).toBe((Number(balance - fee) / 10 ** tokenDecimals).toString());
 			});
 		});
 
@@ -62,7 +64,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(0);
+				expect(result).toBe('0');
 			});
 		});
 
@@ -75,7 +77,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(0);
+				expect(result).toBe('0');
 			});
 		});
 
@@ -88,7 +90,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(0);
+				expect(result).toBe('0');
 
 				result = getMaxTransactionAmount({
 					balance,
@@ -97,7 +99,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+				expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 			});
 		});
 
@@ -109,7 +111,7 @@ describe('token.utils', () => {
 				tokenStandard: 'erc20'
 			});
 
-			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 		});
 
 		it('should return the untouched amount if the token is SPL', () => {
@@ -120,7 +122,7 @@ describe('token.utils', () => {
 				tokenStandard: 'spl'
 			});
 
-			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 		});
 	});
 
@@ -499,6 +501,22 @@ describe('token.utils', () => {
 
 				expect(result.enabled).toBeTruthy();
 			});
+		});
+	});
+
+	describe('getTokenDisplaySymbol', () => {
+		it('should return oisy symbol if exists', () => {
+			const oisySymbol = 'OISY';
+
+			const result = getTokenDisplaySymbol({ ...mockIcrcCustomToken, oisySymbol: { oisySymbol } });
+
+			expect(result).toBe(oisySymbol);
+		});
+
+		it('should return token symbol if oisy symbol does not exist', () => {
+			const result = getTokenDisplaySymbol(mockIcrcCustomToken);
+
+			expect(result).toBe(mockIcrcCustomToken.symbol);
 		});
 	});
 });

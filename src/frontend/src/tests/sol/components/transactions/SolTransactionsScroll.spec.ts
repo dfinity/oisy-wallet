@@ -8,6 +8,7 @@ import {
 	IntersectionObserverActive,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
@@ -25,6 +26,8 @@ describe('SolTransactionsScroll', () => {
 	}));
 
 	const mockLastSignature = mockTransactions[mockTransactions.length - 1].signature;
+
+	const mockSnippet = createMockSnippet('Mock Snippet');
 
 	beforeAll(() => {
 		Object.defineProperty(window, 'IntersectionObserver', {
@@ -54,7 +57,7 @@ describe('SolTransactionsScroll', () => {
 
 	describe('when the infinite scroll is triggered', () => {
 		it('should load next transactions', () => {
-			render(SolTransactionsScroll, { token: mockToken });
+			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextSolTransactions).toHaveBeenCalledOnce();
 			expect(loadNextSolTransactions).toHaveBeenNthCalledWith(1, {
@@ -67,7 +70,7 @@ describe('SolTransactionsScroll', () => {
 		it('should not load next transactions if the token is nullish', () => {
 			token.reset();
 
-			render(SolTransactionsScroll, { token: mockToken });
+			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextSolTransactions).not.toHaveBeenCalled();
 		});
@@ -75,7 +78,7 @@ describe('SolTransactionsScroll', () => {
 		it('should not load next transactions if the transactions store is nullish', () => {
 			solTransactionsStore.reset(mockToken.id);
 
-			render(SolTransactionsScroll, { token: mockToken });
+			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextSolTransactions).not.toHaveBeenCalled();
 		});
@@ -84,7 +87,7 @@ describe('SolTransactionsScroll', () => {
 			solTransactionsStore.reset(mockToken.id);
 			solTransactionsStore.prepend({ tokenId: mockToken.id, transactions: [] });
 
-			render(SolTransactionsScroll, { token: mockToken });
+			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextSolTransactions).not.toHaveBeenCalled();
 		});

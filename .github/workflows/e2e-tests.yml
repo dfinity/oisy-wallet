@@ -1,19 +1,16 @@
 name: E2E Tests
 
 on:
-  push:
-    branches:
-      - main
+  # TODO: Re-enable the E2E test CIs when the E2E tests are stable and not failing frequently.
+  #  push:
+  #    branches:
+  #      - main
   pull_request:
     types: [opened, synchronize, labeled]
   merge_group:
-  schedule:
-    - cron: '30 3 * * *'
+  #  schedule:
+  #    - cron: '30 3 * * *'
   workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions: {}
 
@@ -102,12 +99,12 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJson(needs.define-matrix.outputs.os-matrix) }}
-    env:
-      MATRIX_OS: ${{ matrix.os }}
+        shardIndex: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        shardTotal: [10]
     if: ${{ github.event_name != 'pull_request' || needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
-    outputs:
-      ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
-      macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-${{ matrix.shardIndex }}
+      cancel-in-progress: true
 
     steps:
       - name: Create GitHub App Token
@@ -154,13 +151,13 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Test
-        run: npm run e2e:ci
+        run: npm run e2e:ci -- --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: playwright-report-${{ matrix.os }}
+          name: playwright-report-${{ matrix.os }}-${{ matrix.shardIndex }}
           path: playwright-report/
           retention-days: 3
 
@@ -168,7 +165,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
-          name: test-results-${{ matrix.os }}
+          name: test-results-${{ matrix.os }}-${{ matrix.shardIndex }}
           path: test-results/
           retention-days: 3
 
@@ -185,10 +182,8 @@ jobs:
         id: set_snapshot_output
         run: |
           if [ "$RUNNER_OS" = "Linux" ]; then
-            echo "ubuntu_status=$CHANGES" >> $GITHUB_OUTPUT
             echo "os_suffix=linux" >> $GITHUB_OUTPUT
           elif [ "$RUNNER_OS" = "macOS" ]; then
-            echo "macos_status=$CHANGES" >> $GITHUB_OUTPUT
             echo "os_suffix=darwin" >> $GITHUB_OUTPUT
           fi
         env:
@@ -198,7 +193,7 @@ jobs:
         if: steps.check_snapshots.outputs.CHANGES == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: snapshots-${{ matrix.os }}
+          name: snapshots-${{ matrix.os }}-${{ matrix.shardIndex }}
           path: e2e/snapshots/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
           retention-days: 3
 
@@ -235,26 +230,11 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
 
-      - name: Set snapshot status from previous jobs
-        run: |
-          echo "ubuntu_status=$ubuntu_status" >> $GITHUB_ENV
-          echo "macos_status=$macos_status" >> $GITHUB_ENV
-        env:
-          ubuntu_status: ${{ needs.e2e.outputs.ubuntu_status }}
-          macos_status: ${{ needs.e2e.outputs.macos_status }}
-
-      - name: Download Ubuntu Snapshots
-        if: env.ubuntu_status == 'true'
+      - name: Download All Snapshot Artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: snapshots-ubuntu-24.04
-          path: e2e/snapshots
-
-      - name: Download macOS Snapshots
-        if: env.macos_status == 'true'
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          name: snapshots-macos-14
+          pattern: snapshots-*
+          merge-multiple: true
           path: e2e/snapshots
 
       - name: Check for Final Changes

@@ -147,11 +147,19 @@ const updateCSP = (indexHtml) => {
 		'wss://base-mainnet.g.alchemy.com https://base-mainnet.g.alchemy.com https://base-mainnet.infura.io';
 	const baseSepoliaConnectSrc =
 		'wss://base-sepolia.g.alchemy.com https://base-sepolia.g.alchemy.com https://base-sepolia.infura.io';
+	const arbitrumMainnetConnectSrc =
+		'wss://arb-mainnet.g.alchemy.com https://arb-mainnet.g.alchemy.com https://arbitrum-mainnet.infura.io';
+	const arbitrumSepoliaConnectSrc =
+		'wss://arb-sepolia.g.alchemy.com https://arb-sepolia.g.alchemy.com https://arbitrum-sepolia.infura.io';
 	const bnbMainnetConnectSrc =
 		'wss://bnb-mainnet.g.alchemy.com https://bnb-mainnet.g.alchemy.com https://bsc-mainnet.infura.io';
 	const bnbTestnetConnectSrc =
 		'wss://bnb-testnet.g.alchemy.com https://bnb-testnet.g.alchemy.com https://bsc-testnet.infura.io';
-	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc}`;
+	const polygonMainnetConnectSrc =
+		'wss://polygon-mainnet.g.alchemy.com https://polygon-mainnet.g.alchemy.com https://polygon-mainnet.infura.io https://gasstation.polygon.technology';
+	const polygonAmoyConnectSrc =
+		'wss://polygon-amoy.g.alchemy.com https://polygon-amoy.g.alchemy.com https://polygon-amoy.infura.io';
+	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${arbitrumMainnetConnectSrc} ${arbitrumSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc} ${polygonMainnetConnectSrc} ${polygonAmoyConnectSrc}`;
 
 	const infuraConnectSrc = 'https://gas.api.infura.io';
 
@@ -160,12 +168,14 @@ const updateCSP = (indexHtml) => {
 
 	const coingeckoApiConnectSrc = 'https://pro-api.coingecko.com';
 
+	const paraswapApiConnectSrc = 'https://api.paraswap.io';
+
 	const kongSwapApiConnectSrc = 'https://api.kongswap.io';
 
 	const plausibleApiConnectSrc = 'https://plausible.io/api/event';
 
 	const walletConnectSrc =
-		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org';
+		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org https://pulse.walletconnect.org';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
 	const onramperConnectFrameSrc = 'https://buy.onramper.dev https://buy.onramper.com';
@@ -181,7 +191,7 @@ const updateCSP = (indexHtml) => {
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc} ${paraswapApiConnectSrc};
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';

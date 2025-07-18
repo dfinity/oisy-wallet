@@ -24,6 +24,7 @@ export const SHIB_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckSHIB',
 	groupData: SHIB_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'shib_ethereum'
 	}
