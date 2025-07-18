@@ -17,6 +17,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 
 	let defaultCrypto = $derived(
 		$token?.buy?.onramperId ??
@@ -56,7 +57,7 @@
 	let src = $derived(
 		buildOnramperLink({
 			mode: 'buy',
-			defaultFiat: 'usd',
+			defaultFiat: $currentCurrency,
 			defaultCrypto,
 			onlyCryptos,
 			onlyCryptoNetworks,
