@@ -29,7 +29,7 @@
 		language: Languages;
 	}): string => {
 		const symbol = getCurrencySymbol({ currency, language });
-		return `${nonNullish(symbol) && symbol?.toLowerCase() !== currency ? `${symbol} - ` : ''}${currency.toUpperCase()}`;
+		return `${nonNullish(symbol) && symbol.toLowerCase() !== currency ? `${symbol} - ` : ''}${currency.toUpperCase()}`;
 	};
 
 	const handleCurrencyChange = (currency: Currency) => {
