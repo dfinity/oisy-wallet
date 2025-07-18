@@ -23,7 +23,7 @@ import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore,
-	type StorageAddressData
+	type AddressStoreData
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { BtcAddress } from '$lib/types/address';
@@ -125,7 +125,7 @@ const certifyBtcAddressMainnet = (address: BtcAddress): Promise<ResultSuccess<st
 		addressStore: btcAddressMainnetStore
 	});
 
-export const validateBtcAddressMainnet = async ($addressStore: StorageAddressData<BtcAddress>) =>
+export const validateBtcAddressMainnet = async ($addressStore: AddressStoreData<BtcAddress>) =>
 	await validateAddress<BtcAddress>({
 		$addressStore,
 		certifyAddress: certifyBtcAddressMainnet

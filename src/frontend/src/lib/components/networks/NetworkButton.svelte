@@ -6,11 +6,12 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
 	import type { Network, NetworkId } from '$lib/types/network';
-	import { formatUSD } from '$lib/utils/format.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
 
 	interface Props {
 		selectedNetworkId?: NetworkId;
@@ -73,7 +74,7 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 					{#if $isPrivacyMode}
 						<IconDots variant="xs" />
 					{:else}
-						{formatUSD({ value: usdBalance })}
+						{formatCurrency({ value: usdBalance, currency: $currentCurrency })}
 					{/if}
 				{/if}
 			</span>

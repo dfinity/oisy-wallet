@@ -17,7 +17,7 @@ import type {
 export const initPowProtectorWorker: PowProtectorWorker =
 	async (): Promise<PowProtectorWorkerInitResult> => {
 		const PowWorker = await import('$lib/workers/workers?worker');
-		const worker: Worker = new PowWorker.default();
+		let worker: Worker | null = new PowWorker.default();
 
 		worker.onmessage = ({
 			data: dataMsg
@@ -47,21 +47,35 @@ export const initPowProtectorWorker: PowProtectorWorker =
 			}
 		};
 
+		const stop = () => {
+			worker?.postMessage({
+				msg: 'stopPowProtectionTimer'
+			});
+		};
+
+		let isDestroying = false;
+
 		return {
 			start: () => {
-				worker.postMessage({
+				worker?.postMessage({
 					msg: 'startPowProtectionTimer'
 				});
 			},
-			stop: () => {
-				worker.postMessage({
-					msg: 'stopPowProtectionTimer'
-				});
-			},
+			stop,
 			trigger: () => {
-				worker.postMessage({
+				worker?.postMessage({
 					msg: 'triggerPowProtectionTimer'
 				});
+			},
+			destroy: () => {
+				if (isDestroying) {
+					return;
+				}
+				isDestroying = true;
+				stop();
+				worker?.terminate();
+				worker = null;
+				isDestroying = false;
 			}
 		};
 	};

@@ -21,6 +21,7 @@ export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR = 'eth_to_cketh_convert_erro
 export const TRACK_COUNT_ETH_LOADING_BALANCE_ERROR = 'eth_loading_balance_error';
 export const TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR = 'eth_loading_transactions_error';
 export const TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR = 'eth_pending_transactions_error';
+export const TRACK_ETH_ESTIMATE_GAS_ERROR = 'eth_estimate_gas_error';
 
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success';
@@ -112,6 +113,9 @@ export const HOME_PAGE_ROUTE = 'home-page';
 export const USER_MENU_ROUTE = 'user-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
+
+// Privacymode change
+export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
 
 // Temporary events
 // We have sudden spikes in the number of getLogs calls to Infura, which is causing issues.

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 
 	interface Props {
@@ -10,6 +11,7 @@
 		testId?: string;
 		autofocus?: boolean;
 		disabled?: boolean;
+		innerEnd?: Snippet;
 	}
 
 	let {
@@ -20,7 +22,8 @@
 		required = true,
 		testId,
 		autofocus = false,
-		disabled
+		disabled,
+		innerEnd
 	}: Props = $props();
 </script>
 
@@ -36,4 +39,5 @@
 	{autofocus}
 	{testId}
 	{disabled}
+	{innerEnd}
 />

@@ -1,15 +1,20 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
 import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
-import { ABBVX_TOKEN } from '$env/tokens/tokens-spl/tokens.abbvx.env';
-import { ABTX_TOKEN } from '$env/tokens/tokens-spl/tokens.abtx.env';
+import { AMBRX_TOKEN } from '$env/tokens/tokens-spl/tokens.ambrx.env';
+import { AMZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.amznx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { CRCLX_TOKEN } from '$env/tokens/tokens-spl/tokens.crclx.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { GLDX_TOKEN } from '$env/tokens/tokens-spl/tokens.gldx.env';
+import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
 import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
+import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
+import { NFLXX_TOKEN } from '$env/tokens/tokens-spl/tokens.nflxx.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
@@ -26,16 +31,24 @@ import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	AAPLX_TOKEN,
-	ABBVX_TOKEN,
-	ABTX_TOKEN,
+	// TODO: temporarily disable these 2 tokens, because we don't have a price for them yet. We can enable them once they get traded and habe a price.
+	// ABBVX_TOKEN,
+	// ABTX_TOKEN,
+	AMBRX_TOKEN,
+	AMZNX_TOKEN,
 	BONK_TOKEN,
 	COINX_TOKEN,
 	CRCLX_TOKEN,
 	EURC_TOKEN,
+	GLDX_TOKEN,
+	GMEX_TOKEN,
 	GOOGLX_TOKEN,
+	HOODX_TOKEN,
 	JUP_TOKEN,
+	MCDX_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
+	NFLXX_TOKEN,
 	NVDAX_TOKEN,
 	ORCA_TOKEN,
 	POPCAT_TOKEN,

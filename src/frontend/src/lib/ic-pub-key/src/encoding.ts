@@ -68,4 +68,41 @@ function blobEncodeU8(u8: number): string {
 	return `\\${u8.toString(16).padStart(2, '0')}`;
 }
 
+/**
+ * Convert bytes arranged most significant first to a bigint.
+ * @param bytes The bytes to convert.
+ * @returns The converted number.
+ */
+export function bigintFromBigEndianBytes(bytes: Uint8Array): bigint {
+	if (bytes.length === 0) {
+		return BigInt(0);
+	}
+	const bigEndianHex = '0x' + Buffer.from(bytes).toString('hex');
+	return BigInt(bigEndianHex);
+}
+
+/**
+ * Convert little endian hex to a bigint.
+ * @param hex The hex to convert.
+ * @returns The converted number.
+ */
+export function bigintFromLittleEndianHex(hex: string): bigint {
+	if (hex.length === 0) {
+		return BigInt(0);
+	}
+	const leBytes = Buffer.from(hex, 'hex');
+	const beBytes = leBytes.reverse();
+	const beHex = beBytes.toString('hex');
+	return BigInt('0x' + beHex);
+}
+
+/**
+ * Convert an array of bytes to a hex string.
+ * @param array The array to convert.
+ * @returns The converted string.
+ */
+export function bytesAsHex(array: Uint8Array): string {
+	return Buffer.from(array).toString('hex');
+}
+
 /* v8 ignore stop */

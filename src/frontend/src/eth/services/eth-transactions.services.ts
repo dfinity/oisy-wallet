@@ -74,10 +74,18 @@ const loadEthTransactions = async ({
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({ address });
 
+		const certifiedTransactions = transactions.map((transaction) => ({
+			data: transaction,
+			// We set the certified property to false because we don't have a way to certify ETH transactions for now.
+			certified: false
+		}));
+
 		if (updateOnly) {
-			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+			certifiedTransactions.forEach((transaction) =>
+				ethTransactionsStore.update({ tokenId, transaction })
+			);
 		} else {
-			ethTransactionsStore.set({ tokenId, transactions });
+			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
@@ -95,16 +103,11 @@ const loadEthTransactions = async ({
 					tokenId: `${tokenId.description}`,
 					networkId: `${networkId.description}`,
 					error: `${err}`
-				}
-			});
-
-			// We print the error to console just for debugging purposes
-			console.warn(
-				replacePlaceholders(loading_transactions_symbol, {
+				},
+				warning: `${replacePlaceholders(loading_transactions_symbol, {
 					$symbol: ETHEREUM_NETWORK_SYMBOL
-				}),
-				err
-			);
+				})} ${err}`
+			});
 		}
 
 		return { success: false };
@@ -161,10 +164,18 @@ const loadErc20Transactions = async ({
 			request: async () => await erc20Transactions({ contract: token, address })
 		});
 
+		const certifiedTransactions = transactions.map((transaction) => ({
+			data: transaction,
+			// We set the certified property to false because we don't have a way to certify ERC20 transactions for now.
+			certified: false
+		}));
+
 		if (updateOnly) {
-			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+			certifiedTransactions.forEach((transaction) =>
+				ethTransactionsStore.update({ tokenId, transaction })
+			);
 		} else {
-			ethTransactionsStore.set({ tokenId, transactions });
+			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
@@ -181,16 +192,11 @@ const loadErc20Transactions = async ({
 				tokenId: `${tokenId.description}`,
 				networkId: `${networkId.description}`,
 				error: `${err}`
-			}
-		});
-
-		// We print the error to console just for debugging purposes
-		console.warn(
-			replacePlaceholders(loading_transactions_symbol, {
+			},
+			warning: `${replacePlaceholders(loading_transactions_symbol, {
 				$symbol: token.symbol
-			}),
-			err
-		);
+			})} ${err}`
+		});
 
 		return { success: false };
 	}
