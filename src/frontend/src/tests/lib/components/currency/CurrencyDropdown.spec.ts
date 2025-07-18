@@ -6,7 +6,6 @@ import {
 	CURRENCY_SWITCHER_DROPDOWN_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { currentCurrency } from '$lib/derived/currency.derived';
-import { Currencies } from '$lib/enums/currencies';
 import { Currency } from '$lib/enums/currency';
 import { currencyStore } from '$lib/stores/currency.store';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
