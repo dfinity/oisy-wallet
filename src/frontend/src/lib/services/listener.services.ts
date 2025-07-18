@@ -57,6 +57,7 @@ const syncBalancesFromCache = async ({ tokenId, ...params }: GetIdbTransactionsP
 	});
 };
 
+
 export const syncWalletFromIdbCache = async <
 	T extends BtcTransactionUi | IcTransactionUi | SolTransactionUi
 >({
