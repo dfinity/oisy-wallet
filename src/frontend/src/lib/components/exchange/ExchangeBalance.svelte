@@ -4,8 +4,10 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
@@ -29,14 +31,22 @@
 			{#if hideBalance}
 				<IconDots variant="lg" times={6} styleClass="my-4.25" />
 			{:else}
-				{formatCurrency({ value: totalUsd })}
+				{formatCurrency({
+					value: totalUsd,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore
+				})}
 			{/if}
 		{:else}
 			<span class="animate-pulse">
 				{#if hideBalance}
 					<IconDots variant="lg" times={6} styleClass="my-4.25" />
 				{:else}
-					{formatCurrency({ value: 0 })}
+					{formatCurrency({
+						value: 0,
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore
+					})}
 				{/if}
 			</span>
 		{/if}

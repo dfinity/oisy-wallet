@@ -32,7 +32,8 @@
 			"add": "Aggiungi",
 			"more_items": "+$items in più",
 			"select": "Seleziona",
-			"language": "Lingua"
+			"language": "Lingua",
+			"currency": "Valuta"
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!"
@@ -43,7 +44,8 @@
 			"back": "Torna alla pagina precedente",
 			"open_details": "Apri dettagli",
 			"close_details": "Chiudi dettagli",
-			"switch_language": "Cambia lingua"
+			"switch_language": "Cambia lingua",
+			"switch_currency": "Cambia valuta"
 		},
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata"
@@ -509,6 +511,9 @@
 			"top_up": "Ricarica il tuo wallet per iniziare a usarlo!",
 			"learn_more_about_erc20_icp": "Scopri di più su ERC20 ICP su Ethereum.",
 			"tooltip_toggle_balance": "Fai doppio clic per nascondere/mostrare il saldo"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Attiva e disattiva la modalità privacy"
 		}
 	},
 	"settings": {
@@ -812,7 +817,9 @@
 			"you_receive": "Tu ricevi",
 			"select": "Seleziona >",
 			"select_swap_provider": "Seleziona fornitore di scambio",
-			"open_icp_swap": "Apri il sito web ICP Swap"
+			"open_icp_swap": "Apri il sito web ICP Swap",
+			"select_token": "Seleziona il token",
+			"select_network_filter": "Seleziona la rete"
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -977,6 +984,11 @@
 			"unexpected_undefined": "Il token non è definito. Questo è inaspettato.",
 			"unexpected_error_on_token_delete": "Si è verificato un errore durante la rimozione del token.",
 			"unexpected_error_on_token_update": "Si è verificato un errore durante l'aggiornamento del token."
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": "NFT"
 		}
 	},
 	"fee": {
@@ -1270,10 +1282,10 @@
 			"avatar_for": "Avatar per"
 		},
 		"edit_avatar": {
-			"menu_title": "",
-			"upload_image": "",
-			"replace_image": "",
-			"remove_image": ""
+			"menu_title": "Immagine del Contatto",
+			"upload_image": "Carica",
+			"replace_image": "Cambia",
+			"remove_image": "Rimuovi"
 		},
 		"show_contact": {
 			"title": "Contatto",
