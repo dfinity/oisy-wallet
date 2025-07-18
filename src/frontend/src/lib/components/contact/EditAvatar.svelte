@@ -16,7 +16,7 @@
 		fileInput: typeof $bindable;
 		onReplaceImage: () => void;
 		onRemoveImage: () => void;
-		imageUrl: string | undefined;
+		imageUrl?: string;
 	}
 
 	const {
