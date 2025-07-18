@@ -19,6 +19,7 @@
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
+	import { getTokenInfo } from '$sol/api/solana.api';
 
 	export let tokenAddress: SplTokenAddress | undefined;
 	export let metadata: TokenMetadata | undefined;
@@ -59,9 +60,11 @@
 		try {
 			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
-			metadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
+			const {decimals} = await getTokenInfo({address: tokenAddress, network: solNetwork});
 
-			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
+			const splMetadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
+
+			if (isNullish(splMetadata?.symbol) || isNullish(splMetadata?.name)) {
 				toastsError({
 					msg: { text: $i18n.tokens.error.incomplete_metadata }
 				});
@@ -69,6 +72,8 @@
 				dispatch('icBack');
 				return;
 			}
+
+			metadata = { ...splMetadata, decimals };
 
 			if (
 				$splTokens?.find(
