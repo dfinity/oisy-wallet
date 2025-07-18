@@ -1,23 +1,12 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
-import type { Erc20Token } from '$eth/types/erc20';
-import type { EthereumNetwork } from '$eth/types/network';
-import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
-import type {
-	BridgePrice,
-	DeltaPrice,
-	OptimalRate,
-	QuoteParams,
-	SimpleFetchSDK
-} from '@velora-dex/sdk';
-import type { EthAddress, OptionEthAddress } from './address';
+import type { BridgePrice, DeltaPrice, OptimalRate, SimpleFetchSDK } from '@velora-dex/sdk';
 import type { OptionIdentity } from './identity';
 import type { Amount, OptionAmount } from './send';
-import type { RequiredTransactionFeeData } from './transaction';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
@@ -44,9 +33,9 @@ export interface ICPSwapResult {
 
 export interface FetchSwapAmountsParams {
 	identity: Identity;
-	sourceToken: Token & { address?: string };
-	destinationToken: Token & { address?: string };
-	amount: string | number | bigint;
+	sourceToken: IcToken;
+	destinationToken: IcToken;
+	amount: string | number;
 	tokens: Token[];
 	slippage: string | number;
 }
@@ -136,10 +125,6 @@ export interface FormatSlippageParams {
 	decimals: number;
 }
 
-export interface GetQuoteParams extends QuoteParams<'all'> {
-	destChainId?: number;
-}
-
 export interface CheckDeltaOrderStatusParams {
 	sdk: SimpleFetchSDK;
 	auctionId: string;
@@ -149,24 +134,3 @@ export interface CheckDeltaOrderStatusParams {
 }
 
 export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
-
-export interface SwapVeloraParams extends RequiredTransactionFeeData {
-	identity: OptionIdentity;
-	progress: (step: ProgressStep) => void;
-	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
-	swapAmount: Amount;
-	receiveAmount: bigint;
-	slippageValue: Amount;
-	sourceNetwork: EthereumNetwork;
-	destinationNetwork: EthereumNetwork;
-	userAddress: EthAddress;
-	swapDetails: VeloraSwapDetails;
-}
-
-export interface VeloraQuoteParams {
-	sourceToken: Erc20Token;
-	destinationToken: Erc20Token;
-	amount: string;
-	userAddress: OptionEthAddress;
-}
