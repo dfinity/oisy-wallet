@@ -44,7 +44,7 @@ export const setIdbBalancesStore = async ({
 	);
 };
 
-export const getIdbBalances = (params: GetIdbBalancesParams): Promise<Balance[] | undefined> =>
+export const getIdbBalances = (params: GetIdbBalancesParams): Promise<Balance | undefined> =>
 	get(toKey(params), idbBalancesStore);
 
 export const deleteIdbBalances = (principal: Principal): Promise<void> =>
