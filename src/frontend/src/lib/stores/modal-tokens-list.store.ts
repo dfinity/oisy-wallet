@@ -1,11 +1,14 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkId } from '$lib/types/network';
 import type { Token, TokenUi } from '$lib/types/token';
-import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
+import {
+	filterTokensForSelectedNetwork,
+	filterTokensForSelectedNetworks
+} from '$lib/utils/network.utils';
 import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export interface ModalTokensListData {
@@ -14,6 +17,7 @@ export interface ModalTokensListData {
 	filterNetwork?: Network;
 	filterZeroBalance?: boolean;
 	sortByBalance?: boolean;
+	filterNetworksIds?: NetworkId[];
 }
 
 export const initModalTokensListContext = (
@@ -27,6 +31,7 @@ export const initModalTokensListContext = (
 	const filterNetwork = derived([data], ([{ filterNetwork }]) => filterNetwork);
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
 	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
+	const filterNetworksIds = derived([data], ([{ filterNetworksIds }]) => filterNetworksIds);
 
 	const filteredTokens = derived(
 		[
@@ -36,7 +41,8 @@ export const initModalTokensListContext = (
 			filterZeroBalance,
 			sortByBalance,
 			exchanges,
-			balancesStore
+			balancesStore,
+			filterNetworksIds
 		],
 		([
 			$tokens,
@@ -45,12 +51,22 @@ export const initModalTokensListContext = (
 			$filterZeroBalance,
 			$sortByBalance,
 			$exchanges,
-			$balances
+			$balances,
+			$filterNetworksIds
 		]) => {
 			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
 
+			const filteredByNetworkIds =
+				nonNullish($filterNetworksIds) && $filterNetworksIds.length > 0
+					? filterTokensForSelectedNetworks([
+							filteredByQuery,
+							$filterNetworksIds,
+							isNullish($filterNetworksIds)
+						])
+					: filteredByQuery;
+
 			const filteredByNetwork = filterTokensForSelectedNetwork([
-				filteredByQuery,
+				filteredByNetworkIds,
 				$filterNetwork,
 				isNullish($filterNetwork)
 			]);
@@ -89,6 +105,11 @@ export const initModalTokensListContext = (
 			update((state) => ({
 				...state,
 				filterNetwork: network
+			})),
+		setFilterNetworksIds: (networksIds: NetworkId[] | undefined) =>
+			update((state) => ({
+				...state,
+				filterNetworksIds: networksIds
 			}))
 	};
 };
@@ -100,6 +121,7 @@ export interface ModalTokensListContext {
 	setTokens: (tokens: Token[]) => void;
 	setFilterQuery: (query: string) => void;
 	setFilterNetwork: (network: Network | undefined) => void;
+	setFilterNetworksIds: (networksIds: NetworkId[] | undefined) => void;
 }
 
 export const MODAL_TOKENS_LIST_CONTEXT_KEY = Symbol('modal-tokens-list');

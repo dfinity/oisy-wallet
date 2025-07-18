@@ -1,6 +1,9 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+import { ARB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.arb.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
@@ -128,5 +131,165 @@ describe('modalTokensListStore', () => {
 		expect(get(filterNetwork)).toBe(ICP_NETWORK);
 		expect(get(filterQuery)).toBe(undefined);
 		expect(get(filteredTokens)).toStrictEqual([mockTokenUi1]);
+	});
+
+	describe('modalTokensListStore - filterNetworksIds', () => {
+		const ethExchangeValue = 3;
+		const ethBalance = bn1Bi;
+
+		const mockToken3 = { ...ETHEREUM_TOKEN, enabled: true };
+		const mockToken4 = { ...ARB_TOKEN, enabled: true };
+
+		const mockTokenUi3 = {
+			...mockToken3,
+			balance: ethBalance,
+			usdBalance: usdValue({
+				balance: ethBalance,
+				decimals: ETHEREUM_TOKEN.decimals,
+				exchangeRate: ethExchangeValue
+			})
+		};
+		const mockTokenUi4 = {
+			...mockToken4,
+			balance: ethBalance,
+			usdBalance: usdValue({
+				balance: ethBalance,
+				decimals: ARB_TOKEN.decimals,
+				exchangeRate: ethExchangeValue
+			})
+		};
+
+		beforeEach(() => {
+			mockPage.reset();
+
+			balancesStore.set({
+				id: mockToken3.id,
+				data: { data: ethBalance, certified: true }
+			});
+			balancesStore.set({
+				id: mockToken4.id,
+				data: { data: ethBalance, certified: true }
+			});
+
+			vi.spyOn(exchanges, 'exchanges', 'get').mockImplementation(() =>
+				readable({
+					[mockToken3.id]: { usd: ethExchangeValue },
+					[mockToken4.id]: { usd: ethExchangeValue }
+				})
+			);
+		});
+
+		it('should filter tokens by filterNetworksIds when provided', () => {
+			const { filteredTokens } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterNetworksIds: [ETHEREUM_NETWORK.id],
+				filterZeroBalance: false
+			});
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi3]);
+		});
+
+		it('should not filter when filterNetworksIds is undefined', () => {
+			const { filteredTokens } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterZeroBalance: false
+			});
+
+			const result = get(filteredTokens);
+
+			expect(result).toHaveLength(2);
+
+			expect(result).toEqual([mockTokenUi4, mockTokenUi3]);
+		});
+
+		it('should filter tokens by multiple network IDs', () => {
+			const { filteredTokens } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterNetworksIds: [ETHEREUM_NETWORK.id, ARBITRUM_MAINNET_NETWORK.id],
+				filterZeroBalance: false
+			});
+
+			const result = get(filteredTokens);
+
+			expect(result).toHaveLength(2);
+			expect(result).toEqual([mockTokenUi4, mockTokenUi3]);
+		});
+
+		it('should combine filterNetworksIds with filterNetwork', () => {
+			const { filteredTokens } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterNetworksIds: [ETHEREUM_NETWORK.id, ARBITRUM_MAINNET_NETWORK.id],
+				filterNetwork: ETHEREUM_NETWORK,
+				filterZeroBalance: false
+			});
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi3]);
+		});
+
+		it('should combine filterNetworksIds with filterQuery', () => {
+			const { filteredTokens } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterNetworksIds: [ETHEREUM_NETWORK.id, ARBITRUM_MAINNET_NETWORK.id],
+				filterQuery: 'Ethereum',
+				filterZeroBalance: false
+			});
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi3]);
+		});
+
+		it('should update filterNetworksIds using setFilterNetworksIds', () => {
+			const { filteredTokens, setFilterNetworksIds } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterNetworksIds: [ETHEREUM_NETWORK.id],
+				filterZeroBalance: false
+			});
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi3]);
+
+			setFilterNetworksIds([ARBITRUM_MAINNET_NETWORK.id]);
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi4]);
+		});
+
+		it('should clear filterNetworksIds when setFilterNetworksIds is called with undefined', () => {
+			const { filteredTokens, setFilterNetworksIds } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterNetworksIds: [ETHEREUM_NETWORK.id],
+				filterZeroBalance: false
+			});
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi3]);
+
+			setFilterNetworksIds(undefined);
+
+			const result = get(filteredTokens);
+
+			expect(result).toHaveLength(2);
+		});
+
+		it('should clear filterNetworksIds when setFilterNetworksIds is called with empty array', () => {
+			const { filteredTokens } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterNetworksIds: [],
+				filterZeroBalance: false
+			});
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi4, mockTokenUi3]);
+		});
+
+		it('should clear filterNetworksIds when changed setFilterNetworksIds to empty array', () => {
+			const { filteredTokens, setFilterNetworksIds } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterZeroBalance: false
+			});
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi4, mockTokenUi3]);
+
+			setFilterNetworksIds([]);
+
+			const result = get(filteredTokens);
+
+			expect(result).toEqual([mockTokenUi4, mockTokenUi3]);
+		});
 	});
 });
