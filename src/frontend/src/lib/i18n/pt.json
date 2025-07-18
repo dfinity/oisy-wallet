@@ -32,7 +32,8 @@
 			"add": "Adicionar",
 			"more_items": "+$items mais",
 			"select": "Selecionar",
-			"language": "Linguagem"
+			"language": "Linguagem",
+			"currency": "Moeda"
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!"
@@ -43,7 +44,8 @@
 			"back": "Voltar para a página anterior",
 			"open_details": "Abrir detalhes",
 			"close_details": "Fechar detalhes",
-			"switch_language": "Mudar linguagem"
+			"switch_language": "Mudar linguagem",
+			"switch_currency": "Mudar moeda"
 		},
 		"warning": {
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída"
@@ -509,6 +511,9 @@
 			"top_up": "Carregue sua carteira para começar a usá-la!",
 			"learn_more_about_erc20_icp": "Saiba mais sobre ERC20 ICP no Ethereum.",
 			"tooltip_toggle_balance": "Clique duas vezes para ocultar/mostrar o saldo"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Ativar e desativar o modo de privacidade"
 		}
 	},
 	"settings": {
@@ -812,7 +817,9 @@
 			"you_receive": "Você recebe",
 			"select": "Selecionar >",
 			"select_swap_provider": "Selecionar provedor de troca",
-			"open_icp_swap": "Abrir site do ICP Swap"
+			"open_icp_swap": "Abrir site do ICP Swap",
+			"select_token": "Selecionar token",
+			"select_network_filter": "Selecionar rede"
 		},
 		"error": {
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",

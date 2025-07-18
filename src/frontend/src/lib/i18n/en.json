@@ -32,7 +32,8 @@
 			"add": "Add",
 			"more_items": "+$items more",
 			"select": "Select",
-			"language": "Language"
+			"language": "Language",
+			"currency": "Currency"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -43,7 +44,8 @@
 			"back": "Go back to the previous page",
 			"open_details": "Open details",
 			"close_details": "Close details",
-			"switch_language": "Switch language"
+			"switch_language": "Switch language",
+			"switch_currency": "Switch currency"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -509,6 +511,9 @@
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
 			"tooltip_toggle_balance": "Double-click to hide/show balance"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Set privacy mode on and off"
 		}
 	},
 	"settings": {
@@ -812,7 +817,9 @@
 			"you_receive": "You receive",
 			"select": "Select >",
 			"select_swap_provider": "Select swap provider",
-			"open_icp_swap": "Open ICP Swap website"
+			"open_icp_swap": "Open ICP Swap website",
+			"select_token": "Select token",
+			"select_network_filter": "Select network"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
