@@ -178,7 +178,7 @@ export const mapVeloraMarketSwapResult = (swap: OptimalRate): SwapMappedResult =
 	type: VeloraSwapTypes.MARKET
 });
 
-export const getTokenAddress = (token: Erc20Token) => {
+export const geSwapEthTokenAddress = (token: Erc20Token) => {
 	if (isDefaultEthereumToken(token)) {
 		return SWAP_ETH_TOKEN_PLACEHOLDER;
 	}

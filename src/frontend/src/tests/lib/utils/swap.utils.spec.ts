@@ -19,11 +19,11 @@ import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
 	formatReceiveOutMinimum,
+	geSwapEthTokenAddress,
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
 	getNetworkFee,
 	getSwapRoute,
-	getTokenAddress,
 	mapIcpSwapResult,
 	mapKongSwapResult,
 	mapVeloraMarketSwapResult,
@@ -422,9 +422,9 @@ describe('swap utils', () => {
 		});
 	});
 
-	describe('getTokenAddress', () => {
+	describe('geSwapEthTokenAddress', () => {
 		it('should return placeholder for default Ethereum token', () => {
-			const result = getTokenAddress(ETHEREUM_TOKEN as Erc20Token);
+			const result = geSwapEthTokenAddress(ETHEREUM_TOKEN as Erc20Token);
 
 			expect(result).toBe(SWAP_ETH_TOKEN_PLACEHOLDER);
 		});
@@ -435,7 +435,7 @@ describe('swap utils', () => {
 				address: '0x1234567890abcdef'
 			};
 
-			const result = getTokenAddress(mockErc20Token);
+			const result = geSwapEthTokenAddress(mockErc20Token);
 
 			expect(result).toBe('0x1234567890abcdef');
 		});
@@ -446,7 +446,7 @@ describe('swap utils', () => {
 				address: '0xA0b86a33E6441038e7BC67766E6C6E57AF9E9C'
 			};
 
-			const result = getTokenAddress(mockErc20Token);
+			const result = geSwapEthTokenAddress(mockErc20Token);
 
 			expect(result).toBe('0xA0b86a33E6441038e7BC67766E6C6E57AF9E9C');
 		});
