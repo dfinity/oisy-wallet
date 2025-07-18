@@ -7,15 +7,15 @@ import {
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
+import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { nonNullish } from '@dfinity/utils';
-import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
 
 export const loadNfts = ({
-													 tokens,
-													 loadedNfts,
-													 walletAddress
-												 }: {
+	tokens,
+	loadedNfts,
+	walletAddress
+}: {
 	tokens: Erc721CustomToken[];
 	loadedNfts: Nft[];
 	walletAddress: string;
@@ -45,12 +45,12 @@ export const loadNfts = ({
 };
 
 const loadNftsOfToken = async ({
-																 etherscanProvider,
-																 infuraProvider,
-																 token,
-																 loadedNfts,
-																 walletAddress
-															 }: {
+	etherscanProvider,
+	infuraProvider,
+	token,
+	loadedNfts,
+	walletAddress
+}: {
 	etherscanProvider: EtherscanProvider;
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
@@ -79,10 +79,10 @@ const loadNftsOfToken = async ({
 };
 
 const loadNftsOfBatch = async ({
-																 infuraProvider,
-																 token,
-																 tokenIds
-															 }: {
+	infuraProvider,
+	token,
+	tokenIds
+}: {
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
 	tokenIds: number[];
@@ -100,10 +100,10 @@ const loadNftsOfBatch = async ({
 };
 
 const loadNftsMetadata = async ({
-																	infuraProvider,
-																	contractAddress,
-																	tokenIds
-																}: {
+	infuraProvider,
+	contractAddress,
+	tokenIds
+}: {
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
 	tokenIds: number[];
@@ -117,10 +117,10 @@ const loadNftsMetadata = async ({
 };
 
 const loadNftMetadata = async ({
-																 infuraProvider,
-																 contractAddress,
-																 tokenId
-															 }: {
+	infuraProvider,
+	contractAddress,
+	tokenId
+}: {
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
 	tokenId: number;
