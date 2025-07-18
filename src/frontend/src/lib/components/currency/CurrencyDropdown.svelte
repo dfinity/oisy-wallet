@@ -14,6 +14,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import type { Currencies } from '$lib/enums/currencies';
+	import type { Currency } from '$lib/enums/currency';
 	import type { Languages } from '$lib/enums/languages';
 	import { currencyStore } from '$lib/stores/currency.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -25,14 +26,14 @@
 		currency,
 		language
 	}: {
-		currency: Currencies;
+		currency: Currency;
 		language: Languages;
 	}): string => {
 		const symbol = getCurrencySymbol({ currency, language });
-		return `${nonNullish(symbol) && symbol?.toLowerCase() !== currency ? `${symbol} - ` : ''}${currency.toUpperCase()}`;
+		return `${nonNullish(symbol) && symbol.toLowerCase() !== currency ? `${symbol} - ` : ''}${currency.toUpperCase()}`;
 	};
 
-	const handleCurrencyChange = (currency: Currencies) => {
+	const handleCurrencyChange = (currency: Currency) => {
 		currencyStore.switchCurrency(currency);
 		dropdown?.close();
 	};

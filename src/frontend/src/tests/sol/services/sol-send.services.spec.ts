@@ -248,7 +248,12 @@ describe('sol-send.services', () => {
 			).resolves.not.toThrow();
 
 			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledTimes(2);
-			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
+			expect(spyCreateAtaInstruction).toHaveBeenCalledExactlyOnceWith({
+				signer: mockSigner,
+				destination: mockSolAddress2,
+				tokenAddress: DEVNET_USDC_TOKEN.address,
+				tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
+			});
 
 			expect(pipe).toHaveBeenCalledTimes(4);
 			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();

@@ -33,7 +33,7 @@
 			"more_items": "+$items mais",
 			"select": "Selecionar",
 			"language": "Linguagem",
-			"currency": ""
+			"currency": "Moeda"
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!"
@@ -45,7 +45,7 @@
 			"open_details": "Abrir detalhes",
 			"close_details": "Fechar detalhes",
 			"switch_language": "Mudar linguagem",
-			"switch_currency": ""
+			"switch_currency": "Mudar moeda"
 		},
 		"warning": {
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída"

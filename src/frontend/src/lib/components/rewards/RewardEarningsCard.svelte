@@ -5,6 +5,7 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -25,7 +26,9 @@
 		})
 	);
 
-	const displayUsdAmount = $derived(formatCurrency({ value: usdAmount }));
+	const displayUsdAmount = $derived(
+		formatCurrency({ value: usdAmount, currency: $currentCurrency })
+	);
 </script>
 
 {#if nonNullish(token)}
