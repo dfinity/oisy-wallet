@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import type { ContactImage } from '$declarations/backend/backend.did';
+	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
-	import { selectColorForName } from '$lib/utils/contact.utils';
 	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
+	import { selectColorForName } from '$lib/utils/contact.utils';
 
 	interface AvatarProps {
 		name?: string;
@@ -50,14 +50,13 @@
 
 	let blobUrl: string | null = $state(null);
 
-  $effect(() => {
-    if (image) {
-      blobUrl = imageToDataUrl(image);
-    } else {
-      blobUrl = null;
-    }
-  });
-
+	$effect(() => {
+		if (image) {
+			blobUrl = imageToDataUrl(image);
+		} else {
+			blobUrl = null;
+		}
+	});
 </script>
 
 <div
@@ -65,8 +64,8 @@
 	role="img"
 	aria-label={ariaLabel}
 >
-{#if blobUrl}
-	<img src={blobUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
+	{#if blobUrl}
+		<img src={blobUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
 	{:else if initials}
 		<span class="font-bold text-white">{initials}</span>
 	{:else}

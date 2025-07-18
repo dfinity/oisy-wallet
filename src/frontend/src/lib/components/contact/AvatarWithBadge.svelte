@@ -41,7 +41,6 @@
 	let mappedAddress = $derived(
 		nonNullish(address) ? mapAddressToContactAddressUi(address) : undefined
 	);
-
 </script>
 
 <div class="relative flex">

@@ -198,8 +198,6 @@
 	let currentContact = $derived($sortedContacts.find((c) => c.id === currentContactId));
 	let contacts = $derived($sortedContacts);
 
-	
-
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
 			previousStepName = currentStepName;
