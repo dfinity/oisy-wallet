@@ -1,10 +1,10 @@
-import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockValidNft } from '$tests/mocks/nfts.mock';
-import { parseNftId } from '$lib/validation/nft.validation';
-import type { Nft } from '$lib/types/nft';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import type { Nft } from '$lib/types/nft';
+import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockValidNft } from '$tests/mocks/nfts.mock';
 
 describe('nfts.utils', () => {
 	const erc721Tokens: Erc721CustomToken[] = [
@@ -31,7 +31,10 @@ describe('nfts.utils', () => {
 
 	describe('getLoadedNftsByTokens', () => {
 		it('should return nfts for a given list of tokens', () => {
-			const result = getLoadedNftsByTokens({tokens: erc721Tokens, loadedNfts: [mockNft1, mockNft2, mockNft3]});
+			const result = getLoadedNftsByTokens({
+				tokens: erc721Tokens,
+				loadedNfts: [mockNft1, mockNft2, mockNft3]
+			});
 
 			const expectedResult = new Map([
 				[AZUKI_ELEMENTAL_BEANS_TOKEN.address.toLowerCase(), [mockNft1, mockNft2]],
@@ -42,11 +45,23 @@ describe('nfts.utils', () => {
 		});
 
 		it('should return empty lists for tokens that do not have matching nfts', () => {
-			const customMockNft1: Nft = {...mockNft1, contract: {...mockNft1.contract, address: mockEthAddress}}
-			const customMockNft2: Nft = {...mockNft2, contract: {...mockNft2.contract, address: mockEthAddress}}
-			const customMockNft3: Nft = {...mockNft3, contract: {...mockNft3.contract, address: mockEthAddress}}
+			const customMockNft1: Nft = {
+				...mockNft1,
+				contract: { ...mockNft1.contract, address: mockEthAddress }
+			};
+			const customMockNft2: Nft = {
+				...mockNft2,
+				contract: { ...mockNft2.contract, address: mockEthAddress }
+			};
+			const customMockNft3: Nft = {
+				...mockNft3,
+				contract: { ...mockNft3.contract, address: mockEthAddress }
+			};
 
-			const result = getLoadedNftsByTokens({tokens: erc721Tokens, loadedNfts: [customMockNft1, customMockNft2, customMockNft3]});
+			const result = getLoadedNftsByTokens({
+				tokens: erc721Tokens,
+				loadedNfts: [customMockNft1, customMockNft2, customMockNft3]
+			});
 
 			const expectedResult = new Map([
 				[AZUKI_ELEMENTAL_BEANS_TOKEN.address.toLowerCase(), []],
@@ -57,15 +72,18 @@ describe('nfts.utils', () => {
 		});
 
 		it('should return an empty map', () => {
-			const result = getLoadedNftsByTokens({tokens: [], loadedNfts: [mockNft1, mockNft2, mockNft3]});
+			const result = getLoadedNftsByTokens({
+				tokens: [],
+				loadedNfts: [mockNft1, mockNft2, mockNft3]
+			});
 
 			const expectedResult = new Map();
 
 			expect(result).toEqual(expectedResult);
-		})
+		});
 
 		it('should return empty lists for tokens for which no nfts were provided', () => {
-			const result = getLoadedNftsByTokens({tokens: erc721Tokens, loadedNfts: []});
+			const result = getLoadedNftsByTokens({ tokens: erc721Tokens, loadedNfts: [] });
 
 			const expectedResult = new Map([
 				[AZUKI_ELEMENTAL_BEANS_TOKEN.address.toLowerCase(), []],
@@ -76,11 +94,11 @@ describe('nfts.utils', () => {
 		});
 
 		it('should return an empty map if no tokens and no nfts are provided', () => {
-			const result = getLoadedNftsByTokens({tokens: [], loadedNfts: []});
+			const result = getLoadedNftsByTokens({ tokens: [], loadedNfts: [] });
 
 			const expectedResult = new Map();
 
 			expect(result).toEqual(expectedResult);
-		})
+		});
 	});
 });
