@@ -24,6 +24,7 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckPEPE',
 	groupData: PEPE_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'pepe_ethereum'
 	}

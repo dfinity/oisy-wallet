@@ -1,9 +1,5 @@
 import { initCertifiedUserTokensStore } from '$lib/stores/user-tokens.store';
-import type { SplToken, SplTokenAddress } from '$sol/types/spl';
-import type { PrincipalText } from '@dfinity/zod-schemas';
+import type { SplToken } from '$sol/types/spl';
 
-export const SPL_CUSTOM_TOKENS_KEY = 'spl-custom-tokens';
-
-export type SplAddressMap = Record<PrincipalText, SplTokenAddress[]>;
-
+// TODO: UserToken is deprecated - rename this store initCertifiedUserTokensStore
 export const splCustomTokensStore = initCertifiedUserTokensStore<SplToken>();

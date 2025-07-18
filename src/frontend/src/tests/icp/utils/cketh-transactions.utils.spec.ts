@@ -17,6 +17,7 @@ import {
 	setupCkEthPendingStore
 } from '$tests/mocks/ic-transactions.mock';
 import { Principal } from '@dfinity/principal';
+import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 describe('mapCkEthereumTransaction', () => {
@@ -64,10 +65,12 @@ describe('mapCkEthereumTransaction', () => {
 	});
 
 	it('should return correct explorer URLs for ckSepoliaETH', () => {
+		assertNonNullish(STAGING_CKETH_LEDGER_CANISTER_ID);
+
 		const result = mapCkEthereumTransaction({
 			transaction: mockTransaction,
 			identity: undefined,
-			ledgerCanisterId: STAGING_CKETH_LEDGER_CANISTER_ID!.toString(),
+			ledgerCanisterId: STAGING_CKETH_LEDGER_CANISTER_ID.toString(),
 			env: 'mainnet'
 		});
 

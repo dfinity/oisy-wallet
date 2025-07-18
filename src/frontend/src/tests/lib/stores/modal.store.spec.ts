@@ -30,13 +30,15 @@ describe('modal.store', () => {
 	});
 
 	it('should open convert-ckbtc-btc modal without modalId', () => {
-		modalStore.openConvertCkBTCToBTC();
+		const id = Symbol('modalId');
+		modalStore.openConvertCkBTCToBTC(id);
 
-		expect(get(modalStore)).toEqual({ type: 'convert-ckbtc-btc' });
+		expect(get(modalStore)).toEqual({ id, type: 'convert-ckbtc-btc' });
 	});
 
 	it('should close the modal and reset the store', () => {
-		modalStore.openEthToken();
+		const id = Symbol('modalId');
+		modalStore.openEthToken({ id, data: undefined });
 		modalStore.close();
 
 		expect(get(modalStore)).toBeNull();

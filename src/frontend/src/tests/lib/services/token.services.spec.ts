@@ -1,4 +1,4 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {
@@ -120,8 +120,8 @@ describe('token.services', () => {
 				err: error
 			});
 
-			expect(spyBusyStart).toHaveBeenCalledTimes(1);
-			expect(spyBusyStop).toHaveBeenCalledTimes(1);
+			expect(spyBusyStart).toHaveBeenCalledOnce();
+			expect(spyBusyStop).toHaveBeenCalledOnce();
 		});
 
 		it('should enable token, reload tokens, and return "loaded" on success', async () => {
@@ -139,8 +139,8 @@ describe('token.services', () => {
 			});
 			expect(mockLoadTokens).toHaveBeenCalledWith({ identity: mockIdentity });
 
-			expect(spyBusyStart).toHaveBeenCalledTimes(1);
-			expect(spyBusyStop).toHaveBeenCalledTimes(1);
+			expect(spyBusyStart).toHaveBeenCalledOnce();
+			expect(spyBusyStop).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -232,8 +232,8 @@ describe('token.services', () => {
 				err: error
 			});
 
-			expect(spyBusyStart).toHaveBeenCalledTimes(1);
-			expect(spyBusyStop).toHaveBeenCalledTimes(1);
+			expect(spyBusyStart).toHaveBeenCalledOnce();
+			expect(spyBusyStop).toHaveBeenCalledOnce();
 		});
 
 		it('should enable counterpart token, reload tokens, and return "loaded" on success', async () => {
@@ -255,8 +255,8 @@ describe('token.services', () => {
 			});
 			expect(mockLoadTokens).toHaveBeenCalledWith({ identity: mockIdentity });
 
-			expect(spyBusyStart).toHaveBeenCalledTimes(1);
-			expect(spyBusyStop).toHaveBeenCalledTimes(1);
+			expect(spyBusyStart).toHaveBeenCalledOnce();
+			expect(spyBusyStop).toHaveBeenCalledOnce();
 		});
 	});
 });

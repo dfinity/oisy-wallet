@@ -5,16 +5,18 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
-	import { formatToken, formatUSD } from '$lib/utils/format.utils';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 
 	interface Props {
 		amount: bigint;
 		usdAmount: number;
 		token: IcToken | undefined;
 		loading?: boolean;
+		testId?: string;
 	}
 
-	let { amount, usdAmount, token, loading = true }: Props = $props();
+	let { amount, usdAmount, token, loading = true, testId }: Props = $props();
 
 	const displayAmount = $derived(
 		formatToken({
@@ -24,7 +26,9 @@
 		})
 	);
 
-	const displayUsdAmount = $derived(formatUSD({ value: usdAmount }));
+	const displayUsdAmount = $derived(
+		formatCurrency({ value: usdAmount, currency: $currentCurrency })
+	);
 </script>
 
 {#if nonNullish(token)}
@@ -34,6 +38,7 @@
 		class:duration-500={loading}
 		class:ease-in-out={loading}
 		class:animate-pulse={loading}
+		data-tid={testId}
 	>
 		{#if amount > ZERO}
 			<Sprinkles type="box" />

@@ -1,9 +1,11 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
+import { buildDip20Tokens } from '$icp/services/dip20-tokens.services';
 import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
@@ -22,7 +24,7 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 	([$icrcTokens]) => {
 		// The list of ICRC tokens (SNSes) is defined as environment variables.
 		// These tokens are not necessarily loaded at boot time if the user has not added them to their list of custom tokens.
-		const tokens = buildIcrcCustomTokens();
+		const tokens = [...buildIcrcCustomTokens(), ...buildDip20Tokens()];
 		const icrcEnvTokens: IcTokenToggleable[] =
 			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
 
@@ -57,6 +59,8 @@ export const allTokens = derived(
 	[
 		// The entire list of Erc20 tokens to display to the user.
 		erc20Tokens,
+		// The entire list of Erc721 tokens to display to the user.
+		erc721Tokens,
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		allIcrcTokens,
@@ -66,6 +70,7 @@ export const allTokens = derived(
 	],
 	([
 		$erc20Tokens,
+		$erc721Tokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$allIcrcTokens,
@@ -82,7 +87,17 @@ export const allTokens = derived(
 		...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
 		...$erc20Tokens,
+		...$erc721Tokens,
 		...$allIcrcTokens,
 		...$splTokens
+	]
+);
+
+export const allCrossChainSwapTokens = derived(
+	[erc20Tokens, enabledEthereumTokens, enabledEvmTokens],
+	([$erc20Tokens, $enabledEthereumTokens, $enabledEvmTokens]) => [
+		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
+		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
+		...$erc20Tokens.map((token) => ({ ...token, enabled: true }))
 	]
 );

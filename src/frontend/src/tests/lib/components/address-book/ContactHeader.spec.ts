@@ -16,10 +16,10 @@ describe('ContactHeader', () => {
 
 	it('should render the contact header with name', () => {
 		const name = 'Test Contact';
-		const edit = vi.fn();
+		const onEdit = vi.fn();
 
 		const { container } = render(ContactHeader, {
-			props: { name, edit },
+			props: { name, onEdit },
 			context: mockContext
 		});
 
@@ -29,10 +29,10 @@ describe('ContactHeader', () => {
 
 	it('should call edit function when edit button is clicked', async () => {
 		const name = 'Test Contact';
-		const edit = vi.fn();
+		const onEdit = vi.fn();
 
 		const { getByTestId } = render(ContactHeader, {
-			props: { name, edit },
+			props: { name, onEdit },
 			context: mockContext
 		});
 
@@ -43,15 +43,15 @@ describe('ContactHeader', () => {
 		await fireEvent.click(editButton);
 
 		// Check that edit was called
-		expect(edit).toHaveBeenCalled();
+		expect(onEdit).toHaveBeenCalled();
 	});
 
 	it('should display the edit button with correct text', () => {
 		const name = 'Test Contact';
-		const edit = vi.fn();
+		const onEdit = vi.fn();
 
 		const { getByTestId } = render(ContactHeader, {
-			props: { name, edit },
+			props: { name, onEdit },
 			context: mockContext
 		});
 
@@ -64,10 +64,10 @@ describe('ContactHeader', () => {
 
 	it('should apply the correct color based on the name', () => {
 		const name = 'Test Contact';
-		const edit = vi.fn();
+		const onEdit = vi.fn();
 
 		const { container } = render(ContactHeader, {
-			props: { name, edit },
+			props: { name, onEdit },
 			context: mockContext
 		});
 
@@ -82,11 +82,11 @@ describe('ContactHeader', () => {
 
 	it('should apply custom style class', () => {
 		const name = 'Test Contact';
-		const edit = vi.fn();
+		const onEdit = vi.fn();
 		const styleClass = 'custom-class';
 
 		const { container } = render(ContactHeader, {
-			props: { name, edit, styleClass },
+			props: { name, onEdit, styleClass },
 			context: mockContext
 		});
 

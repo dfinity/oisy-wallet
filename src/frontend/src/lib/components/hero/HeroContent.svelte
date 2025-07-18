@@ -7,7 +7,8 @@
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
-		isVCHFToken as isVCHFTokenUtil
+		isVCHFToken as isVCHFTokenUtil,
+		isVEURToken as isVEURTokenUtil
 	} from '$icp-eth/utils/token.utils';
 	import Back from '$lib/components/core/Back.svelte';
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
@@ -29,11 +30,14 @@
 		networkBitcoin,
 		networkBsc,
 		networkEthereum,
+		networkPolygon,
 		networkICP,
 		networkSolana,
-		pseudoNetworkChainFusion
+		pseudoNetworkChainFusion,
+		networkArbitrum
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
 	import type { OptionTokenUi } from '$lib/types/token';
@@ -77,6 +81,9 @@
 	let isVchfToken = false;
 	$: isVchfToken = nonNullish($pageToken) && isVCHFTokenUtil($pageToken);
 
+	let isVeurToken = false;
+	$: isVeurToken = nonNullish($pageToken) && isVEURTokenUtil($pageToken);
+
 	let isGradientToRight = false;
 	$: isGradientToRight = $networkSolana && !isTrumpToken;
 
@@ -85,11 +92,11 @@
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-pos-0 p-6 text-center text-primary-inverted transition-all duration-500 ease-in-out"
+	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary bg-pos-0 p-3 text-center text-primary-inverted transition-all duration-500 ease-in-out md:rounded-[28px] md:p-5"
 	class:from-default-0={$pseudoNetworkChainFusion}
 	class:to-default-100={$pseudoNetworkChainFusion}
 	class:bg-pos-100={!$pseudoNetworkChainFusion}
-	class:bg-cover={isTrumpToken || isVchfToken}
+	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
 	class:from-trump-0={isTrumpToken}
 	class:to-trump-100={isTrumpToken}
 	class:bg-size-200={!isTrumpToken}
@@ -105,11 +112,17 @@
 	class:to-base-100={$networkBase}
 	class:from-bsc-0={$networkBsc}
 	class:to-bsc-100={$networkBsc}
+	class:from-arbitrum-0={$networkArbitrum}
+	class:to-arbitrum-100={$networkArbitrum}
+	class:from-polygon-0={$networkPolygon}
+	class:to-polygon-100={$networkPolygon}
 	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
 	class:bg-vchf-token-hero-image={isVchfToken}
 	class:bg-top-right={isVchfToken}
+	class:bg-veur-token-hero-image={isVeurToken}
+	class:bg-center={isVeurToken}
 	class:bg-linear-to-b={!isGradientToRight && !isGradientToBottomRight}
 	class:bg-gradient-to-r={isGradientToRight}
 	class:bg-linear-105={isGradientToBottomRight}
@@ -138,7 +151,7 @@
 		</div>
 	{:else}
 		<div in:slide={SLIDE_PARAMS}>
-			<ExchangeBalance />
+			<ExchangeBalance hideBalance={$isPrivacyMode} />
 		</div>
 	{/if}
 

@@ -80,8 +80,10 @@
 		</p>
 	</div>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
-		<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
+			<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

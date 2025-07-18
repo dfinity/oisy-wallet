@@ -9,10 +9,13 @@ import { token } from '$lib/stores/token.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
+	INTERSECTION_OBSERVER_ACTIVE_INTERVAL,
 	IntersectionObserverActive,
+	IntersectionObserverActiveInterval,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
-import { createIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { createIcTransactionUiMockList } from '$tests/utils/transactions-stores.test-utils';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$lib/services/auth.services', () => ({
@@ -26,12 +29,11 @@ vi.mock('$icp/services/ic-transactions.services', () => ({
 describe('IcTransactionsScroll', () => {
 	const mockToken = ICP_TOKEN;
 
-	const mockTransactions: IcTransactionUi[] = [
-		createIcTransactionUiMock('tx1'),
-		createIcTransactionUiMock('tx2')
-	];
+	const mockTransactions: IcTransactionUi[] = createIcTransactionUiMockList(2);
 
 	const mockLastId = mockTransactions[mockTransactions.length - 1].id;
+
+	const mockSnippet = createMockSnippet('Mock Snippet');
 
 	beforeAll(() => {
 		Object.defineProperty(window, 'IntersectionObserver', {
@@ -63,7 +65,7 @@ describe('IcTransactionsScroll', () => {
 
 	describe('when the infinite scroll is triggered', () => {
 		it('should load next transactions', () => {
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).toHaveBeenCalledOnce();
 			expect(loadNextIcTransactions).toHaveBeenNthCalledWith(1, {
@@ -79,7 +81,7 @@ describe('IcTransactionsScroll', () => {
 		it('should not load next transactions if identity is nullish', () => {
 			mockAuthStore(null);
 
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
 
@@ -89,7 +91,7 @@ describe('IcTransactionsScroll', () => {
 		it('should not load next transactions if the token is nullish', () => {
 			token.reset();
 
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
 		});
@@ -97,7 +99,7 @@ describe('IcTransactionsScroll', () => {
 		it('should not load next transactions if the transactions store is nullish', () => {
 			icTransactionsStore.reset(mockToken.id);
 
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
 		});
@@ -106,9 +108,48 @@ describe('IcTransactionsScroll', () => {
 			icTransactionsStore.reset(mockToken.id);
 			icTransactionsStore.prepend({ tokenId: mockToken.id, transactions: [] });
 
-			render(IcTransactionsScroll, { token: mockToken });
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should not load next transactions if there are no more transactions', async () => {
+			Object.defineProperty(window, 'IntersectionObserver', {
+				writable: true,
+				configurable: true,
+				value: IntersectionObserverActiveInterval
+			});
+
+			const interval = INTERSECTION_OBSERVER_ACTIVE_INTERVAL;
+
+			vi.useFakeTimers();
+
+			vi.mocked(loadNextIcTransactions).mockImplementationOnce(
+				async ({ signalEnd }: { signalEnd: () => void }) => {
+					signalEnd();
+					return await Promise.resolve();
+				}
+			);
+
+			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
+
+			await vi.advanceTimersByTimeAsync(interval + 1000);
+
+			expect(loadNextIcTransactions).toHaveBeenCalledOnce();
+			expect(loadNextIcTransactions).toHaveBeenNthCalledWith(1, {
+				lastId: mockLastId,
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				token: mockToken,
+				signalEnd: expect.any(Function)
+			});
+
+			await vi.advanceTimersByTimeAsync(interval * 2);
+
+			expect(loadNextIcTransactions).toHaveBeenCalledOnce();
+
+			vi.useRealTimers();
 		});
 	});
 });

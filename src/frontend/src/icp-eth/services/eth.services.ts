@@ -15,6 +15,8 @@ import {
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import type { IcCkLinkedAssets, IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -145,8 +147,8 @@ const loadPendingTransactions = async ({
 
 		const { id: tokenId } = token;
 
-		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore we reset the store.
-		// This can be useful if there was a previous pending transactions displayed and the transaction has now been processed.
+		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore, we reset the store.
+		// This can be useful if there were previous pending transactions displayed and the transaction has now been processed.
 		if (pendingLogs.length === 0) {
 			icPendingTransactionsStore.reset(tokenId);
 			return;
@@ -168,7 +170,8 @@ const loadPendingTransactions = async ({
 		});
 	} catch (err: unknown) {
 		const {
-			network: { name: networkName }
+			id: tokenId,
+			network: { name: networkName, id: networkId }
 		} = twinToken;
 
 		const {
@@ -177,13 +180,15 @@ const loadPendingTransactions = async ({
 			}
 		} = get(i18n);
 
-		toastsError({
-			msg: {
-				text: replacePlaceholders(loading_pending_ck_ethereum_transactions, {
-					$network: networkName
-				})
+		trackEvent({
+			name: TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR,
+			metadata: {
+				tokenId: `${tokenId.description}`,
+				networkId: `${networkId.description}`
 			},
-			err
+			warning: `${replacePlaceholders(loading_pending_ck_ethereum_transactions, {
+				$network: networkName
+			})} ${err}`
 		});
 	} finally {
 		emit({

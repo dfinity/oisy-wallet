@@ -13,6 +13,7 @@ import type { OptionBalance } from '$lib/types/balance';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { RequiredTokenWithLinkedData, Token, TokenStandard, TokenUi } from '$lib/types/token';
+import type { CardData } from '$lib/types/token-card';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
@@ -39,24 +40,22 @@ export const getMaxTransactionAmount = ({
 	fee?: bigint;
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
-}): number => {
+}): string => {
 	const value =
 		(balance ?? ZERO) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO);
 
-	return Number(
-		value <= ZERO
-			? ZERO
-			: formatToken({
-					value,
-					unitName: tokenDecimals,
-					displayDecimals: tokenDecimals
-				})
-	);
+	return value <= ZERO
+		? ZERO.toString()
+		: formatToken({
+				value,
+				unitName: tokenDecimals,
+				displayDecimals: tokenDecimals
+			});
 };
 
 /**
  * /**
- *  * We always display following tokens on the "Tokens" view:
+ *  * We always display the following tokens on the "Tokens" view:
  *  * - ICP token
  *  * - Ethereum token
  *  * - A subset of cK tokens
@@ -219,3 +218,12 @@ export const findTwinToken = ({
 				(token) => token.symbol === tokenToPair.twinTokenSymbol && isIcCkToken(token)
 			) as IcCkToken | undefined)
 		: undefined;
+
+/**
+ * Gets the symbol to display for the given token.
+ *
+ * @param token - for which the symbol to display should be found
+ * @returns the symbol to display for the token
+ */
+export const getTokenDisplaySymbol = (token: Token | CardData): string =>
+	token.oisySymbol?.oisySymbol ?? token.symbol;

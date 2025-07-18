@@ -29,6 +29,7 @@ declare namespace svelteHTML {
 		'on:oisyValidateAddresses'?: (event: CustomEvent<any>) => void;
 		'on:oisyRefreshUserProfile'?: (event: CustomEvent<any>) => void;
 		'on:oisyToggleZeroBalances'?: (event: CustomEvent<any>) => void;
+		'on:oisyRefreshContacts'?: (event: CustomEvent<any>) => void;
 	}
 }
 

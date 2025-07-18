@@ -19,6 +19,7 @@
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
@@ -36,23 +37,25 @@
 
 	export let listener: OptionWalletConnectListener;
 
+	const modalId = Symbol();
+
 	const signModalId = Symbol();
 	const sendModalId = Symbol();
 
-	const STEP_CONNECT: WizardStep = {
-		name: 'Connect',
+	const STEP_CONNECT: WizardStep<WizardStepsWalletConnect> = {
+		name: WizardStepsWalletConnect.CONNECT,
 		title: $i18n.wallet_connect.text.name
 	};
 
-	const STEP_REVIEW: WizardStep = {
-		name: 'Review',
+	const STEP_REVIEW: WizardStep<WizardStepsWalletConnect> = {
+		name: WizardStepsWalletConnect.REVIEW,
 		title: $i18n.wallet_connect.text.session_proposal
 	};
 
-	let steps: WizardSteps = [STEP_CONNECT, STEP_REVIEW];
+	let steps: WizardSteps<WizardStepsWalletConnect> = [STEP_CONNECT, STEP_REVIEW];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsWalletConnect> | undefined;
+	let modal: WizardModal<WizardStepsWalletConnect>;
 
 	const close = () => modalStore.close();
 	const resetAndClose = () => {
@@ -166,7 +169,7 @@
 		steps = [STEP_REVIEW];
 
 		// We open the WalletConnect auth modal on the review step
-		modalStore.openWalletConnectAuth();
+		modalStore.openWalletConnectAuth(modalId);
 
 		await connect($walletConnectUri);
 	};
@@ -358,7 +361,7 @@
 	onDestroy(() => walletConnectPaired.set(false));
 
 	const openWalletConnectAuth = () => {
-		modalStore.openWalletConnectAuth();
+		modalStore.openWalletConnectAuth(modalId);
 
 		trackEvent({
 			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
@@ -378,14 +381,16 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={resetAndClose}>
-		<WalletConnectModalTitle slot="title">
-			{`${
-				currentStep?.name === 'Review' && nonNullish(proposal)
-					? $i18n.wallet_connect.text.session_proposal
-					: $i18n.wallet_connect.text.name
-			}`}
-		</WalletConnectModalTitle>
+	<WizardModal {steps} bind:currentStep bind:this={modal} onClose={resetAndClose}>
+		{#snippet title()}
+			<WalletConnectModalTitle>
+				{`${
+					currentStep?.name === 'Review' && nonNullish(proposal)
+						? $i18n.wallet_connect.text.session_proposal
+						: $i18n.wallet_connect.text.name
+				}`}
+			</WalletConnectModalTitle>
+		{/snippet}
 
 		{#if currentStep?.name === 'Review'}
 			<WalletConnectReview

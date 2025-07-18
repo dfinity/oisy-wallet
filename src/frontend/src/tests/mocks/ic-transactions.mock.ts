@@ -11,25 +11,24 @@ import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import type { Token } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo, mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import type { PendingUtxo } from '@dfinity/ckbtc';
-import type { BRAND } from 'zod';
 
 export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 	Array.from({ length: n }, () => ({
-		id: crypto.randomUUID(),
+		id: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(),
 		type: 'send',
 		status: 'executed',
 		value: bn1Bi,
 		from: 'dndtm-gk4kn-ssvos-asuit-2q33x-lgtpj-5bnoi-v5ync-m4iza-xclem-mae',
 		to: 'cmpd6-ywgum-ofyfa-masyv-v3gba-il2hu-upwxw-xhdq3-mzkhx-zfhpb-7ae',
-		timestamp: BigInt(1746536120801n)
+		timestamp: 1_747_732_396_194_882_329n
 	}));
 
-export const setupIcTransactionsStore = ({ tokenId }: { tokenId: symbol & BRAND<'TokenId'> }) => {
+export const setupIcTransactionsStore = ({ tokenId }: { tokenId: TokenId }) => {
 	const transactions = [
 		createCertifiedIcTransactionUiMock('tx1'),
 		createCertifiedIcTransactionUiMock('tx2'),
@@ -42,7 +41,7 @@ export const setupIcTransactionsStore = ({ tokenId }: { tokenId: symbol & BRAND<
 	});
 };
 
-export const cleanupIcTransactionsStore = ({ tokenId }: { tokenId: symbol & BRAND<'TokenId'> }) => {
+export const cleanupIcTransactionsStore = ({ tokenId }: { tokenId: TokenId }) => {
 	icTransactionsStore.reset(tokenId);
 };
 

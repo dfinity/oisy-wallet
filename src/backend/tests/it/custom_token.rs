@@ -2,7 +2,10 @@ use std::sync::LazyLock;
 
 use candid::Principal;
 use shared::types::{
-    custom_token::{CustomToken, IcrcToken, SplToken, SplTokenId, Token},
+    custom_token::{
+        ChainId, CustomToken, Erc20Token, Erc721Token, ErcTokenId, IcrcToken, SplToken, SplTokenId,
+        Token,
+    },
     TokenVersion,
 };
 
@@ -48,11 +51,37 @@ static SPL_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     enabled: true,
     version: None,
 });
+static ERC20_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string()));
+static ERC20_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
+static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc20(Erc20Token {
+        token_address: ERC20_TOKEN_ID.clone(),
+        chain_id: ERC20_CHAIN_ID.clone(),
+        symbol: Some("USDC".to_string()),
+        decimals: Some(u8::MAX),
+    }),
+    enabled: true,
+    version: None,
+});
+static ERC721_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x8821bee2ba0df28761afff119d66390d594cd280".to_string()));
+static ERC721_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 137);
+static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc721(Erc721Token {
+        token_address: ERC721_TOKEN_ID.clone(),
+        chain_id: ERC721_CHAIN_ID.clone(),
+    }),
+    enabled: true,
+    version: None,
+});
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
         USER_TOKEN.clone(),
         ANOTHER_USER_TOKEN.clone(),
         SPL_TOKEN.clone(),
+        ERC20_TOKEN.clone(),
+        ERC721_TOKEN.clone(),
     ]
 });
 
@@ -80,6 +109,58 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
     let expected_tokens: Vec<CustomToken> = vec![user_token.with_incremented_version()];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
+}
+
+#[test]
+fn test_remove_custom_spl_token() {
+    test_remove_custom_token(&SPL_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_erc20_token() {
+    test_remove_custom_token(&ERC20_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_erc721_token() {
+    test_remove_custom_token(&ERC721_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_icrc_token() {
+    test_remove_custom_token(&USER_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_no_index_token() {
+    test_remove_custom_token(&USER_TOKEN_NO_INDEX)
+}
+
+fn test_remove_custom_token(token: &CustomToken) {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let before_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+
+    assert_eq!(before_set, Ok(Vec::new()));
+
+    let result = pic_setup.update::<()>(caller, "set_custom_token", token.clone());
+
+    assert_eq!(result, Ok(()));
+
+    let before_remove = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+
+    let expected_tokens: Vec<CustomToken> = vec![token.with_incremented_version()];
+    assert_tokens_data_eq(&before_remove.unwrap(), &expected_tokens);
+
+    let result = pic_setup.update::<()>(caller, "remove_custom_token", token.clone());
+
+    assert_eq!(result, Ok(()));
+
+    let after_remove = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+
+    assert_eq!(after_remove, Ok(Vec::new()));
 }
 
 #[test]
@@ -333,7 +414,7 @@ fn test_anonymous_cannot_add_custom_token() {
     assert!(result.is_err());
     assert_eq!(
         result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        "Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized.".to_string()
     );
 }
 
@@ -349,8 +430,8 @@ fn test_anonymous_cannot_list_custom_tokens() {
 
     assert!(result.is_err());
     assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        &result.unwrap_err(),
+        "Query call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 

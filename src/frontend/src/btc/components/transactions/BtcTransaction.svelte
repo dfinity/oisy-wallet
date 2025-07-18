@@ -15,8 +15,10 @@
 	let timestamp: bigint | undefined;
 	let status: BtcTransactionStatus;
 	let type: BtcTransactionType;
+	let to: string[] | undefined;
+	let from: string | undefined;
 
-	$: ({ type, status, value, timestamp } = transaction);
+	$: ({ type, status, value, timestamp, to, from } = transaction);
 
 	let label: string;
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
@@ -28,13 +30,15 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openBtcTransaction({ id: modalId, data: { transaction, token } })}
+	onClick={() => modalStore.openBtcTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
 	{type}
 	timestamp={Number(timestamp)}
 	{status}
 	{token}
 	{iconType}
+	to={nonNullish(to?.[0]) ? to[0] : undefined}
+	{from}
 >
 	{label}
 </Transaction>

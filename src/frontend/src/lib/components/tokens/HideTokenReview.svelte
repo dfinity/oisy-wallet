@@ -10,6 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -25,7 +26,7 @@
 
 		<p class="text-center font-bold">
 			{#if nonNullish($token)}
-				{$token.name}
+				{getTokenDisplaySymbol($token)}
 			{:else}
 				&ZeroWidthSpace;
 			{/if}
@@ -36,12 +37,14 @@
 		<Html text={$i18n.tokens.hide.info} />
 	</p>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => dispatch('icCancel')} />
-		<Button on:click={() => dispatch('icHide')}>
-			{$i18n.tokens.hide.confirm}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCancel onclick={() => dispatch('icCancel')} />
+			<Button onclick={() => dispatch('icHide')}>
+				{$i18n.tokens.hide.confirm}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
 
 <style lang="scss">

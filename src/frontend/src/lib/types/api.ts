@@ -1,6 +1,7 @@
 import type {
 	AllowSigningRequest,
 	BitcoinNetwork,
+	Contact,
 	CredentialSpec,
 	GetUserProfileError,
 	UserProfile,
@@ -135,4 +136,33 @@ export interface ICPSwapQuoteParams {
 
 export interface ICPSwapAmountReply {
 	receiveAmount: bigint;
+}
+
+export interface BtcGetFeePercentilesParams {
+	network: BitcoinNetwork;
+}
+
+export interface GetContactParams {
+	identity: Identity;
+	contactId: bigint;
+}
+
+export interface CreateContactParams {
+	identity: Identity;
+	name: string;
+}
+
+export interface CreateContactParams {
+	identity: Identity;
+	name: string;
+}
+
+export interface UpdateContactParams {
+	identity: Identity;
+	contact: Contact;
+}
+
+export interface DeleteContactParams {
+	identity: Identity;
+	contactId: bigint;
 }

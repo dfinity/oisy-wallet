@@ -9,6 +9,7 @@ import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
 import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
@@ -23,7 +24,11 @@ import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
-import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
+import type {
+	AllTransactionUiWithCmp,
+	AnyTransactionUi,
+	AnyTransactionUiWithToken
+} from '$lib/types/transaction';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
@@ -109,13 +114,13 @@ export const mapAllTransactionsUi = ({
 
 			return [
 				...acc,
-				...($ethTransactions[tokenId] ?? []).map((transaction) => ({
+				...($ethTransactions?.[tokenId] ?? []).map(({ data: transaction }) => ({
 					transaction: mapEthTransactionUi({
 						transaction,
 						ckMinterInfoAddresses: isSepoliaNetwork
 							? ckEthMinterInfoAddressesSepolia
 							: ckEthMinterInfoAddressesMainnet,
-						$ethAddress
+						ethAddress: $ethAddress
 					}),
 					token,
 					component: 'ethereum' as const
@@ -286,9 +291,19 @@ export const areTransactionsStoresLoading = (
 	return (someNullish || someNotInitialized) && allEmpty;
 };
 
-export const getKnownDestinations = (transactions: AnyTransactionUi[]): KnownDestinations =>
+export const areTransactionsStoresLoaded = (
+	transactionsStores: TransactionsStoreCheckParams[]
+): boolean =>
+	transactionsStores.length > 0 &&
+	transactionsStores.every((transactionsStore) =>
+		isTransactionsStoreInitialized(transactionsStore)
+	);
+
+export const getKnownDestinations = (
+	transactions: AnyTransactionUiWithToken[]
+): KnownDestinations =>
 	transactions.reduce<KnownDestinations>(
-		(acc, { timestamp, value, to, type }) =>
+		(acc, { timestamp, value, to, type, token }) =>
 			nonNullish(to) && type === 'send' && nonNullish(value) && value > ZERO
 				? {
 						...acc,
@@ -296,13 +311,17 @@ export const getKnownDestinations = (transactions: AnyTransactionUi[]): KnownDes
 							(innerAcc, address) => ({
 								...innerAcc,
 								[address]: {
-									amounts: [...(nonNullish(acc[address]) ? acc[address].amounts : []), value],
+									amounts: [
+										...(nonNullish(acc[address]) ? acc[address].amounts : []),
+										{ value, token }
+									],
 									timestamp:
 										nonNullish(acc[address]?.timestamp) && nonNullish(timestamp)
 											? Math.max(Number(acc[address].timestamp), Number(timestamp))
 											: nonNullish(timestamp)
 												? Number(timestamp)
-												: acc[address].timestamp
+												: acc[address].timestamp,
+									address
 								}
 							}),
 							{}
@@ -311,3 +330,22 @@ export const getKnownDestinations = (transactions: AnyTransactionUi[]): KnownDes
 				: acc,
 		{}
 	);
+
+/**
+ * Finds the oldest transaction by timestamp in a list of transactions.
+ *
+ * @param transactions - The list of transactions to search through.
+ * @returns The last transaction or undefined if no transactions are provided.
+ */
+export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
+	transactions: T[]
+): T | undefined =>
+	transactions.length >= 0
+		? transactions.reduce<T>(
+				(min, transaction) =>
+					(Number(transaction.timestamp) ?? Infinity) < (Number(min.timestamp) ?? Infinity)
+						? transaction
+						: min,
+				transactions[0]
+			)
+		: undefined;

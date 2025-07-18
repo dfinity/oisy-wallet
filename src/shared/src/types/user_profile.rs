@@ -74,12 +74,6 @@ pub enum AddUserCredentialError {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub struct ListUsersRequest {
-    pub updated_after_timestamp: Option<Timestamp>,
-    pub matches_max_length: Option<u64>,
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct OisyUser {
     pub principal: Principal,
     pub pouh_verified: bool,
@@ -87,20 +81,8 @@ pub struct OisyUser {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub struct ListUsersResponse {
-    pub users: Vec<OisyUser>,
-    pub matches_max_length: u64,
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct HasUserProfileResponse {
     pub has_user_profile: bool,
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub struct ListUserCreationTimestampsResponse {
-    pub creation_timestamps: Vec<Timestamp>,
-    pub matches_max_length: u64,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
