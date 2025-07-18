@@ -41,13 +41,17 @@ pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, Co
             return Err(ContactError::RandomnessError);
         }
 
-        // Create the new contact - note that CreateContactRequest only has 'name'
+        // Remove memory usage validation from backend. Only validate in impls.
+        // request.validate_with_context already handles all image validation in impls.
+        request.validate_with_context(&stored_contacts, &ic_cdk::caller())?;
+
+        // Create the new contact with the provided image
         let new_contact = Contact {
             id: new_id,
             name: request.name,
             addresses: Vec::new(), // Start with an empty addresses list
             update_timestamp_ns: current_time,
-            image: None, // Start with no image
+            image: request.image,
         };
 
         // Add the contact to the stored contacts
@@ -130,6 +134,12 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
             .contacts
             .get(&request.id)
             .ok_or(ContactError::ContactNotFound)?;
+
+        // Determine if we're adding a new image (didn't have one before but now we do)
+        let is_adding_new_image = existing_contact.image.is_none() && request.image.is_some();
+
+        // Validate the request with context
+        request.validate_with_context(&stored_contacts, &ic_cdk::caller(), is_adding_new_image)?;
 
         // Create an updated contact with current timestamp
         let updated_contact = Contact {
@@ -225,4 +235,15 @@ pub fn delete_contact(contact_id: u64) -> Result<u64, ContactError> {
 
         Ok(contact_id)
     })
+}
+
+/// Gets image statistics for the current user's contacts.
+/// This can be used for monitoring and debugging purposes.
+///
+/// # Returns
+/// * `shared::types::contact::ImageStatistics` - Statistics about images in the user's contacts
+pub fn get_image_statistics() -> shared::types::contact::ImageStatistics {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_contacts = get_stored_contacts_safely(&stored_principal);
+    stored_contacts.get_image_statistics()
 }

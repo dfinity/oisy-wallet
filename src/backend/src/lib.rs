@@ -911,31 +911,17 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
 }
 
 /// Creates a new contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
-///
-/// # Returns
-/// The created contact on success.
-///
-/// # Test
-/// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub async fn create_contact(request: CreateContactRequest) -> CreateContactResult {
-    let result = contacts::create_contact(request).await;
-    result.into()
+    contacts::create_contact(request).await.into()
 }
 
 /// Updates an existing contact for the caller.
-///
-/// # Errors
-/// Errors are enumerated by: `ContactError`.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    let result = contacts::update_contact(request);
-    result.into()
+    contacts::update_contact(request).into()
 }
 
 /// Deletes a contact for the caller.
@@ -976,5 +962,16 @@ pub fn get_contact(contact_id: u64) -> GetContactResult {
 pub fn get_contacts() -> GetContactsResult {
     let result = Ok(contacts::get_contacts());
     result.into()
+}
+
+/// Returns image statistics for the caller's contacts
+///
+/// This query function returns statistics about images stored in the user's contacts.
+/// # Returns
+/// * `ImageStatistics` - Statistics about images in the user's contacts.
+#[query(guard = "caller_is_controller")]
+#[must_use]
+pub fn get_contact_image_statistics() -> shared::types::contact::ImageStatistics {
+    contacts::get_image_statistics()
 }
 export_candid!();

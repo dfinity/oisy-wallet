@@ -2,13 +2,17 @@ use std::time::Duration;
 
 use candid::Principal;
 use pretty_assertions::assert_eq;
+use serde_bytes::ByteBuf;
 use shared::types::{
-    contact::{Contact, ContactError, CreateContactRequest},
+    contact::{
+        Contact, ContactError, ContactImage, CreateContactRequest, UpdateContactRequest, ImageMimeType, ImageStatistics,
+    },
+    result_types::{CreateContactResult, UpdateContactResult, GetContactResult},
     user_profile::OisyUser,
 };
 
 use crate::utils::{
-    mock::CALLER,
+    mock::{CALLER, CONTROLLER},
     pocketic::{setup, PicBackend, PicCanisterTrait},
 };
 
@@ -23,8 +27,95 @@ pub fn call_create_contact(
 ) -> Result<Contact, ContactError> {
     let request = CreateContactRequest { name, image: None };
     let wrapped_result =
-        pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
-    wrapped_result.expect("that create_contact succeeds")
+        pic_setup.update::<CreateContactResult>(caller, "create_contact", request);
+    match wrapped_result.expect("that create_contact succeeds") {
+        CreateContactResult::Ok(contact) => Ok(contact),
+        CreateContactResult::Err(err) => Err(err),
+    }
+}
+
+pub fn call_create_contact_with_image(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    name: String,
+    image: Option<ContactImage>,
+) -> Result<Contact, ContactError> {
+    let request = CreateContactRequest { name, image };
+    let wrapped_result =
+        pic_setup.update::<CreateContactResult>(caller, "create_contact", request);
+    match wrapped_result.expect("that create_contact succeeds") {
+        CreateContactResult::Ok(contact) => Ok(contact),
+        CreateContactResult::Err(err) => Err(err),
+    }
+}
+
+pub fn call_get_contact_image_statistics(
+    pic_setup: &PicBackend,
+    _caller: Principal,
+) -> ImageStatistics {
+    let controller = Principal::from_text(CONTROLLER).unwrap();
+    let wrapped_result =
+        pic_setup.query::<ImageStatistics>(controller, "get_contact_image_statistics", ());
+    wrapped_result.expect("that get_contact_image_statistics succeeds")
+}
+
+/// Creates a valid small PNG image for testing
+pub fn create_test_png_image() -> ContactImage {
+    // A minimal valid PNG image (1x1 pixel, transparent)
+    let png_data = vec![
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG header
+        0x00, 0x00, 0x00, 0x0D, // IHDR chunk size (13 bytes)
+        0x49, 0x48, 0x44, 0x52, // IHDR chunk type
+        0x00, 0x00, 0x00, 0x01, // width = 1
+        0x00, 0x00, 0x00, 0x01, // height = 1
+        0x08, 0x06, 0x00, 0x00, 0x00, // bit depth, color type, compression, filter, interlace
+        0x1F, 0x15, 0xC4, 0x89, // CRC32
+        0x00, 0x00, 0x00, 0x0A, // IDAT chunk size (10 bytes)
+        0x49, 0x44, 0x41, 0x54, // IDAT chunk type
+        0x78, 0x9C, 0x62, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, // zlib compressed data
+        0xE2, 0x21, 0xBC, 0x33, // CRC32
+        0x00, 0x00, 0x00, 0x00, // IEND chunk size (0 bytes)
+        0x49, 0x45, 0x4E, 0x44, // IEND chunk type
+        0xAE, 0x42, 0x60, 0x82, // CRC32
+    ];
+
+    ContactImage {
+        data: ByteBuf::from(png_data),
+        mime_type: ImageMimeType::Png,
+    }
+}
+
+/// Creates a valid small JPEG image for testing
+pub fn create_test_jpeg_image() -> ContactImage {
+    // A minimal valid JPEG image
+    let jpeg_data = vec![
+        0xFF, 0xD8, // SOI (Start of Image)
+        0xFF, 0xE0, // APP0 segment marker
+        0x00, 0x10, // APP0 segment length (16 bytes)
+        0x4A, 0x46, 0x49, 0x46, 0x00, // JFIF identifier
+        0x01, 0x01, // JFIF version 1.1
+        0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, // Resolution info
+        0xFF, 0xD9, // EOI (End of Image)
+    ];
+
+    ContactImage {
+        data: ByteBuf::from(jpeg_data),
+        mime_type: ImageMimeType::Jpeg,
+    }
+}
+
+/// Creates an oversized image for testing size limits
+pub fn create_oversized_image() -> ContactImage {
+    // Create an image larger than MAX_IMAGE_SIZE_BYTES (100KB)
+    let large_data = vec![0xFF; 200 * 1024]; // 200KB
+    let mut jpeg_data = vec![0xFF, 0xD8]; // JPEG header
+    jpeg_data.extend(large_data);
+    jpeg_data.extend(vec![0xFF, 0xD9]); // JPEG footer
+
+    ContactImage {
+        data: ByteBuf::from(jpeg_data),
+        mime_type: ImageMimeType::Jpeg,
+    }
 }
 
 pub fn call_get_contacts(pic_setup: &PicBackend, caller: Principal) -> Vec<Contact> {
@@ -40,8 +131,11 @@ pub fn call_get_contact(
     contact_id: u64,
 ) -> Result<Contact, ContactError> {
     let wrapped_result =
-        pic_setup.query::<Result<Contact, ContactError>>(caller, "get_contact", contact_id);
-    wrapped_result.expect("that get_contact succeeds")
+        pic_setup.query::<GetContactResult>(caller, "get_contact", contact_id);
+    match wrapped_result.expect("that get_contact succeeds") {
+        GetContactResult::Ok(contact) => Ok(contact),
+        GetContactResult::Err(err) => Err(err),
+    }
 }
 
 pub fn call_delete_contact(
@@ -59,9 +153,19 @@ pub fn call_update_contact(
     caller: Principal,
     contact: Contact,
 ) -> Result<Contact, ContactError> {
+    let request = UpdateContactRequest {
+        id: contact.id,
+        name: contact.name,
+        addresses: contact.addresses,
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: contact.image,
+    };
     let wrapped_result =
-        pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", contact);
-    wrapped_result.expect("that update_contact succeeds")
+        pic_setup.update::<UpdateContactResult>(caller, "update_contact", request);
+    match wrapped_result.expect("that update_contact succeeds") {
+        UpdateContactResult::Ok(contact) => Ok(contact),
+        UpdateContactResult::Err(err) => Err(err),
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -77,7 +181,7 @@ fn test_create_contact_requires_authenticated_user() {
         name: "Test Contact".to_string(),
         image: None,
     };
-    let result = pic_setup.update::<Result<Contact, ContactError>>(
+    let result = pic_setup.update::<CreateContactResult>(
         Principal::anonymous(),
         "create_contact",
         request,
@@ -676,19 +780,19 @@ fn test_update_contact_preserves_other_contacts() {
     assert!(update_result.is_ok());
 
     // Get all contacts after update
-    let updated_contacts = call_get_contacts(&pic_setup, caller);
-    assert_eq!(updated_contacts.len(), 3); // Should still have 3 contacts
+    let updated_contacts_list = call_get_contacts(&pic_setup, caller);
+    assert_eq!(updated_contacts_list.len(), 3); // Should still have 3 contacts
 
     // Find each contact by ID and verify
-    let updated_contact1 = updated_contacts
+    let updated_contact1 = updated_contacts_list
         .iter()
         .find(|c| c.id == contact1.id)
         .unwrap();
-    let updated_contact2 = updated_contacts
+    let updated_contact2 = updated_contacts_list
         .iter()
         .find(|c| c.id == contact2.id)
         .unwrap();
-    let updated_contact3 = updated_contacts
+    let updated_contact3 = updated_contacts_list
         .iter()
         .find(|c| c.id == contact3.id)
         .unwrap();
@@ -799,6 +903,322 @@ fn test_delete_contact_should_fail_with_nonexistent_id() {
     // Verify the operation fails with ContactNotFound
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
+}
+
+// -------------------------------------------------------------------------------------------------
+// - Integration tests for contact image functionality
+// -------------------------------------------------------------------------------------------------
+
+#[test]
+fn test_create_contact_with_valid_image() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact with a valid PNG image
+    let image = create_test_png_image();
+    let result = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Test Contact".to_string(),
+        Some(image.clone()),
+    );
+
+    assert!(result.is_ok());
+    let contact = result.unwrap();
+
+    assert_eq!(contact.name, "Test Contact");
+    assert!(contact.image.is_some());
+
+    let stored_image = contact.image.unwrap();
+    assert_eq!(stored_image.mime_type, ImageMimeType::Png);
+    assert_eq!(stored_image.data, image.data);
+}
+
+#[test]
+fn test_create_contact_with_jpeg_image() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact with a valid JPEG image
+    let image = create_test_jpeg_image();
+    let result = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "JPEG Contact".to_string(),
+        Some(image.clone()),
+    );
+
+    assert!(result.is_ok());
+    let contact = result.unwrap();
+
+    assert!(contact.image.is_some());
+    let stored_image = contact.image.unwrap();
+    assert_eq!(stored_image.mime_type, ImageMimeType::Jpeg);
+    assert_eq!(stored_image.data, image.data);
+}
+
+#[test]
+fn test_create_contact_with_oversized_image_should_fail() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact with an oversized image
+    let oversized_image = create_oversized_image();
+    let result = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Oversized Contact".to_string(),
+        Some(oversized_image),
+    );
+
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
+}
+
+#[test]
+fn test_create_contact_with_invalid_image_format_should_fail() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create an image with wrong magic bytes for PNG
+    let invalid_image = ContactImage {
+        data: ByteBuf::from(vec![0x00, 0x01, 0x02, 0x03]), // Invalid PNG header
+        mime_type: ImageMimeType::Png,
+    };
+
+    let result = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Invalid Contact".to_string(),
+        Some(invalid_image),
+    );
+
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
+}
+
+#[test]
+fn test_contact_image_statistics() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+    // Controller management is not supported in PocketIc v7.0; no-op here.
+    // pic_setup.add_controller(caller);
+
+    // Initially, no contacts with images
+    let stats = call_get_contact_image_statistics(&pic_setup, caller);
+    assert_eq!(stats.total_contacts, 0);
+    assert_eq!(stats.contacts_with_images, 0);
+    assert_eq!(stats.total_image_size, 0);
+
+    // Create a contact without an image
+    let result = call_create_contact(&pic_setup, caller, "No Image Contact".to_string());
+    assert!(result.is_ok());
+
+    let stats = call_get_contact_image_statistics(&pic_setup, caller);
+    assert_eq!(stats.total_contacts, 1);
+    assert_eq!(stats.contacts_with_images, 0);
+    assert_eq!(stats.total_image_size, 0);
+
+    // Create a contact with an image
+    let image = create_test_png_image();
+    let image_size = image.data.len();
+    let result = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "With Image Contact".to_string(),
+        Some(image),
+    );
+    assert!(result.is_ok());
+
+    let stats = call_get_contact_image_statistics(&pic_setup, caller);
+    assert_eq!(stats.total_contacts, 2);
+    assert_eq!(stats.contacts_with_images, 1);
+    assert_eq!(stats.total_image_size, image_size);
+
+    // Create another contact with a different image
+    let jpeg_image = create_test_jpeg_image();
+    let jpeg_size = jpeg_image.data.len();
+    let result = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "JPEG Contact".to_string(),
+        Some(jpeg_image),
+    );
+    assert!(result.is_ok());
+
+    let stats = call_get_contact_image_statistics(&pic_setup, caller);
+    assert_eq!(stats.total_contacts, 3);
+    assert_eq!(stats.contacts_with_images, 2);
+    assert_eq!(stats.total_image_size, image_size + jpeg_size);
+}
+
+#[test]
+fn test_contact_images_are_preserved_in_updates() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact with an image
+    let image = create_test_png_image();
+    let result = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Test Contact".to_string(),
+        Some(image.clone()),
+    );
+    assert!(result.is_ok());
+    let contact = result.unwrap();
+
+    // Update the contact without specifying an image (should preserve existing image)
+    let update_data = Contact {
+        id: contact.id,
+        name: "Updated Name".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: None, // Not providing an image should preserve the existing one
+    };
+
+    let update_result = call_update_contact(&pic_setup, caller, update_data);
+    assert!(update_result.is_ok());
+    let updated_contact = update_result.unwrap();
+
+    // Verify the image is preserved
+    assert!(updated_contact.image.is_some());
+    let preserved_image = updated_contact.image.unwrap();
+    assert_eq!(preserved_image.mime_type, ImageMimeType::Png);
+    assert_eq!(preserved_image.data, image.data);
+}
+
+#[test]
+fn test_contact_images_can_be_updated() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact with a PNG image
+    let png_image = create_test_png_image();
+    let result = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Test Contact".to_string(),
+        Some(png_image),
+    );
+    assert!(result.is_ok());
+    let contact = result.unwrap();
+
+    // Update the contact with a JPEG image
+    let jpeg_image = create_test_jpeg_image();
+    let update_data = Contact {
+        id: contact.id,
+        name: "Updated Name".to_string(),
+        addresses: vec![],
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: Some(jpeg_image.clone()),
+    };
+
+    let update_result = call_update_contact(&pic_setup, caller, update_data);
+    assert!(update_result.is_ok());
+    let updated_contact = update_result.unwrap();
+
+    // Verify the image is updated
+    assert!(updated_contact.image.is_some());
+    let new_image = updated_contact.image.unwrap();
+    assert_eq!(new_image.mime_type, ImageMimeType::Jpeg);
+    assert_eq!(new_image.data, jpeg_image.data);
+}
+
+#[test]
+fn test_create_many_contacts_with_images_should_fail_after_limit() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create contacts with images up to the limit
+    let mut successful_contacts = 0;
+    let test_image = create_test_png_image();
+
+    // Try to create more than the limit (100 contacts with images)
+    for i in 0..110 {
+        let result = call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            format!("Contact {i}"),
+            Some(test_image.clone()),
+        );
+
+        if result.is_ok() {
+            successful_contacts += 1;
+        } else {
+            // Once we hit the limit, we should get TooManyContactsWithImages error
+            assert_eq!(result.unwrap_err(), ContactError::TooManyContactsWithImages);
+            break;
+        }
+    }
+
+    // We should have been able to create exactly 100 contacts with images
+    assert_eq!(successful_contacts, 100);
+
+    // Verify that we can still create contacts without images
+    let result_no_image = call_create_contact(&pic_setup, caller, "No Image Contact".to_string());
+    assert!(result_no_image.is_ok());
+}
+
+#[test]
+fn test_contact_images_isolated_between_users() {
+    let pic_setup = setup();
+    let test_users: Vec<OisyUser> = pic_setup.create_users(1..=2);
+    let user1 = test_users[0].principal;
+    let user2 = test_users[1].principal;
+    // Controller management is not supported in PocketIc v7.0; no-op here.
+    // pic_setup.add_controller(user1);
+    // pic_setup.add_controller(user2);
+
+    // Create contacts with images for both users
+    let image1 = create_test_png_image();
+    let image2 = create_test_jpeg_image();
+
+    let result1 = call_create_contact_with_image(
+        &pic_setup,
+        user1,
+        "User 1 Contact".to_string(),
+        Some(image1),
+    );
+    let result2 = call_create_contact_with_image(
+        &pic_setup,
+        user2,
+        "User 2 Contact".to_string(),
+        Some(image2),
+    );
+
+    assert!(result1.is_ok());
+    assert!(result2.is_ok());
+
+    // Check image statistics for each user
+    let stats1 = call_get_contact_image_statistics(&pic_setup, user1);
+    let stats2 = call_get_contact_image_statistics(&pic_setup, user2);
+
+    assert_eq!(stats1.total_contacts, 1);
+    assert_eq!(stats1.contacts_with_images, 1);
+
+    assert_eq!(stats2.total_contacts, 1);
+    assert_eq!(stats2.contacts_with_images, 1);
+
+    // Verify each user only sees their own contacts
+    let contacts1 = call_get_contacts(&pic_setup, user1);
+    let contacts2 = call_get_contacts(&pic_setup, user2);
+
+    assert_eq!(contacts1.len(), 1);
+    assert_eq!(contacts2.len(), 1);
+
+    assert_eq!(contacts1[0].name, "User 1 Contact");
+    assert_eq!(contacts2[0].name, "User 2 Contact");
+
+    // Verify images are different
+    assert!(contacts1[0].image.is_some());
+    assert!(contacts2[0].image.is_some());
+
+    let user1_image = contacts1[0].image.as_ref().unwrap();
+    let user2_image = contacts2[0].image.as_ref().unwrap();
+
+    assert_eq!(user1_image.mime_type, ImageMimeType::Png);
+    assert_eq!(user2_image.mime_type, ImageMimeType::Jpeg);
 }
 
 #[test]

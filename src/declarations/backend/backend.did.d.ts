@@ -142,9 +142,11 @@ export interface ContactAddressData {
 export type ContactError =
 	| { InvalidContactData: null }
 	| { CanisterMemoryNearCapacity: null }
+	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
 	| { ImageTooLarge: null }
 	| { RandomnessError: null }
+	| { ImageExceedsMaxSize: null }
 	| { CanisterStatusError: null }
 	| { TooManyContactsWithImages: null };
 export interface ContactImage {
@@ -246,6 +248,11 @@ export type ImageMimeType =
 	| { 'image/png': null }
 	| { 'image/jpeg': null }
 	| { 'image/webp': null };
+export interface ImageStatistics {
+	contacts_with_images: bigint;
+	total_image_size: bigint;
+	total_contacts: bigint;
+}
 export interface InitArg {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
@@ -428,6 +435,7 @@ export interface _SERVICE {
 	get_allowed_cycles: ActorMethod<[], GetAllowedCyclesResult>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_contact: ActorMethod<[bigint], GetContactResult>;
+	get_contact_image_statistics: ActorMethod<[], ImageStatistics>;
 	get_contacts: ActorMethod<[], GetContactsResult>;
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
 	has_user_profile: ActorMethod<[], HasUserProfileResponse>;

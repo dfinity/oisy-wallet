@@ -5,6 +5,17 @@ use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
 
+/// Maximum image size in bytes (100 KB)
+pub const MAX_IMAGE_SIZE_BYTES: usize = 100 * 1024;
+
+/// Maximum number of images per principal (100)
+pub const MAX_IMAGES_PER_PRINCIPAL: usize = 100;
+
+/// Memory usage threshold (80%) above which new images cannot be added
+pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
+
+pub type ImageId = u64;
+
 /// Represents the MIME type of image.
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum ImageMimeType {
@@ -37,10 +48,6 @@ impl ImageMimeType {
     }
 }
 
-/// Memory usage threshold (80%) above which new images cannot be added
-pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
-pub type ImageId = u64;
-
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
 pub struct Contact {
@@ -70,6 +77,14 @@ pub struct StoredContacts {
     pub update_timestamp_ns: u64,
 }
 
+/// Statistics about images in the contact store
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct ImageStatistics {
+    pub total_contacts: usize,
+    pub contacts_with_images: usize,
+    pub total_image_size: usize,
+}
+
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
 pub struct CreateContactRequest {
@@ -96,4 +111,11 @@ pub enum ContactError {
     TooManyContactsWithImages,
     CanisterMemoryNearCapacity,
     CanisterStatusError,
+    /// TODO: This variant is currently unused. It is intended for future use when we add a
+    /// mechanism to return error variants from the validator.
+    InvalidImageFormat, /* TODO: This variant will be used once we support returning enum error
+                         * codes from the validator. */
+    /// TODO: This variant is currently unused. It will be used as soon as we have a solution to
+    /// return an enum error code.
+    ImageExceedsMaxSize,
 }

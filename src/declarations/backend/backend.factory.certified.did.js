@@ -226,9 +226,11 @@ export const idlFactory = ({ IDL }) => {
 	const ContactError = IDL.Variant({
 		InvalidContactData: IDL.Null,
 		CanisterMemoryNearCapacity: IDL.Null,
+		InvalidImageFormat: IDL.Null,
 		ContactNotFound: IDL.Null,
 		ImageTooLarge: IDL.Null,
 		RandomnessError: IDL.Null,
+		ImageExceedsMaxSize: IDL.Null,
 		CanisterStatusError: IDL.Null,
 		TooManyContactsWithImages: IDL.Null
 	});
@@ -338,6 +340,11 @@ export const idlFactory = ({ IDL }) => {
 	const GetContactResult = IDL.Variant({
 		Ok: Contact,
 		Err: ContactError
+	});
+	const ImageStatistics = IDL.Record({
+		contacts_with_images: IDL.Nat64,
+		total_image_size: IDL.Nat64,
+		total_contacts: IDL.Nat64
 	});
 	const GetContactsResult = IDL.Variant({
 		Ok: IDL.Vec(Contact),
@@ -482,6 +489,7 @@ export const idlFactory = ({ IDL }) => {
 		get_allowed_cycles: IDL.Func([], [GetAllowedCyclesResult], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_contact: IDL.Func([IDL.Nat64], [GetContactResult]),
+		get_contact_image_statistics: IDL.Func([], [ImageStatistics]),
 		get_contacts: IDL.Func([], [GetContactsResult]),
 		get_user_profile: IDL.Func([], [GetUserProfileResult]),
 		has_user_profile: IDL.Func([], [HasUserProfileResponse]),

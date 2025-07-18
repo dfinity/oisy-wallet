@@ -577,13 +577,144 @@ impl Validate for ContactAddressData {
 
 impl Validate for ContactImage {
     fn validate(&self) -> Result<(), Error> {
-        // For now, we don't have specific validation rules for ContactImage
-        // In the future, we might want to validate:
-        // - Image size limits
-        // - MIME type consistency with the actual data
-        // - Image dimensions
+        // Check image size limit
+        if self.data.len() > crate::types::contact::MAX_IMAGE_SIZE_BYTES {
+            return Err(Error::msg(format!(
+                "Image too large: {} bytes, max allowed is {} bytes",
+                self.data.len(),
+                crate::types::contact::MAX_IMAGE_SIZE_BYTES
+            )));
+        }
+
+        // Check magic bytes to ensure the data matches the declared MIME type
+        self.validate_magic_bytes()?;
+
         Ok(())
     }
+}
+
+impl ContactImage {
+    /// Validates that the image data matches the declared MIME type by checking magic bytes
+    fn validate_magic_bytes(&self) -> Result<(), Error> {
+        let data = &self.data;
+
+        match &self.mime_type {
+            crate::types::contact::ImageMimeType::Jpeg => {
+                if data.len() < 2 || data[0] != 0xFF || data[1] != 0xD8 {
+                    return Err(Error::msg(
+                        "Invalid JPEG format: missing or incorrect JPEG header",
+                    ));
+                }
+            }
+            crate::types::contact::ImageMimeType::Png => {
+                let png_header = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+                if data.len() < 8 || !data.starts_with(&png_header) {
+                    return Err(Error::msg(
+                        "Invalid PNG format: missing or incorrect PNG header",
+                    ));
+                }
+            }
+            crate::types::contact::ImageMimeType::Gif => {
+                if data.len() < 6 {
+                    return Err(Error::msg("Invalid GIF format: file too short"));
+                }
+                let gif87a = b"GIF87a";
+                let gif89a = b"GIF89a";
+                if !data.starts_with(gif87a) && !data.starts_with(gif89a) {
+                    return Err(Error::msg(
+                        "Invalid GIF format: missing or incorrect GIF header",
+                    ));
+                }
+            }
+            crate::types::contact::ImageMimeType::Webp => {
+                if data.len() < 12 {
+                    return Err(Error::msg("Invalid WebP format: file too short"));
+                }
+                let riff = b"RIFF";
+                let webp = b"WEBP";
+                if !data.starts_with(riff) || !data[8..12].starts_with(webp) {
+                    return Err(Error::msg(
+                        "Invalid WebP format: missing or incorrect WebP header",
+                    ));
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Validates all image constraints: size, per-principal image count, and canister memory usage
+    ///
+    /// # Errors
+    ///
+    /// Returns `ContactError` if:
+    /// - Image size is too large
+    /// - Image format is invalid
+    /// - Canister memory is near capacity
+    /// - Too many contacts with images for this principal
+    pub fn validate_all(
+        &self,
+        stored_contacts: &crate::types::contact::StoredContacts,
+    ) -> Result<(), crate::types::contact::ContactError> {
+        // Check image size first (fail fast for oversized images)
+        if self.data.len() > crate::types::contact::MAX_IMAGE_SIZE_BYTES {
+            return Err(crate::types::contact::ContactError::InvalidContactData);
+        }
+
+        // Check image format (magic bytes)
+        self.validate()
+            .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+
+        // Comprehensive memory validation (includes projected memory usage)
+        validate_memory_for_new_image(self.data.len(), stored_contacts)
+            .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+
+        Ok(())
+    }
+}
+
+/// Counts the number of contacts with images for a specific principal
+pub fn count_contacts_with_images(
+    stored_contacts: &crate::types::contact::StoredContacts,
+) -> usize {
+    stored_contacts
+        .contacts
+        .values()
+        .filter(|contact| contact.image.is_some())
+        .count()
+}
+
+/// Calculates the total size of all images in the contact store
+pub fn calculate_total_image_size(
+    stored_contacts: &crate::types::contact::StoredContacts,
+) -> usize {
+    stored_contacts
+        .contacts
+        .values()
+        .filter_map(|contact| contact.image.as_ref())
+        .map(|image| image.data.len())
+        .sum()
+}
+
+/// Validates that adding a new image won't exceed the per-principal image limit
+pub fn validate_principal_memory_limit(
+    stored_contacts: &crate::types::contact::StoredContacts,
+    is_adding_new_image: bool,
+) -> Result<(), Error> {
+    if !is_adding_new_image {
+        return Ok(());
+    }
+
+    let current_image_count = count_contacts_with_images(stored_contacts);
+    if current_image_count >= crate::types::contact::MAX_IMAGES_PER_PRINCIPAL {
+        return Err(Error::msg(format!(
+            "Too many images: {} images already stored, max allowed is {}",
+            current_image_count,
+            crate::types::contact::MAX_IMAGES_PER_PRINCIPAL
+        )));
+    }
+
+    Ok(())
 }
 
 impl Validate for CreateContactRequest {
@@ -604,6 +735,11 @@ impl Validate for CreateContactRequest {
             CONTACT_MAX_NAME_LENGTH,
             "CreateContactRequest.name",
         )?;
+
+        // Validate image if present
+        if let Some(image) = &self.image {
+            image.validate()?;
+        }
 
         Ok(())
     }
@@ -628,7 +764,173 @@ impl Validate for UpdateContactRequest {
             "UpdateContactRequest.addresses",
         )?;
 
+        // Validate image if present
+        if let Some(image) = &self.image {
+            image.validate()?;
+        }
+
         Ok(())
+    }
+}
+
+impl crate::types::contact::CreateContactRequest {
+    /// Validates the request with additional context about existing contacts and principal
+    ///
+    /// # Errors
+    /// Returns `ContactError` if validation fails due to:
+    /// - Invalid contact data (name, image format, etc.)
+    /// - Too many contacts with images for this principal
+    /// - Canister memory near capacity
+    pub fn validate_with_context(
+        &self,
+        existing_contacts: &crate::types::contact::StoredContacts,
+        _principal: &Principal,
+    ) -> Result<(), crate::types::contact::ContactError> {
+        // First run the basic validation
+        self.validate()
+            .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+
+        // If we have an image, validate all additional constraints
+        if let Some(image) = &self.image {
+            image.validate_all(existing_contacts)?;
+        }
+
+        Ok(())
+    }
+}
+
+/// Validates memory usage before adding images
+/// Returns an error if the canister is at or above the memory threshold
+pub fn validate_memory_usage() -> Result<(), crate::types::contact::ContactError> {
+    // Check stable memory usage
+    let stable_memory_size = ic_cdk::api::stable::stable_size();
+    let max_stable_memory = 16384; // 1 GB in 64KB pages (16384 * 64KB = 1GB)
+
+    #[allow(clippy::cast_precision_loss, clippy::cast_lossless)]
+    let usage_ratio = stable_memory_size as f64 / max_stable_memory as f64;
+
+    if usage_ratio > crate::types::contact::MEMORY_USAGE_THRESHOLD {
+        return Err(crate::types::contact::ContactError::CanisterMemoryNearCapacity);
+    }
+
+    Ok(())
+}
+
+/// Get current memory usage information
+/// Returns a tuple of (`used_memory_pages`, `max_memory_pages`, `usage_ratio`)
+pub fn get_memory_usage_info() -> (u64, u64, f64) {
+    let stable_memory_size = ic_cdk::api::stable::stable_size();
+    let max_stable_memory = 16384; // 1 GB in 64KB pages
+
+    #[allow(clippy::cast_precision_loss, clippy::cast_lossless)]
+    let usage_ratio = stable_memory_size as f64 / max_stable_memory as f64;
+
+    (stable_memory_size, max_stable_memory, usage_ratio)
+}
+
+/// Validates that adding a new image won't cause memory issues
+/// This function performs a more comprehensive check considering the image size
+pub fn validate_memory_for_new_image(
+    image_size: usize,
+    existing_contacts: &crate::types::contact::StoredContacts,
+) -> Result<(), crate::types::contact::ContactError> {
+    // First check current memory usage
+    validate_memory_usage()?;
+
+    // Check if the new image would push us over the limit
+    let (used_pages, max_pages, _current_ratio) = get_memory_usage_info();
+
+    // Estimate additional memory needed (conservative estimate)
+    // Each page is 64KB, so convert image size to pages
+    let additional_pages = image_size.div_ceil(65536);
+
+    #[allow(clippy::cast_precision_loss, clippy::cast_lossless)]
+    let projected_ratio = (used_pages + additional_pages as u64) as f64 / max_pages as f64;
+
+    if projected_ratio > crate::types::contact::MEMORY_USAGE_THRESHOLD {
+        return Err(crate::types::contact::ContactError::CanisterMemoryNearCapacity);
+    }
+
+    // Also check per-principal limits
+    validate_principal_memory_limit(existing_contacts, true)
+        .map_err(|_| crate::types::contact::ContactError::TooManyContactsWithImages)?;
+
+    Ok(())
+}
+
+impl crate::types::contact::UpdateContactRequest {
+    /// Validates the request with additional context about existing contacts and principal
+    ///
+    /// # Errors
+    /// Returns `ContactError` if validation fails due to:
+    /// - Invalid contact data (name, image format, etc.)
+    /// - Too many contacts with images for this principal (when adding new image)
+    /// - Canister memory near capacity
+    pub fn validate_with_context(
+        &self,
+        existing_contacts: &crate::types::contact::StoredContacts,
+        _principal: &Principal,
+        is_adding_new_image: bool,
+    ) -> Result<(), crate::types::contact::ContactError> {
+        // First run the basic validation
+        self.validate()
+            .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+
+        // If we have an image and we're adding a new one, validate all additional constraints
+        if let Some(image) = &self.image {
+            if is_adding_new_image {
+                image.validate_all(existing_contacts)?;
+            } else {
+                // For updates that aren't adding new images, still validate memory and format
+                validate_memory_usage()?;
+                image
+                    .validate()
+                    .map_err(|_| crate::types::contact::ContactError::InvalidImageFormat)?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl crate::types::contact::StoredContacts {
+    /// Get image statistics for this contact store
+    #[must_use]
+    pub fn get_image_statistics(&self) -> crate::types::contact::ImageStatistics {
+        let total_contacts = self.contacts.len();
+        let contacts_with_images = count_contacts_with_images(self);
+        let total_image_size = calculate_total_image_size(self);
+
+        crate::types::contact::ImageStatistics {
+            total_contacts,
+            contacts_with_images,
+            total_image_size,
+        }
+    }
+
+    /// Check if adding a new image would be allowed based on all constraints
+    #[must_use]
+    pub fn can_add_new_image(&self, image_size: usize) -> bool {
+        // Check image size limit
+        if image_size > crate::types::contact::MAX_IMAGE_SIZE_BYTES {
+            return false;
+        }
+
+        // Check per-principal image count
+        let current_image_count = count_contacts_with_images(self);
+        if current_image_count >= crate::types::contact::MAX_IMAGES_PER_PRINCIPAL {
+            return false;
+        }
+
+        // Check memory usage
+        validate_memory_for_new_image(image_size, self).is_ok()
+    }
+
+    /// Get remaining image capacity for this principal
+    #[must_use]
+    pub fn get_remaining_image_capacity(&self) -> usize {
+        let current_image_count = count_contacts_with_images(self);
+        crate::types::contact::MAX_IMAGES_PER_PRINCIPAL.saturating_sub(current_image_count)
     }
 }
 
