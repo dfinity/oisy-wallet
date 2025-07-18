@@ -392,6 +392,7 @@ interface I18nHero {
 		learn_more_about_erc20_icp: string;
 		tooltip_toggle_balance: string;
 	};
+	alt: { toggle_privacy_mode: string };
 }
 
 interface I18nSettings {

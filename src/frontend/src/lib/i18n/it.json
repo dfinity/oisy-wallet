@@ -511,6 +511,9 @@
 			"top_up": "Ricarica il tuo wallet per iniziare a usarlo!",
 			"learn_more_about_erc20_icp": "Scopri di più su ERC20 ICP su Ethereum.",
 			"tooltip_toggle_balance": "Fai doppio clic per nascondere/mostrare il saldo"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Attiva e disattiva la modalità privacy"
 		}
 	},
 	"settings": {

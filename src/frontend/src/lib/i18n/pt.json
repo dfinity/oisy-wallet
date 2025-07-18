@@ -511,6 +511,9 @@
 			"top_up": "Carregue sua carteira para começar a usá-la!",
 			"learn_more_about_erc20_icp": "Saiba mais sobre ERC20 ICP no Ethereum.",
 			"tooltip_toggle_balance": "Clique duas vezes para ocultar/mostrar o saldo"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Ativar e desativar o modo de privacidade"
 		}
 	},
 	"settings": {
