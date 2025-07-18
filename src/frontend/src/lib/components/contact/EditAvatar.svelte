@@ -14,15 +14,15 @@
 
 	interface Props {
 		fileInput: typeof $bindable;
-		replaceImage: () => void;
-		removeImage: () => void;
+		onReplaceImage: () => void;
+		onRemoveImage: () => void;
 		imageUrl: string | undefined;
 	}
 
 	const {
 		fileInput = $bindable(),
-		replaceImage = $bindable(),
-		removeImage = $bindable(),
+		onReplaceImage = $bindable(),
+		onRemoveImage = $bindable(),
 		imageUrl = $bindable()
 	}: Props = $props();
 
@@ -35,12 +35,12 @@
 				{
 					logo: IconImage,
 					title: $i18n.address_book.edit_avatar.replace_image,
-					action: replaceImage
+					action: onReplaceImage
 				},
 				{
 					logo: IconTrash,
 					title: $i18n.address_book.edit_avatar.remove_image,
-					action: removeImage,
+					action: onRemoveImage,
 					testId: 'IconTrash'
 				}
 			]
@@ -48,7 +48,7 @@
 				{
 					logo: IconImage,
 					title: $i18n.address_book.edit_avatar.upload_image,
-					action: replaceImage
+					action: onReplaceImage
 				}
 			];
 
