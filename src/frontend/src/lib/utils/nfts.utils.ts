@@ -11,7 +11,7 @@ export const getLoadedNftsByTokens = ({
 }): NftsByNetwork => {
 	const nftsByToken: NftsByNetwork = {};
 
-	tokens.forEach(({ address, network: {id} }) => {
+	tokens.forEach(({ address, network: { id } }) => {
 		if (isNullish(nftsByToken[id])) {
 			nftsByToken[id] = {};
 		}
@@ -19,10 +19,18 @@ export const getLoadedNftsByTokens = ({
 	});
 
 	loadedNfts.forEach((nft) => {
-		const { contract: { network: { id: networkId }, address } } = nft;
+		const {
+			contract: {
+				network: { id: networkId },
+				address
+			}
+		} = nft;
 		const normalizedAddress = address.toLowerCase();
 
-		if (nonNullish(nftsByToken[networkId]) && nonNullish(nftsByToken[networkId][normalizedAddress])) {
+		if (
+			nonNullish(nftsByToken[networkId]) &&
+			nonNullish(nftsByToken[networkId][normalizedAddress])
+		) {
 			nftsByToken[networkId][normalizedAddress].push(nft);
 		}
 	});
