@@ -1,9 +1,9 @@
-import type { Currencies } from '$lib/enums/currencies';
+import type { Currency } from '$lib/enums/currency';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { currencyStore } from '$lib/stores/currency.store';
 import { derived, type Readable } from 'svelte/store';
 
-export const currentCurrency: Readable<Currencies> = derived(
+export const currentCurrency: Readable<Currency> = derived(
 	[currencyStore],
 	([{ currency }]) => currency
 );
