@@ -2,7 +2,7 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
-import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
+import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
@@ -43,7 +43,7 @@ describe('nfts.utils', () => {
 		}
 	};
 
-	describe('getLoadedNftsByTokens', () => {
+	describe('getNftsByNetworks', () => {
 		it('should return nfts for a given list of tokens and networks', () => {
 			const customErc721Tokens: Erc721CustomToken[] = [
 				{
@@ -65,9 +65,9 @@ describe('nfts.utils', () => {
 				contract: { ...mockNft2.contract, network: ETHEREUM_NETWORK }
 			};
 
-			const result: NftsByNetwork = getLoadedNftsByTokens({
+			const result: NftsByNetwork = getNftsByNetworks({
 				tokens: customErc721Tokens,
-				loadedNfts: [customMockNft1, customMockNft2, mockNft3]
+				nfts: [customMockNft1, customMockNft2, mockNft3]
 			});
 
 			const expectedResult: NftsByNetwork = {
@@ -83,9 +83,9 @@ describe('nfts.utils', () => {
 		});
 
 		it('should return nfts for a given list of tokens', () => {
-			const result: NftsByNetwork = getLoadedNftsByTokens({
+			const result: NftsByNetwork = getNftsByNetworks({
 				tokens: erc721Tokens,
-				loadedNfts: [mockNft1, mockNft2, mockNft3]
+				nfts: [mockNft1, mockNft2, mockNft3]
 			});
 
 			const expectedResult: NftsByNetwork = {
@@ -112,9 +112,9 @@ describe('nfts.utils', () => {
 				contract: { ...mockNft3.contract, address: mockEthAddress }
 			};
 
-			const result: NftsByNetwork = getLoadedNftsByTokens({
+			const result: NftsByNetwork = getNftsByNetworks({
 				tokens: erc721Tokens,
-				loadedNfts: [customMockNft1, customMockNft2, customMockNft3]
+				nfts: [customMockNft1, customMockNft2, customMockNft3]
 			});
 
 			const expectedResult: NftsByNetwork = {
@@ -128,9 +128,9 @@ describe('nfts.utils', () => {
 		});
 
 		it('should return an empty map', () => {
-			const result: NftsByNetwork = getLoadedNftsByTokens({
+			const result: NftsByNetwork = getNftsByNetworks({
 				tokens: [],
-				loadedNfts: [mockNft1, mockNft2, mockNft3]
+				nfts: [mockNft1, mockNft2, mockNft3]
 			});
 
 			const expectedResult = {};
@@ -139,7 +139,7 @@ describe('nfts.utils', () => {
 		});
 
 		it('should return empty lists for tokens for which no nfts were provided', () => {
-			const result = getLoadedNftsByTokens({ tokens: erc721Tokens, loadedNfts: [] });
+			const result = getNftsByNetworks({ tokens: erc721Tokens, nfts: [] });
 
 			const expectedResult: NftsByNetwork = {
 				[POLYGON_AMOY_NETWORK.id]: {
@@ -152,7 +152,7 @@ describe('nfts.utils', () => {
 		});
 
 		it('should return an empty map if no tokens and no nfts are provided', () => {
-			const result = getLoadedNftsByTokens({ tokens: [], loadedNfts: [] });
+			const result = getNftsByNetworks({ tokens: [], nfts: [] });
 
 			const expectedResult = {};
 
