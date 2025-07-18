@@ -1,6 +1,6 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
-import type { Currency } from '$lib/enums/currency';
+import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
 import type { CurrencyExchangeData } from '$lib/types/currency';
@@ -189,10 +189,14 @@ export const formatCurrency = ({
 
 	const convertedValue = value / exchangeRateToUsd;
 
-	return new Intl.NumberFormat('en-US', {
+	const formatted = new Intl.NumberFormat('en-US', {
 		style: 'currency',
 		currency: currency.toUpperCase()
-	})
-		.format(convertedValue)
-		.replace(/,/g, '’');
+	}).format(convertedValue);
+
+	if (currency === Currency.CHF) {
+		return formatted.replace(/,/g, '’');
+	}
+
+	return formatted;
 };

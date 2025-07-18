@@ -587,19 +587,20 @@ describe('format.utils', () => {
 
 	describe('formatCurrency', () => {
 		const testCases: { value: number; currency: Currency; expected: string }[] = [
-			{ value: 1234.56, currency: Currency.USD, expected: '$1’234.56' },
-			{ value: 987654321.12, currency: Currency.EUR, expected: '€987’654’321.12' },
+			{ value: 1234.56, currency: Currency.USD, expected: '$1,234.56' },
+			{ value: 987654321.12, currency: Currency.EUR, expected: '€987,654,321.12' },
 			{ value: 0.99, currency: Currency.GBP, expected: '£0.99' },
-			{ value: 1000000, currency: Currency.JPY, expected: '¥1’000’000' },
+			{ value: 1000000, currency: Currency.JPY, expected: '¥1,000,000' },
+			{ value: 123456789.99, currency: Currency.CNY, expected: 'CN¥123,456,789.99' },
 
 			{ value: 123456789.99, currency: Currency.CHF, expected: 'CHF 123’456’789.99' },
 			{ value: 0, currency: Currency.USD, expected: '$0.00' },
-			{ value: -1234.56, currency: Currency.USD, expected: '-$1’234.56' },
-			{ value: -987654321.12, currency: Currency.EUR, expected: '-€987’654’321.12' },
-			{ value: 12345, currency: Currency.GBP, expected: '£12’345.00' },
+			{ value: -1234.56, currency: Currency.USD, expected: '-$1,234.56' },
+			{ value: -987654321.12, currency: Currency.EUR, expected: '-€987,654,321.12' },
+			{ value: 12345, currency: Currency.GBP, expected: '£12,345.00' },
 
-			{ value: 1000000.99, currency: Currency.JPY, expected: '¥1’000’001' },
-			{ value: 1000000.4, currency: Currency.JPY, expected: '¥1’000’000' },
+			{ value: 1000000.99, currency: Currency.JPY, expected: '¥1,000,001' },
+			{ value: 1000000.4, currency: Currency.JPY, expected: '¥1,000,000' },
 			{ value: 123456789.12345, currency: Currency.CHF, expected: 'CHF 123’456’789.12' }
 		];
 
