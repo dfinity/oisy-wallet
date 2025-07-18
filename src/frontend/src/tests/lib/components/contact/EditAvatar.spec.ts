@@ -65,7 +65,6 @@ describe('EditAvatar', () => {
 				props: {
 					onReplaceImage: mockReplaceImage,
 					onRemoveImage: mockRemoveImage,
-					imageUrl: undefined
 				}
 			});
 
