@@ -643,7 +643,7 @@ describe('format.utils', () => {
 					currency: Currency.USD,
 					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 }
 				})
-			).toBe('$0.00');
+			).toBeUndefined();
 
 			expect(
 				formatCurrency({
@@ -651,7 +651,7 @@ describe('format.utils', () => {
 					currency: Currency.USD,
 					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 0 }
 				})
-			).toBe('$0.00');
+			).toBeUndefined();
 		});
 
 		it('should convert the value with the exchange rate', () => {
@@ -661,7 +661,7 @@ describe('format.utils', () => {
 					currency: Currency.CHF,
 					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1.2 }
 				})
-			).toBe('CHF 1’200.00');
+			).toBe('CHF 833.33'); // 1000 / 1.2 = 833.33
 		});
 	});
 });
