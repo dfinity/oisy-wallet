@@ -10,5 +10,8 @@ export const SWAP_VALUE_DIFFERENCE_ERROR_VALUE = -5;
 
 export const KONG_SWAP_PROVIDER = 'kongSwap';
 export const ICP_SWAP_PROVIDER = 'icpSwap';
+export const VELORA_SWAP_PROVIDER = 'velora';
 
 export const ICP_SWAP_POOL_FEE = 3000n;
+
+export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
