@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
@@ -8,6 +7,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';

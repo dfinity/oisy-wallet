@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import {
 		TOKEN_INPUT_AMOUNT_EXCHANGE,
@@ -9,6 +8,7 @@
 		TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE
 	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';

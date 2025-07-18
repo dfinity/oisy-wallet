@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapProviderListItem from './SwapProviderListItem.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
@@ -8,6 +7,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,

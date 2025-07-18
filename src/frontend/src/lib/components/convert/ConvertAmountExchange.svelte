@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { fade } from 'svelte/transition';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
@@ -9,6 +8,7 @@
 		CONVERT_AMOUNT_EXCHANGE_VALUE
 	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { formatCurrency } from '$lib/utils/format.utils';
 

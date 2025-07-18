@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { fade } from 'svelte/transition';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
@@ -25,6 +24,7 @@
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward.services';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
