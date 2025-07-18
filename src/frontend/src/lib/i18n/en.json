@@ -814,7 +814,7 @@
 			"select_swap_provider": "Select swap provider",
 			"open_icp_swap": "Open ICP Swap website",
 			"select_token": "Select token",
-			"select_network_filter": "Select network filter"
+			"select_network_filter": "Select network"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
