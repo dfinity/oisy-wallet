@@ -3,29 +3,32 @@ import { etherscanProviders, type EtherscanProvider } from '$eth/providers/ether
 import { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
-import type { NftMetadata } from '$lib/types/nft';
+import type { Nft, NftMetadata } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 
-export const loadNfts = ({ tokens, walletAddress }:{ tokens: Erc721CustomToken[], walletAddress: string }) => {
+export const loadNfts = ({ tokens, nftsByToken, walletAddress }:{ tokens: Erc721CustomToken[], nftsByToken: Map<string, Nft[]> , walletAddress: string }) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura);
 
-	tokens.forEach((token) => loadNftsOfToken({ etherscanProvider, infuraProvider, token, walletAddress }));
+	tokens.forEach((token) => {
+		const loadedNfts = nftsByToken.get(token.address.toLowerCase()) ?? [];
+		loadNftsOfToken({ etherscanProvider, infuraProvider, token, loadedNfts, walletAddress })
+	});
 };
 
 const loadNftsOfToken = async ({
 	etherscanProvider,
 	infuraProvider,
 	token,
+	loadedNfts,
 	walletAddress
 }: {
 	etherscanProvider: EtherscanProvider;
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
+	loadedNfts: Nft[];
 	walletAddress: string;
 }) => {
-	// TODO get walletAddress and already loaded TokenIds as param from Loader component
-
 	let tokenIds: number[];
 	try {
 		tokenIds = await etherscanProvider.erc721TokenInventory({
@@ -36,7 +39,7 @@ const loadNftsOfToken = async ({
 		tokenIds = [];
 	}
 
-	const loadedTokenIds = nftStore.getTokenIds(token.address);
+	const loadedTokenIds = loadedNfts.map((nft) => nft.id);
 	const tokenIdsToLoad = tokenIds.filter((id: number) => !loadedTokenIds.includes(id));
 
 	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });

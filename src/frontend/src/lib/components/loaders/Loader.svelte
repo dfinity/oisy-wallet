@@ -160,13 +160,13 @@
 		if (nonNullish($ethAddressStore?.data)) {
 			const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
 
-			getLoadedNftsByTokens({tokens: tokensList, loadedNfts: $nftStore})
+			const nftsByToken = getLoadedNftsByTokens({tokens: tokensList, loadedNfts: $nftStore ?? []})
 
-			loadNfts({tokens: tokensList, walletAddress: $ethAddressStore.data}); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
+			loadNfts({tokens: tokensList, nftsByToken, walletAddress: $ethAddressStore.data}); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
 		}
 	});
 
-	$: if ($erc721CustomTokensStore && $ethAddressStore) {
+	$: if ($erc721CustomTokensStore) {
 		debounceLoadNfts();
 	}
 
