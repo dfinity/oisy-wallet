@@ -357,7 +357,7 @@
 				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
 			}}
 			contact={currentContact}
-			avatarUrl={currentAvatarUrl}
+			imageUrl={currentAvatarUrl}
 			onEdit={(contact) => {
 				currentContactId = contact.id;
 				gotoStep(AddressBookSteps.EDIT_CONTACT);

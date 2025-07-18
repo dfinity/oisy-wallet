@@ -28,7 +28,11 @@
 
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
 	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
-	let commonClasses = $derived(`${font} ${size} ${bgColor} relative z-0 rounded-full`);
+	
+	const commonClasses = $derived(
+		`${font} ${size} ${bgColor} rounded-full overflow-hidden relative ${styleClass}`
+	);
+	
 	let ariaLabel = $derived(
 		name ? `${$i18n.address_book.avatar.avatar_for} ${name}` : $i18n.address_book.avatar.default
 	);
