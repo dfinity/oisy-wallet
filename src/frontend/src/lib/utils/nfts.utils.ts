@@ -1,14 +1,14 @@
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import type { Nft } from '$lib/types/nft';
 import type { NetworkId } from '$lib/types/network';
+import type { Nft } from '$lib/types/nft';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export type NftsByNetwork = Record<NetworkId, Record<string, Nft[]>>;
 
 export const getLoadedNftsByTokens = ({
-																				tokens,
-																				loadedNfts
-																			}: {
+	tokens,
+	loadedNfts
+}: {
 	tokens: Erc721CustomToken[];
 	loadedNfts: Nft[];
 }): NftsByNetwork => {
