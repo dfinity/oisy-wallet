@@ -513,7 +513,7 @@
 			"tooltip_toggle_balance": "Clique duas vezes para ocultar/mostrar o saldo"
 		},
 		"alt": {
-			"toggle_privacy_mode": ""
+			"toggle_privacy_mode": "Ativar e desativar o modo de privacidade"
 		}
 	},
 	"settings": {
