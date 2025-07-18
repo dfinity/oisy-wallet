@@ -73,13 +73,15 @@ export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	splAddresses: z.array(z.custom<SplTokenAddress>())
 });
 
-export const PostMessageDataRequestIcrcSchema = IcCanistersSchema.merge(
-	NetworkSchema.pick({ env: true })
-);
+export const PostMessageDataRequestIcrcSchema = z.object({
+	...IcCanistersSchema.shape,
+	...NetworkSchema.pick({ env: true }).shape
+});
 
-export const PostMessageDataRequestIcrcStrictSchema = IcCanistersStrictSchema.merge(
-	NetworkSchema.pick({ env: true })
-);
+export const PostMessageDataRequestIcrcStrictSchema = z.object({
+	...IcCanistersStrictSchema.shape,
+	...NetworkSchema.pick({ env: true }).shape
+});
 
 export const PostMessageDataRequestDip20Schema = z.object({
 	canisterId: CanisterIdTextSchema
