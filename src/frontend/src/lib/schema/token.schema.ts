@@ -52,14 +52,13 @@ export const TokenBuyableSchema = z.object({
 	buy: z.custom<AtLeastOne<TokenBuy>>().optional()
 });
 
-export const TokenSchema = z
-	.object({
-		id: TokenIdSchema,
-		network: NetworkSchema,
-		standard: TokenStandardSchema,
-		category: TokenCategorySchema
-	})
-	.merge(TokenMetadataSchema)
-	.merge(TokenAppearanceSchema)
-	.merge(TokenBuyableSchema)
-	.merge(TokenGroupPropSchema);
+export const TokenSchema = z.object({
+	id: TokenIdSchema,
+	network: NetworkSchema,
+	standard: TokenStandardSchema,
+	category: TokenCategorySchema,
+	...TokenMetadataSchema.shape,
+	...TokenAppearanceSchema.shape,
+	...TokenBuyableSchema.shape,
+	...TokenGroupPropSchema.shape
+});

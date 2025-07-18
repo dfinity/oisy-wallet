@@ -16,9 +16,10 @@ export const EnvCkErc20TokenDataSchema = EnvIcTokenSchema.extend({
 	erc20ContractAddress: EnvErc20ContractAddressSchema
 });
 
-export const EnvCkErc20WithMetadataSchema = EnvCkErc20TokenDataSchema.merge(
-	EnvIcrcTokenMetadataSchema
-);
+export const EnvCkErc20WithMetadataSchema = z.object({
+	...EnvCkErc20TokenDataSchema.shape,
+	...EnvIcrcTokenMetadataSchema.shape
+});
 
 export const EnvCkErc20TokensRawSchema = z.record(
 	EnvTokenSymbolSchema,
