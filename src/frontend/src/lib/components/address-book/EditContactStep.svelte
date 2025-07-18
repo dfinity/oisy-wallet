@@ -51,13 +51,16 @@
 	let imageUrl = $derived(contact.image ? imageToDataUrl(contact.image) : null);
 
 	const handleFileChange = async (e: Event) => {
-		const file = (e.target as HTMLInputElement).files?.[0];
-		if (!file) {
+		const selected = (e.target as HTMLInputElement).files?.[0];
+		if (isNullish(selected)) {
 			return;
 		}
-		const options = { maxSizeMB: 0.1, maxWidthOrHeight: 200, useWebWorker: false };
-		const compressed = await imageCompression(file, options);
-		const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
+		const compressedFile = await imageCompression(selected, {
+			maxSizeMB: 0.1,
+			maxWidthOrHeight: 200,
+			useWebWorker: false
+		});
+		const dataUrl = await imageCompression.getDataUrlFromFile(compressedFile);
 		const img: ContactImage = dataUrlToImage(dataUrl);
 
 		onAvatarEdit(img);
@@ -155,6 +158,7 @@
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
+
 <input
 	bind:this={fileInput}
 	type="file"

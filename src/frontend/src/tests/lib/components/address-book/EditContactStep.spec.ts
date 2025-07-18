@@ -16,7 +16,7 @@ import { vi } from 'vitest';
 
 vi.mock('browser-image-compression', () => {
 	const mockFn = vi.fn(
-		(file: File, options: unknown): Promise<File> =>
+		({ file, options: _options }: { file: File; options: unknown }): Promise<File> =>
 			Promise.resolve(file)
 	);
 
@@ -25,8 +25,7 @@ vi.mock('browser-image-compression', () => {
 			getDataUrlFromFile(file: File): Promise<string>;
 		}
 	).getDataUrlFromFile = vi.fn(
-		(file: File): Promise<string> =>
-			Promise.resolve('data:image/png;base64,MOCK')
+		(_file: File): Promise<string> => Promise.resolve('data:image/png;base64,MOCK')
 	);
 
 	return {
@@ -76,7 +75,7 @@ describe('EditContactStep', () => {
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
-				onAvatarEdit: onAvatarEdit
+				onAvatarEdit
 			}
 		});
 
@@ -97,7 +96,7 @@ describe('EditContactStep', () => {
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
-				onAvatarEdit: onAvatarEdit
+				onAvatarEdit
 			}
 		});
 
@@ -118,7 +117,7 @@ describe('EditContactStep', () => {
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
-				onAvatarEdit: onAvatarEdit
+				onAvatarEdit
 			}
 		});
 
@@ -138,7 +137,7 @@ describe('EditContactStep', () => {
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
-				onAvatarEdit: onAvatarEdit
+				onAvatarEdit
 			}
 		});
 
@@ -159,7 +158,7 @@ describe('EditContactStep', () => {
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
-				onAvatarEdit: onAvatarEdit
+				onAvatarEdit
 			}
 		});
 
@@ -179,7 +178,7 @@ describe('EditContactStep', () => {
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
-				onAvatarEdit: onAvatarEdit
+				onAvatarEdit
 			}
 		});
 
@@ -202,7 +201,7 @@ describe('EditContactStep', () => {
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
-				onAvatarEdit: onAvatarEdit
+				onAvatarEdit
 			}
 		});
 
@@ -225,7 +224,7 @@ describe('EditContactStep', () => {
 				onAddAddress: null as unknown as () => void,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
-				onAvatarEdit: onAvatarEdit
+				onAvatarEdit
 			}
 		});
 
@@ -244,20 +243,25 @@ describe('EditContactStep', () => {
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
 				onDeleteAddress: mockDeleteAddress,
-				onAvatarEdit: onAvatarEdit
+				onAvatarEdit
 			}
 		});
 
 		const input = container.querySelector('input[type="file"]');
+
 		expect(input).toBeTruthy();
-		
+
 		const file = new File(['x'], 'avatar.png', { type: 'image/png' });
-		
-		await fireEvent.change(input!, { target: { files: [file] } });
+
+		if (input) {
+			await fireEvent.change(input, { target: { files: [file] } });
+		}
 
 		expect(onAvatarEdit).toHaveBeenCalledTimes(1);
-		const arg = (onAvatarEdit as any).mock.calls[0][0];
+
+		const [firstCall] = onAvatarEdit.mock.calls;
+		const [arg] = firstCall;
+
 		expect(arg).toHaveProperty('data');
 	});
-
 });
