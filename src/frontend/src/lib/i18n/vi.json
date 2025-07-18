@@ -1282,6 +1282,12 @@
 			"default": "Ảnh đại diện mặc định",
 			"avatar_for": "Ảnh đại diện cho"
 		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
+		},
 		"show_contact": {
 			"title": "Liên hệ",
 			"add_address": "Thêm địa chỉ",
