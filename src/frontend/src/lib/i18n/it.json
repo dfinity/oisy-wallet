@@ -1279,6 +1279,12 @@
 			"default": "Avatar predefinito",
 			"avatar_for": "Avatar per"
 		},
+		"edit_avatar": {
+			"menu_title": "Immagine del Contatto",
+			"upload_image": "Carica",
+			"replace_image": "Cambia",
+			"remove_image": "Rimuovi"
+		},
 		"show_contact": {
 			"title": "Contatto",
 			"add_address": "Aggiungi indirizzo",
