@@ -1,6 +1,9 @@
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
+import { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
 import {
+	formatCurrency,
 	formatNanosecondsToDate,
 	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
@@ -8,6 +11,7 @@ import {
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
+import { describe } from 'vitest';
 
 describe('format.utils', () => {
 	describe('formatToken', () => {
@@ -365,8 +369,8 @@ describe('format.utils', () => {
 		});
 
 		describe('when i18n passed or not passed', () => {
-			const i18nEn = { lang: 'en' } as unknown as I18n;
-			const i18nDe = { lang: 'de' } as unknown as I18n;
+			const i18nEn = Languages.ENGLISH;
+			const i18nDe = Languages.GERMAN;
 
 			const getSecondsFromDate = (date: Date) => Math.floor(date.getTime() / 1000);
 
@@ -375,7 +379,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2023-06-12T00:00:00Z')),
 					currentDate: now,
-					i18n: i18nEn
+					language: i18nEn
 				});
 
 				expect(result).toBe('today');
@@ -386,7 +390,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2023-06-11T12:00:00Z')),
 					currentDate: now,
-					i18n: i18nEn
+					language: i18nEn
 				});
 
 				expect(result).toBe('yesterday');
@@ -397,7 +401,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2022-12-25')),
 					currentDate: now,
-					i18n: i18nEn
+					language: i18nEn
 				});
 
 				expect(result).toMatch('December 25, 2022');
@@ -408,7 +412,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2023-03-15')),
 					currentDate: now,
-					i18n: i18nEn
+					language: i18nEn
 				});
 
 				expect(result).toMatch('March 15');
@@ -419,7 +423,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2022-12-25')),
 					currentDate: now,
-					i18n: i18nDe
+					language: i18nDe
 				});
 
 				expect(result).toMatch('25. Dezember 2022');
@@ -430,7 +434,7 @@ describe('format.utils', () => {
 				const result = formatSecondsToNormalizedDate({
 					seconds: getSecondsFromDate(new Date('2023-06-11')),
 					currentDate: now,
-					i18n: i18nDe
+					language: i18nDe
 				});
 
 				expect(result.toLowerCase()).toBe('gestern'); // "yesterday" in German
@@ -458,14 +462,14 @@ describe('format.utils', () => {
 		it('formats date in German locale when i18n.lang is de', () => {
 			const result = formatSecondsToDate({
 				seconds: 1672531200,
-				i18n: { lang: 'de' } as unknown as I18n
+				language: Languages.GERMAN
 			});
 
 			expect(result).toMatch('1. Jan. 2023');
 		});
 
 		it('falls back to en locale when i18n.lang is not provided', () => {
-			const result = formatSecondsToDate({ seconds: 1672531200, i18n: {} as unknown as I18n });
+			const result = formatSecondsToDate({ seconds: 1672531200 });
 
 			expect(result).toMatch('Jan 1, 2023');
 		});
@@ -489,7 +493,7 @@ describe('format.utils', () => {
 			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
 			const result = formatNanosecondsToDate({
 				nanoseconds: jan1_2023_ns,
-				i18n: { lang: 'de' } as unknown as I18n
+				language: Languages.GERMAN
 			});
 
 			expect(result).toMatch('1. Jan. 2023');
@@ -497,10 +501,7 @@ describe('format.utils', () => {
 
 		it('falls back to en locale when i18n.lang is not provided', () => {
 			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
-			const result = formatNanosecondsToDate({
-				nanoseconds: jan1_2023_ns,
-				i18n: {} as unknown as I18n
-			});
+			const result = formatNanosecondsToDate({ nanoseconds: jan1_2023_ns });
 
 			expect(result).toMatch('Jan 1, 2023');
 		});
@@ -582,5 +583,31 @@ describe('format.utils', () => {
 				})
 			).toBe(0);
 		});
+	});
+
+	describe('formatCurrency', () => {
+		const testCases: { value: number; currency: Currency; expected: string }[] = [
+			{ value: 1234.56, currency: Currency.USD, expected: '$1’234.56' },
+			{ value: 987654321.12, currency: Currency.EUR, expected: '€987’654’321.12' },
+			{ value: 0.99, currency: Currency.GBP, expected: '£0.99' },
+			{ value: 1000000, currency: Currency.JPY, expected: '¥1’000’000' },
+
+			{ value: 123456789.99, currency: Currency.CHF, expected: 'CHF 123’456’789.99' },
+			{ value: 0, currency: Currency.USD, expected: '$0.00' },
+			{ value: -1234.56, currency: Currency.USD, expected: '-$1’234.56' },
+			{ value: -987654321.12, currency: Currency.EUR, expected: '-€987’654’321.12' },
+			{ value: 12345, currency: Currency.GBP, expected: '£12’345.00' },
+
+			{ value: 1000000.99, currency: Currency.JPY, expected: '¥1’000’001' },
+			{ value: 1000000.4, currency: Currency.JPY, expected: '¥1’000’000' },
+			{ value: 123456789.12345, currency: Currency.CHF, expected: 'CHF 123’456’789.12' }
+		];
+
+		it.each(testCases)(
+			`should format value $value for currency $currency as expected`,
+			({ value, currency, expected }) => {
+				expect(formatCurrency({ value, currency })).toBe(expected);
+			}
+		);
 	});
 });

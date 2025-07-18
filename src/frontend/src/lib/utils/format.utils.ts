@@ -1,5 +1,7 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import type { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
@@ -85,24 +87,24 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 
 export const formatSecondsToDate = ({
 	seconds,
-	i18n
+	language
 }: {
 	seconds: number;
-	i18n?: I18n;
+	language?: Languages;
 }): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToDate = ({
 	nanoseconds,
-	i18n
+	language
 }: {
 	nanoseconds: bigint;
-	i18n?: I18n;
+	language?: Languages;
 }): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
-	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
@@ -111,10 +113,10 @@ export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 };
 
 export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
-	date.toLocaleDateString(i18n?.lang ?? 'en', { month: 'long' });
+	date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, { month: 'long' });
 
-const getRelativeTimeFormatter = (i18n?: I18n) =>
-	new Intl.RelativeTimeFormat(i18n?.lang ?? 'en', { numeric: 'auto' });
+const getRelativeTimeFormatter = (language?: Languages) =>
+	new Intl.RelativeTimeFormat(language ?? Languages.ENGLISH, { numeric: 'auto' });
 
 /** Formats a number of seconds to a normalized date string.
  *
@@ -130,11 +132,11 @@ const getRelativeTimeFormatter = (i18n?: I18n) =>
 export const formatSecondsToNormalizedDate = ({
 	seconds,
 	currentDate,
-	i18n
+	language
 }: {
 	seconds: number;
 	currentDate?: Date;
-	i18n?: I18n;
+	language?: Languages;
 }): string => {
 	const date = new Date(seconds * 1000);
 	const today = currentDate ?? new Date();
@@ -146,16 +148,19 @@ export const formatSecondsToNormalizedDate = ({
 
 	if (Math.abs(daysDifference) < 2) {
 		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.
-		return getRelativeTimeFormatter(i18n).format(daysDifference, 'day');
+		return getRelativeTimeFormatter(language).format(daysDifference, 'day');
 	}
 
 	// Same year, return day and month name
 	if (date.getFullYear() === today.getFullYear()) {
-		return date.toLocaleDateString(i18n?.lang ?? 'en', { day: 'numeric', month: 'long' });
+		return date.toLocaleDateString(language ?? Languages.ENGLISH, {
+			day: 'numeric',
+			month: 'long'
+		});
 	}
 
 	// Different year, return day, month, and year
-	return date.toLocaleDateString(i18n?.lang ?? 'en', {
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, {
 		day: 'numeric',
 		month: 'long',
 		year: 'numeric'
@@ -164,9 +169,11 @@ export const formatSecondsToNormalizedDate = ({
 
 export const formatCurrency = ({
 	value,
+	currency,
 	options
 }: {
 	value: number;
+	currency: Currency;
 	options?: {
 		minFraction?: number;
 		maxFraction?: number;
@@ -174,15 +181,10 @@ export const formatCurrency = ({
 		symbol?: boolean;
 	};
 }): string => {
-	const {
-		minFraction = 2,
-		maxFraction = 2,
-		maximumSignificantDigits,
-		symbol = true
-	} = options ?? {};
+	const { minFraction, maxFraction, maximumSignificantDigits, symbol = true } = options ?? {};
 
 	return new Intl.NumberFormat('en-US', {
-		...(symbol && { style: 'currency', currency: 'USD' }),
+		...(symbol && { style: 'currency', currency: currency.toUpperCase() }),
 		minimumFractionDigits: minFraction,
 		maximumFractionDigits: maxFraction,
 		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })
