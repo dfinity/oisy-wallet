@@ -1,3 +1,3 @@
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 
-export const SUPPORTED_CURRENCIES = Object.entries(Currencies);
+export const SUPPORTED_CURRENCIES = Object.entries(Currency);

@@ -13,11 +13,11 @@
 	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import type { Currencies } from '$lib/enums/currencies';
 	import type { Languages } from '$lib/enums/languages';
 	import { currencyStore } from '$lib/stores/currency.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { getCurrencyName, getCurrencySymbol } from '$lib/utils/currency.utils';
+	import type { Currency } from '$lib/enums/currency';
 
 	let dropdown = $state<Dropdown>();
 
@@ -25,14 +25,14 @@
 		currency,
 		language
 	}: {
-		currency: Currencies;
+		currency: Currency;
 		language: Languages;
 	}): string => {
 		const symbol = getCurrencySymbol({ currency, language });
 		return `${nonNullish(symbol) && symbol?.toLowerCase() !== currency ? `${symbol} - ` : ''}${currency.toUpperCase()}`;
 	};
 
-	const handleCurrencyChange = (currency: Currencies) => {
+	const handleCurrencyChange = (currency: Currency) => {
 		currencyStore.switchCurrency(currency);
 		dropdown?.close();
 	};
