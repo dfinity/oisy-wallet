@@ -8,8 +8,10 @@ export const getLoadedNftsByTokens = ({tokens, loadedNfts}:{ tokens: Erc721Custo
 
 	loadedNfts.forEach(nft => {
 		const contractAddress = nft.contract.address.toLowerCase();
-		const existingNfts = nftsByToken.get(contractAddress) ?? [];
-		nftsByToken.set(contractAddress, [...existingNfts, nft]);
+		if (nftsByToken.has(contractAddress)) {
+			const existingNfts = nftsByToken.get(contractAddress) ?? [];
+			nftsByToken.set(contractAddress, [...existingNfts, nft]);
+		}
 	});
 
 	return nftsByToken;
