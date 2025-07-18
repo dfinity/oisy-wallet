@@ -1,6 +1,8 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { getIdbBalances } from '$lib/api/idb-balances.api';
 import { authIdentity } from '$lib/derived/auth.derived';
+import { balancesStore } from '$lib/stores/balances.store';
 import type { TransactionsStore } from '$lib/stores/transactions.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -36,6 +38,25 @@ const syncTransactionsFromCache = async <
 	});
 };
 
+const syncBalancesFromCache = async ({ tokenId, ...params }: GetIdbTransactionsParams) => {
+	const balance = await getIdbBalances({
+		...params,
+		tokenId
+	});
+
+	if (isNullish(balance)) {
+		return;
+	}
+
+	balancesStore.set({
+		id: tokenId,
+		data: {
+			data: balance,
+			certified: false
+		}
+	});
+};
+
 export const syncWalletFromIdbCache = async <
 	T extends BtcTransactionUi | IcTransactionUi | SolTransactionUi
 >({
@@ -61,6 +82,12 @@ export const syncWalletFromIdbCache = async <
 		tokenId,
 		getIdbTransactions,
 		transactionsStore,
+		principal,
+		...params
+	});
+
+	await syncBalancesFromCache({
+		tokenId,
 		principal,
 		...params
 	});
