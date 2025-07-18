@@ -50,13 +50,14 @@
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getLoadedNftsByTokens, type NftsByNetwork } from '$lib/utils/nfts.utils';
+	import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import type { NftsByNetwork } from '$lib/types/nft';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
