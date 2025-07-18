@@ -198,8 +198,6 @@
 	let currentContact = $derived($sortedContacts.find((c) => c.id === currentContactId));
 	let contacts = $derived($sortedContacts);
 
-	
-
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
 			previousStepName = currentStepName;
@@ -246,15 +244,6 @@
 			return;
 		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
-	};
-	const handleAddAvatar = async (image: ContactImage) => {
-		if (isNullish(currentContact)) {
-			return;
-		}
-		const contact = {
-			...currentContact
-		};
-		await callUpdateContact({ contact, image });
 	};
 
 	const handleSaveAddress = async (address: ContactAddressUi) => {

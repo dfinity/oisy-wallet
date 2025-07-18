@@ -10,7 +10,6 @@
 	import type { Address } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { AvatarVariants } from '$lib/types/style';
-	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -41,7 +40,6 @@
 	let mappedAddress = $derived(
 		nonNullish(address) ? mapAddressToContactAddressUi(address) : undefined
 	);
-
 </script>
 
 <div class="relative flex">

@@ -15,7 +15,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
-	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 
 	interface Props {

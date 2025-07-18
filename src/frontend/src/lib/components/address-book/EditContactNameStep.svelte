@@ -12,7 +12,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 
 	interface Props {
 		contact?: Partial<ContactUi>;
