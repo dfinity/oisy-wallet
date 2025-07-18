@@ -6,29 +6,33 @@ import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 
 describe('AvatarWithBadge', () => {
-	it('renders contact data if it is provided', () => {
-		const name = 'Test';
-		const { getByText, getByTestId } = render(AvatarWithBadge, {
-			props: {
-				contact: getMockContactsUi({
-					n: 1,
-					name,
-					addresses: [mockContactIcrcAddressUi]
-				})[0] as unknown as ContactUi
-			}
-		});
+  it('renders contact data if it is provided', () => {
+    const name = 'Test';
+    const { getByText, queryByTestId } = render(AvatarWithBadge, {
+      props: {
+        contact: getMockContactsUi({
+          n: 1,
+          name,
+          addresses: [mockContactIcrcAddressUi]
+        }).at(0)!
+      }
+    });
 
-		expect(() => getByTestId(AVATAR_WITH_BADGE_FALLBACK_IMAGE)).toThrow();
-		expect(getByText(`${name[0]}`)).toBeInTheDocument();
-	});
+    // The fallback logo should NOT be in the DOM when a contact is provided
+    expect(queryByTestId(AVATAR_WITH_BADGE_FALLBACK_IMAGE)).toBeNull();
 
-	it('renders fallback data if contact is not provided', () => {
-		const { getByTestId } = render(AvatarWithBadge, {
-			props: {
-				address: mockSolAddress
-			}
-		});
+    // Should render the initial of the contact's name
+    expect(getByText(name[0] as string)).toBeInTheDocument();
+  });
 
-		expect(getByTestId(AVATAR_WITH_BADGE_FALLBACK_IMAGE)).toBeInTheDocument();
-	});
+  it('renders fallback data if contact is not provided', () => {
+    const { getByTestId } = render(AvatarWithBadge, {
+      props: {
+        address: mockSolAddress
+      }
+    });
+
+    // The fallback logo should be rendered when no contact is passed
+    expect(getByTestId(AVATAR_WITH_BADGE_FALLBACK_IMAGE)).toBeInTheDocument();
+  });
 });
