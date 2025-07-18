@@ -829,6 +829,10 @@ interface I18nTokens {
 	};
 }
 
+interface I18nNfts {
+	text: { title: string };
+}
+
 interface I18nFee {
 	text: {
 		fee: string;
@@ -1247,6 +1251,7 @@ interface I18n {
 	swap: I18nSwap;
 	buy: I18nBuy;
 	tokens: I18nTokens;
+	nfts: I18nNfts;
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
