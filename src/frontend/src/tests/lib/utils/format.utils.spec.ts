@@ -643,7 +643,7 @@ describe('format.utils', () => {
 					currency: Currency.USD,
 					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 }
 				})
-			).toBeUndefined();
+			).toBe('$0.00');
 
 			expect(
 				formatCurrency({
