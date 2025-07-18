@@ -658,16 +658,15 @@ impl ContactImage {
     ) -> Result<(), crate::types::contact::ContactError> {
         // Check image size first (fail fast for oversized images)
         if self.data.len() > crate::types::contact::MAX_IMAGE_SIZE_BYTES {
-            return Err(crate::types::contact::ContactError::InvalidContactData);
+            return Err(crate::types::contact::ContactError::ImageTooLarge);
         }
 
         // Check image format (magic bytes)
         self.validate()
-            .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+            .map_err(|_| crate::types::contact::ContactError::InvalidImageFormat)?;
 
         // Comprehensive memory validation (includes projected memory usage)
-        validate_memory_for_new_image(self.data.len(), stored_contacts)
-            .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+        validate_memory_for_new_image(self.data.len(), stored_contacts)?;
 
         Ok(())
     }

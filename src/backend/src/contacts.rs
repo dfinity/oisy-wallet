@@ -41,7 +41,7 @@ pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, Co
             return Err(ContactError::RandomnessError);
         }
 
-        // Remove memory usage validation from backend. Only validate in impls.
+        // Pre-validate the request to catch issues early
         // request.validate_with_context already handles all image validation in impls.
         request.validate_with_context(&stored_contacts, &ic_cdk::caller())?;
 

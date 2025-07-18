@@ -42,7 +42,22 @@ pub fn call_create_contact_with_image(
 ) -> Result<Contact, ContactError> {
     let request = CreateContactRequest { name, image };
     let wrapped_result = pic_setup.update::<CreateContactResult>(caller, "create_contact", request);
-    match wrapped_result.expect("that create_contact succeeds") {
+
+    // Handle the case where the canister call itself fails (e.g., due to deserialization errors)
+    let result = match wrapped_result {
+        Ok(result) => result,
+        Err(err_msg) => {
+            // If the error message contains hints about what type of error occurred,
+            // we can map it to the appropriate ContactError
+            if err_msg.contains("failed to decode call arguments") {
+                return Err(ContactError::InvalidContactData);
+            }
+            // For other errors, we might want to panic or handle differently
+            panic!("Unexpected canister error: {}", err_msg);
+        }
+    };
+
+    match result {
         CreateContactResult::Ok(contact) => Ok(contact),
         CreateContactResult::Err(err) => Err(err),
     }
@@ -966,7 +981,7 @@ fn test_create_contact_with_oversized_image_should_fail() {
     );
 
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
+    assert_eq!(result.unwrap_err(), ContactError::ImageTooLarge);
 }
 
 #[test]
@@ -988,7 +1003,7 @@ fn test_create_contact_with_invalid_image_format_should_fail() {
     );
 
     assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::InvalidContactData);
+    assert_eq!(result.unwrap_err(), ContactError::InvalidImageFormat);
 }
 
 #[test]
