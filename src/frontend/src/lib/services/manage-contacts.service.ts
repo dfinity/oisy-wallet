@@ -1,3 +1,4 @@
+import type { ContactImage } from '$declarations/backend/backend.did';
 import {
 	createContact as createContactApi,
 	deleteContact as deleteContactApi,
@@ -6,13 +7,21 @@ import {
 } from '$lib/api/backend.api';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
+import { compareContactAddresses } from '$lib/utils/contact-address.utils';
 import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
 import type { Identity } from '@dfinity/agent';
 
 export const loadContacts = async (identity: Identity): Promise<void> => {
 	contactsStore.reset();
 	const result = await getContacts({ identity });
-	contactsStore.set(result.map(mapToFrontendContact));
+	const contactsWithSortedAddresses = result.map((contact) => {
+		const contactUi = mapToFrontendContact(contact);
+		return {
+			...contactUi,
+			addresses: contactUi.addresses.sort((a, b) => compareContactAddresses({ a, b }))
+		};
+	});
+	contactsStore.set(contactsWithSortedAddresses);
 };
 
 export const createContact = async ({
@@ -30,12 +39,22 @@ export const createContact = async ({
 
 export const updateContact = async ({
 	contact,
-	identity
+	identity,
+	image
 }: {
 	contact: ContactUi;
 	identity: Identity;
+	image?: ContactImage;
 }): Promise<ContactUi> => {
-	const result = await updateContactApi({ contact: mapToBackendContact(contact), identity });
+	const contactWithSortedAddresses = {
+		...contact,
+		image,
+		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
+	};
+	const result = await updateContactApi({
+		contact: mapToBackendContact(contactWithSortedAddresses),
+		identity
+	});
 	const contactUi = mapToFrontendContact(result);
 	contactsStore.updateContact(contactUi);
 	return contactUi;

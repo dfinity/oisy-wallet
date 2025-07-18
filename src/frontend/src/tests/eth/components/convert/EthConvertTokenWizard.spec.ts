@@ -5,12 +5,12 @@ import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard
 import * as tokensDerived from '$eth/derived/token.derived';
 import * as sendServices from '$eth/services/send.services';
 import {
-	FEE_CONTEXT_KEY,
-	initFeeContext,
-	initFeeStore,
-	type FeeContext,
+	ETH_FEE_CONTEXT_KEY,
+	initEthFeeContext,
+	initEthFeeStore,
+	type EthFeeContext,
 	type FeeStoreData
-} from '$eth/stores/fee.store';
+} from '$eth/stores/eth-fee.store';
 import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import * as ckEthStores from '$icp-eth/stores/cketh.store';
@@ -57,20 +57,20 @@ describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
 	const mockContext = (fees?: FeeStoreData) => {
-		const feeStore = initFeeStore();
+		const feeStore = initEthFeeStore();
 
 		if (nonNullish(fees)) {
 			feeStore.setFee(fees);
 		}
 
-		return new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | FeeContext>([
+		return new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | EthFeeContext>([
 			[
 				CONVERT_CONTEXT_KEY,
 				initConvertContext({ sourceToken: ETHEREUM_TOKEN, destinationToken: SEPOLIA_TOKEN })
 			],
 			[
-				FEE_CONTEXT_KEY,
-				initFeeContext({
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
 					feeStore,
 					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 					feeExchangeRateStore: writable(100),

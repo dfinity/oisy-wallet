@@ -1,15 +1,20 @@
 import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 import {
+	ADDRESS_LIST_ITEM_BUTTON,
+	ADDRESS_LIST_ITEM_INFO_BUTTON,
 	CONTACT_HEADER_EDIT_BUTTON,
 	CONTACT_SHOW_ADD_ADDRESS_BUTTON,
 	CONTACT_SHOW_CLOSE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import type { ContactUi } from '$lib/types/contact';
+import * as clipboardUtils from '$lib/utils/clipboard.utils';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import { vi } from 'vitest';
 
 describe('ShowContactStep', () => {
 	const mockContact: ContactUi = {
@@ -105,7 +110,7 @@ describe('ShowContactStep', () => {
 		const closeButton = getByTestId(CONTACT_SHOW_CLOSE_BUTTON);
 		await fireEvent.click(closeButton);
 
-		expect(mockClose).toHaveBeenCalledTimes(1);
+		expect(mockClose).toHaveBeenCalledOnce();
 	});
 
 	it('should call addAddress function when add address button is clicked', async () => {
@@ -121,7 +126,7 @@ describe('ShowContactStep', () => {
 		const addAddressButton = getByTestId(CONTACT_SHOW_ADD_ADDRESS_BUTTON);
 		await fireEvent.click(addAddressButton);
 
-		expect(mockAddAddress).toHaveBeenCalledTimes(1);
+		expect(mockAddAddress).toHaveBeenCalledOnce();
 	});
 
 	it('should render addresses when contact has addresses', () => {
@@ -137,14 +142,25 @@ describe('ShowContactStep', () => {
 		// Check that the contact name is displayed
 		expect(getByText(mockContactWithAddresses.name)).toBeInTheDocument();
 
-		// Check that each address is displayed
-		mockContactWithAddresses.addresses.forEach((address) => {
-			expect(getByText(`ADDRESS: ${address.address} ${address.label}`)).toBeInTheDocument();
-		});
+		// Check that the first address (ETH) is displayed
+		expect(getByText(en.address.types.Eth)).toBeInTheDocument();
+		expect(getByText('My ETH Address')).toBeInTheDocument();
+
+		const shortenedEthAddress = shortenWithMiddleEllipsis({ text: mockEthAddress });
+
+		expect(getByText(shortenedEthAddress)).toBeInTheDocument();
+
+		// Check that the second address (BTC) is displayed
+		expect(getByText(en.address.types.Btc)).toBeInTheDocument();
+		expect(getByText('My BTC Address')).toBeInTheDocument();
+
+		const shortenedBtcAddress = shortenWithMiddleEllipsis({ text: mockBtcAddress });
+
+		expect(getByText(shortenedBtcAddress)).toBeInTheDocument();
 	});
 
 	it('should show address buttons when showAddress prop is provided', async () => {
-		const { getAllByText } = render(ShowContactStep, {
+		const { getAllByTestId } = render(ShowContactStep, {
 			props: {
 				contact: mockContactWithAddresses,
 				onClose: mockClose,
@@ -153,16 +169,16 @@ describe('ShowContactStep', () => {
 			}
 		});
 
-		// Check that show buttons are displayed for each address
-		const showButtons = getAllByText('SHOW');
+		const infoButtons = getAllByTestId(ADDRESS_LIST_ITEM_INFO_BUTTON);
 
-		expect(showButtons).toHaveLength(mockContactWithAddresses.addresses.length);
+		// Check that we have the expected number of info buttons
+		expect(infoButtons).toHaveLength(2);
 
-		// Click the first show button
-		await fireEvent.click(showButtons[0]);
+		// Click the first info button
+		await fireEvent.click(infoButtons[0]);
 
 		// Check that showAddress was called with the correct index
-		expect(mockShowAddress).toHaveBeenCalledTimes(1);
+		expect(mockShowAddress).toHaveBeenCalledOnce();
 		expect(mockShowAddress).toHaveBeenCalledWith(0);
 	});
 
@@ -181,7 +197,29 @@ describe('ShowContactStep', () => {
 		const editButton = getByTestId(CONTACT_HEADER_EDIT_BUTTON);
 		await fireEvent.click(editButton);
 
-		expect(mockEdit).toHaveBeenCalledTimes(1);
+		expect(mockEdit).toHaveBeenCalledOnce();
 		expect(mockEdit).toHaveBeenCalledWith(mockContact);
+	});
+
+	it('should call copyToClipboard function when address button is clicked', async () => {
+		const spyCopy = vi.spyOn(clipboardUtils, 'copyToClipboard').mockResolvedValue(undefined);
+
+		const { getAllByTestId } = render(ShowContactStep, {
+			props: {
+				contact: mockContactWithAddresses,
+				onClose: mockClose,
+				onAddAddress: vi.fn(),
+				onShowAddress: vi.fn(),
+				onEdit: mockEdit
+			}
+		});
+
+		const addressListItems = getAllByTestId(ADDRESS_LIST_ITEM_BUTTON);
+
+		expect(addressListItems).toHaveLength(2);
+
+		await fireEvent.click(addressListItems[0]);
+
+		expect(spyCopy).toHaveBeenCalled();
 	});
 });

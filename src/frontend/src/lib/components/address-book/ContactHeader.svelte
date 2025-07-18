@@ -17,15 +17,21 @@
 	let { name, onEdit, styleClass = '' }: Props = $props();
 
 	let color = $derived(selectColorForName({ name, colors: CONTACT_TEXT_COLORS }));
+
+	const headerStyles = `
+		backdrop-filter: blur(1px);
+		-webkit-backdrop-filter: blur(1px);
+		overflow: hidden;
+		`;
 </script>
 
-<div class={`relative flex w-full flex-col items-center pb-5 ${styleClass}`}>
+<div class={`relative flex w-full flex-col items-center ${styleClass}`}>
 	<Button
-		styleClass="absolute top-2.5 right-2.5 bg-black/16 dark:bg-black/10 px-3 py-2 font-xs"
+		styleClass="absolute z-1 top-2.5 right-2.5 bg-black/16 dark:bg-black/10 px-3 py-2 font-xs"
 		ariaLabel={$i18n.core.text.edit}
 		colorStyle="secondary"
 		testId={CONTACT_HEADER_EDIT_BUTTON}
-		on:click={onEdit}
+		onclick={onEdit}
 	>
 		<span class="flex items-center">
 			<IconPencil />
@@ -33,7 +39,7 @@
 		{$i18n.core.text.edit}
 	</Button>
 
-	<div class={`self-stretch ${color} transition-colors duration-1000`}>
+	<div class={`self-stretch ${color} transition-colors duration-1000`} style={headerStyles}>
 		<IconContactHeader />
 	</div>
 	<div>

@@ -1,5 +1,6 @@
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { syncWallet } from '$icp/services/ic-listener.services';
+import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
@@ -14,10 +15,12 @@ import type {
 
 export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new WalletWorker.default();
+	let worker: Worker | null = new WalletWorker.default();
+
+	await syncWalletFromCache({ tokenId: ICP_TOKEN_ID, networkId: ICP_NETWORK_ID });
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<
 			| PostMessageDataResponseWallet
@@ -25,45 +28,59 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			| PostMessageDataResponseWalletCleanUp
 		>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncIcpWallet':
 				syncWallet({
 					tokenId: ICP_TOKEN_ID,
-					data: data.data as PostMessageDataResponseWallet
+					data: data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcpWalletError':
 				onLoadTransactionsError({
 					tokenId: ICP_TOKEN_ID,
-					error: (data.data as PostMessageDataResponseError).error
+					error: data.error
 				});
 				return;
 			case 'syncIcpWalletCleanUp':
 				onTransactionsCleanUp({
 					tokenId: ICP_TOKEN_ID,
-					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
+					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
 		}
 	};
 
+	const stop = () => {
+		worker?.postMessage({
+			msg: 'stopIcpWalletTimer'
+		});
+	};
+
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startIcpWalletTimer'
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopIcpWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'triggerIcpWalletTimer'
 			});
+		},
+		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
+			stop();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

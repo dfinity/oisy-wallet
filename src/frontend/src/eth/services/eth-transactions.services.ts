@@ -7,14 +7,13 @@ import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { trackEvent } from '$lib/services/analytics.services';
-import { retry } from '$lib/services/rest.services';
+import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { randomWait } from '$lib/utils/time.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -75,10 +74,18 @@ const loadEthTransactions = async ({
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({ address });
 
+		const certifiedTransactions = transactions.map((transaction) => ({
+			data: transaction,
+			// We set the certified property to false because we don't have a way to certify ETH transactions for now.
+			certified: false
+		}));
+
 		if (updateOnly) {
-			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+			certifiedTransactions.forEach((transaction) =>
+				ethTransactionsStore.update({ tokenId, transaction })
+			);
 		} else {
-			ethTransactionsStore.set({ tokenId, transactions });
+			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
@@ -96,16 +103,11 @@ const loadEthTransactions = async ({
 					tokenId: `${tokenId.description}`,
 					networkId: `${networkId.description}`,
 					error: `${err}`
-				}
-			});
-
-			// We print the error to console just for debugging purposes
-			console.warn(
-				replacePlaceholders(loading_transactions_symbol, {
+				},
+				warning: `${replacePlaceholders(loading_transactions_symbol, {
 					$symbol: ETHEREUM_NETWORK_SYMBOL
-				}),
-				err
-			);
+				})} ${err}`
+			});
 		}
 
 		return { success: false };
@@ -158,15 +160,22 @@ const loadErc20Transactions = async ({
 
 	try {
 		const { erc20Transactions } = etherscanProviders(networkId);
-		const transactions = await retry({
-			request: async () => await erc20Transactions({ contract: token, address }),
-			onRetry: async () => await randomWait({})
+		const transactions = await retryWithDelay({
+			request: async () => await erc20Transactions({ contract: token, address })
 		});
 
+		const certifiedTransactions = transactions.map((transaction) => ({
+			data: transaction,
+			// We set the certified property to false because we don't have a way to certify ERC20 transactions for now.
+			certified: false
+		}));
+
 		if (updateOnly) {
-			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+			certifiedTransactions.forEach((transaction) =>
+				ethTransactionsStore.update({ tokenId, transaction })
+			);
 		} else {
-			ethTransactionsStore.set({ tokenId, transactions });
+			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
@@ -183,16 +192,11 @@ const loadErc20Transactions = async ({
 				tokenId: `${tokenId.description}`,
 				networkId: `${networkId.description}`,
 				error: `${err}`
-			}
-		});
-
-		// We print the error to console just for debugging purposes
-		console.warn(
-			replacePlaceholders(loading_transactions_symbol, {
+			},
+			warning: `${replacePlaceholders(loading_transactions_symbol, {
 				$symbol: token.symbol
-			}),
-			err
-		);
+			})} ${err}`
+		});
 
 		return { success: false };
 	}

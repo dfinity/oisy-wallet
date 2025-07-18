@@ -1,3 +1,4 @@
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	CAROUSEL_SLIDE_NAVIGATION,
 	NAVIGATION_ITEM_EXPLORER
@@ -12,7 +13,7 @@ export class ExplorerPage extends HomepageLoggedIn {
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.navigateTo(NAVIGATION_ITEM_EXPLORER);
+		await this.navigateTo({ testId: NAVIGATION_ITEM_EXPLORER, expectedPath: AppPath.Explore });
 		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
 			state: 'hidden'
 		});

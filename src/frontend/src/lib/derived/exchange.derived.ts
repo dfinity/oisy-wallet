@@ -1,5 +1,9 @@
 import { EXCHANGE_DISABLED } from '$env/exchange.env';
 import {
+	ARBITRUM_ETH_TOKEN_ID,
+	ARBITRUM_SEPOLIA_ETH_TOKEN_ID
+} from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
+import {
 	BASE_ETH_TOKEN_ID,
 	BASE_SEPOLIA_ETH_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
@@ -21,7 +25,6 @@ import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import {
 	SOLANA_DEVNET_TOKEN_ID,
 	SOLANA_LOCAL_TOKEN_ID,
-	SOLANA_TESTNET_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
@@ -64,7 +67,6 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
 			[SOLANA_TOKEN_ID]: solPrice,
-			[SOLANA_TESTNET_TOKEN_ID]: solPrice,
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
 			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
 			[BASE_ETH_TOKEN_ID]: ethPrice,
@@ -73,6 +75,8 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[BNB_TESTNET_TOKEN_ID]: bnbPrice,
 			[POL_MAINNET_TOKEN_ID]: polPrice,
 			[POL_AMOY_TOKEN_ID]: polPrice,
+			[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
+			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const token =
 					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??

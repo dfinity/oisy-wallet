@@ -27,18 +27,17 @@ import {
 } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
+import type {
+	EthCertifiedTransaction,
+	EthTransactionsData
+} from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { Token } from '$lib/types/token';
-import type {
-	AllTransactionUiWithCmp,
-	AnyTransactionUi,
-	Transaction
-} from '$lib/types/transaction';
+import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
 import {
 	areTransactionsStoresLoaded,
 	areTransactionsStoresLoading,
@@ -54,7 +53,7 @@ import {
 } from '$lib/utils/transactions.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
-import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
+import { createMockEthCertifiedTransactions } from '$tests/mocks/eth-transactions.mock';
 import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
@@ -79,15 +78,19 @@ describe('transactions.utils', () => {
 			[BTC_TESTNET_TOKEN_ID]: mockBtcTestnetTransactions.map((data) => ({ data, certified }))
 		};
 
-		const mockEthMainnetTransactions: Transaction[] = createMockEthTransactions(9);
+		const mockEthMainnetTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(9);
 
-		const mockSepoliaTransactions: Transaction[] = createMockEthTransactions(7);
+		const mockSepoliaTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(7);
 
-		const mockErc20Transactions: Transaction[] = createMockEthTransactions(4);
+		const mockErc20Transactions: EthCertifiedTransaction[] = createMockEthCertifiedTransactions(4);
 
-		const mockBaseMainnetTransactions: Transaction[] = createMockEthTransactions(3);
+		const mockBaseMainnetTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(3);
 
-		const mockBnbMainnetTransactions: Transaction[] = createMockEthTransactions(2);
+		const mockBnbMainnetTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(2);
 
 		const mockEthTransactions: EthTransactionsData = {
 			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions,
@@ -118,7 +121,7 @@ describe('transactions.utils', () => {
 		const type = 'receive' as EthTransactionType;
 
 		const expectedEthMainnetTransactions: AllTransactionUiWithCmp[] = [
-			...mockEthMainnetTransactions.map((transaction) => ({
+			...mockEthMainnetTransactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -130,7 +133,7 @@ describe('transactions.utils', () => {
 		];
 
 		const expectedSepoliaTransactions: AllTransactionUiWithCmp[] = [
-			...mockSepoliaTransactions.map((transaction) => ({
+			...mockSepoliaTransactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -142,7 +145,7 @@ describe('transactions.utils', () => {
 		];
 
 		const expectedBaseMainnetTransactions: AllTransactionUiWithCmp[] = [
-			...mockBaseMainnetTransactions.map((transaction) => ({
+			...mockBaseMainnetTransactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -154,7 +157,7 @@ describe('transactions.utils', () => {
 		];
 
 		const expectedBnbMainnetTransactions: AllTransactionUiWithCmp[] = [
-			...mockBnbMainnetTransactions.map((transaction) => ({
+			...mockBnbMainnetTransactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -166,7 +169,7 @@ describe('transactions.utils', () => {
 		];
 
 		const expectedErc20Transactions: AllTransactionUiWithCmp[] = [
-			...mockErc20Transactions.map((transaction) => ({
+			...mockErc20Transactions.map(({ data: transaction }) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash ?? '',
@@ -458,7 +461,8 @@ describe('transactions.utils', () => {
 			[BTC_MAINNET_TOKEN_ID]: mockBtcMainnetTransactions.map((data) => ({ data, certified: false }))
 		};
 
-		const mockEthMainnetTransactions: Transaction[] = createMockEthTransactions(5);
+		const mockEthMainnetTransactions: EthCertifiedTransaction[] =
+			createMockEthCertifiedTransactions(5);
 		const mockEthTransactions: EthTransactionsData = {
 			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions
 		};
@@ -775,9 +779,9 @@ describe('transactions.utils', () => {
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
-				[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
-				[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7),
-				[PEPE_TOKEN_ID]: createMockEthTransactions(4)
+				[ETHEREUM_TOKEN_ID]: createMockEthCertifiedTransactions(9),
+				[SEPOLIA_TOKEN_ID]: createMockEthCertifiedTransactions(7),
+				[PEPE_TOKEN_ID]: createMockEthCertifiedTransactions(4)
 			},
 			tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 		};
@@ -923,8 +927,8 @@ describe('transactions.utils', () => {
 			const result = areTransactionsStoresLoading([
 				{
 					transactionsStoreData: {
-						[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
-						[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7)
+						[ETHEREUM_TOKEN_ID]: createMockEthCertifiedTransactions(9),
+						[SEPOLIA_TOKEN_ID]: createMockEthCertifiedTransactions(7)
 					},
 					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 				},
@@ -1113,9 +1117,9 @@ describe('transactions.utils', () => {
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
-				[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
-				[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7),
-				[PEPE_TOKEN_ID]: createMockEthTransactions(4)
+				[ETHEREUM_TOKEN_ID]: createMockEthCertifiedTransactions(9),
+				[SEPOLIA_TOKEN_ID]: createMockEthCertifiedTransactions(7),
+				[PEPE_TOKEN_ID]: createMockEthCertifiedTransactions(4)
 			},
 			tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 		};
@@ -1261,8 +1265,8 @@ describe('transactions.utils', () => {
 			const result = areTransactionsStoresLoaded([
 				{
 					transactionsStoreData: {
-						[ETHEREUM_TOKEN_ID]: createMockEthTransactions(9),
-						[SEPOLIA_TOKEN_ID]: createMockEthTransactions(7)
+						[ETHEREUM_TOKEN_ID]: createMockEthCertifiedTransactions(9),
+						[SEPOLIA_TOKEN_ID]: createMockEthCertifiedTransactions(7)
 					},
 					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 				},
@@ -1472,7 +1476,7 @@ describe('transactions.utils', () => {
 			const btcTransactionsUi = {
 				...mockTransaction,
 				type: 'send' as BtcTransactionType,
-				to: [mockTransaction.to, mockTransaction.from] as string[],
+				to: [...(mockTransaction.to as string[]), mockTransaction.from] as string[],
 				token: BTC_MAINNET_TOKEN
 			};
 

@@ -1,9 +1,17 @@
-import { ZERO } from '$lib/constants/app.constants';
+import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
+import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
+import { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
 import {
+	formatCurrency,
+	formatNanosecondsToDate,
+	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
+	formatToShortDateString,
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
+import { describe } from 'vitest';
 
 describe('format.utils', () => {
 	describe('formatToken', () => {
@@ -108,7 +116,96 @@ describe('format.utils', () => {
 
 			expect(formatToken({ value: valueD1, showPlusSign: true })).toBe('+1.2');
 
+			expect(formatToken({ value: ZERO, showPlusSign: true })).toBe('0');
+		});
+
+		it('should format negative value with minus sign', () => {
 			expect(formatToken({ value: negativeValue, showPlusSign: true })).toBe('-1');
+
+			expect(
+				formatToken({
+					value: -40827n,
+					displayDecimals: EIGHT_DECIMALS,
+					unitName: DEFAULT_BITCOIN_TOKEN.decimals,
+					showPlusSign: true
+				})
+			).toBe('-0.00040827');
+		});
+
+		it('should format small values', () => {
+			expect(formatToken({ value: 1200000000000000n })).toBe('0.0012');
+			expect(formatToken({ value: 120000000000000n })).toBe('0.00012');
+			expect(formatToken({ value: 12000000000000n })).toBe('0.000012');
+			expect(formatToken({ value: 1200000000000n })).toBe('0.0000012');
+			expect(formatToken({ value: 120000000000n })).toBe('0.00000012');
+			expect(formatToken({ value: 12000000000n })).toBe('0.00000001');
+		});
+
+		it('should format small values with trailing zeros', () => {
+			expect(formatToken({ value: 1200000000000000n, trailingZeros: true })).toBe('0.0012');
+			expect(formatToken({ value: 120000000000000n, trailingZeros: true })).toBe('0.00012');
+			expect(formatToken({ value: 12000000000000n, trailingZeros: true })).toBe('0.000012');
+			expect(formatToken({ value: 1200000000000n, trailingZeros: true })).toBe('0.0000012');
+			expect(formatToken({ value: 120000000000n, trailingZeros: true })).toBe('0.00000012');
+			expect(formatToken({ value: 12000000000n, trailingZeros: true })).toBe('0.00000001');
+		});
+
+		it('should format small values with specified displayDecimals', () => {
+			expect(formatToken({ value: 1200000001000000n, displayDecimals: 12 })).toBe('0.001200000001');
+			expect(formatToken({ value: 120000001000000n, displayDecimals: 12 })).toBe('0.000120000001');
+			expect(formatToken({ value: 12000001000000n, displayDecimals: 12 })).toBe('0.000012000001');
+			expect(formatToken({ value: 1200001000000n, displayDecimals: 12 })).toBe('0.000001200001');
+			expect(formatToken({ value: 120001000000n, displayDecimals: 12 })).toBe('0.000000120001');
+			expect(formatToken({ value: 12001000000n, displayDecimals: 12 })).toBe('0.000000012001');
+			expect(formatToken({ value: 1201000000n, displayDecimals: 12 })).toBe('0.000000001201');
+		});
+
+		it('should format too small value with default displayDecimals', () => {
+			expect(formatToken({ value: 1200000000n })).toBe('< 0.00000001');
+			expect(formatToken({ value: 7000000000n })).toBe('< 0.00000001');
+		});
+
+		it('should format correctly for precision above the maximum', () => {
+			expect(formatToken({ value: 999999999999999876n, displayDecimals: 18, unitName: 18 })).toBe(
+				'0.999999999999999876'
+			);
+
+			expect(formatToken({ value: 999999999999999876n, displayDecimals: 17, unitName: 18 })).toBe(
+				'0.99999999999999988'
+			);
+
+			expect(formatToken({ value: 999999999999999871n, displayDecimals: 17, unitName: 18 })).toBe(
+				'0.99999999999999987'
+			);
+
+			expect(
+				formatToken({ value: 9999999999999999999999999876n, displayDecimals: 28, unitName: 28 })
+			).toBe('0.9999999999999999999999999876');
+
+			expect(
+				formatToken({
+					value: 9999999999999999999999999876n,
+					displayDecimals: 4,
+					unitName: 28,
+					trailingZeros: true
+				})
+			).toBe('1.0000');
+
+			expect(formatToken({ value: 9999999999999999999999999876n, unitName: 28 })).toBe('1');
+
+			expect(formatToken({ value: 876n, displayDecimals: 28, unitName: 28 })).toBe(
+				'0.0000000000000000000000000876'
+			);
+
+			expect(formatToken({ value: 876n, unitName: 28 })).toBe('< 0.00000001');
+
+			expect(
+				formatToken({
+					value: 1111119999999999999999999999999876n,
+					displayDecimals: 28,
+					unitName: 28
+				})
+			).toBe('111111.9999999999999999999999999876');
 		});
 	});
 
@@ -270,6 +367,190 @@ describe('format.utils', () => {
 				);
 			});
 		});
+
+		describe('when i18n passed or not passed', () => {
+			const i18nEn = Languages.ENGLISH;
+			const i18nDe = Languages.GERMAN;
+
+			const getSecondsFromDate = (date: Date) => Math.floor(date.getTime() / 1000);
+
+			it('returns "today" for same day', () => {
+				const now = new Date('2023-06-12T12:00:00Z');
+				const result = formatSecondsToNormalizedDate({
+					seconds: getSecondsFromDate(new Date('2023-06-12T00:00:00Z')),
+					currentDate: now,
+					language: i18nEn
+				});
+
+				expect(result).toBe('today');
+			});
+
+			it('returns "yesterday" for previous day', () => {
+				const now = new Date('2023-06-12T12:00:00Z');
+				const result = formatSecondsToNormalizedDate({
+					seconds: getSecondsFromDate(new Date('2023-06-11T12:00:00Z')),
+					currentDate: now,
+					language: i18nEn
+				});
+
+				expect(result).toBe('yesterday');
+			});
+
+			it('returns full date for dates in a different year', () => {
+				const now = new Date('2023-06-12');
+				const result = formatSecondsToNormalizedDate({
+					seconds: getSecondsFromDate(new Date('2022-12-25')),
+					currentDate: now,
+					language: i18nEn
+				});
+
+				expect(result).toMatch('December 25, 2022');
+			});
+
+			it('returns short date (day + month) for same year, non-recent', () => {
+				const now = new Date('2023-06-12');
+				const result = formatSecondsToNormalizedDate({
+					seconds: getSecondsFromDate(new Date('2023-03-15')),
+					currentDate: now,
+					language: i18nEn
+				});
+
+				expect(result).toMatch('March 15');
+			});
+
+			it('respects German locale for long date format', () => {
+				const now = new Date('2023-06-12');
+				const result = formatSecondsToNormalizedDate({
+					seconds: getSecondsFromDate(new Date('2022-12-25')),
+					currentDate: now,
+					language: i18nDe
+				});
+
+				expect(result).toMatch('25. Dezember 2022');
+			});
+
+			it('respects German locale for relative dates', () => {
+				const now = new Date('2023-06-12');
+				const result = formatSecondsToNormalizedDate({
+					seconds: getSecondsFromDate(new Date('2023-06-11')),
+					currentDate: now,
+					language: i18nDe
+				});
+
+				expect(result.toLowerCase()).toBe('gestern'); // "yesterday" in German
+			});
+
+			it('falls back to English if no i18n is passed', () => {
+				const now = new Date('2023-06-12');
+				const result = formatSecondsToNormalizedDate({
+					seconds: getSecondsFromDate(new Date('2022-12-25')),
+					currentDate: now
+				});
+
+				expect(result).toMatch('December 25, 2022');
+			});
+		});
+	});
+
+	describe('formatSecondsToDate', () => {
+		it('formats seconds correctly in default (en) locale', () => {
+			const result = formatSecondsToDate({ seconds: 1672531200 }); // Jan 1, 2023
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('formats date in German locale when i18n.lang is de', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672531200,
+				language: Languages.GERMAN
+			});
+
+			expect(result).toMatch('1. Jan. 2023');
+		});
+
+		it('falls back to en locale when i18n.lang is not provided', () => {
+			const result = formatSecondsToDate({ seconds: 1672531200 });
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('returns invalid date if NaN is passed', () => {
+			const result = formatSecondsToDate({ seconds: NaN });
+
+			expect(result).toBe('Invalid Date');
+		});
+	});
+
+	describe('formatNanosecondsToDate', () => {
+		it('formats nanoseconds correctly in default (en) locale', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
+			const result = formatNanosecondsToDate({ nanoseconds: jan1_2023_ns });
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('formats date in German locale when i18n.lang is de', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
+			const result = formatNanosecondsToDate({
+				nanoseconds: jan1_2023_ns,
+				language: Languages.GERMAN
+			});
+
+			expect(result).toMatch('1. Jan. 2023');
+		});
+
+		it('falls back to en locale when i18n.lang is not provided', () => {
+			const jan1_2023_ns = BigInt(1672531200000000000); // Jan 1, 2023 in nanoseconds
+			const result = formatNanosecondsToDate({ nanoseconds: jan1_2023_ns });
+
+			expect(result).toMatch('Jan 1, 2023');
+		});
+
+		it('returns Invalid Date if BigInt is invalid or NaN-like', () => {
+			// Use a value that will overflow or convert to NaN
+			const invalid = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(1_000_000_000); // Too large for Number()
+			const result = formatNanosecondsToDate({ nanoseconds: invalid });
+
+			expect(result).toBe('Invalid Date');
+		});
+	});
+
+	describe('formatToShortDateString', () => {
+		it('formats date to full month name in default (en) locale', () => {
+			const result = formatToShortDateString({
+				date: new Date('2023-01-15'),
+				i18n: {} as unknown as I18n
+			});
+
+			expect(result).toBe('January');
+		});
+
+		it('formats date to month name in German locale', () => {
+			const result = formatToShortDateString({
+				date: new Date('2023-01-15'),
+				i18n: { lang: 'de' } as unknown as I18n
+			});
+
+			expect(result).toBe('Januar');
+		});
+
+		it('formats date to month name in French locale', () => {
+			const result = formatToShortDateString({
+				date: new Date('2023-01-15'),
+				i18n: { lang: 'fr' } as unknown as I18n
+			});
+
+			expect(result).toBe('janvier');
+		});
+
+		it('handles invalid date input by returning "Invalid Date"', () => {
+			const result = formatToShortDateString({
+				date: new Date('invalid'),
+				i18n: { lang: 'en' } as unknown as I18n
+			});
+
+			expect(result).toBe('Invalid Date');
+		});
 	});
 
 	describe('formatTokenBigintToNumber', () => {
@@ -302,5 +583,31 @@ describe('format.utils', () => {
 				})
 			).toBe(0);
 		});
+	});
+
+	describe('formatCurrency', () => {
+		const testCases: { value: number; currency: Currency; expected: string }[] = [
+			{ value: 1234.56, currency: Currency.USD, expected: '$1’234.56' },
+			{ value: 987654321.12, currency: Currency.EUR, expected: '€987’654’321.12' },
+			{ value: 0.99, currency: Currency.GBP, expected: '£0.99' },
+			{ value: 1000000, currency: Currency.JPY, expected: '¥1’000’000' },
+
+			{ value: 123456789.99, currency: Currency.CHF, expected: 'CHF 123’456’789.99' },
+			{ value: 0, currency: Currency.USD, expected: '$0.00' },
+			{ value: -1234.56, currency: Currency.USD, expected: '-$1’234.56' },
+			{ value: -987654321.12, currency: Currency.EUR, expected: '-€987’654’321.12' },
+			{ value: 12345, currency: Currency.GBP, expected: '£12’345.00' },
+
+			{ value: 1000000.99, currency: Currency.JPY, expected: '¥1’000’001' },
+			{ value: 1000000.4, currency: Currency.JPY, expected: '¥1’000’000' },
+			{ value: 123456789.12345, currency: Currency.CHF, expected: 'CHF 123’456’789.12' }
+		];
+
+		it.each(testCases)(
+			`should format value $value for currency $currency as expected`,
+			({ value, currency, expected }) => {
+				expect(formatCurrency({ value, currency })).toBe(expected);
+			}
+		);
 	});
 });

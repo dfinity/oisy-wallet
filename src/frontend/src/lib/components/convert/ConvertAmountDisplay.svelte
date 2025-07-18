@@ -18,9 +18,11 @@
 </script>
 
 <ModalValue>
-	<slot name="label" slot="label" />
+	{#snippet label()}
+		<slot name="label" />
+	{/snippet}
 
-	<svelte:fragment slot="main-value">
+	{#snippet mainValue()}
 		{#if nonNullish(amount)}
 			<div in:fade data-tid={CONVERT_AMOUNT_DISPLAY_VALUE}>
 				{nonNullish(amount) && Number(amount) === 0 && nonNullish(zeroAmountLabel)
@@ -32,11 +34,11 @@
 				<SkeletonText />
 			</div>
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="secondary-value">
+	{#snippet secondaryValue()}
 		{#if displayExchangeRate}
 			<ConvertAmountExchange {amount} {exchangeRate} />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </ModalValue>

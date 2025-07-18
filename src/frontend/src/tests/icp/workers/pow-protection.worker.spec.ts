@@ -68,6 +68,9 @@ describe('pow-protector.worker', () => {
 
 	const postMessageMock = vi.fn();
 
+	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	const awaitJobExecution = () => vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS - 100);
+
 	beforeAll(() => {
 		originalPostmessage = window.postMessage;
 		window.postMessage = postMessageMock;
@@ -129,16 +132,16 @@ describe('pow-protector.worker', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
 					expect(spySolvePowChallenge).toHaveBeenCalledWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledTimes(1);
+					expect(spyAllowSigning).toHaveBeenCalledOnce();
 					expect(spyAllowSigning).toHaveBeenCalledWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }
@@ -154,16 +157,16 @@ describe('pow-protector.worker', () => {
 				it('should trigger pow protection periodically', async () => {
 					await scheduler.start(startData);
 
-					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledTimes(1);
+					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
 					expect(spySolvePowChallenge).toHaveBeenCalledWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledTimes(1);
+					expect(spyAllowSigning).toHaveBeenCalledOnce();
 					expect(spyAllowSigning).toHaveBeenCalledWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }
@@ -185,20 +188,42 @@ describe('pow-protector.worker', () => {
 				it('should post messages for status updates', async () => {
 					await scheduler.start(startData);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(2);
-					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageStatusIdle);
+					await awaitJobExecution();
 
-					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
+					// For each execution cycle, we expect:
+					// 1. 'syncPowProtectionStatus' with state 'in_progress' from SchedulerTimer
+					// 2. 'syncPowProgress' with progress 'REQUEST_CHALLENGE'
+					// 3. 'syncPowProgress' with progress 'SOLVE_CHALLENGE'
+					// 4. 'syncPowProgress' with progress 'GRANT_CYCLES'
+					// 5. 'syncPowNextAllowance' with nextAllowanceMs value
+					// 6. 'syncPowProtectionStatus' with state 'idle' from SchedulerTimer
 
-					expect(postMessageMock).toHaveBeenCalledTimes(4);
-					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
-
-					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
-
+					// Verify the first round of messages
 					expect(postMessageMock).toHaveBeenCalledTimes(6);
-					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+
+					// First two calls should be status updates
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+
+					// Reset mock to simplify subsequent tests
+					postMessageMock.mockClear();
+
+					// Advance timer to trigger next cycle
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
+
+					// Second round of messages should have same pattern
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+
+					postMessageMock.mockClear();
+
+					// Advance timer to trigger third cycle
+					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
+
+					// Third round of messages should have same pattern
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 				});
 			}
@@ -273,6 +298,8 @@ describe('pow-protector.worker', () => {
 			tests: () => {
 				it('should not handle ExpiredChallengeError gracefully', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					// Even with ExpiredChallengeError, we should complete normally
 					// because the error is caught and handled internally
