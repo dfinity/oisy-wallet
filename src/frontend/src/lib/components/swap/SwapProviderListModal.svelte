@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapProviderListItem from './SwapProviderListItem.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
@@ -45,7 +46,11 @@
 				displayDecimals: token.decimals
 			}) * exchangeRate;
 
-		return formatCurrency({ value: usdValue, currency: $currentCurrency });
+		return formatCurrency({
+			value: usdValue,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore
+		});
 	};
 </script>
 

@@ -1,9 +1,9 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
-import type { Currencies } from '$lib/enums/currencies';
+import type { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
-import type { CurrencyExchangeData } from '$lib/stores/currency-exchange.store';
 import type { AmountString } from '$lib/types/amount';
+import type { CurrencyExchangeData } from '$lib/types/currency';
 import { isNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import Decimal from 'decimal.js';
@@ -174,7 +174,7 @@ export const formatCurrency = ({
 	exchangeRate
 }: {
 	value: number;
-	currency: Currencies;
+	currency: Currency;
 	exchangeRate: CurrencyExchangeData;
 }): string | undefined => {
 	if (currency !== exchangeRate.currency) {
@@ -195,3 +195,4 @@ export const formatCurrency = ({
 	})
 		.format(convertedValue)
 		.replace(/,/g, '’');
+};

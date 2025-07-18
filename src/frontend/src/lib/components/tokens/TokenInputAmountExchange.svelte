@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import {
 		TOKEN_INPUT_AMOUNT_EXCHANGE,
@@ -27,7 +28,8 @@
 	let formattedUSDAmount: string | undefined;
 	$: formattedUSDAmount = formatCurrency({
 		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
-		currency: $currentCurrency
+		currency: $currentCurrency,
+		exchangeRate: $currencyExchangeStore
 	});
 
 	let formattedTokenAmount: string | undefined;

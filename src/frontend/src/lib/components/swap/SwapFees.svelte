@@ -13,6 +13,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 
 	const { destinationToken, sourceToken, sourceTokenExchangeRate, isSourceTokenIcrc2 } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -61,12 +62,14 @@
 				{:else if sourceTokenTotalFeeUSD < EXCHANGE_USD_AMOUNT_THRESHOLD}
 					{`< ${formatCurrency({
 						value: EXCHANGE_USD_AMOUNT_THRESHOLD,
-						currency: $currentCurrency
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore
 					})}`}
 				{:else}
 					{formatCurrency({
 						value: sourceTokenTotalFeeUSD,
-						currency: $currentCurrency
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore
 					})}
 				{/if}
 			{/snippet}

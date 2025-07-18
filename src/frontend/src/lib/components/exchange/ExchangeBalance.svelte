@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
@@ -30,14 +31,22 @@
 			{#if hideBalance}
 				<IconDots variant="lg" times={6} styleClass="my-4.25" />
 			{:else}
-				{formatCurrency({ value: totalUsd, currency: $currentCurrency })}
+				{formatCurrency({
+					value: totalUsd,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore
+				})}
 			{/if}
 		{:else}
 			<span class="animate-pulse">
 				{#if hideBalance}
 					<IconDots variant="lg" times={6} styleClass="my-4.25" />
 				{:else}
-					{formatCurrency({ value: 0, currency: $currentCurrency })}
+					{formatCurrency({
+						value: 0,
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore
+					})}
 				{/if}
 			</span>
 		{/if}

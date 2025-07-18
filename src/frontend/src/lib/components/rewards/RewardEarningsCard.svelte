@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -27,7 +28,11 @@
 	);
 
 	const displayUsdAmount = $derived(
-		formatCurrency({ value: usdAmount, currency: $currentCurrency })
+		formatCurrency({
+			value: usdAmount,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore
+		})
 	);
 </script>
 

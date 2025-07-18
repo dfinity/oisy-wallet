@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { createEventDispatcher } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import AllNetworksLogo from '$lib/components/networks/AllNetworksLogo.svelte';
@@ -74,7 +75,11 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 					{#if $isPrivacyMode}
 						<IconDots variant="xs" />
 					{:else}
-						{formatCurrency({ value: usdBalance, currency: $currentCurrency })}
+						{formatCurrency({
+							value: usdBalance,
+							currency: $currentCurrency,
+							exchangeRate: $currencyExchangeStore
+						})}
 					{/if}
 				{/if}
 			</span>

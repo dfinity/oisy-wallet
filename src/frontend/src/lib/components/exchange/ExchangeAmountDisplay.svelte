@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { fade } from 'svelte/transition';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
@@ -37,10 +38,15 @@
 			{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
 				{`( < ${formatCurrency({
 					value: EXCHANGE_USD_AMOUNT_THRESHOLD,
-					currency: $currentCurrency
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore
 				})} )`}
 			{:else}
-				{`( ${formatCurrency({ value: usdAmount, currency: $currentCurrency })} )`}
+				{`( ${formatCurrency({
+					value: usdAmount,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore
+				})} )`}
 			{/if}
 		</div>
 	{/if}

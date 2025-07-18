@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
@@ -129,7 +130,11 @@
 			class:animate-pulse={loading}
 			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
 				$noOfSprinkles: amountOfRewards.toString(),
-				$amount: formatCurrency({ value: totalRewardUsd, currency: $currentCurrency })
+				$amount: formatCurrency({
+					value: totalRewardUsd,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore
+				})
 			})}
 		</div>
 

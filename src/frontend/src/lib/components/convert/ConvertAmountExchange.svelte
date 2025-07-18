@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { fade } from 'svelte/transition';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
@@ -25,7 +26,8 @@
 					usdValue === 0 || usdValue > EXCHANGE_USD_AMOUNT_THRESHOLD
 						? usdValue
 						: EXCHANGE_USD_AMOUNT_THRESHOLD,
-				currency: $currentCurrency
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore
 			})
 		: undefined;
 </script>
