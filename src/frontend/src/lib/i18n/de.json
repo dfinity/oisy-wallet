@@ -33,7 +33,7 @@
 			"more_items": "+$items mehr",
 			"select": "Auswählen",
 			"language": "Sprache",
-			"currency": ""
+			"currency": "Währung"
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!"
