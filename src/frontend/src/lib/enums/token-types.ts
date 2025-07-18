@@ -1,4 +1,4 @@
 export enum TokenTypes {
-  TOKENS = 'tokens',
-  NFTS = 'nfts',
+	TOKENS = 'tokens',
+	NFTS = 'nfts'
 }
