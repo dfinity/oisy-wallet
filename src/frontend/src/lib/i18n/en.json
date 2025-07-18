@@ -509,6 +509,9 @@
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
 			"tooltip_toggle_balance": "Double-click to hide/show balance"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Set privacy mode on and off"
 		}
 	},
 	"settings": {

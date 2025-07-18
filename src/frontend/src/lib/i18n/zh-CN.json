@@ -509,6 +509,9 @@
 			"top_up": "充值你的钱包以开始使用！",
 			"learn_more_about_erc20_icp": "了解更多关于以太坊上的 ERC20 ICP。",
 			"tooltip_toggle_balance": "双击隐藏/显示余额"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {
