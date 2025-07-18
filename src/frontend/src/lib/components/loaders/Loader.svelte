@@ -50,7 +50,7 @@
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
+	import { getLoadedNftsByTokens, type NftsByNetwork } from '$lib/utils/nfts.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
@@ -160,12 +160,12 @@
 		if (nonNullish($ethAddressStore?.data)) {
 			const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
 
-			const loadedNftsByToken = getLoadedNftsByTokens({
+			const loadedNftsByNetwork: NftsByNetwork = getLoadedNftsByTokens({
 				tokens: tokensList,
 				loadedNfts: $nftStore ?? []
 			});
 
-			loadNfts({ tokens: tokensList, loadedNftsByToken, walletAddress: $ethAddressStore.data }); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
+			loadNfts({ tokens: tokensList, loadedNftsByNetwork, walletAddress: $ethAddressStore.data }); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
 		}
 	});
 
