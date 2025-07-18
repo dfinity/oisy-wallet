@@ -25,6 +25,7 @@ describe('EditAvatar', () => {
 		});
 
 		const button = getByTestId(CONTACT_POPOVER_TRIGGER);
+
 		expect(button).toBeInTheDocument();
 		expect(button).toHaveAttribute('aria-label', en.address_book.edit_avatar.replace_image);
 	});
@@ -38,6 +39,7 @@ describe('EditAvatar', () => {
 		});
 
 		await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
+
 		expect(getByTestId(CONTACT_POPOVER_MENU)).toBeInTheDocument();
 	});
 
@@ -53,6 +55,7 @@ describe('EditAvatar', () => {
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
 			const menuItems = getAllByTestId(CONTACT_POPOVER_MENU_ITEM);
+
 			expect(menuItems).toHaveLength(1);
 			expect(menuItems[0]).toHaveTextContent(en.address_book.edit_avatar.upload_image);
 		});
@@ -68,6 +71,7 @@ describe('EditAvatar', () => {
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
 			await fireEvent.click(getByText(en.address_book.edit_avatar.upload_image));
+
 			expect(mockReplaceImage).toHaveBeenCalled();
 		});
 	});
@@ -86,6 +90,7 @@ describe('EditAvatar', () => {
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
 			const menuItems = getAllByTestId(new RegExp(`${CONTACT_POPOVER_MENU_ITEM}|IconTrash`));
+
 			expect(menuItems).toHaveLength(2);
 		});
 
@@ -100,6 +105,7 @@ describe('EditAvatar', () => {
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
 			await fireEvent.click(getByText(en.address_book.edit_avatar.replace_image));
+
 			expect(mockReplaceImage).toHaveBeenCalled();
 		});
 
@@ -114,6 +120,7 @@ describe('EditAvatar', () => {
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
 			await fireEvent.click(getByText(en.address_book.edit_avatar.remove_image));
+
 			expect(mockRemoveImage).toHaveBeenCalled();
 		});
 	});
@@ -127,6 +134,7 @@ describe('EditAvatar', () => {
 		});
 
 		await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
+
 		expect(getByText(en.address_book.edit_avatar.menu_title)).toBeInTheDocument();
 	});
 
@@ -139,10 +147,12 @@ describe('EditAvatar', () => {
 		});
 
 		const button = getByTestId(CONTACT_POPOVER_TRIGGER);
+
 		expect(button).toHaveAttribute('aria-label', en.address_book.edit_avatar.replace_image);
 
 		await fireEvent.click(button);
 		const menu = getByTestId(CONTACT_POPOVER_MENU);
+
 		expect(menu).toHaveAttribute('role', 'menu');
 	});
 
@@ -156,6 +166,7 @@ describe('EditAvatar', () => {
 
 		await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
 		const popover = getByTestId(CONTACT_POPOVER_MENU);
+
 		expect(popover).toHaveClass('min-w-60');
 		expect(popover).toHaveClass('max-w-[60%]');
 	});
