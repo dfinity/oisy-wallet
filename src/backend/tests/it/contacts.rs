@@ -5,9 +5,10 @@ use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
     contact::{
-        Contact, ContactError, ContactImage, CreateContactRequest, UpdateContactRequest, ImageMimeType, ImageStatistics,
+        Contact, ContactError, ContactImage, CreateContactRequest, ImageMimeType, ImageStatistics,
+        UpdateContactRequest,
     },
-    result_types::{CreateContactResult, UpdateContactResult, GetContactResult},
+    result_types::{CreateContactResult, GetContactResult, UpdateContactResult},
     user_profile::OisyUser,
 };
 
@@ -26,8 +27,7 @@ pub fn call_create_contact(
     name: String,
 ) -> Result<Contact, ContactError> {
     let request = CreateContactRequest { name, image: None };
-    let wrapped_result =
-        pic_setup.update::<CreateContactResult>(caller, "create_contact", request);
+    let wrapped_result = pic_setup.update::<CreateContactResult>(caller, "create_contact", request);
     match wrapped_result.expect("that create_contact succeeds") {
         CreateContactResult::Ok(contact) => Ok(contact),
         CreateContactResult::Err(err) => Err(err),
@@ -41,8 +41,7 @@ pub fn call_create_contact_with_image(
     image: Option<ContactImage>,
 ) -> Result<Contact, ContactError> {
     let request = CreateContactRequest { name, image };
-    let wrapped_result =
-        pic_setup.update::<CreateContactResult>(caller, "create_contact", request);
+    let wrapped_result = pic_setup.update::<CreateContactResult>(caller, "create_contact", request);
     match wrapped_result.expect("that create_contact succeeds") {
         CreateContactResult::Ok(contact) => Ok(contact),
         CreateContactResult::Err(err) => Err(err),
@@ -130,8 +129,7 @@ pub fn call_get_contact(
     caller: Principal,
     contact_id: u64,
 ) -> Result<Contact, ContactError> {
-    let wrapped_result =
-        pic_setup.query::<GetContactResult>(caller, "get_contact", contact_id);
+    let wrapped_result = pic_setup.query::<GetContactResult>(caller, "get_contact", contact_id);
     match wrapped_result.expect("that get_contact succeeds") {
         GetContactResult::Ok(contact) => Ok(contact),
         GetContactResult::Err(err) => Err(err),
@@ -160,8 +158,7 @@ pub fn call_update_contact(
         update_timestamp_ns: contact.update_timestamp_ns,
         image: contact.image,
     };
-    let wrapped_result =
-        pic_setup.update::<UpdateContactResult>(caller, "update_contact", request);
+    let wrapped_result = pic_setup.update::<UpdateContactResult>(caller, "update_contact", request);
     match wrapped_result.expect("that update_contact succeeds") {
         UpdateContactResult::Ok(contact) => Ok(contact),
         UpdateContactResult::Err(err) => Err(err),
@@ -181,11 +178,8 @@ fn test_create_contact_requires_authenticated_user() {
         name: "Test Contact".to_string(),
         image: None,
     };
-    let result = pic_setup.update::<CreateContactResult>(
-        Principal::anonymous(),
-        "create_contact",
-        request,
-    );
+    let result =
+        pic_setup.update::<CreateContactResult>(Principal::anonymous(), "create_contact", request);
 
     // Verify that the call is rejected for anonymous users
     assert!(
