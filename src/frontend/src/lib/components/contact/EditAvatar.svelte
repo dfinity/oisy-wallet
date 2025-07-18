@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
@@ -13,24 +14,24 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		fileInput: typeof $bindable;
+		fileInput: HTMLInputElement;
 		onReplaceImage: () => void;
 		onRemoveImage: () => void;
 		imageUrl?: string;
 	}
 
 	const {
-		fileInput = $bindable(),
-		onReplaceImage = $bindable(),
-		onRemoveImage = $bindable(),
-		imageUrl = $bindable()
+		fileInput = $bindable<HTMLInputElement>(),
+		onReplaceImage,
+		onRemoveImage,
+		imageUrl
 	}: Props = $props();
 
 	let visible = $state(false);
 
 	let button = $state<HTMLButtonElement | undefined>();
 
-	const avatarMenuItems = imageUrl
+	const avatarMenuItems = nonNullish(imageUrl)
 		? [
 				{
 					logo: IconImage,
