@@ -4,7 +4,7 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
-import type { BridgePrice, DeltaPrice, OptimalRate, SimpleFetchSDK } from '@velora-dex/sdk';
+import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
 import type { OptionIdentity } from './identity';
 import type { Amount, OptionAmount } from './send';
 
@@ -124,3 +124,5 @@ export interface FormatSlippageParams {
 	receiveAmount: bigint;
 	decimals: number;
 }
+
+export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
