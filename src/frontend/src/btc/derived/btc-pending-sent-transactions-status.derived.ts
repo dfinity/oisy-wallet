@@ -37,6 +37,7 @@ export const initPendingSentTransactionsStatus = (
 			const pendingTransactionsData = $pendingTransactionsStore[address];
 
 			if (nonNullish(pendingTransactionsData)) {
+				console.warn('nonNullish(pendingTransactionsData) == true');
 				return pendingTransactionsData.data === null
 					? BtcPendingSentTransactionsStatus.ERROR
 					: pendingTransactionsData.data.length > 0
