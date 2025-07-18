@@ -94,6 +94,8 @@ describe('WalletWorkers', () => {
 
 		emit({ message: 'oisyTriggerWallet' });
 
+		await waitTimer();
+
 		expect(trigger).toHaveBeenCalledTimes(tokens.length);
 	});
 
