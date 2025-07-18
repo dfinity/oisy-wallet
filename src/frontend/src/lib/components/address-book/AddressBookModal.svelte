@@ -42,6 +42,7 @@
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 
 	let loading = $state(false);
 
@@ -197,6 +198,16 @@
 	let currentContact = $derived($sortedContacts.find((c) => c.id === currentContactId));
 	let contacts = $derived($sortedContacts);
 
+	let currentAvatarUrl = $derived(
+		currentContact?.image ? imageToDataUrl(currentContact.image) : null
+	);
+	let contactsWithAvatars = $derived(
+		contacts.map((c: ContactUi) => ({
+			...c,
+			avatarUrl: c.image ? imageToDataUrl(c.image) : null
+		}))
+	);
+
 	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
 			previousStepName = currentStepName;
@@ -304,6 +315,7 @@
 				<Avatar
 					name={currentContact.name}
 					variant="xs"
+					imageUrl={currentAvatarUrl}
 					styleClass="rounded-full flex items-center justify-center"
 				/>
 				<div class="text-center text-lg font-semibold text-primary">
@@ -321,7 +333,7 @@
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
-			{contacts}
+			contacts={contactsWithAvatars}
 			onShowContact={(contact) => {
 				currentContactId = contact.id;
 				gotoStep(AddressBookSteps.SHOW_CONTACT);
@@ -345,6 +357,7 @@
 				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
 			}}
 			contact={currentContact}
+			avatarUrl={currentAvatarUrl}
 			onEdit={(contact) => {
 				currentContactId = contact.id;
 				gotoStep(AddressBookSteps.EDIT_CONTACT);

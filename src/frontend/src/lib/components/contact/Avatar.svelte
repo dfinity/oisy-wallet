@@ -10,10 +10,11 @@
 	interface AvatarProps {
 		name?: string;
 		variant?: AvatarVariants;
+		imageUrl?: string | null;
 		styleClass?: string;
 	}
 
-	const { name, variant = 'md', styleClass }: AvatarProps = $props();
+	const { name, imageUrl, variant = 'md', styleClass }: AvatarProps = $props();
 
 	const font = $derived(
 		{
@@ -42,20 +43,16 @@
 	);
 </script>
 
-{#if !initials}
-	<div
-		class={`${commonClasses} text-brand-primary ${styleClass}`}
-		role="img"
-		aria-label={ariaLabel}
-	>
-		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
-	</div>
-{:else}
-	<span
-		class={`${commonClasses} inline-block inline-flex items-center justify-center font-bold text-white transition-colors duration-1000 ${styleClass}`}
-		role="img"
-		aria-label={ariaLabel}
-	>
-		{initials}
-	</span>
-{/if}
+<div
+	class={`${commonClasses} flex items-center justify-center ${!imageUrl ? bgColor : ''}`}
+	role="img"
+	aria-label={ariaLabel}
+>
+	{#if imageUrl}
+		<img src={imageUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
+	{:else if initials}
+		<span class="font-bold text-white">{initials}</span>
+	{:else}
+	<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
+	{/if}
+</div>
