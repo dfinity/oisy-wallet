@@ -45,7 +45,7 @@
 			"open_details": "Details öffnen",
 			"close_details": "Details schließen",
 			"switch_language": "Sprache wechseln",
-			"switch_currency": ""
+			"switch_currency": "Währung wechseln"
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist"
