@@ -4,10 +4,10 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const getNftsByNetworks = ({
 	tokens,
-	loadedNfts
+	nfts
 }: {
 	tokens: Erc721CustomToken[];
-	loadedNfts: Nft[];
+	nfts: Nft[];
 }): NftsByNetwork => {
 	const nftsByToken: NftsByNetwork = {};
 
@@ -18,7 +18,7 @@ export const getNftsByNetworks = ({
 		nftsByToken[networkId][address.toLowerCase()] = [];
 	});
 
-	loadedNfts.forEach((nft) => {
+	nfts.forEach((nft) => {
 		const {
 			contract: {
 				network: { id: networkId },

@@ -67,7 +67,7 @@ describe('nfts.utils', () => {
 
 			const result: NftsByNetwork = getNftsByNetworks({
 				tokens: customErc721Tokens,
-				loadedNfts: [customMockNft1, customMockNft2, mockNft3]
+				nfts: [customMockNft1, customMockNft2, mockNft3]
 			});
 
 			const expectedResult: NftsByNetwork = {
@@ -85,7 +85,7 @@ describe('nfts.utils', () => {
 		it('should return nfts for a given list of tokens', () => {
 			const result: NftsByNetwork = getNftsByNetworks({
 				tokens: erc721Tokens,
-				loadedNfts: [mockNft1, mockNft2, mockNft3]
+				nfts: [mockNft1, mockNft2, mockNft3]
 			});
 
 			const expectedResult: NftsByNetwork = {
@@ -114,7 +114,7 @@ describe('nfts.utils', () => {
 
 			const result: NftsByNetwork = getNftsByNetworks({
 				tokens: erc721Tokens,
-				loadedNfts: [customMockNft1, customMockNft2, customMockNft3]
+				nfts: [customMockNft1, customMockNft2, customMockNft3]
 			});
 
 			const expectedResult: NftsByNetwork = {
@@ -130,7 +130,7 @@ describe('nfts.utils', () => {
 		it('should return an empty map', () => {
 			const result: NftsByNetwork = getNftsByNetworks({
 				tokens: [],
-				loadedNfts: [mockNft1, mockNft2, mockNft3]
+				nfts: [mockNft1, mockNft2, mockNft3]
 			});
 
 			const expectedResult = {};
@@ -139,7 +139,7 @@ describe('nfts.utils', () => {
 		});
 
 		it('should return empty lists for tokens for which no nfts were provided', () => {
-			const result = getNftsByNetworks({ tokens: erc721Tokens, loadedNfts: [] });
+			const result = getNftsByNetworks({ tokens: erc721Tokens, nfts: [] });
 
 			const expectedResult: NftsByNetwork = {
 				[POLYGON_AMOY_NETWORK.id]: {
@@ -152,7 +152,7 @@ describe('nfts.utils', () => {
 		});
 
 		it('should return an empty map if no tokens and no nfts are provided', () => {
-			const result = getNftsByNetworks({ tokens: [], loadedNfts: [] });
+			const result = getNftsByNetworks({ tokens: [], nfts: [] });
 
 			const expectedResult = {};
 

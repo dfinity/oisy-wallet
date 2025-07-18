@@ -23,7 +23,7 @@ export const loadNfts = ({
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = infuraErc721Providers(ETHEREUM_NETWORK.id);
 
-	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, loadedNfts });
+	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, nfts: loadedNfts });
 
 	return Promise.all(
 		tokens.map((token) => {
