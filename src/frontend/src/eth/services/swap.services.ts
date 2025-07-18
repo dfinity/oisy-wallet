@@ -7,7 +7,7 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { TransferParams } from '$lib/types/send';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, toNullable } from '@dfinity/utils';
 import type { TransactionParams } from '@velora-dex/sdk';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
@@ -38,7 +38,7 @@ const prepareTransactionParams = ({
 		max_fee_per_gas,
 		max_priority_fee_per_gas,
 		nonce: BigInt(nonce),
-		data: [data],
+		data: toNullable(data),
 		gas: BigInt(gas),
 		chain_id: BigInt(chainId),
 		value: BigInt(value)
