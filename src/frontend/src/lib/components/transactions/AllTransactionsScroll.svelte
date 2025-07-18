@@ -18,7 +18,7 @@
 
 	let { children }: Props = $props();
 
-	let disableInfiniteScroll: Record<TokenId, boolean> = {};
+	const disableInfiniteScroll: Record<TokenId, boolean> = {};
 
 	const onIntersect = async () => {
 		if (isNullish($authIdentity)) {
