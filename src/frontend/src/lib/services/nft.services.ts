@@ -9,25 +9,28 @@ import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { nonNullish } from '@dfinity/utils';
+import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
 
 export const loadNfts = ({
-	tokens,
-	loadedNftsByNetwork,
-	walletAddress
-}: {
+													 tokens,
+													 loadedNfts,
+													 walletAddress
+												 }: {
 	tokens: Erc721CustomToken[];
-	loadedNftsByNetwork: NftsByNetwork;
+	loadedNfts: Nft[];
 	walletAddress: string;
 }) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = infuraErc721Providers(ETHEREUM_NETWORK.id);
 
+	const loadedNftsByNetwork: NftsByNetwork = getLoadedNftsByTokens({ tokens, loadedNfts });
+
 	return Promise.all(
 		tokens.map((token) => {
 			let loadedNfts: Nft[] = [];
-			const nftsByNetwork = loadedNftsByNetwork[token.network.id];
-			if (nonNullish(nftsByNetwork)) {
-				loadedNfts = nftsByNetwork[token.address.toLowerCase()] ?? [];
+			const tokensByNetwork = loadedNftsByNetwork[token.network.id];
+			if (nonNullish(tokensByNetwork)) {
+				loadedNfts = tokensByNetwork[token.address.toLowerCase()] ?? [];
 			}
 
 			return loadNftsOfToken({
@@ -42,12 +45,12 @@ export const loadNfts = ({
 };
 
 const loadNftsOfToken = async ({
-	etherscanProvider,
-	infuraProvider,
-	token,
-	loadedNfts,
-	walletAddress
-}: {
+																 etherscanProvider,
+																 infuraProvider,
+																 token,
+																 loadedNfts,
+																 walletAddress
+															 }: {
 	etherscanProvider: EtherscanProvider;
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
@@ -76,10 +79,10 @@ const loadNftsOfToken = async ({
 };
 
 const loadNftsOfBatch = async ({
-	infuraProvider,
-	token,
-	tokenIds
-}: {
+																 infuraProvider,
+																 token,
+																 tokenIds
+															 }: {
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
 	tokenIds: number[];
@@ -97,10 +100,10 @@ const loadNftsOfBatch = async ({
 };
 
 const loadNftsMetadata = async ({
-	infuraProvider,
-	contractAddress,
-	tokenIds
-}: {
+																	infuraProvider,
+																	contractAddress,
+																	tokenIds
+																}: {
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
 	tokenIds: number[];
@@ -114,10 +117,10 @@ const loadNftsMetadata = async ({
 };
 
 const loadNftMetadata = async ({
-	infuraProvider,
-	contractAddress,
-	tokenId
-}: {
+																 infuraProvider,
+																 contractAddress,
+																 tokenId
+															 }: {
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
 	tokenId: number;
