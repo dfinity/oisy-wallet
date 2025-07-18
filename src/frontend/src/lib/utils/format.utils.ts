@@ -1,6 +1,6 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
-import type { Currencies } from '$lib/enums/currencies';
+import type { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -173,7 +173,7 @@ export const formatCurrency = ({
 	options
 }: {
 	value: number;
-	currency: Currencies;
+	currency: Currency;
 	options?: {
 		minFraction?: number;
 		maxFraction?: number;
