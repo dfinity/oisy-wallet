@@ -3,7 +3,7 @@ import { etherscanProviders, type EtherscanProvider } from '$eth/providers/ether
 import { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
-import type { Nft, NftMetadata } from '$lib/types/nft';
+import type { Nft, NftId, NftMetadata } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 
 export const loadNfts = ({ tokens, nftsByToken, walletAddress }:{ tokens: Erc721CustomToken[], nftsByToken: Map<string, Nft[]> , walletAddress: string }) => {
@@ -39,7 +39,7 @@ const loadNftsOfToken = async ({
 		tokenIds = [];
 	}
 
-	const loadedTokenIds = loadedNfts.map((nft) => nft.id);
+	const loadedTokenIds: NftId[] = loadedNfts.map((nft) => nft.id);
 	const tokenIdsToLoad = tokenIds.filter((id: number) => !loadedTokenIds.includes(id));
 
 	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
