@@ -1,39 +1,44 @@
-import { PROD } from '$lib/constants/app.constants';
+import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
 import type { TrackEventParams } from '$lib/types/analytics';
-import { isNullish } from '@dfinity/utils';
-import { initOrbiter, trackEvent as trackEventOrbiter } from '@junobuild/analytics';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import Plausible from 'plausible-tracker';
 
-export const initAnalytics = async () => {
-	if (!PROD) {
+let plausibleTracker: ReturnType<typeof Plausible> | null = null;
+
+export const initPlausibleAnalytics = () => {
+	if (!PLAUSIBLE_ENABLED || isNullish(PLAUSIBLE_DOMAIN)) {
 		return;
 	}
 
-	const SATELLITE_ID = import.meta.env.VITE_JUNO_SATELLITE_ID;
-	const ORBITER_ID = import.meta.env.VITE_JUNO_ORBITER_ID;
-
-	if (isNullish(SATELLITE_ID) || isNullish(ORBITER_ID)) {
-		return;
-	}
-
-	await initOrbiter({
-		satelliteId: SATELLITE_ID,
-		orbiterId: ORBITER_ID,
-		options: {
-			performance: false
-		},
-		worker: {
-			path: '/workers/analytics.worker.js'
+	try {
+		if (isNullish(plausibleTracker)) {
+			plausibleTracker = Plausible({
+				domain: PLAUSIBLE_DOMAIN,
+				hashMode: false,
+				trackLocalhost: false
+			});
+			plausibleTracker.enableAutoPageviews();
 		}
-	});
+	} catch (_err: unknown) {
+		console.warn('An unexpected error occurred during initialization.');
+	}
 };
 
-export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
-	if (!PROD) {
-		return;
-	}
+export const trackEvent = ({ name, metadata, warning }: TrackEventParams) => {
+	/**
+	 * We use the `PLAUSIBLE_ENABLED` feature flag to allow flexibility in enabling or disabling
+	 * analytics in specific builds. This ensures that analytics
+	 * can be disabled even in production-like environments during testing.
+	 *
+	 * TODO: Once testing is complete and Plausible should only run in production,
+	 * replace the `PLAUSIBLE_ENABLED` check with a `PROD` check and remove the feature flag.
+	 */
+	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
+		plausibleTracker.trackEvent(name, { props: metadata });
 
-	await trackEventOrbiter({
-		name,
-		metadata
-	});
+		if (nonNullish(warning)) {
+			// We print the error to console just for debugging purposes
+			console.warn(warning);
+		}
+	}
 };

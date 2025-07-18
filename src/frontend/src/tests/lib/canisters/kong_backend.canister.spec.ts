@@ -9,9 +9,10 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { KongBackendCanister } from '$lib/canisters/kong_backend.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { getKongIcTokenIdentifier } from '$lib/utils/swap.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
@@ -113,9 +114,9 @@ describe('kong_backend.canister', () => {
 
 			expect(res).toEqual(response.Ok);
 			expect(service.swap_amounts).toHaveBeenCalledWith(
-				sourceToken.symbol,
+				getKongIcTokenIdentifier(sourceToken),
 				sourceAmount,
-				destinationToken.symbol
+				getKongIcTokenIdentifier(destinationToken)
 			);
 		});
 
@@ -174,8 +175,8 @@ describe('kong_backend.canister', () => {
 
 			expect(res).toEqual(response.Ok);
 			expect(service.swap_async).toHaveBeenCalledWith({
-				pay_token: swapParams.sourceToken.symbol,
-				receive_token: swapParams.destinationToken.symbol,
+				pay_token: getKongIcTokenIdentifier(swapParams.sourceToken),
+				receive_token: getKongIcTokenIdentifier(swapParams.destinationToken),
 				pay_amount: swapParams.sendAmount,
 				max_slippage: toNullable(swapParams.maxSlippage),
 				receive_address: toNullable(swapParams.receiveAddress),

@@ -1,48 +1,43 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import NetworkInfo from '$lib/components/networks/NetworkInfo.svelte';
-	import SendSource from '$lib/components/send/SendSource.svelte';
+	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
-	import type { OptionBalance } from '$lib/types/balance';
-	import type { Network } from '$lib/types/network';
-	import type { OptionToken } from '$lib/types/token';
+	import type { ContactUi } from '$lib/types/contact';
 
-	export let source: string;
+	export let destination = '';
+	export let invalidDestination = false;
 	export let disabled: boolean | undefined = false;
-	export let token: OptionToken;
-	export let balance: OptionBalance;
-	export let hideSource = false;
-
-	let network: Network | undefined;
-	$: network = nonNullish(token) ? token.network : undefined;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
+
+	const back = () => dispatch('icBack');
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST">
+<form on:submit|preventDefault={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
 		<slot name="amount" />
 
-		<slot name="destination" />
-
-		{#if !hideSource}
-			<SendSource {token} {balance} {source} />
-		{/if}
-
-		{#if nonNullish(network)}
-			<NetworkInfo {network} />
-		{/if}
+		<SendDestination
+			{destination}
+			{selectedContact}
+			{invalidDestination}
+			on:icSendDestinationStep={back}
+		/>
 
 		<slot name="fee" />
 
-		<ButtonGroup slot="toolbar" testId="toolbar">
-			<slot name="cancel" />
+		<slot name="info" />
 
-			<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
-		</ButtonGroup>
+		{#snippet toolbar()}
+			<ButtonGroup testId="toolbar">
+				<slot name="cancel" />
+
+				<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
+			</ButtonGroup>
+		{/snippet}
 	</ContentWithToolbar>
 </form>

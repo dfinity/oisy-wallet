@@ -1,0 +1,39 @@
+name: Add and Commit
+description: Set git remote and commit changes (e.g., formatting)
+
+inputs:
+  add:
+    description: Files to add
+    required: false
+    default: '.'
+  message:
+    description: Commit message
+    required: true
+  token:
+    description: GitHub token
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set git remote silently and locally
+      run: |
+        git config url."https://github-actions:$GITHUB_TOKEN@github.com/".insteadOf "https://github.com/"
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      shell: bash
+
+    - name: Commit format
+      uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
+      with:
+        add: ${{ inputs.add }}
+        default_author: github_actions
+        message: ${{ inputs.message }}
+
+    - name: Unset local git remote config
+      run: |
+        git config --unset-all url."https://github-actions:${GITHUB_TOKEN}@github.com/".insteadOf || true
+        git config --unset-all url."https://github.com/".insteadOf || true
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      shell: bash

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
 	import { page } from '$app/stores';
+	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
@@ -50,7 +51,7 @@
 		</div>
 
 		<div
-			class="item pointer-events-auto px-6 text-sm md:px-0 lg:max-w-48"
+			class="item pointer-events-auto flex flex-col items-end px-6 text-xs md:px-0 lg:max-w-48 2xl:text-sm"
 			class:sm:max-w-none={$authNotSignedIn}
 			class:lg:max-w-none={$authNotSignedIn}
 			class:xl:max-w-none={$authNotSignedIn}
@@ -65,6 +66,7 @@
 			class:1.5md:translate-x-0={$authSignedIn}
 			class:1.5md:visible={$authSignedIn}
 		>
+			<AiAssistantConsoleButton styleClass="mb-4" />
 			<div class="flex flex-col items-center pt-2 sm:flex-row sm:items-start sm:gap-2">
 				<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 				<span

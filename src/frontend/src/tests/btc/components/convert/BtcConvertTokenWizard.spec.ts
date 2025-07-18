@@ -1,8 +1,12 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
 import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
-import * as btcSendApi from '$btc/services/btc-send.services';
+import * as btcUtxosApi from '$btc/services/btc-utxos.service';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
-import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
+import {
+	UTXOS_FEE_CONTEXT_KEY,
+	type UtxosFeeContext,
+	type UtxosFeeStore
+} from '$btc/stores/utxos-fee.store';
 import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -14,7 +18,16 @@ import * as signerApi from '$lib/api/signer.api';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
-import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
+import {
+	CONVERT_CONTEXT_KEY,
+	initConvertContext,
+	type ConvertContext
+} from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -41,15 +54,10 @@ describe('BtcConvertTokenWizard', () => {
 		sourceToken?: Token;
 		mockUtxosFeeStore: UtxosFeeStore;
 	}) =>
-		new Map([
+		new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | UtxosFeeContext>([
 			[UTXOS_FEE_CONTEXT_KEY, { store: mockUtxosFeeStore }],
-			[
-				CONVERT_CONTEXT_KEY,
-				{
-					sourceToken: readable(sourceToken),
-					destinationToken: readable(ICP_TOKEN)
-				}
-			]
+			[CONVERT_CONTEXT_KEY, initConvertContext({ sourceToken, destinationToken: ICP_TOKEN })],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 	const props = {
 		currentStep: {
@@ -57,20 +65,23 @@ describe('BtcConvertTokenWizard', () => {
 			title: 'title'
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
-		sendAmount: sendAmount,
+		sendAmount,
 		receiveAmount: sendAmount
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
-	const mockSelectUtxosFeeApi = () =>
-		vi.spyOn(btcSendApi, 'selectUtxosFee').mockResolvedValue(mockUtxosFee);
+	const mockprepareBtcSendApi = () =>
+		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
+			feeSatoshis: mockUtxosFee.feeSatoshis,
+			utxos: mockUtxosFee.utxos
+		});
 	const mockBackendApi = () =>
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
 			.mockResolvedValue(pendingBtcTransactionResponse);
 	const mockBtcAddressStore = (address: string | undefined = mockBtcAddress) => {
 		btcAddressStore.set({
-			tokenId: ICP_TOKEN.id,
+			id: ICP_TOKEN.id,
 			data: {
 				certified: true,
 				data: address
@@ -100,7 +111,7 @@ describe('BtcConvertTokenWizard', () => {
 	beforeEach(() => {
 		mockPage.reset();
 		mockBtcPendingSentTransactionsStore();
-		mockSelectUtxosFeeApi();
+		mockprepareBtcSendApi();
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {

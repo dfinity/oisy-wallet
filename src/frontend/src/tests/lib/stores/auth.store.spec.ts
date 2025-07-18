@@ -11,6 +11,7 @@ describe('auth.store', () => {
 			expect(() => authStore.setForTesting(identity)).not.toThrow();
 
 			const storeIdentity = get(authStore).identity;
+
 			expect(storeIdentity).toBe(identity);
 		});
 

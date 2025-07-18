@@ -1,28 +1,70 @@
-import { CAROUSEL_SLIDE_NAVIGATION, TOKEN_CARD } from '$lib/constants/test-ids.constants';
+import {
+	CAROUSEL_SLIDE_NAVIGATION,
+	NO_TRANSACTIONS_PLACEHOLDER,
+	TOKEN_CARD
+} from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
-export type TransactionsPageParams = {
+type TransactionsPageParams = HomepageLoggedInParams;
+
+interface TransactionsConfig {
 	tokenSymbol: string;
 	networkId: string;
-} & HomepageLoggedInParams;
+	waitForPlaceholder?: boolean;
+}
+
+export const TransactionCases: TransactionsConfig[] = [
+	{
+		tokenSymbol: 'BTC',
+		networkId: 'BTC',
+		waitForPlaceholder: false
+	},
+	{
+		tokenSymbol: 'ETH',
+		networkId: 'ETH'
+	},
+	{
+		tokenSymbol: 'ICP',
+		networkId: 'ICP'
+	},
+	{
+		tokenSymbol: 'SOL',
+		networkId: 'SOL'
+	},
+	{
+		tokenSymbol: 'ETH',
+		networkId: 'BASE'
+	},
+	{
+		tokenSymbol: 'BNB',
+		networkId: 'BSC'
+	},
+	{
+		tokenSymbol: 'POL',
+		networkId: 'POL'
+	}
+];
 
 export class TransactionsPage extends HomepageLoggedIn {
-	readonly #tokenSymbol: string;
-	readonly #networkId: string;
-
-	constructor({ page, iiPage, viewportSize, tokenSymbol, networkId }: TransactionsPageParams) {
-		super({ page, iiPage, viewportSize });
-
-		this.#tokenSymbol = tokenSymbol;
-		this.#networkId = networkId;
+	constructor(params: TransactionsPageParams) {
+		super(params);
 	}
 
-	override async extendWaitForReady(): Promise<void> {
-		const testId = `${TOKEN_CARD}-${this.#tokenSymbol}-${this.#networkId}`;
+	showTransactions = async ({
+		tokenSymbol,
+		networkId,
+		waitForPlaceholder = true
+	}: TransactionsConfig) => {
+		await this.toggleNetworkSelector({ networkSymbol: networkId });
+		const testId = `${TOKEN_CARD}-${tokenSymbol}-${networkId}`;
 		await this.clickByTestId({ testId });
 		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
 			state: 'hidden'
 		});
+		if (waitForPlaceholder) {
+			await this.waitForByTestId({ testId: NO_TRANSACTIONS_PLACEHOLDER });
+		}
 		await this.waitForLoadState();
-	}
+		await this.takeScreenshot();
+	};
 }

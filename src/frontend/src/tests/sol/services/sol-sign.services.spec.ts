@@ -4,10 +4,10 @@ import {
 	mockSolSignedTransaction,
 	mockSolTransactionMessage
 } from '$tests/mocks/sol-transactions.mock';
-import * as solanaWeb3Pkg from '@solana/web3.js';
+import * as solanaWeb3Pkg from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
-vi.mock(import('@solana/web3.js'), async (importOriginal) => {
+vi.mock(import('@solana/kit'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,

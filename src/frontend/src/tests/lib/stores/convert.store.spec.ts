@@ -3,7 +3,7 @@ import {
 	LOCAL_CKETH_LEDGER_CANISTER_ID,
 	LOCAL_CKUSDC_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -12,13 +12,13 @@ import * as exchanges from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initConvertContext } from '$lib/stores/convert.store';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo as mockCkBtcMinterInfoData } from '$tests/mocks/ckbtc.mock';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
-import { BigNumber } from 'alchemy-sdk';
 import { get, readable } from 'svelte/store';
 import { vi } from 'vitest';
 
@@ -60,15 +60,15 @@ describe('convertStore', () => {
 			destinationToken: ETHEREUM_TOKEN,
 			sourceToken: ICP_TOKEN
 		});
-		const ethBalance = BigNumber.from(1n);
-		const icpBalance = BigNumber.from(2n);
+		const ethBalance = bn1Bi;
+		const icpBalance = bn2Bi;
 
 		balancesStore.set({
-			tokenId: ETHEREUM_TOKEN.id,
+			id: ETHEREUM_TOKEN.id,
 			data: { data: ethBalance, certified: true }
 		});
 		balancesStore.set({
-			tokenId: ICP_TOKEN.id,
+			id: ICP_TOKEN.id,
 			data: { data: icpBalance, certified: true }
 		});
 
@@ -86,9 +86,9 @@ describe('convertStore', () => {
 	});
 
 	it('should have balance for fee set if sourceToken is ERC20', () => {
-		const ethBalance = BigNumber.from(1n);
+		const ethBalance = bn1Bi;
 		balancesStore.set({
-			tokenId: SEPOLIA_TOKEN_ID,
+			id: SEPOLIA_TOKEN_ID,
 			data: { data: ethBalance, certified: true }
 		});
 
@@ -101,9 +101,9 @@ describe('convertStore', () => {
 	});
 
 	it('should have balance for fee set if sourceToken is ckERC20', () => {
-		const ckEthBalance = BigNumber.from(1n);
+		const ckEthBalance = bn1Bi;
 		balancesStore.set({
-			tokenId: parseTokenId('ckETH'),
+			id: parseTokenId('ckETH'),
 			data: { data: ckEthBalance, certified: true }
 		});
 
@@ -124,7 +124,7 @@ describe('convertStore', () => {
 			certified: true
 		};
 		ckEthMinterInfoStore.set({
-			tokenId: SEPOLIA_TOKEN_ID,
+			id: ETHEREUM_TOKEN_ID,
 			data: mockCkEthMinterInfo
 		});
 
@@ -142,7 +142,7 @@ describe('convertStore', () => {
 	it('should have minter info fee set if sourceToken is ckBTC', () => {
 		const mockCkBtcMinterInfo = { data: mockCkBtcMinterInfoData, certified: true };
 		ckBtcMinterInfoStore.set({
-			tokenId: mockValidToken.id,
+			id: mockValidToken.id,
 			data: mockCkBtcMinterInfo
 		});
 

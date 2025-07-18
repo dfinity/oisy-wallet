@@ -121,7 +121,7 @@
 
 			progress(ProgressStepsConvert.DONE);
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_BTC_TO_CKBTC_SUCCESS
 			});
 
@@ -132,7 +132,7 @@
 				err
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR
 			});
 
@@ -144,7 +144,7 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<UtxosFeeContext amount={sendAmount} {networkId} {amountError}>
+<UtxosFeeContext source={sourceAddress} amount={sendAmount} {networkId} {amountError}>
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
 		<BtcConvertForm
 			on:icNext
@@ -156,16 +156,16 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
+					<ButtonBack onclick={back} />
 				{:else}
-					<ButtonCancel on:click={close} />
+					<ButtonCancel onclick={close} />
 				{/if}
 			</svelte:fragment>
 		</BtcConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<BtcConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}
-			><ButtonBack slot="cancel" on:click={back} /></BtcConvertReview
-		>
+		<BtcConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
+			<ButtonBack slot="cancel" onclick={back} />
+		</BtcConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<BtcConvertProgress bind:convertProgressStep />
 	{:else}

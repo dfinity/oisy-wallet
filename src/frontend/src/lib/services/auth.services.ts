@@ -2,7 +2,20 @@ import {
 	deleteIdbBtcAddressMainnet,
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet
-} from '$lib/api/idb.api';
+} from '$lib/api/idb-addresses.api';
+import { deleteIdbBalances } from '$lib/api/idb-balances.api';
+import {
+	deleteIdbEthTokens,
+	deleteIdbEthTokensDeprecated,
+	deleteIdbIcTokens,
+	deleteIdbSolTokens
+} from '$lib/api/idb-tokens.api';
+import {
+	deleteIdbBtcTransactions,
+	deleteIdbEthTransactions,
+	deleteIdbIcTransactions,
+	deleteIdbSolTransactions
+} from '$lib/api/idb-transactions.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -12,7 +25,6 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
@@ -30,7 +42,7 @@ export const signIn = async (
 	try {
 		await authStore.signIn(params);
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_SIGN_IN_SUCCESS
 		});
 
@@ -40,7 +52,7 @@ export const signIn = async (
 		return { success: 'ok' };
 	} catch (err: unknown) {
 		if (err === 'UserInterrupt') {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_SIGN_IN_CANCELLED_COUNT
 			});
 
@@ -48,7 +60,7 @@ export const signIn = async (
 			return { success: 'cancelled' };
 		}
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_SIGN_IN_ERROR_COUNT
 		});
 
@@ -94,7 +106,7 @@ export const idleSignOut = (): Promise<void> =>
 		clearStorages: false
 	});
 
-const emptyIdbAddress = async (deleteIdbAddress: (principal: Principal) => Promise<void>) => {
+const emptyIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
 	const { identity } = get(authStore);
 
 	if (isNullish(identity)) {
@@ -102,7 +114,7 @@ const emptyIdbAddress = async (deleteIdbAddress: (principal: Principal) => Promi
 	}
 
 	try {
-		await deleteIdbAddress(identity.getPrincipal());
+		await deleteIdbStore(identity.getPrincipal());
 	} catch (err: unknown) {
 		// We silence the error.
 		// Effective logout is more important here.
@@ -110,16 +122,31 @@ const emptyIdbAddress = async (deleteIdbAddress: (principal: Principal) => Promi
 	}
 };
 
-const emptyIdbBtcAddressMainnet = (): Promise<void> => emptyIdbAddress(deleteIdbBtcAddressMainnet);
+const emptyIdbBtcAddressMainnet = (): Promise<void> => emptyIdbStore(deleteIdbBtcAddressMainnet);
 
-const emptyIdbEthAddress = (): Promise<void> => emptyIdbAddress(deleteIdbEthAddress);
+const emptyIdbEthAddress = (): Promise<void> => emptyIdbStore(deleteIdbEthAddress);
 
-const emptyIdbSolAddress = (): Promise<void> => emptyIdbAddress(deleteIdbSolAddressMainnet);
+const emptyIdbSolAddress = (): Promise<void> => emptyIdbStore(deleteIdbSolAddressMainnet);
 
-// eslint-disable-next-line require-await
-const clearTestnetsOption = async () => {
-	testnetsStore.reset({ key: 'testnets' });
-};
+const emptyIdbIcTokens = (): Promise<void> => emptyIdbStore(deleteIdbIcTokens);
+
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+const emptyIdbEthTokensDeprecated = (): Promise<void> =>
+	emptyIdbStore(deleteIdbEthTokensDeprecated);
+
+const emptyIdbEthTokens = (): Promise<void> => emptyIdbStore(deleteIdbEthTokens);
+
+const emptyIdbSolTokens = (): Promise<void> => emptyIdbStore(deleteIdbSolTokens);
+
+const emptyIdbBtcTransactions = (): Promise<void> => emptyIdbStore(deleteIdbBtcTransactions);
+
+const emptyIdbEthTransactions = (): Promise<void> => emptyIdbStore(deleteIdbEthTransactions);
+
+const emptyIdbIcTransactions = (): Promise<void> => emptyIdbStore(deleteIdbIcTransactions);
+
+const emptyIdbSolTransactions = (): Promise<void> => emptyIdbStore(deleteIdbSolTransactions);
+
+const emptyIdbBalances = (): Promise<void> => emptyIdbStore(deleteIdbBalances);
 
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
@@ -143,7 +170,15 @@ const logout = async ({
 			emptyIdbBtcAddressMainnet(),
 			emptyIdbEthAddress(),
 			emptyIdbSolAddress(),
-			clearTestnetsOption()
+			emptyIdbIcTokens(),
+			emptyIdbEthTokensDeprecated(),
+			emptyIdbEthTokens(),
+			emptyIdbSolTokens(),
+			emptyIdbBtcTransactions(),
+			emptyIdbEthTransactions(),
+			emptyIdbIcTransactions(),
+			emptyIdbSolTransactions(),
+			emptyIdbBalances()
 		]);
 	}
 
@@ -175,6 +210,10 @@ const PARAM_LEVEL = 'level';
  * If a message was provided to the logout process - e.g. a message informing the logout happened because the session timed-out - append the information to the url as query params
  */
 const appendMsgToUrl = (msg: ToastMsg) => {
+	if (typeof window === 'undefined') {
+		return;
+	}
+
 	const { text, level } = msg;
 
 	const url: URL = new URL(window.location.href);

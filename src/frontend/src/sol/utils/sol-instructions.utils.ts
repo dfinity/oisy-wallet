@@ -1,4 +1,6 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
@@ -74,11 +76,7 @@ import {
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction
 } from '@solana-program/token';
-import {
-	address,
-	assertIsInstructionWithAccounts,
-	assertIsInstructionWithData
-} from '@solana/web3.js';
+import { address, assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/kit';
 
 const mapSystemParsedInstruction = ({
 	type,
@@ -125,6 +123,7 @@ const mapTokenParsedInstruction = async ({
 	cumulativeBalances,
 	addressToToken
 }: {
+	identity: OptionIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
@@ -210,7 +209,7 @@ const mapTokenParsedInstruction = async ({
 
 		// In case of `closeAccount` transaction we take the accumulated balance of SOL (or WSOL) of the Associated Token Account (this is the `from` address).
 		// We do this because the entire amount of SOL (or WSOL) is redeemed by the owner of the ATA.
-		const value = cumulativeBalances?.[from] ?? 0n;
+		const value = cumulativeBalances?.[from] ?? ZERO;
 
 		return { value, from, to };
 	}
@@ -280,85 +279,42 @@ const mapTokenParsedInstruction = async ({
 	}
 };
 
+// Solana program Token2022 provides exactly the same instructions as the legacy Token program plus a few more.
+// So the implementation of the mapping of the instructions is the same as the legacy Token program for the instructions that are common.
 const mapToken2022ParsedInstruction = async ({
+	identity,
 	type,
 	info,
 	network,
+	cumulativeBalances,
 	addressToToken
 }: {
+	identity: OptionIdentity;
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
+	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
 }): Promise<SolMappedTransaction | undefined> => {
-	if (type === 'transfer') {
-		// We need to cast the type since it is not implied
-		const {
-			destination: to,
-			amount: value,
-			source: from
-		} = info as {
-			destination: SolAddress;
-			amount: string;
-			source: SolAddress;
-		};
-
-		const tokenAddress = addressToToken?.[from] ?? addressToToken?.[to];
-
-		if (nonNullish(tokenAddress)) {
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
-
-		const { getAccountInfo } = solanaHttpRpc(network);
-
-		const { value: sourceResult } = await getAccountInfo(address(from), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
-			const {
-				data: {
-					parsed: { info: sourceInfo }
-				}
-			} = sourceResult;
-
-			const { mint: tokenAddress } = sourceInfo as { mint: SplTokenAddress };
-
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
-
-		const { value: destinationResult } = await getAccountInfo(address(to), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
-			const {
-				data: {
-					parsed: { info: destinationInfo }
-				}
-			} = destinationResult;
-
-			const { mint: tokenAddress } = destinationInfo as { mint: SplTokenAddress };
-
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
-	}
-
-	if (type === 'transferChecked') {
-		// We need to cast the type since it is not implied
-		const {
-			destination: to,
-			tokenAmount: { amount: value },
-			source: from,
-			mint: tokenAddress
-		} = info as {
-			destination: SolAddress;
-			tokenAmount: { amount: string };
-			source: SolAddress;
-			mint: SplTokenAddress;
-		};
-
-		return { value: BigInt(value), from, to, tokenAddress };
+	if (
+		[
+			'transfer',
+			'transferChecked',
+			'closeAccount',
+			'mintTo',
+			'burn',
+			'mintToChecked',
+			'burnChecked'
+		].includes(type)
+	) {
+		return await mapTokenParsedInstruction({
+			identity,
+			type,
+			info,
+			network,
+			cumulativeBalances,
+			addressToToken
+		});
 	}
 };
 
@@ -374,11 +330,13 @@ const mapAssociatedTokenAccountInstruction = ({
 };
 
 export const mapSolParsedInstruction = async ({
+	identity,
 	instruction,
 	network,
 	cumulativeBalances,
 	addressToToken
 }: {
+	identity: OptionIdentity;
 	instruction: SolRpcInstruction;
 	network: SolanaNetworkType;
 	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
@@ -403,6 +361,7 @@ export const mapSolParsedInstruction = async ({
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
 		return await mapTokenParsedInstruction({
+			identity,
 			type,
 			info,
 			network,
@@ -412,7 +371,14 @@ export const mapSolParsedInstruction = async ({
 	}
 
 	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
-		return mapToken2022ParsedInstruction({ type, info, network, addressToToken });
+		return mapToken2022ParsedInstruction({
+			identity,
+			type,
+			info,
+			network,
+			cumulativeBalances,
+			addressToToken
+		});
 	}
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
@@ -431,7 +397,7 @@ export const mapSolParsedInstruction = async ({
 const parseSolComputeBudgetInstruction = (
 	instruction: SolInstruction
 ): SolInstruction | SolParsedComputeBudgetInstruction => {
-	assertIsInstructionWithData(instruction);
+	assertIsInstructionWithData<Uint8Array>(instruction);
 
 	const decodedInstruction = identifyComputeBudgetInstruction(instruction);
 	switch (decodedInstruction) {
@@ -468,7 +434,7 @@ const parseSolComputeBudgetInstruction = (
 const parseSolSystemInstruction = (
 	instruction: SolInstruction
 ): SolInstruction | SolParsedSystemInstruction => {
-	assertIsInstructionWithData(instruction);
+	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 
 	const decodedInstruction = identifySystemInstruction(instruction);
@@ -546,7 +512,7 @@ const parseSolSystemInstruction = (
 const parseSolTokenInstruction = (
 	instruction: SolInstruction
 ): SolInstruction | SolParsedTokenInstruction => {
-	assertIsInstructionWithData(instruction);
+	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 
 	const decodedInstruction = identifyTokenInstruction(instruction);

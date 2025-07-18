@@ -16,6 +16,7 @@ import type { ApproveParams, SendParams, SignAndApproveParams } from '$eth/types
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import {
 	toCkErc20HelperContractAddress,
 	toCkEthHelperContractAddress
@@ -27,13 +28,12 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
-import type { TransactionFeeData } from '$lib/types/transaction';
+import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { TransactionResponse } from '@ethersproject/providers';
+import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 const ethPrepareTransaction = ({
@@ -48,7 +48,7 @@ const ethPrepareTransaction = ({
 }: TransferParams &
 	NetworkChainId & { nonce: number; gas: bigint | undefined }): EthSignTransactionRequest => ({
 	to,
-	value: amount.toBigInt(),
+	value: amount,
 	chain_id,
 	nonce: BigInt(nonce),
 	gas: gas ?? ETH_BASE_FEE,
@@ -90,7 +90,7 @@ const erc20PrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO,
 		...rest
 	});
 };
@@ -128,7 +128,7 @@ const ethHelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: amount.toBigInt(),
+		amount,
 		...rest
 	});
 };
@@ -166,7 +166,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO,
 		...rest
 	});
 };
@@ -183,7 +183,7 @@ const erc20ContractAllowance = async ({
 	networkId: NetworkId;
 	owner: EthAddress;
 	spender: EthAddress;
-} & Pick<SendParams, 'token'>): Promise<BigNumber> => {
+} & Pick<SendParams, 'token'>): Promise<bigint> => {
 	const { allowance } = infuraErc20Providers(networkId);
 
 	return await allowance({
@@ -225,7 +225,7 @@ const erc20ContractPrepareApprove = async ({
 	return prepare({
 		data,
 		to,
-		amount: 0n,
+		amount: ZERO,
 		...rest
 	});
 };
@@ -274,14 +274,12 @@ export const send = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-	}): Promise<{ hash: string }> => {
+	RequiredTransactionFeeData): Promise<{ hash: string }> => {
 	progress(ProgressStepsSend.INITIALIZATION);
 
 	const { transactionNeededApproval, nonce } = await approve({
 		progress,
+		progressSteps: ProgressStepsSend,
 		token,
 		...rest
 	});
@@ -320,11 +318,7 @@ const sendTransaction = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	Omit<SendParams, 'lastProgressStep'> &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-		nonce: number;
-	}): Promise<TransactionResponse> => {
+	RequiredTransactionFeeData & { nonce: number }): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
 	const { sendTransaction } = infuraProviders(networkId);
@@ -343,9 +337,8 @@ const sendTransaction = async ({
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	const transferStandard: 'ethereum' | 'erc20' = isSupportedEthTokenId(token.id)
-		? 'ethereum'
-		: 'erc20';
+	const transferStandard: 'ethereum' | 'erc20' =
+		isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id) ? 'ethereum' : 'erc20';
 
 	const networkICP = isNetworkICP(targetNetwork);
 
@@ -374,9 +367,9 @@ const sendTransaction = async ({
 		} & Pick<TransferParams, 'maxFeePerGas' | 'maxPriorityFeePerGas'> = {
 		from,
 		nonce,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
 		chainId
 	};
 
@@ -435,6 +428,7 @@ const prepareAndSignApproval = async ({
 	gas,
 	sourceNetwork,
 	identity,
+	progressSteps = ProgressStepsSend,
 	progress,
 	...rest
 }: SignAndApproveParams): Promise<
@@ -446,18 +440,18 @@ const prepareAndSignApproval = async ({
 
 	const approve = await erc20ContractPrepareApprove({
 		...rest,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
 		chainId,
 		networkId
 	});
 
-	progress?.(ProgressStepsSend.SIGN_APPROVE);
+	progress?.(progressSteps.SIGN_APPROVE);
 
 	const rawTransaction = await signTransaction({ identity, transaction: approve });
 
-	progress?.(ProgressStepsSend.APPROVE);
+	progress?.(progressSteps.APPROVE);
 
 	const { sendTransaction } = infuraProviders(networkId);
 
@@ -485,7 +479,7 @@ const checkExistingApproval = async ({
 	amount,
 	sourceNetwork,
 	...rest
-}: Omit<ApproveParams, 'to' | 'minterInfo' | 'progress'> & {
+}: Omit<ApproveParams, 'to' | 'minterInfo'> & {
 	nonce: number;
 	spender: EthAddress;
 }): Promise<'existingApprovalIsEnough' | 'approvalNeededReset' | 'noExistingApproval'> => {
@@ -497,12 +491,12 @@ const checkExistingApproval = async ({
 	});
 
 	// If there is already an approved allowance that is enough for the required amount, we don't need to approve again.
-	if (preApprovedAmount.gte(amount)) {
+	if (preApprovedAmount >= amount) {
 		return 'existingApprovalIsEnough';
 	}
 
 	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first, before approving the new amount.
-	if (preApprovedAmount.gt(ZERO)) {
+	if (preApprovedAmount > ZERO) {
 		await resetExistingApprovalToZero({
 			...rest,
 			token,
@@ -516,14 +510,17 @@ const checkExistingApproval = async ({
 	return 'noExistingApproval';
 };
 
-const approve = async ({
+export const approve = async ({
 	token,
 	from,
 	to,
 	minterInfo,
 	amount,
 	sourceNetwork,
+	// TODO: Refactor to accept an `onProgress(step)` callback instead of requiring manual `progress(progressSteps.step)` calls
 	progress,
+	shouldSwapWithApproval,
+	progressSteps = ProgressStepsSend,
 	...rest
 }: ApproveParams): Promise<{
 	transactionNeededApproval: boolean;
@@ -541,14 +538,22 @@ const approve = async ({
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	if (
-		isNullish(erc20HelperContractAddress) ||
-		!shouldSendWithApproval({
-			to,
-			tokenId: token.id,
-			erc20HelperContractAddress
-		})
-	) {
+	const shouldSkipApproval = nonNullish(shouldSwapWithApproval)
+		? !shouldSwapWithApproval
+		: isNullish(erc20HelperContractAddress) ||
+			!shouldSendWithApproval({
+				to,
+				tokenId: token.id,
+				erc20HelperContractAddress
+			});
+
+	if (shouldSkipApproval) {
+		return { transactionNeededApproval: false, nonce };
+	}
+
+	const spender = shouldSwapWithApproval ? to : erc20HelperContractAddress;
+
+	if (isNullish(spender)) {
 		return { transactionNeededApproval: false, nonce };
 	}
 
@@ -556,15 +561,16 @@ const approve = async ({
 	const approvalCheckResult = await checkExistingApproval({
 		token,
 		from,
-		spender: erc20HelperContractAddress,
+		spender,
 		nonce,
 		amount,
 		sourceNetwork,
+		progress,
 		...rest
 	});
 
 	if (approvalCheckResult === 'existingApprovalIsEnough') {
-		progress(ProgressStepsSend.APPROVE);
+		progress(progressSteps.APPROVE);
 		return { transactionNeededApproval: false, nonce };
 	}
 
@@ -578,7 +584,7 @@ const approve = async ({
 		token,
 		sourceNetwork,
 		progress,
-		spender: erc20HelperContractAddress
+		spender
 	});
 
 	return { transactionNeededApproval: transactionApproved, hash, nonce: nonceApproval };

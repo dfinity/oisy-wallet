@@ -1,5 +1,5 @@
 import { send as executeSend } from '$eth/services/send.services';
-import type { FeeStoreData } from '$eth/stores/fee.store';
+import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { SendParams } from '$eth/types/send';
 import {
 	getSignParamsMessageHex,
@@ -25,8 +25,8 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 type WalletConnectSendParams = WalletConnectExecuteParams & {
@@ -34,7 +34,7 @@ type WalletConnectSendParams = WalletConnectExecuteParams & {
 	address: OptionEthAddress;
 	fee: FeeStoreData;
 	modalNext: () => void;
-	amount: BigNumber;
+	amount: bigint;
 } & SendParams;
 
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
@@ -139,7 +139,7 @@ export const send = ({
 				return { success: false };
 			}
 
-			const { to, gas: gasWC, data } = firstParam;
+			const { to, gas: gasWC, data } = firstParam as { to: string; gas?: string; data?: string };
 
 			modalNext();
 
@@ -153,7 +153,7 @@ export const send = ({
 					amount,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
-					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
+					gas: nonNullish(gasWC) ? BigInt(gasWC) : gas,
 					data,
 					identity,
 					minterInfo,
@@ -165,7 +165,7 @@ export const send = ({
 
 				progress(lastProgressStep);
 
-				await trackEvent({
+				trackEvent({
 					name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
 					metadata: {
 						token: token.symbol
@@ -174,7 +174,7 @@ export const send = ({
 
 				return { success: true };
 			} catch (err: unknown) {
-				await trackEvent({
+				trackEvent({
 					name: TRACK_COUNT_WC_ETH_SEND_ERROR,
 					metadata: {
 						token: token.symbol
@@ -186,7 +186,9 @@ export const send = ({
 				throw err;
 			}
 		},
-		toastMsg: get(i18n).wallet_connect.info.eth_transaction_executed
+		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {
+			$method: params.request.params.request.method
+		})
 	});
 
 export const signMessage = ({

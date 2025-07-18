@@ -29,7 +29,7 @@ describe('extendCarouselSliderFrame', () => {
 			slideWidth
 		});
 
-		expect(sliderFrame.children.length).toEqual(0);
+		expect(sliderFrame.children).toHaveLength(0);
 	});
 
 	it('puts correct amount of slides in the frame', () => {
@@ -40,7 +40,7 @@ describe('extendCarouselSliderFrame', () => {
 			slideWidth
 		});
 
-		expect(sliderFrame.children.length).toEqual(extendedSlides.length);
+		expect(sliderFrame.children).toHaveLength(extendedSlides.length);
 	});
 
 	it('sets correct width to frame', () => {

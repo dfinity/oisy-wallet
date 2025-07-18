@@ -3,15 +3,17 @@ import { TRANSACTIONS_URL } from './utils/constants/e2e.constants';
 import { HomepageLoggedIn } from './utils/pages/homepage.page';
 import { TransactionsPage } from './utils/pages/transactions.page';
 
+testWithII.beforeEach(async ({ page }) => {
+	await page.clock.install();
+});
+
 testWithII(
 	'should be redirected to home if no network is provided to access transactions',
 	async ({ page, iiPage }) => {
 		// We load the transaction page for ICP. This way we know ICP is supported.
 		const transactionsPage = new TransactionsPage({
 			page,
-			iiPage,
-			tokenSymbol: 'ICP',
-			networkId: 'ICP'
+			iiPage
 		});
 
 		await transactionsPage.waitForReady();
@@ -24,6 +26,6 @@ testWithII(
 
 		await homepageLoggedIn.waitForContentReady();
 
-		await homepageLoggedIn.takeScreenshot();
+		await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
 	}
 );

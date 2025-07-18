@@ -8,7 +8,7 @@
 		type PermissionsConfirmation
 	} from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type ComponentType, getContext } from 'svelte';
+	import { type Component, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
@@ -67,7 +67,7 @@
 
 	const onApprove = () => approvePermissions();
 
-	let listItems: Record<IcrcScopedMethod, { icon: ComponentType; label: string }>;
+	let listItems: Record<IcrcScopedMethod, { icon: Component; label: string }>;
 	$: listItems = {
 		icrc27_accounts: {
 			icon: IconWallet,
@@ -95,8 +95,8 @@
 			<p class="break-normal font-bold">{$i18n.signer.permissions.text.requested_permissions}</p>
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">
-				{#each scopes as scope}
-					{@const { icon, label } = listItems[scope.scope.method]}
+				{#each scopes as { scope: { method } } (method)}
+					{@const { icon, label } = listItems[method]}
 
 					<li class="flex items-center gap-2 break-normal pb-1.5">
 						<svelte:component this={icon} size="24" />
@@ -123,7 +123,7 @@
 		{/if}
 
 		<ButtonGroup>
-			<Button colorStyle="error" on:click={onReject}>
+			<Button colorStyle="error" onclick={onReject}>
 				{$i18n.core.text.reject}
 			</Button>
 			<Button colorStyle="success" type="submit">

@@ -1,11 +1,13 @@
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
+import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
+import { syncWalletFromIdbCache } from '$lib/services/listener.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { TokenId } from '$lib/types/token';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 export const syncWallet = ({
@@ -24,9 +26,9 @@ export const syncWallet = ({
 
 	if (nonNullish(balance)) {
 		balancesStore.set({
-			tokenId,
+			id: tokenId,
 			data: {
-				data: BigNumber.from(balance),
+				data: balance,
 				certified
 			}
 		});
@@ -66,3 +68,10 @@ export const syncWalletError = ({
 		err
 	});
 };
+
+export const syncWalletFromCache = (params: Omit<GetIdbTransactionsParams, 'principal'>) =>
+	syncWalletFromIdbCache({
+		...params,
+		getIdbTransactions: getIdbBtcTransactions,
+		transactionsStore: btcTransactionsStore
+	});

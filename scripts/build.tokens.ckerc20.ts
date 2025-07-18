@@ -17,7 +17,7 @@ import { Principal } from '@dfinity/principal';
 import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { agent, loadMetadata } from './build.tokens.utils';
+import { agent, loadMetadata, saveLogo } from './build.tokens.utils';
 import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
@@ -114,18 +114,22 @@ const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<TokensA
 		async (acc, [key, value]) => {
 			const { tokens: accTokens, icons: accIcons } = await acc;
 
-			const valueWithMetadata = await loadMetadata(value[0]);
+			const [token] = value;
 
-			if (isNullish(valueWithMetadata)) {
+			const { ledgerCanisterId, ...rest } = token;
+
+			const metadataWithIcon = await loadMetadata(ledgerCanisterId);
+
+			if (isNullish(metadataWithIcon)) {
 				return { tokens: accTokens, icons: accIcons };
 			}
 
-			const { ledgerCanisterId, name, icon, ...rest } = valueWithMetadata;
+			const { icon, ...metadata } = metadataWithIcon;
 
 			return {
 				tokens: {
 					...accTokens,
-					[key]: { ledgerCanisterId, name, ...rest }
+					[key]: { ledgerCanisterId, ...rest, ...metadata }
 				},
 				icons: [
 					...accIcons,
@@ -158,11 +162,7 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 		return;
 	}
 
-	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
-
-	const svgContent = Buffer.from(encodedStr, encoding as BufferEncoding).toString('utf-8');
-
-	writeFileSync(file, svgContent, 'utf-8');
+	saveLogo({ logoData, file, name });
 };
 
 const findCkErc20 = async () => {

@@ -1,0 +1,10 @@
+rules:
+  cache-poisoning:
+    ignore:
+      # Staging is deployed with every commit to main, so needs to be fast, hence the use of caching.
+      #
+      # Similarly, deployments to test environments need to be fast, to make developers productive.
+      #
+      # Production builds are verified independently, so bad builds, due to cache poisoning
+      # or any other reason, would be detected.
+      - deploy-to-environment.yml

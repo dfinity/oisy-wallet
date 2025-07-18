@@ -1,4 +1,4 @@
-import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.btc.env';
+import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';

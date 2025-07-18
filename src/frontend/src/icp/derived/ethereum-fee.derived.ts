@@ -21,7 +21,7 @@ export const ethereumFeeTokenCkEth: Readable<IcToken | undefined> = derived(
 			return $token as IcToken;
 		}
 
-		const feeLedgerCanisterId = ($token as IcCkToken).feeLedgerCanisterId;
+		const { feeLedgerCanisterId } = $token as IcCkToken;
 		return nonNullish(feeLedgerCanisterId)
 			? $icrcTokens.find(({ ledgerCanisterId }) => ledgerCanisterId === feeLedgerCanisterId)
 			: undefined;

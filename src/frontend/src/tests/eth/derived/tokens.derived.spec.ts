@@ -2,7 +2,8 @@ import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import * as appContants from '$lib/constants/app.constants';
-import { testnetsStore } from '$lib/stores/settings.store';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('tokens.derived', () => {
@@ -10,7 +11,8 @@ describe('tokens.derived', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 
-			testnetsStore.reset({ key: 'testnets' });
+			setupTestnetsStore('reset');
+			setupUserNetworksStore('allEnabled');
 
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
@@ -29,13 +31,13 @@ describe('tokens.derived', () => {
 
 		it('should return only Sepolia ETH when testnets are enabled and mainnet disabled', () => {
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementationOnce(() => false);
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			expect(get(enabledEthereumTokens)).toEqual([SEPOLIA_TOKEN]);
 		});
 
 		it('should return ETH and Sepolia ETH when testnets are enabled', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 
 			expect(get(enabledEthereumTokens)).toEqual([ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
 		});

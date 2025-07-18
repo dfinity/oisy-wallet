@@ -65,13 +65,13 @@
 		"indexCanisterId": "5ithz-aqaaa-aaaaq-aaa4a-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "GHOST",
-			"symbol": "GHOST",
+			"name": "Mimic Clay",
+			"symbol": "CLAY",
 			"fee": {
 				"__bigint__": "100000000"
 			},
-			"alternativeName": "ICGhost",
-			"url": "https://yadjb-mqaaa-aaaan-qaqlq-cai.raw.ic0.app/"
+			"alternativeName": "Mimic",
+			"url": "https://github.com/dragginzgame/mimic"
 		}
 	},
 	{
@@ -95,10 +95,10 @@
 		"indexCanisterId": "v5tde-5aaaa-aaaaq-aabja-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "BoomDAO",
+			"name": "BOOM",
 			"symbol": "BOOM",
 			"fee": {
-				"__bigint__": "100000"
+				"__bigint__": "1000000"
 			},
 			"alternativeName": "BOOM DAO",
 			"url": "https://boomdao.xyz/"
@@ -122,16 +122,15 @@
 	{
 		"ledgerCanisterId": "rffwt-piaaa-aaaaq-aabqq-cai",
 		"rootCanisterId": "u67kc-jyaaa-aaaaq-aabpq-cai",
+		"deprecated": true,
 		"indexCanisterId": "rlh33-uyaaa-aaaaq-aabrq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Seers",
-			"symbol": "SEER",
+			"name": "---- (formerly Seers)",
+			"symbol": "--- (SEER)",
 			"fee": {
-				"__bigint__": "100000"
-			},
-			"alternativeName": "Seers AI",
-			"url": "https://seers.social"
+				"__bigint__": "100000000"
+			}
 		}
 	},
 	{
@@ -260,8 +259,8 @@
 		"indexCanisterId": "dnqcx-eyaaa-aaaaq-aacrq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "OpenFPL",
-			"symbol": "FPL",
+			"name": "ICFC",
+			"symbol": "ICFC",
 			"fee": {
 				"__bigint__": "100000"
 			},
@@ -326,7 +325,7 @@
 				"__bigint__": "100000"
 			},
 			"alternativeName": "EstateDAO",
-			"url": "https://wbdy5-yyaaa-aaaap-abysq-cai.icp0.io/"
+			"url": "https://estatedao.org/"
 		}
 	},
 	{
@@ -338,7 +337,7 @@
 			"name": "Motoko",
 			"symbol": "MOTOKO",
 			"fee": {
-				"__bigint__": "100000000"
+				"__bigint__": "1000000"
 			},
 			"alternativeName": "Motoko",
 			"url": "https://2uktw-yiaaa-aaaah-adwxq-cai.icp0.io/"
@@ -350,13 +349,13 @@
 		"indexCanisterId": "ldv2p-dqaaa-aaaaq-aadga-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "ICPCC DAO LLC",
-			"symbol": "CONF",
+			"name": "Swampies",
+			"symbol": "SWAMP",
 			"fee": {
 				"__bigint__": "10000"
 			},
-			"alternativeName": "ICPCC DAO LLC",
-			"url": "https://osjzm-oaaaa-aaaal-ajcoq-cai.icp0.io/"
+			"alternativeName": "Swampies",
+			"url": "https://dragginz.io"
 		}
 	},
 	{
@@ -392,6 +391,7 @@
 	{
 		"ledgerCanisterId": "itgqj-7qaaa-aaaaq-aadoa-cai",
 		"rootCanisterId": "ibahq-taaaa-aaaaq-aadna-cai",
+		"deprecated": true,
 		"indexCanisterId": "i5e5b-eaaaa-aaaaq-aadpa-cai",
 		"metadata": {
 			"decimals": 8,
@@ -408,13 +408,13 @@
 		"indexCanisterId": "n535v-yiaaa-aaaaq-aadsq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "DOGMI",
-			"symbol": "DOGMI",
+			"name": "Poked",
+			"symbol": "POKED",
 			"fee": {
-				"__bigint__": "100000000000"
+				"__bigint__": "100000000"
 			},
-			"alternativeName": "DOGMI",
-			"url": "https://qu2gy-uqaaa-aaaal-qcv6a-cai.icp0.io"
+			"alternativeName": "PokedBots",
+			"url": "https://www.pokedbots.com"
 		}
 	},
 	{
@@ -520,6 +520,66 @@
 			},
 			"alternativeName": "IC Explorer",
 			"url": "https://icexplorer.io"
+		}
+	},
+	{
+		"ledgerCanisterId": "ixqp7-kqaaa-aaaaq-aaetq-cai",
+		"rootCanisterId": "izscx-raaaa-aaaaq-aaesq-cai",
+		"indexCanisterId": "j57nf-iaaaa-aaaaq-aaeuq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Personal DAO",
+			"symbol": "DAO",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "Personal DAO",
+			"url": "https://gsnnn-ziaaa-aaaag-acaaa-cai.icp0.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "jg2ra-syaaa-aaaaq-aaewa-cai",
+		"rootCanisterId": "ju4gz-6iaaa-aaaaq-aaeva-cai",
+		"indexCanisterId": "jiy4i-jiaaa-aaaaq-aaexa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Cecil The Lion DAO",
+			"symbol": "CECIL",
+			"fee": {
+				"__bigint__": "1000000"
+			},
+			"alternativeName": "Cecil The Lion DAO",
+			"url": "https://cecildao.org"
+		}
+	},
+	{
+		"ledgerCanisterId": "lvfsa-2aaaa-aaaaq-aaeyq-cai",
+		"rootCanisterId": "jpz24-eqaaa-aaaaq-aaexq-cai",
+		"indexCanisterId": "l3h7i-bqaaa-aaaaq-aaezq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICPEx",
+			"symbol": "ICX",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "ICPEx",
+			"url": "https://icpex.org/"
+		}
+	},
+	{
+		"ledgerCanisterId": "kknbx-zyaaa-aaaaq-aae4a-cai",
+		"rootCanisterId": "lacdn-3iaaa-aaaaq-aae3a-cai",
+		"indexCanisterId": "kepm7-ciaaa-aaaaq-aae5a-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "TACO",
+			"symbol": "TACO",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "TACO DAO",
+			"url": "https://tacodao.com"
 		}
 	}
 ]

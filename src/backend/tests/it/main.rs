@@ -1,10 +1,8 @@
 mod bitcoin;
 mod config;
+mod contacts;
 mod custom_token;
-mod guard;
-mod list_user_creation_timestamps;
-mod list_users;
-mod migration;
+mod pow;
 mod settings;
 mod signer;
 mod stats;

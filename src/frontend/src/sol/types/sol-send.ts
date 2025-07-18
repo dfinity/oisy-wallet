@@ -4,7 +4,7 @@ import type {
 	TransactionMessage,
 	TransactionMessageWithBlockhashLifetime,
 	TransactionVersion
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 export class SolAmountAssertionError extends Error {}
 

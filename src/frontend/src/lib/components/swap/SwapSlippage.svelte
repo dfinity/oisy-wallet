@@ -71,48 +71,56 @@
 	</button>
 </div>
 
-<Collapsible expandButton={false} externalToggle={true} bind:toggleContent>
-	<div class="flex items-center">
-		<TokenInputContainer {focused} error={slippageValueError} styleClass="h-12">
-			<TokenInputCurrency
-				{name}
-				decimals={SWAP_SLIPPAGE_VALUE_DECIMALS}
-				error={slippageValueError}
-				bind:value={slippageValue}
-				on:focus={onFocus}
-				on:blur={onBlur}
-			>
-				<span class="text-tertiary" slot="inner-end">%</span>
-			</TokenInputCurrency>
-		</TokenInputContainer>
+<div class="-m-2">
+	<!-- todo: css hack, fix in gix component -->
+	<Collapsible expandButton={false} externalToggle={true} bind:toggleContent>
+		<div class="p-2"
+			><!-- offset above hack -->
+			<div class="flex items-center">
+				<TokenInputContainer {focused} error={slippageValueError} styleClass="h-12">
+					<TokenInputCurrency
+						{name}
+						decimals={SWAP_SLIPPAGE_VALUE_DECIMALS}
+						error={slippageValueError}
+						bind:value={slippageValue}
+						on:focus={onFocus}
+						on:blur={onBlur}
+					>
+						{#snippet innerEnd()}
+							<span class="text-tertiary">%</span>
+						{/snippet}
+					</TokenInputCurrency>
+				</TokenInputContainer>
 
-		{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue}
-			<Button
-				on:click={() => onPresetValueClick(presetValue)}
-				colorStyle="secondary-light"
-				styleClass={`${nonNullish(slippageValue) && presetValue === Number(slippageValue) ? 'border border-brand-primary' : ''} min-w-16 ml-3 h-12 flex-initial`}
-				paddingSmall={true}
-			>
-				{presetValue}%
-			</Button>
-		{/each}
-	</div>
-
-	<div
-		class="mt-2 text-sm text-tertiary"
-		class:text-tertiary={!slippageValueError && !slippageValueWarning}
-		class:text-warning-primary={slippageValueWarning}
-		class:text-error-primary={slippageValueError}
-	>
-		{#if slippageValueError}
-			<div in:fade>{$i18n.swap.text.max_slippage_error}</div>
-		{:else if slippageValueWarning}
-			<div in:fade class="flex gap-1">
-				<IconWarning />
-				<span>{$i18n.swap.text.max_slippage_warning}</span>
+				{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue (presetValue)}
+					<Button
+						onclick={() => onPresetValueClick(presetValue)}
+						colorStyle="secondary-light"
+						styleClass={`${nonNullish(slippageValue) && presetValue === Number(slippageValue) ? 'border border-brand-primary' : ''} min-w-16 ml-3 h-12 flex-initial`}
+						paddingSmall={true}
+					>
+						{presetValue}%
+					</Button>
+				{/each}
 			</div>
-		{:else}
-			<div in:fade>{$i18n.swap.text.max_slippage_info}</div>
-		{/if}
-	</div>
-</Collapsible>
+
+			<div
+				class="mt-2 text-sm text-tertiary"
+				class:text-tertiary={!slippageValueError && !slippageValueWarning}
+				class:text-warning-primary={slippageValueWarning}
+				class:text-error-primary={slippageValueError}
+			>
+				{#if slippageValueError}
+					<div in:fade>{$i18n.swap.text.max_slippage_error}</div>
+				{:else if slippageValueWarning}
+					<div in:fade class="flex gap-1">
+						<IconWarning />
+						<span>{$i18n.swap.text.max_slippage_warning}</span>
+					</div>
+				{:else}
+					<div in:fade>{$i18n.swap.text.max_slippage_info}</div>
+				{/if}
+			</div>
+		</div>
+	</Collapsible>
+</div>

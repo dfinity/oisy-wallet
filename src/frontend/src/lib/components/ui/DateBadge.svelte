@@ -1,16 +1,28 @@
 <script lang="ts">
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { BadgeVariant } from '$lib/types/style';
 	import { formatToShortDateString } from '$lib/utils/format.utils';
 
-	export let date: Date;
-	export let prefix: string | undefined = undefined;
-	export let suffix: string | undefined = undefined;
-	export let testId: string | undefined = undefined;
-	export let variant: BadgeVariant = 'default';
+	interface Props {
+		date: Date;
+		prefix?: string | undefined;
+		suffix?: string | undefined;
+		testId?: string | undefined;
+		variant?: BadgeVariant;
+	}
 
-	let formattedDate: string;
-	$: formattedDate = `${formatToShortDateString(date)} ${date.getDate()}`;
+	let {
+		date,
+		prefix = undefined,
+		suffix = undefined,
+		testId = undefined,
+		variant = 'default'
+	}: Props = $props();
+
+	const formattedDate = $derived(
+		`${formatToShortDateString({ date, i18n: $i18n })} ${date.getDate()}`
+	);
 </script>
 
 <Badge {testId} {variant}>

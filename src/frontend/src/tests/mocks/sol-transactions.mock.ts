@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
@@ -7,7 +8,6 @@ import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type {
 	SolRpcTransaction,
-	SolRpcTransactionRaw,
 	SolSignedTransaction,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
@@ -23,7 +23,7 @@ import {
 	type Blockhash,
 	type TransactionMessageBytes,
 	type UnixTimestamp
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 const mockSignature =
 	'4UjEjyVYfPNkr5TzZ3oH8ZS8PiEzbHsBdhvRtrLiuBfk8pQMRNvY3UUxjHe4nSzxAnhd8JCSQ3YYmAj651ZWeArM';
@@ -36,9 +36,9 @@ export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
 	signature: signature(mockSignature),
-	timestamp: 0n,
+	timestamp: ZERO,
 	type: 'send',
-	value: BigInt(100),
+	value: 100n,
 	from: 'sender',
 	to: 'receiver',
 	status: 'finalized'
@@ -74,20 +74,32 @@ export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 				{
 					pubkey: address('devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv'),
 					signer: false,
-					source: 'program',
+					source: 'lookupTable',
 					writable: false
 				},
 				{
 					pubkey: address(mockSolAddress),
 					signer: true,
-					source: 'external',
+					source: 'lookupTable',
 					writable: true
 				},
 				{
 					pubkey: address(SYSTEM_PROGRAM_ADDRESS),
 					signer: false,
-					source: 'program',
+					source: 'lookupTable',
 					writable: false
+				}
+			],
+			addressTableLookups: [
+				{
+					accountKey: address('8GU6nusbxwVrwkAkcQCnLfJj1cE4sGH5xCLmss5WEuP4'),
+					readonlyIndexes: [146],
+					writableIndexes: [148, 149, 156, 152]
+				},
+				{
+					accountKey: address('9W6BH3BLditrazBMnT87jc5ZdKRLtUFmWqkLviWtdzXm'),
+					readonlyIndexes: [69, 67, 10, 70, 68, 73],
+					writableIndexes: [66, 63, 71, 72]
 				}
 			],
 			instructions: [
@@ -142,26 +154,38 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 				{
 					pubkey: address(mockSolAddress),
 					signer: true,
-					source: 'external',
+					source: 'lookupTable',
 					writable: true
 				},
 				{
 					pubkey: address('4DAtqyYPYCj2WK4RpPQwCNxz3xYLm5G9vTuZqnP2ZzcQ'),
 					signer: false,
-					source: 'external',
+					source: 'lookupTable',
 					writable: true
 				},
 				{
 					pubkey: address(SYSTEM_PROGRAM_ADDRESS),
 					signer: false,
-					source: 'program',
+					source: 'lookupTable',
 					writable: false
 				},
 				{
 					pubkey: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
 					signer: false,
-					source: 'program',
+					source: 'lookupTable',
 					writable: false
+				}
+			],
+			addressTableLookups: [
+				{
+					accountKey: address('8GU6nusbxwVrwkAkcQCnLfJj1cE4sGH5xCLmss5WEuP4'),
+					readonlyIndexes: [146],
+					writableIndexes: [148, 149, 156, 152]
+				},
+				{
+					accountKey: address('9W6BH3BLditrazBMnT87jc5ZdKRLtUFmWqkLviWtdzXm'),
+					readonlyIndexes: [69, 67, 10, 70, 68, 73],
+					writableIndexes: [66, 63, 71, 72]
 				}
 			],
 			instructions: [
@@ -194,7 +218,7 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 	version: 'legacy'
 };
 
-export const mockSolTransactionDetail: SolRpcTransactionRaw = {
+export const mockSolTransactionDetail: SolRpcTransaction = {
 	blockTime: 1740654097n as UnixTimestamp,
 	meta: {
 		computeUnitsConsumed: 208718n,
@@ -1049,18 +1073,18 @@ export const mockSolTransactionDetail: SolRpcTransactionRaw = {
 					writable: false
 				}
 			],
-			// addressTableLookups: [
-			// 	{
-			// 		accountKey: '8GU6nusbxwVrwkAkcQCnLfJj1cE4sGH5xCLmss5WEuP4',
-			// 		readonlyIndexes: [146],
-			// 		writableIndexes: [148, 149, 156, 152]
-			// 	},
-			// 	{
-			// 		accountKey: '9W6BH3BLditrazBMnT87jc5ZdKRLtUFmWqkLviWtdzXm',
-			// 		readonlyIndexes: [69, 67, 10, 70, 68, 73],
-			// 		writableIndexes: [66, 63, 71, 72]
-			// 	}
-			// ],
+			addressTableLookups: [
+				{
+					accountKey: address('8GU6nusbxwVrwkAkcQCnLfJj1cE4sGH5xCLmss5WEuP4'),
+					readonlyIndexes: [146],
+					writableIndexes: [148, 149, 156, 152]
+				},
+				{
+					accountKey: address('9W6BH3BLditrazBMnT87jc5ZdKRLtUFmWqkLviWtdzXm'),
+					readonlyIndexes: [69, 67, 10, 70, 68, 73],
+					writableIndexes: [66, 63, 71, 72]
+				}
+			],
 			instructions: [
 				{
 					accounts: [],

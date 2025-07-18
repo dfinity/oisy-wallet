@@ -21,7 +21,7 @@ lazy_static! {
         enabled: Some(true),
     };
     pub static ref MOCK_TOKEN_ID: UserTokenId = UserTokenId {
-        chain_id: MOCK_TOKEN.chain_id.clone(),
+        chain_id: MOCK_TOKEN.chain_id,
         contract_address: MOCK_TOKEN.contract_address.clone(),
     };
     pub static ref ANOTHER_TOKEN: UserToken = UserToken {
@@ -51,7 +51,7 @@ fn test_add_user_token() {
 
     let after_set = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserToken> = vec![MOCK_TOKEN.with_incremented_version()];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
@@ -75,8 +75,8 @@ fn test_add_many_user_tokens() {
     let after_set = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserToken> = vec![
-        MOCK_TOKEN.clone_with_incremented_version(),
-        ANOTHER_TOKEN.clone_with_incremented_version(),
+        MOCK_TOKEN.with_incremented_version(),
+        ANOTHER_TOKEN.with_incremented_version(),
     ];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
@@ -97,7 +97,7 @@ fn test_update_user_token() {
 
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
-        version: add_token_result.unwrap().get(0).unwrap().version,
+        version: add_token_result.unwrap().first().unwrap().version,
         ..MOCK_TOKEN.clone()
     };
 
@@ -107,7 +107,7 @@ fn test_update_user_token() {
 
     let results = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -133,15 +133,15 @@ fn test_update_many_user_tokens() {
     assert!(add_token_results.is_ok());
 
     let expected_tokens: Vec<UserToken> = vec![
-        MOCK_TOKEN.clone_with_incremented_version(),
-        ANOTHER_TOKEN.clone_with_incremented_version(),
+        MOCK_TOKEN.with_incremented_version(),
+        ANOTHER_TOKEN.with_incremented_version(),
     ];
 
     assert_tokens_data_eq(&add_token_results.clone().unwrap(), &expected_tokens);
 
     let update_token: UserToken = UserToken {
         enabled: Some(false),
-        version: add_token_results.clone().unwrap().get(0).unwrap().version,
+        version: add_token_results.clone().unwrap().first().unwrap().version,
         ..MOCK_TOKEN.clone()
     };
 
@@ -161,8 +161,8 @@ fn test_update_many_user_tokens() {
     let results = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserToken> = vec![
-        update_token.clone_with_incremented_version(),
-        update_another_token.clone_with_incremented_version(),
+        update_token.with_incremented_version(),
+        update_another_token.with_incremented_version(),
     ];
 
     assert!(results.is_ok());
@@ -188,7 +188,7 @@ fn test_disable_user_token() {
 
     let update_token: UserToken = UserToken {
         enabled: Some(false),
-        version: add_token_result.unwrap().get(0).unwrap().version,
+        version: add_token_result.unwrap().first().unwrap().version,
         ..MOCK_TOKEN.clone()
     };
 
@@ -198,7 +198,7 @@ fn test_disable_user_token() {
 
     let results = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -220,8 +220,8 @@ fn test_list_user_tokens() {
     let results = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserToken> = vec![
-        MOCK_TOKEN.clone_with_incremented_version(),
-        ANOTHER_TOKEN.clone_with_incremented_version(),
+        MOCK_TOKEN.with_incremented_version(),
+        ANOTHER_TOKEN.with_incremented_version(),
     ];
 
     assert!(results.is_ok());
@@ -377,7 +377,7 @@ fn test_anonymous_cannot_set_user_token() {
     assert!(result.is_err());
     assert_eq!(
         result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        "Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized.".to_string()
     );
 }
 
@@ -393,8 +393,8 @@ fn test_anonymous_cannot_list_user_tokens() {
 
     assert!(result.is_err());
     assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        &result.unwrap_err(),
+        "Query call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 

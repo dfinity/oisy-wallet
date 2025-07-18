@@ -16,9 +16,11 @@
 
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
+	export let customDestination = '';
 	export let convertProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'back';
+	export let onIcQrCodeBack: () => void;
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
@@ -52,9 +54,14 @@
 		bind:sendAmount
 		bind:receiveAmount
 		bind:convertProgressStep
+		bind:customDestination
 		on:icBack
 		on:icNext
 		on:icClose
+		on:icDestination
+		on:icDestinationBack
+		on:icQRCodeScan
+		{onIcQrCodeBack}
 	/>
 {:else}
 	<div class="mt-6"><MessageBox>{$i18n.convert.text.unsupported_token_conversion}</MessageBox></div>

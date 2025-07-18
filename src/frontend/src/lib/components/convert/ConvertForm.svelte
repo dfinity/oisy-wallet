@@ -11,33 +11,24 @@
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let totalFee: bigint | undefined;
+	export let destinationTokenFee: bigint | undefined = undefined;
 	export let minFee: bigint | undefined = undefined;
 	export let ethereumEstimateFee: bigint | undefined = undefined;
 	export let disabled: boolean;
-	export let insufficientFunds: boolean;
-	export let insufficientFundsForFee: boolean;
-	export let amountLessThanLedgerFee: boolean | undefined = undefined;
-	export let minimumAmountNotReached: boolean | undefined = undefined;
-	export let unknownMinimumAmount: boolean | undefined = undefined;
-	export let minterInfoNotCertified: boolean | undefined = undefined;
+	export let testId: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
 	let exchangeValueUnit: DisplayUnit = 'usd';
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar {testId}>
 	<ConvertAmount
 		bind:sendAmount
 		bind:receiveAmount
-		bind:insufficientFunds
-		bind:insufficientFundsForFee
-		bind:amountLessThanLedgerFee
-		bind:minimumAmountNotReached
-		bind:unknownMinimumAmount
-		bind:minterInfoNotCertified
 		bind:exchangeValueUnit
 		{totalFee}
+		{destinationTokenFee}
 		{minFee}
 		{ethereumEstimateFee}
 	/>
@@ -45,14 +36,18 @@
 	<div class="mt-6">
 		<slot name="message" />
 
+		<slot name="destination" />
+
 		<slot name="fee" />
 	</div>
 
-	<ButtonGroup slot="toolbar">
-		<slot name="cancel" />
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<slot name="cancel" />
 
-		<Button {disabled} on:click={() => dispatch('icNext')} testId="convert-form-button-next">
-			{$i18n.convert.text.review_button}
-		</Button>
-	</ButtonGroup>
+			<Button {disabled} onclick={() => dispatch('icNext')} testId="convert-form-button-next">
+				{$i18n.convert.text.review_button}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

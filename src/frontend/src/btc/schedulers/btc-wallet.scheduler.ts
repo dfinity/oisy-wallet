@@ -2,11 +2,10 @@ import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
-import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.btc.env';
+import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
-import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { getBtcBalance } from '$lib/api/signer.api';
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
@@ -19,8 +18,15 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
-import { type BitcoinNetwork } from '@dfinity/ckbtc';
-import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import {
+	assertNonNullish,
+	isNullish,
+	jsonReplacer,
+	nonNullish,
+	queryAndUpdate,
+	type QueryAndUpdateRequestParams
+} from '@dfinity/utils';
 
 interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	bitcoinNetwork: BitcoinNetwork;
@@ -40,6 +46,8 @@ interface BtcWalletData {
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
+
+	private failedSyncCounter = 0;
 
 	private store: BtcWalletStore = {
 		balance: undefined,
@@ -172,9 +180,17 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					shouldFetchTransactions: data?.shouldFetchTransactions,
 					minterCanisterId: data?.minterCanisterId
 				}),
-			onLoad: ({ certified: _, ...rest }) => this.syncWalletData(rest),
+			onLoad: ({ certified: _, ...rest }) => {
+				this.syncWalletData(rest);
+				this.failedSyncCounter = 0;
+			},
 			identity,
-			onCertifiedError: ({ error }) => this.postMessageWalletError({ error }),
+			onUpdateError: ({ error }) => {
+				this.failedSyncCounter++;
+				if (FAILURE_THRESHOLD <= this.failedSyncCounter) {
+					this.postMessageWalletError({ error });
+				}
+			},
 			resolution: 'all_settled'
 		});
 	};

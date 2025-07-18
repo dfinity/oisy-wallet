@@ -7,17 +7,30 @@
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
 	export let sendAmount: OptionAmount = undefined;
 	export let receiveAmount: number | undefined = undefined;
+	export let destinationTokenFee: bigint | undefined = undefined;
 	export let exchangeValueUnit: DisplayUnit = 'usd';
 	export let inputUnit: DisplayUnit = 'token';
 
 	const { destinationToken, destinationTokenBalance, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	// receiveAmount will always be equal to sendAmount unless there are some fees on the receiver end (future case)
-	$: receiveAmount = nonNullish(sendAmount) ? Number(sendAmount) : undefined;
+	$: receiveAmount = nonNullish(sendAmount)
+		? nonNullish(destinationTokenFee)
+			? Math.max(
+					Number(sendAmount) -
+						formatTokenBigintToNumber({
+							value: destinationTokenFee,
+							displayDecimals: $destinationToken.decimals,
+							unitName: $destinationToken.decimals
+						}),
+					0
+				)
+			: Number(sendAmount)
+		: undefined;
 </script>
 
 <TokenInput

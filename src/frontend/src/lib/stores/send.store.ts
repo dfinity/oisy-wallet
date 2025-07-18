@@ -3,6 +3,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
@@ -18,22 +19,19 @@ const initSendStore = (token: Token): SendStore => {
 	return {
 		subscribe,
 
-		set(token: Token) {
+		set: (token: Token) => {
 			setStore(token);
 		}
 	};
 };
 
-export const initSendContext = ({
-	token,
-	...staticContext
-}: Pick<SendContext, 'sendPurpose'> & { token: Token }): SendContext => {
+export const initSendContext = ({ token }: { token: Token }): SendContext => {
 	const sendToken = initSendStore(token);
 
 	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
 	const sendTokenId = derived(sendToken, ({ id }) => id);
 	const sendTokenStandard = derived(sendToken, ({ standard }) => standard);
-	const sendTokenSymbol = derived(sendToken, ({ symbol }) => symbol);
+	const sendTokenSymbol = derived(sendToken, (token) => getTokenDisplaySymbol(token));
 	const sendTokenNetworkId = derived(sendToken, ({ network: { id: networkId } }) => networkId);
 
 	const sendBalance = derived(
@@ -53,16 +51,9 @@ export const initSendContext = ({
 		sendTokenSymbol,
 		sendBalance,
 		sendTokenExchangeRate,
-		sendTokenNetworkId,
-		...staticContext
+		sendTokenNetworkId
 	};
 };
-
-export type SendContextPurpose =
-	| 'send'
-	| 'convert-eth-to-cketh'
-	| 'convert-cketh-to-eth'
-	| 'convert-erc20-to-ckerc20';
 
 export interface SendContext {
 	sendToken: SendStore;
@@ -72,7 +63,6 @@ export interface SendContext {
 	sendTokenSymbol: Readable<string>;
 	sendBalance: Readable<OptionBalance>;
 	sendTokenExchangeRate: Readable<number | undefined>;
-	sendPurpose: SendContextPurpose;
 	sendTokenNetworkId: Readable<NetworkId>;
 }
 

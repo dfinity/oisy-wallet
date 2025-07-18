@@ -16,6 +16,7 @@ import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
+import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import {
 	formatJsonRpcResult,
@@ -23,7 +24,6 @@ import {
 	type JsonRpcResponse
 } from '@walletconnect/jsonrpc-utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
-import { Web3Wallet, type Web3WalletTypes } from '@walletconnect/web3wallet';
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
@@ -48,7 +48,7 @@ export const initWalletConnect = async ({
 	// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Wec3Wallet object.
 	clearLocalStorage();
 
-	const web3wallet = await Web3Wallet.init({
+	const walletKit = await WalletKit.init({
 		core: new Core({
 			projectId: PROJECT_ID
 		}),
@@ -59,32 +59,32 @@ export const initWalletConnect = async ({
 		const disconnectExistingSessions = async ([_key, session]: [string, { topic: string }]) => {
 			const { topic } = session;
 
-			await web3wallet.disconnectSession({
+			await walletKit.disconnectSession({
 				topic,
 				reason: getSdkError('USER_DISCONNECTED')
 			});
 		};
 
-		const promises = Object.entries(web3wallet.getActiveSessions()).map(disconnectExistingSessions);
+		const promises = Object.entries(walletKit.getActiveSessions()).map(disconnectExistingSessions);
 		await Promise.all(promises);
 	};
 
 	// Some previous sessions might have not been properly closed, so we disconnect those to have a clean state.
 	await disconnectActiveSessions();
 
-	const sessionProposal = (callback: (proposal: Web3WalletTypes.SessionProposal) => void) => {
-		web3wallet.on('session_proposal', callback);
+	const sessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
+		walletKit.on('session_proposal', callback);
 	};
 
 	const sessionDelete = (callback: () => void) => {
-		web3wallet.on('session_delete', callback);
+		walletKit.on('session_delete', callback);
 	};
 
-	const sessionRequest = (callback: (request: Web3WalletTypes.SessionRequest) => Promise<void>) => {
-		web3wallet.on('session_request', callback);
+	const sessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => {
+		walletKit.on('session_request', callback);
 	};
 
-	const approveSession = async (proposal: Web3WalletTypes.SessionProposal) => {
+	const approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { params } = proposal;
 
 		//TODO enable all networks of solana
@@ -120,23 +120,23 @@ export const initWalletConnect = async ({
 			}
 		});
 
-		await web3wallet.approveSession({
+		await walletKit.approveSession({
 			id: proposal.id,
 			namespaces
 		});
 	};
 
-	const rejectSession = async (proposal: Web3WalletTypes.SessionProposal) => {
+	const rejectSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { id } = proposal;
 
-		await web3wallet.rejectSession({
+		await walletKit.rejectSession({
 			id,
 			reason: getSdkError('USER_REJECTED_METHODS')
 		});
 	};
 
 	const respond = async ({ topic, response }: { topic: string; response: JsonRpcResponse }) =>
-		await web3wallet.respondSessionRequest({ topic, response });
+		await walletKit.respondSessionRequest({ topic, response });
 
 	const rejectRequest = async ({
 		id,
@@ -171,7 +171,7 @@ export const initWalletConnect = async ({
 		});
 
 	return {
-		pair: () => web3wallet.core.pairing.pair({ uri }),
+		pair: () => walletKit.core.pairing.pair({ uri }),
 		approveSession,
 		rejectSession,
 		rejectRequest,
@@ -181,12 +181,12 @@ export const initWalletConnect = async ({
 		sessionRequest,
 		disconnect: async () => {
 			const disconnectPairings = async () => {
-				const pairings = web3wallet.engine.signClient.core.pairing.pairings.values;
+				const pairings = walletKit.engine.signClient.core.pairing.pairings.values;
 
 				for (const pairing of pairings) {
 					const { topic } = pairing;
 
-					await web3wallet.disconnectSession({
+					await walletKit.disconnectSession({
 						topic,
 						reason: getSdkError('USER_DISCONNECTED')
 					});

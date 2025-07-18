@@ -1,644 +1,664 @@
 type Icrc10SupportedStandards = record {
-    url : text;
-    name : text;
+	url : text;
+	name : text
 };
 
 // Canister interface specification for ICRC-21.
 // See https://github.com/dfinity/wg-identity-authentication/blob/main/topics/ICRC-21/icrc_21_consent_msg.md
 
 type icrc21_consent_message_metadata = record {
-    // BCP-47 language tag. See https://www.rfc-editor.org/rfc/bcp/bcp47.txt
-    language: text;
+	// BCP-47 language tag. See https://www.rfc-editor.org/rfc/bcp/bcp47.txt
+	language : text;
 
-    // The users local timezone offset in minutes from UTC.
-    // Applicable when converting timestamps to human-readable format.
-    //
-    // If absent in the request, the canister should fallback to the UTC timezone when creating the consent message.
-    // If absent in the response, the canister is indicating that the consent message is not timezone sensitive.
-    utc_offset_minutes: opt int16;
+	// The users local timezone offset in minutes from UTC.
+	// Applicable when converting timestamps to human-readable format.
+	//
+	// If absent in the request, the canister should fallback to the UTC timezone when creating the consent message.
+	// If absent in the response, the canister is indicating that the consent message is not timezone sensitive.
+	utc_offset_minutes : opt int16
 };
 
 type icrc21_consent_message_spec = record {
-    // Metadata of the consent message.
-    metadata: icrc21_consent_message_metadata;
+	// Metadata of the consent message.
+	metadata : icrc21_consent_message_metadata;
 
-    // Information about the device responsible for presenting the consent message to the user.
-    // If absent in the request, the canister should fallback to one of the values defined in this spec (ICRC-21).
-    device_spec: opt variant {
-        // A generic display able to handle large documents and do line wrapping and pagination / scrolling.
-        // Text must be Markdown formatted, no external resources (e.g. images) are allowed.
-        GenericDisplay;
-        // Simple display able to handle lines of text with a maximum number of characters per line.
-        // Multiple pages can be used if the text does no fit on a single page.
-        // Text must be plain text without any embedded formatting elements.
-        LineDisplay: record {
-            // Maximum number of characters that can be displayed per line.
-            characters_per_line: nat16;
-            // Maximum number of lines that can be displayed at once on a single page.
-            lines_per_page: nat16;
-        };
-    };
+	// Information about the device responsible for presenting the consent message to the user.
+	// If absent in the request, the canister should fallback to one of the values defined in this spec (ICRC-21).
+	device_spec : opt variant {
+		// A generic display able to handle large documents and do line wrapping and pagination / scrolling.
+		// Text must be Markdown formatted, no external resources (e.g. images) are allowed.
+		GenericDisplay;
+		// Simple display able to handle lines of text with a maximum number of characters per line.
+		// Multiple pages can be used if the text does no fit on a single page.
+		// Text must be plain text without any embedded formatting elements.
+		LineDisplay : record {
+			// Maximum number of characters that can be displayed per line.
+			characters_per_line : nat16;
+			// Maximum number of lines that can be displayed at once on a single page.
+			lines_per_page : nat16
+		}
+	}
 };
 
 type icrc21_consent_message_request = record {
-    // Method name of the canister call.
-    method: text;
-    // Argument of the canister call.
-    arg: blob;
-    // User preferences with regards to the consent message presented to the end-user.
-    user_preferences: icrc21_consent_message_spec;
+	// Method name of the canister call.
+	method : text;
+	// Argument of the canister call.
+	arg : blob;
+	// User preferences with regards to the consent message presented to the end-user.
+	user_preferences : icrc21_consent_message_spec
 };
 
 type icrc21_consent_message = variant {
-    // Message for a generic display able to handle large documents and do proper line wrapping and pagination / scrolling.
-    // Uses Markdown formatting, no external resources (e.g. images) are allowed.
-    GenericDisplayMessage: text;
-    // Message for a simple display able to handle pages with multiple lines of text with a fixed maximum number of
-    // characters per line.
-    // Multiple pages can be used if the text does no fit on a single page.
-    // Uses plain text, without any embedded formatting elements.
-    LineDisplayMessage: record {
-        pages: vec record {
-            // Lines of text to be displayed on a single page.
-            // Must not have more entries (lines) than specified in the icrc21_consent_message_spec.
-            // Lines must not exceed the number of characters per line specified in the icrc21_consent_message_spec.
-            lines: vec text;
-        };
-    };
+	// Message for a generic display able to handle large documents and do proper line wrapping and pagination / scrolling.
+	// Uses Markdown formatting, no external resources (e.g. images) are allowed.
+	GenericDisplayMessage : text;
+	// Message for a simple display able to handle pages with multiple lines of text with a fixed maximum number of
+	// characters per line.
+	// Multiple pages can be used if the text does no fit on a single page.
+	// Uses plain text, without any embedded formatting elements.
+	LineDisplayMessage : record {
+		pages : vec record {
+			// Lines of text to be displayed on a single page.
+			// Must not have more entries (lines) than specified in the icrc21_consent_message_spec.
+			// Lines must not exceed the number of characters per line specified in the icrc21_consent_message_spec.
+			lines : vec text
+		}
+	}
 };
 
 type icrc21_consent_info = record {
-    // Consent message describing in a human-readable format what the call will do.
-    //
-    // The message should adhere as close as possible to the user_preferences specified in the consent_message_spec
-    // of the icrc21_consent_message_request.
-    // If the message is not available for the given user_preferences any fallback message should be used. Providing a
-    // message should be preferred over sending an icrc21_error.
-    // The metadata must match the consent_message provided.
-    //
-    // The message should be short and concise.
-    // It should only contain information that is:
-    // * relevant to the user
-    // * relevant given the canister call argument
-    //
-    // The message must fit the following context shown to
-    // the user on the signer UI:
-    // ┌─────────────────────────────────┐
-    // │  Approve the following action?  │
-    // │  ┌───────────────────────────┐  │
-    // │  │    <consent_message>      │  │
-    // │  └───────────────────────────┘  │
-    // │  ┌───────────┐   ┌───────────┐  │
-    // │  │  Reject   │   │  Approve  │  │
-    // │  └───────────┘   └───────────┘  │
-    // └─────────────────────────────────┘
-    consent_message: icrc21_consent_message;
-    // Metadata of the consent_message.
-    metadata: icrc21_consent_message_metadata;
+	// Consent message describing in a human-readable format what the call will do.
+	//
+	// The message should adhere as close as possible to the user_preferences specified in the consent_message_spec
+	// of the icrc21_consent_message_request.
+	// If the message is not available for the given user_preferences any fallback message should be used. Providing a
+	// message should be preferred over sending an icrc21_error.
+	// The metadata must match the consent_message provided.
+	//
+	// The message should be short and concise.
+	// It should only contain information that is:
+	// * relevant to the user
+	// * relevant given the canister call argument
+	//
+	// The message must fit the following context shown to
+	// the user on the signer UI:
+	// ┌─────────────────────────────────┐
+	// │  Approve the following action?  │
+	// │  ┌───────────────────────────┐  │
+	// │  │    <consent_message>      │  │
+	// │  └───────────────────────────┘  │
+	// │  ┌───────────┐   ┌───────────┐  │
+	// │  │  Reject   │   │  Approve  │  │
+	// │  └───────────┘   └───────────┘  │
+	// └─────────────────────────────────┘
+	consent_message : icrc21_consent_message;
+	// Metadata of the consent_message.
+	metadata : icrc21_consent_message_metadata
 };
 
 type icrc21_error_info = record {
-    // Human readable technical description of the error intended for developers, not the end-user.
-    description: text;
+	// Human readable technical description of the error intended for developers, not the end-user.
+	description : text
 };
 
 type icrc21_error = variant {
-    // The canister does not support this call (i.e. it will lead to a rejection or error response).
-    // Reasons might be (non-exhaustive list):
-    // * the canister call is malformed (e.g. wrong method name, argument cannot be decoded)
-    // * the arguments exceed certain bounds
-    //
-    // The developer should provide more information about the error using the description in icrc21_error_info.
-    UnsupportedCanisterCall: icrc21_error_info;
+	// The canister does not support this call (i.e. it will lead to a rejection or error response).
+	// Reasons might be (non-exhaustive list):
+	// * the canister call is malformed (e.g. wrong method name, argument cannot be decoded)
+	// * the arguments exceed certain bounds
+	//
+	// The developer should provide more information about the error using the description in icrc21_error_info.
+	UnsupportedCanisterCall : icrc21_error_info;
 
-    // The canister cannot produce a consent message for this call.
-    // Reasons might be (non-exhaustive list):
-    // * it is an internal call not intended for end-users
-    // * the canister developer has not yet implemented a consent message for this call
-    //
-    // The developer should provide more information about the error using the description in icrc21_error_info.
-    ConsentMessageUnavailable: icrc21_error_info;
+	// The canister cannot produce a consent message for this call.
+	// Reasons might be (non-exhaustive list):
+	// * it is an internal call not intended for end-users
+	// * the canister developer has not yet implemented a consent message for this call
+	//
+	// The developer should provide more information about the error using the description in icrc21_error_info.
+	ConsentMessageUnavailable : icrc21_error_info;
 
-    // The canister did not provide a consent message for because payment was missing or insufficient.
-    //
-    // This error is used to account for payment extensions to be added in the future:
-    // While small consent messages are easy and cheap to provide, this might not generally be the case for all consent
-    // messages. To avoid future breaking changes, when introducing a payment flow, this error is already introduced
-    // even though there no standardized payment flow yet.
-    InsufficientPayment: icrc21_error_info;
+	// The canister did not provide a consent message for because payment was missing or insufficient.
+	//
+	// This error is used to account for payment extensions to be added in the future:
+	// While small consent messages are easy and cheap to provide, this might not generally be the case for all consent
+	// messages. To avoid future breaking changes, when introducing a payment flow, this error is already introduced
+	// even though there no standardized payment flow yet.
+	InsufficientPayment : icrc21_error_info;
 
-    // Any error not covered by the above variants.
-    GenericError: record {
-       // Machine parsable error. Can be chosen by the target canister but should indicate the error category.
-       error_code: nat;
-       // Human readable technical description of the error intended for developers, not the end-user.
-       description: text;
-   };
+	// Any error not covered by the above variants.
+	GenericError : record {
+		// Machine parsable error. Can be chosen by the target canister but should indicate the error category.
+		error_code : nat;
+		// Human readable technical description of the error intended for developers, not the end-user.
+		description : text
+	}
 };
 
 type icrc21_consent_message_response = variant {
-    // The call is ok, consent message is provided.
-    Ok: icrc21_consent_info;
-    // The call is not ok, error is provided.
-    Err: icrc21_error;
+	// The call is ok, consent message is provided.
+	Ok : icrc21_consent_info;
+	// The call is not ok, error is provided.
+	Err : icrc21_error
 };
 
 type Icrc28TrustedOriginsResponse = record { trusted_origins : vec text };
 
 type TxId = variant {
-    BlockIndex : nat;
-    TransactionId : text;
+	BlockIndex : nat;
+	TransactionId : text
 };
 
 type ICTransferReply = record {
-    chain : text;
-    symbol : text;
-    is_send : bool;
-    amount : nat;
-    canister_id : text;
-    block_index : nat;
+	chain : text;
+	symbol : text;
+	is_send : bool;
+	amount : nat;
+	canister_id : text;
+	block_index : nat
 };
 type TransferReply = variant {
-    IC : ICTransferReply;
+	IC : ICTransferReply
 };
 type TransferIdReply = record {
-    transfer_id : nat64;
-    transfer : TransferReply
+	transfer_id : nat64;
+	transfer : TransferReply
 };
 
 type UserReply = record {
-    user_id : nat32;
-    principal_id : text;
-    account_id : text;
-    my_referral_code : text;
-    referred_by : opt text;
-    referred_by_expires_at : opt nat64;
-    fee_level : nat8;
-    fee_level_expires_at : opt nat64;
+	user_id : nat32;
+	principal_id : text;
+	account_id : text;
+	my_referral_code : text;
+	referred_by : opt text;
+	referred_by_expires_at : opt nat64;
+	fee_level : nat8;
+	fee_level_expires_at : opt nat64
 };
 type UserResult = variant { Ok : UserReply; Err : text };
 
 type UserBalancesReply = variant {
-    LP : LPBalancesReply;
+	LP : LPBalancesReply
 };
 type LPBalancesReply = record {
-    name : text;
-    symbol : text;
-    balance : float64;
-    usd_balance : float64;
-    chain_0 : text;
-    symbol_0 : text;
-    address_0 : text;
-    amount_0 : float64;
-    usd_amount_0 : float64;
-    chain_1 : text;
-    symbol_1 : text;
-    address_1 : text;
-    amount_1 : float64;
-    usd_amount_1 : float64;
-    ts : nat64;
+	name : text;
+	symbol : text;
+	lp_token_id : nat64;
+	balance : float64;
+	usd_balance : float64;
+	chain_0 : text;
+	symbol_0 : text;
+	address_0 : text;
+	amount_0 : float64;
+	usd_amount_0 : float64;
+	chain_1 : text;
+	symbol_1 : text;
+	address_1 : text;
+	amount_1 : float64;
+	usd_amount_1 : float64;
+	ts : nat64
 };
 type UserBalancesResult = variant { Ok : vec UserBalancesReply; Err : text };
 
 type MessagesReply = record {
-    message_id : nat64;
-    title : text;
-    message : text;
-    ts : nat64;
+	message_id : nat64;
+	title : text;
+	message : text;
+	ts : nat64
 };
 type MessagesResult = variant { Ok : vec MessagesReply; Err : text };
 
 type TokenReply = variant {
-    LP : LPTokenReply;
-    IC : ICTokenReply;
+	LP : LPTokenReply;
+	IC : ICTokenReply
 };
 type LPTokenReply = record {
-    token_id : nat32;
-    chain : text;
-    address : text;
-    name : text;
-    symbol : text;
-    pool_id_of : nat32;
-    decimals : nat8;
-    fee : nat;
-    total_supply : nat;
-    is_removed : bool;
+	token_id : nat32;
+	chain : text;
+	address : text;
+	name : text;
+	symbol : text;
+	pool_id_of : nat32;
+	decimals : nat8;
+	fee : nat;
+	total_supply : nat;
+	is_removed : bool
 };
 type ICTokenReply = record {
-    token_id : nat32;
-    chain : text;
-    canister_id : text;
-    name : text;
-    symbol : text;
-    decimals : nat8;	
-    fee : nat;
-    icrc1 : bool;
-    icrc2 : bool;
-    icrc3 : bool;
-    is_removed : bool;
+	token_id : nat32;
+	chain : text;
+	canister_id : text;
+	name : text;
+	symbol : text;
+	decimals : nat8;
+	fee : nat;
+	icrc1 : bool;
+	icrc2 : bool;
+	icrc3 : bool;
+	is_removed : bool
 };
 type TokensResult = variant { Ok : vec TokenReply; Err : text };
 
-type PoolsReply = record {
-    pools : vec PoolReply;
-    total_tvl : nat;
-    total_24h_volume : nat;
-    total_24h_lp_fee : nat;
-    total_24h_num_swaps : nat;
-};
 type PoolReply = record {
-    pool_id : nat32;
-    name : text;
-    symbol : text;
-    chain_0 : text;
-    symbol_0 : text;
-    address_0 : text;
-    balance_0 : nat;
-    lp_fee_0 : nat;
-    chain_1 : text;
-    symbol_1 : text;
-    address_1 : text;
-    balance_1 : nat;
-    lp_fee_1 : nat;
-    price : float64;
-    lp_fee_bps : nat8;
-    tvl : nat;                  // USD value of TVL
-    rolling_24h_volume : nat;   // USD value of rolling 24h volume
-    rolling_24h_lp_fee : nat;   // USD value of rolling 24h LP fees
-    rolling_24h_num_swaps : nat;
-    rolling_24h_apy : float64;
-    lp_token_symbol : text;
-    is_removed : bool;
+	pool_id : nat32;
+	name : text;
+	symbol : text;
+	chain_0 : text;
+	symbol_0 : text;
+	address_0 : text;
+	balance_0 : nat;
+	lp_fee_0 : nat;
+	chain_1 : text;
+	symbol_1 : text;
+	address_1 : text;
+	balance_1 : nat;
+	lp_fee_1 : nat;
+	price : float64;
+	lp_fee_bps : nat8;
+	lp_token_symbol : text;
+	is_removed : bool
 };
-type PoolsResult = variant { Ok : PoolsReply; Err : text };
+type PoolsResult = variant { Ok : vec PoolReply; Err : text };
 
 type PoolExpectedBalance = record {
-    pool_symbol : text;
-    balance : nat;
-    lp_fee : nat;
-    kong_fee : nat;
+	pool_symbol : text;
+	balance : nat;
+	lp_fee : nat;
+	kong_fee : nat
 };
 type ExpectedBalance = record {
-    balance : nat;
-    pool_balances : vec PoolExpectedBalance;
-    unclaimed_claims : nat;
+	balance : nat;
+	pool_balances : vec PoolExpectedBalance;
+	unclaimed_claims : nat
 };
 type CheckPoolsReply = record {
-    symbol : text;
-    actual_balance : nat;
-    expected_balance : ExpectedBalance;
-    diff_balance : int;
+	symbol : text;
+	actual_balance : nat;
+	expected_balance : ExpectedBalance;
+	diff_balance : int
 };
 type CheckPoolsResult = variant { Ok : vec CheckPoolsReply; Err : text };
 
 type TxsReply = variant {
-    AddPool : AddPoolReply;
-    AddLiquidity : AddLiquidityReply;
-    RemoveLiquidity : RemoveLiquidityReply;
-    Swap : SwapReply;
+	AddPool : AddPoolReply;
+	AddLiquidity : AddLiquidityReply;
+	RemoveLiquidity : RemoveLiquidityReply;
+	Swap : SwapReply
 };
 type TxsResult = variant { Ok : vec TxsReply; Err : text };
 
 type RequestRequest = variant {
-    AddPool : AddPoolArgs;
-    AddLiquidity : AddLiquidityArgs;
-    RemoveLiquidity : RemoveLiquidityArgs;
-    Swap : SwapArgs;
+	AddPool : AddPoolArgs;
+	AddLiquidity : AddLiquidityArgs;
+	RemoveLiquidity : RemoveLiquidityArgs;
+	Swap : SwapArgs
 };
 
 type RequestReply = variant {
-    Pending;
-    AddPool : AddPoolReply;
-    AddLiquidity : AddLiquidityReply;
-    RemoveLiquidity : RemoveLiquidityReply;
-    Swap : SwapReply;
+	Pending;
+	AddPool : AddPoolReply;
+	AddLiquidity : AddLiquidityReply;
+	RemoveLiquidity : RemoveLiquidityReply;
+	Swap : SwapReply
 };
 
 type RequestsReply = record {
-    request_id : nat64;
-    statuses : vec text;
-    request : RequestRequest;
-    reply : RequestReply;
-    ts : nat64;
+	request_id : nat64;
+	statuses : vec text;
+	request : RequestRequest;
+	reply : RequestReply;
+	ts : nat64
 };
 type RequestsResult = variant { Ok : vec RequestsReply; Err : text };
 
 type TransfersResult = variant { Ok : vec TransferIdReply; Err : text };
 
 type AddTokenArgs = record {
-    token : text;
+	token : text
 };
 type AddTokenReply = variant {
-    IC : ICTokenReply;
+	IC : ICTokenReply
 };
 type AddTokenResult = variant { Ok : AddTokenReply; Err : text };
 
 type UpdateTokenArgs = record {
-    token : text;
+	token : text
 };
 type UpdateTokenReply = variant {
-    IC : ICTokenReply;
+	IC : ICTokenReply
 };
 type UpdateTokenResult = variant { Ok : UpdateTokenReply; Err : text };
 
 type AddPoolArgs = record {
-    token_0 : text;
-    amount_0 : nat;
-    tx_id_0 : opt TxId;
-    token_1 : text;
-    amount_1 : nat;
-    tx_id_1 : opt TxId;
-    lp_fee_bps : opt nat8;
+	token_0 : text;
+	amount_0 : nat;
+	tx_id_0 : opt TxId;
+	token_1 : text;
+	amount_1 : nat;
+	tx_id_1 : opt TxId;
+	lp_fee_bps : opt nat8
 };
 type AddPoolReply = record {
-    tx_id : nat64;
-    pool_id : nat32;
-    request_id : nat64;
-    status : text;    
-    name : text;
-    symbol : text;
-    chain_0 : text;
-    address_0 : text;
-    symbol_0 : text;
-    amount_0 : nat;
-    chain_1 : text;
-    address_1 : text;
-    symbol_1 : text;
-    amount_1 : nat;
-    lp_fee_bps : nat8;
-    lp_token_symbol : text;
-    add_lp_token_amount : nat;
-    transfer_ids : vec TransferIdReply;
-    claim_ids : vec nat64;
-    is_removed : bool;
-    ts : nat64;
+	tx_id : nat64;
+	pool_id : nat32;
+	request_id : nat64;
+	status : text;
+	name : text;
+	symbol : text;
+	chain_0 : text;
+	address_0 : text;
+	symbol_0 : text;
+	amount_0 : nat;
+	chain_1 : text;
+	address_1 : text;
+	symbol_1 : text;
+	amount_1 : nat;
+	lp_fee_bps : nat8;
+	lp_token_symbol : text;
+	add_lp_token_amount : nat;
+	transfer_ids : vec TransferIdReply;
+	claim_ids : vec nat64;
+	is_removed : bool;
+	ts : nat64
 };
 type AddPoolResult = variant { Ok : AddPoolReply; Err : text };
 
 type AddLiquidityAmountsReply = record {
-    symbol : text;
-    chain_0 : text;
-    address_0 : text;
-    symbol_0 : text;
-    amount_0 : nat;
-    fee_0 : nat;
-    chain_1 : text;
-    address_1 : text;
-    symbol_1 : text;
-    amount_1 : nat;
-    fee_1 : nat;
-    add_lp_token_amount : nat;
+	symbol : text;
+	chain_0 : text;
+	address_0 : text;
+	symbol_0 : text;
+	amount_0 : nat;
+	fee_0 : nat;
+	chain_1 : text;
+	address_1 : text;
+	symbol_1 : text;
+	amount_1 : nat;
+	fee_1 : nat;
+	add_lp_token_amount : nat
 };
 type AddLiquiditAmountsResult = variant { Ok : AddLiquidityAmountsReply; Err : text };
 
 type AddLiquidityArgs = record {
-    token_0 : text;
-    amount_0 : nat;
-    tx_id_0 : opt TxId;
-    token_1 : text;
-    amount_1 : nat;
-    tx_id_1 : opt TxId;
+	token_0 : text;
+	amount_0 : nat;
+	tx_id_0 : opt TxId;
+	token_1 : text;
+	amount_1 : nat;
+	tx_id_1 : opt TxId
 };
 type AddLiquidityReply = record {
-    tx_id : nat64;
-    request_id : nat64;
-    status : text;
-    symbol : text;
-    chain_0 : text;
-    address_0 : text;
-    symbol_0 : text;
-    amount_0 : nat;
-    chain_1 : text;
-    address_1 : text;
-    symbol_1 : text;
-    amount_1 : nat;
-    add_lp_token_amount : nat;
-    transfer_ids : vec TransferIdReply;
-    claim_ids : vec nat64;
-    ts : nat64;
+	tx_id : nat64;
+	request_id : nat64;
+	status : text;
+	symbol : text;
+	chain_0 : text;
+	address_0 : text;
+	symbol_0 : text;
+	amount_0 : nat;
+	chain_1 : text;
+	address_1 : text;
+	symbol_1 : text;
+	amount_1 : nat;
+	add_lp_token_amount : nat;
+	transfer_ids : vec TransferIdReply;
+	claim_ids : vec nat64;
+	ts : nat64
 };
 type AddLiquidityResult = variant { Ok : AddLiquidityReply; Err : text };
 type AddLiquidityAsyncResult = variant { Ok : nat64; Err : text };
 type ValidateAddLiquidityResult = variant { Ok : text; Err : text };
 
 type RemoveLiquidityAmountsReply = record {
-    symbol : text;
-    chain_0 : text;
-    address_0 : text;
-    symbol_0 : text;
-    amount_0 : nat;
-    lp_fee_0 : nat;
-    chain_1 : text;
-    address_1 : text;    
-    symbol_1 : text;
-    amount_1 : nat;
-    lp_fee_1 : nat;
-    remove_lp_token_amount : nat;
+	symbol : text;
+	chain_0 : text;
+	address_0 : text;
+	symbol_0 : text;
+	amount_0 : nat;
+	lp_fee_0 : nat;
+	chain_1 : text;
+	address_1 : text;
+	symbol_1 : text;
+	amount_1 : nat;
+	lp_fee_1 : nat;
+	remove_lp_token_amount : nat
 };
 type RemoveLiquidityAmountsResult = variant { Ok : RemoveLiquidityAmountsReply; Err : text };
 
 type RemoveLiquidityArgs = record {
-    token_0 : text;
-    token_1 : text;
-    remove_lp_token_amount : nat;
+	token_0 : text;
+	token_1 : text;
+	remove_lp_token_amount : nat
 };
 type RemoveLiquidityReply = record {
-    tx_id : nat64;
-    request_id : nat64;
-    status : text;
-    symbol : text;
-    chain_0 : text;
-    address_0 : text;
-    symbol_0 : text;
-    amount_0 : nat;
-    lp_fee_0 : nat;
-    chain_1 : text;
-    address_1 : text;
-    symbol_1 : text;
-    amount_1 : nat;
-    lp_fee_1 : nat;
-    remove_lp_token_amount : nat;
-    transfer_ids : vec TransferIdReply;
-    claim_ids : vec nat64;
-    ts : nat64;
+	tx_id : nat64;
+	request_id : nat64;
+	status : text;
+	symbol : text;
+	chain_0 : text;
+	address_0 : text;
+	symbol_0 : text;
+	amount_0 : nat;
+	lp_fee_0 : nat;
+	chain_1 : text;
+	address_1 : text;
+	symbol_1 : text;
+	amount_1 : nat;
+	lp_fee_1 : nat;
+	remove_lp_token_amount : nat;
+	transfer_ids : vec TransferIdReply;
+	claim_ids : vec nat64;
+	ts : nat64
 };
 type RemoveLiquidityResult = variant { Ok : RemoveLiquidityReply; Err : text };
 type RemoveLiquidityAsyncResult = variant { Ok : nat64; Err : text };
 type ValidateRemoveLiquidityResult = variant { Ok : text; Err : text };
 
 type SwapAmountsTxReply = record {
-    pool_symbol : text;
-    pay_chain : text;
-    pay_symbol : text;
-    pay_address : text;
-    pay_amount : nat;
-    receive_chain : text;
-    receive_symbol : text;
-    receive_address : text;
-    receive_amount : nat;
-    price : float64;
-    lp_fee : nat;
-    gas_fee : nat;
+	pool_symbol : text;
+	pay_chain : text;
+	pay_symbol : text;
+	pay_address : text;
+	pay_amount : nat;
+	receive_chain : text;
+	receive_symbol : text;
+	receive_address : text;
+	receive_amount : nat;
+	price : float64;
+	lp_fee : nat;
+	gas_fee : nat
 };
 type SwapAmountsReply = record {
-    pay_chain : text;
-    pay_symbol : text;
-    pay_address : text;
-    pay_amount : nat;
-    receive_chain : text;
-    receive_symbol : text;
-    receive_address : text;
-    receive_amount : nat;
-    price : float64;
-    mid_price : float64;
-    slippage : float64;
-    txs : vec SwapAmountsTxReply;    
+	pay_chain : text;
+	pay_symbol : text;
+	pay_address : text;
+	pay_amount : nat;
+	receive_chain : text;
+	receive_symbol : text;
+	receive_address : text;
+	receive_amount : nat;
+	price : float64;
+	mid_price : float64;
+	slippage : float64;
+	txs : vec SwapAmountsTxReply
 };
 type SwapAmountsResult = variant { Ok : SwapAmountsReply; Err : text };
 
 type SwapArgs = record {
-    pay_token : text;
-    pay_amount : nat;
-    pay_tx_id : opt TxId;
-    receive_token : text;
-    receive_amount : opt nat;
-    receive_address : opt text;
-    max_slippage : opt float64;
-    referred_by : opt text;
+	pay_token : text;
+	pay_amount : nat;
+	pay_tx_id : opt TxId;
+	receive_token : text;
+	receive_amount : opt nat;
+	receive_address : opt text;
+	max_slippage : opt float64;
+	referred_by : opt text
 };
 type SwapTxReply = record {
-    pool_symbol : text;
-    pay_chain : text;
-    pay_address : text;
-    pay_symbol : text;
-    pay_amount : nat;
-    receive_chain : text;
-    receive_address : text;
-    receive_symbol : text;
-    receive_amount : nat;
-    price : float64;
-    lp_fee : nat;
-    gas_fee : nat;
-    ts : nat64;
+	pool_symbol : text;
+	pay_chain : text;
+	pay_address : text;
+	pay_symbol : text;
+	pay_amount : nat;
+	receive_chain : text;
+	receive_address : text;
+	receive_symbol : text;
+	receive_amount : nat;
+	price : float64;
+	lp_fee : nat;
+	gas_fee : nat;
+	ts : nat64
 };
 type SwapReply = record {
-    tx_id : nat64;
-    request_id : nat64;
-    status : text;
-    pay_chain : text;
-    pay_address : text;
-    pay_symbol : text;
-    pay_amount : nat;
-    receive_chain : text;
-    receive_address : text;
-    receive_symbol : text;
-    receive_amount : nat;
-    mid_price : float64;
-    price : float64;
-    slippage : float64;
-    txs : vec SwapTxReply;
-    transfer_ids : vec TransferIdReply;
-    claim_ids : vec nat64;
-    ts : nat64;
+	tx_id : nat64;
+	request_id : nat64;
+	status : text;
+	pay_chain : text;
+	pay_address : text;
+	pay_symbol : text;
+	pay_amount : nat;
+	receive_chain : text;
+	receive_address : text;
+	receive_symbol : text;
+	receive_amount : nat;
+	mid_price : float64;
+	price : float64;
+	slippage : float64;
+	txs : vec SwapTxReply;
+	transfer_ids : vec TransferIdReply;
+	claim_ids : vec nat64;
+	ts : nat64
 };
 type SwapResult = variant { Ok : SwapReply; Err : text };
 type SwapAsyncResult = variant { Ok : nat64; Err : text };
 
+type ClaimsReply = record {
+	claim_id : nat64;
+	status : text;
+	chain : text;
+	symbol : text;
+	canister_id : opt text;
+	amount : nat;
+	fee : nat;
+	to_address : text;
+	desc : text;
+	ts : nat64
+};
+type ClaimsResult = variant { Ok : vec ClaimsReply; Err : text };
+type ClaimReply = record {
+	claim_id : nat64;
+	status : text;
+	chain : text;
+	symbol : text;
+	canister_id : opt text;
+	amount : nat;
+	fee : nat;
+	to_address : text;
+	desc : text;
+	transfer_ids : vec TransferIdReply;
+	ts : nat64
+};
+type ClaimResult = variant { Ok : ClaimReply; Err : text };
+
 type SendArgs = record {
-    token : text;
-    amount : nat;
-    to_address : text;
+	token : text;
+	amount : nat;
+	to_address : text
 };
 type SendReply = record {
-    tx_id : nat64;
-    request_id : nat64;
-    status : text;
-    chain : text;
-    symbol : text;
-    amount : nat;
-    to_address : text;
-    ts : nat64;
+	tx_id : nat64;
+	request_id : nat64;
+	status : text;
+	chain : text;
+	symbol : text;
+	amount : nat;
+	to_address : text;
+	ts : nat64
 };
 type SendResult = variant { OK : SendReply; Err : text };
 
 service : {
-    // icrc1 standards
-    icrc1_name : () -> (text) query;
-    icrc10_supported_standards : () -> (vec Icrc10SupportedStandards) query;
-    icrc21_canister_call_consent_message: (icrc21_consent_message_request) -> (icrc21_consent_message_response);
-    icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);
-    
-    // tokens(opt wildcard) - returns all tokens or wildcard search
-    tokens : (opt text) -> (TokensResult) query;
-    // pools(opt wildcard) - returns all pools or wildcard search
-    pools : (opt text) -> (PoolsResult) query;
+	// icrc1 standards
+	icrc1_name : () -> (text) query;
+	icrc10_supported_standards : () -> (vec Icrc10SupportedStandards) query;
+	icrc21_canister_call_consent_message : (icrc21_consent_message_request) -> (icrc21_consent_message_response);
+	icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);
 
-    // user() - returns user information
-    get_user : () -> (UserResult) query;
-    // user_balances(principal_id) - return user's LP balances
-    user_balances : (text) -> (UserBalancesResult) query;
-    // requests(opt request_id) - return specific request or most recent requests
-    requests : (opt nat64) -> (RequestsResult) query;
-    // txs(opt principal_id) - return transactions filtered by principal id
-    txs : (opt text) -> (TxsResult) query;
+	// tokens(opt wildcard) - returns all tokens or wildcard search
+	tokens : (opt text) -> (TokensResult) query;
+	// pools(opt wildcard) - returns all pools or wildcard search
+	pools : (opt text) -> (PoolsResult) query;
 
-    // add a new token
-    add_token : (AddTokenArgs) -> (AddTokenResult);
-    // update token details
-    update_token : (UpdateTokenArgs) -> (UpdateTokenResult);
-    // add a new liquidity pool and token
-    add_pool : (AddPoolArgs) -> (AddPoolResult);
+	// user() - returns user information
+	get_user : () -> (UserResult) query;
+	// user_balances(principal_id) - return user's LP balances
+	user_balances : (text) -> (UserBalancesResult) query;
+	// requests(opt request_id) - return specific request_id
+	requests : (opt nat64) -> (RequestsResult) query;
 
-    // add_liquidity_amounts(token_0, amount_0, token_1)
-    // token_0, token_1 - format Symbol, Chain.Symbol, CanisterId or Chain.CanisterId ie. ckBTC, IC.ckBTC, or IC.ryjl3-tyaaa-aaaaa-aaaba-cai
-    // amount_0, amount_1 - Nat numbers with corresponding decimal precision as defined in ledger canister
-    // - calculates the required amount_1 to add liquidity to pool
-    // - results of add_liquidity_amounts() are then pass to add_liquidity() for execution
-    add_liquidity_amounts : (text, nat, text) -> (AddLiquiditAmountsResult) query;
-    // adds token_0 and token_1 to the liqudity pool in return for LP tokens
-    // - add_liquidity() has 2 variations:
-    //   1) 2 x icrc2_approve + icrc2_transfer_from - user must icrc2_approve the amount_0+gas of token_0, amount_1+gas of token_1 and then call add_liquidity() where the canister will then icrc2_transfer_from
-    //   2) 2 x icrc1_transfer - user must icrc1_transfer the amount_0 of token_0, amount_1 of token_1 and then call add_liquidity() with the block index (tx_id_0 and tx_id_1)
-    add_liquidity : (AddLiquidityArgs) -> (AddLiquidityResult);
-    // asnychronous version of add_liquidity()
-    // request_id will be returned by add_liquidity_async() and poll requests(request_id) to get updated status
-    add_liquidity_async : (AddLiquidityArgs) -> (AddLiquidityAsyncResult);
-    // validate add_liquidity for SNS proposals
-    validate_add_liquidity : () -> (ValidateAddLiquidityResult);
+	// add a new token
+	add_token : (AddTokenArgs) -> (AddTokenResult);
+	// update token details
+	update_token : (UpdateTokenArgs) -> (UpdateTokenResult);
+	// add a new liquidity pool and token
+	add_pool : (AddPoolArgs) -> (AddPoolResult);
 
-    // remove_liquidity_amounts(token_0, token_1, remove_lp_token_amount)
-    // calcalates the expected token_0 and token_1 to be received from redeeming remove_lp_token_amount of LP tokens to the pool
-    remove_liquidity_amounts : (text, text, nat) -> (RemoveLiquidityAmountsResult) query;
-    // redeems remove_lp_token_amount of LP tokens to the pool and receives token_0 and token_1 in return
-    remove_liquidity : (RemoveLiquidityArgs) -> (RemoveLiquidityResult);
-    // asnychronous version of remove_liquidity()
-    // request_id will be returned by remove_liquidity_async() and poll requests(request_id) to get updated status
-    remove_liquidity_async : (RemoveLiquidityArgs) -> (RemoveLiquidityAsyncResult);
-    // validate remove_liquidity for SNS proposals
-    validate_remove_liquidity : () -> (ValidateRemoveLiquidityResult);
+	// add_liquidity_amounts(token_0, amount_0, token_1)
+	// token_0, token_1 - format Symbol, Chain.Symbol, CanisterId or Chain.CanisterId ie. ckBTC, IC.ckBTC, or IC.ryjl3-tyaaa-aaaaa-aaaba-cai
+	// amount_0, amount_1 - Nat numbers with corresponding decimal precision as defined in ledger canister
+	// - calculates the required amount_1 to add liquidity to pool
+	// - results of add_liquidity_amounts() are then pass to add_liquidity() for execution
+	add_liquidity_amounts : (text, nat, text) -> (AddLiquiditAmountsResult) query;
+	// adds token_0 and token_1 to the liqudity pool in return for LP tokens
+	// - add_liquidity() has 2 variations:
+	//   1) 2 x icrc2_approve + icrc2_transfer_from - user must icrc2_approve the amount_0+gas of token_0, amount_1+gas of token_1 and then call add_liquidity() where the canister will then icrc2_transfer_from
+	//   2) 2 x icrc1_transfer - user must icrc1_transfer the amount_0 of token_0, amount_1 of token_1 and then call add_liquidity() with the block index (tx_id_0 and tx_id_1)
+	add_liquidity : (AddLiquidityArgs) -> (AddLiquidityResult);
+	// asnychronous version of add_liquidity()
+	// request_id will be returned by add_liquidity_async() and poll requests(request_id) to get updated status
+	add_liquidity_async : (AddLiquidityArgs) -> (AddLiquidityAsyncResult);
+	// validate add_liquidity for SNS proposals
+	validate_add_liquidity : () -> (ValidateAddLiquidityResult);
 
-    // swap_amounts(pay_token, pay_amount, receive_token)
-    // pay_token, receive_token - format Symbol, Chain.Symbol, CanisterId or Chain.CanisterId ie. ckBTC, IC.ckBTC, or IC.ryjl3-tyaaa-aaaaa-aaaba-cai
-    // pay_amount, receive_amount - Nat numbers with corresponding decimal precision as defined in ledger canister
-    // - calculates the expected receive_amount and price of the swap
-    // - results of swap_amounts() are then pass to swap() for execution
-    swap_amounts : (text, nat, text) -> (SwapAmountsResult) query;
+	// remove_liquidity_amounts(token_0, token_1, remove_lp_token_amount)
+	// calcalates the expected token_0 and token_1 to be received from redeeming remove_lp_token_amount of LP tokens to the pool
+	remove_liquidity_amounts : (text, text, nat) -> (RemoveLiquidityAmountsResult) query;
+	// redeems remove_lp_token_amount of LP tokens to the pool and receives token_0 and token_1 in return
+	remove_liquidity : (RemoveLiquidityArgs) -> (RemoveLiquidityResult);
+	// asnychronous version of remove_liquidity()
+	// request_id will be returned by remove_liquidity_async() and poll requests(request_id) to get updated status
+	remove_liquidity_async : (RemoveLiquidityArgs) -> (RemoveLiquidityAsyncResult);
+	// validate remove_liquidity for SNS proposals
+	validate_remove_liquidity : () -> (ValidateRemoveLiquidityResult);
 
-    // swap()
-    // pay_token, receive_token - format Symbol, Chain.Symbol, CanisterId or Chain.CanisterId ie. ckBTC, IC.ckBTC, or IC.ryjl3-tyaaa-aaaaa-aaaba-cai
-    // pay_amount, receive_amount - Nat numbers with corresponding decimal precision as defined in ledger canister
-    // - swaps pay_amount of pay_token into receive_amount of receive_token
-    // - swap() has 2 variations:
-    //   1) icrc2_approve + icrc2_transfer_from - user must icrc2_approve the pay_amount+gas of pay_token and then call swap() where the canister will then icrc2_transfer_from
-    //   2) icrc1_transfer - user must icrc1_transfer the pay_amount of pay_token and then call swap() with the block index
-    swap : (SwapArgs) -> (SwapResult);
-    // asnychronous version of swap()
-    // request_id will be returned by swap_async() and poll requests(request_id) to get updated status
-    swap_async : (SwapArgs) -> (SwapAsyncResult);
+	// swap_amounts(pay_token, pay_amount, receive_token)
+	// pay_token, receive_token - format Symbol, Chain.Symbol, CanisterId or Chain.CanisterId ie. ckBTC, IC.ckBTC, or IC.ryjl3-tyaaa-aaaaa-aaaba-cai
+	// pay_amount, receive_amount - Nat numbers with corresponding decimal precision as defined in ledger canister
+	// - calculates the expected receive_amount and price of the swap
+	// - results of swap_amounts() are then pass to swap() for execution
+	swap_amounts : (text, nat, text) -> (SwapAmountsResult) query;
 
-    // send LP tokens to another user
-    send : (SendArgs) -> (SendResult);
+	// swap()
+	// pay_token, receive_token - format Symbol, Chain.Symbol, CanisterId or Chain.CanisterId ie. ckBTC, IC.ckBTC, or IC.ryjl3-tyaaa-aaaaa-aaaba-cai
+	// pay_amount, receive_amount - Nat numbers with corresponding decimal precision as defined in ledger canister
+	// - swaps pay_amount of pay_token into receive_amount of receive_token
+	// - swap() has 2 variations:
+	//   1) icrc2_approve + icrc2_transfer_from - user must icrc2_approve the pay_amount+gas of pay_token and then call swap() where the canister will then icrc2_transfer_from
+	//   2) icrc1_transfer - user must icrc1_transfer the pay_amount of pay_token and then call swap() with the block index
+	swap : (SwapArgs) -> (SwapResult);
+	// asnychronous version of swap()
+	// request_id will be returned by swap_async() and poll requests(request_id) to get updated status
+	swap_async : (SwapArgs) -> (SwapAsyncResult);
 
-    // admin functions
-    check_pools : () -> (CheckPoolsResult);
+	// claims(principal_id) - return list of claims for user
+	claims : (text) -> (ClaimsResult) query;
+	// claim(claim_id) - claim claim_id
+	claim : (nat64) -> (ClaimResult);
+
+	// send LP tokens to another user
+	send : (SendArgs) -> (SendResult);
+
+	// admin functions
+	check_pools : () -> (CheckPoolsResult)
 }

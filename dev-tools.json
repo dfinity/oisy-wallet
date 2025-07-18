@@ -7,12 +7,16 @@
 	},
 	"rust": {
 		"method": "sh",
-		"version": "See rust-toolchain.toml"
+		"note": "See also: rust-toolchain.toml",
+		"version": "nightly-2025-04-01"
 	},
 	"didc": {
 		"method": "curl",
 		"version": "0.4.0",
 		"url": "https://github.com/dfinity/candid/releases/download/2024-07-29/didc-linux64"
+	},
+	"shellcheck": {
+		"method": "apt"
 	},
 	"shfmt": {
 		"method": "go",
@@ -38,7 +42,7 @@
 	},
 	"cargo-audit": {
 		"method": "cargo-binstall",
-		"version": "0.13.1"
+		"version": "0.21.2"
 	},
 	"cargo-edit": {
 		"method": "cargo-binstall",
@@ -51,5 +55,9 @@
 	"candid-extractor": {
 		"method": "cargo-binstall",
 		"version": "0.1.4"
+	},
+	"zizmor": {
+		"method": "cargo-binstall",
+		"version": "1.5.2"
 	}
 }

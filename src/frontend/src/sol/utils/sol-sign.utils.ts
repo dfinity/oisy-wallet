@@ -11,7 +11,7 @@ import {
 	type SignatureDictionary,
 	type Transaction,
 	type TransactionPartialSigner
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 interface CreateSignerParams {
 	identity: OptionIdentity;

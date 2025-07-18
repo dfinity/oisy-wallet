@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
@@ -17,15 +16,15 @@
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let amount: BigNumber;
+	export let amount: bigint;
 	export let destination: string;
 	export let data: string | undefined;
 	export let erc20Approve: boolean;
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 
-	let amountDisplay: BigNumber;
-	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
+	let amountDisplay: bigint;
+	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
@@ -40,10 +39,12 @@
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
-		<FeeDisplay slot="fee" />
+		<EthFeeDisplay slot="fee" />
 
 		<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
 	</SendData>
 
-	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+	{#snippet toolbar()}
+		<WalletConnectActions on:icApprove on:icReject />
+	{/snippet}
 </ContentWithToolbar>

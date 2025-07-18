@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import type { ProposalTypes } from '@walletconnect/types';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
@@ -18,7 +18,7 @@
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let proposal: Option<Web3WalletTypes.SessionProposal>;
+	export let proposal: Option<WalletKitTypes.SessionProposal>;
 
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;
@@ -57,11 +57,11 @@
 
 		<WalletConnectDomainVerification {proposal} />
 
-		{#each Object.entries(params.requiredNamespaces) as [key, value]}
+		{#each Object.entries(params.requiredNamespaces) as [key, value] (key)}
 			{@const allMethods = value.methods}
 			{@const allEvents = value.events}
 
-			{#each value.chains ?? [] as chainId}
+			{#each value.chains ?? [] as chainId (chainId)}
 				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
 
 				<p class="mt-6 font-bold">
@@ -83,9 +83,11 @@
 			{/each}
 		{/each}
 
-		<div in:fade slot="toolbar">
-			<WalletConnectActions {approve} on:icApprove on:icReject />
-		</div>
+		{#snippet toolbar()}
+			<div in:fade>
+				<WalletConnectActions {approve} on:icApprove on:icReject />
+			</div>
+		{/snippet}
 	</ContentWithToolbar>
 {:else}
 	<ContentWithToolbar>
@@ -98,17 +100,17 @@
 			</div>
 		</div>
 
-		<svelte:fragment slot="toolbar">
+		{#snippet toolbar()}
 			{#if displayCancel}
 				<div in:fade>
 					<ButtonGroup>
 						<ButtonCancel
-							on:click={() => dispatch('icCancel')}
+							onclick={() => dispatch('icCancel')}
 							disabled={$isBusy || $ethAddressNotCertified}
 						/>
 					</ButtonGroup>
 				</div>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</ContentWithToolbar>
 {/if}

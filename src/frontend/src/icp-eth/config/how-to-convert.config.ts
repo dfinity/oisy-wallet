@@ -1,39 +1,28 @@
-import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { sendWizardSteps } from '$lib/config/send.config';
-import type { Token } from '$lib/types/token';
+import {
+	convertWizardSteps,
+	type ConvertWizardStepsParams,
+	type WizardStepsConvertComplete
+} from '$lib/config/convert.config';
+import { WizardStepsHowToConvert } from '$lib/enums/wizard-steps';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { WizardSteps } from '@dfinity/gix-components';
 
+export type WizardStepsHowToConvertComplete = WizardStepsHowToConvert | WizardStepsConvertComplete;
+
 export const howToConvertWizardSteps = ({
 	i18n,
-	twinToken
-}: {
-	i18n: I18n;
-	twinToken: Token;
-}): WizardSteps => {
-	const [send, ...rest] = sendWizardSteps({ i18n });
-
-	const { id: tokenId, symbol } = twinToken;
-
-	return [
-		{
-			name: 'Info',
-			title: replacePlaceholders(i18n.info.ethereum.how_to_short, {
-				$token: symbol
-			})
-		},
-		{
-			name: 'ETH QR code',
-			title: i18n.receive.text.address
-		},
-		{
-			...send,
-			title: [SEPOLIA_TOKEN_ID, ETHEREUM_TOKEN_ID].includes(tokenId)
-				? i18n.convert.text.convert_to_cketh
-				: replacePlaceholders(i18n.convert.text.convert_to_ckerc20, {
-						$ckErc20: symbol
-					})
-		},
-		...rest
-	];
-};
+	sourceToken,
+	destinationToken
+}: ConvertWizardStepsParams): WizardSteps<WizardStepsHowToConvertComplete> => [
+	{
+		name: WizardStepsHowToConvert.INFO,
+		title: replacePlaceholders(i18n.info.ethereum.how_to_short, {
+			$token: destinationToken
+		})
+	},
+	{
+		name: WizardStepsHowToConvert.ETH_QR_CODE,
+		title: i18n.receive.text.address
+	},
+	...convertWizardSteps({ i18n, sourceToken, destinationToken })
+];

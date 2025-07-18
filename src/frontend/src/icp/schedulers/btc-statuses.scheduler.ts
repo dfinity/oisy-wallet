@@ -1,7 +1,6 @@
 import { withdrawalStatuses } from '$icp/api/ckbtc-minter.api';
 import { BTC_STATUSES_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type {
 	PostMessageDataRequestIcCk,
@@ -10,7 +9,7 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
-import { assertNonNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, jsonReplacer, nonNullish, queryAndUpdate } from '@dfinity/utils';
 
 export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcCk> {
 	private timer = new SchedulerTimer('syncBtcStatusesStatus');
@@ -49,7 +48,7 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcC
 			request: ({ identity: _, certified }) =>
 				withdrawalStatuses({ minterCanisterId, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncStatusesResults({ certified, ...rest }),
-			onCertifiedError: ({ error }) => this.postMessageWalletError(error),
+			onUpdateError: ({ error }) => this.postMessageWalletError(error),
 			identity,
 			resolution: 'all_settled'
 		});

@@ -1,6 +1,7 @@
 import { isNullish, nonNullish } from '@dfinity/utils';
 import dotenv from 'dotenv';
-import { ethers } from 'ethers';
+import { Contract } from 'ethers/contract';
+import { EtherscanProvider } from 'ethers/providers';
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -68,7 +69,7 @@ const updateListInContent = ({ content, regex, elements, addAtStartIfNotFound = 
 			});
 			return {
 				content: newContent,
-				hasChanged: acc.hasChanged || hasChanged
+				hasChanged: acc.hasChanged ?? hasChanged
 			};
 		},
 		{ content, hasChanged: false }
@@ -83,11 +84,8 @@ const updateImportsInContent = ({ content, imports, module }) =>
 	});
 
 const fetchTokenDetails = async ({ contractAddress, isTestnet }) => {
-	const provider = new ethers.providers.EtherscanProvider(
-		isTestnet ? 'sepolia' : 'homestead',
-		ETHERSCAN_API_KEY
-	);
-	const contract = new ethers.Contract(
+	const provider = new EtherscanProvider(isTestnet ? 'sepolia' : 'homestead', ETHERSCAN_API_KEY);
+	const contract = new Contract(
 		contractAddress,
 		[
 			'function name() view returns (string)',
@@ -334,9 +332,7 @@ const parseTokens = (tokens) => {
 
 	testnetTokens.forEach(({ symbol, erc20ContractAddress }) => {
 		const mainSymbol = symbol.replace('Sepolia', '').slice(2);
-		if (!acc[mainSymbol]) {
-			acc[mainSymbol] = { mainSymbol };
-		}
+		acc[mainSymbol] ??= { mainSymbol };
 		acc[mainSymbol].testnetContractAddress = erc20ContractAddress;
 	});
 
@@ -357,7 +353,7 @@ const main = async () => {
 		`Found ${tokensToProcess.length} tokens to check: ${tokensToProcess.map(({ mainSymbol }) => mainSymbol).join(', ')}`
 	);
 
-	let newTokens = [];
+	const newTokens = [];
 
 	for (const token of tokensToProcess) {
 		const { mainSymbol } = token;

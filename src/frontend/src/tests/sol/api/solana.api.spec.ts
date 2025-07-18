@@ -1,5 +1,5 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import {
 	checkIfAccountExists,
 	estimatePriorityFee,
@@ -26,8 +26,8 @@ import {
 	mockSolAddress2,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
-import { address, lamports } from '@solana/web3.js';
-import { type MockInstance } from 'vitest';
+import { address, lamports } from '@solana/kit';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers');
 
@@ -179,7 +179,7 @@ describe('solana.api', () => {
 
 		it('should handle zero balance', async () => {
 			mockGetTokenAccountBalance.mockReturnValueOnce({
-				send: () => Promise.resolve({ value: { amount: 0n } })
+				send: () => Promise.resolve({ value: { amount: ZERO } })
 			});
 
 			const balance = await loadTokenBalance({
@@ -290,7 +290,7 @@ describe('solana.api', () => {
 			});
 
 			expect(transactions).toHaveLength(2);
-			expect(mockGetSignaturesForAddress).toHaveBeenCalledTimes(1);
+			expect(mockGetSignaturesForAddress).toHaveBeenCalledOnce();
 		});
 
 		it('should handle empty signatures response', async () => {
@@ -366,7 +366,7 @@ describe('solana.api', () => {
 			});
 
 			expect(account).toEqual(mockSplAddress);
-			expect(mockGetTokenAccountsByOwner).toHaveBeenCalledTimes(1);
+			expect(mockGetTokenAccountsByOwner).toHaveBeenCalledOnce();
 		});
 
 		it('should return undefined if no token account exists', async () => {

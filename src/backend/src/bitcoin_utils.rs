@@ -126,8 +126,7 @@ mod tests {
         for (user, expected) in result_utxos.iter().zip(expected_utxos.iter()) {
             assert_eq!(
                 user, expected,
-                "Result utxos differs from expected user: {:?} vs {:?}",
-                user, expected
+                "Result utxos differs from expected user: {user:?} vs {expected:?}"
             );
         }
     }

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import { erc20UserTokens } from '$eth/derived/erc20.derived';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
@@ -14,6 +15,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { networkICP } from '$lib/derived/network.derived';
+	import { networkEthereumDisabled, networkSepoliaDisabled } from '$lib/derived/networks.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
@@ -23,9 +25,18 @@
 	export let nativeTokenId: TokenId;
 	export let ariaLabel: string;
 
+	const ethModalId = Symbol();
+	const ckEthModalId = Symbol();
+
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
+	let isNetworkDisabled = false;
+	$: isNetworkDisabled =
+		(nativeTokenId === ETHEREUM_TOKEN_ID && $networkEthereumDisabled) ||
+		(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled);
+
 	const isDisabled = (): boolean =>
+		isNetworkDisabled ||
 		$ethAddressNotLoaded ||
 		// We can convert to ETH - i.e. we can convert to Ethereum or Sepolia, not an ERC20 token
 		isNotSupportedEthTokenId(nativeTokenId) ||
@@ -52,7 +63,7 @@
 				return;
 			}
 
-			modalStore.openConvertToTwinTokenEth();
+			modalStore.openConvertToTwinTokenEth(ethModalId);
 			return;
 		}
 
@@ -66,17 +77,21 @@
 			return;
 		}
 
-		modalStore.openConvertToTwinTokenCkEth();
+		modalStore.openConvertToTwinTokenCkEth(ckEthModalId);
 	};
 </script>
 
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
-		on:click={async () => await openConvert()}
-		disabled={$isBusy || $outflowActionsDisabled}
+		onclick={async () => await openConvert()}
+		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
 		{ariaLabel}
 	>
-		<slot name="icon" slot="icon" />
-		<slot />
+		{#snippet icon()}
+			<slot name="icon" />
+		{/snippet}
+		{#snippet label()}
+			<slot />
+		{/snippet}
 	</ButtonHero>
 </CkEthLoader>

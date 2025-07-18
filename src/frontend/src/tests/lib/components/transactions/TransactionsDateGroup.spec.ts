@@ -45,7 +45,7 @@ describe('TransactionsDateGroup', () => {
 	it('should render the date', () => {
 		const { getByText } = render(TransactionsDateGroup, {
 			props: {
-				date: 'today',
+				formattedDate: 'today',
 				transactions: mockTransactions
 			}
 		});
@@ -56,7 +56,7 @@ describe('TransactionsDateGroup', () => {
 	it('should render the transactions list', () => {
 		const { container } = render(TransactionsDateGroup, {
 			props: {
-				date: 'today',
+				formattedDate: 'today',
 				transactions: mockTransactions
 			}
 		});

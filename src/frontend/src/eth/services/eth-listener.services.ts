@@ -6,11 +6,11 @@ import {
 } from '$eth/services/eth-transaction.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
-import type { BigNumber } from '@ethersproject/bignumber';
 
 export const initTransactionsListener = ({
 	token,
@@ -19,7 +19,7 @@ export const initTransactionsListener = ({
 	token: Token;
 	address: EthAddress;
 }): WebSocketListener => {
-	if (isSupportedEthTokenId(token.id)) {
+	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {
 		return initMinedTransactionsListenerProvider({
 			toAddress: address,
 			listener: async ({ transaction: { hash } }: { transaction: { hash: string } }) =>
@@ -33,7 +33,7 @@ export const initTransactionsListener = ({
 
 	return initErc20PendingTransactionsListenerProvider({
 		address,
-		listener: async (params: { hash: string; value: BigNumber }) =>
+		listener: async (params: { hash: string; value: bigint }) =>
 			await processErc20Transaction({ token, ...params, type: 'mined' }),
 		contract: token as Erc20Token
 	});

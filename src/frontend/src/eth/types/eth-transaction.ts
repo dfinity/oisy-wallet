@@ -1,4 +1,4 @@
-import { ethTransactionTypes } from '$lib/schema/transaction.schema';
+import type { ethTransactionTypes } from '$lib/schema/transaction.schema';
 import type { Transaction, TransactionId, TransactionType } from '$lib/types/transaction';
 
 export type EthTransactionType = Extract<

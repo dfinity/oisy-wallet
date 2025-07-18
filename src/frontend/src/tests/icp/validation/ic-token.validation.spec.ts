@@ -6,7 +6,6 @@ import {
 	isIcCkToken,
 	isIcToken,
 	isIcTokenCanistersStrict,
-	isNotIcCkToken,
 	isNotIcToken,
 	isNotIcTokenCanistersStrict
 } from '$icp/validation/ic-token.validation';
@@ -21,105 +20,91 @@ describe('ic-token.validation', () => {
 
 	describe('isIcToken', () => {
 		it('should return true for a valid IcToken', () => {
-			expect(isIcToken(mockValidIcToken)).toBe(true);
+			expect(isIcToken(mockValidIcToken)).toBeTruthy();
 		});
 
 		it('should return false for an invalid IcToken', () => {
-			expect(isIcToken(mockValidToken)).toBe(false);
+			expect(isIcToken(mockValidToken)).toBeFalsy();
 		});
 	});
 
 	describe('isNotIcToken', () => {
 		it('should return false for a valid IcToken', () => {
-			expect(isNotIcToken(mockValidIcToken)).toBe(false);
+			expect(isNotIcToken(mockValidIcToken)).toBeFalsy();
 		});
 
 		it('should return true for an invalid IcToken', () => {
-			expect(isNotIcToken(mockValidToken)).toBe(true);
+			expect(isNotIcToken(mockValidToken)).toBeTruthy();
 		});
 	});
 
 	describe('isIcTokenCanistersStrict', () => {
 		it('should return true for a valid IcToken with IcCanistersStrict', () => {
-			expect(isIcTokenCanistersStrict(mockValidIcTokenWithIndex)).toBe(true);
+			expect(isIcTokenCanistersStrict(mockValidIcTokenWithIndex)).toBeTruthy();
 		});
 
 		it('should return false for a valid IcToken without strict canisters fields', () => {
-			expect(isIcTokenCanistersStrict(mockValidIcToken)).toBe(false);
+			expect(isIcTokenCanistersStrict(mockValidIcToken)).toBeFalsy();
 		});
 
 		it('should return false for a token type casted to IcToken', () => {
-			expect(isIcTokenCanistersStrict(mockValidToken as IcToken)).toBe(false);
+			expect(isIcTokenCanistersStrict(mockValidToken as IcToken)).toBeFalsy();
 		});
 	});
 
 	describe('isNotIcTokenCanistersStrict', () => {
 		it('should return false for a valid IcToken with IcCanistersStrict', () => {
-			expect(isNotIcTokenCanistersStrict(mockValidIcTokenWithIndex)).toBe(false);
+			expect(isNotIcTokenCanistersStrict(mockValidIcTokenWithIndex)).toBeFalsy();
 		});
 
 		it('should return true for a valid IcToken without strict canisters fields', () => {
-			expect(isNotIcTokenCanistersStrict(mockValidIcToken)).toBe(true);
+			expect(isNotIcTokenCanistersStrict(mockValidIcToken)).toBeTruthy();
 		});
 
 		it('should return true for a token type casted to IcToken', () => {
-			expect(isNotIcTokenCanistersStrict(mockValidToken as IcToken)).toBe(true);
+			expect(isNotIcTokenCanistersStrict(mockValidToken as IcToken)).toBeTruthy();
 		});
 	});
 
 	describe('isIcCkToken', () => {
 		it('should return true for a valid IcCkToken', () => {
-			expect(isIcCkToken(mockValidIcCkToken)).toBe(true);
+			expect(isIcCkToken(mockValidIcCkToken)).toBeTruthy();
 		});
 
 		it('should return true for a valid IcCkToken that does not have optional props', () => {
-			expect(isIcCkToken(mockValidIcCkToken)).toBe(true);
+			expect(isIcCkToken(mockValidIcCkToken)).toBeTruthy();
 		});
 
 		it('should return false for an invalid IcToken', () => {
-			expect(isIcCkToken(mockValidToken)).toBe(false);
-		});
-	});
-
-	describe('isNotIcCkToken', () => {
-		it('should return false for a valid IcCkToken', () => {
-			expect(isNotIcCkToken(mockValidIcCkToken)).toBe(false);
-		});
-
-		it('should return false for a valid IcCkToken that does not have optional props', () => {
-			expect(isNotIcCkToken(mockValidIcCkToken)).toBe(false);
-		});
-
-		it('should return true for an invalid IcToken', () => {
-			expect(isNotIcCkToken(mockValidToken)).toBe(true);
+			expect(isIcCkToken(mockValidToken)).toBeFalsy();
 		});
 	});
 
 	describe('hasIndexCanister', () => {
 		it('should return false for an IcToken without Index canister', () => {
-			expect(hasIndexCanister(mockValidIcToken)).toBe(false);
+			expect(hasIndexCanister(mockValidIcToken)).toBeFalsy();
 		});
 
 		it('should return true for an IcToken with Index canister', () => {
-			expect(hasIndexCanister(mockValidIcTokenWithIndex)).toBe(true);
+			expect(hasIndexCanister(mockValidIcTokenWithIndex)).toBeTruthy();
 		});
 
 		it('should return false for a token type casted to IcToken', () => {
-			expect(hasIndexCanister(mockValidToken as IcToken)).toBe(false);
+			expect(hasIndexCanister(mockValidToken as IcToken)).toBeFalsy();
 		});
 	});
 
 	describe('hasNoIndexCanister', () => {
 		it('should return true for an IcToken without Index canister', () => {
-			expect(hasNoIndexCanister(mockValidIcToken)).toBe(true);
+			expect(hasNoIndexCanister(mockValidIcToken)).toBeTruthy();
 		});
 
 		it('should return false for an IcToken with Index canister', () => {
-			expect(hasNoIndexCanister(mockValidIcTokenWithIndex)).toBe(false);
+			expect(hasNoIndexCanister(mockValidIcTokenWithIndex)).toBeFalsy();
 		});
 
 		it('should return true for a token type casted to IcToken', () => {
-			expect(hasNoIndexCanister(mockValidToken as IcToken)).toBe(true);
+			expect(hasNoIndexCanister(mockValidToken as IcToken)).toBeTruthy();
 		});
 	});
 });

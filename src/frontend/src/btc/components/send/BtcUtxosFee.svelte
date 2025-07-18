@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
-	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
+	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 	import type { UtxosFee } from '$btc/types/btc-send';
-	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
+	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -15,9 +12,19 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
-	export let utxosFee: UtxosFee | undefined = undefined;
-	export let amount: OptionAmount = undefined;
-	export let networkId: NetworkId | undefined = undefined;
+	interface Props {
+		utxosFee?: UtxosFee;
+		amount?: OptionAmount;
+		networkId?: NetworkId;
+		source: string;
+	}
+
+	let {
+		utxosFee = $bindable(undefined),
+		amount = undefined,
+		networkId = undefined,
+		source
+	}: Props = $props();
 
 	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -32,12 +39,12 @@
 			}
 
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
-
 			utxosFee = nonNullish(network)
-				? await selectUtxosFeeApi({
-						amount,
+				? await prepareBtcSend({
+						identity: $authIdentity,
 						network,
-						identity: $authIdentity
+						amount,
+						source
 					})
 				: undefined;
 		} catch (err: unknown) {
@@ -57,17 +64,11 @@
 	});
 </script>
 
-<Value ref="utxos-fee" element="div">
+<FeeDisplay
+	feeAmount={utxosFee?.feeSatoshis}
+	decimals={$sendTokenDecimals}
+	symbol={$sendTokenSymbol}
+	exchangeRate={$sendTokenExchangeRate}
+>
 	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
-
-	{#if isNullish(utxosFee)}
-		<span class="mt-2 block w-full max-w-[140px]"><SkeletonText /></span>
-	{:else}
-		<ExchangeAmountDisplay
-			amount={BigNumber.from(utxosFee.feeSatoshis)}
-			decimals={$sendTokenDecimals}
-			symbol={$sendTokenSymbol}
-			exchangeRate={$sendTokenExchangeRate}
-		/>
-	{/if}
-</Value>
+</FeeDisplay>

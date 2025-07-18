@@ -1,6 +1,6 @@
 import { NetworkIdSchema } from '$lib/schema/network.schema';
 import type { NetworkId } from '$lib/types/network';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 const NetworkIdStringSchema = z.string();
 

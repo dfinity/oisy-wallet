@@ -1,12 +1,23 @@
-import type { TokenFinancialData, TokenId, TokenUi } from '$lib/types/token';
+import type {
+	TokenGroupIdSchema,
+	TokenGroupPropSchema,
+	TokenGroupSchema
+} from '$lib/schema/token-group.schema';
+import type { TokenFinancialData, TokenUi } from '$lib/types/token';
+import type { NonEmptyArray } from '$lib/types/utils';
+import type * as z from 'zod/v4';
 
-//todo: separate typing from token id
-type GroupId = TokenId;
+export type TokenGroupId = z.infer<typeof TokenGroupIdSchema>;
+
+export type TokenGroupData = z.infer<typeof TokenGroupSchema>;
+
+export type TokenGroup = z.infer<typeof TokenGroupPropSchema>;
 
 export type TokenUiGroup = {
-	id: GroupId;
-	nativeToken: TokenUi;
-	tokens: [TokenUi, ...TokenUi[]];
+	id: TokenGroupId;
+	decimals: number;
+	groupData: TokenGroupData;
+	tokens: NonEmptyArray<TokenUi>;
 } & TokenFinancialData;
 
 export type TokenUiOrGroupUi = { token: TokenUi } | { group: TokenUiGroup };

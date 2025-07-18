@@ -30,15 +30,19 @@
 
 	<ConvertReviewNetworks />
 
+	<slot name="destination" />
+
 	<slot name="fee" />
 
 	<slot name="info-message" />
 
-	<ButtonGroup slot="toolbar">
-		<slot name="cancel" />
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<slot name="cancel" />
 
-		<Button on:click={() => dispatch('icConvert')} testId="convert-review-button-next">
-			{$i18n.convert.text.convert_button}
-		</Button>
-	</ButtonGroup>
+			<Button onclick={() => dispatch('icConvert')} testId="convert-review-button-next">
+				{$i18n.convert.text.convert_button}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

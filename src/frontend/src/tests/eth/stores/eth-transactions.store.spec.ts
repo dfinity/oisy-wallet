@@ -1,20 +1,20 @@
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import { bn3 } from '$tests/mocks/balances.mock';
-import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
+import { bn3Bi } from '$tests/mocks/balances.mock';
+import { createMockEthCertifiedTransactions } from '$tests/mocks/eth-transactions.mock';
 import { get } from 'svelte/store';
 
 describe('eth-transactions.store', () => {
 	const tokenId = ETHEREUM_TOKEN_ID;
 
-	const mockTransactions = createMockEthTransactions(5);
+	const mockTransactions = createMockEthCertifiedTransactions(5);
 
-	const mockOtherTransactions = createMockEthTransactions(3);
+	const mockOtherTransactions = createMockEthCertifiedTransactions(3);
 
 	const store = ethTransactionsStore;
 
 	beforeEach(() => {
-		store.reset();
+		store.resetAll();
 	});
 
 	describe('set', () => {
@@ -56,7 +56,7 @@ describe('eth-transactions.store', () => {
 		});
 
 		it('should add transactions even if the list is empty', () => {
-			store.reset();
+			store.resetAll();
 			store.add({ tokenId, transactions: mockOtherTransactions });
 
 			const state = get(store);
@@ -78,7 +78,7 @@ describe('eth-transactions.store', () => {
 	describe('update', () => {
 		const updatedTransaction = {
 			...mockTransactions[0],
-			value: mockTransactions[0].value.add(bn3)
+			value: mockTransactions[0].data.value + bn3Bi
 		};
 
 		beforeEach(() => {
@@ -145,7 +145,7 @@ describe('eth-transactions.store', () => {
 				[SEPOLIA_TOKEN_ID]: mockOtherTransactions
 			});
 
-			store.reset();
+			store.resetAll();
 
 			expect(get(store)).toEqual({});
 		});

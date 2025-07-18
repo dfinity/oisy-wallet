@@ -19,6 +19,7 @@ describe('time.utils', () => {
 			await randomWait({ min, max });
 
 			expect(setTimeoutMock).toHaveBeenCalled();
+
 			const calledTime = setTimeoutMock.mock.calls[0][1] as number;
 
 			expect(calledTime).toBeGreaterThanOrEqual(min);
@@ -31,6 +32,7 @@ describe('time.utils', () => {
 			await randomWait({});
 
 			expect(setTimeoutMock).toHaveBeenCalled();
+
 			const calledTime = setTimeoutMock.mock.calls[0][1] as number;
 
 			expect(calledTime).toBeGreaterThanOrEqual(1000);
@@ -46,6 +48,7 @@ describe('time.utils', () => {
 			await randomWait({ min, max });
 
 			expect(setTimeoutMock).toHaveBeenCalled();
+
 			const calledTime = setTimeoutMock.mock.calls[0][1] as number;
 
 			expect(calledTime).toBeGreaterThanOrEqual(max);

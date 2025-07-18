@@ -1,6 +1,10 @@
 <!-- source: ISC Lucide - please visit https://lucide.dev/license -->
 <script lang="ts">
-	export let size = '24';
+	interface Props {
+		size?: string;
+	}
+
+	let { size = '24' }: Props = $props();
 </script>
 
 <svg
@@ -13,7 +17,6 @@
 	stroke-width="2"
 	stroke-linecap="round"
 	stroke-linejoin="round"
-	class="lucide lucide-wallet"
 >
 	<path
 		d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"

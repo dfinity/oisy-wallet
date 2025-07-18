@@ -25,6 +25,8 @@
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
+	import DestinationWizardStep from '$lib/components/address/DestinationWizardStep.svelte';
+	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
@@ -38,30 +40,36 @@
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
-	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
+	import { WizardStepsConvert, WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
+	export let customDestination = '';
 	export let convertProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
+	export let onIcQrCodeBack: () => void;
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	// TODO: add "Destination field" step and update receiveAmount calculation to support ckBTC -> BTC
-	let destination: OptionBtcAddress | OptionEthAddress;
-	$: destination = isTokenCkBtcLedger($sourceToken) ? $btcAddressMainnet : $ethAddress;
+	let defaultDestination = '';
+	$: defaultDestination = isTokenCkBtcLedger($sourceToken)
+		? ($btcAddressMainnet ?? '')
+		: ($ethAddress ?? '');
+
+	let isDestinationCustom = false;
+	$: isDestinationCustom = !isNullishOrEmpty(customDestination);
 
 	let networkId: NetworkId;
 	$: networkId = $destinationToken.network.id;
@@ -83,6 +91,10 @@
 	const dispatch = createEventDispatcher();
 
 	const convert = async () => {
+		const destination = isNullishOrEmpty(customDestination)
+			? defaultDestination
+			: customDestination;
+
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
@@ -124,8 +136,8 @@
 				ckErc20ToErc20MaxCkEthFees
 			};
 
-			const trackAnalyticsOnSendComplete = async () => {
-				await trackEvent({
+			const trackAnalyticsOnSendComplete = () => {
+				trackEvent({
 					name: isNetworkIdBitcoin(networkId)
 						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
 						: isConvertCkEthToEth({ token: $sourceToken, networkId })
@@ -148,7 +160,7 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
 					: isConvertCkEthToEth({ token: $sourceToken, networkId })
@@ -175,21 +187,55 @@
 <EthereumFeeContext {networkId}>
 	<BitcoinFeeContext amount={sendAmount} {networkId} token={$sourceToken}>
 		{#if currentStep?.name === WizardStepsConvert.CONVERT}
-			<IcConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
+			<IcConvertForm
+				on:icNext
+				on:icClose
+				on:icDestination
+				bind:sendAmount
+				bind:receiveAmount
+				destination={isDestinationCustom ? customDestination : defaultDestination}
+				{isDestinationCustom}
+			>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
-						<ButtonBack on:click={back} />
+						<ButtonBack onclick={back} />
 					{:else}
-						<ButtonCancel on:click={close} />
+						<ButtonCancel onclick={close} />
 					{/if}
 				</svelte:fragment>
 			</IcConvertForm>
 		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-			<IcConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
-				<ButtonBack slot="cancel" on:click={back} />
+			<IcConvertReview
+				on:icConvert={convert}
+				on:icBack
+				{sendAmount}
+				{receiveAmount}
+				destination={isDestinationCustom ? customDestination : defaultDestination}
+				{isDestinationCustom}
+			>
+				<ButtonBack slot="cancel" onclick={back} />
 			</IcConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 			<IcConvertProgress bind:convertProgressStep />
+		{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
+			<DestinationWizardStep
+				{networkId}
+				tokenStandard={$destinationToken.standard}
+				on:icBack={back}
+				bind:customDestination
+				on:icQRCodeScan
+				on:icDestinationBack
+			>
+				<svelte:fragment slot="title">{$i18n.convert.text.send_to}</svelte:fragment>
+			</DestinationWizardStep>
+		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+			<SendQrCodeScan
+				expectedToken={$destinationToken}
+				bind:destination={customDestination}
+				bind:amount={sendAmount}
+				onDecodeQrCode={decodeQrCode}
+				{onIcQrCodeBack}
+			/>
 		{:else}
 			<slot />
 		{/if}
