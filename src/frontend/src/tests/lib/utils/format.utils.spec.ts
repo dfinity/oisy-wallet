@@ -592,6 +592,7 @@ describe('format.utils', () => {
 			language: Languages;
 			expected: string;
 		}[] = [
+			// English
 			{
 				value: 1234.56,
 				currency: Currency.USD,
@@ -617,7 +618,6 @@ describe('format.utils', () => {
 				language: Languages.ENGLISH,
 				expected: 'CN¥123,456,789.99'
 			},
-
 			{
 				value: 123456789.99,
 				currency: Currency.CHF,
@@ -638,7 +638,6 @@ describe('format.utils', () => {
 				expected: '-€987,654,321.12'
 			},
 			{ value: 12345, currency: Currency.GBP, language: Languages.ENGLISH, expected: '£12,345.00' },
-
 			{
 				value: 1000000.99,
 				currency: Currency.JPY,
@@ -655,6 +654,216 @@ describe('format.utils', () => {
 				value: 123456789.12345,
 				currency: Currency.CHF,
 				language: Languages.ENGLISH,
+				expected: 'CHF 123’456’789.12'
+			},
+
+			// German
+			{
+				value: 1234.56,
+				currency: Currency.USD,
+				language: Languages.GERMAN,
+				expected: '$1,234.56'
+			},
+			{
+				value: 987654321.12,
+				currency: Currency.EUR,
+				language: Languages.GERMAN,
+				expected: '€987,654,321.12'
+			},
+			{ value: 0.99, currency: Currency.GBP, language: Languages.GERMAN, expected: '£0.99' },
+			{
+				value: 1000000,
+				currency: Currency.JPY,
+				language: Languages.GERMAN,
+				expected: '¥1,000,000'
+			},
+			{
+				value: 123456789.99,
+				currency: Currency.CNY,
+				language: Languages.GERMAN,
+				expected: 'CN¥123,456,789.99'
+			},
+			{
+				value: 123456789.99,
+				currency: Currency.CHF,
+				language: Languages.GERMAN,
+				expected: 'CHF 123’456’789.99'
+			},
+			{ value: 0, currency: Currency.USD, language: Languages.GERMAN, expected: '$0.00' },
+			{
+				value: -1234.56,
+				currency: Currency.USD,
+				language: Languages.GERMAN,
+				expected: '-$1,234.56'
+			},
+			{
+				value: -987654321.12,
+				currency: Currency.EUR,
+				language: Languages.GERMAN,
+				expected: '-€987,654,321.12'
+			},
+			{ value: 12345, currency: Currency.GBP, language: Languages.GERMAN, expected: '£12,345.00' },
+			{
+				value: 1000000.99,
+				currency: Currency.JPY,
+				language: Languages.GERMAN,
+				expected: '¥1,000,001'
+			},
+			{
+				value: 1000000.4,
+				currency: Currency.JPY,
+				language: Languages.GERMAN,
+				expected: '¥1,000,000'
+			},
+			{
+				value: 123456789.12345,
+				currency: Currency.CHF,
+				language: Languages.GERMAN,
+				expected: 'CHF 123’456’789.12'
+			},
+
+			// Chinese Simplified
+			{
+				value: 1234.56,
+				currency: Currency.USD,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: 'US$1,234.56'
+			},
+			{
+				value: 987654321.12,
+				currency: Currency.EUR,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: '€987,654,321.12'
+			},
+			{
+				value: 0.99,
+				currency: Currency.GBP,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: '£0.99'
+			},
+			{
+				value: 1000000,
+				currency: Currency.JPY,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: 'JP¥1,000,000'
+			},
+			{
+				value: 123456789.99,
+				currency: Currency.CNY,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: '¥123,456,789.99'
+			},
+			{
+				value: 123456789.99,
+				currency: Currency.CHF,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: 'CHF 123’456’789.99'
+			},
+			{
+				value: 0,
+				currency: Currency.USD,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: 'US$0.00'
+			},
+			{
+				value: -1234.56,
+				currency: Currency.USD,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: '-US$1,234.56'
+			},
+			{
+				value: -987654321.12,
+				currency: Currency.EUR,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: '-€987,654,321.12'
+			},
+			{
+				value: 12345,
+				currency: Currency.GBP,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: '£12,345.00'
+			},
+			{
+				value: 1000000.99,
+				currency: Currency.JPY,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: 'JP¥1,000,001'
+			},
+			{
+				value: 1000000.4,
+				currency: Currency.JPY,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: 'JP¥1,000,000'
+			},
+			{
+				value: 123456789.12345,
+				currency: Currency.CHF,
+				language: Languages.CHINESE_SIMPLIFIED,
+				expected: 'CHF 123’456’789.12'
+			},
+
+			// Italian
+			{
+				value: 1234.56,
+				currency: Currency.USD,
+				language: Languages.ITALIAN,
+				expected: '$1,234.56'
+			},
+			{
+				value: 987654321.12,
+				currency: Currency.EUR,
+				language: Languages.ITALIAN,
+				expected: '€987,654,321.12'
+			},
+			{ value: 0.99, currency: Currency.GBP, language: Languages.ITALIAN, expected: '£0.99' },
+			{
+				value: 1000000,
+				currency: Currency.JPY,
+				language: Languages.ITALIAN,
+				expected: '¥1,000,000'
+			},
+			{
+				value: 123456789.99,
+				currency: Currency.CNY,
+				language: Languages.ITALIAN,
+				expected: 'CN¥123,456,789.99'
+			},
+			{
+				value: 123456789.99,
+				currency: Currency.CHF,
+				language: Languages.ITALIAN,
+				expected: 'CHF 123’456’789.99'
+			},
+			{ value: 0, currency: Currency.USD, language: Languages.ITALIAN, expected: '$0.00' },
+			{
+				value: -1234.56,
+				currency: Currency.USD,
+				language: Languages.ITALIAN,
+				expected: '-$1,234.56'
+			},
+			{
+				value: -987654321.12,
+				currency: Currency.EUR,
+				language: Languages.ITALIAN,
+				expected: '-€987,654,321.12'
+			},
+			{ value: 12345, currency: Currency.GBP, language: Languages.ITALIAN, expected: '£12,345.00' },
+			{
+				value: 1000000.99,
+				currency: Currency.JPY,
+				language: Languages.ITALIAN,
+				expected: '¥1,000,001'
+			},
+			{
+				value: 1000000.4,
+				currency: Currency.JPY,
+				language: Languages.ITALIAN,
+				expected: '¥1,000,000'
+			},
+			{
+				value: 123456789.12345,
+				currency: Currency.CHF,
+				language: Languages.ITALIAN,
 				expected: 'CHF 123’456’789.12'
 			}
 		];
