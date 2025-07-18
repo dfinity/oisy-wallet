@@ -1,6 +1,10 @@
 @use 'sass:meta';
-@use 'tailwindcss';
 
+// We explicitly need to import Tailwind with a plain CSS @import as described in their documentation.
+// Trying to import it with Sass — such as using @use — leads to reproducibility issues.
+// Additionally, we need to explicitly set the base path in order to avoid issues with building the app via Docker.
+/* prettier-ignore */
+@import 'tailwindcss' source("../../../../../src");
 @config '../../../../../tailwind.config.ts';
 
 @layer base {
@@ -20,11 +24,34 @@
 		border-color: var(--color-gray-200, currentColor);
 	}
 
+	:root[theme='dark'] {
+		.invert-on-dark-theme {
+			filter: invert(1);
+		}
+	}
+
+	:root[theme='light'] {
+		.dark-hidden {
+			display: block !important;
+		}
+
+		.dark-block {
+			display: none !important;
+		}
+	}
+	:root[theme='dark'] {
+		.dark-hidden {
+			display: none !important;
+		}
+		.dark-block {
+			display: block !important;
+		}
+	}
+
 	@include meta.load-css('global/font-faces');
 	@include meta.load-css('global/fonts');
 	@include meta.load-css('global/theme');
 	@include meta.load-css('global/variables');
-	@include meta.load-css('global/colors');
 	@include meta.load-css('global/layout');
 	@include meta.load-css('global/body');
 	@include meta.load-css('global/button');
@@ -32,7 +59,39 @@
 	@include meta.load-css('global/gix');
 	@include meta.load-css('global/position');
 	@include meta.load-css('global/links');
-	@include meta.load-css('global/border');
+	@include meta.load-css('global/lists');
 	@include meta.load-css('global/scrollbar');
+
+	// Themes
 	@include meta.load-css('theme/default-theme');
+	@include meta.load-css('theme/dark-theme');
+
+	// Global focus and active states for links, buttons and inputs
+	a,
+	button,
+	div[role='button'],
+	input[type='checkbox'],
+	input[type='radio'],
+	div[role='checkbox'],
+	div[role='radio'] {
+		outline-width: 0;
+
+		&[focus],
+		&:focus {
+			outline-offset: 2px;
+			outline: var(--color-background-brand-primary) solid 2px !important;
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none !important;
+		}
+
+		&[active],
+		&:active {
+			&[focus],
+			&:focus {
+				outline: none !important;
+			}
+		}
+	}
 }

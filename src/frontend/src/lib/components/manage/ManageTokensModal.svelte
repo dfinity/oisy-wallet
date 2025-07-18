@@ -1,86 +1,91 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
-	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
-	import type { Erc20Metadata } from '$eth/types/erc20';
-	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-	import type { EthereumNetwork } from '$eth/types/network';
-	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import {
 		saveErc20UserTokens,
-		saveIcrcCustomTokens
-	} from '$icp-eth/services/manage-tokens.services';
+		saveErc721CustomTokens
+	} from '$eth/services/manage-tokens.services';
+	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
+	import type { Erc20Metadata } from '$eth/types/erc20';
+	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
+	import type { Erc721Metadata } from '$eth/types/erc721';
+	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
+	import type { EthereumNetwork } from '$eth/types/network';
+	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
+	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
+	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import type { Network } from '$lib/types/network';
-	import type { TokenMetadata } from '$lib/types/token';
+	import type { Token, TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkIdEthereum, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdEthereum,
+		isNetworkIdEvm,
+		isNetworkIdICP,
+		isNetworkIdSolana
+	} from '$lib/utils/network.utils';
+	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
-	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
+	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
-	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
+	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 
-	const steps: WizardSteps = [
+	let {
+		initialSearch,
+		onClose = () => {},
+		infoElement
+	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
+
+	const steps: WizardSteps<WizardStepsManageTokens> = [
 		{
-			name: 'Manage',
+			name: WizardStepsManageTokens.MANAGE,
 			title: $i18n.tokens.manage.text.title
 		},
 		{
-			name: 'Import',
+			name: WizardStepsManageTokens.IMPORT,
 			title: $i18n.tokens.import.text.title
 		},
 		{
-			name: 'Review',
+			name: WizardStepsManageTokens.REVIEW,
 			title: $i18n.tokens.import.text.review
 		},
 		{
-			name: 'Saving',
+			name: WizardStepsManageTokens.SAVING,
 			title: $i18n.tokens.import.text.updating
 		}
 	];
 
-	let saveProgressStep: ProgressStepsAddToken = ProgressStepsAddToken.INITIALIZATION;
+	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
+	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 
-	const saveTokens = async ({
-		detail: { icrc, erc20, spl }
-	}: CustomEvent<{
-		icrc: IcrcCustomToken[];
-		erc20: Erc20UserToken[];
-		spl: SplTokenToggleable[];
-	}>) => {
-		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
-			toastsShow({
-				text: $i18n.tokens.manage.info.no_changes,
-				level: 'info',
-				duration: 5000
-			});
-
-			return;
-		}
-
-		await Promise.allSettled([
-			...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
-			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
-			...(spl.length > 0 ? [saveSpl(spl)] : [])
-		]);
+	const saveTokens = async ({ detail: tokens }: CustomEvent<Record<string, Token>>) => {
+		await saveAllCustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			$authIdentity,
+			$i18n
+		});
 	};
 
 	const addIcrcToken = async () => {
@@ -101,29 +106,49 @@
 		]);
 	};
 
-	const saveErc20Token = async () => {
-		if (isNullishOrEmpty(erc20ContractAddress)) {
+	const saveEthToken = async () => {
+		if (isNullishOrEmpty(ethContractAddress)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.invalid_contract_address }
 			});
 			return;
 		}
 
-		if (isNullish(erc20Metadata)) {
+		if (isNullish(ethMetadata)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.no_metadata }
 			});
 			return;
 		}
 
-		await saveErc20([
-			{
-				address: erc20ContractAddress,
-				...erc20Metadata,
-				network: network as EthereumNetwork,
-				enabled: true
-			}
-		]);
+		if (ethMetadata.decimals > 0) {
+			await saveErc20Deprecated([
+				{
+					address: ethContractAddress,
+					...ethMetadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
+
+			await saveErc20([
+				{
+					address: ethContractAddress,
+					...ethMetadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
+		} else {
+			await saveErc721([
+				{
+					address: ethContractAddress,
+					...ethMetadata,
+					network: network as EthereumNetwork,
+					enabled: true
+				}
+			]);
+		}
 	};
 
 	const saveSplToken = () => {
@@ -157,29 +182,50 @@
 		saveIcrcCustomTokens({
 			tokens,
 			progress,
-			modalNext: () => modal.set(3),
+			modalNext: () => modal?.set(3),
 			onSuccess: close,
-			onError: () => modal.set(0),
+			onError: () => modal?.set(0),
 			identity: $authIdentity
 		});
 
-	const saveErc20 = (tokens: SaveUserToken[]): Promise<void> =>
+	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+	const saveErc20Deprecated = (tokens: SaveUserToken[]): Promise<void> =>
 		saveErc20UserTokens({
 			tokens,
 			progress,
-			modalNext: () => modal.set(3),
+			modalNext: () => modal?.set(3),
 			onSuccess: close,
-			onError: () => modal.set(0),
+			onError: () => modal?.set(0),
 			identity: $authIdentity
 		});
 
-	const saveSpl = (tokens: SaveSplUserToken[]): Promise<void> =>
-		saveSplUserTokens({
+	const saveErc20 = (tokens: SaveErc20CustomToken[]): Promise<void> =>
+		saveErc20CustomTokens({
 			tokens,
 			progress,
-			modalNext: () => modal.set(3),
+			modalNext: () => modal?.set(3),
 			onSuccess: close,
-			onError: () => modal.set(0),
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
+	const saveErc721 = (tokens: SaveErc721CustomToken[]): Promise<void> =>
+		saveErc721CustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
+	const saveSpl = (tokens: SaveSplCustomToken[]): Promise<void> =>
+		saveSplCustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
 			identity: $authIdentity
 		});
 
@@ -187,32 +233,35 @@
 		modalStore.close();
 
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
+		onClose();
 	};
 
-	let ledgerCanisterId: string | undefined;
-	let indexCanisterId: string | undefined;
+	let ledgerCanisterId: string | undefined = $state();
+	let indexCanisterId: string | undefined = $state();
 
-	let erc20ContractAddress: string | undefined;
-	let erc20Metadata: Erc20Metadata | undefined;
+	let ethContractAddress: string | undefined = $state();
+	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
 
-	let splTokenAddress: string | undefined;
-	let splMetadata: TokenMetadata | undefined;
+	let splTokenAddress: string | undefined = $state();
+	let splMetadata: TokenMetadata | undefined = $state();
 
-	let network: Network | undefined = $selectedNetwork;
-	let tokenData: Partial<AddTokenData> = {};
+	let network: Network | undefined = $state($selectedNetwork);
+	let tokenData: Partial<AddTokenData> = $state({});
 
-	$: tokenData,
-		({ ledgerCanisterId, indexCanisterId, erc20ContractAddress, splTokenAddress } = tokenData);
+	$effect(() => {
+		({ ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } = tokenData);
+	});
 </script>
 
 <WizardModal
 	{steps}
 	bind:currentStep
 	bind:this={modal}
-	on:nnsClose={close}
+	onClose={close}
 	disablePointerEvents={currentStep?.name === 'Saving'}
+	testId={MANAGE_TOKENS_MODAL}
 >
-	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 	{#if currentStep?.name === 'Review'}
 		{#if isNetworkIdICP(network?.id)}
@@ -222,13 +271,13 @@
 				{ledgerCanisterId}
 				{indexCanisterId}
 			/>
-		{:else if nonNullish(network) && isNetworkIdEthereum(network?.id)}
+		{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
 			<EthAddTokenReview
 				on:icBack={modal.back}
-				on:icSave={saveErc20Token}
-				contractAddress={erc20ContractAddress}
+				on:icSave={saveEthToken}
+				contractAddress={ethContractAddress}
 				{network}
-				bind:metadata={erc20Metadata}
+				bind:metadata={ethMetadata}
 			/>
 		{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
 			<SolAddTokenReview
@@ -248,6 +297,12 @@
 	{:else if currentStep?.name === 'Import'}
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}
-		<ManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} />
+		<ManageTokens
+			on:icClose={close}
+			on:icAddToken={modal.next}
+			on:icSave={saveTokens}
+			{initialSearch}
+			{infoElement}
+		/>
 	{/if}
 </WizardModal>

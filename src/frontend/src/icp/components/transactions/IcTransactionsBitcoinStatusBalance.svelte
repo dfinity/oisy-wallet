@@ -17,6 +17,8 @@
 
 	let receiveProgressStep: string | undefined = undefined;
 
+	const modalId = Symbol();
+
 	const receive = async () => {
 		if (isNullish($token)) {
 			toastsError({
@@ -27,7 +29,7 @@
 
 		receiveProgressStep = ProgressStepsUpdateBalanceCkBtc.INITIALIZATION;
 
-		modalStore.openReceiveBitcoin();
+		modalStore.openReceiveBitcoin(modalId);
 
 		try {
 			await updateBalance({
@@ -81,12 +83,12 @@
 <svelte:window on:oisyCkBtcUpdateBalance={onSyncState} />
 
 {#if nonNullish(ckBtcUpdateBalanceSyncState)}
-	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="animate-pulse text-misty-rose">
+	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="animate-pulse text-tertiary">
 			<span in:blur>{$i18n.receive.bitcoin.text.checking_status}</span>
 		</div>{:else}
 		<button
 			in:blur
-			class="text gap-2 flex border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
+			class="text flex gap-2 border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
 			on:click={async () => await receive()}
 			><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>

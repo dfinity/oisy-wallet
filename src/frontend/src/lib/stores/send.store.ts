@@ -1,7 +1,10 @@
+import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export type SendData = Token;
@@ -16,27 +19,28 @@ const initSendStore = (token: Token): SendStore => {
 	return {
 		subscribe,
 
-		set(token: Token) {
+		set: (token: Token) => {
 			setStore(token);
 		}
 	};
 };
 
-export const initSendContext = ({
-	token,
-	...staticContext
-}: Pick<SendContext, 'sendPurpose'> & { token: Token }): SendContext => {
+export const initSendContext = ({ token }: { token: Token }): SendContext => {
 	const sendToken = initSendStore(token);
 
 	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
 	const sendTokenId = derived(sendToken, ({ id }) => id);
 	const sendTokenStandard = derived(sendToken, ({ standard }) => standard);
-	const sendTokenSymbol = derived(sendToken, ({ symbol }) => symbol);
+	const sendTokenSymbol = derived(sendToken, (token) => getTokenDisplaySymbol(token));
 	const sendTokenNetworkId = derived(sendToken, ({ network: { id: networkId } }) => networkId);
 
 	const sendBalance = derived(
 		[balancesStore, sendTokenId],
 		([$balanceStore, $sendTokenId]) => $balanceStore?.[$sendTokenId]?.data
+	);
+
+	const sendTokenExchangeRate = derived([exchanges, sendToken], ([$exchanges, $sendToken]) =>
+		nonNullish($sendToken) ? $exchanges?.[$sendToken.id]?.usd : undefined
 	);
 
 	return {
@@ -46,16 +50,10 @@ export const initSendContext = ({
 		sendTokenStandard,
 		sendTokenSymbol,
 		sendBalance,
-		sendTokenNetworkId,
-		...staticContext
+		sendTokenExchangeRate,
+		sendTokenNetworkId
 	};
 };
-
-export type SendContextPurpose =
-	| 'send'
-	| 'convert-eth-to-cketh'
-	| 'convert-cketh-to-eth'
-	| 'convert-erc20-to-ckerc20';
 
 export interface SendContext {
 	sendToken: SendStore;
@@ -64,7 +62,7 @@ export interface SendContext {
 	sendTokenStandard: Readable<TokenStandard>;
 	sendTokenSymbol: Readable<string>;
 	sendBalance: Readable<OptionBalance>;
-	sendPurpose: SendContextPurpose;
+	sendTokenExchangeRate: Readable<number | undefined>;
 	sendTokenNetworkId: Readable<NetworkId>;
 }
 

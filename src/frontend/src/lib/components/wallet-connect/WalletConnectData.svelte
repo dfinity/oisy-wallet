@@ -9,9 +9,9 @@
 </script>
 
 {#if nonNullish(data)}
-	<label for="data" class="font-bold px-4.5">{label}:</label>
+	<label for="data" class="font-bold">{label}:</label>
 
-	<div id="data" class="mb-4 gap-1 font-normal px-4.5 flex items-center">
+	<div id="data" class="mb-4 flex items-center gap-1 font-normal">
 		{shortenWithMiddleEllipsis({ text: data })}<Copy
 			inline
 			value={data}

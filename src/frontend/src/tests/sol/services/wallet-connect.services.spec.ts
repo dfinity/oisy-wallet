@@ -1,4 +1,4 @@
-import { ICP_NETWORK_ID } from '$env/networks/networks.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { decode } from '$sol/services/wallet-connect.services';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
@@ -7,7 +7,7 @@ import {
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
-import type { CompilableTransactionMessage } from '@solana/transaction-messages';
+import type { CompilableTransactionMessage } from '@solana/kit';
 
 describe('wallet-connect.services', () => {
 	describe('decode', () => {
@@ -19,7 +19,7 @@ describe('wallet-connect.services', () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = ICP_NETWORK_ID;
 
-			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrowError(
+			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrow(
 				`No Solana network for network ${networkId.description}`
 			);
 		});

@@ -1,74 +1,62 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import { getContext } from 'svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
-	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
-	import SendInfo from '$eth/components/send/SendInfo.svelte';
-	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
-	import type { EthereumNetwork } from '$eth/types/network';
-	import SendSource from '$lib/components/send/SendSource.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { Network } from '$lib/types/network';
+	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
+	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
+	import SendForm from '$lib/components/send/SendForm.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import { isEthAddress } from '$lib/utils/account.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
-	export let network: Network | undefined = undefined;
-	export let destinationEditable = true;
-	export let simplifiedForm = false;
 	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
-	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
-	export let sourceNetwork: EthereumNetwork;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	let insufficientFunds: boolean;
-	let invalidDestination: boolean;
+
+	let invalidDestination = false;
+	$: invalidDestination = isNullishOrEmpty(destination) || !isEthAddress(destination);
 
 	let invalid = true;
-	$: invalid =
-		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
+	$: invalid = invalidDestination || insufficientFunds || isNullish(amount);
 
-	const dispatch = createEventDispatcher();
-
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { feeSymbolStore, feeDecimalsStore, feeTokenIdStore }: EthFeeContext =
+		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST">
-	<ContentWithToolbar>
-		{#if destinationEditable}
-			<EthSendDestination
-				token={$sendToken}
-				{network}
-				bind:destination
-				bind:invalidDestination
-				on:icQRCodeScan
-			/>
+<SendForm
+	on:icNext
+	on:icBack
+	{destination}
+	{selectedContact}
+	{invalidDestination}
+	disabled={invalid}
+>
+	<EthSendAmount
+		slot="amount"
+		{nativeEthereumToken}
+		bind:amount
+		bind:insufficientFunds
+		on:icTokensList
+	/>
 
-			<SendNetworkICP {destination} {sourceNetwork} bind:network />
-		{/if}
+	<EthFeeDisplay slot="fee">
+		<Html slot="label" text={$i18n.fee.text.max_fee_eth} />
+	</EthFeeDisplay>
 
-		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
+	<SendFeeInfo
+		slot="info"
+		feeSymbol={$feeSymbolStore}
+		decimals={$feeDecimalsStore}
+		feeTokenId={$feeTokenIdStore}
+	/>
 
-		<SendSource
-			token={$sendToken}
-			balance={$sendBalance}
-			source={$ethAddress ?? ''}
-			hideSource={simplifiedForm}
-		/>
-
-		<FeeDisplay />
-
-		<SendInfo />
-
-		<ButtonGroup slot="toolbar" testId="toolbar">
-			<slot name="cancel" />
-			<ButtonNext disabled={invalid} />
-		</ButtonGroup>
-	</ContentWithToolbar>
-</form>
+	<slot name="cancel" slot="cancel" />
+</SendForm>

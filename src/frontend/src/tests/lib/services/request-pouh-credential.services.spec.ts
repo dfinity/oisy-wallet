@@ -6,7 +6,7 @@ import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { mockUserProfile } from '$tests/mocks/user-profile.mock';
+import { mockUserProfile, mockUserProfileVersion } from '$tests/mocks/user-profile.mock';
 import { toastsStore } from '@dfinity/gix-components';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { Principal } from '@dfinity/principal';
@@ -64,9 +64,9 @@ describe('request-pouh-credential.services', () => {
 
 			const result = await requestPouhCredential({ identity });
 
-			expect(result.success).toBe(true);
-			expect(addUserCredentialMock).toBeCalledTimes(1);
-			expect(addUserCredentialMock).toBeCalledWith({
+			expect(result.success).toBeTruthy();
+			expect(addUserCredentialMock).toHaveBeenCalledOnce();
+			expect(addUserCredentialMock).toHaveBeenCalledWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {
@@ -74,10 +74,10 @@ describe('request-pouh-credential.services', () => {
 					arguments: []
 				},
 				issuerCanisterId: Principal.fromText(POUH_ISSUER_CANISTER_ID),
-				currentUserVersion: undefined,
+				currentUserVersion: mockUserProfileVersion,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
-			expect(getUserProfileMock).toBeCalledTimes(1);
+			expect(getUserProfileMock).toHaveBeenCalledOnce();
 			expect(get(userProfileStore)).toEqual({
 				certified: true,
 				profile: userProfileWithCredential
@@ -89,9 +89,9 @@ describe('request-pouh-credential.services', () => {
 
 			const result = await requestPouhCredential({ identity });
 
-			expect(result.success).toBe(true);
-			expect(addUserCredentialMock).toBeCalledTimes(1);
-			expect(addUserCredentialMock).toBeCalledWith({
+			expect(result.success).toBeTruthy();
+			expect(addUserCredentialMock).toHaveBeenCalledOnce();
+			expect(addUserCredentialMock).toHaveBeenCalledWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {
@@ -99,10 +99,10 @@ describe('request-pouh-credential.services', () => {
 					arguments: []
 				},
 				issuerCanisterId: Principal.fromText(POUH_ISSUER_CANISTER_ID),
-				currentUserVersion: undefined,
+				currentUserVersion: mockUserProfileVersion,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
-			expect(getUserProfileMock).not.toBeCalled();
+			expect(getUserProfileMock).not.toHaveBeenCalled();
 			expect(get(userProfileStore)).toEqual({
 				certified: true,
 				profile: initialUserProfile

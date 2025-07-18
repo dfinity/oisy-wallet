@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 const commonTypes = ['send', 'receive'] as const;
 
@@ -19,3 +19,5 @@ export const solTransactionTypes = z.enum(commonTypes);
 export const TransactionTypeSchema = z.enum(allTypes);
 
 export const TransactionStatusSchema = z.enum(['confirmed', 'pending', 'unconfirmed']);
+
+export const TransactionIdSchema = z.string();

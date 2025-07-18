@@ -2,12 +2,17 @@
 	import IconAstronautArrow from '$lib/components/icons/IconAstronautArrow.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let fullWidth = false;
+	interface Props {
+		onclick: () => void;
+		fullWidth?: boolean;
+	}
+
+	let { onclick, fullWidth = false }: Props = $props();
 </script>
 
 <button
-	on:click
-	class="login-button gap-4 rounded-2xl py-3 text-lg leading-6 font-bold sm:px-12 flex w-full items-center justify-center bg-brand-primary text-white"
+	{onclick}
+	class="login-button flex w-full items-center justify-center gap-4 rounded-2xl bg-brand-primary py-3 text-lg font-bold leading-6 text-primary-inverted sm:px-12"
 	class:sm:w-80={!fullWidth}
 	data-tid="login-button"
 >

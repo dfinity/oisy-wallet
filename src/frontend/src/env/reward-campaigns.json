@@ -1,0 +1,82 @@
+[
+	{
+		"id": "sprinkles_s1e3",
+		"title": "rewards.campaigns.sprinkles_s1e3.title",
+		"cardTitle": "rewards.campaigns.sprinkles_s1e3.card_title",
+		"oneLiner": "rewards.campaigns.sprinkles_s1e3.one_liner",
+		"participateTitle": "rewards.campaigns.sprinkles_s1e3.participate_title",
+		"description": "rewards.campaigns.sprinkles_s1e3.description",
+		"logo": "/images/rewards/oisy-reward-logo.svg",
+		"cardBanner": "/images/rewards/oisy-episode-three-campaign.svg",
+		"campaignHref": "rewards.campaigns.sprinkles_s1e3.campaign_href",
+		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
+		"startDate": "2025-02-05T14:28:02.288Z",
+		"endDate": "2025-06-26T12:00:00.000Z",
+		"win": {
+			"default": {
+				"title": "rewards.campaigns.sprinkles_s1e3.win.default.title",
+				"banner": "/images/rewards/reward-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e3.win.default.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e3.win.default.share_href"
+			},
+			"jackpot": {
+				"title": "rewards.campaigns.sprinkles_s1e3.win.jackpot.title",
+				"banner": "/images/rewards/reward-jackpot-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e3.win.jackpot.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e3.win.jackpot.share_href"
+			},
+			"referral": {
+				"title": "rewards.campaigns.sprinkles_s1e3.win.referral.title",
+				"banner": "/images/rewards/reward-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e3.win.referral.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e3.win.referral.share_href"
+			}
+		}
+	},
+	{
+		"id": "sprinkles_s1e4",
+		"title": "rewards.campaigns.sprinkles_s1e4.title",
+		"cardTitle": "rewards.campaigns.sprinkles_s1e4.card_title",
+		"oneLiner": "rewards.campaigns.sprinkles_s1e4.one_liner",
+		"participateTitle": "rewards.campaigns.sprinkles_s1e4.participate_title",
+		"description": "rewards.campaigns.sprinkles_s1e4.description",
+		"logo": "/images/rewards/oisy-reward-logo.svg",
+		"cardBanner": "/images/rewards/oisy-episode-three-campaign.svg",
+		"campaignHref": "rewards.campaigns.sprinkles_s1e4.campaign_href",
+		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
+		"startDate": "2025-06-26T12:00:00.000Z",
+		"endDate": "2025-08-10T12:00:00.000Z",
+		"win": {
+			"default": {
+				"title": "rewards.campaigns.sprinkles_s1e4.win.default.title",
+				"banner": "/images/rewards/reward-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e4.win.default.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e4.win.default.share_href"
+			},
+			"jackpot": {
+				"title": "rewards.campaigns.sprinkles_s1e4.win.jackpot.title",
+				"banner": "/images/rewards/reward-jackpot-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e4.win.jackpot.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e4.win.jackpot.share_href"
+			},
+			"leaderboard": {
+				"title": "rewards.campaigns.sprinkles_s1e4.win.leaderboard.title",
+				"banner": "/images/rewards/reward-jackpot-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e4.win.leaderboard.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e4.win.leaderboard.share_href"
+			},
+			"referrer": {
+				"title": "rewards.campaigns.sprinkles_s1e4.win.referrer.title",
+				"banner": "/images/rewards/airdrop-icp.svg",
+				"description": "rewards.campaigns.sprinkles_s1e4.win.referrer.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e4.win.referrer.share_href"
+			},
+			"referee": {
+				"title": "rewards.campaigns.sprinkles_s1e4.win.referee.title",
+				"banner": "/images/rewards/airdrop-icp.svg",
+				"description": "rewards.campaigns.sprinkles_s1e4.win.referee.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e4.win.referee.share_href"
+			}
+		}
+	}
+]

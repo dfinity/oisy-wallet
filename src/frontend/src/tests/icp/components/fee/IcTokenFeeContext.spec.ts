@@ -42,7 +42,7 @@ describe('IcTokenFeeContext', () => {
 
 		await waitFor(() => {
 			expect(transactionFeeSpy).toHaveBeenCalledOnce();
-			expect(transactionFeeSpy).toBeCalledWith({
+			expect(transactionFeeSpy).toHaveBeenCalledWith({
 				ledgerCanisterId: ICP_TOKEN.ledgerCanisterId,
 				identity: mockIdentity
 			});

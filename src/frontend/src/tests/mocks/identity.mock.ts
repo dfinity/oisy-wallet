@@ -2,8 +2,10 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
 export const mockPrincipalText = 'xlmdg-vkosz-ceopx-7wtgu-g3xmd-koiyc-awqaq-7modz-zf6r6-364rh-oqe';
+export const mockPrincipalText2 = 'fnpyv-uis4m-k44er-rkmzg-geafl-jpurz-55cq2-vcdkm-q66js-taqiz-pqe';
 
 export const mockPrincipal = Principal.fromText(mockPrincipalText);
+export const mockPrincipal2 = Principal.fromText(mockPrincipalText2);
 
 const transformRequest = () => {
 	console.error(

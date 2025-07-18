@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Spinner, Toasts } from '@dfinity/gix-components';
+	import { Spinner, Toasts, SystemThemeListener } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -12,7 +12,7 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
-	import { initAnalytics, trackEvent } from '$lib/services/analytics.services';
+	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
@@ -24,7 +24,17 @@
 	 * Init dApp
 	 */
 
-	const init = async () => await Promise.all([syncAuthStore(), initAnalytics(), i18n.init()]);
+	const init = async () => {
+		/**
+		 * We use `Promise.allSettled` to ensure that all initialization functions run,
+		 * regardless of whether some of them fail. This avoids blocking the entire app
+		 * if non-critical services like analytics or i18n fail to initialize.
+		 *
+		 * Each service handles its own error handling,
+		 * and we avoid surfacing errors to the user here to keep the UX clean.
+		 */
+		await Promise.allSettled([syncAuthStore(), initPlausibleAnalytics(), i18n.init()]);
+	};
 
 	const syncAuthStore = async () => {
 		if (!browser) {
@@ -35,13 +45,13 @@
 			await authStore.sync();
 
 			// We are using $authStore.identity here and not the derived $authIdentity because we track the event imperatively right after authStore.sync
-			await trackEvent({
+			trackEvent({
 				name: nonNullish($authStore.identity)
 					? TRACK_SYNC_AUTH_AUTHENTICATED_COUNT
 					: TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 			});
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_SYNC_AUTH_ERROR_COUNT
 			});
 
@@ -99,3 +109,4 @@
 <Toasts maxVisible={3} />
 <Busy />
 <ModalExitHandler />
+<SystemThemeListener />

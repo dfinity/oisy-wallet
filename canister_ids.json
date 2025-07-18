@@ -4,18 +4,24 @@
 		"staging": "t7tos-nyaaa-aaaad-aadkq-cai"
 	},
 	"backend": {
+		"audit": "vhcnk-oqaaa-aaaah-araya-cai",
 		"beta": "yrinv-sqaaa-aaaan-qzmxq-cai",
+		"e2e": "odvuj-myaaa-aaaal-qskqq-cai",
 		"ic": "doked-biaaa-aaaar-qag2a-cai",
 		"staging": "d3nvo-aaaaa-aaaar-qagzq-cai",
 		"test_be_1": "jloto-byaaa-aaaap-anryq-cai"
 	},
 	"frontend": {
+		"audit": "vadl6-diaaa-aaaah-arayq-cai",
 		"beta": "v7iq7-yiaaa-aaaan-qmrtq-cai",
+		"e2e": "okw7v-2qaaa-aaaal-qskra-cai",
 		"ic": "cha4i-riaaa-aaaan-qeccq-cai",
 		"staging": "tewsx-xaaaa-aaaad-aadia-cai",
 		"test_fe_1": "6qzfn-gyaaa-aaaar-qaisa-cai",
 		"test_fe_2": "6xydz-laaaa-aaaar-qaisq-cai",
 		"test_fe_3": "dxvmu-wiaaa-aaaah-aqzaa-cai",
-		"test_fe_4": "gwqec-uqaaa-aaaak-qlnza-cai"
+		"test_fe_4": "gwqec-uqaaa-aaaak-qlnza-cai",
+		"test_fe_5": "c4fs2-pqaaa-aaaal-qsl7a-cai",
+		"test_fe_6": "ehrur-ziaaa-aaaaj-az7lq-cai"
 	}
 }

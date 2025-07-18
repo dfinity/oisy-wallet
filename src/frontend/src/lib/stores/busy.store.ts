@@ -18,15 +18,15 @@ const initBusyStore = (): BusyStore => {
 	return {
 		subscribe,
 
-		start({ msg } = {}) {
+		start: ({ msg } = {}) => {
 			set({ spinner: true, close: false, msg });
 		},
 
-		show() {
+		show: () => {
 			set({ spinner: true, close: true });
 		},
 
-		stop() {
+		stop: () => {
 			set(undefined);
 		}
 	};

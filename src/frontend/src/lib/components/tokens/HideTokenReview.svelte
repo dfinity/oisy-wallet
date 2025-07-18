@@ -10,12 +10,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	const dispatch = createEventDispatcher();
 </script>
 
 <ContentWithToolbar>
-	<div class="icon gap-3 flex flex-col items-center">
+	<div class="icon flex flex-col items-center gap-3">
 		<Logo
 			src={$token?.icon}
 			size="xl"
@@ -23,25 +24,27 @@
 			color="off-white"
 		/>
 
-		<p class="font-bold text-center">
+		<p class="text-center font-bold">
 			{#if nonNullish($token)}
-				{$token.name}
+				{getTokenDisplaySymbol($token)}
 			{:else}
 				&ZeroWidthSpace;
 			{/if}
 		</p>
 	</div>
 
-	<p class="py-10 break-normal">
+	<p class="break-normal py-10">
 		<Html text={$i18n.tokens.hide.info} />
 	</p>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel on:click={() => dispatch('icCancel')} />
-		<Button on:click={() => dispatch('icHide')}>
-			{$i18n.tokens.hide.confirm}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCancel onclick={() => dispatch('icCancel')} />
+			<Button onclick={() => dispatch('icHide')}>
+				{$i18n.tokens.hide.confirm}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
 
 <style lang="scss">

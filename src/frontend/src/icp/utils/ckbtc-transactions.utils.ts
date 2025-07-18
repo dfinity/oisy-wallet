@@ -6,15 +6,20 @@ import {
 } from '$env/explorers.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
+import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/ckbtc-memo.utils';
+import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
+import type { Token } from '$lib/types/token';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -118,7 +123,7 @@ export const mapCkBTCPendingUtxo = ({
 		type: 'receive',
 		status: 'pending',
 		fromLabel: 'transaction.label.twin_network',
-		typeLabel: 'transaction.label.receiving_twin_token',
+		typeLabel: 'transaction.label.converting_twin_token',
 		value: value - kytFee,
 		txExplorerUrl: `${bitcoinExplorerUrl}/tx/${id}`
 	};
@@ -170,11 +175,11 @@ const burnStatus = (
 				status: 'pending'
 			};
 		}
-
-		if (!('Confirmed' in retrieveBtcStatus)) {
-			console.error('Unknown retrieveBtcStatusV2:', retrieveBtcStatus);
-		}
 	}
+
+	// Force compiler error on unhandled cases based on leftover types
+	const _: { Confirmed: { txid: Uint8Array | number[] } } | { Unknown: null } | undefined | never =
+		retrieveBtcStatus;
 
 	return {
 		typeLabel: 'transaction.label.twin_token_sent',
@@ -200,4 +205,33 @@ const burnMemoAddress = (memo: Uint8Array | number[]): OptionString => {
 		console.error('Failed to decode ckBTC burn memo', memo, err);
 		return undefined;
 	}
+};
+
+export const getCkBtcPendingUtxoTransactions = ({
+	token,
+	ckBtcMinterInfoStore,
+	ckBtcPendingUtxosStore
+}: {
+	token: Token;
+	ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
+	ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
+}) => {
+	if (!isTokenCkBtcLedger(token)) {
+		return [];
+	}
+
+	const kytFee = ckBtcMinterInfoStore?.[token.id]?.data.kyt_fee;
+
+	if (isNullish(kytFee)) {
+		return [];
+	}
+
+	return (ckBtcPendingUtxosStore?.[token.id]?.data ?? []).map((utxo) => ({
+		data: mapCkBTCPendingUtxo({
+			utxo,
+			kytFee,
+			ledgerCanisterId: (token as IcCkToken).ledgerCanisterId
+		}),
+		certified: false
+	}));
 };

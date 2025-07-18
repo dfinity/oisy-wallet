@@ -1,7 +1,14 @@
 <script lang="ts">
-	export let testId: string | undefined = undefined;
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		children: Snippet;
+		testId?: string;
+	}
+
+	let { children, testId }: Props = $props();
 </script>
 
-<div class="mb-2 gap-3 flex w-full" data-tid={testId}>
-	<slot />
+<div class="mb-2 flex w-full gap-3" data-tid={testId}>
+	{@render children?.()}
 </div>

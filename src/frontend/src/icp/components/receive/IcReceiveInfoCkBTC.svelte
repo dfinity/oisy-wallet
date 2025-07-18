@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
@@ -60,20 +59,24 @@
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 			on:click={() => displayQRCode(btcAddress ?? '')}
 		>
-			<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.bitcoin_address}</svelte:fragment>
-			<svelte:fragment slot="text"
-				>{$i18n.receive.bitcoin.text.from_network}&nbsp;{#if nonNullish(kytFee)}<span in:fade
+			{#snippet title()}
+				{$i18n.receive.bitcoin.text.bitcoin_address}
+			{/snippet}
+			{#snippet text()}
+				{$i18n.receive.bitcoin.text.from_network}&nbsp;{#if nonNullish(kytFee)}<span in:fade
 						>{replacePlaceholders($i18n.receive.bitcoin.text.fee_applied, {
 							$fee: formatToken({
-								value: BigNumber.from(kytFee),
+								value: kytFee,
 								unitName: BTC_DECIMALS,
 								displayDecimals: BTC_DECIMALS
 							})
 						})}</span
 					>{/if}
-			</svelte:fragment>
+			{/snippet}
 		</ReceiveAddress>
 	{/if}
 
-	<ButtonDone on:click={close} slot="toolbar" />
+	{#snippet toolbar()}
+		<ButtonDone onclick={close} />
+	{/snippet}
 </ContentWithToolbar>

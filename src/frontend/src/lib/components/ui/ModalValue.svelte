@@ -1,21 +1,28 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 
-	export let ref: undefined | string = undefined;
+	interface Props {
+		ref?: string;
+		labelStyleClass?: string;
+		label?: Snippet;
+		mainValue?: Snippet;
+		secondaryValue?: Snippet;
+	}
 
-	let secondaryValue: boolean;
-	$: secondaryValue = nonNullish($$slots['secondary-value']);
+	let { ref, labelStyleClass, label, mainValue, secondaryValue }: Props = $props();
 </script>
 
-<div in:fade class="mb-2 last:mb-0 md:items-center flex w-full justify-between">
-	<label for={ref} class="mr-1 text-sm sm:mr-2 text-tertiary"><slot name="label" /></label>
+<div in:fade class="mb-2 flex w-full justify-between last:mb-0 md:items-center">
+	<label for={ref} class={`mr-1 text-sm text-tertiary sm:mr-2 ${labelStyleClass}`}>
+		{@render label?.()}
+	</label>
 
-	<div class="sm:flex-row sm:items-center flex flex-col items-end">
-		<span class={`mb-1 text-sm font-bold sm:mb-0 ${secondaryValue ? 'sm:mr-2' : ''}`}
-			><slot name="main-value" /></span
-		>
+	<div
+		class="flex flex-col items-end gap-1 text-sm text-tertiary sm:flex-row sm:items-center sm:gap-2"
+	>
+		<span class="font-bold text-primary">{@render mainValue?.()}</span>
 
-		<span class="text-sm text-tertiary"><slot name="secondary-value" /></span>
+		{@render secondaryValue?.()}
 	</div>
 </div>

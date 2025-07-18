@@ -13,10 +13,10 @@ import {
 	jsonReplacer,
 	nonNullish
 } from '@dfinity/utils';
-import { UrlSchema } from '@dfinity/zod-schemas';
+import type { UrlSchema } from '@dfinity/zod-schemas';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { z } from 'zod';
+import type { z } from 'zod/v4';
 import { SNS_JSON_FILE } from './constants.mjs';
 
 const AGGREGATOR_PAGE_SIZE = 10;
@@ -190,6 +190,7 @@ const mapDeprecatedSnsMetadata = ({
 		...(nonNullish(DEPRECATED_SNES[ledgerCanisterId]) && DEPRECATED_SNES[ledgerCanisterId])
 	},
 	ledgerCanisterId,
+	...(nonNullish(DEPRECATED_SNES[ledgerCanisterId]) && { deprecated: true }),
 	...rest
 });
 

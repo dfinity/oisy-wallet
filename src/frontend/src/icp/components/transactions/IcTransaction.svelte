@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
@@ -18,13 +17,17 @@
 	let value: bigint | undefined;
 	let timestampNanoseconds: bigint | undefined;
 	let incoming: boolean | undefined;
+	let to: string | undefined;
+	let from: string | undefined;
 
 	$: ({
 		type,
 		typeLabel: transactionTypeLabel,
 		value,
 		timestamp: timestampNanoseconds,
-		incoming
+		incoming,
+		to,
+		from
 	} = transaction);
 
 	let pending = false;
@@ -33,17 +36,19 @@
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
-	let amount: BigNumber | undefined;
-	$: amount = nonNullish(value) ? BigNumber.from(incoming ? value : value * -1n) : value;
+	let amount: bigint | undefined;
+	$: amount = nonNullish(value) ? (incoming ? value : value * -1n) : value;
 
 	let timestamp: number | undefined;
 	$: timestamp = nonNullish(timestampNanoseconds)
 		? Number(timestampNanoseconds / NANO_SECONDS_IN_SECOND)
 		: undefined;
+
+	const modalId = Symbol();
 </script>
 
 <Transaction
-	on:click={() => modalStore.openIcTransaction({ transaction, token })}
+	onClick={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
 	styleClass="block w-full border-0"
 	{amount}
 	{type}
@@ -51,6 +56,8 @@
 	{status}
 	{token}
 	{iconType}
+	{to}
+	{from}
 >
 	<IcTransactionLabel label={transactionTypeLabel} fallback={type} {token} />
 </Transaction>

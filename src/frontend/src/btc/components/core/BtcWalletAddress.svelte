@@ -17,12 +17,12 @@
 			: $btcAddressMainnet;
 </script>
 
-<div>
-	<label class="text-sm font-bold block" for="btc-wallet-address"
+<div class="p-3">
+	<label class="block text-sm font-bold" for="btc-wallet-address"
 		>{$i18n.wallet.text.wallet_address}:</label
 	>
 
 	<output id="btc-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis({ text: address ?? '' })}</output
-	><Copy color="inherit" inline value={address ?? ''} text={$i18n.wallet.text.address_copied} />
+	><Copy inline value={address ?? ''} text={$i18n.wallet.text.address_copied} />
 </div>

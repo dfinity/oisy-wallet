@@ -1,11 +1,10 @@
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
-import { type QrResponse, type QrStatus } from '$lib/types/qr-code';
+import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 import type { OptionToken, Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { hexStringToUint8Array, isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const decodeQrCode = ({
 	status,
@@ -83,8 +82,7 @@ export const decodeQrCode = ({
 				erc20Tokens.find(
 					(token) =>
 						token.address.toLowerCase() === tokenAddress.toLowerCase() &&
-						(token.network as EthereumNetwork).chainId.toString() ===
-							parsedEthereumChainId.toString()
+						token.network.chainId.toString() === parsedEthereumChainId.toString()
 				) ?? undefined
 			);
 		}
@@ -125,7 +123,7 @@ export const decodeQrCode = ({
 		functionName === 'transfer'
 			? uint256
 			: nonNullish(value)
-				? +formatToken({ value: BigNumber.from(value.toString()), unitName: token.decimals })
+				? +formatToken({ value: BigInt(value), unitName: token.decimals })
 				: undefined;
 
 	return { status: 'success', destination, symbol: token.symbol, amount };

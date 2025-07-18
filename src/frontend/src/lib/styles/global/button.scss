@@ -26,7 +26,11 @@ a.as-button {
 
 	&.primary,
 	&.secondary,
+	&.secondary-light,
 	&.tertiary,
+	&.tertiary-alt,
+	&.tertiary-main-card,
+	&.muted,
 	&.success,
 	&.error {
 		justify-content: center;
@@ -41,38 +45,34 @@ a.as-button {
 		&.padding-sm {
 			--button-padding: var(--padding-1_5x) var(--padding-1_5x);
 		}
-
-		&.loading {
-			background: var(--color-grey);
-		}
 	}
 
 	&.primary,
 	&.secondary,
+	&.secondary-light,
 	&.tertiary,
+	&.tertiary-alt,
+	&.tertiary-main-card,
+	&.muted,
 	&.success,
 	&.error {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
 		&.disabled {
-			background: var(--color-grey);
-			color: var(--color-white);
 			opacity: 1;
 			cursor: not-allowed;
 
 			&.tertiary {
-				background: var(--color-white);
-				color: var(--color-grey);
+				background: var(--color-background-disabled);
+				color: var(--color-foreground-disabled);
 			}
 		}
 
 		&[focus],
 		&:focus {
-			outline: none;
-			box-shadow:
-				0 0 0 2px var(--color-white),
-				0 0 0 4px var(--color-blue-ribbon);
+			outline-offset: 2px;
+			outline: var(--color-background-brand-primary) solid 2px;
 		}
 
 		&:focus:not(:focus-visible) {
@@ -90,81 +90,381 @@ a.as-button {
 		}
 	}
 
-	&.primary:not([disabled]):not(.disabled):not(.loading) {
-		@apply bg-brand-primary;
-		color: var(--color-white);
+	// PRIMARY
+	&.primary:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-primary-inverted;
+
+		&:not(.transparent) {
+			@apply bg-brand-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
+			@apply text-primary-inverted;
 			@apply bg-brand-secondary;
 		}
 
 		&:active {
+			@apply text-primary-inverted;
 			@apply bg-brand-tertiary;
 		}
-	}
 
-	&.secondary:not([disabled]):not(.disabled):not(.loading) {
-		@apply text-brand-primary bg-brand-subtle;
-
-		&:hover {
-			@apply bg-brand-subtle-alt;
-		}
-
-		&:active {
-			@apply bg-brand-subtle2-alt;
+		&:focus-visible {
+			@apply text-primary-inverted;
+			@apply bg-brand-primary;
 		}
 	}
 
-	&.tertiary:not([disabled]):not(.disabled):not(.loading) {
-		background: var(--color-white);
+	&.primary.disabled:not(.loading):not(.link),
+	&.primary[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-disabled;
+	}
+
+	&.primary.loading {
+		@apply text-primary-inverted;
+		@apply bg-brand-primary;
+	}
+
+	// SECONDARY
+	&.secondary:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-primary-inverted-alt;
+
+		&:not(.transparent) {
+			@apply bg-primary-inverted;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
-			@apply text-brand-primary;
+			@apply text-primary-inverted-alt;
+			@apply bg-secondary-inverted;
 		}
 
 		&:active {
-			@apply bg-brand-subtle-alt;
-			color: currentColor;
+			@apply text-primary-inverted-alt;
+			@apply bg-primary-inverted;
 		}
 
-		&.link {
-			@apply text-brand-primary;
+		&:focus-visible {
+			@apply text-brand-primary-alt;
+			@apply bg-primary-inverted;
+		}
+	}
+
+	&.secondary.disabled:not(.loading):not(.link),
+	&.secondary[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-disabled;
+	}
+
+	&.secondary.loading {
+		@apply text-primary-inverted-alt;
+		@apply bg-primary-inverted;
+	}
+
+	// SECONDARY LIGHT
+	&.secondary-light:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-brand-primary-alt;
+
+		&:not(.transparent) {
+			@apply bg-brand-subtle-10;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
+
+		&:hover {
+			@apply text-brand-primary-alt;
+			@apply bg-brand-subtle-20;
+		}
+
+		&:active {
+			@apply text-brand-primary-alt;
+			@apply bg-brand-subtle-30;
+		}
+
+		&:focus-visible {
+			@apply text-brand-primary-alt;
+			@apply bg-brand-subtle-10;
+		}
+	}
+
+	&.secondary-light.disabled:not(.loading):not(.link),
+	&.secondary-light[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-disabled;
+	}
+
+	&.secondary-light.loading {
+		@apply text-brand-primary-alt;
+		@apply bg-brand-subtle-10;
+	}
+
+	// TERTIARY
+	&.tertiary:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-primary;
+
+		&:not(.transparent) {
+			@apply bg-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
+
+		&:hover {
+			@apply text-brand-primary-alt;
+			@apply bg-primary;
+		}
+
+		&:active {
+			@apply text-brand-secondary;
+			@apply bg-primary;
+		}
+
+		&:focus-visible {
+			@apply text-primary;
+			@apply bg-primary;
+		}
+	}
+
+	&.tertiary.disabled:not(.loading):not(.link),
+	&.tertiary[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-disabled;
+	}
+
+	&.tertiary.loading {
+		@apply text-primary;
+		@apply bg-primary;
+	}
+
+	// TERTIARY ALT
+	&.tertiary-alt:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-brand-primary-alt;
+
+		&:not(.transparent) {
+			@apply bg-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
+
+		&:hover {
+			@apply text-brand-primary-alt;
+			@apply bg-brand-subtle-10;
+		}
+
+		&:active {
+			@apply text-brand-primary-alt;
+			@apply bg-brand-subtle-30;
+		}
+
+		&:focus-visible {
+			@apply text-primary;
+			@apply bg-primary;
+		}
+	}
+
+	&.tertiary-alt.disabled:not(.loading):not(.link),
+	&.tertiary-alt[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-disabled;
+	}
+
+	&.tertiary-alt.loading {
+		@apply text-brand-primary-alt;
+		@apply bg-primary;
+	}
+
+	// TERTIARY MAIN CARD
+	&.tertiary-main-card:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-brand-primary-inverted;
+
+		&:not(.transparent) {
+			@apply bg-primary-alt;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
+
+		&:hover {
+			@apply text-brand-primary-inverted;
+			@apply bg-secondary-alt;
+		}
+
+		&:active {
+			@apply bg-tertiary-alt;
+		}
+
+		&:focus-visible {
+			@apply text-brand-primary-inverted;
+			@apply bg-tertiary-alt;
+		}
+	}
+
+	&.tertiary-main-card.disabled:not(.loading):not(.link),
+	&.tertiary-main-card[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-primary-alt;
+	}
+
+	&.tertiary-main-card.loading {
+		@apply text-brand-primary-inverted;
+		@apply bg-primary-alt;
+	}
+
+	// MUTED
+	&.muted:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-tertiary;
+		@apply bg-transparent;
+
+		&:hover {
+			@apply text-secondary;
+			@apply bg-primary;
+		}
+
+		&:active,
+		&.active {
+			@apply text-secondary;
+			@apply bg-disabled;
+		}
+
+		&:focus-visible {
+			@apply text-secondary;
+			@apply bg-disabled;
+		}
+	}
+
+	&.muted.disabled:not(.loading):not(.link),
+	&.muted[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-primary-alt;
+	}
+
+	&.muted.loading {
+		@apply text-brand-primary-inverted;
+		@apply bg-primary-alt;
+	}
+
+	// SUCCESS
+	&.success {
+		&:not(.transparent) {
+			@apply text-primary-inverted;
+			@apply bg-success-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+			@apply text-success-primary;
 
 			&:hover {
-				@apply text-brand-secondary;
+				@apply text-success-primary;
+				@apply bg-success-subtle-20;
 			}
 
 			&:active {
-				@apply text-brand-secondary;
+				@apply text-success-primary;
+				@apply bg-success-subtle-20;
+			}
+
+			&:focus-visible {
+				@apply text-success-primary;
+				@apply bg-success-subtle-20;
 			}
 		}
-	}
-
-	&.success {
-		background: var(--color-green-crayola);
-		color: var(--color-white);
 
 		&:hover {
-			background: var(--color-dartmouth-green);
+			@apply text-primary-inverted;
+			@apply bg-success-secondary;
 		}
 
 		&:active {
-			background: var(--color-british-racing-green);
+			@apply text-primary-inverted;
+			@apply bg-success-tertiary;
+		}
+
+		&:focus-visible {
+			@apply text-primary-inverted;
+			@apply bg-success-primary;
 		}
 	}
 
+	&.success.disabled,
+	&.success[disabled] {
+		@apply text-disabled;
+		@apply bg-disabled;
+	}
+
+	&.success.loading {
+		@apply text-primary-inverted;
+		@apply bg-success-primary;
+	}
+
+	// ERROR
 	&.error {
-		background: var(--color-rusty-red);
-		color: var(--color-white);
+		&:not(.transparent) {
+			@apply text-primary-inverted;
+			@apply bg-error-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+			@apply text-error-primary;
+
+			&:hover {
+				@apply bg-error-subtle-20;
+				@apply text-error-primary;
+			}
+
+			&:active {
+				@apply text-error-primary;
+				@apply bg-error-subtle-20;
+			}
+
+			&:focus-visible {
+				@apply text-error-primary;
+				@apply bg-error-subtle-20;
+			}
+		}
 
 		&:hover {
-			background: var(--color-upsdell-red);
+			@apply text-primary-inverted;
+			@apply bg-error-secondary;
 		}
 
 		&:active {
-			background: var(--color-chocolate-cosmos);
+			@apply text-primary-inverted;
+			@apply bg-error-tertiary;
+		}
+
+		&:focus-visible {
+			@apply text-primary-inverted;
+			@apply bg-error-primary;
 		}
 	}
+
+	&.error.disabled,
+	&.error[disabled] {
+		@apply text-disabled;
+		@apply bg-disabled;
+	}
+
+	&.error.loading {
+		@apply text-primary-inverted;
+		@apply bg-error-primary;
+	}
+
+	// OTHERS
 
 	&.text {
 		&:hover,
@@ -175,5 +475,59 @@ a.as-button {
 
 	&.icon {
 		@include button.icon;
+	}
+
+	// LINK
+	&.link {
+		@apply p-0;
+		@apply bg-transparent;
+		@apply text-brand-primary-alt;
+
+		&.disabled,
+		&[disabled] {
+			@apply p-0;
+			@apply bg-transparent;
+			@apply text-brand-disabled;
+		}
+	}
+}
+
+// DROPDOWN BUTTON
+.dropdown-button:not(.loading) {
+	@apply text-primary;
+	@apply bg-primary;
+	@apply rounded-xl;
+	@apply px-4;
+	@apply py-1;
+	@apply justify-between;
+	@apply gap-2;
+	@apply text-left;
+	@apply font-medium;
+	@apply leading-5;
+
+	transition: all 0.25s ease-out;
+
+	&::placeholder {
+		@apply text-tertiary;
+	}
+
+	&:hover:not(.disabled):not([disabled]) {
+		@apply bg-brand-subtle-20;
+	}
+
+	&.opened {
+		@apply bg-brand-subtle-30;
+	}
+}
+
+.dropdown-button.disabled:not(.loading),
+.dropdown-button[disabled]:not(.loading) {
+	@apply text-disabled;
+	@apply bg-disabled;
+}
+
+@media (width <= theme(--breakpoint-sm)) {
+	.dropdown-button:not(.loading) {
+		@apply px-2;
 	}
 }

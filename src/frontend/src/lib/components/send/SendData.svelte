@@ -10,6 +10,7 @@
 	export let destination: string | null;
 	export let amount: OptionAmount = undefined;
 	export let token: Token;
+	export let exchangeRate: number | undefined = undefined;
 	export let balance: OptionBalance;
 	export let source: string;
 	export let showNullishAmountLabel = false;
@@ -21,10 +22,10 @@
 
 <slot name="network" />
 
-<SendDataAmount {amount} {token} showNullishLabel={showNullishAmountLabel} />
+<SendDataAmount {amount} {token} {exchangeRate} showNullishLabel={showNullishAmountLabel} />
 
 <slot />
 
-<SendSource {token} {balance} {source} />
+<SendSource {token} {balance} {source} {exchangeRate} />
 
 <slot name="fee" />

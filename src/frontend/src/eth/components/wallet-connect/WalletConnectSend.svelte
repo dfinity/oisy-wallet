@@ -1,20 +1,21 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import WalletConnectSendModal from '$eth/components/wallet-connect/WalletConnectSendModal.svelte';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
+	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	export let listener: OptionWalletConnectListener;
 
-	let request: Web3WalletTypes.SessionRequest | undefined;
+	let request: WalletKitTypes.SessionRequest | undefined;
 	$: request = $modalWalletConnectSend
-		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
+		? ($modalStore?.data as WalletKitTypes.SessionRequest | undefined)
 		: undefined;
 
 	let firstTransaction: WalletConnectEthSendTransactionParams | undefined;
@@ -27,7 +28,9 @@
 
 	let sourceNetwork: EthereumNetwork | undefined;
 	$: sourceNetwork = nonNullish(chainId)
-		? $enabledEthereumNetworks.find(({ chainId: cId }) => cId === BigInt(chainId))
+		? [...$enabledEthereumNetworks, ...$enabledEvmNetworks].find(
+				({ chainId: cId }) => cId === BigInt(chainId)
+			)
 		: undefined;
 </script>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import {
 		getSignParamsMessageUtf8,
 		getSignParamsMessageHex
@@ -10,7 +10,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let request: Web3WalletTypes.SessionRequest;
+	export let request: WalletKitTypes.SessionRequest;
 
 	let message: string;
 	$: message = getSignParamsMessageHex(request.params.request.params);
@@ -33,7 +33,7 @@
 
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>
 	{#if nonNullish(json)}
-		<div class="mt-4 rounded-xs p-4 bg-dust">
+		<div class="rounded-xs mt-4 bg-disabled p-4">
 			<Json {json} _collapsed={true} />
 		</div>
 	{:else}
@@ -42,5 +42,7 @@
 		</p>
 	{/if}
 
-	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+	{#snippet toolbar()}
+		<WalletConnectActions on:icApprove on:icReject />
+	{/snippet}
 </ContentWithToolbar>

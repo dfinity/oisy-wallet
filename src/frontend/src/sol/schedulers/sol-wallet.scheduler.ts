@@ -1,24 +1,30 @@
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { retryWithDelay } from '$lib/services/rest.services';
 import type { SolAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import type {
 	PostMessageDataRequestSol,
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Option } from '$lib/types/utils';
-import { loadSolLamportsBalance, loadSplTokenBalance } from '$sol/api/solana.api';
+import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
+import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 interface LoadSolWalletParams {
+	identity: OptionIdentity;
 	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
-	tokenAddress?: SolAddress;
+	tokenAddress?: SplTokenAddress;
+	tokenOwnerAddress?: SolAddress;
 }
 
 interface SolWalletStore {
@@ -45,7 +51,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	async start(data: PostMessageDataRequestSol | undefined) {
 		await this.timer.start<PostMessageDataRequestSol>({
-			interval: WALLET_TIMER_INTERVAL_MILLIS,
+			interval: SOL_WALLET_TIMER_INTERVAL_MILLIS,
 			job: this.syncWallet,
 			data
 		});
@@ -60,25 +66,29 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	private loadBalance = async ({
 		address,
-		solanaNetwork,
-		tokenAddress
+		solanaNetwork: network,
+		tokenAddress,
+		tokenOwnerAddress
 	}: LoadSolWalletParams): Promise<CertifiedData<SolBalance | null>> => ({
-		data: nonNullish(tokenAddress)
-			? await loadSplTokenBalance({ address, network: solanaNetwork, tokenAddress })
-			: await loadSolLamportsBalance({ address, network: solanaNetwork }),
+		data:
+			nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
+				? await loadSplTokenBalance({
+						address,
+						network,
+						tokenAddress,
+						tokenOwnerAddress
+					})
+				: await loadSolLamportsBalance({ address, network }),
 		certified: false
 	});
 
-	// TODO add unit tests for spl txns
 	private loadTransactions = async ({
-		address,
-		solanaNetwork,
-		tokenAddress
+		solanaNetwork: network,
+		...rest
 	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
 		const transactions = await getSolTransactions({
-			network: solanaNetwork,
-			address,
-			tokenAddress
+			network,
+			...rest
 		});
 
 		const transactionsUi = transactions.map((transaction) => ({
@@ -89,30 +99,39 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		return transactionsUi.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
 	};
 
-	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestSol>) => {
+	private loadAndSyncWalletData = async ({
+		identity,
+		data
+	}: Required<SchedulerJobData<PostMessageDataRequestSol>>) => {
+		const {
+			address: { data: address },
+			...rest
+		} = data;
+
+		const [balance, transactions] = await Promise.all([
+			this.loadBalance({
+				identity,
+				address,
+				...rest
+			}),
+			this.loadTransactions({
+				identity,
+				address,
+				...rest
+			})
+		]);
+
+		this.syncWalletData({ response: { balance, transactions } });
+	};
+
+	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestSol>) => {
 		assertNonNullish(data, 'No data provided to get Solana balance.');
 
 		try {
-			const {
-				address: { data: address },
-				solanaNetwork,
-				tokenAddress
-			} = data;
-
-			const [balance, transactions] = await Promise.all([
-				this.loadBalance({
-					address,
-					solanaNetwork,
-					tokenAddress
-				}),
-				this.loadTransactions({
-					address,
-					solanaNetwork,
-					tokenAddress
-				})
-			]);
-
-			this.syncWalletData({ response: { balance, transactions } });
+			await retryWithDelay({
+				request: async () => await this.loadAndSyncWalletData({ identity, data }),
+				maxRetries: 10
+			});
 		} catch (error: unknown) {
 			this.postMessageWalletError({ error });
 		}

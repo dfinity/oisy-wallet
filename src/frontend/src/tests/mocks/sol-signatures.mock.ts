@@ -1,7 +1,5 @@
 import type { SolSignature } from '$sol/types/sol-transaction';
-import { getBase58Decoder } from '@solana/codecs';
-import { signature } from '@solana/keys';
-import type { UnixTimestamp } from '@solana/rpc-types';
+import { getBase58Decoder, signature, type UnixTimestamp } from '@solana/kit';
 
 export const mockSolSignature = () => {
 	const randomBytes = new Uint8Array(64);

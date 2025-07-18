@@ -1,18 +1,17 @@
 @use '../mixins/media';
 
+/************* USE OF !IMPORTANT *********************
+**   Only in this file the use of !important        **
+**   CAN be warranted. As this file is the last     **
+**   instance where the gix components can be       **
+**   styled, !important can be used to override     **
+**   certain styles. However, it still is a last    **
+**   resort solution and if possible, a proper      **
+**   solution must be tried and still is preferred. **
+*****************************************************/
+
 :root {
-	--positive-emphasis: var(--color-green-crayola);
-	--positive-emphasis-rgb: 48, 175, 145;
-
-	--warning-emphasis-shade: var(--color-goldenrod);
-
-	--negative-emphasis: var(--color-cyclamen);
-
-	--primary: var(--color-blue-ribbon);
-	--primary-contrast: var(--color-white);
-	--tertiary: var(--color-secondary);
-
-	--value-color: var(--color-secondary);
+	--toggle-disabled-opacity: 1;
 
 	--border-radius-2x: var(--border-radius-lg);
 	--border-radius-0_5x: var(--border-radius-xs);
@@ -20,16 +19,15 @@
 
 	--animation-time-normal: 0.2s;
 
-	--progress-color: var(--color-primary);
-	--progress-color-contrast: var(--color-white);
-	--progress-color-rgb: var(--color-primary-rgb);
+	--progress-color: var(--color-background-brand-primary-alt);
+	--progress-color-contrast: var(--color-foreground-primary-inverted);
 
-	--overlay-background: var(--color-white);
-	--overlay-background-contrast: var(--color-secondary);
+	--overlay-background: var(--color-background-primary);
+	--overlay-background-contrast: var(--color-foreground-primary);
 
 	--dropdown-background: var(--overlay-background);
 	--dropdown-border-size: 1.5px;
-	--dropdown-border-color: #ebedf9;
+	--dropdown-border-color: var(--color-border-secondary);
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
@@ -38,19 +36,31 @@
 
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
+	--bottom-sheet-border-color: var(--color-border-primary);
+	--bottom-sheet-z-index: var(--modal-z-index);
+	--card-background: var(--color-background-primary);
+
 	// Input
-	--input-background: var(--color-white);
-	--focus-background: var(--color-white);
-	--input-border-color: var(--color-grey);
+	--input-background: var(--color-background-primary);
+	--focus-background: var(--color-background-primary);
+	--focus-border-color: var(---color-border-brand-primary);
+	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
+	--input-width: 100%;
 	--animation-time-short: 0.2s;
-	--secondary: var(--color-dark-blue);
+
+	// General GIX
+	--secondary: var(--color-background-brand-primary);
+	--tertiary: var(--color-foreground-tertiary-inverted);
+	--positive-emphasis: var(--color-background-success-primary);
+	--negative-emphasis: var(--color-background-error-primary);
+	--warning-emphasis: var(--color-background-warning-primary);
 
 	// Toast message max height is calculated based on the font-size.
 	--font-size-standard: 1rem;
 
 	// Segment
-	--segment-selected-background: var(--color-secondary);
+	--segment-selected-background: var(--color-base-black);
 
 	// Checkbox
 	--checkbox-padding: 0;
@@ -76,8 +86,10 @@
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
 	--dialog-header-height: 74px;
 
-	--backdrop-contrast: var(--color-secondary);
+	--backdrop-contrast: var(--color-foreground-primary-inverted);
 	--backdrop-filter: blur(4px);
+	--tooltip-background: var(--color-base-black);
+	--tooltip-text-color: var(--color-foreground-primary-inverted);
 
 	@media (width >= theme(--breakpoint-sm)) {
 		--dialog-width: 560px;
@@ -117,17 +129,38 @@ div.input-field input[id] {
 	padding: var(--padding-1_5x);
 }
 
+.input-field.condensed input {
+	padding-block: var(--padding-1_5x) !important;
+}
+
 div.input-field input[id]::placeholder {
-	color: var(--colors-neutrals-600);
+	color: var(--color-foreground-tertiary) !important;
+}
+
+div:not(.input-currency-container) > div.input-block > div.input-field > input {
+	border-color: var(--input-border-color);
+	border-width: 1px;
+
+	transition: all 0.25s ease-out;
+
+	&:hover {
+		border-color: var(--color-border-brand-primary) !important;
+	}
+
+	&:focus:not(:focus-visible),
+	&:focus-within,
+	&:active {
+		outline: 1px solid var(--color-border-brand-primary) !important;
+	}
 }
 
 div.modal {
-	--overlay-background: var(--colors-neutrals-white);
-	--overlay-background-contrast: var(--color-secondary);
-	--overlay-content-background: var(--colors-neutrals-white);
-	--overlay-content-background-contrast: var(--color-secondary);
+	--overlay-background: var(--color-background-surface);
+	--overlay-background-contrast: var(--color-foreground-primary);
+	--overlay-content-background: var(--color-background-surface);
+	--overlay-content-background-contrast: var(--color-foreground-primary);
 
-	color: var(--color-secondary);
+	color: var(--color-foreground-secondary);
 
 	--toolbar-height: 78px;
 
@@ -161,14 +194,18 @@ div.modal {
 	}
 
 	div.wrapper.dialog > div.container-wrapper {
-		margin: 0;
+		margin: 0 !important;
 
 		& > div.container {
 			border-radius: 0;
+			max-width: 100% !important;
 		}
 	}
 
 	div.container {
+		// hack for fixing blurry text/content on Mac OS when modal content scroll bar is showing
+		border-radius: 0 !important;
+
 		// If using ContentWithToolbar, we need to set some padding manually
 		& > div.content div.stretch {
 			--dialog-padding-x: 12px;
@@ -214,71 +251,188 @@ div.popover {
 	--background-contrast: var(--overlay-background-contrast);
 
 	.wrapper {
-		padding: var(--padding-2x);
-		--padding: var(--padding-2x);
+		padding: var(--padding-0_5x);
+		--padding: var(--padding-0_5x);
 
 		--border-radius: 16px;
 
 		max-width: calc(100vw - (2 * var(--padding)));
-
-		@include media.min-width(xsmall) {
-			max-width: 300px;
-		}
 	}
 }
 
 div.toggle {
-	zoom: 1.45;
+	scale: 1.45;
+	transform-origin: 50%;
+	margin-inline: var(--padding);
 
-	--card-background-contrast: var(--color-dust);
-	--card-background: var(--color-white);
+	--card-background-contrast: var(--color-background-disabled-alt);
+	--card-background: var(--color-base-white);
+
+	&:hover {
+		--card-background-contrast: var(--color-background-disabled-alt2);
+	}
+
+	&:disabled,
+	&.disabled {
+		--card-background: var(--color-background-disabled);
+		--card-background-contrast: var(--color-background-disabled);
+	}
 
 	&:has(input[type='checkbox']:checked) {
-		--card-background-contrast: var(--color-blue-ribbon);
+		--card-background-contrast: var(--color-background-brand-primary);
+
+		&:hover {
+			--card-background-contrast: var(--color-background-brand-secondary);
+		}
+
+		&:active {
+			--card-background-contrast: var(--color-background-brand-primary);
+		}
+
+		&:disabled,
+		&.disabled {
+			--card-background: var(--color-background-primary-alt);
+			--card-background-contrast: var(--color-background-brand-subtle-20);
+		}
+	}
+
+	@media (width < theme(--breakpoint-lg)) {
+		scale: 1.6;
+		margin-inline: var(--padding);
+	}
+
+	@media (width < theme(--breakpoint-sm)) {
+		scale: 1.8;
+		margin-inline: var(--padding-2x);
 	}
 }
 
 div.segment-button {
 	button.selected {
-		color: var(--color-white);
+		color: var(--color-foreground-primary-inverted);
 	}
 }
 
-div.step.completed {
-	svg {
-		--icon-check-circle-background: var(--color-primary);
+div.step {
+	.state {
+		color: var(--color-foreground-brand-primary-alt) !important;
+		background: var(--color-background-brand-subtle-30) !important;
 	}
 
-	div.line {
-		--line-color: var(--color-primary);
+	&.completed {
+		svg {
+			--icon-check-circle-background: var(--color-background-brand-primary);
+			--icon-check-circle-color: var(--color-foreground-primary-inverted);
+		}
+
+		div.line {
+			--line-color: var(--color-background-brand-primary) !important;
+		}
+
+		.state {
+			color: var(--color-foreground-success-primary) !important;
+			background: var(--color-background-success-subtle-30) !important;
+		}
+	}
+
+	&.next {
+		.text {
+			color: var(--color-foreground-primary);
+		}
 	}
 }
 
 div.checkbox {
+	&:hover input {
+		--secondary: var(--color-background-brand-secondary) !important;
+		--input-custom-border-color: var(--color-background-brand-secondary);
+		--focus-background: var(--color-background-brand-secondary);
+		--input-background: var(--color-background-brand-secondary);
+	}
+
 	input[type='checkbox'] {
 		--secondary: var(--color-primary);
-		--focus-background: var(--color-white);
+		--focus-background: var(--color-background-primary);
 
 		&:focus {
 			--secondary: var(--color-primary);
-			--focus-background: var(--color-white);
+			--focus-background: var(--color-background-primary);
 		}
 
 		&:checked {
 			--secondary: var(--color-primary);
-			--focus-background: var(--color-cobalt);
-			--input-custom-border-color: var(--color-primary);
-			--input-background: var(--color-primary);
+			--focus-background: var(--color-background-brand-primary-alt);
+			--input-custom-border-color: var(--color-background-brand-primary-alt);
+			--input-background: var(--color-background-brand-primary-alt);
 
-			&:focus {
-				--secondary: var(--color-cobalt);
-				--focus-background: var(--color-cobalt);
-				--input-custom-border-color: var(--color-cobalt);
+			&:hover:not(:active),
+			&:focus:not(:active) {
+				--secondary: var(--color-background-brand-secondary);
+				--focus-background: var(--color-background-brand-secondary);
+				--input-custom-border-color: var(--color-background-brand-secondary);
 			}
 		}
 
 		&:checked:after {
-			--background-contrast: var(--color-white);
+			--background-contrast: var(--color-foreground-primary-inverted);
 		}
 	}
+}
+
+// Native selects
+div.select {
+	& .icon {
+		--disable-contrast: var(--color-foreground-primary);
+	}
+
+	option {
+		background: var(--color-background-primary);
+		color: var(--color-foreground-primary);
+	}
+}
+
+// Toasts
+.toast {
+	--toast-error-background: var(--color-background-error-light);
+	--toast-error-color: var(--color-foreground-error-secondary);
+
+	--toast-warn-background: var(--color-background-error-light);
+	--toast-warn-color: var(--color-foreground-error-secondary);
+}
+
+// Tooltip
+.tooltip {
+	--tooltip-background: var(--color-base-black);
+	--tooltip-text-color: var(--color-foreground-primary-inverted);
+	--tooltip-border-color: var(--color-base-black);
+	--tooltip-border-size: 1px;
+}
+
+.gix-tooltip {
+	background-color: var(--color-base-black);
+	color: var(--color-foreground-primary-inverted);
+}
+
+/* Tooltip arrow */
+.tooltip::after,
+.gix-tooltip::after {
+	content: '';
+	position: absolute;
+	top: -6px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 0 6px 6px 6px;
+	border-style: solid;
+	border-color: transparent transparent var(--tooltip-background) transparent;
+}
+
+.tooltip.top::after,
+.gix-tooltip.top::after {
+	bottom: -6px;
+	top: auto;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 6px 6px 0 6px;
+	border-style: solid;
+	border-color: var(--tooltip-background) transparent transparent transparent;
 }

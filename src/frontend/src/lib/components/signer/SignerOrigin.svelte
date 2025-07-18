@@ -26,21 +26,22 @@
 	};
 
 	// Null being used if mapping the origin does not work - i.e. invalid origin. Probably an edge case.
-	// eslint-disable-next-line local-rules/use-option-type-wrapper
+
 	let host: OptionString;
 	$: host = mapHost(origin);
 </script>
 
 {#if nonNullish(origin)}
-	<p class="mb-6 text-center break-normal">
+	<p class="mb-6 break-normal text-center">
 		{$i18n.signer.origin.text.request_from}
-		{#if nonNullish(host)}<span class="font-bold text-brand-primary"
+		{#if nonNullish(host)}<span class="font-bold text-brand-primary-alt"
 				><ExternalLink
 					ariaLabel={$i18n.signer.origin.alt.link_to_dapp}
 					href={origin}
 					iconVisible={false}>{host}</ExternalLink
 				></span
-			>{:else}<span class="font-bold text-cyclamen">{$i18n.signer.origin.text.invalid_origin}</span
+			>{:else}<span class="font-bold text-error-primary"
+				>{$i18n.signer.origin.text.invalid_origin}</span
 			>{/if}
 	</p>
 {/if}

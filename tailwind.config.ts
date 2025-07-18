@@ -8,51 +8,23 @@ export default {
 		fontFamily: {
 			sans: ['CircularXX', 'sans-serif', ...defaultTheme.fontFamily.sans]
 		},
+		screens: {
+			...defaultTheme.screens,
+			...themeVariables.screens
+		},
 		colors: {
+			// base colors, can be left in
 			inherit: 'inherit',
 			transparent: 'transparent',
 			current: 'currentColor',
 			black: 'rgb(0, 0, 0)',
-			'black-rgb': '0, 0, 0',
 			white: 'rgb(255 255 255)',
-			'white-rgb': '255, 255, 255',
-			'ghost-white': '#f8f9fa',
+
+			// keeping off-white since there's currently no matching color var in figma even though its used
 			'off-white': '#fcfaf6',
-			dust: '#dbd9d6',
-			grey: '#c0bbc4',
-			// TODO: add the new gray colors as theme-variables
-			'bright-gray': '#e9ecef',
-			'blue-ribbon-rgb': '0, 102, 255',
-			'blue-ribbon': '#0066ff',
-			'info-blue': '#0BA5EC',
-			'dark-blue': '#321469',
-			'absolute-blue': '#004eb5',
-			'interdimensional-blue': '#3b00b9',
-			'united-nations-blue': '#627eea',
-			'pale-cornflower-blue': '#b0cdff',
-			'brilliant-azure': '#348afd',
-			'misty-rose': '#937993',
-			'chinese-purple': '#7014a4',
-			'lavander-indigo': '#904efa',
-			goldenrod: '#dfa81b',
-			cyclamen: '#ea6c99',
-			'bright-lilac': '#e18dff',
-			'green-crayola': '#16b364',
-			'medium-spring-green': '#1de59d',
-			'british-racing-green': '#084c2e',
-			'dartmouth-green': '#087443',
-			'rusty-red': '#dc3545',
-			'chocolate-cosmos': '#520c13',
-			'upsdell-red': '#a71d2a',
-			'alice-blue': '#ecf3fb',
-			'crayola-yellow': '#ffe57f',
-			cornsilk: '#fff7d8',
-			cobalt: '#004abe',
-			zumthor: '#e8f1ff',
-			beer: '#f7931a',
-			fulvous: '#de7900',
-			'bright-gold': '#cca055',
-			'golden-sap': '#ebd27f'
+
+			// custom hero gradient colors
+			...themeVariables.gradient
 		},
 		extend: {
 			backgroundColor: themeVariables.background,
@@ -62,7 +34,11 @@ export default {
 			textColor: themeVariables.foreground,
 			backgroundImage: {
 				'trump-token-hero-image':
-					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)'
+					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)',
+				'vchf-token-hero-image':
+					'url(/images/vchf-token-hero-image.webp), radial-gradient(#DA291C, #AD1207)',
+				'veur-token-hero-image':
+					'url(/images/veur-token-hero-image.webp), linear-gradient(180deg, #00319E, #00319E)'
 			},
 			backgroundSize: {
 				'size-200': '200% 200%'
@@ -74,13 +50,6 @@ export default {
 			width: {
 				sm: '576px',
 				md: '768px'
-			},
-			screens: {
-				'1.5md': '896px',
-				'1.5lg': '1152px',
-				'1.5xl': '1408px',
-				'2.5xl': '1728px',
-				'h-md': { raw: '(max-height: 1090px)' }
 			}
 		}
 	},

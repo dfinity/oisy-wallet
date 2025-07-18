@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
@@ -49,8 +49,12 @@
 				copyAriaLabel: $i18n.wallet.text.wallet_address_copied
 			})}
 	>
-		<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
-		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_all_tokens}</svelte:fragment>
+		{#snippet title()}
+			{$i18n.wallet.text.wallet_address}
+		{/snippet}
+		{#snippet text()}
+			{$i18n.receive.icp.text.use_for_all_tokens}
+		{/snippet}
 	</ReceiveAddress>
 
 	<Hr spacing="lg" />
@@ -73,9 +77,15 @@
 				copyAriaLabel: $i18n.receive.icp.text.account_id_copied
 			})}
 	>
-		<svelte:fragment slot="title">{$i18n.receive.icp.text.account_id}</svelte:fragment>
-		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_icp_deposit}</svelte:fragment>
+		{#snippet title()}
+			{$i18n.receive.icp.text.account_id}
+		{/snippet}
+		{#snippet text()}
+			{$i18n.receive.icp.text.use_for_icp_deposit}
+		{/snippet}
 	</ReceiveAddress>
 
-	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} on:click={close} slot="toolbar" />
+	{#snippet toolbar()}
+		<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={close} />
+	{/snippet}
 </ContentWithToolbar>

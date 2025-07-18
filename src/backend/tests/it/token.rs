@@ -1,12 +1,15 @@
-use crate::utils::assertion::assert_tokens_data_eq;
-use crate::utils::mock::{
-    CALLER, SEPOLIA_CHAIN_ID, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
-};
-use crate::utils::pocketic::{setup, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::token::{UserToken, UserTokenId};
-use shared::types::TokenVersion;
+use shared::types::{
+    token::{UserToken, UserTokenId},
+    TokenVersion,
+};
+
+use crate::utils::{
+    assertion::assert_tokens_data_eq,
+    mock::{CALLER, SEPOLIA_CHAIN_ID, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL},
+    pocketic::{setup, PicCanisterTrait},
+};
 
 lazy_static! {
     static ref MOCK_TOKEN: UserToken = UserToken {
@@ -18,7 +21,7 @@ lazy_static! {
         enabled: Some(true),
     };
     static ref MOCK_TOKEN_ID: UserTokenId = UserTokenId {
-        chain_id: MOCK_TOKEN.chain_id.clone(),
+        chain_id: MOCK_TOKEN.chain_id,
         contract_address: MOCK_TOKEN.contract_address.clone(),
     };
 }
@@ -50,7 +53,7 @@ fn test_update_user_token() {
 
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
-        version: add_token_result.unwrap().get(0).unwrap().version,
+        version: add_token_result.unwrap().first().unwrap().version,
         ..MOCK_TOKEN.clone()
     };
 
@@ -60,7 +63,7 @@ fn test_update_user_token() {
 
     let results = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -106,8 +109,8 @@ fn test_list_user_tokens() {
     let results = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserToken> = vec![
-        MOCK_TOKEN.clone_with_incremented_version(),
-        another_token.clone_with_incremented_version(),
+        MOCK_TOKEN.with_incremented_version(),
+        another_token.with_incremented_version(),
     ];
 
     assert!(results.is_ok());
@@ -197,8 +200,8 @@ fn test_anonymous_cannot_add_user_token() {
 
     assert!(result.is_err());
     assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        &result.unwrap_err(),
+        "Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 
@@ -214,8 +217,8 @@ fn test_anonymous_cannot_remove_user_token() {
 
     assert!(result.is_err());
     assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        &result.unwrap_err(),
+        "Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 
@@ -231,8 +234,8 @@ fn test_anonymous_cannot_list_user_tokens() {
 
     assert!(result.is_err());
     assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        &result.unwrap_err(),
+  "Query call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 

@@ -1,19 +1,27 @@
 <script lang="ts">
-	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { userProfileLoaded, userSettings } from '$lib/derived/user-profile.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
-	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
-		type CarouselSlideOisyDappDescription,
-		dAppDescriptions,
-		type OisyDappDescription
+		userProfileLoaded,
+		userProfileVersion,
+		userSettings
+	} from '$lib/derived/user-profile.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
+	import type {
+		CarouselSlideOisyDappDescription,
+		OisyDappDescription
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let styleClass: string | undefined = undefined;
 
@@ -28,8 +36,38 @@
 		...temporaryHiddenDappsIds
 	];
 
+	const featuredAirdrop: RewardCampaignDescription | undefined = rewardCampaigns.find(
+		({ id }) => id === FEATURED_REWARD_CAROUSEL_SLIDE_ID
+	);
+
+	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
+	$: featureAirdropSlide = nonNullish(featuredAirdrop)
+		? ({
+				id: featuredAirdrop.id,
+				carousel: {
+					text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
+					callToAction: $i18n.rewards.text.carousel_slide_cta
+				},
+				logo: featuredAirdrop.logo,
+				name: featuredAirdrop.title
+			} as CarouselSlideOisyDappDescription)
+		: undefined;
+
+	/*
+	 TODO: rename and adjust DappsCarousel for different data sources (not only dApps descriptions).
+	 1. The component now displays data from difference sources - featured airdrop and dApps
+	 2. We need to update all the related namings to something general.
+	 3. Create a single slide data type that can be used for airdrop, dApps, and all further cases.
+	 4. Adjust DappsCarouselSlide accordingly.
+	 */
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
-	$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
+	$: dappsCarouselSlides = filterCarouselDapps({
+		dAppDescriptions: [
+			...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
+			...dAppDescriptions
+		],
+		hiddenDappsIds
+	});
 
 	let carousel: Carousel;
 
@@ -59,7 +97,7 @@
 		await addUserHiddenDappId({
 			dappId,
 			identity: $authIdentity,
-			currentUserVersion: fromNullable($userProfileStore.profile.version)
+			currentUserVersion: $userProfileVersion
 		});
 
 		emit({ message: 'oisyRefreshUserProfile' });
@@ -74,7 +112,13 @@
 		styleClass={`w-full ${styleClass ?? ''}`}
 	>
 		{#each dappsCarouselSlides as dappsCarouselSlide (dappsCarouselSlide.id)}
-			<DappsCarouselSlide {dappsCarouselSlide} on:icCloseCarouselSlide={closeSlide} />
+			<DappsCarouselSlide
+				{dappsCarouselSlide}
+				airdrop={nonNullish(featuredAirdrop) && featuredAirdrop.id === dappsCarouselSlide.id
+					? featuredAirdrop
+					: undefined}
+				on:icCloseCarouselSlide={closeSlide}
+			/>
 		{/each}
 	</Carousel>
 {/if}

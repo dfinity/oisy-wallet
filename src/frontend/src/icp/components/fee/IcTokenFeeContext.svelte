@@ -30,7 +30,7 @@
 					ledgerCanisterId: token.ledgerCanisterId
 				})
 			});
-		} catch (e: unknown) {
+		} catch (_err: unknown) {
 			// as a fallback, we use the icToken fee prop
 			store.setIcTokenFee({
 				tokenSymbol: token.symbol,

@@ -1,0 +1,40 @@
+name: 'Needed jobs succeeded'
+description: |
+  Checks that the jobs needed by the current job succeeded.
+
+  If one of the needed jobs fails, GitHub will by default skip the
+  current job and consider a skipped job to be successful.  If
+  instead you wish the current job to fail if any job needed by
+  the current one fails, you need to:
+
+  - set the current job to always run. (use: `if: $ {{ always() }}`)
+  - check the result of all the needed jobs. (use this action)
+inputs:
+  needs:
+    description: "JSON describing the needed jobs.  (use: `'$ {{ toJson(needs) }}'`)"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: "Check that we have inputs"
+      shell: bash
+      run: |
+        all_jobs="$(echo "$NEEDS" | jq 'to_entries[]')"
+        [[ "$all_jobs" != "" ]] || {
+           echo "ERROR: No needs found"
+           exit 1
+        }
+      env:
+        NEEDS: ${{ inputs.needs }}
+    - name: "Check that all jobs in 'needs' are successful"
+      shell: bash
+      run: |
+        unsuccessful_jobs="$(echo "$NEEDS" | jq 'to_entries[] | select(.value.result != "success")')"
+        if  [[ "$unsuccessful_jobs" == "" ]]
+        then echo "Congratulations, you may pass."
+        else echo "You shall not pass:  Some required tests did not succeed:"
+             echo "$unsuccessful_jobs"
+             exit 1
+        fi
+      env:
+        NEEDS: ${{ inputs.needs }}

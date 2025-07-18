@@ -1,33 +1,24 @@
 import { enabledEthereumNetworksIds } from '$eth/derived/networks.derived';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
-import type { ContractAddressText } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-import type { EthereumNetwork } from '$eth/types/network';
+import { enabledEvmNetworksIds } from '$evm/derived/networks.derived';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
  * The list of ERC20 default tokens - i.e. the statically configured ERC20 tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
  */
-const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
-	[erc20DefaultTokensStore, enabledEthereumNetworksIds],
-	([$erc20TokensStore, $enabledEthereumNetworksIds]) =>
+export const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
+	[erc20DefaultTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
+	([$erc20TokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
 		($erc20TokensStore ?? []).filter(({ network: { id: networkId } }) =>
-			$enabledEthereumNetworksIds.includes(networkId)
+			[...$enabledEthereumNetworksIds, ...$enabledEvmNetworksIds].includes(networkId)
 		)
-);
-
-/**
- * A flatten list of the default ERC20 contract addresses.
- */
-const erc20DefaultTokensAddresses: Readable<string[]> = derived(
-	[erc20DefaultTokens],
-	([$erc20DefaultTokens]) =>
-		$erc20DefaultTokens.map(({ address }) => mapAddressStartsWith0x(address).toLowerCase())
 );
 
 /**
@@ -35,8 +26,19 @@ const erc20DefaultTokensAddresses: Readable<string[]> = derived(
  * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "user token" in the backend.
  */
 export const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
-	[erc20UserTokensStore],
-	([$erc20UserTokensStore]) => $erc20UserTokensStore?.map(({ data: token }) => token) ?? []
+	[erc20UserTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
+	([$erc20UserTokensStore, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
+		$erc20UserTokensStore?.reduce<Erc20UserToken[]>((acc, { data: token }) => {
+			const {
+				network: { id: networkId }
+			} = token;
+
+			if ([...$enabledEthereumNetworksIds, ...$enabledEvmNetworksIds].includes(networkId)) {
+				return [...acc, token];
+			}
+
+			return acc;
+		}, []) ?? []
 );
 
 const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
@@ -45,8 +47,7 @@ const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 		$erc20DefaultTokens.map(({ address, network, ...rest }) => {
 			const userToken = $erc20UserTokens.find(
 				({ address: contractAddress, network: contractNetwork }) =>
-					contractAddress === address &&
-					(network as EthereumNetwork).chainId === (contractNetwork as EthereumNetwork).chainId
+					contractAddress === address && network.chainId === contractNetwork.chainId
 			);
 
 			return mapDefaultTokenToToggleable({
@@ -74,11 +75,17 @@ const enabledErc20DefaultTokens: Readable<Erc20TokenToggleable[]> = derived(
  * We do so because the default statically configured are those to be used for various feature. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each others ("Twin Token" links).
  */
 const erc20UserTokensToggleable: Readable<Erc20UserToken[]> = derived(
-	[erc20UserTokens, erc20DefaultTokensAddresses],
-	([$erc20UserTokens, $erc20DefaultTokensAddresses]) =>
-		$erc20UserTokens.filter(
-			({ address }) =>
-				!$erc20DefaultTokensAddresses.includes(mapAddressStartsWith0x(address).toLowerCase())
+	[erc20UserTokens, erc20DefaultTokens],
+	([$erc20UserTokens, $erc20DefaultTokens]) =>
+		$erc20UserTokens.filter(({ address, network }) =>
+			isNullish(
+				$erc20DefaultTokens.find(
+					({ address: defaultAddress, network: defaultNetwork }) =>
+						mapAddressStartsWith0x(defaultAddress).toLowerCase() ===
+							mapAddressStartsWith0x(address).toLowerCase() &&
+						defaultNetwork.chainId === network.chainId
+				)
+			)
 		)
 );
 
@@ -107,11 +114,6 @@ export const enabledErc20Tokens: Readable<Erc20TokenToggleable[]> = derived(
 		...$enabledErc20DefaultTokens,
 		...$enabledErc20UserTokens
 	]
-);
-
-export const enabledErc20TokensAddresses: Readable<ContractAddressText[]> = derived(
-	[enabledErc20Tokens],
-	([$enabledErc20Tokens]) => $enabledErc20Tokens.map(({ address }: Erc20Token) => address)
 );
 
 export const erc20UserTokensInitialized: Readable<boolean> = derived(

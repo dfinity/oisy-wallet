@@ -1,4 +1,4 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import {
 	IcCanistersSchema,
 	IcCanistersStrictSchema,
@@ -18,21 +18,27 @@ import type { CertifiedData } from '$lib/types/store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
-export const PostMessageRequestSchema = z.enum([
+export const POST_MESSAGE_REQUESTS = [
 	'startIdleTimer',
 	'stopIdleTimer',
 	'startCodeTimer',
 	'stopCodeTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
+	'startPowProtectionTimer',
+	'triggerPowProtectionTimer',
+	'stopPowProtectionTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
 	'stopIcrcWalletTimer',
 	'startIcrcWalletTimer',
 	'triggerIcrcWalletTimer',
+	'stopDip20WalletTimer',
+	'startDip20WalletTimer',
+	'triggerDip20WalletTimer',
 	'stopBtcWalletTimer',
 	'stopSolWalletTimer',
 	'startBtcWalletTimer',
@@ -50,25 +56,34 @@ export const PostMessageRequestSchema = z.enum([
 	'stopCkBtcMinterInfoTimer',
 	'startCkBtcMinterInfoTimer',
 	'triggerCkBtcMinterInfoTimer'
-]);
+] as const;
+
+export const PostMessageRequestSchema = z.enum(POST_MESSAGE_REQUESTS);
 
 export const PostMessageDataRequestSchema = z.never();
-export const PostMessageDataResponseSchema = z.object({}).strict();
+export const PostMessageDataResponseSchema = z.strictObject({});
+export const PostMessageDataResponseLooseSchema = z.looseObject({});
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
-	// TODO: generate zod schema for Erc20ContractAddress
-	erc20Addresses: z.array(z.custom<Erc20ContractAddress>()),
+	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
+	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>())
 });
 
-export const PostMessageDataRequestIcrcSchema = IcCanistersSchema.merge(
-	NetworkSchema.pick({ env: true })
-);
+export const PostMessageDataRequestIcrcSchema = z.object({
+	...IcCanistersSchema.shape,
+	...NetworkSchema.pick({ env: true }).shape
+});
 
-export const PostMessageDataRequestIcrcStrictSchema = IcCanistersStrictSchema.merge(
-	NetworkSchema.pick({ env: true })
-);
+export const PostMessageDataRequestIcrcStrictSchema = z.object({
+	...IcCanistersStrictSchema.shape,
+	...NetworkSchema.pick({ env: true }).shape
+});
+
+export const PostMessageDataRequestDip20Schema = z.object({
+	canisterId: CanisterIdTextSchema
+});
 
 export const PostMessageDataRequestIcCkSchema = IcCkMetadataSchema.pick({
 	minterCanisterId: true
@@ -94,7 +109,8 @@ export const PostMessageDataRequestSolSchema = z.object({
 	// TODO: generate zod schema for CertifiedData
 	address: z.custom<CertifiedData<SolAddress>>(),
 	solanaNetwork: z.custom<SolanaNetworkType>(),
-	tokenAddress: z.custom<SolAddress>().optional()
+	tokenAddress: z.custom<SplTokenAddress>().optional(),
+	tokenOwnerAddress: z.custom<SolAddress>().optional()
 });
 
 export const PostMessageResponseStatusSchema = z.enum([
@@ -103,31 +119,41 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus'
+	'syncCkBTCUpdateBalanceStatus',
+	'syncPowProtectionStatus'
+]);
+
+export const PostMessageErrorResponseSchema = z.enum([
+	'syncExchangeError',
+	'syncIcpWalletError',
+	'syncIcrcWalletError',
+	'syncDip20WalletError',
+	'syncBtcWalletError',
+	'syncSolWalletError',
+	'syncBtcStatusesError',
+	'syncCkMinterInfoError',
+	'syncPowProtectionError'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
 	'signOutIdleTimer',
 	'delegationRemainingTime',
 	'syncExchange',
-	'syncExchangeError',
 	'syncIcpWallet',
 	'syncIcrcWallet',
+	'syncDip20Wallet',
 	'syncBtcWallet',
 	'syncSolWallet',
-	'syncIcpWalletError',
-	'syncIcrcWalletError',
-	'syncBtcWalletError',
-	'syncSolWalletError',
 	'syncIcpWalletCleanUp',
 	'syncIcrcWalletCleanUp',
+	'syncDip20WalletCleanUp',
 	'syncBtcStatuses',
-	'syncBtcStatusesError',
 	'syncCkMinterInfo',
-	'syncCkMinterInfoError',
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
+	'syncPowProgress',
+	'syncPowNextAllowance',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -143,7 +169,9 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>(),
-	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>()
+	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
+	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>(),
+	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>()
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({
@@ -166,6 +194,11 @@ export const PostMessageDataResponseErrorSchema = PostMessageDataResponseSchema.
 	error: z.unknown()
 });
 
+export const PostMessageDataErrorSchema = z.object({
+	msg: PostMessageErrorResponseSchema,
+	data: PostMessageDataResponseErrorSchema
+});
+
 export const PostMessageDataResponseWalletCleanUpSchema = PostMessageDataResponseSchema.extend({
 	transactionIds: z.array(z.string())
 });
@@ -183,8 +216,21 @@ export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSc
 	address: z.custom<BtcAddressData>()
 }).strict();
 
-export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
-	z.object({
-		msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
-		data: dataSchema.optional()
+export const PostMessageDataResponsePowProtectorProgressSchema =
+	PostMessageDataResponseSchema.extend({
+		progress: z.enum(['REQUEST_CHALLENGE', 'SOLVE_CHALLENGE', 'GRANT_CYCLES'])
 	});
+
+export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
+	PostMessageDataResponseSchema.extend({
+		nextAllowanceMs: z.custom<bigint>().optional()
+	});
+
+export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+	z.union([
+		z.object({
+			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
+			data: z.strictObject(dataSchema).shape.optional()
+		}),
+		PostMessageDataErrorSchema
+	]);

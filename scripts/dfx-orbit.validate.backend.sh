@@ -7,7 +7,7 @@ fi
 
 # Checkout
 git fetch
-git checkout $RELEASE_COMMIT || exit 1
+git checkout "$RELEASE_COMMIT" || exit 1
 
 # Make sure target directory exists but no prior artifacts are there
 mkdir -p target
@@ -18,4 +18,4 @@ ENV=ic ./scripts/deploy.args.sh >target/args.txt
 DOCKER_BUILDKIT=1 docker build --progress=plain --build-arg network=ic -o target/ .
 
 # Verify that the wasm matches the request
-dfx-orbit verify $BACKEND_REQUEST_ID canister install backend --mode upgrade --wasm target/backend.wasm.gz --arg-file target/args.txt
+dfx-orbit verify "$BACKEND_REQUEST_ID" canister install backend --mode upgrade --wasm target/backend.wasm.gz --arg-file target/args.txt

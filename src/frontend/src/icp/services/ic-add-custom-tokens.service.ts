@@ -1,7 +1,9 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { getLedgerId, getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
 import { mapIcrcToken } from '$icp/utils/icrc.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -19,7 +21,10 @@ export const loadAndAssertAddCustomToken = async ({
 	icrcTokens,
 	ledgerCanisterId,
 	indexCanisterId
-}: Partial<IcCanisters> & { identity: OptionIdentity; icrcTokens: IcToken[] }): Promise<{
+}: Partial<IcCanisters> & {
+	identity: OptionIdentity;
+	icrcTokens: IcToken[];
+}): Promise<{
 	result: 'success' | 'error';
 	data?: {
 		token: IcTokenWithoutId;
@@ -38,7 +43,7 @@ export const loadAndAssertAddCustomToken = async ({
 	const canisterIds = { ledgerCanisterId, indexCanisterId };
 
 	const { alreadyAvailable } = assertAlreadyAvailable({
-		icrcTokens,
+		icrcTokens: [ICP_TOKEN, ...icrcTokens],
 		...canisterIds
 	});
 
@@ -83,7 +88,7 @@ export const loadAndAssertAddCustomToken = async ({
 		}
 
 		return { result: 'success', data: { token, balance } };
-	} catch (err: unknown) {
+	} catch (_err: unknown) {
 		return { result: 'error' };
 	}
 };
@@ -178,13 +183,15 @@ const loadLedgerBalance = async ({
 const loadIndexBalance = async ({
 	identity,
 	indexCanisterId
-}: Required<Pick<IcCanisters, 'indexCanisterId'>> & { identity: Identity }): Promise<bigint> => {
+}: Required<Pick<IcCanisters, 'indexCanisterId'>> & {
+	identity: Identity;
+}): Promise<bigint> => {
 	try {
 		const { balance } = await getTransactionsIcrc({
 			indexCanisterId,
 			identity,
 			owner: identity.getPrincipal(),
-			maxResults: 0n,
+			maxResults: ZERO,
 			certified: true
 		});
 
@@ -199,7 +206,7 @@ const loadIndexBalance = async ({
 	}
 };
 
-const assertIndexLedgerId = async ({
+export const assertIndexLedgerId = async ({
 	identity,
 	indexCanisterId,
 	ledgerCanisterId

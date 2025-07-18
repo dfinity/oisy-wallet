@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
 	import { signMessage } from '$eth/services/wallet-connect.services';
@@ -14,13 +14,13 @@
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	export let listener: OptionWalletConnectListener;
-	export let request: Web3WalletTypes.SessionRequest;
+	export let request: WalletKitTypes.SessionRequest;
 
 	/**
 	 * Modal
 	 */
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsSign> = [
 		{
 			name: WizardStepsSign.REVIEW,
 			title: $i18n.send.text.review
@@ -31,8 +31,8 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsSign> | undefined;
+	let modal: WizardModal<WizardStepsSign>;
 
 	const close = () => modalStore.close();
 
@@ -64,10 +64,10 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	<WalletConnectModalTitle slot="title"
-		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
-	>
+<WizardModal {steps} bind:currentStep bind:this={modal} onClose={reject}>
+	{#snippet title()}
+		<WalletConnectModalTitle>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle>
+	{/snippet}
 
 	{#if currentStep?.name === WizardStepsSign.SIGNING}
 		<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />

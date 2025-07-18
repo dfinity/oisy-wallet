@@ -8,11 +8,17 @@
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
+	import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
+	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		modalBtcTransaction,
@@ -20,7 +26,7 @@
 		modalIcTransaction,
 		modalSolTransaction
 	} from '$lib/derived/modal.derived';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
@@ -32,20 +38,25 @@
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
-		tokens: $enabledNetworkTokens,
+		tokens: $enabledFungibleNetworkTokens,
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress: $ethAddress,
-		$icTransactions: $icTransactionsStore,
+		$ethAddress,
 		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore
+		$solTransactions: $solTransactionsStore,
+		$icTransactionsStore,
+		$ckBtcMinterInfoStore,
+		$icPendingTransactionsStore,
+		$ckBtcPendingUtxosStore
 	});
 
-	let sortedTransactions: AllTransactionUiWithCmp[];
-	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>
-		sortTransactions({ transactionA: a, transactionB: b })
-	);
+	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
+	$: sortedTransactions = nonNullish(transactions)
+		? transactions.sort(({ transaction: a }, { transaction: b }) =>
+				sortTransactions({ transactionA: a, transactionB: b })
+			)
+		: undefined;
 
 	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
 	$: groupedTransactions = nonNullish(sortedTransactions)
@@ -57,7 +68,7 @@
 	$: ({ transaction: selectedBtcTransaction, token: selectedBtcToken } =
 		mapTransactionModalData<BtcTransactionUi>({
 			$modalOpen: $modalBtcTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let selectedEthTransaction: EthTransactionUi | undefined;
@@ -65,7 +76,7 @@
 	$: ({ transaction: selectedEthTransaction, token: selectedEthToken } =
 		mapTransactionModalData<EthTransactionUi>({
 			$modalOpen: $modalEthTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let selectedIcTransaction: IcTransactionUi | undefined;
@@ -73,7 +84,7 @@
 	$: ({ transaction: selectedIcTransaction, token: selectedIcToken } =
 		mapTransactionModalData<IcTransactionUi>({
 			$modalOpen: $modalIcTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let selectedSolTransaction: SolTransactionUi | undefined;
@@ -81,20 +92,27 @@
 	$: ({ transaction: selectedSolTransaction, token: selectedSolToken } =
 		mapTransactionModalData<SolTransactionUi>({
 			$modalOpen: $modalSolTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 </script>
 
-<!--TODO: include skeleton for loading transactions and remove nullish checks-->
-{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-	{#each Object.entries(groupedTransactions) as [date, transactions] (date)}
-		<TransactionsDateGroup {date} {transactions} />
-	{/each}
-{/if}
+<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
+	<AllTransactionsLoader {transactions}>
+		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+				<TransactionsDateGroup
+					{formattedDate}
+					{transactions}
+					testId={`all-transactions-date-group-${index}`}
+				/>
+			{/each}
+		{/if}
 
-{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
-	<TransactionsPlaceholder />
-{/if}
+		{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+			<TransactionsPlaceholder />
+		{/if}
+	</AllTransactionsLoader>
+</AllTransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
 	<BtcTransactionModal transaction={selectedBtcTransaction} token={selectedBtcToken} />

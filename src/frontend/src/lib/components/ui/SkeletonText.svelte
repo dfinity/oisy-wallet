@@ -1,3 +1,8 @@
-<div class="opacity-40" aria-hidden="true">
-	<div class="h-4 animate-pulse rounded-md w-full bg-grey"></div>
+<script lang="ts">
+	import { TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
+</script>
+
+<div aria-hidden="true">
+	<div data-tid={TOKEN_SKELETON_TEXT} class="h-4 w-full animate-pulse rounded-md bg-disabled-alt"
+	></div>
 </div>

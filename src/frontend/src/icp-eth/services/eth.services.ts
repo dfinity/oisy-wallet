@@ -4,9 +4,8 @@ import {
 } from '$env/networks/networks.cketh.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
-import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-
 import type { Erc20Token } from '$eth/types/erc20';
+import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
 import {
 	mapCkErc20PendingTransaction,
@@ -16,18 +15,20 @@ import {
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import type { IcCkLinkedAssets, IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
+import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { emit } from '$lib/utils/events.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import type { Log } from 'alchemy-sdk';
+import type { Log } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const loadCkEthereumPendingTransactions = async ({
@@ -146,16 +147,17 @@ const loadPendingTransactions = async ({
 
 		const { id: tokenId } = token;
 
-		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore we reset the store.
-		// This can be useful if there was a previous pending transactions displayed and the transaction has now been processed.
+		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore, we reset the store.
+		// This can be useful if there were previous pending transactions displayed and the transaction has now been processed.
 		if (pendingLogs.length === 0) {
 			icPendingTransactionsStore.reset(tokenId);
 			return;
 		}
 
 		const { getTransaction } = alchemyProviders(twinTokenNetworkId);
-		const loadTransaction = ({ transactionHash }: Log): Promise<TransactionResponse | null> =>
-			getTransaction(transactionHash);
+		const loadTransaction = ({
+			transactionHash
+		}: Log): Promise<TransactionResponseWithBigInt | null> => getTransaction(transactionHash);
 
 		const pendingTransactions = await Promise.all(pendingLogs.map(loadTransaction));
 
@@ -168,7 +170,8 @@ const loadPendingTransactions = async ({
 		});
 	} catch (err: unknown) {
 		const {
-			network: { name: networkName }
+			id: tokenId,
+			network: { name: networkName, id: networkId }
 		} = twinToken;
 
 		const {
@@ -177,13 +180,15 @@ const loadPendingTransactions = async ({
 			}
 		} = get(i18n);
 
-		toastsError({
-			msg: {
-				text: replacePlaceholders(loading_pending_ck_ethereum_transactions, {
-					$network: networkName
-				})
+		trackEvent({
+			name: TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR,
+			metadata: {
+				tokenId: `${tokenId.description}`,
+				networkId: `${networkId.description}`
 			},
-			err
+			warning: `${replacePlaceholders(loading_pending_ck_ethereum_transactions, {
+				$network: networkName
+			})} ${err}`
 		});
 	} finally {
 		emit({

@@ -1,6 +1,5 @@
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
-import tailwindcss from '@tailwindcss/vite';
 import { basename, dirname, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
@@ -14,7 +13,7 @@ import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './v
 const network = process.env.DFX_NETWORK ?? 'local';
 
 const config: UserConfig = {
-	plugins: [sveltekit(), tailwindcss()],
+	plugins: [sveltekit()],
 	resolve: {
 		alias: {
 			$declarations: resolve('./src/declarations')
@@ -76,7 +75,7 @@ const config: UserConfig = {
 			plugins: [
 				{
 					name: 'fix-node-globals-polyfill',
-					setup(build) {
+					setup: (build) => {
 						build.onResolve({ filter: /_virtual-process-polyfill_\.js/ }, ({ path }) => ({ path }));
 					}
 				}

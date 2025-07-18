@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import {
@@ -9,10 +11,13 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
+	import type { CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
+	export let airdrop: RewardCampaignDescription | undefined = undefined;
+
 	$: ({
 		id: dappId,
 		carousel: { text, callToAction },
@@ -20,21 +25,28 @@
 		name: dAppName
 	} = dappsCarouselSlide);
 
-	const open = async () => {
-		await trackEvent({
+	const rewardModalId = Symbol();
+	const dappModalId = Symbol();
+
+	const open = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_OPEN,
 			metadata: {
 				dappId
 			}
 		});
 
-		modalStore.openDappDetails(dappsCarouselSlide);
+		if (nonNullish(airdrop)) {
+			modalStore.openRewardDetails({ id: rewardModalId, data: airdrop });
+		} else {
+			modalStore.openDappDetails({ id: dappModalId, data: dappsCarouselSlide });
+		}
 	};
 
 	const dispatch = createEventDispatcher();
 
-	const close = async () => {
-		await trackEvent({
+	const close = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_CLOSE,
 			metadata: {
 				dappId
@@ -52,17 +64,21 @@
 			width="64"
 			rounded
 			src={logo}
-			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppName })}
+			alt={replacePlaceholders($i18n.dapps.alt.logo, {
+				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
+			})}
 		/>
 	</div>
 	<div class="w-full justify-start">
-		<div class="mb-1">{text}</div>
+		<div class="mb-1">{resolveText({ i18n: $i18n, path: text })}</div>
 		<button
 			on:click={open}
-			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
-			class="text-sm font-semibold text-brand-primary"
+			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
+				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
+			})}
+			class="text-sm font-semibold text-brand-primary-alt"
 		>
-			{callToAction} →
+			{resolveText({ i18n: $i18n, path: callToAction })} →
 		</button>
 	</div>
 	<div class="h-full items-start">

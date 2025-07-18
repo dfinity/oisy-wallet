@@ -1,8 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import tailwindcss from '@tailwindcss/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
-import { type UserConfig } from 'vite';
+import type { UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
 
@@ -13,7 +12,7 @@ process.env = {
 
 export default defineConfig(
 	(): UserConfig => ({
-		plugins: [sveltekit(), tailwindcss(), svelteTesting()],
+		plugins: [sveltekit(), svelteTesting()],
 		...CSS_CONFIG_OPTIONS,
 		resolve: {
 			alias: [
@@ -32,6 +31,10 @@ export default defineConfig(
 				{
 					find: '$eth',
 					replacement: resolve(__dirname, 'src/frontend/src/eth')
+				},
+				{
+					find: '$evm',
+					replacement: resolve(__dirname, 'src/frontend/src/evm')
 				},
 				{
 					find: '$icp',
@@ -70,7 +73,16 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				exclude: ['build', '.dfx', '**/.svelte-kit']
+				include: ['src/frontend'],
+				exclude: ['src/frontend/src/routes/**/+page.ts'],
+				// TODO: increase the thresholds slowly up to an acceptable 90% at least
+				thresholds: {
+					autoUpdate: true,
+					statements: 88,
+					branches: 92,
+					functions: 80,
+					lines: 88
+				}
 			}
 		}
 	})

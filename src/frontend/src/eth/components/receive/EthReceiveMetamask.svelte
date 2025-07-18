@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { assertNonNullish } from '@dfinity/utils';
 	import { metamaskAvailable } from '$eth/derived/metamask.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { openMetamaskTransaction } from '$eth/services/metamask.services';
@@ -18,6 +19,9 @@
 			return;
 		}
 
+		// This is a simple type check, since it should not happen since the user arrived here from a selected Ethereum network
+		assertNonNullish($selectedEthereumNetwork);
+
 		await openMetamaskTransaction({
 			address: $ethAddress,
 			network: $selectedEthereumNetwork
@@ -31,7 +35,7 @@
 </script>
 
 {#if $metamaskAvailable && $networkEthereum && tokenStandardEth}
-	<Button colorStyle="secondary" fullWidth styleClass="mt-8 mb-2" on:click={receiveModal}>
+	<Button colorStyle="primary" fullWidth styleClass="mt-8 mb-2" onclick={receiveModal}>
 		<IconMetamask />
 		<span class="text-dark-slate-blue font-bold">{$i18n.receive.ethereum.text.metamask}</span>
 	</Button>

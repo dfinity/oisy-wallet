@@ -1,10 +1,10 @@
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
+import { ZERO } from '$lib/constants/app.constants';
 import type { Option } from '$lib/types/utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const assertCkBTCUserInputAmount = ({
 	amount,
@@ -12,14 +12,14 @@ export const assertCkBTCUserInputAmount = ({
 	tokenDecimals,
 	i18n
 }: {
-	amount: BigNumber;
+	amount: bigint;
 	minterInfo: Option<CkBtcMinterInfoData>;
 	tokenDecimals: number;
 	i18n: I18n;
 }): IcAmountAssertionError | undefined => {
 	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
 	// e.g. user enters 0. and an error gets displayed.
-	if (amount.isZero()) {
+	if (amount === ZERO) {
 		return undefined;
 	}
 
@@ -32,11 +32,11 @@ export const assertCkBTCUserInputAmount = ({
 		certified: infoCertified
 	} = minterInfo;
 
-	if ((amount?.toBigInt() ?? 0n) < retrieveBtcMinAmount) {
+	if ((amount ?? ZERO) < retrieveBtcMinAmount) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_ckbtc_amount, {
 				$amount: formatToken({
-					value: BigNumber.from(retrieveBtcMinAmount),
+					value: retrieveBtcMinAmount,
 					unitName: tokenDecimals
 				})
 			})

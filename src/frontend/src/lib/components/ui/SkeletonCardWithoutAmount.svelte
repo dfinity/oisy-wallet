@@ -5,11 +5,13 @@
 </script>
 
 <Card noMargin>
-	<span class="sm:w-[200px] inline-block w-[120px] max-w-full"><slot><SkeletonText /></slot></span>
+	<span class="inline-block w-[120px] max-w-full sm:w-[200px]"><slot><SkeletonText /></slot></span>
 
-	<span class="mt-1 sm:w-[200px] inline-block w-[120px] max-w-full" slot="description"
-		><SkeletonText /></span
-	>
+	{#snippet description()}
+		<span class="mt-1 inline-block w-[120px] max-w-full sm:w-[200px]"><SkeletonText /></span>
+	{/snippet}
 
-	<SkeletonLogo slot="icon" />
+	{#snippet icon()}
+		<SkeletonLogo />
+	{/snippet}
 </Card>

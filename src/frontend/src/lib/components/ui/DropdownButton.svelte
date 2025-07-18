@@ -1,25 +1,47 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
+	import type { Snippet } from 'svelte';
 
-	export let disabled = false;
-	export let button: HTMLButtonElement | undefined = undefined;
-	export let ariaLabel: string;
-	export let opened = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		children?: Snippet;
+		onClick: () => void;
+		disabled?: boolean;
+		button?: HTMLButtonElement;
+		ariaLabel: string;
+		opened?: boolean;
+		fullWidth?: boolean;
+		border?: boolean;
+		testId?: string;
+	}
+
+	let {
+		children,
+		onClick,
+		disabled = false,
+		button = $bindable(),
+		ariaLabel,
+		opened = false,
+		fullWidth = false,
+		border = false,
+		testId
+	}: Props = $props();
 </script>
 
 <button
-	class="min-w-72 gap-2 rounded-xl px-4 py-3 leading-5 font-medium justify-between border border-tertiary bg-white text-left text-black text-inherit hover:border-brand-primary"
+	class="dropdown-button"
 	bind:this={button}
-	on:click
+	onclick={onClick}
 	aria-label={ariaLabel}
 	data-tid={testId}
 	{disabled}
-	class:opacity-50={disabled}
-	class:border-brand-primary={opened}
+	class:disabled
+	class:opened
+	class:w-full={fullWidth}
+	class:border
+	class:border-tertiary={border}
 >
-	<slot />
-	<div class="ease-in-out transform transition-transform duration-300" class:-scale-y-100={opened}>
+	{@render children?.()}
+	<div class="transform transition-transform duration-300 ease-in-out" class:-scale-y-100={opened}>
 		<IconExpandMore size="24" />
 	</div>
 </button>

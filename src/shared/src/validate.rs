@@ -36,28 +36,30 @@ macro_rules! validate_on_deserialize {
 pub(crate) use validate_on_deserialize;
 
 /// To test validation when deserializing, create:
-/// - A `TestVector` struct with an `input` field of the type being tested, a `valid` field and a description.
+/// - A `TestVector` struct with an `input` field of the type being tested, a `valid` field and a
+///   description.
 /// - A `test_vectors` function that returns a `Vec<TestVector>`.
 /// - Run `test_validate_on_deserialize!($type)` to test the validation.
 #[cfg(test)]
 macro_rules! test_validate_on_deserialize {
-    ($type:ty) => {
-        #[test]
-        fn validates_on_deserialize() {
+    ($type:ty, $test_vectors:expr) => {
+        paste::paste! {
+            #[test]
+            fn [<$type:snake _validates_on_deserialize>]() {
             for TestVector {
                 input,
                 valid,
                 description,
-            } in test_vectors()
+            } in $test_vectors
             {
                 let result = input.validate();
                 assert_eq!(
                     valid,
                     result.is_ok(),
-                    "Validation does not match for: {}",
-                    description
+                    "Validation does not match for: {} yielding: {:?}",
+                    description,
+                    result
                 );
-
                 let candid = Encode!(&input).unwrap();
                 let result: Result<$type, _> = Decode!(&candid, $type);
                 assert_eq!(
@@ -71,7 +73,18 @@ macro_rules! test_validate_on_deserialize {
                 }
             }
         }
+        }
     };
 }
 #[cfg(test)]
 pub(crate) use test_validate_on_deserialize;
+
+#[cfg(test)]
+pub struct TestVector<T>
+where
+    T: candid::CandidType + Validate,
+{
+    pub description: &'static str,
+    pub input: T,
+    pub valid: bool,
+}

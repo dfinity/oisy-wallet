@@ -1,10 +1,48 @@
 <!doctype html>
 <html lang="en">
 	<head>
+		<!-- Init theme as fast as possible -->
+		<script theme-loader>
+			try {
+				const isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+				const currentTheme =
+					localStorage.nnsTheme === null ||
+					localStorage.nnsTheme === undefined ||
+					localStorage.nnsTheme === ''
+						? undefined
+						: JSON.parse(localStorage.nnsTheme);
+
+				document.documentElement.setAttribute(
+					'theme',
+					currentTheme ?? (isDarkPreferred ? 'dark' : 'light')
+				);
+			} catch (error) {
+				console.error('Error initializing theme', error);
+			}
+		</script>
+
+		<style>
+			:root {
+				&,
+				#app-background-container {
+					background: #e8f1ff;
+				}
+				color: #000;
+			}
+			:root[theme='dark'] {
+				&,
+				#app-background-container {
+					background: #070f1c;
+				}
+				color: #f4f6fa;
+			}
+		</style>
+
 		<!-- CONTENT_SECURITY_POLICY -->
 
 		<meta charset="utf-8" />
-		<meta content="width=device-width, initial-scale=1" name="viewport" />
+		<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport" />
 
 		<title>{{OISY_NAME}}</title>
 		<link href="https://oisy.com" rel="canonical" />
@@ -13,11 +51,11 @@
 		<meta content="{{OISY_DESCRIPTION}}" property="og:description" />
 		<meta content="website" property="og:type" />
 		<meta content="https://oisy.com" property="og:url" />
-		<meta content="https://oisy.com/images/meta-share-v2.jpg" property="og:image" />
+		<meta content="https://oisy.com/images/meta-share-v3.jpg" property="og:image" />
 		<meta content="summary_large_image" name="twitter:card" />
 		<meta content="{{OISY_NAME}}" name="twitter:title" />
 		<meta content="{{OISY_DESCRIPTION}}" name="twitter:description" />
-		<meta content="https://oisy.com/images/meta-share-v2.jpg" name="twitter:image" />
+		<meta content="https://oisy.com/images/meta-share-v3.jpg" name="twitter:image" />
 		<meta content="@dfinity" name="twitter:creator" />
 
 		<link crossorigin="anonymous" href="/manifest.webmanifest" rel="manifest" />
@@ -54,35 +92,9 @@
 
 		<meta content="#FFFFFF" name="theme-color" />
 		%sveltekit.head%
-
-		<!-- Init theme as fast as possible -->
-		<script theme-loader>
-			try {
-				const isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-				const currentTheme =
-					localStorage.nnsTheme === null ||
-					localStorage.nnsTheme === undefined ||
-					localStorage.nnsTheme === ''
-						? undefined
-						: JSON.parse(localStorage.nnsTheme);
-
-				document.documentElement.setAttribute(
-					'theme',
-					currentTheme ?? (isDarkPreferred ? 'dark' : 'light')
-				);
-			} catch (error) {
-				console.error('Error initializing theme', error);
-			}
-		</script>
-
 		<!-- ROUTE_STYLE -->
 
 		<style>
-			:root {
-				background: #e8f1ff;
-			}
-
 			#app-spinner {
 				--spinner-size: 30px;
 
@@ -219,6 +231,11 @@
 			#app-background {
 				width: 100%;
 				min-width: 1728px;
+			}
+
+			/* Color in background image to match dark mode, avoiding additional assets */
+			:root[theme='dark'] #app-background {
+				filter: hue-rotate(25deg) saturate(15) brightness(0.4);
 			}
 		</style>
 

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { ComponentType } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import Info from '$icp/components/info/Info.svelte';
@@ -25,9 +24,10 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { hasIndexCanister } from '$icp/validation/ic-token.validation';
+	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
+	import { modalIcToken, modalIcTokenData, modalIcTransaction } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
@@ -37,7 +37,10 @@
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
 
-	let additionalListener: ComponentType;
+	let additionalListener:
+		| typeof IcTransactionsBtcListeners
+		| typeof IcTransactionsCkEthereumListeners
+		| typeof IcTransactionsNoListener;
 	$: additionalListener = $tokenCkBtcLedger
 		? IcTransactionsBtcListeners
 		: ckEthereum
@@ -49,7 +52,7 @@
 	$: ({ transaction: selectedTransaction, token: selectedToken } =
 		mapTransactionModalData<IcTransactionUi>({
 			$modalOpen: $modalIcTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
 
 	let noTransactions = false;
@@ -61,17 +64,21 @@
 <Header>
 	{$i18n.transactions.text.title}
 
-	<svelte:fragment slot="end">
+	{#snippet end()}
 		{#if $tokenCkBtcLedger}
 			<IcTransactionsBitcoinStatus />
 		{:else if ckEthereum}
 			<IcTransactionsEthereumStatus />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </Header>
 
 <IcTransactionsSkeletons>
-	<svelte:component this={additionalListener}>
+	<svelte:component
+		this={additionalListener}
+		token={$token ?? ICP_TOKEN}
+		ckEthereumNativeToken={$ckEthereumNativeToken}
+	>
 		{#if $icTransactions.length > 0}
 			<IcTransactionsScroll token={$token ?? ICP_TOKEN}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
@@ -95,5 +102,5 @@
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
 	<IcTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalIcToken}
-	<IcTokenModal />
+	<IcTokenModal fromRoute={$modalIcTokenData} />
 {/if}

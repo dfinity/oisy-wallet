@@ -10,6 +10,7 @@ export interface IcCkWorkerInitResult {
 	start: () => void;
 	stop: () => void;
 	trigger: () => void;
+	destroy: () => void;
 }
 
 export type IcCkWorker = (params: IcCkWorkerParams) => Promise<IcCkWorkerInitResult>;

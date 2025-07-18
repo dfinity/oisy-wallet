@@ -19,28 +19,30 @@
 </script>
 
 <ContentWithToolbar>
-	<div slot="outer-content" class="mx-6 mb-8">
-		<TokensReview
-			{sendAmount}
-			{receiveAmount}
-			sourceToken={$sourceToken}
-			destinationToken={$destinationToken}
-			sourceTokenExchangeRate={$sourceTokenExchangeRate}
-			destinationTokenExchangeRate={$destinationTokenExchangeRate}
-		/>
+	<TokensReview
+		{sendAmount}
+		{receiveAmount}
+		sourceToken={$sourceToken}
+		destinationToken={$destinationToken}
+		sourceTokenExchangeRate={$sourceTokenExchangeRate}
+		destinationTokenExchangeRate={$destinationTokenExchangeRate}
+	/>
 
-		<ConvertReviewNetworks />
+	<ConvertReviewNetworks />
 
-		<slot name="fee" />
+	<slot name="destination" />
 
-		<slot name="info-message" />
-	</div>
+	<slot name="fee" />
 
-	<ButtonGroup slot="toolbar">
-		<slot name="cancel" />
+	<slot name="info-message" />
 
-		<Button on:click={() => dispatch('icConvert')} testId="convert-review-button-next">
-			{$i18n.convert.text.convert_button}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<slot name="cancel" />
+
+			<Button onclick={() => dispatch('icConvert')} testId="convert-review-button-next">
+				{$i18n.convert.text.convert_button}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

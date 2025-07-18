@@ -22,7 +22,9 @@ DFX_NETWORK="${DFX_NETWORK:-local}"
 
 SIGNER_RELEASE="v0.2.8"
 SIGNER_RELEASE_URL="https://github.com/dfinity/chain-fusion-signer/releases/download/${SIGNER_RELEASE}"
+# shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${SIGNER_RELEASE_URL}/signer.did"
+# shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 WASM_URL="${SIGNER_RELEASE_URL}/signer.wasm.gz"
 
 CANDID_FILE="$(jq -r .canisters.signer.candid dfx.json)"
@@ -31,20 +33,14 @@ ARG_FILE="$(jq -r .canisters.signer.init_arg_file dfx.json)"
 
 download() {
   : 'Downloads a URL to a given file.'
+  # shellcheck disable=SC2016 # The $ in the comment is not meant to be expanded.
   : '* With argument x, the filename is $X_FILE and the URL is $X_URL'
   : '* If the file already exists, the user is prompted whether to overwrite, keeping the existing file by default.'
-  local asset asset_url asset_file response
+  local asset asset_url asset_file
   asset="$1"
   asset_url="${asset^^}_URL"
   asset_file="${asset^^}_FILE"
-  : 'If the asset file already exists, ask the user whether to overwrite it.'
-  if test -e "${!asset_file}" && read -r -p "Overwrite existing ${!asset_file}? [y/N] " response && [[ "${response,,}" != y* ]]; then
-    echo "Using existing signer $asset file."
-  else
-    echo Downloading ${!asset_url} "-->" ${!asset_file}
-    mkdir -p "$(dirname "${!asset_file}")"
-    curl -sSL "${!asset_url}" >"${!asset_file}"
-  fi
+  scripts/download-immutable.sh "${!asset_url}" "${!asset_file}"
 }
 
 ####

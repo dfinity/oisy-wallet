@@ -1,142 +1,228 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import type { BigNumber } from '@ethersproject/bignumber';
+	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
-	import type { EthTransactionType } from '$eth/types/eth-transaction';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
+	import { mapAddressToName } from '$eth/utils/transactions.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
+	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
-	import type { Transaction } from '$lib/types/transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
 
-	export let transaction: Transaction;
-	export let token: OptionToken;
+	interface Props {
+		transaction: EthTransactionUi;
+		token: OptionToken;
+	}
 
-	let from: string;
-	let to: string | undefined;
-	let value: BigNumber;
-	let timestamp: number | undefined;
-	let hash: string | undefined;
-	let blockNumber: number | undefined;
+	const { transaction, token }: Props = $props();
 
-	$: ({ from, value, timestamp, hash, blockNumber, to } = transaction);
+	let { from, value, timestamp, hash, blockNumber, to, type } = $derived(transaction);
 
-	let type: EthTransactionType;
-	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
+	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined;
+	let explorerUrl: string | undefined = $derived(
+		notEmptyString(hash) ? `${explorerBaseUrl}/tx/${hash}` : undefined
+	);
 
-	let fromExplorerUrl: string;
-	$: fromExplorerUrl = `${$explorerUrlStore}/address/${from}`;
+	let fromExplorerUrl: string = $derived(`${explorerBaseUrl}/address/${from}`);
 
-	let toExplorerUrl: string | undefined;
-	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
+	let toExplorerUrl: string | undefined = $derived(
+		notEmptyString(to) ? `${explorerBaseUrl}/address/${to}` : undefined
+	);
+
+	let ckMinterInfo: OptionCertifiedMinterInfo = $derived(
+		$ckEthMinterInfoStore?.[
+			isNetworkIdSepolia(token?.network.id) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
+		]
+	);
+
+	let fromDisplay: OptionString = $derived(
+		nonNullish(token)
+			? (mapAddressToName({
+					address: from,
+					networkId: token.network.id,
+					erc20Tokens: $erc20Tokens,
+					ckMinterInfo
+				}) ?? from)
+			: from
+	);
+
+	const toDisplay: OptionString = $derived(
+		nonNullish(token)
+			? (mapAddressToName({
+					address: to,
+					networkId: token.network.id,
+					erc20Tokens: $erc20Tokens,
+					ckMinterInfo
+				}) ?? to)
+			: to
+	);
+
+	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
+		modalStore.openEthTransaction({
+			id: Symbol(),
+			data: data as OpenTransactionParams<EthTransactionUi>
+		});
+	};
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
 	<ContentWithToolbar>
-		{#if nonNullish(hash)}
-			<Value ref="hash">
-				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
-				<output>{shortenWithMiddleEllipsis({ text: hash })}</output><Copy
-					value={hash}
-					text={replacePlaceholders($i18n.transaction.text.hash_copied, {
-						$hash: hash
-					})}
-					inline
-				/>{#if nonNullish(explorerUrl)}<ExternalLink
-						iconSize="18"
-						href={explorerUrl}
-						ariaLabel={$i18n.transaction.alt.open_block_explorer}
-						inline
-						color="blue"
-					/>{/if}
-			</Value>
+		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
+			{#snippet logo()}
+				{#if nonNullish(token)}
+					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+				{/if}
+			{/snippet}
+			{#snippet subtitle()}
+				<span class="capitalize">{type}</span>
+			{/snippet}
+			{#snippet title()}
+				{#if nonNullish(token) && nonNullish(value)}
+					<output class:text-success-primary={type === 'receive'}>
+						{formatToken({
+							value,
+							unitName: token.decimals,
+							displayDecimals: token.decimals,
+							showPlusSign: type === 'receive'
+						})}
+						{token.symbol}
+					</output>
+				{:else}
+					&ZeroWidthSpace;
+				{/if}
+			{/snippet}
+		</ModalHero>
+
+		{#if nonNullish(to) && nonNullish(from)}
+			<TransactionContactCard
+				type={type === 'receive' ? 'receive' : 'send'}
+				{to}
+				{from}
+				{toExplorerUrl}
+				{fromExplorerUrl}
+				{onSaveAddressComplete}
+			/>
 		{/if}
 
-		{#if nonNullish(blockNumber)}
-			<Value ref="blockNumber">
-				<svelte:fragment slot="label">{$i18n.transaction.text.block}</svelte:fragment>
-				<output>{blockNumber}</output>
-			</Value>
+		<List styleClass="mt-5">
+			{#if nonNullish(hash)}
+				<ListItem>
+					<span>{$i18n.transaction.text.hash}</span>
+					<span>
+						<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
 
-			<EthTransactionStatus {blockNumber} />
-		{/if}
+						<TransactionAddressActions
+							copyAddress={hash}
+							copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
+								$hash: hash
+							})}
+							{explorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
+						/>
+					</span>
+				</ListItem>
+			{/if}
 
-		{#if nonNullish(timestamp)}
-			<Value ref="timestamp">
-				<svelte:fragment slot="label">{$i18n.transaction.text.timestamp}</svelte:fragment>
-				<output>{formatSecondsToDate(timestamp)}</output>
-			</Value>
-		{/if}
+			{#if nonNullish(blockNumber) && nonNullish(token)}
+				<ListItem>
+					<span>{$i18n.transaction.text.block}</span>
+					<span>
+						<output>{blockNumber}</output>
+					</span>
+				</ListItem>
 
-		<Value ref="type">
-			<svelte:fragment slot="label">{$i18n.transaction.text.type}</svelte:fragment>
-			{`${type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}`}
-		</Value>
+				<ListItem>
+					<EthTransactionStatus {blockNumber} {token} />
+				</ListItem>
+			{/if}
 
-		<Value ref="from">
-			<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
-			<output>{from}</output><Copy
-				value={from}
-				text={$i18n.transaction.text.from_copied}
-				inline
-			/>{#if nonNullish(fromExplorerUrl)}<ExternalLink
-					iconSize="18"
-					href={fromExplorerUrl}
-					ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
-					inline
-					color="blue"
-				/>{/if}
-		</Value>
+			{#if nonNullish(timestamp)}
+				<ListItem>
+					<span>{$i18n.transaction.text.timestamp}</span>
+					<output
+						>{formatSecondsToDate({
+							seconds: Number(timestamp),
+							language: $currentLanguage
+						})}</output
+					>
+				</ListItem>
+			{/if}
 
-		{#if nonNullish(to)}
-			<Value ref="to">
-				<svelte:fragment slot="label">{$i18n.transaction.text.interacted_with}</svelte:fragment>
-				<output>{to}</output><Copy
-					value={to}
-					text={$i18n.transaction.text.to_copied}
-					inline
-				/>{#if nonNullish(toExplorerUrl)}<ExternalLink
-						iconSize="18"
-						href={toExplorerUrl}
-						ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
-						inline
-						color="blue"
-					/>{/if}
-			</Value>
-		{/if}
+			{#if nonNullish(from) && nonNullish(fromDisplay) && from !== fromDisplay}
+				<ListItem>
+					<span>{$i18n.transaction.text.from}</span>
+					<span class="flex max-w-[50%] flex-row break-all">
+						<output>{fromDisplay}</output>
 
-		{#if nonNullish(token)}
-			<Value ref="amount">
-				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-				<output>
-					{formatToken({
-						value,
-						unitName: token.decimals,
-						displayDecimals: token.decimals
-					})}
-					{token.symbol}
-				</output>
-			</Value>
-		{/if}
+						<TransactionAddressActions
+							copyAddress={fromDisplay}
+							copyAddressText={$i18n.transaction.text.from_copied}
+							explorerUrl={fromExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+						/>
+					</span>
+				</ListItem>
+			{/if}
 
-		<ButtonCloseModal slot="toolbar" />
+			{#if nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
+				<ListItem>
+					<span>{$i18n.transaction.text.interacted_with}</span>
+
+					<span class="flex max-w-[50%] flex-row break-all">
+						<output>{toDisplay}</output>
+
+						<TransactionAddressActions
+							copyAddress={toDisplay}
+							copyAddressText={$i18n.transaction.text.to_copied}
+							explorerUrl={toExplorerUrl}
+							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
+					</span>
+				</ListItem>
+			{/if}
+
+			{#if nonNullish(token)}
+				<ListItem>
+					<span>{$i18n.core.text.amount}</span>
+					<output>
+						{formatToken({
+							value,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
+		</List>
+
+		{#snippet toolbar()}
+			<ButtonCloseModal />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

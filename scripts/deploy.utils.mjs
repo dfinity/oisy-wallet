@@ -11,7 +11,6 @@ await copyFile(
 	'./node_modules/@dfinity/ledger-icrc/dist/candid/icrc_ledger.idl.mjs'
 );
 const { init: initLedger } = await import(
-	// eslint-disable-next-line import/no-relative-parent-imports
 	'../node_modules/@dfinity/ledger-icrc/dist/candid/icrc_ledger.idl.mjs'
 );
 
@@ -20,7 +19,6 @@ await copyFile(
 	'./node_modules/@dfinity/ledger-icrc/dist/candid/icrc_index-ng.idl.mjs'
 );
 const { init: initIndex } = await import(
-	// eslint-disable-next-line import/no-relative-parent-imports
 	'../node_modules/@dfinity/ledger-icrc/dist/candid/icrc_index-ng.idl.mjs'
 );
 

@@ -37,12 +37,14 @@ describe('mapIcrcData', () => {
 
 		it('should map ICRC tokens correctly', () => {
 			const result = mapIcrcData(token);
+
 			expect(result).toEqual(expected);
 		});
 	});
 
 	it('should handle empty input', () => {
 		const result = mapIcrcData({});
+
 		expect(result).toEqual({});
 	});
 });

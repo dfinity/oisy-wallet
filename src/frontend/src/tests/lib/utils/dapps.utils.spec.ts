@@ -1,4 +1,4 @@
-import { type OisyDappDescription } from '$lib/types/dapp-description';
+import type { OisyDappDescription } from '$lib/types/dapp-description';
 import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 import { mockDappsDescriptions } from '$tests/mocks/dapps.mock';
 import { nonNullish } from '@dfinity/utils';

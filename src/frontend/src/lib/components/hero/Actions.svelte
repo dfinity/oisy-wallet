@@ -4,9 +4,9 @@
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
 	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
+	import ConvertToCkETH from '$eth/components/convert/ConvertToCkETH.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
-	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
@@ -25,8 +25,10 @@
 		networkBitcoin,
 		pseudoNetworkChainFusion,
 		networkId,
-		networkSolana
+		networkSolana,
+		networkEvm
 	} from '$lib/derived/network.derived';
+	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
@@ -40,10 +42,11 @@
 	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
 
 	let convertCkBtc = false;
-	$: convertCkBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	$: convertCkBtc =
+		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20UserTokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = isNetworkIdBTCMainnet($networkId);
+	$: convertBtc = $networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId);
 
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
@@ -59,16 +62,16 @@
 	$: buyAction = !$networkICP || nonNullish($pageToken?.buy);
 </script>
 
-<div role="toolbar" class="pt-10 flex w-full justify-center">
+<div role="toolbar" class="flex w-full justify-center pt-8">
 	<HeroButtonGroup>
 		{#if $networkICP}
 			<IcReceive token={$tokenWithFallback} />
-		{:else if $networkEthereum}
+		{:else if $networkEthereum || $networkEvm}
 			<EthReceive token={$tokenWithFallback} />
 		{:else if $networkBitcoin}
 			<BtcReceive />
 		{:else if $networkSolana}
-			<SolReceive />
+			<SolReceive token={$tokenWithFallback} />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}
