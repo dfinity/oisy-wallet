@@ -118,6 +118,17 @@
 			})
 		);
 	};
+
+	let amount = $derived(formatCurrency({
+			value: totalRewardUsd,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore
+		})
+	);
+
+	$effect(() => {
+		loading = isNullish(amount);
+	});
 </script>
 
 {#if amountOfRewards > 0}
@@ -130,11 +141,7 @@
 			class:animate-pulse={loading}
 			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
 				$noOfSprinkles: amountOfRewards.toString(),
-				$amount: formatCurrency({
-					value: totalRewardUsd,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore
-				})
+				$amount: amount ?? ''
 			})}
 		</div>
 
