@@ -11,37 +11,48 @@
 		CONTACT_POPOVER_MENU_ITEM
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	interface Props {
+		fileInput: typeof $bindable;
+		replaceImage: () => void;
+		removeImage: () => void;
+		imageUrl: string | undefined;
+	}
+
 	const {
 		fileInput = $bindable(),
 		replaceImage = $bindable(),
 		removeImage = $bindable(),
 		imageUrl = $bindable()
-	} = $props();
+	}: Props = $props();
+
 	let visible = $state(false);
+
 	let button = $state<HTMLButtonElement | undefined>();
-	const items = $derived(
-		imageUrl
-			? [
-					{
-						logo: IconImage,
-						title: $i18n.address_book.edit_avatar.replace_image,
-						action: replaceImage
-					},
-					{
-						logo: IconTrash,
-						title: $i18n.address_book.edit_avatar.remove_image,
-						action: removeImage,
-						testId: 'IconTrash'
-					}
-				]
-			: [
-					{
-						logo: IconImage,
-						title: $i18n.address_book.edit_avatar.upload_image,
-						action: replaceImage
-					}
-				]
-	);
+
+	const avatarMenuItems = imageUrl
+		? [
+				{
+					logo: IconImage,
+					title: $i18n.address_book.edit_avatar.replace_image,
+					action: replaceImage
+				},
+				{
+					logo: IconTrash,
+					title: $i18n.address_book.edit_avatar.remove_image,
+					action: removeImage,
+					testId: 'IconTrash'
+				}
+			]
+		: [
+				{
+					logo: IconImage,
+					title: $i18n.address_book.edit_avatar.upload_image,
+					action: replaceImage
+				}
+			];
+
+	const items = $derived(avatarMenuItems);
 </script>
 
 <ButtonIcon
@@ -51,7 +62,7 @@
 	styleClass="w-auto h-auto p-0"
 	transparent
 	link={false}
-	ariaLabel="Edit image"
+	ariaLabel={$i18n.address_book.edit_avatar.replace_image}
 	testId={CONTACT_POPOVER_TRIGGER}
 >
 	{#snippet icon()}
@@ -67,22 +78,22 @@
 	>
 		<h3 class="popover-title pb-2 pt-1 text-base">{$i18n.address_book.edit_avatar.menu_title}</h3>
 		<ul class="flex flex-col">
-			{#each items as item (item.title)}
+			{#each items as { logo, title, action, testId } (title)}
 				<li class="logo-button-list-item">
 					<LogoButton
 						hover
 						styleClass="w-full"
-						testId={item.testId ?? CONTACT_POPOVER_MENU_ITEM}
+						testId={testId ?? CONTACT_POPOVER_MENU_ITEM}
 						onClick={() => {
-							item.action();
+							action();
 							visible = false;
 						}}
 					>
 						{#snippet logo()}
-							<item.logo />
+							{logo}
 						{/snippet}
 						{#snippet title()}
-							<span class="text-base font-normal">{item.title}</span>
+							<span class="text-base font-normal">{title}</span>
 						{/snippet}
 					</LogoButton>
 				</li>
