@@ -1,6 +1,7 @@
 import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
 import { formatCurrency } from '$lib/utils/format.utils';
 import { render } from '@testing-library/svelte';
 
@@ -40,7 +41,8 @@ describe('ExchangeAmountDisplay', () => {
 			exchangeRate: {
 				currency: Currency.USD,
 				exchangeRateToUsd: 1
-			}
+			},
+			language: Languages.ENGLISH
 		};
 
 		it('should correctly render the USD amount if it is greater or equal than the threshold', () => {
