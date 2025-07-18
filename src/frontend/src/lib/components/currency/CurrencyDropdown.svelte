@@ -13,11 +13,11 @@
 	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import type { Currency } from '$lib/enums/currency';
 	import type { Languages } from '$lib/enums/languages';
 	import { currencyStore } from '$lib/stores/currency.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { getCurrencyName, getCurrencySymbol } from '$lib/utils/currency.utils';
-	import type { Currency } from '$lib/enums/currency';
 
 	let dropdown = $state<Dropdown>();
 
