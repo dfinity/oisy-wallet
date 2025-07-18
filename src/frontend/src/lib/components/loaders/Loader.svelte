@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import {
@@ -54,6 +54,9 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { ethAddressStore } from '$lib/stores/address.store';
+	import { getLoadedNftsByTokens } from '$lib/utils/nfts.utils';
+	import { nftStore } from '$lib/stores/nft.store';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -154,11 +157,16 @@
 	}
 
 	const debounceLoadNfts = debounce(() => {
-		const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
-		loadNfts(tokensList);
+		if (nonNullish($ethAddressStore?.data)) {
+			const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
+
+			getLoadedNftsByTokens({tokens: tokensList, loadedNfts: $nftStore})
+
+			loadNfts({tokens: tokensList, walletAddress: $ethAddressStore.data}); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
+		}
 	});
 
-	$: if ($erc721CustomTokensStore) {
+	$: if ($erc721CustomTokensStore && $ethAddressStore) {
 		debounceLoadNfts();
 	}
 

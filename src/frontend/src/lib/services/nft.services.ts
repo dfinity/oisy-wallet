@@ -2,35 +2,29 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
 import { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { ethAddressStore } from '$lib/stores/address.store';
 import { nftStore } from '$lib/stores/nft.store';
 import type { NftMetadata } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { isNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
-export const loadNfts = (tokens: Erc721CustomToken[]) => {
+export const loadNfts = ({ tokens, walletAddress }:{ tokens: Erc721CustomToken[], walletAddress: string }) => {
 	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
 	const infuraProvider = new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura);
 
-	tokens.forEach((token) => loadNftsOfToken({ etherscanProvider, infuraProvider, token }));
+	tokens.forEach((token) => loadNftsOfToken({ etherscanProvider, infuraProvider, token, walletAddress }));
 };
 
 const loadNftsOfToken = async ({
 	etherscanProvider,
 	infuraProvider,
-	token
+	token,
+	walletAddress
 }: {
 	etherscanProvider: EtherscanProvider;
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721CustomToken;
+	walletAddress: string;
 }) => {
 	// TODO get walletAddress and already loaded TokenIds as param from Loader component
-
-	const walletAddress = get(ethAddressStore)?.data; // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
-	if (isNullish(walletAddress)) {
-		return;
-	}
 
 	let tokenIds: number[];
 	try {
