@@ -124,13 +124,3 @@ export interface FormatSlippageParams {
 	receiveAmount: bigint;
 	decimals: number;
 }
-
-export interface CheckDeltaOrderStatusParams {
-	sdk: SimpleFetchSDK;
-	auctionId: string;
-	onExecuted?: () => void;
-	timeoutMs?: number;
-	intervalMs?: number;
-}
-
-export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
