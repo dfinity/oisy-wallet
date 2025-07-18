@@ -198,13 +198,21 @@
 	let currentContact = $derived($sortedContacts.find((c) => c.id === currentContactId));
 	let contacts = $derived($sortedContacts);
 
+	let currentContactWithAvatar = $derived(() => {
+		if (!currentContact) return undefined;
+		return {
+			...currentContact,
+			imageUrl: currentContact.image ? imageToDataUrl(currentContact.image) : null
+		};
+	});
+
 	let currentAvatarUrl = $derived(
 		currentContact?.image ? imageToDataUrl(currentContact.image) : null
 	);
 	let contactsWithAvatars = $derived(
 		contacts.map((c: ContactUi) => ({
 			...c,
-			avatarUrl: c.image ? imageToDataUrl(c.image) : null
+			imageUrl: c.image ? imageToDataUrl(c.image) : null
 		}))
 	);
 
@@ -356,7 +364,7 @@
 			onClose={() => {
 				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
 			}}
-			contact={currentContact}
+			contact={currentContactWithAvatar()!}
 			imageUrl={currentAvatarUrl}
 			onEdit={(contact) => {
 				currentContactId = contact.id;
