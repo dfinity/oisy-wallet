@@ -1,4 +1,4 @@
-import { Currencies } from '$lib/enums/currencies';
+import { Currency } from '$lib/enums/currency';
 import {
 	initCurrencyExchangeStore,
 	type CurrencyExchangeStore
@@ -19,44 +19,44 @@ describe('currency-exchange.store', () => {
 			const store = initCurrencyExchangeStore();
 
 			expect(get(store)).toEqual({
-				currency: Currencies.USD,
+				currency: Currency.USD,
 				exchangeRateToUsd: 1
 			});
 		});
 
 		describe('setExchangeRateCurrency', () => {
 			it('should switch the currency', () => {
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(mockStore).currency).toEqual(Currency.USD);
 
-				mockStore.setExchangeRateCurrency(Currencies.CHF);
+				mockStore.setExchangeRateCurrency(Currency.CHF);
 
-				expect(get(mockStore).currency).toEqual(Currencies.CHF);
+				expect(get(mockStore).currency).toEqual(Currency.CHF);
 			});
 
 			it('should switch the currency back and forth', () => {
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(mockStore).currency).toEqual(Currency.USD);
 
-				mockStore.setExchangeRateCurrency(Currencies.CHF);
+				mockStore.setExchangeRateCurrency(Currency.CHF);
 
-				expect(get(mockStore).currency).toEqual(Currencies.CHF);
+				expect(get(mockStore).currency).toEqual(Currency.CHF);
 
-				mockStore.setExchangeRateCurrency(Currencies.JPY);
+				mockStore.setExchangeRateCurrency(Currency.JPY);
 
-				expect(get(mockStore).currency).toEqual(Currencies.JPY);
+				expect(get(mockStore).currency).toEqual(Currency.JPY);
 
-				mockStore.setExchangeRateCurrency(Currencies.USD);
+				mockStore.setExchangeRateCurrency(Currency.USD);
 
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(mockStore).currency).toEqual(Currency.USD);
 			});
 
 			it('should set the exchange rate to null for non-USD currencies', () => {
 				expect(get(mockStore).exchangeRateToUsd).toBe(1);
 
-				mockStore.setExchangeRateCurrency(Currencies.CHF);
+				mockStore.setExchangeRateCurrency(Currency.CHF);
 
 				expect(get(mockStore).exchangeRateToUsd).toBeNull();
 
-				mockStore.setExchangeRateCurrency(Currencies.JPY);
+				mockStore.setExchangeRateCurrency(Currency.JPY);
 
 				expect(get(mockStore).exchangeRateToUsd).toBeNull();
 			});
@@ -64,11 +64,11 @@ describe('currency-exchange.store', () => {
 			it('should set the exchange rate to 1 for USD', () => {
 				expect(get(mockStore).exchangeRateToUsd).toBe(1);
 
-				mockStore.setExchangeRateCurrency(Currencies.CHF);
+				mockStore.setExchangeRateCurrency(Currency.CHF);
 
 				expect(get(mockStore).exchangeRateToUsd).toBeNull();
 
-				mockStore.setExchangeRateCurrency(Currencies.USD);
+				mockStore.setExchangeRateCurrency(Currency.USD);
 
 				expect(get(mockStore).exchangeRateToUsd).toBe(1);
 			});
@@ -88,15 +88,15 @@ describe('currency-exchange.store', () => {
 			});
 
 			it('should not change the currency', () => {
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(mockStore).currency).toEqual(Currency.USD);
 
 				mockStore.setExchangeRate(1.5);
 
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(mockStore).currency).toEqual(Currency.USD);
 
 				mockStore.setExchangeRate(101);
 
-				expect(get(mockStore).currency).toEqual(Currencies.USD);
+				expect(get(mockStore).currency).toEqual(Currency.USD);
 			});
 		});
 	});
