@@ -56,13 +56,14 @@ export const initModalTokensListContext = (
 		]) => {
 			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
 
-			const filteredByNetworkIds = nonNullish($filterNetworksIds)
-				? filterTokensForSelectedNetworks([
-						filteredByQuery,
-						$filterNetworksIds,
-						isNullish($filterNetworksIds)
-					])
-				: filteredByQuery;
+			const filteredByNetworkIds =
+				nonNullish($filterNetworksIds) && $filterNetworksIds.length > 0
+					? filterTokensForSelectedNetworks([
+							filteredByQuery,
+							$filterNetworksIds,
+							isNullish($filterNetworksIds)
+						])
+					: filteredByQuery;
 
 			const filteredByNetwork = filterTokensForSelectedNetwork([
 				filteredByNetworkIds,

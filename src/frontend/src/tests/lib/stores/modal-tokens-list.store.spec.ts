@@ -266,5 +266,30 @@ describe('modalTokensListStore', () => {
 
 			expect(result).toHaveLength(2);
 		});
+
+		it('should clear filterNetworksIds when setFilterNetworksIds is called with empty array', () => {
+			const { filteredTokens } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterNetworksIds: [],
+				filterZeroBalance: false
+			});
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi4, mockTokenUi3]);
+		});
+
+		it('should clear filterNetworksIds when changed setFilterNetworksIds to empty array', () => {
+			const { filteredTokens, setFilterNetworksIds } = initModalTokensListContext({
+				tokens: [mockToken3, mockToken4],
+				filterZeroBalance: false
+			});
+
+			expect(get(filteredTokens)).toEqual([mockTokenUi4, mockTokenUi3]);
+
+			setFilterNetworksIds([]);
+
+			const result = get(filteredTokens);
+
+			expect(result).toEqual([mockTokenUi4, mockTokenUi3]);
+		});
 	});
 });
