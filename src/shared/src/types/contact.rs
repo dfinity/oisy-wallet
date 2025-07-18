@@ -77,7 +77,12 @@ impl ContactImage {
                 }
             }
             ImageMimeType::Jpeg => {
-                if self.data.len() < 4 || self.data[0] != 0xFF || self.data[1] != 0xD8 || self.data[self.data.len()-2] != 0xFF || self.data[self.data.len()-1] != 0xD9 {
+                if self.data.len() < 4
+                    || self.data[0] != 0xFF
+                    || self.data[1] != 0xD8
+                    || self.data[self.data.len() - 2] != 0xFF
+                    || self.data[self.data.len() - 1] != 0xD9
+                {
                     return Err(ContactError::InvalidImageFormat);
                 }
             }
