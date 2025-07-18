@@ -1012,7 +1012,7 @@ fn test_create_contact_with_invalid_image_format_should_fail() {
 fn test_contact_image_statistics() {
     let pic_setup = setup();
     let controller: Principal = Principal::from_text(CONTROLLER).unwrap();
-    
+
     // Initially, no contacts with images
     let stats = call_get_contact_image_statistics(&pic_setup, controller);
     assert_eq!(stats.total_contacts, 0);
