@@ -986,6 +986,11 @@
 			"unexpected_error_on_token_update": "Something went wrong while updating the token."
 		}
 	},
+	"nfts": {
+		"text": {
+			"title": "NFTs"
+		}
+	},
 	"fee": {
 		"text": {
 			"fee": "Fee",
