@@ -40,7 +40,7 @@ const loadNftsOfToken = async ({
 	}
 
 	const loadedTokenIds: NftId[] = loadedNfts.map((nft) => nft.id);
-	const tokenIdsToLoad = tokenIds.filter((id: number) => !loadedTokenIds.includes(id));
+	const tokenIdsToLoad = tokenIds.filter((id: number) => !loadedTokenIds.includes(parseNftId(id)));
 
 	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
 	for (const tokenIds of tokenIdBatches) {
