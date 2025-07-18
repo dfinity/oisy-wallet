@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import {
@@ -11,6 +11,7 @@
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
+	import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
@@ -41,8 +42,11 @@
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { initLoader } from '$lib/services/loader.services';
+	import { loadNfts } from '$lib/services/nft.services';
+	import { ethAddressStore } from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -149,6 +153,19 @@
 				}
 			}
 		}
+	}
+
+	const debounceLoadNfts = debounce(() => {
+		if (nonNullish($ethAddressStore?.data)) {
+			const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
+			const loadedNfts = $nftStore ?? [];
+
+			loadNfts({ tokens: tokensList, loadedNfts, walletAddress: $ethAddressStore.data }); // '0x29469395eaf6f95920e59f858042f0e28d98a20b'
+		}
+	});
+
+	$: if ($erc721CustomTokensStore) {
+		debounceLoadNfts();
 	}
 
 	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });

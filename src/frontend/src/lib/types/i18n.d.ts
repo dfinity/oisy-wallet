@@ -831,6 +831,7 @@ interface I18nTokens {
 
 interface I18nNfts {
 	text: { title: string };
+	alt: { image: string };
 }
 
 interface I18nFee {
