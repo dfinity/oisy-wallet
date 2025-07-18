@@ -44,7 +44,8 @@
 		<IconContactHeader />
 	</div>
 	<div>
-		<Avatar variant="xl" {name} {imageUrl} styleClass="mt-[-50%] border-3 border-primary-inverted"></Avatar>
+		<Avatar variant="xl" {name} {imageUrl} styleClass="mt-[-50%] border-3 border-primary-inverted"
+		></Avatar>
 	</div>
 	<div class="pt-5 text-2xl font-bold text-primary md:text-3xl">
 		{name}

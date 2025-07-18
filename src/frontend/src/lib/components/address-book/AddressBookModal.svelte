@@ -40,9 +40,9 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 
 	let loading = $state(false);
 
@@ -199,7 +199,7 @@
 	let contactsSorted = $derived($sortedContacts);
 
 	let currentContact = $derived(() => {
-		if (!currentContactSorted) return undefined;
+		if (!currentContactSorted) {return undefined;}
 		return {
 			...currentContactSorted,
 			imageUrl: currentContactSorted.image ? imageToDataUrl(currentContactSorted.image) : null
@@ -344,7 +344,7 @@
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
-			contacts={contacts}
+			{contacts}
 			onShowContact={(contact) => {
 				currentContactId = contact.id;
 				gotoStep(AddressBookSteps.SHOW_CONTACT);
@@ -388,7 +388,7 @@
 		<!-- TODO find a better way to render EditContactStep with different onDeleteAddress functions -->
 		<Responsive down="sm">
 			<EditContactStep
-				contact={contact}
+				{contact}
 				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 				onEdit={(editedContact) => {
 					currentContactId = editedContact.id;
@@ -413,7 +413,7 @@
 		</Responsive>
 		<Responsive up="md">
 			<EditContactStep
-				contact={contact}
+				{contact}
 				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 				onEdit={(editedContact) => {
 					currentContactId = editedContact.id;
@@ -465,7 +465,7 @@
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact())}
 		{@const contact = currentContact()!}
 		<EditAddressStep
-			contact={contact}
+			{contact}
 			address={nonNullish(currentAddressIndex)
 				? contact.addresses[currentAddressIndex]
 				: nonNullish(qrCodeAddress)
@@ -492,7 +492,7 @@
 			}}
 			onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 			address={contact.addresses[currentAddressIndex]}
-			contact={contact}
+			{contact}
 			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
@@ -559,7 +559,7 @@
 		onCancel={() => (currentAddressIndex = undefined)}
 		onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 		address={contact.addresses[currentAddressIndex]}
-		contact={contact}
+		{contact}
 		disabled={loading}
 	/>
 {:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact()) && isDeletingContact}
@@ -572,7 +572,7 @@
 			isDeletingContact = false;
 			handleDeleteContact(contact.id);
 		}}
-		contact={contact}
+		{contact}
 		disabled={loading}
 	/>
 {/if}

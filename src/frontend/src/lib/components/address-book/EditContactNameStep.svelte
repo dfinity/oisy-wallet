@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import InputContactName from '$lib/components/address-book/InputContactName.svelte';
+	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -35,6 +36,9 @@
 
 	let editingContact = $state(contact ? { ...contact } : {});
 
+	const imageUrl: string | null = nonNullish(contact.image)
+	  ? imageToDataUrl(contact.image) : null;
+
 	const handleSave = (event: Event) => {
 		event.preventDefault();
 
@@ -66,7 +70,7 @@
 
 <form onsubmit={handleSave} method="POST" class="flex w-full flex-col items-center">
 	<ContentWithToolbar styleClass="flex flex-col gap-6 items-center w-full">
-		<Avatar name={editingContact?.name} variant="xl"></Avatar>
+		<Avatar name={editingContact?.name} {imageUrl} variant="xl"></Avatar>
 		<InputContactName bind:contact={editingContact} bind:isValid={isFormValid} {disabled} />
 
 		<!-- TODO Add address list here -->

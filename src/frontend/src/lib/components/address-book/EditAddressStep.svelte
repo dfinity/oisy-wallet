@@ -15,6 +15,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AddressBookModalParams } from '$lib/types/address-book';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
 	import { mapAddressToContactAddressUi } from '$lib/utils/contact.utils';
 
 	interface Props {
@@ -40,6 +41,7 @@
 	}: Props = $props();
 
 	let editingAddress = $state(address ? { ...address } : {});
+	const imageUrl: string | null = nonNullish(contact.image) ? imageToDataUrl(contact.image) : null;
 
 	let modalData: AddressBookModalParams = $derived($modalStore?.data as AddressBookModalParams);
 	let modalDataAddress: string | undefined = $derived(
@@ -87,7 +89,7 @@
 
 <form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-		<Avatar variant="xl" name={contact.name} />
+		<Avatar variant="xl" name={contact.name} {imageUrl} />
 
 		<div class="text-2xl font-bold text-primary md:text-3xl">
 			{contact.name}
