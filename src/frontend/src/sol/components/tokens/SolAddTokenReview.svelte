@@ -15,11 +15,11 @@
 	import type { TokenMetadata } from '$lib/types/token';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { getTokenInfo } from '$sol/api/solana.api';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
-	import { getTokenInfo } from '$sol/api/solana.api';
 
 	export let tokenAddress: SplTokenAddress | undefined;
 	export let metadata: TokenMetadata | undefined;
@@ -60,7 +60,7 @@
 		try {
 			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
-			const {decimals} = await getTokenInfo({address: tokenAddress, network: solNetwork});
+			const { decimals } = await getTokenInfo({ address: tokenAddress, network: solNetwork });
 
 			const splMetadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
 
