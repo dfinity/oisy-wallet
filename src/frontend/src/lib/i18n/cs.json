@@ -511,6 +511,9 @@
 			"top_up": "Doplňte si peněženku a začněte ji používat!",
 			"learn_more_about_erc20_icp": "Více se dozvíte o ERC20 ICP na Ethereu.",
 			"tooltip_toggle_balance": "Dvojitým kliknutím skryjete/zobrazíte zůstatek"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {
