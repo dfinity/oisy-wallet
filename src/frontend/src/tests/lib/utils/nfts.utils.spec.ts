@@ -43,7 +43,7 @@ describe('nfts.utils', () => {
 		}
 	};
 
-	describe('getLoadedNftsByTokens', () => {
+	describe('getNftsByNetworks', () => {
 		it('should return nfts for a given list of tokens and networks', () => {
 			const customErc721Tokens: Erc721CustomToken[] = [
 				{
