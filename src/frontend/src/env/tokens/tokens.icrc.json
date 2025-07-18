@@ -98,5 +98,114 @@
 		"fee": {
 			"__bigint__": "10000"
 		}
+	},
+	"GHOSTNODE": {
+		"ledgerCanisterId": "sx3gz-hqaaa-aaaar-qaoca-cai",
+		"decimals": 8,
+		"name": "GHOSTNODE•ID•ZVVO•ODIN",
+		"symbol": "GHOSTNODE•ID•ZVVO•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"XP": {
+		"ledgerCanisterId": "wqihv-qyaaa-aaaak-afjoa-cai",
+		"indexCanisterId": "7hwgv-uaaaa-aaaao-qjv7q-cai",
+		"decimals": 8,
+		"name": "WindogeXP",
+		"symbol": "XP",
+		"fee": {
+			"__bigint__": "100000000"
+		}
+	},
+	"EXE": {
+		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
+		"fee": {
+			"__bigint__": "100000"
+		},
+		"name": "Windoge98",
+		"symbol": "EXE",
+		"decimals": 8
+	},
+	"BOB": {
+		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
+		"decimals": 8,
+		"name": "BOB",
+		"symbol": "BOB",
+		"fee": {
+			"__bigint__": "1000000"
+		}
+	},
+	"ICONFUCIUS": {
+		"ledgerCanisterId": "5kijx-siaaa-aaaar-qaqda-cai",
+		"decimals": 8,
+		"name": "ICONFUCIUS•ID•RVMN•ODIN",
+		"symbol": "ICONFUCIUS•ID•RVMN•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"DOG.OT": {
+		"ledgerCanisterId": "fmazi-nqaaa-aaaar-qagmq-cai",
+		"decimals": 5,
+		"name": "DOG•GO•TO•THE•MOON",
+		"symbol": "DOG.OT",
+		"fee": {
+			"__bigint__": "100000"
+		}
+	},
+	"MIM.OT": {
+		"ledgerCanisterId": "rk7m2-7yaaa-aaaar-qbmta-cai",
+		"decimals": 0,
+		"name": "MAGIC•INTERNET•MONEY",
+		"symbol": "MIM.OT",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"BITCAT": {
+		"ledgerCanisterId": "xlwi6-kyaaa-aaaar-qarya-cai",
+		"decimals": 8,
+		"name": "BITCAT•ID•YRMO•ODIN",
+		"symbol": "BITCAT•ID•YRMO•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"RSIC.OT": {
+		"ledgerCanisterId": "i44ka-paaaa-aaaar-qbonq-cai",
+		"decimals": 0,
+		"name": "RSIC•GENESIS•RUNE",
+		"symbol": "RSIC.OT",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"BDC.OT": {
+		"ledgerCanisterId": "2ulkl-dqaaa-aaaar-qaijq-cai",
+		"decimals": 0,
+		"name": "BILLION•DOLLAR•CAT",
+		"symbol": "BDC.OT",
+		"fee": {
+			"__bigint__": "1"
+		}
+	},
+	"FORSETISCN": {
+		"ledgerCanisterId": "tta5j-yqaaa-aaaar-qarbq-cai",
+		"decimals": 8,
+		"name": "FORSETISCN•ID•COIU•ODIN",
+		"symbol": "FORSETISCN•ID•COIU•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"ODINDOG": {
+		"ledgerCanisterId": "eazb6-tqaaa-aaaar-qan2a-cai",
+		"decimals": 8,
+		"name": "ODINDOG•ID•YTTL•ODIN",
+		"symbol": "ODINDOG•ID•YTTL•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
 	}
 }

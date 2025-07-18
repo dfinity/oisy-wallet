@@ -4,6 +4,7 @@
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { Network } from '$lib/types/network';
 	import type { OptionToken } from '$lib/types/token';
 	import type { KnownDestinations } from '$lib/types/transactions';
@@ -16,6 +17,7 @@
 	export let destination = '';
 	export let invalidDestination = false;
 	export let knownDestinations: KnownDestinations | undefined = undefined;
+	export let networkContacts: NetworkContacts | undefined = undefined;
 
 	let networkICP = false;
 	$: networkICP = isNetworkICP(network);
@@ -49,7 +51,8 @@
 	bind:destination
 	bind:invalidDestination
 	{knownDestinations}
-	{isInvalidDestination}
+	{networkContacts}
+	onInvalidDestination={isInvalidDestination}
 	inputPlaceholder={$i18n.send.placeholder.enter_eth_address}
 	on:icQRCodeScan
 	onQRButtonClick={() => dispatch('icQRCodeScan')}

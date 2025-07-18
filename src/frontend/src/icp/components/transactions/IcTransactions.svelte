@@ -27,7 +27,7 @@
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
+	import { modalIcToken, modalIcTokenData, modalIcTransaction } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
@@ -64,13 +64,13 @@
 <Header>
 	{$i18n.transactions.text.title}
 
-	<svelte:fragment slot="end">
+	{#snippet end()}
 		{#if $tokenCkBtcLedger}
 			<IcTransactionsBitcoinStatus />
 		{:else if ckEthereum}
 			<IcTransactionsEthereumStatus />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </Header>
 
 <IcTransactionsSkeletons>
@@ -102,5 +102,5 @@
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
 	<IcTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalIcToken}
-	<IcTokenModal />
+	<IcTokenModal fromRoute={$modalIcTokenData} />
 {/if}

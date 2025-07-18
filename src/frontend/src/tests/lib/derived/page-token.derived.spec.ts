@@ -8,12 +8,7 @@ import {
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import {
-	SOLANA_DEVNET_TOKEN,
-	SOLANA_LOCAL_TOKEN,
-	SOLANA_TESTNET_TOKEN,
-	SOLANA_TOKEN
-} from '$env/tokens/tokens.sol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import * as appConstants from '$lib/constants/app.constants';
@@ -51,7 +46,7 @@ describe('page-token.derived', () => {
 		}
 	);
 
-	it.each([BTC_TESTNET_TOKEN, SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN, SEPOLIA_TOKEN])(
+	it.each([BTC_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN, SEPOLIA_TOKEN])(
 		'should find $name token',
 		(token) => {
 			vi.spyOn(testnetsEnabled, 'subscribe').mockImplementation((fn) => {

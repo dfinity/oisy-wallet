@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { assertNonNullish, isNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -13,12 +13,12 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
-	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 
 	export let tokenAddress: SplTokenAddress | undefined;
 	export let metadata: TokenMetadata | undefined;
@@ -44,8 +44,9 @@
 		}
 
 		if (
-			$splTokens?.find(({ address }) => address.toLowerCase() === tokenAddress?.toLowerCase()) !==
-			undefined
+			$splTokens?.find(({ address }) =>
+				areAddressesEqual({ address1: address, address2: tokenAddress, networkId: network.id })
+			) !== undefined
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.already_available }
@@ -56,14 +57,7 @@
 		}
 
 		try {
-			const solNetwork = mapNetworkIdToNetwork(network.id);
-
-			assertNonNullish(
-				solNetwork,
-				replacePlaceholders($i18n.init.error.no_solana_network, {
-					$network: network.id.description ?? ''
-				})
-			);
+			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
 			metadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
 
@@ -169,10 +163,12 @@
 
 	<AddTokenWarning />
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={() => dispatch('icBack')} />
-		<Button disabled={invalid} on:click={() => dispatch('icSave')}>
-			{$i18n.tokens.import.text.add_the_token}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={() => dispatch('icBack')} />
+			<Button disabled={invalid} onclick={() => dispatch('icSave')}>
+				{$i18n.tokens.import.text.add_the_token}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

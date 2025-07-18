@@ -16,7 +16,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { Option } from '$lib/types/utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: OisyDappDescription;
 	$: ({
@@ -45,7 +45,7 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">
-		<span class="text-center text-xl">{dAppName}</span>
+		<span class="text-center text-xl">{resolveText({ i18n: $i18n, path: dAppName })}</span>
 	</svelte:fragment>
 
 	<ContentWithToolbar>
@@ -55,7 +55,9 @@
 					<ImgBanner
 						styleClass="max-h-64"
 						src={screenshots[0]}
-						alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppName })}
+						alt={replacePlaceholders($i18n.dapps.alt.website, {
+							$dAppName: resolveText({ i18n: $i18n, path: dAppName })
+						})}
 					/>
 				</div>
 			{/if}
@@ -67,15 +69,17 @@
 					<Logo
 						size="md"
 						src={logo}
-						alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppName })}
+						alt={replacePlaceholders($i18n.dapps.alt.logo, {
+							$dAppName: resolveText({ i18n: $i18n, path: dAppName })
+						})}
 					/>
 					<div class="mr-auto">
-						<div class="text-lg font-bold">{dAppName}</div>
+						<div class="text-lg font-bold">{resolveText({ i18n: $i18n, path: dAppName })}</div>
 						{#if nonNullish(websiteURL)}
 							<ExternalLink
 								iconVisible={false}
 								ariaLabel={replacePlaceholders($i18n.dapps.text.open_dapp, {
-									$dAppName: dAppName
+									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
 								href={websiteURL.toString()}
 								styleClass="text-sm text-tertiary">{websiteURL.hostname}</ExternalLink
@@ -87,7 +91,7 @@
 							<ExternalLinkIcon
 								href={telegram}
 								ariaLabel={replacePlaceholders($i18n.dapps.alt.open_telegram, {
-									$dAppName: dAppName
+									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
 							>
 								<IconTelegram size="22" />
@@ -97,7 +101,7 @@
 							<ExternalLinkIcon
 								href={openChat}
 								ariaLabel={replacePlaceholders($i18n.dapps.alt.open_open_chat, {
-									$dAppName: dAppName
+									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
 							>
 								<IconOpenChat size="22" />
@@ -107,7 +111,7 @@
 							<ExternalLinkIcon
 								href={twitter}
 								ariaLabel={replacePlaceholders($i18n.dapps.alt.open_twitter, {
-									$dAppName: dAppName
+									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
 							>
 								<IconTwitter size="22" />
@@ -117,7 +121,7 @@
 							<ExternalLinkIcon
 								href={github}
 								ariaLabel={replacePlaceholders($i18n.dapps.alt.source_code_on_github, {
-									$dAppName: dAppName
+									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
 							>
 								<IconGitHub size="22" />
@@ -127,17 +131,17 @@
 				</div>
 
 				<p class="m-0 my-4 text-sm [&_ul]:list-disc [&_ul]:pl-6">
-					<Html text={description} />
+					<Html text={resolveText({ i18n: $i18n, path: description })} />
 				</p>
 				<DappTags {dAppName} {tags} />
 			</article>
 		</div>
 
-		<svelte:fragment slot="toolbar">
+		{#snippet toolbar()}
 			{#if nonNullish(websiteURL)}
 				<ExternalLink
 					ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
-						$dAppName: dAppName
+						$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 					})}
 					asButton
 					fullWidth
@@ -145,12 +149,13 @@
 					href={websiteURL.toString()}
 					iconAsLast
 					trackEvent={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
-					>{callToAction ??
-						replacePlaceholders($i18n.dapps.text.open_dapp, {
-							$dAppName: dAppName
-						})}</ExternalLink
+					>{callToAction
+						? resolveText({ i18n: $i18n, path: callToAction })
+						: replacePlaceholders($i18n.dapps.text.open_dapp, {
+								$dAppName: resolveText({ i18n: $i18n, path: dAppName })
+							})}</ExternalLink
 				>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

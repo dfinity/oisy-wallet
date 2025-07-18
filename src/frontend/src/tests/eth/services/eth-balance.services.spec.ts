@@ -124,22 +124,16 @@ describe('eth-balance.services', () => {
 					tokenId: ETHEREUM_TOKEN_ID.description,
 					networkId: ETHEREUM_NETWORK_ID.description,
 					error: mockError.toString()
-				}
+				},
+				warning: `${replacePlaceholders(en.init.error.loading_balance, {
+					$symbol: `${ETHEREUM_TOKEN_ID.description}`,
+					$network: `${ETHEREUM_NETWORK_ID.description}`
+				})} ${mockError.toString()}`
 			});
 
 			// Required for the type interpreter
 			assertNonNullish(ETHEREUM_TOKEN_ID.description);
 			assertNonNullish(ETHEREUM_NETWORK_ID.description);
-
-			expect(console.warn).toHaveBeenCalledOnce();
-			expect(console.warn).toHaveBeenNthCalledWith(
-				1,
-				replacePlaceholders(en.init.error.loading_balance, {
-					$symbol: ETHEREUM_TOKEN_ID.description,
-					$network: ETHEREUM_NETWORK_ID.description
-				}),
-				mockError
-			);
 
 			expect(get(balancesStore)?.[ETHEREUM_TOKEN_ID]).toEqual(null);
 			expect(get(balancesStore)?.[SEPOLIA_TOKEN_ID]).toEqual({
@@ -164,25 +158,12 @@ describe('eth-balance.services', () => {
 						tokenId: tokenId.description,
 						networkId: networkId.description,
 						error: mockError.toString()
-					}
+					},
+					warning: `${replacePlaceholders(en.init.error.loading_balance, {
+						$symbol: `${tokenId.description}`,
+						$network: `${networkId.description}`
+					})} ${mockError.toString()}`
 				});
-			});
-
-			expect(console.warn).toHaveBeenCalledTimes(mockTokens.length);
-
-			mockTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-				// Required for the type interpreter
-				assertNonNullish(tokenId.description);
-				assertNonNullish(networkId.description);
-
-				expect(console.warn).toHaveBeenNthCalledWith(
-					index + 1,
-					replacePlaceholders(en.init.error.loading_balance, {
-						$symbol: tokenId.description,
-						$network: networkId.description
-					}),
-					mockError
-				);
 			});
 
 			mockTokens.forEach(({ id }) => {
@@ -281,21 +262,15 @@ describe('eth-balance.services', () => {
 			expect(trackEvent).toHaveBeenNthCalledWith(1, {
 				name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
 				metadata: {
-					tokenId: mockErc20DefaultTokens[0].symbol,
-					networkId: mockErc20DefaultTokens[0].network.name,
+					tokenId: mockErc20DefaultTokens[0].id.description,
+					networkId: mockErc20DefaultTokens[0].network.id.description,
 					error: mockError.toString()
-				}
-			});
-
-			expect(console.warn).toHaveBeenCalledOnce();
-			expect(console.warn).toHaveBeenNthCalledWith(
-				1,
-				replacePlaceholders(en.init.error.loading_balance, {
+				},
+				warning: `${replacePlaceholders(en.init.error.loading_balance, {
 					$symbol: mockErc20DefaultTokens[0].symbol,
 					$network: mockErc20DefaultTokens[0].network.name
-				}),
-				mockError
-			);
+				})} ${mockError.toString()}`
+			});
 
 			expect(get(balancesStore)?.[mockErc20DefaultTokens[0].id]).toEqual(null);
 
@@ -314,30 +289,22 @@ describe('eth-balance.services', () => {
 			expect(trackEvent).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
 
 			mockErc20DefaultTokens.forEach(
-				({ symbol: tokenSymbol, network: { name: networkName } }, index) => {
+				(
+					{ id: tokenId, symbol: tokenSymbol, network: { id: networkId, name: networkName } },
+					index
+				) => {
 					expect(trackEvent).toHaveBeenNthCalledWith(index + 1, {
 						name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
 						metadata: {
-							tokenId: tokenSymbol,
-							networkId: networkName,
+							tokenId: tokenId.description,
+							networkId: networkId.description,
 							error: mockError.toString()
-						}
-					});
-				}
-			);
-
-			expect(console.warn).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
-
-			mockErc20DefaultTokens.forEach(
-				({ symbol: tokenSymbol, network: { name: networkName } }, index) => {
-					expect(console.warn).toHaveBeenNthCalledWith(
-						index + 1,
-						replacePlaceholders(en.init.error.loading_balance, {
+						},
+						warning: `${replacePlaceholders(en.init.error.loading_balance, {
 							$symbol: tokenSymbol,
 							$network: networkName
-						}),
-						mockError
-					);
+						})} ${mockError.toString()}`
+					});
 				}
 			);
 

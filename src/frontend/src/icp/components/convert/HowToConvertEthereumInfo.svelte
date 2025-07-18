@@ -96,11 +96,11 @@
 			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 			on:click={() => dispatch('icQRCode')}
 		>
-			<svelte:fragment slot="title"
-				>{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
+			{#snippet title()}
+				{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
 					$token: $ckEthereumTwinToken.symbol
-				})}</svelte:fragment
-			>
+				})}
+			{/snippet}
 		</ReceiveAddress>
 
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
@@ -154,7 +154,7 @@
 						colorStyle="secondary"
 						fullWidth
 						styleClass="mb-4 mt-3"
-						on:click={() => dispatch('icConvert')}
+						onclick={() => dispatch('icConvert')}
 					>
 						<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
 					</Button>
@@ -163,11 +163,11 @@
 		</div>
 	</div>
 
-	<svelte:fragment slot="toolbar">
+	{#snippet toolbar()}
 		{#if formCancelAction === 'back'}
 			<ButtonBack fullWidth onclick={() => dispatch('icBack')} />
 		{:else}
 			<ButtonDone onclick={modalStore.close} />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </ContentWithToolbar>

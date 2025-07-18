@@ -200,7 +200,7 @@ describe('AllTransactionsLoader', () => {
 		ethTransactions.forEach(({ transaction, token: { id: tokenId } }) => {
 			ethTransactionsStore.add({
 				tokenId,
-				transactions: [transaction as Transaction]
+				transactions: [{ data: transaction as Transaction, certified: false }]
 			});
 		});
 
@@ -412,6 +412,7 @@ describe('AllTransactionsLoader', () => {
 				);
 
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					token,
@@ -433,6 +434,7 @@ describe('AllTransactionsLoader', () => {
 				);
 
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					token,
@@ -541,6 +543,7 @@ describe('AllTransactionsLoader', () => {
 			);
 
 			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+				identity: mockIdentity,
 				minTimestamp: mockMinTimestamp,
 				transactions,
 				token,

@@ -26,7 +26,7 @@
 		modalIcTransaction,
 		modalSolTransaction
 	} from '$lib/derived/modal.derived';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
@@ -38,7 +38,7 @@
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
-		tokens: $enabledNetworkTokens,
+		tokens: $enabledFungibleNetworkTokens,
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
@@ -51,10 +51,12 @@
 		$ckBtcPendingUtxosStore
 	});
 
-	let sortedTransactions: AllTransactionUiWithCmp[];
-	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>
-		sortTransactions({ transactionA: a, transactionB: b })
-	);
+	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
+	$: sortedTransactions = nonNullish(transactions)
+		? transactions.sort(({ transaction: a }, { transaction: b }) =>
+				sortTransactions({ transactionA: a, transactionB: b })
+			)
+		: undefined;
 
 	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
 	$: groupedTransactions = nonNullish(sortedTransactions)
@@ -96,7 +98,7 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader {transactions}>
-		{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
+		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
 			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 				<TransactionsDateGroup
 					{formattedDate}
@@ -106,7 +108,7 @@
 			{/each}
 		{/if}
 
-		{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
+		{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
 			<TransactionsPlaceholder />
 		{/if}
 	</AllTransactionsLoader>

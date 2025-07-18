@@ -1,16 +1,23 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
-import { formatToken } from '$lib/utils/format.utils';
+import type { ContactUi } from '$lib/types/contact';
+import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
-import { expect } from 'vitest';
 
 describe('KnownDestination', () => {
+	const [contact] = getMockContactsUi({
+		n: 1,
+		name: 'Multiple Addresses Contact',
+		addresses: [mockContactBtcAddressUi]
+	}) as unknown as ContactUi[];
 	const props = {
 		destination: mockBtcAddress,
+		onClick: () => {},
 		amounts: [
 			{ value: 10000000n, token: BTC_MAINNET_TOKEN },
 			{ value: 20000000n, token: BTC_MAINNET_TOKEN },
@@ -58,5 +65,24 @@ describe('KnownDestination', () => {
 				$items: `${newProps.amounts.length - MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS}`
 			})
 		);
+	});
+
+	it('renders destination if no contact provided', () => {
+		const { getByText } = render(KnownDestination, {
+			props
+		});
+
+		expect(getByText(shortenWithMiddleEllipsis({ text: props.destination }))).toBeInTheDocument();
+	});
+
+	it('renders contact data if contact is provided', () => {
+		const { container } = render(KnownDestination, {
+			props: {
+				...props,
+				contact
+			}
+		});
+
+		expect(container).toHaveTextContent(contact.name);
 	});
 });

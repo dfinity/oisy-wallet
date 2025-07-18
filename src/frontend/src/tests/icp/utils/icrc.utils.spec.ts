@@ -13,11 +13,10 @@ import type { TokenStandard } from '$lib/types/token';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
-import { expect } from 'vitest';
 
 describe('icrc.utils', () => {
 	describe('mapIcrcToken', () => {
-		const mockToken = { ...mockValidIcToken, icon: 'https://icon.png' };
+		const mockToken = { ...mockValidIcToken, icon: 'mock-icon' };
 		const mockMetadata: IcrcTokenMetadataResponse = [
 			[IcrcMetadataResponseEntries.SYMBOL, { Text: mockToken.symbol }],
 			[IcrcMetadataResponseEntries.NAME, { Text: mockToken.name }],
@@ -32,6 +31,15 @@ describe('icrc.utils', () => {
 			position: 1,
 			icrcCustomTokens: {
 				[mockToken.ledgerCanisterId]: mockToken
+			}
+		};
+		const mockParamsWithUrlIcon: IcrcLoadData = {
+			metadata: mockMetadata,
+			category: 'default',
+			ledgerCanisterId: mockValidIcToken.ledgerCanisterId,
+			position: 1,
+			icrcCustomTokens: {
+				[mockToken.ledgerCanisterId]: { ...mockToken, icon: 'https://icon.png' }
 			}
 		};
 
@@ -87,6 +95,57 @@ describe('icrc.utils', () => {
 			});
 			expect(token?.id.description).toBe(mockToken.symbol);
 			expect(token?.icon).toBe(mockToken.icon);
+		});
+
+		it('should use the static icon if the icon is an URL', () => {
+			const token = mapIcrcToken({
+				...mockParamsWithUrlIcon,
+				metadata: [
+					...mockMetadata.slice(0, mockMetadata.length - 1),
+					[IcrcMetadataResponseEntries.LOGO, { Text: 'https://example.com/icon.png' }]
+				]
+			});
+
+			expect(token).toStrictEqual({
+				...mockToken,
+				icon: `/icons/icrc/${mockToken.ledgerCanisterId}.png`,
+				id: token?.id
+			});
+			expect(token?.id.description).toBe(mockToken.symbol);
+		});
+
+		it('should use the static icon if the icon is an URL and the icon is missing from icrcCustomTokens', () => {
+			const token = mapIcrcToken({
+				...mockParamsWithUrlIcon,
+				metadata: [
+					...mockMetadata.slice(0, mockMetadata.length - 1),
+					[IcrcMetadataResponseEntries.LOGO, { Text: 'https://example.com/icon.png' }]
+				],
+				icrcCustomTokens: {
+					[mockToken.ledgerCanisterId]: { ...mockToken, icon: undefined }
+				}
+			});
+
+			expect(token).toStrictEqual({
+				...mockToken,
+				icon: `/icons/icrc/${mockToken.ledgerCanisterId}.png`,
+				id: token?.id
+			});
+			expect(token?.id.description).toBe(mockToken.symbol);
+		});
+
+		it('should use the static icon if the icon is an URL and the icon is missing from metadata', () => {
+			const token = mapIcrcToken({
+				...mockParamsWithUrlIcon,
+				metadata: [...mockMetadata.slice(0, mockMetadata.length - 1)]
+			});
+
+			expect(token).toStrictEqual({
+				...mockToken,
+				icon: `/icons/icrc/${mockToken.ledgerCanisterId}.png`,
+				id: token?.id
+			});
+			expect(token?.id.description).toBe(mockToken.symbol);
 		});
 
 		it('should prioritize the icon from icrcCustomTokens instead of the icon from metadata', () => {

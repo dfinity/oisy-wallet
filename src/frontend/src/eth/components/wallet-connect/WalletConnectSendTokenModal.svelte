@@ -4,18 +4,19 @@
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
-		FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
-		initFeeStore
-	} from '$eth/stores/fee.store';
+		ETH_FEE_CONTEXT_KEY,
+		type EthFeeContext as FeeContextType,
+		initEthFeeContext,
+		initEthFeeStore
+	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
@@ -55,7 +56,7 @@
 	 * Fee context store
 	 */
 
-	const feeStore = initFeeStore();
+	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set($sendToken.symbol);
@@ -67,8 +68,8 @@
 	$: feeDecimalsStore.set($sendToken.decimals);
 
 	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
-		initFeeContext({
+		ETH_FEE_CONTEXT_KEY,
+		initEthFeeContext({
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,
@@ -100,7 +101,7 @@
 	 * Modal
 	 */
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.REVIEW,
 			title: $i18n.send.text.review
@@ -111,8 +112,8 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsSend> | undefined;
+	let modal: WizardModal<WizardStepsSend>;
 
 	const close = () => modalStore.close();
 
@@ -150,7 +151,7 @@
 			fee: $feeStore,
 			modalNext: modal.next,
 			token: $sendToken,
-			progress: (step: ProgressStepsSend) => (sendProgressStep = step),
+			progress: (step: ProgressStep) => (sendProgressStep = step),
 			identity: $authIdentity,
 			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			sourceNetwork,
@@ -161,15 +162,18 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
+<WizardModal {steps} bind:currentStep bind:this={modal} onClose={reject}>
 	{@const { data } = firstTransaction}
 
-	<WalletConnectModalTitle slot="title"
-		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
-	>
+	{#snippet title()}
+		<WalletConnectModalTitle
+			>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
+		>
+	{/snippet}
 
-	<FeeContext
+	<EthFeeContext
 		amount={amount.toString()}
+		{data}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
 		{destination}
@@ -196,5 +200,5 @@
 				/>
 			{/if}
 		</CkEthLoader>
-	</FeeContext>
+	</EthFeeContext>
 </WizardModal>
