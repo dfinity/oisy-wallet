@@ -1,9 +1,10 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
-import type { Currency } from '$lib/enums/currency';
+import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import type { CurrencyExchangeData } from '$lib/types/currency';
+import { isNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import Decimal from 'decimal.js';
 import type { BigNumberish } from 'ethers/utils';
@@ -170,25 +171,32 @@ export const formatSecondsToNormalizedDate = ({
 export const formatCurrency = ({
 	value,
 	currency,
-	options
+	exchangeRate: { exchangeRateToUsd, currency: exchangeRateCurrency }
 }: {
 	value: number;
 	currency: Currency;
-	options?: {
-		minFraction?: number;
-		maxFraction?: number;
-		maximumSignificantDigits?: number;
-		symbol?: boolean;
-	};
-}): string => {
-	const { minFraction, maxFraction, maximumSignificantDigits, symbol = true } = options ?? {};
+	exchangeRate: CurrencyExchangeData;
+}): string | undefined => {
+	if (currency !== exchangeRateCurrency) {
+		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
+		return;
+	}
 
-	return new Intl.NumberFormat('en-US', {
-		...(symbol && { style: 'currency', currency: currency.toUpperCase() }),
-		minimumFractionDigits: minFraction,
-		maximumFractionDigits: maxFraction,
-		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })
-	})
-		.format(value)
-		.replace(/,/g, '’');
+	if (isNullish(exchangeRateToUsd) || exchangeRateToUsd === 0) {
+		// If the exchange rate is not available (probably right after a currency switch), we cannot format the currency
+		return;
+	}
+
+	const convertedValue = value / exchangeRateToUsd;
+
+	const formatted = new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: currency.toUpperCase()
+	}).format(convertedValue);
+
+	if (currency === Currency.CHF) {
+		return formatted.replace(/,/g, '’');
+	}
+
+	return formatted;
 };

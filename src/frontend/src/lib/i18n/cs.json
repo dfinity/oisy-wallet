@@ -986,6 +986,11 @@
 			"unexpected_error_on_token_update": "Při aktualizaci tokenu došlo k chybě."
 		}
 	},
+	"nfts": {
+		"text": {
+			"title": ""
+		}
+	},
 	"fee": {
 		"text": {
 			"fee": "Poplatek",
@@ -1273,6 +1278,12 @@
 		"avatar": {
 			"default": "Výchozí avatar",
 			"avatar_for": "Avatar pro"
+		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
 		},
 		"show_contact": {
 			"title": "Kontakt",

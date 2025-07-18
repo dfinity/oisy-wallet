@@ -986,6 +986,11 @@
 			"unexpected_error_on_token_update": "Si è verificato un errore durante l'aggiornamento del token."
 		}
 	},
+	"nfts": {
+		"text": {
+			"title": "NFT"
+		}
+	},
 	"fee": {
 		"text": {
 			"fee": "Fee",
@@ -1273,6 +1278,12 @@
 		"avatar": {
 			"default": "Avatar predefinito",
 			"avatar_for": "Avatar per"
+		},
+		"edit_avatar": {
+			"menu_title": "Immagine del Contatto",
+			"upload_image": "Carica",
+			"replace_image": "Cambia",
+			"remove_image": "Rimuovi"
 		},
 		"show_contact": {
 			"title": "Contatto",
