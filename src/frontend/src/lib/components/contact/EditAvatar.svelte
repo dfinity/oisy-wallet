@@ -79,7 +79,7 @@
 	>
 		<h3 class="popover-title pb-2 pt-1 text-base">{$i18n.address_book.edit_avatar.menu_title}</h3>
 		<ul class="flex flex-col">
-			{#each items as { title: itemTitle, logo: itemLogo, action, testId } (itemTitle)}
+			{#each items as { title: itemTitle, logo: ItemLogo, action, testId } (itemTitle)}
 				<li class="logo-button-list-item">
 					<LogoButton
 						hover
@@ -91,7 +91,7 @@
 						}}
 					>
 						{#snippet logo()}
-							<svelte:component this={itemLogo} />
+							<ItemLogo />
 						{/snippet}
 						{#snippet title()}
 							<span class="text-base font-normal">{itemTitle}</span>
