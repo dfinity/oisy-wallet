@@ -1,32 +1,29 @@
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import type { NetworkId } from '$lib/types/network';
-import type { Nft } from '$lib/types/nft';
+import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export type NftsByNetwork = Record<NetworkId, Record<string, Nft[]>>;
-
 export const getLoadedNftsByTokens = ({
-	tokens,
-	loadedNfts
-}: {
+																				tokens,
+																				loadedNfts
+																			}: {
 	tokens: Erc721CustomToken[];
 	loadedNfts: Nft[];
 }): NftsByNetwork => {
 	const nftsByToken: NftsByNetwork = {};
 
-	tokens.forEach((token) => {
-		if (isNullish(nftsByToken[token.network.id])) {
-			nftsByToken[token.network.id] = {};
+	tokens.forEach(({ address, network: {id: networkId} }) => {
+		if (isNullish(nftsByToken[networkId])) {
+			nftsByToken[networkId] = {};
 		}
-		nftsByToken[token.network.id][token.address.toLowerCase()] = [];
+		nftsByToken[networkId][address.toLowerCase()] = [];
 	});
 
 	loadedNfts.forEach((nft) => {
-		const networkId = nft.contract.network.id;
-		const address = nft.contract.address.toLowerCase();
+		const { contract: { network: { id: networkId }, address } } = nft;
+		const normalizedAddress = address.toLowerCase();
 
-		if (nonNullish(nftsByToken[networkId]) && nonNullish(nftsByToken[networkId][address])) {
-			nftsByToken[networkId][address].push(nft);
+		if (nonNullish(nftsByToken[networkId]) && nonNullish(nftsByToken[networkId][normalizedAddress])) {
+			nftsByToken[networkId][normalizedAddress].push(nft);
 		}
 	});
 
