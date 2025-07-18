@@ -606,8 +606,62 @@ describe('format.utils', () => {
 		it.each(testCases)(
 			`should format value $value for currency $currency as expected`,
 			({ value, currency, expected }) => {
-				expect(formatCurrency({ value, currency })).toBe(expected);
+				expect(
+					formatCurrency({
+						value,
+						currency,
+						exchangeRate: { currency, exchangeRateToUsd: 1 }
+					})
+				).toBe(expected);
 			}
 		);
+
+		it('should return undefined for mismatch in currency', () => {
+			expect(
+				formatCurrency({
+					value: 1234.56,
+					currency: Currency.EUR,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 }
+				})
+			).toBeUndefined();
+		});
+
+		it('should return undefined if the exchange rate is not provided', () => {
+			expect(
+				formatCurrency({
+					value: 1234.56,
+					currency: Currency.EUR,
+					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: null }
+				})
+			).toBeUndefined();
+		});
+
+		it('should handle zero value correctly', () => {
+			expect(
+				formatCurrency({
+					value: 0,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 }
+				})
+			).toBe('$0.00');
+
+			expect(
+				formatCurrency({
+					value: 1234.56,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 0 }
+				})
+			).toBe('$0.00');
+		});
+
+		it('should convert the value with the exchange rate', () => {
+			expect(
+				formatCurrency({
+					value: 1000,
+					currency: Currency.CHF,
+					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1.2 }
+				})
+			).toBe('CHF 1’200.00');
+		});
 	});
 });

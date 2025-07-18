@@ -3,7 +3,8 @@ import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants
 import type { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import type { CurrencyExchangeData } from '$lib/types/currency';
+import { isNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import Decimal from 'decimal.js';
 import type { BigNumberish } from 'ethers/utils';
@@ -170,25 +171,28 @@ export const formatSecondsToNormalizedDate = ({
 export const formatCurrency = ({
 	value,
 	currency,
-	options
+	exchangeRate
 }: {
 	value: number;
 	currency: Currency;
-	options?: {
-		minFraction?: number;
-		maxFraction?: number;
-		maximumSignificantDigits?: number;
-		symbol?: boolean;
-	};
-}): string => {
-	const { minFraction, maxFraction, maximumSignificantDigits, symbol = true } = options ?? {};
+	exchangeRate: CurrencyExchangeData;
+}): string | undefined => {
+	if (currency !== exchangeRate.currency) {
+		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
+		return;
+	}
+
+	if (isNullish(exchangeRate.exchangeRateToUsd)) {
+		// If the exchange rate is not available (probably right after a currency switch), we cannot format the currency
+		return;
+	}
+
+	const convertedValue = value * exchangeRate.exchangeRateToUsd;
 
 	return new Intl.NumberFormat('en-US', {
-		...(symbol && { style: 'currency', currency: currency.toUpperCase() }),
-		minimumFractionDigits: minFraction,
-		maximumFractionDigits: maxFraction,
-		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })
+		style: 'currency',
+		currency: currency.toUpperCase()
 	})
-		.format(value)
+		.format(convertedValue)
 		.replace(/,/g, '’');
 };
