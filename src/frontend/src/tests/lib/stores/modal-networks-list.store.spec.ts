@@ -23,14 +23,6 @@ describe('modalNetworksListStore', () => {
 		expect(get(filteredNetworks)).toEqual([ICP_NETWORK, ETHEREUM_NETWORK]);
 	});
 
-	it('should return all networks when no allowedNetworkIds provided', () => {
-		const { filteredNetworks } = initModalNetworksListContext({
-			networks: mockNetworks
-		});
-
-		expect(get(filteredNetworks)).toEqual(mockNetworks);
-	});
-
 	it('should return all networks when allowedNetworkIds is empty array', () => {
 		const { filteredNetworks } = initModalNetworksListContext({
 			networks: mockNetworks,
@@ -84,15 +76,15 @@ describe('modalNetworksListStore', () => {
 		expect(get(filteredNetworks)).toEqual([ETHEREUM_NETWORK, BASE_NETWORK]);
 	});
 
-	it('should clear filter when setAllowedNetworkIds is called with undefined', () => {
-		const { filteredNetworks, setAllowedNetworkIds } = initModalNetworksListContext({
+	it('should reset filter when calledresetAllowedNetworksIds', () => {
+		const { filteredNetworks, resetAllowedNetworkIds } = initModalNetworksListContext({
 			networks: mockNetworks,
 			allowedNetworkIds: [ICP_NETWORK.id]
 		});
 
 		expect(get(filteredNetworks)).toEqual([ICP_NETWORK]);
 
-		setAllowedNetworkIds(undefined);
+		resetAllowedNetworkIds();
 
 		expect(get(filteredNetworks)).toEqual(mockNetworks);
 	});
