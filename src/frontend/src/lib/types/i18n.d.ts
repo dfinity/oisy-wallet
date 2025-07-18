@@ -684,6 +684,8 @@ interface I18nSwap {
 		select: string;
 		select_swap_provider: string;
 		open_icp_swap: string;
+		select_token: string;
+		select_network_filter: string;
 	};
 	error: {
 		kong_not_available: string;

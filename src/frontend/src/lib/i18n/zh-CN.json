@@ -817,7 +817,9 @@
 			"you_receive": "你将收到",
 			"select": "选择 >",
 			"select_swap_provider": "选择兑换服务商",
-			"open_icp_swap": "打开 ICP Swap 网站"
+			"open_icp_swap": "打开 ICP Swap 网站",
+			"select_token": "",
+			"select_network_filter": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
