@@ -31,8 +31,10 @@
 	});
 
 	const triggerTimer = () => workers.forEach((worker) => worker.trigger());
+
+	const debounceTriggerTimer = debounce(triggerTimer, 1000);
 </script>
 
-<svelte:window on:oisyTriggerWallet={triggerTimer} />
+<svelte:window on:oisyTriggerWallet={debounceTriggerTimer} />
 
 <slot />
