@@ -7,8 +7,8 @@ import {
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NftId, NftMetadata } from '$lib/types/nft';
-import { parseNftId } from '$lib/validation/nft.validation';
 import type { NftsByNetwork } from '$lib/utils/nfts.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { nonNullish } from '@dfinity/utils';
 
 export const loadNfts = ({
@@ -26,9 +26,9 @@ export const loadNfts = ({
 	return Promise.all(
 		tokens.map((token) => {
 			let loadedNfts: Nft[] = [];
-			const nftsByNetwork = loadedNftsByNetwork[token.network.id]
+			const nftsByNetwork = loadedNftsByNetwork[token.network.id];
 			if (nonNullish(nftsByNetwork)) {
-				loadedNfts = nftsByNetwork[token.address.toLowerCase()] ?? []
+				loadedNfts = nftsByNetwork[token.address.toLowerCase()] ?? [];
 			}
 
 			return loadNftsOfToken({

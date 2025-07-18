@@ -1,3 +1,4 @@
+import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
 import {
 	infuraErc721Providers,
@@ -6,15 +7,13 @@ import {
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { loadNfts } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
-import type { Nft } from '$lib/types/nft';
+import type { NftsByNetwork } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { waitFor } from '@testing-library/svelte';
 import { Network } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { NftsByNetwork } from '$lib/utils/nfts.utils';
-import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 
 vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn(),
