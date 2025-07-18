@@ -397,12 +397,11 @@ describe('swap utils', () => {
 				srcUSD: '1000.0',
 				destToken: '0x456',
 				destDecimals: 6,
-				destAmount: '0',
+				destAmount: '950',
 				destUSD: '0',
 				bestRoute: [],
 				gasCostUSD: '25.0',
 				gasCost: '100000',
-
 				side: 'SELL' as SwapSide,
 				contractMethod: 'swapExactTokensForTokens',
 				tokenTransferProxy: '0xproxy123',
