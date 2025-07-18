@@ -64,6 +64,29 @@ pub struct ContactImage {
     pub mime_type: ImageMimeType,
 }
 
+impl ContactImage {
+    pub fn validate(&self) -> Result<(), ContactError> {
+        if self.data.len() > MAX_IMAGE_SIZE_BYTES {
+            return Err(ContactError::ImageTooLarge);
+        }
+        match self.mime_type {
+            ImageMimeType::Png => {
+                let png_magic = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+                if self.data.len() < 8 || self.data[..8] != png_magic {
+                    return Err(ContactError::InvalidImageFormat);
+                }
+            }
+            ImageMimeType::Jpeg => {
+                if self.data.len() < 4 || self.data[0] != 0xFF || self.data[1] != 0xD8 || self.data[self.data.len()-2] != 0xFF || self.data[self.data.len()-1] != 0xD9 {
+                    return Err(ContactError::InvalidImageFormat);
+                }
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+}
+
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
 pub struct ContactAddressData {
