@@ -1268,10 +1268,10 @@
 			"avatar_for": "Avatar para"
 		},
 		"edit_avatar": {
-			"menu_title": "",
-			"upload_image": "",
-			"replace_image": "",
-			"remove_image": ""
+			"menu_title": "Imagem do Contato",
+			"upload_image": "Carregar",
+			"replace_image": "Trocar",
+			"remove_image": "Remover"
 		},
 		"show_contact": {
 			"title": "Contato",
