@@ -13,7 +13,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import type { Currencies } from '$lib/enums/currencies';
 	import type { Currency } from '$lib/enums/currency';
 	import type { Languages } from '$lib/enums/languages';
 	import { currencyStore } from '$lib/stores/currency.store';
