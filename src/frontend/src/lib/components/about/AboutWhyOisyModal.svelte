@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import AboutFeatureItem from './AboutFeatureItem.svelte';
 	import CoverWhyOisy from '$lib/assets/cover-why-oisy.png';
+	import AboutFeatureItem from '$lib/components/about/AboutFeatureItem.svelte';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconIcLogoPlain from '$lib/components/icons/IconIcLogoPlain.svelte';
@@ -59,13 +59,17 @@
 		<ImgBanner styleClass="max-h-56" src={CoverWhyOisy} alt={$i18n.about.why_oisy.text.title} />
 
 		<div class="mt-5 flex flex-col gap-6">
-			{#each features as feature}
-				<AboutFeatureItem title={feature.title} description={feature.description}>
-					<svelte:component this={feature.icon} slot="icon" />
+			{#each features as { title, description, icon: iconComponent } (title)}
+				<AboutFeatureItem {title} {description}>
+					{#snippet icon()}
+						<svelte:component this={iconComponent} />
+					{/snippet}
 				</AboutFeatureItem>
 			{/each}
 		</div>
 
-		<ButtonCloseModal slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonCloseModal />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

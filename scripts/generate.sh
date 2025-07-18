@@ -36,7 +36,7 @@ function install_did_files() {
       destination=".dfx/local/canisters/${array[0]}/${filename}"
       mkdir -p "$(dirname "$destination")"
       case "$source" in
-      http*) curl -sSL "$source" >"$destination" ;;
+      http*) scripts/download-immutable.sh "$source" "$destination" ;;
       *) if test -e "$source"; then cp "$source" "$destination"; else echo "WARNING: $canister_name did file not found at $source"; fi ;;
       esac
     done
@@ -48,13 +48,24 @@ function install_did_files() {
 # .. downloads candid for the signer
 DFX_NETWORK=ic ./scripts/build.signer.sh
 # .. downloads candid for the kong_backend
-./scripts/build.kong_backend.sh
+DFX_NETWORK=ic ./scripts/build.kong_backend.sh
+# .. downloads candid for the icp_swap_pool
+DFX_NETWORK=ic ./scripts/build.icp_swap_pool.sh
+# .. downloads candid for the icp_swap_factory
+DFX_NETWORK=ic ./scripts/build.icp_swap_factory.sh
+# .. downloads candid for the xtc_ledger
+DFX_NETWORK=ic ./scripts/build.xtc_ledger.sh
+# .. downloads candid for the sol_rpc
+DFX_NETWORK=ic ./scripts/build.sol_rpc.sh
+# .. downloads candid for the llm
+DFX_NETWORK=ic ./scripts/build.llm.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
 scripts/bind/rust.sh cycles_ledger
 # Generate javascript & typescript bindings for canisters with directories in `declarations`:
-for canister in $(ls src/declarations/); do
+mapfile -t canisters < <(ls src/declarations/)
+for canister in "${canisters[@]}"; do
   echo "Generating bindings for $canister"
   dfx generate "$canister"
 done

@@ -1,40 +1,58 @@
+import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
-import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
+import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
-import { retry } from '$lib/services/rest.services';
+import { trackEvent } from '$lib/services/analytics.services';
+import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { randomWait } from '$lib/utils/time.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadEthereumTransactions = ({
 	networkId,
-	tokenId
+	tokenId,
+	updateOnly = false,
+	silent = false
 }: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	updateOnly?: boolean;
+	silent?: boolean;
 }): Promise<ResultSuccess> => {
-	if (isSupportedEthTokenId(tokenId)) {
-		return loadEthTransactions({ networkId, tokenId });
+	if (isSupportedEthTokenId(tokenId) || isSupportedEvmNativeTokenId(tokenId)) {
+		return loadEthTransactions({ networkId, tokenId, updateOnly, silent });
 	}
 
-	return loadErc20Transactions({ networkId, tokenId });
+	return loadErc20Transactions({ networkId, tokenId, updateOnly });
 };
+
+// If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
+// Plus, we add new transactions to the existing ones.
+export const reloadEthereumTransactions = (params: {
+	tokenId: TokenId;
+	networkId: NetworkId;
+	silent?: boolean;
+}): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
 const loadEthTransactions = async ({
 	networkId,
-	tokenId
+	tokenId,
+	updateOnly = false,
+	silent = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
+	updateOnly?: boolean;
+	silent?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
@@ -55,20 +73,43 @@ const loadEthTransactions = async ({
 	try {
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({ address });
-		ethTransactionsStore.set({ tokenId, transactions });
+
+		const certifiedTransactions = transactions.map((transaction) => ({
+			data: transaction,
+			// We set the certified property to false because we don't have a way to certify ETH transactions for now.
+			certified: false
+		}));
+
+		if (updateOnly) {
+			certifiedTransactions.forEach((transaction) =>
+				ethTransactionsStore.update({ tokenId, transaction })
+			);
+		} else {
+			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
+		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
 
-		const {
-			transactions: {
-				error: { loading_transactions }
-			}
-		} = get(i18n);
+		if (!silent) {
+			const {
+				transactions: {
+					error: { loading_transactions_symbol }
+				}
+			} = get(i18n);
 
-		toastsErrorNoTrace({
-			msg: { text: loading_transactions },
-			err
-		});
+			trackEvent({
+				name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
+				metadata: {
+					tokenId: `${tokenId.description}`,
+					networkId: `${networkId.description}`,
+					error: `${err}`
+				},
+				warning: `${replacePlaceholders(loading_transactions_symbol, {
+					$symbol: ETHEREUM_NETWORK_SYMBOL
+				})} ${err}`
+			});
+		}
+
 		return { success: false };
 	}
 
@@ -77,10 +118,12 @@ const loadEthTransactions = async ({
 
 const loadErc20Transactions = async ({
 	networkId,
-	tokenId
+	tokenId,
+	updateOnly = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
+	updateOnly?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
@@ -116,12 +159,24 @@ const loadErc20Transactions = async ({
 	}
 
 	try {
-		const { transactions: transactionsRest } = etherscanRests(networkId);
-		const transactions = await retry({
-			request: async () => await transactionsRest({ contract: token, address }),
-			onRetry: async () => await randomWait({})
+		const { erc20Transactions } = etherscanProviders(networkId);
+		const transactions = await retryWithDelay({
+			request: async () => await erc20Transactions({ contract: token, address })
 		});
-		ethTransactionsStore.set({ tokenId, transactions });
+
+		const certifiedTransactions = transactions.map((transaction) => ({
+			data: transaction,
+			// We set the certified property to false because we don't have a way to certify ERC20 transactions for now.
+			certified: false
+		}));
+
+		if (updateOnly) {
+			certifiedTransactions.forEach((transaction) =>
+				ethTransactionsStore.update({ tokenId, transaction })
+			);
+		} else {
+			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
+		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
 
@@ -131,14 +186,18 @@ const loadErc20Transactions = async ({
 			}
 		} = get(i18n);
 
-		toastsErrorNoTrace({
-			msg: {
-				text: replacePlaceholders(loading_transactions_symbol, {
-					$symbol: token.symbol
-				})
+		trackEvent({
+			name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
+			metadata: {
+				tokenId: `${tokenId.description}`,
+				networkId: `${networkId.description}`,
+				error: `${err}`
 			},
-			err
+			warning: `${replacePlaceholders(loading_transactions_symbol, {
+				$symbol: token.symbol
+			})} ${err}`
 		});
+
 		return { success: false };
 	}
 

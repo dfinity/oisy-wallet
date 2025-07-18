@@ -7,11 +7,12 @@
 		TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE,
 		TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE
 	} from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
-	import { formatUSD } from '$lib/utils/format.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
 
 	export let amount: OptionAmount;
 	export let exchangeRate: number | undefined;
@@ -24,8 +25,9 @@
 	};
 
 	let formattedUSDAmount: string | undefined;
-	$: formattedUSDAmount = formatUSD({
-		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0
+	$: formattedUSDAmount = formatCurrency({
+		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
+		currency: $currentCurrency
 	});
 
 	let formattedTokenAmount: string | undefined;
@@ -39,7 +41,7 @@
 		<button
 			class:hover:cursor-default={disabled}
 			{disabled}
-			on:click={handleUnitSwitch}
+			on:click|preventDefault={handleUnitSwitch}
 			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 		>
 			<IconArrowUpDown size="14" />

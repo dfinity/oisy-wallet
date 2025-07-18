@@ -16,7 +16,7 @@ export const initBitcoinFeeStore = (): BitcoinFeeStore => {
 	return {
 		subscribe,
 
-		setFee(data: BitcoinFeeStoreData) {
+		setFee: (data: BitcoinFeeStoreData) => {
 			set(data);
 		}
 	};

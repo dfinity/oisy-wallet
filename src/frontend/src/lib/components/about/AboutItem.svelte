@@ -1,7 +1,23 @@
 <script lang="ts">
-	export let asMenuItem = false;
-	export let testId: string | undefined = undefined;
-	export let asMenuItemCondensed = false;
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		icon?: Snippet;
+		label: Snippet;
+		onClick: () => void;
+		asMenuItem?: boolean;
+		asMenuItemCondensed?: boolean;
+		testId?: string;
+	}
+
+	let {
+		icon,
+		label,
+		onClick,
+		asMenuItem = false,
+		asMenuItemCondensed = false,
+		testId
+	}: Props = $props();
 </script>
 
 <button
@@ -11,14 +27,14 @@
 	class:whitespace-nowrap={!asMenuItem}
 	class:text-center={!asMenuItem}
 	class:font-bold={!asMenuItem}
-	class:text-brand-primary={!asMenuItem}
-	on:click
+	class:text-brand-primary-alt={!asMenuItem}
+	onclick={onClick}
 	data-tid={testId}
 >
 	<div class="flex items-center gap-2">
 		{#if asMenuItem}
-			<slot name="icon" />
+			{@render icon?.()}
 		{/if}
-		<slot name="label"></slot>
+		{@render label()}
 	</div>
 </button>

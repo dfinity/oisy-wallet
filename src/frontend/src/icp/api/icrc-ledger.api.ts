@@ -1,9 +1,10 @@
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
-import type { CanisterIdText } from '$lib/types/canister';
+import type { CanisterApiFunctionParams, CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import { type Identity } from '@dfinity/agent';
+import type { Identity } from '@dfinity/agent';
+import type { Allowance } from '@dfinity/ledger-icp/dist/candid/ledger';
 import {
 	IcrcLedgerCanister,
 	type IcrcAccount,
@@ -24,8 +25,6 @@ import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
  * @param {QueryParams} params.rest - Additional query parameters.
  * @returns {Promise<IcrcTokenMetadataResponse>} The metadata response for the ICRC token.
- *
- * @todo Add missing test for this function.
  */
 export const metadata = async ({
 	certified = true,
@@ -105,8 +104,6 @@ export const balance = async ({
  * @param {bigint} [params.createdAt] - Optional timestamp for when the transfer was created.
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
  * @returns {Promise<IcrcBlockIndex>} The block index of the transfer.
- *
- * @todo Add missing test for this function.
  */
 export const transfer = async ({
 	identity,
@@ -143,8 +140,6 @@ export const transfer = async ({
  * @param {bigint} params.expiresAt - The expiration timestamp for the approval.
  * @param {bigint} [params.createdAt] - Optional timestamp for when the approval was created.
  * @returns {Promise<IcrcBlockIndex>} The block index of the approval.
- *
- * @todo Add missing test for this function.
  */
 export const approve = async ({
 	identity,
@@ -170,6 +165,40 @@ export const approve = async ({
 		spender: toAccount(spender),
 		expires_at,
 		created_at_time: createdAt ?? nowInBigIntNanoSeconds()
+	});
+};
+
+/**
+ * Retrieves the allowance for a spender on behalf of an owner for ICRC tokens.
+ *
+ * @param {Object} params - The parameters for fetching the allowance.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
+ * @param {IcrcAccount} params.owner - The account owner.
+ * @param {IcrcAccount} params.spender - The account approved to spend on behalf of the owner.
+ * @returns {Promise<Allowance>} The allowance details including amount and expiration.
+ */
+export const allowance = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId,
+	owner,
+	spender
+}: CanisterApiFunctionParams<
+	{
+		ledgerCanisterId: CanisterIdText;
+		owner: IcrcAccount;
+		spender: IcrcAccount;
+	} & QueryParams
+>): Promise<Allowance> => {
+	assertNonNullish(identity);
+	const { allowance } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	return allowance({
+		certified,
+		account: toAccount(owner),
+		spender: toAccount(spender)
 	});
 };
 

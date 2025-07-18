@@ -13,6 +13,7 @@ export const readCanisterIds = ({
 	try {
 		interface Details {
 			ic?: string;
+			beta?: string;
 			staging?: string;
 			local?: string;
 		}

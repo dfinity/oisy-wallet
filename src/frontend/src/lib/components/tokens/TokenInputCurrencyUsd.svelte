@@ -16,6 +16,7 @@
 	export let placeholder = '0';
 	export let error = false;
 	export let loading = false;
+	export let autofocus = false;
 
 	let displayValue: OptionAmount;
 
@@ -52,13 +53,14 @@
 	{disabled}
 	{error}
 	{loading}
+	{autofocus}
 	decimals={2}
 	on:focus
 	on:blur
 	testId={TOKEN_INPUT_CURRENCY_USD}
 	styleClass="no-padding"
 >
-	<svelte:fragment slot="prefix">
+	{#snippet prefix()}
 		<span
 			class="duration=[var(--animation-time-short)] pl-3 transition-colors"
 			class:text-tertiary={isNullish(displayValue)}
@@ -66,12 +68,14 @@
 		>
 			$
 		</span>
-	</svelte:fragment>
-	<slot name="inner-end" slot="inner-end" />
+	{/snippet}
+	{#snippet innerEnd()}
+		<slot name="inner-end" />
+	{/snippet}
 </TokenInputCurrency>
 
 <style lang="scss">
 	:global(.token-input-currency.no-padding div.input-field input[id]) {
-		padding: 0;
+		padding: 0 0.75rem 0 0;
 	}
 </style>

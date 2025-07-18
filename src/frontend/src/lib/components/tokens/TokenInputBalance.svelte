@@ -1,13 +1,18 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import type { Balance } from '$lib/types/balance';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let token: Token;
-	export let balance: BigNumber | undefined = undefined;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		token: Token;
+		balance?: Balance;
+		testId?: string;
+	}
+
+	let { token, balance, testId }: Props = $props();
 </script>
 
 <div class="flex items-center" data-tid={testId}>
@@ -18,6 +23,6 @@
 			value: balance ?? ZERO,
 			unitName: token.decimals
 		})}
-		{token.symbol}
+		{getTokenDisplaySymbol(token)}
 	</div>
 </div>

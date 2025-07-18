@@ -1,56 +1,61 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import { ethereumToken } from '$eth/derived/token.derived';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ConvertAmountErrorType } from '$lib/types/convert';
+	import {
+		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+		type TokenActionValidationErrorsContext
+	} from '$lib/stores/token-action-validation-errors.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
-	import { validateConvertAmount } from '$lib/utils/convert.utils';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
 	export let sendAmount: OptionAmount = undefined;
 	export let totalFee: bigint | undefined;
 	export let minFee: bigint | undefined = undefined;
-	export let insufficientFunds: boolean;
-	export let insufficientFundsForFee: boolean;
+	export let ethereumEstimateFee: bigint | undefined = undefined;
 	export let exchangeValueUnit: DisplayUnit = 'usd';
 	export let inputUnit: DisplayUnit = 'token';
 
-	let errorType: ConvertAmountErrorType = undefined;
+	let errorType: TokenActionErrorType = undefined;
 
-	$: insufficientFunds = nonNullish(errorType) && errorType === 'insufficient-funds';
-	$: insufficientFundsForFee = nonNullish(errorType) && errorType === 'insufficient-funds-for-fee';
-
-	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate } =
+	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate, balanceForFee, minterInfo } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
-		validateConvertAmount({
+	const { setErrorType } = getContext<TokenActionValidationErrorsContext>(
+		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY
+	);
+
+	$: errorType, setErrorType(errorType);
+
+	const customValidate = (userAmount: bigint): TokenActionErrorType =>
+		validateUserAmount({
 			userAmount,
 			token: $sourceToken,
 			balance: $sourceTokenBalance,
-			ethBalance: $balancesStore?.[$ethereumToken.id]?.data ?? ZERO,
+			balanceForFee: $balanceForFee,
+			ethereumEstimateFee,
+			minterInfo: $minterInfo,
 			// If ETH, the balance should cover the user entered amount plus the min gas fee
 			// If other tokens - the balance plus total (max) fee
 			fee: isSupportedEthTokenId($sourceToken.id) ? minFee : totalFee
 		});
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
+	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === ZERO;
 
-	let maxAmount: number | undefined;
+	let maxAmount: string | undefined;
 	$: maxAmount = nonNullish(totalFee)
 		? getMaxTransactionAmount({
 				balance: $sourceTokenBalance,
-				fee: BigNumber.from(totalFee),
+				fee: totalFee,
 				tokenDecimals: $sourceToken.decimals,
 				tokenStandard: $sourceToken.standard
 			})
@@ -66,7 +71,7 @@
 	};
 
 	/**
-	 * Reevaluate max amount if user has used the "Max" button and totalFee is changing.
+	 * Reevaluate max amount if a user has used the "Max" button and totalFee is changing.
 	 */
 	const debounceSetMax = () => {
 		if (!amountSetToMax) {

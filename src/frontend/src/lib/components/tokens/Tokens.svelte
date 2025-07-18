@@ -1,24 +1,39 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
+	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
+	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
+	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	let { initialSearch, message } = $derived(
+		nonNullish($modalManageTokensData)
+			? $modalManageTokensData
+			: { initialSearch: undefined, message: undefined }
+	);
 </script>
 
 <div>
-	<Header>
-		{#if $testnetsEnabled}
-			<NetworksSwitcher />
-		{:else}
-			<h2 class="text-base">{$i18n.tokens.text.title}</h2>
-		{/if}
-
-		<TokensMenu slot="end" />
-	</Header>
+	<StickyHeader>
+		<div class="flex w-full justify-between">
+			<div class="grow-1 relative flex justify-between">
+				<TokensFilter>
+					{#snippet overflowableContent()}
+						<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+					{/snippet}
+				</TokensFilter>
+			</div>
+			<div class="flex">
+				<TokensMenu />
+			</div>
+		</div>
+	</StickyHeader>
 
 	<TokensList />
 
@@ -26,3 +41,15 @@
 		<ManageTokensButton />
 	</div>
 </div>
+
+{#if $modalManageTokens}
+	<ManageTokensModal {initialSearch}>
+		{#snippet infoElement()}
+			{#if nonNullish(message)}
+				<MessageBox level="info">
+					{message}
+				</MessageBox>
+			{/if}
+		{/snippet}
+	</ManageTokensModal>
+{/if}

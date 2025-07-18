@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
 		ckEthereumNativeToken,
@@ -14,25 +14,29 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { HOW_TO_CONVERT_ETHEREUM_INFO } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let formCancelAction: 'back' | 'close' = 'back';
+	interface Props {
+		formCancelAction?: 'back' | 'close';
+	}
 
-	let ckErc20 = false;
-	$: ckErc20 = $tokenCkErc20Ledger;
+	let { formCancelAction = 'back' }: Props = $props();
+
+	const { sourceTokenBalance, sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+
+	const ckErc20 = $derived($tokenCkErc20Ledger);
 
 	const dispatch = createEventDispatcher();
-
-	const { sendBalance, sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar testId={HOW_TO_CONVERT_ETHEREUM_INFO}>
 	<div>
 		<p>
 			{replacePlaceholders(
@@ -92,11 +96,11 @@
 			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 			on:click={() => dispatch('icQRCode')}
 		>
-			<svelte:fragment slot="title"
-				>{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
+			{#snippet title()}
+				{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
 					$token: $ckEthereumTwinToken.symbol
-				})}</svelte:fragment
-			>
+				})}
+			{/snippet}
 		</ReceiveAddress>
 
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
@@ -110,20 +114,22 @@
 
 		<div>
 			<Value element="div">
-				<svelte:fragment slot="label"
-					>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
+				{#snippet label()}
+					{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
 						$token: $ckEthereumTwinToken.symbol
-					})}</svelte:fragment
-				>
-
-				<p class="mb-6">
-					{formatToken({
-						value: $sendBalance ?? ZERO,
-						unitName: $sendTokenDecimals,
-						displayDecimals: $sendTokenDecimals
 					})}
-					{$sendToken.symbol}
-				</p>
+				{/snippet}
+
+				{#snippet content()}
+					<p class="mb-6">
+						{formatToken({
+							value: $sourceTokenBalance ?? ZERO,
+							unitName: $sourceToken.decimals,
+							displayDecimals: $sourceToken.decimals
+						})}
+						{$sourceToken.symbol}
+					</p>
+				{/snippet}
 			</Value>
 		</div>
 
@@ -136,30 +142,32 @@
 
 		<div>
 			<Value element="div">
-				<svelte:fragment slot="label"
-					>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
+				{#snippet label()}
+					{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
 						$token: $ckEthereumTwinToken.symbol,
 						$ckToken: $tokenWithFallback.symbol
-					})}</svelte:fragment
-				>
+					})}
+				{/snippet}
 
-				<Button
-					colorStyle="secondary"
-					fullWidth
-					styleClass="mb-4 mt-3"
-					on:click={() => dispatch('icConvert')}
-				>
-					<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
-				</Button>
+				{#snippet content()}
+					<Button
+						colorStyle="secondary"
+						fullWidth
+						styleClass="mb-4 mt-3"
+						onclick={() => dispatch('icConvert')}
+					>
+						<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
+					</Button>
+				{/snippet}
 			</Value>
 		</div>
 	</div>
 
-	<svelte:fragment slot="toolbar">
+	{#snippet toolbar()}
 		{#if formCancelAction === 'back'}
-			<ButtonBack fullWidth on:click={() => dispatch('icBack')} />
+			<ButtonBack fullWidth onclick={() => dispatch('icBack')} />
 		{:else}
-			<ButtonDone on:click={modalStore.close} />
+			<ButtonDone onclick={modalStore.close} />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </ContentWithToolbar>

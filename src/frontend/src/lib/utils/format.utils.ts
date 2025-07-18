@@ -1,14 +1,18 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import type { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
-import { nonNullish } from '@dfinity/utils';
-import { BigNumber, type BigNumberish } from '@ethersproject/bignumber';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
+import Decimal from 'decimal.js';
+import type { BigNumberish } from 'ethers/utils';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
+const MAX_DEFAULT_DISPLAY_DECIMALS = 8;
 
 interface FormatTokenParams {
-	value: BigNumber;
+	value: bigint;
 	unitName?: string | BigNumberish;
 	displayDecimals?: number;
 	trailingZeros?: boolean;
@@ -18,16 +22,29 @@ interface FormatTokenParams {
 export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
-	displayDecimals = DEFAULT_DISPLAY_DECIMALS,
+	displayDecimals,
 	trailingZeros = false,
 	showPlusSign = false
 }: FormatTokenParams): AmountString => {
 	const res = Utils.formatUnits(value, unitName);
-	const formatted = (+res).toLocaleString('en-US', {
-		useGrouping: false,
-		maximumFractionDigits: displayDecimals,
-		minimumFractionDigits: trailingZeros ? displayDecimals : undefined
-	}) as `${number}`;
+
+	const match = res.match(/^0\.0*/);
+	const leadingZeros = match ? match[0].length - 2 : 0;
+
+	if (isNullish(displayDecimals) && leadingZeros >= MAX_DEFAULT_DISPLAY_DECIMALS) {
+		return '< 0.00000001';
+	}
+
+	const maxFractionDigits = Math.min(leadingZeros + 2, MAX_DEFAULT_DISPLAY_DECIMALS);
+	const minFractionDigits = displayDecimals ?? DEFAULT_DISPLAY_DECIMALS;
+
+	const dec = new Decimal(res);
+	const maxDigits =
+		displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS);
+	const decDP = dec.toDecimalPlaces(maxDigits);
+	const minDigits = trailingZeros ? Math.max(minFractionDigits, maxDigits) : undefined;
+
+	const formatted = decDP.toFixed(minDigits) as `${number}`;
 
 	if (trailingZeros) {
 		return formatted;
@@ -36,18 +53,8 @@ export const formatToken = ({
 	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
 };
 
-export const formatTokenBigintToNumber = ({
-	value,
-	...restParams
-}: Omit<FormatTokenParams, 'value'> & {
-	value: bigint;
-}): number =>
-	Number(
-		formatToken({
-			value: BigNumber.from(value),
-			...restParams
-		})
-	);
+export const formatTokenBigintToNumber = (params: FormatTokenParams): number =>
+	Number(formatToken(params));
 
 /**
  * Shortens the text from the middle. Ex: "12345678901234567890" -> "1234567...5678901"
@@ -78,20 +85,38 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	hour12: false
 };
 
-export const formatSecondsToDate = (seconds: number): string => {
+export const formatSecondsToDate = ({
+	seconds,
+	language
+}: {
+	seconds: number;
+	language?: Languages;
+}): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
-export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
+export const formatNanosecondsToDate = ({
+	nanoseconds,
+	language
+}: {
+	nanoseconds: bigint;
+	language?: Languages;
+}): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
-	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
-export const formatToShortDateString = (date: Date): string =>
-	date.toLocaleDateString('en', { month: 'long' });
+export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
+	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
+	return date.getTime();
+};
 
-const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
+	date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, { month: 'long' });
+
+const getRelativeTimeFormatter = (language?: Languages) =>
+	new Intl.RelativeTimeFormat(language ?? Languages.ENGLISH, { numeric: 'auto' });
 
 /** Formats a number of seconds to a normalized date string.
  *
@@ -106,40 +131,49 @@ const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto
  */
 export const formatSecondsToNormalizedDate = ({
 	seconds,
-	currentDate
+	currentDate,
+	language
 }: {
 	seconds: number;
 	currentDate?: Date;
+	language?: Languages;
 }): string => {
 	const date = new Date(seconds * 1000);
 	const today = currentDate ?? new Date();
 
 	// TODO: add additional test suite for the below calculations
-	const dateOnlyDate = new Date(date.setHours(0, 0, 0, 0));
-	const dateOnlyToday = new Date(today.setHours(0, 0, 0, 0));
-	const daysDifference = Math.ceil(
-		(dateOnlyDate.getTime() - dateOnlyToday.getTime()) / MILLISECONDS_IN_DAY
-	);
+	const dateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+	const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+	const daysDifference = Math.ceil((dateUTC - todayUTC) / MILLISECONDS_IN_DAY);
 
 	if (Math.abs(daysDifference) < 2) {
 		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.
-		return relativeTimeFormatter.format(daysDifference, 'day');
+		return getRelativeTimeFormatter(language).format(daysDifference, 'day');
 	}
 
 	// Same year, return day and month name
 	if (date.getFullYear() === today.getFullYear()) {
-		return date.toLocaleDateString('en', { day: 'numeric', month: 'long' });
+		return date.toLocaleDateString(language ?? Languages.ENGLISH, {
+			day: 'numeric',
+			month: 'long'
+		});
 	}
 
 	// Different year, return day, month, and year
-	return date.toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' });
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric'
+	});
 };
 
-export const formatUSD = ({
+export const formatCurrency = ({
 	value,
+	currency,
 	options
 }: {
 	value: number;
+	currency: Currency;
 	options?: {
 		minFraction?: number;
 		maxFraction?: number;
@@ -147,15 +181,10 @@ export const formatUSD = ({
 		symbol?: boolean;
 	};
 }): string => {
-	const {
-		minFraction = 2,
-		maxFraction = 2,
-		maximumSignificantDigits,
-		symbol = true
-	} = options ?? {};
+	const { minFraction, maxFraction, maximumSignificantDigits, symbol = true } = options ?? {};
 
 	return new Intl.NumberFormat('en-US', {
-		...(symbol && { style: 'currency', currency: 'USD' }),
+		...(symbol && { style: 'currency', currency: currency.toUpperCase() }),
 		minimumFractionDigits: minFraction,
 		maximumFractionDigits: maxFraction,
 		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })

@@ -3,3 +3,4 @@ wrap_comments = true
 comment_width = 120
 imports_granularity = "Crate"
 group_imports = "StdExternalCrate"
+reorder_impl_items = true

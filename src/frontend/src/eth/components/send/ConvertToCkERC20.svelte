@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
+	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
@@ -32,15 +32,16 @@
 
 <ConvertETH
 	nativeTokenId={$ethereumTokenId}
-	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
 		$ckErc20: convertToSymbol
 	})}
 >
-	<IconCkConvert size="28" slot="icon" />
+	<IconCkConvert size="24" slot="icon" />
 	<span>{convertToSymbol}</span>
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckToken) && nonNullish($pageToken)}
-	<ConvertModal sourceToken={$pageToken} destinationToken={ckToken} />
+	<FeeStoreContext token={$ethereumToken}>
+		<ConvertModal sourceToken={$pageToken} destinationToken={ckToken} />
+	</FeeStoreContext>
 {/if}

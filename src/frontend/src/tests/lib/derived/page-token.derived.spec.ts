@@ -1,12 +1,19 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import {
+	BTC_MAINNET_TOKEN,
+	BTC_REGTEST_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import * as appConstants from '$lib/constants/app.constants';
 import { pageToken } from '$lib/derived/page-token.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -18,6 +25,7 @@ describe('page-token.derived', () => {
 		vi.resetAllMocks();
 		mockPage.reset();
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
 		vi.spyOn(enabledSplTokens, 'subscribe').mockImplementation((fn) => {
 			fn([{ ...JUP_TOKEN, enabled: true }]);
@@ -29,15 +37,38 @@ describe('page-token.derived', () => {
 		expect(get(pageToken)).toBeUndefined();
 	});
 
-	it.each([
-		['ICP token', ICP_TOKEN],
-		['BTC token', BTC_MAINNET_TOKEN],
-		['SOL token', SOLANA_TOKEN],
-		['ETH token', ETHEREUM_TOKEN],
-		['Sepolia token', SEPOLIA_TOKEN]
-		// eslint-disable-next-line local-rules/prefer-object-params
-	])('should find %s', (_, token) => {
+	it.each([ICP_TOKEN, BTC_MAINNET_TOKEN, SOLANA_TOKEN, ETHEREUM_TOKEN])(
+		'should find $name token',
+		(token) => {
+			mockPage.mock({ token: token.name, network: token.network.id.description });
+
+			expect(get(pageToken)).toBe(token);
+		}
+	);
+
+	it.each([BTC_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN, SEPOLIA_TOKEN])(
+		'should find $name token',
+		(token) => {
+			vi.spyOn(testnetsEnabled, 'subscribe').mockImplementation((fn) => {
+				fn(true);
+				return () => {};
+			});
+
+			mockPage.mock({ token: token.name, network: token.network.id.description });
+
+			expect(get(pageToken)).toBe(token);
+		}
+	);
+
+	it.each([BTC_REGTEST_TOKEN, SOLANA_LOCAL_TOKEN])('should find $name token', (token) => {
+		vi.spyOn(testnetsEnabled, 'subscribe').mockImplementation((fn) => {
+			fn(true);
+			return () => {};
+		});
+		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
+
 		mockPage.mock({ token: token.name, network: token.network.id.description });
+
 		expect(get(pageToken)).toBe(token);
 	});
 
@@ -66,6 +97,7 @@ describe('page-token.derived', () => {
 
 	it('should return undefined when token is not found in any list', () => {
 		mockPage.mock({ token: 'non-existent-token' });
+
 		expect(get(pageToken)).toBeUndefined();
 	});
 

@@ -1,13 +1,13 @@
 import { warnSignOut } from '$lib/services/auth.services';
-import { type AddressStore, type StorageAddressData } from '$lib/stores/address.store';
+import type { AddressStore, AddressStoreData } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Address } from '$lib/types/address';
 import { LoadIdbAddressError } from '$lib/types/errors';
-import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
+import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb-addresses';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { TokenId } from '$lib/types/token';
+import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { Principal } from '@dfinity/principal';
@@ -15,14 +15,14 @@ import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export interface LoadTokenAddressParams<T extends Address> {
-	tokenId: TokenId;
+	networkId: NetworkId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
 	setIdbAddress: ((params: SetIdbAddressParams<T>) => Promise<void>) | null;
 	addressStore: AddressStore<T>;
 }
 
 export const loadTokenAddress = async <T extends Address>({
-	tokenId,
+	networkId,
 	getAddress,
 	setIdbAddress,
 	addressStore
@@ -42,7 +42,7 @@ export const loadTokenAddress = async <T extends Address>({
 		toastsError({
 			msg: {
 				text: replacePlaceholders(get(i18n).init.error.loading_address, {
-					$symbol: tokenId.description ?? ''
+					$symbol: networkId.description ?? ''
 				})
 			},
 			err
@@ -79,12 +79,12 @@ const saveTokenAddressForFutureSignIn = async <T extends Address>({
 };
 
 export const loadIdbTokenAddress = async <T extends Address>({
-	tokenId,
+	networkId,
 	getIdbAddress,
 	updateIdbAddressLastUsage,
 	addressStore
 }: {
-	tokenId: TokenId;
+	networkId: NetworkId;
 	getIdbAddress: (principal: Principal) => Promise<IdbAddress<T> | undefined>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
 	addressStore: AddressStore<T>;
@@ -96,13 +96,13 @@ export const loadIdbTokenAddress = async <T extends Address>({
 		assertNonNullish(identity, 'Cannot continue without an identity.');
 
 		if (identity.getPrincipal().isAnonymous()) {
-			return { success: false, err: new LoadIdbAddressError(tokenId) };
+			return { success: false, err: new LoadIdbAddressError(networkId) };
 		}
 
 		const idbAddress = await getIdbAddress(identity.getPrincipal());
 
 		if (isNullish(idbAddress)) {
-			return { success: false, err: new LoadIdbAddressError(tokenId) };
+			return { success: false, err: new LoadIdbAddressError(networkId) };
 		}
 
 		const { address } = idbAddress;
@@ -112,23 +112,23 @@ export const loadIdbTokenAddress = async <T extends Address>({
 	} catch (_err: unknown) {
 		// We silence the error as the dapp will proceed with a standard lookup of the address.
 		console.error(
-			`Error encountered while searching for locally stored ${tokenId.description} public address in the browser.`
+			`Error encountered while searching for locally stored ${networkId.description} public address in the browser.`
 		);
 
-		return { success: false, err: new LoadIdbAddressError(tokenId) };
+		return { success: false, err: new LoadIdbAddressError(networkId) };
 	}
 
 	return { success: true };
 };
 
 export const certifyAddress = async <T extends Address>({
-	tokenId,
+	networkId,
 	address,
 	getAddress,
 	updateIdbAddressLastUsage,
 	addressStore
 }: {
-	tokenId: TokenId;
+	networkId: NetworkId;
 	address: T;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
@@ -148,7 +148,7 @@ export const certifyAddress = async <T extends Address>({
 		if (address.toLowerCase() !== certifiedAddress.toLowerCase()) {
 			return {
 				success: false,
-				err: `The address used to load the data did not match your actual ${tokenId.description} wallet address, which is why your session was ended. Please sign in again to reload your own data.`
+				err: `The address used to load the data did not match your actual ${networkId.description} wallet address, which is why your session was ended. Please sign in again to reload your own data.`
 			};
 		}
 
@@ -158,7 +158,7 @@ export const certifyAddress = async <T extends Address>({
 	} catch (_err: unknown) {
 		addressStore.reset();
 
-		return { success: false, err: `Error while loading the ${tokenId.description} address.` };
+		return { success: false, err: `Error while loading the ${networkId.description} address.` };
 	}
 
 	return { success: true };
@@ -168,7 +168,7 @@ export const validateAddress = async <T extends Address>({
 	$addressStore,
 	certifyAddress
 }: {
-	$addressStore: StorageAddressData<T>;
+	$addressStore: AddressStoreData<T>;
 	certifyAddress: (address: T) => Promise<ResultSuccess<string>>;
 }) => {
 	if (isNullish($addressStore)) {

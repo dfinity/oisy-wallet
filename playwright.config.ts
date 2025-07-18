@@ -1,3 +1,4 @@
+import { notEmptyString } from '@dfinity/utils';
 import { defineConfig, devices } from '@playwright/test';
 import dotenv, { type DotenvPopulateInput } from 'dotenv';
 import { join } from 'node:path';
@@ -18,7 +19,9 @@ dotenv.populate(
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 const MATRIX_OS = process.env.MATRIX_OS ?? '';
-const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
+const isMac = notEmptyString(MATRIX_OS)
+	? MATRIX_OS.includes('macos')
+	: process.platform === 'darwin';
 
 const appleProjects = [
 	{
@@ -26,11 +29,23 @@ const appleProjects = [
 		use: devices['Desktop Safari']
 	},
 	{
+		name: 'Google Chrome',
+		use: devices['Desktop Chrome']
+	},
+	{
 		name: 'iPhone SE',
 		use: {
 			...devices['iPhone SE'],
 			screen: { width: 375, height: 667 },
 			viewport: { width: 375, height: 667 }
+		}
+	},
+	{
+		name: 'iPad Pro 11',
+		use: {
+			...devices['iPad Pro 11'],
+			screen: { width: 633, height: 1194 },
+			viewport: { width: 633, height: 1194 }
 		}
 	}
 ];
@@ -59,13 +74,16 @@ const TIMEOUT = 5 * 60 * 1000;
 export default defineConfig({
 	retries: 3,
 	timeout: TIMEOUT,
-	workers: DEV ? 5 : 2,
+	workers: 5,
 	expect: {
 		toHaveScreenshot: {
-			// disable any animations caught by playwright for better screenshots and less flaky tests.
+			threshold: 0.3,
+			// disable any animations caught by playwright for better screenshots and less flaky tests
 			animations: 'disabled',
-			// hide caret for cleaner snapshots.
-			caret: 'hide'
+			// hide caret for cleaner snapshots
+			caret: 'hide',
+			// apply masks to hide flaky elements
+			stylePath: 'e2e/styles/masks.css'
 		}
 	},
 	webServer: {
@@ -76,6 +94,7 @@ export default defineConfig({
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
+	snapshotDir: 'e2e/snapshots',
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',

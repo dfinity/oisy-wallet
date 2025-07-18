@@ -2,9 +2,15 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
+import type { Balance } from '$lib/types/balance';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
+
+export interface SwapError {
+	variant: 'error' | 'warning' | 'info';
+	message: string;
+	url?: { url: string; text: string };
+}
 
 export interface SwapData {
 	sourceToken?: IcTokenToggleable;
@@ -55,7 +61,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
-		failedSwapError: writable<string | undefined>(undefined),
+		failedSwapError: writable<SwapError | undefined>(undefined),
 		setSourceToken: (token: IcTokenToggleable) =>
 			update((state) => ({
 				...state,
@@ -77,12 +83,12 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 export interface SwapContext {
 	sourceToken: Readable<IcTokenToggleable | undefined>;
 	destinationToken: Readable<IcTokenToggleable | undefined>;
-	sourceTokenBalance: Readable<BigNumber | undefined>;
-	destinationTokenBalance: Readable<BigNumber | undefined>;
+	sourceTokenBalance: Readable<Balance | undefined>;
+	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean>;
-	failedSwapError: Writable<string | undefined>;
+	failedSwapError: Writable<SwapError | undefined>;
 	setSourceToken: (token: IcTokenToggleable) => void;
 	setDestinationToken: (token: IcTokenToggleable) => void;
 	switchTokens: () => void;

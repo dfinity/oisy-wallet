@@ -19,8 +19,8 @@ import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import {
-	combinedDerivedSortedNetworkTokens,
-	combinedDerivedSortedNetworkTokensUi
+	combinedDerivedSortedFungibleNetworkTokens,
+	combinedDerivedSortedFungibleNetworkTokensUi
 } from '$lib/derived/network-tokens.derived';
 import {
 	networkAddress,
@@ -33,13 +33,11 @@ import {
 } from '$lib/derived/network.derived';
 import { networks, networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
-import { hideZeroBalances, showZeroBalances, testnetsEnabled } from '$lib/derived/settings.derived';
-import { testnets } from '$lib/derived/testnets.derived';
+import { hideZeroBalances, showZeroBalances } from '$lib/derived/settings.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import {
-	tokenDecimals,
 	tokenId,
 	tokenStandard,
-	tokenSymbol,
 	tokenToggleable,
 	tokenWithFallback
 } from '$lib/derived/token.derived';
@@ -65,8 +63,8 @@ const derivedList: Record<string, Readable<unknown>> = {
 	balanceZero,
 	btcAddressMainnet,
 	btcAddressTestnet,
-	combinedDerivedSortedNetworkTokens,
-	combinedDerivedSortedNetworkTokensUi,
+	combinedDerivedSortedFungibleNetworkTokens,
+	combinedDerivedSortedFungibleNetworkTokensUi,
 	enabledErc20Tokens,
 	enabledIcTokens,
 	enabledMainnetTokensUsdBalancesPerNetwork,
@@ -93,12 +91,9 @@ const derivedList: Record<string, Readable<unknown>> = {
 	routeToken,
 	selectedNetwork,
 	showZeroBalances,
-	testnets,
 	testnetsEnabled,
-	tokenDecimals,
 	tokenId,
 	tokenStandard,
-	tokenSymbol,
 	tokenToggleable,
 	tokenWithFallback,
 	tokenWithFallbackAsIcToken,
@@ -124,7 +119,7 @@ export const testDerivedUpdates = async (changeStore: () => void) => {
 
 	try {
 		// Initialization call
-		derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledTimes(1));
+		derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledOnce());
 
 		changeStore();
 

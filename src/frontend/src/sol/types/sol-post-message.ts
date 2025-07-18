@@ -1,5 +1,5 @@
 import type { SolPostMessageDataResponseWalletSchema } from '$sol/schema/sol-post-message.schema';
-import * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export type SolPostMessageDataResponseWallet = z.infer<
 	typeof SolPostMessageDataResponseWalletSchema

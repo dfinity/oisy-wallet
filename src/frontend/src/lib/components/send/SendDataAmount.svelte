@@ -1,39 +1,38 @@
 <script lang="ts">
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import { formatToken } from '$lib/utils/format.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let token: Token;
+	export let exchangeRate: number | undefined = undefined;
 	export let showNullishLabel = false;
 
-	let amountDisplay: string;
-	$: (() => {
-		try {
-			amountDisplay = formatToken({
-				value: parseToken({
-					value: `${amount ?? 0}`,
-					unitName: token.decimals
-				}),
-				unitName: token.decimals,
-				displayDecimals: token.decimals
-			});
-		} catch (_err: unknown) {
-			// Infinite amount e.g. 1.157920892373162e+59 will fail parsing
-			amountDisplay = `${amount ?? 0}`;
-		}
-	})();
+	let bigNumberAmount: bigint;
+	$: bigNumberAmount = parseToken({
+		value: `${amount ?? 0}`,
+		unitName: token.decimals
+	});
 </script>
 
 <Value ref="amount" element="div">
-	<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-	{#if showNullishLabel}
-		{$i18n.send.error.unable_to_retrieve_amount}
-	{:else}
-		{amountDisplay}
-		{token.symbol}
-	{/if}
+	{#snippet label()}
+		{$i18n.core.text.amount}
+	{/snippet}
+
+	{#snippet content()}
+		{#if showNullishLabel}
+			{$i18n.send.error.unable_to_retrieve_amount}
+		{:else}
+			<ExchangeAmountDisplay
+				amount={bigNumberAmount}
+				decimals={token.decimals}
+				symbol={token.symbol}
+				{exchangeRate}
+			/>
+		{/if}
+	{/snippet}
 </Value>

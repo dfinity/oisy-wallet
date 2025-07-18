@@ -5,7 +5,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import type { Transaction } from '@solana/transactions';
+import type { Transaction } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 describe('sol-sign.utils', () => {
@@ -66,6 +66,7 @@ describe('sol-sign.utils', () => {
 			const signatures = await signer.signTransactions(transactions);
 
 			expect(spySignWithSchnorr).toHaveBeenCalledTimes(transactions.length);
+
 			transactions.forEach((_, index) => {
 				expect(spySignWithSchnorr).toHaveBeenNthCalledWith(index + 1, {
 					identity: mockIdentity,
@@ -74,6 +75,7 @@ describe('sol-sign.utils', () => {
 					message: Array.from(mockTransaction.messageBytes)
 				});
 			});
+
 			expect(signatures).toEqual([
 				{ [mockSolAddress]: Uint8Array.from([4, 5, 6]) },
 				{ [mockSolAddress]: Uint8Array.from([7, 8, 9]) }

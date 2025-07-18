@@ -1,4 +1,4 @@
-import { type Command } from './runner';
+import type { Command } from './runner';
 
 interface LedgerTransferCommandParams {
 	amount: string;

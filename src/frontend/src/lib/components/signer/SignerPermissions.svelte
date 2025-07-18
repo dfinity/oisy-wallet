@@ -8,12 +8,13 @@
 		type PermissionsConfirmation
 	} from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type ComponentType, getContext } from 'svelte';
+	import { type Component, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
@@ -66,7 +67,7 @@
 
 	const onApprove = () => approvePermissions();
 
-	let listItems: Record<IcrcScopedMethod, { icon: ComponentType; label: string }>;
+	let listItems: Record<IcrcScopedMethod, { icon: Component; label: string }>;
 	$: listItems = {
 		icrc27_accounts: {
 			icon: IconWallet,
@@ -94,8 +95,8 @@
 			<p class="break-normal font-bold">{$i18n.signer.permissions.text.requested_permissions}</p>
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">
-				{#each scopes as scope}
-					{@const { icon, label } = listItems[scope.scope.method]}
+				{#each scopes as { scope: { method } } (method)}
+					{@const { icon, label } = listItems[method]}
 
 					<li class="flex items-center gap-2 break-normal pb-1.5">
 						<svelte:component this={icon} size="24" />
@@ -106,7 +107,7 @@
 		</div>
 
 		{#if requestAccountsPermissions}
-			<div class="mb-10 flex gap-4 rounded-lg border border-off-white bg-primary p-4">
+			<div class="mb-10 flex gap-4 rounded-lg border border-secondary-inverted bg-primary p-4">
 				<IconAstronautHelmet />
 
 				<div>
@@ -122,10 +123,12 @@
 		{/if}
 
 		<ButtonGroup>
-			<button type="button" class="error flex-1" on:click={onReject}
-				>{$i18n.core.text.reject}</button
-			>
-			<button type="submit" class="success flex-1">{$i18n.core.text.approve}</button>
+			<Button colorStyle="error" onclick={onReject}>
+				{$i18n.core.text.reject}
+			</Button>
+			<Button colorStyle="success" type="submit">
+				{$i18n.core.text.approve}
+			</Button>
 		</ButtonGroup>
 	</form>
 {/if}

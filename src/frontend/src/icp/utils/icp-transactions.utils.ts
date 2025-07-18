@@ -5,6 +5,7 @@ import type {
 	IcpTransaction
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
@@ -59,7 +60,7 @@ export const mapIcpTransaction = ({
 	const { operation, timestamp, transferToSelf } = transaction;
 
 	const tx: Pick<IcTransactionUi, 'timestamp' | 'id' | 'status' | 'txExplorerUrl'> = {
-		id,
+		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
 		timestamp: fromNullable(timestamp)?.timestamp_nanos,
 		status: 'executed',
 		txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${id}`
@@ -92,7 +93,7 @@ export const mapIcpTransaction = ({
 		incoming: boolean | undefined;
 		fee: Tokens;
 		amount: Tokens;
-	}): bigint => amount.e8s + (incoming === false ? fee.e8s : 0n);
+	}): bigint => amount.e8s + (incoming === false ? fee.e8s : ZERO);
 
 	if ('Approve' in operation) {
 		return {

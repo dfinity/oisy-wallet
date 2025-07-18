@@ -3,7 +3,7 @@
 import { config } from 'dotenv';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { ENV, findHtmlFiles, replaceEnv } from './build.utils.mjs';
+import { ENV, OISY_IC_DOMAIN, findHtmlFiles, replaceEnv } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
 
@@ -16,7 +16,7 @@ const parseMetadata = (targetFile) => {
 
 	const METADATA = {
 		...getMetadata(),
-		VITE_OISY_URL: process.env.VITE_OISY_URL
+		OISY_IC_DOMAIN
 	};
 
 	Object.entries(METADATA).forEach(
@@ -27,7 +27,7 @@ const parseMetadata = (targetFile) => {
 	content = replaceEnv({
 		content,
 		pattern: `https://oisy.com`,
-		value: process.env.VITE_OISY_URL
+		value: OISY_IC_DOMAIN
 	});
 
 	writeFileSync(targetFile, content);
@@ -39,7 +39,7 @@ const parseUrl = (filePath) => {
 	content = replaceEnv({
 		content,
 		pattern: `https://oisy.com`,
-		value: process.env.VITE_OISY_URL
+		value: OISY_IC_DOMAIN
 	});
 
 	writeFileSync(filePath, content);
@@ -52,8 +52,8 @@ const updateRobotsTxt = () => {
 
 	const content = `User-agent: *
 Allow: /
-Sitemap: ${process.env.VITE_OISY_URL}/sitemap.xml
-Host: ${process.env.VITE_OISY_URL}`;
+Sitemap: ${OISY_IC_DOMAIN}/sitemap.xml
+Host: ${OISY_IC_DOMAIN}`;
 
 	writeFileSync(join(process.cwd(), 'build', 'robots.txt'), content);
 };
@@ -63,7 +63,7 @@ const removeMetaRobots = (targetFile) => {
 		return;
 	}
 
-	let content = readFileSync(targetFile, 'utf8');
+	const content = readFileSync(targetFile, 'utf8');
 
 	const update = content.replace(/<meta\s+name="robots"\s+content="noindex"\s*\/>/, '');
 

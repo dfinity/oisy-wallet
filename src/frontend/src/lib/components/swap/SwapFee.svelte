@@ -1,16 +1,18 @@
 <script lang="ts">
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 
-	export let fee: number;
+	export let fee: number | string;
 	export let symbol: string;
-	export let label: string;
+	export let feeLabel: string;
 </script>
 
 <ModalValue>
-	<svelte:fragment slot="label">{label}</svelte:fragment>
+	{#snippet label()}
+		{feeLabel}
+	{/snippet}
 
-	<svelte:fragment slot="main-value">
+	{#snippet mainValue()}
 		{fee}
 		{symbol}
-	</svelte:fragment>
+	{/snippet}
 </ModalValue>

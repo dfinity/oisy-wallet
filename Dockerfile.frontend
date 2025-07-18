@@ -20,7 +20,13 @@ RUN npm --version
 
 FROM deps AS build_frontend
 
-COPY . .
+COPY package.json package-lock.json .
+RUN npm ci
+
+COPY .env.* *.js *.cjs *.mjs *.ts *.json .npmrc .nvmrc .
+COPY src/frontend/ src/frontend
+COPY src/declarations/ src/declarations
+COPY scripts/ scripts/
 
 ARG network="staging"
 ENV ENV=$network
@@ -31,6 +37,7 @@ RUN echo $DFX_NETWORK
 
 RUN npm ci
 RUN npm run build
+RUN scripts/build.frontend-report.sh > build/build-report.txt
 
 
 FROM scratch AS scratch_frontend

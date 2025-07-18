@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import type { ProposalTypes } from '@walletconnect/types';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
@@ -18,7 +18,7 @@
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let proposal: Option<Web3WalletTypes.SessionProposal>;
+	export let proposal: Option<WalletKitTypes.SessionProposal>;
 
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;
@@ -47,47 +47,47 @@
 
 {#if nonNullish(proposal) && nonNullish(params)}
 	<ContentWithToolbar>
-		<div class="stretch" in:fade>
-			<p class="mb-0 font-bold">
-				{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}
-			</p>
-			<p class="mb-0">{params.proposer.metadata.description}</p>
-			<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
-				>{params.proposer.metadata.url}</a
-			>
+		<p class="mb-0 font-bold">
+			{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}
+		</p>
+		<p class="mb-0">{params.proposer.metadata.description}</p>
+		<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
+			>{params.proposer.metadata.url}</a
+		>
 
-			<WalletConnectDomainVerification {proposal} />
+		<WalletConnectDomainVerification {proposal} />
 
-			{#each Object.entries(params.requiredNamespaces) as [key, value]}
-				{@const allMethods = value.methods}
-				{@const allEvents = value.events}
+		{#each Object.entries(params.requiredNamespaces) as [key, value] (key)}
+			{@const allMethods = value.methods}
+			{@const allEvents = value.events}
 
-				{#each value.chains ?? [] as chainId}
-					{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
+			{#each value.chains ?? [] as chainId (chainId)}
+				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
 
-					<p class="mt-6 font-bold">
-						{replacePlaceholders($i18n.wallet_connect.text.review, {
-							$chain_name: chainName,
-							$key: key
-						})}:
-					</p>
+				<p class="mt-6 font-bold">
+					{replacePlaceholders($i18n.wallet_connect.text.review, {
+						$chain_name: chainName,
+						$key: key
+					})}:
+				</p>
 
-					<article class="rounded-xs mt-4 bg-disabled p-4">
-						<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
+				<article class="rounded-xs mt-4 bg-disabled p-4">
+					<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
-						<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
+					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
 
-						<p class="mt-4 font-bold">{$i18n.wallet_connect.text.events}:</p>
+					<p class="mt-4 font-bold">{$i18n.wallet_connect.text.events}:</p>
 
-						<p>{allEvents.length ? allEvents.join(', ') : '-'}</p>
-					</article>
-				{/each}
+					<p>{allEvents.length ? allEvents.join(', ') : '-'}</p>
+				</article>
 			{/each}
-		</div>
+		{/each}
 
-		<div in:fade slot="toolbar">
-			<WalletConnectActions {approve} on:icApprove on:icReject />
-		</div>
+		{#snippet toolbar()}
+			<div in:fade>
+				<WalletConnectActions {approve} on:icApprove on:icReject />
+			</div>
+		{/snippet}
 	</ContentWithToolbar>
 {:else}
 	<ContentWithToolbar>
@@ -100,17 +100,17 @@
 			</div>
 		</div>
 
-		<svelte:fragment slot="toolbar">
+		{#snippet toolbar()}
 			{#if displayCancel}
 				<div in:fade>
 					<ButtonGroup>
 						<ButtonCancel
-							on:click={() => dispatch('icCancel')}
+							onclick={() => dispatch('icCancel')}
 							disabled={$isBusy || $ethAddressNotCertified}
 						/>
 					</ButtonGroup>
 				</div>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</ContentWithToolbar>
 {/if}

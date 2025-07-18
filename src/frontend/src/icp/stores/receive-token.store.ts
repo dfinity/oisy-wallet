@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
@@ -16,10 +16,7 @@ const initReceiveTokenStore = (token: IcToken): ReceiveTokenStore => {
 
 	return {
 		subscribe,
-
-		set(token) {
-			set(token);
-		}
+		set
 	};
 };
 

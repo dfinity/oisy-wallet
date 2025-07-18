@@ -1,24 +1,25 @@
+/* eslint-disable vitest/require-top-level-describe */
 import { runResolvedPromises } from '$tests/utils/timers.test-utils';
 
 type LogType = 'log' | 'debug' | 'warn' | 'error';
 
 const logTypes: LogType[] = ['log', 'debug', 'warn', 'error'];
 
-for (const logType of logTypes) {
-	replaceRealLogger(logType);
-}
-
 let gotLogs = false;
 let isLoggingAllowed = false;
 
-function replaceRealLogger(logType: LogType) {
+const replaceRealLogger = (logType: LogType) => {
 	// eslint-disable-next-line no-console
 	const realLogger = console[logType];
 	// eslint-disable-next-line no-console
-	console[logType] = function (...args) {
+	console[logType] = (...args) => {
 		gotLogs = true;
 		realLogger(...args);
 	};
+};
+
+for (const logType of logTypes) {
+	replaceRealLogger(logType);
 }
 
 export const failTestsThatLogToConsole = () => {
@@ -44,4 +45,13 @@ export const failTestsThatLogToConsole = () => {
 // Use this only when debugging.
 export const allowLoggingForDebugging = () => {
 	isLoggingAllowed = true;
+};
+
+export const disableConsoleLog = () => {
+	// eslint-disable-next-line vitest/no-duplicate-hooks,vitest/prefer-hooks-in-order
+	beforeEach(() => {
+		// We mock console just to avoid unnecessary logs while running the tests
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+	});
 };

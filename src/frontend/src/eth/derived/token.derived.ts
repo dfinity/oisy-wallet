@@ -9,9 +9,10 @@ import { derived, type Readable } from 'svelte/store';
  */
 export const ethereumToken: Readable<RequiredTokenWithLinkedData> = derived(
 	[enabledEthereumTokens, selectedEthereumNetwork],
-	([$enabledEthereumTokens, { id }]) =>
-		$enabledEthereumTokens.find(({ network: { id: networkId } }) => id === networkId) ??
-		DEFAULT_ETHEREUM_TOKEN
+	([$enabledEthereumTokens, $selectedEthereumNetwork]) =>
+		$enabledEthereumTokens.find(
+			({ network: { id: networkId } }) => $selectedEthereumNetwork?.id === networkId
+		) ?? DEFAULT_ETHEREUM_TOKEN
 );
 
 export const ethereumTokenId: Readable<TokenId> = derived([ethereumToken], ([{ id }]) => id);

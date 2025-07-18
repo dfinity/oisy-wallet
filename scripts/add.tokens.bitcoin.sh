@@ -41,12 +41,12 @@ done
 
 if [ -n "$amount" ] && [ -n "$address" ]; then
   # Reference: https://internetcomputer.org/docs/current/developer-docs/multi-chain/bitcoin/using-btc/local-development
-  ./$BITCOIN_DIR/bin/bitcoin-cli -conf=$(pwd)/$BITCOIN_DIR/bitcoin.conf generatetoaddress $amount $address
+  ./$BITCOIN_DIR/bin/bitcoin-cli -conf="$(pwd)/$BITCOIN_DIR/bitcoin.conf" generatetoaddress "$amount" "$address"
   # One caveat of the previous block rewards is that they are subject to the Coinbase maturity rule
   # which states that, in order for you to spend them, you will first need to mine 100 additional blocks.
   # Therefore, we will generate 100 blocks to a random address.
-  ./$BITCOIN_DIR/bin/bitcoin-cli -conf=$(pwd)/$BITCOIN_DIR/bitcoin.conf generatetoaddress 100 mtbZzVBwLnDmhH4pE9QynWAgh6H3aC1E6M
+  ./$BITCOIN_DIR/bin/bitcoin-cli -conf="$(pwd)/$BITCOIN_DIR/bitcoin.conf" generatetoaddress 100 mtbZzVBwLnDmhH4pE9QynWAgh6H3aC1E6M
 else
   # Step necessary after making a transaction so that it becomes part of the blockchain
-  ./$BITCOIN_DIR/bin/bitcoin-cli -conf=$(pwd)/$BITCOIN_DIR/bitcoin.conf generatetoaddress 1 mtbZzVBwLnDmhH4pE9QynWAgh6H3aC1E6M
+  ./$BITCOIN_DIR/bin/bitcoin-cli -conf="$(pwd)/$BITCOIN_DIR/bitcoin.conf" generatetoaddress 1 mtbZzVBwLnDmhH4pE9QynWAgh6H3aC1E6M
 fi

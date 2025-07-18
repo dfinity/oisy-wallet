@@ -1,32 +1,49 @@
-import { ICP_NETWORK } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
 import * as tokensDerived from '$eth/derived/token.derived';
 import * as sendServices from '$eth/services/send.services';
-import type { FeeStoreData } from '$eth/stores/fee.store';
-import * as feeStores from '$eth/stores/fee.store';
+import {
+	ETH_FEE_CONTEXT_KEY,
+	initEthFeeContext,
+	initEthFeeStore,
+	type EthFeeContext,
+	type FeeStoreData
+} from '$eth/stores/eth-fee.store';
 import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
+import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import * as ckEthStores from '$icp-eth/stores/cketh.store';
-import { type CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
-import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
+import {
+	CONVERT_CONTEXT_KEY,
+	initConvertContext,
+	type ConvertContext
+} from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
+import type { OptionEthAddress } from '$lib/types/address';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import type { MinterInfo } from '@dfinity/cketh';
-import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
+import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
-import { expect, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
@@ -36,57 +53,39 @@ vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
 }));
 
-vi.mock('@ethersproject/providers', () => {
-	const provider = vi.fn();
-	provider.prototype.getFeeData = vi.fn().mockResolvedValue({
-		lastBaseFeePerGas: null,
-		maxFeePerGas: null,
-		maxPriorityFeePerGas: null,
-		gasPrice: null
-	});
-	return { InfuraProvider: provider, JsonRpcProvider: provider };
-});
-
 describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
-	const mockContext = () =>
-		new Map([
+	const mockContext = (fees?: FeeStoreData) => {
+		const feeStore = initEthFeeStore();
+
+		if (nonNullish(fees)) {
+			feeStore.setFee(fees);
+		}
+
+		return new Map<symbol, ConvertContext | TokenActionValidationErrorsContext | EthFeeContext>([
 			[
 				CONVERT_CONTEXT_KEY,
-				{
-					sourceToken: readable(ETHEREUM_TOKEN),
-					destinationToken: readable(SEPOLIA_TOKEN)
-				}
-			]
+				initConvertContext({ sourceToken: ETHEREUM_TOKEN, destinationToken: SEPOLIA_TOKEN })
+			],
+			[
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
+					feeStore,
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeExchangeRateStore: writable(100),
+					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+				})
+			],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
-	const mockMinterInfo = {
-		deposit_with_subaccount_helper_contract_address: toNullable(''),
-		eth_balance: toNullable(100n),
-		eth_helper_contract_address: toNullable(''),
-		last_observed_block_number: toNullable(100n),
-		evm_rpc_id: toNullable(mockPrincipal),
-		erc20_helper_contract_address: toNullable(''),
-		last_erc20_scraped_block_number: toNullable(100n),
-		supported_ckerc20_tokens: toNullable([]),
-		last_gas_fee_estimate: toNullable({
-			max_priority_fee_per_gas: 100n,
-			max_fee_per_gas: 100n,
-			timestamp: 100n
-		}),
-		cketh_ledger_id: toNullable(mockPrincipal),
-		smart_contract_address: toNullable(''),
-		last_eth_scraped_block_number: toNullable(100n),
-		minimum_withdrawal_amount: toNullable(100n),
-		erc20_balances: toNullable([]),
-		minter_address: toNullable(''),
-		last_deposit_with_subaccount_scraped_block_number: toNullable(100n),
-		ethereum_block_height: toNullable({ Safe: null })
 	};
+	const mockMinterInfo = mockCkMinterInfo;
 	const mockFees = {
-		gas: BigNumber.from(100n),
-		maxFeePerGas: BigNumber.from(100n),
-		maxPriorityFeePerGas: BigNumber.from(100n)
+		gas: 100n,
+		maxFeePerGas: 100n,
+		maxPriorityFeePerGas: 100n
 	};
 	const props = {
 		currentStep: {
@@ -94,18 +93,18 @@ describe('EthConvertTokenWizard', () => {
 			title: 'title'
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
-		sendAmount: sendAmount,
+		sendAmount,
 		receiveAmount: sendAmount
 	};
+
 	let sendSpy: MockInstance;
-	const mockSendServices = () =>
-		vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: transactionId });
+
 	const mockCkEthMinterInfoStore = (minterInfo?: MinterInfo) => {
 		const store = initCertifiedSetterStore<CkEthMinterInfoData>();
 
 		if (nonNullish(minterInfo)) {
 			store.set({
-				tokenId: ETHEREUM_TOKEN.id,
+				id: ETHEREUM_TOKEN.id,
 				data: {
 					certified: true,
 					data: minterInfo
@@ -116,28 +115,27 @@ describe('EthConvertTokenWizard', () => {
 		vi.spyOn(ckEthStores, 'ckEthMinterInfoStore', 'get').mockImplementation(() => store);
 		return store;
 	};
-	const mockEthAddressStore = (address = mockEthAddress) => {
+
+	const mockEthAddressStore = (address: OptionEthAddress = mockEthAddress) => {
+		if (isNullish(address)) {
+			ethAddressStore.reset();
+			return;
+		}
+
 		ethAddressStore.set({
 			certified: true,
 			data: address
 		});
 	};
-	const mockFeeStore = (fees?: FeeStoreData) => {
-		const store = writable<FeeStoreData>(undefined);
-		store.set(fees);
 
-		vi.spyOn(feeStores, 'initFeeStore').mockImplementation(() => ({
-			...store,
-			setFee: store.set
-		}));
-		return store;
-	};
-	const mockCkEthHelperContractAddress = (address = mockEthAddress) =>
+	const mockCkEthHelperContractAddress = (address: OptionEthAddress = mockEthAddress) =>
 		vi
 			.spyOn(ckEthDerived, 'ckEthHelperContractAddress', 'get')
 			.mockImplementation(() => readable(address));
+
 	const mockEthereumToken = (token = ETHEREUM_TOKEN) =>
 		vi.spyOn(tokensDerived, 'ethereumToken', 'get').mockImplementation(() => readable(token));
+
 	const clickConvertButton = async (container: HTMLElement) => {
 		const convertButtonSelector = '[data-tid="convert-review-button-next"]';
 		const button: HTMLButtonElement | null = container.querySelector(convertButtonSelector);
@@ -146,29 +144,40 @@ describe('EthConvertTokenWizard', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
+		InfuraProvider.prototype.getFeeData = vi.fn().mockResolvedValue({
+			lastBaseFeePerGas: null,
+			maxFeePerGas: null,
+			maxPriorityFeePerGas: null,
+			gasPrice: null
+		});
+
 		mockPage.reset();
-		vi.resetAllMocks();
+		mockPage.mock({ network: ETHEREUM_NETWORK_ID.description });
+
 		ethAddressStore.reset();
 
+		mockAuthStore();
 		mockEthereumToken();
-		sendSpy = mockSendServices();
+		mockEthAddressStore();
+		mockCkEthMinterInfoStore(mockMinterInfo);
+		mockCkEthHelperContractAddress();
+
+		sendSpy = vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: transactionId });
 	});
 
 	it('should call send if all requirements are met', async () => {
 		const ckEthMinterInfoStore = mockCkEthMinterInfoStore(mockMinterInfo);
-		mockAuthStore();
-		mockEthAddressStore();
-		mockCkEthHelperContractAddress();
-		const feeStore = mockFeeStore(mockFees);
 
 		const { container } = render(EthConvertTokenWizard, {
 			props,
-			context: mockContext()
+			context: mockContext(mockFees)
 		});
 
 		await clickConvertButton(container);
 
-		const args = sendSpy.mock.calls[0][0];
+		const [[args]] = sendSpy.mock.calls;
 
 		expect(sendSpy).toHaveBeenCalledOnce();
 		expect(stringifyJson({ value: args })).toBe(
@@ -182,9 +191,9 @@ describe('EthConvertTokenWizard', () => {
 						value: `${sendAmount}`,
 						unitName: ETHEREUM_TOKEN.decimals
 					}),
-					maxFeePerGas: get(feeStore)?.maxFeePerGas,
-					maxPriorityFeePerGas: get(feeStore)?.maxPriorityFeePerGas,
-					gas: get(feeStore)?.gas,
+					maxFeePerGas: mockFees.maxFeePerGas,
+					maxPriorityFeePerGas: mockFees.maxPriorityFeePerGas,
+					gas: mockFees.gas,
 					sourceNetwork: DEFAULT_ETHEREUM_NETWORK,
 					targetNetwork: ICP_NETWORK,
 					identity: mockIdentity,
@@ -195,10 +204,7 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if authIdentity is not defined', async () => {
-		mockCkEthMinterInfoStore(mockMinterInfo);
-		mockEthAddressStore();
-		mockCkEthHelperContractAddress();
-		mockFeeStore(mockFees);
+		mockAuthStore(null);
 
 		const { container } = render(EthConvertTokenWizard, {
 			props,
@@ -211,13 +217,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if sendAmount is not defined', async () => {
-		mockCkEthMinterInfoStore(mockMinterInfo);
-		mockEthAddressStore();
-		mockCkEthHelperContractAddress();
-		mockEthereumToken();
-		mockAuthStore();
-		mockFeeStore(mockFees);
-
 		const { container } = render(EthConvertTokenWizard, {
 			props: {
 				...props,
@@ -232,12 +231,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if sendAmount is invalid', async () => {
-		mockCkEthMinterInfoStore(mockMinterInfo);
-		mockEthAddressStore();
-		mockCkEthHelperContractAddress();
-		mockAuthStore();
-		mockFeeStore(mockFees);
-
 		const { container } = render(EthConvertTokenWizard, {
 			props: {
 				...props,
@@ -252,12 +245,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if feeStore is undefined', async () => {
-		mockCkEthMinterInfoStore(mockMinterInfo);
-		mockEthAddressStore();
-		mockCkEthHelperContractAddress();
-		mockAuthStore();
-		mockFeeStore(undefined);
-
 		const { container } = render(EthConvertTokenWizard, {
 			props,
 			context: mockContext()
@@ -270,10 +257,6 @@ describe('EthConvertTokenWizard', () => {
 
 	it('should not call send if minter info assertion failed', async () => {
 		mockCkEthMinterInfoStore(undefined);
-		mockEthAddressStore();
-		mockCkEthHelperContractAddress();
-		mockAuthStore();
-		mockFeeStore(mockFees);
 
 		const { container } = render(EthConvertTokenWizard, {
 			props,
@@ -286,16 +269,9 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if maxFeePerGas is null', async () => {
-		mockCkEthMinterInfoStore(mockMinterInfo);
-		mockEthAddressStore();
-		mockCkEthHelperContractAddress();
-		mockEthereumToken();
-		mockAuthStore();
-		mockFeeStore({ ...mockFees, maxFeePerGas: null });
-
 		const { container } = render(EthConvertTokenWizard, {
 			props,
-			context: mockContext()
+			context: mockContext({ ...mockFees, maxFeePerGas: null })
 		});
 
 		await clickConvertButton(container);
@@ -303,16 +279,10 @@ describe('EthConvertTokenWizard', () => {
 		expect(sendSpy).not.toHaveBeenCalled();
 	});
 
-	it('should not call send if maxFeePerGas is null', async () => {
-		mockCkEthMinterInfoStore(mockMinterInfo);
-		mockEthAddressStore();
-		mockCkEthHelperContractAddress();
-		mockAuthStore();
-		mockFeeStore({ ...mockFees, maxPriorityFeePerGas: null });
-
+	it('should not call send if maxPriorityFeePerGas is null', async () => {
 		const { container } = render(EthConvertTokenWizard, {
 			props,
-			context: mockContext()
+			context: mockContext({ ...mockFees, maxPriorityFeePerGas: null })
 		});
 
 		await clickConvertButton(container);
@@ -321,10 +291,7 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if ethAddress is not defined', async () => {
-		mockCkEthMinterInfoStore(mockMinterInfo);
-		mockCkEthHelperContractAddress();
-		mockAuthStore();
-		mockFeeStore(mockFees);
+		mockEthAddressStore(null);
 
 		const { container } = render(EthConvertTokenWizard, {
 			props,
@@ -337,10 +304,7 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if ckEthHelperContractAddress is not defined', async () => {
-		mockCkEthMinterInfoStore(mockMinterInfo);
-		mockEthAddressStore();
-		mockAuthStore();
-		mockFeeStore(mockFees);
+		mockCkEthHelperContractAddress(null);
 
 		const { container } = render(EthConvertTokenWizard, {
 			props,
@@ -353,8 +317,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should render convert form if currentStep is CONVERT', () => {
-		mockFeeStore(mockFees);
-
 		const { getByTestId } = render(EthConvertTokenWizard, {
 			props: {
 				...props,
@@ -370,8 +332,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should render convert progress if currentStep is CONVERTING', () => {
-		mockFeeStore(mockFees);
-
 		const { container } = render(EthConvertTokenWizard, {
 			props: {
 				...props,

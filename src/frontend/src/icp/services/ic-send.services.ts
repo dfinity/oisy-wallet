@@ -7,6 +7,7 @@ import {
 	transfer as transferIcp
 } from '$icp/api/icp-ledger.api';
 import { transfer as transferIcrc } from '$icp/api/icrc-ledger.api';
+import { transfer as transferDip20 } from '$icp/api/xtc-ledger.api';
 import {
 	convertCkBTCToBtc,
 	convertCkETHToEth,
@@ -15,6 +16,7 @@ import {
 import type { IcTransferParams } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
+import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
@@ -24,6 +26,7 @@ import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
+import { Principal } from '@dfinity/principal';
 import { get } from 'svelte/store';
 
 export const sendIc = async ({
@@ -32,15 +35,15 @@ export const sendIc = async ({
 	...rest
 }: IcTransferParams & {
 	token: IcToken;
-	targetNetworkId: NetworkId | undefined;
-	sendCompleted: () => Promise<void>;
+	targetNetworkId?: NetworkId;
+	sendCompleted: () => void;
 }): Promise<void> => {
 	await send({
 		progress,
 		...rest
 	});
 
-	await sendCompleted();
+	sendCompleted();
 
 	progress(ProgressStepsSendIc.RELOAD);
 
@@ -53,7 +56,7 @@ const send = async ({
 	...rest
 }: IcTransferParams & {
 	token: IcToken;
-	targetNetworkId: NetworkId | undefined;
+	targetNetworkId?: NetworkId;
 }): Promise<void> => {
 	if (isNetworkIdBitcoin(targetNetworkId)) {
 		await convertCkBTCToBtc({
@@ -79,10 +82,18 @@ const send = async ({
 		return;
 	}
 
-	const { standard, ledgerCanisterId } = token;
+	const { ledgerCanisterId } = token;
 
-	if (standard === 'icrc') {
+	if (isTokenIcrc(token)) {
 		await sendIcrc({
+			...rest,
+			ledgerCanisterId
+		});
+		return;
+	}
+
+	if (isTokenDip20(token)) {
+		await sendDip20({
 			...rest,
 			ledgerCanisterId
 		});
@@ -115,7 +126,7 @@ export const sendIcrc = ({
 		identity,
 		ledgerCanisterId,
 		to: decodeIcrcAccount(to),
-		amount: amount.toBigInt()
+		amount
 	});
 };
 
@@ -139,11 +150,36 @@ export const sendIcp = ({
 		? icrc1TransferIcp({
 				identity,
 				to: decodeIcrcAccount(to),
-				amount: amount.toBigInt()
+				amount
 			})
 		: transferIcp({
 				identity,
 				to,
-				amount: amount.toBigInt()
+				amount
 			});
+};
+
+export const sendDip20 = ({
+	to,
+	amount,
+	identity,
+	ledgerCanisterId,
+	progress
+}: PartialSpecific<IcTransferParams, 'progress'> &
+	Pick<IcToken, 'ledgerCanisterId'>): Promise<bigint> => {
+	const validIcrcAddress = !invalidIcrcAddress(to);
+
+	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
+	if (!validIcrcAddress) {
+		throw new Error(get(i18n).send.error.invalid_destination);
+	}
+
+	progress?.(ProgressStepsSendIc.SEND);
+
+	return transferDip20({
+		identity,
+		canisterId: ledgerCanisterId,
+		to: Principal.fromText(to),
+		amount
+	});
 };

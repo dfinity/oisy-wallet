@@ -18,19 +18,7 @@ KYTID="$(dfx canister id ckbtc_kyt --network "$DFX_NETWORK")"
 echo "$KYTID"
 
 echo "Step 2: deploy minter canister..."
-dfx deploy ckbtc_minter --specified-id ml52i-qqaaa-aaaar-qaaba-cai --network "$DFX_NETWORK" --argument "(variant {
-  Init = record {
-       btc_network = variant { Regtest };
-       ledger_id = principal \"$LEDGERID\";
-       ecdsa_key_name = \"dfx_test_key\";
-       retrieve_btc_min_amount = 10_000;
-       max_time_in_queue_nanos = 420_000_000_000;
-       min_confirmations = opt 12;
-       mode = variant { GeneralAvailability };
-       kyt_fee = opt 1_333;
-       kyt_principal = opt principal \"$KYTID\";
-   }
-})"
+dfx deploy ckbtc_minter --network "$DFX_NETWORK"
 
 echo "Step 3: deploy ledger canister..."
 PRINCIPAL="$(dfx identity get-principal)"
@@ -55,20 +43,10 @@ dfx deploy ckbtc_ledger --specified-id mc6ru-gyaaa-aaaar-qaaaq-cai --network "$D
 })"
 
 echo "Step 4: deploy kyt canister..."
-dfx deploy ckbtc_kyt --specified-id pvm5g-xaaaa-aaaar-qaaia-cai --network "$DFX_NETWORK" --argument "(variant {
-  InitArg = record {
-    minter_id = principal \"$MINTERID\";
-    maintainers = vec {};
-    mode = variant { AcceptAll };
-   }
-})"
+dfx deploy ckbtc_kyt --network "$DFX_NETWORK"
 
 echo "Step 5: deploy index canister..."
-dfx deploy ckbtc_index --specified-id mm444-5iaaa-aaaar-qaabq-cai --network "$DFX_NETWORK" --argument "(opt variant {
-  Init = record {
-    ledger_id = principal \"$LEDGERID\";
-   }
-})"
+dfx deploy ckbtc_index --network "$DFX_NETWORK"
 
 # Example to mint ckBTC
 

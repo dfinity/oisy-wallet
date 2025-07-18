@@ -15,15 +15,13 @@ import { get } from 'svelte/store';
 export const convertCkBTCToBtc = async ({
 	token: { ledgerCanisterId, minterCanisterId },
 	progress,
-	amount: amountBigNumber,
+	amount,
 	identity,
 	to
 }: IcTransferParams & {
 	token: IcCkToken;
 }): Promise<void> => {
 	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_ckbtc_btc);
-
-	const amount = amountBigNumber.toBigInt();
 
 	await approveTransfer({
 		canisters: { ledgerCanisterId, minterCanisterId },
@@ -53,7 +51,7 @@ export const convertCkErc20ToErc20 = async ({
 	progress,
 	identity,
 	to,
-	amount: amountBigNumber,
+	amount,
 	ckErc20ToErc20MaxCkEthFees
 }: IcTransferParams & {
 	token: IcCkToken;
@@ -85,8 +83,6 @@ export const convertCkErc20ToErc20 = async ({
 
 	// 2. Approve amount on ckErc20 Ledger for minter
 
-	const amount = amountBigNumber.toBigInt();
-
 	await approveTransfer({
 		canisters: { ledgerCanisterId, minterCanisterId },
 		identity,
@@ -111,15 +107,13 @@ export const convertCkErc20ToErc20 = async ({
 export const convertCkETHToEth = async ({
 	token: { ledgerCanisterId, minterCanisterId },
 	progress,
-	amount: amountBigNumber,
+	amount,
 	identity,
 	to
 }: IcTransferParams & {
 	token: IcCkToken;
 }): Promise<void> => {
 	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_cketh_eth);
-
-	const amount = amountBigNumber.toBigInt();
 
 	await approveTransfer({
 		canisters: { ledgerCanisterId, minterCanisterId },
@@ -145,7 +139,10 @@ const approveTransfer = ({
 	progressStep = ProgressStepsSendIc.APPROVE_TRANSFER,
 	amount,
 	identity
-}: Omit<IcTransferParams, 'amount'> & { amount: bigint; progressStep?: ProgressStepsSendIc } & {
+}: Omit<IcTransferParams, 'amount'> & {
+	amount: bigint;
+	progressStep?: ProgressStepsSendIc;
+} & {
 	canisters: Pick<IcCanisters, 'ledgerCanisterId'> & IcCkMetadata;
 }): Promise<IcrcBlockIndex> => {
 	progress(progressStep);

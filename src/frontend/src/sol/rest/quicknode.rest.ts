@@ -1,14 +1,13 @@
 import {
 	QUICKNODE_API_KEY,
 	QUICKNODE_API_URL_DEVNET,
-	QUICKNODE_API_URL_MAINNET,
-	QUICKNODE_API_URL_TESTNET
+	QUICKNODE_API_URL_MAINNET
 } from '$env/rest/quicknode.env';
 import type { TokenMetadata } from '$lib/types/token';
 import type { UrlSchema } from '$lib/validation/url.validation';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { z } from 'zod';
+import type { z } from 'zod/v4';
 
 interface QuicknodeApiError {
 	error: {
@@ -68,12 +67,7 @@ const fetchQuicknodeApi = async <T>({
 	body?: Record<string, unknown>;
 	network?: SolanaNetworkType;
 }): Promise<T | QuicknodeApiError> => {
-	const API_URL =
-		network === 'devnet'
-			? QUICKNODE_API_URL_DEVNET
-			: network === 'testnet'
-				? QUICKNODE_API_URL_TESTNET
-				: QUICKNODE_API_URL_MAINNET;
+	const API_URL = network === 'devnet' ? QUICKNODE_API_URL_DEVNET : QUICKNODE_API_URL_MAINNET;
 
 	const response = await fetch(`${API_URL}${QUICKNODE_API_KEY}`, {
 		method: 'POST',

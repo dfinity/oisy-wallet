@@ -5,8 +5,7 @@ import {
 	ethAddressStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore,
-	solAddressTestnetStore
+	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import type {
 	BtcAddress,
@@ -20,9 +19,39 @@ import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
+export const btcAddressMainnetNotLoaded: Readable<boolean> = derived(
+	[btcAddressMainnetStore],
+	([$btcAddressMainnetStore]) => isNullish($btcAddressMainnetStore)
+);
+
+export const btcAddressTestnetNotLoaded: Readable<boolean> = derived(
+	[btcAddressTestnetStore],
+	([$btcAddressTestnetStore]) => isNullish($btcAddressTestnetStore)
+);
+
+export const btcAddressRegtestNotLoaded: Readable<boolean> = derived(
+	[btcAddressRegtestStore],
+	([$btcAddressRegtestStore]) => isNullish($btcAddressRegtestStore)
+);
+
 export const ethAddressNotLoaded: Readable<boolean> = derived(
 	[ethAddressStore],
 	([$ethAddressStore]) => isNullish($ethAddressStore)
+);
+
+export const solAddressMainnetNotLoaded: Readable<boolean> = derived(
+	[solAddressMainnetStore],
+	([$solAddressMainnetStore]) => isNullish($solAddressMainnetStore)
+);
+
+export const solAddressDevnetNotLoaded: Readable<boolean> = derived(
+	[solAddressDevnetStore],
+	([$solAddressDevnetStore]) => isNullish($solAddressDevnetStore)
+);
+
+export const solAddressLocalnetNotLoaded: Readable<boolean> = derived(
+	[solAddressLocalnetStore],
+	([$solAddressLocalnetStore]) => isNullish($solAddressLocalnetStore)
 );
 
 export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
@@ -58,11 +87,6 @@ export const ethAddressNotCertified: Readable<boolean> = derived(
 export const solAddressMainnet: Readable<OptionSolAddress> = derived(
 	[solAddressMainnetStore],
 	([$solAddressMainnetStore]) => mapAddress<SolAddress>($solAddressMainnetStore)
-);
-
-export const solAddressTestnet: Readable<OptionSolAddress> = derived(
-	[solAddressTestnetStore],
-	([$solAddressTestnetStore]) => mapAddress<SolAddress>($solAddressTestnetStore)
 );
 
 export const solAddressDevnet: Readable<OptionSolAddress> = derived(

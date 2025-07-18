@@ -10,6 +10,7 @@
 	export let placeholder = '0';
 	export let error = false;
 	export let loading = false;
+	export let autofocus = false;
 </script>
 
 <TokenInputCurrency
@@ -20,10 +21,13 @@
 	{placeholder}
 	{disabled}
 	{decimals}
+	{autofocus}
+	testId={TOKEN_INPUT_CURRENCY_TOKEN}
 	on:focus
 	on:blur
-	testId={TOKEN_INPUT_CURRENCY_TOKEN}
 	on:nnsInput
 >
-	<slot name="inner-end" slot="inner-end" />
+	{#snippet innerEnd()}
+		<slot name="inner-end" />
+	{/snippet}
 </TokenInputCurrency>

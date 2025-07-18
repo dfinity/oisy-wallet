@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getSdkError } from '@walletconnect/utils';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onDestroy } from 'svelte';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
@@ -19,6 +19,7 @@
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
@@ -36,20 +37,25 @@
 
 	export let listener: OptionWalletConnectListener;
 
-	const STEP_CONNECT: WizardStep = {
-		name: 'Connect',
+	const modalId = Symbol();
+
+	const signModalId = Symbol();
+	const sendModalId = Symbol();
+
+	const STEP_CONNECT: WizardStep<WizardStepsWalletConnect> = {
+		name: WizardStepsWalletConnect.CONNECT,
 		title: $i18n.wallet_connect.text.name
 	};
 
-	const STEP_REVIEW: WizardStep = {
-		name: 'Review',
+	const STEP_REVIEW: WizardStep<WizardStepsWalletConnect> = {
+		name: WizardStepsWalletConnect.REVIEW,
 		title: $i18n.wallet_connect.text.session_proposal
 	};
 
-	let steps: WizardSteps = [STEP_CONNECT, STEP_REVIEW];
+	let steps: WizardSteps<WizardStepsWalletConnect> = [STEP_CONNECT, STEP_REVIEW];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsWalletConnect> | undefined;
+	let modal: WizardModal<WizardStepsWalletConnect>;
 
 	const close = () => modalStore.close();
 	const resetAndClose = () => {
@@ -57,7 +63,7 @@
 		close();
 	};
 
-	let proposal: Option<Web3WalletTypes.SessionProposal>;
+	let proposal: Option<WalletKitTypes.SessionProposal>;
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -163,7 +169,7 @@
 		steps = [STEP_REVIEW];
 
 		// We open the WalletConnect auth modal on the review step
-		modalStore.openWalletConnectAuth();
+		modalStore.openWalletConnectAuth(modalId);
 
 		await connect($walletConnectUri);
 	};
@@ -207,7 +213,7 @@
 			goToFirstStep();
 		});
 
-		listener.sessionRequest(async (sessionRequest: Web3WalletTypes.SessionRequest) => {
+		listener.sessionRequest(async (sessionRequest: WalletKitTypes.SessionRequest) => {
 			// Prevent race condition
 			if (isNullish(listener)) {
 				return;
@@ -237,11 +243,11 @@
 				case SESSION_REQUEST_PERSONAL_SIGN:
 				case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
 				case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
-					modalStore.openWalletConnectSign(sessionRequest);
+					modalStore.openWalletConnectSign({ id: signModalId, data: sessionRequest });
 					return;
 				}
 				case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
-					modalStore.openWalletConnectSend(sessionRequest);
+					modalStore.openWalletConnectSend({ id: sendModalId, data: sessionRequest });
 					return;
 				}
 				default: {
@@ -309,7 +315,7 @@
 		callback,
 		toast
 	}: {
-		callback: ((proposal: Web3WalletTypes.SessionProposal) => Promise<void>) | undefined;
+		callback: ((proposal: WalletKitTypes.SessionProposal) => Promise<void>) | undefined;
 		toast?: () => void;
 	}) => {
 		if (isNullish(listener) || isNullish(callback)) {
@@ -354,10 +360,10 @@
 
 	onDestroy(() => walletConnectPaired.set(false));
 
-	const openWalletConnectAuth = async () => {
-		modalStore.openWalletConnectAuth();
+	const openWalletConnectAuth = () => {
+		modalStore.openWalletConnectAuth(modalId);
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
 		});
 	};
@@ -375,14 +381,16 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={resetAndClose}>
-		<WalletConnectModalTitle slot="title">
-			{`${
-				currentStep?.name === 'Review' && nonNullish(proposal)
-					? $i18n.wallet_connect.text.session_proposal
-					: $i18n.wallet_connect.text.name
-			}`}
-		</WalletConnectModalTitle>
+	<WizardModal {steps} bind:currentStep bind:this={modal} onClose={resetAndClose}>
+		{#snippet title()}
+			<WalletConnectModalTitle>
+				{`${
+					currentStep?.name === 'Review' && nonNullish(proposal)
+						? $i18n.wallet_connect.text.session_proposal
+						: $i18n.wallet_connect.text.name
+				}`}
+			</WalletConnectModalTitle>
+		{/snippet}
 
 		{#if currentStep?.name === 'Review'}
 			<WalletConnectReview

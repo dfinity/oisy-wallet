@@ -8,7 +8,7 @@
 	const modalId = Symbol();
 </script>
 
-<SendButton on:click={() => open(modalId)} />
+<SendButton onclick={() => open(modalId)} />
 
 {#if isOpen && $modalStore?.id === modalId}
 	<slot name="modal" />

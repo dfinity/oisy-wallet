@@ -1,12 +1,11 @@
-import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
+import { SOLANA_KEY_ID, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
-import * as idbApi from '$lib/api/idb.api';
+import * as idbApi from '$lib/api/idb-addresses.api';
 import * as signerApi from '$lib/api/signer.api';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore,
-	solAddressTestnetStore
+	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import * as toastsStore from '$lib/stores/toasts.store';
@@ -17,22 +16,20 @@ import {
 	getSolAddressDevnet,
 	getSolAddressLocal,
 	getSolAddressMainnet,
-	getSolAddressTestnet,
 	loadIdbSolAddressMainnet,
 	loadSolAddressDevnet,
 	loadSolAddressLocal,
 	loadSolAddressMainnet,
-	loadSolAddressTestnet,
 	validateSolAddressMainnet
 } from '$sol/services/sol-address.services';
 import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { getAddressDecoder } from '@solana/addresses';
+import { getAddressDecoder } from '@solana/kit';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-vi.mock('@solana/addresses', () => ({
+vi.mock('@solana/kit', () => ({
 	getAddressDecoder: vi.fn()
 }));
 
@@ -70,7 +67,6 @@ describe('sol-address.services', () => {
 
 		const networkCases = [
 			['mainnet', getSolAddressMainnet, SolanaNetworks.mainnet],
-			['testnet', getSolAddressTestnet, SolanaNetworks.testnet],
 			['devnet', getSolAddressDevnet, SolanaNetworks.devnet],
 			['local', getSolAddressLocal, SolanaNetworks.local]
 		] as const;
@@ -80,6 +76,7 @@ describe('sol-address.services', () => {
 			// eslint-disable-next-line local-rules/prefer-object-params
 			async (_, getAddress, networkType) => {
 				const result = await getAddress(mockIdentity);
+
 				expect(result).toBe(mockSolAddress);
 				expect(spyGetSchnorrPublicKey).toHaveBeenCalledWith({
 					identity: mockIdentity,
@@ -97,7 +94,6 @@ describe('sol-address.services', () => {
 
 		const loadCases = [
 			['mainnet', loadSolAddressMainnet, solAddressMainnetStore],
-			['testnet', loadSolAddressTestnet, solAddressTestnetStore],
 			['devnet', loadSolAddressDevnet, solAddressDevnetStore],
 			['local', loadSolAddressLocal, solAddressLocalnetStore]
 		] as const;
@@ -105,6 +101,7 @@ describe('sol-address.services', () => {
 		// eslint-disable-next-line local-rules/prefer-object-params
 		it.each(loadCases)('should load %s address into store', async (_, loadAddress, store) => {
 			const result = await loadAddress();
+
 			expect(result).toEqual({ success: true });
 			expect(get(store)).toEqual({
 				data: mockSolAddress,
@@ -113,7 +110,6 @@ describe('sol-address.services', () => {
 		});
 
 		it('should handle errors during address loading', async () => {
-			vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 			const error = new Error('Failed to load address');
 			spyGetSchnorrPublicKey.mockRejectedValue(error);
 
@@ -152,7 +148,7 @@ describe('sol-address.services', () => {
 
 			expect(result).toEqual({
 				success: false,
-				err: new LoadIdbAddressError(SOLANA_TOKEN_ID)
+				err: new LoadIdbAddressError(SOLANA_MAINNET_NETWORK_ID)
 			});
 			expect(spyUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
 		});

@@ -11,6 +11,7 @@
 	import SignerConsentMessageWarning from '$lib/components/signer/SignerConsentMessageWarning.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
@@ -136,10 +137,12 @@
 		</div>
 
 		<ButtonGroup>
-			<button type="button" class="error flex-1" on:click={onReject}
-				>{$i18n.core.text.reject}</button
-			>
-			<button type="submit" class="success flex-1">{$i18n.core.text.approve}</button>
+			<Button colorStyle="error" onclick={onReject}>
+				{$i18n.core.text.reject}
+			</Button>
+			<Button colorStyle="success" type="submit">
+				{$i18n.core.text.approve}
+			</Button>
 		</ButtonGroup>
 	</form>
 {/if}

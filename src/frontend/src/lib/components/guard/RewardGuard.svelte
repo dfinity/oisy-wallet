@@ -1,32 +1,79 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { page } from '$app/stores';
-	import RewardStateModal from '$lib/components/qr/RewardStateModal.svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount, type Snippet } from 'svelte';
+	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
+	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
+	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
+	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalRewardState } from '$lib/derived/modal.derived';
-	import { claimVipReward } from '$lib/services/reward-code.services';
-	import { loading } from '$lib/stores/loader.store';
+	import { modalRewardState, modalRewardStateData, modalWelcome } from '$lib/derived/modal.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { removeSearchParam } from '$lib/utils/nav.utils';
+	import { isOngoingCampaign, loadRewardResult } from '$lib/utils/rewards.utils';
 
-	$: (async () => {
-		if (!$loading && $page.url.searchParams.has('code') && nonNullish($authIdentity)) {
-			const rewardCode = $page.url.searchParams.get('code');
-			if (nonNullish(rewardCode)) {
-				const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
+	interface Props {
+		children?: Snippet;
+	}
 
-				removeSearchParam({ url: $page.url, searchParam: 'code' });
-				modalStore.openRewardState(result.success);
-			}
+	let { children }: Props = $props();
+
+	const rewardModalId = Symbol();
+	const welcomeModalId = Symbol();
+
+	onMount(async () => {
+		if (isNullish($authIdentity)) {
+			return;
 		}
-	})();
 
-	let rewardState: boolean | undefined;
-	$: rewardState = $modalRewardState ? ($modalStore?.data as boolean | undefined) : undefined;
+		const { reward, lastTimestamp, rewardType } = await loadRewardResult($authIdentity);
+
+		const campaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
+			({ id }) => id === reward?.campaignId
+		);
+
+		if (nonNullish(rewardType) && nonNullish(campaign)) {
+			trackEvent({
+				name: TRACK_REWARD_CAMPAIGN_WIN,
+				metadata: { campaignId: `${campaign.id}`, type: rewardType }
+			});
+
+			modalStore.openRewardState({
+				id: rewardModalId,
+				data: { reward: campaign, rewardType }
+			});
+		}
+
+		const season1Episode4Campaign = rewardCampaigns.find(
+			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
+		);
+		if (
+			nonNullish(lastTimestamp) &&
+			lastTimestamp === ZERO &&
+			nonNullish(season1Episode4Campaign) &&
+			isOngoingCampaign({
+				startDate: season1Episode4Campaign.startDate,
+				endDate: season1Episode4Campaign.endDate
+			}) &&
+			isNullish($modalStore?.type)
+		) {
+			trackEvent({
+				name: TRACK_WELCOME_OPEN,
+				metadata: { campaignId: `${season1Episode4Campaign.id}` }
+			});
+			modalStore.openWelcome(welcomeModalId);
+		}
+	});
 </script>
 
-<slot />
+{@render children?.()}
 
-{#if nonNullish(rewardState)}
-	<RewardStateModal isSuccessful={rewardState} />
+{#if $modalRewardState && nonNullish($modalRewardStateData)}
+	<RewardStateModal
+		reward={$modalRewardStateData.reward}
+		rewardType={$modalRewardStateData.rewardType}
+	/>
+{:else if $modalWelcome}
+	<WelcomeModal />
 {/if}

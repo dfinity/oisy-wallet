@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -9,6 +9,7 @@
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -34,10 +35,12 @@
 	copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
-	<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
-	<svelte:fragment slot="text"
-		>{replacePlaceholders($i18n.wallet.text.use_address_from_to, {
-			$token: $token.symbol
-		})}</svelte:fragment
-	>
+	{#snippet title()}
+		{$i18n.wallet.text.wallet_address}
+	{/snippet}
+	{#snippet text()}
+		{replacePlaceholders($i18n.wallet.text.use_address_from_to, {
+			$token: getTokenDisplaySymbol($token)
+		})}
+	{/snippet}
 </ReceiveAddress>

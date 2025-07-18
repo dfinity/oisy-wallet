@@ -1,4 +1,4 @@
-import { ICP_NETWORK_ID } from '$env/networks/networks.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { execute } from '$lib/services/wallet-connect.services';
@@ -15,9 +15,9 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import type { CompilableTransactionMessage } from '@solana/transaction-messages';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import type { MockInstance } from 'vitest';
+import type { CompilableTransactionMessage } from '@solana/kit';
 
 describe('wallet-connect.services', () => {
 	const parsedTransaction = { mock: 'parsedTransaction' };
@@ -44,7 +44,7 @@ describe('wallet-connect.services', () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = ICP_NETWORK_ID;
 
-			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrowError(
+			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrow(
 				`No Solana network for network ${networkId.description}`
 			);
 		});

@@ -2,7 +2,6 @@ import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyTo
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import type { OptionAmount } from '$lib/types/send';
 import { fireEvent, render } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
 
 describe('TokenInputCurrencyToken', () => {
 	const defaultProps = {
@@ -19,6 +18,7 @@ describe('TokenInputCurrencyToken', () => {
 		const input = getByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 		await fireEvent.input(input, { target: { value: '100' } });
+
 		expect(input).toHaveValue('100');
 	});
 
@@ -27,6 +27,7 @@ describe('TokenInputCurrencyToken', () => {
 		const input = getByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 		await fireEvent.input(input, { target: { value: '' } });
+
 		expect(input).toHaveValue('');
 	});
 

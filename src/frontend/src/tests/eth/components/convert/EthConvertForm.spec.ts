@@ -2,29 +2,33 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 import {
-	FEE_CONTEXT_KEY,
-	initFeeContext,
-	initFeeStore,
-	type FeeContext,
-	type FeeStore
-} from '$eth/stores/fee.store';
+	ETH_FEE_CONTEXT_KEY,
+	initEthFeeContext,
+	initEthFeeStore,
+	type EthFeeContext,
+	type EthFeeStore
+} from '$eth/stores/eth-fee.store';
 import {
 	CONVERT_CONTEXT_KEY,
 	initConvertContext,
 	type ConvertContext
 } from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';
 
 describe('EthConvertForm', () => {
-	let store: FeeStore;
-	const mockContext = ({ feeStore }: { feeStore: FeeStore }) =>
-		new Map<symbol, ConvertContext | FeeContext>([
+	let store: EthFeeStore;
+	const mockContext = ({ feeStore }: { feeStore: EthFeeStore }) =>
+		new Map<symbol, ConvertContext | EthFeeContext | TokenActionValidationErrorsContext>([
 			[
-				FEE_CONTEXT_KEY,
-				initFeeContext({
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
 					feeStore,
 					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
 					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
@@ -38,7 +42,8 @@ describe('EthConvertForm', () => {
 					sourceToken: ETHEREUM_TOKEN,
 					destinationToken: ICP_TOKEN
 				})
-			]
+			],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 
 	const props = {
@@ -47,10 +52,10 @@ describe('EthConvertForm', () => {
 		destination: 'address'
 	};
 	const mockFeeStore = {
-		maxFeePerGas: BigNumber.from(1000n),
-		gas: BigNumber.from(1000n),
-		maxPriorityFeePerGas: BigNumber.from(1000n),
-		maxGasFee: BigNumber.from(1000n)
+		maxFeePerGas: 1000n,
+		gas: 1000n,
+		maxPriorityFeePerGas: 1000n,
+		maxGasFee: 1000n
 	};
 
 	const buttonTestId = 'convert-form-button-next';
@@ -58,7 +63,7 @@ describe('EthConvertForm', () => {
 	beforeEach(() => {
 		mockPage.reset();
 		vi.resetAllMocks();
-		store = initFeeStore();
+		store = initEthFeeStore();
 	});
 
 	it('should keep the next button clickable if all requirements are met', () => {

@@ -1,0 +1,89 @@
+# A GitHub Actions workflow that can be used to trigger updates of npm packages.
+name: Update npm Package Dependencies
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        required: true
+        type: choice
+        description: 'Select the package(s) to update.'
+        options:
+          - gix-components
+          - ic-js
+          - oisy-wallet-signer
+          - eslint-config-oisy-wallet
+          - agent
+          - agent & ic-js
+      next:
+        required: false
+        type: boolean
+        description: 'Use the `@next` tag instead of the latest version'
+        default: true
+
+permissions: {}
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Set package variable
+        id: package_name
+        run: |
+          case "$PACKAGE" in
+            "gix-components") PKG_NAME="gix-cmp" ;;
+            "ic-js") PKG_NAME="ic-js" ;;
+            "oisy-wallet-signer") PKG_NAME="signer" ;;
+            "eslint-config-oisy-wallet") PKG_NAME="oisy-eslint" ;;
+            "agent") PKG_NAME="agent" ;;
+            "agent & ic-js") PKG_NAME="agent:ic-js" ;;
+            *) echo "Invalid package selection: $PACKAGE" && exit 1 ;;
+          esac
+          echo "PKG_NAME=$PKG_NAME" >> "$GITHUB_ENV"
+          echo "PKG_TAG=$NEXT_TAG" >> "$GITHUB_ENV"
+        env:
+          PACKAGE: ${{ inputs.package }}
+          NEXT_TAG: ${{ inputs.next && 'next' || '' }}
+
+      - name: Update package
+        run: npm run update:$PKG_SCRIPT --script-shell bash
+        env:
+          PKG_SCRIPT: ${{ env.PKG_NAME }}${{ env.PKG_TAG && ':' || '' }}${{ env.PKG_TAG }}
+
+      - name: Create Pull Request
+        uses: ./.github/actions/create-pr
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: bot-bump-${{ inputs.package }}${{ inputs.next && '-next' || '' }}
+          title: "build(frontend): Bump ${{ inputs.package }}${{ inputs.next && ' to next' || '' }}"
+          body: |
+            # Motivation
+
+            We want to pull in the latest changes for the `${{ inputs.package }}` package.
+
+            # Changes
+
+            * Ran `npm run update:${{ env.PKG_NAME }}${{ inputs.next && ':next' || '' }}`
+
+            # Tests
+
+            * CI should pass
+            * The pulled in changes should have been tested before being committed to their repositories.

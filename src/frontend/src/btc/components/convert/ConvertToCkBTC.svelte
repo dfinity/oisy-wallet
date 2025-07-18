@@ -18,11 +18,14 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertBTCToCkBTC } from '$lib/derived/modal.derived';
+	import { networkBitcoinMainnetDisabled } from '$lib/derived/networks.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { findTwinToken } from '$lib/utils/token.utils';
+
+	const modalId = Symbol();
 
 	let ckBtcToken: IcCkToken | undefined;
 	$: ckBtcToken = findTwinToken({
@@ -49,20 +52,27 @@
 			identity: $authIdentity
 		});
 
-		modalStore.openConvertBTCToCkBTC();
+		modalStore.openConvertBTCToCkBTC(modalId);
 	};
 
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <ButtonHero
-	on:click={async () => await openConvert()}
-	disabled={$isBusy || $outflowActionsDisabled || isNullish(ckBtcToken)}
+	onclick={async () => await openConvert()}
+	disabled={$networkBitcoinMainnetDisabled ||
+		$isBusy ||
+		$outflowActionsDisabled ||
+		isNullish(ckBtcToken)}
 	ariaLabel={$i18n.convert.text.convert_to_ckbtc}
 	testId="convert-to-ckbtc-button"
 >
-	<IconCkConvert size="28" slot="icon" />
-	<span>{BTC_MAINNET_TOKEN.twinTokenSymbol}</span>
+	{#snippet icon()}
+		<IconCkConvert size="24" />
+	{/snippet}
+	{#snippet label()}
+		<span>{BTC_MAINNET_TOKEN.twinTokenSymbol}</span>
+	{/snippet}
 </ButtonHero>
 
 {#if $modalConvertBTCToCkBTC && nonNullish(ckBtcToken)}

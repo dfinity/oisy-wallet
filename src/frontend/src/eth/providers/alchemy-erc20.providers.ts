@@ -1,8 +1,5 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
-import {
-	ALCHEMY_JSON_RPC_URL_MAINNET,
-	ALCHEMY_JSON_RPC_URL_SEPOLIA
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -13,9 +10,8 @@ import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+import { Contract } from 'ethers/contract';
+import { JsonRpcProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class AlchemyErc20Provider {
@@ -23,7 +19,10 @@ export class AlchemyErc20Provider {
 
 	// AlchemyProvider of ether.js does not support Sepolia
 	constructor(private readonly providerUrl: string) {
-		this.provider = new JsonRpcProvider(`${this.providerUrl}/${ALCHEMY_API_KEY}`);
+		this.provider = new JsonRpcProvider(`${this.providerUrl}/${ALCHEMY_API_KEY}`, undefined, {
+			// See: https://github.com/ethers-io/ethers.js/issues/4784#issuecomment-2820177791
+			polling: true
+		});
 	}
 
 	initMinedTransactionsListener = ({
@@ -33,15 +32,15 @@ export class AlchemyErc20Provider {
 	}: {
 		contract: Erc20Token;
 		address: EthAddress;
-		listener: (params: { hash: string; value: BigNumber }) => Promise<void>;
+		listener: (params: { hash: string; value: bigint }) => Promise<void>;
 	}): WebSocketListener => {
-		const erc20Contract = new ethers.Contract(contract.address, ERC20_ABI, this.provider);
+		const erc20Contract = new Contract(contract.address, ERC20_ABI, this.provider);
 
 		// eslint-disable-next-line local-rules/prefer-object-params -- This function needs to have listed arguments to match the Listener type passed to ethers.js providers
 		const filterListener = async (
 			_from: string,
 			_address: string,
-			_value: BigNumber,
+			_value: bigint,
 			transaction: Erc20Transaction
 		) => {
 			const { transactionHash: hash, args } = transaction;
@@ -61,10 +60,16 @@ export class AlchemyErc20Provider {
 	};
 }
 
-const providers: Record<NetworkId, AlchemyErc20Provider> = {
-	[ETHEREUM_NETWORK_ID]: new AlchemyErc20Provider(ALCHEMY_JSON_RPC_URL_MAINNET),
-	[SEPOLIA_NETWORK_ID]: new AlchemyErc20Provider(ALCHEMY_JSON_RPC_URL_SEPOLIA)
-};
+const providers: Record<NetworkId, AlchemyErc20Provider> = [
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
+].reduce<Record<NetworkId, AlchemyErc20Provider>>(
+	(acc, { id, providers: { alchemyJsonRpcUrl } }) => ({
+		...acc,
+		[id]: new AlchemyErc20Provider(alchemyJsonRpcUrl)
+	}),
+	{}
+);
 
 export const alchemyErc20Providers = (networkId: NetworkId): AlchemyErc20Provider => {
 	const provider = providers[networkId];

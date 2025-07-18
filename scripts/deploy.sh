@@ -3,27 +3,30 @@ set -euxo pipefail
 
 dfx canister create --all
 dfx deploy backend
-./scripts/deploy.signer.sh
-
-mkdir -p ./target/ic
-
-./scripts/download.icp.sh
+dfx deploy signer
 dfx deploy icp_ledger
 dfx deploy icp_index
 
 ./scripts/download.ckbtc.sh
 ./scripts/deploy.ckbtc.sh
 
-./scripts/download.cketh.sh
-./scripts/deploy.cketh.sh
-./scripts/deploy.ckerc20.sh
+dfx deploy cketh_minter
+dfx deploy cketh_ledger
+dfx deploy cketh_index
+dfx deploy ckusdc_ledger
+dfx deploy ckusdc_index
 
-./scripts/deploy.kong_backend.sh
+dfx deploy kong_backend
+dfx deploy icp_swap_factory
+dfx deploy icp_swap_pool
 
-dfx deploy internet_identity --specified-id rdmx6-jaaaa-aaaaa-aaadq-cai
-dfx deploy pouh_issuer --specified-id qbw6f-caaaa-aaaah-qdcwa-cai
+dfx deploy internet_identity
+dfx deploy pouh_issuer
 dfx deploy cycles_ledger
 dfx deploy cycles_depositor
 dfx deploy rewards
+dfx deploy llm
+
+dfx deploy sol_rpc
 
 scripts/top-up-cycles-ledger-account.sh --cycles 50T

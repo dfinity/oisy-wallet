@@ -3,6 +3,7 @@ import { autoLoadCustomToken, setCustomToken } from '$icp-eth/services/custom-to
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -16,14 +17,25 @@ import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
+vi.mock('idb-keyval', () => ({
+	createStore: vi.fn(() => ({
+		/* mock store implementation */
+	})),
+	set: vi.fn(),
+	get: vi.fn(),
+	del: vi.fn(),
+	update: vi.fn()
+}));
+
+vi.mock('$app/environment', () => ({
+	browser: true
+}));
+
 describe('custom-token.services', () => {
 	const backendCanisterMock = mock<BackendCanister>();
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 
 	let spyToastsError: MockInstance;
-
-	// we mock console.error just to avoid unnecessary logs while running the tests
-	vi.spyOn(console, 'error').mockImplementation(() => {});
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -123,7 +135,7 @@ describe('custom-token.services', () => {
 
 					await assertSetCustomToken({
 						customTokens,
-						expectedVersion: [customTokens[0].version ?? 0n],
+						expectedVersion: [customTokens[0].version ?? ZERO],
 						indexCanisterId
 					});
 				}
@@ -228,7 +240,7 @@ describe('custom-token.services', () => {
 			});
 
 			it.each([undefined, IC_CKBTC_INDEX_CANISTER_ID])(
-				'should result with loaded but toastError if metadata fails with index ID %s',
+				'should result with loaded but console error if metadata fails with index ID %s',
 				async (indexCanisterId) => {
 					backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
 
@@ -256,10 +268,11 @@ describe('custom-token.services', () => {
 
 					expect(result).toBe('loaded');
 
-					expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-						msg: { text: get(i18n).init.error.icrc_canisters },
-						err
-					});
+					expect(spyToastsError).not.toHaveBeenCalled();
+
+					expect(console.error).toHaveBeenCalledTimes(2);
+					expect(console.error).toHaveBeenNthCalledWith(1, err);
+					expect(console.error).toHaveBeenNthCalledWith(2, err);
 				}
 			);
 		});

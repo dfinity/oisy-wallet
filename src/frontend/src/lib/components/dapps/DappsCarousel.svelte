@@ -1,23 +1,27 @@
 <script lang="ts">
-	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-	import { airdropCampaigns, FEATURED_AIRDROP_CAROUSEL_SLIDE_ID } from '$env/airdrop-campaigns.env';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
-	import type { AirdropDescription } from '$env/types/env-airdrop';
+	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { userProfileLoaded, userSettings } from '$lib/derived/user-profile.derived';
+	import {
+		userProfileLoaded,
+		userProfileVersion,
+		userSettings
+	} from '$lib/derived/user-profile.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
-	import {
-		type CarouselSlideOisyDappDescription,
-		type OisyDappDescription
+	import type {
+		CarouselSlideOisyDappDescription,
+		OisyDappDescription
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let styleClass: string | undefined = undefined;
 
@@ -32,16 +36,17 @@
 		...temporaryHiddenDappsIds
 	];
 
-	let featuredAirdrop: AirdropDescription | undefined;
-	$: featuredAirdrop = airdropCampaigns.find(({ id }) => id === FEATURED_AIRDROP_CAROUSEL_SLIDE_ID);
+	const featuredAirdrop: RewardCampaignDescription | undefined = rewardCampaigns.find(
+		({ id }) => id === FEATURED_REWARD_CAROUSEL_SLIDE_ID
+	);
 
 	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
 	$: featureAirdropSlide = nonNullish(featuredAirdrop)
 		? ({
 				id: featuredAirdrop.id,
 				carousel: {
-					text: replaceOisyPlaceholders($i18n.airdrops.text.carousel_slide_title),
-					callToAction: $i18n.airdrops.text.carousel_slide_cta
+					text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
+					callToAction: $i18n.rewards.text.carousel_slide_cta
 				},
 				logo: featuredAirdrop.logo,
 				name: featuredAirdrop.title
@@ -92,7 +97,7 @@
 		await addUserHiddenDappId({
 			dappId,
 			identity: $authIdentity,
-			currentUserVersion: fromNullable($userProfileStore.profile.version)
+			currentUserVersion: $userProfileVersion
 		});
 
 		emit({ message: 'oisyRefreshUserProfile' });
