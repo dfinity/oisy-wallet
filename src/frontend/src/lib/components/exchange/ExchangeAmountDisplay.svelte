@@ -4,6 +4,7 @@
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 
@@ -37,10 +38,15 @@
 			{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
 				{`( < ${formatCurrency({
 					value: EXCHANGE_USD_AMOUNT_THRESHOLD,
-					currency: $currentCurrency
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore
 				})} )`}
 			{:else}
-				{`( ${formatCurrency({ value: usdAmount, currency: $currentCurrency })} )`}
+				{`( ${formatCurrency({
+					value: usdAmount,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore
+				})} )`}
 			{/if}
 		</div>
 	{/if}
