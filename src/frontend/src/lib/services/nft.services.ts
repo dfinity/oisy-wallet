@@ -27,7 +27,7 @@ export const loadNfts = ({
 
 	return Promise.all(
 		tokens.map((token) => {
-			const loadedNfts = getLoadedNfts({token, loadedNftsByNetwork});
+			const loadedNfts = getLoadedNfts({ token, loadedNftsByNetwork });
 
 			return loadNftsOfToken({
 				etherscanProvider,
@@ -53,10 +53,16 @@ const loadNftsOfToken = async ({
 	loadedNfts: Nft[];
 	walletAddress: string;
 }): Promise<void> => {
-	const holdersTokenIds = await loadHoldersTokenIds({etherscanProvider, walletAddress, contractAddress: token.address});
+	const holdersTokenIds = await loadHoldersTokenIds({
+		etherscanProvider,
+		walletAddress,
+		contractAddress: token.address
+	});
 
 	const loadedTokenIds: NftId[] = loadedNfts.map((nft) => nft.id);
-	const tokenIdsToLoad = holdersTokenIds.filter((id: number) => !loadedTokenIds.includes(parseNftId(id)));
+	const tokenIdsToLoad = holdersTokenIds.filter(
+		(id: number) => !loadedTokenIds.includes(parseNftId(id))
+	);
 
 	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
 	for (const tokenIds of tokenIdBatches) {
@@ -121,17 +127,31 @@ const loadNftMetadata = async ({
 			tokenId
 		});
 	} catch (err: unknown) {
-		console.warn('Failed to load metadata', err)
+		console.warn('Failed to load metadata', err);
 		return { id: parseNftId(tokenId) };
 	}
 };
 
-const createBatches = ({ tokenIds, batchSize }: { tokenIds: number[]; batchSize: number }): number[][] =>
+const createBatches = ({
+	tokenIds,
+	batchSize
+}: {
+	tokenIds: number[];
+	batchSize: number;
+}): number[][] =>
 	Array.from({ length: Math.ceil(tokenIds.length / batchSize) }, (_, index) =>
 		tokenIds.slice(index * batchSize, (index + 1) * batchSize)
 	);
 
-const loadHoldersTokenIds = async ({etherscanProvider, walletAddress, contractAddress}: {etherscanProvider: EtherscanProvider, walletAddress: string, contractAddress: string}): Promise<number[]> => {
+const loadHoldersTokenIds = async ({
+	etherscanProvider,
+	walletAddress,
+	contractAddress
+}: {
+	etherscanProvider: EtherscanProvider;
+	walletAddress: string;
+	contractAddress: string;
+}): Promise<number[]> => {
 	try {
 		return await etherscanProvider.erc721TokenInventory({
 			address: walletAddress,
@@ -140,14 +160,17 @@ const loadHoldersTokenIds = async ({etherscanProvider, walletAddress, contractAd
 	} catch (_: unknown) {
 		return [];
 	}
-}
+};
 
 const getLoadedNfts = ({
-												 token: { network: {id: networkId}, address},
-												 loadedNftsByNetwork
-											 }: {
-	token: Erc721CustomToken,
-	loadedNftsByNetwork: NftsByNetwork
+	token: {
+		network: { id: networkId },
+		address
+	},
+	loadedNftsByNetwork
+}: {
+	token: Erc721CustomToken;
+	loadedNftsByNetwork: NftsByNetwork;
 }): Nft[] => {
 	const tokensByNetwork = loadedNftsByNetwork[networkId];
 	if (nonNullish(tokensByNetwork)) {
@@ -155,4 +178,4 @@ const getLoadedNfts = ({
 	}
 
 	return [];
-}
+};
