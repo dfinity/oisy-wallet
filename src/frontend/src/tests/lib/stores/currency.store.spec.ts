@@ -1,10 +1,7 @@
 import { Currency } from '$lib/enums/currency';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
-import {
-	initCurrencyStore,
-	type CurrencyData,
-	type CurrencyStore
-} from '$lib/stores/currency.store';
+import { initCurrencyStore, type CurrencyStore } from '$lib/stores/currency.store';
+import type { CurrencyData } from '$lib/types/currency';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { get } from 'svelte/store';
 
