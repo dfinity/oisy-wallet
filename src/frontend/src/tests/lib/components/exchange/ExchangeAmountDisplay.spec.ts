@@ -35,10 +35,18 @@ describe('ExchangeAmountDisplay', () => {
 	});
 
 	describe('with exchange rate', () => {
+		const formatParams = {
+			currency: Currency.USD,
+			exchangeRate: {
+				currency: Currency.USD,
+				exchangeRateToUsd: 1
+			}
+		};
+
 		it('should correctly render the USD amount if it is greater or equal than the threshold', () => {
 			const mockExchangeRateBigAmount = (EXCHANGE_USD_AMOUNT_THRESHOLD * 2) / mockAmountNumber;
 
-			const expectedUsdAmount = `( ${formatCurrency({ value: mockAmountNumber * mockExchangeRateBigAmount, currency: Currency.USD })} )`;
+			const expectedUsdAmount = `( ${formatCurrency({ value: mockAmountNumber * mockExchangeRateBigAmount, ...formatParams })} )`;
 
 			const { getByText } = render(ExchangeAmountDisplay, {
 				props: { ...mockProps, exchangeRate: mockExchangeRateBigAmount }
@@ -50,7 +58,7 @@ describe('ExchangeAmountDisplay', () => {
 		it('should render the threshold if the USD amount is less the threshold', () => {
 			const mockExchangeRateSmallAmount = EXCHANGE_USD_AMOUNT_THRESHOLD / 2 / mockAmountNumber;
 
-			const expectedUsdAmount = `( < ${formatCurrency({ value: EXCHANGE_USD_AMOUNT_THRESHOLD, currency: Currency.USD })} )`;
+			const expectedUsdAmount = `( < ${formatCurrency({ value: EXCHANGE_USD_AMOUNT_THRESHOLD, ...formatParams })} )`;
 
 			const { getByText } = render(ExchangeAmountDisplay, {
 				props: { ...mockProps, exchangeRate: mockExchangeRateSmallAmount }
