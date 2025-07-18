@@ -32,7 +32,8 @@
 			"add": "Add",
 			"more_items": "+$items more",
 			"select": "Select",
-			"language": "Language"
+			"language": "Language",
+			"currency": "Currency"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -43,7 +44,8 @@
 			"back": "Go back to the previous page",
 			"open_details": "Open details",
 			"close_details": "Close details",
-			"switch_language": "Switch language"
+			"switch_language": "Switch language",
+			"switch_currency": "Switch currency"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
