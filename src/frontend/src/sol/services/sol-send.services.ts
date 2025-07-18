@@ -186,7 +186,8 @@ const createSplTokenTransactionMessage = async ({
 	const ataInstruction = await createAtaInstruction({
 		signer,
 		destination,
-		tokenAddress
+		tokenAddress,
+		tokenOwnerAddress
 	});
 
 	const transferInstruction = getTransferInstruction(
