@@ -6,6 +6,7 @@
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -44,7 +45,7 @@
 				displayDecimals: token.decimals
 			}) * exchangeRate;
 
-		return formatCurrency({ value: usdValue });
+		return formatCurrency({ value: usdValue, currency: $currentCurrency });
 	};
 </script>
 
