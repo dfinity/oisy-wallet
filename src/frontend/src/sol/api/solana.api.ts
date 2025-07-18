@@ -197,44 +197,40 @@ export const estimatePriorityFee = async ({
 	);
 };
 
-export const getTokenDecimals = async ({
+export const getTokenInfo = async ({
 	address,
 	network
 }: {
 	address: SplTokenAddress;
 	network: SolanaNetworkType;
-}): Promise<number> => {
+}): Promise<{
+	owner: SplTokenAddress | undefined;
+	decimals: number;
+	mintAuthority?: SplTokenAddress;
+	freezeAuthority?: SplTokenAddress;
+}> => {
 	const { getAccountInfo } = solanaHttpRpc(network);
 	const token = solAddress(address);
 
 	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
 
-	if (nonNullish(value) && 'parsed' in value.data) {
-		const {
-			data: {
-				parsed: { info }
-			}
-		} = value;
+	const owner = value?.owner?.toString();
 
-		return nonNullish(info) && 'decimals' in info ? (info.decimals as number) : 0;
+	if (isNullish(value?.data) || !('parsed' in value.data)) {
+		return { owner, decimals: 0 };
 	}
 
-	return 0;
-};
+	if (isNullish(value.data.parsed?.info)) {
+		return { owner, decimals: 0 };
+	}
 
-export const getTokenOwner = async ({
-	address,
-	network
-}: {
-	address: SplTokenAddress;
-	network: SolanaNetworkType;
-}): Promise<SplTokenAddress | undefined> => {
-	const { getAccountInfo } = solanaHttpRpc(network);
-	const token = solAddress(address);
+	const { decimals, mintAuthority, freezeAuthority } = value.data.parsed.info as {
+		decimals?: number;
+		mintAuthority?: SplTokenAddress;
+		freezeAuthority?: SplTokenAddress;
+	};
 
-	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
-
-	return value?.owner?.toString();
+	return { owner, decimals: decimals ?? 0, mintAuthority, freezeAuthority };
 };
 
 export const getAccountOwner = async ({
