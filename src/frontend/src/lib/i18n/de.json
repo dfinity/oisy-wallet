@@ -511,6 +511,9 @@
 			"top_up": "Lade dein Wallet auf, um es zu nutzen!",
 			"learn_more_about_erc20_icp": "Erfahre mehr über ERC20 ICP auf Ethereum.",
 			"tooltip_toggle_balance": "Doppelklick zum Anzeigen/Ausblenden des Guthabens"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {
