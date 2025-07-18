@@ -1,6 +1,5 @@
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
-import { last } from '$lib/utils/array.utils';
 import { getAccountInfo } from '$sol/api/sol-rpc.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
