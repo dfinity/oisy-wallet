@@ -74,7 +74,7 @@
 
 	const totalRewardUsd = $derived(ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd);
 
-	let loading = $state(true);
+	let loadingRewards = $state(true);
 
 	const loadRewards = async ({
 		ckBtcToken,
@@ -85,6 +85,8 @@
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
 	}) => {
+		loadingRewards = true;
+
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
@@ -94,6 +96,8 @@
 			return;
 		}
 
+
+
 		({ ckBtcReward, ckUsdcReward, icpReward, amountOfRewards } = await getUserRewardsTokenAmounts({
 			ckBtcToken,
 			ckUsdcToken,
@@ -101,7 +105,8 @@
 			identity: $authIdentity,
 			campaignId: reward.id
 		}));
-		loading = false;
+
+		loadingRewards = false;
 	};
 
 	onMount(() => {
@@ -119,16 +124,19 @@
 		);
 	};
 
-	let amount = $derived(formatCurrency({
+	let amount = $derived(
+		formatCurrency({
 			value: totalRewardUsd,
 			currency: $currentCurrency,
 			exchangeRate: $currencyExchangeStore
 		})
 	);
 
-	$effect(() => {
-		loading = isNullish(amount);
-	});
+	let loadingAmount = $derived(isNullish(amount))
+
+		let loading = $derived(loadingRewards || loadingAmount);
+
+
 </script>
 
 {#if amountOfRewards > 0}
