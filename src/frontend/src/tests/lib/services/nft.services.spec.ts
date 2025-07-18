@@ -69,11 +69,13 @@ describe('nft.services', () => {
 			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
-			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(async ({ tokenId }) => ({
-				id: parseNftId(tokenId),
-				name: `Test NFT #${tokenId}`,
-				imageUrl: `https://test.com/image-${tokenId}.png`
-			}));
+			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
+				Promise.resolve({
+					id: parseNftId(tokenId),
+					name: `Test NFT #${tokenId}`,
+					imageUrl: `https://test.com/image-${tokenId}.png`
+				})
+			);
 
 			await loadNfts({ tokens, loadedNftsByToken, walletAddress: mockWalletAddress })
 
@@ -115,11 +117,13 @@ describe('nft.services', () => {
 			const tokenIds = [...loadedTokenIds, ...notLoadedTokenIds];
 
 			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
-			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(async ({ tokenId }) => ({
-				id: parseNftId(tokenId),
-				name: `Test NFT #${tokenId}`,
-				imageUrl: `https://test.com/image-${tokenId}.png`
-			}));
+			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
+				Promise.resolve({
+					id: parseNftId(tokenId),
+					name: `Test NFT #${tokenId}`,
+					imageUrl: `https://test.com/image-${tokenId}.png`
+				})
+			);
 
 			await loadNfts({ tokens, loadedNftsByToken, walletAddress: mockWalletAddress })
 
