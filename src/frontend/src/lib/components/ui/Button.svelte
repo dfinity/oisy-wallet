@@ -10,6 +10,7 @@
 		loading?: boolean;
 		loadingAsSkeleton?: boolean;
 		fullWidth?: boolean;
+		contentFullWidth?: boolean;
 		alignLeft?: boolean;
 		link?: boolean;
 		inlineLink?: boolean;
@@ -30,6 +31,7 @@
 		loading = false,
 		loadingAsSkeleton = true,
 		fullWidth = false,
+		contentFullWidth = false,
 		alignLeft = false,
 		link = false,
 		inlineLink = false,
@@ -70,6 +72,7 @@
 >
 	<span
 		class="flex min-w-0 gap-2"
+		class:w-full={contentFullWidth}
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
