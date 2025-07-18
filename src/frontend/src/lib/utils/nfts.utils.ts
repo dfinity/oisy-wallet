@@ -2,9 +2,9 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { Nft } from '$lib/types/nft';
 
 export const getLoadedNftsByTokens = ({
-																				tokens,
-																				loadedNfts
-																			}: {
+	tokens,
+	loadedNfts
+}: {
 	tokens: Erc721CustomToken[];
 	loadedNfts: Nft[];
 }) => {
