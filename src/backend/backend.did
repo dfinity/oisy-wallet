@@ -141,9 +141,11 @@ type ContactAddressData = record {
 type ContactError = variant {
 	InvalidContactData;
 	CanisterMemoryNearCapacity;
+	InvalidImageFormat;
 	ContactNotFound;
 	ImageTooLarge;
 	RandomnessError;
+	ImageExceedsMaxSize;
 	CanisterStatusError;
 	TooManyContactsWithImages
 };
@@ -231,6 +233,11 @@ type ImageMimeType = variant {
 	"image/png";
 	"image/jpeg";
 	"image/webp"
+};
+type ImageStatistics = record {
+	contacts_with_images : nat64;
+	total_image_size : nat64;
+	total_contacts : nat64
 };
 type InitArg = record {
 	derivation_origin : opt text;
@@ -398,6 +405,7 @@ service : (Arg) -> {
 	get_allowed_cycles : () -> (GetAllowedCyclesResult);
 	get_canister_status : () -> (CanisterStatusResultV2);
 	get_contact : (nat64) -> (GetContactResult) query;
+	get_contact_image_statistics : () -> (ImageStatistics) query;
 	get_contacts : () -> (GetContactsResult) query;
 	get_user_profile : () -> (GetUserProfileResult) query;
 	has_user_profile : () -> (HasUserProfileResponse) query;

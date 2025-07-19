@@ -167,7 +167,7 @@ export const formatReceiveOutMinimum = ({
 export const mapVeloraSwapResult = (swap: DeltaPrice | BridgePrice): SwapMappedResult => ({
 	provider: SwapProvider.VELORA,
 	receiveAmount: 'bridge' in swap ? BigInt(swap.destAmountAfterBridge) : BigInt(swap.destAmount),
-	swapDetails: swap as VeloraSwapDetails,
+	swapDetails: swap,
 	type: VeloraSwapTypes.DELTA
 });
 
