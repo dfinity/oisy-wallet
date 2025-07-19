@@ -650,7 +650,7 @@ impl ContactImage {
         // Check image format and size (this already handles both cases properly)
         // Debug: print image size
         ic_cdk::api::print(format!("Image size: {} bytes", self.data.len()));
-        
+
         match self.validate() {
             Ok(_) => {
                 ic_cdk::api::print("Image validation passed");
