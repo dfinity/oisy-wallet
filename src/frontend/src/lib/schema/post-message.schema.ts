@@ -6,6 +6,7 @@ import {
 } from '$icp/schema/ic-token.schema';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
+import { CurrencyExchangeDataSchema, CurrencySchema } from '$lib/schema/currency.schema';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { SyncStateSchema } from '$lib/schema/sync.schema';
 import type { BtcAddress, SolAddress } from '$lib/types/address';
@@ -65,19 +66,22 @@ export const PostMessageDataResponseSchema = z.strictObject({});
 export const PostMessageDataResponseLooseSchema = z.looseObject({});
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
+	currentCurrency: CurrencySchema,
 	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
 	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>())
 });
 
-export const PostMessageDataRequestIcrcSchema = IcCanistersSchema.merge(
-	NetworkSchema.pick({ env: true })
-);
+export const PostMessageDataRequestIcrcSchema = z.object({
+	...IcCanistersSchema.shape,
+	...NetworkSchema.pick({ env: true }).shape
+});
 
-export const PostMessageDataRequestIcrcStrictSchema = IcCanistersStrictSchema.merge(
-	NetworkSchema.pick({ env: true })
-);
+export const PostMessageDataRequestIcrcStrictSchema = z.object({
+	...IcCanistersStrictSchema.shape,
+	...NetworkSchema.pick({ env: true }).shape
+});
 
 export const PostMessageDataRequestDip20Schema = z.object({
 	canisterId: CanisterIdTextSchema
@@ -161,6 +165,7 @@ export const PostMessageDataResponseAuthSchema = PostMessageDataResponseSchema.e
 
 // TODO: generate zod schema for Coingecko
 export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSchema.extend({
+	currentExchangeRate: CurrencyExchangeDataSchema.optional(),
 	currentEthPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentBtcPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentErc20Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),

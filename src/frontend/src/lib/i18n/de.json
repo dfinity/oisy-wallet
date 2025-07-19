@@ -32,7 +32,8 @@
 			"add": "Hinzufügen",
 			"more_items": "+$items mehr",
 			"select": "Auswählen",
-			"language": "Sprache"
+			"language": "Sprache",
+			"currency": "Währung"
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!"
@@ -43,7 +44,8 @@
 			"back": "Zurück zur vorherigen Seite",
 			"open_details": "Details öffnen",
 			"close_details": "Details schließen",
-			"switch_language": "Sprache wechseln"
+			"switch_language": "Sprache wechseln",
+			"switch_currency": "Währung wechseln"
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist"
@@ -509,6 +511,9 @@
 			"top_up": "Lade dein Wallet auf, um es zu nutzen!",
 			"learn_more_about_erc20_icp": "Erfahre mehr über ERC20 ICP auf Ethereum.",
 			"tooltip_toggle_balance": "Doppelklick zum Anzeigen/Ausblenden des Guthabens"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {
@@ -812,7 +817,9 @@
 			"you_receive": "Du erhältst",
 			"select": "Auswählen >",
 			"select_swap_provider": "Tausch-Anbieter auswählen",
-			"open_icp_swap": "ICP Swap-Website öffnen"
+			"open_icp_swap": "ICP Swap-Website öffnen",
+			"select_token": "",
+			"select_network_filter": ""
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
@@ -977,6 +984,11 @@
 			"unexpected_undefined": "Token ist undefiniert. Das ist unerwartet.",
 			"unexpected_error_on_token_delete": "Beim Löschen des Tokens ist etwas schiefgelaufen.",
 			"unexpected_error_on_token_update": "Beim Aktualisieren des Tokens ist etwas schiefgelaufen."
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": ""
 		}
 	},
 	"fee": {
@@ -1266,6 +1278,12 @@
 		"avatar": {
 			"default": "Standard-Avatar",
 			"avatar_for": "Avatar für"
+		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
 		},
 		"show_contact": {
 			"title": "Kontakt",
