@@ -577,15 +577,6 @@ impl Validate for ContactAddressData {
 
 impl Validate for ContactImage {
     fn validate(&self) -> Result<(), Error> {
-        // Check image size limit
-        if self.data.len() > crate::types::contact::MAX_IMAGE_SIZE_BYTES {
-            return Err(Error::msg(format!(
-                "Image too large: {} bytes, max allowed is {} bytes",
-                self.data.len(),
-                crate::types::contact::MAX_IMAGE_SIZE_BYTES
-            )));
-        }
-
         // Check magic bytes to ensure the data matches the declared MIME type
         self.validate_magic_bytes()?;
 
@@ -656,14 +647,19 @@ impl ContactImage {
         &self,
         stored_contacts: &crate::types::contact::StoredContacts,
     ) -> Result<(), crate::types::contact::ContactError> {
-        // Check image size first (fail fast for oversized images)
-        if self.data.len() > crate::types::contact::MAX_IMAGE_SIZE_BYTES {
-            return Err(crate::types::contact::ContactError::ImageTooLarge);
+        // Check image format and size (this already handles both cases properly)
+        // Debug: print image size
+        ic_cdk::api::print(format!("Image size: {} bytes", self.data.len()));
+        
+        match self.validate() {
+            Ok(_) => {
+                ic_cdk::api::print("Image validation passed");
+            }
+            Err(err) => {
+                ic_cdk::api::print(format!("Image validation failed: {:?}", err));
+                return Err(err);
+            }
         }
-
-        // Check image format (magic bytes)
-        self.validate()
-            .map_err(|_| crate::types::contact::ContactError::InvalidImageFormat)?;
 
         // Comprehensive memory validation (includes projected memory usage)
         validate_memory_for_new_image(self.data.len(), stored_contacts)?;
@@ -737,7 +733,9 @@ impl Validate for CreateContactRequest {
 
         // Validate image if present
         if let Some(image) = &self.image {
-            image.validate()?;
+            image
+                .validate()
+                .map_err(|e| Error::msg(format!("{:?}", e)))?;
         }
 
         Ok(())
@@ -765,7 +763,9 @@ impl Validate for UpdateContactRequest {
 
         // Validate image if present
         if let Some(image) = &self.image {
-            image.validate()?;
+            image
+                .validate()
+                .map_err(|e| Error::msg(format!("{:?}", e)))?;
         }
 
         Ok(())
@@ -785,13 +785,22 @@ impl crate::types::contact::CreateContactRequest {
         existing_contacts: &crate::types::contact::StoredContacts,
         _principal: &Principal,
     ) -> Result<(), crate::types::contact::ContactError> {
-        // First run the basic validation
-        self.validate()
+        // Validate name directly to avoid error conversion
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "CreateContactRequest.name",
+        )
+        .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+
+        validate_string_whitespace_padding(&self.name, "CreateContactRequest.name")
             .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
 
-        // If we have an image, validate all additional constraints
+        // If we have an image, validate all constraints (including format and size)
         if let Some(image) = &self.image {
-            image.validate_all(existing_contacts)?;
+            ic_cdk::api::print("Validating image in CreateContactRequest");
+            // This should preserve specific error types like InvalidImageFormat and ImageTooLarge
+            return image.validate_all(existing_contacts);
         }
 
         Ok(())
@@ -871,9 +880,24 @@ impl crate::types::contact::UpdateContactRequest {
         _principal: &Principal,
         is_adding_new_image: bool,
     ) -> Result<(), crate::types::contact::ContactError> {
-        // First run the basic validation
-        self.validate()
+        // Validate name directly to avoid error conversion
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "UpdateContactRequest.name",
+        )
+        .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+
+        validate_string_whitespace_padding(&self.name, "UpdateContactRequest.name")
             .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+
+        // Validate address count
+        validate_collection_size(
+            &self.addresses,
+            CONTACT_MAX_ADDRESSES,
+            "UpdateContactRequest.addresses",
+        )
+        .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
 
         // If we have an image and we're adding a new one, validate all additional constraints
         if let Some(image) = &self.image {
