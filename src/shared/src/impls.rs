@@ -648,18 +648,8 @@ impl ContactImage {
         stored_contacts: &crate::types::contact::StoredContacts,
     ) -> Result<(), crate::types::contact::ContactError> {
         // Check image format and size (this already handles both cases properly)
-        // Debug: print image size
-        ic_cdk::api::print(format!("Image size: {} bytes", self.data.len()));
-        
-        match self.validate() {
-            Ok(_) => {
-                ic_cdk::api::print("Image validation passed");
-            }
-            Err(err) => {
-                ic_cdk::api::print(format!("Image validation failed: {:?}", err));
-                return Err(err);
-            }
-        }
+
+        self.validate()?;
 
         // Comprehensive memory validation (includes projected memory usage)
         validate_memory_for_new_image(self.data.len(), stored_contacts)?;
@@ -695,18 +685,14 @@ pub fn calculate_total_image_size(
 pub fn validate_principal_memory_limit(
     stored_contacts: &crate::types::contact::StoredContacts,
     is_adding_new_image: bool,
-) -> Result<(), Error> {
+) -> Result<(), crate::types::contact::ContactError> {
     if !is_adding_new_image {
         return Ok(());
     }
 
     let current_image_count = count_contacts_with_images(stored_contacts);
     if current_image_count >= crate::types::contact::MAX_IMAGES_PER_PRINCIPAL {
-        return Err(Error::msg(format!(
-            "Too many images: {} images already stored, max allowed is {}",
-            current_image_count,
-            crate::types::contact::MAX_IMAGES_PER_PRINCIPAL
-        )));
+        return Err(crate::types::contact::ContactError::TooManyContactsWithImages);
     }
 
     Ok(())
@@ -723,13 +709,6 @@ impl Validate for CreateContactRequest {
 
         // Validate that string does not contain leading, trailing or empty whitespaces
         validate_string_whitespace_padding(&self.name, "CreateContactRequest.name")?;
-
-        // Validate that the name is not an empty string
-        validate_string_length(
-            &self.name,
-            CONTACT_MAX_NAME_LENGTH,
-            "CreateContactRequest.name",
-        )?;
 
         // Validate image if present
         if let Some(image) = &self.image {
@@ -785,20 +764,30 @@ impl crate::types::contact::CreateContactRequest {
         existing_contacts: &crate::types::contact::StoredContacts,
         _principal: &Principal,
     ) -> Result<(), crate::types::contact::ContactError> {
-        // Validate name directly to avoid error conversion
-        validate_string_length(
-            &self.name,
-            CONTACT_MAX_NAME_LENGTH,
-            "CreateContactRequest.name",
-        )
-        .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+        ic_cdk::api::print(format!(
+            "CREATE VALIDATION DEBUG: name='{}', trimmed='{}', is_empty={}, has_whitespace={}",
+            self.name,
+            self.name.trim(),
+            self.name.trim().is_empty(),
+            self.name != self.name.trim()
+        ));
 
-        validate_string_whitespace_padding(&self.name, "CreateContactRequest.name")
-            .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+        if self.name.trim().is_empty() {
+            ic_cdk::api::print("CREATE VALIDATION FAILED: empty name");
+            return Err(crate::types::contact::ContactError::InvalidContactData);
+        }
+        if self.name != self.name.trim() {
+            ic_cdk::api::print("CREATE VALIDATION FAILED: whitespace padding");
+            return Err(crate::types::contact::ContactError::InvalidContactData);
+        }
+        if self.name.chars().count() > CONTACT_MAX_NAME_LENGTH {
+            ic_cdk::api::print("CREATE VALIDATION FAILED: too long");
+            return Err(crate::types::contact::ContactError::InvalidContactData);
+        }
+        ic_cdk::api::print("CREATE VALIDATION PASSED");
 
         // If we have an image, validate all constraints (including format and size)
         if let Some(image) = &self.image {
-            ic_cdk::api::print("Validating image in CreateContactRequest");
             // This should preserve specific error types like InvalidImageFormat and ImageTooLarge
             return image.validate_all(existing_contacts);
         }
@@ -860,8 +849,7 @@ pub fn validate_memory_for_new_image(
     }
 
     // Also check per-principal limits
-    validate_principal_memory_limit(existing_contacts, true)
-        .map_err(|_| crate::types::contact::ContactError::TooManyContactsWithImages)?;
+    validate_principal_memory_limit(existing_contacts, true)?;
 
     Ok(())
 }
@@ -880,18 +868,30 @@ impl crate::types::contact::UpdateContactRequest {
         _principal: &Principal,
         is_adding_new_image: bool,
     ) -> Result<(), crate::types::contact::ContactError> {
-        // Validate name directly to avoid error conversion
-        validate_string_length(
-            &self.name,
-            CONTACT_MAX_NAME_LENGTH,
-            "UpdateContactRequest.name",
-        )
-        .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+        // DEBUG: Add explicit validation with logging
+        ic_cdk::api::print(format!(
+            "UPDATE VALIDATION DEBUG: name='{}', trimmed='{}', is_empty={}, has_whitespace={}",
+            self.name,
+            self.name.trim(),
+            self.name.trim().is_empty(),
+            self.name != self.name.trim()
+        ));
 
-        validate_string_whitespace_padding(&self.name, "UpdateContactRequest.name")
-            .map_err(|_| crate::types::contact::ContactError::InvalidContactData)?;
+        if self.name.trim().is_empty() {
+            ic_cdk::api::print("UPDATE VALIDATION FAILED: empty name");
+            return Err(crate::types::contact::ContactError::InvalidContactData);
+        }
+        if self.name != self.name.trim() {
+            ic_cdk::api::print("UPDATE VALIDATION FAILED: whitespace padding");
+            return Err(crate::types::contact::ContactError::InvalidContactData);
+        }
+        if self.name.chars().count() > CONTACT_MAX_NAME_LENGTH {
+            ic_cdk::api::print("UPDATE VALIDATION FAILED: too long");
+            return Err(crate::types::contact::ContactError::InvalidContactData);
+        }
+        ic_cdk::api::print("UPDATE VALIDATION PASSED");
 
-        // Validate address count
+        // Validate address count using original validation function
         validate_collection_size(
             &self.addresses,
             CONTACT_MAX_ADDRESSES,
@@ -906,9 +906,7 @@ impl crate::types::contact::UpdateContactRequest {
             } else {
                 // For updates that aren't adding new images, still validate memory and format
                 validate_memory_usage()?;
-                image
-                    .validate()
-                    .map_err(|_| crate::types::contact::ContactError::InvalidImageFormat)?;
+                image.validate()?;
             }
         }
 
@@ -958,10 +956,11 @@ impl crate::types::contact::StoredContacts {
 }
 
 // Apply the validation during deserialization for all types
-validate_on_deserialize!(Contact);
-validate_on_deserialize!(ContactAddressData);
-validate_on_deserialize!(CreateContactRequest);
-validate_on_deserialize!(UpdateContactRequest);
+// Removed: validate_on_deserialize!(Contact); - uses standard derive
+// Removed: validate_on_deserialize!(ContactAddressData); - uses standard derive
+// Removed: validate_on_deserialize!(CreateContactRequest); - uses standard derive, manual
+// validation in backend Removed: validate_on_deserialize!(UpdateContactRequest); - uses standard
+// derive, manual validation in backend
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);

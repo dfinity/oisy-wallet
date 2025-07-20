@@ -49,7 +49,6 @@ impl ImageMimeType {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(remote = "Self")]
 pub struct Contact {
     pub id: u64,
     pub name: String,
@@ -93,7 +92,6 @@ impl ContactImage {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(remote = "Self")]
 pub struct ContactAddressData {
     pub token_account_id: TokenAccountId,
     pub label: Option<String>,
@@ -114,14 +112,12 @@ pub struct ImageStatistics {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(remote = "Self")]
 pub struct CreateContactRequest {
     pub name: String,
     pub image: Option<ContactImage>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-#[serde(remote = "Self")]
 pub struct UpdateContactRequest {
     pub id: u64,
     pub name: String,
