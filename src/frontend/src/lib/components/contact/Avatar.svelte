@@ -54,19 +54,12 @@
 
 <div
 	class={`${commonClasses} flex items-center justify-center ${isNullish(blobUrl) ? bgColor : ''}`}
-	role="img"
-	aria-label={ariaLabel}
 	data-tid={AVATAR_IMAGE}
+	aria-label={ariaLabel}
 >
 	{#if nonNullish(blobUrl)}
-		<Img
-			src={blobUrl}
-			alt={ariaLabel}
-			styleClass="h-full w-full object-cover"
-			rounded
-			loading="eager"
-		/>
-	{:else if initials}
+		<Img src={blobUrl} alt={ariaLabel} styleClass="h-full w-full object-cover" rounded />
+	{:else if nonNullish(initials)}
 		<span class="font-bold text-white">{initials}</span>
 	{:else}
 		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />

@@ -313,6 +313,7 @@
 			<div class="flex flex-wrap items-center gap-2">
 				<Avatar
 					name={currentContact.name}
+					image={currentContact.image}
 					variant="xs"
 					styleClass="rounded-full flex items-center justify-center"
 				/>
