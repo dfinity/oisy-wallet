@@ -32,6 +32,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { SwapError } from '$lib/utils/swap.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -65,6 +66,15 @@
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore)
 			? $icTokenFeeStore[$sourceToken.symbol]
 			: undefined
+	);
+
+	console.log(
+		nonNullish(swapAmount)
+			? parseToken({
+					value: `${swapAmount}`,
+					unitName: 8
+				})
+			: 'hello'
 	);
 
 	const swap = async () => {
@@ -133,7 +143,7 @@
 			}
 
 			if (err instanceof SwapError) {
-				if (err.code === 'withdraw_failed') {
+				if (err.code === 'swap_failed_withdraw_success') {
 					failedSwapError.set({
 						message: $i18n.swap.error.withdraw_failed,
 						variant: 'error',
@@ -145,7 +155,7 @@
 				} else {
 					failedSwapError.set({
 						message: $i18n.swap.error[err.code],
-						variant: 'error'
+						variant: 'info'
 					});
 				}
 			} else {
