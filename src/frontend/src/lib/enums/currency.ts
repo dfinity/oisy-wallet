@@ -11,7 +11,5 @@ export enum Currency {
 	JPY = 'jpy',
 	SAR = 'sar',
 	SGD = 'sgd',
-	USD = 'usd',
-	XAF = 'xaf',
-	XOF = 'xof'
+	USD = 'usd'
 }
