@@ -30,7 +30,8 @@
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-5">
-	<ContactHeader name={contact.name} onEdit={() => onEdit?.(contact)}></ContactHeader>
+	<ContactHeader name={contact.name} image={contact.image} onEdit={() => onEdit?.(contact)}
+	></ContactHeader>
 
 	{#if hasAddresses}
 		<div class="flex flex-col gap-1">

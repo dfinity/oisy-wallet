@@ -1,5 +1,5 @@
 import type { Contact, ContactAddressData } from '$declarations/backend/backend.did';
-import type { ContactAddressUi } from '$lib/types/contact';
+import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import { mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
@@ -74,16 +74,11 @@ export const getMockContactsUi = ({
 	n: number;
 	name?: string;
 	addresses: ContactAddressUi[];
-}): Contact[] =>
-	Array(n)
-		.fill(null)
-		.map(
-			(_, i) =>
-				({
-					id: BigInt(i),
-					name: name ?? 'Testname',
-					updateTimestampNs: 12,
-					addresses,
-					image: []
-				}) as unknown as Contact
-		);
+}): ContactUi[] =>
+	Array.from({ length: n }, (_, i) => ({
+		id: BigInt(i),
+		name: name ?? 'Testname',
+		updateTimestampNs: BigInt(12),
+		addresses,
+		image: undefined
+	}));

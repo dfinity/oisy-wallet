@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ContactImage } from '$declarations/backend/backend.did';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconContactHeader from '$lib/components/icons/IconContactHeader.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
@@ -10,11 +11,12 @@
 
 	interface Props {
 		name: string;
+		image?: ContactImage;
 		onEdit: () => void;
 		styleClass?: string;
 	}
 
-	let { name, onEdit, styleClass = '' }: Props = $props();
+	let { name, image, onEdit, styleClass = '' }: Props = $props();
 
 	let color = $derived(selectColorForName({ name, colors: CONTACT_TEXT_COLORS }));
 
@@ -43,7 +45,8 @@
 		<IconContactHeader />
 	</div>
 	<div>
-		<Avatar variant="xl" {name} styleClass="mt-[-50%] border-3 border-primary-inverted"></Avatar>
+		<Avatar variant="xl" {name} {image} styleClass="mt-[-50%] border-3 border-primary-inverted"
+		></Avatar>
 	</div>
 	<div class="pt-5 text-2xl font-bold text-primary md:text-3xl">
 		{name}

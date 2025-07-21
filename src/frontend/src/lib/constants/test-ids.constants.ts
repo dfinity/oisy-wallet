@@ -236,6 +236,8 @@ export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleto
 
 export const SEND_FEE_INFO = 'send-fee-info';
 
+// Avatar
+export const AVATAR_IMAGE = 'avatar-image';
 export const AVATAR_WITH_BADGE_FALLBACK_IMAGE = 'avatar-with-badge-fallback-image';
 
 // Contact Card test IDs
