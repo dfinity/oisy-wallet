@@ -15,8 +15,6 @@ import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-const ERC721_INTERFACE_ID = '0x80ac58cd';
-
 export class InfuraErc721Provider {
 	private readonly provider: InfuraProvider;
 
