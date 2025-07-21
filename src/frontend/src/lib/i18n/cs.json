@@ -1494,7 +1494,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short AI Asistent",
-			"welcome_message": "Dobrý den! \uD83D\uDC4B Jsem OISY, váš osobní AI asistent. Zde je návod, jak vám mohu pomoci:",
+			"welcome_message": "Dobrý den! 👋 Jsem OISY, váš osobní AI asistent. Zde je návod, jak vám mohu pomoci:",
 			"action_button_contacts_title": "Zobrazit kontakty",
 			"action_button_contacts_subtitle": "Zobrazte své uložené kontakty",
 			"action_button_contacts_prompt": "Ukaž mi moje kontakty.",
