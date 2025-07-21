@@ -166,6 +166,7 @@
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
+
 {#if AVATAR_ENABLED}
 	<input
 		bind:this={fileInput}
