@@ -214,17 +214,17 @@ export const getTokenInfo = async ({
 
 	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
 
-	const owner = value?.owner?.toString();
+	const { owner, data } = value ?? {};
 
-	if (isNullish(value?.data) || !('parsed' in value.data)) {
+	if (isNullish(data) || !('parsed' in data)) {
 		return { owner, decimals: 0 };
 	}
 
-	if (isNullish(value.data.parsed?.info)) {
+	if (isNullish(data.parsed?.info)) {
 		return { owner, decimals: 0 };
 	}
 
-	const { decimals, mintAuthority, freezeAuthority } = value.data.parsed.info as {
+	const { decimals, mintAuthority, freezeAuthority } = data.parsed.info as {
 		decimals?: number;
 		mintAuthority?: SplTokenAddress;
 		freezeAuthority?: SplTokenAddress;
