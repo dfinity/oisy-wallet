@@ -3,6 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
+	import NftsList from '$lib/components/nfts/NftsList.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
@@ -14,7 +15,6 @@
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import NftsList from '$lib/components/nfts/NftsList.svelte';
 
 	let activeTab = $state(TokenTypes.TOKENS);
 
