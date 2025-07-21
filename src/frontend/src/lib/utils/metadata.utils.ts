@@ -7,5 +7,5 @@ import { UrlSchema } from '$lib/validation/url.validation';
 export const hardenMetadata = <T extends Partial<TokenMetadata>>({ icon, ...rest }: T): T => {
 	const { success } = UrlSchema.safeParse(icon);
 
-	return { ...rest, icon: success ? undefined : icon } as T;
+	return { ...rest, ...(!success && { icon }) } as T;
 };
