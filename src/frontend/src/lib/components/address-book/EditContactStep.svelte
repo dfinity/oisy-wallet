@@ -48,7 +48,7 @@
 		onDeleteAddress
 	}: Props = $props();
 
-	let fileInput = $state<HTMLInputElement>();
+	let fileInput = $state<HTMLInputElement | undefined>();
 	let imageUrl = $derived(contact.image ? imageToDataUrl(contact.image) : undefined);
 
 	const handleFileChange = async (e: Event) => {
