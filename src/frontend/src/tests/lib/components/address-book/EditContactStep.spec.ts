@@ -34,6 +34,10 @@ vi.mock('browser-image-compression', () => {
 	};
 });
 
+vi.mock('$env/avatar.env', () => ({
+	AVATAR_ENABLED: true
+}));
+
 describe('EditContactStep', () => {
 	const mockContact: ContactUi = {
 		id: 1n,
