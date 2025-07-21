@@ -9,6 +9,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
@@ -63,13 +64,15 @@
 					{`< ${formatCurrency({
 						value: EXCHANGE_USD_AMOUNT_THRESHOLD,
 						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore
+						exchangeRate: $currencyExchangeStore,
+						language: $currentLanguage
 					})}`}
 				{:else}
 					{formatCurrency({
 						value: sourceTokenTotalFeeUSD,
 						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore
+						exchangeRate: $currencyExchangeStore,
+						language: $currentLanguage
 					})}
 				{/if}
 			{/snippet}
