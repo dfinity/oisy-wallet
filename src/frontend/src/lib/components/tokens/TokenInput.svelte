@@ -5,8 +5,8 @@
 	import { slide } from 'svelte/transition';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
-	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
 	import TokenInputCurrencyFiat from '$lib/components/tokens/TokenInputCurrencyFiat.svelte';
+	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
