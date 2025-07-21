@@ -1,4 +1,3 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
 import {
 	infuraErc721Providers,
@@ -20,13 +19,13 @@ export const loadNfts = ({
 	loadedNfts: Nft[];
 	walletAddress: string;
 }): Promise<void[]> => {
-	const etherscanProvider = etherscanProviders(ETHEREUM_NETWORK.id);
-	const infuraProvider = infuraErc721Providers(ETHEREUM_NETWORK.id);
-
 	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, nfts: loadedNfts });
 
 	return Promise.all(
 		tokens.map((token) => {
+			const etherscanProvider = etherscanProviders(token.network.id);
+			const infuraProvider = infuraErc721Providers(token.network.id);
+
 			const loadedNfts = getLoadedNfts({ token, loadedNftsByNetwork });
 
 			return loadNftsOfToken({
@@ -116,12 +115,20 @@ const loadNftsMetadata = async ({
 	contractAddress: string;
 	tokenIds: number[];
 }): Promise<NftMetadata[]> => {
-	const nftsMetadata: NftMetadata[] = [];
-	for (const tokenId of tokenIds) {
-		nftsMetadata.push(await loadNftMetadata({ infuraProvider, contractAddress, tokenId }));
-	}
+	const metadataPromises = tokenIds.map((tokenId) => loadNftMetadata({infuraProvider, contractAddress, tokenId}));
+	const results = await Promise.allSettled(metadataPromises);
+	return results.reduce<NftMetadata[]>((acc, result) => {
+		if (result.status !== 'fulfilled') {
+			// For development purposes, we want to see the error in the console.
+			console.error(result.reason);
 
-	return nftsMetadata;
+			return acc;
+		}
+
+		const {value} = result;
+
+		return nonNullish(value) ? [...acc, value] : acc;
+	}, [])
 };
 
 const loadNftMetadata = async ({
