@@ -265,100 +265,104 @@ export const fetchIcpSwap = async ({
 		throwSwapError('deposit_error');
 	}
 
-	try {
-		if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 200000000n) {
+	// Only for test-purposes
+	if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 200000000n) {
+		try {
+			await swapIcp({
+				identity,
+				canisterId: poolCanisterId,
+				amountIn: `${parsedSwapAmount}000`,
+				zeroForOne: pool.token0.address === sourceLedgerCanisterId,
+				amountOutMinimum: slippageMinimum.toString()
+			});
+		} catch (err: unknown) {
+			console.error(err);
+
 			try {
-				await swapIcp({
+				// If the swap fails, attempt to refund the user's original tokens
+				await withdraw({
 					identity,
 					canisterId: poolCanisterId,
-					amountIn: `${parsedSwapAmount}000`,
-					zeroForOne: pool.token0.address === sourceLedgerCanisterId,
-					amountOutMinimum: slippageMinimum.toString()
+					token: sourceLedgerCanisterId,
+					amount: BigInt(`${parsedSwapAmount}000`),
+					fee: sourceTokenFee
 				});
 			} catch (err: unknown) {
 				console.error(err);
 
-				try {
-					// If the swap fails, attempt to refund the user's original tokens
-					await withdraw({
-						identity,
-						canisterId: poolCanisterId,
-						token: sourceLedgerCanisterId,
-						amount: BigInt(`${parsedSwapAmount}000`),
-						fee: sourceTokenFee
-					});
-				} catch (err: unknown) {
-					console.error(err);
+				// const errorMessage = getSwapErrorMessage('withdraw_failed');
 
-					// const errorMessage = getSwapErrorMessage('withdraw_failed');
-
-					// // If even the refund fails, show a critical error requiring manual user action
-					// throw new Error(errorMessage);
-
-					throwSwapError('withdraw_failed');
-				}
-
-				// const errorMessage = getSwapErrorMessage('swap_failed_withdraw_success');
-
-				// Inform the user that the swap failed, but refund was successful
-				throwSwapError('swap_failed_withdraw_success');
-
+				// // If even the refund fails, show a critical error requiring manual user action
 				// throw new Error(errorMessage);
+
+				throwSwapError('withdraw_failed');
 			}
+
+			// const errorMessage = getSwapErrorMessage('swap_failed_withdraw_success');
+
+			// Inform the user that the swap failed, but refund was successful
+			throwSwapError('swap_failed_withdraw_success');
+
+			// throw new Error(errorMessage);
 		}
 
-		if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 300000000n) {
+		return;
+	}
+	// Only for test-purposes
+	if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 300000000n) {
+		try {
+			await swapIcp({
+				identity,
+				canisterId: poolCanisterId,
+				amountIn: `${parsedSwapAmount}000`,
+				zeroForOne: pool.token0.address === sourceLedgerCanisterId,
+				amountOutMinimum: slippageMinimum.toString()
+			});
+		} catch (err: unknown) {
+			console.error(err, 'err SWAP FAILED');
+
 			try {
-				await swapIcp({
+				// If the swap fails, attempt to refund the user's original tokens
+				await withdraw({
 					identity,
 					canisterId: poolCanisterId,
-					amountIn: `${parsedSwapAmount}000`,
-					zeroForOne: pool.token0.address === sourceLedgerCanisterId,
-					amountOutMinimum: slippageMinimum.toString()
+					token: sourceLedgerCanisterId,
+					amount: parsedSwapAmount,
+					fee: sourceTokenFee
 				});
+
+				console.log('withdraw success');
 			} catch (err: unknown) {
-				console.error(err, 'err SWAP FAILED');
+				console.error(err);
 
-				try {
-					// If the swap fails, attempt to refund the user's original tokens
-					await withdraw({
-						identity,
-						canisterId: poolCanisterId,
-						token: sourceLedgerCanisterId,
-						amount: parsedSwapAmount,
-						fee: sourceTokenFee
-					});
+				console.log('idk, why but error in catch block');
 
-					console.log('withdraw success');
-				} catch (err: unknown) {
-					console.error(err);
+				// const errorMessage = getSwapErrorMessage('withdraw_failed');
 
-					console.log('idk, why but error in catch block');
-
-					// const errorMessage = getSwapErrorMessage('withdraw_failed');
-
-					// // If even the refund fails, show a critical error requiring manual user action
-					// throw new Error(errorMessage);
-
-					throwSwapError('withdraw_failed');
-				}
-
-				console.log('should update error to swap_failed_withdraw_success');
-
-				console.log('should throw error swap_failed_withdraw_success ');
-
-				throwSwapError('swap_failed_withdraw_success');
-
-				// const errorMessage = getSwapErrorMessage('swap_failed_withdraw_success');
-
-				// Inform the user that the swap failed, but refund was successful
-
+				// // If even the refund fails, show a critical error requiring manual user action
 				// throw new Error(errorMessage);
+
+				throwSwapError('withdraw_failed');
 			}
+
+			console.log('should update error to swap_failed_withdraw_success');
+
+			console.log('should throw error swap_failed_withdraw_success ');
+
+			throwSwapError('swap_failed_withdraw_success');
+
+			// const errorMessage = getSwapErrorMessage('swap_failed_withdraw_success');
+
+			// Inform the user that the swap failed, but refund was successful
+
+			// throw new Error(errorMessage);
 		}
+		return;
+	}
 
-		console.log('should not go here as it throw error');
+	console.log('should not go here as it throw error');
 
+	try {
 		// Perform the actual token swap after a successful deposit
 		await swapIcp({
 			identity,
