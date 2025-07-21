@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import imageCompression from 'browser-image-compression';
 	import type { ContactImage } from '$declarations/backend/backend.did';
+	import { AVATAR_ENABLED } from '$env/avatar.env';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
@@ -81,12 +82,14 @@
 					variant="xs"
 					styleClass="md:text-[19.2px]"
 				/>
-				<span
-					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
-					data-tid={`avatar-badge-${contact.name}`}
-				>
-					<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={() => {}} />
-				</span>
+				{#if AVATAR_ENABLED}
+					<span
+						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+						data-tid={`avatar-badge-${contact.name}`}
+					>
+						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={() => {}} />
+					</span>
+				{/if}
 			</div>
 		{/snippet}
 
@@ -163,11 +166,12 @@
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
-
-<input
-	bind:this={fileInput}
-	type="file"
-	accept="image/*"
-	class="hidden"
-	onchange={handleFileChange}
-/>
+{#if AVATAR_ENABLED}
+	<input
+		bind:this={fileInput}
+		type="file"
+		accept="image/*"
+		class="hidden"
+		onchange={handleFileChange}
+	/>
+{/if}
