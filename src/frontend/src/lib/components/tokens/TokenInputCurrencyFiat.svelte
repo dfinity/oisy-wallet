@@ -57,7 +57,7 @@
 				})
 				: undefined;
 
-		if (newDisplayValue !== displayValue?.toString()) {
+		if (Number(newDisplayValue) !== Number(displayValue)) {
 			displayValue = newDisplayValue;
 		}
 	};
