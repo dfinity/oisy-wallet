@@ -119,8 +119,8 @@ export const REFERRAL_CODE_LEARN_MORE = 'referral-code-learn-more';
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
 export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
-export const TOKEN_INPUT_CURRENCY_USD = 'token-input-currency-usd';
-export const TOKEN_INPUT_CURRENCY_USD_SYMBOL = 'token-input-currency-usd-symbol';
+export const TOKEN_INPUT_CURRENCY_FIAT = 'token-input-currency-fiat';
+export const TOKEN_INPUT_CURRENCY_FIAT_SYMBOL = 'token-input-currency-fiat-symbol';
 
 export const TOKEN_INPUT_AMOUNT_EXCHANGE = 'swap-amount-exchange';
 export const TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
