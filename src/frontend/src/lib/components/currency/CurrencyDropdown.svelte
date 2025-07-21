@@ -48,12 +48,10 @@
 			return nonNullish(name)
 				? [...acc, { key, currency, name, symbol: parseSymbolString({ currency, language }) }]
 				: acc;
-
-
-		}, [])
+		}, []);
 	});
 
-	let sortedCurrencies = $derived(currencies.sort((a, b) => a.name.localeCompare(b.name)))
+	let sortedCurrencies = $derived(currencies.sort((a, b) => a.name.localeCompare(b.name)));
 </script>
 
 <span class="currency-selector min-w-32">
@@ -73,7 +71,7 @@
 
 		{#snippet items()}
 			<List noPadding condensed testId={CURRENCY_SWITCHER_DROPDOWN}>
-				{#each sortedCurrencies as { key,currency, name, symbol}, index (index + key)}
+				{#each sortedCurrencies as { key, currency, name, symbol }, index (index + key)}
 					<ListItem>
 						<Button
 							onclick={() => handleCurrencyChange(currency)}
