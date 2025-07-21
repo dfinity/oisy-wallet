@@ -13,5 +13,5 @@ export enum Currency {
 	SGD = 'sgd',
 	USD = 'usd',
 	XAF = 'xaf',
-	XOF = 'xof'	
+	XOF = 'xof'
 }
