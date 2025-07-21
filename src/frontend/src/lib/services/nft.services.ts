@@ -65,11 +65,23 @@ const loadNftsOfToken = async ({
 	);
 
 	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
-	for (const tokenIds of tokenIdBatches) {
-		const nfts = await loadNftsOfBatch({ infuraProvider, token, tokenIds });
 
-		nftStore.addAll(nfts);
-	}
+	const nftsPromises = tokenIdBatches.map((tokenIds) => loadNftsOfBatch({infuraProvider, token, tokenIds}))
+	const results = await Promise.allSettled(nftsPromises)
+	const successfulNfts = results.reduce<Nft[]>((acc, result) => {
+		if (result.status !== 'fulfilled') {
+			// For development purposes, we want to see the error in the console.
+			console.error(result.reason);
+
+			return acc;
+		}
+
+		const {value} = result;
+
+		return [...acc, ...[value]]
+	}, []).flat()
+
+	nftStore.addAll(successfulNfts);
 };
 
 const loadNftsOfBatch = async ({
