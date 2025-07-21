@@ -14,6 +14,7 @@
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import NftsList from '$lib/components/nfts/NftsList.svelte';
 
 	let activeTab = $state(TokenTypes.TOKENS);
 
@@ -54,7 +55,7 @@
 	{#if activeTab === TokenTypes.TOKENS}
 		<TokensList />
 	{:else}
-		<!--		TODO render NFTs list -->
+		<NftsList />
 	{/if}
 
 	<div in:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
