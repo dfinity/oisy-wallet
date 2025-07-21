@@ -13,20 +13,23 @@ import {
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
-import type { SplTokenAddress } from '$sol/types/spl';
+import type { SplToken } from '$sol/types/spl';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
-import { getTransferInstruction } from '@solana-program/token';
+import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
 import {
 	appendTransactionMessageInstructions,
 	assertTransactionIsFullySigned,
+	compileTransaction,
 	createTransactionMessage,
+	getBase64Decoder,
 	getComputeUnitEstimateForTransactionMessageFactory,
+	getTransactionEncoder,
 	lamports,
 	pipe,
 	prependTransactionMessageInstruction,
@@ -34,6 +37,7 @@ import {
 	setTransactionMessageFeePayerSigner,
 	setTransactionMessageLifetimeUsingBlockhash,
 	address as solAddress,
+	type Base64EncodedWireTransaction,
 	type Commitment,
 	type ITransactionMessageWithFeePayer,
 	type Rpc,
@@ -132,16 +136,21 @@ const createSplTokenTransactionMessage = async ({
 	destination,
 	amount,
 	network,
-	tokenAddress,
-	tokenOwnerAddress
+	token
 }: {
 	signer: TransactionSigner;
 	destination: SolAddress;
 	amount: bigint;
 	network: SolanaNetworkType;
-	tokenAddress: SplTokenAddress;
-	tokenOwnerAddress: SolAddress;
+	token: SplToken;
 }): Promise<SolTransactionMessage> => {
+	const {
+		address: tokenAddress,
+		owner: tokenOwnerAddress,
+		mintAuthority: tokenMintAuthority,
+		decimals: tokenDecimals
+	} = token;
+
 	const rpc = solanaHttpRpc(network);
 
 	const source = signer.address;
@@ -190,21 +199,31 @@ const createSplTokenTransactionMessage = async ({
 		tokenOwnerAddress
 	});
 
-	const transferInstruction = getTransferInstruction(
-		{
-			source: solAddress(sourceTokenAccountAddress),
-			destination: solAddress(
-				destinationIsAtaAddress
-					? destination
-					: mustCreateDestinationTokenAccount
-						? calculatedDestinationTokenAccountAddress
-						: destinationTokenAccountAddress
-			),
-			authority: signer,
-			amount
-		},
-		{ programAddress: solAddress(tokenOwnerAddress) }
-	);
+	const transferParams = {
+		source: solAddress(sourceTokenAccountAddress),
+		destination: solAddress(
+			destinationIsAtaAddress
+				? destination
+				: mustCreateDestinationTokenAccount
+					? calculatedDestinationTokenAccountAddress
+					: destinationTokenAccountAddress
+		),
+		authority: signer,
+		amount
+	};
+
+	const config = { programAddress: solAddress(tokenOwnerAddress) };
+
+	const transferInstruction = nonNullish(tokenMintAuthority)
+		? getTransferCheckedInstruction(
+				{
+					...transferParams,
+					mint: solAddress(tokenMintAuthority),
+					decimals: tokenDecimals
+				},
+				config
+			)
+		: getTransferInstruction(transferParams, { programAddress: solAddress(tokenOwnerAddress) });
 
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(
@@ -302,6 +321,8 @@ export const sendSol = async ({
 		network: solNetwork
 	});
 
+	console.log(1, isTokenSpl(token), token, destination, amount);
+
 	const transactionMessage = isTokenSpl(token)
 		? await createSplTokenTransactionMessage({
 				signer,
@@ -309,7 +330,8 @@ export const sendSol = async ({
 				amount,
 				network: solNetwork,
 				tokenAddress: token.address,
-				tokenOwnerAddress: token.owner
+				tokenOwnerAddress: token.owner,
+				tokenMintAuthority: token.mintAuthority
 			})
 		: await createSolTransactionMessage({
 				signer,
@@ -318,15 +340,42 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
+	console.log(2);
+
 	const getComputeUnitEstimateForTransactionMessage =
 		getComputeUnitEstimateForTransactionMessageFactory({
 			rpc
 		});
 
-	const computeUnitsEstimate =
-		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
+	const compiledTransaction = compileTransaction(transactionMessage);
+
+	const transactionBytes = getBase64Decoder().decode(
+		getTransactionEncoder().encode(compiledTransaction)
+	);
+
+	const { simulateTransaction } = rpc;
+
+	const simulationResult = await simulateTransaction(
+		transactionBytes as Base64EncodedWireTransaction,
+		{
+			encoding: 'base64'
+		}
+	).send();
+
+	console.log({ simulationResult });
+
+	console.log(2.5, prioritizationFee, transactionMessage);
+
+	const computeUnitsEstimate = await getComputeUnitEstimateForTransactionMessage(
+		transactionMessage,
+		{ commitment: 'confirmed' }
+	);
+
+	console.log(2.9, prioritizationFee, computeUnitsEstimate);
 
 	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
+
+	console.log(3, prioritizationFee, computeUnitsEstimate, computeUnitPrice);
 
 	const transactionMessageWithComputeUnitPrice = prependTransactionMessageInstruction(
 		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
@@ -335,9 +384,13 @@ export const sendSol = async ({
 
 	progress(ProgressStepsSendSol.SIGN);
 
+	console.log(4);
+
 	const { signedTransaction, signature } = await signTransaction(
 		prioritizationFee > ZERO ? transactionMessageWithComputeUnitPrice : transactionMessage
 	);
+
+	console.log(5);
 
 	progress(ProgressStepsSendSol.SEND);
 
@@ -346,6 +399,8 @@ export const sendSol = async ({
 		signedTransaction
 	});
 
+	console.log(6);
+
 	progress(ProgressStepsSendSol.CONFIRM);
 
 	await confirmSignedTransaction({
@@ -353,6 +408,8 @@ export const sendSol = async ({
 		rpcSubscriptions,
 		signedTransaction
 	});
+
+	console.log(7);
 
 	progress(ProgressStepsSendSol.DONE);
 
