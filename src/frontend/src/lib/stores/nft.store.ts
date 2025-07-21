@@ -1,4 +1,4 @@
-import type { Nft, NftId } from '$lib/types/nft';
+import type { Nft } from '$lib/types/nft';
 import { isNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -6,7 +6,6 @@ export type NftStoreData = Nft[] | undefined;
 
 export interface NftStore extends Readable<NftStoreData> {
 	addAll: (nfts: Nft[]) => void;
-	getTokenIds: (contractAddress: string) => number[];
 	resetAll: () => void;
 }
 
@@ -32,27 +31,6 @@ const initNftStore = (): NftStore => {
 
 				return [...currentNfts, ...newNfts];
 			});
-		},
-		getTokenIds: (contractAddress: string): NftId[] => {
-			let tokenIds: NftId[] = [];
-
-			update((nfts) => {
-				if (isNullish(nfts)) {
-					tokenIds = [];
-					return nfts;
-				}
-
-				tokenIds = nfts.reduce<NftId[]>((acc, nft) => {
-					if (nft.contract.address.toLowerCase() === contractAddress.toLowerCase()) {
-						acc.push(nft.id);
-					}
-					return acc;
-				}, []);
-
-				return nfts;
-			});
-
-			return tokenIds;
 		},
 		resetAll: () => set(undefined)
 	};
