@@ -54,8 +54,6 @@
 
 <div
 	class={`${commonClasses} flex items-center justify-center ${isNullish(blobUrl) ? bgColor : ''}`}
-	role="img"
-	aria-label={ariaLabel}
 	data-tid={AVATAR_IMAGE}
 >
 	{#if nonNullish(blobUrl)}
