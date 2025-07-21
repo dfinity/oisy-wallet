@@ -8,6 +8,7 @@
 		CONVERT_AMOUNT_EXCHANGE_VALUE
 	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { formatCurrency } from '$lib/utils/format.utils';
@@ -27,7 +28,8 @@
 						? usdValue
 						: EXCHANGE_USD_AMOUNT_THRESHOLD,
 				currency: $currentCurrency,
-				exchangeRate: $currencyExchangeStore
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage
 			})
 		: undefined;
 </script>

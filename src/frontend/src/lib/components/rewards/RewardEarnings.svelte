@@ -20,6 +20,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -126,7 +127,8 @@
 		formatCurrency({
 			value: totalRewardUsd,
 			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
 		})
 	);
 
