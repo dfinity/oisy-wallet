@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import {
@@ -52,6 +52,10 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { ethAddressStore } from '$lib/stores/address.store';
+	import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+	import { nftStore } from '$lib/stores/nft.store';
+	import { loadNfts } from '$lib/services/nft.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -149,6 +153,19 @@
 				}
 			}
 		}
+	}
+
+	const debounceLoadNfts = debounce(() => {
+		if (nonNullish($ethAddressStore?.data)) {
+			const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
+			const loadedNfts = $nftStore ?? [];
+
+			loadNfts({ tokens: tokensList, loadedNfts, walletAddress: $ethAddressStore.data });
+		}
+	});
+
+	$: if ($erc721CustomTokensStore) {
+		debounceLoadNfts();
 	}
 
 	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });
