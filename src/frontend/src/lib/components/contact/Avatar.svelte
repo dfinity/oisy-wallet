@@ -57,12 +57,7 @@
 	data-tid={AVATAR_IMAGE}
 >
 	{#if nonNullish(blobUrl)}
-		<Img
-			src={blobUrl}
-			alt={ariaLabel}
-			styleClass="h-full w-full object-cover"
-			rounded
-		/>
+		<Img src={blobUrl} alt={ariaLabel} styleClass="h-full w-full object-cover" rounded />
 	{:else if nonNullish(initials)}
 		<span class="font-bold text-white">{initials}</span>
 	{:else}
