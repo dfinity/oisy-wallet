@@ -9,6 +9,7 @@ import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
 import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { nonNullish } from '@dfinity/utils';
+import { randomWait } from '$lib/utils/time.utils';
 
 export const loadNfts = ({
 	tokens,
@@ -64,25 +65,15 @@ const loadNftsOfToken = async ({
 	);
 
 	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
+	for (const tokenIds of tokenIdBatches) {
+		try {
+			const nfts = await loadNftsOfBatch({ infuraProvider, token, tokenIds });
 
-	const nftsPromises = tokenIdBatches.map((tokenIds) =>
-		loadNftsOfBatch({ infuraProvider, token, tokenIds })
-	);
-	const results = await Promise.allSettled(nftsPromises);
-	const successfulNfts = results.reduce<Nft[]>((acc, result) => {
-		if (result.status !== 'fulfilled') {
-			// For development purposes, we want to see the error in the console.
-			console.error(result.reason);
-
-			return acc;
+			nftStore.addAll(nfts);
+		} catch (err: unknown) {
+			console.warn('Failed to load batch of nfts', err);
 		}
-
-		const { value } = result;
-
-		return nonNullish(value) ? [...acc, ...value] : acc;
-	}, []);
-
-	nftStore.addAll(successfulNfts);
+	}
 };
 
 const loadNftsOfBatch = async ({
@@ -140,7 +131,7 @@ const loadNftMetadata = async ({
 	contractAddress: string;
 	tokenId: number;
 }): Promise<NftMetadata> => {
-	await new Promise((resolve) => setTimeout(resolve, 200));
+	await randomWait({min: 0, max: 2000});
 
 	try {
 		return await infuraProvider.getNftMetadata({
