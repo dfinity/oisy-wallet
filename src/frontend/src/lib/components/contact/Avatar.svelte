@@ -31,7 +31,7 @@
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
 	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
 
-	const commonClasses = $derived(
+	let commonClasses = $derived(
 		`${font} ${size} ${bgColor} rounded-full overflow-hidden relative ${styleClass}`
 	);
 
