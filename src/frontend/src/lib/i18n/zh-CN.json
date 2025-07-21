@@ -506,7 +506,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "你的余额",
-			"unavailable_balance": "$ 值不可用",
+			"unavailable_balance": "$currencySymbol 值不可用",
 			"hidden_balance": "你的余额已隐藏",
 			"top_up": "充值你的钱包以开始使用！",
 			"learn_more_about_erc20_icp": "了解更多关于以太坊上的 ERC20 ICP。",
