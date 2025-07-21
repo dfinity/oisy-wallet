@@ -21,7 +21,7 @@ export const saveCustomTokens = async ({
 	const customTokens: CustomToken[] = tokens.map((token) =>
 		toCustomToken({
 			...token,
-			chainId: token.network.id,
+			chainId: token.network.chainId,
 			networkKey: 'Erc721'
 		})
 	);
