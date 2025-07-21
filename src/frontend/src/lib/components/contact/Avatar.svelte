@@ -57,9 +57,9 @@
 	aria-label={ariaLabel}
 >
 	{#if nonNullish(blobUrl)}
-		<Img 
-			src={blobUrl} 
-			alt={ariaLabel} 
+		<Img
+			src={blobUrl}
+			alt={ariaLabel}
 			styleClass="h-full w-full object-cover"
 			rounded
 			loading="eager"
