@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, isNullish } from '@dfinity/utils';
 	import type { ContactImage } from '$declarations/backend/backend.did';
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -48,24 +48,22 @@
 			.toUpperCase()
 	);
 
-	let blobUrl: string | null = $state(null);
-
-	$effect(() => {
-		if (nonNullish(image)) {
-			blobUrl = imageToDataUrl(image);
-		} else {
-			blobUrl = null;
-		}
-	});
+	const blobUrl = $derived(nonNullish(image) ? imageToDataUrl(image) : null);
 </script>
 
 <div
-	class={`${commonClasses} flex items-center justify-center ${!blobUrl ? bgColor : ''}`}
+	class={`${commonClasses} flex items-center justify-center ${isNullish(blobUrl) ? bgColor : ''}`}
 	role="img"
 	aria-label={ariaLabel}
 >
-	{#if blobUrl}
-		<img src={blobUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
+	{#if nonNullish(blobUrl)}
+		<Img 
+			src={blobUrl} 
+			alt={ariaLabel} 
+			styleClass="h-full w-full object-cover"
+			rounded
+			loading="eager"
+		/>
 	{:else if initials}
 		<span class="font-bold text-white">{initials}</span>
 	{:else}

@@ -66,7 +66,7 @@
 
 <form onsubmit={handleSave} method="POST" class="flex w-full flex-col items-center">
 	<ContentWithToolbar styleClass="flex flex-col gap-6 items-center w-full">
-		<Avatar name={editingContact?.name} image={contact.image} variant="xl"></Avatar>
+		<Avatar name={editingContact?.name} image={editingContact?.image} variant="xl"></Avatar>
 		<InputContactName bind:contact={editingContact} bind:isValid={isFormValid} {disabled} />
 
 		<!-- TODO Add address list here -->
