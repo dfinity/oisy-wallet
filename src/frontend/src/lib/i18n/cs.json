@@ -317,8 +317,8 @@
 			},
 			"toolkit": {
 				"name": "Toolkit",
-				"one_liner": "",
-				"description": ""
+				"one_liner": "Kde se správa setkává se spoluprací a podněcuje inovace.",
+				"description": "Toolkit je univerzální sada pro správu systémů SNS (Service Nervous System) a projektů na Internet Computeru. Umožňuje uživatelům bezproblémově inovovat, spolupracovat a decentralizovat - od návrhů na správu až po nasazení kanystrů."
 			}
 		}
 	},
@@ -425,7 +425,7 @@
 			"by": "od",
 			"dfinity_foundation": "Nadace DFINITY",
 			"copyright": "© 2025",
-			"ai_assistant_console_button": ""
+			"ai_assistant_console_button": "$oisy_short Asistent"
 		},
 		"alt": {
 			"dfinity": "Přejít na webové stránky Nadace DFINITY"
@@ -491,10 +491,10 @@
 			"btc_withdrawal_statuses": "Chyba při načítání stavů výběru BTC.",
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
-			"erc20_custom_tokens": "",
+			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
 			"erc20_user_tokens": "Chyba při načítání uživatelských tokenů ERC20.",
-			"spl_custom_tokens": "",
-			"erc721_custom_tokens": "",
+			"spl_custom_tokens": "Chyba při načítání vlastních tokenů SPL.",
+			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
 			"erc20_user_token": "Chyba při povolování dvojitého tokenu ERC20.",
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
@@ -658,7 +658,7 @@
 			"sending": "Odesílání...",
 			"signing": "Podepisování...",
 			"signing_message": "Podepisování zprávy...",
-			"confirming": "",
+			"confirming": "Potvrzování...",
 			"network": "Síť",
 			"source_network": "Zdrojová síť",
 			"destination_network": "Cílová síť",
@@ -734,7 +734,7 @@
 			"unexpected_utxos_fee": "Při výpočtu transakčního poplatku se něco pokazilo.",
 			"unable_to_retrieve_amount": "není k dispozici (nelze načíst)",
 			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
-			"solana_confirmation_failed": ""
+			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně."
 		}
 	},
 	"convert": {
@@ -931,7 +931,7 @@
 				"import_token": "Importovat token",
 				"network": "Síť",
 				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek.",
-				"enable_more_assets": ""
+				"enable_more_assets": "Povolit další tokeny"
 			},
 			"placeholder": {
 				"select_network": "Vybrat síť"
@@ -1064,7 +1064,7 @@
 			"disconnected": "WalletConnect odpojen.",
 			"session_ended": "Relace WalletConnect byla ukončena.",
 			"connected": "WalletConnect připojen.",
-			"transaction_executed": "",
+			"transaction_executed": "WalletConnect \"$method\" požadavek proveden.",
 			"sign_executed": "Požadavek na podpis WalletConnect byl proveden."
 		},
 		"error": {
@@ -1125,11 +1125,11 @@
 		"type": {
 			"send": "Odeslat",
 			"receive": "Přijmout",
-			"withdraw": "",
-			"deposit": "",
+			"withdraw": "Vybrat",
+			"deposit": "Vložit",
 			"approve": "Schválit",
-			"burn": "",
-			"mint": ""
+			"burn": "Spálit",
+			"mint": "Razit"
 		},
 		"label": {
 			"reimbursement": "Náhrada",
@@ -1493,18 +1493,18 @@
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "",
-			"welcome_message": "",
-			"action_button_contacts_title": "",
-			"action_button_contacts_subtitle": "",
-			"action_button_contacts_prompt": "",
-			"send_message": "",
-			"send_message_input_placeholder": "",
-			"loading": ""
+			"title": "$oisy_short AI Asistent",
+			"welcome_message": "Dobrý den! \uD83D\uDC4B Jsem OISY, váš osobní AI asistent. Zde je návod, jak vám mohu pomoci:",
+			"action_button_contacts_title": "Zobrazit kontakty",
+			"action_button_contacts_subtitle": "Zobrazte své uložené kontakty",
+			"action_button_contacts_prompt": "Ukaž mi moje kontakty.",
+			"send_message": "Poslat zprávu",
+			"send_message_input_placeholder": "Co chcete dělat?",
+			"loading": "Přemýšlím..."
 		},
 		"errors": {
-			"unknown": "",
-			"no_response": ""
+			"unknown": "Omlouvám se, něco se pokazilo při získávání odpovědi od LLM.",
+			"no_response": "Omlouvám se, nedostal jsem odpověď od LLM."
 		}
 	}
 }
