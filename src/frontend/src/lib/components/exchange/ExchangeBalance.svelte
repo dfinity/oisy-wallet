@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
