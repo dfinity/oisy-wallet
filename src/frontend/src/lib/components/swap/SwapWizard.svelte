@@ -51,6 +51,8 @@
 	const { sourceToken, destinationToken, isSourceTokenIcrc2, failedSwapError } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
+	console.log($sourceToken, $destinationToken);
+
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContextType>(IC_TOKEN_FEE_CONTEXT_KEY);
@@ -128,7 +130,6 @@
 					),
 					variant: 'info'
 				});
-				return;
 			}
 
 			if (err instanceof SwapError) {
@@ -151,14 +152,13 @@
 						}
 					});
 				}
-				return;
+			} else {
+				failedSwapError.set(undefined);
+				toastsError({
+					msg: { text: $i18n.swap.error.unexpected },
+					err
+				});
 			}
-
-			failedSwapError.set(undefined);
-			toastsError({
-				msg: { text: $i18n.swap.error.unexpected },
-				err
-			});
 
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,

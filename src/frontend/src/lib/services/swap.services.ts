@@ -1,4 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -183,11 +184,13 @@ export const fetchIcpSwap = async ({
 }: SwapParams): Promise<void> => {
 	progress(ProgressStepsSwap.SWAP);
 
-	if (sourceToken.symbol === 'ICP') {
+	if (sourceToken.id === ICP_TOKEN.id) {
 		throwSwapError('deposit_error');
 	}
 
-	if (destinationToken.symbol === 'ICP') {
+	console.log(sourceToken, destinationToken);
+
+	if (destinationToken.id === ICP_TOKEN.id) {
 		throwSwapError('withdraw_failed');
 	}
 

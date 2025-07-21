@@ -193,6 +193,9 @@ export const getSwapErrorMessage = (key: keyof I18n['swap']['error']) => get(i18
 type SwapErrorKey = keyof I18n['swap']['error'];
 
 export const throwSwapError = (code: SwapErrorKey): never => {
+
+	console.log('here is Error');
+	
 	throw new SwapError(code);
 };
 
