@@ -329,9 +329,7 @@ export const sendSol = async ({
 				destination,
 				amount,
 				network: solNetwork,
-				tokenAddress: token.address,
-				tokenOwnerAddress: token.owner,
-				tokenMintAuthority: token.mintAuthority
+				token
 			})
 		: await createSolTransactionMessage({
 				signer,
