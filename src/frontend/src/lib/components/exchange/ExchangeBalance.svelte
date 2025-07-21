@@ -5,6 +5,7 @@
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -34,7 +35,8 @@
 				{formatCurrency({
 					value: totalUsd,
 					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
 				})}
 			{/if}
 		{:else}
@@ -45,7 +47,8 @@
 					{formatCurrency({
 						value: 0,
 						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore
+						exchangeRate: $currencyExchangeStore,
+						language: $currentLanguage
 					})}
 				{/if}
 			</span>
