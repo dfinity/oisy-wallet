@@ -1,6 +1,5 @@
 import type { SolAddress } from '$lib/types/address';
 import type { RequiredToken, Token } from '$lib/types/token';
-import type { RequiredExcept } from '$lib/types/utils';
 
 export type SplTokenAddress = SolAddress;
 
@@ -14,4 +13,4 @@ export type SplToken = Token & {
 	owner: SplTokenAddress;
 } & SplAuthorities;
 
-export type RequiredSplToken = RequiredExcept<RequiredToken<SplToken>, keyof SplAuthorities>;
+export type RequiredSplToken = RequiredToken<SplToken, SplAuthorities>;
