@@ -78,7 +78,7 @@ const loadNftsOfToken = async ({
 
 		const {value} = result;
 
-		return [...acc, ...[value]]
+		return [...acc, value]
 	}, []).flat()
 
 	nftStore.addAll(successfulNfts);
