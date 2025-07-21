@@ -52,11 +52,8 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 
 	const getIdentifier = (
 		transaction: TransactionTypes
-	):
-		| IcTransactionUi['id']
-		| BtcTransactionUi['id']
-		| SolTransactionUi['id']
-		| Transaction['hash'] => (isTransactionUi(transaction) ? transaction.id : transaction.hash);
+	): UiTransactionTypes['id'] | Transaction['hash'] =>
+		isTransactionUi(transaction) ? transaction.id : transaction.hash;
 
 	return {
 		set: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>

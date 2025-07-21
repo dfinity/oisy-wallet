@@ -5,26 +5,34 @@ import type {
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import type { Erc20Token } from '$eth/types/erc20';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	ICP_SWAP_PROVIDER,
 	KONG_SWAP_PROVIDER,
-	SWAP_DEFAULT_SLIPPAGE_VALUE
+	SWAP_DEFAULT_SLIPPAGE_VALUE,
+	SWAP_ETH_TOKEN_PLACEHOLDER,
+	VELORA_SWAP_PROVIDER
 } from '$lib/constants/swap.constants';
-import type { ICPSwapResult } from '$lib/types/swap';
+import { VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
 	formatReceiveOutMinimum,
+	geSwapEthTokenAddress,
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
 	getNetworkFee,
 	getSwapRoute,
 	mapIcpSwapResult,
-	mapKongSwapResult
+	mapKongSwapResult,
+	mapVeloraMarketSwapResult,
+	mapVeloraSwapResult
 } from '$lib/utils/swap.utils';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
+import type { BridgePrice, DeltaPrice, OptimalRate, SwapSide } from '@velora-dex/sdk';
 
 describe('swap utils', () => {
 	const ICP_LP_FEE = 4271n;
@@ -311,6 +319,135 @@ describe('swap utils', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('mapVeloraSwapResult', () => {
+		it('should map DeltaPrice swap result correctly', () => {
+			const mockDeltaSwap: DeltaPrice = {
+				srcToken: '0x123',
+				destToken: '0x456',
+				srcAmount: '1000',
+				destAmount: '900',
+				destAmountBeforeFee: '920',
+				gasCost: '50000',
+				gasCostBeforeFee: '48000',
+				gasCostUSD: '15.5',
+				gasCostUSDBeforeFee: '14.8',
+				srcUSD: '1000.0',
+				destUSD: '895.5',
+				destUSDBeforeFee: '915.2',
+				partner: 'PartnerName',
+				partnerFee: 0.25,
+				hmac: 'abcd1234'
+			};
+
+			const result = mapVeloraSwapResult(mockDeltaSwap);
+
+			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
+			expect(result.receiveAmount).toBe(900n);
+			expect(result.swapDetails).toBe(mockDeltaSwap);
+			expect(result.type).toBe(VeloraSwapTypes.DELTA);
+		});
+
+		it('should map BridgePrice swap result correctly', () => {
+			const mockBridgeSwap: BridgePrice = {
+				srcToken: '0x123',
+				destToken: '0x456',
+				srcAmount: '1000',
+				destAmount: '850',
+				destAmountBeforeFee: '870',
+				gasCost: '60000',
+				gasCostBeforeFee: '58000',
+				gasCostUSD: '18.0',
+				gasCostUSDBeforeFee: '17.4',
+				srcUSD: '1000.0',
+				destUSD: '845.0',
+				destUSDBeforeFee: '865.0',
+				partner: 'BridgePartner',
+				partnerFee: 0.5,
+				hmac: 'bridge1234',
+				destAmountAfterBridge: '800',
+				destUSDAfterBridge: '795.0',
+				bridgeFee: '50',
+				bridgeFeeUSD: '50.0',
+				poolAddress: '0xpool123',
+				bridge: {
+					destinationChainId: 1,
+					outputToken: '0xoutput456'
+				}
+			};
+			const result = mapVeloraSwapResult(mockBridgeSwap);
+
+			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
+			expect(result.receiveAmount).toBe(800n);
+			expect(result.swapDetails).toBe(mockBridgeSwap);
+			expect(result.type).toBe(VeloraSwapTypes.DELTA);
+		});
+	});
+
+	describe('mapVeloraMarketSwapResult', () => {
+		it('should map OptimalRate result correctly', () => {
+			const mockOptimalRate: OptimalRate = {
+				blockNumber: 12345678,
+				network: 1,
+				srcToken: '0x123',
+				srcDecimals: 18,
+				srcAmount: '1000',
+				srcUSD: '1000.0',
+				destToken: '0x456',
+				destDecimals: 6,
+				destAmount: '950',
+				destUSD: '0',
+				bestRoute: [],
+				gasCostUSD: '25.0',
+				gasCost: '100000',
+				side: 'SELL' as SwapSide,
+				contractMethod: 'swapExactTokensForTokens',
+				tokenTransferProxy: '0xproxy123',
+				contractAddress: '0xcontract456',
+				partner: 'ZeroPartner',
+				partnerFee: 0,
+				hmac: 'zero1234',
+				version: '6.2' as OptimalRate['version']
+			};
+
+			const result = mapVeloraMarketSwapResult(mockOptimalRate);
+
+			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
+			expect(result.receiveAmount).toBe(950n);
+			expect(result.swapDetails).toBe(mockOptimalRate);
+			expect(result.type).toBe(VeloraSwapTypes.MARKET);
+		});
+	});
+
+	describe('geSwapEthTokenAddress', () => {
+		it('should return placeholder for default Ethereum token', () => {
+			const result = geSwapEthTokenAddress(ETHEREUM_TOKEN as Erc20Token);
+
+			expect(result).toBe(SWAP_ETH_TOKEN_PLACEHOLDER);
+		});
+
+		it('should return token address for ERC20 token', () => {
+			const mockErc20Token = {
+				...mockValidErc20Token,
+				address: '0x1234567890abcdef'
+			};
+
+			const result = geSwapEthTokenAddress(mockErc20Token);
+
+			expect(result).toBe('0x1234567890abcdef');
+		});
+
+		it('should return address for ERC20 token with different address format', () => {
+			const mockErc20Token = {
+				...mockValidErc20Token,
+				address: '0xA0b86a33E6441038e7BC67766E6C6E57AF9E9C'
+			};
+
+			const result = geSwapEthTokenAddress(mockErc20Token);
+
+			expect(result).toBe('0xA0b86a33E6441038e7BC67766E6C6E57AF9E9C');
 		});
 	});
 });

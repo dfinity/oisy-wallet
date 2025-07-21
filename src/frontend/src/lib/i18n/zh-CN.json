@@ -33,7 +33,7 @@
 			"more_items": "+$items 更多",
 			"select": "选择",
 			"language": "语言",
-			"currency": ""
+			"currency": "货币"
 		},
 		"info": {
 			"test_banner": "仅供测试使用！"
@@ -45,7 +45,7 @@
 			"open_details": "打开详情",
 			"close_details": "关闭详情",
 			"switch_language": "切换语言",
-			"switch_currency": ""
+			"switch_currency": "切换货币"
 		},
 		"warning": {
 			"do_not_close": "交易完成前请勿关闭此标签页"
@@ -506,7 +506,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "你的余额",
-			"unavailable_balance": "$ 值不可用",
+			"unavailable_balance": "$currencySymbol 值不可用",
 			"hidden_balance": "你的余额已隐藏",
 			"top_up": "充值你的钱包以开始使用！",
 			"learn_more_about_erc20_icp": "了解更多关于以太坊上的 ERC20 ICP。",
@@ -989,6 +989,9 @@
 	"nfts": {
 		"text": {
 			"title": ""
+		},
+		"alt": {
+			"image": ""
 		}
 	},
 	"fee": {
@@ -1278,6 +1281,12 @@
 		"avatar": {
 			"default": "默认头像",
 			"avatar_for": "$contact 的头像"
+		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
 		},
 		"show_contact": {
 			"title": "联系人",
