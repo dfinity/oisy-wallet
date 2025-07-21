@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, isNullish } from '@dfinity/utils';
 	import type { ContactImage } from '$declarations/backend/backend.did';
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
+	import { AVATAR_IMAGE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
 	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
@@ -31,7 +32,7 @@
 	let size = $derived(variant === 'xl' ? 'size-25' : 'size-[2.5em]');
 	let bgColor = $derived(selectColorForName({ name, colors: CONTACT_BACKGROUND_COLORS }));
 
-	const commonClasses = $derived(
+	let commonClasses = $derived(
 		`${font} ${size} ${bgColor} rounded-full overflow-hidden relative ${styleClass}`
 	);
 
@@ -48,24 +49,23 @@
 			.toUpperCase()
 	);
 
-	let blobUrl: string | null = $state(null);
-
-	$effect(() => {
-		if (nonNullish(image)) {
-			blobUrl = imageToDataUrl(image);
-		} else {
-			blobUrl = null;
-		}
-	});
+	const blobUrl = $derived(nonNullish(image) ? imageToDataUrl(image) : null);
 </script>
 
 <div
-	class={`${commonClasses} flex items-center justify-center ${!blobUrl ? bgColor : ''}`}
+	class={`${commonClasses} flex items-center justify-center ${isNullish(blobUrl) ? bgColor : ''}`}
 	role="img"
 	aria-label={ariaLabel}
+	data-tid={AVATAR_IMAGE}
 >
-	{#if blobUrl}
-		<img src={blobUrl} alt={ariaLabel} class="h-full w-full rounded-full object-cover" />
+	{#if nonNullish(blobUrl)}
+		<Img
+			src={blobUrl}
+			alt={ariaLabel}
+			styleClass="h-full w-full object-cover"
+			rounded
+			loading="eager"
+		/>
 	{:else if initials}
 		<span class="font-bold text-white">{initials}</span>
 	{:else}
