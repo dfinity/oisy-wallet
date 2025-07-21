@@ -506,7 +506,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Váš zůstatek",
-			"unavailable_balance": "$ hodnota není k dispozici",
+			"unavailable_balance": "$currencySymbol hodnota není k dispozici",
 			"hidden_balance": "Váš zůstatek je skrytý",
 			"top_up": "Doplňte si peněženku a začněte ji používat!",
 			"learn_more_about_erc20_icp": "Více se dozvíte o ERC20 ICP na Ethereu.",

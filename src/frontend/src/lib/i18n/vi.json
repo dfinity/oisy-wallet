@@ -506,7 +506,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Số dư của bạn",
-			"unavailable_balance": "Giá trị $ không khả dụng",
+			"unavailable_balance": "Giá trị $currencySymbol không khả dụng",
 			"hidden_balance": "Số dư của bạn bị ẩn",
 			"top_up": "Nạp tiền vào ví của bạn để bắt đầu sử dụng!",
 			"learn_more_about_erc20_icp": "Tìm hiểu thêm về ERC20 ICP trên Ethereum.",
