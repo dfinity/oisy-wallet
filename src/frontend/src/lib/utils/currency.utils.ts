@@ -23,3 +23,13 @@ export const getCurrencySymbol = ({
 	new Intl.NumberFormat(language, { style: 'currency', currency })
 		.formatToParts(0)
 		.find((p) => p.type === 'currency')?.value;
+
+export const getCurrencyDecimalDigits = ({
+	currency,
+	language
+}: {
+	currency: Currency;
+	language: Languages;
+}): number =>
+	new Intl.NumberFormat(language, { style: 'currency', currency }).resolvedOptions()
+		.maximumFractionDigits;
