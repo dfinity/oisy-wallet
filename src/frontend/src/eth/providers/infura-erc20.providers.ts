@@ -9,7 +9,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { hardenMetadata } from '$lib/utils/metadata.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract, type ContractTransaction } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
@@ -31,13 +30,11 @@ export class InfuraErc20Provider implements Erc20Provider {
 			erc20Contract.decimals()
 		]);
 
-		const metadata: Erc20Metadata = {
+		return {
 			name,
 			symbol,
 			decimals: Number(decimals)
 		};
-
-		return hardenMetadata(metadata);
 	};
 
 	balance = ({
