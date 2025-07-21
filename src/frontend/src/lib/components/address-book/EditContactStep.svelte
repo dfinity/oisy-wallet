@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
+	import type { ContactImage } from '$declarations/backend/backend.did';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -25,6 +26,7 @@
 		contact: ContactUi;
 		onClose: () => void;
 		onEdit: (contact: ContactUi) => void;
+		onAvatarEdit: (image: ContactImage) => void;
 		onEditAddress: (index: number) => void;
 		onAddAddress: () => void;
 		onDeleteContact: (id: bigint) => void;
@@ -35,6 +37,7 @@
 		contact,
 		onClose,
 		onEdit,
+		onAvatarEdit,
 		onEditAddress,
 		onAddAddress,
 		onDeleteContact,
