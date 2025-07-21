@@ -991,7 +991,7 @@
 			"title": "NFT"
 		},
 		"alt": {
-			"image": ""
+			"image": "Immagine dell'NFT con token ID: $tokenId"
 		}
 	},
 	"fee": {
