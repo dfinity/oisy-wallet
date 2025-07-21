@@ -184,20 +184,14 @@ export const fetchIcpSwap = async ({
 }: SwapParams): Promise<void> => {
 	progress(ProgressStepsSwap.SWAP);
 
-	if (sourceToken.id === ICP_TOKEN.id) {
-		throwSwapError('deposit_error');
-	}
-
-	console.log(sourceToken, destinationToken);
-
-	if (destinationToken.id === ICP_TOKEN.id) {
-		throwSwapError('withdraw_failed');
-	}
-
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
 	});
+
+	if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 100000000n) {
+		throwSwapError('deposit_error');
+	}
 
 	const { ledgerCanisterId: sourceLedgerCanisterId, standard: sourceStandard } = sourceToken;
 	const {
@@ -272,6 +266,88 @@ export const fetchIcpSwap = async ({
 	}
 
 	try {
+		if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 200000000n) {
+			try {
+				await swapIcp({
+					identity,
+					canisterId: poolCanisterId,
+					amountIn: `${parsedSwapAmount}000`,
+					zeroForOne: pool.token0.address === sourceLedgerCanisterId,
+					amountOutMinimum: slippageMinimum.toString()
+				});
+			} catch (err: unknown) {
+				console.error(err);
+
+				try {
+					// If the swap fails, attempt to refund the user's original tokens
+					await withdraw({
+						identity,
+						canisterId: poolCanisterId,
+						token: sourceLedgerCanisterId,
+						amount: BigInt(`${parsedSwapAmount}000`),
+						fee: sourceTokenFee
+					});
+				} catch (err: unknown) {
+					console.error(err);
+
+					// const errorMessage = getSwapErrorMessage('withdraw_failed');
+
+					// // If even the refund fails, show a critical error requiring manual user action
+					// throw new Error(errorMessage);
+
+					throwSwapError('withdraw_failed');
+				}
+
+				// const errorMessage = getSwapErrorMessage('swap_failed_withdraw_success');
+
+				// Inform the user that the swap failed, but refund was successful
+				throwSwapError('swap_failed_withdraw_success');
+
+				// throw new Error(errorMessage);
+			}
+		}
+
+		if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 300000000n) {
+			try {
+				await swapIcp({
+					identity,
+					canisterId: poolCanisterId,
+					amountIn: `${parsedSwapAmount}000`,
+					zeroForOne: pool.token0.address === sourceLedgerCanisterId,
+					amountOutMinimum: slippageMinimum.toString()
+				});
+			} catch (err: unknown) {
+				console.error(err);
+
+				try {
+					// If the swap fails, attempt to refund the user's original tokens
+					await withdraw({
+						identity,
+						canisterId: poolCanisterId,
+						token: sourceLedgerCanisterId,
+						amount: parsedSwapAmount,
+						fee: sourceTokenFee
+					});
+				} catch (err: unknown) {
+					console.error(err);
+
+					// const errorMessage = getSwapErrorMessage('withdraw_failed');
+
+					// // If even the refund fails, show a critical error requiring manual user action
+					// throw new Error(errorMessage);
+
+					throwSwapError('withdraw_failed');
+				}
+
+				// const errorMessage = getSwapErrorMessage('swap_failed_withdraw_success');
+
+				// Inform the user that the swap failed, but refund was successful
+				throwSwapError('swap_failed_withdraw_success');
+
+				// throw new Error(errorMessage);
+			}
+		}
+
 		// Perform the actual token swap after a successful deposit
 		await swapIcp({
 			identity,
