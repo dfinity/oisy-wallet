@@ -26,6 +26,8 @@ import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
 
 import type { Erc20Token } from '$eth/types/erc20';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { i18n } from '$lib/stores/i18n.store';
+import { get } from 'svelte/store';
 import { formatToken } from './format.utils';
 import { isNullishOrEmpty } from './input.utils';
 
@@ -185,3 +187,18 @@ export const geSwapEthTokenAddress = (token: Erc20Token) => {
 
 	return token.address;
 };
+
+export const getSwapErrorMessage = (key: keyof I18n['swap']['error']) => get(i18n).swap.error[key];
+
+type SwapErrorKey = keyof I18n['swap']['error'];
+
+export const throwSwapError = (code: SwapErrorKey): never => {
+	throw new SwapError(code);
+};
+
+export class SwapError extends Error {
+	constructor(public readonly code: SwapErrorKey) {
+		super(get(i18n).swap.error[code]);
+		this.name = 'SwapError';
+	}
+}

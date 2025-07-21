@@ -31,6 +31,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { SwapError } from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -127,28 +128,37 @@
 					),
 					variant: 'info'
 				});
-			} else if (
-				nonNullish(errorDetail) &&
-				errorDetail.startsWith('Swap failed and withdraw also failed')
-			) {
-				failedSwapError.set({
-					message: errorDetail,
-					variant: 'error',
-					url: {
-						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
-						text: 'icpswap.com'
-					}
-				});
-			} else if (errorDetail && errorDetail.startsWith('Swap failed.')) {
-				failedSwapError.set({ message: errorDetail, variant: 'error' });
-			} else {
-				failedSwapError.set(undefined);
-
-				toastsError({
-					msg: { text: $i18n.swap.error.unexpected },
-					err
-				});
+				return;
 			}
+
+			if (err instanceof SwapError) {
+				if (err.code === 'withdraw_failed') {
+					failedSwapError.set({
+						message: $i18n.swap.error.withdraw_failed,
+						variant: 'error',
+						url: {
+							url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+							text: 'icpswap.com'
+						}
+					});
+				} else {
+					failedSwapError.set({
+						message: $i18n.swap.error[err.code],
+						variant: 'error',
+						url: {
+							url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+							text: 'icpswap.com'
+						}
+					});
+				}
+				return;
+			}
+
+			failedSwapError.set(undefined);
+			toastsError({
+				msg: { text: $i18n.swap.error.unexpected },
+				err
+			});
 
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,

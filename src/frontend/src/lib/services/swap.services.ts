@@ -27,7 +27,7 @@ import {
 } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
-import { calculateSlippage } from '$lib/utils/swap.utils';
+import { calculateSlippage, throwSwapError } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -183,6 +183,14 @@ export const fetchIcpSwap = async ({
 }: SwapParams): Promise<void> => {
 	progress(ProgressStepsSwap.SWAP);
 
+	if (sourceToken.symbol === 'ICP') {
+		throwSwapError('deposit_error');
+	}
+
+	if (destinationToken.symbol === 'ICP') {
+		throwSwapError('withdraw_failed');
+	}
+
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
@@ -253,7 +261,11 @@ export const fetchIcpSwap = async ({
 		}
 	} catch (err: unknown) {
 		console.error(err);
-		throw new Error(get(i18n).swap.error.deposit_error);
+
+		// const errorMessage = getSwapErrorMessage('deposit_error');
+		// throw new Error(errorMessage);
+
+		throwSwapError('deposit_error');
 	}
 
 	try {
@@ -279,11 +291,21 @@ export const fetchIcpSwap = async ({
 			});
 		} catch (err: unknown) {
 			console.error(err);
-			// If even the refund fails, show a critical error requiring manual user action
-			throw new Error(get(i18n).swap.error.withdraw_failed);
+
+			// const errorMessage = getSwapErrorMessage('withdraw_failed');
+
+			// // If even the refund fails, show a critical error requiring manual user action
+			// throw new Error(errorMessage);
+
+			throwSwapError('withdraw_failed');
 		}
+
+		// const errorMessage = getSwapErrorMessage('swap_failed_withdraw_success');
+
 		// Inform the user that the swap failed, but refund was successful
-		throw new Error(get(i18n).swap.error.swap_failed_withdraw_success);
+		throwSwapError('swap_failed_withdraw_success');
+
+		// throw new Error(errorMessage);
 	}
 
 	try {
@@ -298,7 +320,11 @@ export const fetchIcpSwap = async ({
 	} catch (err: unknown) {
 		console.error(err);
 
-		throw new Error(get(i18n).swap.error.withdraw_failed);
+		throwSwapError('withdraw_failed');
+
+		// const errorMessage = getSwapErrorMessage('withdraw_failed');
+
+		// throw new Error(errorMessage);
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
