@@ -64,9 +64,8 @@
 			alt={ariaLabel}
 			styleClass="h-full w-full object-cover"
 			rounded
-			loading="eager"
 		/>
-	{:else if initials}
+	{:else if nonNullish(initials)}
 		<span class="font-bold text-white">{initials}</span>
 	{:else}
 		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
