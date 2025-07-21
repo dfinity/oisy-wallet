@@ -38,16 +38,6 @@ export class InfuraErc721Provider {
 		};
 	};
 
-	isErc721 = async ({ contractAddress }: { contractAddress: string }): Promise<boolean> => {
-		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
-
-		try {
-			return await erc721Contract.supportsInterface(ERC721_INTERFACE_ID);
-		} catch (_: unknown) {
-			return false;
-		}
-	};
-
 	getNftMetadata = async ({
 		contractAddress,
 		tokenId
