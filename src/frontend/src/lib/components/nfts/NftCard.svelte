@@ -23,13 +23,14 @@
 				})}
 				class="h-48"
 				loading="lazy"
+				data-tid={`${testId}-image`}
 			/>
 		{:else}
-			<div class="bg-black/16 h-48 rounded-lg"></div>
+			<div class="bg-black/16 h-48 rounded-lg" data-tid={`${testId}-placeholder`}></div>
 		{/if}
 
 		<div class="absolute bottom-2 right-2">
-			<NetworkLogo network={nft.contract.network} size="xs" color="white" />
+			<NetworkLogo network={nft.contract.network} size="xs" color="white" testId={`${testId}-network`} />
 		</div>
 	</div>
 
