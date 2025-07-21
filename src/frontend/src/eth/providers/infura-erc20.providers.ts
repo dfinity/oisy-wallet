@@ -114,6 +114,17 @@ export class InfuraErc20Provider implements Erc20Provider {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.allowance(owner, spender);
 	};
+
+	isErc20 = async ({contractAddress}: {contractAddress: string}): Promise<boolean> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+
+		try {
+			await erc20Contract.decimals()
+			return true
+		} catch (_: unknown) {
+			return false
+		}
+	}
 }
 
 const providers: Record<NetworkId, InfuraErc20Provider> = [
