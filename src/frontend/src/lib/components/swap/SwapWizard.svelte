@@ -21,7 +21,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swapService } from '$lib/services/swap.services';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { enI18n, i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext as SwapAmountsContextType
@@ -116,7 +116,7 @@
 				}
 			});
 
-			setTimeout(() => close(), 750);
+			setTimeout(() => close(), 50);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
 			// TODO: Add unit tests to cover failed swap error scenarios
@@ -145,11 +145,7 @@
 				} else {
 					failedSwapError.set({
 						message: $i18n.swap.error[err.code],
-						variant: 'error',
-						url: {
-							url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
-							text: 'icpswap.com'
-						}
+						variant: 'error'
 					});
 				}
 			} else {
@@ -165,7 +161,9 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					errorKey: err instanceof SwapError ? err.code : '',
+					errorMessage: err instanceof SwapError ? enI18n().swap.error[err.code] : ''
 				}
 			});
 
