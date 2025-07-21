@@ -41,7 +41,6 @@ import type { NetworkId } from '$lib/types/network';
 import type { UserTokenState } from '$lib/types/token-toggleable';
 import type { LoadUserTokenParams } from '$lib/types/user-token';
 import type { ResultSuccess } from '$lib/types/utils';
-import { hardenMetadata } from '$lib/utils/metadata.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import {
 	assertNonNullish,
@@ -352,11 +351,6 @@ const loadUserTokens = async (params: LoadUserTokenParams): Promise<Erc20UserTok
 						`Inconsistency in network data: no network found for chainId ${chain_id} in user token, even though it is in the environment`
 					);
 
-					// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
-					const metadata: Erc20Metadata = await infuraErc20Providers(network.id).metadata({
-						address
-					});
-
 					return {
 						...{
 							address,
@@ -366,7 +360,8 @@ const loadUserTokens = async (params: LoadUserTokenParams): Promise<Erc20UserTok
 							version: fromNullable(version),
 							enabled: fromNullable(enabled) ?? true
 						},
-						...hardenMetadata(metadata)
+						// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
+						...(await infuraErc20Providers(network.id).metadata({ address }))
 					};
 				}
 			);
