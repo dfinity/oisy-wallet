@@ -48,13 +48,13 @@
 		const newDisplayValue =
 			nonNullish(exchangeRate) && nonNullish(tokenAmount)
 				? formatCurrency({
-					value: Number(tokenAmount) * exchangeRate,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage,
-					hideSymbol: true,
-					normalizeSeparators: true
-				})
+						value: Number(tokenAmount) * exchangeRate,
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore,
+						language: $currentLanguage,
+						hideSymbol: true,
+						normalizeSeparators: true
+					})
 				: undefined;
 
 		if (Number(newDisplayValue) !== Number(displayValue)) {
@@ -95,7 +95,7 @@
 </TokenInputCurrency>
 
 <style lang="scss">
-  :global(.token-input-currency.no-padding div.input-field input[id]) {
-    padding: 0 0.75rem 0 0;
-  }
+	:global(.token-input-currency.no-padding div.input-field input[id]) {
+		padding: 0 0.75rem 0 0;
+	}
 </style>
