@@ -989,6 +989,9 @@
 	"nfts": {
 		"text": {
 			"title": "NFT"
+		},
+		"alt": {
+			"image": ""
 		}
 	},
 	"fee": {
