@@ -55,6 +55,7 @@
 <div
 	class={`${commonClasses} flex items-center justify-center ${isNullish(blobUrl) ? bgColor : ''}`}
 	data-tid={AVATAR_IMAGE}
+	aria-label={ariaLabel}
 >
 	{#if nonNullish(blobUrl)}
 		<Img src={blobUrl} alt={ariaLabel} styleClass="h-full w-full object-cover" rounded />
