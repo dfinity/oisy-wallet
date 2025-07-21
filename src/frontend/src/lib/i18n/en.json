@@ -989,6 +989,9 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs"
+		},
+		"alt": {
+			"image": "Image of NFT with token ID: $tokenId"
 		}
 	},
 	"fee": {
