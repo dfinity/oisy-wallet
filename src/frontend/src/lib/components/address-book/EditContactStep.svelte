@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import type { ContactImage } from '$declarations/backend/backend.did';
+	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
