@@ -173,12 +173,14 @@ export const formatCurrency = ({
 	value,
 	currency,
 	exchangeRate: { exchangeRateToUsd, currency: exchangeRateCurrency },
-	language
+	language,
+	hideSymbol = false
 }: {
 	value: number;
 	currency: Currency;
 	exchangeRate: CurrencyExchangeData;
 	language: Languages;
+	hideSymbol?: boolean;
 }): string | undefined => {
 	if (currency !== exchangeRateCurrency) {
 		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
@@ -196,8 +198,12 @@ export const formatCurrency = ({
 
 	const formatted = new Intl.NumberFormat(locale, {
 		style: 'currency',
-		currency: currency.toUpperCase()
-	}).format(convertedValue);
+		currency: currency.toUpperCase(),
+		...(hideSymbol && { currencyDisplay: 'code' })
+	})
+		.format(convertedValue)
+		.replace(hideSymbol ? currency.toUpperCase() : '', '')
+		.trim();
 
 	if (currency === Currency.CHF) {
 		return formatted.replace(/,/g, '’');
