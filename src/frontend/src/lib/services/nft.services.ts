@@ -7,9 +7,9 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
 import { getNftsByNetworks } from '$lib/utils/nfts.utils';
+import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { nonNullish } from '@dfinity/utils';
-import { randomWait } from '$lib/utils/time.utils';
 
 export const loadNfts = ({
 	tokens,
@@ -106,7 +106,9 @@ const loadNftsMetadata = async ({
 	contractAddress: string;
 	tokenIds: number[];
 }): Promise<NftMetadata[]> => {
-	const metadataPromises = tokenIds.map((tokenId) => loadNftMetadata({infuraProvider, contractAddress, tokenId}));
+	const metadataPromises = tokenIds.map((tokenId) =>
+		loadNftMetadata({ infuraProvider, contractAddress, tokenId })
+	);
 	const results = await Promise.allSettled(metadataPromises);
 	return results.reduce<NftMetadata[]>((acc, result) => {
 		if (result.status !== 'fulfilled') {
@@ -116,10 +118,10 @@ const loadNftsMetadata = async ({
 			return acc;
 		}
 
-		const {value} = result;
+		const { value } = result;
 
 		return nonNullish(value) ? [...acc, value] : acc;
-	}, [])
+	}, []);
 };
 
 const loadNftMetadata = async ({
@@ -131,7 +133,7 @@ const loadNftMetadata = async ({
 	contractAddress: string;
 	tokenId: number;
 }): Promise<NftMetadata> => {
-	await randomWait({min: 0, max: 2000});
+	await randomWait({ min: 0, max: 2000 });
 
 	try {
 		return await infuraProvider.getNftMetadata({
