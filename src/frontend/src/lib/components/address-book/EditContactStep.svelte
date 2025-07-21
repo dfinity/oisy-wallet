@@ -75,7 +75,12 @@
 	<LogoButton hover={false} condensed={true}>
 		{#snippet logo()}
 			<div class="relative flex">
-				<Avatar name={contact.name} {imageUrl} variant="xs" styleClass="md:text-[19.2px]" />
+				<Avatar
+					name={contact.name}
+					image={contact.image}
+					variant="xs"
+					styleClass="md:text-[19.2px]"
+				/>
 				<span
 					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 					data-tid={`avatar-badge-${contact.name}`}
