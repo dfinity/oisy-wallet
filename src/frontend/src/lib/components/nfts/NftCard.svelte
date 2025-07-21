@@ -4,6 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import Img from '$lib/components/ui/Img.svelte';
 
 	interface Props {
 		nft: Nft;
@@ -16,14 +17,12 @@
 <div data-tid={testId}>
 	<div class="relative overflow-hidden rounded-lg">
 		{#if nonNullish(nft.imageUrl)}
-			<img
+			<Img
 				src={nft.imageUrl}
 				alt={replacePlaceholders($i18n.nfts.alt.image, {
 					$tokenId: nft.id.toString()
 				})}
-				class="h-48"
-				loading="lazy"
-				data-tid={`${testId}-image`}
+				testId={`${testId}-image`}
 			/>
 		{:else}
 			<div class="bg-black/16 h-48 rounded-lg" data-tid={`${testId}-placeholder`}></div>
