@@ -36,6 +36,24 @@
 		currencyStore.switchCurrency(currency);
 		dropdown?.close();
 	};
+
+	let currencies = $derived.by(() => {
+		const language = $currentLanguage;
+
+		return SUPPORTED_CURRENCIES.reduce<
+			{ key: string; currency: Currency; name: string; symbol: string }[]
+		>((acc, [key, currency]) => {
+			const name = getCurrencyName({ currency, language });
+
+			return nonNullish(name)
+				? [...acc, { key, currency, name, symbol: parseSymbolString({ currency, language }) }]
+				: acc;
+
+
+		}, [])
+	});
+
+	let sortedCurrencies = $derived(currencies.sort((a, b) => a.name.localeCompare(b.name)))
 </script>
 
 <span class="currency-selector min-w-32">
@@ -55,16 +73,10 @@
 
 		{#snippet items()}
 			<List noPadding condensed testId={CURRENCY_SWITCHER_DROPDOWN}>
-				{#each SUPPORTED_CURRENCIES as [currencyKey, currencyVal], index (index + currencyKey)}
-					{@const name = getCurrencyName({ currency: currencyVal, language: $currentLanguage })}
-					{@const symbolString = parseSymbolString({
-						currency: currencyVal,
-						language: $currentLanguage
-					})}
-
+				{#each sortedCurrencies as { key,currency, name, symbol}, index (index + key)}
 					<ListItem>
 						<Button
-							onclick={() => handleCurrencyChange(currencyVal)}
+							onclick={() => handleCurrencyChange(currency)}
 							fullWidth
 							contentFullWidth
 							alignLeft
@@ -72,16 +84,16 @@
 							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
 							colorStyle="tertiary-alt"
 							transparent
-							testId={`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${currencyVal}`}
+							testId={`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${currency}`}
 						>
 							<span class="pt-0.75 w-[20px] text-brand-primary">
-								{#if $currentCurrency === currencyVal}
+								{#if $currentCurrency === currency}
 									<IconCheck size="20" />
 								{/if}
 							</span>
 							<div class="flex w-full flex-row justify-between gap-5">
 								{name}
-								<span class="text-right text-tertiary">{symbolString}</span>
+								<span class="text-right text-tertiary">{symbol}</span>
 							</div>
 						</Button>
 					</ListItem>
