@@ -117,8 +117,8 @@ export const REFERRAL_CODE_LEARN_MORE = 'referral-code-learn-more';
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
 export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
-export const TOKEN_INPUT_CURRENCY_USD = 'token-input-currency-usd';
-export const TOKEN_INPUT_CURRENCY_USD_SYMBOL = 'token-input-currency-usd-symbol';
+export const TOKEN_INPUT_CURRENCY_FIAT = 'token-input-currency-fiat';
+export const TOKEN_INPUT_CURRENCY_FIAT_SYMBOL = 'token-input-currency-fiat-symbol';
 
 export const TOKEN_INPUT_AMOUNT_EXCHANGE = 'swap-amount-exchange';
 export const TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
@@ -236,6 +236,8 @@ export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleto
 
 export const SEND_FEE_INFO = 'send-fee-info';
 
+// Avatar
+export const AVATAR_IMAGE = 'avatar-image';
 export const AVATAR_WITH_BADGE_FALLBACK_IMAGE = 'avatar-with-badge-fallback-image';
 
 // Contact Card test IDs
