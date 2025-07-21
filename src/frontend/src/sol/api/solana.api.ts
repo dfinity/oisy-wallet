@@ -220,11 +220,13 @@ export const getTokenInfo = async ({
 		return { owner, decimals: 0 };
 	}
 
-	if (isNullish(data.parsed?.info)) {
+	const { parsed } = data;
+
+	if (isNullish(parsed?.info)) {
 		return { owner, decimals: 0 };
 	}
 
-	const { decimals, mintAuthority, freezeAuthority } = data.parsed.info as {
+	const { decimals, mintAuthority, freezeAuthority } = parsed.info as {
 		decimals?: number;
 		mintAuthority?: SplTokenAddress;
 		freezeAuthority?: SplTokenAddress;
