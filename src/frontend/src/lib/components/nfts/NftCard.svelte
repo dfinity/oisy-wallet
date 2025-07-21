@@ -30,7 +30,12 @@
 		{/if}
 
 		<div class="absolute bottom-2 right-2">
-			<NetworkLogo network={nft.contract.network} size="xs" color="white" testId={`${testId}-network`} />
+			<NetworkLogo
+				network={nft.contract.network}
+				size="xs"
+				color="white"
+				testId={`${testId}-network`}
+			/>
 		</div>
 	</div>
 

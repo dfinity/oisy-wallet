@@ -1,6 +1,6 @@
-import { render } from '@testing-library/svelte';
 import NftCard from '$lib/components/nfts/NftCard.svelte';
 import { mockValidNft } from '$tests/mocks/nfts.mock';
+import { render } from '@testing-library/svelte';
 
 describe('NftCard', () => {
 	const testId = 'nft-card';
@@ -10,12 +10,12 @@ describe('NftCard', () => {
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
 
 	it('should render nft with metadata', () => {
-		const {container, getByText} = render(NftCard, {
+		const { container, getByText } = render(NftCard, {
 			props: {
 				nft: mockValidNft,
 				testId
 			}
-		})
+		});
 
 		const image: HTMLImageElement | null = container.querySelector(imageSelector);
 
@@ -23,7 +23,7 @@ describe('NftCard', () => {
 
 		const networkLogo: HTMLDivElement | null = container.querySelector(networkLogoSelector);
 
-		expect(networkLogo).toBeInTheDocument()
+		expect(networkLogo).toBeInTheDocument();
 
 		expect(getByText(mockValidNft.contract.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidNft.id}`)).toBeInTheDocument();
@@ -37,13 +37,14 @@ describe('NftCard', () => {
 			}
 		});
 
-		const imagePlaceholder: HTMLDivElement | null = container.querySelector(imagePlaceholderSelector);
+		const imagePlaceholder: HTMLDivElement | null =
+			container.querySelector(imagePlaceholderSelector);
 
-		expect(imagePlaceholder).toBeInTheDocument()
+		expect(imagePlaceholder).toBeInTheDocument();
 
 		const networkLogo: HTMLDivElement | null = container.querySelector(networkLogoSelector);
 
-		expect(networkLogo).toBeInTheDocument()
+		expect(networkLogo).toBeInTheDocument();
 
 		expect(getByText(mockValidNft.contract.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidNft.id}`)).toBeInTheDocument();
