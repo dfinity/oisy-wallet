@@ -10,16 +10,20 @@
 	export let balance: TokenFinancialData['balance'];
 	export let usdBalance: TokenFinancialData['usdBalance'];
 	export let nullishBalanceMessage: string | undefined = undefined;
+
+	let exchangeBalance: string | undefined;
+	$ : exchangeBalance = nonNullish(usdBalance) ? formatCurrency({
+		value:usdBalance,
+		currency: $currentCurrency,
+		exchangeRate: $currencyExchangeStore,
+		language: $currentLanguage
+	}) : undefined;
+
 </script>
 
 <output class="break-all">
-	{#if nonNullish(balance) && nonNullish(usdBalance)}
-		{formatCurrency({
-			value: usdBalance,
-			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore,
-			language: $currentLanguage
-		})}
+	{#if nonNullish(balance) && nonNullish(exchangeBalance)}
+		{exchangeBalance}
 	{:else if isNullish(balance) || isNullish(usdBalance)}
 		<span class="animate-pulse">{nullishBalanceMessage ?? '-'}</span>
 	{:else}
