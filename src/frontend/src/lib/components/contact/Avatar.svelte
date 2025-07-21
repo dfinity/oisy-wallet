@@ -4,6 +4,7 @@
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
+	import { AVATAR_IMAGE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
 	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
@@ -55,6 +56,7 @@
 	class={`${commonClasses} flex items-center justify-center ${isNullish(blobUrl) ? bgColor : ''}`}
 	role="img"
 	aria-label={ariaLabel}
+	data-tid={AVATAR_IMAGE}
 >
 	{#if nonNullish(blobUrl)}
 		<Img
