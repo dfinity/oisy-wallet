@@ -6,8 +6,7 @@
 		TOKEN_INPUT_CURRENCY_FIAT,
 		TOKEN_INPUT_CURRENCY_FIAT_SYMBOL
 	} from '$lib/constants/test-ids.constants';
-	import {currentCurrencyDecimals
-	} from '$lib/derived/currency.derived';
+	import { currentCurrencyDecimals } from '$lib/derived/currency.derived';
 	import type { OptionAmount } from '$lib/types/send';
 
 	export let tokenAmount: OptionAmount;
