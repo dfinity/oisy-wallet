@@ -20,6 +20,7 @@
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
+	import { hardenMetadata } from '$lib/utils/metadata.utils';
 
 	export let tokenAddress: SplTokenAddress | undefined;
 	export let metadata: TokenMetadata | undefined;
@@ -73,7 +74,7 @@
 				return;
 			}
 
-			metadata = { ...splMetadata, decimals };
+			metadata = { ...hardenMetadata(splMetadata), decimals };
 
 			if (
 				$splTokens?.find(
