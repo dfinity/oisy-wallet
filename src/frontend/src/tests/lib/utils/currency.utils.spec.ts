@@ -1,6 +1,10 @@
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
-import { getCurrencyName, getCurrencySymbol } from '$lib/utils/currency.utils';
+import {
+	getCurrencyDecimalDigits,
+	getCurrencyName,
+	getCurrencySymbol
+} from '$lib/utils/currency.utils';
 
 describe('currency.utils', () => {
 	describe('getCurrencyName', () => {
@@ -175,5 +179,28 @@ describe('currency.utils', () => {
 				})
 			).toBe('CHF');
 		});
+	});
+
+	describe('getCurrencyDecimalDigits', () => {
+		const testCases: { currency: Currency; language: Languages; expected: number }[] = [
+			{ currency: Currency.USD, language: Languages.ENGLISH, expected: 2 },
+			{ currency: Currency.EUR, language: Languages.ENGLISH, expected: 2 },
+			{ currency: Currency.JPY, language: Languages.ENGLISH, expected: 0 },
+			{ currency: Currency.USD, language: Languages.ITALIAN, expected: 2 },
+			{ currency: Currency.EUR, language: Languages.ITALIAN, expected: 2 },
+			{ currency: Currency.JPY, language: Languages.ITALIAN, expected: 0 },
+			{ currency: Currency.USD, language: Languages.CHINESE_SIMPLIFIED, expected: 2 },
+			{ currency: Currency.EUR, language: Languages.CHINESE_SIMPLIFIED, expected: 2 },
+			{ currency: Currency.JPY, language: Languages.CHINESE_SIMPLIFIED, expected: 0 }
+		];
+
+		it.each(testCases)(
+			'should return $expected for currency $currency in language $language',
+			({ currency, language, expected }) => {
+				const result = getCurrencyDecimalDigits({ currency, language });
+
+				expect(result).toBe(expected);
+			}
+		);
 	});
 });

@@ -1,5 +1,6 @@
 import {
 	currentCurrency,
+	currentCurrencyDecimals,
 	currentCurrencyExchangeRate,
 	currentCurrencySymbol
 } from '$lib/derived/currency.derived';
@@ -122,6 +123,35 @@ describe('currency.derived', () => {
 				i18n.switchLang(language);
 
 				expect(get(currentCurrencySymbol)).toEqual(expected);
+			}
+		);
+	});
+
+	describe('currentCurrencyDecimals', () => {
+		const testCases = [
+			{ currency: Currency.USD, language: Languages.ENGLISH, expected: 2 },
+			{ currency: Currency.EUR, language: Languages.ENGLISH, expected: 2 },
+			{ currency: Currency.JPY, language: Languages.ENGLISH, expected: 0 },
+			{ currency: Currency.USD, language: Languages.ITALIAN, expected: 2 },
+			{ currency: Currency.EUR, language: Languages.ITALIAN, expected: 2 },
+			{ currency: Currency.JPY, language: Languages.ITALIAN, expected: 0 },
+			{ currency: Currency.USD, language: Languages.CHINESE_SIMPLIFIED, expected: 2 },
+			{ currency: Currency.EUR, language: Languages.CHINESE_SIMPLIFIED, expected: 2 },
+			{ currency: Currency.JPY, language: Languages.CHINESE_SIMPLIFIED, expected: 0 }
+		];
+
+		beforeEach(() => {
+			currencyStore.switchCurrency(Currency.USD);
+			i18n.switchLang(Languages.ENGLISH);
+		});
+
+		it.each(testCases)(
+			`should return $expected for $currency in $language`,
+			({ currency, language, expected }) => {
+				currencyStore.switchCurrency(currency);
+				i18n.switchLang(language);
+
+				expect(get(currentCurrencyDecimals)).toEqual(expected);
 			}
 		);
 	});
