@@ -89,7 +89,7 @@ export class InfuraErc721Provider {
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
 
-		const imageUrl = extractImageUrl(metadata.image);
+		const imageUrl = extractImageUrl(metadata.image ?? metadata.image_url);
 
 		const mappedAttributes = (metadata?.attributes ?? []).map(
 			(attr: { trait_type: string; value: string | number }) => ({
