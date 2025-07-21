@@ -7,6 +7,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -78,7 +79,8 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 						{formatCurrency({
 							value: usdBalance,
 							currency: $currentCurrency,
-							exchangeRate: $currencyExchangeStore
+							exchangeRate: $currencyExchangeStore,
+							language: $currentLanguage
 						})}
 					{/if}
 				{/if}
