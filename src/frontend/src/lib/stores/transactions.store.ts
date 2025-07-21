@@ -2,7 +2,6 @@ import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.s
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransaction, Transaction } from '$lib/types/transaction';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
 
 type TransactionTypes = AnyTransaction;
