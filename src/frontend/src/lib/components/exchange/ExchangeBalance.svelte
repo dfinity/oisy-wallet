@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
@@ -24,20 +25,24 @@
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
 	const totalUsd = $derived(sumTokensUiUsdBalance($combinedDerivedSortedFungibleNetworkTokensUi));
+
+	let balance = $derived(
+		formatCurrency({
+			value: $loaded ? totalUsd : 0,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		})
+	);
 </script>
 
 <span class="flex flex-col items-center gap-1">
 	<output class="mt-7 inline-block break-all text-5xl font-bold">
-		{#if $loaded}
+		{#if $loaded && nonNullish(balance)}
 			{#if hideBalance}
 				<IconDots variant="lg" times={6} styleClass="my-4.25" />
 			{:else}
-				{formatCurrency({
-					value: totalUsd,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})}
+				{balance}
 			{/if}
 		{:else}
 			<span class="animate-pulse">
@@ -47,7 +52,7 @@
 					{formatCurrency({
 						value: 0,
 						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore,
+						exchangeRate: { currency: $currentCurrency, exchangeRateToUsd: 1 },
 						language: $currentLanguage
 					})}
 				{/if}
