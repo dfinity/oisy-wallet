@@ -14,7 +14,7 @@
 		btcAddressMainnetStore,
 		btcAddressRegtestStore,
 		btcAddressTestnetStore,
-		type StorageAddressData
+		type AddressStoreData
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -22,7 +22,7 @@
 	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
-	let addressData: StorageAddressData<BtcAddress>;
+	let addressData: AddressStoreData<BtcAddress>;
 	$: addressData = isNetworkIdBTCTestnet($networkId)
 		? $btcAddressTestnetStore
 		: isNetworkIdBTCRegtest($networkId)

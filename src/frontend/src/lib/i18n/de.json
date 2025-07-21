@@ -32,7 +32,8 @@
 			"add": "Hinzufügen",
 			"more_items": "+$items mehr",
 			"select": "Auswählen",
-			"language": "Sprache"
+			"language": "Sprache",
+			"currency": "Währung"
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!"
@@ -43,7 +44,8 @@
 			"back": "Zurück zur vorherigen Seite",
 			"open_details": "Details öffnen",
 			"close_details": "Details schließen",
-			"switch_language": "Sprache wechseln"
+			"switch_language": "Sprache wechseln",
+			"switch_currency": "Währung wechseln"
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist"
@@ -83,7 +85,7 @@
 			"changelog": "Änderungsprotokoll von $oisy_name auf GitHub öffnen, um die neuesten Updates zu sehen",
 			"documentation": "Dokumentation von $oisy_name öffnen",
 			"support": "Support-Bereich der $oisy_name-Dokumentation öffnen",
-			"open_twitter": "Twitter-Feed von DFINITY X öffnen",
+			"open_twitter": "X/Twitter-Feed von DFINITY X öffnen",
 			"vip_qr_code": "Einladungslink generieren",
 			"binance_qr_code": "Binance Clubhouse-Link generieren",
 			"refer_a_friend": "Empfehlungslink für einen Freund erstellen",
@@ -187,7 +189,8 @@
 			"verifiable_credentials": "Bescheinigungen",
 			"staking": "Beteiligungen",
 			"walletconnect": "Wallet Connect",
-			"game": "Spiele"
+			"game": "Spiele",
+			"tools": "Tools"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -311,6 +314,11 @@
 					"text": "Dezentrale soziale Medien",
 					"call_to_action": "Mehr erfahren"
 				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "Wo Governance auf Zusammenarbeit trifft und Inovation entfacht.",
+				"description": "Toolkit ist eine vielseitige Suite zur Verwaltung von Service Nervous Systems (SNS) und Projekten im Internet-Computer. Von Governance-Vorschlägen bis zur Kanisterbereitstellung ermöglicht es Nutzern nahtlose Innovation, Zusammenarbeit und Dezentralisierung."
 			}
 		}
 	},
@@ -359,12 +367,12 @@
 				"win": {
 					"default": {
 						"title": "Gratulation zum Erhalt von OISY Sprinkles!",
-						"description": "Teile deinen Sieg auf Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
+						"description": "Teile deinen Sieg auf X/Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
 						"share_href": "https://x.com/intent/post?text=Habe%20soeben%20gratis%20Bitcoin%20von%20%40OISY%20Wallet%20bekommen%20%F0%9F%AA%82%0ASie%20verteilen%20%24BTC%20Sprinkles%20non-stop.%0AFalls%20du%20noch%20nicht%20auf%20OISY.com%20bist%2C%20jetzt%20ist%20der%20beste%20Zeitpunkt."
 					},
 					"jackpot": {
 						"title": "Gratulation zum Erhalt von OISY Jackpot Sprinkles!",
-						"description": "Teile deinen Sieg auf Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
+						"description": "Teile deinen Sieg auf X/Twitter, um sich für eine weitere Gewinnchance zu qualifizieren.",
 						"share_href": "https://x.com/intent/post?text=Habe%20soeben%20die%20Super%20Sprinkles%20%40OISY%20Wallet%20bekommen%20%F0%9F%AA%82%0AKleine%20Streusel%20den%20ganzen%20Tag%20%2B%205%20grosse%20%24BTC%20jeden%20Tag.%0ARegistriere%20dich%20auf%20OISY.com%2C%20und%20erhalte%20gratis%20Bitcoin."
 					},
 					"referral": {
@@ -462,6 +470,7 @@
 			"no_infura_provider": "Kein Infura-Anbieter für Netzwerk $network",
 			"no_infura_cketh_provider": "Kein Infura CkETH-Anbieter für Netzwerk $network",
 			"no_infura_erc20_provider": "Kein Infura-ERC20-Anbieter für Netzwerk $network",
+			"no_infura_erc721_provider": "Kein Infura-ERC721-Anbieter für Netzwerk $network",
 			"no_infura_erc20_icp_provider": "Kein Infura-ERC20-ICP-Anbieter für Netzwerk $network",
 			"no_solana_network": "Kein Solana-Netzwerk für Netzwerk $network",
 			"eth_address_unknown": "ETH-Adresse ist unbekannt.",
@@ -482,8 +491,10 @@
 			"btc_withdrawal_statuses": "Fehler beim Abrufen der BTC-Auszahlungsstatus.",
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
+			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"erc20_user_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
+			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
@@ -500,6 +511,9 @@
 			"top_up": "Lade dein Wallet auf, um es zu nutzen!",
 			"learn_more_about_erc20_icp": "Erfahre mehr über ERC20 ICP auf Ethereum.",
 			"tooltip_toggle_balance": "Doppelklick zum Anzeigen/Ausblenden des Guthabens"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {
@@ -644,6 +658,7 @@
 			"sending": "Sende...",
 			"signing": "Signiere...",
 			"signing_message": "Nachricht wird signiert...",
+			"confirming": "",
 			"network": "Netzwerk",
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",
@@ -718,7 +733,8 @@
 			"no_pending_bitcoin_transaction": "Fehler beim Laden ausstehender Bitcoin-Transaktionen. Bitte später erneut versuchen.",
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist etwas schiefgelaufen.",
 			"unable_to_retrieve_amount": "k. A. (konnte nicht abgerufen werden)",
-			"solana_transaction_expired": "Deine Send-Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, wahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichte. Wir haben sie auf den zuletzt empfohlenen Betrag aktualisiert, bitte versuche es erneut."
+			"solana_transaction_expired": "Deine Send-Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, wahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichte. Wir haben sie auf den zuletzt empfohlenen Betrag aktualisiert, bitte versuche es erneut.",
+			"solana_confirmation_failed": "Wir konnten keine gültige Bestätigung der soeben getätigten Transaktion erhalten. Bitte warte ein paar Sekunden und überprüfe in der Transaktionsliste des Tokens, ob die Transaktion korrekt getätigt wurde."
 		}
 	},
 	"convert": {
@@ -801,7 +817,9 @@
 			"you_receive": "Du erhältst",
 			"select": "Auswählen >",
 			"select_swap_provider": "Tausch-Anbieter auswählen",
-			"open_icp_swap": "ICP Swap-Website öffnen"
+			"open_icp_swap": "ICP Swap-Website öffnen",
+			"select_token": "",
+			"select_network_filter": ""
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
@@ -968,6 +986,11 @@
 			"unexpected_error_on_token_update": "Beim Aktualisieren des Tokens ist etwas schiefgelaufen."
 		}
 	},
+	"nfts": {
+		"text": {
+			"title": ""
+		}
+	},
 	"fee": {
 		"text": {
 			"fee": "Gebühr",
@@ -1041,8 +1064,7 @@
 			"disconnected": "WalletConnect getrennt.",
 			"session_ended": "WalletConnect-Sitzung wurde beendet.",
 			"connected": "WalletConnect verbunden.",
-			"eth_transaction_executed": "WalletConnect eth_sendTransaction-Anfrage ausgeführt.",
-			"sol_transaction_executed": "WalletConnect \"$method\"-Anfrage ausgeführt.",
+			"transaction_executed": "WalletConnect \"$method\"-Anfrage ausgeführt.",
 			"sign_executed": "WalletConnect-Signaturanfrage ausgeführt."
 		},
 		"error": {
@@ -1099,6 +1121,15 @@
 			"pending": "Ausstehend...",
 			"safe": "Sicher",
 			"unconfirmed": "Unbestätigt"
+		},
+		"type": {
+			"send": "Senden",
+			"receive": "Empfang",
+			"withdraw": "Auszahlung",
+			"deposit": "Einzahlung",
+			"approve": "Genehmigung",
+			"burn": "Burn",
+			"mint": "Mint"
 		},
 		"label": {
 			"reimbursement": "Rückerstattung",
@@ -1247,6 +1278,12 @@
 		"avatar": {
 			"default": "Standard-Avatar",
 			"avatar_for": "Avatar für"
+		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
 		},
 		"show_contact": {
 			"title": "Kontakt",
@@ -1452,6 +1489,22 @@
 			"minute_plural": "Minuten",
 			"second": "Sekunde",
 			"second_plural": "Sekunden"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "",
+			"welcome_message": "",
+			"action_button_contacts_title": "",
+			"action_button_contacts_subtitle": "",
+			"action_button_contacts_prompt": "",
+			"send_message": "",
+			"send_message_input_placeholder": "",
+			"loading": ""
+		},
+		"errors": {
+			"unknown": "",
+			"no_response": ""
 		}
 	}
 }

@@ -60,13 +60,13 @@
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
-	let steps: WizardSteps;
+	let steps: WizardSteps<WizardStepsSend>;
 	$: steps = isTransactionsPage
 		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
 		: allSendWizardSteps({ i18n: $i18n });
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsSend> | undefined;
+	let modal: WizardModal<WizardStepsSend>;
 
 	const dispatch = createEventDispatcher();
 
@@ -125,8 +125,6 @@
 
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			reset();
-
 			goToStep(WizardStepsSend.DESTINATION);
 		};
 
@@ -170,12 +168,12 @@
 		{steps}
 		bind:currentStep
 		bind:this={modal}
-		on:nnsClose={close}
+		onClose={close}
 		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
 			currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 		testId={SEND_TOKENS_MODAL}
 	>
-		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 			<SendTokensList

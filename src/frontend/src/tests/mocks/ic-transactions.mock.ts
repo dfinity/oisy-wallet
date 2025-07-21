@@ -11,12 +11,11 @@ import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import type { Token } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo, mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import type { PendingUtxo } from '@dfinity/ckbtc';
-import type { BRAND } from 'zod';
 
 export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 	Array.from({ length: n }, () => ({
@@ -29,7 +28,7 @@ export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 		timestamp: 1_747_732_396_194_882_329n
 	}));
 
-export const setupIcTransactionsStore = ({ tokenId }: { tokenId: symbol & BRAND<'TokenId'> }) => {
+export const setupIcTransactionsStore = ({ tokenId }: { tokenId: TokenId }) => {
 	const transactions = [
 		createCertifiedIcTransactionUiMock('tx1'),
 		createCertifiedIcTransactionUiMock('tx2'),
@@ -42,7 +41,7 @@ export const setupIcTransactionsStore = ({ tokenId }: { tokenId: symbol & BRAND<
 	});
 };
 
-export const cleanupIcTransactionsStore = ({ tokenId }: { tokenId: symbol & BRAND<'TokenId'> }) => {
+export const cleanupIcTransactionsStore = ({ tokenId }: { tokenId: TokenId }) => {
 	icTransactionsStore.reset(tokenId);
 };
 

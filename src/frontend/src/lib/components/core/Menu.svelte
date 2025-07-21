@@ -3,13 +3,13 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { I18N_ENABLED } from '$env/i18n';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
+	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
@@ -66,7 +66,7 @@
 	const hidePopover = () => (visible = false);
 
 	const handlePrivacyToggle = () => {
-		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false, source: 'Menu button click' });
+		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false, source: 'User menu click' });
 	};
 
 	const settingsRoute = $derived(isRouteSettings(page));
@@ -211,19 +211,17 @@
 		{/if}
 	</div>
 
-	{#if I18N_ENABLED || $authSignedIn}
-		<Hr />
+	<Hr />
 
-		<div class="flex max-w-80 flex-col gap-5 py-5">
-			{#if I18N_ENABLED}
-				<MenuLanguageSelector />
-			{/if}
+	<div class="flex max-w-80 flex-col gap-5 py-5">
+		<MenuLanguageSelector />
 
-			{#if $authSignedIn}
-				<MenuThemeSelector />
-			{/if}
-		</div>
-	{/if}
+		{#if $authSignedIn}
+			<MenuCurrencySelector />
+
+			<MenuThemeSelector />
+		{/if}
+	</div>
 
 	{#if $authSignedIn}
 		<Hr />

@@ -11,6 +11,10 @@ export const NAVIGATION_MENU_SUPPORT_BUTTON = 'navigation-support-button';
 
 export const LANGUAGE_DROPDOWN = 'language-dropdown';
 
+export const CURRENCY_SWITCHER_BUTTON = 'currency-switcher-button';
+export const CURRENCY_SWITCHER_DROPDOWN = 'currency-switcher-dropdown';
+export const CURRENCY_SWITCHER_DROPDOWN_BUTTON = 'currency-switcher-dropdown-button';
+
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
 export const MAX_BUTTON = 'max-button';
@@ -247,5 +251,11 @@ export const TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON =
 	'token-modal-index-canister-id-edit-button';
 export const TOKEN_MODAL_SAVE_BUTTON = 'token-modal-save-button';
 
+// Contact popover menu
+export const CONTACT_POPOVER_TRIGGER = 'contact-popover-trigger';
+export const CONTACT_POPOVER_MENU = 'contact-popover-menu';
+export const CONTACT_POPOVER_MENU_ITEM = 'contact-popover-menu-item';
+
 // AI Assistant
-export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistanta-console-button';
+export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';
+export const AI_ASSISTANT_SEND_MESSAGE_BUTTON = 'ai-assistant-send-message-button';

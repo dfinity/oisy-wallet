@@ -1,8 +1,12 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import type { CurrencyExchangeData } from '$lib/types/currency';
+import { isNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
+import Decimal from 'decimal.js';
 import type { BigNumberish } from 'ethers/utils';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
@@ -35,12 +39,13 @@ export const formatToken = ({
 	const maxFractionDigits = Math.min(leadingZeros + 2, MAX_DEFAULT_DISPLAY_DECIMALS);
 	const minFractionDigits = displayDecimals ?? DEFAULT_DISPLAY_DECIMALS;
 
-	const formatted = (+res).toLocaleString('en-US', {
-		useGrouping: false,
-		maximumFractionDigits:
-			displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS),
-		minimumFractionDigits: trailingZeros ? minFractionDigits : undefined
-	}) as `${number}`;
+	const dec = new Decimal(res);
+	const maxDigits =
+		displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS);
+	const decDP = dec.toDecimalPlaces(maxDigits);
+	const minDigits = trailingZeros ? Math.max(minFractionDigits, maxDigits) : undefined;
+
+	const formatted = decDP.toFixed(minDigits) as `${number}`;
 
 	if (trailingZeros) {
 		return formatted;
@@ -83,24 +88,24 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 
 export const formatSecondsToDate = ({
 	seconds,
-	i18n
+	language
 }: {
 	seconds: number;
-	i18n?: I18n;
+	language?: Languages;
 }): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToDate = ({
 	nanoseconds,
-	i18n
+	language
 }: {
 	nanoseconds: bigint;
-	i18n?: I18n;
+	language?: Languages;
 }): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
-	return date.toLocaleDateString(i18n?.lang ?? 'en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
@@ -109,10 +114,10 @@ export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 };
 
 export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
-	date.toLocaleDateString(i18n?.lang ?? 'en', { month: 'long' });
+	date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, { month: 'long' });
 
-const getRelativeTimeFormatter = (i18n?: I18n) =>
-	new Intl.RelativeTimeFormat(i18n?.lang ?? 'en', { numeric: 'auto' });
+const getRelativeTimeFormatter = (language?: Languages) =>
+	new Intl.RelativeTimeFormat(language ?? Languages.ENGLISH, { numeric: 'auto' });
 
 /** Formats a number of seconds to a normalized date string.
  *
@@ -128,11 +133,11 @@ const getRelativeTimeFormatter = (i18n?: I18n) =>
 export const formatSecondsToNormalizedDate = ({
 	seconds,
 	currentDate,
-	i18n
+	language
 }: {
 	seconds: number;
 	currentDate?: Date;
-	i18n?: I18n;
+	language?: Languages;
 }): string => {
 	const date = new Date(seconds * 1000);
 	const today = currentDate ?? new Date();
@@ -144,47 +149,54 @@ export const formatSecondsToNormalizedDate = ({
 
 	if (Math.abs(daysDifference) < 2) {
 		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.
-		return getRelativeTimeFormatter(i18n).format(daysDifference, 'day');
+		return getRelativeTimeFormatter(language).format(daysDifference, 'day');
 	}
 
 	// Same year, return day and month name
 	if (date.getFullYear() === today.getFullYear()) {
-		return date.toLocaleDateString(i18n?.lang ?? 'en', { day: 'numeric', month: 'long' });
+		return date.toLocaleDateString(language ?? Languages.ENGLISH, {
+			day: 'numeric',
+			month: 'long'
+		});
 	}
 
 	// Different year, return day, month, and year
-	return date.toLocaleDateString(i18n?.lang ?? 'en', {
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, {
 		day: 'numeric',
 		month: 'long',
 		year: 'numeric'
 	});
 };
 
-export const formatUSD = ({
+export const formatCurrency = ({
 	value,
-	options
+	currency,
+	exchangeRate: { exchangeRateToUsd, currency: exchangeRateCurrency }
 }: {
 	value: number;
-	options?: {
-		minFraction?: number;
-		maxFraction?: number;
-		maximumSignificantDigits?: number;
-		symbol?: boolean;
-	};
-}): string => {
-	const {
-		minFraction = 2,
-		maxFraction = 2,
-		maximumSignificantDigits,
-		symbol = true
-	} = options ?? {};
+	currency: Currency;
+	exchangeRate: CurrencyExchangeData;
+}): string | undefined => {
+	if (currency !== exchangeRateCurrency) {
+		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
+		return;
+	}
 
-	return new Intl.NumberFormat('en-US', {
-		...(symbol && { style: 'currency', currency: 'USD' }),
-		minimumFractionDigits: minFraction,
-		maximumFractionDigits: maxFraction,
-		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })
-	})
-		.format(value)
-		.replace(/,/g, '’');
+	if (isNullish(exchangeRateToUsd) || exchangeRateToUsd === 0) {
+		// If the exchange rate is not available (probably right after a currency switch), we cannot format the currency
+		return;
+	}
+
+	const convertedValue = value / exchangeRateToUsd;
+
+	const formatted = new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: currency.toUpperCase()
+	}).format(convertedValue);
+
+	if (currency === Currency.CHF) {
+		return formatted.replace(/,/g, '’');
+	}
+
+	return formatted;
 };

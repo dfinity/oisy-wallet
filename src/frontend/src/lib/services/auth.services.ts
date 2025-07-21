@@ -3,12 +3,19 @@ import {
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
+import { deleteIdbBalances } from '$lib/api/idb-balances.api';
 import {
 	deleteIdbEthTokens,
 	deleteIdbEthTokensDeprecated,
 	deleteIdbIcTokens,
 	deleteIdbSolTokens
 } from '$lib/api/idb-tokens.api';
+import {
+	deleteIdbBtcTransactions,
+	deleteIdbEthTransactions,
+	deleteIdbIcTransactions,
+	deleteIdbSolTransactions
+} from '$lib/api/idb-transactions.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -131,6 +138,16 @@ const emptyIdbEthTokens = (): Promise<void> => emptyIdbStore(deleteIdbEthTokens)
 
 const emptyIdbSolTokens = (): Promise<void> => emptyIdbStore(deleteIdbSolTokens);
 
+const emptyIdbBtcTransactions = (): Promise<void> => emptyIdbStore(deleteIdbBtcTransactions);
+
+const emptyIdbEthTransactions = (): Promise<void> => emptyIdbStore(deleteIdbEthTransactions);
+
+const emptyIdbIcTransactions = (): Promise<void> => emptyIdbStore(deleteIdbIcTransactions);
+
+const emptyIdbSolTransactions = (): Promise<void> => emptyIdbStore(deleteIdbSolTransactions);
+
+const emptyIdbBalances = (): Promise<void> => emptyIdbStore(deleteIdbBalances);
+
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
 	sessionStorage.clear();
@@ -156,7 +173,12 @@ const logout = async ({
 			emptyIdbIcTokens(),
 			emptyIdbEthTokensDeprecated(),
 			emptyIdbEthTokens(),
-			emptyIdbSolTokens()
+			emptyIdbSolTokens(),
+			emptyIdbBtcTransactions(),
+			emptyIdbEthTransactions(),
+			emptyIdbIcTransactions(),
+			emptyIdbSolTransactions(),
+			emptyIdbBalances()
 		]);
 	}
 

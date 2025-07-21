@@ -53,13 +53,13 @@
 		<Button
 			transparent
 			fullWidth
-			ariaLabel="Set privacy mode on and off"
+			ariaLabel={$i18n.hero.alt.toggle_privacy_mode}
 			styleClass="bg-transparent p-0 text-xl font-medium"
 			ondblclick={() =>
 				setPrivacyMode({
 					enabled: !$isPrivacyMode,
 					withToast: false,
-					source: 'Double click on the Balance'
+					source: 'Hero - Double click on the Balance'
 				})}
 		>
 			{#if !$isPrivacyMode}

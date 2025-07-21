@@ -12,7 +12,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 	token: { id: tokenId }
 }: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
 	const BtcStatusesWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new BtcStatusesWorker.default();
+	let worker: Worker | null = new BtcStatusesWorker.default();
 
 	worker.onmessage = ({
 		data: dataMsg
@@ -37,27 +37,41 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 		}
 	};
 
+	const stop = () => {
+		worker?.postMessage({
+			msg: 'stopBtcStatusesTimer'
+		});
+	};
+
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startBtcStatusesTimer',
 				data: {
 					minterCanisterId
 				}
 			});
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopBtcStatusesTimer'
-			});
-		},
+		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'triggerBtcStatusesTimer',
 				data: {
 					minterCanisterId
 				}
 			});
+		},
+		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
+			stop();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

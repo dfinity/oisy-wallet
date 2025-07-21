@@ -6,7 +6,6 @@
 	import { goto } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
-	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -14,21 +13,18 @@
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
-	import type { Token, TokenUi } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
-	import { getFilteredTokenList } from '$lib/utils/token-list.utils';
+	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
@@ -68,32 +64,12 @@
 		filter: string;
 		selectedNetwork?: Network;
 	}) => {
-		// hide enabled initially, but keep enabled (modified) ones that have just been enabled to let the user revert easily
-		// then we return it as a valid TokenUiOrGroupUi since the displaying cards require that type
-		// we also apply the same logic for filtering networks as in manage tokens modal
-		const reducedTokens = ($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
-			const isModified = nonNullish(
-				modifiedTokens[`${token.network.id.description}-${token.id.description}`]
-			);
-			if (
-				(!token.enabled || (token.enabled && isModified)) &&
-				showTokenFilteredBySelectedNetwork({
-					token,
-					$selectedNetwork: selectedNetwork,
-					$pseudoNetworkChainFusion: isNullish(selectedNetwork)
-				})
-			) {
-				acc.push({
-					token: token as TokenUi
-				});
-			}
-			return acc;
-		}, []);
-
 		// sort alphabetally and apply filter
 		enableMoreTokensList = getFilteredTokenList({
 			filter,
-			list: sortTokenOrGroupUi(reducedTokens)
+			list: sortTokenOrGroupUi(
+				getDisabledOrModifiedTokens({ $allTokens, modifiedTokens, selectedNetwork })
+			)
 		});
 
 		// we need to reset modified tokens, since the filter has changed the selected token(s) may not be visible anymore
@@ -110,15 +86,6 @@
 		const network = $selectedNetwork;
 		untrack(() => debouncedFilterList({ filter, selectedNetwork: network })); // we untrack the function so it only updates the list on filter change
 	});
-
-	let {
-		initialSearch,
-		message
-	}: { initialSearch: string | undefined; message?: string | undefined } = $derived(
-		nonNullish($modalManageTokensData)
-			? $modalManageTokensData
-			: { initialSearch: undefined, message: undefined }
-	);
 
 	let saveLoading = $state(false);
 
@@ -227,18 +194,6 @@
 					</div>
 				{/each}
 			</div>
-		{/if}
-
-		{#if $modalManageTokens}
-			<ManageTokensModal {initialSearch}>
-				{#snippet infoElement()}
-					{#if nonNullish(message)}
-						<MessageBox level="info">
-							{message}
-						</MessageBox>
-					{/if}
-				{/snippet}
-			</ManageTokensModal>
 		{/if}
 	</TokensSkeletons>
 </TokensDisplayHandler>

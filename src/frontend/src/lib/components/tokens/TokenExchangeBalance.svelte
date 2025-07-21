@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenFinancialData } from '$lib/types/token';
-	import { formatUSD } from '$lib/utils/format.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
 
 	export let balance: TokenFinancialData['balance'];
 	export let usdBalance: TokenFinancialData['usdBalance'];
@@ -11,7 +13,11 @@
 
 <output class="break-all">
 	{#if nonNullish(balance) && nonNullish(usdBalance)}
-		{formatUSD({ value: usdBalance })}
+		{formatCurrency({
+			value: usdBalance,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore
+		})}
 	{:else if isNullish(balance) || isNullish(usdBalance)}
 		<span class="animate-pulse">{nullishBalanceMessage ?? '-'}</span>
 	{:else}
