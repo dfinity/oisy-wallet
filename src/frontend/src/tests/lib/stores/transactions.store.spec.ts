@@ -6,6 +6,7 @@ import { initTransactionsStore } from '$lib/stores/transactions.store';
 import type { Transaction } from '$lib/types/transaction';
 import { bn3Bi } from '$tests/mocks/balances.mock';
 import { createMockEthCertifiedTransactions } from '$tests/mocks/eth-transactions.mock';
+import { bn3Bi } from '$tests/mocks/balances.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { get } from 'svelte/store';
 

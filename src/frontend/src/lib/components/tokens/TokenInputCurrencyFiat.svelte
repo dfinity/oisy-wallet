@@ -3,15 +3,15 @@
 	import { createEventDispatcher } from 'svelte';
 	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
 	import {
-		TOKEN_INPUT_CURRENCY_USD,
-		TOKEN_INPUT_CURRENCY_USD_SYMBOL
+		TOKEN_INPUT_CURRENCY_FIAT,
+		TOKEN_INPUT_CURRENCY_FIAT_SYMBOL
 	} from '$lib/constants/test-ids.constants';
 	import type { OptionAmount } from '$lib/types/send';
 
 	export let tokenAmount: OptionAmount;
 	export let tokenDecimals: number;
 	export let exchangeRate: number | undefined = undefined;
-	export let name = 'token-input-currency-usd';
+	export let name = 'token-input-currency-fiat';
 	export let disabled = false;
 	export let placeholder = '0';
 	export let error = false;
@@ -57,14 +57,14 @@
 	decimals={2}
 	on:focus
 	on:blur
-	testId={TOKEN_INPUT_CURRENCY_USD}
+	testId={TOKEN_INPUT_CURRENCY_FIAT}
 	styleClass="no-padding"
 >
 	{#snippet prefix()}
 		<span
 			class="duration=[var(--animation-time-short)] pl-3 transition-colors"
 			class:text-tertiary={isNullish(displayValue)}
-			data-tid={TOKEN_INPUT_CURRENCY_USD_SYMBOL}
+			data-tid={TOKEN_INPUT_CURRENCY_FIAT_SYMBOL}
 		>
 			$
 		</span>
