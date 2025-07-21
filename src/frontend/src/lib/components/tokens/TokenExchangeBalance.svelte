@@ -12,13 +12,14 @@
 	export let nullishBalanceMessage: string | undefined = undefined;
 
 	let exchangeBalance: string | undefined;
-	$ : exchangeBalance = nonNullish(usdBalance) ? formatCurrency({
-		value:usdBalance,
-		currency: $currentCurrency,
-		exchangeRate: $currencyExchangeStore,
-		language: $currentLanguage
-	}) : undefined;
-
+	$: exchangeBalance = nonNullish(usdBalance)
+		? formatCurrency({
+				value: usdBalance,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage
+			})
+		: undefined;
 </script>
 
 <output class="break-all">
