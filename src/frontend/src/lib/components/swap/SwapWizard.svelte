@@ -143,7 +143,11 @@
 			}
 
 			if (err instanceof SwapError) {
-				if (err.code === 'swap_failed_withdraw_success') {
+				console.log(err.code);
+
+				console.log($i18n.swap.error[err.code]);
+
+				if (err.code === 'withdraw_failed') {
 					failedSwapError.set({
 						message: $i18n.swap.error.withdraw_failed,
 						variant: 'error',

@@ -317,7 +317,7 @@ export const fetchIcpSwap = async ({
 					amountOutMinimum: slippageMinimum.toString()
 				});
 			} catch (err: unknown) {
-				console.error(err);
+				console.error(err, 'err SWAP FAILED');
 
 				try {
 					// If the swap fails, attempt to refund the user's original tokens
@@ -328,8 +328,12 @@ export const fetchIcpSwap = async ({
 						amount: parsedSwapAmount,
 						fee: sourceTokenFee
 					});
+
+					console.log('withdraw success');
 				} catch (err: unknown) {
 					console.error(err);
+
+					console.log('idk, why but error in catch block');
 
 					// const errorMessage = getSwapErrorMessage('withdraw_failed');
 
@@ -339,14 +343,21 @@ export const fetchIcpSwap = async ({
 					throwSwapError('withdraw_failed');
 				}
 
+				console.log('should update error to swap_failed_withdraw_success');
+
+				console.log('should throw error swap_failed_withdraw_success ');
+
+				throwSwapError('swap_failed_withdraw_success');
+
 				// const errorMessage = getSwapErrorMessage('swap_failed_withdraw_success');
 
 				// Inform the user that the swap failed, but refund was successful
-				throwSwapError('swap_failed_withdraw_success');
 
 				// throw new Error(errorMessage);
 			}
 		}
+
+		console.log('should not go here as it throw error');
 
 		// Perform the actual token swap after a successful deposit
 		await swapIcp({
