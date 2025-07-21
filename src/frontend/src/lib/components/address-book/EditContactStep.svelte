@@ -26,7 +26,6 @@
 		contact: ContactUi;
 		onClose: () => void;
 		onEdit: (contact: ContactUi) => void;
-		onAvatarEdit: (image: ContactImage) => void;
 		onEditAddress: (index: number) => void;
 		onAddAddress: () => void;
 		onDeleteContact: (id: bigint) => void;
@@ -37,7 +36,6 @@
 		contact,
 		onClose,
 		onEdit,
-		onAvatarEdit,
 		onEditAddress,
 		onAddAddress,
 		onDeleteContact,
