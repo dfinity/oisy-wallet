@@ -1,6 +1,6 @@
+import type { Erc721Token } from '$eth/types/erc721';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Erc721Token } from '$eth/types/erc721';
 
 export const getNftsByNetworks = ({
 	tokens,
