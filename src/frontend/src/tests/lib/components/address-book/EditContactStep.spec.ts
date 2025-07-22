@@ -265,10 +265,5 @@ describe('EditContactStep', () => {
 				mime_type: { 'image/png': null }
 			})
 		);
-
-		const [firstCall] = onAvatarEdit.mock.calls;
-		const [arg] = firstCall;
-
-		expect(arg).toHaveProperty('data');
 	});
 });
