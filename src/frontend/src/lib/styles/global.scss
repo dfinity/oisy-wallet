@@ -94,7 +94,7 @@
 			}
 		}
 	}
-	input {
+	input[type='file'] {
 		&.visually-hidden {
 			position: absolute;
 			opacity: 0;

@@ -1,17 +1,19 @@
 <script lang="ts">
 	interface Props {
 		onClick?: () => void;
+		onchange?: (e: Event) => void;
 		testId?: string;
 	}
 
-	let { onclick, testId }: Props = $props();
+	let { onClick, onchange, testId }: Props = $props();
 
 	let fileInput = $state<HTMLInputElement | undefined>();
 
 	export const triggerClick = (): void => {
 		fileInput?.click();
-		onclick?.();
+		onClick?.();
 	};
+	
 </script>
 
 <input
@@ -20,5 +22,6 @@
 	accept="image/*"
 	data-tid={testId}
 	class="visually-hidden"
-	on:change
+	{onchange}
 />
+
