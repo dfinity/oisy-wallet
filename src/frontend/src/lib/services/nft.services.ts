@@ -12,7 +12,7 @@ import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export const loadNfts = ({
+export const loadNfts = async ({
 	tokens,
 	loadedNfts,
 	walletAddress
@@ -20,14 +20,14 @@ export const loadNfts = ({
 	tokens: Erc721Token[];
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
-}): Promise<void[]> => {
+}) => {
 	if (isNullish(walletAddress)) {
-		return Promise.resolve([]);
+		return;
 	}
 
 	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, nfts: loadedNfts });
 
-	return Promise.all(
+	await Promise.all(
 		tokens.map((token) => {
 			const etherscanProvider = etherscanProviders(token.network.id);
 			const infuraProvider = infuraErc721Providers(token.network.id);
@@ -57,7 +57,7 @@ const loadNftsOfToken = async ({
 	token: Erc721Token;
 	loadedNfts: Nft[];
 	walletAddress: string;
-}): Promise<void> => {
+}) => {
 	const holdersTokenIds = await loadHoldersTokenIds({
 		etherscanProvider,
 		walletAddress,

@@ -154,8 +154,8 @@
 		}
 	}
 
-	const debounceLoadNfts = debounce(() => {
-		loadNfts({
+	const debounceLoadNfts = debounce(async () => {
+		await loadNfts({
 			tokens: $erc721Tokens ?? [],
 			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
