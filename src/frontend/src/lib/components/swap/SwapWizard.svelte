@@ -21,7 +21,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swapService } from '$lib/services/swap.services';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { enI18n, i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext as SwapAmountsContextType
@@ -29,8 +29,10 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { SwapErrorCodes } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isSwapError } from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -127,23 +129,26 @@
 					),
 					variant: 'info'
 				});
-			} else if (
-				nonNullish(errorDetail) &&
-				errorDetail.startsWith('Swap failed and withdraw also failed')
-			) {
-				failedSwapError.set({
-					message: errorDetail,
-					variant: 'error',
-					url: {
-						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
-						text: 'icpswap.com'
-					}
-				});
-			} else if (errorDetail && errorDetail.startsWith('Swap failed.')) {
-				failedSwapError.set({ message: errorDetail, variant: 'error' });
+			}
+
+			if (isSwapError(err)) {
+				if (err.code === SwapErrorCodes.WITHDRAW_FAILED) {
+					failedSwapError.set({
+						message: $i18n.swap.error.withdraw_failed,
+						variant: 'error',
+						url: {
+							url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+							text: 'icpswap.com'
+						}
+					});
+				} else {
+					failedSwapError.set({
+						message: $i18n.swap.error[err.code],
+						variant: 'info'
+					});
+				}
 			} else {
 				failedSwapError.set(undefined);
-
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected },
 					err
@@ -155,7 +160,9 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					errorKey: isSwapError(err) ? err.code : '',
+					errorMessage: isSwapError(err) ? enI18n().swap.error[err.code] : ''
 				}
 			});
 
