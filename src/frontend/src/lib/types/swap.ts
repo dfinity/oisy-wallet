@@ -105,6 +105,8 @@ type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsRepl
 
 type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
 
+export type SwapErrorKey = keyof I18n['swap']['error'];
+
 export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
 
 export interface SwapParams {
