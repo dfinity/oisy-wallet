@@ -175,9 +175,5 @@
 </ContentWithToolbar>
 
 {#if AVATAR_ENABLED}
-	<HiddenFileInput
-		bind:this={fileInput}
-		testId={AVATAR_UPLOAD_IMAGE}
-		on:change={handleFileChange}
-	/>
+	<HiddenFileInput bind:this={fileInput} testId={AVATAR_UPLOAD_IMAGE} onChange={handleFileChange} />
 {/if}
