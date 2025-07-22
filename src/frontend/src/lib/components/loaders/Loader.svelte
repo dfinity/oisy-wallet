@@ -12,7 +12,6 @@
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
-	import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
@@ -44,7 +43,6 @@
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { initLoader } from '$lib/services/loader.services';
 	import { loadNfts } from '$lib/services/nft.services';
-	import { ethAddressStore } from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import { nftStore } from '$lib/stores/nft.store';
