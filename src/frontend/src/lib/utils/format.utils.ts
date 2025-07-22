@@ -198,19 +198,19 @@ export const formatCurrency = ({
 
 	const convertedValue = value / exchangeRateToUsd;
 
-	const nf = new Intl.NumberFormat(locale, {
+	const formatter = new Intl.NumberFormat(locale, {
 		style: 'currency',
 		currency: currency.toUpperCase(),
 		...(hideSymbol && { currencyDisplay: 'code' })
 	});
 
-	const formatted = nf
+	const formatted = formatter
 		.format(convertedValue)
 		.replace(hideSymbol ? currency.toUpperCase() : '', '')
 		.trim();
 
 	if (normalizeSeparators) {
-		const parts = nf.formatToParts(123456.78);
+		const parts = formatter.formatToParts(123456.78);
 		const groupSep = parts.find((p) => p.type === 'group')?.value ?? '';
 		const decimalSep = parts.find((p) => p.type === 'decimal')?.value ?? '.';
 
