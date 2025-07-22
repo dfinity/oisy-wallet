@@ -13,8 +13,8 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import HiddenFileInput from '$lib/components/ui/HiddenFileInput.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import HiddenFileInput from '$lib/components/ui/HiddenFileInput.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import {
