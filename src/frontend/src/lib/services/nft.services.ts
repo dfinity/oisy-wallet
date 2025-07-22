@@ -20,9 +20,9 @@ export const loadNfts = ({
 	tokens: Erc721Token[];
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
-}): void[] => {
+}): Promise<void[]> => {
 	if (isNullish(walletAddress)) {
-		return;
+		return Promise.resolve([]);
 	}
 
 	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, nfts: loadedNfts });
