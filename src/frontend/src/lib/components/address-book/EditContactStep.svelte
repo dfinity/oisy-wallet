@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import imageCompression from 'browser-image-compression';
 	import type { ContactImage } from '$declarations/backend/backend.did';
 	import { AVATAR_ENABLED } from '$env/avatar.env';
@@ -49,22 +49,26 @@
 	}: Props = $props();
 
 	let fileInput = $state<HTMLInputElement | undefined>();
-	let imageUrl = $derived(contact.image ? imageToDataUrl(contact.image) : undefined);
+
+	let imageUrl = $derived(nonNullish(contact.image) ? imageToDataUrl(contact.image) : undefined);
 
 	const handleFileChange = async (e: Event) => {
 		const selected = (e.target as HTMLInputElement).files?.[0];
 		if (isNullish(selected)) {
 			return;
 		}
+
+		// Compress image to 100KB max and resize to max 200px
 		const compressedFile = await imageCompression(selected, {
-			maxSizeMB: 0.1,
-			maxWidthOrHeight: 200,
+			maxSizeMB: 0.1, // 100 KB max to minimize upload size
+			maxWidthOrHeight: 200, // Avatar display size constraints
 			useWebWorker: false
 		});
+
 		const dataUrl = await imageCompression.getDataUrlFromFile(compressedFile);
 		const img: ContactImage = dataUrlToImage(dataUrl);
 
-		onAvatarEdit(img);
+		await onAvatarEdit(img);
 	};
 
 	const replaceImage = (): void => {
@@ -172,7 +176,7 @@
 		bind:this={fileInput}
 		type="file"
 		accept="image/*"
-		class="hidden"
+		class="visually-hidden"
 		onchange={handleFileChange}
 	/>
 {/if}
