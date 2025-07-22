@@ -61,7 +61,8 @@
 			return;
 		}
 
-		// Compress image to 100KB max and resize to max 200px
+		// Compress image to 100KB max and resize to max 200px.
+		// This limitation is defined by the backend: check the constraints of the related methods.
 		const compressedFile = await imageCompression(selected, {
 			maxSizeMB: 0.1, // 100 KB max to minimize upload size
 			maxWidthOrHeight: 200, // Avatar display size constraints
