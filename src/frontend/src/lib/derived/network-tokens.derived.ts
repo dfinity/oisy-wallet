@@ -15,7 +15,6 @@ import { derived, type Readable } from 'svelte/store';
 /**
  * All user-enabled fungible tokens matching the selected network or chain fusion.
  */
-// TODO: Create tests for this store
 export const enabledFungibleNetworkTokens: Readable<Token[]> = derived(
 	[enabledFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
