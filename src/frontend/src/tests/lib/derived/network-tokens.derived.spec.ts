@@ -47,26 +47,31 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
-import { enabledFungibleNetworkTokens, enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+import {
+	enabledFungibleNetworkTokens,
+	enabledNonFungibleNetworkTokens
+} from '$lib/derived/network-tokens.derived';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
+import {
+	AZUKI_ELEMENTAL_BEANS_TOKEN,
+	DE_GODS_TOKEN,
+	PUDGY_PENGUINS_TOKEN,
+	SEPOLIA_PUDGY_PENGUINS_TOKEN,
+	mockValidErc721Token
+} from '$tests/mocks/erc721-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import {
-	AZUKI_ELEMENTAL_BEANS_TOKEN,
-	DE_GODS_TOKEN,
-	mockValidErc721Token, PUDGY_PENGUINS_TOKEN, SEPOLIA_PUDGY_PENGUINS_TOKEN
-} from '$tests/mocks/erc721-tokens.mock';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 
 describe('network-tokens.derived', () => {
 	const toggleProps = {
@@ -232,7 +237,7 @@ describe('network-tokens.derived', () => {
 		it('should return all non-testnet tokens when no network is selected and testnets are disabled', () => {
 			const mockCustomErc721Token = { ...mockValidErc721Token, enabled: true };
 
-			erc721CustomTokensStore.setAll([{data: mockCustomErc721Token, certified: false}]);
+			erc721CustomTokensStore.setAll([{ data: mockCustomErc721Token, certified: false }]);
 
 			expect(get(enabledNonFungibleNetworkTokens)).toEqual([mockCustomErc721Token]);
 		});
@@ -256,7 +261,7 @@ describe('network-tokens.derived', () => {
 			const mockErc721BaseSepoliaCustomToken: Erc721CustomToken = {
 				...{ ...AZUKI_ELEMENTAL_BEANS_TOKEN, network: BASE_SEPOLIA_NETWORK },
 				...toggleProps
-			}
+			};
 
 			const mockErc721BscCustomToken: Erc721CustomToken = {
 				...{ ...DE_GODS_TOKEN, network: BSC_MAINNET_NETWORK },
@@ -351,17 +356,17 @@ describe('network-tokens.derived', () => {
 				setupTestnetsStore('enabled');
 
 				erc721CustomTokensStore.setAll([
-					{data: mockErc721EthereumCustomToken, certified: false},
-					{data: mockErc721SepoliaCustomToken, certified: false},
-					{data: mockErc721BaseCustomToken, certified: false},
-					{data: mockErc721BaseSepoliaCustomToken, certified: false},
-					{data: mockErc721BscCustomToken, certified: false},
-					{data: mockErc721BscTestnetCustomToken, certified: false},
-					{data: mockErc721PolygonCustomToken, certified: false},
-					{data: mockErc721PolygonAmoyCustomToken, certified: false},
-					{data: mockErc721ArbitrumCustomToken, certified: false},
-					{data: mockErc721ArbitrumSepoliaCustomToken, certified: false}
-				])
+					{ data: mockErc721EthereumCustomToken, certified: false },
+					{ data: mockErc721SepoliaCustomToken, certified: false },
+					{ data: mockErc721BaseCustomToken, certified: false },
+					{ data: mockErc721BaseSepoliaCustomToken, certified: false },
+					{ data: mockErc721BscCustomToken, certified: false },
+					{ data: mockErc721BscTestnetCustomToken, certified: false },
+					{ data: mockErc721PolygonCustomToken, certified: false },
+					{ data: mockErc721PolygonAmoyCustomToken, certified: false },
+					{ data: mockErc721ArbitrumCustomToken, certified: false },
+					{ data: mockErc721ArbitrumSepoliaCustomToken, certified: false }
+				]);
 			});
 
 			it('should not return testnet tokens when no network is selected', () => {

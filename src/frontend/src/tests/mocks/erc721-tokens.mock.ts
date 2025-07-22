@@ -57,7 +57,7 @@ export const PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	decimals: 0,
 	icon: usdc,
 	address: '0xbd3531da5cf5857e7cfaa92426877b022e612cf8'
-}
+};
 
 export const SEPOLIA_PUDGY_PENGUINS_SYMBOL = 'Ppenguins';
 
@@ -73,7 +73,7 @@ export const SEPOLIA_PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	decimals: 0,
 	icon: usdc,
 	address: '0xbd3531da5cf5857e7cfaa92426877b022e612cf8'
-}
+};
 
 export const mockValidErc721Token: Erc721Token = {
 	...mockValidToken,
