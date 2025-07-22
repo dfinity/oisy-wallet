@@ -12,8 +12,7 @@
 	let { children, nfts = $bindable([]) }: Props = $props();
 
 	$effect(() => {
-		const allNfts = $nftStore ?? [];
-		nfts = allNfts.filter(
+		nfts = ($nftStore ?? []).filter(
 			({
 				contract: {
 					address: nftContractAddress,

@@ -115,6 +115,8 @@ export class InfuraErc20Provider implements Erc20Provider {
 		return erc20Contract.allowance(owner, spender);
 	};
 
+	// We use this function to differentiate between Erc20 and Erc721 contracts, because currently we do
+	// not have another way to find out the token standard only by contract address.
 	isErc20 = async ({ contractAddress }: { contractAddress: string }): Promise<boolean> => {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
 
