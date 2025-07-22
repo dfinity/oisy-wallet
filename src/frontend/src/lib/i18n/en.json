@@ -993,7 +993,7 @@
 			"description_empty": "It looks like you haven't received NFTs yet"
 		},
 		"alt": {
-			"image": "No NFTs yet",
+			"placeholder_image": "No NFTs yet",
 			"card": {
 				"image": "Image of NFT with token ID: $tokenId"
 			}

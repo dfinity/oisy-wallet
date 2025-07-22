@@ -989,11 +989,11 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
-			"title_empty": "",
-			"description_empty": ""
+			"title_empty": "I tuoi NFT appariranno qui",
+			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT"
 		},
 		"alt": {
-			"image": "",
+			"placeholder_image": "",
 			"card": {
 				"image": "Immagine dell'NFT con token ID: $tokenId"
 			}

@@ -993,7 +993,7 @@
 			"description_empty": ""
 		},
 		"alt": {
-			"image": "",
+			"placeholder_image": "",
 			"card": {
 				"image": ""
 			}

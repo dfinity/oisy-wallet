@@ -13,7 +13,7 @@
 <NftsDisplayHandler bind:nfts>
 	{#if nfts.length === 0}
 		<div class="flex flex-col items-center gap-5 px-6 py-10">
-			<Img src={noNftsBanner} alt={$i18n.nfts.alt.image} />
+			<Img src={noNftsBanner} alt={$i18n.nfts.alt.placeholder_image} />
 
 			<div class="flex flex-col items-center gap-2">
 				<h5>{$i18n.nfts.text.title_empty}</h5>
