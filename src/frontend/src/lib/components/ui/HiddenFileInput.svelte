@@ -5,7 +5,8 @@
 	}
 
 	let { onclick, testId }: Props = $props();
-	let fileInput: HTMLInputElement;
+
+	let fileInput = $state< HTMLInputElement  | undefined>()
 
 	export const triggerClick = (): void => {
 		fileInput?.click();
