@@ -13,6 +13,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import HiddenFileInput from '$lib/components/ui/HiddenFileInput.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -49,11 +50,12 @@
 		onDeleteAddress
 	}: Props = $props();
 
-	let fileInput = $state<HTMLInputElement | undefined>();
+	let fileInput = $state<ReturnType<typeof HiddenFileInput>>();
 
 	let imageUrl = $derived(nonNullish(contact.image) ? imageToDataUrl(contact.image) : undefined);
 
 	const handleFileChange = async (e: Event) => {
+		
 		const selected = (e.target as HTMLInputElement).files?.[0];
 		if (isNullish(selected)) {
 			return;
@@ -72,9 +74,9 @@
 		await onAvatarEdit(img);
 	};
 
-	const replaceImage = (): void => {
-		fileInput?.click();
-	};
+	function replaceImage(): void {
+		fileInput?.triggerClick();
+	}
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
@@ -90,7 +92,7 @@
 				{#if AVATAR_ENABLED}
 					<span
 						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
-						data-tid={`${CONTACT_AVATAR_BADGE}-${contact.name}`}
+						data-tid={`${AVATAR_BADGE}-${contact.name}`}
 					>
 						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={() => {}} />
 					</span>
@@ -173,11 +175,10 @@
 </ContentWithToolbar>
 
 {#if AVATAR_ENABLED}
-	<input
+	<HiddenFileInput
 		bind:this={fileInput}
-		type="file"
-		accept="image/*"
-		class="visually-hidden"
-		onchange={handleFileChange}
+		onclick={() => {}}
+		testId={`${AVATAR_BADGE}-${contact.name}`}
+		on:change={handleFileChange}
 	/>
 {/if}
