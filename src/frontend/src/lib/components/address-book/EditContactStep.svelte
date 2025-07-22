@@ -51,7 +51,7 @@
 		onDeleteAddress
 	}: Props = $props();
 
-	let fileInput = $state<ReturnType<typeof HiddenFileInput>>();
+	let fileInput = $state<HiddenFileInput | undefined>();
 
 	let imageUrl = $derived(nonNullish(contact.image) ? imageToDataUrl(contact.image) : undefined);
 
