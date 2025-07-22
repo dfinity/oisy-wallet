@@ -339,7 +339,6 @@ export const sendSol = async ({
 
 	const computeUnitsEstimate = await getComputeUnitEstimateForTransactionMessage(
 		transactionMessage,
-		{ commitment: 'confirmed' }
 	);
 
 	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
