@@ -115,7 +115,7 @@
 				}
 			});
 
-			setTimeout(() => close(), 50);
+			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
 			// TODO: Add unit tests to cover failed swap error scenarios
