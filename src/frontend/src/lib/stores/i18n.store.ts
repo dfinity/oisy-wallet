@@ -5,13 +5,14 @@ import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
 import it from '$lib/i18n/it.json';
 import pt from '$lib/i18n/pt.json';
+import vi from '$lib/i18n/vi.json';
 import zhcn from '$lib/i18n/zh-CN.json';
 import { trackEvent } from '$lib/services/analytics.services';
 import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
 import { get, set } from '$lib/utils/storage.utils';
 import { get as getStore, writable, type Readable } from 'svelte/store';
 
-const enI18n = (): I18n => ({
+export const enI18n = (): I18n => ({
 	...en,
 	lang: Languages.ENGLISH
 });
@@ -31,6 +32,11 @@ const ptI18n = (): I18n => ({
 	lang: Languages.PORTUGUESE
 });
 
+const viI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: vi as I18n }),
+	lang: Languages.VIETNAMESE
+});
+
 const zhcnI18n = (): I18n => ({
 	...mergeWithFallback({ refLang: enI18n(), targetLang: zhcn as I18n }),
 	lang: Languages.CHINESE_SIMPLIFIED
@@ -46,6 +52,8 @@ const loadLang = (lang: Languages): I18n => {
 			return itI18n();
 		case Languages.PORTUGUESE:
 			return ptI18n();
+		case Languages.VIETNAMESE:
+			return viI18n();
 		default:
 			return enI18n();
 	}

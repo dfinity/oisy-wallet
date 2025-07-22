@@ -513,7 +513,7 @@
 			"tooltip_toggle_balance": "Doppelklick zum Anzeigen/Ausblenden des Guthabens"
 		},
 		"alt": {
-			"toggle_privacy_mode": ""
+			"toggle_privacy_mode": "Privatsphären Modus aktivieren oder deaktivieren"
 		}
 	},
 	"settings": {
@@ -658,7 +658,7 @@
 			"sending": "Sende...",
 			"signing": "Signiere...",
 			"signing_message": "Nachricht wird signiert...",
-			"confirming": "",
+			"confirming": "Bestätigen...",
 			"network": "Netzwerk",
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",
@@ -818,8 +818,8 @@
 			"select": "Auswählen >",
 			"select_swap_provider": "Tausch-Anbieter auswählen",
 			"open_icp_swap": "ICP Swap-Website öffnen",
-			"select_token": "",
-			"select_network_filter": ""
+			"select_token": "Token auswählen",
+			"select_network_filter": "Netzwerk auswählen"
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
@@ -988,10 +988,15 @@
 	},
 	"nfts": {
 		"text": {
-			"title": ""
+			"title": "",
+			"title_empty": "",
+			"description_empty": ""
 		},
 		"alt": {
-			"image": ""
+			"placeholder_image": "",
+			"card": {
+				"image": ""
+			}
 		}
 	},
 	"fee": {
@@ -1283,10 +1288,10 @@
 			"avatar_for": "Avatar für"
 		},
 		"edit_avatar": {
-			"menu_title": "",
-			"upload_image": "",
-			"replace_image": "",
-			"remove_image": ""
+			"menu_title": "Kontakt Avatar",
+			"upload_image": "Hochladen",
+			"replace_image": "Ersetzen",
+			"remove_image": "Entfernen"
 		},
 		"show_contact": {
 			"title": "Kontakt",
