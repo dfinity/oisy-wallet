@@ -3,20 +3,20 @@ import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
 import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { nonNullish } from '@dfinity/utils';
+import type { Erc721Token } from '$eth/types/erc721';
 
 export const loadNfts = ({
 	tokens,
 	loadedNfts,
 	walletAddress
 }: {
-	tokens: Erc721CustomToken[];
+	tokens: Erc721Token[];
 	loadedNfts: Nft[];
 	walletAddress: string;
 }): Promise<void[]> => {
@@ -49,7 +49,7 @@ const loadNftsOfToken = async ({
 }: {
 	etherscanProvider: EtherscanProvider;
 	infuraProvider: InfuraErc721Provider;
-	token: Erc721CustomToken;
+	token: Erc721Token;
 	loadedNfts: Nft[];
 	walletAddress: string;
 }): Promise<void> => {
@@ -82,7 +82,7 @@ const loadNftsOfBatch = async ({
 	tokenIds
 }: {
 	infuraProvider: InfuraErc721Provider;
-	token: Erc721CustomToken;
+	token: Erc721Token;
 	tokenIds: number[];
 }): Promise<Nft[]> => {
 	const nftsMetadata: NftMetadata[] = await loadNftsMetadata({
@@ -185,7 +185,7 @@ const getLoadedNfts = ({
 	},
 	loadedNftsByNetwork
 }: {
-	token: Erc721CustomToken;
+	token: Erc721Token;
 	loadedNftsByNetwork: NftsByNetwork;
 }): Nft[] => {
 	const tokensByNetwork = loadedNftsByNetwork[networkId];
