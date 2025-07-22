@@ -33,6 +33,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { SwapErrorCodes } from '$lib/types/swap';
+	import { isSwapError } from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -131,7 +132,7 @@
 				});
 			}
 
-			if (err instanceof SwapError) {
+			if (isSwapError(err)) {
 				if (err.code === SwapErrorCodes.WITHDRAW_FAILED) {
 					failedSwapError.set({
 						message: $i18n.swap.error.withdraw_failed,
@@ -161,8 +162,8 @@
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
-					errorKey: err instanceof SwapError ? err.code : '',
-					errorMessage: err instanceof SwapError ? enI18n().swap.error[err.code] : ''
+					errorKey: isSwapError(err) ? err.code : '',
+					errorMessage: isSwapError(err) ? enI18n().swap.error[err.code] : ''
 				}
 			});
 
