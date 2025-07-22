@@ -5,7 +5,7 @@
 		testId?: string;
 	}
 
-	let { onClick, onchange, testId }: Props = $props();
+	let { onClick, onChange, testId }: Props = $props();
 
 	let fileInput = $state<HTMLInputElement | undefined>();
 
