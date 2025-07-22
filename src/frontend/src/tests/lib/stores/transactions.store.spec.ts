@@ -3,7 +3,9 @@ import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
 import { initTransactionsStore } from '$lib/stores/transactions.store';
+import type { Transaction } from '$lib/types/transaction';
 import { bn3Bi } from '$tests/mocks/balances.mock';
+import { createMockEthCertifiedTransactions } from '$tests/mocks/eth-transactions.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { get } from 'svelte/store';
 
@@ -258,16 +260,15 @@ describe('transactions.store', () => {
 			expect(state?.[tokenId]).toEqual([...mockTransactions.slice(1), updatedTransaction]);
 		});
 
-		// TODO: un-skip this test when we implement the resetAll method
-		it.skip('should update a transaction with the same hash', () => {
-			// const mockTransactions = createMockEthCertifiedTransactions(5);
-			// const store = initTransactionsStore<Transaction>();
-			// store.set({ tokenId, transactions: mockTransactions });
-			//
-			// const updatedTransaction = {
-			// 	...mockTransactions[0],
-			// 	value: (mockTransactions[0].data.value ?? ZERO) + bn3Bi
-			// };
+		it('should update a transaction with the same hash', () => {
+			const mockTransactions = createMockEthCertifiedTransactions(5);
+			const store = initTransactionsStore<Transaction>();
+			store.set({ tokenId, transactions: mockTransactions });
+
+			const updatedTransaction = {
+				...mockTransactions[0],
+				value: (mockTransactions[0].data.value ?? ZERO) + bn3Bi
+			};
 
 			store.update({ tokenId, transaction: updatedTransaction });
 

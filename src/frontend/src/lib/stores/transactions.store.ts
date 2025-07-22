@@ -43,7 +43,7 @@ export interface TransactionsStore<T extends TransactionTypes>
 	nullify: (tokenId: TokenId) => void;
 }
 
-export const initTransactionsStore = <T extends UiTransactionTypes>(): TransactionsStore<T> => {
+export const initTransactionsStore = <T extends TransactionTypes>(): TransactionsStore<T> => {
 	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
 
 	const isTransactionUi = (transaction: TransactionTypes): transaction is UiTransactionTypes =>
@@ -71,7 +71,8 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 				[tokenId]: [
 					...transactions,
 					...((state ?? {})[tokenId] ?? []).filter(
-						({ data: { id } }) => !transactions.some(({ data: { id: txId } }) => txId === id)
+						({ data }) =>
+							!transactions.some(({ data: tx }) => getIdentifier(tx) === getIdentifier(data))
 					)
 				]
 			})),
@@ -81,8 +82,10 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 				[tokenId]: [
 					...((state ?? {})[tokenId] ?? []),
 					...transactions.filter(
-						({ data: { id } }) =>
-							!((state ?? {})[tokenId] ?? []).some(({ data: { id: txId } }) => txId === id)
+						({ data }) =>
+							!((state ?? {})[tokenId] ?? []).some(
+								({ data: tx }) => getIdentifier(tx) === getIdentifier(data)
+							)
 					)
 				]
 			})),
@@ -90,7 +93,7 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: ((state ?? {})[tokenId] ?? []).filter(
-					({ data: { id } }) => !transactionIds.includes(`${id}`)
+					({ data }) => !transactionIds.includes(`${getIdentifier(data)}`)
 				)
 			})),
 		update: ({
