@@ -22,8 +22,8 @@
 
 	const {
 		fileInput = $bindable<HTMLInputElement | undefined>(),
-		onReplaceImage = () => {},
-		onRemoveImage = () => {},
+		onReplaceImage,
+		onRemoveImage,
 		imageUrl
 	}: Props = $props();
 
