@@ -35,13 +35,13 @@
 
 	{#if nonNullish(usdAmount)}
 		<div class="text-tertiary">
-				{`( ${formatCurrency({
-					value: usdAmount,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage,
-					notBelowThreshold: true
-				})} )`}
+			{`( ${formatCurrency({
+				value: usdAmount,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage,
+				notBelowThreshold: true
+			})} )`}
 		</div>
 	{/if}
 </div>

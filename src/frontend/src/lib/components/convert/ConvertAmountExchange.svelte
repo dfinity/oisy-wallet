@@ -22,18 +22,18 @@
 	let displayValue: string | undefined;
 	$: displayValue = nonNullish(usdValue)
 		? formatCurrency({
-				value:usdValue,
+				value: usdValue,
 				currency: $currentCurrency,
 				exchangeRate: $currencyExchangeStore,
 				language: $currentLanguage,
-			notBelowThreshold: usdValue !== 0
+				notBelowThreshold: usdValue !== 0
 			})
 		: undefined;
 </script>
 
 {#if nonNullish(usdValue)}
 	<div in:fade data-tid={CONVERT_AMOUNT_EXCHANGE_VALUE}>
-		{usdValue === 0 ? '' :  displayValue?.includes('<')  ? '' : '~'}{displayValue}
+		{usdValue === 0 ? '' : displayValue?.includes('<') ? '' : '~'}{displayValue}
 	</div>
 {:else if isNullish(amount)}
 	<div in:fade class="w-10 sm:w-8" data-tid={CONVERT_AMOUNT_EXCHANGE_SKELETON}>
