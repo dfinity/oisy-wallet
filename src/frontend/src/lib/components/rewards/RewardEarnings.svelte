@@ -18,11 +18,14 @@
 	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward.services';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
@@ -72,7 +75,7 @@
 
 	const totalRewardUsd = $derived(ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd);
 
-	let loading = $state(true);
+	let loadingRewards = $state(true);
 
 	const loadRewards = async ({
 		ckBtcToken,
@@ -83,6 +86,8 @@
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
 	}) => {
+		loadingRewards = true;
+
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
@@ -99,7 +104,8 @@
 			identity: $authIdentity,
 			campaignId: reward.id
 		}));
-		loading = false;
+
+		loadingRewards = false;
 	};
 
 	onMount(() => {
@@ -116,6 +122,19 @@
 			})
 		);
 	};
+
+	let amount = $derived(
+		formatCurrency({
+			value: totalRewardUsd,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		})
+	);
+
+	let loadingAmount = $derived(isNullish(amount));
+
+	let loading = $derived(loadingRewards || loadingAmount);
 </script>
 
 {#if amountOfRewards > 0}
@@ -128,7 +147,7 @@
 			class:animate-pulse={loading}
 			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
 				$noOfSprinkles: amountOfRewards.toString(),
-				$amount: formatCurrency({ value: totalRewardUsd })
+				$amount: amount ?? ''
 			})}
 		</div>
 

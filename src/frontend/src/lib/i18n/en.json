@@ -32,7 +32,8 @@
 			"add": "Add",
 			"more_items": "+$items more",
 			"select": "Select",
-			"language": "Language"
+			"language": "Language",
+			"currency": "Currency"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -43,7 +44,8 @@
 			"back": "Go back to the previous page",
 			"open_details": "Open details",
 			"close_details": "Close details",
-			"switch_language": "Switch language"
+			"switch_language": "Switch language",
+			"switch_currency": "Switch currency"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -504,11 +506,14 @@
 	"hero": {
 		"text": {
 			"available_balance": "Your balance",
-			"unavailable_balance": "$ value is not available",
+			"unavailable_balance": "$currencySymbol value is not available",
 			"hidden_balance": "Your balance is hidden",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
 			"tooltip_toggle_balance": "Double-click to hide/show balance"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Set privacy mode on and off"
 		}
 	},
 	"settings": {
@@ -812,7 +817,9 @@
 			"you_receive": "You receive",
 			"select": "Select >",
 			"select_swap_provider": "Select swap provider",
-			"open_icp_swap": "Open ICP Swap website"
+			"open_icp_swap": "Open ICP Swap website",
+			"select_token": "Select token",
+			"select_network_filter": "Select network"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -977,6 +984,14 @@
 			"unexpected_undefined": "Token is undefined. This is unexpected.",
 			"unexpected_error_on_token_delete": "Something went wrong while removing the token.",
 			"unexpected_error_on_token_update": "Something went wrong while updating the token."
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": "NFTs"
+		},
+		"alt": {
+			"image": "Image of NFT with token ID: $tokenId"
 		}
 	},
 	"fee": {
@@ -1267,6 +1282,12 @@
 			"default": "Default avatar",
 			"avatar_for": "Avatar for"
 		},
+		"edit_avatar": {
+			"menu_title": "Contact Image",
+			"upload_image": "Upload",
+			"replace_image": "Replace",
+			"remove_image": "Remove"
+		},
 		"show_contact": {
 			"title": "Contact",
 			"add_address": "Add address",
@@ -1485,7 +1506,7 @@
 			"loading": "Thinking..."
 		},
 		"errors": {
-			"unknown": "Sorry, something went wrong:",
+			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
 			"no_response": "Sorry, I didn't get a response from the LLM."
 		}
 	}

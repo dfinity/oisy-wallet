@@ -36,6 +36,7 @@ interface I18nCore {
 		more_items: string;
 		select: string;
 		language: string;
+		currency: string;
 	};
 	info: { test_banner: string };
 	alt: {
@@ -45,6 +46,7 @@ interface I18nCore {
 		open_details: string;
 		close_details: string;
 		switch_language: string;
+		switch_currency: string;
 	};
 	warning: { do_not_close: string };
 }
@@ -390,6 +392,7 @@ interface I18nHero {
 		learn_more_about_erc20_icp: string;
 		tooltip_toggle_balance: string;
 	};
+	alt: { toggle_privacy_mode: string };
 }
 
 interface I18nSettings {
@@ -681,6 +684,8 @@ interface I18nSwap {
 		select: string;
 		select_swap_provider: string;
 		open_icp_swap: string;
+		select_token: string;
+		select_network_filter: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -822,6 +827,11 @@ interface I18nTokens {
 		unexpected_error_on_token_delete: string;
 		unexpected_error_on_token_update: string;
 	};
+}
+
+interface I18nNfts {
+	text: { title: string };
+	alt: { image: string };
 }
 
 interface I18nFee {
@@ -1075,6 +1085,12 @@ interface I18nAddress_book {
 	alt: { show_addresses_of_contact: string; hide_addresses: string };
 	edit_contact: { title: string; add_address: string; delete_contact: string };
 	avatar: { default: string; avatar_for: string };
+	edit_avatar: {
+		menu_title: string;
+		upload_image: string;
+		replace_image: string;
+		remove_image: string;
+	};
 	show_contact: {
 		title: string;
 		add_address: string;
@@ -1242,6 +1258,7 @@ interface I18n {
 	swap: I18nSwap;
 	buy: I18nBuy;
 	tokens: I18nTokens;
+	nfts: I18nNfts;
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;

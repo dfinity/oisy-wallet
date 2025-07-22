@@ -3,6 +3,9 @@
 	import { fade } from 'svelte/transition';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 
@@ -35,10 +38,18 @@
 		<div class="text-tertiary">
 			{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
 				{`( < ${formatCurrency({
-					value: EXCHANGE_USD_AMOUNT_THRESHOLD
+					value: EXCHANGE_USD_AMOUNT_THRESHOLD,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
 				})} )`}
 			{:else}
-				{`( ${formatCurrency({ value: usdAmount })} )`}
+				{`( ${formatCurrency({
+					value: usdAmount,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})} )`}
 			{/if}
 		</div>
 	{/if}

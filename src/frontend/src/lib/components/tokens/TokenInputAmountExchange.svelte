@@ -7,6 +7,9 @@
 		TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE,
 		TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE
 	} from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -25,7 +28,10 @@
 
 	let formattedUSDAmount: string | undefined;
 	$: formattedUSDAmount = formatCurrency({
-		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0
+		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
+		currency: $currentCurrency,
+		exchangeRate: $currencyExchangeStore,
+		language: $currentLanguage
 	});
 
 	let formattedTokenAmount: string | undefined;

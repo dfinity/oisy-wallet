@@ -32,7 +32,8 @@
 			"add": "添加",
 			"more_items": "+$items 更多",
 			"select": "选择",
-			"language": "语言"
+			"language": "语言",
+			"currency": "货币"
 		},
 		"info": {
 			"test_banner": "仅供测试使用！"
@@ -43,7 +44,8 @@
 			"back": "返回上一页",
 			"open_details": "打开详情",
 			"close_details": "关闭详情",
-			"switch_language": "切换语言"
+			"switch_language": "切换语言",
+			"switch_currency": "切换货币"
 		},
 		"warning": {
 			"do_not_close": "交易完成前请勿关闭此标签页"
@@ -504,11 +506,14 @@
 	"hero": {
 		"text": {
 			"available_balance": "你的余额",
-			"unavailable_balance": "$ 值不可用",
+			"unavailable_balance": "$currencySymbol 值不可用",
 			"hidden_balance": "你的余额已隐藏",
 			"top_up": "充值你的钱包以开始使用！",
 			"learn_more_about_erc20_icp": "了解更多关于以太坊上的 ERC20 ICP。",
 			"tooltip_toggle_balance": "双击隐藏/显示余额"
+		},
+		"alt": {
+			"toggle_privacy_mode": ""
 		}
 	},
 	"settings": {
@@ -812,7 +817,9 @@
 			"you_receive": "你将收到",
 			"select": "选择 >",
 			"select_swap_provider": "选择兑换服务商",
-			"open_icp_swap": "打开 ICP Swap 网站"
+			"open_icp_swap": "打开 ICP Swap 网站",
+			"select_token": "",
+			"select_network_filter": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -977,6 +984,14 @@
 			"unexpected_undefined": "代币未定义。此为异常情况。",
 			"unexpected_error_on_token_delete": "移除代币时发生错误。",
 			"unexpected_error_on_token_update": "更新代币时发生错误。"
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": ""
+		},
+		"alt": {
+			"image": ""
 		}
 	},
 	"fee": {
@@ -1266,6 +1281,12 @@
 		"avatar": {
 			"default": "默认头像",
 			"avatar_for": "$contact 的头像"
+		},
+		"edit_avatar": {
+			"menu_title": "",
+			"upload_image": "",
+			"replace_image": "",
+			"remove_image": ""
 		},
 		"show_contact": {
 			"title": "联系人",

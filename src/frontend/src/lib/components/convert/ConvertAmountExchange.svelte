@@ -7,6 +7,9 @@
 		CONVERT_AMOUNT_EXCHANGE_SKELETON,
 		CONVERT_AMOUNT_EXCHANGE_VALUE
 	} from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
@@ -23,7 +26,10 @@
 				value:
 					usdValue === 0 || usdValue > EXCHANGE_USD_AMOUNT_THRESHOLD
 						? usdValue
-						: EXCHANGE_USD_AMOUNT_THRESHOLD
+						: EXCHANGE_USD_AMOUNT_THRESHOLD,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage
 			})
 		: undefined;
 </script>
