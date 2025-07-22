@@ -471,6 +471,59 @@ describe('infura-erc20.providers', () => {
 				await expect(provider.allowance(mockParams)).rejects.toThrow(errorMessage);
 			});
 		});
+
+		describe('isErc20', () => {
+			const mockDecimals = vi.fn() as unknown as typeof mockContract.prototype.decimals;
+
+			const mockParams = {
+				contractAddress
+			};
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				mockDecimals.mockResolvedValue('18');
+
+				mockContract.prototype.decimals = mockDecimals;
+			});
+
+			it('should return true if contract is erc20', async () => {
+				const provider = new InfuraErc20Provider(infura);
+
+				const result = await provider.isErc20(mockParams);
+
+				expect(result).toBeTruthy();
+			});
+
+			it('should return false on error', async () => {
+				const errorMessage = 'Error fetching decimals';
+				mockDecimals.mockRejectedValue(new Error(errorMessage));
+
+				const provider = new InfuraErc20Provider(infura);
+
+				const result = await provider.isErc20(mockParams);
+
+				expect(result).toBeFalsy();
+			});
+
+			it('should call the decimals method of the contract', async () => {
+				const provider = new InfuraErc20Provider(infura);
+
+				await provider.isErc20(mockParams);
+
+				expect(provider).toBeDefined();
+
+				expect(mockContract).toHaveBeenCalledOnce();
+
+				expect(mockContract).toHaveBeenNthCalledWith(
+					1,
+					...expectedContractParams,
+					new mockProvider()
+				);
+
+				expect(mockDecimals).toHaveBeenCalledOnce();
+			});
+		});
 	});
 
 	describe('infuraErc20Providers', () => {
