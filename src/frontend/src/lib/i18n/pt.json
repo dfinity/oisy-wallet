@@ -506,7 +506,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Seu saldo",
-			"unavailable_balance": "$ valor não disponível",
+			"unavailable_balance": "$currencySymbol valor não disponível",
 			"hidden_balance": "O seu saldo está escondido",
 			"top_up": "Carregue sua carteira para começar a usá-la!",
 			"learn_more_about_erc20_icp": "Saiba mais sobre ERC20 ICP no Ethereum.",

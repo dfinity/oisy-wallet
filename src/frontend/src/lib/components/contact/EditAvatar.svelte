@@ -22,8 +22,8 @@
 
 	const {
 		fileInput = $bindable<HTMLInputElement | undefined>(),
-		onReplaceImage = () => {},
-		onRemoveImage = () => {},
+		onReplaceImage,
+		onRemoveImage,
 		imageUrl
 	}: Props = $props();
 
@@ -31,29 +31,29 @@
 
 	let button = $state<HTMLButtonElement | undefined>();
 
-	const avatarMenuItems = nonNullish(imageUrl)
-		? [
-				{
-					logo: IconImage,
-					title: $i18n.address_book.edit_avatar.replace_image,
-					action: onReplaceImage
-				},
-				{
-					logo: IconTrash,
-					title: $i18n.address_book.edit_avatar.remove_image,
-					action: onRemoveImage,
-					testId: 'IconTrash'
-				}
-			]
-		: [
-				{
-					logo: IconImage,
-					title: $i18n.address_book.edit_avatar.upload_image,
-					action: onReplaceImage
-				}
-			];
-
-	const items = $derived(avatarMenuItems);
+	const items = $derived(
+		nonNullish(imageUrl)
+			? [
+					{
+						logo: IconImage,
+						title: $i18n.address_book.edit_avatar.replace_image,
+						action: onReplaceImage
+					},
+					{
+						logo: IconTrash,
+						title: $i18n.address_book.edit_avatar.remove_image,
+						action: onRemoveImage,
+						testId: 'IconTrash'
+					}
+				]
+			: [
+					{
+						logo: IconImage,
+						title: $i18n.address_book.edit_avatar.upload_image,
+						action: onReplaceImage
+					}
+				]
+	);
 </script>
 
 <ButtonIcon
