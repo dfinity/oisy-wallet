@@ -19,7 +19,7 @@
 		{#if nonNullish(nft.imageUrl)}
 			<Img
 				src={nft.imageUrl}
-				alt={replacePlaceholders($i18n.nfts.alt.image, {
+				alt={replacePlaceholders($i18n.nfts.alt.card.image, {
 					$tokenId: nft.id.toString()
 				})}
 				testId={`${testId}-image`}
