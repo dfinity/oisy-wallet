@@ -14,5 +14,6 @@ export enum Currency {
 	NGN = 'ngn',
 	SAR = 'sar',
 	SGD = 'sgd',
-	USD = 'usd'
+	USD = 'usd',
+	VND = 'vnd'
 }
