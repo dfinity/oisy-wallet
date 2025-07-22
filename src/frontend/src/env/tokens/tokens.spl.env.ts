@@ -17,6 +17,7 @@ import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
 import { NFLXX_TOKEN } from '$env/tokens/tokens-spl/tokens.nflxx.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
+import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
@@ -51,6 +52,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	NFLXX_TOKEN,
 	NVDAX_TOKEN,
 	ORCA_TOKEN,
+	PENGU_TOKEN,
 	POPCAT_TOKEN,
 	QQQX_TOKEN,
 	RAY_TOKEN,
