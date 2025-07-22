@@ -184,13 +184,13 @@
 			"website": "Hình ảnh của $dAppName"
 		},
 		"categories": {
-			"defi": "Tài chính phí tập trung",
+			"defi": "DeFi",
 			"social_media": "Mạng xã hội",
-			"verifiable_credentials": "Thông tin xác thực có thể xác minh",
+			"verifiable_credentials": "Thông tin xác thực",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
-			"game": "Game",
-			"tools": ""
+			"game": "Trò chơi",
+			"tools": "Khí cụ"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -1131,11 +1131,11 @@
 			"unconfirmed": "Chưa xác nhận"
 		},
 		"type": {
-			"send": "",
-			"receive": "",
-			"withdraw": "",
-			"deposit": "",
-			"approve": "",
+			"send": "Gửi",
+			"receive": "Nhận",
+			"withdraw": "Rút",
+			"deposit": "Tiền gửi",
+			"approve": "Chấp thuận",
 			"burn": "",
 			"mint": ""
 		},
