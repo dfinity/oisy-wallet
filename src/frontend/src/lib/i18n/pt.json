@@ -993,7 +993,7 @@
 			"description_empty": "Parece que você ainda não recebeu NFT"
 		},
 		"alt": {
-			"placeholder_image": "",
+			"placeholder_image": "Nenhum NFT por enquanto",
 			"card": {
 				"image": "Imagem do NFT com token ID: $tokenId"
 			}
