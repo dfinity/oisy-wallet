@@ -12,7 +12,7 @@ import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
 import { get, set } from '$lib/utils/storage.utils';
 import { get as getStore, writable, type Readable } from 'svelte/store';
 
-const enI18n = (): I18n => ({
+export const enI18n = (): I18n => ({
 	...en,
 	lang: Languages.ENGLISH
 });

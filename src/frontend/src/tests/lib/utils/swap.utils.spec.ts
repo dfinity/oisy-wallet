@@ -14,6 +14,7 @@ import {
 	SWAP_ETH_TOKEN_PLACEHOLDER,
 	VELORA_SWAP_PROVIDER
 } from '$lib/constants/swap.constants';
+import { SwapError } from '$lib/services/swap-errors.services';
 import { VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import {
@@ -24,6 +25,7 @@ import {
 	getLiquidityFees,
 	getNetworkFee,
 	getSwapRoute,
+	isSwapError,
 	mapIcpSwapResult,
 	mapKongSwapResult,
 	mapVeloraMarketSwapResult,
@@ -448,6 +450,27 @@ describe('swap utils', () => {
 			const result = geSwapEthTokenAddress(mockErc20Token);
 
 			expect(result).toBe('0xA0b86a33E6441038e7BC67766E6C6E57AF9E9C');
+		});
+	});
+
+	describe('isSwapError', () => {
+		it('should return true if error is instance of SwapError', () => {
+			const error = new SwapError('deposit_error', 'Deposit failed');
+
+			expect(isSwapError(error)).toBeTruthy();
+		});
+
+		it('should return false if error is not instance of SwapError', () => {
+			const error = new Error('Generic error');
+
+			expect(isSwapError(error)).toBeFalsy();
+		});
+
+		it('should return false for non-error values', () => {
+			expect(isSwapError(null)).toBeFalsy();
+			expect(isSwapError(undefined)).toBeFalsy();
+			expect(isSwapError('string')).toBeFalsy();
+			expect(isSwapError({ code: 'deposit_error' })).toBeFalsy();
 		});
 	});
 });

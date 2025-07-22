@@ -26,6 +26,7 @@ import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
 
 import type { Erc20Token } from '$eth/types/erc20';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { SwapError } from '$lib/services/swap-errors.services';
 import { formatToken } from './format.utils';
 import { isNullishOrEmpty } from './input.utils';
 
@@ -185,3 +186,5 @@ export const geSwapEthTokenAddress = (token: Erc20Token) => {
 
 	return token.address;
 };
+
+export const isSwapError = (err: unknown): err is SwapError => err instanceof SwapError;

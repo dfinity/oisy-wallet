@@ -22,6 +22,12 @@ export enum VeloraSwapTypes {
 	DELTA = 'delta',
 	MARKET = 'market'
 }
+
+export enum SwapErrorCodes {
+	WITHDRAW_FAILED = 'withdraw_failed',
+	DEPOSIT_FAILED = 'deposit_error',
+	SWAP_FAILED_WITHDRAW_SUCESS = 'swap_failed_withdraw_success'
+}
 export interface ProviderFee {
 	fee: bigint;
 	token: Token;
