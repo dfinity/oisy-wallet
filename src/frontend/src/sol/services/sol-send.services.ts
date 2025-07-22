@@ -190,21 +190,22 @@ const createSplTokenTransactionMessage = async ({
 		tokenOwnerAddress
 	});
 
-	const transferInstruction = getTransferInstruction(
-		{
-			source: solAddress(sourceTokenAccountAddress),
-			destination: solAddress(
-				destinationIsAtaAddress
-					? destination
-					: mustCreateDestinationTokenAccount
-						? calculatedDestinationTokenAccountAddress
-						: destinationTokenAccountAddress
-			),
-			authority: signer,
-			amount
-		},
-		{ programAddress: solAddress(tokenOwnerAddress) }
-	);
+	const transferParams = {
+		source: solAddress(sourceTokenAccountAddress),
+		destination: solAddress(
+			destinationIsAtaAddress
+				? destination
+				: mustCreateDestinationTokenAccount
+					? calculatedDestinationTokenAccountAddress
+					: destinationTokenAccountAddress
+		),
+		authority: signer,
+		amount
+	};
+
+	const config = { programAddress: solAddress(tokenOwnerAddress) };
+
+	const transferInstruction = getTransferInstruction(transferParams, config);
 
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(
