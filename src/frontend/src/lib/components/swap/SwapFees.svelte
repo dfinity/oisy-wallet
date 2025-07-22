@@ -21,64 +21,66 @@
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
-	let sourceTokenTransferFeeDisplay: string;
-	$: sourceTokenTransferFeeDisplay =
+	let sourceTokenTransferFeeDisplay = $derived(
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore?.[$sourceToken.symbol])
 			? formatToken({
 					value: $icTokenFeeStore[$sourceToken.symbol],
 					displayDecimals: $sourceToken.decimals,
 					unitName: $sourceToken.decimals
 				})
-			: '0';
+			: '0'
+	);
 
-	let sourceTokenTransferFee: number;
-	$: sourceTokenTransferFee = Number(sourceTokenTransferFeeDisplay);
+	let sourceTokenTransferFee = $derived(Number(sourceTokenTransferFeeDisplay));
 
-	let sourceTokenApproveFeeDisplay: string;
-	$: sourceTokenApproveFeeDisplay = $isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0';
+	let sourceTokenApproveFeeDisplay = $derived(
+		$isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0'
+	);
 
-	let sourceTokenApproveFee: number;
-	$: sourceTokenApproveFee = Number(sourceTokenApproveFeeDisplay);
+	let sourceTokenApproveFee = $derived(Number(sourceTokenApproveFeeDisplay));
 
-	let sourceTokenTotalFeeUSD: number;
-	$: sourceTokenTotalFeeUSD = nonNullish($sourceTokenExchangeRate)
-		? (sourceTokenTransferFee + sourceTokenApproveFee) * $sourceTokenExchangeRate
-		: 0;
+	let sourceTokenTotalFeeUSD = $derived(
+		nonNullish($sourceTokenExchangeRate)
+			? (sourceTokenTransferFee + sourceTokenApproveFee) * $sourceTokenExchangeRate
+			: 0
+	);
 </script>
 
 {#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 	<ModalExpandableValues>
-		<ModalValue slot="list-header">
-			{#snippet label()}
-				{$i18n.swap.text.total_fee}
-			{/snippet}
+		{#snippet listHeader()}
+			<ModalValue>
+				{#snippet label()}
+					{$i18n.swap.text.total_fee}
+				{/snippet}
 
-			{#snippet mainValue()}
-				{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol])}
-					<div class="w-14 sm:w-16">
-						<SkeletonText />
-					</div>
-				{:else if isNullish($sourceTokenExchangeRate)}
-					{sourceTokenTransferFee + sourceTokenApproveFee} {getTokenDisplaySymbol($sourceToken)}
-				{:else if sourceTokenTotalFeeUSD < EXCHANGE_USD_AMOUNT_THRESHOLD}
-					{`< ${formatCurrency({
-						value: EXCHANGE_USD_AMOUNT_THRESHOLD,
-						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore,
-						language: $currentLanguage
-					})}`}
-				{:else}
-					{formatCurrency({
-						value: sourceTokenTotalFeeUSD,
-						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore,
-						language: $currentLanguage
-					})}
-				{/if}
-			{/snippet}
-		</ModalValue>
+				{#snippet mainValue()}
+					{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol])}
+						<div class="w-14 sm:w-16">
+							<SkeletonText />
+						</div>
+					{:else if isNullish($sourceTokenExchangeRate)}
+						{sourceTokenTransferFee + sourceTokenApproveFee} {getTokenDisplaySymbol($sourceToken)}
+					{:else if sourceTokenTotalFeeUSD < EXCHANGE_USD_AMOUNT_THRESHOLD}
+						{`< ${formatCurrency({
+							value: EXCHANGE_USD_AMOUNT_THRESHOLD,
+							currency: $currentCurrency,
+							exchangeRate: $currencyExchangeStore,
+							language: $currentLanguage
+						})}`}
+					{:else}
+						{formatCurrency({
+							value: sourceTokenTotalFeeUSD,
+							currency: $currentCurrency,
+							exchangeRate: $currencyExchangeStore,
+							language: $currentLanguage
+						})}
+					{/if}
+				{/snippet}
+			</ModalValue>
+		{/snippet}
 
-		<svelte:fragment slot="list-items">
+		{#snippet listItems()}
 			{#if $isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
 				<SwapFee
 					fee={sourceTokenApproveFeeDisplay}
@@ -92,6 +94,6 @@
 				symbol={getTokenDisplaySymbol($sourceToken)}
 				feeLabel={$i18n.swap.text.network_fee}
 			/>
-		</svelte:fragment>
+		{/snippet}
 	</ModalExpandableValues>
 {/if}
