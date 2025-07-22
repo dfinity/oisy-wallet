@@ -74,9 +74,9 @@
 		await onAvatarEdit(img);
 	};
 
-	function replaceImage(): void {
+	const replaceImage = (): void => {
 		fileInput?.triggerClick();
-	}
+	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
