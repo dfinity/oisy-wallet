@@ -8,6 +8,7 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
+	import { erc721CustomTokensInitialized } from '$eth/derived/erc721.derived';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
@@ -56,7 +57,6 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { erc721CustomTokensInitialized } from '$eth/derived/erc721.derived';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
