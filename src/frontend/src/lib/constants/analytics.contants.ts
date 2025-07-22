@@ -104,6 +104,9 @@ export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog';
 // I18n
 export const TRACK_CHANGE_LANGUAGE = 'change_language';
 
+// Currency
+export const TRACK_CHANGE_CURRENCY = 'change_currency';
+
 // Snapshots
 export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';
 
