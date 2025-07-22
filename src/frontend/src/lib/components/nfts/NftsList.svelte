@@ -2,10 +2,10 @@
 	import noNftsBanner from '$lib/assets/nfts/no-nfts-banner.svg';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
-	import { NFT_CARD } from '$lib/constants/test-ids.constants';
-	import type { Nft } from '$lib/types/nft';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { NFT_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Nft } from '$lib/types/nft';
 
 	let nfts: Nft[] = $state([]);
 </script>
