@@ -21,5 +21,5 @@
 	accept="image/*"
 	data-tid={testId}
 	class="visually-hidden"
-	onchange={() => onChange?.()}
+	onchange={(e: Event) => onChange?.(e)}
 />
