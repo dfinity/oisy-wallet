@@ -66,8 +66,9 @@ export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =
 	$tokens.filter((token) => !isTokenErc721(token))
 );
 
-export const nonFungibleTokens: Readable<Erc721Token[]> = derived([erc721Tokens], ([$erc721Tokens]) =>
-	$erc721Tokens
+export const nonFungibleTokens: Readable<Erc721Token[]> = derived(
+	[erc721Tokens],
+	([$erc721Tokens]) => $erc721Tokens
 );
 
 export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
@@ -103,9 +104,9 @@ export const enabledFungibleTokens: Readable<Token[]> = derived(
  * All user-enabled non-fungible tokens
  */
 export const enabledNonFungibleTokens: Readable<Erc721Token[]> = derived(
-	[nonFungibleTokens], ([$nonFungibleTokens]) =>
-		filterEnabledTokens([$nonFungibleTokens])
-)
+	[nonFungibleTokens],
+	([$nonFungibleTokens]) => filterEnabledTokens([$nonFungibleTokens])
+);
 
 /**
  * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's code wise convenient to avoid duplication of logic.
