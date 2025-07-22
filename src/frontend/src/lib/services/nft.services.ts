@@ -22,7 +22,7 @@ export const loadNfts = ({
 	walletAddress: OptionEthAddress;
 }): Promise<void[]> => {
 	if (isNullish(walletAddress)) {
-		return;
+		return Promise.resolve([]);
 	}
 
 	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, nfts: loadedNfts });
