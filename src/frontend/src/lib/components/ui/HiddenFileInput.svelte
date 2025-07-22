@@ -1,6 +1,6 @@
 <script lang="ts">
 	interface Props {
-		onclick?: () => void;
+		onClick?: () => void;
 		testId?: string;
 	}
 
