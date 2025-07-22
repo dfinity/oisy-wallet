@@ -155,7 +155,11 @@
 	}
 
 	const debounceLoadNfts = debounce(() => {
-		loadNfts({ tokens: $erc721Tokens ?? [], loadedNfts: $nftStore ?? [], walletAddress: $ethAddress });
+		loadNfts({
+			tokens: $erc721Tokens ?? [],
+			loadedNfts: $nftStore ?? [],
+			walletAddress: $ethAddress
+		});
 	});
 
 	$: if ($erc721CustomTokensInitialized && nonNullish($ethAddress) && $erc721Tokens) {

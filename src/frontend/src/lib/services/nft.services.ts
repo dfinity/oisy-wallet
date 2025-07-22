@@ -5,12 +5,12 @@ import {
 } from '$eth/providers/infura-erc721.providers';
 import type { Erc721Token } from '$eth/types/erc721';
 import { nftStore } from '$lib/stores/nft.store';
+import type { OptionEthAddress } from '$lib/types/address';
 import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
 import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { OptionEthAddress } from '$lib/types/address';
 
 export const loadNfts = ({
 	tokens,
