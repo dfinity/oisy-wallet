@@ -218,7 +218,7 @@ const createSplTokenTransactionMessage = async ({
 		? getTransferCheckedInstruction(
 				{
 					...transferParams,
-					mint: solAddress(tokenMintAuthority),
+					mint: solAddress(tokenAddress),
 					decimals: tokenDecimals
 				},
 				config
@@ -321,8 +321,6 @@ export const sendSol = async ({
 		network: solNetwork
 	});
 
-	console.log(1, isTokenSpl(token), token, destination, amount);
-
 	const transactionMessage = isTokenSpl(token)
 		? await createSplTokenTransactionMessage({
 				signer,
@@ -337,8 +335,6 @@ export const sendSol = async ({
 				amount,
 				network: solNetwork
 			});
-
-	console.log(2);
 
 	const getComputeUnitEstimateForTransactionMessage =
 		getComputeUnitEstimateForTransactionMessageFactory({
@@ -360,20 +356,12 @@ export const sendSol = async ({
 		}
 	).send();
 
-	console.log({ simulationResult });
-
-	console.log(2.5, prioritizationFee, transactionMessage);
-
 	const computeUnitsEstimate = await getComputeUnitEstimateForTransactionMessage(
 		transactionMessage,
 		{ commitment: 'confirmed' }
 	);
 
-	console.log(2.9, prioritizationFee, computeUnitsEstimate);
-
 	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
-
-	console.log(3, prioritizationFee, computeUnitsEstimate, computeUnitPrice);
 
 	const transactionMessageWithComputeUnitPrice = prependTransactionMessageInstruction(
 		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
@@ -382,13 +370,9 @@ export const sendSol = async ({
 
 	progress(ProgressStepsSendSol.SIGN);
 
-	console.log(4);
-
 	const { signedTransaction, signature } = await signTransaction(
 		prioritizationFee > ZERO ? transactionMessageWithComputeUnitPrice : transactionMessage
 	);
-
-	console.log(5);
 
 	progress(ProgressStepsSendSol.SEND);
 
@@ -397,8 +381,6 @@ export const sendSol = async ({
 		signedTransaction
 	});
 
-	console.log(6);
-
 	progress(ProgressStepsSendSol.CONFIRM);
 
 	await confirmSignedTransaction({
@@ -406,8 +388,6 @@ export const sendSol = async ({
 		rpcSubscriptions,
 		signedTransaction
 	});
-
-	console.log(7);
 
 	progress(ProgressStepsSendSol.DONE);
 
