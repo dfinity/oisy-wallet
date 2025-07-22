@@ -49,7 +49,6 @@
 		onDeleteAddress
 	}: Props = $props();
 
-
 	let fileInput = $state<HTMLInputElement | undefined>();
 
 	let imageUrl = $derived(nonNullish(contact.image) ? imageToDataUrl(contact.image) : undefined);
@@ -76,7 +75,6 @@
 	const replaceImage = (): void => {
 		fileInput?.click();
 	};
-	
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">

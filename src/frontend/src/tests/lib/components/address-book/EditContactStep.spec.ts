@@ -11,26 +11,22 @@ import type { ContactUi } from '$lib/types/contact';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
+import { nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { vi } from 'vitest';
 
 vi.mock('browser-image-compression', () => {
-	const mockFn = vi.fn(
-		({ file, options: _options }: { file: File; options: unknown }): Promise<File> =>
-			Promise.resolve(file)
-	);
+	const mockCompression = vi
+		.fn()
+		.mockResolvedValue(new File(['x'], 'avatar.png', { type: 'image/png' }));
 
-	(
-		mockFn as unknown as {
-			getDataUrlFromFile(file: File): Promise<string>;
-		}
-	).getDataUrlFromFile = vi.fn(
-		(_file: File): Promise<string> => Promise.resolve('data:image/png;base64,MOCK')
-	);
+	const getDataUrlFromFile = vi.fn().mockResolvedValue('data:image/png;base64,MOCK');
 
 	return {
 		__esModule: true,
-		default: mockFn
+		default: Object.assign(mockCompression, {
+			getDataUrlFromFile // ← attach directly to the mockCompression function
+		})
 	};
 });
 
@@ -257,11 +253,18 @@ describe('EditContactStep', () => {
 
 		const file = new File(['x'], 'avatar.png', { type: 'image/png' });
 
-		if (input) {
+		if (nonNullish(input)) {
 			await fireEvent.change(input, { target: { files: [file] } });
 		}
 
 		expect(onAvatarEdit).toHaveBeenCalledTimes(1);
+		expect(onAvatarEdit).toHaveBeenNthCalledWith(
+			1,
+			expect.objectContaining({
+				data: expect.any(Uint8Array),
+				mime_type: { 'image/png': null }
+			})
+		);
 
 		const [firstCall] = onAvatarEdit.mock.calls;
 		const [arg] = firstCall;
