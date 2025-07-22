@@ -19,6 +19,7 @@
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import {
 		AVATAR_BADGE,
+		AVATAR_UPLOAD_IMAGE,
 		CONTACT_EDIT_DELETE_CONTACT_BUTTON,
 		CONTACT_SHOW_CLOSE_BUTTON,
 		CONTACT_EDIT_ADD_ADDRESS_BUTTON,
@@ -55,7 +56,6 @@
 	let imageUrl = $derived(nonNullish(contact.image) ? imageToDataUrl(contact.image) : undefined);
 
 	const handleFileChange = async (e: Event) => {
-		
 		const selected = (e.target as HTMLInputElement).files?.[0];
 		if (isNullish(selected)) {
 			return;
@@ -177,8 +177,7 @@
 {#if AVATAR_ENABLED}
 	<HiddenFileInput
 		bind:this={fileInput}
-		onclick={() => {}}
-		testId={`${AVATAR_BADGE}-${contact.name}`}
+		testId={AVATAR_UPLOAD_IMAGE}
 		on:change={handleFileChange}
 	/>
 {/if}
