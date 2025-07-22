@@ -5,7 +5,7 @@ import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
-const SPX_DECIMALS = 18;
+const SPX_DECIMALS = 8;
 
 const SPX_SYMBOL = 'SPX';
 
@@ -16,11 +16,11 @@ export const SPX_TOKEN: RequiredAdditionalErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: 'erc20',
 	category: 'default',
-	name: 'Arbitrum',
+	name: 'SPX6900',
 	symbol: SPX_SYMBOL,
 	decimals: SPX_DECIMALS,
 	icon: spx,
-	address: '0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1',
+	address: '0xe0f63a424a4439cbe457d80e4f4b51ad25b2c56c',
 	exchange: 'erc20',
 	groupData: SPX_TOKEN_GROUP
 };
