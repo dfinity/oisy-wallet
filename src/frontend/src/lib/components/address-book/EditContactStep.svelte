@@ -3,6 +3,7 @@
 	import imageCompression from 'browser-image-compression';
 	import type { ContactImage } from '$declarations/backend/backend.did';
 	import { AVATAR_ENABLED } from '$env/avatar.env';
+	import { CONTACT_AVATAR_BADGE } from '$lib/constants/test-ids.constants';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
@@ -89,7 +90,7 @@
 				{#if AVATAR_ENABLED}
 					<span
 						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
-						data-tid={`avatar-badge-${contact.name}`}
+						data-tid={`${CONTACT_AVATAR_BADGE}-${contact.name}`}
 					>
 						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={() => {}} />
 					</span>
