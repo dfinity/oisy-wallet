@@ -1,0 +1,9 @@
+// hide an element visually while keeping it accessible to screen readers
+@mixin visually-hidden {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	z-index: -1;
+}
