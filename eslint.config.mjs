@@ -17,6 +17,7 @@ export default [
 			'**/.DS_Store',
 			'**/node_modules',
 			'build',
+			'.dfx',
 			'.svelte-kit',
 			'package',
 			'**/.env',
