@@ -1,8 +1,8 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SPX_TOKEN_GROUP } from '$env/tokens/groups/groups.spx.env';
+import spx from '$eth/assets/spx.png';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import spx from '$eth/assets/spx.png';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { RequiredSplToken } from '$sol/types/spl';
 
