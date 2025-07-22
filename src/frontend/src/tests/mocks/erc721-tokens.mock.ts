@@ -1,5 +1,5 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { Erc721Token } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
@@ -41,6 +41,38 @@ export const DE_GODS_TOKEN: RequiredEvmErc721Token = {
 	decimals: 0,
 	icon: usdc,
 	address: '0x41E54Eb019C0762f9Bfcf9Fb1E58925BfB0e7582'
+};
+
+export const PUDGY_PENGUINS_SYMBOL = 'Ppenguins';
+
+export const PUDGY_PENGUINS_TOKEN_ID: TokenId = parseTokenId(PUDGY_PENGUINS_SYMBOL);
+
+export const PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
+	id: PUDGY_PENGUINS_TOKEN_ID,
+	network: ETHEREUM_NETWORK,
+	standard: 'erc721',
+	category: 'custom',
+	name: 'Pudgy Penguins',
+	symbol: PUDGY_PENGUINS_SYMBOL,
+	decimals: 0,
+	icon: usdc,
+	address: '0xbd3531da5cf5857e7cfaa92426877b022e612cf8'
+};
+
+export const SEPOLIA_PUDGY_PENGUINS_SYMBOL = 'Ppenguins';
+
+export const SEPOLIA_PUDGY_PENGUINS_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_PUDGY_PENGUINS_SYMBOL);
+
+export const SEPOLIA_PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
+	id: SEPOLIA_PUDGY_PENGUINS_TOKEN_ID,
+	network: SEPOLIA_NETWORK,
+	standard: 'erc721',
+	category: 'custom',
+	name: 'Pudgy Penguins',
+	symbol: SEPOLIA_PUDGY_PENGUINS_SYMBOL,
+	decimals: 0,
+	icon: usdc,
+	address: '0xbd3531da5cf5857e7cfaa92426877b022e612cf8'
 };
 
 export const mockValidErc721Token: Erc721Token = {
