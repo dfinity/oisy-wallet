@@ -174,13 +174,15 @@ export const formatCurrency = ({
 	currency,
 	exchangeRate: { exchangeRateToUsd, currency: exchangeRateCurrency },
 	language,
-	hideSymbol = false
+	hideSymbol = false,
+	normalizeSeparators = false
 }: {
 	value: number;
 	currency: Currency;
 	exchangeRate: CurrencyExchangeData;
 	language: Languages;
 	hideSymbol?: boolean;
+	normalizeSeparators?: boolean;
 }): string | undefined => {
 	if (currency !== exchangeRateCurrency) {
 		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
@@ -196,14 +198,30 @@ export const formatCurrency = ({
 
 	const convertedValue = value / exchangeRateToUsd;
 
-	const formatted = new Intl.NumberFormat(locale, {
+	const currencyFormatter = new Intl.NumberFormat(locale, {
 		style: 'currency',
 		currency: currency.toUpperCase(),
 		...(hideSymbol && { currencyDisplay: 'code' })
-	})
+	});
+
+	const formatted = currencyFormatter
 		.format(convertedValue)
 		.replace(hideSymbol ? currency.toUpperCase() : '', '')
 		.trim();
+
+	if (normalizeSeparators) {
+		const parts = currencyFormatter.formatToParts(123456.78);
+		const groupSep = parts.find((p) => p.type === 'group')?.value ?? '';
+		const decimalSep = parts.find((p) => p.type === 'decimal')?.value ?? '.';
+
+		return (
+			formatted
+				// Remove group separators (thousands)
+				.replaceAll(groupSep, '')
+				// Replace decimal separator with '.'
+				.replace(decimalSep, '.')
+		);
+	}
 
 	if (currency === Currency.CHF) {
 		return formatted.replace(/,/g, '’');
