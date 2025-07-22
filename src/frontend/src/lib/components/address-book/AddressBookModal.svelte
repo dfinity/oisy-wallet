@@ -380,6 +380,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
+				onAvatarEdit={handleAddAvatar}
 				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
@@ -406,6 +407,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
+				onAvatarEdit={handleAddAvatar}
 				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
