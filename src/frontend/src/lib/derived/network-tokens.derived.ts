@@ -1,6 +1,11 @@
+import type { Erc721Token } from '$eth/types/erc721';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
-import { enabledFungibleTokens, tokensToPin } from '$lib/derived/tokens.derived';
+import {
+	enabledFungibleTokens,
+	enabledNonFungibleTokens,
+	tokensToPin
+} from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
@@ -10,9 +15,16 @@ import { derived, type Readable } from 'svelte/store';
 /**
  * All user-enabled fungible tokens matching the selected network or chain fusion.
  */
-// TODO: Create tests for this store
 export const enabledFungibleNetworkTokens: Readable<Token[]> = derived(
 	[enabledFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
+	filterTokensForSelectedNetwork
+);
+
+/**
+ * All user-enabled non-fungible tokens matching the selected network or chain fusion.
+ */
+export const enabledNonFungibleNetworkTokens: Readable<Erc721Token[]> = derived(
+	[enabledNonFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );
 
