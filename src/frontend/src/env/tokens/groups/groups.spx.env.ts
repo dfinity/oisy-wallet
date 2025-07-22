@@ -1,6 +1,6 @@
+import spx from '$eth/assets/spx.png';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
-import spx from '$eth/assets/spx.png';
 
 const SPX_TOKEN_GROUP_SYMBOL = 'SPX';
 
