@@ -46,14 +46,14 @@ jobs:
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .eslintcache
-          key: eslint-format-cache-${{ github.event.pull_request.number }}
+          key: eslint-cache-format-${{ github.event.pull_request.number }}
       - name: Format
         run: npm run format
       - name: Save ESLint Cache
         if: steps.check_changes.outputs.changes_detected == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: eslint-format-cache-${{ github.event.pull_request.number }}
+          name: eslint-cache-format-${{ github.event.pull_request.number }}
           path: .eslintcache
           retention-days: 1
       - name: Check for Changes
