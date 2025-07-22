@@ -13,7 +13,6 @@
 		fileInput?.click();
 		onClick?.();
 	};
-	
 </script>
 
 <input
@@ -24,4 +23,3 @@
 	class="visually-hidden"
 	{onchange}
 />
-
