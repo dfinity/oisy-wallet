@@ -11,6 +11,7 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { hardenMetadata } from '$lib/utils/metadata.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { getTokenInfo } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
@@ -105,26 +106,22 @@ const loadCustomTokensWithMetadata = async (
 					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
 				}
 
-				return [
-					accExisting,
-					[
-						...accNonExisting,
-						{
-							id: parseTokenId(`custom-token#${fromNullable(symbol)}#${tokenNetwork.chainId}`),
-							name: tokenAddress,
-							address: tokenAddress,
-							// TODO: save this value to the backend too
-							owner: TOKEN_PROGRAM_ADDRESS,
-							network: tokenNetwork,
-							symbol: fromNullable(symbol) ?? '',
-							decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
-							standard: 'spl' as const,
-							category: 'custom' as const,
-							enabled,
-							version
-						}
-					]
-				];
+				const newToken = {
+					id: parseTokenId(`custom-token#${fromNullable(symbol)}#${tokenNetwork.chainId}`),
+					name: tokenAddress,
+					address: tokenAddress,
+					// TODO: save this value to the backend too
+					owner: TOKEN_PROGRAM_ADDRESS,
+					network: tokenNetwork,
+					symbol: fromNullable(symbol) ?? '',
+					decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
+					standard: 'spl' as const,
+					category: 'custom' as const,
+					enabled,
+					version
+				};
+
+				return [accExisting, [...accNonExisting, newToken]];
 			},
 			[[], []]
 		);
@@ -145,7 +142,7 @@ const loadCustomTokensWithMetadata = async (
 			const metadata = await getSplMetadata({ address, network: solNetwork });
 
 			return nonNullish(metadata)
-				? [...(await acc), { ...token, owner, ...rest, ...metadata }]
+				? [...(await acc), { ...token, owner, ...rest, ...hardenMetadata(metadata) }]
 				: acc;
 		}, Promise.resolve([]));
 
