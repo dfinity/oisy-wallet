@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft } from '$lib/types/nft';
+	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	interface Props {
 		children: Snippet;
@@ -19,7 +19,7 @@
 					network: { id: nftContractNetworkId }
 				}
 			}) =>
-				$enabledNonFungibleTokens.some(
+				$enabledNonFungibleNetworkTokens.some(
 					({ address: contractAddress, network: { id: contractNetworkId } }) =>
 						contractAddress === nftContractAddress && contractNetworkId === nftContractNetworkId
 				)

@@ -1,11 +1,12 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
-import { enabledFungibleTokens, tokensToPin } from '$lib/derived/tokens.derived';
+import { enabledFungibleTokens, enabledNonFungibleTokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
+import type { Erc721Token } from '$eth/types/erc721';
 
 /**
  * All user-enabled fungible tokens matching the selected network or chain fusion.
@@ -15,6 +16,14 @@ export const enabledFungibleNetworkTokens: Readable<Token[]> = derived(
 	[enabledFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );
+
+/**
+ * All user-enabled non-fungible tokens matching the selected network or chain fusion.
+ */
+export const enabledNonFungibleNetworkTokens: Readable<Erc721Token[]> = derived(
+	[enabledNonFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
+	filterTokensForSelectedNetwork
+)
 
 /**
  * Fungible network tokens sorted by market cap, with the ones to pin at the top of the list.
