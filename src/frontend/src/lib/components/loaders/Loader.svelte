@@ -8,11 +8,10 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
-	import { erc721CustomTokensInitialized } from '$eth/derived/erc721.derived';
+	import { erc721CustomTokensInitialized, erc721Tokens } from '$eth/derived/erc721.derived';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
-	import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
@@ -157,13 +156,11 @@
 
 	const debounceLoadNfts = debounce(() => {
 		if (nonNullish($ethAddress)) {
-			const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
-
-			loadNfts({ tokens: tokensList, loadedNfts: $nftStore ?? [], walletAddress: $ethAddress });
+			loadNfts({ tokens: $erc721Tokens ?? [], loadedNfts: $nftStore ?? [], walletAddress: '0x29469395eaf6f95920e59f858042f0e28d98a20b' });
 		}
 	});
 
-	$: if ($erc721CustomTokensInitialized && nonNullish($ethAddress)) {
+	$: if ($erc721CustomTokensInitialized && nonNullish($ethAddress) && $erc721Tokens) {
 		debounceLoadNfts();
 	}
 
