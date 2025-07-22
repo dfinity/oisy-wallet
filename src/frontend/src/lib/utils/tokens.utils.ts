@@ -191,7 +191,7 @@ export const sumMainnetTokensUsdBalancesPerNetwork = ({
  * @param $tokens - The list of tokens.
  * @returns The list of "enabled" tokens.
  */
-export const filterEnabledTokens = ([$tokens]: [$tokens: Token[]]): Token[] =>
+export const filterEnabledTokens = <T extends Token> ([$tokens]: [$tokens: T[]]): T[] =>
 	$tokens.filter((token) => ('enabled' in token ? token.enabled : true));
 
 /** Pins enabled tokens at the top of the list, preserving the order of the parts.
