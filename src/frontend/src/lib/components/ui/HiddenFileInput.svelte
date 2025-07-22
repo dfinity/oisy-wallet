@@ -1,7 +1,7 @@
 <script lang="ts">
 	interface Props {
 		onClick?: () => void;
-		onchange?: (e: Event) => void;
+		onChange?: (e: Event) => void;
 		testId?: string;
 	}
 
