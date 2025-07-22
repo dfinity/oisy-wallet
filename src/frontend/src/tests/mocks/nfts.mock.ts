@@ -17,7 +17,7 @@ export const mockValidNft: Nft = {
 		address: mockEthAddress,
 		network: ETHEREUM_NETWORK,
 		standard: 'erc721',
-		enabled: true,
+		symbol: 'MC',
 		name: 'MyContract'
 	}
 };
