@@ -67,7 +67,7 @@ export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =
 );
 
 export const nonFungibleTokens: Readable<Erc721Token[]> = derived([tokens], ([$tokens]) =>
-	$tokens.filter((token) => isTokenErc721(token))
+	$tokens.filter((token): token is Erc721Token => isTokenErc721(token))
 )
 
 export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
