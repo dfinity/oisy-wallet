@@ -106,26 +106,22 @@ const loadCustomTokensWithMetadata = async (
 					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
 				}
 
-				return [
-					accExisting,
-					[
-						...accNonExisting,
-						{
-							id: parseTokenId(`custom-token#${fromNullable(symbol)}#${tokenNetwork.chainId}`),
-							name: tokenAddress,
-							address: tokenAddress,
-							// TODO: save this value to the backend too
-							owner: TOKEN_PROGRAM_ADDRESS,
-							network: tokenNetwork,
-							symbol: fromNullable(symbol) ?? '',
-							decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
-							standard: 'spl' as const,
-							category: 'custom' as const,
-							enabled,
-							version
-						}
-					]
-				];
+				const newToken = {
+					id: parseTokenId(`custom-token#${fromNullable(symbol)}#${tokenNetwork.chainId}`),
+					name: tokenAddress,
+					address: tokenAddress,
+					// TODO: save this value to the backend too
+					owner: TOKEN_PROGRAM_ADDRESS,
+					network: tokenNetwork,
+					symbol: fromNullable(symbol) ?? '',
+					decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
+					standard: 'spl' as const,
+					category: 'custom' as const,
+					enabled,
+					version
+				};
+
+				return [accExisting, [...accNonExisting, newToken]];
 			},
 			[[], []]
 		);

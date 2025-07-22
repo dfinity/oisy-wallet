@@ -74,7 +74,7 @@
 				return;
 			}
 
-			metadata = { ...splMetadata, decimals };
+			metadata = { ...hardenMetadata(splMetadata), decimals };
 
 			if (
 				$splTokens?.find(
