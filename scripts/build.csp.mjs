@@ -192,7 +192,7 @@ const updateCSP = (indexHtml) => {
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
         connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc} ${paraswapApiConnectSrc};
-        img-src 'self' data:;
+        img-src 'self' https: ipfs: data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
         script-src 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
