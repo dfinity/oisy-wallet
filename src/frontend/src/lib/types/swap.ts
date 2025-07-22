@@ -22,6 +22,12 @@ export enum VeloraSwapTypes {
 	DELTA = 'delta',
 	MARKET = 'market'
 }
+
+export enum SwapErrorCodes {
+	WITHDRAW_FAILED = 'withdraw_failed',
+	DEPOSIT_FAILED = 'deposit_error',
+	SWAP_FAILED_WITHDRAW_SUCESS = 'swap_failed_withdraw_success'
+}
 export interface ProviderFee {
 	fee: bigint;
 	token: Token;
@@ -104,6 +110,8 @@ interface BaseSwapProvider<T extends SwapProvider, QuoteResult, QuoteMapParams> 
 type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsReply, KongQuoteParams>;
 
 type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
+
+export type SwapErrorKey = keyof I18n['swap']['error'];
 
 export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
 
