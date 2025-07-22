@@ -988,10 +988,15 @@
 	},
 	"nfts": {
 		"text": {
-			"title": ""
+			"title": "",
+			"title_empty": "",
+			"description_empty": ""
 		},
 		"alt": {
-			"image": ""
+			"placeholder_image": "",
+			"card": {
+				"image": ""
+			}
 		}
 	},
 	"fee": {
