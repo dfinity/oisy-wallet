@@ -1,18 +1,18 @@
 <script lang="ts">
+	import noNftsBanner from '$lib/assets/nfts/no-nfts-banner.svg';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
-	import { NFT_CARD } from '$lib/constants/test-ids.constants';
-	import type { Nft } from '$lib/types/nft';
-	import noNftsBanner from '$lib/assets/nfts/no-nfts-banner.svg'
 	import Img from '$lib/components/ui/Img.svelte';
+	import { NFT_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Nft } from '$lib/types/nft';
 
 	let nfts: Nft[] = $state([]);
 </script>
 
 <NftsDisplayHandler bind:nfts>
 	{#if nfts.length === 0}
-		<div class="py-10 px-6 flex flex-col items-center gap-5">
+		<div class="flex flex-col items-center gap-5 px-6 py-10">
 			<Img src={noNftsBanner} alt={$i18n.nfts.alt.image} />
 
 			<div class="flex flex-col items-center gap-2">
