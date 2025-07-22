@@ -1276,9 +1276,7 @@
 		"edit_contact": {
 			"title": "编辑联系人",
 			"add_address": "添加地址",
-			"delete_contact": "删除联系人",
-			"failed_save_image": "",
-			"failed_remove_image": ""
+			"delete_contact": "删除联系人"
 		},
 		"avatar": {
 			"default": "默认头像",

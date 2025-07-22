@@ -1087,8 +1087,6 @@ interface I18nAddress_book {
 		title: string;
 		add_address: string;
 		delete_contact: string;
-		failed_save_image: string;
-		failed_remove_image: string;
 	};
 	avatar: { default: string; avatar_for: string };
 	edit_avatar: {

@@ -1276,9 +1276,7 @@
 		"edit_contact": {
 			"title": "Kontakt bearbeiten",
 			"add_address": "Adresse hinzufügen",
-			"delete_contact": "Kontakt löschen",
-			"failed_save_image": "",
-			"failed_remove_image": ""
+			"delete_contact": "Kontakt löschen"
 		},
 		"avatar": {
 			"default": "Standard-Avatar",

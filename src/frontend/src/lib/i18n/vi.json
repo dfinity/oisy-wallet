@@ -1276,9 +1276,7 @@
 		"edit_contact": {
 			"title": "Chỉnh sửa liên hệ",
 			"add_address": "Thêm địa chỉ",
-			"delete_contact": "Xóa liên hệ",
-			"failed_save_image": "",
-			"failed_remove_image": ""
+			"delete_contact": "Xóa liên hệ"
 		},
 		"avatar": {
 			"default": "Ảnh đại diện mặc định",
