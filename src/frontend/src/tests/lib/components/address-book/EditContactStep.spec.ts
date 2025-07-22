@@ -25,7 +25,7 @@ vi.mock('browser-image-compression', () => {
 	return {
 		__esModule: true,
 		default: Object.assign(mockCompression, {
-			getDataUrlFromFile // ← attach directly to the mockCompression function
+			getDataUrlFromFile 
 		})
 	};
 });
