@@ -1467,52 +1467,52 @@
 	},
 	"earning": {
 		"text": {
-			"title": ""
+			"title": "Kiếm tiền"
 		},
 		"cards": {
-			"gold_title": "",
-			"gold_description": "",
-			"stablecoins_title": "",
-			"stablecoins_description": "",
-			"sprinkles_title": "",
-			"sprinkles_description": ""
+			"gold_title": "Vàng",
+			"gold_description": "GLDT Staking",
+			"stablecoins_title": "Stablecoins",
+			"stablecoins_description": "Sắp ra mắt",
+			"sprinkles_title": "Sprinkles",
+			"sprinkles_description": "Phần thưởng OISY"
 		}
 	},
 	"welcome": {
-		"title": "",
-		"subtitle": "",
-		"description": ""
+		"title": "Chào mừng đến với $oisy_short!",
+		"subtitle": "Sẵn sàng kiếm tiền?",
+		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu 4 người bạn và nhận một khoản tiền thưởng."
 	},
 	"temporal": {
 		"seconds_to_duration": {
-			"year": "",
-			"year_plural": "",
-			"month": "",
-			"month_plural": "",
-			"day": "",
-			"day_plural": "",
-			"hour": "",
-			"hour_plural": "",
-			"minute": "",
-			"minute_plural": "",
-			"second": "",
-			"second_plural": ""
+			"year": "năm",
+			"year_plural": "năm",
+			"month": "tháng",
+			"month_plural": "tháng",
+			"day": "ngày",
+			"day_plural": "ngày",
+			"hour": "giờ",
+			"hour_plural": "giờ",
+			"minute": "phút",
+			"minute_plural": "phút",
+			"second": "giây",
+			"second_plural": "giây"
 		}
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "",
-			"welcome_message": "",
-			"action_button_contacts_title": "",
-			"action_button_contacts_subtitle": "",
-			"action_button_contacts_prompt": "",
-			"send_message": "",
-			"send_message_input_placeholder": "",
-			"loading": ""
+			"title": "Trợ lý AI $oisy_short",
+			"welcome_message": "Xin chào! 👋 Tôi là OISY, trợ lý AI cá nhân của bạn. Đây là cách tôi có thể giúp bạn:",
+			"action_button_contacts_title": "Hiển thị danh bạ",
+			"action_button_contacts_subtitle": "Hiển thị danh bạ đã lưu của bạn",
+			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
+			"send_message": "Gửi tin nhắn",
+			"send_message_input_placeholder": "Bạn muốn làm gì?",
+			"loading": "Đang suy nghĩ..."
 		},
 		"errors": {
-			"unknown": "",
-			"no_response": ""
+			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",
+			"no_response": "Xin lỗi, tôi không nhận được phản hồi từ LLM."
 		}
 	}
 }
