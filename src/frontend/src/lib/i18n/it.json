@@ -988,7 +988,9 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT"
+			"title": "NFT",
+			"title_empty": "",
+			"description_empty": ""
 		},
 		"alt": {
 			"image": "",

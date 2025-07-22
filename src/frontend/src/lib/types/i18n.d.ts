@@ -830,17 +830,8 @@ interface I18nTokens {
 }
 
 interface I18nNfts {
-	text: {
-		title: string
-		title_empty: string;
-		description_empty: string;
-	};
-	alt: {
-		image: string;
-		card: {
-			image: string
-		}
-	};
+	text: { title: string; title_empty: string; description_empty: string };
+	alt: { image: string; card: { image: string } };
 }
 
 interface I18nFee {
