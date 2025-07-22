@@ -17,11 +17,11 @@
 		NAVIGATION_MENU_DOC_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	
+
 	let visible = $state(false);
-	
+
 	let button = $state<HTMLButtonElement | undefined>();
-	
+
 	const hidePopover = () => (visible = false);
 </script>
 
