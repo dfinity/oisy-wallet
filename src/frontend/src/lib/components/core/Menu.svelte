@@ -186,10 +186,10 @@
 					{$i18n.navigation.text.binance_qr_code}
 				</ButtonMenu>
 			{/if}
-		{/if}
 
-		{#if isGold || isVip}
-			<Hr />
+			{#if isGold || isVip}
+				<Hr />
+			{/if}
 		{/if}
 	</div>
 
