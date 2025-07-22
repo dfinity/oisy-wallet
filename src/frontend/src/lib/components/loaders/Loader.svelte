@@ -56,6 +56,7 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { erc721CustomTokensInitialized } from '$eth/derived/erc721.derived';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -156,15 +157,14 @@
 	}
 
 	const debounceLoadNfts = debounce(() => {
-		if (nonNullish($ethAddressStore?.data)) {
+		if (nonNullish($ethAddress)) {
 			const tokensList = $erc721CustomTokensStore?.map((entry) => entry.data) ?? [];
-			const loadedNfts = $nftStore ?? [];
 
-			loadNfts({ tokens: tokensList, loadedNfts, walletAddress: $ethAddressStore.data });
+			loadNfts({ tokens: tokensList, loadedNfts: $nftStore ?? [], walletAddress: $ethAddress });
 		}
 	});
 
-	$: if ($erc721CustomTokensStore) {
+	$: if ($erc721CustomTokensInitialized && nonNullish($ethAddress)) {
 		debounceLoadNfts();
 	}
 
