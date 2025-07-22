@@ -27,6 +27,7 @@ import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { derived, type Readable } from 'svelte/store';
+import type { Erc721Token } from '$eth/types/erc721';
 
 export const tokens: Readable<Token[]> = derived(
 	[
@@ -65,6 +66,11 @@ export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =
 	$tokens.filter((token) => !isTokenErc721(token))
 );
 
+export const nonFungibleTokens: Readable<Erc721Token[]> = derived(
+	[erc721Tokens],
+	([$erc721Tokens]) => $erc721Tokens
+);
+
 export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
 	$tokens.filter((token) => isDefaultEthereumToken(token))
 );
@@ -92,6 +98,13 @@ export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledT
 export const enabledFungibleTokens: Readable<Token[]> = derived(
 	[fungibleTokens],
 	filterEnabledTokens
+);
+
+/**
+ * All user-enabled non-fungible tokens
+ */
+export const enabledNonFungibleTokens: Readable<Erc721Token[]> = derived(
+	[nonFungibleTokens], filterEnabledTokens
 );
 
 /**
