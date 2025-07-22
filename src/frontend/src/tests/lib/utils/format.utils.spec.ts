@@ -976,5 +976,97 @@ describe('format.utils', () => {
 				})
 			).toBe('1,000,000');
 		});
+
+		it('should normalize the separators', () => {
+			expect(
+				formatCurrency({
+					value: 1234.56,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					normalizeSeparators: true
+				})
+			).toBe('$1234.56');
+
+			expect(
+				formatCurrency({
+					value: 987654321.12,
+					currency: Currency.EUR,
+					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					normalizeSeparators: true
+				})
+			).toBe('€987654321.12');
+
+			expect(
+				formatCurrency({
+					value: 0.99,
+					currency: Currency.GBP,
+					exchangeRate: { currency: Currency.GBP, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					normalizeSeparators: true
+				})
+			).toBe('£0.99');
+
+			expect(
+				formatCurrency({
+					value: 1000000,
+					currency: Currency.JPY,
+					exchangeRate: { currency: Currency.JPY, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					normalizeSeparators: true
+				})
+			).toBe('¥1000000');
+
+			expect(
+				formatCurrency({
+					value: 123456789.99,
+					currency: Currency.CHF,
+					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					normalizeSeparators: true
+				})
+			).toBe('CHF 123456789.99');
+
+			expect(
+				formatCurrency({
+					value: 0,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					normalizeSeparators: true
+				})
+			).toBe('$0.00');
+
+			expect(
+				formatCurrency({
+					value: -1234.56,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					normalizeSeparators: true
+				})
+			).toBe('-$1234.56');
+
+			expect(
+				formatCurrency({
+					value: -987654321.12,
+					currency: Currency.EUR,
+					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					normalizeSeparators: true
+				})
+			).toBe('-€987654321.12');
+
+			expect(
+				formatCurrency({
+					value: 1000000.99,
+					currency: Currency.JPY,
+					exchangeRate: { currency: Currency.JPY, exchangeRateToUsd: 1 },
+					language: Languages.ITALIAN,
+					normalizeSeparators: true
+				})
+			).toBe('¥1000001');
+		});
 	});
 });
