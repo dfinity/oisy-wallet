@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
+	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
+	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
-	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import {
@@ -14,10 +16,7 @@
 		NAVIGATION_MENU_SUPPORT_BUTTON,
 		NAVIGATION_MENU_DOC_BUTTON
 	} from '$lib/constants/test-ids.constants';
-
 	import { i18n } from '$lib/stores/i18n.store';
-	import Hr from '../ui/Hr.svelte';
-	import IconHelpCircle from '../icons/IconHelpCircle.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();

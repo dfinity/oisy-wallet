@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import IconCopy from '$lib/components/icons/IconCopy.svelte';
+	import IconOisyMenu from '$lib/components/icons/IconOisyMenu.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { emit } from '$lib/utils/events.utils';
-	import IconOisyMenu from '../icons/IconOisyMenu.svelte';
 
 	const dispatch = createEventDispatcher();
 

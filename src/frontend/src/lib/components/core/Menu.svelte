@@ -15,6 +15,7 @@
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
+	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
@@ -46,7 +47,6 @@
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
-	import IconUsersRound from '../icons/lucide/IconUsersRound.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
