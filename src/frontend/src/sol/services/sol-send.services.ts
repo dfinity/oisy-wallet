@@ -337,9 +337,8 @@ export const sendSol = async ({
 			rpc
 		});
 
-	const computeUnitsEstimate = await getComputeUnitEstimateForTransactionMessage(
-		transactionMessage,
-	);
+	const computeUnitsEstimate =
+		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
 
 	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
 
