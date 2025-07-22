@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
