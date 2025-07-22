@@ -108,60 +108,6 @@ describe('infura-erc721.providers', () => {
 			});
 		});
 
-		describe('isErc721', () => {
-			const mockSupportsInterface =
-				vi.fn() as unknown as typeof mockContract.prototype.supportsInterface;
-
-			const mockParams = {
-				contractAddress
-			};
-
-			beforeEach(() => {
-				vi.clearAllMocks();
-
-				mockSupportsInterface.mockResolvedValue(true);
-
-				mockContract.prototype.supportsInterface = mockSupportsInterface;
-			});
-
-			it('should return true if contract is erc721', async () => {
-				const provider = new InfuraErc721Provider(infura);
-
-				const result = await provider.isErc721(mockParams);
-
-				expect(result).toBeTruthy();
-			});
-
-			it('should return false on error', async () => {
-				const errorMessage = 'Error fetching metadata';
-				mockSupportsInterface.mockRejectedValue(new Error(errorMessage));
-
-				const provider = new InfuraErc721Provider(infura);
-
-				const result = await provider.isErc721(mockParams);
-
-				expect(result).toBeFalsy();
-			});
-
-			it('should call the supportsInterface method of the contract', async () => {
-				const provider = new InfuraErc721Provider(infura);
-
-				await provider.isErc721(mockParams);
-
-				expect(provider).toBeDefined();
-
-				expect(mockContract).toHaveBeenCalledOnce();
-
-				expect(mockContract).toHaveBeenNthCalledWith(
-					1,
-					...expectedContractParams,
-					new mockProvider()
-				);
-
-				expect(mockSupportsInterface).toHaveBeenCalledOnce();
-			});
-		});
-
 		describe('getNftMetadata', () => {
 			const mockTokenUri = vi.fn() as unknown as typeof mockContract.prototype.tokenURI;
 
