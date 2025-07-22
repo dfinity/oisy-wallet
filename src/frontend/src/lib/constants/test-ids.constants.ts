@@ -241,7 +241,7 @@ export const SEND_FEE_INFO = 'send-fee-info';
 // Avatar
 export const AVATAR_IMAGE = 'avatar-image';
 export const AVATAR_WITH_BADGE_FALLBACK_IMAGE = 'avatar-with-badge-fallback-image';
-export const CONTACT_AVATAR_BADGE = 'avatar-badge';
+export const AVATAR_BADGE = 'avatar-badge';
 
 // Contact Card test IDs
 export const CONTACT_CARD = 'contact-card';
