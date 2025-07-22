@@ -9,7 +9,8 @@ import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
 import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import type { OptionEthAddress } from '$lib/types/address';
 
 export const loadNfts = ({
 	tokens,
@@ -18,8 +19,12 @@ export const loadNfts = ({
 }: {
 	tokens: Erc721Token[];
 	loadedNfts: Nft[];
-	walletAddress: string;
+	walletAddress: OptionEthAddress;
 }): Promise<void[]> => {
+	if (isNullish(walletAddress)) {
+		return;
+	}
+
 	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, nfts: loadedNfts });
 
 	return Promise.all(
