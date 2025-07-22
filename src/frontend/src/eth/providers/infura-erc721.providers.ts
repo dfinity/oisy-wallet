@@ -15,8 +15,6 @@ import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-const ERC721_INTERFACE_ID = '0x80ac58cd';
-
 export class InfuraErc721Provider {
 	private readonly provider: InfuraProvider;
 
@@ -36,16 +34,6 @@ export class InfuraErc721Provider {
 			symbol,
 			decimals: 0 // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 		};
-	};
-
-	isErc721 = async ({ contractAddress }: { contractAddress: string }): Promise<boolean> => {
-		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
-
-		try {
-			return await erc721Contract.supportsInterface(ERC721_INTERFACE_ID);
-		} catch (_: unknown) {
-			return false;
-		}
 	};
 
 	getNftMetadata = async ({
@@ -89,7 +77,7 @@ export class InfuraErc721Provider {
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
 
-		const imageUrl = extractImageUrl(metadata.image);
+		const imageUrl = extractImageUrl(metadata.image ?? metadata.image_url);
 
 		const mappedAttributes = (metadata?.attributes ?? []).map(
 			(attr: { trait_type: string; value: string | number }) => ({

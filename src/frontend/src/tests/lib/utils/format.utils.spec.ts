@@ -934,5 +934,47 @@ describe('format.utils', () => {
 				})
 			).toBe('CHF 833.33'); // 1000 / 1.2 = 833.33
 		});
+
+		it('should hide the currency symbol if hideSymbol is true', () => {
+			expect(
+				formatCurrency({
+					value: 1234.56,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					hideSymbol: true
+				})
+			).toBe('1,234.56');
+
+			expect(
+				formatCurrency({
+					value: 987654321.12,
+					currency: Currency.EUR,
+					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					hideSymbol: true
+				})
+			).toBe('987,654,321.12');
+
+			expect(
+				formatCurrency({
+					value: 0.99,
+					currency: Currency.CHF,
+					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					hideSymbol: true
+				})
+			).toBe('0.99');
+
+			expect(
+				formatCurrency({
+					value: 1000000,
+					currency: Currency.JPY,
+					exchangeRate: { currency: Currency.JPY, exchangeRateToUsd: 1 },
+					language: Languages.CHINESE_SIMPLIFIED,
+					hideSymbol: true
+				})
+			).toBe('1,000,000');
+		});
 	});
 });
