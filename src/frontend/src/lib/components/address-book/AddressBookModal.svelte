@@ -385,7 +385,6 @@
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
-				onAvatarEdit={handleAddAvatar}
 				onAddAddress={() => {
 					currentAddressIndex = undefined;
 					previousStepName = AddressBookSteps.SHOW_CONTACT;
@@ -412,7 +411,6 @@
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
-				onAvatarEdit={handleAddAvatar}
 				onAddAddress={() => {
 					currentAddressIndex = undefined;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
