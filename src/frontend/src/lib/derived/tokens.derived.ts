@@ -27,6 +27,7 @@ import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { derived, type Readable } from 'svelte/store';
+import type { Erc721Token } from '$eth/types/erc721';
 
 export const tokens: Readable<Token[]> = derived(
 	[
@@ -65,6 +66,10 @@ export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =
 	$tokens.filter((token) => !isTokenErc721(token))
 );
 
+export const nonFungibleTokens: Readable<Erc721Token[]> = derived([tokens], ([$tokens]) =>
+	$tokens.filter((token) => isTokenErc721(token))
+)
+
 export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
 	$tokens.filter((token) => isDefaultEthereumToken(token))
 );
@@ -93,6 +98,14 @@ export const enabledFungibleTokens: Readable<Token[]> = derived(
 	[fungibleTokens],
 	filterEnabledTokens
 );
+
+/**
+ * All user-enabled non-fungible tokens
+ */
+export const enabledNonFungibleTokens: Readable<Erc721Token[]> = derived(
+	[nonFungibleTokens],
+	filterEnabledTokens
+)
 
 /**
  * It isn't performant to post filter again the Erc20 tokens that are enabled, but it's code wise convenient to avoid duplication of logic.
