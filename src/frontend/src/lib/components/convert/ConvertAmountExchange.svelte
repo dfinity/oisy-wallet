@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import {
 		CONVERT_AMOUNT_EXCHANGE_SKELETON,
 		CONVERT_AMOUNT_EXCHANGE_VALUE
@@ -23,20 +22,18 @@
 	let displayValue: string | undefined;
 	$: displayValue = nonNullish(usdValue)
 		? formatCurrency({
-				value:
-					usdValue === 0 || usdValue > EXCHANGE_USD_AMOUNT_THRESHOLD
-						? usdValue
-						: EXCHANGE_USD_AMOUNT_THRESHOLD,
+				value:usdValue,
 				currency: $currentCurrency,
 				exchangeRate: $currencyExchangeStore,
-				language: $currentLanguage
+				language: $currentLanguage,
+			notBelowThreshold: usdValue !== 0
 			})
 		: undefined;
 </script>
 
 {#if nonNullish(usdValue)}
 	<div in:fade data-tid={CONVERT_AMOUNT_EXCHANGE_VALUE}>
-		{usdValue === 0 ? '' : usdValue < EXCHANGE_USD_AMOUNT_THRESHOLD ? '< ' : '~'}{displayValue}
+		{usdValue === 0 ? '' :  displayValue?.includes('<')  ? '' : '~'}{displayValue}
 	</div>
 {:else if isNullish(amount)}
 	<div in:fade class="w-10 sm:w-8" data-tid={CONVERT_AMOUNT_EXCHANGE_SKELETON}>

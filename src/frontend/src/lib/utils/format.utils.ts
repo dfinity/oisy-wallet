@@ -5,6 +5,7 @@ import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
 import type { CurrencyExchangeData } from '$lib/types/currency';
+import { getCurrencyDecimalDigits } from '$lib/utils/currency.utils';
 import { isNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import Decimal from 'decimal.js';
@@ -174,6 +175,7 @@ export const formatCurrency = ({
 	currency,
 	exchangeRate: { exchangeRateToUsd, currency: exchangeRateCurrency },
 	language,
+	notBelowThreshold = false,
 	hideSymbol = false,
 	normalizeSeparators = false
 }: {
@@ -181,6 +183,7 @@ export const formatCurrency = ({
 	currency: Currency;
 	exchangeRate: CurrencyExchangeData;
 	language: Languages;
+	notBelowThreshold?: boolean;
 	hideSymbol?: boolean;
 	normalizeSeparators?: boolean;
 }): string | undefined => {
@@ -203,6 +206,15 @@ export const formatCurrency = ({
 		currency: currency.toUpperCase(),
 		...(hideSymbol && { currencyDisplay: 'code' })
 	});
+
+	if (notBelowThreshold) {
+		const decimalDigits = getCurrencyDecimalDigits({ currency, language });
+		const minThreshold = 1 / Math.pow(10, decimalDigits);
+
+		if (Math.abs(convertedValue) < minThreshold) {
+			return `< ${currencyFormatter.format(minThreshold)}`;
+		}
+	}
 
 	const formatted = currencyFormatter
 		.format(convertedValue)
