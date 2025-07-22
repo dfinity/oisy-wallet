@@ -249,7 +249,7 @@ describe('EditContactStep', () => {
 
 		const input = container.querySelector('input[type="file"]');
 
-		expect(input).toBeTruthy();
+		expect(input).toBeInTheDocument();
 
 		const file = new File(['x'], 'avatar.png', { type: 'image/png' });
 
