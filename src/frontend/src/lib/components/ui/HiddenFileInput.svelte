@@ -1,11 +1,11 @@
 <script lang="ts">
 	interface Props {
 		onClick?: () => void;
-		onchange?: (e: Event) => void;
+		onChange?: (e: Event) => void;
 		testId?: string;
 	}
 
-	let { onClick, onchange, testId }: Props = $props();
+	let { onClick, onChange, testId }: Props = $props();
 
 	let fileInput = $state<HTMLInputElement | undefined>();
 
@@ -21,5 +21,5 @@
 	accept="image/*"
 	data-tid={testId}
 	class="visually-hidden"
-	{onchange}
+	onchange={(e: Event) => onChange?.(e)}
 />
