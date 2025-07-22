@@ -20,7 +20,6 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { SwapError } from '$lib/services/swap-errors.services';
 	import { swapService } from '$lib/services/swap.services';
 	import { enI18n, i18n } from '$lib/stores/i18n.store';
 	import {
@@ -30,9 +29,9 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { SwapErrorCodes } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { SwapErrorCodes } from '$lib/types/swap';
 	import { isSwapError } from '$lib/utils/swap.utils';
 
 	interface Props {
