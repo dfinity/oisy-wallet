@@ -7,6 +7,7 @@ import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc721Token } from '$eth/types/erc721';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -65,6 +66,11 @@ export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =
 	$tokens.filter((token) => !isTokenErc721(token))
 );
 
+const nonFungibleTokens: Readable<Erc721Token[]> = derived(
+	[erc721Tokens],
+	([$erc721Tokens]) => $erc721Tokens
+);
+
 export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
 	$tokens.filter((token) => isDefaultEthereumToken(token))
 );
@@ -91,6 +97,14 @@ export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledT
  */
 export const enabledFungibleTokens: Readable<Token[]> = derived(
 	[fungibleTokens],
+	filterEnabledTokens
+);
+
+/**
+ * All user-enabled non-fungible tokens
+ */
+export const enabledNonFungibleTokens: Readable<Erc721Token[]> = derived(
+	[nonFungibleTokens],
 	filterEnabledTokens
 );
 
