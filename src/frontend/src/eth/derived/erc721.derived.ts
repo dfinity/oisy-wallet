@@ -3,8 +3,8 @@ import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store'
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
 import { enabledEvmNetworksIds } from '$evm/derived/networks.derived';
-import { derived, type Readable } from 'svelte/store';
 import { nonNullish } from '@dfinity/utils';
+import { derived, type Readable } from 'svelte/store';
 
 /**
  * The list of ERC721 tokens the user has added, enabled or disabled.
@@ -34,5 +34,6 @@ export const erc721Tokens: Readable<Erc721TokenToggleable[]> = derived(
 );
 
 export const erc721CustomTokensInitialized: Readable<boolean> = derived(
-	[erc721CustomTokensStore], ([$erc721CustomTokensStore]) => nonNullish($erc721CustomTokensStore)
-)
+	[erc721CustomTokensStore],
+	([$erc721CustomTokensStore]) => nonNullish($erc721CustomTokensStore)
+);
