@@ -103,8 +103,8 @@ export const enabledFungibleTokens: Readable<Token[]> = derived(
  * All user-enabled non-fungible tokens
  */
 export const enabledNonFungibleTokens: Readable<Erc721Token[]> = derived(
-	[nonFungibleTokens],
-	filterEnabledTokens
+	[nonFungibleTokens], ([$nonFungibleTokens]) =>
+		filterEnabledTokens([$nonFungibleTokens]).filter((token): token is Erc721Token => isTokenErc721(token))
 )
 
 /**
