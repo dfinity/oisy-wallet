@@ -988,10 +988,15 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs"
+			"title": "NFTs",
+			"title_empty": "Your NFTs will appear here",
+			"description_empty": "It looks like you haven't received NFTs yet"
 		},
 		"alt": {
-			"image": "Image of NFT with token ID: $tokenId"
+			"image": "No NFTs yet",
+			"card": {
+				"image": "Image of NFT with token ID: $tokenId"
+			}
 		}
 	},
 	"fee": {

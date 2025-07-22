@@ -991,7 +991,10 @@
 			"title": ""
 		},
 		"alt": {
-			"image": ""
+			"image": "",
+			"card": {
+				"image": ""
+			}
 		}
 	},
 	"fee": {
