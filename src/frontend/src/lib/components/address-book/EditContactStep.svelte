@@ -3,7 +3,6 @@
 	import imageCompression from 'browser-image-compression';
 	import type { ContactImage } from '$declarations/backend/backend.did';
 	import { AVATAR_ENABLED } from '$env/avatar.env';
-	import { CONTACT_AVATAR_BADGE } from '$lib/constants/test-ids.constants';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
@@ -18,6 +17,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import {
+		CONTACT_AVATAR_BADGE,
 		CONTACT_EDIT_DELETE_CONTACT_BUTTON,
 		CONTACT_SHOW_CLOSE_BUTTON,
 		CONTACT_EDIT_ADD_ADDRESS_BUTTON,
