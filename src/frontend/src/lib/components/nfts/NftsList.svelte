@@ -1,9 +1,9 @@
 <script lang="ts">
+	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
 	import { NFT_CARD } from '$lib/constants/test-ids.constants';
 	import type { Nft } from '$lib/types/nft';
-	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 
 	let nfts: Nft[] = $state([]);
 </script>
