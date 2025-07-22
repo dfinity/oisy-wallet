@@ -3,6 +3,7 @@
 	interface Props {
 		size?: string;
 	}
+	
 	let { size = '22' }: Props = $props();
 </script>
 
