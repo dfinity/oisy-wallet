@@ -32,6 +32,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { SwapError } from '$lib/services/swap-errors.services';
+	import { SwapErrorCodes } from '$lib/types/swap';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -131,7 +132,7 @@
 			}
 
 			if (err instanceof SwapError) {
-				if (err.code === 'withdraw_failed') {
+				if (err.code === SwapErrorCodes.WITHDRAW_FAILED) {
 					failedSwapError.set({
 						message: $i18n.swap.error.withdraw_failed,
 						variant: 'error',

@@ -19,6 +19,7 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import {
+	SwapErrorCodes,
 	SwapProvider,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
@@ -254,7 +255,10 @@ export const fetchIcpSwap = async ({
 		}
 	} catch (err: unknown) {
 		console.error(err);
-		throwSwapError({ code: 'deposit_error', message: get(i18n).swap.error.deposit_error });
+		throwSwapError({
+			code: SwapErrorCodes.DEPOSIT_FAILED,
+			message: get(i18n).swap.error.deposit_error
+		});
 	}
 
 	try {
@@ -281,11 +285,14 @@ export const fetchIcpSwap = async ({
 		} catch (err: unknown) {
 			console.error(err);
 			// If even the refund fails, show a critical error requiring manual user action
-			throwSwapError({ code: 'withdraw_failed', message: get(i18n).swap.error.withdraw_failed });
+			throwSwapError({
+				code: SwapErrorCodes.WITHDRAW_FAILED,
+				message: get(i18n).swap.error.withdraw_failed
+			});
 		}
 		// Inform the user that the swap failed, but refund was successful
 		throwSwapError({
-			code: 'swap_failed_withdraw_success',
+			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS,
 			message: get(i18n).swap.error.swap_failed_withdraw_success
 		});
 	}
@@ -302,7 +309,10 @@ export const fetchIcpSwap = async ({
 	} catch (err: unknown) {
 		console.error(err);
 
-		throwSwapError({ code: 'withdraw_failed', message: get(i18n).swap.error.withdraw_failed });
+		throwSwapError({
+			code: SwapErrorCodes.WITHDRAW_FAILED,
+			message: get(i18n).swap.error.withdraw_failed
+		});
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
