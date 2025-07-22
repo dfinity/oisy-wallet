@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
+	import HelpMenu from '$lib/components/core/HelpMenu.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
@@ -37,6 +38,8 @@
 		{/if}
 
 		{#if $authSignedIn}
+			<HelpMenu />
+
 			<Menu />
 		{:else}
 			<div class="mr-2 flex justify-end gap-3 sm:gap-5 md:mr-0">
