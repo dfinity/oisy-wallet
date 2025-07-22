@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft } from '$lib/types/nft';
-	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	interface Props {
 		children: Snippet;
