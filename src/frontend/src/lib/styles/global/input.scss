@@ -1,0 +1,7 @@
+@use '../mixins/hidden';
+
+input[type='file'] {
+	&.visually-hidden {
+		@include hidden.visually-hidden;
+	}
+}
