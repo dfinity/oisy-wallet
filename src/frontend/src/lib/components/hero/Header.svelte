@@ -12,6 +12,7 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import HelpMenu from '../core/HelpMenu.svelte';
 </script>
 
 <header
@@ -37,6 +38,8 @@
 		{/if}
 
 		{#if $authSignedIn}
+			<HelpMenu />
+
 			<Menu />
 		{:else}
 			<div class="mr-2 flex justify-end gap-3 sm:gap-5 md:mr-0">
