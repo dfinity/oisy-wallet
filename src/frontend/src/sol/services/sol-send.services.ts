@@ -25,11 +25,8 @@ import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-p
 import {
 	appendTransactionMessageInstructions,
 	assertTransactionIsFullySigned,
-	compileTransaction,
 	createTransactionMessage,
-	getBase64Decoder,
 	getComputeUnitEstimateForTransactionMessageFactory,
-	getTransactionEncoder,
 	lamports,
 	pipe,
 	prependTransactionMessageInstruction,
@@ -37,7 +34,6 @@ import {
 	setTransactionMessageFeePayerSigner,
 	setTransactionMessageLifetimeUsingBlockhash,
 	address as solAddress,
-	type Base64EncodedWireTransaction,
 	type Commitment,
 	type ITransactionMessageWithFeePayer,
 	type Rpc,
@@ -340,21 +336,6 @@ export const sendSol = async ({
 		getComputeUnitEstimateForTransactionMessageFactory({
 			rpc
 		});
-
-	const compiledTransaction = compileTransaction(transactionMessage);
-
-	const transactionBytes = getBase64Decoder().decode(
-		getTransactionEncoder().encode(compiledTransaction)
-	);
-
-	const { simulateTransaction } = rpc;
-
-	const simulationResult = await simulateTransaction(
-		transactionBytes as Base64EncodedWireTransaction,
-		{
-			encoding: 'base64'
-		}
-	).send();
 
 	const computeUnitsEstimate = await getComputeUnitEstimateForTransactionMessage(
 		transactionMessage,
