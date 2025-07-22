@@ -33,6 +33,7 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { throwSwapError } from './swap-errors.services';
 import { autoLoadSingleToken } from './token.services';
 
 export const fetchKongSwap = async ({
@@ -253,7 +254,7 @@ export const fetchIcpSwap = async ({
 		}
 	} catch (err: unknown) {
 		console.error(err);
-		throw new Error(get(i18n).swap.error.deposit_error);
+		throwSwapError({ code: 'deposit_error', message: get(i18n).swap.error.deposit_error });
 	}
 
 	try {
@@ -280,10 +281,13 @@ export const fetchIcpSwap = async ({
 		} catch (err: unknown) {
 			console.error(err);
 			// If even the refund fails, show a critical error requiring manual user action
-			throw new Error(get(i18n).swap.error.withdraw_failed);
+			throwSwapError({ code: 'withdraw_failed', message: get(i18n).swap.error.withdraw_failed });
 		}
 		// Inform the user that the swap failed, but refund was successful
-		throw new Error(get(i18n).swap.error.swap_failed_withdraw_success);
+		throwSwapError({
+			code: 'swap_failed_withdraw_success',
+			message: get(i18n).swap.error.swap_failed_withdraw_success
+		});
 	}
 
 	try {
@@ -298,7 +302,7 @@ export const fetchIcpSwap = async ({
 	} catch (err: unknown) {
 		console.error(err);
 
-		throw new Error(get(i18n).swap.error.withdraw_failed);
+		throwSwapError({ code: 'withdraw_failed', message: get(i18n).swap.error.withdraw_failed });
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);

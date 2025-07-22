@@ -21,7 +21,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swapService } from '$lib/services/swap.services';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { enI18n, i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext as SwapAmountsContextType
@@ -31,6 +31,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { SwapError } from '$lib/services/swap-errors.services';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -113,7 +114,7 @@
 				}
 			});
 
-			setTimeout(() => close(), 750);
+			setTimeout(() => close(), 50);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
 			// TODO: Add unit tests to cover failed swap error scenarios
@@ -127,23 +128,26 @@
 					),
 					variant: 'info'
 				});
-			} else if (
-				nonNullish(errorDetail) &&
-				errorDetail.startsWith('Swap failed and withdraw also failed')
-			) {
-				failedSwapError.set({
-					message: errorDetail,
-					variant: 'error',
-					url: {
-						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
-						text: 'icpswap.com'
-					}
-				});
-			} else if (errorDetail && errorDetail.startsWith('Swap failed.')) {
-				failedSwapError.set({ message: errorDetail, variant: 'error' });
+			}
+
+			if (err instanceof SwapError) {
+				if (err.code === 'withdraw_failed') {
+					failedSwapError.set({
+						message: $i18n.swap.error.withdraw_failed,
+						variant: 'error',
+						url: {
+							url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+							text: 'icpswap.com'
+						}
+					});
+				} else {
+					failedSwapError.set({
+						message: $i18n.swap.error[err.code],
+						variant: 'info'
+					});
+				}
 			} else {
 				failedSwapError.set(undefined);
-
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected },
 					err
@@ -155,7 +159,9 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					errorKey: err instanceof SwapError ? err.code : '',
+					errorMessage: err instanceof SwapError ? enI18n().swap.error[err.code] : ''
 				}
 			});
 
