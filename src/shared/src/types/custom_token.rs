@@ -44,8 +44,6 @@ pub type ChainId = u64;
 pub struct Erc20Token {
     pub token_address: ErcTokenId,
     pub chain_id: ChainId,
-    pub symbol: Option<String>,
-    pub decimals: Option<u8>,
 }
 
 /// An ERC721 compliant token on the Ethereum or EVM-compatible networks.
