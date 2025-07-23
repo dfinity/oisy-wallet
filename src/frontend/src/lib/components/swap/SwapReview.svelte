@@ -81,11 +81,11 @@
 					<CustomError
 						firstMessage={$i18n.swap.error.withdraw_success_first_part}
 						firstLink={{
-							link: ' https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens',
+							url: 'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens',
 							text: $i18n.swap.error.swap_failed_instruction_link
 						}}
 						secondMessage={$i18n.swap.error.withdraw_success_second_part}
-						secondLink={{ link: $failedSwapError.url.url, text: $failedSwapError.url.text }}
+						secondLink={{ url: $failedSwapError.url.url, text: $failedSwapError.url.text }}
 					/>
 				{:else}
 					{$failedSwapError.message}
