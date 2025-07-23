@@ -14,7 +14,7 @@
 
 	let { tokens, initWalletWorker, children }: Props = $props();
 
-	let workers = $state(new SvelteMap<TokenId, WalletWorker>());
+	let workers = (new SvelteMap<TokenId, WalletWorker>());
 
 	const manageWorkers = async () => {
 		cleanWorkers({ workers, tokens });
