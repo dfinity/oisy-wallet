@@ -9,7 +9,6 @@ import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('spl.derived', () => {
 	const mockSplDefaultToken: SplToken = {
