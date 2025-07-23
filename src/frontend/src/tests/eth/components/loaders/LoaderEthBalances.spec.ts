@@ -7,7 +7,7 @@ import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 import { ethAddressStore } from '$lib/stores/address.store';
 import type { Token } from '$lib/types/token';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';

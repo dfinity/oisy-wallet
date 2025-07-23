@@ -6,7 +6,7 @@ import type {
 	PostMessageDataRequestExchangeTimer,
 	PostMessageDataResponseExchange
 } from '$lib/types/post-message';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockSplAddress } from '$tests/mocks/sol.mock';
 

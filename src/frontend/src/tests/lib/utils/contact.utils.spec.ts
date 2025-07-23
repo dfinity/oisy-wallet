@@ -19,7 +19,7 @@ import {
 	mockBackendContactAddressSol,
 	mockContactBtcAddressUi
 } from '$tests/mocks/contacts.mock';
-import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';

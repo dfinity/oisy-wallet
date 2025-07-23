@@ -2,7 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Nft } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 
 export const mockValidNft: Nft = {
 	name: 'Beanz 123',

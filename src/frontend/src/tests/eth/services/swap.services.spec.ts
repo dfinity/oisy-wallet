@@ -8,7 +8,7 @@ import { swap } from '$eth/services/swap.services';
 import * as signerApiLib from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TransactionParams } from '@velora-dex/sdk';
