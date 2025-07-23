@@ -1,7 +1,7 @@
 import type {
 	CustomToken,
 	Erc20Token,
-	Erc721Token,
+	Erc20Token as Erc721Token,
 	IcrcToken,
 	SplToken,
 	Token
@@ -28,14 +28,10 @@ const toIcrcCustomToken = ({
 
 const toErc20CustomToken = ({
 	address: token_address,
-	chainId: chain_id,
-	decimals,
-	symbol
+	chainId: chain_id
 }: Erc20SaveCustomToken): Erc20Token => ({
 	token_address,
-	chain_id,
-	decimals: toNullable(decimals),
-	symbol: toNullable(symbol)
+	chain_id
 });
 
 const toErc721CustomToken = ({

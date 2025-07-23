@@ -1,4 +1,4 @@
-import type { CustomToken, Erc721Token } from '$declarations/backend/backend.did';
+import type { CustomToken, Erc20Token as Erc721Token } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
