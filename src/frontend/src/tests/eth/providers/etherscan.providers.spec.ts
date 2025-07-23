@@ -19,7 +19,6 @@ import {
 } from '$tests/mocks/etherscan.mock';
 import en from '$tests/mocks/i18n.mock';
 import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
-import type { MockedClass } from 'vitest';
 
 vi.mock('$env/rest/etherscan.env', () => ({
 	ETHERSCAN_API_KEY: 'test-api-key'
@@ -48,7 +47,7 @@ describe('etherscan.providers', () => {
 		const address = mockEthAddress;
 
 		const mockFetch = vi.fn();
-		const mockProvider = EtherscanProviderLib as MockedClass<typeof EtherscanProviderLib>;
+		const mockProvider = vi.mocked(EtherscanProviderLib);
 		mockProvider.prototype.fetch = mockFetch;
 
 		beforeEach(() => {
