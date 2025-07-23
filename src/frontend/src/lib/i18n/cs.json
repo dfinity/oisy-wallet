@@ -977,7 +977,6 @@
 			"unexpected": "Při ukládání tokenu se něco pokazilo.",
 			"unexpected_hiding": "Při skrývání tokenu se něco pokazilo.",
 			"already_available": "Token je již k dispozici.",
-			"loading_metadata": "Chyba při načítání metadat tokenu.",
 			"not_toggleable": "Token nelze přepnout, nelze jej skrýt.",
 			"incomplete_metadata": "V metadatech není uveden žádný název ani symbol.",
 			"duplicate_metadata": "Token s podobným názvem nebo symbolem již existuje.",
