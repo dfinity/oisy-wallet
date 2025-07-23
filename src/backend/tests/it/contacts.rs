@@ -768,7 +768,7 @@ fn test_update_contact_image_set_to_none_when_request_image_is_none() {
         .update::<Result<Contact, ContactError>>(caller, "create_contact", request_with_image)
         .expect("create_contact should succeed")
         .expect("contact creation should succeed");
-    
+
     // Verify the contact initially has an image
     assert!(created_contact.image.is_some());
 
@@ -803,7 +803,7 @@ fn test_update_contact_image_preserved_when_request_image_is_some_none() {
         .update::<Result<Contact, ContactError>>(caller, "create_contact", request_with_image)
         .expect("create_contact should succeed")
         .expect("contact creation should succeed");
-    
+
     // Verify the contact initially has an image
     assert!(created_contact.image.is_some());
 
@@ -823,7 +823,10 @@ fn test_update_contact_image_preserved_when_request_image_is_some_none() {
 
     // Verify that the new image is set
     assert!(updated_contact.image.is_some());
-    assert_eq!(updated_contact.image.unwrap().data, ByteBuf::from(b"new_image_data"));
+    assert_eq!(
+        updated_contact.image.unwrap().data,
+        ByteBuf::from(b"new_image_data")
+    );
 }
 
 #[test]
@@ -841,7 +844,7 @@ fn test_update_contact_image_fallback_to_existing_when_request_image_contains_no
         .update::<Result<Contact, ContactError>>(caller, "create_contact", request_with_image)
         .expect("create_contact should succeed")
         .expect("contact creation should succeed");
-    
+
     // Verify the contact initially has an image
     assert!(created_contact.image.is_some());
 
@@ -864,7 +867,10 @@ fn test_update_contact_image_fallback_to_existing_when_request_image_contains_no
 
     // Verify that the new image is set
     assert!(updated_contact.image.is_some());
-    assert_eq!(updated_contact.image.unwrap().data, ByteBuf::from(b"replacement_image_data"));
+    assert_eq!(
+        updated_contact.image.unwrap().data,
+        ByteBuf::from(b"replacement_image_data")
+    );
 }
 
 #[test]
@@ -875,7 +881,7 @@ fn test_update_contact_image_none_to_some() {
     // Create a contact without an image
     let created_contact = call_create_contact(&pic_setup, caller, "Test Contact".to_string())
         .expect("create_contact should succeed");
-    
+
     // Verify the contact initially has no image
     assert!(created_contact.image.is_none());
 
@@ -893,7 +899,10 @@ fn test_update_contact_image_none_to_some() {
 
     // Verify that the image is now set
     assert!(updated_contact.image.is_some());
-    assert_eq!(updated_contact.image.unwrap().data, ByteBuf::from(b"new_image_data"));
+    assert_eq!(
+        updated_contact.image.unwrap().data,
+        ByteBuf::from(b"new_image_data")
+    );
 }
 
 #[test]
@@ -910,7 +919,7 @@ fn test_update_contact_image_some_to_none() {
         .update::<Result<Contact, ContactError>>(caller, "create_contact", request_with_image)
         .expect("create_contact should succeed")
         .expect("contact creation should succeed");
-    
+
     // Verify the contact initially has an image
     assert!(created_contact.image.is_some());
 
@@ -944,10 +953,13 @@ fn test_update_contact_image_some_to_different_some() {
         .update::<Result<Contact, ContactError>>(caller, "create_contact", request_with_image)
         .expect("create_contact should succeed")
         .expect("contact creation should succeed");
-    
+
     // Verify the contact initially has an image
     assert!(created_contact.image.is_some());
-    assert_eq!(created_contact.image.as_ref().unwrap().data, ByteBuf::from(b"original_image_data"));
+    assert_eq!(
+        created_contact.image.as_ref().unwrap().data,
+        ByteBuf::from(b"original_image_data")
+    );
 
     // Update the contact with a different image
     let update_request = UpdateContactRequest {
@@ -963,7 +975,10 @@ fn test_update_contact_image_some_to_different_some() {
 
     // Verify that the image has been updated
     assert!(updated_contact.image.is_some());
-    assert_eq!(updated_contact.image.unwrap().data, ByteBuf::from(b"updated_image_data"));
+    assert_eq!(
+        updated_contact.image.unwrap().data,
+        ByteBuf::from(b"updated_image_data")
+    );
 }
 
 // -------------------------------------------------------------------------------------------------
