@@ -818,6 +818,7 @@
 			"select": "Seleziona >",
 			"select_swap_provider": "Seleziona fornitore di scambio",
 			"open_icp_swap": "Apri il sito web ICP Swap",
+			"open_instructions_link": "Apri il link con le istruzioni",
 			"select_token": "Seleziona il token",
 			"select_network_filter": "Seleziona la rete"
 		},
@@ -827,9 +828,12 @@
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di scambio.",
 			"slippage_exceeded": "$oisy_short ti protegge: la transazione è al di fuori della tua tolleranza di slippage del $maxSlippage%. Per favore, regola lo slippage massimo e riprova.",
 			"pool_not_found": "Scambio fallito. Pool non trovata.",
-			"deposit_error": "Scambio fallito. Non siamo riusciti a depositare i tuoi token nel pool. Riprova.",
+			"deposit_error": "Il deposito dei fondi per lo swap non è riuscito. Riprova oppure cambia il provider dello swap.",
 			"withdraw_failed": "Lo scambio è fallito e anche il prelievo è fallito. Controlla il tuo saldo inutilizzato e prova il prelievo manuale: ",
-			"swap_failed_withdraw_success": "Scambio fallito. I tuoi token sono stati rimborsati con successo. Puoi riprovare o aumentare la tolleranza allo slippage."
+			"swap_failed_withdraw_success": "Lo swap non è andato a buon fine e i tuoi token sono stati rimborsati con successo. Riprova oppure cambia il provider dello swap.",
+			"withdraw_failed_first_part": "Lo swap non è andato a buon fine e i token inviati non possono essere ritirati automaticamente. Segui ",
+			"withdraw_failed_second_part": "per ritirarli manualmente su ",
+			"swap_failed_instruction_link": "queste istruzioni "
 		}
 	},
 	"buy": {
