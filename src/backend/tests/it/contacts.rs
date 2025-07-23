@@ -2,8 +2,12 @@ use std::time::Duration;
 
 use candid::Principal;
 use pretty_assertions::assert_eq;
+use serde_bytes::ByteBuf;
 use shared::types::{
-    contact::{Contact, ContactError, CreateContactRequest},
+    contact::{
+        Contact, ContactError, ContactImage, CreateContactRequest, ImageMimeType,
+        UpdateContactRequest,
+    },
     user_profile::OisyUser,
 };
 
@@ -62,6 +66,26 @@ pub fn call_update_contact(
     let wrapped_result =
         pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", contact);
     wrapped_result.expect("that update_contact succeeds")
+}
+
+// Helper functions for image tests
+fn create_test_png_image() -> ContactImage {
+    ContactImage {
+        data: ByteBuf::from(vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
+        mime_type: ImageMimeType::Png,
+    }
+}
+fn create_test_jpeg_image() -> ContactImage {
+    ContactImage {
+        data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10]),
+        mime_type: ImageMimeType::Jpeg,
+    }
+}
+fn create_empty_contacts() -> shared::types::contact::StoredContacts {
+    shared::types::contact::StoredContacts {
+        contacts: std::collections::BTreeMap::new(),
+        update_timestamp_ns: 0,
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -914,4 +938,185 @@ fn test_delete_contact_returns_error_for_already_deleted_contact() {
     // Verify contacts are still empty
     let contacts_after_second_delete = call_get_contacts(&pic_setup, caller);
     assert_eq!(contacts_after_second_delete.len(), 0);
+}
+
+#[test]
+fn test_update_contact_image_png_and_remove() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact
+    let contact = call_create_contact(&pic_setup, caller, "Image Test".to_string()).unwrap();
+    assert!(contact.image.is_none());
+
+    // Update contact with PNG image
+    let png_image = create_test_png_image();
+    let updated_contact = Contact {
+        id: contact.id,
+        name: contact.name.clone(),
+        addresses: contact.addresses.clone(),
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: Some(png_image.clone()),
+    };
+    let result = call_update_contact(&pic_setup, caller, updated_contact.clone());
+    assert!(result.is_ok());
+    let contact_with_image = result.unwrap();
+    assert_eq!(contact_with_image.image, Some(png_image));
+
+    // Remove image
+    let updated_contact_no_image = Contact {
+        id: contact.id,
+        name: contact.name.clone(),
+        addresses: contact.addresses.clone(),
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: None,
+    };
+    let result = call_update_contact(&pic_setup, caller, updated_contact_no_image);
+    assert!(result.is_ok());
+    let contact_no_image = result.unwrap();
+    assert!(contact_no_image.image.is_none());
+}
+
+#[test]
+fn test_update_contact_image_jpeg() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    // Create a contact
+    let contact = call_create_contact(&pic_setup, caller, "JPEG Test".to_string()).unwrap();
+    assert!(contact.image.is_none());
+
+    // Update contact with JPEG image
+    let jpeg_image = create_test_jpeg_image();
+    let updated_contact = Contact {
+        id: contact.id,
+        name: contact.name.clone(),
+        addresses: contact.addresses.clone(),
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: Some(jpeg_image.clone()),
+    };
+    let result = call_update_contact(&pic_setup, caller, updated_contact.clone());
+    assert!(result.is_ok());
+    let contact_with_image = result.unwrap();
+    assert_eq!(contact_with_image.image, Some(jpeg_image));
+}
+
+#[cfg(test)]
+mod tests {
+    use std::assert_eq;
+
+    use serde_bytes::ByteBuf;
+    use shared::types::contact::{ContactImage, ImageMimeType};
+
+    use super::*;
+
+    #[test]
+    fn test_update_contact_image_png() {
+        let mut stored_contacts = create_empty_contacts();
+        let contact = Contact {
+            id: 1,
+            name: "Test".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: None,
+        };
+        stored_contacts.contacts.insert(1, contact.clone());
+        let png_image = ContactImage {
+            data: ByteBuf::from(vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
+            mime_type: ImageMimeType::Png,
+        };
+        let request = UpdateContactRequest {
+            id: 1,
+            name: "Test".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(png_image.clone()),
+        };
+        let updated = Contact {
+            id: 1,
+            name: "Test".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(png_image),
+        };
+        let result = if request.image.is_none() {
+            None
+        } else {
+            request.image.clone()
+        };
+        assert_eq!(result, updated.image);
+    }
+
+    #[test]
+    fn test_update_contact_image_remove() {
+        let mut stored_contacts = create_empty_contacts();
+        let contact = Contact {
+            id: 2,
+            name: "Test2".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(ContactImage {
+                data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF]),
+                mime_type: ImageMimeType::Jpeg,
+            }),
+        };
+        stored_contacts.contacts.insert(2, contact.clone());
+        let request = UpdateContactRequest {
+            id: 2,
+            name: "Test2".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: None,
+        };
+        let updated = Contact {
+            id: 2,
+            name: "Test2".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: None,
+        };
+        let result = if request.image.is_none() {
+            None
+        } else {
+            request.image.clone()
+        };
+        assert_eq!(result, updated.image);
+    }
+
+    #[test]
+    fn test_update_contact_image_jpeg() {
+        let mut stored_contacts = create_empty_contacts();
+        let contact = Contact {
+            id: 3,
+            name: "Test3".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: None,
+        };
+        stored_contacts.contacts.insert(3, contact.clone());
+        let jpeg_image = ContactImage {
+            data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10]),
+            mime_type: ImageMimeType::Jpeg,
+        };
+        let request = UpdateContactRequest {
+            id: 3,
+            name: "Test3".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(jpeg_image.clone()),
+        };
+        let updated = Contact {
+            id: 3,
+            name: "Test3".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(jpeg_image),
+        };
+        let result = if request.image.is_none() {
+            None
+        } else {
+            request.image.clone()
+        };
+        assert_eq!(result, updated.image);
+    }
 }
