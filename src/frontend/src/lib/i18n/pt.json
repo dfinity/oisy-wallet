@@ -828,7 +828,7 @@
 			"unexpected_missing_data": "Algo deu errado ao iniciar uma transação de troca.",
 			"slippage_exceeded": "$oisy_short protege você: A negociação está fora da sua tolerância de deslizamento de $maxSlippage%. Por favor, ajuste o deslizamento máximo e tente novamente.",
 			"pool_not_found": "Troca falhou. Pool não encontrada.",
-			"deposit_error": "",
+			"deposit_error": "O depósito dos fundos para a troca falhou. Tente novamente ou altere o provedor da troca.",
 			"withdraw_failed": "A troca falhou e a retirada também falhou. Por favor, verifique seu saldo não utilizado e tente a retirada manual: ",
 			"swap_failed_withdraw_success": "",
 			"withdraw_failed_first_part": "",
