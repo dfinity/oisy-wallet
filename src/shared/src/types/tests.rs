@@ -250,7 +250,6 @@ mod custom_token {
         //! Tests for the erc20 module.
         use super::*;
         use crate::{
-            types::MAX_SYMBOL_LENGTH,
             validate::{test_validate_on_deserialize, TestVector, Validate},
         };
 
@@ -262,9 +261,7 @@ mod custom_token {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
-                        chain_id: 1,
-                        symbol: Some("☃☃☃ ☃ ☃☃☃".to_string()),
-                        decimals: Some(6),
+                        chain_id: 1
                     },
                     valid: true,
                     description: "Valid Erc20Token",
@@ -272,23 +269,9 @@ mod custom_token {
                 TestVector {
                     input: Erc20Token {
                         token_address: ErcTokenId(
-                            "0x1234567890123456789012345678901234567890".to_string()
-                        ),
-                        chain_id: 1,
-                        symbol: None,
-                        decimals: None,
-                    },
-                    valid: true,
-                    description: "Erc20Token without a symbol or decimals",
-                },
-                TestVector {
-                    input: Erc20Token {
-                        token_address: ErcTokenId(
                             "0x12345678901234567890123456789012345678".to_string()
                         ),
                         chain_id: 1,
-                        symbol: Some("Bouncy Castle".to_string()),
-                        decimals: Some(6),
                     },
                     valid: false,
                     description: "Erc20Token with a token address that is too short",
@@ -297,8 +280,6 @@ mod custom_token {
                     input: Erc20Token {
                         token_address: ErcTokenId("1".repeat(99)),
                         chain_id: 1,
-                        symbol: Some("Bouncy Castle".to_string()),
-                        decimals: Some(6),
                     },
                     valid: false,
                     description: "Erc20Token with a token address that is too long",
@@ -308,45 +289,7 @@ mod custom_token {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
-                        chain_id: 1,
-                        symbol: Some("B".repeat(MAX_SYMBOL_LENGTH + 1)),
-                        decimals: Some(6),
-                    },
-                    valid: false,
-                    description: "Too long symbol",
-                },
-                TestVector {
-                    input: Erc20Token {
-                        token_address: ErcTokenId(
-                            "0x1234567890123456789012345678901234567890".to_string()
-                        ),
-                        chain_id: 1,
-                        symbol: Some("Bouncy Castle".to_string()),
-                        decimals: Some(255),
-                    },
-                    valid: true,
-                    description: "Maximum decimals",
-                },
-                TestVector {
-                    input: Erc20Token {
-                        token_address: ErcTokenId(
-                            "0x1234567890123456789012345678901234567890".to_string()
-                        ),
-                        chain_id: 1,
-                        symbol: Some("Bouncy Castle".to_string()),
-                        decimals: Some(0),
-                    },
-                    valid: true,
-                    description: "Minimum decimals",
-                },
-                TestVector {
-                    input: Erc20Token {
-                        token_address: ErcTokenId(
-                            "0x1234567890123456789012345678901234567890".to_string()
-                        ),
                         chain_id: 2 ^ 64 - 1,
-                        symbol: Some("Bouncy Castle".to_string()),
-                        decimals: Some(6),
                     },
                     valid: true,
                     description: "Maximum chain ID",
@@ -357,8 +300,6 @@ mod custom_token {
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 0,
-                        symbol: Some("Bouncy Castle".to_string()),
-                        decimals: Some(6),
                     },
                     valid: true,
                     description: "Minimum chain ID",

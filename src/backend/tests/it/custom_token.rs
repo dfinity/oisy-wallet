@@ -57,9 +57,7 @@ static ERC20_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
 static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc20(Erc20Token {
         token_address: ERC20_TOKEN_ID.clone(),
-        chain_id: ERC20_CHAIN_ID.clone(),
-        symbol: Some("USDC".to_string()),
-        decimals: Some(u8::MAX),
+        chain_id: ERC20_CHAIN_ID.clone()
     }),
     enabled: true,
     version: None,
