@@ -818,6 +818,7 @@
 			"select": "Auswählen >",
 			"select_swap_provider": "Tausch-Anbieter auswählen",
 			"open_icp_swap": "ICP Swap-Website öffnen",
+			"open_instructions_link": "",
 			"select_token": "Token auswählen",
 			"select_network_filter": "Netzwerk auswählen"
 		},
@@ -830,8 +831,8 @@
 			"deposit_error": "Tausch fehlgeschlagen. Wir konnten deine Token nicht in den Pool einzahlen. Bitte versuche es erneut.",
 			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
 			"swap_failed_withdraw_success": "Tausch fehlgeschlagen. Deine Token wurden erfolgreich zurückerstattet. Du kannst es erneut versuchen oder die Slippage-Toleranz erhöhen.",
-			"swap_failed_withdraw_success_first_part": "",
-			"swap_failed_withdraw_success_second_part": "",
+			"withdraw_success_first_part": "",
+			"withdraw_success_second_part": "",
 			"swap_failed_instruction_link": ""
 		}
 	},

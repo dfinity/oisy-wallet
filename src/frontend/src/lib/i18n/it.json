@@ -818,6 +818,7 @@
 			"select": "Seleziona >",
 			"select_swap_provider": "Seleziona fornitore di scambio",
 			"open_icp_swap": "Apri il sito web ICP Swap",
+			"open_instructions_link": "",
 			"select_token": "Seleziona il token",
 			"select_network_filter": "Seleziona la rete"
 		},
@@ -830,8 +831,8 @@
 			"deposit_error": "Scambio fallito. Non siamo riusciti a depositare i tuoi token nel pool. Riprova.",
 			"withdraw_failed": "Lo scambio è fallito e anche il prelievo è fallito. Controlla il tuo saldo inutilizzato e prova il prelievo manuale: ",
 			"swap_failed_withdraw_success": "Scambio fallito. I tuoi token sono stati rimborsati con successo. Puoi riprovare o aumentare la tolleranza allo slippage.",
-			"swap_failed_withdraw_success_first_part": "",
-			"swap_failed_withdraw_success_second_part": "",
+			"withdraw_success_first_part": "",
+			"withdraw_success_second_part": "",
 			"swap_failed_instruction_link": ""
 		}
 	},

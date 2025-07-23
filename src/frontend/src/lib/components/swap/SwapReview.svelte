@@ -79,12 +79,12 @@
 			<MessageBox level={$failedSwapError.variant}>
 				{#if $failedSwapError.message === $i18n.swap.error.withdraw_failed && nonNullish($failedSwapError?.url)}
 					<CustomError
-						firstMessage={$i18n.swap.error.swap_failed_withdraw_success_first_part}
+						firstMessage={$i18n.swap.error.withdraw_success_first_part}
 						firstLink={{
 							link: ' https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens',
 							text: $i18n.swap.error.swap_failed_instruction_link
 						}}
-						secondMessage={$i18n.swap.error.swap_failed_withdraw_success_first_part}
+						secondMessage={$i18n.swap.error.withdraw_success_second_part}
 						secondLink={{ link: $failedSwapError.url.url, text: $failedSwapError.url.text }}
 					/>
 				{:else}

@@ -818,6 +818,7 @@
 			"select": "Select >",
 			"select_swap_provider": "Select swap provider",
 			"open_icp_swap": "Open ICP Swap website",
+			"open_instructions_link": "Open instructions link",
 			"select_token": "Select token",
 			"select_network_filter": "Select network"
 		},
@@ -827,11 +828,11 @@
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
 			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
 			"pool_not_found": "Swap failed. Pool not found.",
-			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
+			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",
 			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
-			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance.",
-			"swap_failed_withdraw_success_first_part": "The swap failed and the sent tokens could not be automatically withdrawn. Please follow ",
-			"swap_failed_withdraw_success_second_part": "to withdraw them manually on ",
+			"swap_failed_withdraw_success": "The swap failed and your tokens were successfully refunded. Please try again or change the swap provider.",
+			"withdraw_success_first_part": "The swap failed and the sent tokens could not be automatically withdrawn. Please follow ",
+			"withdraw_success_second_part": "to withdraw them manually on ",
 			"swap_failed_instruction_link": "these instructions "
 		}
 	},

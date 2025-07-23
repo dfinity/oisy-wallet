@@ -818,6 +818,7 @@
 			"select": "Vybrat >",
 			"select_swap_provider": "Vybrat poskytovatele výměny",
 			"open_icp_swap": "Otevřít webové stránky ICP Swap",
+			"open_instructions_link": "",
 			"select_token": "",
 			"select_network_filter": ""
 		},
@@ -830,8 +831,8 @@
 			"deposit_error": "Výměna se nezdařila. Nemohli jsme vložit vaše tokeny do poolu. Zkuste to prosím znovu.",
 			"withdraw_failed": "Výměna se nezdařila a výběr také selhal. Zkontrolujte prosím svůj nevyužitý zůstatek a zkuste ruční výběr: ",
 			"swap_failed_withdraw_success": "Výměna se nezdařila. Vaše tokeny byly úspěšně vráceny. Můžete to zkusit znovu nebo zvýšit toleranci skluzu.",
-			"swap_failed_withdraw_success_first_part": "",
-			"swap_failed_withdraw_success_second_part": "",
+			"withdraw_success_first_part": "",
+			"withdraw_success_second_part": "",
 			"swap_failed_instruction_link": ""
 		}
 	},

@@ -818,6 +818,7 @@
 			"select": "Selecionar >",
 			"select_swap_provider": "Selecionar provedor de troca",
 			"open_icp_swap": "Abrir site do ICP Swap",
+			"open_instructions_link": "",
 			"select_token": "Selecionar token",
 			"select_network_filter": "Selecionar rede"
 		},
@@ -830,8 +831,8 @@
 			"deposit_error": "Troca falhou. Não foi possível depositar seus tokens no pool. Por favor, tente novamente.",
 			"withdraw_failed": "A troca falhou e a retirada também falhou. Por favor, verifique seu saldo não utilizado e tente a retirada manual: ",
 			"swap_failed_withdraw_success": "Troca falhou. Seus tokens foram reembolsados com sucesso. Você pode tentar novamente ou aumentar a tolerância a deslizamento.",
-			"swap_failed_withdraw_success_first_part": "",
-			"swap_failed_withdraw_success_second_part": "",
+			"withdraw_success_first_part": "",
+			"withdraw_success_second_part": "",
 			"swap_failed_instruction_link": ""
 		}
 	},
