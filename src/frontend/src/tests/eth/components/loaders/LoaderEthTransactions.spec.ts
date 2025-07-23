@@ -20,7 +20,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
-import type { MockedFunction } from 'vitest';
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
 	loadEthereumTransactions: vi.fn(),
@@ -28,12 +27,8 @@ vi.mock('$eth/services/eth-transactions.services', () => ({
 }));
 
 describe('LoaderEthTransactions', () => {
-	const mockLoadTransactions = loadEthereumTransactions as MockedFunction<
-		typeof loadEthereumTransactions
-	>;
-	const mockReloadTransactions = reloadEthereumTransactions as MockedFunction<
-		typeof reloadEthereumTransactions
-	>;
+	const mockLoadTransactions = vi.mocked(loadEthereumTransactions);
+	const mockReloadTransactions = vi.mocked(reloadEthereumTransactions);
 
 	beforeEach(() => {
 		vi.clearAllMocks();

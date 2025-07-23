@@ -11,7 +11,6 @@ import {
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { vi } from 'vitest';
 
 const mockContactImage: ContactImage = {
 	data: new Uint8Array([1, 2, 3]),

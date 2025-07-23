@@ -28,7 +28,6 @@ import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import type { MockedFunction } from 'vitest';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
@@ -127,7 +126,7 @@ describe('token.utils', () => {
 	});
 
 	describe('calculateTokenUsdBalance', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -179,7 +178,7 @@ describe('token.utils', () => {
 	});
 
 	describe('calculateTokenUsdAmount', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -221,7 +220,7 @@ describe('token.utils', () => {
 	});
 
 	describe('mapTokenUi', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
