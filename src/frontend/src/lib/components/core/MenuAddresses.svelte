@@ -14,10 +14,10 @@
 	import SolWalletAddress from '$sol/components/core/SolWalletAddress.svelte';
 
 	interface Props {
-		onClick?: () => void;
+		onReceiveClick?: () => void;
 	}
 
-	let { onClick }: Props = $props();
+	let { onReceiveClick }: Props = $props();
 
 
 </script>
@@ -31,5 +31,5 @@
 {:else if $networkSolana}
 	<SolWalletAddress />
 {:else if $pseudoNetworkChainFusion}
-	<WalletAddresses {onClick} />
+	<WalletAddresses onClick={onReceiveClick} />
 {/if}
