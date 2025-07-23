@@ -115,6 +115,7 @@ pub struct ContactImageTemp<'a> {
 }
 
 /// Counts the number of contacts with images for a specific principal
+#[must_use]
 pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
     stored_contacts
         .contacts
@@ -124,6 +125,7 @@ pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
 }
 
 /// Calculates the total size of all images in the contact store
+#[must_use]
 pub fn calculate_total_image_size(stored_contacts: &StoredContacts) -> usize {
     stored_contacts
         .contacts
@@ -134,6 +136,9 @@ pub fn calculate_total_image_size(stored_contacts: &StoredContacts) -> usize {
 }
 
 /// Validates that adding a new image won't exceed the per-principal image limit
+///
+/// # Errors
+/// Returns an error if the image limit is exceeded or other constraints are violated.
 pub fn validate_principal_memory_limit(
     stored_contacts: &StoredContacts,
     is_adding_new_image: bool,
