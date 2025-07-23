@@ -14,7 +14,7 @@
 		totalFee?: bigint;
 	}
 
-	let { totalFee = $bindable(undefined) }: Props = $props();
+	let { totalFee = $bindable() }: Props = $props();
 
 	const { sourceToken, sourceTokenExchangeRate, destinationToken } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
