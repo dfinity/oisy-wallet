@@ -54,8 +54,12 @@ export const toCustomToken = ({
 			return { Icrc: toIcrcCustomToken(rest) };
 		}
 
-		if (networkKey === 'Erc20' || networkKey === 'Erc721') {
+		if (networkKey === 'Erc20') {
 			return { Erc20: toErcCustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc721') {
+			return { Erc721: toErcCustomToken(rest) };
 		}
 
 		if (networkKey === 'SplMainnet') {
