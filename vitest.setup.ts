@@ -4,11 +4,14 @@ import {
 	disableConsoleLog,
 	failTestsThatLogToConsole
 } from '$tests/utils/console.test-utils';
+import { HttpAgent } from '@dfinity/agent';
+import { nonNullish } from '@dfinity/utils';
 import type { HttpAgent } from '@dfinity/agent';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';
-import { vi } from 'vitest';
+import { writable, type StartStopNotifier } from 'svelte/store';
+import { beforeEach, vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 // We mock ResizeObserver and element.animate because neither JSDOM nor Happy DOM supports them, while Svelte v5 requires them.
@@ -100,3 +103,33 @@ window.matchMedia = vi.fn().mockImplementation((query) => ({
 	removeEventListener: vi.fn(),
 	dispatchEvent: vi.fn()
 }));
+
+const resetStoreFunctions: (() => void)[] = vi.hoisted(() => []);
+
+vi.mock('svelte/store', async (importOriginal) => {
+	const svelteStoreModule: { [key: string | number | symbol]: unknown } = await importOriginal();
+	return {
+		...svelteStoreModule,
+		// eslint-disable-next-line local-rules/prefer-object-params
+		writable: <T>(
+			initialValue: T | undefined,
+			...otherArgs: (StartStopNotifier<T> | undefined)[]
+		) => {
+			const writableFunction = svelteStoreModule.writable as typeof writable;
+
+			const store = writableFunction<T>(initialValue, ...otherArgs);
+
+			if (nonNullish(initialValue)) {
+				resetStoreFunctions.push(() => store.set(initialValue));
+			}
+
+			return store;
+		}
+	};
+});
+
+beforeEach(() => {
+	for (const reset of resetStoreFunctions) {
+		reset();
+	}
+});
