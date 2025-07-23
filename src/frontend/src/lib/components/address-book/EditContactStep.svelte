@@ -33,7 +33,7 @@
 		contact: ContactUi;
 		onClose: () => void;
 		onEdit: (contact: ContactUi) => void;
-		onAvatarEdit: (image: ContactImage) => void;
+		onAvatarEdit: (image: ContactImage | null) => void;
 		onEditAddress: (index: number) => void;
 		onAddAddress: () => void;
 		onDeleteContact: (id: bigint) => void;
@@ -78,6 +78,10 @@
 	const replaceImage = (): void => {
 		fileInput?.triggerClick();
 	};
+	const removeImage = (): void => {
+		imageUrl = undefined;
+		onAvatarEdit(null);
+	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
@@ -95,7 +99,7 @@
 						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 						data-tid={`${AVATAR_BADGE}-${contact.name}`}
 					>
-						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={() => {}} />
+						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={removeImage} />
 					</span>
 				{/if}
 			</div>

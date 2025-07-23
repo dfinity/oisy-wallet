@@ -17,7 +17,7 @@
 		fileInput?: HTMLInputElement;
 		onReplaceImage: () => void;
 		onRemoveImage: () => void;
-		imageUrl?: string;
+		imageUrl?: string | null;
 	}
 
 	const {

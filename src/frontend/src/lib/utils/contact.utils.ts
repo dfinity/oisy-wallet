@@ -50,7 +50,7 @@ export const mapToBackendContact = (contact: ContactUi): Contact => {
 	return {
 		...rest,
 		update_timestamp_ns: updateTimestampNs,
-		image: toNullable(image),
+		image: image !== undefined ? toNullable(image) : [],
 		addresses: contact.addresses.map((address) => ({
 			token_account_id: TokenAccountIdSchema.parse(address.address),
 			label: toNullable(address.label)
