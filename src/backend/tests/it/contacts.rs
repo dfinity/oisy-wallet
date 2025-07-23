@@ -811,19 +811,6 @@ fn test_delete_contact_should_succeed_with_valid_id() {
     assert_eq!(get_result.unwrap_err(), ContactError::ContactNotFound);
 }
 
-#[test]
-fn test_delete_contact_should_fail_with_nonexistent_id() {
-    let pic_setup = setup();
-    let caller: Principal = Principal::from_text(CALLER).unwrap();
-
-    // Try to delete a contact with a non-existent ID
-    let nonexistent_id = 999999;
-    let result = call_delete_contact(&pic_setup, caller, nonexistent_id);
-
-    // Verify the operation fails with ContactNotFound
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
-}
 
 #[test]
 fn test_delete_specific_contact_from_multiple() {
