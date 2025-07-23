@@ -125,7 +125,7 @@
 		{/if}
 		{#if $authSignedIn}
 			{#if addressesOption}
-				<MenuAddresses on:icMenuClick={hidePopover} />
+				<MenuAddresses onReceiveClick={hidePopover} />
 			{/if}
 
 			<ButtonMenu
