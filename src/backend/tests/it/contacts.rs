@@ -811,7 +811,6 @@ fn test_delete_contact_should_succeed_with_valid_id() {
     assert_eq!(get_result.unwrap_err(), ContactError::ContactNotFound);
 }
 
-
 #[test]
 fn test_delete_specific_contact_from_multiple() {
     let pic_setup = setup();
