@@ -1,5 +1,4 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -206,13 +205,6 @@ export const fetchIcpSwap = async ({
 		fee: ICP_SWAP_POOL_FEE
 	});
 
-	if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 100000000n) {
-		throwSwapError({
-			code: SwapErrorCodes.DEPOSIT_FAILED,
-			message: get(i18n).swap.error.deposit_error
-		});
-	}
-
 	if (isNullish(pool)) {
 		throw new Error(get(i18n).swap.error.pool_not_found);
 	}
@@ -274,11 +266,7 @@ export const fetchIcpSwap = async ({
 		await swapIcp({
 			identity,
 			canisterId: poolCanisterId,
-			amountIn:
-				sourceToken.id === ICP_TOKEN.id &&
-				(parsedSwapAmount === 200000000n || parsedSwapAmount === 300000000n)
-					? `${parsedSwapAmount}000`
-					: parsedSwapAmount.toString(),
+			amountIn: parsedSwapAmount.toString(),
 			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
@@ -291,10 +279,7 @@ export const fetchIcpSwap = async ({
 				identity,
 				canisterId: poolCanisterId,
 				token: sourceLedgerCanisterId,
-				amount:
-					sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 200000000n
-						? BigInt(`${parsedSwapAmount}000`)
-						: parsedSwapAmount,
+				amount: parsedSwapAmount,
 				fee: sourceTokenFee
 			});
 		} catch (err: unknown) {
