@@ -8,7 +8,6 @@ import type { HttpAgent } from '@dfinity/agent';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';
-
 import { mock } from 'vitest-mock-extended';
 
 // We mock ResizeObserver and element.animate because neither JSDOM nor Happy DOM supports them, while Svelte v5 requires them.
