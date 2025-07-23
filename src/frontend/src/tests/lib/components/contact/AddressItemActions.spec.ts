@@ -11,7 +11,6 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
-import { vi } from 'vitest';
 
 describe('AddressItemActions', () => {
 	// Mock the i18n store
