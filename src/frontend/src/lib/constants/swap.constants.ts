@@ -15,3 +15,6 @@ export const VELORA_SWAP_PROVIDER = 'velora';
 export const ICP_SWAP_POOL_FEE = 3000n;
 
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+
+export const OISY_DOCS_SWAP_LINK =
+	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens';
