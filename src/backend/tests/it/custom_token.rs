@@ -8,7 +8,7 @@ use shared::types::{
     },
     TokenVersion,
 };
-
+use shared::types::custom_token::ErcToken;
 use crate::utils::{
     assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
     mock::CALLER,
@@ -55,11 +55,9 @@ static ERC20_TOKEN_ID: LazyLock<ErcTokenId> =
     LazyLock::new(|| ErcTokenId("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string()));
 static ERC20_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
 static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
-    token: Token::Erc20(Erc20Token {
+    token: Token::Erc20(ErcToken {
         token_address: ERC20_TOKEN_ID.clone(),
         chain_id: ERC20_CHAIN_ID.clone(),
-        symbol: Some("USDC".to_string()),
-        decimals: Some(u8::MAX),
     }),
     enabled: true,
     version: None,
@@ -68,7 +66,7 @@ static ERC721_TOKEN_ID: LazyLock<ErcTokenId> =
     LazyLock::new(|| ErcTokenId("0x8821bee2ba0df28761afff119d66390d594cd280".to_string()));
 static ERC721_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 137);
 static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
-    token: Token::Erc721(Erc721Token {
+    token: Token::Erc721(ErcToken {
         token_address: ERC721_TOKEN_ID.clone(),
         chain_id: ERC721_CHAIN_ID.clone(),
     }),
