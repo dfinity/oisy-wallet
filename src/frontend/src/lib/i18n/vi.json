@@ -977,7 +977,6 @@
 			"unexpected": "Đã xảy ra lỗi trong khi lưu token.",
 			"unexpected_hiding": "Đã xảy ra lỗi trong khi ẩn token.",
 			"already_available": "Token đã có sẵn.",
-			"loading_metadata": "Lỗi khi tải metadata của token.",
 			"not_toggleable": "Token không thể chuyển đổi, không thể ẩn.",
 			"incomplete_metadata": "Không có tên hoặc ký hiệu được cung cấp trong metadata.",
 			"duplicate_metadata": "Đã tồn tại một token có tên hoặc ký hiệu tương tự.",
