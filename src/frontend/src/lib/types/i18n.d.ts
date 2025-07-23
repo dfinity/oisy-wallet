@@ -823,7 +823,6 @@ interface I18nTokens {
 		unexpected: string;
 		unexpected_hiding: string;
 		already_available: string;
-		loading_metadata: string;
 		not_toggleable: string;
 		incomplete_metadata: string;
 		duplicate_metadata: string;

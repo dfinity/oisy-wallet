@@ -912,7 +912,7 @@
 				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},
 			"error": {
-				"loading_metadata": "Error while loading the metadata of the token.",
+				"loading_metadata": "The specified address is not a valid token in the selected network.",
 				"no_metadata": "No metadata for the token is provided. This is unexpected.",
 				"unexpected_ledger": "Something went wrong while validating the Ledger canister.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
@@ -981,7 +981,6 @@
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
-			"loading_metadata": "Error while loading the metadata of the token.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",

@@ -912,7 +912,7 @@
 				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados."
 			},
 			"error": {
-				"loading_metadata": "Erro ao carregar os metadados do token.",
+				"loading_metadata": "O endereço fornecido não corresponde a um token válido na rede selecionada.",
 				"no_metadata": "Nenhum metadado para o token é fornecido. Isso é inesperado.",
 				"unexpected_ledger": "Algo deu errado ao validar o canister Ledger.",
 				"unexpected_index": "Algo deu errado ao validar o canister Index.",
@@ -981,7 +981,6 @@
 			"unexpected": "Algo deu errado ao salvar o token.",
 			"unexpected_hiding": "Algo deu errado ao ocultar o token.",
 			"already_available": "Token já disponível.",
-			"loading_metadata": "Erro ao carregar os metadados do token.",
 			"not_toggleable": "O token não é alternável, não pode ser ocultado.",
 			"incomplete_metadata": "Nenhum nome ou símbolo é fornecido nos metadados.",
 			"duplicate_metadata": "Um token com nome ou símbolo semelhante já existe.",

@@ -912,7 +912,7 @@
 				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
 			},
 			"error": {
-				"loading_metadata": "Fehler beim Laden der Metadaten des Tokens.",
+				"loading_metadata": "Die angegebene Adresse ist kein gültiges Token in der gewählten Blockchain",
 				"no_metadata": "Keine Metadaten für das Token verfügbar. Das ist unerwartet.",
 				"unexpected_ledger": "Beim Validieren des Ledger-Canisters ist etwas schiefgelaufen.",
 				"unexpected_index": "Beim Validieren des Index-Canisters ist etwas schiefgelaufen.",
@@ -981,7 +981,6 @@
 			"unexpected": "Beim Speichern des Tokens ist etwas schiefgelaufen.",
 			"unexpected_hiding": "Beim Verbergen des Tokens ist etwas schiefgelaufen.",
 			"already_available": "Token ist bereits verfügbar.",
-			"loading_metadata": "Fehler beim Laden der Metadaten des Tokens.",
 			"not_toggleable": "Token kann nicht ausgeblendet werden.",
 			"incomplete_metadata": "Kein Name oder Symbol in den Metadaten vorhanden.",
 			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol existiert bereits.",

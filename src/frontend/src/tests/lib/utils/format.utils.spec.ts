@@ -11,7 +11,6 @@ import {
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
-import { describe } from 'vitest';
 
 describe('format.utils', () => {
 	describe('formatToken', () => {
@@ -1067,6 +1066,78 @@ describe('format.utils', () => {
 					normalizeSeparators: true
 				})
 			).toBe('¥1000001');
+		});
+
+		it('should format correctly below the minimum threshold', () => {
+			expect(
+				formatCurrency({
+					value: 0.00000001,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					notBelowThreshold: true
+				})
+			).toBe('< $0.01');
+
+			expect(
+				formatCurrency({
+					value: 0.01,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					notBelowThreshold: true
+				})
+			).toBe('$0.01');
+
+			expect(
+				formatCurrency({
+					value: 0.1,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					notBelowThreshold: true
+				})
+			).toBe('$0.10');
+
+			expect(
+				formatCurrency({
+					value: 0,
+					currency: Currency.USD,
+					exchangeRate: { currency: Currency.USD, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					notBelowThreshold: true
+				})
+			).toBe('< $0.01');
+
+			expect(
+				formatCurrency({
+					value: 0.00000001,
+					currency: Currency.CHF,
+					exchangeRate: { currency: Currency.CHF, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					notBelowThreshold: true
+				})
+			).toBe('< CHF 0.01');
+
+			expect(
+				formatCurrency({
+					value: 0.00000001,
+					currency: Currency.EUR,
+					exchangeRate: { currency: Currency.EUR, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					notBelowThreshold: true
+				})
+			).toBe('< €0.01');
+
+			expect(
+				formatCurrency({
+					value: 0.00000001,
+					currency: Currency.JPY,
+					exchangeRate: { currency: Currency.JPY, exchangeRateToUsd: 1 },
+					language: Languages.ENGLISH,
+					notBelowThreshold: true
+				})
+			).toBe('< ¥1');
 		});
 	});
 });
