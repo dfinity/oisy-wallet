@@ -5,8 +5,8 @@ use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
     contact::{Contact, ContactError, ContactImage, CreateContactRequest, UpdateContactRequest},
-    user_profile::OisyUser,
     token::ImageMimeType,
+    user_profile::OisyUser,
 };
 
 use crate::utils::{

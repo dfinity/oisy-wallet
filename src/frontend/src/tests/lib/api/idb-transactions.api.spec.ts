@@ -20,7 +20,6 @@ import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
-import { expect, vi } from 'vitest';
 
 vi.mock('idb-keyval', () => ({
 	createStore: vi.fn(() => ({

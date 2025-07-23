@@ -13,7 +13,6 @@ import {
 	replaceOisyPlaceholders,
 	replacePlaceholders
 } from '$lib/utils/i18n.utils';
-import { describe, expect } from 'vitest';
 
 describe('i18n-utils', () => {
 	describe('replacePlaceholders', () => {
