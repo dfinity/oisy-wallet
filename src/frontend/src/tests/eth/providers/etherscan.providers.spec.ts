@@ -12,7 +12,7 @@ import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import {
 	createMockEtherscanInternalTransactions,
 	createMockEtherscanTransactions
