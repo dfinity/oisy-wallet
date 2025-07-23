@@ -137,11 +137,9 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
             name: request.name,
             addresses: request.addresses,
             update_timestamp_ns: current_time,
-            image: if request.image.is_none() {
-                None
-            } else {
-                request.image.or_else(|| existing_contact.image.clone())
-            },
+            image: request.image.or_else(|| existing_contact.image.clone()), /* Use request image
+                                                                              * or preserve
+                                                                              * existing */
         };
 
         // Update the contact in the stored contacts
