@@ -56,6 +56,8 @@ on:
         required: true
       VITE_ALCHEMY_API_KEY_STAGING:
         required: true
+      VITE_ALCHEMY_API_KEY_TEST_FE:
+        required: true
       VITE_QUICKNODE_API_KEY_STAGING:
         required: true
       VITE_WALLET_CONNECT_PROJECT_ID_STAGING:
@@ -230,11 +232,23 @@ jobs:
       - name: Set Output Variables Based on Network
         id: set-outputs
         run: |
+          if [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
+            {
+              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_TEST_FE"
+            } >> $GITHUB_OUTPUT
+          elif [[ "$NETWORK" == "staging" ]]; then
+           {
+              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING"
+            } >> $GITHUB_OUTPUT
+          elif [[ "$NETWORK" == "beta" ]]; then
+            {
+              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA"
+            } >> $GITHUB_OUTPUT
+          fi
           if [[ "$NETWORK" == "staging" ]] || [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
             {
               echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_STAGING"
               echo "VITE_INFURA_API_KEY=$VITE_INFURA_API_KEY_STAGING"
-              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING"
               echo "VITE_QUICKNODE_API_KEY=$VITE_QUICKNODE_API_KEY_STAGING"
               echo "VITE_WALLET_CONNECT_PROJECT_ID=$VITE_WALLET_CONNECT_PROJECT_ID_STAGING"
               echo "VITE_COINGECKO_API_KEY=$VITE_COINGECKO_API_KEY_STAGING"
@@ -266,7 +280,6 @@ jobs:
             {
               echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_BETA"
               echo "VITE_INFURA_API_KEY=$VITE_INFURA_API_KEY_BETA"
-              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA"
               echo "VITE_QUICKNODE_API_KEY=$VITE_QUICKNODE_API_KEY_BETA"
               echo "VITE_WALLET_CONNECT_PROJECT_ID=$VITE_WALLET_CONNECT_PROJECT_ID_BETA"
               echo "VITE_COINGECKO_API_KEY=$VITE_COINGECKO_API_KEY_BETA"
@@ -294,6 +307,7 @@ jobs:
           VITE_ETHERSCAN_API_KEY_STAGING: ${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}
           VITE_INFURA_API_KEY_STAGING: ${{ secrets.VITE_INFURA_API_KEY_STAGING }}
           VITE_ALCHEMY_API_KEY_STAGING: ${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}
+          VITE_ALCHEMY_API_KEY_TEST_FE: ${{ secrets.VITE_ALCHEMY_API_KEY_TEST_FE }}
           VITE_QUICKNODE_API_KEY_STAGING: ${{ secrets.VITE_QUICKNODE_API_KEY_STAGING }}
           VITE_WALLET_CONNECT_PROJECT_ID_STAGING: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}
           VITE_COINGECKO_API_KEY_STAGING: ${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}
