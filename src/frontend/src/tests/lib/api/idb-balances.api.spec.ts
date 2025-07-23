@@ -9,7 +9,6 @@ import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
 
-
 vi.mock('idb-keyval', () => ({
 	createStore: vi.fn(() => ({
 		/* mock store implementation */

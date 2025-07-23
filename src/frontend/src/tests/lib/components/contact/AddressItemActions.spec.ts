@@ -12,7 +12,6 @@ import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-
 describe('AddressItemActions', () => {
 	// Mock the i18n store
 	const mockI18n = readable(en);

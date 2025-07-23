@@ -10,7 +10,6 @@ import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
-
 describe('CreateContactStep', () => {
 	it('should render the create contact step with forms and buttons', () => {
 		const onSave = vi.fn();

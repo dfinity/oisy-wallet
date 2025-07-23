@@ -21,7 +21,6 @@ import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
 import { get, readable } from 'svelte/store';
 
-
 const ethExchangeValue = 1;
 const icpExchangeValue = 2;
 

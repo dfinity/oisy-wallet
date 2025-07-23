@@ -16,7 +16,6 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
-
 describe('AddressBookStep', () => {
 	const baseContacts: ContactUi[] = [
 		{

@@ -9,7 +9,6 @@ import type { TrackEventParams } from '$lib/types/analytics';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-
 describe('LanguageDropdown', () => {
 	beforeEach(() => {
 		vi.mock('$lib/services/analytics.services.ts', () => ({

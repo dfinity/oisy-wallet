@@ -4,7 +4,6 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
-
 describe('SendDataDestination', () => {
 	const props = {
 		destination: mockBtcAddress

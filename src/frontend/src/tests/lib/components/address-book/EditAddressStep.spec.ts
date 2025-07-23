@@ -9,7 +9,6 @@ import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
-
 describe('EditAddressStep', () => {
 	const mockContact: ContactUi = {
 		id: 1n,

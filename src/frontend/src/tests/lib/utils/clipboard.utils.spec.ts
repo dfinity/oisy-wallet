@@ -1,7 +1,7 @@
 import * as toastsStore from '$lib/stores/toasts.store';
 import { copyToClipboard } from '$lib/utils/clipboard.utils';
 import { copyText } from '$lib/utils/share.utils';
-import type { MockedFunction, MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/utils/share.utils', () => ({
 	copyText: vi.fn()

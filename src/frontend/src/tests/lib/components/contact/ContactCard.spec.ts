@@ -10,7 +10,6 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
-
 describe('ContactCard', () => {
 	// Create mock contacts using getMockContacts
 	const [singleAddressContact] = getMockContactsUi({

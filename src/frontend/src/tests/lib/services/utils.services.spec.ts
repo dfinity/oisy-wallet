@@ -4,7 +4,6 @@ import { wrapCallWith } from '$lib/services/utils.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
-
 describe('utils.services', () => {
 	describe('wrapCallWith', () => {
 		const mockMethodToCall = vi.fn();

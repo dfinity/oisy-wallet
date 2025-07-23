@@ -4,7 +4,6 @@ import type { ContactAddressUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
-
 describe('AddressBookInfoPage', () => {
 	const mockAddress: ContactAddressUi = {
 		address: '0x1234567890abcdef',

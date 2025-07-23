@@ -8,7 +8,6 @@ import {
 	type ScreensKeyType
 } from '$lib/utils/screens.utils';
 
-
 // Helper to convert rem to px for test comparison
 const remToPx = (rem: string) => Number(rem.replaceAll('rem', '')) * 16;
 

@@ -10,7 +10,6 @@ import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { cleanWorkers, loadWorker, waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 
-
 describe('wallet.utils', () => {
 	describe('waitAndTriggerWallet', () => {
 		beforeEach(() => {

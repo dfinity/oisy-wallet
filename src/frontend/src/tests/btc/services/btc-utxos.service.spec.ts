@@ -9,7 +9,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
 import type { get_utxos_response } from '@dfinity/ckbtc/dist/candid/bitcoin';
 
-
 // Mock environment variables
 vi.mock('$env/networks/networks.icrc.env', () => ({
 	IC_CKBTC_MINTER_CANISTER_ID: 'rdmx6-jaaaa-aaaah-qcaiq-cai',

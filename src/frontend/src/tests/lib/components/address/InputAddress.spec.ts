@@ -2,7 +2,6 @@ import InputAddress from '$lib/components/address/InputAddress.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
-
 describe('InputAddress', () => {
 	const VALID_BTC_ADDRESS = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
 	const INVALID_BTC_ADDRESS = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlx';

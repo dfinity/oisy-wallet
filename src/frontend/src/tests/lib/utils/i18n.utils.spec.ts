@@ -14,7 +14,6 @@ import {
 	replacePlaceholders
 } from '$lib/utils/i18n.utils';
 
-
 describe('i18n-utils', () => {
 	describe('replacePlaceholders', () => {
 		it('should replace single placeholder', () => {

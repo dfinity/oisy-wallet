@@ -10,7 +10,6 @@ import {
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 
-
 describe('btc-utxos.utils', () => {
 	const createMockUtxo = ({
 		value,

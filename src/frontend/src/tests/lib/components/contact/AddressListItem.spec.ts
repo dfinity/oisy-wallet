@@ -14,7 +14,6 @@ import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-
 describe('AddressListItem', () => {
 	// Mock the i18n store
 	const mockI18n = readable(en);

@@ -3,7 +3,6 @@ import { fetchBatchKongSwapPrices, getKongSwapTokenById } from '$lib/rest/kongsw
 import { MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2 } from '$tests/mocks/exchanges.mock';
 import { createMockKongSwapToken } from '$tests/mocks/kongswap.mock';
 
-
 const EXPECTED_ENDPOINT = `${KONGSWAP_API_URL}/tokens/${MOCK_CANISTER_ID_1}`;
 const mockTokenResponse = createMockKongSwapToken({});
 

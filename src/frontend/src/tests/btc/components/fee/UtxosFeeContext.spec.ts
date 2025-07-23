@@ -17,7 +17,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-
 describe('UtxosFeeContext', () => {
 	const amount = 10;
 	const networkId = BTC_MAINNET_NETWORK_ID;

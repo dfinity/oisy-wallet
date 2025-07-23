@@ -28,7 +28,6 @@ import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import type { MockedFunction } from 'vitest';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];

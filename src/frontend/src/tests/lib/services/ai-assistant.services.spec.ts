@@ -4,7 +4,6 @@ import { askLlm } from '$lib/services/ai-assistant.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fromNullable, toNullable } from '@dfinity/utils';
 
-
 vi.mock('$lib/api/llm.api');
 
 describe('ai-assistant.services', () => {

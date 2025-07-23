@@ -11,7 +11,6 @@ import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Contract, type ContractTransaction } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import type { MockedClass } from 'vitest';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'

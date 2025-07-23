@@ -46,7 +46,6 @@ import i18nMock from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
-import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()

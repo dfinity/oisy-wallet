@@ -12,7 +12,6 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
-
 describe('CurrencyDropdown', () => {
 	beforeEach(() => {
 		currencyStore.switchCurrency(Currency.USD);

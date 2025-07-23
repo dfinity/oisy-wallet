@@ -10,7 +10,6 @@ import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { get } from 'svelte/store';
 
-
 describe('spl.derived', () => {
 	const mockSplDefaultToken: SplToken = {
 		...mockValidSplToken,

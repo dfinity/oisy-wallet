@@ -7,7 +7,6 @@ import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
-
 describe('ReviewNetwork', () => {
 	const props = {
 		sourceNetwork: BTC_MAINNET_NETWORK

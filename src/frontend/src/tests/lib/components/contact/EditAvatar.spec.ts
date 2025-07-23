@@ -7,7 +7,6 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
-
 describe('EditAvatar', () => {
 	const mockReplaceImage = vi.fn();
 	const mockRemoveImage = vi.fn();

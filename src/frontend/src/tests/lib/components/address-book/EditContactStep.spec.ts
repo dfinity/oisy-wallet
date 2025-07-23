@@ -14,7 +14,6 @@ import en from '$tests/mocks/i18n.mock';
 import { nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
-
 vi.mock('browser-image-compression', () => {
 	const mockCompression = vi
 		.fn()

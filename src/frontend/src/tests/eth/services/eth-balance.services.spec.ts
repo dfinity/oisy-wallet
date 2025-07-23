@@ -29,7 +29,6 @@ import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { MockedClass } from 'vitest';
 
 vi.mock('ethers/providers', () => {
 	const provider = vi.fn();

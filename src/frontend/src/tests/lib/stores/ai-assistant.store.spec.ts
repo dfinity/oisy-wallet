@@ -5,7 +5,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import { get } from 'svelte/store';
 
-
 describe('ai-assistant.store', () => {
 	const defaultState = {
 		isOpen: false,

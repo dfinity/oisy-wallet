@@ -2,7 +2,6 @@ import type { ContactImage, ImageMimeType } from '$declarations/backend/backend.
 import { dataUrlToImage, imageToDataUrl } from '$lib/utils/contact-image.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 
-
 describe('contact-image.utils', () => {
 	const MOCK_IMAGE: ContactImage = {
 		data: new Uint8Array([1, 2, 3]),
