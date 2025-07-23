@@ -142,9 +142,11 @@ export interface ContactAddressData {
 export type ContactError =
 	| { InvalidContactData: null }
 	| { CanisterMemoryNearCapacity: null }
+	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
 	| { ImageTooLarge: null }
 	| { RandomnessError: null }
+	| { ImageExceedsMaxSize: null }
 	| { CanisterStatusError: null }
 	| { TooManyContactsWithImages: null };
 export interface ContactImage {
@@ -194,12 +196,6 @@ export interface DefiniteCanisterSettingsArgs {
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export interface Erc20Token {
-	decimals: [] | [number];
-	token_address: string;
-	chain_id: bigint;
-	symbol: [] | [string];
-}
-export interface Erc721Token {
 	token_address: string;
 	chain_id: bigint;
 }
@@ -338,7 +334,7 @@ export interface TestnetsSettings {
 export type Token =
 	| { Erc20: Erc20Token }
 	| { Icrc: IcrcToken }
-	| { Erc721: Erc721Token }
+	| { Erc721: Erc20Token }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken };
 export type TokenAccountId =
