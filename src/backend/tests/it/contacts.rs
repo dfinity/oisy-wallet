@@ -85,7 +85,6 @@ fn create_empty_contacts() -> shared::types::contact::StoredContacts {
     }
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the contact management functionality
 // -------------------------------------------------------------------------------------------------
@@ -756,7 +755,6 @@ fn test_updated_contact_can_be_retrieved_directly() {
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for contact image functionality
 // -------------------------------------------------------------------------------------------------
-
 
 #[test]
 fn test_update_contact_image_png_and_remove() {
