@@ -828,11 +828,11 @@
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di scambio.",
 			"slippage_exceeded": "$oisy_short ti protegge: la transazione è al di fuori della tua tolleranza di slippage del $maxSlippage%. Per favore, regola lo slippage massimo e riprova.",
 			"pool_not_found": "Scambio fallito. Pool non trovata.",
-			"deposit_error": "Scambio fallito. Non siamo riusciti a depositare i tuoi token nel pool. Riprova.",
+			"deposit_error": "",
 			"withdraw_failed": "Lo scambio è fallito e anche il prelievo è fallito. Controlla il tuo saldo inutilizzato e prova il prelievo manuale: ",
-			"swap_failed_withdraw_success": "Scambio fallito. I tuoi token sono stati rimborsati con successo. Puoi riprovare o aumentare la tolleranza allo slippage.",
-			"withdraw_success_first_part": "",
-			"withdraw_success_second_part": "",
+			"swap_failed_withdraw_success": "",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
 			"swap_failed_instruction_link": ""
 		}
 	},

@@ -14,8 +14,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import CustomError from './CustomError.svelte';
 	import { OISY_DOCS_SWAP_LINK } from '$lib/constants/swap.constants';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -78,15 +78,20 @@
 		<div class="mt-4">
 			<MessageBox level={$failedSwapError.variant}>
 				{#if $failedSwapError.message === $i18n.swap.error.withdraw_failed && nonNullish($failedSwapError?.url)}
-					<CustomError
-						firstMessage={$i18n.swap.error.withdraw_success_first_part}
-						firstLink={{
-							url: OISY_DOCS_SWAP_LINK,
-							text: $i18n.swap.error.swap_failed_instruction_link
-						}}
-						secondMessage={$i18n.swap.error.withdraw_success_second_part}
-						secondLink={{ url: $failedSwapError.url.url, text: $failedSwapError.url.text }}
-					/>
+					{$i18n.swap.error.withdraw_failed_first_part}
+					<ExternalLink
+						iconSize="15"
+						href={OISY_DOCS_SWAP_LINK}
+						ariaLabel={$i18n.swap.text.open_instructions_link}
+						>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
+					>
+					{$i18n.swap.error.withdraw_failed_second_part}
+
+					<ExternalLink
+						iconSize="15"
+						href={$failedSwapError.url.url}
+						ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
+					>
 				{:else}
 					{$failedSwapError.message}
 				{/if}

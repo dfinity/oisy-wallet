@@ -831,8 +831,8 @@
 			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",
 			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
 			"swap_failed_withdraw_success": "The swap failed and your tokens were successfully refunded. Please try again or change the swap provider.",
-			"withdraw_success_first_part": "The swap failed and the sent tokens could not be automatically withdrawn. Please follow ",
-			"withdraw_success_second_part": "to withdraw them manually on ",
+			"withdraw_failed_first_part": "The swap failed and the sent tokens could not be automatically withdrawn. Please follow ",
+			"withdraw_failed_second_part": "to withdraw them manually on ",
 			"swap_failed_instruction_link": "these instructions "
 		}
 	},
