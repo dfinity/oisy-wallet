@@ -49,7 +49,7 @@
 		timer = setInterval(estimateFee, 5000);
 	};
 
-	$: $sendTokenNetworkId, (async () => await updateFee())();
+	$: ($sendTokenNetworkId, (async () => await updateFee())());
 
 	let timer: NodeJS.Timeout | undefined;
 
@@ -90,7 +90,7 @@
 		ataFeeStore.setFee(ataFee);
 	};
 
-	$: destination, $sendToken, updateAtaFee();
+	$: (destination, $sendToken, updateAtaFee());
 </script>
 
 <slot />
