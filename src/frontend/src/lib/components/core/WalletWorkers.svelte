@@ -11,10 +11,9 @@
 		children?: Snippet;
 	}
 
-	let { tokens, initWalletWorker ,children}: Props = $props();
+	let { tokens, initWalletWorker, children }: Props = $props();
 
-
-	let workers=$state( new Map<TokenId, WalletWorker>());
+	let workers = $state(new Map<TokenId, WalletWorker>());
 
 	const manageWorkers = async () => {
 		cleanWorkers({ workers, tokens });
@@ -48,4 +47,3 @@
 <svelte:window on:oisyTriggerWallet={debounceTriggerTimer} />
 
 {@render children?.()}
-
