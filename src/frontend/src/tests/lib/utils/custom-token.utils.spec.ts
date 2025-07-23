@@ -87,7 +87,7 @@ describe('custom-token.utils', () => {
 				token: {
 					Erc20: {
 						token_address: 'mock-token-address',
-						chain_id: 123n,
+						chain_id: 123n
 					}
 				}
 			});
