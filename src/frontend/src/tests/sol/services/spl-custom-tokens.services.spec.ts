@@ -13,7 +13,6 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 
-
 vi.mock('$lib/api/backend.api', () => ({
 	setManyCustomTokens: vi.fn()
 }));

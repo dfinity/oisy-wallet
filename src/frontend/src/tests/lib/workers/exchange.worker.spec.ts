@@ -14,7 +14,6 @@ import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
 
-
 vi.mock('$lib/rest/coingecko.rest', () => ({
 	simplePrice: vi.fn(),
 	simpleTokenPrice: vi.fn()

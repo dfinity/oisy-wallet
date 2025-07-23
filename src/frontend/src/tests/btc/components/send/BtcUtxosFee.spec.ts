@@ -9,7 +9,6 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-
 describe('BtcUtxosFee', () => {
 	const mockContext = new Map([]);
 	mockContext.set(

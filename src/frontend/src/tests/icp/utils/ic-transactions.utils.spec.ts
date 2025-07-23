@@ -20,7 +20,6 @@ import {
 } from '$tests/mocks/ic-transactions.mock';
 import { get } from 'svelte/store';
 
-
 describe('getIcExtendedTransactions', () => {
 	it('should return no transactions if the stores are empty', () => {
 		const result = getIcExtendedTransactions({

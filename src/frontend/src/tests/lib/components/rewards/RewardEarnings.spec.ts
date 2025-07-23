@@ -18,7 +18,6 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
-
 describe('RewardEarnings', () => {
 	const ckBtcRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-${BTC_MAINNET_TOKEN.twinTokenSymbol}"]`;
 	const ckUsdcRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-${USDC_TOKEN.twinTokenSymbol}"]`;

@@ -12,7 +12,6 @@ import {
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
 
-
 describe('format.utils', () => {
 	describe('formatToken', () => {
 		const value = 1000000000000000000n;

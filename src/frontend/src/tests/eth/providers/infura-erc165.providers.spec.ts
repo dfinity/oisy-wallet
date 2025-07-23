@@ -5,7 +5,6 @@ import { ERC165_ABI } from '$eth/constants/erc165.constants';
 import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import type { MockedClass } from 'vitest';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'

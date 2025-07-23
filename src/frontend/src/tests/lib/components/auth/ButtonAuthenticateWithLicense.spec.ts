@@ -6,7 +6,6 @@ import { modalStore } from '$lib/stores/modal.store';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-
 describe('ButtonAuthenticateWithLicense', () => {
 	const signInButtonSelector = `button[data-tid="login-button"]`;
 	const licenseLinkAnchorSelector = `a[data-tid="${AUTH_LICENSE_LINK}"]`;

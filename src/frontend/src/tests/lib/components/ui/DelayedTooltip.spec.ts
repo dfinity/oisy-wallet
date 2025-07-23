@@ -3,7 +3,6 @@ import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
-
 describe('DelayedTooltip', () => {
 	const testId = 'test-content';
 	const children = createMockSnippet(testId);

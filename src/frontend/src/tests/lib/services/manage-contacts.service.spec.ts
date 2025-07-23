@@ -12,7 +12,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-
 const mockContactImage: ContactImage = {
 	data: new Uint8Array([1, 2, 3]),
 	mime_type: { 'image/png': null }

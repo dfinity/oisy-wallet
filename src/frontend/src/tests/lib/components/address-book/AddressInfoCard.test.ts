@@ -2,7 +2,6 @@ import AddressInfoCard from '$lib/components/address-book/AddressInfoCard.svelte
 import type { ContactAddressUi } from '$lib/types/contact';
 import { render } from '@testing-library/svelte';
 
-
 describe('AddressInfoCard', () => {
 	const mockAddress: ContactAddressUi = {
 		address: '0x1234567890abcdef',

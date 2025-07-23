@@ -8,7 +8,6 @@ import { generateUrn } from '$tests/mocks/qr-generator.mock';
 import { decodePayment } from '@dfinity/ledger-icrc';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { MockedFunction } from 'vitest';
 
 vi.mock('@dfinity/ledger-icrc', () => ({
 	decodePayment: vi.fn()

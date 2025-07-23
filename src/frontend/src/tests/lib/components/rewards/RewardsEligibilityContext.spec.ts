@@ -6,7 +6,6 @@ import type { CampaignEligibility } from '$lib/types/reward';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { render } from '@testing-library/svelte';
 
-
 describe('RewardsEligibilityContext', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();

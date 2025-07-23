@@ -23,7 +23,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockManageContactsService } from '$tests/mocks/manage-contacts.service.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
-
 describe('AddressBookModal', () => {
 	let cleanup: { restore: () => void };
 

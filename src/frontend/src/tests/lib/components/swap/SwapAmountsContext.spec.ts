@@ -15,7 +15,6 @@ import { act, render } from '@testing-library/svelte';
 import { tick, type Snippet } from 'svelte';
 import { get, readable, writable } from 'svelte/store';
 
-
 const fakeSnippet: Snippet = (() => {}) as Snippet;
 
 interface SwapAmountsContextProps {

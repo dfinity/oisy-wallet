@@ -27,7 +27,6 @@ import { bn1Bi, bn2Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
 
-
 const tokens: TokenUi[] = [
 	{
 		...BTC_MAINNET_TOKEN,

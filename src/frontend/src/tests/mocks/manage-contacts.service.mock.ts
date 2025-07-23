@@ -2,7 +2,6 @@ import * as manageContactsService from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 
-
 export const mockManageContactsService = () => {
 	// Mock createContact
 	vi.spyOn(manageContactsService, 'createContact').mockImplementation(

@@ -13,7 +13,6 @@ import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-
 describe('AuthHelpIdentityForm', () => {
 	const imageBannerSelector = `img[data-tid="${HELP_AUTH_IDENTITY_IMAGE_BANNER}"]`;
 	const signInButtonSelector = `button[data-tid="${HELP_AUTH_LEGACY_SIGN_IN_BUTTON}"]`;

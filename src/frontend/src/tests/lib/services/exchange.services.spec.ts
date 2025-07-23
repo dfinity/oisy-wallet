@@ -1,7 +1,6 @@
 import { exchangeRateICRCToUsd, exchangeRateUsdToCurrency } from '$lib/services/exchange.services';
 import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
 
-
 import { Currency } from '$lib/enums/currency';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
