@@ -71,7 +71,7 @@
 		loading = false;
 	};
 
-	$: $tokenWithFallback, $tokenNotInitialized, (async () => await load())();
+	$: ($tokenWithFallback, $tokenNotInitialized, (async () => await load())());
 
 	const reload = async () => {
 		await load({ reload: true });
