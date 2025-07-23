@@ -43,7 +43,7 @@ pub type ChainId = u64;
 #[serde(remote = "Self")]
 pub struct Erc20Token {
     pub token_address: ErcTokenId,
-    pub chain_id: ChainId
+    pub chain_id: ChainId,
 }
 
 /// An ERC721 compliant token on the Ethereum or EVM-compatible networks.

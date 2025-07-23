@@ -249,9 +249,7 @@ mod custom_token {
     mod erc20 {
         //! Tests for the erc20 module.
         use super::*;
-        use crate::{
-            validate::{test_validate_on_deserialize, TestVector, Validate},
-        };
+        use crate::validate::{test_validate_on_deserialize, TestVector, Validate};
 
         test_validate_on_deserialize!(
             Erc20Token,

@@ -487,7 +487,7 @@ impl Validate for SplToken {
 }
 
 impl Validate for Erc20Token {
-    fn validate(&self) -> Result<(), candid::Error> { 
+    fn validate(&self) -> Result<(), candid::Error> {
         self.token_address.validate()
     }
 }
