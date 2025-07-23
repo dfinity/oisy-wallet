@@ -17,7 +17,6 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
-import { beforeEach } from 'vitest';
 
 describe('RewardEarnings', () => {
 	const ckBtcRewardEarningsCardSelector = `div[data-tid="${REWARDS_EARNINGS_CARD}-${BTC_MAINNET_TOKEN.twinTokenSymbol}"]`;

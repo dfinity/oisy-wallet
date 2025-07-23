@@ -14,7 +14,6 @@ import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
-import type { MockedFunction } from 'vitest';
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
 	loadEthereumTransactions: vi.fn()
@@ -157,9 +156,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should not load transactions twice for the same tokens even if the stores change', async () => {
-		const mockLoadEthereumTransactions = loadEthereumTransactions as MockedFunction<
-			typeof loadEthereumTransactions
-		>;
+		const mockLoadEthereumTransactions = vi.mocked(loadEthereumTransactions);
 		mockLoadEthereumTransactions.mockResolvedValue({ success: true });
 
 		const mockAdditionalTokens = createMockErc20UserTokens({
@@ -201,9 +198,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should load transactions for new tokens when they are added', async () => {
-		const mockLoadEthereumTransactions = loadEthereumTransactions as MockedFunction<
-			typeof loadEthereumTransactions
-		>;
+		const mockLoadEthereumTransactions = vi.mocked(loadEthereumTransactions);
 		mockLoadEthereumTransactions.mockResolvedValue({ success: true });
 
 		render(LoaderMultipleEthTransactions);
@@ -262,9 +257,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should load transactions in the next call if it failed the first time', async () => {
-		const mockLoadEthereumTransactions = loadEthereumTransactions as MockedFunction<
-			typeof loadEthereumTransactions
-		>;
+		const mockLoadEthereumTransactions = vi.mocked(loadEthereumTransactions);
 		mockLoadEthereumTransactions
 			.mockResolvedValueOnce({ success: false })
 			.mockResolvedValue({ success: true });

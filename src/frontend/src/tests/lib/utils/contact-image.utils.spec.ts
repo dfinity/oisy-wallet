@@ -1,7 +1,6 @@
 import type { ContactImage, ImageMimeType } from '$declarations/backend/backend.did';
 import { dataUrlToImage, imageToDataUrl } from '$lib/utils/contact-image.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { vi } from 'vitest';
 
 describe('contact-image.utils', () => {
 	const MOCK_IMAGE: ContactImage = {

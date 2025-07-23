@@ -8,7 +8,6 @@ import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';
 import type { get_utxos_response } from '@dfinity/ckbtc/dist/candid/bitcoin';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock environment variables
 vi.mock('$env/networks/networks.icrc.env', () => ({

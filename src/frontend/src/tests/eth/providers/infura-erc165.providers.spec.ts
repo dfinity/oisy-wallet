@@ -5,7 +5,6 @@ import { ERC165_ABI } from '$eth/constants/erc165.constants';
 import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import type { MockedClass } from 'vitest';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
@@ -24,10 +23,10 @@ describe('infura-erc165.providers', () => {
 		} = ETHEREUM_NETWORK;
 		const { address: contractAddress } = PEPE_TOKEN;
 
-		const mockProvider = InfuraProviderLib as MockedClass<typeof InfuraProviderLib>;
+		const mockProvider = vi.mocked(InfuraProviderLib);
 		const expectedContractParams = [contractAddress, ERC165_ABI];
 
-		const mockContract = Contract as MockedClass<typeof Contract>;
+		const mockContract = vi.mocked(Contract);
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -41,8 +40,7 @@ describe('infura-erc165.providers', () => {
 		});
 
 		describe('isSupportedInterface', () => {
-			const mocksupportedInterface =
-				vi.fn() as unknown as typeof mockContract.prototype.supportsInterface;
+			const mockSupportedInterface = vi.fn();
 
 			const mockParams = {
 				contract: { address: contractAddress },
@@ -52,9 +50,10 @@ describe('infura-erc165.providers', () => {
 			beforeEach(() => {
 				vi.clearAllMocks();
 
-				mocksupportedInterface.mockResolvedValue(true);
+				mockSupportedInterface.mockResolvedValue(true);
 
-				mockContract.prototype.supportsInterface = mocksupportedInterface;
+				mockContract.prototype.supportsInterface =
+					mockSupportedInterface as unknown as typeof mockContract.prototype.supportsInterface;
 			});
 
 			it.each(Object.entries(Erc165Identifier))(
@@ -74,7 +73,7 @@ describe('infura-erc165.providers', () => {
 
 			it('should return false if the method is not supported', async () => {
 				const errorMessage = 'Mock error message';
-				mocksupportedInterface.mockRejectedValue(new Error(errorMessage));
+				mockSupportedInterface.mockRejectedValue(new Error(errorMessage));
 
 				const provider = new InfuraErc165Provider(infura);
 
@@ -93,7 +92,7 @@ describe('infura-erc165.providers', () => {
 					new mockProvider()
 				);
 
-				expect(mocksupportedInterface).toHaveBeenCalledExactlyOnceWith(mockParams.interfaceId);
+				expect(mockSupportedInterface).toHaveBeenCalledExactlyOnceWith(mockParams.interfaceId);
 			});
 		});
 	});

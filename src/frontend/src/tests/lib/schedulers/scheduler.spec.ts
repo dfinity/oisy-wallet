@@ -2,7 +2,7 @@ import { SchedulerTimer } from '$lib/schedulers/scheduler';
 import * as authUtils from '$lib/utils/auth.utils';
 import { loadIdentity } from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { expect, vi, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 describe('scheduler', () => {
 	describe('SchedulerTimer', () => {

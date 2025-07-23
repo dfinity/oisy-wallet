@@ -13,7 +13,6 @@ import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
-import { vi } from 'vitest';
 
 describe('AddressListItem', () => {
 	// Mock the i18n store

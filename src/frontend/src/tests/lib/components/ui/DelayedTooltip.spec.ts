@@ -2,7 +2,6 @@ import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { vi } from 'vitest';
 
 describe('DelayedTooltip', () => {
 	const testId = 'test-content';

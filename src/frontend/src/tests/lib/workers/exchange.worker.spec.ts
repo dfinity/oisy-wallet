@@ -13,7 +13,6 @@ import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/type
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
-import { expect } from 'vitest';
 
 vi.mock('$lib/rest/coingecko.rest', () => ({
 	simplePrice: vi.fn(),

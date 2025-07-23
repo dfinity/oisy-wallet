@@ -4,7 +4,7 @@ import { privacyModeStore } from '$lib/stores/settings.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
-import { vi, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 describe('setPrivacyMode', () => {
 	let spyToastsShow: MockInstance;
