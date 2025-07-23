@@ -1,6 +1,6 @@
 import { KongSwapTokenSchema, KongSwapTokenWithMetricsSchema } from '$lib/types/kongswap';
 import { createMockKongSwapToken } from '$tests/mocks/kongswap.mock';
-import { describe, expect, it } from 'vitest';
+
 
 describe('Schema: KongSwapTokenWithMetricsSchema', () => {
 	it('validates a fully correct token', () => {

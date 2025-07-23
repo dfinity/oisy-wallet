@@ -13,7 +13,7 @@ vi.mock('ethers/address', () => ({
 
 describe('account.utils', () => {
 	describe('isIcpAccountIdentifier', () => {
-		const mockCheckAccountId = checkAccountId as MockedFunction<typeof checkAccountId>;
+		const mockCheckAccountId = vi.mocked(checkAccountId);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -79,7 +79,7 @@ describe('account.utils', () => {
 	});
 
 	describe('invalidIcpAddress', () => {
-		const mockCheckAccountId = checkAccountId as MockedFunction<typeof checkAccountId>;
+		const mockCheckAccountId = vi.mocked(checkAccountId);
 
 		beforeEach(() => {
 			vi.resetAllMocks();

@@ -58,7 +58,7 @@ describe('infura.rest', () => {
 				json: () => mockApiResponse
 			} as unknown as Response);
 
-			const mockFetch = fetch as MockedFunction<typeof fetch>;
+			const mockFetch = vi.mocked(fetch);
 
 			const infuraRest = new InfuraGasRest(chainId);
 

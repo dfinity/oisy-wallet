@@ -11,7 +11,7 @@ import { currencyStore } from '$lib/stores/currency.store';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
+
 
 describe('CurrencyDropdown', () => {
 	beforeEach(() => {

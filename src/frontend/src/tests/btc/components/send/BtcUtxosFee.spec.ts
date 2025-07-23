@@ -8,7 +8,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { expect } from 'vitest';
+
 
 describe('BtcUtxosFee', () => {
 	const mockContext = new Map([]);

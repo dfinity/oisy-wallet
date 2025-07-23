@@ -11,7 +11,7 @@ describe('clipboard.utils', () => {
 	describe('copyToClipboard', () => {
 		let spyToastsShow: MockInstance;
 
-		const mockCopyText = copyText as MockedFunction<typeof copyText>;
+		const mockCopyText = vi.mocked(copyText);
 
 		const text = 'Copied!';
 		const value = 'text to copy';

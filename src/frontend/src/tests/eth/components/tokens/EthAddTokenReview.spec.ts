@@ -13,7 +13,7 @@ import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
-import { vi } from 'vitest';
+
 
 describe('EthAddTokenReview', () => {
 	const mockErc721CustomToken: Erc721CustomToken = {

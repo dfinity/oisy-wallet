@@ -64,7 +64,7 @@ describe('decodeQrCode', () => {
 	const address = 'some-address';
 	const amount = 1.23;
 	const code = 'some-qr-code';
-	const mockDecodePayment = decodePayment as MockedFunction<typeof decodePayment>;
+	const mockDecodePayment = vi.mocked(decodePayment);
 
 	beforeEach(() => {
 		vi.clearAllMocks();

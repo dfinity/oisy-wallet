@@ -127,7 +127,7 @@ describe('token.utils', () => {
 	});
 
 	describe('calculateTokenUsdBalance', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -179,7 +179,7 @@ describe('token.utils', () => {
 	});
 
 	describe('calculateTokenUsdAmount', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -221,7 +221,7 @@ describe('token.utils', () => {
 	});
 
 	describe('mapTokenUi', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();

@@ -8,7 +8,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import { beforeEach, expect } from 'vitest';
+
 
 describe('LanguageDropdown', () => {
 	beforeEach(() => {

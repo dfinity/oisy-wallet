@@ -1,7 +1,7 @@
 import AddressInfoCard from '$lib/components/address-book/AddressInfoCard.svelte';
 import type { ContactAddressUi } from '$lib/types/contact';
 import { render } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
+
 
 describe('AddressInfoCard', () => {
 	const mockAddress: ContactAddressUi = {

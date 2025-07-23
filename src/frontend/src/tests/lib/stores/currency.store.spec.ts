@@ -7,7 +7,7 @@ import type { CurrencyData } from '$lib/types/currency';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
 import { get } from 'svelte/store';
-import { vi } from 'vitest';
+
 
 vi.mock('$lib/utils/storage.utils', () => ({
 	set: vi.fn(),
