@@ -40,8 +40,7 @@ describe('infura-erc165.providers', () => {
 		});
 
 		describe('isSupportedInterface', () => {
-			const mocksupportedInterface =
-				vi.fn() as unknown as typeof mockContract.prototype.supportsInterface;
+			const mockSupportedInterface = vi.fn();
 
 			const mockParams = {
 				contract: { address: contractAddress },
@@ -51,9 +50,10 @@ describe('infura-erc165.providers', () => {
 			beforeEach(() => {
 				vi.clearAllMocks();
 
-				mocksupportedInterface.mockResolvedValue(true);
+				mockSupportedInterface.mockResolvedValue(true);
 
-				mockContract.prototype.supportsInterface = mocksupportedInterface;
+				mockContract.prototype.supportsInterface =
+					mockSupportedInterface as unknown as typeof mockContract.prototype.supportsInterface;
 			});
 
 			it.each(Object.entries(Erc165Identifier))(
@@ -73,7 +73,7 @@ describe('infura-erc165.providers', () => {
 
 			it('should return false if the method is not supported', async () => {
 				const errorMessage = 'Mock error message';
-				mocksupportedInterface.mockRejectedValue(new Error(errorMessage));
+				mockSupportedInterface.mockRejectedValue(new Error(errorMessage));
 
 				const provider = new InfuraErc165Provider(infura);
 
@@ -92,7 +92,7 @@ describe('infura-erc165.providers', () => {
 					new mockProvider()
 				);
 
-				expect(mocksupportedInterface).toHaveBeenCalledExactlyOnceWith(mockParams.interfaceId);
+				expect(mockSupportedInterface).toHaveBeenCalledExactlyOnceWith(mockParams.interfaceId);
 			});
 		});
 	});

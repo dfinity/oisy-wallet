@@ -49,8 +49,8 @@ describe('infura-erc721.providers', () => {
 		});
 
 		describe('metadata', () => {
-			const mockName = vi.fn() as unknown as typeof mockContract.prototype.name;
-			const mockSymbol = vi.fn() as unknown as typeof mockContract.prototype.symbol;
+			const mockName = vi.fn();
+			const mockSymbol = vi.fn();
 
 			const mockParams = {
 				address: contractAddress
@@ -62,8 +62,9 @@ describe('infura-erc721.providers', () => {
 				mockName.mockResolvedValue('mock-name');
 				mockSymbol.mockResolvedValue('mock-symbol');
 
-				mockContract.prototype.name = mockName;
-				mockContract.prototype.symbol = mockSymbol;
+				mockContract.prototype.name = mockName as unknown as typeof mockContract.prototype.name;
+				mockContract.prototype.symbol =
+					mockSymbol as unknown as typeof mockContract.prototype.symbol;
 			});
 
 			it('should return the fetched metadata', async () => {
@@ -108,7 +109,7 @@ describe('infura-erc721.providers', () => {
 		});
 
 		describe('getNftMetadata', () => {
-			const mockTokenUri = vi.fn() as unknown as typeof mockContract.prototype.tokenURI;
+			const mockTokenUri = vi.fn();
 
 			const mockParams = {
 				contractAddress,
@@ -132,7 +133,8 @@ describe('infura-erc721.providers', () => {
 					json: () => Promise.resolve(mockMetadata)
 				});
 
-				mockContract.prototype.tokenURI = mockTokenUri;
+				mockContract.prototype.tokenURI =
+					mockTokenUri as unknown as typeof mockContract.prototype.tokenURI;
 			});
 
 			it('should return nft metadata for token id', async () => {
