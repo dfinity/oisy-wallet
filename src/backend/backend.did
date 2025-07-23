@@ -141,9 +141,11 @@ type ContactAddressData = record {
 type ContactError = variant {
 	InvalidContactData;
 	CanisterMemoryNearCapacity;
+	InvalidImageFormat;
 	ContactNotFound;
 	ImageTooLarge;
 	RandomnessError;
+	ImageExceedsMaxSize;
 	CanisterStatusError;
 	TooManyContactsWithImages
 };
