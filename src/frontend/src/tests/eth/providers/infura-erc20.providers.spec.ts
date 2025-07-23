@@ -7,7 +7,7 @@ import { InfuraErc20Provider, infuraErc20Providers } from '$eth/providers/infura
 import type { EthereumNetwork } from '$eth/types/network';
 import { ZERO } from '$lib/constants/app.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Contract, type ContractTransaction } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
