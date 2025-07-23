@@ -3,7 +3,6 @@ import { llmChat } from '$lib/api/llm.api';
 import { askLlm } from '$lib/services/ai-assistant.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fromNullable, toNullable } from '@dfinity/utils';
-import { expect } from 'vitest';
 
 vi.mock('$lib/api/llm.api');
 

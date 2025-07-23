@@ -11,7 +11,6 @@ import {
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
-import { describe } from 'vitest';
 
 describe('format.utils', () => {
 	describe('formatToken', () => {
