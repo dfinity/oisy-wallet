@@ -1,5 +1,5 @@
 import type { Erc721Token } from '$eth/types/erc721';
-import { NftError } from '$lib/types/errors';
+import type { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
