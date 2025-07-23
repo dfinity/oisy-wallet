@@ -8,7 +8,7 @@ import type { NetworkEnvironment } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 export const AZUKI_ELEMENTAL_BEANS_SYMBOL = 'MBeans';

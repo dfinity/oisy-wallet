@@ -5,7 +5,7 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 export const mockValidErc20Token: Erc20Token = {

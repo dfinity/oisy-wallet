@@ -9,7 +9,7 @@ import { nftStore } from '$lib/stores/nft.store';
 import type { Nft } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { waitFor } from '@testing-library/svelte';
 import { Network } from 'ethers/providers';
 import { get } from 'svelte/store';
