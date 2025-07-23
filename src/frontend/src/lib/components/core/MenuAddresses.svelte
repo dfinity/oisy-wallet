@@ -18,8 +18,6 @@
 	}
 
 	let { onReceiveClick }: Props = $props();
-
-
 </script>
 
 {#if $networkICP}

@@ -9,9 +9,8 @@
 
 	let { onClick }: Props = $props();
 
-
 	const openReceive = () => {
-		onClick?.()
+		onClick?.();
 		emit({ message: 'oisyReceive' });
 	};
 </script>
