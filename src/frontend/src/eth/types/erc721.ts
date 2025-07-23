@@ -1,8 +1,11 @@
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
-import type { RequiredToken, Token, TokenMetadata } from '$lib/types/token';
+import type { RequiredToken, Token, TokenMetadata, TokenStandard } from '$lib/types/token';
 
-export type Erc721Token = Erc721Contract & Omit<Token, 'network'> & { network: EthereumNetwork };
+type Erc721Standard = Extract<TokenStandard, 'erc721'>;
+
+export type Erc721Token = Erc721Contract &
+	Omit<Token, 'network' | 'standard'> & { network: EthereumNetwork; standard: Erc721Standard };
 
 export type RequiredErc721Token = RequiredToken<Erc721Token>;
 

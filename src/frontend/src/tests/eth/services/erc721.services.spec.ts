@@ -295,7 +295,7 @@ describe('erc721.services', () => {
 
 		it('should reset token store on error', async () => {
 			erc721CustomTokensStore.setAll([
-				{ data: { ...SEPOLIA_PEPE_TOKEN, enabled: true }, certified: false }
+				{ data: { ...SEPOLIA_PEPE_TOKEN, standard: 'erc721', enabled: true }, certified: false }
 			]);
 
 			vi.mocked(listCustomTokens).mockRejectedValue(new Error('Error loading custom tokens'));
