@@ -226,9 +226,11 @@ export const idlFactory = ({ IDL }) => {
 	const ContactError = IDL.Variant({
 		InvalidContactData: IDL.Null,
 		CanisterMemoryNearCapacity: IDL.Null,
+		InvalidImageFormat: IDL.Null,
 		ContactNotFound: IDL.Null,
 		ImageTooLarge: IDL.Null,
 		RandomnessError: IDL.Null,
+		ImageExceedsMaxSize: IDL.Null,
 		CanisterStatusError: IDL.Null,
 		TooManyContactsWithImages: IDL.Null
 	});
