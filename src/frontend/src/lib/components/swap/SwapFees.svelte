@@ -7,7 +7,6 @@
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -61,19 +60,13 @@
 						</div>
 					{:else if isNullish($sourceTokenExchangeRate)}
 						{sourceTokenTransferFee + sourceTokenApproveFee} {getTokenDisplaySymbol($sourceToken)}
-					{:else if sourceTokenTotalFeeUSD < EXCHANGE_USD_AMOUNT_THRESHOLD}
-						{`< ${formatCurrency({
-							value: EXCHANGE_USD_AMOUNT_THRESHOLD,
-							currency: $currentCurrency,
-							exchangeRate: $currencyExchangeStore,
-							language: $currentLanguage
-						})}`}
 					{:else}
 						{formatCurrency({
 							value: sourceTokenTotalFeeUSD,
 							currency: $currentCurrency,
 							exchangeRate: $currencyExchangeStore,
-							language: $currentLanguage
+							language: $currentLanguage,
+							notBelowThreshold: true
 						})}
 					{/if}
 				{/snippet}
