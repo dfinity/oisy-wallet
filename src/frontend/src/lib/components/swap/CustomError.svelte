@@ -2,7 +2,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import ExternalLink from '../ui/ExternalLink.svelte';
 
-	let { firstMessage, firstLink, secondMessage, secondLink } = $props();
+	interface Props {
+		firstMessage: string;
+		firstLink: { url: string; text: string };
+		secondMessage: string;
+		secondLink: { url: string; text: string };
+	}
+
+	let { firstMessage, firstLink, secondMessage, secondLink }: Props = $props();
 </script>
 
 {firstMessage}

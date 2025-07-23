@@ -33,7 +33,6 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
-	import CustomError from './CustomError.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
