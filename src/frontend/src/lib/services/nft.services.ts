@@ -88,7 +88,7 @@ const loadNftsOfBatch = async ({
 }: {
 	infuraProvider: InfuraErc721Provider;
 	token: Erc721Token;
-	tokenIds: number[];
+	tokenIds: NftId[];
 }): Promise<Nft[]> => {
 	const nftsMetadata: NftMetadata[] = await loadNftsMetadata({
 		infuraProvider,
@@ -109,7 +109,7 @@ const loadNftsMetadata = async ({
 }: {
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
-	tokenIds: number[];
+	tokenIds: NftId[];
 }): Promise<NftMetadata[]> => {
 	const metadataPromises = tokenIds.map((tokenId) =>
 		loadNftMetadata({ infuraProvider, contractAddress, tokenId })
@@ -136,7 +136,7 @@ const loadNftMetadata = async ({
 }: {
 	infuraProvider: InfuraErc721Provider;
 	contractAddress: string;
-	tokenId: number;
+	tokenId: NftId;
 }): Promise<NftMetadata> => {
 	// We want to wait for a random amount of time between 0 and 2 seconds to avoid triggering rate limits.
 	// Since we are handling batch sizes of 10, on average, we should wait for 0.2 seconds between each nft.
@@ -159,9 +159,10 @@ const createBatches = ({
 }: {
 	tokenIds: number[];
 	batchSize: number;
-}): number[][] =>
-	Array.from({ length: Math.ceil(tokenIds.length / batchSize) }, (_, index) =>
-		tokenIds.slice(index * batchSize, (index + 1) * batchSize)
+}): NftId[][] =>
+	Array.from(
+		{ length: Math.ceil(tokenIds.length / batchSize) },
+		(_, index) => tokenIds.slice(index * batchSize, (index + 1) * batchSize) as NftId[]
 	);
 
 const loadHoldersTokenIds = async ({
@@ -172,7 +173,7 @@ const loadHoldersTokenIds = async ({
 	etherscanProvider: EtherscanProvider;
 	walletAddress: string;
 	contractAddress: string;
-}): Promise<number[]> => {
+}): Promise<NftId[]> => {
 	try {
 		return await etherscanProvider.erc721TokenInventory({
 			address: walletAddress,
