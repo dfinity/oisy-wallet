@@ -121,7 +121,7 @@ describe('currency.store', () => {
 				expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
 					name: TRACK_CHANGE_CURRENCY,
 					metadata: {
-						language: Currency.CHF,
+						currency: Currency.CHF,
 						source: 'landing-page'
 					}
 				});
@@ -135,7 +135,7 @@ describe('currency.store', () => {
 				expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
 					name: TRACK_CHANGE_CURRENCY,
 					metadata: {
-						language: Currency.EUR,
+						currency: Currency.EUR,
 						source: 'app'
 					}
 				});
