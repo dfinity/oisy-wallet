@@ -33,7 +33,7 @@
 			"more_items": "+$items mục khác",
 			"select": "Chọn",
 			"language": "Ngôn ngữ",
-			"currency": ""
+			"currency": "Tiền tệ"
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!"
@@ -45,7 +45,7 @@
 			"open_details": "Mở chi tiết",
 			"close_details": "Đóng chi tiết",
 			"switch_language": "Chuyển đổi ngôn ngữ",
-			"switch_currency": ""
+			"switch_currency": "Chuyển đổi tiền tệ"
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất"
@@ -658,7 +658,7 @@
 			"sending": "Đang gửi...",
 			"signing": "Đang ký...",
 			"signing_message": "Đang ký tin nhắn...",
-			"confirming": "",
+			"confirming": "Xác nhận...",
 			"network": "Mạng",
 			"source_network": "Mạng nguồn",
 			"destination_network": "Mạng đích",
@@ -931,7 +931,7 @@
 				"import_token": "Nhập token",
 				"network": "Mạng",
 				"all_tokens_zero_balance": "Tất cả các token có số dư bằng 0.",
-				"enable_more_assets": ""
+				"enable_more_assets": "Kích hoạt thêm token"
 			},
 			"placeholder": {
 				"select_network": "Chọn mạng"
@@ -1071,7 +1071,7 @@
 			"disconnected": "WalletConnect đã ngắt kết nối.",
 			"session_ended": "Phiên WalletConnect đã kết thúc.",
 			"connected": "WalletConnect đã kết nối.",
-			"transaction_executed": "",
+			"transaction_executed": "WalletConnect \"$method\" yêu cầu được thực hiện.",
 			"sign_executed": "Yêu cầu ký của WalletConnect đã được thực hiện."
 		},
 		"error": {
@@ -1287,10 +1287,10 @@
 			"avatar_for": "Ảnh đại diện cho"
 		},
 		"edit_avatar": {
-			"menu_title": "",
-			"upload_image": "",
-			"replace_image": "",
-			"remove_image": ""
+			"menu_title": "Chỉnh sửa hình đại diện",
+			"upload_image": "Tải hình đại diện lên",
+			"replace_image": "Thay thế hình đại diện",
+			"remove_image": "Xóa hình đại diện"
 		},
 		"show_contact": {
 			"title": "Liên hệ",
