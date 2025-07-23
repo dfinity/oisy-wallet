@@ -99,7 +99,7 @@
 			}
 			validateMetadata();
 		} catch (err: unknown) {
-			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata }, });
+			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
 			dispatch('icBack');
 		}
