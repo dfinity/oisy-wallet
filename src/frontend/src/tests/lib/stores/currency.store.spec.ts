@@ -8,7 +8,6 @@ import { get as getStorage } from '$lib/utils/storage.utils';
 import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
 import { get } from 'svelte/store';
 
-
 vi.mock('$lib/utils/storage.utils', () => ({
 	set: vi.fn(),
 	get: vi.fn(),
