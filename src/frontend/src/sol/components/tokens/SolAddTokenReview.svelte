@@ -90,7 +90,7 @@
 				dispatch('icBack');
 				return;
 			}
-		} catch (err: unknown) {
+		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
 			dispatch('icBack');
