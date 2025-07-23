@@ -12,7 +12,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import { describe, type MockedClass } from 'vitest';
+import type { MockedClass } from 'vitest';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
@@ -33,10 +33,10 @@ describe('infura-erc721.providers', () => {
 		} = ETHEREUM_NETWORK;
 		const { address: contractAddress } = PEPE_TOKEN;
 
-		const mockProvider = InfuraProviderLib as MockedClass<typeof InfuraProviderLib>;
+		const mockProvider = vi.mocked(InfuraProviderLib);
 		const expectedContractParams = [contractAddress, ERC721_ABI];
 
-		const mockContract = Contract as MockedClass<typeof Contract>;
+		const mockContract = vi.mocked(Contract);
 
 		beforeEach(() => {
 			vi.clearAllMocks();

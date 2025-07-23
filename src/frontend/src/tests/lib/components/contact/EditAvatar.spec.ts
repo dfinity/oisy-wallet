@@ -6,7 +6,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
+
 
 describe('EditAvatar', () => {
 	const mockReplaceImage = vi.fn();

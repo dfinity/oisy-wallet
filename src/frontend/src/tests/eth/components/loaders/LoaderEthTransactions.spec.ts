@@ -28,12 +28,8 @@ vi.mock('$eth/services/eth-transactions.services', () => ({
 }));
 
 describe('LoaderEthTransactions', () => {
-	const mockLoadTransactions = loadEthereumTransactions as MockedFunction<
-		typeof loadEthereumTransactions
-	>;
-	const mockReloadTransactions = reloadEthereumTransactions as MockedFunction<
-		typeof reloadEthereumTransactions
-	>;
+	const mockLoadTransactions = vi.mocked(loadEthereumTransactions);
+	const mockReloadTransactions = vi.mocked(reloadEthereumTransactions);
 
 	beforeEach(() => {
 		vi.clearAllMocks();

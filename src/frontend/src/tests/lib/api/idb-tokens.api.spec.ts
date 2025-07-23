@@ -29,7 +29,7 @@ import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
-import { expect, vi } from 'vitest';
+
 
 vi.mock('idb-keyval', () => ({
 	createStore: vi.fn(() => ({

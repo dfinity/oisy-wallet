@@ -80,7 +80,7 @@ describe('swap.services', () => {
 
 		const mockGetTransactionCount = vi.fn();
 		const mockSendTransaction = vi.fn();
-		const mockProvider = InfuraProviderLib as MockedClass<typeof InfuraProviderLib>;
+		const mockProvider = vi.mocked(InfuraProviderLib);
 
 		let spyGet: MockInstance;
 

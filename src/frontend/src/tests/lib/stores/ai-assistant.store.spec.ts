@@ -4,7 +4,7 @@ import type { ChatMessage } from '$lib/types/ai-assistant';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
+
 
 describe('ai-assistant.store', () => {
 	const defaultState = {

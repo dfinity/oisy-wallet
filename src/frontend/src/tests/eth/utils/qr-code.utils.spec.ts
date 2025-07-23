@@ -28,7 +28,7 @@ describe('decodeQrCode', () => {
 		erc20Tokens: get(enabledErc20Tokens)
 	};
 
-	const mockDecodeQrCodeUrn = decodeQrCodeUrn as MockedFunction<typeof decodeQrCodeUrn>;
+	const mockDecodeQrCodeUrn = vi.mocked(decodeQrCodeUrn);
 
 	beforeEach(() => {
 		vi.clearAllMocks();

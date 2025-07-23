@@ -48,7 +48,7 @@ describe('etherscan.providers', () => {
 		const address = mockEthAddress;
 
 		const mockFetch = vi.fn();
-		const mockProvider = EtherscanProviderLib as MockedClass<typeof EtherscanProviderLib>;
+		const mockProvider = vi.mocked(EtherscanProviderLib);
 		mockProvider.prototype.fetch = mockFetch;
 
 		beforeEach(() => {

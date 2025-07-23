@@ -24,10 +24,10 @@ describe('infura-erc165.providers', () => {
 		} = ETHEREUM_NETWORK;
 		const { address: contractAddress } = PEPE_TOKEN;
 
-		const mockProvider = InfuraProviderLib as MockedClass<typeof InfuraProviderLib>;
+		const mockProvider = vi.mocked(InfuraProviderLib);
 		const expectedContractParams = [contractAddress, ERC165_ABI];
 
-		const mockContract = Contract as MockedClass<typeof Contract>;
+		const mockContract = vi.mocked(Contract);
 
 		beforeEach(() => {
 			vi.clearAllMocks();

@@ -13,7 +13,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
+
 
 vi.mock('browser-image-compression', () => {
 	const mockCompression = vi
@@ -257,7 +257,7 @@ describe('EditContactStep', () => {
 			await fireEvent.change(input, { target: { files: [file] } });
 		}
 
-		expect(onAvatarEdit).toHaveBeenCalledTimes(1);
+		expect(onAvatarEdit).toHaveBeenCalledOnce();
 		expect(onAvatarEdit).toHaveBeenNthCalledWith(
 			1,
 			expect.objectContaining({

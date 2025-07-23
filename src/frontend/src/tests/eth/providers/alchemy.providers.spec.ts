@@ -6,7 +6,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { Alchemy } from 'alchemy-sdk';
-import { vi } from 'vitest';
+
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();

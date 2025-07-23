@@ -157,9 +157,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should not load transactions twice for the same tokens even if the stores change', async () => {
-		const mockLoadEthereumTransactions = loadEthereumTransactions as MockedFunction<
-			typeof loadEthereumTransactions
-		>;
+		const mockLoadEthereumTransactions = vi.mocked(loadEthereumTransactions);
 		mockLoadEthereumTransactions.mockResolvedValue({ success: true });
 
 		const mockAdditionalTokens = createMockErc20UserTokens({
@@ -201,9 +199,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should load transactions for new tokens when they are added', async () => {
-		const mockLoadEthereumTransactions = loadEthereumTransactions as MockedFunction<
-			typeof loadEthereumTransactions
-		>;
+		const mockLoadEthereumTransactions = vi.mocked(loadEthereumTransactions);
 		mockLoadEthereumTransactions.mockResolvedValue({ success: true });
 
 		render(LoaderMultipleEthTransactions);
@@ -262,9 +258,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should load transactions in the next call if it failed the first time', async () => {
-		const mockLoadEthereumTransactions = loadEthereumTransactions as MockedFunction<
-			typeof loadEthereumTransactions
-		>;
+		const mockLoadEthereumTransactions = vi.mocked(loadEthereumTransactions);
 		mockLoadEthereumTransactions
 			.mockResolvedValueOnce({ success: false })
 			.mockResolvedValue({ success: true });
