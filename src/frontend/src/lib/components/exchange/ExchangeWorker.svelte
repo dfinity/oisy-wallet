@@ -33,12 +33,12 @@
 
 	const debounceSyncTimer = debounce(syncTimer, 1000);
 
-	$: (worker,
+	$: worker,
 		$currentCurrency,
 		$enabledMergedErc20TokensAddresses,
 		$enabledIcrcLedgerCanisterIdsNoCk,
 		$enabledSplTokenAddresses,
-		debounceSyncTimer());
+		debounceSyncTimer();
 </script>
 
 <slot />

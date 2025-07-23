@@ -33,7 +33,7 @@
 		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY
 	);
 
-	$: (errorType, setErrorType(errorType));
+	$: errorType, setErrorType(errorType);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		validateUserAmount({
@@ -80,7 +80,7 @@
 
 		debounce(() => setMax(), 500)();
 	};
-	$: (totalFee, debounceSetMax());
+	$: totalFee, debounceSetMax();
 </script>
 
 <TokenInput

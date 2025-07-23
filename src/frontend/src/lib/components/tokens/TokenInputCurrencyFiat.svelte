@@ -62,7 +62,7 @@
 		}
 	};
 
-	$: (tokenAmount, syncDisplayValueWithTokenAmount());
+	$: tokenAmount, syncDisplayValueWithTokenAmount();
 </script>
 
 <TokenInputCurrency

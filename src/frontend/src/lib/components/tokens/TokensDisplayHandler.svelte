@@ -21,7 +21,7 @@
 
 	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 500);
 
-	$: (sortedTokensOrGroups, debounceUpdateTokensToDisplay());
+	$: sortedTokensOrGroups, debounceUpdateTokensToDisplay();
 </script>
 
 <slot />
