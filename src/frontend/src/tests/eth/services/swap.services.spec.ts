@@ -14,7 +14,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TransactionParams } from '@velora-dex/sdk';
 import { InfuraProvider as InfuraProviderLib, type TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { MockInstance, MockedClass } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
@@ -80,7 +80,7 @@ describe('swap.services', () => {
 
 		const mockGetTransactionCount = vi.fn();
 		const mockSendTransaction = vi.fn();
-		const mockProvider = InfuraProviderLib as MockedClass<typeof InfuraProviderLib>;
+		const mockProvider = vi.mocked(InfuraProviderLib);
 
 		let spyGet: MockInstance;
 
