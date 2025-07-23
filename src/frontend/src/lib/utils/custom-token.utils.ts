@@ -28,7 +28,7 @@ const toIcrcCustomToken = ({
 
 const toErc20CustomToken = ({
 	address: token_address,
-	chainId: chain_id,
+	chainId: chain_id
 }: Erc20SaveCustomToken): Erc20Token => ({
 	token_address,
 	chain_id
