@@ -4,8 +4,7 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
-    contact::{Contact, ContactError, ContactImage, CreateContactRequest, UpdateContactRequest},
-    token::ImageMimeType,
+    contact::{Contact, ContactError, ContactImage, CreateContactRequest, UpdateContactRequest, ImageMimeType},
     user_profile::OisyUser,
 };
 
@@ -61,8 +60,15 @@ pub fn call_update_contact(
     caller: Principal,
     contact: Contact,
 ) -> Result<Contact, ContactError> {
+    let request = UpdateContactRequest {
+        id: contact.id,
+        name: contact.name,
+        addresses: contact.addresses,
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: contact.image,
+    };
     let wrapped_result =
-        pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", contact);
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", request);
     wrapped_result.expect("that update_contact succeeds")
 }
 
