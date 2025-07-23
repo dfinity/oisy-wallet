@@ -1,4 +1,3 @@
-import type { ContactImage } from '$declarations/backend/backend.did';
 import {
 	createContact as createContactApi,
 	deleteContact as deleteContactApi,
@@ -44,7 +43,7 @@ export const updateContact = async ({
 }: {
 	contact: ContactUi;
 	identity: Identity;
-	image?: ContactImage;
+	image?:  ContactUi;
 }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
 		...contact,

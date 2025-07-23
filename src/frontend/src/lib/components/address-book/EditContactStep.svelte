@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import imageCompression from 'browser-image-compression';
-	import type { ContactImage } from '$declarations/backend/backend.did';
+	import type { ContactUi } from '$lib/types/contact';
 	import { AVATAR_ENABLED } from '$env/avatar.env';
 	import AddressListItem from '$lib/components/contact/AddressListItem.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
@@ -26,14 +26,13 @@
 		CONTACT_HEADER_EDITING_EDIT_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ContactUi } from '$lib/types/contact';
 	import { dataUrlToImage, imageToDataUrl } from '$lib/utils/contact-image.utils';
 
 	interface Props {
 		contact: ContactUi;
 		onClose: () => void;
 		onEdit: (contact: ContactUi) => void;
-		onAvatarEdit: (image: ContactImage) => void;
+		onAvatarEdit: (image: ContactUi) => void;
 		onEditAddress: (index: number) => void;
 		onAddAddress: () => void;
 		onDeleteContact: (id: bigint) => void;
@@ -70,13 +69,16 @@
 		});
 
 		const dataUrl = await imageCompression.getDataUrlFromFile(compressedFile);
-		const img: ContactImage = dataUrlToImage(dataUrl);
+		const img: ContactUi = dataUrlToImage(dataUrl);
 
 		await onAvatarEdit(img);
 	};
 
 	const replaceImage = (): void => {
 		fileInput?.triggerClick();
+	};
+	const handleRemoveImage = async (): Promise<void> => {
+		await onAvatarEdit(null);
 	};
 </script>
 
@@ -95,7 +97,7 @@
 						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 						data-tid={`${AVATAR_BADGE}-${contact.name}`}
 					>
-						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={() => {}} />
+						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={handleRemoveImage} />
 					</span>
 				{/if}
 			</div>

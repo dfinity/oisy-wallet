@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish, isNullish } from '@dfinity/utils';
-	import type { ContactImage } from '$declarations/backend/backend.did';
+	import type { ContactUi } from '$lib/types/contact';
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
@@ -13,7 +13,7 @@
 	interface AvatarProps {
 		name?: string;
 		variant?: AvatarVariants;
-		image?: ContactImage;
+		image?: ContactUi;
 		styleClass?: string;
 	}
 

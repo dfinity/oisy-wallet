@@ -2,7 +2,6 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
-	import type { ContactImage } from '$declarations/backend/backend.did';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookQrCodeStep from '$lib/components/address-book/AddressBookQrCodeStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
@@ -245,7 +244,7 @@
 		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
-	const handleAddAvatar = async (image: ContactImage) => {
+	const handleAddAvatar = async (image: ContactUi | null) => {
 		if (isNullish(currentContact)) {
 			return;
 		}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ContactImage } from '$declarations/backend/backend.did';
+	import type { ContactUi } from '$lib/types/contact';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconContactHeader from '$lib/components/icons/IconContactHeader.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
@@ -11,7 +11,7 @@
 
 	interface Props {
 		name: string;
-		image?: ContactImage;
+		image?: ContactUi;
 		onEdit: () => void;
 		styleClass?: string;
 	}
