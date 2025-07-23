@@ -142,11 +142,9 @@ export interface ContactAddressData {
 export type ContactError =
 	| { InvalidContactData: null }
 	| { CanisterMemoryNearCapacity: null }
-	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
 	| { ImageTooLarge: null }
 	| { RandomnessError: null }
-	| { ImageExceedsMaxSize: null }
 	| { CanisterStatusError: null }
 	| { TooManyContactsWithImages: null };
 export interface ContactImage {
