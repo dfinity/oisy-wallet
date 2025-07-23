@@ -977,7 +977,6 @@
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
-			"loading_metadata": "Error while loading the metadata of the token.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
