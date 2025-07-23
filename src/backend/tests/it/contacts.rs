@@ -2,9 +2,11 @@ use std::time::Duration;
 
 use candid::Principal;
 use pretty_assertions::assert_eq;
+use serde_bytes::ByteBuf;
 use shared::types::{
-    contact::{Contact, ContactError, CreateContactRequest},
+    contact::{Contact, ContactError, ContactImage, CreateContactRequest, UpdateContactRequest},
     user_profile::OisyUser,
+    token::ImageMimeType,
 };
 
 use crate::utils::{
@@ -62,6 +64,23 @@ pub fn call_update_contact(
     let wrapped_result =
         pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", contact);
     wrapped_result.expect("that update_contact succeeds")
+}
+
+pub fn call_update_contact_with_request(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    request: UpdateContactRequest,
+) -> Result<Contact, ContactError> {
+    let wrapped_result =
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", request);
+    wrapped_result.expect("that update_contact succeeds")
+}
+
+pub fn create_test_image(data: &[u8]) -> ContactImage {
+    ContactImage {
+        data: ByteBuf::from(data),
+        mime_type: ImageMimeType::Png,
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
