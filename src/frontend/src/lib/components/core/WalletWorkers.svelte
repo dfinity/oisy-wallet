@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
 	import { onDestroy, type Snippet } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import type { InitWalletWorkerFn, WalletWorker } from '$lib/types/listener';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { cleanWorkers, loadWorker } from '$lib/utils/wallet.utils';
@@ -13,7 +14,7 @@
 
 	let { tokens, initWalletWorker, children }: Props = $props();
 
-	let workers = $state(new Map<TokenId, WalletWorker>());
+	let workers = $state(new SvelteMap<TokenId, WalletWorker>());
 
 	const manageWorkers = async () => {
 		cleanWorkers({ workers, tokens });
