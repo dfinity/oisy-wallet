@@ -830,7 +830,7 @@
 			"pool_not_found": "Tausch fehlgeschlagen. Pool nicht gefunden.",
 			"deposit_error": "Das Senden der Token für den Tausch ist fehlgeschlagen. Please try again or change the swap provider. Versuche es erneut oder wähle einen anderen Anbieter.",
 			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
-			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Tokens wurder erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
+			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Tokens wurden erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
 			"withdraw_failed_first_part": "Der Tausch ist fehlgeschlagen und deine Tokens konnten nicht automatisch zurückgeholt werden. Folge ",
 			"withdraw_failed_second_part": "um sie manuell zurückzuholen von ",
 			"swap_failed_instruction_link": "diesen Anweisungen "
