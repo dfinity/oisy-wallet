@@ -908,7 +908,7 @@
 				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
 			},
 			"error": {
-				"loading_metadata": "Fehler beim Laden der Metadaten des Tokens.",
+				"loading_metadata": "",
 				"no_metadata": "Keine Metadaten für das Token verfügbar. Das ist unerwartet.",
 				"unexpected_ledger": "Beim Validieren des Ledger-Canisters ist etwas schiefgelaufen.",
 				"unexpected_index": "Beim Validieren des Index-Canisters ist etwas schiefgelaufen.",

@@ -908,7 +908,7 @@
 				"custom_tokens_not_supported": "La rete selezionata non supporta i token personalizzati."
 			},
 			"error": {
-				"loading_metadata": "Errore durante il caricamento dei metadati del token.",
+				"loading_metadata": "",
 				"no_metadata": "Nessun metadato per il token è fornito. Questo è inaspettato.",
 				"unexpected_ledger": "Qualcosa è andato storto durante la convalida del canister Ledger.",
 				"unexpected_index": "Qualcosa è andato storto durante la convalida del canister Index.",

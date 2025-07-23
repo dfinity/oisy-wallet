@@ -908,7 +908,7 @@
 				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh."
 			},
 			"error": {
-				"loading_metadata": "Lỗi khi tải metadata của token.",
+				"loading_metadata": "",
 				"no_metadata": "Không có metadata nào được cung cấp cho token. Điều này không mong muốn.",
 				"unexpected_ledger": "Đã xảy ra lỗi trong khi xác thực ledger canister.",
 				"unexpected_index": "Đã xảy ra lỗi trong khi xác thực index canister.",
