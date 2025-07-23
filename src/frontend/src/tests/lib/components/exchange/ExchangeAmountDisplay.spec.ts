@@ -1,5 +1,4 @@
 import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
-import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import { formatCurrency } from '$lib/utils/format.utils';
@@ -20,6 +19,8 @@ describe('ExchangeAmountDisplay', () => {
 	const mockAmountNumber = Number(mockAmount) / 10 ** mockDecimals;
 
 	const expectedAmount = '123456789.123 MOCK';
+
+	const usdMinimum = 0.01;
 
 	it('should render the amount', () => {
 		const { getByText } = render(ExchangeAmountDisplay, { props: mockProps });
@@ -46,7 +47,7 @@ describe('ExchangeAmountDisplay', () => {
 		};
 
 		it('should correctly render the USD amount if it is greater or equal than the threshold', () => {
-			const mockExchangeRateBigAmount = (EXCHANGE_USD_AMOUNT_THRESHOLD * 2) / mockAmountNumber;
+			const mockExchangeRateBigAmount = (usdMinimum * 2) / mockAmountNumber;
 
 			const expectedUsdAmount = `( ${formatCurrency({ value: mockAmountNumber * mockExchangeRateBigAmount, ...formatParams })} )`;
 
@@ -58,9 +59,9 @@ describe('ExchangeAmountDisplay', () => {
 		});
 
 		it('should render the threshold if the USD amount is less the threshold', () => {
-			const mockExchangeRateSmallAmount = EXCHANGE_USD_AMOUNT_THRESHOLD / 2 / mockAmountNumber;
+			const mockExchangeRateSmallAmount = usdMinimum / 2 / mockAmountNumber;
 
-			const expectedUsdAmount = `( < ${formatCurrency({ value: EXCHANGE_USD_AMOUNT_THRESHOLD, ...formatParams })} )`;
+			const expectedUsdAmount = `( < ${formatCurrency({ value: usdMinimum, ...formatParams })} )`;
 
 			const { getByText } = render(ExchangeAmountDisplay, {
 				props: { ...mockProps, exchangeRate: mockExchangeRateSmallAmount }
