@@ -471,6 +471,7 @@
 			"no_infura_cketh_provider": "Không có nhà cung cấp Infura CkETH cho mạng $network",
 			"no_infura_erc20_provider": "Không có nhà cung cấp Infura ERC20 cho mạng $network",
 			"no_infura_erc721_provider": "",
+			"no_infura_erc1155_provider": "",
 			"no_infura_erc20_icp_provider": "Không có nhà cung cấp Infura ERC20 Icp cho mạng $network",
 			"no_solana_network": "Không có mạng Solana cho mạng $network",
 			"eth_address_unknown": "Địa chỉ ETH không xác định.",

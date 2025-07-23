@@ -471,6 +471,7 @@
 			"no_infura_cketh_provider": "Žádný poskytovatel Infura CkETH pro síť $network",
 			"no_infura_erc20_provider": "Žádný poskytovatel Infura ERC20 pro síť $network",
 			"no_infura_erc721_provider": "Žádný poskytovatel Infura ERC721 pro síť $network",
+			"no_infura_erc1155_provider": "",
 			"no_infura_erc20_icp_provider": "Žádný poskytovatel Infura ERC20 ICP pro síť $network",
 			"no_solana_network": "Žádná síť Solana pro síť $network",
 			"eth_address_unknown": "Adresa ETH je neznámá.",
