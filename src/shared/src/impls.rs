@@ -11,8 +11,8 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, ErcTokenId, IcrcToken, SplToken,
-            SplTokenId, Token,
+            CustomToken, CustomTokenId, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId,
+            Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -29,7 +29,6 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
-use crate::types::custom_token::ErcToken;
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;

@@ -38,7 +38,8 @@ pub struct ErcTokenId(pub String);
 /// IDs may be found on: <https://chainlist.org/>
 pub type ChainId = u64;
 
-/// An ERC compliant token on the Ethereum or EVM-compatible networks (for example, ERC20, ERC721, ERC1155).
+/// An ERC compliant token on the Ethereum or EVM-compatible networks (for example, ERC20, ERC721,
+/// ERC1155).
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[serde(remote = "Self")]
 pub struct ErcToken {
