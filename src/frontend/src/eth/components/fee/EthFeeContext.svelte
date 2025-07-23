@@ -192,10 +192,10 @@
 
 	$: obverseFeeData(observe);
 
-	$: $ckEthMinterInfoStore,
+	$: ($ckEthMinterInfoStore,
 		(() => {
 			observe && debounceUpdateFeeData();
-		})();
+		})());
 
 	/**
 	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.

@@ -59,14 +59,14 @@
 		});
 	};
 
-	$: $networkEthereumDisabled,
+	$: ($networkEthereumDisabled,
 		$networkSepoliaDisabled,
 		$ethToCkETHEnabled,
 		$erc20ToCkErc20Enabled,
 		$icrcDefaultTokensStore,
 		nativeTokenId,
 		isSendFlow,
-		(async () => await load())();
+		(async () => await load())());
 </script>
 
 <slot />

@@ -48,14 +48,14 @@
 		]);
 	};
 
-	$: $btcAddressMainnetStore,
+	$: ($btcAddressMainnetStore,
 		$ethAddressStore,
 		$solAddressMainnetStore,
 		$networkBitcoinMainnetEnabled,
 		$networkEthereumEnabled,
 		$networkEvmMainnetEnabled,
 		$networkSolanaMainnetEnabled,
-		(async () => await validateAddresses())();
+		(async () => await validateAddresses())());
 </script>
 
 <svelte:window on:oisyValidateAddresses={loadSignerAllowanceAndValidateAddresses} />

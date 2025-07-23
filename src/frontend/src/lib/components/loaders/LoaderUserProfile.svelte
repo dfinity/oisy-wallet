@@ -13,7 +13,7 @@
 		loadUserProfile({ identity: $authIdentity, reload });
 	};
 
-	$: $authIdentity, load({});
+	$: ($authIdentity, load({}));
 
 	const reload = () => {
 		load({ reload: true });

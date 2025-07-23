@@ -48,7 +48,7 @@
 	setContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY, context);
 
 	// At boot time, if the context is derived globally, the token might be updated a few times. That's why we also update it with an auto-subscriber.
-	$: token, (() => context.token.set(token as IcToken))();
+	$: (token, (() => context.token.set(token as IcToken))());
 </script>
 
 {#if ckEthereum}

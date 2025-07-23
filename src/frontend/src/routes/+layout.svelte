@@ -72,7 +72,7 @@
 
 	onMount(async () => (worker = await initAuthWorker()));
 
-	$: worker, $authStore, (() => worker?.syncAuthIdle($authStore))();
+	$: (worker, $authStore, (() => worker?.syncAuthIdle($authStore))());
 
 	/**
 	 * UI loader

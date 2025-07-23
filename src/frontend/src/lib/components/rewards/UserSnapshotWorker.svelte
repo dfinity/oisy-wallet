@@ -106,7 +106,7 @@
 	// Balances: All balances (since we need to check if the user has any balance).
 	// Exchanges: All exchanges initialized (since we have no disclaimer specific for the tokens we are interested in).
 	// Transactions: all transactions related to each network.
-	$: $authSignedIn,
+	$: ($authSignedIn,
 		$btcAddressMainnet,
 		$btcAddressTestnet,
 		$ethAddress,
@@ -119,7 +119,7 @@
 		$ethTransactionsStore,
 		$icTransactionsStore,
 		$solTransactionsStore,
-		triggerTimer();
+		triggerTimer());
 </script>
 
 <slot />
