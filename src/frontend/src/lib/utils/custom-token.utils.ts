@@ -1,7 +1,7 @@
 import type {
 	CustomToken,
 	Erc20Token,
-	Erc721Token,
+	Erc20Token as Erc721Token,
 	IcrcToken,
 	SplToken,
 	Token
