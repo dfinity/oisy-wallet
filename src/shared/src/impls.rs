@@ -11,7 +11,7 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, Erc20Token, Erc721Token, ErcTokenId, IcrcToken, SplToken,
+            CustomToken, CustomTokenId, ErcTokenId, IcrcToken, SplToken,
             SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
@@ -29,6 +29,7 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
+use crate::types::custom_token::ErcToken;
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -84,12 +85,12 @@ impl From<&Token> for CustomTokenId {
             Token::SplDevnet(SplToken { token_address, .. }) => {
                 CustomTokenId::SolDevnet(token_address.clone())
             }
-            Token::Erc20(Erc20Token {
+            Token::Erc20(ErcToken {
                 token_address,
                 chain_id,
                 ..
             })
-            | Token::Erc721(Erc721Token {
+            | Token::Erc721(ErcToken {
                 token_address,
                 chain_id,
                 ..
@@ -486,23 +487,7 @@ impl Validate for SplToken {
     }
 }
 
-impl Validate for Erc20Token {
-    fn validate(&self) -> Result<(), candid::Error> {
-        use crate::types::MAX_SYMBOL_LENGTH;
-        if let Some(symbol) = &self.symbol {
-            if symbol.chars().count() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg(format!(
-                    "Symbol too long: {} > {}",
-                    symbol.len(),
-                    MAX_SYMBOL_LENGTH
-                )));
-            }
-        }
-        self.token_address.validate()
-    }
-}
-
-impl Validate for Erc721Token {
+impl Validate for ErcToken {
     fn validate(&self) -> Result<(), candid::Error> {
         self.token_address.validate()
     }
@@ -642,7 +627,6 @@ validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
-validate_on_deserialize!(Erc20Token);
+validate_on_deserialize!(ErcToken);
 validate_on_deserialize!(ErcTokenId);
-validate_on_deserialize!(Erc721Token);
 validate_on_deserialize!(UserToken);
