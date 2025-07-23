@@ -92,7 +92,7 @@
 			}
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: $i18n.tokens.error.loading_metadata },
+				msg: { text: $i18n.tokens.import.error.loading_metadata },
 				err
 			});
 
