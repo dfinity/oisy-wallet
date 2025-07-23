@@ -360,7 +360,6 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
-	const ErcToken = IDL.Record({
 		token_address: IDL.Text,
 		chain_id: IDL.Nat64
 	});
@@ -376,7 +375,6 @@ export const idlFactory = ({ IDL }) => {
 	const Token = IDL.Variant({
 		Erc20: ErcToken,
 		Icrc: IcrcToken,
-		Erc721: ErcToken,
 		SplDevnet: SplToken,
 		SplMainnet: SplToken
 	});

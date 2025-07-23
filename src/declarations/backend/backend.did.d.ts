@@ -193,7 +193,6 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
-export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
 }
@@ -332,7 +331,6 @@ export interface TestnetsSettings {
 export type Token =
 	| { Erc20: ErcToken }
 	| { Icrc: IcrcToken }
-	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken };
 export type TokenAccountId =
