@@ -56,6 +56,14 @@ pub struct Erc721Token {
     pub chain_id: ChainId,
 }
 
+/// An ERC1155 compliant token on the Ethereum or EVM-compatible networks.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
+pub struct Erc1155Token {
+    pub token_address: ErcTokenId,
+    pub chain_id: ChainId,
+}
+
 /// A variant describing any token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[repr(u8)]
@@ -65,6 +73,7 @@ pub enum Token {
     SplDevnet(SplToken) = 2,
     Erc20(Erc20Token) = 3,
     Erc721(Erc721Token) = 4,
+    Erc1155(Erc1155Token) = 5,
 }
 
 /// User preferences for any token

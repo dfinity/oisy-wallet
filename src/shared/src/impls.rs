@@ -29,6 +29,7 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
+use crate::types::custom_token::Erc1155Token;
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -93,7 +94,11 @@ impl From<&Token> for CustomTokenId {
                 token_address,
                 chain_id,
                 ..
-            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
+            }) | Token::Erc1155(Erc1155Token {
+                                                               token_address,
+                                                               chain_id,
+                                                               ..
+                                                           }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
         }
     }
 }
@@ -466,6 +471,7 @@ impl Validate for Token {
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
             Token::Erc20(token) => token.validate(),
             Token::Erc721(token) => token.validate(),
+            Token::Erc1155(token) => token.validate(),
         }
     }
 }
@@ -503,6 +509,12 @@ impl Validate for Erc20Token {
 }
 
 impl Validate for Erc721Token {
+    fn validate(&self) -> Result<(), candid::Error> {
+        self.token_address.validate()
+    }
+}
+
+impl Validate for Erc1155Token {
     fn validate(&self) -> Result<(), candid::Error> {
         self.token_address.validate()
     }
@@ -645,4 +657,5 @@ validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(Erc20Token);
 validate_on_deserialize!(ErcTokenId);
 validate_on_deserialize!(Erc721Token);
+validate_on_deserialize!(Erc1155Token);
 validate_on_deserialize!(UserToken);
