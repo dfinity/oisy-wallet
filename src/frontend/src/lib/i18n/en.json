@@ -829,7 +829,10 @@
 			"pool_not_found": "Swap failed. Pool not found.",
 			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
 			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
-			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance."
+			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance.",
+			"swap_failed_withdraw_success_first_part": "The swap failed and the sent tokens could not be automatically withdrawn. Please follow ",
+			"swap_failed_withdraw_success_second_part": "to withdraw them manually on ",
+			"swap_failed_instruction_link": "these instructions "
 		}
 	},
 	"buy": {

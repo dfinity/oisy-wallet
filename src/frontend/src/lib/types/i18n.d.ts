@@ -696,6 +696,9 @@ interface I18nSwap {
 		deposit_error: string;
 		withdraw_failed: string;
 		swap_failed_withdraw_success: string;
+		swap_failed_withdraw_success_first_part: string;
+		swap_failed_withdraw_success_second_part: string;
+		swap_failed_instruction_link: string;
 	};
 }
 

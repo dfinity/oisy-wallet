@@ -829,7 +829,10 @@
 			"pool_not_found": "Hoán đổi thất bại. Không tìm thấy bể thanh khoản.",
 			"deposit_error": "Hoán đổi thất bại. Chúng tôi không thể gửi token của bạn vào bể thanh khoản. Vui lòng thử lại.",
 			"withdraw_failed": "Hoán đổi thất bại và rút tiền cũng thất bại. Vui lòng kiểm tra số dư chưa sử dụng của bạn và thử rút tiền thủ công: ",
-			"swap_failed_withdraw_success": "Hoán đổi thất bại. Token của bạn đã được hoàn lại thành công. Bạn có thể thử lại hoặc tăng giới hạn trượt giá."
+			"swap_failed_withdraw_success": "Hoán đổi thất bại. Token của bạn đã được hoàn lại thành công. Bạn có thể thử lại hoặc tăng giới hạn trượt giá.",
+			"swap_failed_withdraw_success_first_part": "",
+			"swap_failed_withdraw_success_second_part": "",
+			"swap_failed_instruction_link": ""
 		}
 	},
 	"buy": {

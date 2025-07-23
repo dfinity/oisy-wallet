@@ -829,7 +829,10 @@
 			"pool_not_found": "兑换失败，未找到兑换池。",
 			"deposit_error": "兑换失败。无法将你的代币存入兑换池。请重试。",
 			"withdraw_failed": "兑换失败，退款也失败。请检查未使用余额并尝试手动提现：",
-			"swap_failed_withdraw_success": "兑换失败，但代币已成功退款。你可以重试或提高滑点容忍度。"
+			"swap_failed_withdraw_success": "兑换失败，但代币已成功退款。你可以重试或提高滑点容忍度。",
+			"swap_failed_withdraw_success_first_part": "",
+			"swap_failed_withdraw_success_second_part": "",
+			"swap_failed_instruction_link": ""
 		}
 	},
 	"buy": {
