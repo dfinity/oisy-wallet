@@ -11,8 +11,8 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, Erc20Token, Erc721Token, ErcTokenId, IcrcToken, SplToken,
-            SplTokenId, Token,
+            CustomToken, CustomTokenId, Erc1155Token, Erc20Token, Erc721Token, ErcTokenId,
+            IcrcToken, SplToken, SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -29,7 +29,6 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
-use crate::types::custom_token::Erc1155Token;
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -94,11 +93,12 @@ impl From<&Token> for CustomTokenId {
                 token_address,
                 chain_id,
                 ..
-            }) | Token::Erc1155(Erc1155Token {
-                                                               token_address,
-                                                               chain_id,
-                                                               ..
-                                                           }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
+            })
+            | Token::Erc1155(Erc1155Token {
+                token_address,
+                chain_id,
+                ..
+            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
         }
     }
 }
