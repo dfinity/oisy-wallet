@@ -909,7 +909,7 @@
 				"custom_tokens_not_supported": "所选网络不支持自定义代币。"
 			},
 			"error": {
-				"loading_metadata": "加载代币元数据时出错。",
+				"loading_metadata": "",
 				"no_metadata": "未提供代币的元数据。此为异常情况。",
 				"unexpected_ledger": "验证账本 Canister 时发生错误。",
 				"unexpected_index": "验证索引 Canister 时发生错误。",

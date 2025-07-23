@@ -909,7 +909,7 @@
 				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny."
 			},
 			"error": {
-				"loading_metadata": "Chyba při načítání metadat tokenu.",
+				"loading_metadata": "",
 				"no_metadata": "Pro token nejsou k dispozici žádná metadata. To je neočekávané.",
 				"unexpected_ledger": "Při ověřování kanystru účetní knihy se něco pokazilo.",
 				"unexpected_index": "Při ověřování kanystru indexu se něco pokazilo.",
