@@ -4,7 +4,10 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::{
-    contact::{Contact, ContactError, ContactImage, CreateContactRequest, UpdateContactRequest, ImageMimeType},
+    contact::{
+        Contact, ContactError, ContactImage, CreateContactRequest, ImageMimeType,
+        UpdateContactRequest,
+    },
     user_profile::OisyUser,
 };
 
