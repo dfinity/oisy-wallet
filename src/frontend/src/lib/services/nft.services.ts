@@ -65,9 +65,7 @@ const loadNftsOfToken = async ({
 	});
 
 	const loadedTokenIds: NftId[] = loadedNfts.map((nft) => nft.id);
-	const tokenIdsToLoad = holdersTokenIds.filter(
-		(id: number) => !loadedTokenIds.includes(parseNftId(id))
-	);
+	const tokenIdsToLoad = holdersTokenIds.filter((id: NftId) => !loadedTokenIds.includes(id));
 
 	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
 	for (const tokenIds of tokenIdBatches) {
@@ -157,12 +155,11 @@ const createBatches = ({
 	tokenIds,
 	batchSize
 }: {
-	tokenIds: number[];
+	tokenIds: NftId[];
 	batchSize: number;
 }): NftId[][] =>
-	Array.from(
-		{ length: Math.ceil(tokenIds.length / batchSize) },
-		(_, index) => tokenIds.slice(index * batchSize, (index + 1) * batchSize) as NftId[]
+	Array.from({ length: Math.ceil(tokenIds.length / batchSize) }, (_, index) =>
+		tokenIds.slice(index * batchSize, (index + 1) * batchSize)
 	);
 
 const loadHoldersTokenIds = async ({
