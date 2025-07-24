@@ -1,10 +1,12 @@
 import { browser } from '$app/environment';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import { BTC_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { nullishSignOut } from '$lib/services/auth.services';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -68,17 +70,17 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 };
 
 export const setIdbBtcTransactions = (
-	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<BtcTransactionUi>>>
+	params: SetIdbTransactionsParams<BtcCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbBtcTransactionsStore });
 
 export const setIdbEthTransactions = (
-	params: SetIdbTransactionsParams<EthTransactionsData>
+	params: SetIdbTransactionsParams<EthCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbEthTransactionsStore });
 
 export const setIdbIcTransactions = (
-	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<IcTransactionUi>>>
+	params: SetIdbTransactionsParams<IcCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbIcTransactionsStore });
 
@@ -93,7 +95,8 @@ export const getIdbBtcTransactions = (
 
 export const getIdbEthTransactions = (
 	params: GetIdbTransactionsParams
-): Promise<EthTransactionsData[] | undefined> => get(toKey(params), idbEthTransactionsStore);
+): Promise<EthCertifiedTransactionsData[] | undefined> =>
+	get(toKey(params), idbEthTransactionsStore);
 
 export const getIdbIcTransactions = (
 	params: GetIdbTransactionsParams

@@ -22,7 +22,7 @@ interface EthTransactionsStore<T extends TransactionTypes>
 
 export type EthCertifiedTransaction = CertifiedTransaction<Transaction>;
 
-type EthTransactionsData = TransactionsData<Transaction>;
+export type EthTransactionsData = TransactionsData<Transaction>;
 
 export type EthCertifiedTransactionsData = CertifiedStoreData<EthTransactionsData>;
 

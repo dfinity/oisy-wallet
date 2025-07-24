@@ -33,6 +33,7 @@ import type {
 	EthCertifiedTransactionsData
 } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -102,7 +103,7 @@ describe('transactions.utils', () => {
 		};
 
 		const mockIcTransactionsUi: IcTransactionUi[] = createMockIcTransactionsUi(7);
-		const mockIcTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+		const mockIcTransactions: IcCertifiedTransactionsData = {
 			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified }))
 		};
 
@@ -458,7 +459,7 @@ describe('transactions.utils', () => {
 		const tokens = [...btcTokens, ...ethTokens, ...icTokens, ...solTokens];
 
 		const mockBtcMainnetTransactions: BtcTransactionUi[] = createMockBtcTransactionsUi(3);
-		const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+		const mockBtcTransactions: BtcCertifiedTransactionsData = {
 			[BTC_MAINNET_TOKEN_ID]: mockBtcMainnetTransactions.map((data) => ({ data, certified: false }))
 		};
 
@@ -469,7 +470,7 @@ describe('transactions.utils', () => {
 		};
 
 		const mockIcTransactionsUi: IcTransactionUi[] = createMockIcTransactionsUi(7);
-		const mockIcTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+		const mockIcTransactions: IcCertifiedTransactionsData = {
 			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({
 				data: { ...data, type: 'receive' },
 				certified: false
@@ -521,7 +522,7 @@ describe('transactions.utils', () => {
 			});
 
 			it('should filter only received micro transactions', () => {
-				const mockIcSendTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+				const mockIcSendTransactions: IcCertifiedTransactionsData = {
 					[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified: false }))
 				};
 
@@ -760,7 +761,7 @@ describe('transactions.utils', () => {
 		});
 
 		const mockBtcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+			transactionsStoreData: BtcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -787,7 +788,7 @@ describe('transactions.utils', () => {
 			tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 		};
 		const mockIcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+			transactionsStoreData: IcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1098,7 +1099,7 @@ describe('transactions.utils', () => {
 		});
 
 		const mockBtcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+			transactionsStoreData: BtcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1125,7 +1126,7 @@ describe('transactions.utils', () => {
 			tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 		};
 		const mockIcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+			transactionsStoreData: IcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {

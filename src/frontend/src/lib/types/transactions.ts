@@ -1,6 +1,11 @@
 import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { BtcTransactionUi } from '$btc/types/btc';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { Address } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
