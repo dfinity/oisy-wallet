@@ -1,22 +1,24 @@
 import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
+import { TRACK_AVATAR_UPDATE_SUCCESS } from '$lib/constants/analytics.contants';
 import {
 	ADDRESS_BOOK_ADD_CONTACT_BUTTON,
 	ADDRESS_BOOK_CANCEL_BUTTON,
 	ADDRESS_BOOK_CONTACT_NAME_INPUT,
 	ADDRESS_BOOK_MODAL,
 	ADDRESS_BOOK_SAVE_BUTTON,
+	AVATAR_UPLOAD_IMAGE,
 	BUTTON_MODAL_CLOSE,
 	CONTACT_CARD,
 	CONTACT_CARD_BUTTON,
 	CONTACT_HEADER_EDIT_BUTTON,
+	CONTACT_POPOVER_TRIGGER,
+	CONTACT_REPLACE_MENU_ITEM,
 	CONTACT_SHOW_ADD_ADDRESS_BUTTON,
 	CONTACT_SHOW_CLOSE_BUTTON,
-	MODAL_TITLE,
-	AVATAR_UPLOAD_IMAGE,
-	CONTACT_POPOVER_TRIGGER,
-	CONTACT_REPLACE_MENU_ITEM
+	MODAL_TITLE
 } from '$lib/constants/test-ids.constants';
 import { AddressBookSteps } from '$lib/enums/progress-steps';
+import * as analytics from '$lib/services/analytics.services';
 import { loadContacts } from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -25,10 +27,6 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockManageContactsService } from '$tests/mocks/manage-contacts.service.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import {
-	TRACK_AVATAR_UPDATE_SUCCESS
-} from '$lib/constants/analytics.contants';
-import * as analytics from '$lib/services/analytics.services';
 
 vi.mock('browser-image-compression', () => {
 	const mockCompression = vi
@@ -45,11 +43,9 @@ vi.mock('browser-image-compression', () => {
 	};
 });
 
-
 vi.mock('$env/avatar.env', () => ({
 	AVATAR_ENABLED: true
 }));
-
 
 describe('AddressBookModal', () => {
 	let cleanup: { restore: () => void };
@@ -111,32 +107,34 @@ describe('AddressBookModal', () => {
 
 		// Step 2: Go to "edit contact" view
 		await fireEvent.click(getByTestId(CONTACT_HEADER_EDIT_BUTTON));
-	
+
 		// Step 3: Click avatar pencil icon to open popover
 		await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
-	
+
 		// Step 4: Click "Replace Image" in the popover
 		await fireEvent.click(getByTestId(CONTACT_REPLACE_MENU_ITEM));
-	
+
 		// Create mock file
 		const file = new File(['test'], 'avatar.png', { type: 'image/png' });
-		
+
 		const fileInput = getByTestId(AVATAR_UPLOAD_IMAGE) as HTMLInputElement;
-		
+
 		// 6. Trigger file change
 		await fireEvent.change(fileInput, { target: { files: [file] } });
-	  
+
 		// Wait for all async operations
-		await waitFor(() => {
-		  // Verify analytics was called
-		  expect(spyTrackEvent).toHaveBeenCalledWith(
-			expect.objectContaining({
-			  name: TRACK_AVATAR_UPDATE_SUCCESS
-			})
-		  );
-		}, { timeout: 2000 }); // Increased timeout for async operations
-	  });
-	  
+		await waitFor(
+			() => {
+				// Verify analytics was called
+				expect(spyTrackEvent).toHaveBeenCalledWith(
+					expect.objectContaining({
+						name: TRACK_AVATAR_UPDATE_SUCCESS
+					})
+				);
+			},
+			{ timeout: 2000 }
+		); // Increased timeout for async operations
+	});
 
 	it('should navigate to add contact step when add contact button is clicked', async () => {
 		const { getByTestId } = render(AddressBookModal);
