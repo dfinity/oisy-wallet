@@ -1,4 +1,5 @@
 import type { ContactImage } from '$declarations/backend/backend.did';
+import { nonNullish } from '@dfinity/utils';
 import {
 	createContact as createContactApi,
 	deleteContact as deleteContactApi,
@@ -46,15 +47,18 @@ export const updateContact = async ({
 	identity: Identity;
 	image?: ContactImage | null;
 }): Promise<ContactUi> => {
+	
 	const contactWithSortedAddresses = {
 		...contact,
-		image,
+		image: nonNullish(image) ? image : contact.image,
 		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
 	};
+
 	const result = await updateContactApi({
 		contact: mapToBackendContact(contactWithSortedAddresses),
 		identity
 	});
+
 	const contactUi = mapToFrontendContact(result);
 	contactsStore.updateContact(contactUi);
 	return contactUi;
