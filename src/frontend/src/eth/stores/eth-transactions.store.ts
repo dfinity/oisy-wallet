@@ -1,3 +1,4 @@
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import {
 	initTransactionsStore,
 	type CertifiedTransaction,
