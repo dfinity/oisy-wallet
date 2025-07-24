@@ -48,13 +48,15 @@ export const updateContact = async ({
 }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
 		...contact,
-		image,
+		image: image !== undefined ? image : contact.image,
 		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
 	};
+
 	const result = await updateContactApi({
 		contact: mapToBackendContact(contactWithSortedAddresses),
 		identity
 	});
+
 	const contactUi = mapToFrontendContact(result);
 	contactsStore.updateContact(contactUi);
 	return contactUi;

@@ -195,7 +195,8 @@ describe('manage-contacts.service', () => {
 
 			const result = await updateContact({
 				contact,
-				identity: mockIdentity
+				identity: mockIdentity,
+				image: null
 			});
 
 			expect(mockUpdateContact).toHaveBeenCalledWith(
