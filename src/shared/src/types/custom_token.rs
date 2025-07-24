@@ -56,6 +56,7 @@ pub enum Token {
     SplDevnet(SplToken) = 2,
     Erc20(ErcToken) = 3,
     Erc721(ErcToken) = 4,
+    Erc1155(ErcToken) = 5,
 }
 
 /// User preferences for any token
