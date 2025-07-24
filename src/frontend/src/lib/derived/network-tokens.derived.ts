@@ -1,4 +1,3 @@
-import type { Erc721Token } from '$eth/types/erc721';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 import {
@@ -7,6 +6,7 @@ import {
 	tokensToPin
 } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
@@ -23,7 +23,7 @@ export const enabledFungibleNetworkTokens: Readable<Token[]> = derived(
 /**
  * All user-enabled non-fungible tokens matching the selected network or chain fusion.
  */
-export const enabledNonFungibleNetworkTokens: Readable<Erc721Token[]> = derived(
+export const enabledNonFungibleNetworkTokens: Readable<NonFungibleToken[]> = derived(
 	[enabledNonFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );
