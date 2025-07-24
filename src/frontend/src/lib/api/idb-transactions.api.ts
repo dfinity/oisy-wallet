@@ -6,7 +6,6 @@ import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { nullishSignOut } from '$lib/services/auth.services';

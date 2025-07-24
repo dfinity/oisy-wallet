@@ -1,7 +1,5 @@
 import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
