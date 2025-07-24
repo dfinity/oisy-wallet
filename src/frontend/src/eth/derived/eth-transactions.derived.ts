@@ -1,11 +1,12 @@
 import { ethereumTokenId } from '$eth/derived/token.derived';
-import { ethTransactionsStore, type TransactionsData } from '$eth/stores/eth-transactions.store';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { ethAddress } from '$lib/derived/address.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
+import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransactionUiWithToken, Transaction } from '$lib/types/transaction';
 import type { KnownDestinations } from '$lib/types/transactions';

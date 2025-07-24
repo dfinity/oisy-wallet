@@ -14,6 +14,7 @@ import type {
 	IdbTransactionsStoreData,
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
+import type { Transaction } from '$lib/types/transaction';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
@@ -73,7 +74,7 @@ export const setIdbBtcTransactions = (
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbBtcTransactionsStore });
 
 export const setIdbEthTransactions = (
-	params: SetIdbTransactionsParams<EthTransactionsData>
+	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<Transaction>>>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbEthTransactionsStore });
 
