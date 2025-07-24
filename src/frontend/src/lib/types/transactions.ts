@@ -1,4 +1,5 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
@@ -8,9 +9,9 @@ import type { Transaction } from '$lib/types/transaction';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 export interface TransactionsStoreCheckParams {
-	transactionsStoreData: CertifiedStoreData<
-		TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi | Transaction>
-	>;
+	transactionsStoreData:
+		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
+		| EthCertifiedTransactionsData;
 	tokens: Token[];
 }
 

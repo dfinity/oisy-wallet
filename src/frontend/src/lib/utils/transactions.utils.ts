@@ -1,5 +1,6 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
@@ -7,7 +8,7 @@ import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
-import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
@@ -69,14 +70,14 @@ export const mapAllTransactionsUi = ({
 	$icPendingTransactionsStore
 }: {
 	tokens: Token[];
-	$btcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
-	$ethTransactions: CertifiedStoreData<TransactionsData<Transaction>>;
+	$btcTransactions: BtcCertifiedTransactionsData;
+	$ethTransactions: EthCertifiedTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
 	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
-	$icTransactionsStore: CertifiedStoreData<IcTransactionsData>;
+	$icTransactionsStore: IcCertifiedTransactionsData;
 	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
 	$icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
 }): AllTransactionUiWithCmp[] => {

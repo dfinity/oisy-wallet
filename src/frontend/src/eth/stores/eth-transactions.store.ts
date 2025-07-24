@@ -9,4 +9,6 @@ export type EthCertifiedTransaction = CertifiedTransaction<Transaction>;
 
 export type EthTransactionsData = TransactionsData<Transaction>;
 
+export type EthCertifiedTransactionsData = CertifiedStoreData<EthTransactionsData>;
+
 export const ethTransactionsStore = initTransactionsStore<Transaction>();

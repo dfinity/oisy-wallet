@@ -1,3 +1,4 @@
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcTransactionType } from '$btc/types/btc-transaction';
 import * as ethEnv from '$env/networks/networks.eth.env';
@@ -29,9 +30,10 @@ import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import type {
 	EthCertifiedTransaction,
-	EthTransactionsData
+	EthCertifiedTransactionsData
 } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -73,7 +75,7 @@ describe('transactions.utils', () => {
 
 		const mockBtcTestnetTransactions: BtcTransactionUi[] = createMockBtcTransactionsUi(3);
 
-		const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+		const mockBtcTransactions: BtcCertifiedTransactionsData = {
 			[BTC_MAINNET_TOKEN_ID]: mockBtcMainnetTransactions.map((data) => ({ data, certified })),
 			[BTC_TESTNET_TOKEN_ID]: mockBtcTestnetTransactions.map((data) => ({ data, certified }))
 		};
@@ -92,7 +94,7 @@ describe('transactions.utils', () => {
 		const mockBnbMainnetTransactions: EthCertifiedTransaction[] =
 			createMockEthCertifiedTransactions(2);
 
-		const mockEthTransactions: EthTransactionsData = {
+		const mockEthTransactions: EthCertifiedTransactionsData = {
 			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions,
 			[SEPOLIA_TOKEN_ID]: mockSepoliaTransactions,
 			[PEPE_TOKEN_ID]: mockErc20Transactions,
@@ -101,7 +103,7 @@ describe('transactions.utils', () => {
 		};
 
 		const mockIcTransactionsUi: IcTransactionUi[] = createMockIcTransactionsUi(7);
-		const mockIcTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+		const mockIcTransactions: IcCertifiedTransactionsData = {
 			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified }))
 		};
 
@@ -254,7 +256,7 @@ describe('transactions.utils', () => {
 			});
 
 			it('should return an empty array if there are no transactions for BTC mainnet', () => {
-				const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+				const mockBtcTransactions: BtcCertifiedTransactionsData = {
 					[BTC_TESTNET_TOKEN_ID]: mockBtcTestnetTransactions.map((data) => ({ data, certified }))
 				};
 
@@ -314,7 +316,7 @@ describe('transactions.utils', () => {
 			it('should return an empty array if there are no transactions any of the tokens', () => {
 				const tokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN];
 
-				const mockEthTransactions: EthTransactionsData = {
+				const mockEthTransactions: EthCertifiedTransactionsData = {
 					[PEPE_TOKEN_ID]: mockErc20Transactions
 				};
 
@@ -328,7 +330,7 @@ describe('transactions.utils', () => {
 			});
 
 			it('should map correctly if there are no transactions for some of the tokens', () => {
-				const mockEthTransactions: EthTransactionsData = {
+				const mockEthTransactions: EthCertifiedTransactionsData = {
 					[PEPE_TOKEN_ID]: mockErc20Transactions
 				};
 
@@ -457,18 +459,18 @@ describe('transactions.utils', () => {
 		const tokens = [...btcTokens, ...ethTokens, ...icTokens, ...solTokens];
 
 		const mockBtcMainnetTransactions: BtcTransactionUi[] = createMockBtcTransactionsUi(3);
-		const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+		const mockBtcTransactions: BtcCertifiedTransactionsData = {
 			[BTC_MAINNET_TOKEN_ID]: mockBtcMainnetTransactions.map((data) => ({ data, certified: false }))
 		};
 
 		const mockEthMainnetTransactions: EthCertifiedTransaction[] =
 			createMockEthCertifiedTransactions(5);
-		const mockEthTransactions: EthTransactionsData = {
+		const mockEthTransactions: EthCertifiedTransactionsData = {
 			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions
 		};
 
 		const mockIcTransactionsUi: IcTransactionUi[] = createMockIcTransactionsUi(7);
-		const mockIcTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+		const mockIcTransactions: IcCertifiedTransactionsData = {
 			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({
 				data: { ...data, type: 'receive' },
 				certified: false
@@ -520,7 +522,7 @@ describe('transactions.utils', () => {
 			});
 
 			it('should filter only received micro transactions', () => {
-				const mockIcSendTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>> = {
+				const mockIcSendTransactions: IcCertifiedTransactionsData = {
 					[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified: false }))
 				};
 
@@ -759,7 +761,7 @@ describe('transactions.utils', () => {
 		});
 
 		const mockBtcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+			transactionsStoreData: BtcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -775,7 +777,7 @@ describe('transactions.utils', () => {
 			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
 		};
 		const mockEthTransactionStoreData: {
-			transactionsStoreData: EthTransactionsData;
+			transactionsStoreData: EthCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -786,7 +788,7 @@ describe('transactions.utils', () => {
 			tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 		};
 		const mockIcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+			transactionsStoreData: IcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1097,7 +1099,7 @@ describe('transactions.utils', () => {
 		});
 
 		const mockBtcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+			transactionsStoreData: BtcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1113,7 +1115,7 @@ describe('transactions.utils', () => {
 			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
 		};
 		const mockEthTransactionStoreData: {
-			transactionsStoreData: EthTransactionsData;
+			transactionsStoreData: EthCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1124,7 +1126,7 @@ describe('transactions.utils', () => {
 			tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 		};
 		const mockIcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+			transactionsStoreData: IcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
