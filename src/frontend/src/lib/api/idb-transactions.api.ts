@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import { BTC_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
@@ -69,7 +70,7 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 };
 
 export const setIdbBtcTransactions = (
-	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<BtcTransactionUi>>>
+	params: SetIdbTransactionsParams<BtcCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbBtcTransactionsStore });
 
