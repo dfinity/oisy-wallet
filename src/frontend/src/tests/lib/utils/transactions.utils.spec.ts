@@ -30,7 +30,7 @@ import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import type {
 	EthCertifiedTransaction,
-	EthTransactionsData
+	EthCertifiedTransactionsData
 } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
@@ -94,7 +94,7 @@ describe('transactions.utils', () => {
 		const mockBnbMainnetTransactions: EthCertifiedTransaction[] =
 			createMockEthCertifiedTransactions(2);
 
-		const mockEthTransactions: EthTransactionsData = {
+		const mockEthTransactions: EthCertifiedTransactionsData = {
 			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions,
 			[SEPOLIA_TOKEN_ID]: mockSepoliaTransactions,
 			[PEPE_TOKEN_ID]: mockErc20Transactions,
@@ -316,7 +316,7 @@ describe('transactions.utils', () => {
 			it('should return an empty array if there are no transactions any of the tokens', () => {
 				const tokens = [ETHEREUM_TOKEN, SEPOLIA_TOKEN];
 
-				const mockEthTransactions: EthTransactionsData = {
+				const mockEthTransactions: EthCertifiedTransactionsData = {
 					[PEPE_TOKEN_ID]: mockErc20Transactions
 				};
 
@@ -330,7 +330,7 @@ describe('transactions.utils', () => {
 			});
 
 			it('should map correctly if there are no transactions for some of the tokens', () => {
-				const mockEthTransactions: EthTransactionsData = {
+				const mockEthTransactions: EthCertifiedTransactionsData = {
 					[PEPE_TOKEN_ID]: mockErc20Transactions
 				};
 
@@ -465,7 +465,7 @@ describe('transactions.utils', () => {
 
 		const mockEthMainnetTransactions: EthCertifiedTransaction[] =
 			createMockEthCertifiedTransactions(5);
-		const mockEthTransactions: EthTransactionsData = {
+		const mockEthTransactions: EthCertifiedTransactionsData = {
 			[ETHEREUM_TOKEN_ID]: mockEthMainnetTransactions
 		};
 
@@ -777,7 +777,7 @@ describe('transactions.utils', () => {
 			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
 		};
 		const mockEthTransactionStoreData: {
-			transactionsStoreData: EthTransactionsData;
+			transactionsStoreData: EthCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1115,7 +1115,7 @@ describe('transactions.utils', () => {
 			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
 		};
 		const mockEthTransactionStoreData: {
-			transactionsStoreData: EthTransactionsData;
+			transactionsStoreData: EthCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
