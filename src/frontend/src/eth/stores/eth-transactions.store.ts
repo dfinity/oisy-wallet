@@ -1,8 +1,5 @@
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type {
-	NullableCertifiedTransactions,
-	TransactionsStore
-} from '$lib/stores/transactions.store';
+import type { TransactionsData, TransactionsStore } from '$lib/stores/transactions.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
@@ -18,10 +15,6 @@ interface TransactionsStoreParams<T extends TransactionTypes> {
 	transactions: CertifiedTransaction<T>[];
 }
 
-export type TransactionsData<T extends TransactionTypes> =
-	| CertifiedTransaction<T>[]
-	| NullableCertifiedTransactions;
-
 interface EthTransactionsStore<T extends TransactionTypes>
 	extends Omit<TransactionsStore<T>, 'prepend' | 'append' | 'cleanUp'> {
 	resetAll: () => void;
@@ -29,12 +22,14 @@ interface EthTransactionsStore<T extends TransactionTypes>
 
 export type EthCertifiedTransaction = CertifiedTransaction<Transaction>;
 
-export type EthTransactionsData = CertifiedStoreData<TransactionsData<Transaction>>;
+type EthTransactionsData = TransactionsData<Transaction>;
+
+export type EthCertifiedTransactionsData = CertifiedStoreData<EthTransactionsData>;
 
 const initEthTransactionsStore = (): EthTransactionsStore<Transaction> => {
-	const INITIAL: EthTransactionsData = {} as EthTransactionsData;
+	const INITIAL: EthCertifiedTransactionsData = {} as EthCertifiedTransactionsData;
 
-	const { subscribe, update, set } = writable<EthTransactionsData>(INITIAL);
+	const { subscribe, update, set } = writable<EthCertifiedTransactionsData>(INITIAL);
 
 	return {
 		set: ({ tokenId, transactions }: TransactionsStoreParams<Transaction>) =>
