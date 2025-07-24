@@ -34,13 +34,6 @@ describe('nft.utils', () => {
 	});
 
 	describe('isTokenFungible', () => {
-		it.each([...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS])(
-			'should return true for token $name',
-			(token) => {
-				expect(isTokenFungible(token)).toBeTruthy();
-			}
-		);
-
 		it.each([
 			ICP_TOKEN,
 			...SUPPORTED_BITCOIN_TOKENS,
@@ -48,10 +41,17 @@ describe('nft.utils', () => {
 			...SUPPORTED_EVM_TOKENS,
 			...SUPPORTED_SOLANA_TOKENS,
 			...SPL_TOKENS,
-			...MOCK_ERC721_TOKENS,
-			...MOCK_ERC1155_TOKENS
-		])('should return false for token $name', (token) => {
-			expect(isTokenFungible(token)).toBeFalsy();
+			...ERC20_TWIN_TOKENS,
+			...EVM_ERC20_TOKENS
+		])('should return true for token $name', (token) => {
+			expect(isTokenFungible(token)).toBeTruthy();
 		});
+
+		it.each([...MOCK_ERC721_TOKENS, ...MOCK_ERC1155_TOKENS])(
+			'should return false for token $name',
+			(token) => {
+				expect(isTokenFungible(token)).toBeFalsy();
+			}
+		);
 	});
 });
