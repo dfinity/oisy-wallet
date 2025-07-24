@@ -1,3 +1,4 @@
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcTransactionType } from '$btc/types/btc-transaction';
 import * as ethEnv from '$env/networks/networks.eth.env';
@@ -73,7 +74,7 @@ describe('transactions.utils', () => {
 
 		const mockBtcTestnetTransactions: BtcTransactionUi[] = createMockBtcTransactionsUi(3);
 
-		const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+		const mockBtcTransactions: BtcCertifiedTransactionsData = {
 			[BTC_MAINNET_TOKEN_ID]: mockBtcMainnetTransactions.map((data) => ({ data, certified })),
 			[BTC_TESTNET_TOKEN_ID]: mockBtcTestnetTransactions.map((data) => ({ data, certified }))
 		};
@@ -254,7 +255,7 @@ describe('transactions.utils', () => {
 			});
 
 			it('should return an empty array if there are no transactions for BTC mainnet', () => {
-				const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+				const mockBtcTransactions: BtcCertifiedTransactionsData = {
 					[BTC_TESTNET_TOKEN_ID]: mockBtcTestnetTransactions.map((data) => ({ data, certified }))
 				};
 
@@ -457,7 +458,7 @@ describe('transactions.utils', () => {
 		const tokens = [...btcTokens, ...ethTokens, ...icTokens, ...solTokens];
 
 		const mockBtcMainnetTransactions: BtcTransactionUi[] = createMockBtcTransactionsUi(3);
-		const mockBtcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>> = {
+		const mockBtcTransactions: BtcCertifiedTransactionsData = {
 			[BTC_MAINNET_TOKEN_ID]: mockBtcMainnetTransactions.map((data) => ({ data, certified: false }))
 		};
 
@@ -759,7 +760,7 @@ describe('transactions.utils', () => {
 		});
 
 		const mockBtcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+			transactionsStoreData: BtcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1097,7 +1098,7 @@ describe('transactions.utils', () => {
 		});
 
 		const mockBtcTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+			transactionsStoreData: BtcCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {

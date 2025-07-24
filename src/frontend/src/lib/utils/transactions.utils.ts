@@ -1,4 +1,4 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
@@ -69,7 +69,7 @@ export const mapAllTransactionsUi = ({
 	$icPendingTransactionsStore
 }: {
 	tokens: Token[];
-	$btcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
+	$btcTransactions: BtcCertifiedTransactionsData;
 	$ethTransactions: EthCertifiedTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
