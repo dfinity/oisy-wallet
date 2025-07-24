@@ -251,7 +251,6 @@
 	};
 
 	const handleAddAvatar = async (image: ContactImage | null) => {
-		
 		if (isNullish(currentContact)) {
 			return;
 		}
