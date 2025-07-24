@@ -9,6 +9,7 @@ import {
 } from '$eth/providers/infura-erc721.providers';
 import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import en from '$tests/mocks/i18n.mock';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
@@ -113,7 +114,7 @@ describe('infura-erc721.providers', () => {
 
 			const mockParams = {
 				contractAddress,
-				tokenId: 123456
+				tokenId: parseNftId(123456)
 			};
 
 			const mockMetadata = {

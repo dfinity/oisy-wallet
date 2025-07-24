@@ -12,8 +12,10 @@ import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Address, EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
+import type { NftId } from '$lib/types/nft';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish } from '@dfinity/utils';
 import {
 	EtherscanProvider as EtherscanProviderLib,
@@ -189,7 +191,7 @@ export class EtherscanProvider {
 	}: {
 		address: EthAddress;
 		contractAddress: Address;
-	}): Promise<number[]> => {
+	}): Promise<NftId[]> => {
 		const params = {
 			action: 'addresstokennftinventory',
 			address,
@@ -208,7 +210,7 @@ export class EtherscanProvider {
 			throw new Error(result);
 		}
 
-		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseInt(TokenId));
+		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(parseInt(TokenId)));
 	};
 }
 
