@@ -36,8 +36,6 @@ import type { EthTransactionType } from '$eth/types/eth-transaction';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
 import {
