@@ -36,8 +36,6 @@ import type { EthTransactionType } from '$eth/types/eth-transaction';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
 import {
@@ -53,6 +51,7 @@ import {
 	mapAllTransactionsUi,
 	sortTransactions
 } from '$lib/utils/transactions.utils';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthCertifiedTransactions } from '$tests/mocks/eth-transactions.mock';
@@ -108,7 +107,7 @@ describe('transactions.utils', () => {
 		};
 
 		const mockSolTransactionsUi: SolTransactionUi[] = createMockSolTransactionsUi(4);
-		const mockSolTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>> = {
+		const mockSolTransactions: SolCertifiedTransactionsData = {
 			[SOLANA_TOKEN_ID]: mockSolTransactionsUi.map((data) => ({ data, certified }))
 		};
 
@@ -800,7 +799,7 @@ describe('transactions.utils', () => {
 			tokens: [ICP_TOKEN]
 		};
 		const mockSolTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+			transactionsStoreData: SolCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
@@ -1138,7 +1137,7 @@ describe('transactions.utils', () => {
 			tokens: [ICP_TOKEN]
 		};
 		const mockSolTransactionStoreData: {
-			transactionsStoreData: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+			transactionsStoreData: SolCertifiedTransactionsData;
 			tokens: Token[];
 		} = {
 			transactionsStoreData: {
