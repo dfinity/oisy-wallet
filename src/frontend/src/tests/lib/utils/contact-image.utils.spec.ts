@@ -27,7 +27,7 @@ describe('contact-image.utils', () => {
 		it('should correctly parse valid data URL', () => {
 			const result = dataUrlToImage(sampleDataUrl);
 
-			expect(isNullish(result)).toBeFalsy();
+			expect(result).toBeDefined();
 
 			if (!isNullish(result)) {
 				expect(result.mime_type).toEqual({ 'image/png': null });
