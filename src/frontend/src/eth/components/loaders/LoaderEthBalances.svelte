@@ -49,22 +49,22 @@
 		debounceLoad();
 	});
 
-	onMount(() => {
+	onMount(async () => {
 		const principal = $authIdentity?.getPrincipal();
 
 		if (isNullish(principal)) {
 			return;
 		}
 
-		[...$enabledEthereumTokens, ...$enabledEvmTokens, ...$enabledErc20Tokens].map(
-			({ id: tokenId, network: { id: networkId } }) => {
-				syncBalancesFromCache({
+		await Promise.allSettled([...$enabledEthereumTokens, ...$enabledEvmTokens, ...$enabledErc20Tokens].map(
+			async ({ id: tokenId, network: { id: networkId } }) => {
+				await syncBalancesFromCache({
 					principal,
 					tokenId,
 					networkId
 				});
 			}
-		);
+		));
 	});
 </script>
 
