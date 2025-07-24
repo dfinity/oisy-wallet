@@ -1,10 +1,9 @@
 import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
 import {
 	CONTACT_POPOVER_MENU,
-	CONTACT_POPOVER_MENU_ITEM,
 	CONTACT_POPOVER_TRIGGER,
-	CONTACT_REPLACE_MENU_ITEM,
-	CONTACT_REMOVE_MENU_ITEM
+	CONTACT_REMOVE_MENU_ITEM,
+	CONTACT_REPLACE_MENU_ITEM
 } from '$lib/constants/test-ids.constants';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -26,6 +25,7 @@ describe('EditAvatar', () => {
 		});
 
 		const button = getByTestId(CONTACT_POPOVER_TRIGGER);
+
 		expect(button).toBeInTheDocument();
 		expect(button).toHaveAttribute('aria-label', en.address_book.edit_avatar.replace_image);
 	});
@@ -133,6 +133,7 @@ describe('EditAvatar', () => {
 		});
 
 		await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
+
 		expect(getByText(en.address_book.edit_avatar.menu_title)).toBeInTheDocument();
 	});
 
@@ -145,10 +146,12 @@ describe('EditAvatar', () => {
 		});
 
 		const button = getByTestId(CONTACT_POPOVER_TRIGGER);
+
 		expect(button).toHaveAttribute('aria-label', en.address_book.edit_avatar.replace_image);
 
 		await fireEvent.click(button);
 		const menu = getByTestId(CONTACT_POPOVER_MENU);
+
 		expect(menu).toHaveAttribute('role', 'menu');
 	});
 
