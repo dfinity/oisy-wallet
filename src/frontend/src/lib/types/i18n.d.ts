@@ -350,6 +350,7 @@ interface I18nInit {
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc721_provider: string;
+		no_infura_erc1155_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_network: string;
 		eth_address_unknown: string;
