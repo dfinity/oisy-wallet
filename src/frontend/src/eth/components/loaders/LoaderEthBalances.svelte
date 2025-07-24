@@ -56,15 +56,17 @@
 			return;
 		}
 
-		await Promise.allSettled([...$enabledEthereumTokens, ...$enabledEvmTokens, ...$enabledErc20Tokens].map(
-			async ({ id: tokenId, network: { id: networkId } }) => {
-				await syncBalancesFromCache({
-					principal,
-					tokenId,
-					networkId
-				});
-			}
-		));
+		await Promise.allSettled(
+			[...$enabledEthereumTokens, ...$enabledEvmTokens, ...$enabledErc20Tokens].map(
+				async ({ id: tokenId, network: { id: networkId } }) => {
+					await syncBalancesFromCache({
+						principal,
+						tokenId,
+						networkId
+					});
+				}
+			)
+		);
 	});
 </script>
 
