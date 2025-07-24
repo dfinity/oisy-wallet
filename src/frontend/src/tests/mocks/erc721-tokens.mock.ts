@@ -11,9 +11,9 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
-export const AZUKI_ELEMENTAL_BEANS_SYMBOL = 'MBeans';
+const AZUKI_ELEMENTAL_BEANS_SYMBOL = 'MBeans';
 
-export const AZUKI_ELEMENTAL_BEANS_TOKEN_ID: TokenId = parseTokenId(AZUKI_ELEMENTAL_BEANS_SYMBOL);
+const AZUKI_ELEMENTAL_BEANS_TOKEN_ID: TokenId = parseTokenId(AZUKI_ELEMENTAL_BEANS_SYMBOL);
 
 export const AZUKI_ELEMENTAL_BEANS_TOKEN: RequiredEvmErc721Token = {
 	id: AZUKI_ELEMENTAL_BEANS_TOKEN_ID,
@@ -27,9 +27,9 @@ export const AZUKI_ELEMENTAL_BEANS_TOKEN: RequiredEvmErc721Token = {
 	address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582'
 };
 
-export const DE_GODS_SYMBOL = 'DGods';
+const DE_GODS_SYMBOL = 'DGods';
 
-export const DE_GODS_TOKEN_ID: TokenId = parseTokenId(DE_GODS_SYMBOL);
+const DE_GODS_TOKEN_ID: TokenId = parseTokenId(DE_GODS_SYMBOL);
 
 export const DE_GODS_TOKEN: RequiredEvmErc721Token = {
 	id: DE_GODS_TOKEN_ID,
@@ -43,9 +43,9 @@ export const DE_GODS_TOKEN: RequiredEvmErc721Token = {
 	address: '0x41E54Eb019C0762f9Bfcf9Fb1E58925BfB0e7582'
 };
 
-export const PUDGY_PENGUINS_SYMBOL = 'Ppenguins';
+const PUDGY_PENGUINS_SYMBOL = 'Ppenguins';
 
-export const PUDGY_PENGUINS_TOKEN_ID: TokenId = parseTokenId(PUDGY_PENGUINS_SYMBOL);
+const PUDGY_PENGUINS_TOKEN_ID: TokenId = parseTokenId(PUDGY_PENGUINS_SYMBOL);
 
 export const PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	id: PUDGY_PENGUINS_TOKEN_ID,
@@ -59,9 +59,9 @@ export const PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	address: '0xbd3531da5cf5857e7cfaa92426877b022e612cf8'
 };
 
-export const SEPOLIA_PUDGY_PENGUINS_SYMBOL = 'Ppenguins';
+const SEPOLIA_PUDGY_PENGUINS_SYMBOL = 'Ppenguins';
 
-export const SEPOLIA_PUDGY_PENGUINS_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_PUDGY_PENGUINS_SYMBOL);
+const SEPOLIA_PUDGY_PENGUINS_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_PUDGY_PENGUINS_SYMBOL);
 
 export const SEPOLIA_PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	id: SEPOLIA_PUDGY_PENGUINS_TOKEN_ID,
@@ -74,6 +74,12 @@ export const SEPOLIA_PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	icon: usdc,
 	address: '0xbd3531da5cf5857e7cfaa92426877b022e612cf8'
 };
+
+export const MOCK_ERC721_TOKENS = [
+	AZUKI_ELEMENTAL_BEANS_TOKEN,
+	DE_GODS_TOKEN,
+	PUDGY_PENGUINS_TOKEN
+];
 
 export const mockValidErc721Token: Erc721Token = {
 	...mockValidToken,
