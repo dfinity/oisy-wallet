@@ -78,9 +78,7 @@ describe('custom-token.utils', () => {
 					...mockParams,
 					networkKey: 'Erc20',
 					address: 'mock-token-address',
-					chainId: 123n,
-					decimals: 8,
-					symbol: 'mock-symbol'
+					chainId: 123n
 				})
 			).toEqual({
 				...partialExpected,

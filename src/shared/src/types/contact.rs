@@ -114,6 +114,13 @@ pub struct ContactImageTemp<'a> {
     pub data: &'a serde_bytes::ByteBuf,
 }
 
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, serde::Serialize)]
+pub struct ImageStatistics {
+    pub total_contacts: usize,
+    pub contacts_with_images: usize,
+    pub total_image_size: usize,
+}
+
 /// Counts the number of contacts with images for a specific principal
 #[must_use]
 pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
