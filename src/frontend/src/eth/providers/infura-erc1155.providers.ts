@@ -1,90 +1,46 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
+import { Erc165Identifier } from '$eth/constants/erc.constants';
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
-import type { Erc1155ContractAddress, Erc1155Metadata } from '$eth/types/erc1155';
+import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import { i18n } from '$lib/stores/i18n.store';
-import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
+import { InvalidTokenUri } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
-import type { NftMetadata } from '$lib/types/nft';
+import type { NftId } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { parseNftId } from '$lib/validation/nft.validation';
-import { UrlSchema } from '$lib/validation/url.validation';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
+import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
 
 export class InfuraErc1155Provider extends InfuraErc165Provider {
-	metadata = async ({
-		address
-	}: Pick<Erc1155ContractAddress, 'address'>): Promise<Erc1155Metadata> => {
-		const erc1155Contract = new Contract(address, ERC1155_ABI, this.provider);
+	private supportsMetadataExtension = (contract: Erc1155ContractAddress): Promise<boolean> =>
+		this.isSupportedInterface({ contract, interfaceId: Erc165Identifier.ERC1155_METADATA_URI });
 
-		const [name, symbol] = await Promise.all([erc1155Contract.name(), erc1155Contract.symbol()]);
-
-		return {
-			name,
-			symbol,
-			decimals: 0 // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-		};
-	};
-
-	getNftMetadata = async ({
-		contractAddress,
+	uri = async ({
+		contract,
 		tokenId
 	}: {
-		contractAddress: string;
-		tokenId: number;
-	}): Promise<NftMetadata> => {
-		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);
+		contract: Erc1155ContractAddress;
+		tokenId: NftId;
+	}): Promise<URL | undefined> => {
+		const supportsMetadata = await this.supportsMetadataExtension(contract);
 
-		const resolveResourceUrl = (url: URL): URL => {
-			const IPFS_PREFIX = 'ipfs://';
-			if (url.href.startsWith(IPFS_PREFIX)) {
-				return new URL(url.href.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/'));
-			}
-
-			return url;
-		};
-
-		const extractImageUrl = (imageUrl: string | undefined): URL | undefined => {
-			if (isNullish(imageUrl)) {
-				return undefined;
-			}
-
-			const parsedMetadataUrl = UrlSchema.safeParse(imageUrl);
-			if (!parsedMetadataUrl.success) {
-				throw new InvalidMetadataImageUrl(tokenId, contractAddress);
-			}
-
-			return resolveResourceUrl(new URL(parsedMetadataUrl.data));
-		};
-
-		const parsedTokenUri = UrlSchema.safeParse(await erc1155Contract.tokenURI(tokenId));
-		if (!parsedTokenUri.success) {
-			throw new InvalidTokenUri(tokenId, contractAddress);
+		if (!supportsMetadata) {
+			return;
 		}
 
-		const metadataUrl = resolveResourceUrl(new URL(parsedTokenUri.data));
+		const { address: contractAddress } = contract;
 
-		const response = await fetch(metadataUrl);
-		const metadata = await response.json();
+		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);
 
-		const imageUrl = extractImageUrl(metadata.image ?? metadata.image_url);
+		const rawUri = await erc1155Contract.uri(tokenId);
 
-		const mappedAttributes = (metadata?.attributes ?? []).map(
-			(attr: { trait_type: string; value: string | number }) => ({
-				traitType: attr.trait_type,
-				value: attr.value.toString()
-			})
-		);
-
-		return {
-			id: parseNftId(tokenId),
-			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
-			...(nonNullish(metadata.name) && { name: metadata.name }),
-			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
-		};
+		return parseMetadataResourceUrl({
+			url: rawUri,
+			error: new InvalidTokenUri(tokenId, contractAddress)
+		});
 	};
 }
 
