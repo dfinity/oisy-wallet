@@ -337,7 +337,7 @@ export type Token =
 	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken }
-	| { Erc1155: Erc20Token };
+	| { Erc1155: ErcToken };
 export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }

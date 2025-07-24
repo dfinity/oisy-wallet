@@ -381,7 +381,7 @@ export const idlFactory = ({ IDL }) => {
 		Erc721: ErcToken,
 		SplDevnet: SplToken,
 		SplMainnet: SplToken,
-		Erc1155: Erc20Token
+		Erc1155: ErcToken
 	});
 	const CustomToken = IDL.Record({
 		token: Token,
