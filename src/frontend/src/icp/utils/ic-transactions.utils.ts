@@ -3,7 +3,10 @@ import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
-import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
+import type {
+	IcCertifiedTransaction,
+	IcCertifiedTransactionsData
+} from '$icp/stores/ic-transactions.store';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import type {
 	IcTransaction,
@@ -28,7 +31,7 @@ import {
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { CertifiedTransaction, TransactionsData } from '$lib/stores/transactions.store';
+import type { CertifiedTransaction } from '$lib/stores/transactions.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 
@@ -96,7 +99,7 @@ export const getIcExtendedTransactions = ({
 	btcStatusesStore
 }: {
 	token: Token;
-	icTransactionsStore: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	icTransactionsStore: IcCertifiedTransactionsData;
 	btcStatusesStore: CertifiedStoreData<BtcStatusesData>;
 }) =>
 	(icTransactionsStore?.[token.id] ?? []).map((transaction) =>
@@ -119,7 +122,7 @@ export const getAllIcTransactions = ({
 	ckBtcPendingUtxoTransactions: CertifiedTransaction<IcTransactionUi>[];
 	ckEthPendingTransactions: CertifiedTransaction<IcTransactionUi>[];
 	icExtendedTransactions: CertifiedTransaction<IcTransactionUi>[];
-	icTransactionsStore: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	icTransactionsStore: IcCertifiedTransactionsData;
 	btcStatusesStore: CertifiedStoreData<BtcStatusesData>;
 	ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
