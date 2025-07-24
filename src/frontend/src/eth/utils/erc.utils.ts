@@ -12,4 +12,4 @@ export const isTokenErc = (token: Token): token is Erc20Token | Erc721Token | Er
 export const isNftErc = (token: Token): token is Erc721Token | Erc1155Token =>
 	isTokenErc721(token) || isTokenErc1155(token);
 
-export const isFungibleTokenErc = (token: Token): token is Erc20Token => !isNftErc(token);
+export const isFungibleTokenErc = (token: Token): token is Erc20Token => isTokenErc20(token);
