@@ -1,4 +1,4 @@
-import type { CustomToken, Erc20Token as Erc721Token } from '$declarations/backend/backend.did';
+import type { CustomToken, ErcToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
@@ -56,7 +56,7 @@ const loadCustomTokensWithMetadata = async (
 
 		const customTokenPromises = erc721CustomTokens
 			.filter(
-				(customToken): customToken is CustomToken & { token: { Erc721: Erc721Token } } =>
+				(customToken): customToken is CustomToken & { token: { Erc721: ErcToken } } =>
 					'Erc721' in customToken.token
 			)
 			.map(async ({ token, enabled, version: versionNullable }) => {
