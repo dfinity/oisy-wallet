@@ -39,7 +39,7 @@ const BUILD_AN_APE_TOKEN: RequiredErc1155Token = {
 	address: '0x26Dea1f35a2f240968F42330aD9528f416C80A17'
 };
 
-export const ERC1155_TOKENS = [NYAN_CAT_TOKEN, BUILD_AN_APE_TOKEN];
+export const MOCK_ERC1155_TOKENS = [NYAN_CAT_TOKEN, BUILD_AN_APE_TOKEN];
 
 export const mockValidErc1155Token: Erc1155Token = {
 	...mockValidToken,

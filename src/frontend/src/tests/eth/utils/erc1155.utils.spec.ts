@@ -7,12 +7,12 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
-import { ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
+import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 
 describe('erc1155.utils', () => {
 	describe('isTokenErc1155', () => {
-		it.each(ERC1155_TOKENS)('should return true for token $name', (token) => {
+		it.each(MOCK_ERC1155_TOKENS)('should return true for token $name', (token) => {
 			expect(isTokenErc1155(token)).toBeTruthy();
 		});
 
@@ -25,7 +25,7 @@ describe('erc1155.utils', () => {
 			...SPL_TOKENS,
 			...ERC20_TWIN_TOKENS,
 			...EVM_ERC20_TOKENS,
-			...[AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN]
+			...MOCK_ERC721_TOKENS
 		])('should return false for token $name', (token) => {
 			expect(isTokenErc1155(token)).toBeFalsy();
 		});

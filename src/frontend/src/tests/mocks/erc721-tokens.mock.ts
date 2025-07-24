@@ -75,7 +75,11 @@ export const SEPOLIA_PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	address: '0xbd3531da5cf5857e7cfaa92426877b022e612cf8'
 };
 
-export const ERC721_TOKENS = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN, PUDGY_PENGUINS_TOKEN];
+export const MOCK_ERC721_TOKENS = [
+	AZUKI_ELEMENTAL_BEANS_TOKEN,
+	DE_GODS_TOKEN,
+	PUDGY_PENGUINS_TOKEN
+];
 
 export const mockValidErc721Token: Erc721Token = {
 	...mockValidToken,
