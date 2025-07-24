@@ -245,7 +245,7 @@
 		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
-	const handleAddAvatar = async (image: ContactImage) => {
+	const handleAddAvatar = async (image: ContactImage | null) => {
 		if (isNullish(currentContact)) {
 			return;
 		}

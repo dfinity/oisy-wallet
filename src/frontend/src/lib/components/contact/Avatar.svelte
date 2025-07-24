@@ -13,7 +13,7 @@
 	interface AvatarProps {
 		name?: string;
 		variant?: AvatarVariants;
-		image?: ContactImage;
+		image?: ContactImage | null;
 		styleClass?: string;
 	}
 

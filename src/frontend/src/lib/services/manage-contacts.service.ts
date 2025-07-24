@@ -44,7 +44,7 @@ export const updateContact = async ({
 }: {
 	contact: ContactUi;
 	identity: Identity;
-	image?: ContactImage;
+	image?: ContactImage | null;
 }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
 		...contact,

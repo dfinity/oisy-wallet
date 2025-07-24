@@ -11,7 +11,7 @@
 
 	interface Props {
 		name: string;
-		image?: ContactImage;
+		image?: ContactImage | null;
 		onEdit: () => void;
 		styleClass?: string;
 	}
