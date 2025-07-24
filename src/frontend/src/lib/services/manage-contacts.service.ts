@@ -49,7 +49,7 @@ export const updateContact = async ({
 }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
 		...contact,
-		image: nonNullish(image) ? image : contact.image,
+		image: image !== undefined ? image : contact.image,
 		addresses: contact.addresses.sort((a, b) => compareContactAddresses({ a, b }))
 	};
 
