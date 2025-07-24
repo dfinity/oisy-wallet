@@ -1,4 +1,4 @@
-import type { ContactImage, ImageMimeType } from '$declarations/backend/backend.did';
+import type { ImageMimeType } from '$declarations/backend/backend.did';
 import type { ContactUi } from '$lib/types/contact';
 import { isNullish } from '@dfinity/utils';
 
@@ -25,7 +25,7 @@ export const dataUrlToImage = (dataUrl: string | null): ContactUi => {
 	return { mime_type: mimeType, data };
 };
 
-export const imageToDataUrl = (img:	ContactUi): string | null => {
+export const imageToDataUrl = (img: ContactUi): string | null => {
 	if (isNullish(img)) return null;
 
 	const [mime] = Object.keys(img.mime_type);

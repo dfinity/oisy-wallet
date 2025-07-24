@@ -43,7 +43,7 @@ export const updateContact = async ({
 }: {
 	contact: ContactUi;
 	identity: Identity;
-	image?:  ContactUi;
+	image?: ContactUi;
 }): Promise<ContactUi> => {
 	const contactWithSortedAddresses = {
 		...contact,
