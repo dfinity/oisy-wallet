@@ -6,6 +6,7 @@ import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { nullishSignOut } from '$lib/services/auth.services';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -79,7 +80,7 @@ export const setIdbEthTransactions = (
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbEthTransactionsStore });
 
 export const setIdbIcTransactions = (
-	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<IcTransactionUi>>>
+	params: SetIdbTransactionsParams<IcCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbIcTransactionsStore });
 
