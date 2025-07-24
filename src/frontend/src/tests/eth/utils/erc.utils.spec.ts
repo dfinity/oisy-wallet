@@ -6,7 +6,7 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isTokenErc } from '$eth/utils/erc.utils';
+import { isFungibleTokenErc, isNftErc, isTokenErc } from '$eth/utils/erc.utils';
 import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
 import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 
@@ -30,6 +30,50 @@ describe('erc.utils', () => {
 			...SPL_TOKENS
 		])('should return false for token $name', (token) => {
 			expect(isTokenErc(token)).toBeFalsy();
+		});
+	});
+
+	describe('isNftErc', () => {
+		it.each([...MOCK_ERC721_TOKENS, ...MOCK_ERC1155_TOKENS])(
+			'should return true for token $name',
+			(token) => {
+				expect(isNftErc(token)).toBeTruthy();
+			}
+		);
+
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...SPL_TOKENS,
+			...ERC20_TWIN_TOKENS,
+			...EVM_ERC20_TOKENS
+		])('should return false for token $name', (token) => {
+			expect(isNftErc(token)).toBeFalsy();
+		});
+	});
+
+	describe('isFungibleTokenErc', () => {
+		it.each([...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS])(
+			'should return true for token $name',
+			(token) => {
+				expect(isFungibleTokenErc(token)).toBeTruthy();
+			}
+		);
+
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...SPL_TOKENS,
+			...MOCK_ERC721_TOKENS,
+			...MOCK_ERC1155_TOKENS
+		])('should return false for token $name', (token) => {
+			expect(isFungibleTokenErc(token)).toBeFalsy();
 		});
 	});
 });

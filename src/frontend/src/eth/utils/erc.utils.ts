@@ -8,3 +8,8 @@ import type { Token } from '$lib/types/token';
 
 export const isTokenErc = (token: Token): token is Erc20Token | Erc721Token | Erc1155Token =>
 	isTokenErc20(token) || isTokenErc721(token) || isTokenErc1155(token);
+
+export const isNftErc = (token: Token): token is Erc721Token | Erc1155Token =>
+	isTokenErc721(token) || isTokenErc1155(token);
+
+export const isFungibleTokenErc = (token: Token): token is Erc20Token => !isNftErc(token);
