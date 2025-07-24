@@ -27,6 +27,13 @@ pub enum TokenStandard {
     ///
     /// - [ERC721 Spec](https://eips.ethereum.org/EIPS/eip-721)
     ERC721,
+    /// Standard for the Ethereum blockchain
+    ///
+    /// # Used for:
+    /// - Both fungible tokens and NFTs on ETH and other EVM networks.
+    ///
+    /// - [ERC1155 Spec](https://eips.ethereum.org/EIPS/eip-1155)
+    ERC1155,
     /// Standard for the Bitcoin blockchain
     ///
     /// # Used for:
