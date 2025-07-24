@@ -16,6 +16,10 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
+
 describe('AllTransactions', () => {
 	const customIcrcToken: IcrcCustomToken = {
 		...mockValidIcToken,

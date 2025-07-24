@@ -1,6 +1,6 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -10,9 +10,9 @@ import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Principal } from '@dfinity/principal';
 
 export type IdbTransactionsStoreData =
-	| CertifiedStoreData<TransactionsData<BtcTransactionUi>>
+	| BtcCertifiedTransactionsData
 	| EthTransactionsData
-	| CertifiedStoreData<TransactionsData<IcTransactionUi>>
+	| IcCertifiedTransactionsData
 	| CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 
 export interface SetIdbTransactionsParams<T extends IdbTransactionsStoreData> {

@@ -9,7 +9,6 @@ import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
@@ -20,6 +19,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import { isTokenFungible } from '$lib/utils/nft.utils';
 import {
 	filterEnabledTokens,
 	sumMainnetTokensUsdBalancesPerNetwork
@@ -64,7 +64,7 @@ export const tokens: Readable<Token[]> = derived(
 );
 
 export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
-	$tokens.filter((token) => !isTokenErc721(token))
+	$tokens.filter(isTokenFungible)
 );
 
 const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
