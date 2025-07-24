@@ -818,7 +818,7 @@
 			"select": "Selecionar >",
 			"select_swap_provider": "Selecionar provedor de troca",
 			"open_icp_swap": "Abrir site do ICP Swap",
-			"open_instructions_link": "",
+			"open_instructions_link": "Abrir o link com as instruções",
 			"select_token": "Selecionar token",
 			"select_network_filter": "Selecionar rede"
 		},
@@ -828,12 +828,12 @@
 			"unexpected_missing_data": "Algo deu errado ao iniciar uma transação de troca.",
 			"slippage_exceeded": "$oisy_short protege você: A negociação está fora da sua tolerância de deslizamento de $maxSlippage%. Por favor, ajuste o deslizamento máximo e tente novamente.",
 			"pool_not_found": "Troca falhou. Pool não encontrada.",
-			"deposit_error": "",
+			"deposit_error": "O depósito dos fundos para a troca falhou. Tente novamente ou altere o provedor da troca.",
 			"withdraw_failed": "A troca falhou e a retirada também falhou. Por favor, verifique seu saldo não utilizado e tente a retirada manual: ",
-			"swap_failed_withdraw_success": "",
-			"withdraw_failed_first_part": "",
-			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": ""
+			"swap_failed_withdraw_success": "A troca falhou e seus tokens foram reembolsados com sucesso. Tente novamente ou altere o provedor da troca.",
+			"withdraw_failed_first_part": "A troca falhou e os tokens enviados não puderam ser retirados automaticamente. Siga ",
+			"withdraw_failed_second_part": "para retirá-los manualmente em ",
+			"swap_failed_instruction_link": "estas instruções "
 		}
 	},
 	"buy": {
@@ -912,7 +912,7 @@
 				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados."
 			},
 			"error": {
-				"loading_metadata": "Erro ao carregar os metadados do token.",
+				"loading_metadata": "O endereço fornecido não corresponde a um token válido na rede selecionada.",
 				"no_metadata": "Nenhum metadado para o token é fornecido. Isso é inesperado.",
 				"unexpected_ledger": "Algo deu errado ao validar o canister Ledger.",
 				"unexpected_index": "Algo deu errado ao validar o canister Index.",
@@ -981,7 +981,6 @@
 			"unexpected": "Algo deu errado ao salvar o token.",
 			"unexpected_hiding": "Algo deu errado ao ocultar o token.",
 			"already_available": "Token já disponível.",
-			"loading_metadata": "Erro ao carregar os metadados do token.",
 			"not_toggleable": "O token não é alternável, não pode ser ocultado.",
 			"incomplete_metadata": "Nenhum nome ou símbolo é fornecido nos metadados.",
 			"duplicate_metadata": "Um token com nome ou símbolo semelhante já existe.",

@@ -1,11 +1,11 @@
 import type { Contact, ContactAddressData } from '$declarations/backend/backend.did';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import { mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { nonNullish } from '@dfinity/utils';
 import { mockBtcAddress } from './btc.mock';
-import { mockEthAddress } from './eth.mocks';
+import { mockEthAddress } from './eth.mock';
 import { mockAccountIdentifierText } from './identity.mock';
 
 export const mockBackendContactAddressSol: ContactAddressData = {

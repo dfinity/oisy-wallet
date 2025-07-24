@@ -818,7 +818,7 @@
 			"select": "Seleziona >",
 			"select_swap_provider": "Seleziona fornitore di scambio",
 			"open_icp_swap": "Apri il sito web ICP Swap",
-			"open_instructions_link": "",
+			"open_instructions_link": "Apri il link con le istruzioni",
 			"select_token": "Seleziona il token",
 			"select_network_filter": "Seleziona la rete"
 		},
@@ -828,12 +828,12 @@
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di scambio.",
 			"slippage_exceeded": "$oisy_short ti protegge: la transazione è al di fuori della tua tolleranza di slippage del $maxSlippage%. Per favore, regola lo slippage massimo e riprova.",
 			"pool_not_found": "Scambio fallito. Pool non trovata.",
-			"deposit_error": "",
+			"deposit_error": "Il deposito dei fondi per lo swap non è riuscito. Riprova oppure cambia il provider dello swap.",
 			"withdraw_failed": "Lo scambio è fallito e anche il prelievo è fallito. Controlla il tuo saldo inutilizzato e prova il prelievo manuale: ",
-			"swap_failed_withdraw_success": "",
-			"withdraw_failed_first_part": "",
-			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": ""
+			"swap_failed_withdraw_success": "Lo swap non è andato a buon fine e i tuoi token sono stati rimborsati con successo. Riprova oppure cambia il provider dello swap.",
+			"withdraw_failed_first_part": "Lo swap non è andato a buon fine e i token inviati non possono essere ritirati automaticamente. Segui ",
+			"withdraw_failed_second_part": "per ritirarli manualmente su ",
+			"swap_failed_instruction_link": "queste istruzioni "
 		}
 	},
 	"buy": {
@@ -912,7 +912,7 @@
 				"custom_tokens_not_supported": "La rete selezionata non supporta i token personalizzati."
 			},
 			"error": {
-				"loading_metadata": "Errore durante il caricamento dei metadati del token.",
+				"loading_metadata": "L'indirizzo inserito non corrisponde ad un token valido nella rete scelta.",
 				"no_metadata": "Nessun metadato per il token è fornito. Questo è inaspettato.",
 				"unexpected_ledger": "Qualcosa è andato storto durante la convalida del canister Ledger.",
 				"unexpected_index": "Qualcosa è andato storto durante la convalida del canister Index.",
@@ -981,7 +981,6 @@
 			"unexpected": "Qualcosa è andato storto durante il salvataggio del token.",
 			"unexpected_hiding": "Qualcosa è andato storto nel nascondere il token.",
 			"already_available": "Token già disponibile.",
-			"loading_metadata": "Errore durante il caricamento dei metadati del token.",
 			"not_toggleable": "Il token non è attivabile/disattivabile, non può essere nascosto.",
 			"incomplete_metadata": "Nessun nome o simbolo è fornito nei metadati.",
 			"duplicate_metadata": "Un token con un nome o simbolo simile esiste già.",

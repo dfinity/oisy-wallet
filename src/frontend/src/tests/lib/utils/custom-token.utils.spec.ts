@@ -78,18 +78,14 @@ describe('custom-token.utils', () => {
 					...mockParams,
 					networkKey: 'Erc20',
 					address: 'mock-token-address',
-					chainId: 123n,
-					decimals: 8,
-					symbol: 'mock-symbol'
+					chainId: 123n
 				})
 			).toEqual({
 				...partialExpected,
 				token: {
 					Erc20: {
 						token_address: 'mock-token-address',
-						chain_id: 123n,
-						decimals: [8],
-						symbol: ['mock-symbol']
+						chain_id: 123n
 					}
 				}
 			});

@@ -912,7 +912,7 @@
 				"custom_tokens_not_supported": "所选网络不支持自定义代币。"
 			},
 			"error": {
-				"loading_metadata": "加载代币元数据时出错。",
+				"loading_metadata": "",
 				"no_metadata": "未提供代币的元数据。此为异常情况。",
 				"unexpected_ledger": "验证账本 Canister 时发生错误。",
 				"unexpected_index": "验证索引 Canister 时发生错误。",
@@ -981,7 +981,6 @@
 			"unexpected": "保存代币时发生错误。",
 			"unexpected_hiding": "隐藏代币时发生错误。",
 			"already_available": "代币已存在。",
-			"loading_metadata": "加载代币元数据时出错。",
 			"not_toggleable": "代币不可切换，无法隐藏。",
 			"incomplete_metadata": "元数据中未提供名称或符号。",
 			"duplicate_metadata": "已存在名称或符号相似的代币。",

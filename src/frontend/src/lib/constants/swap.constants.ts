@@ -16,5 +16,5 @@ export const ICP_SWAP_POOL_FEE = 3000n;
 
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
-export const OISY_DOCS_SWAP_LINK =
-	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens';
+export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
+	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
