@@ -1288,7 +1288,8 @@
 		},
 		"avatar": {
 			"default": "Default avatar",
-			"avatar_for": "Avatar for"
+			"avatar_for": "Avatar for",
+			"avatar_loading": "Avatar is loading..."
 		},
 		"edit_avatar": {
 			"menu_title": "Contact Image",
