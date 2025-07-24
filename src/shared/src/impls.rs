@@ -11,9 +11,8 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, ErcTokenId,
-            IcrcToken, SplToken, SplTokenId, Token,
-            ErcToken,
+            CustomToken, CustomTokenId, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId,
+            Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -496,7 +495,6 @@ impl Validate for ErcToken {
         self.token_address.validate()
     }
 }
-
 
 impl Validate for IcrcToken {
     /// Verifies that an ICRC token is valid.
