@@ -7,9 +7,9 @@
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import { syncBalancesFromCache } from '$lib/services/listener.services';
-	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		children?: Snippet;
