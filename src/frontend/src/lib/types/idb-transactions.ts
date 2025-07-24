@@ -6,14 +6,14 @@ import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { Principal } from '@dfinity/principal';
 
 export type IdbTransactionsStoreData =
 	| CertifiedStoreData<TransactionsData<BtcTransactionUi>>
 	| EthTransactionsData
 	| CertifiedStoreData<TransactionsData<IcTransactionUi>>
-	| CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+	| SolCertifiedTransactionsData;
 
 export interface SetIdbTransactionsParams<T extends IdbTransactionsStoreData> {
 	identity: OptionIdentity;

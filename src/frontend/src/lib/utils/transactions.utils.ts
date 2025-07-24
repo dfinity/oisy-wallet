@@ -39,6 +39,7 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -74,7 +75,7 @@ export const mapAllTransactionsUi = ({
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
-	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+	$solTransactions: SolCertifiedTransactionsData;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 	$icTransactionsStore: CertifiedStoreData<IcTransactionsData>;
 	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
