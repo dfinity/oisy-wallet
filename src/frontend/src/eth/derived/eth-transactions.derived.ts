@@ -6,7 +6,6 @@ import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { ethAddress } from '$lib/derived/address.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
-import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransactionUiWithToken } from '$lib/types/transaction';
 import type { KnownDestinations } from '$lib/types/transactions';
