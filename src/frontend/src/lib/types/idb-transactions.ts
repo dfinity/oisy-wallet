@@ -1,5 +1,5 @@
 import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
@@ -9,7 +9,7 @@ import type { Principal } from '@dfinity/principal';
 
 export type IdbTransactionsStoreData =
 	| BtcCertifiedTransactionsData
-	| EthTransactionsData
+	| EthCertifiedTransactionsData
 	| IcCertifiedTransactionsData
 	| SolCertifiedTransactionsData;
 
