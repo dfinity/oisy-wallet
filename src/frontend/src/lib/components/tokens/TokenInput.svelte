@@ -63,7 +63,7 @@
 	};
 
 	const debounceValidate = debounce(validate, 300);
-	$: (amount, token, debounceValidate());
+	$: amount, token, debounceValidate();
 </script>
 
 <div

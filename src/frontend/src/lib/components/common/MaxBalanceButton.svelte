@@ -45,7 +45,7 @@
 		debounce(() => setMax(), 500)();
 	};
 
-	$: (fee, debounceSetMax());
+	$: fee, debounceSetMax();
 </script>
 
 <button

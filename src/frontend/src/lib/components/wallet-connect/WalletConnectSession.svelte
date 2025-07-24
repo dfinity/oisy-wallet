@@ -174,11 +174,11 @@
 		await connect($walletConnectUri);
 	};
 
-	$: ($ethAddress,
+	$: $ethAddress,
 		$solAddressMainnet,
 		$walletConnectUri,
 		$loading,
-		(async () => await uriConnect())());
+		(async () => await uriConnect())();
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);

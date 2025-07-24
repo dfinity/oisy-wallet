@@ -45,7 +45,7 @@
 
 	const debounceLoad = debounce(onLoad, 1000);
 
-	$: ($enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad());
+	$: $enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad();
 </script>
 
 <IntervalLoader {onLoad} interval={WALLET_TIMER_INTERVAL_MILLIS}>

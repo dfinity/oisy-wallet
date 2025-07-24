@@ -249,6 +249,7 @@
 		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
+
 	const handleAddAvatar = async (image: ContactImage) => {
 		if (isNullish(currentContact)) {
 			return;
