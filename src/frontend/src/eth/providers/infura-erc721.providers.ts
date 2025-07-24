@@ -9,6 +9,8 @@ import type { NetworkId } from '$lib/types/network';
 import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
+import { parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
@@ -44,34 +46,25 @@ export class InfuraErc721Provider {
 	}): Promise<NftMetadata> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
-		const resolveResourceUrl = (url: URL): URL => {
-			const IPFS_PREFIX = 'ipfs://';
-			if (url.href.startsWith(IPFS_PREFIX)) {
-				return new URL(url.href.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/'));
-			}
-
-			return url;
-		};
-
 		const extractImageUrl = (imageUrl: string | undefined): URL | undefined => {
 			if (isNullish(imageUrl)) {
 				return undefined;
 			}
 
-			const parsedMetadataUrl = UrlSchema.safeParse(imageUrl);
-			if (!parsedMetadataUrl.success) {
-				throw new InvalidMetadataImageUrl(tokenId, contractAddress);
-			}
-
-			return resolveResourceUrl(new URL(parsedMetadataUrl.data));
+			return parseMetadataResourceUrl({
+				url: imageUrl,
+				error: new InvalidMetadataImageUrl(tokenId, contractAddress)
+			});
 		};
 
-		const parsedTokenUri = UrlSchema.safeParse(await erc721Contract.tokenURI(tokenId));
-		if (!parsedTokenUri.success) {
-			throw new InvalidTokenUri(tokenId, contractAddress);
-		}
+		const tokenUri = await erc721Contract.tokenURI(tokenId);
+		const errorTokenUri = new InvalidTokenUri(tokenId, contractAddress);
 
-		const metadataUrl = resolveResourceUrl(new URL(parsedTokenUri.data));
+		const metadataUrl = parseMetadataResourceUrl({ url: tokenUri, error: errorTokenUri });
+
+		if (isNullish(metadataUrl)) {
+			throw errorTokenUri;
+		}
 
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
