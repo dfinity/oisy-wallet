@@ -47,14 +47,6 @@ pub struct ErcToken {
     pub chain_id: ChainId,
 }
 
-/// An ERC1155 compliant token on the Ethereum or EVM-compatible networks.
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-#[serde(remote = "Self")]
-pub struct Erc1155Token {
-    pub token_address: ErcTokenId,
-    pub chain_id: ChainId,
-}
-
 /// A variant describing any token
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[repr(u8)]

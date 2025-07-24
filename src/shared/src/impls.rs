@@ -11,10 +11,9 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, Erc1155Token, Erc20Token, Erc721Token, ErcTokenId,
+            CustomToken, CustomTokenId, ErcTokenId,
             IcrcToken, SplToken, SplTokenId, Token,
-            CustomToken, CustomTokenId, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId,
-            Token,
+            ErcToken,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
@@ -96,7 +95,7 @@ impl From<&Token> for CustomTokenId {
                 chain_id,
                 ..
             })
-            | Token::Erc1155(Erc1155Token {
+            | Token::Erc1155(ErcToken {
                 token_address,
                 chain_id,
                 ..
@@ -498,11 +497,6 @@ impl Validate for ErcToken {
     }
 }
 
-impl Validate for Erc1155Token {
-    fn validate(&self) -> Result<(), candid::Error> {
-        self.token_address.validate()
-    }
-}
 
 impl Validate for IcrcToken {
     /// Verifies that an ICRC token is valid.
