@@ -819,6 +819,7 @@
 			"select": "Vybrat >",
 			"select_swap_provider": "Vybrat poskytovatele výměny",
 			"open_icp_swap": "Otevřít webové stránky ICP Swap",
+			"open_instructions_link": "",
 			"select_token": "",
 			"select_network_filter": ""
 		},
@@ -828,9 +829,12 @@
 			"unexpected_missing_data": "Při zahájení transakce výměny se něco pokazilo.",
 			"slippage_exceeded": "$oisy_short vás chrání: Obchod je mimo vaši toleranci skluzu $maxSlippage%. Upravte prosím maximální skluz a zkuste to znovu.",
 			"pool_not_found": "Výměna se nezdařila. Pool nebyl nalezen.",
-			"deposit_error": "Výměna se nezdařila. Nemohli jsme vložit vaše tokeny do poolu. Zkuste to prosím znovu.",
+			"deposit_error": "",
 			"withdraw_failed": "Výměna se nezdařila a výběr také selhal. Zkontrolujte prosím svůj nevyužitý zůstatek a zkuste ruční výběr: ",
-			"swap_failed_withdraw_success": "Výměna se nezdařila. Vaše tokeny byly úspěšně vráceny. Můžete to zkusit znovu nebo zvýšit toleranci skluzu."
+			"swap_failed_withdraw_success": "",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
+			"swap_failed_instruction_link": ""
 		}
 	},
 	"buy": {

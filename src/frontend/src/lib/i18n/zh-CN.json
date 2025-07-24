@@ -819,6 +819,7 @@
 			"select": "选择 >",
 			"select_swap_provider": "选择兑换服务商",
 			"open_icp_swap": "打开 ICP Swap 网站",
+			"open_instructions_link": "",
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络"
 		},
@@ -828,9 +829,12 @@
 			"unexpected_missing_data": "初始化兑换交易时发生错误。",
 			"slippage_exceeded": "$oisy_short 已保护你：本次交易超过了你设置的 $maxSlippage% 滑点容忍度。请调整最大滑点后再试。",
 			"pool_not_found": "兑换失败，未找到兑换池。",
-			"deposit_error": "兑换失败。无法将你的代币存入兑换池。请重试。",
+			"deposit_error": "",
 			"withdraw_failed": "兑换失败，退款也失败。请检查未使用余额并尝试手动提现：",
-			"swap_failed_withdraw_success": "兑换失败，但代币已成功退款。你可以重试或提高滑点容忍度。"
+			"swap_failed_withdraw_success": "",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
+			"swap_failed_instruction_link": ""
 		}
 	},
 	"buy": {
