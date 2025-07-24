@@ -70,8 +70,10 @@
 		});
 
 		const dataUrl = await imageCompression.getDataUrlFromFile(compressedFile);
-		const img: ContactImage = dataUrlToImage(dataUrl);
-
+		const img = dataUrlToImage(dataUrl);
+		if (isNullish(img)) {
+			return;
+		}
 		await onAvatarEdit(img);
 	};
 
