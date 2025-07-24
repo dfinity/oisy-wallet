@@ -39,7 +39,7 @@ describe('contact-image.utils', () => {
 		it('should convert ContactImage to data URL', () => {
 			const result = imageToDataUrl(MOCK_IMAGE);
 
-			expect(result).not.toBeNull();
+			expect(result).toBeDefined();
 			expect(result).toMatch(/^data:image\/png;base64,/);
 		});
 	});
