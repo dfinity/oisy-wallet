@@ -45,9 +45,9 @@ export const DE_GODS_TOKEN: RequiredEvmErc721Token = {
 
 const PUDGY_PENGUINS_SYMBOL = 'Ppenguins';
 
-export const PUDGY_PENGUINS_TOKEN_ID: TokenId = parseTokenId(PUDGY_PENGUINS_SYMBOL);
+const PUDGY_PENGUINS_TOKEN_ID: TokenId = parseTokenId(PUDGY_PENGUINS_SYMBOL);
 
-const PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
+export const PUDGY_PENGUINS_TOKEN: RequiredEvmErc721Token = {
 	id: PUDGY_PENGUINS_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: 'erc721',
