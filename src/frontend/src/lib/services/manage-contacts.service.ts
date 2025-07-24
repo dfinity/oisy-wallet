@@ -10,7 +10,6 @@ import type { ContactUi } from '$lib/types/contact';
 import { compareContactAddresses } from '$lib/utils/contact-address.utils';
 import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
 import type { Identity } from '@dfinity/agent';
-import { nonNullish } from '@dfinity/utils';
 
 export const loadContacts = async (identity: Identity): Promise<void> => {
 	contactsStore.reset();
