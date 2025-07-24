@@ -9,13 +9,12 @@ import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.
 import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { nullishSignOut } from '$lib/services/auth.services';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
 import type {
 	GetIdbTransactionsParams,
 	IdbTransactionsStoreData,
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
@@ -85,7 +84,7 @@ export const setIdbIcTransactions = (
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbIcTransactionsStore });
 
 export const setIdbSolTransactions = (
-	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<SolTransactionUi>>>
+	params: SetIdbTransactionsParams<SolCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbSolTransactionsStore });
 
