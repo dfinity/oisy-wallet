@@ -72,6 +72,17 @@ static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     enabled: true,
     version: None,
 });
+static ERC1155_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x6a00bfd7f89204721aaf9aec39592cf444bff845".to_string()));
+static ERC1155_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 42161);
+static ERC1155_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc1155(ErcToken {
+        token_address: ERC1155_TOKEN_ID.clone(),
+        chain_id: ERC1155_CHAIN_ID.clone(),
+    }),
+    enabled: true,
+    version: None,
+});
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
         USER_TOKEN.clone(),
@@ -79,6 +90,7 @@ static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
         SPL_TOKEN.clone(),
         ERC20_TOKEN.clone(),
         ERC721_TOKEN.clone(),
+        ERC1155_TOKEN.clone(),
     ]
 });
 
@@ -121,6 +133,11 @@ fn test_remove_custom_erc20_token() {
 #[test]
 fn test_remove_custom_erc721_token() {
     test_remove_custom_token(&ERC721_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_erc1155_token() {
+    test_remove_custom_token(&ERC1155_TOKEN)
 }
 
 #[test]

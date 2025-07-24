@@ -33,7 +33,7 @@
 		contact: ContactUi;
 		onClose: () => void;
 		onEdit: (contact: ContactUi) => void;
-		onAvatarEdit: (image: ContactImage) => void;
+		onAvatarEdit: (image: ContactImage | null) => void;
 		onEditAddress: (index: number) => void;
 		onAddAddress: () => void;
 		onDeleteContact: (id: bigint) => void;
@@ -70,13 +70,19 @@
 		});
 
 		const dataUrl = await imageCompression.getDataUrlFromFile(compressedFile);
-		const img: ContactImage = dataUrlToImage(dataUrl);
-
+		const img = dataUrlToImage(dataUrl);
+		if (isNullish(img)) {
+			return;
+		}
 		await onAvatarEdit(img);
 	};
 
 	const replaceImage = (): void => {
 		fileInput?.triggerClick();
+	};
+	const removeImage = (): void => {
+		imageUrl = undefined;
+		onAvatarEdit(null);
 	};
 </script>
 
@@ -95,7 +101,7 @@
 						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 						data-tid={`${AVATAR_BADGE}-${contact.name}`}
 					>
-						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={() => {}} />
+						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={removeImage} />
 					</span>
 				{/if}
 			</div>
