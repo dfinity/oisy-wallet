@@ -6,10 +6,9 @@ import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
-import type { NftMetadata } from '$lib/types/nft';
+import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
-import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
@@ -41,7 +40,7 @@ export class InfuraErc721Provider {
 		tokenId
 	}: {
 		contractAddress: string;
-		tokenId: number;
+		tokenId: NftId;
 	}): Promise<NftMetadata> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
@@ -78,7 +77,7 @@ export class InfuraErc721Provider {
 		);
 
 		return {
-			id: parseNftId(tokenId),
+			id: tokenId,
 			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
 			...(nonNullish(metadata.name) && { name: metadata.name }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
