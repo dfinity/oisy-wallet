@@ -1,8 +1,9 @@
 import EditAvatar from '$lib/components/contact/EditAvatar.svelte';
 import {
 	CONTACT_POPOVER_MENU,
-	CONTACT_POPOVER_MENU_ITEM,
-	CONTACT_POPOVER_TRIGGER
+	CONTACT_POPOVER_TRIGGER,
+	CONTACT_REMOVE_MENU_ITEM,
+	CONTACT_REPLACE_MENU_ITEM
 } from '$lib/constants/test-ids.constants';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -29,7 +30,7 @@ describe('EditAvatar', () => {
 		expect(button).toHaveAttribute('aria-label', en.address_book.edit_avatar.replace_image);
 	});
 
-	it('should open popover when button is clicked', async () => {
+	it('should open popover when trigger is clicked', async () => {
 		const { getByTestId } = render(EditAvatar, {
 			props: {
 				onReplaceImage: mockReplaceImage,
@@ -43,32 +44,32 @@ describe('EditAvatar', () => {
 	});
 
 	describe('when no image is set', () => {
-		it('should show only upload option', async () => {
-			const { getByTestId, getAllByTestId } = render(EditAvatar, {
+		it('should show only the upload option', async () => {
+			const { getByTestId, queryByTestId } = render(EditAvatar, {
 				props: {
 					onReplaceImage: mockReplaceImage,
 					onRemoveImage: mockRemoveImage,
-					imageUrl: undefined
+					imageUrl: null
 				}
 			});
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
-			const menuItems = getAllByTestId(CONTACT_POPOVER_MENU_ITEM);
 
-			expect(menuItems).toHaveLength(1);
-			expect(menuItems[0]).toHaveTextContent(en.address_book.edit_avatar.upload_image);
+			expect(getByTestId(CONTACT_REPLACE_MENU_ITEM)).toBeInTheDocument();
+			expect(queryByTestId(CONTACT_REMOVE_MENU_ITEM)).not.toBeInTheDocument();
 		});
 
 		it('should call onReplaceImage when upload is clicked', async () => {
-			const { getByTestId, getByText } = render(EditAvatar, {
+			const { getByTestId } = render(EditAvatar, {
 				props: {
 					onReplaceImage: mockReplaceImage,
-					onRemoveImage: mockRemoveImage
+					onRemoveImage: mockRemoveImage,
+					imageUrl: null
 				}
 			});
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
-			await fireEvent.click(getByText(en.address_book.edit_avatar.upload_image));
+			await fireEvent.click(getByTestId(CONTACT_REPLACE_MENU_ITEM));
 
 			expect(mockReplaceImage).toHaveBeenCalled();
 		});
@@ -78,7 +79,7 @@ describe('EditAvatar', () => {
 		const imageUrl = 'https://example.com/image.jpg';
 
 		it('should show both replace and remove options', async () => {
-			const { getByTestId, getAllByTestId } = render(EditAvatar, {
+			const { getByTestId } = render(EditAvatar, {
 				props: {
 					onReplaceImage: mockReplaceImage,
 					onRemoveImage: mockRemoveImage,
@@ -87,13 +88,13 @@ describe('EditAvatar', () => {
 			});
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
-			const menuItems = getAllByTestId(new RegExp(`${CONTACT_POPOVER_MENU_ITEM}|IconTrash`));
 
-			expect(menuItems).toHaveLength(2);
+			expect(getByTestId(CONTACT_REPLACE_MENU_ITEM)).toBeInTheDocument();
+			expect(getByTestId(CONTACT_REMOVE_MENU_ITEM)).toBeInTheDocument();
 		});
 
 		it('should call onReplaceImage when replace is clicked', async () => {
-			const { getByTestId, getByText } = render(EditAvatar, {
+			const { getByTestId } = render(EditAvatar, {
 				props: {
 					onReplaceImage: mockReplaceImage,
 					onRemoveImage: mockRemoveImage,
@@ -102,13 +103,13 @@ describe('EditAvatar', () => {
 			});
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
-			await fireEvent.click(getByText(en.address_book.edit_avatar.replace_image));
+			await fireEvent.click(getByTestId(CONTACT_REPLACE_MENU_ITEM));
 
 			expect(mockReplaceImage).toHaveBeenCalled();
 		});
 
 		it('should call onRemoveImage when remove is clicked', async () => {
-			const { getByTestId, getByText } = render(EditAvatar, {
+			const { getByTestId } = render(EditAvatar, {
 				props: {
 					onReplaceImage: mockReplaceImage,
 					onRemoveImage: mockRemoveImage,
@@ -117,7 +118,7 @@ describe('EditAvatar', () => {
 			});
 
 			await fireEvent.click(getByTestId(CONTACT_POPOVER_TRIGGER));
-			await fireEvent.click(getByText(en.address_book.edit_avatar.remove_image));
+			await fireEvent.click(getByTestId(CONTACT_REMOVE_MENU_ITEM));
 
 			expect(mockRemoveImage).toHaveBeenCalled();
 		});
@@ -136,7 +137,7 @@ describe('EditAvatar', () => {
 		expect(getByText(en.address_book.edit_avatar.menu_title)).toBeInTheDocument();
 	});
 
-	it('should have proper accessibility attributes', async () => {
+	it('should apply correct accessibility attributes', async () => {
 		const { getByTestId } = render(EditAvatar, {
 			props: {
 				onReplaceImage: mockReplaceImage,
@@ -154,7 +155,7 @@ describe('EditAvatar', () => {
 		expect(menu).toHaveAttribute('role', 'menu');
 	});
 
-	it('should apply correct styling classes', async () => {
+	it('should apply correct styling classes to popover', async () => {
 		const { getByTestId } = render(EditAvatar, {
 			props: {
 				onReplaceImage: mockReplaceImage,

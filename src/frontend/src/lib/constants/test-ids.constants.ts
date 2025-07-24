@@ -261,6 +261,8 @@ export const TOKEN_MODAL_SAVE_BUTTON = 'token-modal-save-button';
 export const CONTACT_POPOVER_TRIGGER = 'contact-popover-trigger';
 export const CONTACT_POPOVER_MENU = 'contact-popover-menu';
 export const CONTACT_POPOVER_MENU_ITEM = 'contact-popover-menu-item';
+export const CONTACT_REPLACE_MENU_ITEM = 'contact-replace-menu-item';
+export const CONTACT_REMOVE_MENU_ITEM = 'contact-remove-menu-item';
 
 // AI Assistant
 export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';

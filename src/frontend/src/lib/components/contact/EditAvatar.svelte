@@ -9,7 +9,9 @@
 	import {
 		CONTACT_POPOVER_TRIGGER,
 		CONTACT_POPOVER_MENU,
-		CONTACT_POPOVER_MENU_ITEM
+		CONTACT_POPOVER_MENU_ITEM,
+		CONTACT_REPLACE_MENU_ITEM,
+		CONTACT_REMOVE_MENU_ITEM
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -37,20 +39,22 @@
 					{
 						logo: IconImage,
 						title: $i18n.address_book.edit_avatar.replace_image,
-						action: onReplaceImage
+						action: onReplaceImage,
+						testId: CONTACT_REPLACE_MENU_ITEM
 					},
 					{
 						logo: IconTrash,
 						title: $i18n.address_book.edit_avatar.remove_image,
 						action: onRemoveImage,
-						testId: 'IconTrash'
+						testId: CONTACT_REMOVE_MENU_ITEM
 					}
 				]
 			: [
 					{
 						logo: IconImage,
 						title: $i18n.address_book.edit_avatar.upload_image,
-						action: onReplaceImage
+						action: onReplaceImage,
+						testId: CONTACT_REPLACE_MENU_ITEM
 					}
 				]
 	);
