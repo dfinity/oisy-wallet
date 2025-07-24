@@ -471,7 +471,7 @@
 			"no_infura_cketh_provider": "Nessun provider Infura CkETH per la rete $network",
 			"no_infura_erc20_provider": "Nessun provider Infura ERC20 per la rete $network",
 			"no_infura_erc721_provider": "Nessun provider Infura ERC721 per la rete $network",
-			"no_infura_erc1155_provider": "",
+			"no_infura_erc1155_provider": "Nessun provider Infura ERC1155 per la rete $network",
 			"no_infura_erc20_icp_provider": "Nessun provider Infura ERC20 ICP per la rete $network",
 			"no_solana_network": "Nessuna rete Solana per la rete $network",
 			"eth_address_unknown": "L'indirizzo ETH è sconosciuto.",
