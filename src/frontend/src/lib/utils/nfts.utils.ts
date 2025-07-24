@@ -59,18 +59,18 @@ const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	return new URL(parsedNewUrl.data);
 };
 
-export const parseMetadataResourceUrl = ({
-	url,
-	error
-}: {
-	url: string;
-	error: NftError;
-}): URL | undefined => {
+export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: NftError }): URL => {
 	const parsedUrl = UrlSchema.safeParse(url);
 
 	if (!parsedUrl.success) {
 		throw error;
 	}
 
-	return adaptMetadataResourceUrl(new URL(parsedUrl.data));
+	const adaptedUrl = adaptMetadataResourceUrl(new URL(parsedUrl.data));
+
+	if (isNullish(adaptedUrl)) {
+		throw error;
+	}
+
+	return adaptedUrl;
 };
