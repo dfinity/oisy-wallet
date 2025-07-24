@@ -5,7 +5,6 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { Address } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import type { Transaction } from '$lib/types/transaction';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 export interface TransactionsStoreCheckParams {
