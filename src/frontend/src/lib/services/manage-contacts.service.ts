@@ -1,5 +1,4 @@
 import type { ContactImage } from '$declarations/backend/backend.did';
-import { nonNullish } from '@dfinity/utils';
 import {
 	createContact as createContactApi,
 	deleteContact as deleteContactApi,
@@ -11,6 +10,7 @@ import type { ContactUi } from '$lib/types/contact';
 import { compareContactAddresses } from '$lib/utils/contact-address.utils';
 import { mapToBackendContact, mapToFrontendContact } from '$lib/utils/contact.utils';
 import type { Identity } from '@dfinity/agent';
+import { nonNullish } from '@dfinity/utils';
 
 export const loadContacts = async (identity: Identity): Promise<void> => {
 	contactsStore.reset();
@@ -47,7 +47,6 @@ export const updateContact = async ({
 	identity: Identity;
 	image?: ContactImage | null;
 }): Promise<ContactUi> => {
-	
 	const contactWithSortedAddresses = {
 		...contact,
 		image: nonNullish(image) ? image : contact.image,
