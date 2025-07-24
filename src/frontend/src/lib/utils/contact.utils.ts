@@ -50,6 +50,7 @@ export const mapToBackendContact = (contact: ContactUi): Contact => {
 	return {
 		...rest,
 		update_timestamp_ns: updateTimestampNs,
+		// null is an acceptable value — it means the user forcibly removed their avatar
 		image: image !== undefined ? toNullable(image) : [],
 		addresses: contact.addresses.map((address) => ({
 			token_account_id: TokenAccountIdSchema.parse(address.address),
