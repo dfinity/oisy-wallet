@@ -1,8 +1,5 @@
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type {
-	NullableCertifiedTransactions,
-	TransactionsStore
-} from '$lib/stores/transactions.store';
+import type { TransactionsData, TransactionsStore } from '$lib/stores/transactions.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
@@ -17,10 +14,6 @@ interface TransactionsStoreParams<T extends TransactionTypes> {
 	tokenId: TokenId;
 	transactions: CertifiedTransaction<T>[];
 }
-
-export type TransactionsData<T extends TransactionTypes> =
-	| CertifiedTransaction<T>[]
-	| NullableCertifiedTransactions;
 
 interface EthTransactionsStore<T extends TransactionTypes>
 	extends Omit<TransactionsStore<T>, 'prepend' | 'append' | 'cleanUp'> {
