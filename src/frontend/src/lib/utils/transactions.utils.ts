@@ -20,7 +20,6 @@ import {
 } from '$icp/utils/ic-transactions.utils';
 import { MICRO_TRANSACTION_USD_THRESHOLD, ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
@@ -39,6 +38,7 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -74,7 +74,7 @@ export const mapAllTransactionsUi = ({
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
-	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+	$solTransactions: SolCertifiedTransactionsData;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 	$icTransactionsStore: IcCertifiedTransactionsData;
 	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
