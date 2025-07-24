@@ -226,9 +226,11 @@ export const idlFactory = ({ IDL }) => {
 	const ContactError = IDL.Variant({
 		InvalidContactData: IDL.Null,
 		CanisterMemoryNearCapacity: IDL.Null,
+		InvalidImageFormat: IDL.Null,
 		ContactNotFound: IDL.Null,
 		ImageTooLarge: IDL.Null,
 		RandomnessError: IDL.Null,
+		ImageExceedsMaxSize: IDL.Null,
 		CanisterStatusError: IDL.Null,
 		TooManyContactsWithImages: IDL.Null
 	});
@@ -360,7 +362,7 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
-	const Erc20Token = IDL.Record({
+	const ErcToken = IDL.Record({
 		token_address: IDL.Text,
 		chain_id: IDL.Nat64
 	});
@@ -374,9 +376,9 @@ export const idlFactory = ({ IDL }) => {
 		symbol: IDL.Opt(IDL.Text)
 	});
 	const Token = IDL.Variant({
-		Erc20: Erc20Token,
+		Erc20: ErcToken,
 		Icrc: IcrcToken,
-		Erc721: Erc20Token,
+		Erc721: ErcToken,
 		SplDevnet: SplToken,
 		SplMainnet: SplToken
 	});

@@ -252,10 +252,10 @@ mod custom_token {
         use crate::validate::{test_validate_on_deserialize, TestVector, Validate};
 
         test_validate_on_deserialize!(
-            Erc20Token,
+            ErcToken,
             vec![
                 TestVector {
-                    input: Erc20Token {
+                    input: ErcToken {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
@@ -265,7 +265,7 @@ mod custom_token {
                     description: "Valid Erc20Token",
                 },
                 TestVector {
-                    input: Erc20Token {
+                    input: ErcToken {
                         token_address: ErcTokenId(
                             "0x12345678901234567890123456789012345678".to_string()
                         ),
@@ -275,7 +275,7 @@ mod custom_token {
                     description: "Erc20Token with a token address that is too short",
                 },
                 TestVector {
-                    input: Erc20Token {
+                    input: ErcToken {
                         token_address: ErcTokenId("1".repeat(99)),
                         chain_id: 1,
                     },
@@ -283,7 +283,7 @@ mod custom_token {
                     description: "Erc20Token with a token address that is too long",
                 },
                 TestVector {
-                    input: Erc20Token {
+                    input: ErcToken {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
@@ -293,7 +293,7 @@ mod custom_token {
                     description: "Maximum chain ID",
                 },
                 TestVector {
-                    input: Erc20Token {
+                    input: ErcToken {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),

@@ -141,9 +141,11 @@ type ContactAddressData = record {
 type ContactError = variant {
 	InvalidContactData;
 	CanisterMemoryNearCapacity;
+	InvalidImageFormat;
 	ContactNotFound;
 	ImageTooLarge;
 	RandomnessError;
+	ImageExceedsMaxSize;
 	CanisterStatusError;
 	TooManyContactsWithImages
 };
@@ -185,7 +187,7 @@ type DefiniteCanisterSettingsArgs = record {
 	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
-type Erc20Token = record { token_address : text; chain_id : nat64 };
+type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
@@ -307,9 +309,9 @@ type SupportedCredential = record {
 };
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
-	Erc20 : Erc20Token;
+	Erc20 : ErcToken;
 	Icrc : IcrcToken;
-	Erc721 : Erc20Token;
+	Erc721 : ErcToken;
 	SplDevnet : SplToken;
 	SplMainnet : SplToken
 };
