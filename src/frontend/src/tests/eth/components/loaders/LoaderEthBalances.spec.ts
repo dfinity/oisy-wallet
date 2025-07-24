@@ -88,6 +88,18 @@ describe('LoaderEthBalances', () => {
 		expect(syncBalancesFromCache).not.toHaveBeenCalled();
 	});
 
+	it('should not throw if syncing balances from cache fails', async () => {
+		vi.mocked(syncBalancesFromCache).mockRejectedValueOnce(new Error('Error syncing balances'));
+
+		render(LoaderEthBalances);
+
+		await tick();
+
+		expect(syncBalancesFromCache).toHaveBeenCalledTimes(
+			mainnetTokens.length + mockErc20DefaultTokens.length
+		);
+	});
+
 	it('should call `loadEthBalances` on mount', async () => {
 		render(LoaderEthBalances);
 
