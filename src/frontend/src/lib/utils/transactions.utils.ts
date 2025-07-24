@@ -8,7 +8,7 @@ import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
-import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
@@ -76,7 +76,7 @@ export const mapAllTransactionsUi = ({
 	$ethAddress: OptionEthAddress;
 	$solTransactions: SolCertifiedTransactionsData;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
-	$icTransactionsStore: CertifiedStoreData<IcTransactionsData>;
+	$icTransactionsStore: IcCertifiedTransactionsData;
 	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
 	$icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
 }): AllTransactionUiWithCmp[] => {
