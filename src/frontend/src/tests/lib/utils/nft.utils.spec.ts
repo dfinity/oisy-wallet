@@ -10,7 +10,7 @@ import { isTokenFungible, isTokenNonFungible } from '$lib/utils/nft.utils';
 import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
 import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 
-describe('erc.utils', () => {
+describe('nft.utils', () => {
 	describe('isTokenNonFungible', () => {
 		it.each([...MOCK_ERC721_TOKENS, ...MOCK_ERC1155_TOKENS])(
 			'should return true for token $name',
