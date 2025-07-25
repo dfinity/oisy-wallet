@@ -14,8 +14,8 @@ import type {
 	IdbTransactionsStoreData,
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
-import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import type { Transaction } from '$lib/types/transaction';
+import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Principal } from '@dfinity/principal';
