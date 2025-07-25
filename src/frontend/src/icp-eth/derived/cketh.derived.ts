@@ -14,7 +14,7 @@ import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
+import { tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
@@ -95,19 +95,9 @@ export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
  * - on network ICP if the token is ckETH
  */
 export const ethToCkETHEnabled: Readable<boolean> = derived(
-	[
-		tokenStandard,
-		tokenWithFallbackAsIcToken,
-		selectedEthereumNetwork,
-		ckEthereumNativeTokenEnabledNetwork
-	],
-	([
-		$tokenStandard,
-		$tokenWithFallbackAsIcToken,
-		$selectedEthereumNetwork,
-		$ckEthereumNativeTokenEnabledNetwork
-	]) =>
-		($tokenStandard === 'ethereum' && nonNullish($selectedEthereumNetwork)) ||
+	[tokenWithFallbackAsIcToken, selectedEthereumNetwork, ckEthereumNativeTokenEnabledNetwork],
+	([$tokenWithFallbackAsIcToken, $selectedEthereumNetwork, $ckEthereumNativeTokenEnabledNetwork]) =>
+		($tokenWithFallbackAsIcToken.standard === 'ethereum' && nonNullish($selectedEthereumNetwork)) ||
 		(isTokenCkEthLedger($tokenWithFallbackAsIcToken) &&
 			nonNullish($ckEthereumNativeTokenEnabledNetwork))
 );

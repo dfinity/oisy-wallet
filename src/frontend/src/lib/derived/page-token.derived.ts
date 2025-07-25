@@ -5,7 +5,7 @@ import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-import type { OptionToken } from '$lib/types/token';
+import type { OptionToken, OptionTokenStandard } from '$lib/types/token';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { isNullish } from '@dfinity/utils';
@@ -58,4 +58,9 @@ export const pageToken: Readable<OptionToken> = derived(
 				name === $routeToken && networkId.description === $routeNetwork
 		);
 	}
+);
+
+export const pageTokenStandard: Readable<OptionTokenStandard> = derived(
+	[pageToken],
+	([$pageToken]) => $pageToken?.standard
 );
