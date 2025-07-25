@@ -40,19 +40,19 @@
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
-	import type { OptionTokenUi } from '$lib/types/token';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
 
-	let pageTokenUi: OptionTokenUi;
-	$: pageTokenUi = nonNullish($pageToken)
-		? mapTokenUi({
-				token: $pageToken,
-				$balances: $balancesStore,
-				$exchanges
-			})
-		: undefined;
+	let pageTokenUi = $derived(
+		nonNullish($pageToken)
+			? mapTokenUi({
+					token: $pageToken,
+					$balances: $balancesStore,
+					$exchanges
+				})
+			: undefined
+	);
 
 	const { loading, outflowActionsDisabled, ...rest } = initHeroContext();
 	setContext<HeroContext>(HERO_CONTEXT_KEY, {
@@ -61,34 +61,31 @@
 		...rest
 	});
 
-	$: loading.set(
-		isRouteTransactions(page)
-			? isNullish(pageTokenUi?.balance)
-			: $exchangeNotInitialized || $noPositiveBalanceAndNotAllBalancesZero
-	);
+	$effect(() => {
+		loading.set(
+			isRouteTransactions(page)
+				? isNullish(pageTokenUi?.balance)
+				: $exchangeNotInitialized || $noPositiveBalanceAndNotAllBalancesZero
+		);
+	});
 
-	let isTransactionsPage = false;
-	$: isTransactionsPage = isRouteTransactions(page);
+	let isTransactionsPage = $derived(isRouteTransactions(page));
 
-	$: outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
+	$effect(() => {
+		outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
+	});
 
-	let isTrumpToken = false;
-	$: isTrumpToken = nonNullish($pageToken) ? isTrumpTokenUtil($pageToken) : false;
+	let isTrumpToken = $derived(nonNullish($pageToken) ? isTrumpTokenUtil($pageToken) : false);
 
-	let isGLDTToken = false;
-	$: isGLDTToken = nonNullish($pageToken) ? isGLDTTokenUtil($pageToken) : false;
+	let isGLDTToken = $derived(nonNullish($pageToken) ? isGLDTTokenUtil($pageToken) : false);
 
-	let isVchfToken = false;
-	$: isVchfToken = nonNullish($pageToken) && isVCHFTokenUtil($pageToken);
+	let isVchfToken = $derived(nonNullish($pageToken) && isVCHFTokenUtil($pageToken));
 
-	let isVeurToken = false;
-	$: isVeurToken = nonNullish($pageToken) && isVEURTokenUtil($pageToken);
+	let isVeurToken = $derived(nonNullish($pageToken) && isVEURTokenUtil($pageToken));
 
-	let isGradientToRight = false;
-	$: isGradientToRight = $networkSolana && !isTrumpToken;
+	let isGradientToRight = $derived($networkSolana && !isTrumpToken);
 
-	let isGradientToBottomRight = false;
-	$: isGradientToBottomRight = isGLDTToken || $networkBsc;
+	let isGradientToBottomRight = $derived(isGLDTToken || $networkBsc);
 </script>
 
 <div

@@ -1,3 +1,4 @@
+import type { Token } from '$lib/types/token';
 import { resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
 import type { Page } from '@sveltejs/kit';
 import { writable } from 'svelte/store';
@@ -23,6 +24,8 @@ const initPageStoreMock = () => {
 				url
 			});
 		},
+		mockToken: ({ name, network: { id: networkId } }: Token) =>
+			set({ data: { token: name, network: networkId.description } }),
 
 		reset: () => set(initialStoreValue)
 	};

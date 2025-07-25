@@ -13,7 +13,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 
-	$: isHomePage = isRouteTokens(page);
+	let isHomePage = $derived(isRouteTokens(page));
 </script>
 
 <footer
