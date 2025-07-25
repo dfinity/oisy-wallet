@@ -1,3 +1,4 @@
+import type { Token } from '$lib/types/token';
 import { resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
 import type { Page } from '@sveltejs/kit';
 import { writable } from 'svelte/store';
