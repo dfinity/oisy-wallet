@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Spinner } from '@dfinity/gix-components';
 	interface Props {
 		testId?: string;
 		ariaLabel?: string;
@@ -14,14 +15,5 @@
 	data-tid={testId}
 	aria-label={ariaLabel}
 >
-	<svg
-		id="app-spinner"
-		preserveAspectRatio="xMidYMid meet"
-		focusable="false"
-		aria-hidden="true"
-		data-tid="spinner"
-		viewBox="0 0 100 100"
-	>
-		<circle cx="50%" cy="50%" r="45" />
-	</svg>
+	<Spinner />
 </div>
