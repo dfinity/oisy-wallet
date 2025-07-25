@@ -30,7 +30,6 @@
 
 		loading = true;
 
-
 		if ($tokenNotInitialized) {
 			tokenIdLoaded = undefined;
 			loading = false;
