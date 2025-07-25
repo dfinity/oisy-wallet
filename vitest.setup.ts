@@ -52,7 +52,7 @@ vi.mock('$app/stores', () => ({
 }));
 
 vi.mock('$app/state', () => ({
-	page: mockPage
+	page: {}
 }));
 
 vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
