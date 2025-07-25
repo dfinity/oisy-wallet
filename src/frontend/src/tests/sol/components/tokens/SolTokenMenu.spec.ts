@@ -1,5 +1,4 @@
 import { SOL_DEVNET_EXPLORER_URL, SOL_MAINNET_EXPLORER_URL } from '$env/explorers.env';
-import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
@@ -39,14 +38,12 @@ describe('SolTokenMenu', () => {
 		{
 			token: SOLANA_TOKEN,
 			explorerUrl: SOL_MAINNET_EXPLORER_URL,
-			network: SOLANA_MAINNET_NETWORK,
 			store: solAddressMainnetStore,
 			description: 'mainnet'
 		},
 		{
 			token: SOLANA_DEVNET_TOKEN,
 			explorerUrl: SOL_DEVNET_EXPLORER_URL,
-			network: SOLANA_DEVNET_NETWORK,
 			store: solAddressDevnetStore,
 			description: 'devnet'
 		}
@@ -54,7 +51,7 @@ describe('SolTokenMenu', () => {
 
 	it.each(testCases)(
 		'external link forwards to correct $description explorer',
-		async ({ token, explorerUrl, network, store }) => {
+		async ({ token, explorerUrl, store }) => {
 			mockPage.mockToken(token);
 			store.set({ certified: true, data: mockSolAddress });
 
