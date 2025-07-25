@@ -8,7 +8,6 @@ import {
 	TOKEN_MENU_SOL_EXPLORER_LINK
 } from '$lib/constants/test-ids.constants';
 import { solAddressDevnetStore, solAddressMainnetStore } from '$lib/stores/address.store';
-import { token as tokenStore } from '$lib/stores/token.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolTokenMenu from '$sol/components/tokens/SolTokenMenu.svelte';
 import type { SolanaNetwork } from '$sol/types/network';
@@ -56,9 +55,8 @@ describe('SolTokenMenu', () => {
 	it.each(testCases)(
 		'external link forwards to correct $description explorer',
 		async ({ token, explorerUrl, network, store }) => {
-			tokenStore.set(token);
+			mockPage.mockToken(token);
 			store.set({ certified: true, data: mockSolAddress });
-			mockPage.mock({ network: network.id.description });
 
 			const { queryByTestId, getByTestId } = render(SolTokenMenu);
 			const button = getByTestId(TOKEN_MENU_SOL_BUTTON);
@@ -78,8 +76,7 @@ describe('SolTokenMenu', () => {
 	it('external link forwards to SPL explorer URL', async () => {
 		const mockToken = TRUMP_TOKEN;
 
-		tokenStore.set(mockToken);
-		mockPage.mock({ network: mockToken.network.id.description });
+		mockPage.mockToken(mockToken);
 
 		const { queryByTestId, getByTestId } = render(SolTokenMenu);
 		const button = getByTestId(TOKEN_MENU_SOL_BUTTON);
