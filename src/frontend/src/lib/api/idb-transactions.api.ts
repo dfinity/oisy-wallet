@@ -14,10 +14,11 @@ import type {
 	IdbTransactionsStoreData,
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
+import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
-import { createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
+import { createStore, get, set as idbSet, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
 const idbTransactionsStore = (key: string): UseStore =>
@@ -104,13 +105,13 @@ export const getIdbSolTransactions = (
 ): Promise<SolTransactionUi[] | undefined> => get(toKey(params), idbSolTransactionsStore);
 
 export const deleteIdbBtcTransactions = (principal: Principal): Promise<void> =>
-	del(principal.toText(), idbBtcTransactionsStore);
+	delMultiKeysByPrincipal({ principal, store: idbBtcTransactionsStore });
 
 export const deleteIdbEthTransactions = (principal: Principal): Promise<void> =>
-	del(principal.toText(), idbEthTransactionsStore);
+	delMultiKeysByPrincipal({ principal, store: idbEthTransactionsStore });
 
 export const deleteIdbIcTransactions = (principal: Principal): Promise<void> =>
-	del(principal.toText(), idbIcTransactionsStore);
+	delMultiKeysByPrincipal({ principal, store: idbIcTransactionsStore });
 
 export const deleteIdbSolTransactions = (principal: Principal): Promise<void> =>
-	del(principal.toText(), idbSolTransactionsStore);
+	delMultiKeysByPrincipal({ principal, store: idbSolTransactionsStore });
