@@ -10,22 +10,28 @@
 		isNetworkIdEvm,
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
+	import type { Snippet } from 'svelte';
 
-	export let token: OptionToken;
+	interface Props {
+		token: OptionToken;
+		children?: Snippet;
+	}
+
+	let { token, children }: Props = $props();
 </script>
 
 {#if isNullish(token) || $authNotSignedIn}
-	<slot />
+	{@render children?.()}
 {:else if isNetworkIdICP(token.network.id)}
-	<slot />
+	{@render children?.()}
 {:else if isNetworkIdBitcoin(token.network.id)}
 	<BitcoinListener>
-		<slot />
+		{@render children?.()}
 	</BitcoinListener>
 {:else if isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)}
 	<EthListener {token}>
-		<slot />
+		{@render children?.()}
 	</EthListener>
 {:else}
-	<slot />
+	{@render children?.()}
 {/if}
