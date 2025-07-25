@@ -24,7 +24,11 @@
 		TRACK_CONTACT_DELETE_ERROR,
 		TRACK_CONTACT_DELETE_SUCCESS,
 		TRACK_CONTACT_UPDATE_ERROR,
-		TRACK_CONTACT_UPDATE_SUCCESS
+		TRACK_CONTACT_UPDATE_SUCCESS,
+		TRACK_AVATAR_UPDATE_SUCCESS,
+		TRACK_AVATAR_UPDATE_ERROR,
+		TRACK_AVATAR_DELETE_SUCCESS,
+		TRACK_AVATAR_DELETE_ERROR
 	} from '$lib/constants/analytics.contants';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -245,14 +249,30 @@
 		}
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
-	const handleAddAvatar = async (image: ContactImage) => {
+
+	const handleAddAvatar = async (image: ContactImage | null) => {
 		if (isNullish(currentContact)) {
 			return;
 		}
-		const contact = {
-			...currentContact
+
+		const contact = { ...currentContact };
+		const isDeleting = isNullish(image);
+
+		const tracking = {
+			success: isDeleting ? TRACK_AVATAR_DELETE_SUCCESS : TRACK_AVATAR_UPDATE_SUCCESS,
+			error: isDeleting ? TRACK_AVATAR_DELETE_ERROR : TRACK_AVATAR_UPDATE_ERROR
 		};
-		await callUpdateContact({ contact, image });
+
+		const callUpdateAvatar = callWithState(
+			wrapCallWith({
+				methodToCall: updateContact,
+				toastErrorMessage: $i18n.contact.error.update,
+				trackEventNames: tracking,
+				identity: $authIdentity
+			})
+		);
+
+		await callUpdateAvatar({ contact, image });
 	};
 
 	const handleSaveAddress = async (address: ContactAddressUi) => {

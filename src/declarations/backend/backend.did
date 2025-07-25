@@ -313,7 +313,8 @@ type Token = variant {
 	Icrc : IcrcToken;
 	Erc721 : ErcToken;
 	SplDevnet : SplToken;
-	SplMainnet : SplToken
+	SplMainnet : SplToken;
+	Erc1155 : ErcToken
 };
 type TokenAccountId = variant {
 	Btc : BtcAddress;

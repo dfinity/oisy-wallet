@@ -62,6 +62,10 @@ export const toCustomToken = ({
 			return { Erc721: toErcCustomToken(rest) };
 		}
 
+		if (networkKey === 'Erc1155') {
+			return { Erc1155: toErcCustomToken(rest) };
+		}
+
 		if (networkKey === 'SplMainnet') {
 			return { SplMainnet: toSplCustomToken(rest) };
 		}
