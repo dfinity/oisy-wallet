@@ -7,9 +7,9 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { networkEthereum } from '$lib/derived/network.derived';
+	import { pageTokenStandard } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import {pageTokenStandard} from "$lib/derived/page-token.derived";
 
 	const receiveModal = async () => {
 		if (!$metamaskAvailable) {

@@ -8,7 +8,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { TOKEN_MENU_ETH } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import {pageToken, pageTokenStandard} from '$lib/derived/page-token.derived';
+	import { pageToken, pageTokenStandard } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let explorerUrl: string | undefined;
