@@ -1,5 +1,6 @@
 import { signOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
+import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 
@@ -10,7 +11,13 @@ vi.mock('idb-keyval', () => ({
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn(),
+	delMany: vi.fn(),
+	keys: vi.fn(),
 	update: vi.fn()
+}));
+
+vi.mock('$lib/utils/idb.utils', () => ({
+	delMultiKeysByPrincipal: vi.fn()
 }));
 
 const rootLocation = 'https://oisy.com/';
@@ -81,8 +88,11 @@ describe('auth.services', () => {
 
 			await signOut({});
 
-			// 3 addresses + 3(+1) tokens + 4 transactions + 1 balances
-			expect(idbKeyval.del).toHaveBeenCalledTimes(12);
+			// 3 addresses + 3(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
+
+			// 4 transactions + 1 balances
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
 		});
 	});
 });
