@@ -1,17 +1,13 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getIdbBalances } from '$lib/api/idb-balances.api';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TransactionsStore } from '$lib/stores/transactions.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { AnyTransaction } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const syncTransactionsFromCache = async <
-	T extends BtcTransactionUi | IcTransactionUi | SolTransactionUi
->({
+export const syncTransactionsFromCache = async <T extends AnyTransaction>({
 	tokenId,
 	getIdbTransactions,
 	transactionsStore,
@@ -38,7 +34,7 @@ const syncTransactionsFromCache = async <
 	});
 };
 
-const syncBalancesFromCache = async ({ tokenId, ...params }: GetIdbTransactionsParams) => {
+export const syncBalancesFromCache = async ({ tokenId, ...params }: GetIdbTransactionsParams) => {
 	const balance = await getIdbBalances({
 		...params,
 		tokenId
@@ -57,9 +53,7 @@ const syncBalancesFromCache = async ({ tokenId, ...params }: GetIdbTransactionsP
 	});
 };
 
-export const syncWalletFromIdbCache = async <
-	T extends BtcTransactionUi | IcTransactionUi | SolTransactionUi
->({
+export const syncWalletFromIdbCache = async <T extends AnyTransaction>({
 	tokenId,
 	getIdbTransactions,
 	transactionsStore,
