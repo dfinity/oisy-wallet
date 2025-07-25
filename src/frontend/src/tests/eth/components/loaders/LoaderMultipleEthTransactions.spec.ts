@@ -9,14 +9,24 @@ import {
 import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 import * as appContants from '$lib/constants/app.constants';
+import { syncTransactionsFromCache } from '$lib/services/listener.services';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
 	loadEthereumTransactions: vi.fn()
+}));
+
+vi.mock('$lib/services/listener.services', () => ({
+	syncTransactionsFromCache: vi.fn()
 }));
 
 describe('LoaderMultipleEthTransactions', () => {
@@ -62,6 +72,8 @@ describe('LoaderMultipleEthTransactions', () => {
 			vi.fn(() => 123456789)
 		);
 
+		mockAuthStore();
+
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
 
@@ -75,6 +87,56 @@ describe('LoaderMultipleEthTransactions', () => {
 		vi.unstubAllGlobals();
 
 		vi.useRealTimers();
+	});
+
+	describe('on mount', () => {
+		it('should sync balances from the IDB cache', async () => {
+			render(LoaderMultipleEthTransactions);
+
+			await tick();
+
+			expect(syncTransactionsFromCache).toHaveBeenCalledTimes(allExpectedTokens.length);
+
+			allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+				expect(syncTransactionsFromCache).toHaveBeenNthCalledWith(index + 1, {
+					principal: mockIdentity.getPrincipal(),
+					tokenId,
+					networkId,
+					getIdbTransactions: getIdbEthTransactions,
+					transactionsStore: ethTransactionsStore
+				});
+			});
+		});
+
+		it('should not sync balances from the IDB cache if not signed in', async () => {
+			mockAuthStore(null);
+
+			render(LoaderMultipleEthTransactions);
+
+			await tick();
+
+			expect(syncTransactionsFromCache).not.toHaveBeenCalled();
+		});
+
+		it('should sync balances from the IDB cache only for tokens that have not been initialized', async () => {
+			ethTransactionsStore.set({ tokenId: allExpectedTokens[0].id, transactions: [] });
+
+			render(LoaderMultipleEthTransactions);
+
+			await tick();
+
+			expect(syncTransactionsFromCache).toHaveBeenCalledTimes(allExpectedTokens.length - 1);
+
+			allExpectedTokens.slice(1).forEach(({ id: tokenId, network: { id: networkId } }, index) => {
+				expect(syncTransactionsFromCache).toHaveBeenNthCalledWith(index + 1, {
+					principal: mockIdentity.getPrincipal(),
+					tokenId,
+					networkId,
+					getIdbTransactions: getIdbEthTransactions,
+					transactionsStore: ethTransactionsStore
+				});
+			});
+		});
 	});
 
 	it('should load transactions for all Ethereum and Sepolia tokens (native and ERC20) when testnets flag is enabled', async () => {
