@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		menu: Snippet;

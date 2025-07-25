@@ -1,7 +1,7 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import { SIDEBAR_NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		children: Snippet;

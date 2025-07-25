@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
@@ -22,7 +23,6 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
-	import type {Snippet} from "svelte";
 
 	interface Props {
 		children: Snippet;
