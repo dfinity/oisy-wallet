@@ -2,7 +2,6 @@ import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { NO_TRANSACTIONS_PLACEHOLDER } from '$lib/constants/test-ids.constants';
-import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 
@@ -11,7 +10,7 @@ describe('IcTransactions', () => {
 		vi.clearAllMocks();
 
 		mockPage.reset();
-		token.set(ICP_TOKEN);
+		mockPage.mockToken(ICP_TOKEN);
 
 		icTransactionsStore.reset(ICP_TOKEN_ID);
 	});
