@@ -6,7 +6,6 @@ header {
 .avatar-spinner-overlay {
 	position: absolute;
 	inset: 0;
-	border-radius: 50%;
 	background-color: color-mix(in srgb, var(--color-base-white) 40%, transparent);
 	display: flex;
 	justify-content: center;

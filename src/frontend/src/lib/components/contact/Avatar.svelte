@@ -5,7 +5,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import LoaderWithOverlay from '$lib/components/ui/LoaderWithOverlay.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
-	import { AVATAR_IMAGE } from '$lib/constants/test-ids.constants';
+	import { AVATAR_IMAGE, AVATAR_LOADER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
 	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
@@ -60,7 +60,10 @@
 	aria-label={ariaLabel}
 >
 	{#if loading}
-		<LoaderWithOverlay />
+		<LoaderWithOverlay
+			testId={AVATAR_LOADER}
+			ariaLabel={$i18n.address_book.avatar.avatar_loading}
+		/>
 	{:else if nonNullish(blobUrl)}
 		<Img src={blobUrl} alt={ariaLabel} styleClass="h-full w-full object-cover" rounded />
 	{:else if nonNullish(initials)}
