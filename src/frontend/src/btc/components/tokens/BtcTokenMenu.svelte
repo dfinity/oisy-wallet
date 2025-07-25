@@ -27,7 +27,7 @@
 			: mapAddress<BtcAddress>($btcAddressRegtestStore);
 
 	let explorerUrl: string | undefined;
-	$: explorerUrl = ($pageToken?.network as BitcoinNetwork).explorerUrl ?? undefined;
+	$: explorerUrl = ($pageToken?.network as BitcoinNetwork).explorerUrl;
 
 	let explorerAddressUrl: string | undefined;
 	$: explorerAddressUrl =
