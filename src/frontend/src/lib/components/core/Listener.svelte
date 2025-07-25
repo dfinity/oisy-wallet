@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
 	import EthListener from '$eth/components/core/EthListener.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
@@ -10,7 +11,6 @@
 		isNetworkIdEvm,
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		token: OptionToken;
