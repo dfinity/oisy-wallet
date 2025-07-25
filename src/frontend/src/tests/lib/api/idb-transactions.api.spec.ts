@@ -42,6 +42,10 @@ vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
 }));
 
+vi.mock('$lib/utils/idb.utils', () => ({
+	delMultiKeysByPrincipal: vi.fn()
+}));
+
 describe('idb-transactions.api', () => {
 	const mockIdbTransactionsStore = createStore('mock-store', 'mock-store');
 

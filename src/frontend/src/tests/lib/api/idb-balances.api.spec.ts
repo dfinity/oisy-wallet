@@ -22,7 +22,7 @@ vi.mock('idb-keyval', () => ({
 	update: vi.fn()
 }));
 
-vi.mock('$lib/utils/storage.utils', () => ({
+vi.mock('$lib/utils/idb.utils', () => ({
 	delMultiKeysByPrincipal: vi.fn()
 }));
 
