@@ -1,6 +1,10 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
-	export let inline = false;
+	interface Props {
+		inline?: boolean;
+	}
+
+	let { inline = false }: Props = $props();
 </script>
 
 <svg
