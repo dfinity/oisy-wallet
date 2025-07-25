@@ -7,7 +7,7 @@ import type { AnyTransaction } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const syncTransactionsFromCache = async <T extends AnyTransaction>({
+export const syncTransactionsFromCache = async <T extends AnyTransaction>({
 	tokenId,
 	getIdbTransactions,
 	transactionsStore,
