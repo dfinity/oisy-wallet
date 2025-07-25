@@ -14,11 +14,11 @@
 		networkICP,
 		networkSolana
 	} from '$lib/derived/network.derived';
+	import { pageToken, pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import {pageToken, pageTokenToggleable} from "$lib/derived/page-token.derived";
 
 	interface Props {
 		testId?: string;
