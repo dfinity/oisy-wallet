@@ -23,6 +23,8 @@ const initPageStoreMock = () => {
 				url
 			});
 		},
+		mockToken: ({ name, network: { id: networkId } }: Token) =>
+			set({ data: { token: name, network: networkId.description } }),
 
 		reset: () => set(initialStoreValue)
 	};
