@@ -3,8 +3,9 @@
 	import type { ContactImage } from '$declarations/backend/backend.did';
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
+	import LoaderWithOverlay from '$lib/components/ui/LoaderWithOverlay.svelte';
 	import { CONTACT_BACKGROUND_COLORS } from '$lib/constants/contact.constants';
-	import { AVATAR_IMAGE } from '$lib/constants/test-ids.constants';
+	import { AVATAR_IMAGE, AVATAR_LOADER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AvatarVariants } from '$lib/types/style';
 	import { imageToDataUrl } from '$lib/utils/contact-image.utils';
@@ -15,9 +16,10 @@
 		variant?: AvatarVariants;
 		image?: ContactImage | null;
 		styleClass?: string;
+		loading?: boolean;
 	}
 
-	const { name, image, variant = 'md', styleClass }: AvatarProps = $props();
+	const { name, image, variant = 'md', styleClass, loading }: AvatarProps = $props();
 
 	const font = $derived(
 		{
@@ -53,11 +55,16 @@
 </script>
 
 <div
-	class={`${commonClasses} flex items-center justify-center ${isNullish(blobUrl) ? bgColor : ''}`}
+	class={`${commonClasses} relative flex items-center justify-center ${isNullish(blobUrl) ? bgColor : ''}`}
 	data-tid={AVATAR_IMAGE}
 	aria-label={ariaLabel}
 >
-	{#if nonNullish(blobUrl)}
+	{#if loading}
+		<LoaderWithOverlay
+			testId={AVATAR_LOADER}
+			ariaLabel={$i18n.address_book.avatar.avatar_loading}
+		/>
+	{:else if nonNullish(blobUrl)}
 		<Img src={blobUrl} alt={ariaLabel} styleClass="h-full w-full object-cover" rounded />
 	{:else if nonNullish(initials)}
 		<span class="font-bold text-white">{initials}</span>
