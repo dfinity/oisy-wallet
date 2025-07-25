@@ -17,3 +17,13 @@
 >
 	<Spinner />
 </div>
+
+<style lang="scss">
+	.avatar-spinner-overlay {
+		inset: 0;
+		background-color: color-mix(in srgb, var(--color-base-white) 40%, transparent);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+</style>
