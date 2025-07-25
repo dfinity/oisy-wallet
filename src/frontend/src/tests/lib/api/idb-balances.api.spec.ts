@@ -4,6 +4,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { deleteIdbBalances, getIdbBalances, setIdbBalancesStore } from '$lib/api/idb-balances.api';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Balance } from '$lib/types/balance';
+import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
@@ -16,7 +17,13 @@ vi.mock('idb-keyval', () => ({
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn(),
+	delMany: vi.fn(),
+	keys: vi.fn(),
 	update: vi.fn()
+}));
+
+vi.mock('$lib/utils/storage.utils', () => ({
+	delMultiKeysByPrincipal: vi.fn()
 }));
 
 vi.mock('$app/environment', () => ({
@@ -222,10 +229,10 @@ describe('idb-balances.api', () => {
 		it('should delete balances', async () => {
 			await deleteIdbBalances(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
-				mockPrincipal.toText(),
-				expect.any(Object)
-			);
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
+				principal: mockPrincipal,
+				store: expect.any(Object)
+			});
 		});
 	});
 });

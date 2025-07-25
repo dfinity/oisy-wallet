@@ -14,6 +14,7 @@ import {
 	getIdbSolTransactions,
 	setIdbTransactionsStore
 } from '$lib/api/idb-transactions.api';
+import { delMultiKeysByPrincipal } from '$lib/utils/storage.utils';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
@@ -28,6 +29,8 @@ vi.mock('idb-keyval', () => ({
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn(),
+	delMany: vi.fn(),
+	keys: vi.fn(),
 	update: vi.fn()
 }));
 
@@ -284,10 +287,10 @@ describe('idb-transactions.api', () => {
 		it('should delete BTC tokens', async () => {
 			await deleteIdbBtcTransactions(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
-				mockPrincipal.toText(),
-				expect.any(Object)
-			);
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
+				principal: mockPrincipal,
+				store: expect.any(Object)
+			});
 		});
 	});
 
@@ -295,10 +298,10 @@ describe('idb-transactions.api', () => {
 		it('should delete ETH transactions', async () => {
 			await deleteIdbEthTransactions(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
-				mockPrincipal.toText(),
-				expect.any(Object)
-			);
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
+				principal: mockPrincipal,
+				store: expect.any(Object)
+			});
 		});
 	});
 
@@ -306,10 +309,10 @@ describe('idb-transactions.api', () => {
 		it('should delete IC transactions', async () => {
 			await deleteIdbIcTransactions(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
-				mockPrincipal.toText(),
-				expect.any(Object)
-			);
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
+				principal: mockPrincipal,
+				store: expect.any(Object)
+			});
 		});
 	});
 
@@ -317,10 +320,10 @@ describe('idb-transactions.api', () => {
 		it('should delete SOL transactions', async () => {
 			await deleteIdbSolTransactions(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
-				mockPrincipal.toText(),
-				expect.any(Object)
-			);
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
+				principal: mockPrincipal,
+				store: expect.any(Object)
+			});
 		});
 	});
 });
