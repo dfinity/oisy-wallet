@@ -14,7 +14,7 @@ import {
 	getIdbSolTransactions,
 	setIdbTransactionsStore
 } from '$lib/api/idb-transactions.api';
-import { delMultiKeysByPrincipal } from '$lib/utils/storage.utils';
+import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
