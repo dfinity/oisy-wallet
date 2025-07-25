@@ -51,6 +51,10 @@ vi.mock('$app/stores', () => ({
 	page: mockPage
 }));
 
+vi.mock('$app/state', () => ({
+	page: mockPage
+}));
+
 vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
