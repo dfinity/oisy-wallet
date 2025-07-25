@@ -14,6 +14,7 @@ import type {
 	IdbTransactionsStoreData,
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
+import type { Transaction } from '$lib/types/transaction';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Principal } from '@dfinity/principal';
@@ -94,8 +95,7 @@ export const getIdbBtcTransactions = (
 
 export const getIdbEthTransactions = (
 	params: GetIdbTransactionsParams
-): Promise<EthCertifiedTransactionsData[] | undefined> =>
-	get(toKey(params), idbEthTransactionsStore);
+): Promise<Transaction[] | undefined> => get(toKey(params), idbEthTransactionsStore);
 
 export const getIdbIcTransactions = (
 	params: GetIdbTransactionsParams
