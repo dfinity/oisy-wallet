@@ -2,7 +2,7 @@ import { browser } from '$app/environment';
 import { nullishSignOut } from '$lib/services/auth.services';
 import type { Balance } from '$lib/types/balance';
 import type { GetIdbBalancesParams, SetIdbBalancesParams } from '$lib/types/idb-balances';
-import { delMultiKeysByPrincipal } from '$lib/utils/storage.utils';
+import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { createStore, get, set as idbSet, type UseStore } from 'idb-keyval';
