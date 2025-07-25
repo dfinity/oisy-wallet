@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
 	import EthListener from '$eth/components/core/EthListener.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
@@ -11,21 +12,26 @@
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
 
-	export let token: OptionToken;
+	interface Props {
+		token: OptionToken;
+		children?: Snippet;
+	}
+
+	let { token, children }: Props = $props();
 </script>
 
 {#if isNullish(token) || $authNotSignedIn}
-	<slot />
+	{@render children?.()}
 {:else if isNetworkIdICP(token.network.id)}
-	<slot />
+	{@render children?.()}
 {:else if isNetworkIdBitcoin(token.network.id)}
 	<BitcoinListener>
-		<slot />
+		{@render children?.()}
 	</BitcoinListener>
 {:else if isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)}
 	<EthListener {token}>
-		<slot />
+		{@render children?.()}
 	</EthListener>
 {:else}
-	<slot />
+	{@render children?.()}
 {/if}
