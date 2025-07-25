@@ -14,7 +14,7 @@
 		networkICP,
 		networkSolana
 	} from '$lib/derived/network.derived';
-	import { tokenToggleable } from '$lib/derived/token.derived';
+	import { pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
@@ -91,7 +91,7 @@
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
 	<div class="flex flex-col gap-1">
-		{#if $tokenToggleable}
+		{#if $pageTokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} onclick={hideToken}>
 				{hideTokenLabel}
 			</ButtonMenu>
