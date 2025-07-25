@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
@@ -62,13 +62,13 @@
 	});
 
 	$: loading.set(
-		isRouteTransactions($page)
+		isRouteTransactions(page)
 			? isNullish(pageTokenUi?.balance)
 			: $exchangeNotInitialized || $noPositiveBalanceAndNotAllBalancesZero
 	);
 
 	let isTransactionsPage = false;
-	$: isTransactionsPage = isRouteTransactions($page);
+	$: isTransactionsPage = isRouteTransactions(page);
 
 	$: outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
 

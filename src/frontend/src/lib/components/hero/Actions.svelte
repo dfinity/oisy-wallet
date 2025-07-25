@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
 	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
@@ -49,7 +49,7 @@
 	$: convertBtc = $networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId);
 
 	let isTransactionsPage = false;
-	$: isTransactionsPage = isRouteTransactions($page);
+	$: isTransactionsPage = isRouteTransactions(page);
 
 	let swapAction = false;
 	$: swapAction =

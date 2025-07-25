@@ -2,7 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
@@ -24,10 +24,10 @@
 	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	let tokensRoute: boolean;
-	$: tokensRoute = isRouteTokens($page);
+	$: tokensRoute = isRouteTokens(page);
 
 	let transactionsRoute: boolean;
-	$: transactionsRoute = isRouteTransactions($page);
+	$: transactionsRoute = isRouteTransactions(page);
 
 	let showHero: boolean;
 	$: showHero = tokensRoute || transactionsRoute;
