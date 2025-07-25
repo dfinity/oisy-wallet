@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
 	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
@@ -35,31 +35,25 @@
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
-	let convertEth = false;
-	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
+	let convertEth = $derived($ethToCkETHEnabled && $erc20UserTokensInitialized);
 
-	let convertErc20 = false;
-	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
+	let convertErc20 = $derived($erc20ToCkErc20Enabled && $erc20UserTokensInitialized);
 
-	let convertCkBtc = false;
-	$: convertCkBtc =
-		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	let convertCkBtc = $derived(
+		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20UserTokensInitialized
+	);
 
-	let convertBtc = false;
-	$: convertBtc = $networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId);
+	let convertBtc = $derived($networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId));
 
-	let isTransactionsPage = false;
-	$: isTransactionsPage = isRouteTransactions($page);
+	let isTransactionsPage = $derived(isRouteTransactions(page));
 
-	let swapAction = false;
-	$: swapAction =
-		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP));
+	let swapAction = $derived(
+		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP))
+	);
 
-	let sendAction = true;
-	$: sendAction = !$allBalancesZero || isTransactionsPage;
+	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
-	let buyAction = true;
-	$: buyAction = !$networkICP || nonNullish($pageToken?.buy);
+	let buyAction = $derived(!$networkICP || nonNullish($pageToken?.buy));
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-8">

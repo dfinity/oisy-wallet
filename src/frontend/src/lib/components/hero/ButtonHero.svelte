@@ -9,9 +9,10 @@
 		onclick: () => void;
 		disabled?: boolean;
 		ariaLabel: string;
-		testId?: string | undefined;
+		testId?: string;
 	}
-	let { icon, label, onclick, disabled = false, testId = undefined, ariaLabel }: Props = $props();
+
+	let { icon, label, onclick, disabled = false, testId, ariaLabel }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
