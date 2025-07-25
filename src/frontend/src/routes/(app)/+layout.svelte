@@ -2,7 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
@@ -22,17 +22,23 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
+	import type {Snippet} from "svelte";
 
-	let tokensRoute: boolean;
-	$: tokensRoute = isRouteTokens($page);
+	interface Props {
+		children: Snippet;
+	}
 
-	let transactionsRoute: boolean;
-	$: transactionsRoute = isRouteTransactions($page);
+	let { children }: Props = $props();
 
-	let showHero: boolean;
-	$: showHero = tokensRoute || transactionsRoute;
+	let tokensRoute = $derived(isRouteTokens(page));
 
-	$: token.set($pageToken);
+	let transactionsRoute = $derived(isRouteTransactions(page));
+
+	let showHero = $derived(tokensRoute || transactionsRoute);
+
+	$effect(() => {
+		token.set($pageToken);
+	});
 
 	// Source: https://svelte.dev/blog/view-transitions
 	onNavigate((navigation) => {
@@ -64,22 +70,24 @@
 
 		<AuthGuard>
 			<SplitPane>
-				<NavigationMenu slot="menu">
-					{#if tokensRoute}
-						<Responsive up="xl">
-							<div transition:fade class="hidden xl:block">
-								<DappsCarousel />
-							</div>
-						</Responsive>
-					{/if}
-				</NavigationMenu>
+				{#snippet menu()}
+					<NavigationMenu>
+						{#if tokensRoute}
+							<Responsive up="xl">
+								<div transition:fade class="hidden xl:block">
+									<DappsCarousel />
+								</div>
+							</Responsive>
+						{/if}
+					</NavigationMenu>
+				{/snippet}
 
 				{#if showHero}
 					<Hero />
 				{/if}
 
 				<Loaders>
-					<slot />
+					{@render children()}
 				</Loaders>
 			</SplitPane>
 

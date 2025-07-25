@@ -1,6 +1,13 @@
 <script lang="ts">
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import { SIDEBAR_NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
+	import type {Snippet} from "svelte";
+
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
 </script>
 
 <div
@@ -12,6 +19,6 @@
 	</div>
 
 	<div class="my-4 flex h-full flex-col">
-		<slot />
+		{@render children()}
 	</div>
 </div>
