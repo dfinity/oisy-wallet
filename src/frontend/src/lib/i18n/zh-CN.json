@@ -1289,7 +1289,8 @@
 		},
 		"avatar": {
 			"default": "默认头像",
-			"avatar_for": "$contact 的头像"
+			"avatar_for": "$contact 的头像",
+			"avatar_loading": ""
 		},
 		"edit_avatar": {
 			"menu_title": "联系人图片",

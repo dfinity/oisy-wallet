@@ -52,6 +52,7 @@
 	}: Props = $props();
 
 	let fileInput = $state<HiddenFileInput | undefined>();
+	let loading = $state(false);
 
 	let imageUrl = $derived(nonNullish(contact.image) ? imageToDataUrl(contact.image) : undefined);
 
@@ -60,6 +61,7 @@
 		if (isNullish(selected)) {
 			return;
 		}
+		loading = true;
 
 		// Compress image to 100KB max and resize to max 200px.
 		// This limitation is defined by the backend: check the constraints of the related methods.
@@ -75,14 +77,17 @@
 			return;
 		}
 		await onAvatarEdit(img);
+		loading = false;
 	};
 
 	const replaceImage = (): void => {
 		fileInput?.triggerClick();
 	};
 	const removeImage = (): void => {
+		loading = true;
 		imageUrl = undefined;
 		onAvatarEdit(null);
+		loading = false;
 	};
 </script>
 
@@ -95,6 +100,7 @@
 					image={contact.image}
 					variant="xs"
 					styleClass="md:text-[19.2px]"
+					{loading}
 				/>
 				{#if AVATAR_ENABLED}
 					<span
