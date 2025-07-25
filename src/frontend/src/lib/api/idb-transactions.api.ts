@@ -1,20 +1,22 @@
 import { browser } from '$app/environment';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import { BTC_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_SYMBOL } from '$env/networks/networks.sol.env';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { nullishSignOut } from '$lib/services/auth.services';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
 import type {
 	GetIdbTransactionsParams,
 	IdbTransactionsStoreData,
 	SetIdbTransactionsParams
 } from '$lib/types/idb-transactions';
 import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
+import type { Transaction } from '$lib/types/transaction';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
@@ -69,22 +71,22 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 };
 
 export const setIdbBtcTransactions = (
-	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<BtcTransactionUi>>>
+	params: SetIdbTransactionsParams<BtcCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbBtcTransactionsStore });
 
 export const setIdbEthTransactions = (
-	params: SetIdbTransactionsParams<EthTransactionsData>
+	params: SetIdbTransactionsParams<EthCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbEthTransactionsStore });
 
 export const setIdbIcTransactions = (
-	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<IcTransactionUi>>>
+	params: SetIdbTransactionsParams<IcCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbIcTransactionsStore });
 
 export const setIdbSolTransactions = (
-	params: SetIdbTransactionsParams<CertifiedStoreData<TransactionsData<SolTransactionUi>>>
+	params: SetIdbTransactionsParams<SolCertifiedTransactionsData>
 ): Promise<void> =>
 	setIdbTransactionsStore({ ...params, idbTransactionsStore: idbSolTransactionsStore });
 
@@ -94,7 +96,7 @@ export const getIdbBtcTransactions = (
 
 export const getIdbEthTransactions = (
 	params: GetIdbTransactionsParams
-): Promise<EthTransactionsData[] | undefined> => get(toKey(params), idbEthTransactionsStore);
+): Promise<Transaction[] | undefined> => get(toKey(params), idbEthTransactionsStore);
 
 export const getIdbIcTransactions = (
 	params: GetIdbTransactionsParams

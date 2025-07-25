@@ -36,7 +36,7 @@ describe('eth-transactions.derived', () => {
 
 	describe('ethKnownDestinations', () => {
 		beforeEach(() => {
-			ethTransactionsStore.resetAll();
+			ethTransactionsStore.reset(ETHEREUM_TOKEN_ID);
 			token.reset();
 			ethAddressStore.set({ certified: true, data: mockEthAddress });
 		});

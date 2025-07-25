@@ -71,7 +71,8 @@ describe('idb-transactions.api', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		ethTransactionsStore.resetAll();
+		ethTransactionsStore.reset(mockToken1.id);
+		ethTransactionsStore.reset(mockToken3.id);
 
 		ethTransactionsStore.set({
 			tokenId: mockToken1.id,
