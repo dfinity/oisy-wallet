@@ -1289,7 +1289,8 @@
 		},
 		"avatar": {
 			"default": "Avatar predefinito",
-			"avatar_for": "Avatar per"
+			"avatar_for": "Avatar per",
+			"avatar_loading": ""
 		},
 		"edit_avatar": {
 			"menu_title": "Immagine del Contatto",
