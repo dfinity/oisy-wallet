@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type {Snippet} from 'svelte';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		name: string;
 		logo?: 'start' | 'end';
 		description?: string;
-		icon:Snippet;
+		icon: Snippet;
 	}
 
 	let { name, logo = 'end', description, icon }: Props = $props();
