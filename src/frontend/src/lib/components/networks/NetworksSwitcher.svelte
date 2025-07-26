@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { SUPPORTED_MAINNET_NETWORKS, SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import NetworkSwitcherList from '$lib/components/networks/NetworkSwitcherList.svelte';
@@ -24,7 +24,7 @@
 	const onNetworkSelect = async ({ detail: networkId }: CustomEvent<NetworkId>) => {
 		await switchNetwork(networkId);
 
-		if (isRouteTransactions($page)) {
+		if (isRouteTransactions(page)) {
 			await gotoReplaceRoot();
 		}
 

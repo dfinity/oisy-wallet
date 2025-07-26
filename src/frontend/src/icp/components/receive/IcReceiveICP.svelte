@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -16,7 +16,7 @@
 	const { tokenStandard, open, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const openReceive = (modalId: symbol) => {
-		if (isTokenIcp({ standard: $tokenStandard }) || isRouteTokens($page)) {
+		if (isTokenIcp({ standard: $tokenStandard }) || isRouteTokens(page)) {
 			modalStore.openIcpReceive(modalId);
 			return;
 		}
