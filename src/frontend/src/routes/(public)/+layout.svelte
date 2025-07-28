@@ -1,6 +1,6 @@
 <script lang="ts">
-	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import type { Snippet } from 'svelte';
+	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 
 	interface Props {
 		children: Snippet;

@@ -1,7 +1,7 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children: Snippet;

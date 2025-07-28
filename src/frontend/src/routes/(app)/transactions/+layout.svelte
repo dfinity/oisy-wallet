@@ -1,7 +1,7 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import { token } from '$lib/stores/token.store';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children: Snippet;
