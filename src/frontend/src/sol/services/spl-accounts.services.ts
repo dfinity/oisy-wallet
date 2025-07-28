@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { checkIfAccountExists, loadTokenBalance } from '$sol/api/solana.api';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolInstruction } from '$sol/types/sol-instructions';
@@ -26,7 +27,7 @@ export const calculateAssociatedTokenAddress = async ({
 		mint: solAddress(tokenAddress)
 	});
 
-	return ataAddress;
+	return parseSolAddress(ataAddress);
 };
 
 export const createAtaInstruction = async ({
