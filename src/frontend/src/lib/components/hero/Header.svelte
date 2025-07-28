@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import HelpMenu from '$lib/components/core/HelpMenu.svelte';
@@ -29,7 +29,7 @@
 	</div>
 
 	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
-		{#if $authSignedIn && !isRouteTransactions($page)}
+		{#if $authSignedIn && !isRouteTransactions(page)}
 			<NetworksSwitcher />
 		{/if}
 
