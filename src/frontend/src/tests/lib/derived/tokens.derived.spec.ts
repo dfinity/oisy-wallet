@@ -108,14 +108,8 @@ describe('tokens.derived', () => {
 		symbol: 'SplDefaultTokenId1'
 	};
 
-	const mockSplCustomToken: SplCustomToken = {
-		...mockValidSplToken,
-		id: parseTokenId('SplCustomTokenId2'),
-		symbol: 'SplCustomTokenId2',
-		address: parseSolAddress(`${mockValidSplToken.address}2`),
-		version: undefined,
-		enabled: true
-	};
+	
+
 
   
 	beforeEach(() => {
