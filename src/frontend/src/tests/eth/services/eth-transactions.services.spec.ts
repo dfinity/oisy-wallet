@@ -17,7 +17,7 @@ import { ethAddressStore } from '$lib/stores/address.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';

@@ -471,6 +471,7 @@
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc721_provider": "No Infura ERC721 provider for network $network",
+			"no_infura_erc1155_provider": "No Infura ERC1155 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
@@ -818,6 +819,7 @@
 			"select": "Select >",
 			"select_swap_provider": "Select swap provider",
 			"open_icp_swap": "Open ICP Swap website",
+			"open_instructions_link": "Open instructions link",
 			"select_token": "Select token",
 			"select_network_filter": "Select network"
 		},
@@ -827,9 +829,12 @@
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
 			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
 			"pool_not_found": "Swap failed. Pool not found.",
-			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
+			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",
 			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
-			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance."
+			"swap_failed_withdraw_success": "The swap failed and your tokens were successfully refunded. Please try again or change the swap provider.",
+			"withdraw_failed_first_part": "The swap failed and the sent tokens could not be automatically withdrawn. Please follow ",
+			"withdraw_failed_second_part": "to withdraw them manually on ",
+			"swap_failed_instruction_link": "these instructions "
 		}
 	},
 	"buy": {
@@ -908,7 +913,7 @@
 				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},
 			"error": {
-				"loading_metadata": "Error while loading the metadata of the token.",
+				"loading_metadata": "The specified address is not a valid token in the selected network.",
 				"no_metadata": "No metadata for the token is provided. This is unexpected.",
 				"unexpected_ledger": "Something went wrong while validating the Ledger canister.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
@@ -977,7 +982,6 @@
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
-			"loading_metadata": "Error while loading the metadata of the token.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
@@ -1285,7 +1289,8 @@
 		},
 		"avatar": {
 			"default": "Default avatar",
-			"avatar_for": "Avatar for"
+			"avatar_for": "Avatar for",
+			"avatar_loading": "Avatar is loading..."
 		},
 		"edit_avatar": {
 			"menu_title": "Contact Image",

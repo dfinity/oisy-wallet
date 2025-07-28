@@ -6,10 +6,9 @@ import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
-import type { NftMetadata } from '$lib/types/nft';
+import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { parseNftId } from '$lib/validation/nft.validation';
-import { UrlSchema } from '$lib/validation/url.validation';
+import { parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
@@ -41,38 +40,27 @@ export class InfuraErc721Provider {
 		tokenId
 	}: {
 		contractAddress: string;
-		tokenId: number;
+		tokenId: NftId;
 	}): Promise<NftMetadata> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
-
-		const resolveResourceUrl = (url: URL): URL => {
-			const IPFS_PREFIX = 'ipfs://';
-			if (url.href.startsWith(IPFS_PREFIX)) {
-				return new URL(url.href.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/'));
-			}
-
-			return url;
-		};
 
 		const extractImageUrl = (imageUrl: string | undefined): URL | undefined => {
 			if (isNullish(imageUrl)) {
 				return undefined;
 			}
 
-			const parsedMetadataUrl = UrlSchema.safeParse(imageUrl);
-			if (!parsedMetadataUrl.success) {
-				throw new InvalidMetadataImageUrl(tokenId, contractAddress);
-			}
-
-			return resolveResourceUrl(new URL(parsedMetadataUrl.data));
+			return parseMetadataResourceUrl({
+				url: imageUrl,
+				error: new InvalidMetadataImageUrl(tokenId, contractAddress)
+			});
 		};
 
-		const parsedTokenUri = UrlSchema.safeParse(await erc721Contract.tokenURI(tokenId));
-		if (!parsedTokenUri.success) {
-			throw new InvalidTokenUri(tokenId, contractAddress);
-		}
+		const tokenUri = await erc721Contract.tokenURI(tokenId);
 
-		const metadataUrl = resolveResourceUrl(new URL(parsedTokenUri.data));
+		const metadataUrl = parseMetadataResourceUrl({
+			url: tokenUri,
+			error: new InvalidTokenUri(tokenId, contractAddress)
+		});
 
 		const response = await fetch(metadataUrl);
 		const metadata = await response.json();
@@ -87,7 +75,7 @@ export class InfuraErc721Provider {
 		);
 
 		return {
-			id: parseNftId(tokenId),
+			id: tokenId,
 			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
 			...(nonNullish(metadata.name) && { name: metadata.name }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })

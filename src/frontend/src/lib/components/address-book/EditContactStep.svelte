@@ -33,7 +33,7 @@
 		contact: ContactUi;
 		onClose: () => void;
 		onEdit: (contact: ContactUi) => void;
-		onAvatarEdit: (image: ContactImage) => void;
+		onAvatarEdit: (image: ContactImage | null) => void;
 		onEditAddress: (index: number) => void;
 		onAddAddress: () => void;
 		onDeleteContact: (id: bigint) => void;
@@ -52,6 +52,7 @@
 	}: Props = $props();
 
 	let fileInput = $state<HiddenFileInput | undefined>();
+	let loading = $state(false);
 
 	let imageUrl = $derived(nonNullish(contact.image) ? imageToDataUrl(contact.image) : undefined);
 
@@ -60,6 +61,7 @@
 		if (isNullish(selected)) {
 			return;
 		}
+		loading = true;
 
 		// Compress image to 100KB max and resize to max 200px.
 		// This limitation is defined by the backend: check the constraints of the related methods.
@@ -70,13 +72,22 @@
 		});
 
 		const dataUrl = await imageCompression.getDataUrlFromFile(compressedFile);
-		const img: ContactImage = dataUrlToImage(dataUrl);
-
+		const img = dataUrlToImage(dataUrl);
+		if (isNullish(img)) {
+			return;
+		}
 		await onAvatarEdit(img);
+		loading = false;
 	};
 
 	const replaceImage = (): void => {
 		fileInput?.triggerClick();
+	};
+	const removeImage = (): void => {
+		loading = true;
+		imageUrl = undefined;
+		onAvatarEdit(null);
+		loading = false;
 	};
 </script>
 
@@ -89,13 +100,14 @@
 					image={contact.image}
 					variant="xs"
 					styleClass="md:text-[19.2px]"
+					{loading}
 				/>
 				{#if AVATAR_ENABLED}
 					<span
 						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 						data-tid={`${AVATAR_BADGE}-${contact.name}`}
 					>
-						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={() => {}} />
+						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={removeImage} />
 					</span>
 				{/if}
 			</div>

@@ -29,7 +29,7 @@ export const initCurrencyStore = (): CurrencyStore => {
 			trackEvent({
 				name: TRACK_CHANGE_CURRENCY,
 				metadata: {
-					language: currency,
+					currency,
 					source: getStore(authSignedIn) ? 'app' : 'landing-page'
 				}
 			});

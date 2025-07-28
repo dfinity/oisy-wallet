@@ -38,7 +38,7 @@ describe('ExchangeWorker', () => {
 
 		await waitTimer();
 
-		expect(initExchangeWorker).toHaveBeenCalledTimes(1);
+		expect(initExchangeWorker).toHaveBeenCalledOnce();
 	});
 
 	it('should start the worker once when mounted', async () => {

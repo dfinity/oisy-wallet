@@ -10,10 +10,9 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('EthAddTokenReview', () => {
 	const mockErc721CustomToken: Erc721CustomToken = {

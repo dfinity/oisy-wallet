@@ -6,7 +6,7 @@ import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { token } from '$lib/stores/token.store';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh/dist/candid/minter';
 import { get } from 'svelte/store';
 
@@ -36,7 +36,7 @@ describe('eth-transactions.derived', () => {
 
 	describe('ethKnownDestinations', () => {
 		beforeEach(() => {
-			ethTransactionsStore.resetAll();
+			ethTransactionsStore.reset(ETHEREUM_TOKEN_ID);
 			token.reset();
 			ethAddressStore.set({ certified: true, data: mockEthAddress });
 		});

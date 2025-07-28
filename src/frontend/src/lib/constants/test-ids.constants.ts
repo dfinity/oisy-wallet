@@ -243,6 +243,7 @@ export const AVATAR_IMAGE = 'avatar-image';
 export const AVATAR_WITH_BADGE_FALLBACK_IMAGE = 'avatar-with-badge-fallback-image';
 export const AVATAR_BADGE = 'avatar-badge';
 export const AVATAR_UPLOAD_IMAGE = 'avatar-upload-image';
+export const AVATAR_LOADER = 'avatar-loader';
 
 // Contact Card test IDs
 export const CONTACT_CARD = 'contact-card';
@@ -261,6 +262,8 @@ export const TOKEN_MODAL_SAVE_BUTTON = 'token-modal-save-button';
 export const CONTACT_POPOVER_TRIGGER = 'contact-popover-trigger';
 export const CONTACT_POPOVER_MENU = 'contact-popover-menu';
 export const CONTACT_POPOVER_MENU_ITEM = 'contact-popover-menu-item';
+export const CONTACT_REPLACE_MENU_ITEM = 'contact-replace-menu-item';
+export const CONTACT_REMOVE_MENU_ITEM = 'contact-remove-menu-item';
 
 // AI Assistant
 export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';

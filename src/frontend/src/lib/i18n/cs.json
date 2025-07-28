@@ -471,6 +471,7 @@
 			"no_infura_cketh_provider": "Žádný poskytovatel Infura CkETH pro síť $network",
 			"no_infura_erc20_provider": "Žádný poskytovatel Infura ERC20 pro síť $network",
 			"no_infura_erc721_provider": "Žádný poskytovatel Infura ERC721 pro síť $network",
+			"no_infura_erc1155_provider": "Žádný poskytovatel Infura ERC1155 pro síť $network",
 			"no_infura_erc20_icp_provider": "Žádný poskytovatel Infura ERC20 ICP pro síť $network",
 			"no_solana_network": "Žádná síť Solana pro síť $network",
 			"eth_address_unknown": "Adresa ETH je neznámá.",
@@ -818,6 +819,7 @@
 			"select": "Vybrat >",
 			"select_swap_provider": "Vybrat poskytovatele výměny",
 			"open_icp_swap": "Otevřít webové stránky ICP Swap",
+			"open_instructions_link": "",
 			"select_token": "",
 			"select_network_filter": ""
 		},
@@ -827,9 +829,12 @@
 			"unexpected_missing_data": "Při zahájení transakce výměny se něco pokazilo.",
 			"slippage_exceeded": "$oisy_short vás chrání: Obchod je mimo vaši toleranci skluzu $maxSlippage%. Upravte prosím maximální skluz a zkuste to znovu.",
 			"pool_not_found": "Výměna se nezdařila. Pool nebyl nalezen.",
-			"deposit_error": "Výměna se nezdařila. Nemohli jsme vložit vaše tokeny do poolu. Zkuste to prosím znovu.",
+			"deposit_error": "",
 			"withdraw_failed": "Výměna se nezdařila a výběr také selhal. Zkontrolujte prosím svůj nevyužitý zůstatek a zkuste ruční výběr: ",
-			"swap_failed_withdraw_success": "Výměna se nezdařila. Vaše tokeny byly úspěšně vráceny. Můžete to zkusit znovu nebo zvýšit toleranci skluzu."
+			"swap_failed_withdraw_success": "",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
+			"swap_failed_instruction_link": ""
 		}
 	},
 	"buy": {
@@ -908,7 +913,7 @@
 				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny."
 			},
 			"error": {
-				"loading_metadata": "Chyba při načítání metadat tokenu.",
+				"loading_metadata": "",
 				"no_metadata": "Pro token nejsou k dispozici žádná metadata. To je neočekávané.",
 				"unexpected_ledger": "Při ověřování kanystru účetní knihy se něco pokazilo.",
 				"unexpected_index": "Při ověřování kanystru indexu se něco pokazilo.",
@@ -977,7 +982,6 @@
 			"unexpected": "Při ukládání tokenu se něco pokazilo.",
 			"unexpected_hiding": "Při skrývání tokenu se něco pokazilo.",
 			"already_available": "Token je již k dispozici.",
-			"loading_metadata": "Chyba při načítání metadat tokenu.",
 			"not_toggleable": "Token nelze přepnout, nelze jej skrýt.",
 			"incomplete_metadata": "V metadatech není uveden žádný název ani symbol.",
 			"duplicate_metadata": "Token s podobným názvem nebo symbolem již existuje.",
@@ -1285,7 +1289,8 @@
 		},
 		"avatar": {
 			"default": "Výchozí avatar",
-			"avatar_for": "Avatar pro"
+			"avatar_for": "Avatar pro",
+			"avatar_loading": ""
 		},
 		"edit_avatar": {
 			"menu_title": "",

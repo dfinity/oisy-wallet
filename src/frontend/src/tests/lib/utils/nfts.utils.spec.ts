@@ -1,11 +1,13 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
-import { getNftsByNetworks } from '$lib/utils/nfts.utils';
+import { getNftsByNetworks, parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidNft } from '$tests/mocks/nfts.mock';
 
 describe('nfts.utils', () => {
@@ -157,6 +159,66 @@ describe('nfts.utils', () => {
 			const expectedResult = {};
 
 			expect(result).toEqual(expectedResult);
+		});
+	});
+
+	describe('parseMetadataResourceUrl', () => {
+		const mockError = new NftError(123456, PEPE_TOKEN.address);
+
+		it('should raise an error if URL is not a parseable URL', () => {
+			const url = 'invalid-url';
+
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+		});
+
+		it('should return the same URL if not IPFS protocol', () => {
+			const url = 'https://example.com/metadata.json';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result).toBeInstanceOf(URL);
+			expect(result?.href).toBe(url);
+		});
+
+		it('should transform a valid ipfs:// URL to ipfs.io', () => {
+			const url = 'ipfs://Qm12345abcde/metadata.json';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result).toBeInstanceOf(URL);
+			expect(result?.href).toBe('https://ipfs.io/ipfs/Qm12345abcde/metadata.json');
+		});
+
+		it('should handle malformed IPFS path', () => {
+			const url = 'ipfs://';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('https://ipfs.io/ipfs/');
+		});
+
+		it('should handle transformed IPFS URL with emojis', () => {
+			const url = 'ipfs://??//💣';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('https://ipfs.io/ipfs/??//%F0%9F%92%A3');
+		});
+
+		it('should handle IPFS URL that is not valid per UrlSchema', () => {
+			const url = 'ipfs:??//💣';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('ipfs:??//%F0%9F%92%A3');
+		});
+
+		it('should handle empty IPFS string', () => {
+			const url = 'ipfs:// ';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('ipfs:/');
+		});
+
+		it('should not allow URL with localhost', () => {
+			const url = 'http://localhost:3000/some-data';
+
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
 		});
 	});
 });

@@ -1,7 +1,6 @@
 import type { ContactImage, ImageMimeType } from '$declarations/backend/backend.did';
 import { dataUrlToImage, imageToDataUrl } from '$lib/utils/contact-image.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { vi } from 'vitest';
 
 describe('contact-image.utils', () => {
 	const MOCK_IMAGE: ContactImage = {
@@ -27,8 +26,10 @@ describe('contact-image.utils', () => {
 		it('should correctly parse valid data URL', () => {
 			const result = dataUrlToImage(sampleDataUrl);
 
-			expect(result.mime_type).toEqual({ 'image/png': null });
-			expect(result.data).toEqual(new Uint8Array([10, 20, 30, 40]));
+			expect(result).toBeDefined();
+
+			expect(result?.mime_type).toEqual({ 'image/png': null });
+			expect(result?.data).toEqual(new Uint8Array([10, 20, 30, 40]));
 		});
 	});
 
@@ -36,6 +37,7 @@ describe('contact-image.utils', () => {
 		it('should convert ContactImage to data URL', () => {
 			const result = imageToDataUrl(MOCK_IMAGE);
 
+			expect(result).toBeDefined();
 			expect(result).toMatch(/^data:image\/png;base64,/);
 		});
 	});

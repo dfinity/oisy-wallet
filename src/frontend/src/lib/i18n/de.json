@@ -471,6 +471,7 @@
 			"no_infura_cketh_provider": "Kein Infura CkETH-Anbieter für Netzwerk $network",
 			"no_infura_erc20_provider": "Kein Infura-ERC20-Anbieter für Netzwerk $network",
 			"no_infura_erc721_provider": "Kein Infura-ERC721-Anbieter für Netzwerk $network",
+			"no_infura_erc1155_provider": "Kein Infura-ERC1155-Anbieter für Netzwerk $network",
 			"no_infura_erc20_icp_provider": "Kein Infura-ERC20-ICP-Anbieter für Netzwerk $network",
 			"no_solana_network": "Kein Solana-Netzwerk für Netzwerk $network",
 			"eth_address_unknown": "ETH-Adresse ist unbekannt.",
@@ -818,6 +819,7 @@
 			"select": "Auswählen >",
 			"select_swap_provider": "Tausch-Anbieter auswählen",
 			"open_icp_swap": "ICP Swap-Website öffnen",
+			"open_instructions_link": "Link mit Anweisungen öffnen",
 			"select_token": "Token auswählen",
 			"select_network_filter": "Netzwerk auswählen"
 		},
@@ -827,9 +829,12 @@
 			"unexpected_missing_data": "Beim Starten der Tauschtransaktion ist etwas schiefgelaufen.",
 			"slippage_exceeded": "$oisy_short schützt Dich: Der Handel liegt außerhalb deiner Slippage-Toleranz von $maxSlippage%. Bitte passe die maximale Slippage an und versuche es erneut.",
 			"pool_not_found": "Tausch fehlgeschlagen. Pool nicht gefunden.",
-			"deposit_error": "Tausch fehlgeschlagen. Wir konnten deine Token nicht in den Pool einzahlen. Bitte versuche es erneut.",
+			"deposit_error": "Das Senden der Token für den Tausch ist fehlgeschlagen. Please try again or change the swap provider. Versuche es erneut oder wähle einen anderen Anbieter.",
 			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
-			"swap_failed_withdraw_success": "Tausch fehlgeschlagen. Deine Token wurden erfolgreich zurückerstattet. Du kannst es erneut versuchen oder die Slippage-Toleranz erhöhen."
+			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Tokens wurden erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
+			"withdraw_failed_first_part": "Der Tausch ist fehlgeschlagen und deine Tokens konnten nicht automatisch zurückgeholt werden. Folge ",
+			"withdraw_failed_second_part": "um sie manuell zurückzuholen von ",
+			"swap_failed_instruction_link": "diesen Anweisungen "
 		}
 	},
 	"buy": {
@@ -908,7 +913,7 @@
 				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
 			},
 			"error": {
-				"loading_metadata": "Fehler beim Laden der Metadaten des Tokens.",
+				"loading_metadata": "Die angegebene Adresse ist kein gültiges Token in der gewählten Blockchain",
 				"no_metadata": "Keine Metadaten für das Token verfügbar. Das ist unerwartet.",
 				"unexpected_ledger": "Beim Validieren des Ledger-Canisters ist etwas schiefgelaufen.",
 				"unexpected_index": "Beim Validieren des Index-Canisters ist etwas schiefgelaufen.",
@@ -977,7 +982,6 @@
 			"unexpected": "Beim Speichern des Tokens ist etwas schiefgelaufen.",
 			"unexpected_hiding": "Beim Verbergen des Tokens ist etwas schiefgelaufen.",
 			"already_available": "Token ist bereits verfügbar.",
-			"loading_metadata": "Fehler beim Laden der Metadaten des Tokens.",
 			"not_toggleable": "Token kann nicht ausgeblendet werden.",
 			"incomplete_metadata": "Kein Name oder Symbol in den Metadaten vorhanden.",
 			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol existiert bereits.",
@@ -1285,7 +1289,8 @@
 		},
 		"avatar": {
 			"default": "Standard-Avatar",
-			"avatar_for": "Avatar für"
+			"avatar_for": "Avatar für",
+			"avatar_loading": ""
 		},
 		"edit_avatar": {
 			"menu_title": "Kontakt Avatar",

@@ -33,7 +33,7 @@
 			"more_items": "+$items mục khác",
 			"select": "Chọn",
 			"language": "Ngôn ngữ",
-			"currency": ""
+			"currency": "Tiền tệ"
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!"
@@ -45,7 +45,7 @@
 			"open_details": "Mở chi tiết",
 			"close_details": "Đóng chi tiết",
 			"switch_language": "Chuyển đổi ngôn ngữ",
-			"switch_currency": ""
+			"switch_currency": "Chuyển đổi tiền tệ"
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất"
@@ -470,7 +470,8 @@
 			"no_infura_provider": "Không có nhà cung cấp Infura cho mạng $network",
 			"no_infura_cketh_provider": "Không có nhà cung cấp Infura CkETH cho mạng $network",
 			"no_infura_erc20_provider": "Không có nhà cung cấp Infura ERC20 cho mạng $network",
-			"no_infura_erc721_provider": "",
+			"no_infura_erc721_provider": "Không có nhà cung cấp Infura ERC721 cho mạng $network",
+			"no_infura_erc1155_provider": "Không có nhà cung cấp Infura ERC1155 cho mạng $network",
 			"no_infura_erc20_icp_provider": "Không có nhà cung cấp Infura ERC20 Icp cho mạng $network",
 			"no_solana_network": "Không có mạng Solana cho mạng $network",
 			"eth_address_unknown": "Địa chỉ ETH không xác định.",
@@ -658,7 +659,7 @@
 			"sending": "Đang gửi...",
 			"signing": "Đang ký...",
 			"signing_message": "Đang ký tin nhắn...",
-			"confirming": "",
+			"confirming": "Xác nhận...",
 			"network": "Mạng",
 			"source_network": "Mạng nguồn",
 			"destination_network": "Mạng đích",
@@ -818,6 +819,7 @@
 			"select": "Chọn >",
 			"select_swap_provider": "Chọn nhà cung cấp hoán đổi",
 			"open_icp_swap": "Mở trang web ICP Swap",
+			"open_instructions_link": "",
 			"select_token": "",
 			"select_network_filter": ""
 		},
@@ -827,9 +829,12 @@
 			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch hoán đổi.",
 			"slippage_exceeded": "$oisy_short bảo vệ bạn: Giao dịch nằm ngoài giới hạn trượt giá $maxSlippage% của bạn. Vui lòng điều chỉnh độ trượt tối đa và thử lại.",
 			"pool_not_found": "Hoán đổi thất bại. Không tìm thấy bể thanh khoản.",
-			"deposit_error": "Hoán đổi thất bại. Chúng tôi không thể gửi token của bạn vào bể thanh khoản. Vui lòng thử lại.",
+			"deposit_error": "",
 			"withdraw_failed": "Hoán đổi thất bại và rút tiền cũng thất bại. Vui lòng kiểm tra số dư chưa sử dụng của bạn và thử rút tiền thủ công: ",
-			"swap_failed_withdraw_success": "Hoán đổi thất bại. Token của bạn đã được hoàn lại thành công. Bạn có thể thử lại hoặc tăng giới hạn trượt giá."
+			"swap_failed_withdraw_success": "",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
+			"swap_failed_instruction_link": ""
 		}
 	},
 	"buy": {
@@ -908,7 +913,7 @@
 				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh."
 			},
 			"error": {
-				"loading_metadata": "Lỗi khi tải metadata của token.",
+				"loading_metadata": "",
 				"no_metadata": "Không có metadata nào được cung cấp cho token. Điều này không mong muốn.",
 				"unexpected_ledger": "Đã xảy ra lỗi trong khi xác thực ledger canister.",
 				"unexpected_index": "Đã xảy ra lỗi trong khi xác thực index canister.",
@@ -931,7 +936,7 @@
 				"import_token": "Nhập token",
 				"network": "Mạng",
 				"all_tokens_zero_balance": "Tất cả các token có số dư bằng 0.",
-				"enable_more_assets": ""
+				"enable_more_assets": "Kích hoạt thêm token"
 			},
 			"placeholder": {
 				"select_network": "Chọn mạng"
@@ -977,7 +982,6 @@
 			"unexpected": "Đã xảy ra lỗi trong khi lưu token.",
 			"unexpected_hiding": "Đã xảy ra lỗi trong khi ẩn token.",
 			"already_available": "Token đã có sẵn.",
-			"loading_metadata": "Lỗi khi tải metadata của token.",
 			"not_toggleable": "Token không thể chuyển đổi, không thể ẩn.",
 			"incomplete_metadata": "Không có tên hoặc ký hiệu được cung cấp trong metadata.",
 			"duplicate_metadata": "Đã tồn tại một token có tên hoặc ký hiệu tương tự.",
@@ -1072,7 +1076,7 @@
 			"disconnected": "WalletConnect đã ngắt kết nối.",
 			"session_ended": "Phiên WalletConnect đã kết thúc.",
 			"connected": "WalletConnect đã kết nối.",
-			"transaction_executed": "",
+			"transaction_executed": "WalletConnect \"$method\" yêu cầu được thực hiện.",
 			"sign_executed": "Yêu cầu ký của WalletConnect đã được thực hiện."
 		},
 		"error": {
@@ -1285,13 +1289,14 @@
 		},
 		"avatar": {
 			"default": "Ảnh đại diện mặc định",
-			"avatar_for": "Ảnh đại diện cho"
+			"avatar_for": "Ảnh đại diện cho",
+			"avatar_loading": ""
 		},
 		"edit_avatar": {
-			"menu_title": "",
-			"upload_image": "",
-			"replace_image": "",
-			"remove_image": ""
+			"menu_title": "Chỉnh sửa hình đại diện",
+			"upload_image": "Tải hình đại diện lên",
+			"replace_image": "Thay thế hình đại diện",
+			"remove_image": "Xóa hình đại diện"
 		},
 		"show_contact": {
 			"title": "Liên hệ",
