@@ -48,7 +48,7 @@ jobs:
           path: .eslintcache
           key: eslint-cache-format-${{ github.event.pull_request.number }}
       - name: Format
-        run: eslint . --cache
+        run: npx eslint . --cache
       - name: Save ESLint Cache
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
