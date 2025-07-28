@@ -29,6 +29,11 @@
 		isNetworkIdBTCTestnet,
 		mapNetworkIdToBitcoinNetwork
 	} from '$lib/utils/network.utils';
+	import {trackEvent} from "$lib/services/analytics.services";
+	import {
+		TRACK_COUNT_BTC_SEND_ERROR,
+		TRACK_COUNT_BTC_SEND_SUCCESS,
+	} from "$lib/constants/analytics.contants";
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -121,10 +126,26 @@
 				}
 			});
 
+			trackEvent({
+				name: TRACK_COUNT_BTC_SEND_SUCCESS,
+				metadata: {
+					token: $sendToken.symbol,
+					network: `${networkId.description}`,
+				}
+			});
+
 			sendProgressStep = ProgressStepsSendBtc.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			trackEvent({
+				name: TRACK_COUNT_BTC_SEND_ERROR,
+				metadata: {
+					token: $sendToken.symbol,
+					network: `${networkId.description}`,
+				}
+			});
+
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
 				err
