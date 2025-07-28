@@ -13,8 +13,7 @@
 		hideText?: boolean;
 	}
 
-	let { onHidePopover = () => {}, hideText = false }: Props = $props();
-
+	const { onHidePopover, hideText = false }: Props = $props();
 	const dispatch = createEventDispatcher();
 
 	const logout = async () => {

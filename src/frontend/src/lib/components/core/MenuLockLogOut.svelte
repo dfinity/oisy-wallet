@@ -12,7 +12,7 @@
 		hideText?: boolean;
 	}
 
-	let { onHidePopover = () => {}, hideText = true }: Props = $props();
+	let { onHidePopover, hideText = true }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 	const remainingTimeMilliseconds = $derived($authRemainingTimeStore);
