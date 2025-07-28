@@ -43,19 +43,14 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Restore ESLint Cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          path: .eslintcache
-          key: eslint-cache-format-${{ github.event.pull_request.number }}
-      - name: Print the cache
-        run: |
-          if [ -e .eslintcache ] && [ ! -s .eslintcache ]; then
-          echo "File exists and is empty"
-          else
-          echo "File is missing or not empty"
-          fi
-          echo "Cache contents:"
-          ls -la .eslintcache && echo "Cache exists" || echo "No cache found"
+          name: eslint-cache-format-${{ github.event.pull_request.number }}
+          path: .
+#        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+#        with:
+#          path: .eslintcache
+#          key: eslint-cache-format-${{ github.event.pull_request.number }}
       - name: Format
         run: npm run format
       - name: Save ESLint Cache
