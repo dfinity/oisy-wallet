@@ -74,7 +74,7 @@
 	 * Workers
 	 */
 
-	let worker: { syncAuthIdle: (auth: AuthStoreData) => void } | undefined = $state();
+	let worker = $state<{ syncAuthIdle: (auth: AuthStoreData) => void } | undefined>();
 
 	onMount(async () => (worker = await initAuthWorker()));
 
