@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import pengu from '$sol/assets/pengu.png';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,6 +21,6 @@ export const PENGU_TOKEN: RequiredSplToken = {
 	symbol: PENGU_SYMBOL,
 	decimals: PENGU_DECIMALS,
 	icon: pengu,
-	address: '2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv',
+	address: parseSolAddress('2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv'),
 	owner: TOKEN_PROGRAM_ADDRESS
 };
