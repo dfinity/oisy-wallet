@@ -215,7 +215,9 @@ export const getTokenInfo = async ({
 
 	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
 
-	const { owner, data } = value ?? {};
+	const { owner: unparsedOwner, data } = value ?? {};
+
+	const owner = nonNullish(unparsedOwner) ? parseSolAddress(unparsedOwner) : undefined;
 
 	if (isNullish(data) || !('parsed' in data)) {
 		return { owner, decimals: 0 };

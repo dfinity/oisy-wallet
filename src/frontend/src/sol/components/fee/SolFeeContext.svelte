@@ -66,7 +66,7 @@
 
 		const solNetwork = safeMapNetworkIdToNetwork($sendTokenNetworkId);
 
-		// we check if it is an ATA address and if it is not closed, if it isnt an ATA address or has been closed we need to charge the ATA fee
+        // We check if it is an ATA address and if it is not closed, if it isn't an ATA address or has been closed, we need to charge the ATA fee
 		if (
 			(await isAtaAddress({ address: destination, network: solNetwork })) &&
 			(await checkIfAccountExists({ address: destination, network: solNetwork }))
