@@ -14,28 +14,30 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 
-	export let slippageValue: OptionAmount;
-	export let name = 'swap-slippage';
+	interface Props {
+		slippageValue: OptionAmount;
+		name?: string;
+	}
 
-	let parsedValue: number;
-	$: parsedValue = nonNullish(slippageValue) ? Number(slippageValue) : 0;
+	let { slippageValue = $bindable(undefined), name = 'swap-slippage' }: Props = $props();
 
-	let slippageValueWarning: boolean;
-	$: slippageValueWarning =
-		parsedValue < SWAP_SLIPPAGE_INVALID_VALUE && parsedValue >= SWAP_SLIPPAGE_WARNING_VALUE;
+	let parsedValue = $derived(nonNullish(slippageValue) ? Number(slippageValue) : 0);
 
-	let slippageValueError: boolean;
-	$: slippageValueError = parsedValue >= SWAP_SLIPPAGE_INVALID_VALUE || parsedValue <= 0;
+	let slippageValueWarning = $derived(
+		parsedValue < SWAP_SLIPPAGE_INVALID_VALUE && parsedValue >= SWAP_SLIPPAGE_WARNING_VALUE
+	);
 
-	let toggleContent: () => void;
-	let expanded = false;
+	let slippageValueError = $derived(parsedValue >= SWAP_SLIPPAGE_INVALID_VALUE || parsedValue <= 0);
+
+	let cmp = $state<Collapsible | undefined>(undefined);
+	let expanded = $state(false);
 
 	const extendedToggleContent = () => {
 		expanded = !expanded;
-		toggleContent();
+		cmp?.toggleContent();
 	};
 
-	let focused: boolean;
+	let focused = $state(false);
 	const onFocus = () => (focused = true);
 	const onBlur = () => (focused = false);
 
@@ -52,7 +54,7 @@
 	<button
 		class="ml-2 flex gap-1 rounded-md px-2 py-0.5 text-sm font-bold hover:bg-brand-subtle-30"
 		aria-label={$i18n.swap.text.max_slippage}
-		on:click={extendedToggleContent}
+		onclick={extendedToggleContent}
 		class:bg-brand-subtle-20={!slippageValueError && !slippageValueWarning}
 		class:hover:bg-brand-subtle-30={!slippageValueError && !slippageValueWarning}
 		class:text-brand-primary={!slippageValueError && !slippageValueWarning}
@@ -73,7 +75,8 @@
 
 <div class="-m-2">
 	<!-- todo: css hack, fix in gix component -->
-	<Collapsible expandButton={false} externalToggle={true} bind:toggleContent>
+	<Collapsible expandButton={false} externalToggle={true} bind:this={cmp}>
+		{#snippet header()}{/snippet}
 		<div class="p-2"
 			><!-- offset above hack -->
 			<div class="flex items-center">
@@ -86,13 +89,15 @@
 						on:focus={onFocus}
 						on:blur={onBlur}
 					>
-						<span class="text-tertiary" slot="inner-end">%</span>
+						{#snippet innerEnd()}
+							<span class="text-tertiary">%</span>
+						{/snippet}
 					</TokenInputCurrency>
 				</TokenInputContainer>
 
 				{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue (presetValue)}
 					<Button
-						on:click={() => onPresetValueClick(presetValue)}
+						onclick={() => onPresetValueClick(presetValue)}
 						colorStyle="secondary-light"
 						styleClass={`${nonNullish(slippageValue) && presetValue === Number(slippageValue) ? 'border border-brand-primary' : ''} min-w-16 ml-3 h-12 flex-initial`}
 						paddingSmall={true}

@@ -11,18 +11,14 @@ import type { EthereumNetwork } from '$eth/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import {
 	createMockEtherscanInternalTransactions,
 	createMockEtherscanTransactions
 } from '$tests/mocks/etherscan.mock';
 import en from '$tests/mocks/i18n.mock';
-import {
-	EtherscanPlugin,
-	EtherscanProvider as EtherscanProviderLib,
-	Network
-} from 'ethers/providers';
-import type { MockedClass } from 'vitest';
+import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
 
 vi.mock('$env/rest/etherscan.env', () => ({
 	ETHERSCAN_API_KEY: 'test-api-key'
@@ -45,23 +41,13 @@ describe('etherscan.providers', () => {
 		});
 	});
 
-	it('should attach the custom plugin to the providers', () => {
-		const ETHERSCAN_PLUGIN = new EtherscanPlugin('https://api.etherscan.io/v2');
-
-		expect(Network.prototype.attachPlugin).toHaveBeenCalledTimes(networks.length);
-
-		networks.forEach((_, index) => {
-			expect(Network.prototype.attachPlugin).toHaveBeenNthCalledWith(index + 1, ETHERSCAN_PLUGIN);
-		});
-	});
-
 	describe('EtherscanProvider', () => {
 		const network: Network = new Network(ETHEREUM_NETWORK.name, ETHEREUM_NETWORK.chainId);
 		const { chainId } = ETHEREUM_NETWORK;
 		const address = mockEthAddress;
 
 		const mockFetch = vi.fn();
-		const mockProvider = EtherscanProviderLib as MockedClass<typeof EtherscanProviderLib>;
+		const mockProvider = vi.mocked(EtherscanProviderLib);
 		mockProvider.prototype.fetch = mockFetch;
 
 		beforeEach(() => {
@@ -165,7 +151,6 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(1, 'account', {
-					chainId,
 					action: 'txlist',
 					address,
 					startblock: 0,
@@ -183,7 +168,6 @@ describe('etherscan.providers', () => {
 
 				expect(mockFetch).toHaveBeenCalledTimes(2);
 				expect(mockFetch).toHaveBeenNthCalledWith(2, 'account', {
-					chainId,
 					action: 'txlistinternal',
 					address,
 					startblock: 0,
@@ -253,7 +237,7 @@ describe('etherscan.providers', () => {
 
 					expect(provider).toBeDefined();
 
-					expect(mockFetch).toHaveBeenCalledTimes(1);
+					expect(mockFetch).toHaveBeenCalledOnce();
 
 					expect(result).toStrictEqual(expectedTransactions);
 				});
@@ -269,25 +253,75 @@ describe('etherscan.providers', () => {
 			});
 		});
 
-		describe('etherscanProviders', () => {
-			networks.forEach(({ id, name }) => {
-				it(`should return the correct provider for ${name} network`, () => {
-					const provider = etherscanProviders(id);
+		describe('erc721TokenInventory', () => {
+			const mockApiResponse = [
+				{
+					TokenAddress: mockEthAddress,
+					TokenId: '1'
+				},
+				{
+					TokenAddress: mockEthAddress2,
+					TokenId: '2'
+				},
+				{
+					TokenAddress: mockEthAddress3,
+					TokenId: '3'
+				}
+			];
 
-					expect(provider).toBeInstanceOf(EtherscanProvider);
+			const expectedTokenIds = [1, 2, 3];
 
-					expect(provider).toHaveProperty('network');
-					expect(provider).toHaveProperty('chainId');
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				mockFetch.mockResolvedValue(mockApiResponse);
+			});
+
+			it('should fetch and map token ids correctly', async () => {
+				const provider = new EtherscanProvider(network, chainId);
+
+				const tokenIds = await provider.erc721TokenInventory({
+					address: mockEthAddress,
+					contractAddress: mockValidErc721Token.address
 				});
+
+				expect(mockFetch).toHaveBeenCalledOnce();
+
+				expect(tokenIds).toStrictEqual(expectedTokenIds);
 			});
 
-			it('should throw an error for an unsupported network ID', () => {
-				expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
-					replacePlaceholders(en.init.error.no_etherscan_provider, {
-						$network: ICP_NETWORK_ID.toString()
+			it('should throw an error if the API call fails', async () => {
+				const provider = new EtherscanProvider(network, chainId);
+				mockFetch.mockRejectedValue(new Error('Network error'));
+
+				await expect(
+					provider.erc721TokenInventory({
+						address: mockEthAddress,
+						contractAddress: mockValidErc721Token.address
 					})
-				);
+				).rejects.toThrow('Network error');
 			});
+		});
+	});
+
+	describe('etherscanProviders', () => {
+		networks.forEach(({ id, name }) => {
+			it(`should return the correct provider for ${name} network`, () => {
+				const provider = etherscanProviders(id);
+
+				expect(provider).toBeInstanceOf(EtherscanProvider);
+
+				expect(provider).toHaveProperty('network');
+				expect(provider).toHaveProperty('chainId');
+			});
+		});
+
+		it('should throw an error for an unsupported network ID', () => {
+			expect(() => etherscanProviders(ICP_NETWORK_ID)).toThrow(
+				replacePlaceholders(en.init.error.no_etherscan_provider, {
+					$network: ICP_NETWORK_ID.toString()
+				})
+			);
 		});
 	});
 });

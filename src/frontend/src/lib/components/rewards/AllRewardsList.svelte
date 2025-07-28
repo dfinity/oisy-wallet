@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
+	import oisyEpisodeFour from '$lib/assets/oisy-episode-four-coming.svg';
+	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
 	import {
@@ -15,33 +17,40 @@
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
-	const ongoingCampaigns: RewardDescription[] = rewardCampaigns.filter(({ startDate, endDate }) =>
-		isOngoingCampaign({ startDate, endDate })
+	const ongoingCampaigns: RewardCampaignDescription[] = rewardCampaigns.filter(
+		({ startDate, endDate }) => isOngoingCampaign({ startDate, endDate })
 	);
 
-	const upcomingCampaigns: RewardDescription[] = rewardCampaigns.filter(({ startDate }) =>
+	const upcomingCampaigns: RewardCampaignDescription[] = rewardCampaigns.filter(({ startDate }) =>
 		isUpcomingCampaign(startDate)
 	);
 
-	const endedCampaigns: RewardDescription[] = rewardCampaigns.filter(({ endDate }) =>
+	const endedCampaigns: RewardCampaignDescription[] = rewardCampaigns.filter(({ endDate }) =>
 		isEndedCampaign(endDate)
 	);
 </script>
 
-<RewardsFilter
-	bind:rewardState={selectedRewardState}
-	endedCampaignsAmount={endedCampaigns.length}
-/>
-
-{#if selectedRewardState === RewardStates.ONGOING}
-	<RewardsGroup rewards={ongoingCampaigns} testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER} />
-
-	<RewardsGroup
-		title={$i18n.rewards.text.upcoming_campaigns}
-		rewards={upcomingCampaigns}
-		altText={replaceOisyPlaceholders($i18n.rewards.alt.upcoming_campaigns)}
-		testId={REWARDS_UPCOMING_CAMPAIGNS_CONTAINER}
+<RewardsEligibilityContext>
+	<RewardsFilter
+		bind:rewardState={selectedRewardState}
+		endedCampaignsAmount={endedCampaigns.length}
 	/>
-{:else if selectedRewardState === RewardStates.ENDED}
-	<RewardsGroup rewards={endedCampaigns} testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER} />
-{/if}
+
+	{#if selectedRewardState === RewardStates.ONGOING}
+		<RewardsGroup
+			rewards={ongoingCampaigns}
+			testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}
+			altImg={oisyEpisodeFour}
+			altText={replaceOisyPlaceholders($i18n.rewards.alt.coming_soon)}
+		/>
+
+		<RewardsGroup
+			title={replaceOisyPlaceholders($i18n.rewards.text.upcoming_campaigns)}
+			rewards={upcomingCampaigns}
+			altText={replaceOisyPlaceholders($i18n.rewards.alt.upcoming_campaigns)}
+			testId={REWARDS_UPCOMING_CAMPAIGNS_CONTAINER}
+		/>
+	{:else if selectedRewardState === RewardStates.ENDED}
+		<RewardsGroup rewards={endedCampaigns} testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER} />
+	{/if}
+</RewardsEligibilityContext>

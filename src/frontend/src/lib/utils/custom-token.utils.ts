@@ -1,5 +1,12 @@
-import type { CustomToken, IcrcToken, SplToken } from '$declarations/backend/backend.did';
 import type {
+	CustomToken,
+	ErcToken,
+	IcrcToken,
+	SplToken,
+	Token
+} from '$declarations/backend/backend.did';
+import type {
+	ErcSaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
@@ -17,6 +24,14 @@ const toIcrcCustomToken = ({
 	)
 });
 
+const toErcCustomToken = ({
+	address: token_address,
+	chainId: chain_id
+}: ErcSaveCustomToken): ErcToken => ({
+	token_address,
+	chain_id
+});
+
 const toSplCustomToken = ({
 	address: token_address,
 	decimals,
@@ -30,15 +45,44 @@ const toSplCustomToken = ({
 export const toCustomToken = ({
 	enabled,
 	version,
-	networkKey,
 	...rest
-}: SaveCustomTokenWithKey): CustomToken => ({
-	enabled,
-	version: toNullable(version),
-	token:
-		networkKey === 'Icrc'
-			? { Icrc: toIcrcCustomToken(rest as IcrcSaveCustomToken) }
-			: networkKey === 'SplMainnet'
-				? { SplMainnet: toSplCustomToken(rest as SplSaveCustomToken) }
-				: { SplDevnet: toSplCustomToken(rest as SplSaveCustomToken) }
-});
+}: SaveCustomTokenWithKey): CustomToken => {
+	const toCustomTokenMap = (): Token => {
+		const { networkKey } = rest;
+
+		if (networkKey === 'Icrc') {
+			return { Icrc: toIcrcCustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc20') {
+			return { Erc20: toErcCustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc721') {
+			return { Erc721: toErcCustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc1155') {
+			return { Erc1155: toErcCustomToken(rest) };
+		}
+
+		if (networkKey === 'SplMainnet') {
+			return { SplMainnet: toSplCustomToken(rest) };
+		}
+
+		if (networkKey === 'SplDevnet') {
+			return { SplDevnet: toSplCustomToken(rest) };
+		}
+
+		// Force compiler error on unhandled cases based on leftover types
+		const _: never = networkKey;
+
+		throw new Error(`Unsupported network key: ${networkKey}`);
+	};
+
+	return {
+		enabled,
+		version: toNullable(version),
+		token: toCustomTokenMap()
+	};
+};

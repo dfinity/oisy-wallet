@@ -68,7 +68,7 @@
 				: undefined;
 	};
 
-	$: $payload, onPayload();
+	$: ($payload, onPayload());
 
 	type Text = { title: string; content: string } | undefined;
 
@@ -137,7 +137,7 @@
 		</div>
 
 		<ButtonGroup>
-			<Button colorStyle="error" on:click={onReject}>
+			<Button colorStyle="error" onclick={onReject}>
 				{$i18n.core.text.reject}
 			</Button>
 			<Button colorStyle="success" type="submit">

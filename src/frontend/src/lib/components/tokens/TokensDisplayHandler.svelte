@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
@@ -9,7 +9,7 @@
 	export let tokens: TokenUiOrGroupUi[] | undefined = undefined;
 
 	let groupedTokens: TokenUiOrGroupUi[];
-	$: groupedTokens = groupTokensByTwin($combinedDerivedSortedNetworkTokensUi);
+	$: groupedTokens = groupTokensByTwin($combinedDerivedSortedFungibleNetworkTokensUi);
 
 	let sortedTokensOrGroups: TokenUiOrGroupUi[];
 	$: sortedTokensOrGroups = filterTokenGroups({
@@ -21,7 +21,7 @@
 
 	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 500);
 
-	$: sortedTokensOrGroups, debounceUpdateTokensToDisplay();
+	$: (sortedTokensOrGroups, debounceUpdateTokensToDisplay());
 </script>
 
 <slot />

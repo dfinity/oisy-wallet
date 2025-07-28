@@ -3,36 +3,61 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let {
 		content,
 		contentHeader,
-		contentFooter
+		contentFooter,
+		showContentHeader = false
 	}: {
 		content: Snippet;
-		contentHeader: Snippet;
+		contentHeader: Snippet<[{ isInBottomSheet: boolean }]>;
 		contentFooter?: Snippet<[closeFn: () => void]>;
+		showContentHeader?: boolean;
 	} = $props();
 
 	let expanded = $state(false);
 </script>
 
 <Responsive down="sm">
+	<div class="flex w-full items-center justify-between">
+		{@render contentHeader({ isInBottomSheet: false })}
+		<ButtonIcon
+			onclick={() => (expanded = true)}
+			ariaLabel={$i18n.core.alt.open_details}
+			colorStyle="muted"
+			styleClass="text-disabled mb-2 items-end"
+			width="w-8"
+		>
+			{#snippet icon()}
+				<IconInfo />
+			{/snippet}
+		</ButtonIcon>
+	</div>
+
 	{#if expanded}
-		<div class="z-14 fixed bottom-0 left-0 right-0 top-0">
+		<div class="z-14 fixed inset-0">
 			<BottomSheet on:nnsClose={() => (expanded = false)} transition>
 				<div slot="header" class="w-full p-4">
 					<ButtonIcon
-						on:click={() => (expanded = false)}
+						onclick={() => (expanded = false)}
 						styleClass="text-disabled float-right"
-						ariaLabel="close"
+						ariaLabel={$i18n.core.alt.close_details}
 					>
-						<IconClose slot="icon" size="24" />
+						{#snippet icon()}
+							<IconClose size="24" />
+						{/snippet}
 					</ButtonIcon>
 				</div>
-				<div class="min-h-[35vh] w-full pb-4 pl-4 pr-4">
+
+				<div class="min-h-[35vh] w-full px-4 pb-4">
+					{#if showContentHeader}
+						{@render contentHeader({ isInBottomSheet: true })}
+					{/if}
 					{@render content()}
 				</div>
 				<div slot="footer" class="w-full p-4">
@@ -48,13 +73,22 @@
 	{/if}
 </Responsive>
 
-<Collapsible bind:expanded initiallyExpanded={expanded}>
-	<!-- The width of the item below should be 100% - collapsible expand button width (1.5rem) -->
-	<div class="flex w-[calc(100%-2rem)] items-center" slot="header">
-		{@render contentHeader()}
-	</div>
+<Responsive up="md">
+	<div class="modal-expandable-values">
+		<Collapsible bind:expanded initiallyExpanded={expanded}>
+			{#snippet header()}
+				<div class="flex w-[calc(100%-1.5rem)] items-center">
+					{@render contentHeader({ isInBottomSheet: false })}
+				</div>
+			{/snippet}
 
-	<Responsive up="md">
-		{@render content()}
-	</Responsive>
-</Collapsible>
+			{@render content()}
+		</Collapsible>
+	</div>
+</Responsive>
+
+<style lang="scss">
+	:global(.modal-expandable-values > div.contents > div.header > button.collapsible-expand-icon) {
+		justify-content: flex-end;
+	}
+</style>

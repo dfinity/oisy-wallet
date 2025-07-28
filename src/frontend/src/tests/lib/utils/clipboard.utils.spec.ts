@@ -1,7 +1,7 @@
 import * as toastsStore from '$lib/stores/toasts.store';
 import { copyToClipboard } from '$lib/utils/clipboard.utils';
 import { copyText } from '$lib/utils/share.utils';
-import type { MockedFunction, MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/utils/share.utils', () => ({
 	copyText: vi.fn()
@@ -11,7 +11,7 @@ describe('clipboard.utils', () => {
 	describe('copyToClipboard', () => {
 		let spyToastsShow: MockInstance;
 
-		const mockCopyText = copyText as MockedFunction<typeof copyText>;
+		const mockCopyText = vi.mocked(copyText);
 
 		const text = 'Copied!';
 		const value = 'text to copy';
@@ -21,7 +21,7 @@ describe('clipboard.utils', () => {
 
 			spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
 
-			mockCopyText.mockImplementation(() => Promise.resolve());
+			mockCopyText.mockResolvedValue(undefined);
 		});
 
 		it('should copy text to clipboard', async () => {

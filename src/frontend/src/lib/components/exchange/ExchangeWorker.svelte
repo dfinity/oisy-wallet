@@ -4,6 +4,7 @@
 	import { EXCHANGE_DISABLED } from '$env/exchange.env';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { type ExchangeWorker, initExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
 
@@ -23,19 +24,21 @@
 	const syncTimer = () => {
 		worker?.stopExchangeTimer();
 		worker?.startExchangeTimer({
+			currentCurrency: $currentCurrency,
 			erc20Addresses: $enabledMergedErc20TokensAddresses,
 			icrcCanisterIds: $enabledIcrcLedgerCanisterIdsNoCk,
 			splAddresses: $enabledSplTokenAddresses
 		});
 	};
 
-	const debounceSyncTimer = debounce(syncTimer);
+	const debounceSyncTimer = debounce(syncTimer, 1000);
 
-	$: worker,
+	$: (worker,
+		$currentCurrency,
 		$enabledMergedErc20TokensAddresses,
 		$enabledIcrcLedgerCanisterIdsNoCk,
 		$enabledSplTokenAddresses,
-		debounceSyncTimer();
+		debounceSyncTimer());
 </script>
 
 <slot />

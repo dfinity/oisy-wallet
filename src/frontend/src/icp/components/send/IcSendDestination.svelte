@@ -4,6 +4,7 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { NetworkId } from '$lib/types/network';
 	import type { TokenStandard } from '$lib/types/token';
 	import type { KnownDestinations } from '$lib/types/transactions';
@@ -14,6 +15,7 @@
 	export let tokenStandard: TokenStandard;
 	export let invalidDestination = false;
 	export let knownDestinations: KnownDestinations | undefined = undefined;
+	export let networkContacts: NetworkContacts | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -30,7 +32,7 @@
 
 	const debounceValidateInit = debounce(init);
 
-	$: destination, tokenStandard, networkId, debounceValidateInit();
+	$: (destination, tokenStandard, networkId, debounceValidateInit());
 
 	let inputPlaceholder: string;
 	$: inputPlaceholder = isNetworkIdEthereum(networkId)
@@ -44,7 +46,8 @@
 	bind:destination
 	bind:invalidDestination
 	{knownDestinations}
-	{isInvalidDestination}
+	{networkContacts}
+	onInvalidDestination={isInvalidDestination}
 	{inputPlaceholder}
 	on:icQRCodeScan
 	onQRButtonClick={() => dispatch('icQRCodeScan')}

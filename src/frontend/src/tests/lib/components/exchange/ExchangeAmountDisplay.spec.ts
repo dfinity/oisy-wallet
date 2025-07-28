@@ -1,6 +1,7 @@
 import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
-import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
-import { formatUSD } from '$lib/utils/format.utils';
+import { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
+import { formatCurrency } from '$lib/utils/format.utils';
 import { render } from '@testing-library/svelte';
 
 describe('ExchangeAmountDisplay', () => {
@@ -19,6 +20,8 @@ describe('ExchangeAmountDisplay', () => {
 
 	const expectedAmount = '123456789.123 MOCK';
 
+	const usdMinimum = 0.01;
+
 	it('should render the amount', () => {
 		const { getByText } = render(ExchangeAmountDisplay, { props: mockProps });
 
@@ -34,10 +37,19 @@ describe('ExchangeAmountDisplay', () => {
 	});
 
 	describe('with exchange rate', () => {
-		it('should correctly render the USD amount if it is greater or equal than the threshold', () => {
-			const mockExchangeRateBigAmount = (EXCHANGE_USD_AMOUNT_THRESHOLD * 2) / mockAmountNumber;
+		const formatParams = {
+			currency: Currency.USD,
+			exchangeRate: {
+				currency: Currency.USD,
+				exchangeRateToUsd: 1
+			},
+			language: Languages.ENGLISH
+		};
 
-			const expectedUsdAmount = `( ${formatUSD({ value: mockAmountNumber * mockExchangeRateBigAmount })} )`;
+		it('should correctly render the USD amount if it is greater or equal than the threshold', () => {
+			const mockExchangeRateBigAmount = (usdMinimum * 2) / mockAmountNumber;
+
+			const expectedUsdAmount = `( ${formatCurrency({ value: mockAmountNumber * mockExchangeRateBigAmount, ...formatParams })} )`;
 
 			const { getByText } = render(ExchangeAmountDisplay, {
 				props: { ...mockProps, exchangeRate: mockExchangeRateBigAmount }
@@ -47,9 +59,9 @@ describe('ExchangeAmountDisplay', () => {
 		});
 
 		it('should render the threshold if the USD amount is less the threshold', () => {
-			const mockExchangeRateSmallAmount = EXCHANGE_USD_AMOUNT_THRESHOLD / 2 / mockAmountNumber;
+			const mockExchangeRateSmallAmount = usdMinimum / 2 / mockAmountNumber;
 
-			const expectedUsdAmount = `( < ${formatUSD({ value: EXCHANGE_USD_AMOUNT_THRESHOLD })} )`;
+			const expectedUsdAmount = `( < ${formatCurrency({ value: usdMinimum, ...formatParams })} )`;
 
 			const { getByText } = render(ExchangeAmountDisplay, {
 				props: { ...mockProps, exchangeRate: mockExchangeRateSmallAmount }

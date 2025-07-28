@@ -3,9 +3,16 @@
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import type { Network } from '$lib/types/network';
 
-	export let network: Network;
+	interface Props {
+		network: Network;
+		logo?: 'start' | 'end';
+	}
+
+	const { network, logo = 'end' }: Props = $props();
 </script>
 
-<TextWithLogo name={network.name}>
-	<NetworkLogo slot="icon" {network} />
+<TextWithLogo name={network.name} {logo}>
+	{#snippet icon()}
+		<NetworkLogo {network} />
+	{/snippet}
 </TextWithLogo>

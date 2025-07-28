@@ -1,14 +1,19 @@
-import { type AddressSchema, type SolAddressSchema } from '$lib/schema/address.schema';
+import type {
+	AddressSchema,
+	BtcAddressSchema,
+	EthAddressSchema,
+	SolAddressSchema
+} from '$lib/schema/address.schema';
 import type { Option } from '$lib/types/utils';
-import type { z } from 'zod';
+import type * as z from 'zod/v4';
 
 export type Address = z.infer<typeof AddressSchema>;
 
 // TODO: create own brand for BTC address
-export type BtcAddress = Address;
+export type BtcAddress = z.infer<typeof BtcAddressSchema>;
 
 // TODO: create own brand for ETH address
-export type EthAddress = Address;
+export type EthAddress = z.infer<typeof EthAddressSchema>;
 
 export type SolAddress = z.infer<typeof SolAddressSchema>;
 

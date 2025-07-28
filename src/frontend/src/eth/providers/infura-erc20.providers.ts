@@ -4,6 +4,7 @@ import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Metadata } from '$eth/types/erc20';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -47,7 +48,7 @@ export class InfuraErc20Provider implements Erc20Provider {
 		return erc20Contract.balanceOf(address);
 	};
 
-	getFeeData = ({
+	getFeeData = async ({
 		contract: { address: contractAddress },
 		to,
 		from,
@@ -59,7 +60,18 @@ export class InfuraErc20Provider implements Erc20Provider {
 		amount: bigint;
 	}): Promise<bigint> => {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
-		return erc20Contract.approve.estimateGas(to, amount, { from });
+
+		const results = await Promise.allSettled([
+			erc20Contract.approve.estimateGas(to, amount, { from }),
+			erc20Contract.transfer.estimateGas(to, amount, { from })
+		]);
+
+		return results.reduce((max, result) => {
+			if (result.status === 'fulfilled' && result.value > max) {
+				return result.value;
+			}
+			return max;
+		}, ZERO);
 	};
 
 	// Transaction send: https://ethereum.stackexchange.com/a/131944
@@ -101,6 +113,19 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}): Promise<bigint> => {
 		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.allowance(owner, spender);
+	};
+
+	// We use this function to differentiate between Erc20 and Erc721 contracts, because currently we do
+	// not have another way to find out the token standard only by contract address.
+	isErc20 = async ({ contractAddress }: { contractAddress: string }): Promise<boolean> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+
+		try {
+			await erc20Contract.decimals();
+			return true;
+		} catch (_: unknown) {
+			return false;
+		}
 	};
 }
 

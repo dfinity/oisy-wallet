@@ -15,7 +15,7 @@ import { userProfileStore } from '$lib/stores/user-profile.store';
 import { emit } from '$lib/utils/events.utils';
 import * as solAddressServices from '$sol/services/sol-address.services';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
@@ -186,6 +186,8 @@ describe('AddressGuard', () => {
 									[{ EthereumMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ ArbitrumMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
 								]
 							}
@@ -294,7 +296,7 @@ describe('AddressGuard', () => {
 					});
 
 					await waitFor(() => {
-						expect(validateSpy).toHaveBeenCalledTimes(1);
+						expect(validateSpy).toHaveBeenCalledOnce();
 					});
 
 					emit({ message: 'oisyValidateAddresses' });

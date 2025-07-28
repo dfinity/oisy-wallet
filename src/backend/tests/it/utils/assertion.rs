@@ -1,4 +1,4 @@
-use shared::types::{custom_token::CustomToken, user_profile::OisyUser};
+use shared::types::custom_token::CustomToken;
 
 pub fn assert_tokens_data_eq<T: PartialEq + std::fmt::Debug>(
     results_tokens: &[T],
@@ -32,17 +32,6 @@ pub fn assert_custom_tokens_eq(
         assert_eq!(
             token, expected,
             "Result custom token differs from expected custom token: {token:?} vs {expected:?}"
-        );
-    }
-}
-
-pub fn assert_user_profiles_eq(results_users: Vec<OisyUser>, expected_users: Vec<OisyUser>) {
-    assert_eq!(results_users.len(), expected_users.len(),);
-
-    for (user, expected) in results_users.iter().zip(expected_users.iter()) {
-        assert_eq!(
-            user, expected,
-            "Result users differs from expected user: {user:?} vs {expected:?}"
         );
     }
 }

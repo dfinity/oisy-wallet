@@ -11,8 +11,8 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import type { TokenUi } from '$lib/types/token';
-import type { TokenUiGroup } from '$lib/types/token-group';
+import type { Token, TokenUi } from '$lib/types/token';
+import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import { last } from '$lib/utils/array.utils';
 import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 import {
@@ -20,6 +20,7 @@ import {
 	groupSecondaryToken,
 	groupTokens,
 	groupTokensByTwin,
+	sortTokenOrGroupUi,
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
 import { bn1Bi, bn2Bi, bn3Bi } from '$tests/mocks/balances.mock';
@@ -183,9 +184,6 @@ describe('token-group.utils', () => {
 
 			expect(groupedTokens).toHaveLength(3);
 
-			expect(groupedTokens[0]).toHaveProperty('group.nativeToken', reorderedTokens[1]);
-			expect(groupedTokens[1]).toHaveProperty('group.nativeToken', reorderedTokens[0]);
-
 			expect(groupedTokens[0]).toHaveProperty('group.tokens', [
 				reorderedTokens[1],
 				reorderedTokens[2]
@@ -207,9 +205,6 @@ describe('token-group.utils', () => {
 			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
 
 			expect(groupedTokens).toHaveLength(2);
-
-			expect(groupedTokens[0]).toHaveProperty('group.nativeToken', reorderedTokens[1]);
-			expect(groupedTokens[1]).toHaveProperty('group.nativeToken', reorderedTokens[0]);
 
 			expect(groupedTokens[0]).toHaveProperty('group.tokens', [
 				reorderedTokens[1],
@@ -291,7 +286,6 @@ describe('token-group.utils', () => {
 		const tokenGroup: TokenUiGroup = {
 			id: anotherToken.groupData.id,
 			decimals: anotherToken.decimals,
-			nativeToken: anotherToken,
 			groupData: anotherToken.groupData,
 			tokens: [anotherToken],
 			balance: anotherToken.balance,
@@ -477,7 +471,6 @@ describe('token-group.utils', () => {
 			expect(groupSecondaryToken({ token: twinToken, tokenGroup: undefined })).toEqual({
 				id: ETH_TOKEN_GROUP_ID,
 				decimals,
-				nativeToken: twinToken,
 				groupData: ETH_TOKEN_GROUP,
 				tokens: [twinToken],
 				balance: twinToken.balance,
@@ -489,7 +482,6 @@ describe('token-group.utils', () => {
 			const tokenGroup: TokenUiGroup = {
 				id: ETH_TOKEN_GROUP_ID,
 				decimals,
-				nativeToken: token,
 				groupData: ETH_TOKEN_GROUP,
 				tokens: [token],
 				balance: bn3Bi,
@@ -513,7 +505,6 @@ describe('token-group.utils', () => {
 			const tokenGroup: TokenUiGroup = {
 				id: token.groupData.id,
 				decimals,
-				nativeToken: token,
 				groupData: token.groupData,
 				tokens: [token, anotherToken],
 				balance: bn3Bi,
@@ -599,7 +590,6 @@ describe('token-group.utils', () => {
 				expect(group).toEqual({
 					id: currentToken.groupData?.id,
 					decimals: currentToken.decimals,
-					nativeToken: currentToken,
 					groupData: currentToken.groupData,
 					tokens: [currentToken],
 					balance: currentToken.balance,
@@ -629,7 +619,6 @@ describe('token-group.utils', () => {
 			expect(group0).toStrictEqual({
 				id: mockToken.groupData?.id,
 				decimals,
-				nativeToken: mockToken,
 				groupData: mockToken.groupData,
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
@@ -639,7 +628,6 @@ describe('token-group.utils', () => {
 			expect(group1).toStrictEqual({
 				id: mockSecondToken.groupData?.id,
 				decimals: mockSecondToken.decimals,
-				nativeToken: mockSecondToken,
 				groupData: mockSecondToken.groupData,
 				tokens: [mockSecondToken],
 				balance: mockSecondToken.balance,
@@ -666,7 +654,6 @@ describe('token-group.utils', () => {
 			expect(group0).toStrictEqual({
 				id: mockTwinToken1.groupData?.id,
 				decimals,
-				nativeToken: mockTwinToken1,
 				groupData: mockTwinToken1.groupData,
 				tokens: [mockTwinToken1, mockToken, mockTwinToken2],
 				balance: mockTwinToken1.balance + mockToken.balance + mockTwinToken2.balance,
@@ -676,7 +663,6 @@ describe('token-group.utils', () => {
 			expect(group1).toStrictEqual({
 				id: mockSecondToken.groupData?.id,
 				decimals,
-				nativeToken: mockSecondToken,
 				groupData: mockSecondToken.groupData,
 				tokens: [mockSecondToken],
 				balance: mockSecondToken.balance,
@@ -704,7 +690,6 @@ describe('token-group.utils', () => {
 			expect(group0).toStrictEqual({
 				id: mockSecondToken.groupData?.id,
 				decimals,
-				nativeToken: mockSecondToken,
 				groupData: mockSecondToken.groupData,
 				tokens: [mockSecondToken],
 				balance: mockSecondToken.balance,
@@ -714,7 +699,6 @@ describe('token-group.utils', () => {
 			expect(group1).toStrictEqual({
 				id: mockToken.groupData?.id,
 				decimals,
-				nativeToken: mockToken,
 				groupData: mockToken.groupData,
 				tokens: [mockToken, mockTwinToken1, mockTwinToken2],
 				balance: mockToken.balance + mockTwinToken1.balance + mockTwinToken2.balance,
@@ -742,12 +726,47 @@ describe('token-group.utils', () => {
 			expect(group).toStrictEqual({
 				id: mockToken.groupData?.id,
 				decimals,
-				nativeToken: mockToken,
 				groupData: mockToken.groupData,
 				tokens: [mockToken, mockTwinToken, mockTwinToken2],
 				balance: undefined,
 				usdBalance: mockToken.usdBalance + mockTwinToken2.usdBalance
 			});
+		});
+	});
+
+	describe('sortTokenOrGroupUi', () => {
+		const toTokenUiOrGroupUi = (token: Token): TokenUiOrGroupUi => ({ token });
+
+		const mockToken = toTokenUiOrGroupUi({ ...ETHEREUM_TOKEN, name: 'Aaa' });
+		const mockSecondToken = toTokenUiOrGroupUi({ ...BTC_MAINNET_TOKEN, name: 'Bbb' });
+		const mockThirdToken = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: 'Ccc' });
+		const mockFourthToken = toTokenUiOrGroupUi({ ...ICP_TOKEN, name: '--- AAA' });
+
+		const tokenList = [mockToken, mockSecondToken, mockThirdToken, mockFourthToken]
+			.map((value) => ({ value, sort: Math.random() }))
+			.sort((a, b) => a.sort - b.sort)
+			.map(({ value }) => value);
+		// map().sort().map() is used to shuffle the array randomly
+
+		it('should sort correctly', () => {
+			const result = sortTokenOrGroupUi(tokenList);
+
+			expect(result).toEqual([mockToken, mockSecondToken, mockThirdToken, mockFourthToken]);
+		});
+
+		it('should keep order the same if groups passed', () => {
+			const expected = [
+				{ group: { id: 'Bgroup1', tokens: [mockToken] } as unknown as TokenUiGroup },
+				{
+					group: {
+						id: 'Agroup1',
+						tokens: [mockSecondToken, mockThirdToken]
+					} as unknown as TokenUiGroup
+				}
+			];
+			const result = sortTokenOrGroupUi(expected);
+
+			expect(result).toEqual(expected);
 		});
 	});
 });

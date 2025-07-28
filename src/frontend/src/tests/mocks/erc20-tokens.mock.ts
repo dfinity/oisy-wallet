@@ -1,10 +1,11 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 export const mockValidErc20Token: Erc20Token = {
@@ -46,6 +47,20 @@ export const createMockErc20UserTokens = ({
 	networkEnv: NetworkEnvironment;
 	start?: number;
 }): CertifiedData<Erc20UserToken>[] =>
+	createMockErc20Tokens({ n, networkEnv, start }).map((token) => ({
+		data: { ...token, enabled: true },
+		certified: false
+	}));
+
+export const createMockErc20CustomTokens = ({
+	n,
+	networkEnv,
+	start = 0
+}: {
+	n: number;
+	networkEnv: NetworkEnvironment;
+	start?: number;
+}): CertifiedData<Erc20CustomToken>[] =>
 	createMockErc20Tokens({ n, networkEnv, start }).map((token) => ({
 		data: { ...token, enabled: true },
 		certified: false

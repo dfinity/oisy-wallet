@@ -1,178 +1,119 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
-	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
-	export let transaction: IcTransactionUi;
-	export let token: OptionToken;
+	interface Props {
+		transaction: IcTransactionUi;
+		token: OptionToken;
+	}
 
-	let id: bigint | string;
-	let from: string | undefined;
-	let to: string | undefined;
-	let value: bigint | undefined;
-	let timestamp: bigint | undefined;
-	let type: IcTransactionType;
-	let toLabel: string | undefined;
-	let fromLabel: string | undefined;
-	let txExplorerUrl: string | undefined;
-	let fromExplorerUrl: string | undefined;
-	let toExplorerUrl: string | undefined;
+	const { transaction, token }: Props = $props();
 
-	$: ({
-		id,
-		from,
-		to,
-		value,
-		timestamp,
-		type,
-		toLabel,
-		fromLabel,
-		txExplorerUrl,
-		fromExplorerUrl,
-		toExplorerUrl
-	} = transaction);
+	let { id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl } =
+		$derived(transaction);
+
+	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
+		modalStore.openIcTransaction({
+			id: Symbol(),
+			data: data as OpenTransactionParams<IcTransactionUi>
+		});
+	};
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
 	<ContentWithToolbar>
-		<Value ref="id" element="div">
-			{#snippet label()}
-				{$i18n.transaction.text.id}
-			{/snippet}
-			{#snippet content()}
-				<output>{id}</output>
-				<Copy value={`${id}`} text={$i18n.transaction.text.id_copied} inline />
-				{#if nonNullish(txExplorerUrl)}
-					<ExternalLink
-						iconSize="18"
-						href={txExplorerUrl}
-						ariaLabel={$i18n.transaction.alt.open_block_explorer}
-						inline
-						color="blue"
-					/>
+		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
+			{#snippet logo()}
+				{#if nonNullish(token)}
+					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
 				{/if}
 			{/snippet}
-		</Value>
-
-		{#if nonNullish(timestamp)}
-			<Value ref="timestamp">
-				{#snippet label()}
-					{$i18n.transaction.text.timestamp}
-				{/snippet}
-				{#snippet content()}
-					<output>{formatNanosecondsToDate(timestamp)}</output>
-				{/snippet}
-			</Value>
-		{/if}
-
-		<Value ref="type" element="div">
-			{#snippet label()}
-				{$i18n.transaction.text.type}
+			{#snippet subtitle()}
+				<span class="capitalize">{type}</span>
 			{/snippet}
-
-			{#snippet content()}
-				<p class="first-letter:capitalize">{type}</p>
+			{#snippet title()}
+				{#if nonNullish(token) && nonNullish(value)}
+					<output class:text-success-primary={type === 'receive'}>
+						{formatToken({
+							value,
+							unitName: token.decimals,
+							displayDecimals: token.decimals,
+							showPlusSign: type === 'receive'
+						})}
+						{token.symbol}
+					</output>
+				{:else}
+					&ZeroWidthSpace;
+				{/if}
 			{/snippet}
-		</Value>
+		</ModalHero>
 
-		{#if nonNullish(from) || nonNullish(fromLabel)}
-			<Value ref="from" element="div">
-				{#snippet label()}
-					{$i18n.transaction.text.from}
-				{/snippet}
-
-				{#snippet content()}
-					{#if nonNullish(fromLabel)}
-						<p class="mb-0.5 first-letter:capitalize">
-							<IcTransactionLabel label={fromLabel} {token} />
-						</p>
-					{/if}
-
-					{#if nonNullish(from)}
-						<p>
-							<output>{from}</output>
-							<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
-							{#if nonNullish(fromExplorerUrl)}
-								<ExternalLink
-									iconSize="18"
-									href={fromExplorerUrl}
-									ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
-									inline
-									color="blue"
-								/>
-							{/if}
-						</p>
-					{/if}
-				{/snippet}
-			</Value>
+		{#if nonNullish(to) && nonNullish(from)}
+			<TransactionContactCard
+				type={type === 'receive' ? 'receive' : 'send'}
+				{to}
+				{from}
+				{toExplorerUrl}
+				{fromExplorerUrl}
+				{onSaveAddressComplete}
+			/>
 		{/if}
 
-		{#if nonNullish(to) || nonNullish(toLabel)}
-			<Value ref="to" element="div">
-				{#snippet label()}
-					{$i18n.transaction.text.to}
-				{/snippet}
+		<List styleClass="mt-5">
+			{#if nonNullish(timestamp)}
+				<ListItem>
+					<span>{$i18n.transaction.text.timestamp}</span>
+					<output
+						>{formatNanosecondsToDate({
+							nanoseconds: timestamp,
+							language: $currentLanguage
+						})}</output
+					>
+				</ListItem>
+			{/if}
 
-				{#snippet content()}
-					{#if nonNullish(toLabel)}
-						<p class="mb-0.5 first-letter:capitalize">
-							<IcTransactionLabel label={toLabel} {token} />
-						</p>
-					{/if}
+			{#if nonNullish(token)}
+				<ListItem>
+					<span>{$i18n.networks.network}</span>
+					<span><NetworkWithLogo network={token.network} logo="start" /></span>
+				</ListItem>
+			{/if}
 
-					{#if nonNullish(to)}
-						<p>
-							<output>{to}</output>
-							<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
-							{#if nonNullish(toExplorerUrl)}
-								<ExternalLink
-									iconSize="18"
-									href={toExplorerUrl}
-									ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
-									inline
-									color="blue"
-								/>
-							{/if}
-						</p>
-					{/if}
-				{/snippet}
-			</Value>
-		{/if}
+			<ListItem>
+				<span>{$i18n.transaction.text.id}</span>
+				<span>
+					<output>{id}</output>
 
-		{#if nonNullish(value)}
-			<Value ref="amount">
-				{#snippet label()}
-					{$i18n.core.text.amount}
-				{/snippet}
-				{#snippet content()}
-					{#if nonNullish(token)}
-						<output>
-							{formatToken({
-								value,
-								unitName: token.decimals,
-								displayDecimals: token.decimals
-							})}
-							{token.symbol}
-						</output>
-					{:else}
-						&ZeroWidthSpace;
-					{/if}
-				{/snippet}
-			</Value>
-		{/if}
+					<TransactionAddressActions
+						copyAddress={`${id}`}
+						copyAddressText={$i18n.transaction.text.id_copied}
+						explorerUrl={txExplorerUrl}
+						explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
+					/>
+				</span>
+			</ListItem>
+		</List>
 
-		<ButtonCloseModal slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonCloseModal />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

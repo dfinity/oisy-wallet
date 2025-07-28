@@ -4,22 +4,24 @@
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import { TRACK_SNAPSHOT_SEND_ERROR } from '$lib/constants/analytics.contants';
 	import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressTestnet,
 		ethAddress,
 		solAddressDevnet,
-		solAddressMainnet,
-		solAddressTestnet
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { exchangeNotInitialized } from '$lib/derived/exchange.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
 	let timer: NodeJS.Timeout | undefined = undefined;
@@ -35,7 +37,11 @@
 		try {
 			await registerUserSnapshot();
 		} catch (error: unknown) {
-			console.error('Unexpected error while taking user snapshot:', error);
+			trackEvent({
+				name: TRACK_SNAPSHOT_SEND_ERROR,
+				metadata: mapIcErrorMetadata(error),
+				warning: `Unexpected error while taking user snapshot: ${error}`
+			});
 		}
 
 		syncInProgress = false;
@@ -100,12 +106,11 @@
 	// Balances: All balances (since we need to check if the user has any balance).
 	// Exchanges: All exchanges initialized (since we have no disclaimer specific for the tokens we are interested in).
 	// Transactions: all transactions related to each network.
-	$: $authSignedIn,
+	$: ($authSignedIn,
 		$btcAddressMainnet,
 		$btcAddressTestnet,
 		$ethAddress,
 		$solAddressMainnet,
-		$solAddressTestnet,
 		$solAddressDevnet,
 		$tokens,
 		$balancesStore,
@@ -114,7 +119,7 @@
 		$ethTransactionsStore,
 		$icTransactionsStore,
 		$solTransactionsStore,
-		triggerTimer();
+		triggerTimer());
 </script>
 
 <slot />

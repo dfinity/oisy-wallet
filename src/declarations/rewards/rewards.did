@@ -3,10 +3,23 @@ type Account = record {
 	subaccount : opt blob
 };
 
+type AccountId_Any = text;
+
 type AccountSnapshotFor = variant {
+	Any : AccountSnapshot_Any;
 	Icrc : AccountSnapshot_Icrc;
 	SplDevnet : AccountSnapshot_Spl;
 	SplMainnet : AccountSnapshot_Spl
+};
+type AccountSnapshot_Any = record {
+	decimals : nat8;
+	token_address : AnyToken;
+	network : AnyNetwork;
+	approx_usd_per_token : float64;
+	last_transactions : vec Transaction_Any;
+	account : AccountId_Any;
+	timestamp : nat64;
+	amount : nat
 };
 type AccountSnapshot_Icrc = record {
 	decimals : nat8;
@@ -16,7 +29,7 @@ type AccountSnapshot_Icrc = record {
 	last_transactions : vec Transaction_Icrc;
 	account : principal;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
 type AccountSnapshot_Spl = record {
 	decimals : nat8;
@@ -26,17 +39,21 @@ type AccountSnapshot_Spl = record {
 	last_transactions : vec Transaction_Spl;
 	account : text;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
 
-type AirDropConfig = record {
-	/// Max number of participants
-	number_of_participants : nat64;
-	/// When to start the timestamp
-	start_timestamp_ns : nat64;
-	/// The tokens to distribute during the airdrop
-	token_configs : vec TokenConfig
+/// A network on which a token can be found.
+type AnyNetwork = record {
+	network_id : text;
+	testnet_for : opt text
 };
+
+/// A token on a specified network.
+type AnyToken = record {
+	token_symbol : text;
+	wraps : opt text
+};
+
 ///
 type CampaignEligibility = record {
 	///
@@ -71,7 +88,6 @@ type ClaimVipRewardResponse = variant {
 
 type Config = record {
 	usage_awards_config : opt UsageAwardConfig;
-	airdrop_config : opt AirDropConfig;
 	/// The VIP configuration
 	vip_config : opt VipConfig;
 	/// VIP Campaigns
@@ -97,12 +113,23 @@ type Criterion = variant {
 		/// "recent" is defined by this duration.
 		duration : CandidDuration;
 		/// The user must have logged in at least this many times recently.
-		count : nat32
+		count : nat32;
+		/// The assumed session length.
+		session_duration : opt CandidDuration
 	};
 	/// The minimum total assets at the last valuation.
 	MinTotalAssetsUsd : record { usd : nat32 };
-	/// The minimum number of distrinct tokens that the user must hold.
-	MinTokens : record { count : nat32 }
+	/// The minimum number of distinct tokens that the user must hold.
+	MinTokens : record { count : nat32 };
+	/// The minimum time since the user's last sprinkles award.
+	Hangover : record {
+		/// The time that must pass before a sprinkled user can be eligible again.
+		duration : CandidDuration
+	};
+	/// The user must be eligible for this campaign.
+	EligibleForCampaign : record { campaign_name : text };
+	/// The user must have made at least this many referrals.
+	MinEligibleReferrals : record { count : nat32; campaign_name : text }
 };
 /// Whether a user satisfies a given criterion.
 type CriterionEligibility = record {
@@ -284,6 +311,13 @@ type SprinkleStatus = record {
 	/// A list of past sprinkle events that have been completed
 	past_events : vec SprinkleEvent
 };
+type StatsKeyType = variant { TokenGroup; Network; TokenSymbol };
+type StatsRequest = record { by : StatsKeyType };
+type StatsResponse = record {
+	request : StatsRequest;
+	stats : vec record { text; StatsValue }
+};
+type StatsValue = record { user_count : nat64; assets_usd : float64 };
 type StatusResponse = record {
 	/// The latest last_updated timestamp of a fetched Oisy user
 	latest_oisy_user_timestamp : opt nat64;
@@ -311,12 +345,19 @@ type TokenConfig = record {
 	/// The ledger canister that manages the token.
 	ledger_canister : principal
 };
+type Transaction_Any = record {
+	transaction_type : TransactionType;
+	network : AnyNetwork;
+	counterparty : AccountId_Any;
+	timestamp : nat64;
+	amount : nat
+};
 type Transaction_Icrc = record {
 	transaction_type : TransactionType;
 	network : record {};
 	counterparty : principal;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
 type TransactionType = variant {
 	Send;
@@ -327,8 +368,9 @@ type Transaction_Spl = record {
 	network : record {};
 	counterparty : text;
 	timestamp : nat64;
-	amount : nat64
+	amount : nat
 };
+
 type UsageAndHolding = record {
 	// Account valuation at the time of the last snapshot.
 	approx_usd_valuation : float64;
@@ -353,7 +395,10 @@ type UsageAwardEvent = record {
 	campaign_name : opt text
 };
 type UsageAwardState = record {
+	/// The last few snapshots
 	snapshots : vec UserSnapshot;
+	/// Timestamps of recent snapshots
+	snapshot_timestamps : vec nat64;
 	/// Pseudonym for user who introduced the caller to Oisy.
 	referred_by : opt nat32;
 	/// User's code for inviting others to the platform, and referral stats.
@@ -373,9 +418,7 @@ type UsageAwardStats = record {
 	eligible_snapshots : nat64
 };
 type UsageCriteria = record {
-	criteria : vec Criterion;
-	measurement_duration : CandidDuration;
-	min_valuation_usd : nat64
+	criteria : vec Criterion
 };
 ///
 type UsageVsHoldingStats = record {
@@ -464,12 +507,11 @@ service : (opt Config) -> {
 	register_snapshot_for : (principal, UserSnapshot) -> ();
 	/// Sets the caller's referrer.
 	set_referrer : (nat32) -> (SetReferrerResponse);
+	stats_by : (StatsKeyType) -> (StatsResponse) query;
 	stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
 	/// Runs the provided award event.  This is normally done automatically.  It can be useful
 	/// to trigger an event directly when testing.
 	trigger_usage_award_event : (UsageAwardEvent) -> ();
-	/// Usage Awards: User is eligible.
-	usage_eligible : (principal) -> (bool, bool) query;
 	/// Aggregate usage stats.
 	usage_stats : () -> (UsageAwardStats) query;
 	/// Finds winners

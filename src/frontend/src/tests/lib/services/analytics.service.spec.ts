@@ -37,6 +37,28 @@ describe('plausible analytics service', () => {
 			hashMode: false,
 			trackLocalhost: false
 		});
+
+		expect(console.warn).not.toHaveBeenCalledWith('Warning message');
+	});
+
+	it('should call console.warn if value is provided', async () => {
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		initPlausibleAnalytics();
+
+		const params: TrackEventParams = {
+			name: 'test_event_name',
+			metadata: { eventName: 'eventValue' },
+			warning: 'Warning message'
+		};
+
+		trackEvent(params);
+
+		expect(trackEventMock).toHaveBeenCalledWith('test_event_name', {
+			props: { eventName: 'eventValue' }
+		});
+
+		expect(console.warn).toHaveBeenCalledWith('Warning message');
 	});
 
 	it('should enable auto pageviews', async () => {
@@ -46,7 +68,7 @@ describe('plausible analytics service', () => {
 
 		initPlausibleAnalytics();
 
-		expect(enableAutoPageviews).toHaveBeenCalledTimes(1);
+		expect(enableAutoPageviews).toHaveBeenCalledOnce();
 	});
 
 	it('should call trackEvent if tracker is initialized', async () => {

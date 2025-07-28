@@ -19,7 +19,7 @@ print_help() {
 ICP_SWAP_POOL_BUILDENV="$DFX_NETWORK"
 export ICP_SWAP_POOL_BUILDENV
 
-ICP_SWAP_REPO_URL="https://raw.githubusercontent.com/ICPSwap-Labs/docs/refs/heads/main/_canister/SwapPool"
+ICP_SWAP_REPO_URL="https://raw.githubusercontent.com/ICPSwap-Labs/docs/ac989c62fb65ed39769dbebfa94eb57f90c86d8f/_canister/SwapPool"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${ICP_SWAP_REPO_URL}/SwapPool.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
@@ -33,20 +33,11 @@ ARG_FILE="$(jq -r .canisters.icp_swap_pool.init_arg_file dfx.json)"
 download() {
   : 'Downloads a URL to a given file.'
   # shellcheck disable=SC2016 # The $ in the comment is not meant to be expanded.
-  : '* With argument x, the filename is $X_FILE and the URL is $X_URL'
-  : '* If the file already exists, the user is prompted whether to overwrite, keeping the existing file by default.'
-  local asset asset_url asset_file response
+  local asset asset_url asset_file
   asset="$1"
   asset_url="${asset^^}_URL"
   asset_file="${asset^^}_FILE"
-  : 'If the asset file already exists, ask the user whether to overwrite it.'
-  if test -e "${!asset_file}" && read -r -p "Overwrite existing ${!asset_file}? [y/N] " response && [[ "${response,,}" != y* ]]; then
-    echo "Using existing ICP Swap Pool $asset file."
-  else
-    echo "Downloading ${!asset_url} --> ${!asset_file}"
-    mkdir -p "$(dirname "${!asset_file}")"
-    curl -sSL "${!asset_url}" >"${!asset_file}"
-  fi
+  scripts/download-immutable.sh "${!asset_url}" "${!asset_file}"
 }
 
 # Download candid and wasm
@@ -55,7 +46,7 @@ download wasm
 
 # Compress Wasm
 echo "Compressing Wasm: $WASM_FILE_GZ"
-gzip -c "$WASM_FILE" >"$WASM_FILE_GZ"
+gzip <"$WASM_FILE" >"$WASM_FILE_GZ"
 
 # Set token config
 TOKEN0='record { address = "ryjl3-tyaaa-aaaaa-aaaba-cai"; standard = "icrc-1" }'
@@ -74,7 +65,8 @@ cat <<EOF >"$ARG_FILE"
   $TOKEN1,
   principal "$OWNER_PRINCIPAL",
   principal "$OWNER_PRINCIPAL",
-  principal "$OWNER_PRINCIPAL"
+  principal "$OWNER_PRINCIPAL",
+  principal "$OWNER_PRINCIPAL",
 )
 EOF
 

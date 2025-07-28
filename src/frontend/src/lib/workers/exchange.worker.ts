@@ -1,6 +1,7 @@
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
+import { Currency } from '$lib/enums/currency';
 import {
 	exchangeRateBNBToUsd,
 	exchangeRateBTCToUsd,
@@ -8,11 +9,17 @@ import {
 	exchangeRateETHToUsd,
 	exchangeRateICPToUsd,
 	exchangeRateICRCToUsd,
+	exchangeRatePOLToUsd,
 	exchangeRateSOLToUsd,
-	exchangeRateSPLToUsd
+	exchangeRateSPLToUsd,
+	exchangeRateUsdToCurrency
 } from '$lib/services/exchange.services';
-import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko';
-import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
+import type { CoingeckoErc20PriceParams, CoingeckoPlatformId } from '$lib/types/coingecko';
+import type {
+	PostMessage,
+	PostMessageDataRequestExchangeTimer,
+	PostMessageDataResponseExchange
+} from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -42,12 +49,13 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 
 	const sync = async () =>
 		await syncExchange({
+			currentCurrency: data?.currentCurrency ?? Currency.USD,
 			erc20ContractAddresses: data?.erc20Addresses ?? [],
 			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
 			splTokenAddresses: data?.splAddresses ?? []
 		});
 
-	// We sync now but also schedule the update afterwards
+	// We sync now but also schedule the update afterward
 	await sync();
 
 	timer = setInterval(sync, SYNC_EXCHANGE_TIMER_INTERVAL);
@@ -65,43 +73,50 @@ const stopTimer = () => {
 let syncInProgress = false;
 
 const syncExchange = async ({
+	currentCurrency,
 	erc20ContractAddresses,
 	icrcLedgerCanisterIds,
 	splTokenAddresses
 }: {
+	currentCurrency: Currency;
 	erc20ContractAddresses: Erc20ContractAddressWithNetwork[];
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
 	splTokenAddresses: SplTokenAddress[];
 }) => {
-	// Avoid to duplicate the sync if already in progress and not yet finished
+	// Avoid duplicating the sync if already in progress and not yet finished
 	if (syncInProgress) {
 		return;
 	}
 
 	syncInProgress = true;
 
-	const erc20PriceParams: CoingeckoErc20PriceParams[] = erc20ContractAddresses.reduce<
-		CoingeckoErc20PriceParams[]
-	>((acc, { address, coingeckoId }) => {
-		if (
-			coingeckoId !== 'ethereum' &&
-			coingeckoId !== 'base' &&
-			coingeckoId !== 'binance-smart-chain'
-		) {
-			return acc;
-		}
+	const erc20PriceParams: CoingeckoErc20PriceParams[] = Object.values(
+		erc20ContractAddresses.reduce<Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>>(
+			(acc, { address, coingeckoId }) => {
+				if (
+					coingeckoId !== 'ethereum' &&
+					coingeckoId !== 'base' &&
+					coingeckoId !== 'binance-smart-chain' &&
+					coingeckoId !== 'polygon-pos' &&
+					coingeckoId !== 'arbitrum-one'
+				) {
+					return acc;
+				}
 
-		const existing = acc.find(({ coingeckoPlatformId }) => coingeckoPlatformId === coingeckoId);
-
-		return [
-			...acc,
-			{
-				...existing,
-				coingeckoPlatformId: coingeckoId,
-				contractAddresses: [...(existing?.contractAddresses ?? []), { address, coingeckoId }]
-			}
-		];
-	}, []);
+				return {
+					...acc,
+					[coingeckoId]: {
+						coingeckoPlatformId: coingeckoId,
+						contractAddresses: [
+							...(acc[coingeckoId]?.contractAddresses ?? []),
+							{ address, coingeckoId }
+						]
+					}
+				};
+			},
+			{} as Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>
+		)
+	);
 
 	try {
 		const erc20Prices = await Promise.all(
@@ -109,6 +124,7 @@ const syncExchange = async ({
 		);
 
 		const [
+			currentExchangeRate,
 			currentEthPrice,
 			currentBtcPrice,
 			currentErc20Prices,
@@ -116,8 +132,10 @@ const syncExchange = async ({
 			currentIcrcPrices,
 			currentSolPrice,
 			currentSplPrices,
-			currentBnbPrice
+			currentBnbPrice,
+			currentPolPrice
 		] = await Promise.all([
+			exchangeRateUsdToCurrency(currentCurrency),
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
 			erc20Prices.reduce((acc, prices) => ({ ...acc, ...prices }), {}),
@@ -125,12 +143,17 @@ const syncExchange = async ({
 			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
 			exchangeRateSPLToUsd(splTokenAddresses),
-			exchangeRateBNBToUsd()
+			exchangeRateBNBToUsd(),
+			exchangeRatePOLToUsd()
 		]);
 
 		postMessage({
 			msg: 'syncExchange',
 			data: {
+				currentExchangeRate: {
+					exchangeRateToUsd: currentExchangeRate,
+					currency: currentCurrency
+				},
 				currentEthPrice,
 				currentBtcPrice,
 				currentErc20Prices,
@@ -138,9 +161,10 @@ const syncExchange = async ({
 				currentIcrcPrices,
 				currentSolPrice,
 				currentSplPrices,
-				currentBnbPrice
+				currentBnbPrice,
+				currentPolPrice
 			}
-		});
+		} as PostMessage<PostMessageDataResponseExchange>);
 	} catch (err: unknown) {
 		console.error('Unexpected error while fetching symbol average price:', err);
 		stopTimer();

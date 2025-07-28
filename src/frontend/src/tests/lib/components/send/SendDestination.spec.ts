@@ -1,7 +1,8 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SendDestination from '$lib/components/send/SendDestination.svelte';
 import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { render } from '@testing-library/svelte';
 
 describe('SendDestination', () => {
@@ -19,6 +20,6 @@ describe('SendDestination', () => {
 			context: mockContext
 		});
 
-		expect(getByText(mockEthAddress)).toBeInTheDocument();
+		expect(getByText(shortenWithMiddleEllipsis({ text: mockEthAddress }))).toBeInTheDocument();
 	});
 });

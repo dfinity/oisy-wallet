@@ -7,12 +7,12 @@
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 
 	type GixInputProps = ComponentProps<GixInput>;
-	type InputProps = {
+	interface InputProps {
 		showResetButton?: boolean;
 		resetButtonAriaLabel?: string;
 		showPasteButton?: boolean;
 		innerEnd?: Snippet;
-	};
+	}
 
 	let endWidth: number = $state(0);
 
@@ -26,7 +26,10 @@
 	}: InputProps & GixInputProps = $props();
 </script>
 
-<div style={`--input-padding-inner-end: calc(var(--padding-2x) + ${endWidth}px)`}>
+<div
+	style={`--input-padding-inner-end: calc(var(--padding-2x) + ${endWidth}px)`}
+	class="base-input"
+>
 	<GixInput {...props} bind:value on:nnsInput>
 		<svelte:fragment slot="inner-end">
 			<div bind:clientWidth={endWidth} class="flex items-center pl-2">
@@ -46,3 +49,9 @@
 		</svelte:fragment>
 	</GixInput>
 </div>
+
+<style lang="scss">
+	:global(div.base-input input) {
+		font-size: var(--input-font-size);
+	}
+</style>

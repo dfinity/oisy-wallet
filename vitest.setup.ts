@@ -8,7 +8,6 @@ import type { HttpAgent } from '@dfinity/agent';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';
-import { vi } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 // We mock ResizeObserver and element.animate because neither JSDOM nor Happy DOM supports them, while Svelte v5 requires them.
@@ -52,6 +51,10 @@ vi.mock('$app/stores', () => ({
 	page: mockPage
 }));
 
+vi.mock('$app/state', () => ({
+	page: {}
+}));
+
 vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
@@ -89,3 +92,14 @@ disableConsoleLog();
 configure({
 	testIdAttribute: 'data-tid'
 });
+
+window.matchMedia = vi.fn().mockImplementation((query) => ({
+	matches: false,
+	media: query,
+	onchange: null,
+	addListener: vi.fn(), // Deprecated
+	removeListener: vi.fn(), // Deprecated
+	addEventListener: vi.fn(),
+	removeEventListener: vi.fn(),
+	dispatchEvent: vi.fn()
+}));

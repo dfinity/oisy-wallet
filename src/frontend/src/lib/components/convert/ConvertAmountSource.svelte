@@ -33,7 +33,7 @@
 		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY
 	);
 
-	$: errorType, setErrorType(errorType);
+	$: (errorType, setErrorType(errorType));
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		validateUserAmount({
@@ -51,7 +51,7 @@
 	let isZeroBalance: boolean;
 	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === ZERO;
 
-	let maxAmount: number | undefined;
+	let maxAmount: string | undefined;
 	$: maxAmount = nonNullish(totalFee)
 		? getMaxTransactionAmount({
 				balance: $sourceTokenBalance,
@@ -71,7 +71,7 @@
 	};
 
 	/**
-	 * Reevaluate max amount if user has used the "Max" button and totalFee is changing.
+	 * Reevaluate max amount if a user has used the "Max" button and totalFee is changing.
 	 */
 	const debounceSetMax = () => {
 		if (!amountSetToMax) {
@@ -80,7 +80,7 @@
 
 		debounce(() => setMax(), 500)();
 	};
-	$: totalFee, debounceSetMax();
+	$: (totalFee, debounceSetMax());
 </script>
 
 <TokenInput

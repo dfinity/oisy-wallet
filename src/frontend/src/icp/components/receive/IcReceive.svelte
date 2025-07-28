@@ -15,7 +15,7 @@
 		isTokenCkErc20Ledger,
 		isTokenCkEthLedger
 	} from '$icp/utils/ic-send.utils';
-	import { isTokenIcrc } from '$icp/utils/icrc.utils';
+	import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 
@@ -29,6 +29,9 @@
 
 	let icrc = false;
 	$: icrc = isTokenIcrc(token);
+
+	let dip20 = false;
+	$: dip20 = isTokenDip20(token);
 
 	const open = async (callback: () => Promise<void>) => {
 		await callback();
@@ -45,14 +48,14 @@
 	setContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY, context);
 
 	// At boot time, if the context is derived globally, the token might be updated a few times. That's why we also update it with an auto-subscriber.
-	$: token, (() => context.token.set(token as IcToken))();
+	$: (token, (() => context.token.set(token as IcToken))());
 </script>
 
 {#if ckEthereum}
 	<IcReceiveCkEthereum />
 {:else if ckBTC}
 	<IcReceiveCkBTC />
-{:else if icrc}
+{:else if icrc || dip20}
 	<IcReceiveIcrc />
 {:else}
 	<IcReceiveIcp />

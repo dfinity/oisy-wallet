@@ -5,8 +5,8 @@
 	import { slide } from 'svelte/transition';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
+	import TokenInputCurrencyFiat from '$lib/components/tokens/TokenInputCurrencyFiat.svelte';
 	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
-	import TokenInputCurrencyUsd from '$lib/components/tokens/TokenInputCurrencyUsd.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -17,6 +17,7 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
@@ -62,7 +63,7 @@
 	};
 
 	const debounceValidate = debounce(validate, 300);
-	$: amount, token, debounceValidate();
+	$: (amount, token, debounceValidate());
 </script>
 
 <div
@@ -98,7 +99,7 @@
 						on:nnsInput={onInput}
 					/>
 				{:else if displayUnit === 'usd'}
-					<TokenInputCurrencyUsd
+					<TokenInputCurrencyFiat
 						bind:tokenAmount={amount}
 						tokenDecimals={token.decimals}
 						{exchangeRate}
@@ -125,7 +126,7 @@
 		<button class="flex h-full gap-1 px-3" on:click disabled={!isSelectable}>
 			{#if token}
 				<TokenLogo data={token} logoSize="xs" />
-				<div class="ml-2 text-sm font-semibold">{token.symbol}</div>
+				<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
 			{:else}
 				<span
 					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"

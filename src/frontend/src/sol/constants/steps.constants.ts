@@ -18,6 +18,11 @@ export const sendSteps = (i18n: I18n): ProgressSteps => [
 		state: 'next'
 	},
 	{
+		step: ProgressStepsSendSol.CONFIRM,
+		text: i18n.send.text.confirming,
+		state: 'next'
+	},
+	{
 		step: ProgressStepsSendSol.RELOAD,
 		text: i18n.send.text.refreshing_ui,
 		state: 'next'

@@ -4,7 +4,7 @@ import { TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
 import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 export const IcFeeSchema = z.object({
 	fee: z.bigint()
@@ -34,15 +34,27 @@ export const IcCkMetadataSchema = IcCkLinkedAssetsSchema.partial().extend({
 	minterCanisterId: CanisterIdTextSchema
 });
 
-export const IcInterfaceSchema = IcCanistersSchema.merge(IcAppMetadataSchema);
+export const IcInterfaceSchema = z.object({
+	...IcCanistersSchema.shape,
+	...IcAppMetadataSchema.shape
+});
 
-export const IcTokenSchema = TokenSchema.merge(IcFeeSchema)
-	.merge(IcInterfaceSchema)
-	.merge(IcTokenDeprecatedSchema);
+export const IcTokenSchema = z.object({
+	...TokenSchema.shape,
+	...IcFeeSchema.shape,
+	...IcInterfaceSchema.shape,
+	...IcTokenDeprecatedSchema.shape
+});
 
 export const IcTokenWithoutIdSchema = IcTokenSchema.omit({ id: true }).strict();
 
-export const IcCkTokenSchema = IcTokenSchema.merge(IcCkMetadataSchema.partial());
+export const IcCkTokenSchema = z.object({
+	...IcTokenSchema.shape,
+	...IcCkMetadataSchema.partial().shape
+});
 
-export const IcCkInterfaceSchema =
-	IcInterfaceSchema.merge(IcCkMetadataSchema).merge(TokenGroupPropSchema);
+export const IcCkInterfaceSchema = z.object({
+	...IcInterfaceSchema.shape,
+	...IcCkMetadataSchema.shape,
+	...TokenGroupPropSchema.shape
+});

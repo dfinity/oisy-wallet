@@ -7,6 +7,8 @@ import {
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -14,16 +16,35 @@ import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, nonNullish } from '@dfinity/utils';
+import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+
+vi.mock('idb-keyval', () => ({
+	createStore: vi.fn(() => ({
+		/* mock store implementation */
+	})),
+	set: vi.fn(),
+	get: vi.fn(),
+	del: vi.fn(),
+	update: vi.fn()
+}));
+
+vi.mock('$app/environment', () => ({
+	browser: true
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
 
 describe('icrc.services', () => {
 	const mockLedgerCanisterId = 'bw4dl-smaaa-aaaaa-qaacq-cai';
@@ -217,6 +238,31 @@ describe('icrc.services', () => {
 					certified: true
 				});
 			});
+
+			it('should cache the custom tokens in IDB on update call', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
+
+				expect(idbKeyval.set).toHaveBeenCalledOnce();
+				expect(idbKeyval.set).toHaveBeenNthCalledWith(
+					1,
+					mockIdentity.getPrincipal().toText(),
+					[mockCustomToken],
+					expect.any(Object)
+				);
+			});
+
+			it('should fetch the cached custom tokens in IDB on query call', async () => {
+				await loadCustomTokens({ identity: mockIdentity, useCache: true });
+
+				expect(idbKeyval.get).toHaveBeenCalledOnce();
+				expect(idbKeyval.get).toHaveBeenNthCalledWith(
+					1,
+					mockIdentity.getPrincipal().toText(),
+					expect.any(Object)
+				);
+			});
 		});
 
 		describe('error', () => {
@@ -253,10 +299,32 @@ describe('icrc.services', () => {
 				const afterTokens = get(icrcCustomTokensStore);
 
 				expect(afterTokens).toBeNull();
+			});
+
+			it('should show a toast error on list custom tokens error', async () => {
+				const err = new Error('test');
+				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
 
 				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
 					msg: { text: get(i18n).init.error.icrc_canisters },
 					err
+				});
+			});
+
+			it('should show track event on list custom tokens error', async () => {
+				const err = new Error('test');
+				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(trackEvent).toHaveBeenCalledOnce();
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+					metadata: {
+						error: err.message
+					}
 				});
 			});
 
@@ -310,6 +378,19 @@ describe('icrc.services', () => {
 				expect(console.error).toHaveBeenCalledTimes(2);
 				expect(console.error).toHaveBeenNthCalledWith(1, err);
 				expect(console.error).toHaveBeenNthCalledWith(2, err);
+			});
+
+			it('should not cache the custom tokens in IDB', async () => {
+				const tokens = get(icrcCustomTokensStore);
+
+				expect(tokens).toHaveLength(1);
+
+				const err = new Error('test');
+				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(idbKeyval.set).not.toHaveBeenCalled();
 			});
 		});
 	});

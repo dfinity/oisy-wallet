@@ -28,3 +28,9 @@ export type TagVariant =
 	| 'outline';
 
 export type AvatarVariants = 'xl' | 'lg' | 'md' | 'sm' | 'xs';
+
+export type ModalHeroVariant = 'default' | 'success';
+
+export type ListVariant = 'none' | 'styled';
+
+export type TabVariant = 'default' | 'menu';
