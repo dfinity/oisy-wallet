@@ -1,4 +1,3 @@
-import { SolAddressSchema } from '$lib/schema/address.schema';
 import type { Address, SolAddress } from '$lib/types/address';
 import { getAccountOwner } from '$sol/api/solana.api';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -7,11 +6,6 @@ import { assertIsAddress } from '@solana/kit';
 
 export const isSolAddress = (address: Address | undefined): boolean => {
 	if (isNullish(address)) {
-		return false;
-	}
-
-	const { success } = SolAddressSchema.safeParse(address);
-	if (!success) {
 		return false;
 	}
 
