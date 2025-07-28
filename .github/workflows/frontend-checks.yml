@@ -47,6 +47,10 @@ jobs:
         with:
           path: .eslintcache
           key: eslint-cache-format-${{ github.event.pull_request.number }}
+      - name: Print the cache
+        run: |
+          echo "Cache contents:"
+          ls -la .eslintcache || echo "No cache found"
       - name: Format
         run: npm run format
       - name: Save ESLint Cache
@@ -56,6 +60,10 @@ jobs:
           path: .eslintcache
           include-hidden-files: true
           retention-days: 1
+      - name: Print the cache 2
+        run: |
+          echo "Cache contents:"
+          ls -la .eslintcache || echo "No cache found"
       - name: Check for Changes
         id: check_changes
         run: |
