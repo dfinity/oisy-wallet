@@ -184,7 +184,8 @@
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_SUCCESS,
 				metadata: {
-					token: $sendToken.symbol
+					token: $sendToken.symbol,
+					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`,
 				}
 			});
 
@@ -193,7 +194,8 @@
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_ERROR,
 				metadata: {
-					token: $sendToken.symbol
+					token: $sendToken.symbol,
+					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`,
 				}
 			});
 
