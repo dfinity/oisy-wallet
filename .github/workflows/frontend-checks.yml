@@ -49,6 +49,11 @@ jobs:
           key: eslint-cache-format-${{ github.event.pull_request.number }}
       - name: Print the cache
         run: |
+          if [ -e .eslintcache ] && [ ! -s .eslintcache ]; then
+          echo "File exists and is empty"
+          else
+          echo "File is missing or not empty"
+          fi
           echo "Cache contents:"
           ls -la .eslintcache || echo "No cache found"
       - name: Format
