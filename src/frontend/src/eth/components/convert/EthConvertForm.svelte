@@ -56,7 +56,9 @@
 	</svelte:fragment>
 
 	<EthFeeDisplay slot="fee">
-		<Html slot="label" text={$i18n.fee.text.convert_fee} />
+		{#snippet label()}
+			<Html text={$i18n.fee.text.convert_fee} />
+		{/snippet}
 	</EthFeeDisplay>
 
 	<slot name="cancel" slot="cancel" />
