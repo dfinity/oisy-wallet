@@ -9,6 +9,10 @@
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
+		TRACK_COUNT_BTC_SEND_ERROR,
+		TRACK_COUNT_BTC_SEND_SUCCESS
+	} from '$lib/constants/analytics.contants';
+	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet
@@ -16,6 +20,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -29,11 +34,6 @@
 		isNetworkIdBTCTestnet,
 		mapNetworkIdToBitcoinNetwork
 	} from '$lib/utils/network.utils';
-	import {trackEvent} from "$lib/services/analytics.services";
-	import {
-		TRACK_COUNT_BTC_SEND_ERROR,
-		TRACK_COUNT_BTC_SEND_SUCCESS,
-	} from "$lib/constants/analytics.contants";
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -130,7 +130,7 @@
 				name: TRACK_COUNT_BTC_SEND_SUCCESS,
 				metadata: {
 					token: $sendToken.symbol,
-					network: `${networkId.description}`,
+					network: `${networkId.description}`
 				}
 			});
 
@@ -142,7 +142,7 @@
 				name: TRACK_COUNT_BTC_SEND_ERROR,
 				metadata: {
 					token: $sendToken.symbol,
-					network: `${networkId.description}`,
+					network: `${networkId.description}`
 				}
 			});
 
