@@ -197,6 +197,18 @@ export const estimatePriorityFee = async ({
 	);
 };
 
+export const getAccountInfo = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}) => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+
+	return await getAccountInfo(solAddress(address), { encoding: 'jsonParsed' }).send();
+};
+
 export const getTokenInfo = async ({
 	address,
 	network
@@ -209,10 +221,7 @@ export const getTokenInfo = async ({
 	mintAuthority?: SplTokenAddress;
 	freezeAuthority?: SplTokenAddress;
 }> => {
-	const { getAccountInfo } = solanaHttpRpc(network);
-	const token = solAddress(address);
-
-	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
+	const { value } = await getAccountInfo({ address, network });
 
 	const { owner, data } = value ?? {};
 
@@ -242,10 +251,7 @@ export const getAccountOwner = async ({
 	address: SolAddress;
 	network: SolanaNetworkType;
 }): Promise<SolAddress | undefined> => {
-	const { getAccountInfo } = solanaHttpRpc(network);
-	const account = solAddress(address);
-
-	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+	const { value } = await getAccountInfo({ address, network });
 
 	if (isNullish(value?.data) || !('parsed' in value.data)) {
 		return undefined;
@@ -268,10 +274,7 @@ export const checkIfAccountExists = async ({
 	address: SolAddress;
 	network: SolanaNetworkType;
 }): Promise<boolean> => {
-	const { getAccountInfo } = solanaHttpRpc(network);
-	const account = solAddress(address);
-
-	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+	const { value } = await getAccountInfo({ address, network });
 
 	return nonNullish(value);
 };
