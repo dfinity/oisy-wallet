@@ -3,12 +3,13 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { LOCK_SCREEN_ENABLED } from '$env/lock-screen.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
-	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import MenuLockLogOut from '$lib/components/core/MenuLockLogOut.svelte';
+	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
@@ -208,8 +209,11 @@
 		<Hr />
 
 		<div class="flex max-w-80 flex-col gap-3 pt-3">
-			<!-- <SignOut on:icLogoutTriggered={hidePopover} /> -->
-			<MenuLockLogOut on:icLogoutTriggered={hidePopover} />
+			{#if LOCK_SCREEN_ENABLED}
+				<MenuLockLogOut on:icLogoutTriggered={hidePopover} />
+			{:else}
+				<SignOut on:icLogoutTriggered={hidePopover} />
+			{/if}
 			<Hr />
 
 			<span class="text-center text-sm text-tertiary">
