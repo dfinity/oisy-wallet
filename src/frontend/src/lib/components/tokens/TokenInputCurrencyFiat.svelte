@@ -3,15 +3,24 @@
 	import { createEventDispatcher } from 'svelte';
 	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
 	import {
-		TOKEN_INPUT_CURRENCY_USD,
-		TOKEN_INPUT_CURRENCY_USD_SYMBOL
+		TOKEN_INPUT_CURRENCY_FIAT,
+		TOKEN_INPUT_CURRENCY_FIAT_SYMBOL
 	} from '$lib/constants/test-ids.constants';
+	import {
+		currentCurrencyExchangeRate,
+		currentCurrencySymbol,
+		currentCurrency,
+		currentCurrencyDecimals
+	} from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { formatCurrency } from '$lib/utils/format.utils';
 
 	export let tokenAmount: OptionAmount;
 	export let tokenDecimals: number;
 	export let exchangeRate: number | undefined = undefined;
-	export let name = 'token-input-currency-usd';
+	export let name = 'token-input-currency-fiat';
 	export let disabled = false;
 	export let placeholder = '0';
 	export let error = false;
@@ -23,10 +32,14 @@
 	const dispatch = createEventDispatcher();
 
 	const handleInput = () => {
-		tokenAmount =
-			nonNullish(exchangeRate) && nonNullish(displayValue)
-				? (Number(displayValue) / exchangeRate).toFixed(tokenDecimals)
+		const convertedValue =
+			nonNullish(displayValue) &&
+			nonNullish(exchangeRate) &&
+			nonNullish($currentCurrencyExchangeRate)
+				? (Number(displayValue) / exchangeRate) * $currentCurrencyExchangeRate
 				: undefined;
+
+		tokenAmount = nonNullish(convertedValue) ? convertedValue.toFixed(tokenDecimals) : undefined;
 
 		dispatch('nnsInput');
 	};
@@ -34,7 +47,14 @@
 	const syncDisplayValueWithTokenAmount = () => {
 		const newDisplayValue =
 			nonNullish(exchangeRate) && nonNullish(tokenAmount)
-				? (Number(tokenAmount) * exchangeRate).toFixed(2)
+				? formatCurrency({
+						value: Number(tokenAmount) * exchangeRate,
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore,
+						language: $currentLanguage,
+						hideSymbol: true,
+						normalizeSeparators: true
+					})
 				: undefined;
 
 		if (Number(newDisplayValue) !== Number(displayValue)) {
@@ -42,7 +62,7 @@
 		}
 	};
 
-	$: tokenAmount, syncDisplayValueWithTokenAmount();
+	$: (tokenAmount, syncDisplayValueWithTokenAmount());
 </script>
 
 <TokenInputCurrency
@@ -54,19 +74,19 @@
 	{error}
 	{loading}
 	{autofocus}
-	decimals={2}
+	decimals={$currentCurrencyDecimals}
 	on:focus
 	on:blur
-	testId={TOKEN_INPUT_CURRENCY_USD}
+	testId={TOKEN_INPUT_CURRENCY_FIAT}
 	styleClass="no-padding"
 >
 	{#snippet prefix()}
 		<span
 			class="duration=[var(--animation-time-short)] pl-3 transition-colors"
 			class:text-tertiary={isNullish(displayValue)}
-			data-tid={TOKEN_INPUT_CURRENCY_USD_SYMBOL}
+			data-tid={TOKEN_INPUT_CURRENCY_FIAT_SYMBOL}
 		>
-			$
+			{$currentCurrencySymbol}
 		</span>
 	{/snippet}
 	{#snippet innerEnd()}

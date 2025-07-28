@@ -19,6 +19,7 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import {
+	SwapErrorCodes,
 	SwapProvider,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
@@ -33,6 +34,7 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { throwSwapError } from './swap-errors.services';
 import { autoLoadSingleToken } from './token.services';
 
 export const fetchKongSwap = async ({
@@ -253,7 +255,10 @@ export const fetchIcpSwap = async ({
 		}
 	} catch (err: unknown) {
 		console.error(err);
-		throw new Error(get(i18n).swap.error.deposit_error);
+		throwSwapError({
+			code: SwapErrorCodes.DEPOSIT_FAILED,
+			message: get(i18n).swap.error.deposit_error
+		});
 	}
 
 	try {
@@ -280,10 +285,16 @@ export const fetchIcpSwap = async ({
 		} catch (err: unknown) {
 			console.error(err);
 			// If even the refund fails, show a critical error requiring manual user action
-			throw new Error(get(i18n).swap.error.withdraw_failed);
+			throwSwapError({
+				code: SwapErrorCodes.WITHDRAW_FAILED,
+				message: get(i18n).swap.error.withdraw_failed
+			});
 		}
 		// Inform the user that the swap failed, but refund was successful
-		throw new Error(get(i18n).swap.error.swap_failed_withdraw_success);
+		throwSwapError({
+			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS,
+			message: get(i18n).swap.error.swap_failed_withdraw_success
+		});
 	}
 
 	try {
@@ -298,7 +309,10 @@ export const fetchIcpSwap = async ({
 	} catch (err: unknown) {
 		console.error(err);
 
-		throw new Error(get(i18n).swap.error.withdraw_failed);
+		throwSwapError({
+			code: SwapErrorCodes.WITHDRAW_FAILED,
+			message: get(i18n).swap.error.withdraw_failed
+		});
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
@@ -318,5 +332,9 @@ export const fetchIcpSwap = async ({
 
 export const swapService = {
 	[SwapProvider.ICP_SWAP]: fetchIcpSwap,
-	[SwapProvider.KONG_SWAP]: fetchKongSwap
+	[SwapProvider.KONG_SWAP]: fetchKongSwap,
+	//TODO: Will be fixed and updated in the next PRs
+	[SwapProvider.VELORA]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
+	}
 };

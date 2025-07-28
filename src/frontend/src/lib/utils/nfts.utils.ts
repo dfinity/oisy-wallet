@@ -1,13 +1,15 @@
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import type { Erc721Token } from '$eth/types/erc721';
+import type { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
+import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export const getLoadedNftsByTokens = ({
+export const getNftsByNetworks = ({
 	tokens,
-	loadedNfts
+	nfts
 }: {
-	tokens: Erc721CustomToken[];
-	loadedNfts: Nft[];
+	tokens: Erc721Token[];
+	nfts: Nft[];
 }): NftsByNetwork => {
 	const nftsByToken: NftsByNetwork = {};
 
@@ -18,7 +20,7 @@ export const getLoadedNftsByTokens = ({
 		nftsByToken[networkId][address.toLowerCase()] = [];
 	});
 
-	loadedNfts.forEach((nft) => {
+	nfts.forEach((nft) => {
 		const {
 			contract: {
 				network: { id: networkId },
@@ -36,4 +38,39 @@ export const getLoadedNftsByTokens = ({
 	});
 
 	return nftsByToken;
+};
+
+const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
+	const IPFS_PROTOCOL = 'ipfs:';
+	const IPFS_GATEWAY = 'https://ipfs.io/ipfs/';
+
+	if (url.protocol !== IPFS_PROTOCOL) {
+		return url;
+	}
+
+	const newUrl = url.href.replace(`${IPFS_PROTOCOL}//`, IPFS_GATEWAY);
+
+	const parsedNewUrl = UrlSchema.safeParse(newUrl);
+
+	if (!parsedNewUrl.success) {
+		return;
+	}
+
+	return new URL(parsedNewUrl.data);
+};
+
+export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: NftError }): URL => {
+	const parsedUrl = UrlSchema.safeParse(url);
+
+	if (!parsedUrl.success) {
+		throw error;
+	}
+
+	const adaptedUrl = adaptMetadataResourceUrl(new URL(parsedUrl.data));
+
+	if (isNullish(adaptedUrl)) {
+		throw error;
+	}
+
+	return adaptedUrl;
 };

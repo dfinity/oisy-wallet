@@ -89,20 +89,17 @@
 			return;
 		}
 
-		const { metadata: metadataApiErc721, isErc721 } = infuraErc721Providers(network.id);
+		const { metadata: metadataApiErc20, isErc20 } = infuraErc20Providers(network.id);
 		try {
-			if (await isErc721({ contractAddress })) {
-				metadata = await metadataApiErc721({ address: contractAddress });
-			} else {
-				const { metadata: metadataApiErc20 } = infuraErc20Providers(network.id);
+			if (await isErc20({ contractAddress })) {
 				metadata = await metadataApiErc20({ address: contractAddress });
+			} else {
+				const { metadata: metadataApiErc721 } = infuraErc721Providers(network.id);
+				metadata = await metadataApiErc721({ address: contractAddress });
 			}
 			validateMetadata();
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.loading_metadata },
-				err
-			});
+		} catch (_: unknown) {
+			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
 			dispatch('icBack');
 		}

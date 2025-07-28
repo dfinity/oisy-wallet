@@ -5,6 +5,7 @@ import { AMZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.amznx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { CRCLX_TOKEN } from '$env/tokens/tokens-spl/tokens.crclx.env';
+import { DFDVX_TOKEN } from '$env/tokens/tokens-spl/tokens.dfdvx.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { GLDX_TOKEN } from '$env/tokens/tokens-spl/tokens.gldx.env';
 import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
@@ -17,9 +18,11 @@ import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
 import { NFLXX_TOKEN } from '$env/tokens/tokens-spl/tokens.nflxx.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
+import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
+import { SPX_TOKEN } from '$env/tokens/tokens-spl/tokens.spx.env';
 import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { TSLAX_TOKEN } from '$env/tokens/tokens-spl/tokens.tslax.env';
@@ -39,6 +42,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	BONK_TOKEN,
 	COINX_TOKEN,
 	CRCLX_TOKEN,
+	DFDVX_TOKEN,
 	EURC_TOKEN,
 	GLDX_TOKEN,
 	GMEX_TOKEN,
@@ -51,9 +55,11 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	NFLXX_TOKEN,
 	NVDAX_TOKEN,
 	ORCA_TOKEN,
+	PENGU_TOKEN,
 	POPCAT_TOKEN,
 	QQQX_TOKEN,
 	RAY_TOKEN,
+	SPX_TOKEN,
 	SPYX_TOKEN,
 	TRUMP_TOKEN,
 	TSLAX_TOKEN,

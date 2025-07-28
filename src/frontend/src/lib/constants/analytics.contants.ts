@@ -78,6 +78,12 @@ export const TRACK_CONTACT_UPDATE_ERROR = 'contact_update_error';
 export const TRACK_CONTACT_DELETE_SUCCESS = 'contact_delete_success';
 export const TRACK_CONTACT_DELETE_ERROR = 'contact_delete_error';
 
+// Avatar
+export const TRACK_AVATAR_UPDATE_SUCCESS = 'avatar_update_success';
+export const TRACK_AVATAR_UPDATE_ERROR = 'avatar_update_error';
+export const TRACK_AVATAR_DELETE_SUCCESS = 'avatar_delete_success';
+export const TRACK_AVATAR_DELETE_ERROR = 'avatar_delete_error';
+
 // Rewards
 export const TRACK_REWARD_LEARN_MORE = 'reward_learn_more';
 export const TRACK_REWARD_FILTER_CHANGE = 'reward_filter_change';
@@ -103,6 +109,9 @@ export const TRACK_COUNT_OPEN_CHANGELOG = 'open_changelog';
 
 // I18n
 export const TRACK_CHANGE_LANGUAGE = 'change_language';
+
+// Currency
+export const TRACK_CHANGE_CURRENCY = 'change_currency';
 
 // Snapshots
 export const TRACK_SNAPSHOT_SEND_ERROR = 'snapshot_send_error';

@@ -33,7 +33,7 @@
 			"more_items": "+$items 更多",
 			"select": "选择",
 			"language": "语言",
-			"currency": ""
+			"currency": "货币"
 		},
 		"info": {
 			"test_banner": "仅供测试使用！"
@@ -45,7 +45,7 @@
 			"open_details": "打开详情",
 			"close_details": "关闭详情",
 			"switch_language": "切换语言",
-			"switch_currency": ""
+			"switch_currency": "切换货币"
 		},
 		"warning": {
 			"do_not_close": "交易完成前请勿关闭此标签页"
@@ -471,6 +471,7 @@
 			"no_infura_cketh_provider": "没有 $network 网络的 Infura CkETH 提供商",
 			"no_infura_erc20_provider": "没有 $network 网络的 Infura ERC20 提供商",
 			"no_infura_erc721_provider": "没有 $network 网络的 Infura ERC721 提供商",
+			"no_infura_erc1155_provider": "没有 $network 网络的 Infura ERC1155 提供商",
 			"no_infura_erc20_icp_provider": "没有 $network 网络的 Infura ERC20 ICP 提供商",
 			"no_solana_network": "没有 $network 网络的 Solana 网络配置",
 			"eth_address_unknown": "ETH 地址未知。",
@@ -506,7 +507,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "你的余额",
-			"unavailable_balance": "$ 值不可用",
+			"unavailable_balance": "$currencySymbol 值不可用",
 			"hidden_balance": "你的余额已隐藏",
 			"top_up": "充值你的钱包以开始使用！",
 			"learn_more_about_erc20_icp": "了解更多关于以太坊上的 ERC20 ICP。",
@@ -658,7 +659,7 @@
 			"sending": "发送中...",
 			"signing": "签署中...",
 			"signing_message": "正在签署消息...",
-			"confirming": "",
+			"confirming": "确认...",
 			"network": "网络",
 			"source_network": "来源网络",
 			"destination_network": "目标网络",
@@ -818,8 +819,9 @@
 			"select": "选择 >",
 			"select_swap_provider": "选择兑换服务商",
 			"open_icp_swap": "打开 ICP Swap 网站",
-			"select_token": "",
-			"select_network_filter": ""
+			"open_instructions_link": "",
+			"select_token": "选择代币",
+			"select_network_filter": "选择网络"
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -827,9 +829,12 @@
 			"unexpected_missing_data": "初始化兑换交易时发生错误。",
 			"slippage_exceeded": "$oisy_short 已保护你：本次交易超过了你设置的 $maxSlippage% 滑点容忍度。请调整最大滑点后再试。",
 			"pool_not_found": "兑换失败，未找到兑换池。",
-			"deposit_error": "兑换失败。无法将你的代币存入兑换池。请重试。",
+			"deposit_error": "",
 			"withdraw_failed": "兑换失败，退款也失败。请检查未使用余额并尝试手动提现：",
-			"swap_failed_withdraw_success": "兑换失败，但代币已成功退款。你可以重试或提高滑点容忍度。"
+			"swap_failed_withdraw_success": "",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
+			"swap_failed_instruction_link": ""
 		}
 	},
 	"buy": {
@@ -908,7 +913,7 @@
 				"custom_tokens_not_supported": "所选网络不支持自定义代币。"
 			},
 			"error": {
-				"loading_metadata": "加载代币元数据时出错。",
+				"loading_metadata": "",
 				"no_metadata": "未提供代币的元数据。此为异常情况。",
 				"unexpected_ledger": "验证账本 Canister 时发生错误。",
 				"unexpected_index": "验证索引 Canister 时发生错误。",
@@ -977,7 +982,6 @@
 			"unexpected": "保存代币时发生错误。",
 			"unexpected_hiding": "隐藏代币时发生错误。",
 			"already_available": "代币已存在。",
-			"loading_metadata": "加载代币元数据时出错。",
 			"not_toggleable": "代币不可切换，无法隐藏。",
 			"incomplete_metadata": "元数据中未提供名称或符号。",
 			"duplicate_metadata": "已存在名称或符号相似的代币。",
@@ -988,7 +992,15 @@
 	},
 	"nfts": {
 		"text": {
-			"title": ""
+			"title": "",
+			"title_empty": "",
+			"description_empty": ""
+		},
+		"alt": {
+			"placeholder_image": "",
+			"card": {
+				"image": ""
+			}
 		}
 	},
 	"fee": {
@@ -1277,7 +1289,14 @@
 		},
 		"avatar": {
 			"default": "默认头像",
-			"avatar_for": "$contact 的头像"
+			"avatar_for": "$contact 的头像",
+			"avatar_loading": ""
+		},
+		"edit_avatar": {
+			"menu_title": "联系人图片",
+			"upload_image": "上传",
+			"replace_image": "代替",
+			"remove_image": "消除"
 		},
 		"show_contact": {
 			"title": "联系人",
