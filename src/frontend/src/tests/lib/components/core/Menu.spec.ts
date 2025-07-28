@@ -22,7 +22,6 @@ import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
 import { render, screen, waitFor } from '@testing-library/svelte';
 
-// Mock the environment module
 vi.mock('$env/lock-screen.env', () => ({
 	LOCK_SCREEN_ENABLED: false
 }));
@@ -153,7 +152,7 @@ describe('Menu', () => {
 		const { default: MenuWithLockDisabled } = await import('$lib/components/core/Menu.svelte');
 
 		({ container } = render(MenuWithLockDisabled));
-		const menuButton = container.querySelector(menuButtonSelector);
+		const menuButton = container.querySelector(menuButtonSelector) as HTMLElement;
 
 		expect(menuButton).toBeInTheDocument();
 
