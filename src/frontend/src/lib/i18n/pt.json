@@ -102,6 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Descentralizado",
 			"logout": "Sair",
+			"lock": "",
 			"authenticate": "Abrir ou Criar",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP e mais",
 			"instant_and_private": "Acesso instantâneo e privado em qualquer lugar",
