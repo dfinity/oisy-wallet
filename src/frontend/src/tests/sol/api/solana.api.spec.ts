@@ -4,6 +4,7 @@ import {
 	checkIfAccountExists,
 	estimatePriorityFee,
 	fetchSignatures,
+	getAccountInfo,
 	getAccountOwner,
 	getSolCreateAccountFee,
 	getTokenInfo,
@@ -485,6 +486,71 @@ describe('solana.api', () => {
 			await expect(estimatePriorityFee({ network: SolanaNetworks.mainnet })).rejects.toThrow(
 				mockError
 			);
+		});
+	});
+
+	describe('getAccountInfo', () => {
+		beforeEach(() => {
+			mockAccountInfo = mockTokenAccountInfo;
+		});
+
+		it('should get account info successfully', async () => {
+			const info = await getAccountInfo({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(info).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+		});
+
+		it('should cache account info', async () => {
+			vi.clearAllMocks();
+
+			const firstCall = await getAccountInfo({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(firstCall).toEqual(mockAccountInfo);
+
+			const secondCall = await getAccountInfo({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(secondCall).toEqual(firstCall);
+			expect(mockGetAccountInfo).toHaveBeenCalledOnce();
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
+
+			await expect(
+				getAccountInfo({
+					address: mockSolAddress2,
+					network: SolanaNetworks.mainnet
+				})
+			).rejects.toThrow(mockError);
+		});
+
+		it('should not throw error when RPC call fails but the info was already cached', async () => {
+			const firstCall = await getAccountInfo({
+				address: mockSolAddress3,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(firstCall).toEqual(mockAccountInfo);
+
+			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
+
+			const secondCall = await getAccountInfo({
+				address: mockSolAddress3,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(secondCall).toEqual(firstCall);
+			expect(mockGetAccountInfo).toHaveBeenCalledOnce();
 		});
 	});
 
