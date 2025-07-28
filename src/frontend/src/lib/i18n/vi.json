@@ -1289,7 +1289,8 @@
 		},
 		"avatar": {
 			"default": "Ảnh đại diện mặc định",
-			"avatar_for": "Ảnh đại diện cho"
+			"avatar_for": "Ảnh đại diện cho",
+			"avatar_loading": ""
 		},
 		"edit_avatar": {
 			"menu_title": "Chỉnh sửa hình đại diện",
