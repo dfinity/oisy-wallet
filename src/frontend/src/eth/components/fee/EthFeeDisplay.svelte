@@ -15,6 +15,8 @@
 		symbol={$feeSymbolStore}
 		exchangeRate={$feeExchangeRateStore}
 	>
-		<slot slot="label" name="label" />
+		{#snippet label()}
+			<slot name="label" />
+		{/snippet}
 	</FeeDisplay>
 {/if}
