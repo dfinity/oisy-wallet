@@ -9,6 +9,7 @@ import {
 import { solAddressDevnetStore, solAddressMainnetStore } from '$lib/stores/address.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolTokenMenu from '$sol/components/tokens/SolTokenMenu.svelte';
+import { enabledSplTokens } from '$sol/derived/spl.derived';
 import type { SolanaNetwork } from '$sol/types/network';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
@@ -72,6 +73,11 @@ describe('SolTokenMenu', () => {
 
 	it('external link forwards to SPL explorer URL', async () => {
 		const mockToken = TRUMP_TOKEN;
+
+		vi.spyOn(enabledSplTokens, 'subscribe').mockImplementation((fn) => {
+			fn([{ ...mockToken, enabled: true }]);
+			return () => {};
+		});
 
 		mockPage.mockToken(mockToken);
 
