@@ -47,15 +47,17 @@ jobs:
         with:
           path: .eslintcache
           key: eslint-cache-format-${{ github.event.pull_request.number }}
+          restore-keys: |
+            eslint-
       - name: Format
         run: npm run format
-      - name: Save ESLint Cache
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: eslint-cache-format-${{ github.event.pull_request.number }}
-          path: .eslintcache
-          include-hidden-files: true
-          retention-days: 1
+#      - name: Save ESLint Cache
+#        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+#        with:
+#          name: eslint-cache-format-${{ github.event.pull_request.number }}
+#          path: .eslintcache
+#          include-hidden-files: true
+#          retention-days: 1
       - name: Check for Changes
         id: check_changes
         run: |
