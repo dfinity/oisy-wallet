@@ -56,10 +56,6 @@ jobs:
           path: .eslintcache
           include-hidden-files: true
           retention-days: 1
-      - name: Print the cache 2
-        run: |
-          echo "Cache contents:"
-          ls -la .eslintcache && echo "Cache exists" || echo "No cache found"
       - name: Check for Changes
         id: check_changes
         run: |
