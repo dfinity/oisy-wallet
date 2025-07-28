@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
 	import CkBTCUpdateBalanceListener from '$icp/components/core/CkBTCUpdateBalanceListener.svelte';
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
@@ -14,7 +15,6 @@
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		children: Snippet;

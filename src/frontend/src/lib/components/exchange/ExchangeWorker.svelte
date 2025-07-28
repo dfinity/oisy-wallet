@@ -40,8 +40,14 @@
 	const debounceSyncTimer = debounce(syncTimer, 1000);
 
 	$effect(() => {
-		[worker, $currentCurrency, $enabledMergedErc20TokensAddresses, $enabledIcrcLedgerCanisterIdsNoCk, $enabledSplTokenAddresses,];
-			debounceSyncTimer();
+		[
+			worker,
+			$currentCurrency,
+			$enabledMergedErc20TokensAddresses,
+			$enabledIcrcLedgerCanisterIdsNoCk,
+			$enabledSplTokenAddresses
+		];
+		debounceSyncTimer();
 	});
 </script>
 

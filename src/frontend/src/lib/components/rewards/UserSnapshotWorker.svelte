@@ -113,7 +113,8 @@
 	// Exchanges: All exchanges initialized (since we have no disclaimer specific for the tokens we are interested in).
 	// Transactions: all transactions related to each network.
 	$effect(() => {
-		[$authSignedIn,
+		[
+			$authSignedIn,
 			$btcAddressMainnet,
 			$btcAddressTestnet,
 			$ethAddress,
@@ -125,8 +126,9 @@
 			$btcTransactionsStore,
 			$ethTransactionsStore,
 			$icTransactionsStore,
-			$solTransactionsStore];
-			triggerTimer();
+			$solTransactionsStore
+		];
+		triggerTimer();
 	});
 </script>
 

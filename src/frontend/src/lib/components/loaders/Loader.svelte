@@ -69,12 +69,12 @@
 			step: ProgressStepsLoader.INITIALIZATION,
 			text: $i18n.init.text.securing_session,
 			state: 'completed'
-		} ,
+		},
 		{
 			step: ProgressStepsLoader.ADDRESSES,
 			text: $i18n.init.text.retrieving_public_keys,
 			state: 'in_progress'
-		} ,
+		},
 		{
 			step: ProgressStepsLoader.DONE,
 			text: replaceOisyPlaceholders($i18n.init.text.done),
