@@ -50,8 +50,6 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
-import { parseSolAddress } from '$lib/validation/address.validation';
-import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';

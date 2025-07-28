@@ -41,6 +41,7 @@
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
@@ -52,7 +53,6 @@
 		initFeeContext,
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
-	import { parseSolAddress } from '$lib/validation/address.validation';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -163,7 +163,7 @@
 					unitName: $sendTokenDecimals
 				}),
 				prioritizationFee: $prioritizationFeeStore ?? ZERO,
-				destination : parseSolAddress(destination),
+				destination: parseSolAddress(destination),
 				source
 			});
 

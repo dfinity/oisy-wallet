@@ -1,5 +1,4 @@
 import { SolAddressSchema } from '$lib/schema/address.schema';
-import type { SolAddress } from '$lib/types/address';
 import type { Address, SolAddress } from '$lib/types/address';
 import { getAccountOwner } from '$sol/api/solana.api';
 import type { SolanaNetworkType } from '$sol/types/network';

@@ -3,6 +3,7 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 	import {
 		checkIfAccountExists,
 		estimatePriorityFee,
@@ -17,7 +18,6 @@
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-	import { parseSolAddress } from '$lib/validation/address.validation';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -76,7 +76,7 @@
 		}
 
 		const tokenAccount = await loadTokenAccount({
-			address: parseSolAddress( destination),
+			address: parseSolAddress(destination),
 			network: solNetwork,
 			tokenAddress: $sendToken.address
 		});

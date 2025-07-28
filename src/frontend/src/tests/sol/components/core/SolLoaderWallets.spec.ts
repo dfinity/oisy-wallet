@@ -42,8 +42,8 @@ describe('SolLoaderWallets', () => {
 	});
 
 	it('should initialize wallet workers only for networks with available addresses', () => {
-		const devnetAddress =parseSolAddress( 'devnet-address');
-		const mainnetAddress =parseSolAddress( 'mainnet-address');
+		const devnetAddress = parseSolAddress('devnet-address');
+		const mainnetAddress = parseSolAddress('mainnet-address');
 
 		solAddressDevnetStore.set({ data: devnetAddress, certified: true });
 		solAddressMainnetStore.set({ data: mainnetAddress, certified: true });

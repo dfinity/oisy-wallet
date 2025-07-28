@@ -3,7 +3,6 @@ import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseSolAddress } from '$lib/validation/address.validation';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';

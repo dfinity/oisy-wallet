@@ -1,7 +1,6 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
-import { WALLET_PAGINATION, ZERO_BI } from '$lib/constants/app.constants';
-import { parseSolAddress } from '$lib/validation/address.validation';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import {
 	checkIfAccountExists,
 	estimatePriorityFee,

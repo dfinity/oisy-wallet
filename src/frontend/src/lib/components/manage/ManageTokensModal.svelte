@@ -30,6 +30,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { SolAddress } from '$lib/types/address';
 	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenMetadata } from '$lib/types/token';
@@ -46,7 +47,6 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import type { SolAddress } from '$lib/types/address';
 
 	let {
 		initialSearch,

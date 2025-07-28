@@ -9,7 +9,9 @@ import { z } from 'zod/v4';
 
 export const AddressSchema = z.string().nonempty();
 
-export const SolAddressSchema = AddressSchema.brand('SolAddress').refine((val) => isSolAddress(val));
+export const SolAddressSchema = AddressSchema.brand('SolAddress').refine((val) =>
+	isSolAddress(val)
+);
 
 export const BtcAddressSchema = AddressSchema.refine((val) => isBtcAddress({ address: val }));
 

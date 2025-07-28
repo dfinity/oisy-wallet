@@ -1,5 +1,4 @@
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
-import { last } from '$lib/utils/array.utils';
 import { parseSolAddress } from '$lib/validation/address.validation';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
