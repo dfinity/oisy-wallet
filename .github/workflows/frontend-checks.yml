@@ -55,7 +55,7 @@ jobs:
           echo "File is missing or not empty"
           fi
           echo "Cache contents:"
-          ls -la .eslintcache || echo "No cache found"
+          ls -la .eslintcache && echo "Cache exists" || echo "No cache found"
       - name: Format
         run: npm run format
       - name: Save ESLint Cache
@@ -68,7 +68,7 @@ jobs:
       - name: Print the cache 2
         run: |
           echo "Cache contents:"
-          ls -la .eslintcache || echo "No cache found"
+          ls -la .eslintcache && echo "Cache exists" || echo "No cache found"
       - name: Check for Changes
         id: check_changes
         run: |
