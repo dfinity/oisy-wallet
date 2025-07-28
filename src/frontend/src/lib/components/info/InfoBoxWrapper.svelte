@@ -5,7 +5,7 @@
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
 
 	interface Props {
-		key: HideInfoKey;
+		key?: HideInfoKey;
 		children: Snippet;
 	}
 
