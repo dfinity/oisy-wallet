@@ -4,6 +4,7 @@
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconLock from '$lib/components/icons/IconLock.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { LOCK_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -27,6 +28,7 @@
 		<Button
 			colorStyle="tertiary"
 			styleClass="w-full py-2 flex-1 border-tertiary hover:text-brand-primary hover:bg-brand-subtle-10"
+			testId={LOCK_BUTTON}
 		>
 			{$i18n.auth.text.lock}
 			<IconLock />
