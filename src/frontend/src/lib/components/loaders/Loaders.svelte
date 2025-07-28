@@ -14,6 +14,13 @@
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
 </script>
 
 <LoaderUserProfile>
@@ -30,7 +37,7 @@
 											<LoaderContacts>
 												<TransactionsIdbSetter>
 													<BalancesIdbSetter>
-														<slot />
+														{@render children()}
 													</BalancesIdbSetter>
 												</TransactionsIdbSetter>
 											</LoaderContacts>
