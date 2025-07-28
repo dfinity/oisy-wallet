@@ -185,7 +185,7 @@
 				name: TRACK_COUNT_ETH_SEND_SUCCESS,
 				metadata: {
 					token: $sendToken.symbol,
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`,
+					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
 				}
 			});
 
@@ -195,7 +195,7 @@
 				name: TRACK_COUNT_ETH_SEND_ERROR,
 				metadata: {
 					token: $sendToken.symbol,
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`,
+					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
 				}
 			});
 
