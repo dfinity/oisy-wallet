@@ -198,7 +198,10 @@ export const estimatePriorityFee = async ({
 	);
 };
 
-const addressToAccountInfo: Record<SolAddress, SolanaGetAccountInfoReturn> = {};
+const addressToAccountInfo = new Map<
+	SolanaNetworkType,
+	Map<SolAddress, SolanaGetAccountInfoReturn>
+>();
 
 export const getAccountInfo = async ({
 	address,
@@ -207,7 +210,12 @@ export const getAccountInfo = async ({
 	address: SolAddress;
 	network: SolanaNetworkType;
 }) => {
-	const cachedInfo = addressToAccountInfo[address];
+	const addressMap =
+		addressToAccountInfo.get(network) ?? new Map<SolAddress, SolanaGetAccountInfoReturn>();
+
+	addressToAccountInfo.set(network, addressMap);
+
+	const cachedInfo = addressMap.get(address);
 
 	if (nonNullish(cachedInfo)) {
 		return cachedInfo;
@@ -217,7 +225,7 @@ export const getAccountInfo = async ({
 
 	const info = await getAccountInfo(solAddress(address), { encoding: 'jsonParsed' }).send();
 
-	addressToAccountInfo[address] = info;
+	addressMap.set(address, info);
 
 	return info;
 };
