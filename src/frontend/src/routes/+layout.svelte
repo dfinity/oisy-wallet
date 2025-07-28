@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Spinner, Toasts, SystemThemeListener } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
@@ -19,6 +19,12 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	/**
 	 * Init dApp
@@ -68,11 +74,14 @@
 	 * Workers
 	 */
 
-	let worker: { syncAuthIdle: (auth: AuthStoreData) => void } | undefined;
+	let worker = $state<{ syncAuthIdle: (auth: AuthStoreData) => void } | undefined>();
 
 	onMount(async () => (worker = await initAuthWorker()));
 
-	$: (worker, $authStore, (() => worker?.syncAuthIdle($authStore))());
+	$effect(() => {
+		[worker, $authStore];
+		worker?.syncAuthIdle($authStore);
+	});
 
 	/**
 	 * UI loader
@@ -80,7 +89,7 @@
 
 	// To improve the UX while the app is loading on mainnet we display a spinner which is attached statically in the index.html files.
 	// Once the authentication has been initialized we know most JavaScript resources has been loaded and therefore we can hide the spinner, the loading information.
-	$: (() => {
+	$effect(() => {
 		if (!browser) {
 			return;
 		}
@@ -92,17 +101,17 @@
 
 		const spinner = document.querySelector('body > #app-spinner');
 		spinner?.remove();
-	})();
+	});
 </script>
 
-<svelte:window on:storage={syncAuthStore} />
+<svelte:window onstorage={syncAuthStore} />
 
 {#await init()}
 	<div in:fade>
 		<Spinner />
 	</div>
 {:then _}
-	<slot />
+	{@render children()}
 {/await}
 
 <Banner />
