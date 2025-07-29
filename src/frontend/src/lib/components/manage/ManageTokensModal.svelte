@@ -110,10 +110,7 @@
 	};
 
 	const saveEthToken = async () => {
-		// This does not happen at this point, but it is useful type-wise
-		assertNonNullish(network);
 
-		const ethereumNetwork = network as EthereumNetwork;
 
 		if (isNullishOrEmpty(ethContractAddress)) {
 			toastsError({
