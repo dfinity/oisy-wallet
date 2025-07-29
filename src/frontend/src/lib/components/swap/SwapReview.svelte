@@ -36,6 +36,8 @@
 		failedSwapError.set(undefined);
 		dispatch('icBack');
 	};
+
+	$effect(() => console.log($failedSwapError, 'error'));
 </script>
 
 <ContentWithToolbar>
