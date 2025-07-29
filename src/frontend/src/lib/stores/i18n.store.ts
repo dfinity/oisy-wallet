@@ -69,16 +69,18 @@ export interface I18nStore extends Readable<I18n> {
 const initI18n = (): I18nStore => {
 	const { subscribe, set } = writable<I18n>(loadLang(getDefaultLang()));
 
-	const switchLang = (lang: Languages) => {
+	const switchLang = ({ lang, track = true }: { lang: Languages; track?: boolean }) => {
 		set(loadLang(lang));
 
-		trackEvent({
-			name: TRACK_CHANGE_LANGUAGE,
-			metadata: {
-				language: lang,
-				source: getStore(authSignedIn) ? 'app' : 'landing-page'
-			}
-		});
+		if (track) {
+			trackEvent({
+				name: TRACK_CHANGE_LANGUAGE,
+				metadata: {
+					language: lang,
+					source: getStore(authSignedIn) ? 'app' : 'landing-page'
+				}
+			});
+		}
 
 		saveLang(lang);
 	};
@@ -95,10 +97,10 @@ const initI18n = (): I18nStore => {
 				return;
 			}
 
-			switchLang(lang);
+			switchLang({ lang, track: false });
 		},
 
-		switchLang
+		switchLang: (lang: Languages) => switchLang({ lang })
 	};
 };
 
