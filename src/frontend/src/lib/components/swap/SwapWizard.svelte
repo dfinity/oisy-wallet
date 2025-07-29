@@ -144,7 +144,7 @@
 
 				failedSwapError.set({
 					message: err.message,
-					variant: 'error',
+					variant: err.variant ?? 'info',
 					errorType: err.code,
 					url: {
 						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
