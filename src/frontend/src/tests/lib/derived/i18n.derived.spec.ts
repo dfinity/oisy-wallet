@@ -4,9 +4,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { get } from 'svelte/store';
 
 vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
+	createStore: vi.fn(),
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn(),

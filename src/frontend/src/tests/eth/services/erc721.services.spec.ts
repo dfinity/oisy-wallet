@@ -21,9 +21,7 @@ import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
+	createStore: vi.fn(),
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn(),
