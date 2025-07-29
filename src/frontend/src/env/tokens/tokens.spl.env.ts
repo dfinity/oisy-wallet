@@ -14,6 +14,7 @@ import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { HONX_TOKEN } from '$env/tokens/tokens-spl/tokens.honx.env';
 import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { LLYX_TOKEN } from '$env/tokens/tokens-spl/tokens.llyx.env';
 import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
@@ -53,6 +54,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	HONX_TOKEN,
 	HOODX_TOKEN,
 	JUP_TOKEN,
+	LLYX_TOKEN,
 	MCDX_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
