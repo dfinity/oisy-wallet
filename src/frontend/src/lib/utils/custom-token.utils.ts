@@ -18,7 +18,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
-import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { nonNullish, toNullable } from '@dfinity/utils';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,
@@ -104,4 +104,4 @@ export const parseCustomTokenId = ({
 	| {
 			identifier: SplTokenAddress | TokenMetadata['symbol'];
 			chainId: SolanaChainId;
-	  }): TokenId => parseTokenId(`custom-token#${fromNullable(identifier)}#${tokenNetwork.chainId}`);
+	  }): TokenId => parseTokenId(`custom-token#${identifier}#${tokenNetwork.chainId}`);
