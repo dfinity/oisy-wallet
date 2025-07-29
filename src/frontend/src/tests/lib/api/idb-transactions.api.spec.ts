@@ -23,7 +23,7 @@ import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
 
 vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(),
+	createStore: vi.fn(() => ({})),
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn(),

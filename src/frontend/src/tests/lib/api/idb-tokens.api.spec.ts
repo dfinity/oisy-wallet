@@ -31,7 +31,7 @@ import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 
 vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(),
+	createStore: vi.fn(() => ({})),
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn(),
