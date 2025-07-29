@@ -2,7 +2,6 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
-	import EthListener from '$eth/components/core/EthListener.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import type { OptionToken } from '$lib/types/token';
 	import {
@@ -29,9 +28,9 @@
 		{@render children?.()}
 	</BitcoinListener>
 {:else if isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)}
-	<EthListener {token}>
+<!--	<EthListener {token}>-->
 		{@render children?.()}
-	</EthListener>
+<!--	</EthListener>-->
 {:else}
 	{@render children?.()}
 {/if}
