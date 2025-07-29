@@ -17,6 +17,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
+	import { Html } from '@dfinity/gix-components';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -86,7 +87,7 @@
 			<MessageBox level={$failedSwapError.variant}>
 				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isEmptyString($failedSwapError?.message)}
 					{#if $failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED}
-						{$i18n.swap.error.withdraw_failed_first_part}
+						<Html text={$i18n.swap.error.withdraw_failed_first_part} />
 						<ExternalLink
 							iconSize="15"
 							href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
