@@ -37,10 +37,10 @@
 	}: Props = $props();
 
 	const onClick = () => {
-
-
 		// If rendered in the dropdown, we add a small delay to give the user a visual feedback that the network is checked
-		delayOnNetworkSelect ? setTimeout(() => onSelected?.(network?.id), 500) : onSelected?.(network?.id);
+		delayOnNetworkSelect
+			? setTimeout(() => onSelected?.(network?.id), 500)
+			: onSelected?.(network?.id);
 	};
 </script>
 

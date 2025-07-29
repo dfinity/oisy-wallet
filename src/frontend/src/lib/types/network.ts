@@ -6,8 +6,8 @@ import type {
 	NetworkIdSchema,
 	NetworkSchema
 } from '$lib/schema/network.schema';
-import type * as z from 'zod/v4';
 import type { Option } from '$lib/types/utils';
+import type * as z from 'zod/v4';
 
 export type NetworkId = z.infer<typeof NetworkIdSchema>;
 

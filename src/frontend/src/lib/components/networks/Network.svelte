@@ -6,7 +6,7 @@
 
 	interface Props {
 		network: Network;
-		selectedNetworkId?: NetworkId ;
+		selectedNetworkId?: NetworkId;
 		usdBalance?: number;
 		testIdPrefix?: string;
 		delayOnNetworkSelect?: boolean;
