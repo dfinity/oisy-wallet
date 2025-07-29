@@ -3,6 +3,7 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		swapProgressStep?: string;
@@ -15,6 +16,8 @@
 		sendWithApproval = false,
 		failedSteps = $bindable([])
 	}: Props = $props();
+
+	console.log(failedSteps);
 
 	let steps = $derived<ProgressSteps>([
 		{
@@ -44,12 +47,16 @@
 		{
 			step: ProgressStepsSwap.SWAP,
 			text: $i18n.swap.text.swapping,
-			state: failedSteps.includes(ProgressStepsSwap.SWAP) ? 'failed' : 'next'
+			state:
+				nonNullish(failedSteps) && failedSteps.includes(ProgressStepsSwap.SWAP) ? 'failed' : 'next'
 		},
 		{
 			step: ProgressStepsSwap.WITHDRAW,
-			text: 'Withdrawing...', // ← Виправте текст
-			state: failedSteps.includes(ProgressStepsSwap.WITHDRAW) ? 'failed' : 'next'
+			text: 'Withdrawing...',
+			state:
+				nonNullish(failedSteps) && failedSteps.includes(ProgressStepsSwap.WITHDRAW)
+					? 'failed'
+					: 'next'
 		},
 		{
 			step: ProgressStepsSwap.UPDATE_UI,
