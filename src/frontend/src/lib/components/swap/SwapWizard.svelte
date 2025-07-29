@@ -208,13 +208,13 @@
 			<SwapReview
 				on:icSwap={swap}
 				on:icBack
-				on:isClose
+				on:isClose={close}
 				{slippageValue}
 				{swapAmount}
 				{receiveAmount}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress bind:swapProgressStep bind:failedSteps={swapFailedProgressSteps} />
+			<SwapProgress bind:swapProgressStep />
 		{/if}
 	</SwapAmountsContext>
 </IcTokenFeeContext>

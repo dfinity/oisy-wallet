@@ -17,11 +17,6 @@
 		failedSteps = $bindable([])
 	}: Props = $props();
 
-	$effect(() => {
-		console.log('🔍 SwapProgress - failedSteps:', failedSteps);
-		console.log('🔍 SwapProgress - swapProgressStep:', swapProgressStep);
-	});
-
 	let steps = $derived<ProgressSteps>([
 		{
 			step: ProgressStepsSwap.INITIALIZATION,
@@ -50,13 +45,13 @@
 		{
 			step: ProgressStepsSwap.SWAP,
 			text: $i18n.swap.text.swapping,
-			state: failedSteps.includes(ProgressStepsSwap.SWAP) ? 'failed' : 'next'
+			state: 'next'
 		},
-		{
-			step: ProgressStepsSwap.WITHDRAW,
-			text: 'Withdrawing...',
-			state: failedSteps.includes(ProgressStepsSwap.WITHDRAW) ? 'failed' : 'next'
-		},
+		// {
+		// 	step: ProgressStepsSwap.WITHDRAW,
+		// 	text: 'Withdrawing...',
+		// 	state: failedSteps.includes(ProgressStepsSwap.WITHDRAW) ? 'failed' : 'next'
+		// },
 		{
 			step: ProgressStepsSwap.UPDATE_UI,
 			text: $i18n.swap.text.refreshing_ui,
