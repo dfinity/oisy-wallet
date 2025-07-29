@@ -18,6 +18,8 @@
 	];
 
 	const updateSteps = () => {
+		console.log('🔍 InProgress - updateSteps called');
+		console.log('🔍 InProgress - dynamicSteps before update:', dynamicSteps);
 		const progressIndex = dynamicSteps.findIndex(({ step }) => step === progressStep);
 
 		dynamicSteps = dynamicSteps.map((step, index) => {

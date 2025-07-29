@@ -60,8 +60,12 @@
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 	const setFailedProgressStep = (step: ProgressStepsSwap) => {
+		console.log('🔍 setFailedProgressStep called with:', step);
+		console.log('🔍 swapFailedProgressSteps before:', swapFailedProgressSteps);
+
 		if (!swapFailedProgressSteps.includes(step)) {
 			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
+			console.log('🔍 swapFailedProgressSteps after:', swapFailedProgressSteps);
 		}
 	};
 
