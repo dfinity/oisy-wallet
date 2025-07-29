@@ -4,6 +4,7 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc20ContractAddress } from '$eth/types/address';
+import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
@@ -13,6 +14,7 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -21,7 +23,7 @@ export const isInterfaceErc1155 = async ({
 	address
 }: {
 	networkId: NetworkId;
-	address: Erc20ContractAddress;
+	address: Erc1155ContractAddress['address'];
 }): Promise<boolean> => {
 	const { isInterfaceErc1155 } = infuraErc1155Providers(networkId);
 
@@ -95,7 +97,7 @@ const loadCustomTokensWithMetadata = async (
 
 				return {
 					...{
-						id: parseTokenId(`custom-token#${tokenAddress}#${network.chainId}`),
+						id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
 						name: tokenAddress,
 						address: tokenAddress,
 						network,
