@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import {
+		saveErc1155CustomTokens,
 		saveErc20UserTokens,
 		saveErc721CustomTokens
 	} from '$eth/services/manage-tokens.services';
@@ -45,6 +46,8 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
+	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 
 	let {
 		initialSearch,
@@ -107,6 +110,11 @@
 	};
 
 	const saveEthToken = async () => {
+		// This does not happen at this point, but it is useful type-wise
+		assertNonNullish(network)
+
+		const ethereumNetwork = network as EthereumNetwork;
+
 		if (isNullishOrEmpty(ethContractAddress)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.invalid_contract_address }
@@ -121,34 +129,31 @@
 			return;
 		}
 
-		if (ethMetadata.decimals > 0) {
-			await saveErc20Deprecated([
-				{
-					address: ethContractAddress,
-					...ethMetadata,
-					network: network as EthereumNetwork,
-					enabled: true
-				}
-			]);
-
-			await saveErc20([
-				{
-					address: ethContractAddress,
-					...ethMetadata,
-					network: network as EthereumNetwork,
-					enabled: true
-				}
-			]);
-		} else {
-			await saveErc721([
-				{
-					address: ethContractAddress,
-					...ethMetadata,
-					network: network as EthereumNetwork,
-					enabled: true
-				}
-			]);
+		const newToken = 	{
+			address: ethContractAddress,
+			...ethMetadata,
+			network: ethereumNetwork,
+			enabled: true
 		}
+
+		if (ethMetadata.decimals > 0) {
+			await saveErc20Deprecated([newToken]);
+
+			await saveErc20([newToken]);
+
+			return;
+		}
+
+		const isErc1155 = await isInterfaceErc1155({address: ethContractAddress, networkId:network.id})
+
+		if (isErc1155) {
+			await saveErc1155([newToken]);
+
+			return
+		}
+
+		// TODO: Warn the user that if no interface is encountered, it falls back to standard ERC721
+		await saveErc721([newToken]);
 	};
 
 	const saveSplToken = () => {
@@ -211,6 +216,17 @@
 
 	const saveErc721 = (tokens: SaveErc721CustomToken[]): Promise<void> =>
 		saveErc721CustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
+
+	const saveErc1155 = (tokens: SaveErc1155CustomToken[]): Promise<void> =>
+		saveErc1155CustomTokens({
 			tokens,
 			progress,
 			modalNext: () => modal?.set(3),
