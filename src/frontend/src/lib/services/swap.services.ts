@@ -313,11 +313,10 @@ export const fetchIcpSwap = async ({
 			amountOutMinimum: slippageMinimum.toString()
 		});
 
-		setFailedProgressStep(ProgressStepsSwap.SWAP);
-		progress(ProgressStepsSwap.WITHDRAW);
-
 		console.log('✅ swapIcp() SUCCESS');
 	} catch (err: unknown) {
+		setFailedProgressStep(ProgressStepsSwap.SWAP);
+		progress(ProgressStepsSwap.WITHDRAW);
 		console.error('❌ swapIcp() FAILED', err);
 
 		// Swap failed, try to withdraw the source tokens
