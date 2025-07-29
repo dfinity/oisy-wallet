@@ -37,8 +37,6 @@
 		failedSwapError.set(undefined);
 		dispatch('icBack');
 	};
-
-	$: () => console.log($failedSwapError, 'error');
 </script>
 
 <ContentWithToolbar>
@@ -80,10 +78,6 @@
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
-			<span
-				>{$failedSwapError.errorType}: {$failedSwapError.message}
-				{$failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED}</span
-			>
 			<MessageBox level={$failedSwapError.variant}>
 				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isEmptyString($failedSwapError?.message)}
 					{#if $failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED}
