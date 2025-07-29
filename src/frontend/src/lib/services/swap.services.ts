@@ -194,6 +194,7 @@ export const fetchIcpSwap = async ({
 	tryToWithdraw?: boolean;
 	withdrawDestinationTokens?: boolean;
 }): Promise<void> => {
+	console.log('🚀 Start ICP Swap');
 	progress(ProgressStepsSwap.SWAP);
 
 	const parsedSwapAmount = parseToken({
@@ -331,8 +332,10 @@ export const fetchIcpSwap = async ({
 			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
+
+		console.log('✅ swapIcp() SUCCESS');
 	} catch (err: unknown) {
-		console.error(err);
+		console.error('❌ swapIcp() FAILED', err);
 
 		// Swap failed, try to withdraw the source tokens
 		await withdrawICPSwapAfterFailedSwap({
@@ -428,6 +431,7 @@ const withdrawICPSwapAfterFailedSwap = async ({
 	sourceToken: IcTokenToggleable;
 }) => {
 	try {
+		console.log('💸 Withdraw attempt #1');
 		// First withdrawal attempt
 		await withdraw({
 			identity,
@@ -439,6 +443,8 @@ const withdrawICPSwapAfterFailedSwap = async ({
 					: amount,
 			fee
 		});
+
+		console.log('✅ Withdraw #1 SUCCESS');
 
 		trackEvent({
 			name: TRACK_COUNT_SWAP_ERROR,
@@ -452,6 +458,8 @@ const withdrawICPSwapAfterFailedSwap = async ({
 			message: get(i18n).swap.error.swap_failed_withdraw_success
 		});
 	} catch (_: unknown) {
+		console.warn('⚠️ [Withdraw #1] Failed:');
+
 		try {
 			// Second withdrawal attempt
 			await withdraw({
@@ -465,6 +473,8 @@ const withdrawICPSwapAfterFailedSwap = async ({
 				fee
 			});
 
+			console.log('✅ [Withdraw #2] Success');
+
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
@@ -477,6 +487,8 @@ const withdrawICPSwapAfterFailedSwap = async ({
 				message: get(i18n).swap.error.swap_failed_withdraw_success
 			});
 		} catch (_: unknown) {
+			console.error('❌ [Withdraw #2] Failed:');
+
 			// Both withdrawal attempts failed
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,

@@ -79,6 +79,7 @@
 		<div class="mt-4">
 			<MessageBox level={$failedSwapError.variant}>
 				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isNullish($failedSwapError.message)}
+					{$failedSwapError.errorType}
 					{#if $failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED}
 						{$i18n.swap.error.withdraw_failed_first_part}
 						<ExternalLink
