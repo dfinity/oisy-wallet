@@ -361,8 +361,7 @@ export const fetchIcpSwap = async ({
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
 			amount:
-				sourceToken.id === ICP_TOKEN.id &&
-				(parsedSwapAmount === 100000000n || parsedSwapAmount === 400000000n)
+				sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 400000000n
 					? BigInt(`${receiveAmount}000`)
 					: receiveAmount,
 			fee: destinationTokenFee

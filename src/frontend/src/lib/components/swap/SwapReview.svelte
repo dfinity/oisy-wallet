@@ -145,7 +145,7 @@
 			{/if}
 
 			<Button onclick={() => dispatch('icSwap')}>
-				{nonNullish($failedSwapError?.errorType) && isNullish($failedSwapError?.message)
+				{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
 					? 'Withdraw'
 					: $i18n.swap.text.swap_button}
 			</Button>

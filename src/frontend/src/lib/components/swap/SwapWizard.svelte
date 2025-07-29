@@ -90,7 +90,7 @@
 		dispatch('icNext');
 
 		try {
-			failedSwapError.set(undefined);
+			// failedSwapError.set(undefined);
 
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
@@ -102,13 +102,14 @@
 				slippageValue,
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2,
-				trackEvent
-				// tryToWithdraw:
-				// 	nonNullish($failedSwapError?.message) &&
-				// 	$failedSwapError.message === $i18n.swap.error.withdraw_failed,
-				// withdrawDestinationTokens:
-				// 	nonNullish($failedSwapError?.message) &&
-				// 	$failedSwapError.message === $i18n.swap.error.swap_success_withdraw_failed
+				trackEvent,
+				tryToWithdraw:
+					nonNullish($failedSwapError?.errorType) &&
+					($failedSwapError?.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED ||
+						$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED),
+				withdrawDestinationTokens:
+					nonNullish($failedSwapError?.errorType) &&
+					$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED
 			});
 
 			progress(ProgressStepsSwap.DONE);
