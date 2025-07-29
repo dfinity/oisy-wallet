@@ -196,7 +196,6 @@ export const fetchIcpSwap = async ({
 	tryToWithdraw?: boolean;
 	withdrawDestinationTokens?: boolean;
 }): Promise<void> => {
-	console.log('🚀 Start ICP Swap');
 	progress(ProgressStepsSwap.SWAP);
 
 	const parsedSwapAmount = parseToken({
@@ -219,7 +218,7 @@ export const fetchIcpSwap = async ({
 		fee: ICP_SWAP_POOL_FEE
 	});
 
-	if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 500000000n) {
+	if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 100000000n) {
 		throwSwapError({
 			code: SwapErrorCodes.DEPOSIT_FAILED,
 			message: get(i18n).swap.error.deposit_error
@@ -246,19 +245,20 @@ export const fetchIcpSwap = async ({
 	};
 
 	if (tryToWithdraw) {
-		const result = await performManualWithdraw({
+		const { code, message, variant } = await performManualWithdraw({
 			withdrawDestinationTokens,
 			identity,
 			canisterId: poolCanisterId,
-			token: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
+			tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
 			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
-			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee
+			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
+			token: withdrawDestinationTokens ? sourceToken : destinationToken
 		});
 
 		throwSwapError({
-			code: result.code,
-			message: result.message,
-			variant: result.variant
+			code,
+			message,
+			variant
 		});
 	}
 
@@ -306,21 +306,18 @@ export const fetchIcpSwap = async ({
 			canisterId: poolCanisterId,
 			amountIn:
 				sourceToken.id === ICP_TOKEN.id &&
-				(parsedSwapAmount === 200000000n || parsedSwapAmount === 300000000n)
+				(parsedSwapAmount === 200000000n ||
+					parsedSwapAmount === 300000000n ||
+					parsedSwapAmount === 400000000n ||
+					parsedSwapAmount === 400000000n)
 					? `${parsedSwapAmount}000`
 					: parsedSwapAmount.toString(),
 			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
-
-		console.log('✅ swapIcp() SUCCESS');
-	} catch (err: unknown) {
-		setFailedProgressStep(ProgressStepsSwap.SWAP);
-		progress(ProgressStepsSwap.WITHDRAW);
-		console.error('❌ swapIcp() FAILED', err);
-
+	} catch (_: unknown) {
 		// Swap failed, try to withdraw the source tokens
-		const result = await withdrawICPSwapAfterFailedSwap({
+		const { code, message, variant } = await withdrawICPSwapAfterFailedSwap({
 			identity,
 			sourceToken,
 			canisterId: poolCanisterId,
@@ -331,9 +328,9 @@ export const fetchIcpSwap = async ({
 		});
 
 		throwSwapError({
-			code: result.code,
-			message: result.message,
-			variant: result.variant
+			code,
+			message,
+			variant
 		});
 	}
 
@@ -344,20 +341,25 @@ export const fetchIcpSwap = async ({
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
 			amount:
-				sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 400000000n
+				sourceToken.id === ICP_TOKEN.id &&
+				(parsedSwapAmount === 600000000n ||
+					parsedSwapAmount === 700000000n ||
+					parsedSwapAmount === 800000000n)
 					? BigInt(`${receiveAmount}000`)
 					: receiveAmount,
 			fee: destinationTokenFee
 		});
-	} catch (err: unknown) {
-		console.error('❌ First withdraw failed:', err);
+	} catch (_: unknown) {
 		try {
 			await withdraw({
 				identity,
 				canisterId: poolCanisterId,
 				token: destinationLedgerCanisterId,
 				amount:
-					sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 400000000n
+					sourceToken.id === ICP_TOKEN.id &&
+					(parsedSwapAmount === 600000000n ||
+						parsedSwapAmount === 700000000n ||
+						parsedSwapAmount === 800000000n)
 						? BigInt(`${receiveAmount}000`)
 						: receiveAmount,
 				fee: destinationTokenFee
@@ -418,22 +420,18 @@ const withdrawICPSwapAfterFailedSwap = async ({
 	trackEvent: ({ name, metadata, warning }: TrackEventParams) => void;
 	sourceToken: IcTokenToggleable;
 }): Promise<{ code: SwapErrorCodes; message?: string; variant?: 'error' | 'warning' | 'info' }> => {
-	// ← Повертає код помилки
-
 	try {
-		console.log('💸 Withdraw attempt #1');
 		await withdraw({
 			identity,
 			canisterId,
 			token,
 			amount:
-				sourceToken.id === ICP_TOKEN.id && (amount === 200000000n || amount === 300000000n)
+				sourceToken.id === ICP_TOKEN.id &&
+				(amount === 300000000n || amount === 400000000n || amount === 500000000n)
 					? BigInt(`${amount}000`)
 					: amount,
 			fee
 		});
-
-		console.log('✅ Withdraw #1 SUCCESS');
 
 		trackEvent({
 			name: TRACK_COUNT_SWAP_ERROR,
@@ -445,10 +443,8 @@ const withdrawICPSwapAfterFailedSwap = async ({
 		return {
 			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
 			message: get(i18n).swap.error.swap_failed_withdraw_success
-		}; // ← Повертаємо код
+		};
 	} catch (_: unknown) {
-		console.warn('⚠️ [Withdraw #1] Failed:');
-
 		try {
 			// Second withdrawal attempt
 			await withdraw({
@@ -456,13 +452,11 @@ const withdrawICPSwapAfterFailedSwap = async ({
 				canisterId,
 				token,
 				amount:
-					sourceToken.id === ICP_TOKEN.id && amount === 300000000n
+					sourceToken.id === ICP_TOKEN.id && (amount === 400000000n || amount === 500000000n)
 						? BigInt(`${amount}000`)
 						: amount,
 				fee
 			});
-
-			console.log('✅ [Withdraw #2] Success');
 
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
@@ -474,10 +468,8 @@ const withdrawICPSwapAfterFailedSwap = async ({
 			return {
 				code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
 				message: get(i18n).swap.error.swap_failed_withdraw_success
-			}; // ← Повертаємо код
+			};
 		} catch (_: unknown) {
-			console.error('❌ [Withdraw #2] Failed:');
-
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
@@ -485,7 +477,7 @@ const withdrawICPSwapAfterFailedSwap = async ({
 				}
 			});
 
-			return { code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED, variant: 'error' }; // ← Повертаємо код
+			return { code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED, variant: 'error' };
 		}
 	}
 };
@@ -494,25 +486,39 @@ const performManualWithdraw = async ({
 	withdrawDestinationTokens,
 	identity,
 	canisterId,
-	token,
+	tokenId,
 	amount,
-	fee
+	fee,
+	token
 }: {
 	withdrawDestinationTokens: boolean;
 	identity: OptionIdentity;
 	canisterId: string;
-	token: string;
+	tokenId: string;
 	amount: bigint;
 	fee: bigint;
+	token: IcTokenToggleable;
 }): Promise<{ code: SwapErrorCodes; message?: string; variant?: 'error' | 'warning' | 'info' }> => {
 	try {
-		if (withdrawDestinationTokens) {
-			await withdraw({ identity, canisterId, token, amount, fee });
-		} else {
-			await withdraw({ identity, canisterId, token, amount, fee });
-		}
+		await withdraw({
+			identity,
+			canisterId,
+			token: tokenId,
+			amount:
+				token.id === ICP_TOKEN.id && (amount === 400000000n || amount === 700000000n)
+					? BigInt(`${amount}000`)
+					: amount,
+			fee
+		});
 
-		trackEvent({ name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS });
+		trackEvent({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+			metadata: {
+				token: token.symbol,
+				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
+			}
+		});
+
 		return {
 			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			message: withdrawDestinationTokens
@@ -520,7 +526,14 @@ const performManualWithdraw = async ({
 				: get(i18n).swap.error.manually_withdraw_success
 		};
 	} catch (_: unknown) {
-		trackEvent({ name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED });
+		trackEvent({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
+			metadata: {
+				token: token.symbol,
+				tokenOrigin: withdrawDestinationTokens ? 'receive' : 'pay'
+			}
+		});
+
 		return {
 			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			variant: 'error'

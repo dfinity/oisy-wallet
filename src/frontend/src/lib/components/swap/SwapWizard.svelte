@@ -135,7 +135,7 @@
 				}
 			});
 
-			setTimeout(() => close(), 750);
+			setTimeout(() => close(), 2500);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
 			// TODO: Add unit tests to cover failed swap error scenarios
@@ -152,8 +152,6 @@
 			}
 
 			if (isSwapError(err)) {
-				console.log({ err });
-
 				failedSwapError.set({
 					message: err.message,
 					variant: err.variant ?? 'info',

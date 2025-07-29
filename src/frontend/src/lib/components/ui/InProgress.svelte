@@ -17,26 +17,25 @@
 		...(steps as ProgressSteps)
 	];
 
-	const updateSteps = () => {
+		const updateSteps = () => {
 		console.log('🔍 InProgress - updateSteps called');
-		console.log('🔍 InProgress - dynamicSteps before update:', dynamicSteps);
-		const progressIndex = dynamicSteps.findIndex(({ step }) => step === progressStep);
+		
+		// ⭐ ВИКОРИСТОВУЙТЕ steps prop НАПРЯМУ, а не dynamicSteps
+		const progressIndex = (steps as ProgressSteps).findIndex(({ step }) => step === progressStep);
 
-		dynamicSteps = dynamicSteps.map((step, index) => {
+		// ⭐ БАЗУЙТЕСЯ НА АКТУАЛЬНИХ steps prop
+		return (steps as ProgressSteps).map((step, index) => {
+			console.log(`🔍 Step ${step.step} has state: ${step.state}`);
+			
 			if (step.state === 'failed') {
+				console.log('🔍 InProgress - preserving failed step:', step.step);
 				return step;
 			}
 
 			return step.step === progressStep
-				? {
-						...step,
-						state: 'in_progress'
-					}
-				: {
-						...step,
-						state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
-					};
-		}) as ProgressSteps;
+				? { ...step, state: 'in_progress' }
+				: { ...step, state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next' };
+		});
 	};
 
 	$: progressStep, updateSteps();

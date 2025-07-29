@@ -37,6 +37,10 @@
 		failedSwapError.set(undefined);
 		dispatch('icBack');
 	};
+
+	$: isManualWithdrawSuccess =
+		$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS &&
+		$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success;
 </script>
 
 <ContentWithToolbar>
@@ -80,52 +84,26 @@
 		<div class="mt-4">
 			<MessageBox level={$failedSwapError.variant}>
 				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isEmptyString($failedSwapError?.message)}
-					{#if $failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED}
-						<Html text={$i18n.swap.error.withdraw_failed_first_part} />
-						<ExternalLink
-							iconSize="15"
-							href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
-							ariaLabel={$i18n.swap.text.open_instructions_link}
-							>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
-						>
-						{$i18n.swap.error.withdraw_failed_second_part}
+					<Html
+						text={$failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
+							? $i18n.swap.error.withdraw_failed_first_part
+							: $failedSwapError.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED
+								? $i18n.swap.error.manually_withdraw_failed
+								: $i18n.swap.error.swap_sucess_withdraw_failed}
+					/>
+					<ExternalLink
+						iconSize="15"
+						href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
+						ariaLabel={$i18n.swap.text.open_instructions_link}
+						>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
+					>
+					{$i18n.swap.error.withdraw_failed_second_part}
 
-						<ExternalLink
-							iconSize="15"
-							href={$failedSwapError.url.url}
-							ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
-						>
-					{:else if $failedSwapError.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED}
-						<Html text={$i18n.swap.error.manually_withdraw_failed} />
-						<ExternalLink
-							iconSize="15"
-							href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
-							ariaLabel={$i18n.swap.text.open_instructions_link}
-							>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
-						>
-						{$i18n.swap.error.withdraw_failed_second_part}
-
-						<ExternalLink
-							iconSize="15"
-							href={$failedSwapError.url.url}
-							ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
-						>
-					{:else if $failedSwapError.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED}
-						<Html text={$i18n.swap.error.swap_sucess_withdraw_failed} />
-
-						<ExternalLink
-							iconSize="15"
-							href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
-							ariaLabel={$i18n.swap.text.open_instructions_link}
-							>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
-						>
-						{$i18n.swap.error.withdraw_failed_second_part}
-						<ExternalLink
-							iconSize="15"
-							href={$failedSwapError.url.url}
-							ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
-						>
-					{/if}
+					<ExternalLink
+						iconSize="15"
+						href={$failedSwapError.url.url}
+						ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
+					>
 				{:else}
 					{$failedSwapError.message}
 				{/if}
@@ -135,16 +113,16 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			{#if !($failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS && $failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success)}
+			{#if !isManualWithdrawSuccess}
 				<ButtonBack onclick={onClick} />
 			{/if}
 
-			{#if $failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS && $failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success}
-				<Button onclick={() => dispatch('icClose')}>Close</Button>
+			{#if isManualWithdrawSuccess}
+				<Button onclick={() => dispatch('icClose')}>{$i18n.core.text.close}</Button>
 			{:else}
 				<Button onclick={() => dispatch('icSwap')}>
 					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
-						? 'Withdraw'
+						? $i18n.swap.text.withdraw
 						: $i18n.swap.text.swap_button}
 				</Button>
 			{/if}
