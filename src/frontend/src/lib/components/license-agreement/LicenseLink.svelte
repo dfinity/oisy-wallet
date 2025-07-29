@@ -2,8 +2,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let noUnderline = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		noUnderline?: boolean;
+		testId?: string;
+	}
+
+	let { noUnderline = false, testId }: Props = $props();
 </script>
 
 <a
