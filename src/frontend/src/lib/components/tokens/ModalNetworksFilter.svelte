@@ -9,7 +9,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import type { NetworkId } from '$lib/types/network';
+	import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 
 	const { setFilterNetwork, filterNetwork } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -19,7 +19,7 @@
 
 	const back = () => dispatch('icNetworkFilter');
 
-	const onNetworkSelect = ({ detail: networkId }: CustomEvent<NetworkId>) => {
+	const onNetworkSelect = (networkId: OptionNetworkId) => {
 		const network = $networks.find(({ id }) => id === networkId);
 
 		setFilterNetwork(network);
@@ -30,7 +30,7 @@
 
 <ContentWithToolbar>
 	<NetworkSwitcherList
-		on:icSelected={onNetworkSelect}
+		onSelected={onNetworkSelect}
 		selectedNetworkId={$filterNetwork?.id}
 		delayOnNetworkSelect={false}
 		labelsSize="lg"
