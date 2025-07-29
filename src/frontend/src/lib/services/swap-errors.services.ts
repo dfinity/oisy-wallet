@@ -7,6 +7,7 @@ export const throwSwapError = ({
 	code: SwapErrorCodes;
 	message?: string;
 }): never => {
+	console.log("🔥 throwSwapError:", code);
 	throw new SwapError(code, message);
 };
 
