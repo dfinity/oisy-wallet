@@ -9,16 +9,27 @@
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
-	import type { NetworkId } from '$lib/types/network';
+	import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 
-	export let selectedNetworkId: NetworkId | undefined = undefined;
-	export let delayOnNetworkSelect = true;
-	export let labelsSize: LabelSize = 'md';
+	interface Props {
+		selectedNetworkId?: NetworkId;
+		delayOnNetworkSelect?: boolean;
+		labelsSize?: LabelSize;
+		onSelected?: (networkId: OptionNetworkId) => void;
+	}
 
-	let mainnetTokensUsdBalance: number;
-	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
-		(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
-		0
+	let {
+		selectedNetworkId,
+		delayOnNetworkSelect = true,
+		labelsSize = 'md',
+		onSelected
+	}: Props = $props();
+
+	let mainnetTokensUsdBalance = $derived(
+		$networksMainnets.reduce(
+			(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
+			0
+		)
 	);
 </script>
 
@@ -27,7 +38,7 @@
 	{selectedNetworkId}
 	{delayOnNetworkSelect}
 	{labelsSize}
-	on:icSelected
+	{onSelected}
 />
 
 <ul class="flex list-none flex-col">
@@ -38,7 +49,7 @@
 				{selectedNetworkId}
 				{delayOnNetworkSelect}
 				{labelsSize}
-				on:icSelected
+				{onSelected}
 			/></li
 		>
 	{/each}
@@ -57,7 +68,7 @@
 					{selectedNetworkId}
 					{delayOnNetworkSelect}
 					{labelsSize}
-					on:icSelected
+					{onSelected}
 				/></li
 			>
 		{/each}
