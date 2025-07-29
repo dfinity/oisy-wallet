@@ -39,6 +39,7 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { trackEvent } from './analytics.services';
 import { throwSwapError } from './swap-errors.services';
 import { autoLoadSingleToken } from './token.services';
 
@@ -244,42 +245,19 @@ export const fetchIcpSwap = async ({
 	};
 
 	if (tryToWithdraw) {
-		try {
-			if (withdrawDestinationTokens) {
-				// Manual withdraw of destination tokens (swap succeeded but withdraw failed)
-				await withdraw({
-					identity,
-					canisterId: poolCanisterId,
-					token: destinationLedgerCanisterId,
-					amount: receiveAmount,
-					fee: destinationTokenFee
-				});
-			} else {
-				// Manual withdraw of source tokens (swap failed)
-				await withdraw({
-					identity,
-					canisterId: poolCanisterId,
-					token: sourceLedgerCanisterId,
-					amount: parsedSwapAmount,
-					fee: sourceTokenFee
-				});
-			}
+		const result = await performManualWithdraw({
+			withdrawDestinationTokens,
+			identity,
+			canisterId: poolCanisterId,
+			token: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
+			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
+			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee
+		});
 
-			trackEvent({ name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS });
-
-			throwSwapError({
-				code: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
-				message: withdrawDestinationTokens
-					? get(i18n).swap.error.swap_sucess_manually_withdraw_success
-					: get(i18n).swap.error.manually_withdraw_success
-			});
-		} catch (_: unknown) {
-			trackEvent({ name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED });
-
-			throwSwapError({
-				code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED
-			});
-		}
+		throwSwapError({
+			code: result.code,
+			message: result.message
+		});
 	}
 
 	try {
@@ -503,5 +481,42 @@ const withdrawICPSwapAfterFailedSwap = async ({
 
 			return { code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED }; // ← Повертаємо код
 		}
+	}
+};
+
+const performManualWithdraw = async ({
+	withdrawDestinationTokens,
+	identity,
+	canisterId,
+	token,
+	amount,
+	fee
+}: {
+	withdrawDestinationTokens: boolean;
+	identity: OptionIdentity;
+	canisterId: string;
+	token: string;
+	amount: bigint;
+	fee: bigint;
+}): Promise<{ code: SwapErrorCodes; message?: string }> => {
+	try {
+		if (withdrawDestinationTokens) {
+			await withdraw({ identity, canisterId, token, amount, fee });
+		} else {
+			await withdraw({ identity, canisterId, token, amount, fee });
+		}
+
+		trackEvent({ name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS });
+		return {
+			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+			message: withdrawDestinationTokens
+				? get(i18n).swap.error.swap_sucess_manually_withdraw_success
+				: get(i18n).swap.error.manually_withdraw_success
+		};
+	} catch (_: unknown) {
+		trackEvent({ name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED });
+		return {
+			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED
+		};
 	}
 };
