@@ -338,7 +338,7 @@ export const fetchIcpSwap = async ({
 		console.error('❌ swapIcp() FAILED', err);
 
 		// Swap failed, try to withdraw the source tokens
-		await withdrawICPSwapAfterFailedSwap({
+		const result = await withdrawICPSwapAfterFailedSwap({
 			identity,
 			sourceToken,
 			canisterId: poolCanisterId,
@@ -346,6 +346,10 @@ export const fetchIcpSwap = async ({
 			amount: parsedSwapAmount,
 			fee: sourceTokenFee,
 			trackEvent
+		});
+
+		throwSwapError({
+			code: result
 		});
 	}
 
@@ -429,10 +433,11 @@ const withdrawICPSwapAfterFailedSwap = async ({
 	fee: bigint;
 	trackEvent: ({ name, metadata, warning }: TrackEventParams) => void;
 	sourceToken: IcTokenToggleable;
-}) => {
+}): Promise<SwapErrorCodes> => {
+	// ← Повертає код помилки
+
 	try {
 		console.log('💸 Withdraw attempt #1');
-		// First withdrawal attempt
 		await withdraw({
 			identity,
 			canisterId,
@@ -453,10 +458,7 @@ const withdrawICPSwapAfterFailedSwap = async ({
 			}
 		});
 
-		throwSwapError({
-			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
-			message: get(i18n).swap.error.swap_failed_withdraw_success
-		});
+		return SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS; // ← Повертаємо код
 	} catch (_: unknown) {
 		console.warn('⚠️ [Withdraw #1] Failed:');
 
@@ -475,27 +477,17 @@ const withdrawICPSwapAfterFailedSwap = async ({
 
 			console.log('✅ [Withdraw #2] Success');
 
-			// trackEvent({
-			// 	name: TRACK_COUNT_SWAP_ERROR,
-			// 	metadata: {
-			// 		errorKey: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS
-			// 	}
-			// });
-
-			console.log("🔥 THROWING: ", SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS);
-
-			
-
-			throwSwapError({
-				code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
-				message: get(i18n).swap.error.swap_failed_withdraw_success
+			trackEvent({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: {
+					errorKey: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS
+				}
 			});
 
-
+			return SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS; // ← Повертаємо код
 		} catch (_: unknown) {
 			console.error('❌ [Withdraw #2] Failed:');
 
-			// Both withdrawal attempts failed
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
@@ -503,9 +495,7 @@ const withdrawICPSwapAfterFailedSwap = async ({
 				}
 			});
 
-			throwSwapError({
-				code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
-			});
+			return SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED; // ← Повертаємо код
 		}
 	}
 };
