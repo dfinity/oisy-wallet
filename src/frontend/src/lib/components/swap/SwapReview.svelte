@@ -79,6 +79,7 @@
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
+			<span>{($failedSwapError.errorType, $failedSwapError.message)}</span>
 			<MessageBox level={$failedSwapError.variant}>
 				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isNullish($failedSwapError.message)}
 					{$failedSwapError.errorType}
