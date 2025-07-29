@@ -108,7 +108,7 @@ const loadCustomTokensWithMetadata = async (
 
 				const newToken = {
 					id: parseCustomTokenId({
-						identifier: fromNullable(symbol),
+						identifier: fromNullable(symbol) ?? tokenAddress,
 						chainId: tokenNetwork.chainId
 					}),
 					name: tokenAddress,
