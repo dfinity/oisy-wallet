@@ -90,6 +90,8 @@
 		dispatch('icNext');
 
 		try {
+			failedSwapError.set(undefined);
+
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
 				progress,
@@ -110,8 +112,6 @@
 			});
 
 			progress(ProgressStepsSwap.DONE);
-
-			failedSwapError.set(undefined);
 
 			trackEvent({
 				name: TRACK_COUNT_SWAP_SUCCESS,
@@ -139,6 +139,8 @@
 			}
 
 			if (isSwapError(err)) {
+				console.log({ err });
+
 				failedSwapError.set({
 					message: err.message,
 					variant: 'error',
