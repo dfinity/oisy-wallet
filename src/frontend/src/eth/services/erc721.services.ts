@@ -10,7 +10,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
-import { parseTokenId } from '$lib/validation/token.validation';
+import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -83,7 +83,7 @@ const loadCustomTokensWithMetadata = async (
 
 				return {
 					...{
-						id: parseTokenId(`custom-token#${symbol}#${network.chainId}`),
+						id: parseCustomTokenId({ identifier: symbol, chainId: network.chainId }),
 						name: tokenAddress,
 						address: tokenAddress,
 						network,
