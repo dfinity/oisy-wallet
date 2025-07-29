@@ -95,7 +95,7 @@ export const toCustomToken = ({
 
 export const parseCustomTokenId = ({
 	identifier,
-	tokenNetwork
+	chainId
 }:
 	| {
 			identifier: ContractAddress['address'] | TokenMetadata['symbol'];
@@ -104,4 +104,4 @@ export const parseCustomTokenId = ({
 	| {
 			identifier: SplTokenAddress | TokenMetadata['symbol'];
 			chainId: SolanaChainId;
-	  }): TokenId => parseTokenId(`custom-token#${identifier}#${tokenNetwork.chainId}`);
+	  }): TokenId => parseTokenId(`custom-token#${identifier}#${chainId}`);
