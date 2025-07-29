@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -79,10 +79,12 @@
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
-			<span>{$failedSwapError.errorType}: {$failedSwapError.message}</span>
+			<span
+				>{$failedSwapError.errorType}: {$failedSwapError.message}
+				{$failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED}</span
+			>
 			<MessageBox level={$failedSwapError.variant}>
-				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isNullish($failedSwapError.message)}
-					{$failedSwapError.errorType}
+				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isEmptyString($failedSwapError?.message)}
 					{#if $failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED}
 						{$i18n.swap.error.withdraw_failed_first_part}
 						<ExternalLink
