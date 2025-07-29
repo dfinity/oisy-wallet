@@ -181,6 +181,7 @@ export const fetchSwapAmounts = async ({
 export const fetchIcpSwap = async ({
 	identity,
 	progress,
+	setFailedProgressStep,
 	sourceToken,
 	destinationToken,
 	swapAmount,
@@ -311,6 +312,9 @@ export const fetchIcpSwap = async ({
 			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
+
+		setFailedProgressStep(ProgressStepsSwap.SWAP);
+		progress(ProgressStepsSwap.WITHDRAW);
 
 		console.log('✅ swapIcp() SUCCESS');
 	} catch (err: unknown) {

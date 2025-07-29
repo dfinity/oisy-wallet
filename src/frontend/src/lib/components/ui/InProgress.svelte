@@ -20,8 +20,12 @@
 	const updateSteps = () => {
 		const progressIndex = dynamicSteps.findIndex(({ step }) => step === progressStep);
 
-		dynamicSteps = dynamicSteps.map((step, index) =>
-			step.step === progressStep
+		dynamicSteps = dynamicSteps.map((step, index) => {
+			if (step.state === 'failed') {
+				return step;
+			}
+
+			return step.step === progressStep
 				? {
 						...step,
 						state: 'in_progress'
@@ -29,11 +33,11 @@
 				: {
 						...step,
 						state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
-					}
-		) as ProgressSteps;
+					};
+		}) as ProgressSteps;
 	};
 
-	$: (progressStep, updateSteps());
+	$: progressStep, updateSteps();
 </script>
 
 <div class="px-2 pb-3">

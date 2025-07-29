@@ -121,6 +121,7 @@ export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
 export interface SwapParams {
 	identity: OptionIdentity;
 	progress: (step: ProgressStepsSwap) => void;
+	setFailedProgressStep: (step: ProgressStepsSwap) => void;
 	sourceToken: IcTokenToggleable;
 	destinationToken: IcTokenToggleable;
 	swapAmount: Amount;
