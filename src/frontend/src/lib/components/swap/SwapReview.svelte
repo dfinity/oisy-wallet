@@ -37,7 +37,7 @@
 		dispatch('icBack');
 	};
 
-	$effect(() => console.log($failedSwapError, 'error'));
+	$: () => console.log($failedSwapError, 'error');
 </script>
 
 <ContentWithToolbar>
