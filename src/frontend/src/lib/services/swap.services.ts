@@ -309,7 +309,7 @@ export const fetchIcpSwap = async ({
 				(parsedSwapAmount === 200000000n ||
 					parsedSwapAmount === 300000000n ||
 					parsedSwapAmount === 400000000n ||
-					parsedSwapAmount === 400000000n)
+					parsedSwapAmount === 500000000n)
 					? `${parsedSwapAmount}000`
 					: parsedSwapAmount.toString(),
 			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
@@ -504,10 +504,7 @@ const performManualWithdraw = async ({
 			identity,
 			canisterId,
 			token: tokenId,
-			amount:
-				token.id === ICP_TOKEN.id && (amount === 400000000n || amount === 700000000n)
-					? BigInt(`${amount}000`)
-					: amount,
+			amount: amount === 400000000n || amount === 700000000n ? BigInt(`${amount}000`) : amount,
 			fee
 		});
 
