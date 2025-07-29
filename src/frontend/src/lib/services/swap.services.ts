@@ -349,7 +349,8 @@ export const fetchIcpSwap = async ({
 		});
 
 		throwSwapError({
-			code: result
+			code: result.code,
+			message: result.message
 		});
 	}
 
@@ -433,7 +434,7 @@ const withdrawICPSwapAfterFailedSwap = async ({
 	fee: bigint;
 	trackEvent: ({ name, metadata, warning }: TrackEventParams) => void;
 	sourceToken: IcTokenToggleable;
-}): Promise<SwapErrorCodes> => {
+}): Promise<{ code: SwapErrorCodes; message?: string }> => {
 	// ← Повертає код помилки
 
 	try {
@@ -458,7 +459,10 @@ const withdrawICPSwapAfterFailedSwap = async ({
 			}
 		});
 
-		return SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS; // ← Повертаємо код
+		return {
+			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
+			message: get(i18n).swap.error.swap_failed_withdraw_success
+		}; // ← Повертаємо код
 	} catch (_: unknown) {
 		console.warn('⚠️ [Withdraw #1] Failed:');
 
@@ -484,7 +488,10 @@ const withdrawICPSwapAfterFailedSwap = async ({
 				}
 			});
 
-			return SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS; // ← Повертаємо код
+			return {
+				code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
+				message: get(i18n).swap.error.swap_failed_withdraw_success
+			}; // ← Повертаємо код
 		} catch (_: unknown) {
 			console.error('❌ [Withdraw #2] Failed:');
 
@@ -495,7 +502,7 @@ const withdrawICPSwapAfterFailedSwap = async ({
 				}
 			});
 
-			return SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED; // ← Повертаємо код
+			return { code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED }; // ← Повертаємо код
 		}
 	}
 };
