@@ -1293,7 +1293,8 @@
 		},
 		"avatar": {
 			"default": "Výchozí avatar",
-			"avatar_for": "Avatar pro"
+			"avatar_for": "Avatar pro",
+			"avatar_loading": ""
 		},
 		"edit_avatar": {
 			"menu_title": "",

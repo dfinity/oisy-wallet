@@ -1293,7 +1293,8 @@
 		},
 		"avatar": {
 			"default": "Standard-Avatar",
-			"avatar_for": "Avatar für"
+			"avatar_for": "Avatar für",
+			"avatar_loading": ""
 		},
 		"edit_avatar": {
 			"menu_title": "Kontakt Avatar",

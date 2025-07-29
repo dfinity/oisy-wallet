@@ -2,6 +2,7 @@ import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SolanaGetAccountInfoReturn } from '$sol/types/sol-rpc';
 import type {
 	SolRpcTransaction,
 	SolRpcTransactionRaw,
@@ -197,6 +198,38 @@ export const estimatePriorityFee = async ({
 	);
 };
 
+const addressToAccountInfo = new Map<
+	SolanaNetworkType,
+	Map<SolAddress, SolanaGetAccountInfoReturn>
+>();
+
+export const getAccountInfo = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}) => {
+	const addressMap =
+		addressToAccountInfo.get(network) ?? new Map<SolAddress, SolanaGetAccountInfoReturn>();
+
+	addressToAccountInfo.set(network, addressMap);
+
+	const cachedInfo = addressMap.get(address);
+
+	if (nonNullish(cachedInfo)) {
+		return cachedInfo;
+	}
+
+	const { getAccountInfo } = solanaHttpRpc(network);
+
+	const info = await getAccountInfo(solAddress(address), { encoding: 'jsonParsed' }).send();
+
+	addressMap.set(address, info);
+
+	return info;
+};
+
 export const getTokenInfo = async ({
 	address,
 	network
@@ -209,10 +242,7 @@ export const getTokenInfo = async ({
 	mintAuthority?: SplTokenAddress;
 	freezeAuthority?: SplTokenAddress;
 }> => {
-	const { getAccountInfo } = solanaHttpRpc(network);
-	const token = solAddress(address);
-
-	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
+	const { value } = await getAccountInfo({ address, network });
 
 	const { owner, data } = value ?? {};
 
@@ -242,10 +272,7 @@ export const getAccountOwner = async ({
 	address: SolAddress;
 	network: SolanaNetworkType;
 }): Promise<SolAddress | undefined> => {
-	const { getAccountInfo } = solanaHttpRpc(network);
-	const account = solAddress(address);
-
-	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+	const { value } = await getAccountInfo({ address, network });
 
 	if (isNullish(value?.data) || !('parsed' in value.data)) {
 		return undefined;
@@ -268,10 +295,7 @@ export const checkIfAccountExists = async ({
 	address: SolAddress;
 	network: SolanaNetworkType;
 }): Promise<boolean> => {
-	const { getAccountInfo } = solanaHttpRpc(network);
-	const account = solAddress(address);
-
-	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+	const { value } = await getAccountInfo({ address, network });
 
 	return nonNullish(value);
 };

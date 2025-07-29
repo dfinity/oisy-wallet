@@ -1293,7 +1293,8 @@
 		},
 		"avatar": {
 			"default": "Avatar padrão",
-			"avatar_for": "Avatar para"
+			"avatar_for": "Avatar para",
+			"avatar_loading": "O avatar está carregando"
 		},
 		"edit_avatar": {
 			"menu_title": "Imagem do Contato",
