@@ -28,9 +28,9 @@
 		{@render children?.()}
 	</BitcoinListener>
 {:else if isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)}
-<!--	<EthListener {token}>-->
-		{@render children?.()}
-<!--	</EthListener>-->
+	<!--	<EthListener {token}> -->
+	{@render children?.()}
+	<!--	</EthListener> -->
 {:else}
 	{@render children?.()}
 {/if}
