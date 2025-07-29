@@ -5,6 +5,7 @@ import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
 import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
+import type { TrackEventParams } from './analytics';
 import type { OptionIdentity } from './identity';
 import type { Amount, OptionAmount } from './send';
 
@@ -24,9 +25,13 @@ export enum VeloraSwapTypes {
 }
 
 export enum SwapErrorCodes {
-	WITHDRAW_FAILED = 'withdraw_failed',
+	SWAP_SUCCESS_WITHDRAW_FAILED = 'swap_success_withdraw_failed',
 	DEPOSIT_FAILED = 'deposit_error',
-	SWAP_FAILED_WITHDRAW_SUCESS = 'swap_failed_withdraw_success'
+	SWAP_FAILED_WITHDRAW_SUCESS = 'swap_failed_withdraw_success',
+	SWAP_FAILED_2ND_WITHDRAW_SUCCESS = 'swap_failed_2nd_withdraw_success',
+	SWAP_FAILED_WITHDRAW_FAILED = 'swap_failed_withdraw_failed',
+	ICP_SWAP_WITHDRAW_SUCCESS = 'ICPSwap_withdraw_success',
+	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed'
 }
 export interface ProviderFee {
 	fee: bigint;
@@ -111,8 +116,6 @@ type KongSwapProvider = BaseSwapProvider<SwapProvider.KONG_SWAP, SwapAmountsRepl
 
 type IcpSwapProvider = BaseSwapProvider<SwapProvider.ICP_SWAP, ICPSwapResult, IcpQuoteParams>;
 
-export type SwapErrorKey = keyof I18n['swap']['error'];
-
 export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
 
 export interface SwapParams {
@@ -125,6 +128,7 @@ export interface SwapParams {
 	slippageValue: Amount;
 	sourceTokenFee: bigint;
 	isSourceTokenIcrc2: boolean;
+	trackEvent: ({ name, metadata, warning }: TrackEventParams) => void;
 }
 
 export interface FormatSlippageParams {

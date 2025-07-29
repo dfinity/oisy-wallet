@@ -1,19 +1,19 @@
-import type { SwapErrorKey } from '$lib/types/swap';
+import type { SwapErrorCodes } from '$lib/types/swap';
 
 export const throwSwapError = ({
 	code,
-	message
+	message = undefined
 }: {
-	code: SwapErrorKey;
-	message: string;
+	code: SwapErrorCodes;
+	message?: string;
 }): never => {
 	throw new SwapError(code, message);
 };
 
 export class SwapError extends Error {
 	constructor(
-		public readonly code: SwapErrorKey,
-		message: string
+		public readonly code: SwapErrorCodes,
+		message?: string
 	) {
 		super(message);
 		this.name = 'SwapError';

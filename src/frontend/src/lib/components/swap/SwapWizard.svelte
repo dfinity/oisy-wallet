@@ -90,8 +90,6 @@
 		dispatch('icNext');
 
 		try {
-			failedSwapError.set(undefined);
-
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
 				progress,
@@ -101,10 +99,19 @@
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
-				isSourceTokenIcrc2: $isSourceTokenIcrc2
+				isSourceTokenIcrc2: $isSourceTokenIcrc2,
+				trackEvent
+				// tryToWithdraw:
+				// 	nonNullish($failedSwapError?.message) &&
+				// 	$failedSwapError.message === $i18n.swap.error.withdraw_failed,
+				// withdrawDestinationTokens:
+				// 	nonNullish($failedSwapError?.message) &&
+				// 	$failedSwapError.message === $i18n.swap.error.swap_success_withdraw_failed
 			});
 
 			progress(ProgressStepsSwap.DONE);
+
+			failedSwapError.set(undefined);
 
 			trackEvent({
 				name: TRACK_COUNT_SWAP_SUCCESS,
@@ -132,21 +139,15 @@
 			}
 
 			if (isSwapError(err)) {
-				if (err.code === SwapErrorCodes.WITHDRAW_FAILED) {
-					failedSwapError.set({
-						message: $i18n.swap.error.withdraw_failed,
-						variant: 'error',
-						url: {
-							url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
-							text: 'icpswap.com'
-						}
-					});
-				} else {
-					failedSwapError.set({
-						message: $i18n.swap.error[err.code],
-						variant: 'info'
-					});
-				}
+				failedSwapError.set({
+					message: err.message,
+					variant: 'error',
+					errorType: err.code,
+					url: {
+						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+						text: 'icpswap.com'
+					}
+				});
 			} else {
 				failedSwapError.set(undefined);
 				toastsError({
@@ -161,8 +162,7 @@
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
-					errorKey: isSwapError(err) ? err.code : '',
-					errorMessage: isSwapError(err) ? enI18n().swap.error[err.code] : ''
+					errorKey: isSwapError(err) ? err.code : ''
 				}
 			});
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -16,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { SwapErrorCodes } from '$lib/types/swap';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -77,21 +78,52 @@
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
 			<MessageBox level={$failedSwapError.variant}>
-				{#if $failedSwapError.message === $i18n.swap.error.withdraw_failed && nonNullish($failedSwapError?.url)}
-					{$i18n.swap.error.withdraw_failed_first_part}
-					<ExternalLink
-						iconSize="15"
-						href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
-						ariaLabel={$i18n.swap.text.open_instructions_link}
-						>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
-					>
-					{$i18n.swap.error.withdraw_failed_second_part}
+				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isNullish($failedSwapError.message)}
+					{#if $failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED}
+						{$i18n.swap.error.withdraw_failed_first_part}
+						<ExternalLink
+							iconSize="15"
+							href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
+							ariaLabel={$i18n.swap.text.open_instructions_link}
+							>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
+						>
+						{$i18n.swap.error.withdraw_failed_second_part}
 
-					<ExternalLink
-						iconSize="15"
-						href={$failedSwapError.url.url}
-						ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
-					>
+						<ExternalLink
+							iconSize="15"
+							href={$failedSwapError.url.url}
+							ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
+						>
+					{:else if $failedSwapError.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED}
+						{$i18n.swap.error.manually_withdraw_failed}
+						<ExternalLink
+							iconSize="15"
+							href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
+							ariaLabel={$i18n.swap.text.open_instructions_link}
+							>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
+						>
+						{$i18n.swap.error.withdraw_failed_second_part}
+
+						<ExternalLink
+							iconSize="15"
+							href={$failedSwapError.url.url}
+							ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
+						>
+					{:else if $failedSwapError.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED}
+						{$i18n.swap.error.swap_sucess_withdraw_failed}
+						<ExternalLink
+							iconSize="15"
+							href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
+							ariaLabel={$i18n.swap.text.open_instructions_link}
+							>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
+						>
+						{$i18n.swap.error.withdraw_failed_second_part}
+						<ExternalLink
+							iconSize="15"
+							href={$failedSwapError.url.url}
+							ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
+						>
+					{/if}
 				{:else}
 					{$failedSwapError.message}
 				{/if}
@@ -101,10 +133,14 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={onClick} />
+			{#if !($failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS && $failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success)}
+				<ButtonBack onclick={onClick} />
+			{/if}
 
 			<Button onclick={() => dispatch('icSwap')}>
-				{$i18n.swap.text.swap_button}
+				{nonNullish($failedSwapError?.errorType) && isNullish($failedSwapError?.message)
+					? 'Withdraw'
+					: $i18n.swap.text.swap_button}
 			</Button>
 		</ButtonGroup>
 	{/snippet}
