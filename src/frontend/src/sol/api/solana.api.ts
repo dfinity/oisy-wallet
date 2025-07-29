@@ -2,6 +2,7 @@ import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SolanaGetAccountInfoReturn } from '$sol/types/sol-rpc';
 import type {
 	SolRpcTransaction,
 	SolRpcTransactionRaw,
@@ -197,6 +198,11 @@ export const estimatePriorityFee = async ({
 	);
 };
 
+const addressToAccountInfo = new Map<
+	SolanaNetworkType,
+	Map<SolAddress, SolanaGetAccountInfoReturn>
+>();
+
 export const getAccountInfo = async ({
 	address,
 	network
@@ -204,9 +210,24 @@ export const getAccountInfo = async ({
 	address: SolAddress;
 	network: SolanaNetworkType;
 }) => {
+	const addressMap =
+		addressToAccountInfo.get(network) ?? new Map<SolAddress, SolanaGetAccountInfoReturn>();
+
+	addressToAccountInfo.set(network, addressMap);
+
+	const cachedInfo = addressMap.get(address);
+
+	if (nonNullish(cachedInfo)) {
+		return cachedInfo;
+	}
+
 	const { getAccountInfo } = solanaHttpRpc(network);
 
-	return await getAccountInfo(solAddress(address), { encoding: 'jsonParsed' }).send();
+	const info = await getAccountInfo(solAddress(address), { encoding: 'jsonParsed' }).send();
+
+	addressMap.set(address, info);
+
+	return info;
 };
 
 export const getTokenInfo = async ({
