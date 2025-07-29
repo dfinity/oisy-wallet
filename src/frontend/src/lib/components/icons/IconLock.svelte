@@ -1,3 +1,4 @@
+<!-- source: DFINITY foundation -->
 <script lang="ts">
 	interface Props {
 		size?: string;
