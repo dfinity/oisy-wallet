@@ -495,17 +495,23 @@ const withdrawICPSwapAfterFailedSwap = async ({
 		} catch (_: unknown) {
 			console.error('❌ [Withdraw #2] Failed:');
 
-			// Both withdrawal attempts failed
-			trackEvent({
-				name: TRACK_COUNT_SWAP_ERROR,
-				metadata: {
-					errorKey: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
-				}
-			});
+			// // Both withdrawal attempts failed
+			// trackEvent({
+			// 	name: TRACK_COUNT_SWAP_ERROR,
+			// 	metadata: {
+			// 		errorKey: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
+			// 	}
+			// });
+
+			console.log('here');
+			
 
 			throwSwapError({
 				code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
 			});
+
+			console.log('here2');
+			
 		}
 	}
 };
