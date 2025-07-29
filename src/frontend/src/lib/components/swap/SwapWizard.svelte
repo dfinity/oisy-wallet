@@ -212,7 +212,7 @@
 				{receiveAmount}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress bind:swapProgressStep />
+			<SwapProgress bind:swapProgressStep bind:failedSteps={swapFailedProgressSteps} />
 		{/if}
 	</SwapAmountsContext>
 </IcTokenFeeContext>

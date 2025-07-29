@@ -54,7 +54,7 @@
 	let receiveAmount = $state<number | undefined>();
 	let slippageValue = $state<OptionAmount>(SWAP_DEFAULT_SLIPPAGE_VALUE);
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
-	let swapFailedProgressSteps = $state<string[]>();
+	let swapFailedProgressSteps = $state<string[]>([]);
 	let currentStep = $state<WizardStep<WizardStepsSwap> | undefined>();
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
 	let showSelectProviderModal = $state<boolean>(false);
