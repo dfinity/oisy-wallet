@@ -499,6 +499,8 @@ const performManualWithdraw = async ({
 	token: IcTokenToggleable;
 }): Promise<{ code: SwapErrorCodes; message?: string; variant?: 'error' | 'warning' | 'info' }> => {
 	try {
+		console.log({ amount });
+
 		await withdraw({
 			identity,
 			canisterId,
