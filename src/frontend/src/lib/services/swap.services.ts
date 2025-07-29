@@ -181,7 +181,6 @@ export const fetchSwapAmounts = async ({
 export const fetchIcpSwap = async ({
 	identity,
 	progress,
-	setFailedProgressStep,
 	sourceToken,
 	destinationToken,
 	swapAmount,

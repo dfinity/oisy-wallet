@@ -17,7 +17,7 @@
 		failedSteps = $bindable([])
 	}: Props = $props();
 
-	let steps = $derived<ProgressSteps>([
+	let steps = $state<ProgressSteps>([
 		{
 			step: ProgressStepsSwap.INITIALIZATION,
 			text: $i18n.swap.text.initializing,

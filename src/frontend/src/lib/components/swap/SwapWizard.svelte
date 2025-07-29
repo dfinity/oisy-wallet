@@ -59,15 +59,15 @@
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContextType>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
-	const setFailedProgressStep = (step: ProgressStepsSwap) => {
-		console.log('🔍 setFailedProgressStep called with:', step);
-		console.log('🔍 swapFailedProgressSteps before:', swapFailedProgressSteps);
+	// const setFailedProgressStep = (step: ProgressStepsSwap) => {
+	// 	console.log('🔍 setFailedProgressStep called with:', step);
+	// 	console.log('🔍 swapFailedProgressSteps before:', swapFailedProgressSteps);
 
-		if (!swapFailedProgressSteps.includes(step)) {
-			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
-			console.log('🔍 swapFailedProgressSteps after:', swapFailedProgressSteps);
-		}
-	};
+	// 	if (!swapFailedProgressSteps.includes(step)) {
+	// 		swapFailedProgressSteps = [...swapFailedProgressSteps, step];
+	// 		console.log('🔍 swapFailedProgressSteps after:', swapFailedProgressSteps);
+	// 	}
+	// };
 
 	const dispatch = createEventDispatcher();
 
@@ -114,7 +114,7 @@
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2,
 				trackEvent,
-				setFailedProgressStep,
+				// setFailedProgressStep,
 				tryToWithdraw:
 					nonNullish($failedSwapError?.errorType) &&
 					($failedSwapError?.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED ||
