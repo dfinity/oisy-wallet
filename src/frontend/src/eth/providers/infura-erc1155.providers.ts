@@ -15,6 +15,9 @@ import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
 
 export class InfuraErc1155Provider extends InfuraErc165Provider {
+	isInterfaceErc1155 = (contract: Erc1155ContractAddress): Promise<boolean> =>
+		this.isSupportedInterface({ contract, interfaceId: Erc165Identifier.ERC1155 });
+
 	private supportsMetadataExtension = (contract: Erc1155ContractAddress): Promise<boolean> =>
 		this.isSupportedInterface({ contract, interfaceId: Erc165Identifier.ERC1155_METADATA_URI });
 
