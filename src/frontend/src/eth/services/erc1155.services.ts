@@ -3,7 +3,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
-import type { Erc20ContractAddress } from '$eth/types/address';
+import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
@@ -21,7 +21,7 @@ export const isInterfaceErc1155 = async ({
 	address
 }: {
 	networkId: NetworkId;
-	address: Erc20ContractAddress;
+	address: Erc1155ContractAddress['address'];
 }): Promise<boolean> => {
 	const { isInterfaceErc1155 } = infuraErc1155Providers(networkId);
 
