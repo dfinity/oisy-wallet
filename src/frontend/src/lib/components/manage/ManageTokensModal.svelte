@@ -4,6 +4,7 @@
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
+	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import {
 		saveErc1155CustomTokens,
@@ -11,6 +12,7 @@
 		saveErc721CustomTokens
 	} from '$eth/services/manage-tokens.services';
 	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
+	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
 	import type { Erc721Metadata } from '$eth/types/erc721';
@@ -46,8 +48,6 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
-	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 
 	let {
 		initialSearch,
@@ -111,7 +111,7 @@
 
 	const saveEthToken = async () => {
 		// This does not happen at this point, but it is useful type-wise
-		assertNonNullish(network)
+		assertNonNullish(network);
 
 		const ethereumNetwork = network as EthereumNetwork;
 
@@ -129,12 +129,12 @@
 			return;
 		}
 
-		const newToken = 	{
+		const newToken = {
 			address: ethContractAddress,
 			...ethMetadata,
 			network: ethereumNetwork,
 			enabled: true
-		}
+		};
 
 		if (ethMetadata.decimals > 0) {
 			await saveErc20Deprecated([newToken]);
@@ -144,12 +144,15 @@
 			return;
 		}
 
-		const isErc1155 = await isInterfaceErc1155({address: ethContractAddress, networkId:network.id})
+		const isErc1155 = await isInterfaceErc1155({
+			address: ethContractAddress,
+			networkId: network.id
+		});
 
 		if (isErc1155) {
 			await saveErc1155([newToken]);
 
-			return
+			return;
 		}
 
 		// TODO: Warn the user that if no interface is encountered, it falls back to standard ERC721
@@ -223,7 +226,6 @@
 			onError: () => modal?.set(0),
 			identity: $authIdentity
 		});
-
 
 	const saveErc1155 = (tokens: SaveErc1155CustomToken[]): Promise<void> =>
 		saveErc1155CustomTokens({
