@@ -9,7 +9,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import type { NetworkId, OptionNetworkId } from '$lib/types/network';
+	import type { OptionNetworkId } from '$lib/types/network';
 
 	const { setFilterNetwork, filterNetwork } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
