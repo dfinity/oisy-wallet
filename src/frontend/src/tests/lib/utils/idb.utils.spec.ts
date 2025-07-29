@@ -3,9 +3,7 @@ import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { delMany, keys, type UseStore } from 'idb-keyval';
 
 vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
+	createStore: vi.fn(() => ({})),
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn(),
