@@ -12,7 +12,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import { parseTokenId } from '$lib/validation/token.validation';
+import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -95,7 +95,7 @@ const loadCustomTokensWithMetadata = async (
 
 				return {
 					...{
-						id: parseTokenId(`custom-token#${tokenAddress}#${network.chainId}`),
+						id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
 						name: tokenAddress,
 						address: tokenAddress,
 						network,
