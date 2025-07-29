@@ -29,9 +29,7 @@ import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
+	createStore: vi.fn(() => ({})),
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn(),
