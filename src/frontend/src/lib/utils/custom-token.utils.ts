@@ -13,7 +13,7 @@ import type {
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
-import type { TokenMetadata } from '$lib/types/token';
+import type { TokenId, TokenMetadata } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -103,5 +103,5 @@ export const parseCustomTokenId = ({
 	  }
 	| {
 			identifier: SplTokenAddress | TokenMetadata['symbol'];
-			chainId: SolanaChainId;
+			chainId: SolanaChainId['chainId'];
 	  }): TokenId => parseTokenId(`custom-token#${identifier}#${chainId}`);
