@@ -28,7 +28,7 @@
 	const { testId, children }: Props = $props();
 
 	let visible = $state(false);
-	let button = $state< HTMLButtonElement | undefined>();
+	let button = $state<HTMLButtonElement | undefined>();
 	let fromRoute = $state<NavigationTarget | undefined>();
 
 	afterNavigate(({ from }) => {

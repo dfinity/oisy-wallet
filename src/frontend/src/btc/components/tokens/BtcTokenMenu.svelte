@@ -18,7 +18,7 @@
 	import { mapAddress } from '$lib/utils/address.utils';
 	import { isNetworkIdBTCMainnet, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
-	let btcAddress= $derived(
+	let btcAddress = $derived(
 		isNetworkIdBTCMainnet($networkId)
 			? mapAddress<BtcAddress>($btcAddressMainnetStore)
 			: isNetworkIdBTCTestnet($networkId)
@@ -26,9 +26,7 @@
 				: mapAddress<BtcAddress>($btcAddressRegtestStore)
 	);
 
-	let explorerUrl = $derived(
-		($pageToken?.network as BitcoinNetwork).explorerUrl ?? undefined
-	);
+	let explorerUrl = $derived(($pageToken?.network as BitcoinNetwork).explorerUrl ?? undefined);
 
 	let explorerAddressUrl = $derived(
 		nonNullish(explorerUrl) && nonNullish(btcAddress)

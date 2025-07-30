@@ -17,9 +17,7 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
-	let explorerUrl= $derived(
-		($pageToken?.network as SolanaNetwork)?.explorerUrl
-	);
+	let explorerUrl = $derived(($pageToken?.network as SolanaNetwork)?.explorerUrl);
 
 	let address = $derived(
 		isNetworkIdSOLDevnet($networkId)
@@ -33,7 +31,7 @@
 		nonNullish($pageToken) && isTokenSpl($pageToken) ? $pageToken.address : undefined
 	);
 
-	let explorerAddressUrl= $derived(
+	let explorerAddressUrl = $derived(
 		nonNullish(explorerUrl)
 			? replacePlaceholders(explorerUrl, {
 					$args: nonNullish(tokenAddress) ? `token/${tokenAddress}/` : `account/${address}/`
