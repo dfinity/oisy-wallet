@@ -46,6 +46,8 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_COUNT_BTC_SEND_ERROR, TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.contants';
 
 	let {
 		initialSearch,
@@ -151,6 +153,14 @@
 
 			return
 		}
+
+		trackEvent({
+			name: TRACK_UNRECOGNISED_ERC_INTERFACE,
+			metadata: {
+				address:newToken.address,
+				network: `${newToken.network.id.description}`
+			}
+		});
 
 		// TODO: Warn the user that if no interface is encountered, it falls back to standard ERC721
 		await saveErc721([newToken]);
