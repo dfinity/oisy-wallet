@@ -169,17 +169,15 @@
 				});
 			}
 
-			if (!(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS || SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)) {
-				trackEvent({
-					name: TRACK_COUNT_SWAP_ERROR,
-					metadata: {
-						sourceToken: $sourceToken.symbol,
-						destinationToken: $destinationToken.symbol,
-						dApp: $swapAmountsStore.selectedProvider.provider,
-						errorKey: isSwapError(err) ? err.code : ''
-					}
-				});
-			}
+			trackEvent({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: {
+					sourceToken: $sourceToken.symbol,
+					destinationToken: $destinationToken.symbol,
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					errorKey: isSwapError(err) ? err.code : ''
+				}
+			});
 
 			setTimeout(() => back(), 2000);
 		}
