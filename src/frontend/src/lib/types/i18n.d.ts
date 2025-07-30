@@ -344,7 +344,6 @@ interface I18nInit {
 	error: {
 		no_alchemy_config: string;
 		no_alchemy_provider: string;
-		no_alchemy_erc20_provider: string;
 		no_etherscan_provider: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
@@ -689,6 +688,7 @@ interface I18nSwap {
 		open_instructions_link: string;
 		select_token: string;
 		select_network_filter: string;
+		withdrawing: string;
 	};
 	error: {
 		kong_not_available: string;
