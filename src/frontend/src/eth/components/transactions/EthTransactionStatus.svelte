@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, onMount } from 'svelte';
+	import {onDestroy, onMount, untrack} from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
@@ -91,7 +91,7 @@
 			return;
 		}
 
-		if (nonNullish(listener)) {
+		if (nonNullish(untrack(() => listener))) {
 			return;
 		}
 
