@@ -6,9 +6,9 @@
 	import { LOCK_SCREEN_ENABLED } from '$env/lock-screen.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
+	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
-	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
