@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -21,24 +22,33 @@
 	} from '$lib/utils/network.utils';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
-	let ckBtcToken: IcCkToken | undefined;
-	$: ckBtcToken = findTwinToken({
-		tokenToPair: BTC_MAINNET_TOKEN,
-		tokens: $tokens
-	});
+	interface Props {
+		children: Snippet;
+	}
 
-	let walletWorkerTokens: Token[];
-	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
-	$: walletWorkerTokens = $enabledBitcoinTokens.filter(({ network: { id: networkId } }) =>
-		LOCAL
-			? isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)
-			: !isNetworkIdBTCRegtest(networkId) &&
-				((isNetworkIdBTCTestnet(networkId) && nonNullish($btcAddressTestnet)) ||
-					// To query mainnet BTC balance, we need to wait for ckBtcToken.minterCanisterId to be available
-					(nonNullish(ckBtcToken) &&
-						isNetworkIdBTCMainnet(networkId) &&
-						nonNullish($btcAddressMainnet)))
+	let { children }: Props = $props();
+
+	let ckBtcToken = $derived(
+		findTwinToken({
+			tokenToPair: BTC_MAINNET_TOKEN,
+			tokens: $tokens
+		})
 	);
+
+	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
+	let walletWorkerTokens = $derived(
+		$enabledBitcoinTokens.filter(({ network: { id: networkId } }) =>
+			LOCAL
+				? isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)
+				: !isNetworkIdBTCRegtest(networkId) &&
+					((isNetworkIdBTCTestnet(networkId) && nonNullish($btcAddressTestnet)) ||
+						// To query mainnet BTC balance, we need to wait for ckBtcToken.minterCanisterId to be available
+						(nonNullish(ckBtcToken) &&
+							isNetworkIdBTCMainnet(networkId) &&
+							nonNullish($btcAddressMainnet)))
+		)
+	);
+
 
 	const initWalletWorker: InitWalletWorkerFn = ({ token }) =>
 		initBtcWalletWorker({
@@ -50,5 +60,5 @@
 </script>
 
 <WalletWorkers tokens={walletWorkerTokens} {initWalletWorker}>
-	<slot />
+	{@render children()}
 </WalletWorkers>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
 	import {
 		solAddressDevnet,
@@ -16,15 +17,22 @@
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { initSolWalletWorker as initWalletWorker } from '$sol/services/worker.sol-wallet.services';
 
-	let walletWorkerTokens: Token[];
-	$: walletWorkerTokens = [...$enabledSolanaTokens, ...$enabledSplTokens].filter(
-		({ network: { id: networkId } }) =>
-			(isNetworkIdSOLLocal(networkId) && nonNullish($solAddressLocal)) ||
-			(isNetworkIdSOLDevnet(networkId) && nonNullish($solAddressDevnet)) ||
-			(isNetworkIdSOLMainnet(networkId) && nonNullish($solAddressMainnet))
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
+
+	let walletWorkerTokens = $derived(
+		[...$enabledSolanaTokens, ...$enabledSplTokens].filter(
+			({ network: { id: networkId } }) =>
+				(isNetworkIdSOLLocal(networkId) && nonNullish($solAddressLocal)) ||
+				(isNetworkIdSOLDevnet(networkId) && nonNullish($solAddressDevnet)) ||
+				(isNetworkIdSOLMainnet(networkId) && nonNullish($solAddressMainnet))
+		)
 	);
 </script>
 
 <WalletWorkers tokens={walletWorkerTokens} {initWalletWorker}>
-	<slot />
+	{@render children()}
 </WalletWorkers>
