@@ -288,8 +288,6 @@ export const fetchIcpSwap = async ({
 	} catch (err: unknown) {
 		console.error(err);
 
-		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
-
 		throwSwapError({
 			code: SwapErrorCodes.DEPOSIT_FAILED,
 			message: get(i18n).swap.error.deposit_error
