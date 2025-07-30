@@ -22,11 +22,11 @@
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	const destinationToken: OptionIcCkToken = $derived(
+	const destinationToken = $derived(
 		nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined
 	);
 
-	const sourceToken: Token = $derived($ckEthereumTwinToken);
+	const sourceToken = $derived($ckEthereumTwinToken);
 
 	const openReceive = async (modalId: symbol) => {
 		const { result } = await autoLoadUserToken({
@@ -46,11 +46,11 @@
 </script>
 
 <ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>
-	<svelte:fragment slot="modal">
+	{#snippet modal()}
 		{#if nonNullish(sourceToken) && nonNullish(destinationToken)}
 			<FeeStoreContext token={$ethereumToken}>
 				<IcReceiveCkEthereumModal on:nnsClose={close} {sourceToken} {destinationToken} />
 			</FeeStoreContext>
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </ReceiveButtonWithModal>
