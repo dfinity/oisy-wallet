@@ -110,8 +110,6 @@
 	};
 
 	const saveEthToken = async () => {
-
-
 		if (isNullishOrEmpty(ethContractAddress)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.invalid_contract_address }
