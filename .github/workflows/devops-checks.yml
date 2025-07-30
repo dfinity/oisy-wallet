@@ -27,11 +27,11 @@ jobs:
               - '**/*.sh'
 
       - name: Install shellcheck
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.shell == 'true'
         run: ./scripts/setup shellcheck
 
       - name: Lint shell scripts
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.shell == 'true'
         run: scripts/lint.sh.sh
 
   lint-github-actions:
@@ -54,11 +54,11 @@ jobs:
               - '**/*.yaml'
 
       - name: Install zizmor
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.gha == 'true'
         run: ./scripts/setup cargo-binstall zizmor
 
       - name: Lint GitHub workflows
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.gha == 'true'
         run: scripts/lint.github.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
