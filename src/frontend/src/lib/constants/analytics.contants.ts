@@ -73,6 +73,7 @@ export const TRACK_COUNT_SWAP_ERROR = 'swap_error';
 export const TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS = 'manage_tokens_enable_success';
 export const TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS = 'manage_tokens_disable_success';
 export const TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR = 'manage_tokens_save_error';
+export const TRACK_UNRECOGNISED_ERC_INTERFACE = 'unrecognised_erc_interface';
 
 // Contacts
 export const TRACK_CONTACT_CREATE_SUCCESS = 'contact_create_success';

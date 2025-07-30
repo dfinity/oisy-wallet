@@ -5,6 +5,7 @@
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
+	import { isInterfaceErc721 } from '$eth/services/erc721.services';
 	import {
 		saveErc20UserTokens,
 		saveErc721CustomTokens
@@ -21,12 +22,14 @@
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import { TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.contants';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -131,11 +134,32 @@
 			enabled: true
 		};
 
+		const isErc721 = await isInterfaceErc721({
+			address: ethContractAddress,
+			networkId: network.id
+		});
+
+		if (isErc721) {
+			await saveErc721([newToken]);
+
+			return;
+		}
+
 		if (ethMetadata.decimals > 0) {
 			await saveErc20Deprecated([newToken]);
 
 			await saveErc20([newToken]);
+
+			return;
 		}
+
+		trackEvent({
+			name: TRACK_UNRECOGNISED_ERC_INTERFACE,
+			metadata: {
+				address: newToken.address,
+				network: `${newToken.network.id.description}`
+			}
+		});
 
 		// TODO: Warn the user that if no interface is encountered, it falls back to standard ERC721
 		await saveErc721([newToken]);
