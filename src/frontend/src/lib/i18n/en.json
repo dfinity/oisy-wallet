@@ -822,7 +822,8 @@
 			"open_icp_swap": "Open ICP Swap website",
 			"open_instructions_link": "Open instructions link",
 			"select_token": "Select token",
-			"select_network_filter": "Select network"
+			"select_network_filter": "Select network",
+			"withdrawing": "Withdrawing..."
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
