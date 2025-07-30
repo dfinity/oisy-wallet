@@ -68,6 +68,9 @@ jobs:
     permissions:
       contents: read
     env:
+      # Suppress the '-mainnet_plaintext_identity' warning to avoid interruptions during the workflow.
+      # This warning relates to the use of plaintext identities on the mainnet. In this context, it is safe to suppress
+      # because the workflow does not involve sensitive operations or production deployments.
       DFX_WARNING: '-mainnet_plaintext_identity'
     steps:
       - name: Checkout code
