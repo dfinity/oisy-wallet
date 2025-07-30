@@ -86,7 +86,44 @@ describe('infura-erc1155.providers', () => {
 						value: [1, 2, 3, 4],
 						class: 'emphasis'
 					}
-				}
+				},
+				attributes: [
+					{ trait_type: 'Issuance Month', value: '2022/06' },
+					{ trait_type: 'Pepe', value: 'No' },
+					{ trait_type: 'GM', value: 'No' },
+					{
+						display_type: 'boost_percentage',
+						trait_type: 'Points - Power',
+						value: '69',
+						max_value: '100'
+					},
+					{
+						display_type: 'boost_percentage',
+						trait_type: 'Points - Wisdom',
+						value: '100',
+						max_value: '100'
+					},
+					{
+						display_type: 'boost_percentage',
+						trait_type: 'Points - Loki',
+						value: '0',
+						max_value: '100'
+					},
+					{
+						display_type: 'boost_percentage',
+						trait_type: 'Points - Speed',
+						value: '25',
+						max_value: '100'
+					},
+					{ trait_type: 'Bonus', value: 'None' },
+					{ trait_type: 'Boost', value: 'None' },
+					{ display_type: 'number', trait_type: 'Type - Meme', value: '1' },
+					{ display_type: 'number', trait_type: 'Type - Season', value: '1' },
+					{ display_type: 'number', trait_type: 'Type - Card', value: '1' },
+					{ trait_type: 'Summer', value: 'No' },
+					{ trait_type: 'Tulip', value: 'No' },
+					{ value: '6529er', trait_type: 'SEIZE Artist Profile' }
+				]
 			};
 
 			beforeEach(() => {
@@ -114,15 +151,24 @@ describe('infura-erc1155.providers', () => {
 					name: mockMetadata.name,
 					imageUrl: mockMetadata.image,
 					attributes: [
+						{ traitType: 'Issuance Month', value: '2022/06' },
+						{ traitType: 'Pepe', value: 'No' },
+						{ traitType: 'GM', value: 'No' },
+						{ traitType: 'Points - Power', value: '69' },
+						{ traitType: 'Points - Wisdom', value: '100' },
+						{ traitType: 'Points - Loki', value: '0' },
+						{ traitType: 'Points - Speed', value: '25' },
+						{ traitType: 'Bonus', value: 'None' },
+						{ traitType: 'Boost', value: 'None' },
+						{ traitType: 'Type - Meme', value: '1' },
+						{ traitType: 'Type - Season', value: '1' },
+						{ traitType: 'Type - Card', value: '1' },
+						{ traitType: 'Summer', value: 'No' },
+						{ traitType: 'Tulip', value: 'No' },
+						{ traitType: 'SEIZE Artist Profile', value: '6529er' },
 						{ traitType: 'simple_property', value: 'example value' },
-						{
-							traitType: 'Name',
-							value: '123 Example Value'
-						},
-						{
-							traitType: 'Name',
-							value: '1,2,3,4'
-						}
+						{ traitType: 'Name', value: '123 Example Value' },
+						{ traitType: 'Name', value: '1,2,3,4' }
 					]
 				});
 			});

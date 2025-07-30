@@ -465,7 +465,6 @@
 		"error": {
 			"no_alchemy_config": "没有 $network 网络的 Alchemy 配置",
 			"no_alchemy_provider": "没有 $network 网络的 Alchemy 提供商",
-			"no_alchemy_erc20_provider": "没有 $network 网络的 Alchemy ERC20 提供商",
 			"no_etherscan_provider": "没有 $network 网络的 Etherscan 提供商",
 			"no_infura_provider": "没有 $network 网络的 Infura 提供商",
 			"no_infura_cketh_provider": "没有 $network 网络的 Infura CkETH 提供商",
@@ -822,7 +821,8 @@
 			"open_icp_swap": "打开 ICP Swap 网站",
 			"open_instructions_link": "",
 			"select_token": "选择代币",
-			"select_network_filter": "选择网络"
+			"select_network_filter": "选择网络",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",

@@ -9,6 +9,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
@@ -69,6 +70,66 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 			...('decimals' in metadata &&
 				nonNullish(metadata.decimals) && { decimals: metadata.decimals }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
+		};
+	};
+
+	getNftMetadata = async ({
+		contractAddress,
+		tokenId
+	}: {
+		contractAddress: Erc1155ContractAddress['address'];
+		tokenId: NftId;
+	}): Promise<NftMetadata | undefined> => {
+		const supportsMetadata = await this.supportsMetadataExtension({ address: contractAddress });
+
+		if (!supportsMetadata) {
+			return;
+		}
+
+		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);
+
+		const tokenUri = await erc1155Contract.uri(tokenId);
+
+		const { metadata, imageUrl } = await fetchMetadataFromUri({
+			metadataUrl: tokenUri,
+			contractAddress,
+			tokenId
+		});
+
+		if (isNullish(metadata)) {
+			return { id: tokenId, ...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }) };
+		}
+
+		const mappedAttributes =
+			'attributes' in metadata
+				? (metadata.attributes ?? []).map(({ trait_type: traitType, value }) => ({
+						traitType,
+						value: value.toString()
+					}))
+				: [];
+
+		const mappedProperties =
+			'properties' in metadata
+				? Object.entries(metadata.properties ?? {}).map(([key, entry]) =>
+						typeof entry === 'object' && !Array.isArray(entry)
+							? {
+									traitType: entry.name?.toString(),
+									value: entry.display_value?.toString() ?? entry.value?.toString()
+								}
+							: {
+									traitType: key,
+									value: entry.toString()
+								}
+					)
+				: [];
+
+		return {
+			id: tokenId,
+			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
+			...(nonNullish(metadata.name) && { name: metadata.name }),
+			...('decimals' in metadata &&
+				nonNullish(metadata.decimals) && { decimals: metadata.decimals }),
+			...(mappedProperties.length > 0 && { attributes: [...mappedAttributes, ...mappedProperties] })
 		};
 	};
 }
