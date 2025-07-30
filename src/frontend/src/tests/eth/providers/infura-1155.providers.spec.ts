@@ -86,7 +86,44 @@ describe('infura-erc1155.providers', () => {
 						value: [1, 2, 3, 4],
 						class: 'emphasis'
 					}
-				}
+				},
+				attributes: [
+					{ trait_type: 'Issuance Month', value: '2022/06' },
+					{ trait_type: 'Pepe', value: 'No' },
+					{ trait_type: 'GM', value: 'No' },
+					{
+						display_type: 'boost_percentage',
+						trait_type: 'Points - Power',
+						value: '69',
+						max_value: '100'
+					},
+					{
+						display_type: 'boost_percentage',
+						trait_type: 'Points - Wisdom',
+						value: '100',
+						max_value: '100'
+					},
+					{
+						display_type: 'boost_percentage',
+						trait_type: 'Points - Loki',
+						value: '0',
+						max_value: '100'
+					},
+					{
+						display_type: 'boost_percentage',
+						trait_type: 'Points - Speed',
+						value: '25',
+						max_value: '100'
+					},
+					{ trait_type: 'Bonus', value: 'None' },
+					{ trait_type: 'Boost', value: 'None' },
+					{ display_type: 'number', trait_type: 'Type - Meme', value: '1' },
+					{ display_type: 'number', trait_type: 'Type - Season', value: '1' },
+					{ display_type: 'number', trait_type: 'Type - Card', value: '1' },
+					{ trait_type: 'Summer', value: 'No' },
+					{ trait_type: 'Tulip', value: 'No' },
+					{ value: '6529er', trait_type: 'SEIZE Artist Profile' }
+				]
 			};
 
 			beforeEach(() => {

@@ -75,6 +75,14 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 		}
 
 		const mappedAttributes =
+			'attributes' in metadata
+				? (metadata.attributes ?? []).map(({ trait_type: traitType, value }) => ({
+						traitType,
+						value: value.toString()
+					}))
+				: [];
+
+		const mappedProperties =
 			'properties' in metadata
 				? Object.entries(metadata.properties ?? {}).map(([key, entry]) =>
 						typeof entry === 'object' && !Array.isArray(entry)
@@ -95,7 +103,7 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 			...(nonNullish(metadata.name) && { name: metadata.name }),
 			...('decimals' in metadata &&
 				nonNullish(metadata.decimals) && { decimals: metadata.decimals }),
-			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
+			...(mappedProperties.length > 0 && { attributes: [...mappedAttributes, ...mappedProperties] })
 		};
 	};
 }
