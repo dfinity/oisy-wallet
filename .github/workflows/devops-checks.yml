@@ -23,15 +23,15 @@ jobs:
         id: change
         with:
           filters: |
-            shell:
+            any:
               - '**/*.sh'
 
       - name: Install shellcheck
-        if: steps.change.outputs.shell == 'true'
+        if: steps.change.outputs.any == 'true'
         run: ./scripts/setup shellcheck
 
       - name: Lint shell scripts
-        if: steps.change.outputs.shell == 'true'
+        if: steps.change.outputs.any == 'true'
         run: scripts/lint.sh.sh
 
   lint-github-actions:
@@ -48,17 +48,17 @@ jobs:
         id: change
         with:
           filters: |
-            gha:
+            any:
               - '.github/**/*'
               - '**/*.yml'
               - '**/*.yaml'
 
       - name: Install zizmor
-        if: steps.change.outputs.gha == 'true'
+        if: steps.change.outputs.any == 'true'
         run: ./scripts/setup cargo-binstall zizmor
 
       - name: Lint GitHub workflows
-        if: steps.change.outputs.gha == 'true'
+        if: steps.change.outputs.any == 'true'
         run: scripts/lint.github.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
