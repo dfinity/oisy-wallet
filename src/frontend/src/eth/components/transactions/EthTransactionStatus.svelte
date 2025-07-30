@@ -55,6 +55,11 @@
 	let status: 'included' | 'safe' | 'finalised' | undefined;
 
 	$: (() => {
+		if (status === 'finalised') {
+			disconnect();
+			return;
+		}
+
 		if (isNullish(currentBlockNumber)) {
 			status = undefined;
 			return;
