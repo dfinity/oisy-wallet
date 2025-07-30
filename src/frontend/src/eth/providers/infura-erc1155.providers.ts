@@ -9,7 +9,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
