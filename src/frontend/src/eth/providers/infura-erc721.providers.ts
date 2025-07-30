@@ -54,12 +54,10 @@ export class InfuraErc721Provider extends InfuraErc165Provider {
 
 		const mappedAttributes =
 			'attributes' in metadata
-				? (metadata.attributes ?? []).map(
-						(attr: { trait_type: string; value: string | number }) => ({
-							traitType: attr.trait_type,
-							value: attr.value.toString()
-						})
-					)
+				? (metadata.attributes ?? []).map(({ trait_type: traitType, value }) => ({
+						traitType,
+						value: value.toString()
+					}))
 				: [];
 
 		return {
