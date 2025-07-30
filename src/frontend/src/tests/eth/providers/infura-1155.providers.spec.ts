@@ -151,15 +151,24 @@ describe('infura-erc1155.providers', () => {
 					name: mockMetadata.name,
 					imageUrl: mockMetadata.image,
 					attributes: [
+						{ traitType: 'Issuance Month', value: '2022/06' },
+						{ traitType: 'Pepe', value: 'No' },
+						{ traitType: 'GM', value: 'No' },
+						{ traitType: 'Points - Power', value: '69' },
+						{ traitType: 'Points - Wisdom', value: '100' },
+						{ traitType: 'Points - Loki', value: '0' },
+						{ traitType: 'Points - Speed', value: '25' },
+						{ traitType: 'Bonus', value: 'None' },
+						{ traitType: 'Boost', value: 'None' },
+						{ traitType: 'Type - Meme', value: '1' },
+						{ traitType: 'Type - Season', value: '1' },
+						{ traitType: 'Type - Card', value: '1' },
+						{ traitType: 'Summer', value: 'No' },
+						{ traitType: 'Tulip', value: 'No' },
+						{ traitType: 'SEIZE Artist Profile', value: '6529er' },
 						{ traitType: 'simple_property', value: 'example value' },
-						{
-							traitType: 'Name',
-							value: '123 Example Value'
-						},
-						{
-							traitType: 'Name',
-							value: '1,2,3,4'
-						}
+						{ traitType: 'Name', value: '123 Example Value' },
+						{ traitType: 'Name', value: '1,2,3,4' }
 					]
 				});
 			});
