@@ -8,7 +8,7 @@
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
-	import MenuLockLogOut from '$lib/components/core/MenuLockLogOut.svelte';
+	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
@@ -210,7 +210,7 @@
 
 		<div class="flex max-w-80 flex-col gap-3 pt-3">
 			{#if LOCK_SCREEN_ENABLED}
-				<MenuLockLogOut on:icLogoutTriggered={hidePopover} />
+				<LockOrSignOut onHidePopover={hidePopover} />
 			{:else}
 				<SignOut on:icLogoutTriggered={hidePopover} />
 			{/if}

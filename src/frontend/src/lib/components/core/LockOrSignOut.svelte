@@ -10,9 +10,8 @@
 	interface Props {
 		onHidePopover?: () => void;
 		hideText?: boolean;
-		onIcLogoutTriggered?: () => void;
 	}
-	let { onHidePopover, hideText = true, onIcLogoutTriggered }: Props = $props();
+	let { onHidePopover, hideText = true }: Props = $props();
 
 	let remainingTimeMs = $derived($authRemainingTimeStore);
 
@@ -27,7 +26,7 @@
 	};
 
 	const handleLogoutTriggered = () => {
-		onIcLogoutTriggered?.();
+		onHidePopover?.();
 	};
 </script>
 
