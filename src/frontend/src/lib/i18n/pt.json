@@ -835,7 +835,11 @@
 			"swap_failed_withdraw_success": "A troca falhou e seus tokens foram reembolsados com sucesso. Tente novamente ou altere o provedor da troca.",
 			"withdraw_failed_first_part": "A troca falhou e os tokens enviados não puderam ser retirados automaticamente. Siga ",
 			"withdraw_failed_second_part": "para retirá-los manualmente em ",
-			"swap_failed_instruction_link": "estas instruções "
+			"swap_failed_instruction_link": "estas instruções ",
+			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
