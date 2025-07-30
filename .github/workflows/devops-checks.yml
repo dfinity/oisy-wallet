@@ -67,6 +67,8 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+    env:
+      DFX_WARNING: '-mainnet_plaintext_identity'
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -81,10 +83,6 @@ jobs:
               - scripts/download-canister-api.test
               - scripts/download-canister-api
               - .github/workflows/devops-checks.yml
-
-      - name: Prepare
-        if: steps.change.outputs.any == 'true'
-        uses: ./.github/actions/prepare
 
       - name: Install dfx
         if: steps.change.outputs.any == 'true'
