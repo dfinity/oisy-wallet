@@ -161,8 +161,7 @@
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
-					errorKey: isSwapError(err) ? err.code : '',
-					errorMessage: isSwapError(err) ? enI18n().swap.error[err.code] : ''
+					errorKey: isSwapError(err) ? err.code : ''
 				}
 			});
 
