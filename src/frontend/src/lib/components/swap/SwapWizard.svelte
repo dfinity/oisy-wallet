@@ -65,6 +65,10 @@
 		}
 	};
 
+	const clearFailedProgressStep = () => {
+		swapFailedProgressSteps = [];
+	};
+
 	const dispatch = createEventDispatcher();
 
 	let sourceTokenFee = $derived<bigint | undefined>(
@@ -97,6 +101,7 @@
 		dispatch('icNext');
 
 		try {
+			clearFailedProgressStep();
 			failedSwapError.set(undefined);
 
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
@@ -175,6 +180,8 @@
 					errorKey: isSwapError(err) ? err.code : ''
 				}
 			});
+
+			setTimeout(() => close(), 1500);
 
 			back();
 		}
