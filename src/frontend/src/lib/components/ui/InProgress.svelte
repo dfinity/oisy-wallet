@@ -36,7 +36,7 @@
 		}) as ProgressSteps;
 	};
 
-	$: progressStep, updateSteps();
+	$: (progressStep, updateSteps());
 </script>
 
 <div class="px-2 pb-3">
