@@ -3,13 +3,12 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { Erc165Identifier } from '$eth/constants/erc.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
+import { fetchMetadataFromUri } from '$eth/services/erc.services';
 import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
-import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
@@ -36,40 +35,30 @@ export class InfuraErc721Provider extends InfuraErc165Provider {
 		contractAddress,
 		tokenId
 	}: {
-		contractAddress: string;
+		contractAddress: Erc721ContractAddress['address'];
 		tokenId: NftId;
 	}): Promise<NftMetadata> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
-		const extractImageUrl = (imageUrl: string | undefined): URL | undefined => {
-			if (isNullish(imageUrl)) {
-				return undefined;
-			}
-
-			return parseMetadataResourceUrl({
-				url: imageUrl,
-				error: new InvalidMetadataImageUrl(tokenId, contractAddress)
-			});
-		};
-
 		const tokenUri = await erc721Contract.tokenURI(tokenId);
 
-		const metadataUrl = parseMetadataResourceUrl({
-			url: tokenUri,
-			error: new InvalidTokenUri(tokenId, contractAddress)
+		const { metadata, imageUrl } = await fetchMetadataFromUri({
+			metadataUrl: tokenUri,
+			contractAddress,
+			tokenId
 		});
 
-		const response = await fetch(metadataUrl);
-		const metadata = await response.json();
+		if (isNullish(metadata)) {
+			return { id: tokenId, ...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }) };
+		}
 
-		const imageUrl = extractImageUrl(metadata.image ?? metadata.image_url);
-
-		const mappedAttributes = (metadata?.attributes ?? []).map(
-			(attr: { trait_type: string; value: string | number }) => ({
-				traitType: attr.trait_type,
-				value: attr.value.toString()
-			})
-		);
+		const mappedAttributes =
+			'attributes' in metadata
+				? (metadata.attributes ?? []).map(({ trait_type: traitType, value }) => ({
+						traitType,
+						value: value.toString()
+					}))
+				: [];
 
 		return {
 			id: tokenId,
