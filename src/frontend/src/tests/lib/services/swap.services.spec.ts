@@ -181,14 +181,14 @@ describe('loadKongSwapTokens', () => {
 describe('withdrawICPSwapAfterFailedSwap', () => {
 	const identity = {} as OptionIdentity;
 	const canisterId = 'test-canister-id';
-	const token = 'icp';
+	const tokenId = 'icp';
 	const amount = 1000n;
 	const fee = 10n;
 
 	const baseParams = {
 		identity,
 		canisterId,
-		token,
+		tokenId,
 		amount,
 		fee
 	};

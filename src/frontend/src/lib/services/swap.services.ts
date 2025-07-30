@@ -3,7 +3,6 @@ import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-t
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
@@ -19,12 +18,14 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
-import type { OptionIdentity } from '$lib/types/identity';
 import {
 	SwapErrorCodes,
 	SwapProvider,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
+	type IcpSwapManualWithdrawParams,
+	type IcpSwapWithdrawParams,
+	type IcpSwapWithdrawResponse,
 	type SwapMappedResult,
 	type SwapParams
 } from '$lib/types/swap';
@@ -345,26 +346,20 @@ export const swapService = {
 export const withdrawICPSwapAfterFailedSwap = async ({
 	identity,
 	canisterId,
-	token,
+	tokenId,
 	amount,
 	fee,
 	setFailedProgressStep
-}: {
-	identity: OptionIdentity;
-	canisterId: string;
-	token: string;
-	amount: bigint;
-	fee: bigint;
-	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
-}): Promise<{ code: SwapErrorCodes; message?: string; variant?: 'error' | 'warning' | 'info' }> => {
+}: IcpSwapWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
+	const baseParams = {
+		identity,
+		canisterId,
+		token: tokenId,
+		amount,
+		fee
+	};
 	try {
-		await withdraw({
-			identity,
-			canisterId,
-			token,
-			amount,
-			fee
-		});
+		await withdraw(baseParams);
 
 		return {
 			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS,
@@ -373,13 +368,7 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 	} catch (_: unknown) {
 		try {
 			// Second withdrawal attempt
-			await withdraw({
-				identity,
-				canisterId,
-				token,
-				amount,
-				fee
-			});
+			await withdraw(baseParams);
 
 			return {
 				code: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS,
@@ -402,16 +391,7 @@ export const performManualWithdraw = async ({
 	fee,
 	token,
 	setFailedProgressStep
-}: {
-	withdrawDestinationTokens: boolean;
-	identity: OptionIdentity;
-	canisterId: string;
-	tokenId: string;
-	amount: bigint;
-	fee: bigint;
-	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
-	token: IcTokenToggleable;
-}): Promise<{ code: SwapErrorCodes; message?: string; variant?: 'error' | 'warning' | 'info' }> => {
+}: IcpSwapManualWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
 	try {
 		await withdraw({
 			identity,

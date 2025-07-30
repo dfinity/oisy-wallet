@@ -132,6 +132,26 @@ export interface SwapParams {
 	isSourceTokenIcrc2: boolean;
 }
 
+export interface IcpSwapWithdrawParams {
+	identity: OptionIdentity;
+	canisterId: string;
+	tokenId: string;
+	amount: bigint;
+	fee: bigint;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+}
+
+export interface IcpSwapManualWithdrawParams extends IcpSwapWithdrawParams {
+	withdrawDestinationTokens: boolean;
+	token: IcTokenToggleable;
+}
+
+export interface IcpSwapWithdrawResponse {
+	code: SwapErrorCodes;
+	message?: string;
+	variant?: 'error' | 'warning' | 'info';
+}
+
 export interface FormatSlippageParams {
 	slippageValue: OptionAmount;
 	receiveAmount: bigint;
