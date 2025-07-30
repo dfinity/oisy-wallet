@@ -45,6 +45,7 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import { isInterfaceErc721 } from '$eth/services/erc721.services';
 
 	let {
 		initialSearch,
@@ -131,10 +132,24 @@
 			enabled: true
 		};
 
+		const isErc721 = await isInterfaceErc721({
+			address: ethContractAddress,
+			networkId: network.id
+		});
+
+		if (isErc721) {
+			await saveErc721([newToken]);
+
+			return;
+		}
+
+
 		if (ethMetadata.decimals > 0) {
 			await saveErc20Deprecated([newToken]);
 
 			await saveErc20([newToken]);
+
+			return
 		}
 
 		// TODO: Warn the user that if no interface is encountered, it falls back to standard ERC721
