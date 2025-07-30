@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
@@ -121,34 +121,24 @@
 			return;
 		}
 
-		if (ethMetadata.decimals > 0) {
-			await saveErc20Deprecated([
-				{
-					address: ethContractAddress,
-					...ethMetadata,
-					network: network as EthereumNetwork,
-					enabled: true
-				}
-			]);
+		// This does not happen at this point, but it is useful type-wise
+		assertNonNullish(network);
 
-			await saveErc20([
-				{
-					address: ethContractAddress,
-					...ethMetadata,
-					network: network as EthereumNetwork,
-					enabled: true
-				}
-			]);
-		} else {
-			await saveErc721([
-				{
-					address: ethContractAddress,
-					...ethMetadata,
-					network: network as EthereumNetwork,
-					enabled: true
-				}
-			]);
+		const newToken = {
+			address: ethContractAddress,
+			...ethMetadata,
+			network: network as EthereumNetwork,
+			enabled: true
+		};
+
+		if (ethMetadata.decimals > 0) {
+			await saveErc20Deprecated([newToken]);
+
+			await saveErc20([newToken]);
 		}
+
+		// TODO: Warn the user that if no interface is encountered, it falls back to standard ERC721
+		await saveErc721([newToken]);
 	};
 
 	const saveSplToken = () => {
