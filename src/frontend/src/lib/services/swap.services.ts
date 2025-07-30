@@ -482,7 +482,7 @@ const withdrawICPSwapAfterFailedSwap = async ({
 			// });
 
 			return {
-				code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
+				code: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS,
 				message: get(i18n).swap.error.swap_failed_withdraw_success
 			};
 		} catch (_: unknown) {
