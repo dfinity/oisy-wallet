@@ -183,6 +183,7 @@
 	});
 	onDestroy(() => {
 		listener?.disconnect();
+		listener = undefined;
 		clearTimeout(listenerCallbackTimer);
 	});
 

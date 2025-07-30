@@ -136,7 +136,10 @@
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
 	$: ($balance, toContractAddress, debounceLoadPendingTransactions());
 
-	onDestroy(async () => await listener?.disconnect());
+	onDestroy(async () => {
+		await listener?.disconnect();
+		listener = undefined;
+	});
 </script>
 
 <slot />
