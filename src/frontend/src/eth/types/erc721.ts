@@ -20,6 +20,6 @@ export interface Erc721UriJson {
 	image_url?: string;
 	attributes?: {
 		trait_type: string;
-		value: string;
+		value: string | number;
 	}[];
 }
