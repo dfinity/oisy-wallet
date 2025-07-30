@@ -11,14 +11,6 @@ import { currencyStore } from '$lib/stores/currency.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { get } from 'svelte/store';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
-
 describe('currency.derived', () => {
 	describe('currentCurrency', () => {
 		it('should initialize with the default currency', () => {
