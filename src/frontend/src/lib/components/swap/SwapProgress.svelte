@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
-	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		swapProgressStep?: string;
