@@ -13,3 +13,23 @@ export type Erc1155ContractAddress = ContractAddress;
 export type Erc1155Contract = Erc1155ContractAddress;
 
 export type Erc1155Metadata = TokenMetadata;
+
+// https://eips.ethereum.org/EIPS/eip-1155#erc-1155-metadata-uri-json-schema
+export interface Erc1155UriJson {
+	name?: string;
+	decimals?: number;
+	description?: string;
+	image?: string;
+	properties?: Record<string, NestedUriJsonPropertyMap>;
+}
+
+type NestedUriJsonValue =
+	| string
+	| number
+	| boolean
+	| NestedUriJsonValue[]
+	| NestedUriJsonPropertyMap;
+
+interface NestedUriJsonPropertyMap {
+	[key: string]: NestedUriJsonValue;
+}
