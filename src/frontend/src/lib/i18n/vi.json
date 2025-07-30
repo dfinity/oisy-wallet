@@ -465,7 +465,6 @@
 		"error": {
 			"no_alchemy_config": "Không có cấu hình Alchemy cho mạng $network",
 			"no_alchemy_provider": "Không có nhà cung cấp Alchemy cho mạng $network",
-			"no_alchemy_erc20_provider": "Không có nhà cung cấp Alchemy ERC20 cho mạng $network",
 			"no_etherscan_provider": "Không có nhà cung cấp Etherscan cho mạng $network",
 			"no_infura_provider": "Không có nhà cung cấp Infura cho mạng $network",
 			"no_infura_cketh_provider": "Không có nhà cung cấp Infura CkETH cho mạng $network",
