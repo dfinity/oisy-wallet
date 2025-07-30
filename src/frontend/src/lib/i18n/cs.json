@@ -835,7 +835,9 @@
 			"swap_failed_withdraw_success": "",
 			"withdraw_failed_first_part": "",
 			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": ""
+			"swap_failed_instruction_link": "",
+			"manually_withdraw_success": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {

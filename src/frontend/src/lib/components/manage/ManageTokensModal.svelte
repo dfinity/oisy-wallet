@@ -20,6 +20,7 @@
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
+	import type { ValidateTokenData } from '$icp/services/ic-add-custom-tokens.service';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
@@ -104,6 +105,7 @@
 
 		await saveIcrc([
 			{
+				...icrcMetadata,
 				enabled: true,
 				networkKey: 'Icrc',
 				ledgerCanisterId,
@@ -276,6 +278,7 @@
 
 	let ledgerCanisterId: string | undefined = $state();
 	let indexCanisterId: string | undefined = $state();
+	let icrcMetadata: ValidateTokenData | undefined = $state();
 
 	let ethContractAddress: string | undefined = $state();
 	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
@@ -308,6 +311,7 @@
 				on:icSave={addIcrcToken}
 				{ledgerCanisterId}
 				{indexCanisterId}
+				bind:metadata={icrcMetadata}
 			/>
 		{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
 			<EthAddTokenReview
