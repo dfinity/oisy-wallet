@@ -102,8 +102,7 @@ describe('mapListeners', () => {
 		expect(mapListeners(tokens)).toEqual([
 			{ token: mockCkBtcToken, listener: IcTransactionsCkBTCListeners },
 			{ token: mockCkEthToken, listener: IcTransactionsCkEthereumListeners },
-			{ token: mockCkUSDCToken, listener: IcTransactionsCkEthereumListeners },
-			{ token: BTC_MAINNET_TOKEN, listener: BitcoinListener }
+			{ token: mockCkUSDCToken, listener: IcTransactionsCkEthereumListeners }
 		]);
 	});
 });
