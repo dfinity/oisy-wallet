@@ -466,7 +466,6 @@
 		"error": {
 			"no_alchemy_config": "没有 $network 网络的 Alchemy 配置",
 			"no_alchemy_provider": "没有 $network 网络的 Alchemy 提供商",
-			"no_alchemy_erc20_provider": "没有 $network 网络的 Alchemy ERC20 提供商",
 			"no_etherscan_provider": "没有 $network 网络的 Etherscan 提供商",
 			"no_infura_provider": "没有 $network 网络的 Infura 提供商",
 			"no_infura_cketh_provider": "没有 $network 网络的 Infura CkETH 提供商",
