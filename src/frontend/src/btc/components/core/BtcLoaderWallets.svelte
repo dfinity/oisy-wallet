@@ -49,7 +49,6 @@
 		)
 	);
 
-
 	const initWalletWorker: InitWalletWorkerFn = ({ token }) =>
 		initBtcWalletWorker({
 			token,
