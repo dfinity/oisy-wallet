@@ -213,8 +213,6 @@ export const fetchIcpSwap = async ({
 	});
 
 	if (isNullish(pool)) {
-		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
-
 		throw new Error(get(i18n).swap.error.pool_not_found);
 	}
 
