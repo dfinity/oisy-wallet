@@ -13,7 +13,7 @@
 	import {
 		btcAddressMainnetStore,
 		btcAddressRegtestStore,
-		btcAddressTestnetStore,
+		btcAddressTestnetStore
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -27,7 +27,7 @@
 				: $btcAddressMainnetStore
 	);
 
-	let addressToken= $derived(
+	let addressToken = $derived(
 		isNetworkIdBTCTestnet($networkId)
 			? BTC_TESTNET_TOKEN
 			: isNetworkIdBTCRegtest($networkId)

@@ -13,7 +13,7 @@
 </script>
 
 <ButtonHero
-	onclick = {onClick}
+	onclick={onClick}
 	disabled={$isBusy}
 	ariaLabel={$i18n.receive.text.receive}
 	testId={RECEIVE_TOKENS_MODAL_OPEN_BUTTON}
