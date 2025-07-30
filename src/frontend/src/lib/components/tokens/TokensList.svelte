@@ -137,9 +137,9 @@
 					{:else}
 						{@const { token } = tokenOrGroup}
 
-							<div class="transition duration-300 hover:bg-primary">
-								<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
-							</div>
+						<div class="transition duration-300 hover:bg-primary">
+							<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+						</div>
 					{/if}
 				</div>
 			{/each}
