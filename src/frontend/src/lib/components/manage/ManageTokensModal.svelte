@@ -126,10 +126,13 @@
 			return;
 		}
 
+		// This does not happen at this point, but it is useful type-wise
+		assertNonNullish(network);
+
 		const newToken = {
 			address: ethContractAddress,
 			...ethMetadata,
-			network: ethereumNetwork,
+			network: network as EthereumNetwork,
 			enabled: true
 		};
 
