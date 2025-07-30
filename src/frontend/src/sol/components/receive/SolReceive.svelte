@@ -8,7 +8,7 @@
 	import {
 		solAddressDevnetStore,
 		solAddressLocalnetStore,
-		solAddressMainnetStore,
+		solAddressMainnetStore
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
