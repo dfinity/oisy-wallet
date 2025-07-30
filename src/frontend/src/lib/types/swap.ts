@@ -129,7 +129,6 @@ export interface SwapParams {
 	slippageValue: Amount;
 	sourceTokenFee: bigint;
 	isSourceTokenIcrc2: boolean;
-	trackEvent: ({ name, metadata, warning }: TrackEventParams) => void;
 }
 
 export interface FormatSlippageParams {

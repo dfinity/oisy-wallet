@@ -11,7 +11,6 @@ import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
-import { TRACK_COUNT_SWAP_ERROR } from '$lib/constants/analytics.contants';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -21,7 +20,6 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
-import type { TrackEventParams } from '$lib/types/analytics';
 import type { OptionIdentity } from '$lib/types/identity';
 import {
 	SwapErrorCodes,
@@ -190,8 +188,7 @@ export const fetchIcpSwap = async ({
 	sourceTokenFee,
 	isSourceTokenIcrc2,
 	tryToWithdraw = false,
-	withdrawDestinationTokens = false,
-	trackEvent
+	withdrawDestinationTokens = false
 }: SwapParams & {
 	tryToWithdraw?: boolean;
 	withdrawDestinationTokens?: boolean;
@@ -260,7 +257,7 @@ export const fetchIcpSwap = async ({
 			tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
 			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
 			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
-			token: withdrawDestinationTokens ? sourceToken : destinationToken
+			token: withdrawDestinationTokens ? destinationToken : sourceToken
 		});
 
 		throwSwapError({
@@ -336,7 +333,6 @@ export const fetchIcpSwap = async ({
 			token: sourceLedgerCanisterId,
 			amount: parsedSwapAmount,
 			fee: sourceTokenFee,
-			trackEvent,
 			setFailedProgressStep
 		});
 
@@ -385,12 +381,12 @@ export const fetchIcpSwap = async ({
 		} catch (_: unknown) {
 			setFailedProgressStep?.(ProgressStepsSwap.WITHDRAW);
 
-			trackEvent({
-				name: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED,
-				metadata: {
-					errorKey: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED
-				}
-			});
+			// trackEvent({
+			// 	name: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED,
+			// 	metadata: {
+			// 		errorKey: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED
+			// 	}
+			// });
 
 			throwSwapError({
 				code: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED,
@@ -430,7 +426,6 @@ const withdrawICPSwapAfterFailedSwap = async ({
 	amount,
 	fee,
 	setFailedProgressStep,
-	trackEvent,
 	sourceToken
 }: {
 	identity: OptionIdentity;
@@ -439,7 +434,6 @@ const withdrawICPSwapAfterFailedSwap = async ({
 	amount: bigint;
 	fee: bigint;
 	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
-	trackEvent: ({ name, metadata, warning }: TrackEventParams) => void;
 	sourceToken: IcTokenToggleable;
 }): Promise<{ code: SwapErrorCodes; message?: string; variant?: 'error' | 'warning' | 'info' }> => {
 	try {
@@ -455,12 +449,12 @@ const withdrawICPSwapAfterFailedSwap = async ({
 			fee
 		});
 
-		trackEvent({
-			name: TRACK_COUNT_SWAP_ERROR,
-			metadata: {
-				errorKey: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS
-			}
-		});
+		// trackEvent({
+		// 	name: TRACK_COUNT_SWAP_ERROR,
+		// 	metadata: {
+		// 		errorKey: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS
+		// 	}
+		// });
 
 		return {
 			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
@@ -480,12 +474,12 @@ const withdrawICPSwapAfterFailedSwap = async ({
 				fee
 			});
 
-			trackEvent({
-				name: TRACK_COUNT_SWAP_ERROR,
-				metadata: {
-					errorKey: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS
-				}
-			});
+			// trackEvent({
+			// 	name: TRACK_COUNT_SWAP_ERROR,
+			// 	metadata: {
+			// 		errorKey: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS
+			// 	}
+			// });
 
 			return {
 				code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
@@ -494,12 +488,12 @@ const withdrawICPSwapAfterFailedSwap = async ({
 		} catch (_: unknown) {
 			setFailedProgressStep?.(ProgressStepsSwap.WITHDRAW);
 
-			trackEvent({
-				name: TRACK_COUNT_SWAP_ERROR,
-				metadata: {
-					errorKey: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
-				}
-			});
+			// trackEvent({
+			// 	name: TRACK_COUNT_SWAP_ERROR,
+			// 	metadata: {
+			// 		errorKey: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
+			// 	}
+			// });
 
 			return { code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED, variant: 'error' };
 		}
@@ -526,8 +520,6 @@ const performManualWithdraw = async ({
 	token: IcTokenToggleable;
 }): Promise<{ code: SwapErrorCodes; message?: string; variant?: 'error' | 'warning' | 'info' }> => {
 	try {
-		console.log({ amount });
-
 		await withdraw({
 			identity,
 			canisterId,

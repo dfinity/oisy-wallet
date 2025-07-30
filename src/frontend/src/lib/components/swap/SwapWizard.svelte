@@ -113,7 +113,6 @@
 				slippageValue,
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2,
-				trackEvent,
 				setFailedProgressStep,
 				tryToWithdraw:
 					nonNullish($failedSwapError?.errorType) &&
@@ -150,15 +149,6 @@
 					),
 					variant: 'info'
 				});
-
-				trackEvent({
-					name: TRACK_COUNT_SWAP_ERROR,
-					metadata: {
-						sourceToken: $sourceToken.symbol,
-						destinationToken: $destinationToken.symbol,
-						dApp: $swapAmountsStore.selectedProvider.provider
-					}
-				});
 			}
 
 			if (isSwapError(err)) {
@@ -177,13 +167,16 @@
 					msg: { text: $i18n.swap.error.unexpected },
 					err
 				});
+			}
 
+			if (!(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS || SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)) {
 				trackEvent({
 					name: TRACK_COUNT_SWAP_ERROR,
 					metadata: {
 						sourceToken: $sourceToken.symbol,
 						destinationToken: $destinationToken.symbol,
-						dApp: $swapAmountsStore.selectedProvider.provider
+						dApp: $swapAmountsStore.selectedProvider.provider,
+						errorKey: isSwapError(err) ? err.code : ''
 					}
 				});
 			}
