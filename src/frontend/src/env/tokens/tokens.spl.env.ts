@@ -2,6 +2,7 @@ import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
 import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
 import { AMBRX_TOKEN } from '$env/tokens/tokens-spl/tokens.ambrx.env';
 import { AMZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.amznx.env';
+import { AZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.aznx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { CRCLX_TOKEN } from '$env/tokens/tokens-spl/tokens.crclx.env';
@@ -45,6 +46,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	// ABTX_TOKEN,
 	AMBRX_TOKEN,
 	AMZNX_TOKEN,
+	AZNX_TOKEN,
 	BONK_TOKEN,
 	COINX_TOKEN,
 	CRCLX_TOKEN,
