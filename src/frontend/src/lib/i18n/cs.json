@@ -823,7 +823,8 @@
 			"open_icp_swap": "Otevřít webové stránky ICP Swap",
 			"open_instructions_link": "",
 			"select_token": "",
-			"select_network_filter": ""
+			"select_network_filter": "",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
