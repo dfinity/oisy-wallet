@@ -9,7 +9,7 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-	import type { IcCkToken, OptionIcCkToken } from '$icp/types/ic-token';
+	import type { IcCkToken } from '$icp/types/ic-token';
 	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -17,14 +17,11 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Token } from '$lib/types/token';
 
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	const destinationToken = $derived(
-		nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined
-	);
+	const destinationToken = $derived(nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined);
 
 	const sourceToken = $derived($ckEthereumTwinToken);
 

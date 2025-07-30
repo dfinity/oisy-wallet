@@ -9,11 +9,9 @@
 		solAddressDevnetStore,
 		solAddressLocalnetStore,
 		solAddressMainnetStore,
-		type AddressStoreData
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { SolAddress } from '$lib/types/address';
 	import type { Token } from '$lib/types/token';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 
@@ -24,7 +22,7 @@
 	let { token }: Props = $props();
 
 	// TODO: consolidate this logic together with btc into $networkAddress like it's done for ICP and ETH
-	let addressData= $derived(
+	let addressData = $derived(
 		isNetworkIdSOLDevnet($networkId)
 			? $solAddressDevnetStore
 			: isNetworkIdSOLLocal($networkId)

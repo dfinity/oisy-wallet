@@ -4,6 +4,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
+		// eslint-disable-next-line svelte/require-event-prefix -- It sounds better without the prefix
 		open: (modalId: symbol) => void | Promise<void>;
 		isOpen: boolean;
 		modalId?: symbol;
