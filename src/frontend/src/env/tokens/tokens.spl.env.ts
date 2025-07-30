@@ -5,13 +5,16 @@ import { AMZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.amznx.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { CRCLX_TOKEN } from '$env/tokens/tokens-spl/tokens.crclx.env';
+import { CSCOX_TOKEN } from '$env/tokens/tokens-spl/tokens.cscox.env';
 import { DFDVX_TOKEN } from '$env/tokens/tokens-spl/tokens.dfdvx.env';
 import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { GLDX_TOKEN } from '$env/tokens/tokens-spl/tokens.gldx.env';
 import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
 import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
+import { HONX_TOKEN } from '$env/tokens/tokens-spl/tokens.honx.env';
 import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { LLYX_TOKEN } from '$env/tokens/tokens-spl/tokens.llyx.env';
 import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
@@ -42,13 +45,16 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	BONK_TOKEN,
 	COINX_TOKEN,
 	CRCLX_TOKEN,
+	CSCOX_TOKEN,
 	DFDVX_TOKEN,
 	EURC_TOKEN,
 	GLDX_TOKEN,
 	GMEX_TOKEN,
 	GOOGLX_TOKEN,
+	HONX_TOKEN,
 	HOODX_TOKEN,
 	JUP_TOKEN,
+	LLYX_TOKEN,
 	MCDX_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
