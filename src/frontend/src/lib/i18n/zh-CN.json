@@ -823,7 +823,7 @@
 			"open_instructions_link": "",
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
-			"withdraw": ""
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",

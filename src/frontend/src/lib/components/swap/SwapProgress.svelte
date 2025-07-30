@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -49,7 +48,7 @@
 			? ([
 					{
 						step: ProgressStepsSwap.WITHDRAW,
-						text: $i18n.swap.text.withdraw,
+						text: $i18n.swap.text.withdrawing,
 						state: 'next'
 					}
 				] as ProgressSteps)

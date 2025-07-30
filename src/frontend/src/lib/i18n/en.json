@@ -823,7 +823,7 @@
 			"open_instructions_link": "Open instructions link",
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
-			"withdraw": "Withdrawing..."
+			"withdrawing": "Withdrawing..."
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",

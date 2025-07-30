@@ -823,7 +823,7 @@
 			"open_instructions_link": "",
 			"select_token": "",
 			"select_network_filter": "",
-			"withdraw": ""
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
