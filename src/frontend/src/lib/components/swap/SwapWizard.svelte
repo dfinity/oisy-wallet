@@ -102,7 +102,6 @@
 
 		try {
 			clearFailedProgressStep();
-			failedSwapError.set(undefined);
 
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
@@ -151,6 +150,15 @@
 					),
 					variant: 'info'
 				});
+
+				trackEvent({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: {
+						sourceToken: $sourceToken.symbol,
+						destinationToken: $destinationToken.symbol,
+						dApp: $swapAmountsStore.selectedProvider.provider
+					}
+				});
 			}
 
 			if (isSwapError(err)) {
@@ -169,17 +177,16 @@
 					msg: { text: $i18n.swap.error.unexpected },
 					err
 				});
-			}
 
-			trackEvent({
-				name: TRACK_COUNT_SWAP_ERROR,
-				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
-					errorKey: isSwapError(err) ? err.code : ''
-				}
-			});
+				trackEvent({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: {
+						sourceToken: $sourceToken.symbol,
+						destinationToken: $destinationToken.symbol,
+						dApp: $swapAmountsStore.selectedProvider.provider
+					}
+				});
+			}
 
 			setTimeout(() => back(), 2000);
 		}
