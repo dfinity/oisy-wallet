@@ -822,7 +822,8 @@
 			"open_icp_swap": "Apri il sito web ICP Swap",
 			"open_instructions_link": "Apri il link con le istruzioni",
 			"select_token": "Seleziona il token",
-			"select_network_filter": "Seleziona la rete"
+			"select_network_filter": "Seleziona la rete",
+			"withdraw": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -835,7 +836,11 @@
 			"swap_failed_withdraw_success": "Lo swap non è andato a buon fine e i tuoi token sono stati rimborsati con successo. Riprova oppure cambia il provider dello swap.",
 			"withdraw_failed_first_part": "Lo swap non è andato a buon fine e i token inviati non possono essere ritirati automaticamente. Segui ",
 			"withdraw_failed_second_part": "per ritirarli manualmente su ",
-			"swap_failed_instruction_link": "queste istruzioni "
+			"swap_failed_instruction_link": "queste istruzioni ",
+			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {

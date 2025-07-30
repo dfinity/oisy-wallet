@@ -39,6 +39,7 @@
 		receiveAmount: number | undefined;
 		slippageValue: OptionAmount;
 		swapProgressStep: string;
+		swapFailedProgressSteps?: string[];
 		currentStep: WizardStep | undefined;
 	}
 	let {
@@ -46,6 +47,7 @@
 		receiveAmount = $bindable<number | undefined>(),
 		slippageValue = $bindable<OptionAmount>(),
 		swapProgressStep = $bindable<string>(),
+		swapFailedProgressSteps = $bindable<string[]>(),
 		currentStep
 	}: Props = $props();
 
@@ -57,6 +59,15 @@
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContextType>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
+	const setFailedProgressStep = (step: ProgressStepsSwap) => {
+		if (!swapFailedProgressSteps.includes(step)) {
+			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
+		}
+	};
+
+	const clearFailedProgressStep = () => {
+		swapFailedProgressSteps = [];
+	};
 
 	const dispatch = createEventDispatcher();
 
@@ -90,7 +101,7 @@
 		dispatch('icNext');
 
 		try {
-			failedSwapError.set(undefined);
+			clearFailedProgressStep();
 
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
@@ -101,7 +112,17 @@
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
-				isSourceTokenIcrc2: $isSourceTokenIcrc2
+				isSourceTokenIcrc2: $isSourceTokenIcrc2,
+				trackEvent,
+				setFailedProgressStep,
+				tryToWithdraw:
+					nonNullish($failedSwapError?.errorType) &&
+					($failedSwapError?.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED ||
+						$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
+						$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED),
+				withdrawDestinationTokens:
+					nonNullish($failedSwapError?.errorType) &&
+					$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED
 			});
 
 			progress(ProgressStepsSwap.DONE);
@@ -115,7 +136,7 @@
 				}
 			});
 
-			setTimeout(() => close(), 750);
+			setTimeout(() => close(), 2500);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
 			// TODO: Add unit tests to cover failed swap error scenarios
@@ -129,44 +150,45 @@
 					),
 					variant: 'info'
 				});
+
+				trackEvent({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: {
+						sourceToken: $sourceToken.symbol,
+						destinationToken: $destinationToken.symbol,
+						dApp: $swapAmountsStore.selectedProvider.provider
+					}
+				});
 			}
 
 			if (isSwapError(err)) {
-				if (err.code === SwapErrorCodes.WITHDRAW_FAILED) {
-					failedSwapError.set({
-						message: $i18n.swap.error.withdraw_failed,
-						variant: 'error',
-						url: {
-							url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
-							text: 'icpswap.com'
-						}
-					});
-				} else {
-					failedSwapError.set({
-						message: $i18n.swap.error[err.code],
-						variant: 'info'
-					});
-				}
+				failedSwapError.set({
+					message: err.message,
+					variant: err.variant ?? 'info',
+					errorType: err.code,
+					url: {
+						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+						text: 'icpswap.com'
+					}
+				});
 			} else {
 				failedSwapError.set(undefined);
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected },
 					err
 				});
+
+				trackEvent({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: {
+						sourceToken: $sourceToken.symbol,
+						destinationToken: $destinationToken.symbol,
+						dApp: $swapAmountsStore.selectedProvider.provider
+					}
+				});
 			}
 
-			trackEvent({
-				name: TRACK_COUNT_SWAP_ERROR,
-				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
-					errorKey: isSwapError(err) ? err.code : '',
-					errorMessage: isSwapError(err) ? enI18n().swap.error[err.code] : ''
-				}
-			});
-
-			back();
+			setTimeout(() => back(), 2000);
 		}
 	};
 
@@ -192,9 +214,16 @@
 				bind:slippageValue
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
+			<SwapReview
+				on:icSwap={swap}
+				on:icBack
+				on:icClose
+				{slippageValue}
+				{swapAmount}
+				{receiveAmount}
+			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress bind:swapProgressStep />
+			<SwapProgress bind:swapProgressStep bind:failedSteps={swapFailedProgressSteps} />
 		{/if}
 	</SwapAmountsContext>
 </IcTokenFeeContext>

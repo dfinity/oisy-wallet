@@ -3,15 +3,18 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		swapProgressStep?: string;
 		sendWithApproval?: boolean;
+		failedSteps?: string[];
 	}
 
 	let {
 		swapProgressStep = $bindable(ProgressStepsSwap.INITIALIZATION),
-		sendWithApproval = false
+		sendWithApproval = false,
+		failedSteps = $bindable([])
 	}: Props = $props();
 
 	let steps = $state<ProgressSteps>([
@@ -45,6 +48,11 @@
 			state: 'next'
 		},
 		{
+			step: ProgressStepsSwap.WITHDRAW,
+			text: 'Withdrawing...',
+			state: 'next'
+		},
+		{
 			step: ProgressStepsSwap.UPDATE_UI,
 			text: $i18n.swap.text.refreshing_ui,
 			state: 'next'
@@ -52,4 +60,4 @@
 	]);
 </script>
 
-<InProgressWizard progressStep={swapProgressStep} {steps} />
+<InProgressWizard progressStep={swapProgressStep} {steps} {failedSteps} />

@@ -24,6 +24,7 @@ export enum ProgressStepsSwap {
 	APPROVE = 'approve',
 	SIGN_TRANSFER = 'sign_transfer',
 	SWAP = 'swap',
+	WITHDRAW = 'withdraw',
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }

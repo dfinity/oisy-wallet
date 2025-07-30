@@ -822,7 +822,8 @@
 			"open_icp_swap": "打开 ICP Swap 网站",
 			"open_instructions_link": "",
 			"select_token": "选择代币",
-			"select_network_filter": "选择网络"
+			"select_network_filter": "选择网络",
+			"withdraw": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -835,7 +836,11 @@
 			"swap_failed_withdraw_success": "",
 			"withdraw_failed_first_part": "",
 			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": ""
+			"swap_failed_instruction_link": "",
+			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
