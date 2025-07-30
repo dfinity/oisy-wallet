@@ -2,8 +2,8 @@ import type { SwapErrorCodes } from '$lib/types/swap';
 
 export const throwSwapError = ({
 	code,
-	message = undefined,
-	variant = undefined
+	message,
+	variant
 }: {
 	code: SwapErrorCodes;
 	message?: string;
