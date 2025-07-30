@@ -822,7 +822,8 @@
 			"open_icp_swap": "Mở trang web ICP Swap",
 			"open_instructions_link": "",
 			"select_token": "",
-			"select_network_filter": ""
+			"select_network_filter": "",
+			"withdraw": ""
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",

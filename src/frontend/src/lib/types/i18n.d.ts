@@ -689,6 +689,7 @@ interface I18nSwap {
 		open_instructions_link: string;
 		select_token: string;
 		select_network_filter: string;
+		withdraw: string;
 	};
 	error: {
 		kong_not_available: string;
