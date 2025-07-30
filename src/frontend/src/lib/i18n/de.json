@@ -835,7 +835,9 @@
 			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Tokens wurden erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
 			"withdraw_failed_first_part": "Der Tausch ist fehlgeschlagen und deine Tokens konnten nicht automatisch zurückgeholt werden. Folge ",
 			"withdraw_failed_second_part": "um sie manuell zurückzuholen von ",
-			"swap_failed_instruction_link": "diesen Anweisungen "
+			"swap_failed_instruction_link": "diesen Anweisungen ",
+			"manually_withdraw_success": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
