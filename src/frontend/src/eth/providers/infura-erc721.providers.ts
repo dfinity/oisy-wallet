@@ -1,8 +1,9 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { INFURA_API_KEY } from '$env/rest/infura.env';
+import { Erc165Identifier } from '$eth/constants/erc.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import { fetchMetadataFromUri } from '$eth/services/erc.services';
+import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
@@ -10,15 +11,11 @@ import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
-import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-export class InfuraErc721Provider {
-	private readonly provider: InfuraProvider;
-
-	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
-	}
+export class InfuraErc721Provider extends InfuraErc165Provider {
+	isInterfaceErc721 = (contract: Erc721ContractAddress): Promise<boolean> =>
+		this.isSupportedInterface({ contract, interfaceId: Erc165Identifier.ERC721 });
 
 	metadata = async ({
 		address
