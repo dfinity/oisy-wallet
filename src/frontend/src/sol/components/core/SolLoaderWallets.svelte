@@ -8,7 +8,6 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { enabledSplTokens } from '$lib/derived/tokens.derived';
-	import type { Token } from '$lib/types/token';
 	import {
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
