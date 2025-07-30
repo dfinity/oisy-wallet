@@ -21,7 +21,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swapService } from '$lib/services/swap.services';
-	import { enI18n, i18n } from '$lib/stores/i18n.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext as SwapAmountsContextType
@@ -142,10 +142,15 @@
 						}
 					});
 				} else {
-					failedSwapError.set({
-						message: $i18n.swap.error[err.code],
-						variant: 'info'
-					});
+					if (
+						err.code === SwapErrorCodes.DEPOSIT_FAILED ||
+						err.code === SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS
+					) {
+						failedSwapError.set({
+							message: $i18n.swap.error[err.code],
+							variant: 'info'
+						});
+					}
 				}
 			} else {
 				failedSwapError.set(undefined);
@@ -161,8 +166,7 @@
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
-					errorKey: isSwapError(err) ? err.code : '',
-					errorMessage: isSwapError(err) ? enI18n().swap.error[err.code] : ''
+					errorKey: isSwapError(err) ? err.code : ''
 				}
 			});
 
