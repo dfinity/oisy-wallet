@@ -4,16 +4,6 @@ import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	delMany: vi.fn(),
-	keys: vi.fn(),
-	update: vi.fn()
-}));
-
 vi.mock('$lib/utils/idb.utils', () => ({
 	delMultiKeysByPrincipal: vi.fn()
 }));

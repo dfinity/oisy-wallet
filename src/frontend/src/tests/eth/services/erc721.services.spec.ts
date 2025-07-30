@@ -20,14 +20,6 @@ import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
-
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
 }));
