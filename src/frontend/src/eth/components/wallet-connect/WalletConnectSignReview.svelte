@@ -10,19 +10,26 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let request: WalletKitTypes.SessionRequest;
+	interface Props {
+		request: WalletKitTypes.SessionRequest;
+		onApprove: () => void;
+		onReject: () => void;
+	}
 
-	let message: string;
-	$: message = getSignParamsMessageHex(request.params.request.params);
+	let { request,onApprove,onReject }: Props = $props();
 
-	let json: unknown | undefined;
-	$: (() => {
-		try {
-			json = JSON.parse(message);
-		} catch (_err: unknown) {
-			json = undefined;
-		}
-	})();
+	let message = $derived(getSignParamsMessageHex(request.params.request.params));
+
+	let json = $state< unknown | undefined>();
+	$effect(() => {
+		(() => {
+			try {
+				json = JSON.parse(message);
+			} catch (_err: unknown) {
+				json = undefined;
+			}
+		})();
+	});
 </script>
 
 <ContentWithToolbar>
@@ -43,6 +50,6 @@
 	{/if}
 
 	{#snippet toolbar()}
-		<WalletConnectActions on:icApprove on:icReject />
+		<WalletConnectActions {onApprove} {onReject} />
 	{/snippet}
 </ContentWithToolbar>

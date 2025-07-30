@@ -395,9 +395,9 @@
 		{#if currentStep?.name === 'Review'}
 			<WalletConnectReview
 				{proposal}
-				on:icReject={reject}
-				on:icApprove={approve}
-				on:icCancel={cancel}
+				onReject={reject}
+				onApprove={approve}
+				onCancel={cancel}
 			/>
 		{:else}
 			<WalletConnectForm on:icConnect={userConnect} />

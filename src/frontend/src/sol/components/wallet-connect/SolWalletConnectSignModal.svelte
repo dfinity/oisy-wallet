@@ -150,8 +150,8 @@
 			destination={destination ?? ''}
 			{data}
 			{token}
-			on:icApprove={sign}
-			on:icReject={reject}
+			onApprove={sign}
+			onReject={reject}
 		/>
 	{/if}
 </WizardModal>

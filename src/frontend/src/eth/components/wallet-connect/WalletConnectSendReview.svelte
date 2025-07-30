@@ -16,15 +16,31 @@
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let amount: bigint;
-	export let destination: string;
-	export let data: string | undefined;
-	export let erc20Approve: boolean;
-	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
+	interface Props {
+		amount: bigint;
+		destination: string;
+		data?: string;
+		erc20Approve: boolean;
+		sourceNetwork: EthereumNetwork;
+		targetNetwork?: Network;
+		onApprove: () => void;
+		onReject: () => void;
+	}
 
-	let amountDisplay: bigint;
-	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount;
+	let {
+		amount,
+		destination,
+		data,
+		erc20Approve,
+		sourceNetwork,
+		targetNetwork,
+		onApprove,
+		onReject
+	}: Props = $props();
+
+	let amountDisplay = $derived(
+		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount
+	);
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
@@ -45,6 +61,6 @@
 	</SendData>
 
 	{#snippet toolbar()}
-		<WalletConnectActions on:icApprove on:icReject />
+		<WalletConnectActions {onApprove} {onReject} />
 	{/snippet}
 </ContentWithToolbar>
