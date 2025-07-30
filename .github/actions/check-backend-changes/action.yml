@@ -28,4 +28,4 @@ runs:
             - '**/*rust*'
             - 'Dockerfile'
             - 'docker/**'
-            - !'src/frontend/**'
+            - '!src/frontend/**'
