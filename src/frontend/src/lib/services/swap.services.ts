@@ -3,6 +3,7 @@ import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-t
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
@@ -18,6 +19,7 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { OptionIdentity } from '$lib/types/identity';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -34,6 +36,7 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { trackEvent } from './analytics.services';
 import { throwSwapError } from './swap-errors.services';
 import { autoLoadSingleToken } from './token.services';
 
@@ -336,5 +339,116 @@ export const swapService = {
 	//TODO: Will be fixed and updated in the next PRs
 	[SwapProvider.VELORA]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
+	}
+};
+
+export const withdrawICPSwapAfterFailedSwap = async ({
+	identity,
+	canisterId,
+	token,
+	amount,
+	fee,
+	setFailedProgressStep
+}: {
+	identity: OptionIdentity;
+	canisterId: string;
+	token: string;
+	amount: bigint;
+	fee: bigint;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+}): Promise<{ code: SwapErrorCodes; message?: string; variant?: 'error' | 'warning' | 'info' }> => {
+	try {
+		await withdraw({
+			identity,
+			canisterId,
+			token,
+			amount,
+			fee
+		});
+
+		return {
+			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS,
+			message: get(i18n).swap.error.swap_failed_withdraw_success
+		};
+	} catch (_: unknown) {
+		try {
+			// Second withdrawal attempt
+			await withdraw({
+				identity,
+				canisterId,
+				token,
+				amount,
+				fee
+			});
+
+			return {
+				code: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS,
+				message: get(i18n).swap.error.swap_failed_withdraw_success
+			};
+		} catch (_: unknown) {
+			setFailedProgressStep?.(ProgressStepsSwap.WITHDRAW);
+
+			return { code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED, variant: 'error' };
+		}
+	}
+};
+
+export const performManualWithdraw = async ({
+	withdrawDestinationTokens,
+	identity,
+	canisterId,
+	tokenId,
+	amount,
+	fee,
+	token,
+	setFailedProgressStep
+}: {
+	withdrawDestinationTokens: boolean;
+	identity: OptionIdentity;
+	canisterId: string;
+	tokenId: string;
+	amount: bigint;
+	fee: bigint;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+	token: IcTokenToggleable;
+}): Promise<{ code: SwapErrorCodes; message?: string; variant?: 'error' | 'warning' | 'info' }> => {
+	try {
+		await withdraw({
+			identity,
+			canisterId,
+			token: tokenId,
+			amount,
+			fee
+		});
+
+		trackEvent({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+			metadata: {
+				token: token.symbol,
+				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
+			}
+		});
+
+		return {
+			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+			message: withdrawDestinationTokens
+				? get(i18n).swap.error.swap_sucess_manually_withdraw_success
+				: get(i18n).swap.error.manually_withdraw_success
+		};
+	} catch (_: unknown) {
+		trackEvent({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
+			metadata: {
+				token: token.symbol,
+				tokenOrigin: withdrawDestinationTokens ? 'receive' : 'pay'
+			}
+		});
+
+		setFailedProgressStep?.(ProgressStepsSwap.WITHDRAW);
+
+		return {
+			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
+			variant: 'error'
+		};
 	}
 };

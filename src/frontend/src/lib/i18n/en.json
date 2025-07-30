@@ -835,7 +835,9 @@
 			"swap_failed_withdraw_success": "The swap failed and your tokens were successfully refunded. Please try again or change the swap provider.",
 			"withdraw_failed_first_part": "The swap failed and the sent tokens could not be automatically withdrawn. Please follow ",
 			"withdraw_failed_second_part": "to withdraw them manually on ",
-			"swap_failed_instruction_link": "these instructions "
+			"swap_failed_instruction_link": "these instructions ",
+			"manually_withdraw_success": "The tokens from your previous failed swap were successfully withdrawn. You can try the swap again or change the swap provider.",
+			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal."
 		}
 	},
 	"buy": {
