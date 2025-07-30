@@ -59,15 +59,11 @@
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContextType>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
-	// const setFailedProgressStep = (step: ProgressStepsSwap) => {
-	// 	console.log('🔍 setFailedProgressStep called with:', step);
-	// 	console.log('🔍 swapFailedProgressSteps before:', swapFailedProgressSteps);
-
-	// 	if (!swapFailedProgressSteps.includes(step)) {
-	// 		swapFailedProgressSteps = [...swapFailedProgressSteps, step];
-	// 		console.log('🔍 swapFailedProgressSteps after:', swapFailedProgressSteps);
-	// 	}
-	// };
+	const setFailedProgressStep = (step: ProgressStepsSwap) => {
+		if (!swapFailedProgressSteps.includes(step)) {
+			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
+		}
+	};
 
 	const dispatch = createEventDispatcher();
 
@@ -101,7 +97,7 @@
 		dispatch('icNext');
 
 		try {
-			// failedSwapError.set(undefined);
+			failedSwapError.set(undefined);
 
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
@@ -114,11 +110,12 @@
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2,
 				trackEvent,
-				// setFailedProgressStep,
+				setFailedProgressStep,
 				tryToWithdraw:
 					nonNullish($failedSwapError?.errorType) &&
 					($failedSwapError?.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED ||
-						$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED),
+						$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
+						$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED),
 				withdrawDestinationTokens:
 					nonNullish($failedSwapError?.errorType) &&
 					$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED
@@ -214,7 +211,7 @@
 				{receiveAmount}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress bind:swapProgressStep />
+			<SwapProgress bind:swapProgressStep bind:failedSteps={swapFailedProgressSteps} />
 		{/if}
 	</SwapAmountsContext>
 </IcTokenFeeContext>

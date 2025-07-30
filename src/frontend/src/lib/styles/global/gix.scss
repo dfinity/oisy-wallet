@@ -335,6 +335,13 @@ div.step {
 		}
 	}
 
+	&.failed {
+		.state {
+			color: var(--negative-emphasis) !important;
+			background: var(--color-background-error-light) !important;
+		}
+	}
+
 	&.next {
 		.text {
 			color: var(--color-foreground-primary);

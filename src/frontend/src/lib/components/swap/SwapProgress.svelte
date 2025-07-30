@@ -47,11 +47,11 @@
 			text: $i18n.swap.text.swapping,
 			state: 'next'
 		},
-		// {
-		// 	step: ProgressStepsSwap.WITHDRAW,
-		// 	text: 'Withdrawing...',
-		// 	state: failedSteps.includes(ProgressStepsSwap.WITHDRAW) ? 'failed' : 'next'
-		// },
+		{
+			step: ProgressStepsSwap.WITHDRAW,
+			text: 'Withdrawing...',
+			state: 'next'
+		},
 		{
 			step: ProgressStepsSwap.UPDATE_UI,
 			text: $i18n.swap.text.refreshing_ui,
@@ -60,4 +60,4 @@
 	]);
 </script>
 
-<InProgressWizard progressStep={swapProgressStep} {steps} />
+<InProgressWizard progressStep={swapProgressStep} {steps} {failedSteps} />

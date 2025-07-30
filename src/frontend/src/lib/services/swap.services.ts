@@ -181,6 +181,7 @@ export const fetchSwapAmounts = async ({
 export const fetchIcpSwap = async ({
 	identity,
 	progress,
+	setFailedProgressStep,
 	sourceToken,
 	destinationToken,
 	swapAmount,
@@ -315,6 +316,9 @@ export const fetchIcpSwap = async ({
 			amountOutMinimum: slippageMinimum.toString()
 		});
 	} catch (_: unknown) {
+		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
+		progress(ProgressStepsSwap.WITHDRAW);
+
 		// Swap failed, try to withdraw the source tokens
 		const { code, message, variant } = await withdrawICPSwapAfterFailedSwap({
 			identity,
@@ -364,6 +368,8 @@ export const fetchIcpSwap = async ({
 				fee: destinationTokenFee
 			});
 		} catch (_: unknown) {
+			setFailedProgressStep?.(ProgressStepsSwap.WITHDRAW);
+
 			trackEvent({
 				name: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED,
 				metadata: {
