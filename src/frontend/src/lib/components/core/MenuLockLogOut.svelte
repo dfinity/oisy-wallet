@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconLock from '$lib/components/icons/IconLock.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -11,15 +10,24 @@
 	interface Props {
 		onHidePopover?: () => void;
 		hideText?: boolean;
+		onIcLogoutTriggered?: () => void;
 	}
+	let { onHidePopover, hideText = true, onIcLogoutTriggered }: Props = $props();
 
-	let { onHidePopover, hideText = true }: Props = $props();
+	let remainingTimeMs = $derived($authRemainingTimeStore);
 
-	const dispatch = createEventDispatcher();
-	const remainingTimeMilliseconds = $derived($authRemainingTimeStore);
+	const formatDuration = (ms: number) => {
+		if (ms <= 0) {
+			return '0';
+		}
+		return secondsToDuration({
+			seconds: BigInt(ms) / 1000n,
+			i18n: $i18n.temporal.seconds_to_duration
+		});
+	};
 
 	const handleLogoutTriggered = () => {
-		dispatch('icLogoutTriggered');
+		onIcLogoutTriggered?.();
 	};
 </script>
 
@@ -37,15 +45,10 @@
 		<SignOut on:icLogoutTriggered={handleLogoutTriggered} {onHidePopover} {hideText} />
 	</div>
 
-	{#if nonNullish(remainingTimeMilliseconds)}
+	{#if nonNullish(remainingTimeMs)}
 		<span class="mt-2 block w-full text-center text-sm text-tertiary">
 			{$i18n.settings.text.session_expires_in}
-			{remainingTimeMilliseconds <= 0
-				? '0'
-				: secondsToDuration({
-						seconds: BigInt(remainingTimeMilliseconds) / 1000n,
-						i18n: $i18n.temporal.seconds_to_duration
-					})}
+			{formatDuration(remainingTimeMs)}
 		</span>
 	{/if}
 </div>
