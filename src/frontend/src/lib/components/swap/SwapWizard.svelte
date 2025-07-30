@@ -142,10 +142,15 @@
 						}
 					});
 				} else {
-					failedSwapError.set({
-						message: $i18n.swap.error[err.code],
-						variant: 'info'
-					});
+					if (
+						err.code === SwapErrorCodes.DEPOSIT_FAILED ||
+						err.code === SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS
+					) {
+						failedSwapError.set({
+							message: $i18n.swap.error[err.code],
+							variant: 'info'
+						});
+					}
 				}
 			} else {
 				failedSwapError.set(undefined);

@@ -26,7 +26,12 @@ export enum VeloraSwapTypes {
 export enum SwapErrorCodes {
 	WITHDRAW_FAILED = 'withdraw_failed',
 	DEPOSIT_FAILED = 'deposit_error',
-	SWAP_FAILED_WITHDRAW_SUCESS = 'swap_failed_withdraw_success'
+	SWAP_FAILED_WITHDRAW_SUCESS = 'swap_failed_withdraw_success',
+	SWAP_SUCCESS_WITHDRAW_FAILED = 'swap_success_withdraw_failed',
+	SWAP_FAILED_2ND_WITHDRAW_SUCCESS = 'swap_failed_2nd_withdraw_success',
+	SWAP_FAILED_WITHDRAW_FAILED = 'swap_failed_withdraw_failed',
+	ICP_SWAP_WITHDRAW_SUCCESS = 'ICPSwap_withdraw_success',
+	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed'
 }
 export interface ProviderFee {
 	fee: bigint;
@@ -125,6 +130,26 @@ export interface SwapParams {
 	slippageValue: Amount;
 	sourceTokenFee: bigint;
 	isSourceTokenIcrc2: boolean;
+}
+
+export interface IcpSwapWithdrawParams {
+	identity: OptionIdentity;
+	canisterId: string;
+	tokenId: string;
+	amount: bigint;
+	fee: bigint;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+}
+
+export interface IcpSwapManualWithdrawParams extends IcpSwapWithdrawParams {
+	withdrawDestinationTokens: boolean;
+	token: IcTokenToggleable;
+}
+
+export interface IcpSwapWithdrawResponse {
+	code: SwapErrorCodes;
+	message?: string;
+	variant?: 'error' | 'warning' | 'info';
 }
 
 export interface FormatSlippageParams {

@@ -702,6 +702,8 @@ interface I18nSwap {
 		withdraw_failed_first_part: string;
 		withdraw_failed_second_part: string;
 		swap_failed_instruction_link: string;
+		manually_withdraw_success: string;
+		swap_sucess_manually_withdraw_success: string;
 	};
 }
 
