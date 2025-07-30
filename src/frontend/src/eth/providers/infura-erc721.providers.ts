@@ -2,8 +2,8 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { Erc165Identifier } from '$eth/constants/erc.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
-import { fetchMetadataFromUri } from '$eth/services/erc.services';
 import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
+import { fetchMetadataFromUri } from '$eth/services/erc.services';
 import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
