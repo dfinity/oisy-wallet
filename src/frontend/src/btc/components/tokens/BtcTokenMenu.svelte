@@ -14,7 +14,6 @@
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { BtcAddress } from '$lib/types/address';
-	import type { Option } from '$lib/types/utils';
 	import { mapAddress } from '$lib/utils/address.utils';
 	import { isNetworkIdBTCMainnet, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
