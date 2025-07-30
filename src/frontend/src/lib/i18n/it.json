@@ -465,7 +465,6 @@
 		"error": {
 			"no_alchemy_config": "Nessuna configurazione Alchemy per la rete $network",
 			"no_alchemy_provider": "Nessun provider Alchemy per la rete $network",
-			"no_alchemy_erc20_provider": "Nessun provider Alchemy ERC20 per la rete $network",
 			"no_etherscan_provider": "Nessun provider Etherscan per la rete $network",
 			"no_infura_provider": "Nessun provider Infura per la rete $network",
 			"no_infura_cketh_provider": "Nessun provider Infura CkETH per la rete $network",
@@ -822,7 +821,8 @@
 			"open_icp_swap": "Apri il sito web ICP Swap",
 			"open_instructions_link": "Apri il link con le istruzioni",
 			"select_token": "Seleziona il token",
-			"select_network_filter": "Seleziona la rete"
+			"select_network_filter": "Seleziona la rete",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
