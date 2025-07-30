@@ -7,7 +7,7 @@ describe('SwapError Service', () => {
 		it('throws SwapError with message', () => {
 			expect(() =>
 				throwSwapError({
-					code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED,
+					code: SwapErrorCodes.WITHDRAW_FAILED,
 					message: en.swap.error.withdraw_failed,
 					variant: 'error'
 				})
@@ -17,7 +17,7 @@ describe('SwapError Service', () => {
 		it('throws SwapError without message', () => {
 			expect(() =>
 				throwSwapError({
-					code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
+					code: SwapErrorCodes.WITHDRAW_FAILED
 				})
 			).toThrow(SwapError);
 		});
@@ -48,22 +48,22 @@ describe('SwapError Service', () => {
 	describe('SwapError class', () => {
 		it('can be created with all fields', () => {
 			const error = new SwapError(
-				SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+				SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS,
 				'Withdrawal succeeded manually',
 				'info'
 			);
 
 			expect(error).toBeInstanceOf(SwapError);
-			expect(error.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS);
+			expect(error.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS);
 			expect(error.message).toBe('Withdrawal succeeded manually');
 			expect(error.variant).toBe('info');
 		});
 
 		it('can be created with only code', () => {
-			const error = new SwapError(SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED);
+			const error = new SwapError(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS);
 
 			expect(error).toBeInstanceOf(SwapError);
-			expect(error.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED);
+			expect(error.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS);
 			expect(error.message).toBe('');
 			expect(error.variant).toBeUndefined();
 		});
