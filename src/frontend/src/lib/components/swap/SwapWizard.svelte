@@ -181,9 +181,7 @@
 				}
 			});
 
-			setTimeout(() => close(), 1500);
-
-			back();
+			setTimeout(() => back(), 2000);
 		}
 	};
 
