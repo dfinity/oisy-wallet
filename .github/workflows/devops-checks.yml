@@ -82,6 +82,10 @@ jobs:
               - scripts/download-canister-api
               - .github/workflows/devops-checks.yml
 
+      - name: Install dfx
+        if: steps.change.outputs.any == 'true'
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
+
       - name: Run test
         if: steps.change.outputs.any == 'true'
         run: scripts/download-canister-api.test
