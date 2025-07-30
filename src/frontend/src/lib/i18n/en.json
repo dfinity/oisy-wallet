@@ -833,7 +833,7 @@
 			"pool_not_found": "Swap failed. Pool not found.",
 			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",
 			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
-			"swap_failed_withdraw_success": "The tokens from your previous failed swap were successfully withdrawn. You can try the swap again or change the swap provider.",
+			"swap_failed_withdraw_success": "The swap failed and your tokens were successfully refunded. Please try again or change the swap provider.",
 			"withdraw_failed_first_part": "The swap failed and your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow ",
 			"withdraw_failed_second_part": "to withdraw them anytime later directly from their website: ",
 			"swap_failed_instruction_link": "these instructions ",

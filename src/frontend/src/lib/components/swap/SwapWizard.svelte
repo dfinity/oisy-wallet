@@ -217,7 +217,7 @@
 			<SwapReview
 				on:icSwap={swap}
 				on:icBack
-				on:isClose
+				on:icClose
 				{slippageValue}
 				{swapAmount}
 				{receiveAmount}
