@@ -101,7 +101,7 @@ export const initPendingTransactionsListener = ({
 	return {
 		// eslint-disable-next-line require-await
 		disconnect: async () => {
-			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have for effect to double the triggers. That's why we reset it to null.
+			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have the effect of doubling the triggers. That's why we reset it to null.
 			provider?.ws.off(event);
 			provider?.ws.removeAllListeners();
 			provider = null;
