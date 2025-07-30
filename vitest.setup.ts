@@ -87,7 +87,7 @@ vi.mock('idb-keyval', () => ({
 	get: vi.fn(),
 	del: vi.fn(),
 	delMany: vi.fn(),
-	keys: vi.fn(),
+	keys: vi.fn(() => []),
 	update: vi.fn()
 }));
 
