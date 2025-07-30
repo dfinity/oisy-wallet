@@ -16,11 +16,11 @@
 		onReject: () => void;
 	}
 
-	let { request,onApprove,onReject }: Props = $props();
+	let { request, onApprove, onReject }: Props = $props();
 
 	let message = $derived(getSignParamsMessageHex(request.params.request.params));
 
-	let json = $state< unknown | undefined>();
+	let json = $state<unknown | undefined>();
 	$effect(() => {
 		(() => {
 			try {

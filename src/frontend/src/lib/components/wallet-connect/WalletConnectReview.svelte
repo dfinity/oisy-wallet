@@ -24,16 +24,15 @@
 		onCancel: () => void;
 	}
 
-	let { proposal ,onApprove,onReject, onCancel}: Props = $props();
+	let { proposal, onApprove, onReject, onCancel }: Props = $props();
 
 	let params = $derived(proposal?.params);
 
 	let approve = $derived(acceptedContext(proposal?.verifyContext));
 
-
 	// Display a cancel button after a while if the WalletConnect initialization never resolves
 
-	let timer=$state<NodeJS.Timeout | undefined>();
+	let timer = $state<NodeJS.Timeout | undefined>();
 	let displayCancel = $state(false);
 
 	onMount(() => (timer = setTimeout(() => (displayCancel = true), 2000)));
@@ -107,10 +106,7 @@
 			{#if displayCancel}
 				<div in:fade>
 					<ButtonGroup>
-						<ButtonCancel
-							onclick={onCancel}
-							disabled={$isBusy || $ethAddressNotCertified}
-						/>
+						<ButtonCancel onclick={onCancel} disabled={$isBusy || $ethAddressNotCertified} />
 					</ButtonGroup>
 				</div>
 			{/if}

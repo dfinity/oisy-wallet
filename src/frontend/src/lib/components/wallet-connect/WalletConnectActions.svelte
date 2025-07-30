@@ -10,7 +10,7 @@
 		onReject: () => void;
 	}
 
-	let { approve = true, onApprove,onReject  }: Props = $props();
+	let { approve = true, onApprove, onReject }: Props = $props();
 </script>
 
 <ButtonGroup>

@@ -20,7 +20,7 @@
 		onReject: () => void;
 	}
 
-	let { amount, destination, data, token, onApprove,onReject }: Props = $props();
+	let { amount, destination, data, token, onApprove, onReject }: Props = $props();
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
