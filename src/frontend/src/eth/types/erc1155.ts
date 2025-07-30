@@ -20,15 +20,12 @@ export interface Erc1155UriJson {
 	decimals?: number;
 	description?: string;
 	image?: string;
-	properties?: Record<string, NestedUriJsonPropertyMap>;
+	properties?: Record<string, NestedUriJsonValue>;
 }
 
-type NestedUriJsonValue =
-	| string
-	| number
-	| boolean
-	| NestedUriJsonValue[]
-	| NestedUriJsonPropertyMap;
+type UriJsonPrimitive = string | number | boolean;
+
+type NestedUriJsonValue = UriJsonPrimitive | UriJsonPrimitive[] | NestedUriJsonPropertyMap;
 
 interface NestedUriJsonPropertyMap {
 	[key: string]: NestedUriJsonValue;
