@@ -202,7 +202,7 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 
 		const result = await withdrawICPSwapAfterFailedSwap(baseParams);
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(1);
+		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
 		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS);
 	});
 
@@ -262,7 +262,7 @@ describe('performManualWithdraw', () => {
 
 		const result = await performManualWithdraw(baseParams);
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(1);
+		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
@@ -284,7 +284,7 @@ describe('performManualWithdraw', () => {
 			setFailedProgressStep
 		});
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(1);
+		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			metadata: {
