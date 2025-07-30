@@ -1,4 +1,3 @@
-import BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	CKBTC_LEDGER_CANISTER_IDS,
@@ -30,13 +29,8 @@ describe('mapListeners', () => {
 		expect(mapListeners(tokens)).toEqual([]);
 	});
 
-	it('should map a Bitcoin token to `BitcoinListener`', () => {
-		const tokens: OptionToken[] = [null, undefined, BTC_MAINNET_TOKEN];
-
-		expect(mapListeners(tokens)).toEqual([{ token: BTC_MAINNET_TOKEN, listener: BitcoinListener }]);
-	});
-
 	it.each([
+		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		SEPOLIA_TOKEN,
 		BASE_ETH_TOKEN,
@@ -66,7 +60,7 @@ describe('mapListeners', () => {
 			BNB_TESTNET_TOKEN
 		];
 
-		expect(mapListeners(tokens)).toEqual([{ token: BTC_MAINNET_TOKEN, listener: BitcoinListener }]);
+		expect(mapListeners(tokens)).toEqual([]);
 	});
 
 	const mockCkBtcToken = {
@@ -108,8 +102,7 @@ describe('mapListeners', () => {
 		expect(mapListeners(tokens)).toEqual([
 			{ token: mockCkBtcToken, listener: IcTransactionsCkBTCListeners },
 			{ token: mockCkEthToken, listener: IcTransactionsCkEthereumListeners },
-			{ token: mockCkUSDCToken, listener: IcTransactionsCkEthereumListeners },
-			{ token: BTC_MAINNET_TOKEN, listener: BitcoinListener }
+			{ token: mockCkUSDCToken, listener: IcTransactionsCkEthereumListeners }
 		]);
 	});
 });
