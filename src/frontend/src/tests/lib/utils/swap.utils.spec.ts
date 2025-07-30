@@ -15,7 +15,7 @@ import {
 	VELORA_SWAP_PROVIDER
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
-import { VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
+import { SwapErrorCodes, VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
@@ -455,7 +455,7 @@ describe('swap utils', () => {
 
 	describe('isSwapError', () => {
 		it('should return true if error is instance of SwapError', () => {
-			const error = new SwapError('deposit_error', 'Deposit failed');
+			const error = new SwapError(SwapErrorCodes.DEPOSIT_FAILED, 'Deposit failed');
 
 			expect(isSwapError(error)).toBeTruthy();
 		});
