@@ -45,6 +45,7 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import type { ValidateTokenData } from '$icp/services/ic-add-custom-tokens.service';
 
 	let {
 		initialSearch,
@@ -98,6 +99,7 @@
 
 		await saveIcrc([
 			{
+				...icrcMetadata,
 				enabled: true,
 				networkKey: 'Icrc',
 				ledgerCanisterId,
@@ -228,6 +230,7 @@
 
 	let ledgerCanisterId: string | undefined = $state();
 	let indexCanisterId: string | undefined = $state();
+	let icrcMetadata: ValidateTokenData | undefined = $state();
 
 	let ethContractAddress: string | undefined = $state();
 	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
@@ -260,6 +263,7 @@
 				on:icSave={addIcrcToken}
 				{ledgerCanisterId}
 				{indexCanisterId}
+				bind:metadata={icrcMetadata}
 			/>
 		{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
 			<EthAddTokenReview

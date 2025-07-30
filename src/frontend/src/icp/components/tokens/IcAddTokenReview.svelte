@@ -7,6 +7,7 @@
 		loadAndAssertAddCustomToken,
 		type ValidateTokenData
 	} from '$icp/services/ic-add-custom-tokens.service';
+	import type { IcTokenWithoutId } from '$icp/types/ic-token';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -23,14 +24,13 @@
 
 	export let ledgerCanisterId: string | undefined;
 	export let indexCanisterId: string | undefined;
+	export let metadata: ValidateTokenData | undefined;
 
 	let invalid = true;
-	$: invalid = isNullish(token);
+	$: invalid = isNullish(metadata);
 
 	const dispatch = createEventDispatcher();
 	const back = () => dispatch('icBack');
-
-	let token: ValidateTokenData | undefined;
 
 	onMount(async () => {
 		const { result, data } = await loadAndAssertAddCustomToken({
@@ -45,24 +45,24 @@
 			return;
 		}
 
-		token = data;
+		metadata = data;
 	});
 </script>
 
 <ContentWithToolbar>
 	<div class="mb-4 rounded-lg bg-brand-subtle-20 p-4">
-		{#if isNullish(token)}
+		{#if isNullish(metadata)}
 			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
 		{:else}
 			<div in:blur>
 				<Card noMargin>
-					{token.token.name}
+					{metadata.token.name}
 
 					{#snippet icon()}
-						{#if nonNullish(token)}
+						{#if nonNullish(metadata)}
 							<Logo
-								src={token.token.icon}
-								alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
+								src={metadata.token.icon}
+								alt={replacePlaceholders($i18n.core.alt.logo, { $name: metadata.token.name })}
 								size="lg"
 								color="white"
 							/>
@@ -70,9 +70,9 @@
 					{/snippet}
 
 					{#snippet description()}
-						{#if nonNullish(token)}
+						{#if nonNullish(metadata)}
 							<span class="break-all">
-								{token.token.symbol}
+								{metadata.token.symbol}
 							</span>
 						{/if}
 					{/snippet}
@@ -81,12 +81,12 @@
 		{/if}
 	</div>
 
-	{#if nonNullish(token)}
+	{#if nonNullish(metadata)}
 		{@const {
 			network: safeNetwork,
 			ledgerCanisterId: safeLedgerCanisterId,
 			indexCanisterId: safeIndexCanisterId
-		} = token.token}
+		} = metadata.token}
 		<div in:fade>
 			<Value ref="network" element="div">
 				{#snippet label()}
@@ -121,7 +121,7 @@
 
 	{#snippet toolbar()}
 		<div in:fade>
-			{#if nonNullish(token)}
+			{#if nonNullish(metadata)}
 				<ButtonGroup>
 					<ButtonBack onclick={back} />
 					<Button disabled={invalid} onclick={() => dispatch('icSave')}>
