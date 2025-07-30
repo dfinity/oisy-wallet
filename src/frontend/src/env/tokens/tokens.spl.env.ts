@@ -22,6 +22,7 @@ import { NFLXX_TOKEN } from '$env/tokens/tokens-spl/tokens.nflxx.env';
 import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
+import { PEPX_TOKEN } from '$env/tokens/tokens-spl/tokens.pepx.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
@@ -29,8 +30,10 @@ import { SPX_TOKEN } from '$env/tokens/tokens-spl/tokens.spx.env';
 import { SPYX_TOKEN } from '$env/tokens/tokens-spl/tokens.spyx.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { TSLAX_TOKEN } from '$env/tokens/tokens-spl/tokens.tslax.env';
+import { UNHX_TOKEN } from '$env/tokens/tokens-spl/tokens.unhx.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
+import { VTIX_TOKEN } from '$env/tokens/tokens-spl/tokens.vtix.env';
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import type { RequiredSplToken } from '$sol/types/spl';
@@ -62,6 +65,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	NVDAX_TOKEN,
 	ORCA_TOKEN,
 	PENGU_TOKEN,
+	PEPX_TOKEN,
 	POPCAT_TOKEN,
 	QQQX_TOKEN,
 	RAY_TOKEN,
@@ -69,8 +73,10 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	SPYX_TOKEN,
 	TRUMP_TOKEN,
 	TSLAX_TOKEN,
+	UNHX_TOKEN,
 	USDC_TOKEN,
 	USDT_TOKEN,
+	VTIX_TOKEN,
 	WSOL_TOKEN
 ];
 
