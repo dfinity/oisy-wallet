@@ -134,14 +134,6 @@
 			enabled: true
 		};
 
-		if (ethMetadata.decimals > 0) {
-			await saveErc20Deprecated([newToken]);
-
-			await saveErc20([newToken]);
-
-			return;
-		}
-
 		const isErc1155 = await isInterfaceErc1155({
 			address: ethContractAddress,
 			networkId: network.id
@@ -149,6 +141,14 @@
 
 		if (isErc1155) {
 			await saveErc1155([newToken]);
+
+			return;
+		}
+
+		if (ethMetadata.decimals > 0) {
+			await saveErc20Deprecated([newToken]);
+
+			await saveErc20([newToken]);
 
 			return;
 		}
