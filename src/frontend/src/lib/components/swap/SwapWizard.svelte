@@ -69,6 +69,16 @@
 		swapFailedProgressSteps = [];
 	};
 
+	const setFailedProgressStep = (step: ProgressStepsSwap) => {
+		if (!swapFailedProgressSteps.includes(step)) {
+			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
+		}
+	};
+
+	const clearFailedProgressStep = () => {
+		swapFailedProgressSteps = [];
+	};
+
 	const dispatch = createEventDispatcher();
 
 	let sourceTokenFee = $derived<bigint | undefined>(
