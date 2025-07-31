@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
@@ -17,7 +18,6 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
-	import { Html } from '@dfinity/gix-components';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
