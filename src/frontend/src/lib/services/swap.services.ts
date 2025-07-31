@@ -179,13 +179,16 @@ export const fetchSwapAmounts = async ({
 export const fetchIcpSwap = async ({
 	identity,
 	progress,
+	setFailedProgressStep,
 	sourceToken,
 	destinationToken,
 	swapAmount,
 	receiveAmount,
 	slippageValue,
 	sourceTokenFee,
-	isSourceTokenIcrc2
+	isSourceTokenIcrc2,
+	tryToWithdraw = false,
+	withdrawDestinationTokens = false
 }: SwapParams): Promise<void> => {
 	progress(ProgressStepsSwap.SWAP);
 
@@ -228,6 +231,33 @@ export const fetchIcpSwap = async ({
 		ledgerCanisterId: sourceLedgerCanisterId
 	};
 
+	// TODO: Revisit this logic once `tryToWithdraw` and `withdrawDestinationTokens` are provided.
+	// Let's keep it like this for now and adjust it later.
+	if (tryToWithdraw) {
+		if (!withdrawDestinationTokens) {
+			setFailedProgressStep?.(ProgressStepsSwap.SWAP);
+		}
+
+		progress(ProgressStepsSwap.WITHDRAW);
+
+		const { code, message, variant } = await performManualWithdraw({
+			withdrawDestinationTokens,
+			setFailedProgressStep,
+			identity,
+			canisterId: poolCanisterId,
+			tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
+			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
+			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
+			token: withdrawDestinationTokens ? destinationToken : sourceToken
+		});
+
+		throwSwapError({
+			code,
+			message,
+			variant
+		});
+	}
+
 	try {
 		if (!isSourceTokenIcrc2) {
 			await sendIcrc(transferParams);
@@ -259,6 +289,7 @@ export const fetchIcpSwap = async ({
 		}
 	} catch (err: unknown) {
 		console.error(err);
+
 		throwSwapError({
 			code: SwapErrorCodes.DEPOSIT_FAILED,
 			message: get(i18n).swap.error.deposit_error
