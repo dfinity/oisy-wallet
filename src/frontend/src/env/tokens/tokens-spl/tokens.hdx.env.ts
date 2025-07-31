@@ -21,5 +21,6 @@ export const HDX_TOKEN: RequiredSplToken = {
 	decimals: HDX_DECIMALS,
 	icon: hdx,
 	address: 'XszjVtyhowGjSC5odCqBpW1CtXXwXjYokymrk7fGKD3',
-	owner: TOKEN_2022_PROGRAM_ADDRESS
-};
+	owner: TOKEN_2022_PROGRAM_ADDRESS,
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
