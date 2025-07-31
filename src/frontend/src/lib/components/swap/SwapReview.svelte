@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
@@ -18,6 +17,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
+	import { Html } from '@dfinity/gix-components';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -37,16 +37,6 @@
 		failedSwapError.set(undefined);
 		dispatch('icBack');
 	};
-
-	const onClose = () => {
-		failedSwapError.set(undefined);
-		dispatch('icClose');
-	};
-
-	let isManualWithdrawSuccess: boolean;
-	$: isManualWithdrawSuccess =
-		$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS &&
-		$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success;
 </script>
 
 <ContentWithToolbar>
@@ -119,19 +109,11 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			{#if !isManualWithdrawSuccess}
-				<ButtonBack onclick={onClick} />
-			{/if}
+			<ButtonBack onclick={onClick} />
 
-			{#if isManualWithdrawSuccess}
-				<Button onclick={onClose}>{$i18n.core.text.close}</Button>
-			{:else}
-				<Button onclick={() => dispatch('icSwap')}>
-					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
-						? $i18n.transaction.type.withdraw
-						: $i18n.swap.text.swap_button}
-				</Button>
-			{/if}
+			<Button onclick={() => dispatch('icSwap')}>
+				{$i18n.swap.text.swap_button}
+			</Button>
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
