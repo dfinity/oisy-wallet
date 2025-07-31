@@ -23,7 +23,7 @@ const BASE_PROPS = {
 	receiveAmount: 2,
 	slippageValue: '0.5',
 	swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-	swapFailedProgressSteps: [],
+	swapFailedProgressSteps: []
 };
 
 describe('SwapWizard', () => {
