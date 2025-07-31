@@ -24,3 +24,4 @@ export const HDX_TOKEN: RequiredSplToken = {
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
 	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
+};
