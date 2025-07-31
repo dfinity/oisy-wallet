@@ -837,6 +837,8 @@
 			"withdraw_failed_second_part": "um sie manuell zurückzuholen von ",
 			"swap_failed_instruction_link": "diesen Anweisungen ",
 			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
