@@ -248,7 +248,7 @@ export const fetchIcpSwap = async ({
 
 		progress(ProgressStepsSwap.WITHDRAW);
 
-		const { code, message, variant } = await performManualWithdraw({
+		const { code, message, variant, swapSucceded } = await performManualWithdraw({
 			withdrawDestinationTokens,
 			setFailedProgressStep,
 			identity,
@@ -263,7 +263,8 @@ export const fetchIcpSwap = async ({
 		throwSwapError({
 			code,
 			message,
-			variant
+			variant,
+			swapSucceded
 		});
 	}
 
@@ -384,7 +385,8 @@ export const fetchIcpSwap = async ({
 
 			throwSwapError({
 				code: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED,
-				variant: 'error'
+				variant: 'error',
+				swapSucceded: false
 			});
 		}
 	}
@@ -517,7 +519,8 @@ export const performManualWithdraw = async ({
 
 		return {
 			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
-			variant: 'error'
+			variant: 'error',
+			swapSucceded: withdrawDestinationTokens ? true : false
 		};
 	}
 };
