@@ -101,7 +101,15 @@
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
-				isSourceTokenIcrc2: $isSourceTokenIcrc2
+				isSourceTokenIcrc2: $isSourceTokenIcrc2,
+				tryToWithdraw:
+					nonNullish($failedSwapError?.errorType) &&
+					($failedSwapError?.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED ||
+						$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
+						$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED),
+				withdrawDestinationTokens:
+					nonNullish($failedSwapError?.errorType) &&
+					$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED
 			});
 
 			progress(ProgressStepsSwap.DONE);
@@ -115,7 +123,7 @@
 				}
 			});
 
-			setTimeout(() => close(), 750);
+			setTimeout(() => close(), 2500);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
 			// TODO: Add unit tests to cover failed swap error scenarios
@@ -132,26 +140,15 @@
 			}
 
 			if (isSwapError(err)) {
-				if (err.code === SwapErrorCodes.WITHDRAW_FAILED) {
-					failedSwapError.set({
-						message: $i18n.swap.error.withdraw_failed,
-						variant: 'error',
-						url: {
-							url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
-							text: 'icpswap.com'
-						}
-					});
-				} else {
-					if (
-						err.code === SwapErrorCodes.DEPOSIT_FAILED ||
-						err.code === SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS
-					) {
-						failedSwapError.set({
-							message: $i18n.swap.error[err.code],
-							variant: 'info'
-						});
+				failedSwapError.set({
+					message: err.message,
+					variant: err.variant ?? 'info',
+					errorType: err.code,
+					url: {
+						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+						text: 'icpswap.com'
 					}
-				}
+				});
 			} else {
 				failedSwapError.set(undefined);
 				toastsError({
@@ -160,17 +157,25 @@
 				});
 			}
 
-			trackEvent({
-				name: TRACK_COUNT_SWAP_ERROR,
-				metadata: {
-					sourceToken: $sourceToken.symbol,
-					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider,
-					errorKey: isSwapError(err) ? err.code : ''
-				}
-			});
+			if (
+				!(
+					isSwapError(err) &&
+					(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
+						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
+				)
+			) {
+				trackEvent({
+					name: TRACK_COUNT_SWAP_ERROR,
+					metadata: {
+						sourceToken: $sourceToken.symbol,
+						destinationToken: $destinationToken.symbol,
+						dApp: $swapAmountsStore.selectedProvider.provider,
+						errorKey: isSwapError(err) ? err.code : ''
+					}
+				});
+			}
 
-			back();
+			setTimeout(() => back(), 2000);
 		}
 	};
 
