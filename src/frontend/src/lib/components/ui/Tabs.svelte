@@ -32,12 +32,12 @@
 			class:hover:text-brand-primary={tabVariant === 'default'}
 			class:ml-4={index !== 0}
 			class:p-2={tabVariant === 'default'}
+			class:text-brand-primary={activeTab === id && tabVariant === 'default'}
+			class:text-tertiary={activeTab !== id && tabVariant === 'menu'}
+			class:text-tertiary-inverted={activeTab !== id && tabVariant === 'default'}
+			class:w-full={tabVariant === 'default'}
 			aria-label={label}
 			onclick={() => (activeTab = id)}
-			class:w-full={tabVariant === 'default'}
-			class:text-tertiary-inverted={activeTab !== id && tabVariant === 'default'}
-			class:text-tertiary={activeTab !== id && tabVariant === 'menu'}
-			class:text-brand-primary={activeTab === id && tabVariant === 'default'}
 		>
 			{label}
 		</button>
