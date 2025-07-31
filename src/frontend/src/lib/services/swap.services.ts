@@ -473,7 +473,7 @@ export const performManualWithdraw = async ({
 		return {
 			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			variant: 'error',
-			swapSucceded: withdrawDestinationTokens ? true : false
+			swapSucceded: withdrawDestinationTokens
 		};
 	}
 };
