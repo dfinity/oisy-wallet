@@ -1,5 +1,6 @@
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import type { AlwaysCertifiedData } from '$lib/types/store';
+import { jsonReplacer } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 type Address = string;
@@ -41,6 +42,10 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 			address: Address;
 			pendingTransactions: Array<PendingTransaction>;
 		}) => {
+			console.warn(
+				`Init pending transactions for address ${address} in store: ${JSON.stringify(pendingTransactions, jsonReplacer, 2)}`
+			);
+
 			update((state) => ({
 				...state,
 				[address]: {
@@ -59,6 +64,7 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 			}));
 		},
 		reset: () => {
+			console.warn('Resetting BtcPendingSentTransactionsStore');
 			set({});
 		}
 	};
