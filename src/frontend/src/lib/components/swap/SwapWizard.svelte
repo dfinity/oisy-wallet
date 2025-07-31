@@ -122,7 +122,8 @@
 						$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED),
 				withdrawDestinationTokens:
 					nonNullish($failedSwapError?.errorType) &&
-					$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED
+					($failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
+						$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
 			});
 
 			progress(ProgressStepsSwap.DONE);
