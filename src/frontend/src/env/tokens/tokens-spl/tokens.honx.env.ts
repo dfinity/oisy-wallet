@@ -21,5 +21,7 @@ export const HONX_TOKEN: RequiredSplToken = {
 	decimals: HONX_DECIMALS,
 	icon: honx,
 	address: 'XsRbLZthfABAPAfumWNEJhPyiKDW6TvDVeAeW7oKqA2',
-	owner: TOKEN_2022_PROGRAM_ADDRESS
+	owner: TOKEN_2022_PROGRAM_ADDRESS,
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };
