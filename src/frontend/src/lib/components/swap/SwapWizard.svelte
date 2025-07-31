@@ -48,7 +48,6 @@
 		slippageValue = $bindable<OptionAmount>(),
 		swapProgressStep = $bindable<string>(),
 		swapFailedProgressSteps = $bindable<string[]>(),
-
 		currentStep
 	}: Props = $props();
 
@@ -226,6 +225,7 @@
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				bind:swapProgressStep
+				bind:failedSteps={swapFailedProgressSteps}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}
 			/>
