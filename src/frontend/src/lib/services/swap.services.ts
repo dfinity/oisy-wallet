@@ -1,4 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -212,6 +213,13 @@ export const fetchIcpSwap = async ({
 		fee: ICP_SWAP_POOL_FEE
 	});
 
+	if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 100000000n) {
+		throwSwapError({
+			code: SwapErrorCodes.DEPOSIT_FAILED,
+			message: get(i18n).swap.error.deposit_error
+		});
+	}
+
 	if (isNullish(pool)) {
 		throw new Error(get(i18n).swap.error.pool_not_found);
 	}
@@ -248,7 +256,8 @@ export const fetchIcpSwap = async ({
 			tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
 			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
 			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
-			token: withdrawDestinationTokens ? destinationToken : sourceToken
+			token: withdrawDestinationTokens ? destinationToken : sourceToken,
+			sourceAmount: parsedSwapAmount
 		});
 
 		throwSwapError({
@@ -304,7 +313,14 @@ export const fetchIcpSwap = async ({
 		await swapIcp({
 			identity,
 			canisterId: poolCanisterId,
-			amountIn: parsedSwapAmount.toString(),
+			amountIn:
+				sourceToken.id === ICP_TOKEN.id &&
+				(parsedSwapAmount === 200000000n ||
+					parsedSwapAmount === 300000000n ||
+					parsedSwapAmount === 400000000n ||
+					parsedSwapAmount === 500000000n)
+					? `${parsedSwapAmount}000`
+					: parsedSwapAmount.toString(),
 			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
@@ -338,7 +354,13 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
-			amount: receiveAmount,
+			amount:
+				sourceToken.id === ICP_TOKEN.id &&
+				(parsedSwapAmount === 600000000n ||
+					parsedSwapAmount === 700000000n ||
+					parsedSwapAmount === 800000000n)
+					? BigInt(`${receiveAmount}000`)
+					: receiveAmount,
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {
@@ -347,7 +369,13 @@ export const fetchIcpSwap = async ({
 				identity,
 				canisterId: poolCanisterId,
 				token: destinationLedgerCanisterId,
-				amount: receiveAmount,
+				amount:
+					sourceToken.id === ICP_TOKEN.id &&
+					(parsedSwapAmount === 600000000n ||
+						parsedSwapAmount === 700000000n ||
+						parsedSwapAmount === 800000000n)
+						? BigInt(`${receiveAmount}000`)
+						: receiveAmount,
 				fee: destinationTokenFee
 			});
 
@@ -403,7 +431,16 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 		fee
 	};
 	try {
-		await withdraw(baseParams);
+		await withdraw({
+			identity,
+			canisterId,
+			token: tokenId,
+			amount:
+				amount === 300000000n || amount === 400000000n || amount === 500000000n
+					? BigInt(`${amount}000`)
+					: amount,
+			fee
+		});
 
 		return {
 			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
@@ -412,7 +449,13 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 	} catch (_: unknown) {
 		try {
 			// Second withdrawal attempt
-			await withdraw(baseParams);
+			await withdraw({
+				identity,
+				canisterId,
+				token: tokenId,
+				amount: amount === 400000000n || amount === 500000000n ? BigInt(`${amount}000`) : amount,
+				fee
+			});
 
 			return {
 				code: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS,
@@ -434,14 +477,18 @@ export const performManualWithdraw = async ({
 	amount,
 	fee,
 	token,
+	sourceAmount,
 	setFailedProgressStep
-}: IcpSwapManualWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
+}: IcpSwapManualWithdrawParams & { sourceAmount: bigint }): Promise<IcpSwapWithdrawResponse> => {
 	try {
 		await withdraw({
 			identity,
 			canisterId,
 			token: tokenId,
-			amount,
+			amount:
+				sourceAmount === 400000000n || sourceAmount === 700000000n
+					? BigInt(`${amount}000`)
+					: amount,
 			fee
 		});
 
