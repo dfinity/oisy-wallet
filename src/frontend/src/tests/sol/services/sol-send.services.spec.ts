@@ -4,6 +4,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
 import type { SolAddress } from '$lib/types/address';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
@@ -170,7 +171,7 @@ describe('sol-send.services', () => {
 							? mockAtaAddress
 							: owner === mockSolAddress2
 								? mockAtaAddress2
-								: ''
+								: parseSolAddress('')
 					)
 				);
 			spyCreateAtaInstruction = vi

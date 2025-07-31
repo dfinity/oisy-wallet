@@ -3,6 +3,7 @@ import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import * as solanaApi from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { getSolSignatures, getSolTransactions } from '$sol/services/sol-signatures.services';
@@ -81,7 +82,7 @@ describe('sol-signatures.services', () => {
 
 			spyFindAssociatedTokenPda = vi.spyOn(solProgramToken, 'findAssociatedTokenPda');
 			spyFindAssociatedTokenPda.mockImplementation(({ mint }: { mint: Address }) => [
-				mockAtaAddresses[mint.toString()]
+				mockAtaAddresses[parseSolAddress(mint.toString())]
 			]);
 		});
 

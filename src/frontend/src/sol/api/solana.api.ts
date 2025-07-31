@@ -1,4 +1,5 @@
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -161,7 +162,7 @@ export const loadTokenAccount = async ({
 
 	const [{ pubkey: accountAddress }] = response.value;
 
-	return accountAddress;
+	return nonNullish(accountAddress) ? parseSolAddress(accountAddress) : undefined;
 };
 
 /**
@@ -244,7 +245,9 @@ export const getTokenInfo = async ({
 }> => {
 	const { value } = await getAccountInfo({ address, network });
 
-	const { owner, data } = value ?? {};
+	const { owner: unparsedOwner, data } = value ?? {};
+
+	const owner = nonNullish(unparsedOwner) ? parseSolAddress(unparsedOwner) : undefined;
 
 	if (isNullish(data) || !('parsed' in data)) {
 		return { owner, decimals: 0 };

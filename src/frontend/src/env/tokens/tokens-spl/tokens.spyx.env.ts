@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import spyx from '$sol/assets/spyx.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,8 +21,8 @@ export const SPYX_TOKEN: RequiredSplToken = {
 	symbol: SPYX_SYMBOL,
 	decimals: SPYX_DECIMALS,
 	icon: spyx,
-	address: 'XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W',
+	address: parseSolAddress('XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W'),
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
-	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
-	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
+	mintAuthority: parseSolAddress('JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'),
+	freezeAuthority: parseSolAddress('JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs')
 };

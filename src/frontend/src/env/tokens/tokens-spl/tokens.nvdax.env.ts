@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import nvdax from '$sol/assets/nvdax.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,8 +21,8 @@ export const NVDAX_TOKEN: RequiredSplToken = {
 	symbol: NVDAX_SYMBOL,
 	decimals: NVDAX_DECIMALS,
 	icon: nvdax,
-	address: 'Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh',
+	address: parseSolAddress('Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh'),
 	owner: TOKEN_2022_PROGRAM_ADDRESS,
-	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
-	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
+	mintAuthority: parseSolAddress('JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'),
+	freezeAuthority: parseSolAddress('JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs')
 };

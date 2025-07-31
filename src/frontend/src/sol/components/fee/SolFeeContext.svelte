@@ -3,6 +3,7 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 	import {
 		checkIfAccountExists,
 		estimatePriorityFee,
@@ -65,7 +66,7 @@
 
 		const solNetwork = safeMapNetworkIdToNetwork($sendTokenNetworkId);
 
-		// we check if it is an ATA address and if it is not closed, if it isnt an ATA address or has been closed we need to charge the ATA fee
+		// We check if it is an ATA address and if it is not closed, if it isn't an ATA address or has been closed, we need to charge the ATA fee
 		if (
 			(await isAtaAddress({ address: destination, network: solNetwork })) &&
 			(await checkIfAccountExists({ address: destination, network: solNetwork }))
@@ -75,7 +76,7 @@
 		}
 
 		const tokenAccount = await loadTokenAccount({
-			address: destination,
+			address: parseSolAddress(destination),
 			network: solNetwork,
 			tokenAddress: $sendToken.address
 		});

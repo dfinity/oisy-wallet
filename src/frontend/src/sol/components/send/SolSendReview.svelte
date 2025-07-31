@@ -10,6 +10,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';

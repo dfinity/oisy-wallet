@@ -3,6 +3,7 @@ import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
@@ -153,7 +154,7 @@ const createSplTokenTransactionMessage = async ({
 
 	// To be sure which token account is used, we calculate the associated token account address
 	const sourceTokenAccountAddress: SolAddress = await calculateAssociatedTokenAddress({
-		owner: source,
+		owner: parseSolAddress(source),
 		tokenAddress,
 		tokenOwnerAddress
 	});

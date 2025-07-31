@@ -9,8 +9,10 @@ import type * as z from 'zod/v4';
 
 export type Address = z.infer<typeof AddressSchema>;
 
+// TODO: create own brand for BTC address
 export type BtcAddress = z.infer<typeof BtcAddressSchema>;
 
+// TODO: create own brand for ETH address
 export type EthAddress = z.infer<typeof EthAddressSchema>;
 
 export type SolAddress = z.infer<typeof SolAddressSchema>;

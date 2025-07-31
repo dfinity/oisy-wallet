@@ -6,6 +6,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import SolSendAmount from '$sol/components/send/SolSendAmount.svelte';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';

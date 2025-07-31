@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import dfdvx from '$sol/assets/dfdvx.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,6 +21,6 @@ export const DFDVX_TOKEN: RequiredSplToken = {
 	symbol: DFDVX_SYMBOL,
 	decimals: DFDVX_DECIMALS,
 	icon: dfdvx,
-	address: 'Xs2yquAgsHByNzx68WJC55WHjHBvG9JsMB7CWjTLyPy',
+	address: parseSolAddress('Xs2yquAgsHByNzx68WJC55WHjHBvG9JsMB7CWjTLyPy'),
 	owner: TOKEN_2022_PROGRAM_ADDRESS
 };

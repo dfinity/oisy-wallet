@@ -4,6 +4,7 @@ import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
 import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import {
 	checkIfAccountExists,
 	estimatePriorityFee,
@@ -175,7 +176,7 @@ describe('solana.api', () => {
 		it('should throw error when address is empty', async () => {
 			await expect(
 				loadSolLamportsBalance({
-					address: '',
+					address: parseSolAddress(''),
 					network: SolanaNetworks.mainnet
 				})
 			).rejects.toThrow();
@@ -246,7 +247,7 @@ describe('solana.api', () => {
 		it('should throw error when address is empty', async () => {
 			await expect(
 				loadTokenBalance({
-					ataAddress: '',
+					ataAddress: parseSolAddress(''),
 					network: SolanaNetworks.mainnet
 				})
 			).rejects.toThrow();
@@ -416,7 +417,7 @@ describe('solana.api', () => {
 		it('should throw an error when address is empty', async () => {
 			await expect(
 				loadTokenAccount({
-					address: '',
+					address: parseSolAddress(''),
 					network: SolanaNetworks.mainnet,
 					tokenAddress: DEVNET_EURC_TOKEN.address
 				})
@@ -428,7 +429,7 @@ describe('solana.api', () => {
 				loadTokenAccount({
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet,
-					tokenAddress: ''
+					tokenAddress: parseSolAddress('')
 				})
 			).rejects.toThrow();
 		});

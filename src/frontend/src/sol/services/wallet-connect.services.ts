@@ -19,6 +19,7 @@ import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import {
@@ -154,7 +155,7 @@ export const sign = ({
 					.map((signer) =>
 						createSigner({
 							identity,
-							address: signer,
+							address: parseSolAddress(signer),
 							network: solNetwork
 						})
 					);

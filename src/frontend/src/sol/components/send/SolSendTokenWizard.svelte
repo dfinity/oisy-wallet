@@ -41,6 +41,7 @@
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { parseSolAddress } from '$lib/validation/address.validation';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
@@ -162,7 +163,7 @@
 					unitName: $sendTokenDecimals
 				}),
 				prioritizationFee: $prioritizationFeeStore ?? ZERO,
-				destination,
+				destination: parseSolAddress(destination),
 				source
 			});
 
