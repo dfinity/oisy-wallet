@@ -465,7 +465,6 @@
 		"error": {
 			"no_alchemy_config": "没有 $network 网络的 Alchemy 配置",
 			"no_alchemy_provider": "没有 $network 网络的 Alchemy 提供商",
-			"no_alchemy_erc20_provider": "没有 $network 网络的 Alchemy ERC20 提供商",
 			"no_etherscan_provider": "没有 $network 网络的 Etherscan 提供商",
 			"no_infura_provider": "没有 $network 网络的 Infura 提供商",
 			"no_infura_cketh_provider": "没有 $network 网络的 Infura CkETH 提供商",
@@ -493,9 +492,10 @@
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
+			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
+			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
 			"erc20_user_tokens": "加载 ERC20 用户代币时出错。",
 			"spl_custom_tokens": "加载 SPL 用户代币时出错。",
-			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc20_user_token": "启用 ERC20 双生代币时出错。",
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
@@ -821,7 +821,8 @@
 			"open_icp_swap": "打开 ICP Swap 网站",
 			"open_instructions_link": "",
 			"select_token": "选择代币",
-			"select_network_filter": "选择网络"
+			"select_network_filter": "选择网络",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -834,7 +835,9 @@
 			"swap_failed_withdraw_success": "",
 			"withdraw_failed_first_part": "",
 			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": ""
+			"swap_failed_instruction_link": "",
+			"manually_withdraw_success": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {

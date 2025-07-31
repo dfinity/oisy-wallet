@@ -2,6 +2,9 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { Erc1155Token, RequiredErc1155Token } from '$eth/types/erc1155';
+import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { NetworkEnvironment } from '$lib/types/network';
+import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -48,3 +51,37 @@ export const mockValidErc1155Token: Erc1155Token = {
 	standard: 'erc1155',
 	address: mockEthAddress
 };
+
+export const createMockErc1155Tokens = ({
+	n,
+	networkEnv,
+	start = 0
+}: {
+	n: number;
+	networkEnv: NetworkEnvironment;
+	start?: number;
+}): Erc1155Token[] =>
+	Array.from({ length: n }, (_, i) => ({
+		id: parseTokenId(`Erc1155Token${start + i + 1}-${networkEnv}`),
+		symbol: `ERC1155-${start + i + 1}-${networkEnv}`,
+		name: `Erc1155Token${start + i + 1} ${networkEnv}`,
+		network: ETHEREUM_NETWORK,
+		standard: 'erc1155',
+		category: 'custom',
+		decimals: 0,
+		address: `0x${start + i + 1}-${networkEnv}`
+	}));
+
+export const createMockErc1155CustomTokens = ({
+	n,
+	networkEnv,
+	start = 0
+}: {
+	n: number;
+	networkEnv: NetworkEnvironment;
+	start?: number;
+}): CertifiedData<Erc1155CustomToken>[] =>
+	createMockErc1155Tokens({ n, networkEnv, start }).map((token) => ({
+		data: { ...token, enabled: true },
+		certified: false
+	}));

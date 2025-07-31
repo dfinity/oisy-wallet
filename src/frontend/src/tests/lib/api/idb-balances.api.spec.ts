@@ -10,18 +10,6 @@ import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	delMany: vi.fn(),
-	keys: vi.fn(),
-	update: vi.fn()
-}));
-
 vi.mock('$lib/utils/idb.utils', () => ({
 	delMultiKeysByPrincipal: vi.fn()
 }));

@@ -465,7 +465,6 @@
 		"error": {
 			"no_alchemy_config": "Žádná konfigurace Alchemy pro síť $network",
 			"no_alchemy_provider": "Žádný poskytovatel Alchemy pro síť $network",
-			"no_alchemy_erc20_provider": "Žádný poskytovatel Alchemy ERC20 pro síť $network",
 			"no_etherscan_provider": "Žádný poskytovatel Etherscan pro síť $network",
 			"no_infura_provider": "Žádný poskytovatel Infura pro síť $network",
 			"no_infura_cketh_provider": "Žádný poskytovatel Infura CkETH pro síť $network",
@@ -493,9 +492,10 @@
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
+			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
+			"erc1155_custom_tokens": "Chyba při načítání vlastních tokenů ERC1155.",
 			"erc20_user_tokens": "Chyba při načítání uživatelských tokenů ERC20.",
 			"spl_custom_tokens": "Chyba při načítání vlastních tokenů SPL.",
-			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
 			"erc20_user_token": "Chyba při povolování dvojitého tokenu ERC20.",
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
@@ -821,7 +821,8 @@
 			"open_icp_swap": "Otevřít webové stránky ICP Swap",
 			"open_instructions_link": "",
 			"select_token": "",
-			"select_network_filter": ""
+			"select_network_filter": "",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
@@ -834,7 +835,9 @@
 			"swap_failed_withdraw_success": "",
 			"withdraw_failed_first_part": "",
 			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": ""
+			"swap_failed_instruction_link": "",
+			"manually_withdraw_success": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {

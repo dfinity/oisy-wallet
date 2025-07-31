@@ -465,7 +465,6 @@
 		"error": {
 			"no_alchemy_config": "Không có cấu hình Alchemy cho mạng $network",
 			"no_alchemy_provider": "Không có nhà cung cấp Alchemy cho mạng $network",
-			"no_alchemy_erc20_provider": "Không có nhà cung cấp Alchemy ERC20 cho mạng $network",
 			"no_etherscan_provider": "Không có nhà cung cấp Etherscan cho mạng $network",
 			"no_infura_provider": "Không có nhà cung cấp Infura cho mạng $network",
 			"no_infura_cketh_provider": "Không có nhà cung cấp Infura CkETH cho mạng $network",
@@ -493,9 +492,10 @@
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
 			"erc20_custom_tokens": "",
+			"erc721_custom_tokens": "",
+			"erc1155_custom_tokens": "",
 			"erc20_user_tokens": "Lỗi khi tải các token người dùng ERC20.",
 			"spl_custom_tokens": "",
-			"erc721_custom_tokens": "",
 			"erc20_user_token": "Lỗi khi bật token đôi ERC20.",
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
@@ -821,7 +821,8 @@
 			"open_icp_swap": "Mở trang web ICP Swap",
 			"open_instructions_link": "",
 			"select_token": "",
-			"select_network_filter": ""
+			"select_network_filter": "",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
@@ -834,7 +835,9 @@
 			"swap_failed_withdraw_success": "",
 			"withdraw_failed_first_part": "",
 			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": ""
+			"swap_failed_instruction_link": "",
+			"manually_withdraw_success": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {

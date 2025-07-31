@@ -465,7 +465,6 @@
 		"error": {
 			"no_alchemy_config": "Nessuna configurazione Alchemy per la rete $network",
 			"no_alchemy_provider": "Nessun provider Alchemy per la rete $network",
-			"no_alchemy_erc20_provider": "Nessun provider Alchemy ERC20 per la rete $network",
 			"no_etherscan_provider": "Nessun provider Etherscan per la rete $network",
 			"no_infura_provider": "Nessun provider Infura per la rete $network",
 			"no_infura_cketh_provider": "Nessun provider Infura CkETH per la rete $network",
@@ -493,9 +492,10 @@
 			"transaction_price": "Errore durante il caricamento della stima del prezzo di una transazione.",
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
+			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
+			"erc1155_custom_tokens": "Errore durante il caricamento del token personalizzato ERC1155.",
 			"erc20_user_tokens": "Errore durante il caricamento dei token utente ERC20.",
 			"spl_custom_tokens": "Errore durante il caricamento del token personalizzato SPL.",
-			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
 			"erc20_user_token": "Errore durante l'abilitazione del token gemello ERC20.",
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
@@ -821,7 +821,8 @@
 			"open_icp_swap": "Apri il sito web ICP Swap",
 			"open_instructions_link": "Apri il link con le istruzioni",
 			"select_token": "Seleziona il token",
-			"select_network_filter": "Seleziona la rete"
+			"select_network_filter": "Seleziona la rete",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -834,7 +835,9 @@
 			"swap_failed_withdraw_success": "Lo swap non è andato a buon fine e i tuoi token sono stati rimborsati con successo. Riprova oppure cambia il provider dello swap.",
 			"withdraw_failed_first_part": "Lo swap non è andato a buon fine e i token inviati non possono essere ritirati automaticamente. Segui ",
 			"withdraw_failed_second_part": "per ritirarli manualmente su ",
-			"swap_failed_instruction_link": "queste istruzioni "
+			"swap_failed_instruction_link": "queste istruzioni ",
+			"manually_withdraw_success": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
