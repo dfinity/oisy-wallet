@@ -102,6 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralizzato",
 			"logout": "Logout",
+			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Accesso istantaneo e privato ovunque",
