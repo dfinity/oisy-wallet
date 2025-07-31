@@ -40,7 +40,6 @@
 		slippageValue: OptionAmount;
 		swapProgressStep: string;
 		swapFailedProgressSteps?: string[];
-
 		currentStep: WizardStep | undefined;
 	}
 	let {
