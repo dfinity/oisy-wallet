@@ -21,5 +21,7 @@ export const PGX_TOKEN: RequiredSplToken = {
 	decimals: PGX_DECIMALS,
 	icon: pgx,
 	address: 'XsYdjDjNUygZ7yGKfQaB6TxLh2gC6RRjzLtLAGJrhzV',
-	owner: TOKEN_2022_PROGRAM_ADDRESS
+	owner: TOKEN_2022_PROGRAM_ADDRESS,
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };

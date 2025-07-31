@@ -21,5 +21,7 @@ export const PEPX_TOKEN: RequiredSplToken = {
 	decimals: PEPX_DECIMALS,
 	icon: pepx,
 	address: 'Xsv99frTRUeornyvCfvhnDesQDWuvns1M852Pez91vF',
-	owner: TOKEN_2022_PROGRAM_ADDRESS
+	owner: TOKEN_2022_PROGRAM_ADDRESS,
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };
