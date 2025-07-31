@@ -29,7 +29,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { SwapErrorCodes } from '$lib/types/swap';
+	import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
@@ -210,7 +210,11 @@
 				{receiveAmount}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress bind:swapProgressStep />
+			<SwapProgress
+				bind:swapProgressStep
+				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
+					SwapProvider.ICP_SWAP}
+			/>
 		{/if}
 	</SwapAmountsContext>
 </IcTokenFeeContext>
