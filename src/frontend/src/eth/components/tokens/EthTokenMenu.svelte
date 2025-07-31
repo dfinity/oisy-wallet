@@ -11,14 +11,15 @@
 	import { pageToken, pageTokenStandard } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = nonNullish($pageToken)
-		? $pageTokenStandard === 'erc20'
-			? `${getExplorerUrl({ token: $pageToken })}/token/${($pageToken as Erc20Token).address}`
-			: notEmptyString($ethAddress)
-				? `${getExplorerUrl({ token: $pageToken })}/address/${$ethAddress}`
-				: undefined
-		: undefined;
+	let explorerUrl = $derived(
+		nonNullish($pageToken)
+			? $pageTokenStandard === 'erc20'
+				? `${getExplorerUrl({ token: $pageToken })}/token/${($pageToken as Erc20Token).address}`
+				: notEmptyString($ethAddress)
+					? `${getExplorerUrl({ token: $pageToken })}/address/${$ethAddress}`
+					: undefined
+			: undefined
+	);
 </script>
 
 <TokenMenu testId={TOKEN_MENU_ETH}>

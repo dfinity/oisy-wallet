@@ -8,11 +8,11 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = ($pageToken as OptionIcCkToken)?.explorerUrl;
+	let explorerUrl = $derived(($pageToken as OptionIcCkToken)?.explorerUrl);
 
-	let transactionsExplorerUrl: string | undefined;
-	$: transactionsExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined;
+	let transactionsExplorerUrl = $derived(
+		nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined
+	);
 </script>
 
 <TokenMenu testId={TOKEN_MENU_IC}>
