@@ -59,16 +59,6 @@
 			"__bigint__": "1000000"
 		}
 	},
-	"RUGGY": {
-		"ledgerCanisterId": "icaf7-3aaaa-aaaam-qcx3q-cai",
-		"indexCanisterId": "qiu4p-taaaa-aaaal-qsi4a-cai",
-		"decimals": 8,
-		"name": "RUGGY",
-		"symbol": "RUGGY",
-		"fee": {
-			"__bigint__": "1000000"
-		}
-	},
 	"NAK": {
 		"ledgerCanisterId": "eig2s-waaaa-aaaam-qbg5a-cai",
 		"indexCanisterId": "hmav7-uaaaa-aaaam-qdhnq-cai",
