@@ -23,7 +23,7 @@
 	export let receiveAmount: number | undefined;
 	export let slippageValue: OptionAmount;
 
-	let isManualWithdrawSuccess;
+	let isManualWithdrawSuccess: boolean;
 
 	const dispatch = createEventDispatcher();
 
