@@ -119,11 +119,6 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			{#if isManualWithdrawSuccess}
-				<Button onclick={onClose}>{$i18n.core.text.close}</Button>
-			{:else}
-				<ButtonBack onclick={onClick} />
-
 				<Button onclick={() => dispatch('icSwap')}>
 					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
 						? $i18n.transaction.type.withdraw
