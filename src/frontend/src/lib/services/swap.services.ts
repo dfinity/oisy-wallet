@@ -386,7 +386,7 @@ export const fetchIcpSwap = async ({
 			throwSwapError({
 				code: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED,
 				variant: 'error',
-				swapSucceded: false
+				swapSucceded: true
 			});
 		}
 	}
