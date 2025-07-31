@@ -12,7 +12,11 @@ import { i18n } from '$lib/stores/i18n.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
+
+vi.mock('$lib/services/auth.services', () => ({
+	signIn: vi.fn(),
+	nullishSignOut: vi.fn()
+}));
 
 describe('AuthHelpIdentityForm', () => {
 	const imageBannerSelector = `img[data-tid="${HELP_AUTH_IDENTITY_IMAGE_BANNER}"]`;

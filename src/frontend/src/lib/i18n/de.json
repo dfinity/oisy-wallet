@@ -465,12 +465,12 @@
 		"error": {
 			"no_alchemy_config": "Keine Alchemy-Konfiguration für Netzwerk $network",
 			"no_alchemy_provider": "Kein Alchemy-Anbieter für Netzwerk $network",
-			"no_alchemy_erc20_provider": "Kein Alchemy-ERC20-Anbieter für Netzwerk $network",
 			"no_etherscan_provider": "Kein Etherscan-Anbieter für Netzwerk $network",
 			"no_infura_provider": "Kein Infura-Anbieter für Netzwerk $network",
 			"no_infura_cketh_provider": "Kein Infura CkETH-Anbieter für Netzwerk $network",
 			"no_infura_erc20_provider": "Kein Infura-ERC20-Anbieter für Netzwerk $network",
 			"no_infura_erc721_provider": "Kein Infura-ERC721-Anbieter für Netzwerk $network",
+			"no_infura_erc1155_provider": "Kein Infura-ERC1155-Anbieter für Netzwerk $network",
 			"no_infura_erc20_icp_provider": "Kein Infura-ERC20-ICP-Anbieter für Netzwerk $network",
 			"no_solana_network": "Kein Solana-Netzwerk für Netzwerk $network",
 			"eth_address_unknown": "ETH-Adresse ist unbekannt.",
@@ -492,9 +492,10 @@
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
+			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
+			"erc1155_custom_tokens": "Fehler beim Laden der ERC1155-Benutzertoken.",
 			"erc20_user_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
-			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
@@ -506,14 +507,14 @@
 	"hero": {
 		"text": {
 			"available_balance": "Dein Guthaben",
-			"unavailable_balance": "$ Wert ist nicht verfügbar",
+			"unavailable_balance": "$currencySymbol Wert ist nicht verfügbar",
 			"hidden_balance": "Dein Guthaben ist ausgeblendet",
 			"top_up": "Lade dein Wallet auf, um es zu nutzen!",
 			"learn_more_about_erc20_icp": "Erfahre mehr über ERC20 ICP auf Ethereum.",
 			"tooltip_toggle_balance": "Doppelklick zum Anzeigen/Ausblenden des Guthabens"
 		},
 		"alt": {
-			"toggle_privacy_mode": ""
+			"toggle_privacy_mode": "Privatsphären Modus aktivieren oder deaktivieren"
 		}
 	},
 	"settings": {
@@ -659,7 +660,7 @@
 			"sending": "Sende...",
 			"signing": "Signiere...",
 			"signing_message": "Nachricht wird signiert...",
-			"confirming": "",
+			"confirming": "Bestätigen...",
 			"network": "Netzwerk",
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",
@@ -819,8 +820,10 @@
 			"select": "Auswählen >",
 			"select_swap_provider": "Tausch-Anbieter auswählen",
 			"open_icp_swap": "ICP Swap-Website öffnen",
-			"select_token": "",
-			"select_network_filter": ""
+			"open_instructions_link": "Link mit Anweisungen öffnen",
+			"select_token": "Token auswählen",
+			"select_network_filter": "Netzwerk auswählen",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
@@ -828,9 +831,14 @@
 			"unexpected_missing_data": "Beim Starten der Tauschtransaktion ist etwas schiefgelaufen.",
 			"slippage_exceeded": "$oisy_short schützt Dich: Der Handel liegt außerhalb deiner Slippage-Toleranz von $maxSlippage%. Bitte passe die maximale Slippage an und versuche es erneut.",
 			"pool_not_found": "Tausch fehlgeschlagen. Pool nicht gefunden.",
-			"deposit_error": "Tausch fehlgeschlagen. Wir konnten deine Token nicht in den Pool einzahlen. Bitte versuche es erneut.",
+			"deposit_error": "Das Senden der Token für den Tausch ist fehlgeschlagen. Please try again or change the swap provider. Versuche es erneut oder wähle einen anderen Anbieter.",
 			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
-			"swap_failed_withdraw_success": "Tausch fehlgeschlagen. Deine Token wurden erfolgreich zurückerstattet. Du kannst es erneut versuchen oder die Slippage-Toleranz erhöhen."
+			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Tokens wurden erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
+			"withdraw_failed_first_part": "Der Tausch ist fehlgeschlagen und deine Tokens konnten nicht automatisch zurückgeholt werden. Folge ",
+			"withdraw_failed_second_part": "um sie manuell zurückzuholen von ",
+			"swap_failed_instruction_link": "diesen Anweisungen ",
+			"manually_withdraw_success": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
@@ -909,7 +917,7 @@
 				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
 			},
 			"error": {
-				"loading_metadata": "Fehler beim Laden der Metadaten des Tokens.",
+				"loading_metadata": "Die angegebene Adresse ist kein gültiges Token in der gewählten Blockchain",
 				"no_metadata": "Keine Metadaten für das Token verfügbar. Das ist unerwartet.",
 				"unexpected_ledger": "Beim Validieren des Ledger-Canisters ist etwas schiefgelaufen.",
 				"unexpected_index": "Beim Validieren des Index-Canisters ist etwas schiefgelaufen.",
@@ -978,7 +986,6 @@
 			"unexpected": "Beim Speichern des Tokens ist etwas schiefgelaufen.",
 			"unexpected_hiding": "Beim Verbergen des Tokens ist etwas schiefgelaufen.",
 			"already_available": "Token ist bereits verfügbar.",
-			"loading_metadata": "Fehler beim Laden der Metadaten des Tokens.",
 			"not_toggleable": "Token kann nicht ausgeblendet werden.",
 			"incomplete_metadata": "Kein Name oder Symbol in den Metadaten vorhanden.",
 			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol existiert bereits.",
@@ -989,7 +996,15 @@
 	},
 	"nfts": {
 		"text": {
-			"title": ""
+			"title": "",
+			"title_empty": "",
+			"description_empty": ""
+		},
+		"alt": {
+			"placeholder_image": "",
+			"card": {
+				"image": ""
+			}
 		}
 	},
 	"fee": {
@@ -1278,7 +1293,14 @@
 		},
 		"avatar": {
 			"default": "Standard-Avatar",
-			"avatar_for": "Avatar für"
+			"avatar_for": "Avatar für",
+			"avatar_loading": ""
+		},
+		"edit_avatar": {
+			"menu_title": "Kontakt Avatar",
+			"upload_image": "Hochladen",
+			"replace_image": "Ersetzen",
+			"remove_image": "Entfernen"
 		},
 		"show_contact": {
 			"title": "Kontakt",

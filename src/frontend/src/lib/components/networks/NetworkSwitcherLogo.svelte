@@ -4,7 +4,11 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import type { Network } from '$lib/types/network';
 
-	export let network: Network | undefined;
+	interface Props {
+		network?: Network;
+	}
+
+	let { network }: Props = $props();
 </script>
 
 {#if nonNullish(network)}

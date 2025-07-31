@@ -1,11 +1,21 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
+import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
-import { fetchSwapAmounts, loadKongSwapTokens } from '$lib/services/swap.services';
+import {
+	fetchSwapAmounts,
+	loadKongSwapTokens,
+	performManualWithdraw,
+	withdrawICPSwapAfterFailedSwap
+} from '$lib/services/swap.services';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import { SwapProvider } from '$lib/types/swap';
+import type { OptionIdentity } from '$lib/types/identity';
+import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { get } from 'svelte/store';
@@ -25,6 +35,14 @@ vi.mock('$lib/api/kong_backend.api', () => ({
 
 vi.mock('$lib/services/icp-swap.services', () => ({
 	icpSwapAmounts: vi.fn()
+}));
+
+vi.mock('$lib/api/icp-swap-pool.api', () => ({
+	withdraw: vi.fn()
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('fetchSwapAmounts', () => {
@@ -157,5 +175,142 @@ describe('loadKongSwapTokens', () => {
 		await loadKongSwapTokens({ identity: mockIdentity });
 
 		expect(get(kongSwapTokensStore)).toStrictEqual({});
+	});
+});
+
+describe('withdrawICPSwapAfterFailedSwap', () => {
+	const identity = {} as OptionIdentity;
+	const canisterId = 'test-canister-id';
+	const tokenId = 'icp';
+	const amount = 1000n;
+	const fee = 10n;
+
+	const baseParams = {
+		identity,
+		canisterId,
+		tokenId,
+		amount,
+		fee
+	};
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('should succeed on first withdraw attempt', async () => {
+		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
+
+		const result = await withdrawICPSwapAfterFailedSwap(baseParams);
+
+		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS);
+	});
+
+	it('should succeed on second withdraw attempt after first fails', async () => {
+		vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail'));
+
+		const result = await withdrawICPSwapAfterFailedSwap(baseParams);
+
+		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
+		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS);
+	});
+
+	it('should return failed code if both attempts fail and call setFailedProgressStep', async () => {
+		const setFailedProgressStep = vi.fn();
+
+		vi.mocked(icpSwapPool.withdraw)
+			.mockRejectedValueOnce(new Error('fail1'))
+			.mockRejectedValueOnce(new Error('fail2'));
+
+		const result = await withdrawICPSwapAfterFailedSwap({
+			...baseParams,
+			setFailedProgressStep
+		});
+
+		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
+		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED);
+	});
+});
+
+describe('performManualWithdraw', () => {
+	const identity = {} as OptionIdentity;
+	const canisterId = 'test-canister-id';
+	const tokenId = 'icp';
+	const amount = 1000n;
+	const fee = 10n;
+
+	const token = {
+		symbol: 'ICP'
+	} as IcTokenToggleable;
+
+	const baseParams = {
+		withdrawDestinationTokens: true,
+		identity,
+		canisterId,
+		tokenId,
+		amount,
+		fee,
+		token
+	};
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('should track success event and return success code', async () => {
+		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
+
+		const result = await performManualWithdraw(baseParams);
+
+		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+			metadata: {
+				token: 'ICP',
+				tokenDirection: 'receive'
+			}
+		});
+		expect(result.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS);
+		expect(result.message).toBeDefined();
+	});
+
+	it('should track failed event, call setFailedProgressStep and return error code', async () => {
+		const setFailedProgressStep = vi.fn();
+
+		vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail'));
+
+		const result = await performManualWithdraw({
+			...baseParams,
+			setFailedProgressStep
+		});
+
+		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
+			metadata: {
+				token: 'ICP',
+				tokenOrigin: 'receive'
+			}
+		});
+		expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);
+		expect(result.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED);
+		expect(result.variant).toBe('error');
+	});
+
+	it('should track tokenDirection correctly when withdrawDestinationTokens is false', async () => {
+		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1000n);
+
+		await performManualWithdraw({
+			...baseParams,
+			withdrawDestinationTokens: false
+		});
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+			metadata: {
+				token: 'ICP',
+				tokenDirection: 'pay'
+			}
+		});
 	});
 });

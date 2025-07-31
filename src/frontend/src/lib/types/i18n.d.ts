@@ -344,12 +344,12 @@ interface I18nInit {
 	error: {
 		no_alchemy_config: string;
 		no_alchemy_provider: string;
-		no_alchemy_erc20_provider: string;
 		no_etherscan_provider: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc721_provider: string;
+		no_infura_erc1155_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_network: string;
 		eth_address_unknown: string;
@@ -371,9 +371,10 @@ interface I18nInit {
 		transaction_price: string;
 		icrc_canisters: string;
 		erc20_custom_tokens: string;
+		erc721_custom_tokens: string;
+		erc1155_custom_tokens: string;
 		erc20_user_tokens: string;
 		spl_custom_tokens: string;
-		erc721_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
@@ -685,8 +686,10 @@ interface I18nSwap {
 		select: string;
 		select_swap_provider: string;
 		open_icp_swap: string;
+		open_instructions_link: string;
 		select_token: string;
 		select_network_filter: string;
+		withdrawing: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -697,6 +700,11 @@ interface I18nSwap {
 		deposit_error: string;
 		withdraw_failed: string;
 		swap_failed_withdraw_success: string;
+		withdraw_failed_first_part: string;
+		withdraw_failed_second_part: string;
+		swap_failed_instruction_link: string;
+		manually_withdraw_success: string;
+		swap_sucess_manually_withdraw_success: string;
 	};
 }
 
@@ -820,7 +828,6 @@ interface I18nTokens {
 		unexpected: string;
 		unexpected_hiding: string;
 		already_available: string;
-		loading_metadata: string;
 		not_toggleable: string;
 		incomplete_metadata: string;
 		duplicate_metadata: string;
@@ -831,7 +838,8 @@ interface I18nTokens {
 }
 
 interface I18nNfts {
-	text: { title: string };
+	text: { title: string; title_empty: string; description_empty: string };
+	alt: { placeholder_image: string; card: { image: string } };
 }
 
 interface I18nFee {
@@ -1084,7 +1092,13 @@ interface I18nAddress_book {
 	};
 	alt: { show_addresses_of_contact: string; hide_addresses: string };
 	edit_contact: { title: string; add_address: string; delete_contact: string };
-	avatar: { default: string; avatar_for: string };
+	avatar: { default: string; avatar_for: string; avatar_loading: string };
+	edit_avatar: {
+		menu_title: string;
+		upload_image: string;
+		replace_image: string;
+		remove_image: string;
+	};
 	show_contact: {
 		title: string;
 		add_address: string;

@@ -29,6 +29,8 @@ export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
 export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
+export const NFT_CARD = 'nft-card';
+
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
 
@@ -117,8 +119,8 @@ export const REFERRAL_CODE_LEARN_MORE = 'referral-code-learn-more';
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
 export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
-export const TOKEN_INPUT_CURRENCY_USD = 'token-input-currency-usd';
-export const TOKEN_INPUT_CURRENCY_USD_SYMBOL = 'token-input-currency-usd-symbol';
+export const TOKEN_INPUT_CURRENCY_FIAT = 'token-input-currency-fiat';
+export const TOKEN_INPUT_CURRENCY_FIAT_SYMBOL = 'token-input-currency-fiat-symbol';
 
 export const TOKEN_INPUT_AMOUNT_EXCHANGE = 'swap-amount-exchange';
 export const TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
@@ -236,7 +238,12 @@ export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleto
 
 export const SEND_FEE_INFO = 'send-fee-info';
 
+// Avatar
+export const AVATAR_IMAGE = 'avatar-image';
 export const AVATAR_WITH_BADGE_FALLBACK_IMAGE = 'avatar-with-badge-fallback-image';
+export const AVATAR_BADGE = 'avatar-badge';
+export const AVATAR_UPLOAD_IMAGE = 'avatar-upload-image';
+export const AVATAR_LOADER = 'avatar-loader';
 
 // Contact Card test IDs
 export const CONTACT_CARD = 'contact-card';
@@ -250,6 +257,13 @@ export const TOKEN_MODAL_INDEX_CANISTER_ID_INPUT = 'token-modal-index-canister-i
 export const TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON =
 	'token-modal-index-canister-id-edit-button';
 export const TOKEN_MODAL_SAVE_BUTTON = 'token-modal-save-button';
+
+// Contact popover menu
+export const CONTACT_POPOVER_TRIGGER = 'contact-popover-trigger';
+export const CONTACT_POPOVER_MENU = 'contact-popover-menu';
+export const CONTACT_POPOVER_MENU_ITEM = 'contact-popover-menu-item';
+export const CONTACT_REPLACE_MENU_ITEM = 'contact-replace-menu-item';
+export const CONTACT_REMOVE_MENU_ITEM = 'contact-remove-menu-item';
 
 // AI Assistant
 export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';

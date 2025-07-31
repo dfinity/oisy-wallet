@@ -465,12 +465,12 @@
 		"error": {
 			"no_alchemy_config": "Nessuna configurazione Alchemy per la rete $network",
 			"no_alchemy_provider": "Nessun provider Alchemy per la rete $network",
-			"no_alchemy_erc20_provider": "Nessun provider Alchemy ERC20 per la rete $network",
 			"no_etherscan_provider": "Nessun provider Etherscan per la rete $network",
 			"no_infura_provider": "Nessun provider Infura per la rete $network",
 			"no_infura_cketh_provider": "Nessun provider Infura CkETH per la rete $network",
 			"no_infura_erc20_provider": "Nessun provider Infura ERC20 per la rete $network",
 			"no_infura_erc721_provider": "Nessun provider Infura ERC721 per la rete $network",
+			"no_infura_erc1155_provider": "Nessun provider Infura ERC1155 per la rete $network",
 			"no_infura_erc20_icp_provider": "Nessun provider Infura ERC20 ICP per la rete $network",
 			"no_solana_network": "Nessuna rete Solana per la rete $network",
 			"eth_address_unknown": "L'indirizzo ETH è sconosciuto.",
@@ -492,9 +492,10 @@
 			"transaction_price": "Errore durante il caricamento della stima del prezzo di una transazione.",
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
+			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
+			"erc1155_custom_tokens": "Errore durante il caricamento del token personalizzato ERC1155.",
 			"erc20_user_tokens": "Errore durante il caricamento dei token utente ERC20.",
 			"spl_custom_tokens": "Errore durante il caricamento del token personalizzato SPL.",
-			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
 			"erc20_user_token": "Errore durante l'abilitazione del token gemello ERC20.",
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
@@ -506,7 +507,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Il tuo saldo",
-			"unavailable_balance": "Valore in $ non disponibile",
+			"unavailable_balance": "Valore in $currencySymbol non disponibile",
 			"hidden_balance": "Il tuo saldo è nascosto",
 			"top_up": "Ricarica il tuo wallet per iniziare a usarlo!",
 			"learn_more_about_erc20_icp": "Scopri di più su ERC20 ICP su Ethereum.",
@@ -819,8 +820,10 @@
 			"select": "Seleziona >",
 			"select_swap_provider": "Seleziona fornitore di scambio",
 			"open_icp_swap": "Apri il sito web ICP Swap",
+			"open_instructions_link": "Apri il link con le istruzioni",
 			"select_token": "Seleziona il token",
-			"select_network_filter": "Seleziona la rete"
+			"select_network_filter": "Seleziona la rete",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -828,9 +831,14 @@
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di scambio.",
 			"slippage_exceeded": "$oisy_short ti protegge: la transazione è al di fuori della tua tolleranza di slippage del $maxSlippage%. Per favore, regola lo slippage massimo e riprova.",
 			"pool_not_found": "Scambio fallito. Pool non trovata.",
-			"deposit_error": "Scambio fallito. Non siamo riusciti a depositare i tuoi token nel pool. Riprova.",
+			"deposit_error": "Il deposito dei fondi per lo swap non è riuscito. Riprova oppure cambia il provider dello swap.",
 			"withdraw_failed": "Lo scambio è fallito e anche il prelievo è fallito. Controlla il tuo saldo inutilizzato e prova il prelievo manuale: ",
-			"swap_failed_withdraw_success": "Scambio fallito. I tuoi token sono stati rimborsati con successo. Puoi riprovare o aumentare la tolleranza allo slippage."
+			"swap_failed_withdraw_success": "Lo swap non è andato a buon fine e i tuoi token sono stati rimborsati con successo. Riprova oppure cambia il provider dello swap.",
+			"withdraw_failed_first_part": "Lo swap non è andato a buon fine e i token inviati non possono essere ritirati automaticamente. Segui ",
+			"withdraw_failed_second_part": "per ritirarli manualmente su ",
+			"swap_failed_instruction_link": "queste istruzioni ",
+			"manually_withdraw_success": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
@@ -909,7 +917,7 @@
 				"custom_tokens_not_supported": "La rete selezionata non supporta i token personalizzati."
 			},
 			"error": {
-				"loading_metadata": "Errore durante il caricamento dei metadati del token.",
+				"loading_metadata": "L'indirizzo inserito non corrisponde ad un token valido nella rete scelta.",
 				"no_metadata": "Nessun metadato per il token è fornito. Questo è inaspettato.",
 				"unexpected_ledger": "Qualcosa è andato storto durante la convalida del canister Ledger.",
 				"unexpected_index": "Qualcosa è andato storto durante la convalida del canister Index.",
@@ -978,7 +986,6 @@
 			"unexpected": "Qualcosa è andato storto durante il salvataggio del token.",
 			"unexpected_hiding": "Qualcosa è andato storto nel nascondere il token.",
 			"already_available": "Token già disponibile.",
-			"loading_metadata": "Errore durante il caricamento dei metadati del token.",
 			"not_toggleable": "Il token non è attivabile/disattivabile, non può essere nascosto.",
 			"incomplete_metadata": "Nessun nome o simbolo è fornito nei metadati.",
 			"duplicate_metadata": "Un token con un nome o simbolo simile esiste già.",
@@ -989,7 +996,15 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT"
+			"title": "NFT",
+			"title_empty": "I tuoi NFT appariranno qui",
+			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT"
+		},
+		"alt": {
+			"placeholder_image": "Nessun NFT per adesso",
+			"card": {
+				"image": "Immagine dell'NFT con token ID: $tokenId"
+			}
 		}
 	},
 	"fee": {
@@ -1278,7 +1293,14 @@
 		},
 		"avatar": {
 			"default": "Avatar predefinito",
-			"avatar_for": "Avatar per"
+			"avatar_for": "Avatar per",
+			"avatar_loading": "L'avatar si sta caricando"
+		},
+		"edit_avatar": {
+			"menu_title": "Immagine del Contatto",
+			"upload_image": "Carica",
+			"replace_image": "Cambia",
+			"remove_image": "Rimuovi"
 		},
 		"show_contact": {
 			"title": "Contatto",

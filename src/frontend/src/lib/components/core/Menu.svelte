@@ -11,21 +11,18 @@
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
-	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
-	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
+	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
-	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
-	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
@@ -109,8 +106,46 @@
 				<ButtonAuthenticateWithLicense fullWidth needHelpLink={false} licenseAlignment="center" />
 			</span>
 			<Hr />
+
+			<AboutWhyOisy
+				asMenuItem
+				asMenuItemCondensed
+				onIcOpenAboutModal={hidePopover}
+				trackEventSource={USER_MENU_ROUTE}
+			/>
+
+			<DocumentationLink
+				asMenuItem
+				asMenuItemCondensed
+				trackEventSource={USER_MENU_ROUTE}
+				testId={NAVIGATION_MENU_DOC_BUTTON}
+			/>
+
+			<SupportLink asMenuItem asMenuItemCondensed testId={NAVIGATION_MENU_SUPPORT_BUTTON} />
 		{/if}
 		{#if $authSignedIn}
+			{#if addressesOption}
+				<MenuAddresses onReceiveClick={hidePopover} />
+			{/if}
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.address_book}
+				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
+				onclick={() => modalStore.openAddressBook({ id: addressModalId })}
+			>
+				<IconUsersRound size="20" />
+				{$i18n.navigation.text.address_book}
+			</ButtonMenu>
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.refer_a_friend}
+				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
+				onclick={() => modalStore.openReferralCode(referralModalId)}
+			>
+				<IconShare size="20" />
+				{$i18n.navigation.text.refer_a_friend}
+			</ButtonMenu>
+
 			<ButtonMenu
 				ariaLabel={$isPrivacyMode
 					? $i18n.navigation.alt.show_balances
@@ -130,27 +165,16 @@
 
 			<Hr />
 
-			{#if addressesOption}
-				<MenuAddresses on:icMenuClick={hidePopover} />
+			{#if isVip}
+				<ButtonMenu
+					ariaLabel={$i18n.navigation.alt.vip_qr_code}
+					testId={NAVIGATION_MENU_VIP_BUTTON}
+					onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
+				>
+					<IconVipQr size="20" />
+					{$i18n.navigation.text.vip_qr_code}
+				</ButtonMenu>
 			{/if}
-
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.address_book}
-				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
-				onclick={() => modalStore.openAddressBook({ id: addressModalId })}
-			>
-				<IconUserSquare size="20" />
-				{$i18n.navigation.text.address_book}
-			</ButtonMenu>
-
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.refer_a_friend}
-				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
-				onclick={() => modalStore.openReferralCode(referralModalId)}
-			>
-				<IconShare size="20" />
-				{$i18n.navigation.text.refer_a_friend}
-			</ButtonMenu>
 
 			{#if isGold}
 				<ButtonMenu
@@ -163,55 +187,11 @@
 				</ButtonMenu>
 			{/if}
 
-			{#if isVip}
-				<ButtonMenu
-					ariaLabel={$i18n.navigation.alt.vip_qr_code}
-					testId={NAVIGATION_MENU_VIP_BUTTON}
-					onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
-				>
-					<IconVipQr size="20" />
-					{$i18n.navigation.text.vip_qr_code}
-				</ButtonMenu>
+			{#if isGold || isVip}
+				<Hr />
 			{/if}
-
-			<Hr />
-		{/if}
-
-		<AboutWhyOisy
-			asMenuItem
-			asMenuItemCondensed
-			onIcOpenAboutModal={hidePopover}
-			trackEventSource={USER_MENU_ROUTE}
-		/>
-
-		<DocumentationLink
-			asMenuItem
-			asMenuItemCondensed
-			trackEventSource={USER_MENU_ROUTE}
-			testId={NAVIGATION_MENU_DOC_BUTTON}
-		/>
-
-		<SupportLink asMenuItem asMenuItemCondensed testId={NAVIGATION_MENU_SUPPORT_BUTTON} />
-
-		{#if $authSignedIn}
-			<Hr />
-
-			<a
-				href={OISY_REPO_URL}
-				rel="external noopener noreferrer"
-				target="_blank"
-				class="nav-item nav-item-condensed"
-				aria-label={$i18n.navigation.text.source_code_on_github}
-			>
-				<IconGitHub />
-				{$i18n.navigation.text.source_code}
-			</a>
-
-			<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
 		{/if}
 	</div>
-
-	<Hr />
 
 	<div class="flex max-w-80 flex-col gap-5 py-5">
 		<MenuLanguageSelector />
