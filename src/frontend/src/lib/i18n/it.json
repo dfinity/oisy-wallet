@@ -833,10 +833,12 @@
 			"deposit_error": "Il deposito dei fondi per lo swap non è riuscito. Riprova oppure cambia il provider dello swap.",
 			"withdraw_failed": "Lo scambio è fallito e anche il prelievo è fallito. Controlla il tuo saldo inutilizzato e prova il prelievo manuale: ",
 			"swap_failed_withdraw_success": "Lo swap non è andato a buon fine e i tuoi token sono stati rimborsati con successo. Riprova oppure cambia il provider dello swap.",
-			"withdraw_failed_first_part": "Lo swap non è andato a buon fine e i token inviati non possono essere ritirati automaticamente. Segui ",
-			"withdraw_failed_second_part": "per ritirarli manualmente su ",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
 			"swap_failed_instruction_link": "queste istruzioni ",
 			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
