@@ -28,5 +28,7 @@
 </script>
 
 <ReceiveButtonWithModal open={openModal} isOpen={$modalIcpReceive}>
-	<ReceiveAddressModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} slot="modal" />
+	{#snippet modal()}
+		<ReceiveAddressModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} />
+	{/snippet}
 </ReceiveButtonWithModal>
