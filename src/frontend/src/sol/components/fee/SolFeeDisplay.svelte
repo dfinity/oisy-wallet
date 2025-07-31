@@ -19,10 +19,10 @@
 {#if nonNullish($symbol) && nonNullish($sendTokenId) && nonNullish($decimals)}
 	{#if nonNullish($fee)}
 		<FeeDisplay
-			feeAmount={$fee}
 			decimals={$decimals}
-			symbol={$symbol}
 			exchangeRate={$sendTokenExchangeRate}
+			feeAmount={$fee}
+			symbol={$symbol}
 		>
 			{#snippet label()}
 				<span>{$i18n.fee.text.fee}</span>
@@ -32,10 +32,10 @@
 
 	{#if nonNullish($ataFee)}
 		<FeeDisplay
-			feeAmount={$ataFee}
 			decimals={$decimals}
-			symbol={$symbol}
 			exchangeRate={$sendTokenExchangeRate}
+			feeAmount={$ataFee}
+			symbol={$symbol}
 		>
 			{#snippet label()}
 				<span>{$i18n.fee.text.ata_fee}</span>

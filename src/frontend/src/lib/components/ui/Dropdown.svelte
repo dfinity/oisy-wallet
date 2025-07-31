@@ -35,21 +35,21 @@
 </script>
 
 <DropdownButton
-	bind:button
-	onClick={() => (visible = true)}
 	{ariaLabel}
-	{testId}
-	{disabled}
-	opened={visible}
-	fullWidth={buttonFullWidth}
 	border={buttonBorder}
+	{disabled}
+	fullWidth={buttonFullWidth}
+	onClick={() => (visible = true)}
+	opened={visible}
+	{testId}
+	bind:button
 >
 	{@render children()}
 </DropdownButton>
 
 {#if asModalOnMobile}
 	<Responsive up="1.5md">
-		<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+		<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
 			{@render items()}
 		</Popover>
 	</Responsive>
@@ -68,7 +68,7 @@
 		{/if}
 	</Responsive>
 {:else}
-	<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
 		{@render items()}
 	</Popover>
 {/if}

@@ -55,7 +55,7 @@
 	let buyAction = $derived(!$networkICP || nonNullish($pageToken?.buy));
 </script>
 
-<div role="toolbar" class="flex w-full justify-center pt-8">
+<div class="flex w-full justify-center pt-8" role="toolbar">
 	<HeroButtonGroup>
 		{#if $networkICP}
 			<IcReceive token={$pageTokenWithFallback} />

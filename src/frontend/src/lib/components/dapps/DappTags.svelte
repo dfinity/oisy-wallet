@@ -8,10 +8,10 @@
 </script>
 
 <ul
+	class="flex list-none flex-wrap gap-2"
 	aria-label={replacePlaceholders($i18n.dapps.alt.tags, {
 		$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 	})}
-	class="flex list-none flex-wrap gap-2"
 >
 	{#each tags as tag (tag)}
 		<li class="flex">

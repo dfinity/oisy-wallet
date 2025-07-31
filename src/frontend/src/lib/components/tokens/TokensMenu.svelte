@@ -29,13 +29,13 @@
 </script>
 
 <ButtonIcon
-	bind:button
-	onclick={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
+	colorStyle="muted"
 	disabled={$erc20UserTokensNotInitialized}
 	link={false}
-	colorStyle="muted"
+	onclick={() => (visible = true)}
 	styleClass={visible ? 'active' : ''}
+	bind:button
 >
 	{#snippet icon()}
 		<NotificationBlob display={$hideZeroBalances} position="top-right">
@@ -44,7 +44,7 @@
 	{/snippet}
 </ButtonIcon>
 
-<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
 	<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 	<ul class="flex flex-col">
 		<li class="logo-button-list-item">

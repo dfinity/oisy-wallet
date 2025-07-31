@@ -49,14 +49,14 @@
 		<Hr spacing="lg" />
 
 		<ReceiveAddress
-			labelRef="bitcoin-address"
 			address={btcAddress}
+			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			labelRef="bitcoin-address"
 			network={twinToken.network}
 			qrCodeAction={{
 				enabled: true,
 				ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
 			}}
-			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 			on:click={() => displayQRCode(btcAddress ?? '')}
 		>
 			{#snippet title()}

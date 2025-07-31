@@ -45,19 +45,19 @@
 <div class="flex items-end justify-between">
 	<div class="mr-3 flex-1">
 		<InputSearch
-			bind:filter
-			showResetButton={notEmptyString(filter)}
-			placeholder={$i18n.tokens.placeholder.search_token}
 			autofocus={isDesktop()}
+			placeholder={$i18n.tokens.placeholder.search_token}
+			showResetButton={notEmptyString(filter)}
+			bind:filter
 		/>
 	</div>
 
 	<button
 		class="dropdown-button h-[3.375rem] rounded-lg border border-solid border-primary"
 		class:hover:border-brand-primary={!networkSelectorViewOnly}
+		aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 		disabled={networkSelectorViewOnly}
 		onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
-		aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 	>
 		<NetworkSwitcherLogo network={$filterNetwork} />
 

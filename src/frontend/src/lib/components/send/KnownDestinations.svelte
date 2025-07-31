@@ -71,7 +71,7 @@
 
 <div in:fade>
 	{#if nonNullish(knownDestinations) && filteredKnownDestinations.length > 0}
-		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
+		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]" in:fade>
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each filteredKnownDestinations as { address, ...rest } (address)}
 					{@const networkContact = nonNullish(networkContacts)
@@ -84,8 +84,8 @@
 
 					<li>
 						<KnownDestination
-							destination={address}
 							contact={networkContact}
+							destination={address}
 							{...rest}
 							onClick={() => {
 								destination = address;
@@ -103,8 +103,8 @@
 		</div>
 	{:else}
 		<EmptyState
-			title={$i18n.send.text.recently_used_empty_state_title}
 			description={$i18n.send.text.recently_used_empty_state_description}
+			title={$i18n.send.text.recently_used_empty_state_title}
 		/>
 	{/if}
 </div>

@@ -57,4 +57,4 @@
 	const updateUi = (): Promise<void> => Promise.resolve();
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />
+<HideTokenModal {assertHide} {fromRoute} {hideToken} {updateUi} />

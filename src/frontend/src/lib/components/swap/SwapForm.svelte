@@ -139,13 +139,13 @@
 		<div class="relative">
 			<div class="mb-2">
 				<TokenInput
-					bind:amount={swapAmount}
+					{customValidate}
 					displayUnit={inputUnit}
 					exchangeRate={$sourceTokenExchangeRate}
+					token={$sourceToken}
+					bind:amount={swapAmount}
 					bind:errorType
 					bind:amountSetToMax
-					token={$sourceToken}
-					{customValidate}
 					on:click={() => {
 						dispatch('icShowTokensList', 'source');
 					}}
@@ -168,12 +168,12 @@
 					<svelte:fragment slot="balance">
 						{#if nonNullish($sourceToken)}
 							<MaxBalanceButton
+								balance={$sourceTokenBalance}
+								error={nonNullish(errorType)}
+								fee={totalFee}
+								token={$sourceToken}
 								bind:amountSetToMax
 								bind:amount={swapAmount}
-								error={nonNullish(errorType)}
-								balance={$sourceTokenBalance}
-								token={$sourceToken}
-								fee={totalFee}
 							/>
 						{/if}
 					</svelte:fragment>
@@ -183,12 +183,12 @@
 			<SwapSwitchTokensButton disabled={disableSwitchTokens} on:icSwitchTokens={onTokensSwitch} />
 
 			<TokenInput
-				token={$destinationToken}
 				amount={receiveAmount}
+				disabled={true}
 				displayUnit={inputUnit}
 				exchangeRate={$destinationTokenExchangeRate}
 				loading={swapAmountsLoading}
-				disabled={true}
+				token={$destinationToken}
 				on:click={() => {
 					dispatch('icShowTokensList', 'destination');
 				}}
@@ -198,7 +198,7 @@
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
 						{#if $swapAmountsStore?.swaps.length === 0}
-							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
+							<div class="text-error-primary" transition:slide={SLIDE_DURATION}
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
 						{:else}
@@ -210,7 +210,7 @@
 									bind:displayUnit={exchangeValueUnit}
 								/>
 
-								<SwapValueDifference {swapAmount} {receiveAmount} />
+								<SwapValueDifference {receiveAmount} {swapAmount} />
 							</div>
 						{/if}
 					{/if}
@@ -218,7 +218,7 @@
 
 				<svelte:fragment slot="balance">
 					{#if nonNullish($destinationToken)}
-						<TokenInputBalance token={$destinationToken} balance={$destinationTokenBalance} />
+						<TokenInputBalance balance={$destinationTokenBalance} token={$destinationToken} />
 					{/if}
 				</svelte:fragment>
 			</TokenInput>
@@ -230,7 +230,7 @@
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider on:icShowProviderList showSelectButton {slippageValue} />
+				<SwapProvider showSelectButton {slippageValue} on:icShowProviderList />
 				<SwapFees />
 			</div>
 		{/if}

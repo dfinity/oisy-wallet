@@ -57,7 +57,7 @@
 
 {#if $modalVipRewardState && nonNullish($modalVipRewardStateData)}
 	<VipRewardStateModal
-		isSuccessful={$modalVipRewardStateData.success}
 		codeType={$modalVipRewardStateData.codeType}
+		isSuccessful={$modalVipRewardStateData.success}
 	/>
 {/if}

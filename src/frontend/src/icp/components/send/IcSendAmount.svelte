@@ -48,13 +48,13 @@
 
 <div class="mb-4">
 	<TokenInput
-		token={$sendToken}
-		bind:amount
+		autofocus={nonNullish($sendToken)}
+		customErrorValidate={customValidate}
 		displayUnit={inputUnit}
 		exchangeRate={$sendTokenExchangeRate}
+		token={$sendToken}
+		bind:amount
 		bind:error={amountError}
-		customErrorValidate={customValidate}
-		autofocus={nonNullish($sendToken)}
 		on:click={() => {
 			dispatch('icTokensList');
 		}}
@@ -77,11 +77,11 @@
 		<svelte:fragment slot="balance">
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
-					bind:amount
-					error={nonNullish(amountError)}
 					balance={$sendBalance}
-					token={$sendToken}
+					error={nonNullish(amountError)}
 					fee={fee ?? ZERO}
+					token={$sendToken}
+					bind:amount
 				/>
 			{/if}
 		</svelte:fragment>

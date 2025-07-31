@@ -71,15 +71,15 @@
 </script>
 
 <Transaction
-	onClick={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
-	{type}
-	timestamp={transactionDate}
-	{status}
-	{token}
-	{iconType}
-	{to}
 	{from}
+	{iconType}
+	onClick={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}
+	{status}
+	timestamp={transactionDate}
+	{to}
+	{token}
+	{type}
 >
 	{label}
 </Transaction>

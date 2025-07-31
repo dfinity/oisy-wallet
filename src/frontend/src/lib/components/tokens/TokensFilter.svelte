@@ -28,12 +28,12 @@
 </script>
 
 <SlidingInput
-	testIdPrefix={TOKEN_LIST_FILTER}
-	inputPlaceholder={$i18n.tokens.text.filter_placeholder}
 	ariaLabel={$i18n.tokens.alt.filter_button}
 	disabled={$erc20UserTokensNotInitialized}
-	bind:inputValue
+	inputPlaceholder={$i18n.tokens.text.filter_placeholder}
 	{overflowableContent}
+	testIdPrefix={TOKEN_LIST_FILTER}
+	bind:inputValue
 >
 	{#snippet icon()}
 		<IconSearch />

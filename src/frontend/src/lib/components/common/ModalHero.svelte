@@ -17,8 +17,8 @@
 <div
 	class="mb-6 flex flex-col items-center justify-center rounded-lg border border-solid p-4"
 	class:bg-brand-subtle-10={variant === 'default'}
-	class:border-brand-subtle-20={variant === 'default'}
 	class:bg-success-subtle-20={variant === 'success'}
+	class:border-brand-subtle-20={variant === 'default'}
 	class:border-success-subtle-20={variant === 'success'}
 >
 	{#if nonNullish(logo)}

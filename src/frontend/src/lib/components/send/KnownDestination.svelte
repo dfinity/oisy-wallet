@@ -34,13 +34,13 @@
 	let currentDate = $state(new Date());
 </script>
 
-<LogoButton styleClass="group" {onClick}>
+<LogoButton {onClick} styleClass="group">
 	{#snippet logo()}
 		<div class="mr-2">
 			<AvatarWithBadge
-				{contact}
 				address={destination}
 				badge={{ type: 'addressType', address: destination }}
+				{contact}
 				variant="sm"
 			/>
 		</div>
@@ -51,7 +51,7 @@
 			{#if isNullish(contact)}
 				{shortenWithMiddleEllipsis({ text: destination })}
 			{:else}
-				<SendContactName {contact} address={destination} />
+				<SendContactName address={destination} {contact} />
 			{/if}
 		</span>
 	{/snippet}

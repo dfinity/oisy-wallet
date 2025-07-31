@@ -33,7 +33,7 @@
 <ModalValue {label}>
 	{#snippet mainValue()}
 		{#if nonNullish(amount)}
-			<div in:fade data-tid={CONVERT_AMOUNT_DISPLAY_VALUE}>
+			<div data-tid={CONVERT_AMOUNT_DISPLAY_VALUE} in:fade>
 				{nonNullish(amount) && Number(amount) === 0 && nonNullish(zeroAmountLabel)
 					? zeroAmountLabel
 					: `${amount} ${symbol}`}

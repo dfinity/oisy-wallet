@@ -46,10 +46,10 @@
 	{#if isNetworkIdEthereum($sendToken.network.id)}
 		<EthSendTokenWizard
 			{currentStep}
-			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
-			nativeEthereumToken={$ethereumToken}
 			{destination}
+			nativeEthereumToken={$ethereumToken}
 			{selectedContact}
+			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
@@ -61,10 +61,10 @@
 	{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
 		<EthSendTokenWizard
 			{currentStep}
-			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
-			nativeEthereumToken={evmNativeEthereumToken}
 			{destination}
+			nativeEthereumToken={evmNativeEthereumToken}
 			{selectedContact}
+			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 			bind:amount
 			bind:sendProgressStep
 			on:icBack

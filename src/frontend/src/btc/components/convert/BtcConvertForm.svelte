@@ -50,22 +50,22 @@
 </script>
 
 <ConvertForm
+	disabled={invalid}
+	testId={BTC_CONVERT_FORM_TEST_ID}
+	{totalFee}
 	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
-	{totalFee}
-	disabled={invalid}
-	testId={BTC_CONVERT_FORM_TEST_ID}
 >
 	<svelte:fragment slot="message">
 		{#if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
-				<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
+				<BtcSendWarnings pendingTransactionsStatus={$hasPendingTransactionsStore} {utxosFee} />
 			</div>
 		{/if}
 	</svelte:fragment>
 
-	<BtcConvertFees bind:totalFee slot="fee" />
+	<BtcConvertFees slot="fee" bind:totalFee />
 
 	<slot name="cancel" slot="cancel" />
 </ConvertForm>

@@ -200,9 +200,9 @@
 <IcTokenFeeContext token={$sourceToken}>
 	<SwapAmountsContext
 		amount={swapAmount}
-		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
 		{slippageValue}
+		sourceToken={$sourceToken}
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapForm
@@ -216,18 +216,18 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
+				{receiveAmount}
+				{slippageValue}
+				{swapAmount}
 				on:icSwap={swap}
 				on:icBack
 				on:icClose
-				{slippageValue}
-				{swapAmount}
-				{receiveAmount}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
-				bind:swapProgressStep
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}
+				bind:swapProgressStep
 			/>
 		{/if}
 	</SwapAmountsContext>

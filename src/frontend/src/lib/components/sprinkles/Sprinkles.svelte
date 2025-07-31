@@ -35,29 +35,29 @@
 {#if type === 'page' || type === 'page-jackpot'}
 	<div class="box-confetti-page">
 		<Confetti
-			x={[-5, 5]}
-			y={[0, 0.1]}
-			iterationCount={2}
+			amount={300}
+			colorArray={type === 'page-jackpot' ? colorArrayJackpot : colorArray}
 			delay={[0, 3500]}
 			duration={2500}
-			amount={300}
 			fallDistance="100vh"
-			colorArray={type === 'page-jackpot' ? colorArrayJackpot : colorArray}
+			iterationCount={2}
 			size={32}
+			x={[-5, 5]}
+			y={[0, 0.1]}
 		/>
 	</div>
 {:else}
 	<div class="box-confetti-container">
 		<Confetti
-			x={[-1, 1]}
-			y={[0, 0]}
-			iterationCount={5}
+			amount={100}
+			{colorArray}
 			delay={[0, 1500]}
 			duration={1500}
-			amount={100}
 			fallDistance="300px"
-			{colorArray}
+			iterationCount={5}
 			size={32}
+			x={[-1, 1]}
+			y={[0, 0]}
 		/>
 	</div>
 {/if}

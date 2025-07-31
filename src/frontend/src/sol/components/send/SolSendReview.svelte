@@ -44,8 +44,8 @@
 	let disableSend = $derived(insufficientFundsForFee || invalid);
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
-	<ReviewNetwork sourceNetwork={network} slot="network" />
+<SendReview {amount} {destination} disabled={disableSend} {selectedContact} on:icBack on:icSend>
+	<ReviewNetwork slot="network" sourceNetwork={network} />
 
 	<SolFeeDisplay slot="fee" />
 

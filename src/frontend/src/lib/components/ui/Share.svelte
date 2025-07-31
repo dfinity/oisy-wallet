@@ -15,13 +15,13 @@
 </script>
 
 <ExternalLink
+	ariaLabel={text}
+	asButton
 	{href}
+	iconVisible={false}
+	styleClass={`${styleClass ?? ''} border border-disabled rounded-xl px-3 py-2 tertiary`}
 	{testId}
 	{trackEvent}
-	ariaLabel={text}
-	iconVisible={false}
-	asButton
-	styleClass={`${styleClass ?? ''} border border-disabled rounded-xl px-3 py-2 tertiary`}
 >
 	{text}
 	<IconShare />

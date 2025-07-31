@@ -58,7 +58,7 @@
 	{/if}
 
 	{#if notEmptyString(tokenListWithoutCanister)}
-		<MessageBox level="warning" closableKey="oisy_ic_hide_transaction_no_canister">
+		<MessageBox closableKey="oisy_ic_hide_transaction_no_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
 				$token_list: tokenListWithoutCanister
 			})}
@@ -66,14 +66,14 @@
 	{/if}
 
 	{#if notEmptyString(tokenListWithUnavailableCanister)}
-		<MessageBox level="warning" closableKey="oisy_ic_hide_transaction_unavailable_canister">
+		<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 				$token_list: tokenListWithUnavailableCanister
 			})}
 		</MessageBox>
 	{/if}
 
-	<MessageBox level="plain" closableKey="oisy_ic_hide_bitcoin_activity">
+	<MessageBox closableKey="oisy_ic_hide_bitcoin_activity" level="plain">
 		{$i18n.activity.info.btc_transactions}
 	</MessageBox>
 

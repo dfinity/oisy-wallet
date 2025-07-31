@@ -60,32 +60,31 @@
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-6 md:mb-10">
 		<DappPromoBanner
-			onclick={() => modalStore.openDappDetails({ id: modalId, data: featuredDapp })}
 			dAppDescription={featuredDapp}
+			onclick={() => modalStore.openDappDetails({ id: modalId, data: featuredDapp })}
 		/>
 	</div>
 {/if}
 
 <div class="no-scrollbar flex gap-4 overflow-x-auto p-1 md:flex-wrap md:p-0">
 	<Button
-		paddingSmall
 		ariaLabel={$i18n.dapps.alt.show_all}
-		onclick={() => onClickFilterBtn()}
-		styleClass="text-nowrap max-w-fit text-sm"
 		colorStyle={selectedTag === undefined ? 'primary' : 'tertiary'}
+		onclick={() => onClickFilterBtn()}
+		paddingSmall
+		styleClass="text-nowrap max-w-fit text-sm"
 	>
 		{$i18n.dapps.text.all_dapps}
 	</Button>
 	{#each uniqueTags as tag (tag)}
 		<Button
-			paddingSmall
 			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, {
 				$tag: resolveText({ i18n: $i18n, path: tag })
 			})}
-			onclick={() => onClickFilterBtn(tag)}
-			styleClass="text-nowrap max-w-fit text-sm"
 			colorStyle={selectedTag === tag ? 'primary' : 'tertiary'}
-			>{resolveText({ i18n: $i18n, path: tag })}</Button
+			onclick={() => onClickFilterBtn(tag)}
+			paddingSmall
+			styleClass="text-nowrap max-w-fit text-sm">{resolveText({ i18n: $i18n, path: tag })}</Button
 		>
 	{/each}
 </div>
@@ -94,6 +93,7 @@
 	{#each filteredDapps as dApp (dApp.id)}
 		<li class="flex" in:fade>
 			<DappCard
+				dAppDescription={dApp}
 				on:click={() => {
 					modalStore.openDappDetails({ id: modalId, data: dApp });
 					trackEvent({
@@ -101,7 +101,6 @@
 						metadata: { dappId: dApp.id }
 					});
 				}}
-				dAppDescription={dApp}
 			/>
 		</li>
 	{/each}

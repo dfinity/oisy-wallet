@@ -9,6 +9,6 @@
 	$: loading = isNullish($pageToken) || $solTransactionsNotInitialized;
 </script>
 
-<TransactionsSkeletons testIdPrefix={SOL_TRANSACTION_SKELETON_PREFIX} {loading}>
+<TransactionsSkeletons {loading} testIdPrefix={SOL_TRANSACTION_SKELETON_PREFIX}>
 	<slot />
 </TransactionsSkeletons>

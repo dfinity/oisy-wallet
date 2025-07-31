@@ -87,7 +87,7 @@
 			{#snippet icon()}
 				<div>
 					{#if iconType === 'token'}
-						<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+						<TokenLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} data={token} />
 					{:else}
 						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
 					{/if}
@@ -102,8 +102,8 @@
 						<Amount
 							amount={cardAmount}
 							decimals={token.decimals}
-							symbol={getTokenDisplaySymbol(token)}
 							formatPositiveAmount
+							symbol={getTokenDisplaySymbol(token)}
 						/>
 					{/if}
 				{/if}

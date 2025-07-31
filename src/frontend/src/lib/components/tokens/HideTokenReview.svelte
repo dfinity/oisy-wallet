@@ -18,10 +18,10 @@
 <ContentWithToolbar>
 	<div class="icon flex flex-col items-center gap-3">
 		<Logo
-			src={$token?.icon}
-			size="xl"
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
 			color="off-white"
+			size="xl"
+			src={$token?.icon}
 		/>
 
 		<p class="text-center font-bold">

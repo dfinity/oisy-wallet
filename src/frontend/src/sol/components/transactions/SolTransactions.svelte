@@ -44,7 +44,7 @@
 		<SolTransactionsScroll {token}>
 			{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
 				<li in:slide={SLIDE_DURATION}>
-					<SolTransaction {transaction} {token} />
+					<SolTransaction {token} {transaction} />
 				</li>
 			{/each}
 		</SolTransactionsScroll>
@@ -54,7 +54,7 @@
 </SolTransactionsSkeletons>
 
 {#if $modalSolTransaction && nonNullish(selectedTransaction)}
-	<SolTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<SolTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalSolToken}
 	<SolTokenModal fromRoute={$modalSolTokenData} />
 {/if}

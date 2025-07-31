@@ -48,12 +48,12 @@
 </script>
 
 <SendInputDestination
-	bind:destination
-	bind:invalidDestination
+	inputPlaceholder={$i18n.send.placeholder.enter_eth_address}
 	{knownDestinations}
 	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
-	inputPlaceholder={$i18n.send.placeholder.enter_eth_address}
-	on:icQRCodeScan
 	onQRButtonClick={() => dispatch('icQRCodeScan')}
+	bind:destination
+	bind:invalidDestination
+	on:icQRCodeScan
 />

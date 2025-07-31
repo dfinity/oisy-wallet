@@ -102,8 +102,8 @@
 			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 				<TransactionsDateGroup
 					{formattedDate}
-					{transactions}
 					testId={`all-transactions-date-group-${index}`}
+					{transactions}
 				/>
 			{/each}
 		{/if}
@@ -115,11 +115,11 @@
 </AllTransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
-	<BtcTransactionModal transaction={selectedBtcTransaction} token={selectedBtcToken} />
+	<BtcTransactionModal token={selectedBtcToken} transaction={selectedBtcTransaction} />
 {:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
-	<EthTransactionModal transaction={selectedEthTransaction} token={selectedEthToken} />
+	<EthTransactionModal token={selectedEthToken} transaction={selectedEthTransaction} />
 {:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
-	<IcTransactionModal transaction={selectedIcTransaction} token={selectedIcToken} />
+	<IcTransactionModal token={selectedIcToken} transaction={selectedIcTransaction} />
 {:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
-	<SolTransactionModal transaction={selectedSolTransaction} token={selectedSolToken} />
+	<SolTransactionModal token={selectedSolToken} transaction={selectedSolTransaction} />
 {/if}

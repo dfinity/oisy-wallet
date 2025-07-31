@@ -30,10 +30,10 @@
 
 <ContentWithToolbar>
 	<NetworkSwitcherList
-		onSelected={onNetworkSelect}
-		selectedNetworkId={$filterNetwork?.id}
 		delayOnNetworkSelect={false}
 		labelsSize="lg"
+		onSelected={onNetworkSelect}
+		selectedNetworkId={$filterNetwork?.id}
 	/>
 
 	{#snippet toolbar()}

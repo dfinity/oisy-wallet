@@ -11,7 +11,7 @@
 </script>
 
 <ButtonGroup>
-	<Button colorStyle="error" onclick={() => dispatch('icReject')} disabled={$isBusy}
+	<Button colorStyle="error" disabled={$isBusy} onclick={() => dispatch('icReject')}
 		>{$i18n.core.text.reject}</Button
 	>
 

@@ -13,7 +13,7 @@
 	const { address }: Props = $props();
 </script>
 
-<Value ref="address-info" element="div">
+<Value element="div" ref="address-info">
 	{#snippet label()}
 		<div class="mb-3 font-bold text-primary">
 			{$i18n.address.types[address.addressType]}

@@ -23,10 +23,10 @@
 	let currentStep = $state(steps[0]);
 </script>
 
-<WizardModal {steps} bind:currentStep testId={SEND_TOKENS_MODAL}>
+<WizardModal {steps} testId={SEND_TOKENS_MODAL} bind:currentStep>
 	<SendDestinationWizardStep
-		{destination}
 		{activeSendDestinationTab}
+		{destination}
 		bind:selectedContact={$selectedContact}
 	/>
 </WizardModal>

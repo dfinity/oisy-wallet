@@ -4,17 +4,17 @@
 </script>
 
 <svg
-	xmlns="http://www.w3.org/2000/svg"
-	width={size}
-	height={size}
-	viewBox="0 0 24 24"
 	fill="none"
+	height={size}
 	stroke="currentColor"
-	stroke-width="2"
 	stroke-linecap="round"
 	stroke-linejoin="round"
+	stroke-width="2"
+	viewBox="0 0 24 24"
+	width={size}
+	xmlns="http://www.w3.org/2000/svg"
 >
-	<rect x="3" y="3" width="18" height="18" rx="2" />
+	<rect height="18" rx="2" width="18" x="3" y="3" />
 
 	<circle cx="8.5" cy="8.5" r="1.5" />
 	<polyline points="21 15 16 10 5 21" />

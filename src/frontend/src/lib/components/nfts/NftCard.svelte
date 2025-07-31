@@ -18,10 +18,10 @@
 	<div class="relative overflow-hidden rounded-lg">
 		{#if nonNullish(nft.imageUrl)}
 			<Img
-				src={nft.imageUrl}
 				alt={replacePlaceholders($i18n.nfts.alt.card.image, {
 					$tokenId: nft.id.toString()
 				})}
+				src={nft.imageUrl}
 				testId={`${testId}-image`}
 			/>
 		{:else}
@@ -30,9 +30,9 @@
 
 		<div class="absolute bottom-2 right-2">
 			<NetworkLogo
+				color="white"
 				network={nft.contract.network}
 				size="xs"
-				color="white"
 				testId={`${testId}-network`}
 			/>
 		</div>

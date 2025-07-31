@@ -105,8 +105,8 @@
 				<div in:fade>
 					<ButtonGroup>
 						<ButtonCancel
-							onclick={() => dispatch('icCancel')}
 							disabled={$isBusy || $ethAddressNotCertified}
+							onclick={() => dispatch('icCancel')}
 						/>
 					</ButtonGroup>
 				</div>

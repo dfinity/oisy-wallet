@@ -22,13 +22,13 @@
 		>{$i18n.wallet.text.wallet_address}:</label
 	>
 
-	<output class="break-all" id="eth-wallet-address"
+	<output id="eth-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis({ text: $ethAddress ?? '' })}</output
-	><Copy inline value={$ethAddress ?? ''} text={$i18n.wallet.text.address_copied} />
+	><Copy inline text={$i18n.wallet.text.address_copied} value={$ethAddress ?? ''} />
 </div>
 
 {#if nonNullish(explorerUrl)}
-	<ExternalLink asMenuItem href={explorerUrl} ariaLabel={$i18n.wallet.alt.open_etherscan}>
+	<ExternalLink ariaLabel={$i18n.wallet.alt.open_etherscan} asMenuItem href={explorerUrl}>
 		{$i18n.navigation.text.view_on_explorer}
 	</ExternalLink>
 {/if}

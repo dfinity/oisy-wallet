@@ -2,10 +2,10 @@
 <!-- This icon was adjusted by the DFINITY Foundation to fulfill our needs. -->
 <svg
 	class="ufo"
-	width="24"
+	fill="none"
 	height="24"
 	viewBox="0 0 20 20"
-	fill="none"
+	width="24"
 	xmlns="http://www.w3.org/2000/svg"
 >
 	<!-- UFO details (dome, etc.) -->

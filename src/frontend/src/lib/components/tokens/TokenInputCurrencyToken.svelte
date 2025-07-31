@@ -14,15 +14,15 @@
 </script>
 
 <TokenInputCurrency
-	bind:value
 	{name}
+	{autofocus}
+	{decimals}
+	{disabled}
 	{error}
 	{loading}
 	{placeholder}
-	{disabled}
-	{decimals}
-	{autofocus}
 	testId={TOKEN_INPUT_CURRENCY_TOKEN}
+	bind:value
 	on:focus
 	on:blur
 	on:nnsInput

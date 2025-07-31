@@ -66,19 +66,19 @@
 </script>
 
 <TokenInputCurrency
-	bind:value={displayValue}
-	on:nnsInput={handleInput}
 	{name}
-	{placeholder}
+	{autofocus}
+	decimals={$currentCurrencyDecimals}
 	{disabled}
 	{error}
 	{loading}
-	{autofocus}
-	decimals={$currentCurrencyDecimals}
+	{placeholder}
+	styleClass="no-padding"
+	testId={TOKEN_INPUT_CURRENCY_FIAT}
+	bind:value={displayValue}
+	on:nnsInput={handleInput}
 	on:focus
 	on:blur
-	testId={TOKEN_INPUT_CURRENCY_FIAT}
-	styleClass="no-padding"
 >
 	{#snippet prefix()}
 		<span

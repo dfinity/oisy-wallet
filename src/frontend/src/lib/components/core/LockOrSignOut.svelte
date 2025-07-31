@@ -41,7 +41,7 @@
 			<IconLock />
 		</Button>
 
-		<SignOut on:icLogoutTriggered={handleLogoutTriggered} {onHidePopover} {hideText} />
+		<SignOut {hideText} {onHidePopover} on:icLogoutTriggered={handleLogoutTriggered} />
 	</div>
 
 	{#if nonNullish(remainingTimeMs)}

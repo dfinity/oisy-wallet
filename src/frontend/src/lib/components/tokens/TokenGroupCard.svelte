@@ -99,15 +99,15 @@
 					class="duration-250 flex overflow-hidden rounded-lg bg-secondary transition hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
-					<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} asNetwork />
+					<TokenCard asNetwork data={token} on:click={() => goto(transactionsUrl({ token }))} />
 				</div>
 			{/each}
 
 			{#if notDisplayedCount > 0 || !hideZeros}
 				<Button
-					styleClass="font-normal text-sm justify-start py-2"
 					link
 					onclick={() => toggleHideZeros(!hideZeros)}
+					styleClass="font-normal text-sm justify-start py-2"
 				>
 					{hideZeros
 						? replacePlaceholders($i18n.tokens.text.show_more_networks, {

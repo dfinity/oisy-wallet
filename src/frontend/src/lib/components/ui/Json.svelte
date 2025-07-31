@@ -71,14 +71,14 @@
 	{#if collapsed}
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<span
-			data-tid={testId}
 			class="key"
-			class:expanded={!collapsed}
-			class:collapsed
-			class:root
 			class:arrow={isExpandable && hasChildren}
-			role="button"
+			class:collapsed
+			class:expanded={!collapsed}
+			class:root
 			aria-label="Toggle"
+			data-tid={testId}
+			role="button"
 			tabindex="0"
 			on:click|stopPropagation={toggle}
 			>{keyLabel}
@@ -87,14 +87,14 @@
 	{:else}
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<span
-			data-tid={testId}
 			class="key"
-			class:expanded={!collapsed}
-			class:collapsed
-			class:root
 			class:arrow={isExpandable && hasChildren}
-			role="button"
+			class:collapsed
+			class:expanded={!collapsed}
+			class:root
 			aria-label="Toggle"
+			data-tid={testId}
+			role="button"
 			tabindex="0"
 			on:click|stopPropagation={toggle}
 			>{keyLabel}<span class="bracket open">{openBracket}</span></span
@@ -103,7 +103,7 @@
 		<ul>
 			{#each children as [key, value] (key)}
 				<li>
-					<svelte:self json={value} _key={key} {defaultExpandedLevel} _level={_level + 1} />
+					<svelte:self _key={key} _level={_level + 1} {defaultExpandedLevel} json={value} />
 				</li>
 			{/each}
 		</ul>
@@ -111,12 +111,12 @@
 	{/if}
 {:else if isExpandable}
 	<!-- no childre -->
-	<span data-tid={testId} class="key" class:root
+	<span class="key" class:root data-tid={testId}
 		>{keyLabel}<span class="bracket">{openBracket} {closeBracket}</span></span
 	>
 {:else}
 	<!-- key:value -->
-	<span data-tid={testId} class="key-value">
+	<span class="key-value" data-tid={testId}>
 		<span class="key" class:root>{keyLabel}</span><span class="value {valueType}" {title}
 			>{value}</span
 		></span
