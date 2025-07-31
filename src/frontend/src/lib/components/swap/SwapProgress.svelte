@@ -65,4 +65,4 @@
 	]);
 </script>
 
-<InProgressWizard progressStep={swapProgressStep} {steps} />
+<InProgressWizard progressStep={swapProgressStep} {steps} {failedSteps} />
