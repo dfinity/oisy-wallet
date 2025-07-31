@@ -130,6 +130,9 @@ export interface SwapParams {
 	slippageValue: Amount;
 	sourceTokenFee: bigint;
 	isSourceTokenIcrc2: boolean;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+	tryToWithdraw?: boolean;
+	withdrawDestinationTokens?: boolean;
 }
 
 export interface IcpSwapWithdrawParams {
