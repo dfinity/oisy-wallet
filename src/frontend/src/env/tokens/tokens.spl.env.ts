@@ -26,6 +26,7 @@ import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
 import { PEPX_TOKEN } from '$env/tokens/tokens-spl/tokens.pepx.env';
+import { PGX_TOKEN } from '$env/tokens/tokens-spl/tokens.pgx.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
@@ -72,6 +73,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	ORCA_TOKEN,
 	PENGU_TOKEN,
 	PEPX_TOKEN,
+	PGX_TOKEN,
 	POPCAT_TOKEN,
 	QQQX_TOKEN,
 	RAY_TOKEN,
