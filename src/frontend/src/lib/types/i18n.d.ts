@@ -101,6 +101,7 @@ interface I18nAuth {
 		title_part_1: string;
 		title_part_2: string;
 		logout: string;
+		lock: string;
 		authenticate: string;
 		asset_types: string;
 		instant_and_private: string;
