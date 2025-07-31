@@ -102,6 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% 去中心化",
 			"logout": "退出登录",
+			"lock": "",
 			"authenticate": "打开或创建",
 			"asset_types": "比特币、Solana、以太坊、ICP 等",
 			"instant_and_private": "随时随地实现即时且私密的访问",
@@ -837,6 +838,8 @@
 			"withdraw_failed_second_part": "",
 			"swap_failed_instruction_link": "",
 			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": ""
 		}
 	},

@@ -102,6 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Phi tập trung",
 			"logout": "Đăng xuất",
+			"lock": "",
 			"authenticate": "Mở hoặc Tạo",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP và hơn thế nữa",
 			"instant_and_private": "Nhanh và riêng tư mọi lúc mọi nơi",
@@ -837,6 +838,8 @@
 			"withdraw_failed_second_part": "",
 			"swap_failed_instruction_link": "",
 			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
