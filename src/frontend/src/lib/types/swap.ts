@@ -153,6 +153,7 @@ export interface IcpSwapWithdrawResponse {
 	code: SwapErrorCodes;
 	message?: string;
 	variant?: 'error' | 'warning' | 'info';
+	swapSucceded?: boolean;
 }
 
 export interface FormatSlippageParams {
