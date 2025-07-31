@@ -13,10 +13,10 @@
 </script>
 
 <ButtonHero
-	{onclick}
-	disabled={$isBusy}
-	testId={SWAP_TOKENS_MODAL_OPEN_BUTTON}
 	ariaLabel={$i18n.swap.text.swap}
+	disabled={$isBusy}
+	{onclick}
+	testId={SWAP_TOKENS_MODAL_OPEN_BUTTON}
 >
 	{#snippet icon()}
 		<IconCkConvert size="24" />

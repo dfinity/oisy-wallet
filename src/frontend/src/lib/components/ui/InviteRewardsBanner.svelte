@@ -17,11 +17,11 @@
 </script>
 
 <a
-	href="https://docs.oisy.com/rewards/oisy-sprinkles"
-	target="_blank"
-	rel="noopener noreferrer"
 	class="invite-rewards-banner"
+	href="https://docs.oisy.com/rewards/oisy-sprinkles"
 	onclick={handleSprinklesBannerClick}
+	rel="noopener noreferrer"
+	target="_blank"
 >
 	<div class="banner-content">
 		<!-- Sprinkles Animation -->

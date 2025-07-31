@@ -11,9 +11,9 @@
 
 <div
 	class={`avatar-spinner-overlay ${styleClass ?? ''}`}
-	role="status"
-	data-tid={testId}
 	aria-label={ariaLabel}
+	data-tid={testId}
+	role="status"
 >
 	<Spinner />
 </div>

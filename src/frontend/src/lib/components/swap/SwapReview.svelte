@@ -39,12 +39,12 @@
 
 <ContentWithToolbar>
 	<TokensReview
-		sendAmount={swapAmount}
-		{receiveAmount}
-		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
-		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 		destinationTokenExchangeRate={$destinationTokenExchangeRate}
+		{receiveAmount}
+		sendAmount={swapAmount}
+		sourceToken={$sourceToken}
+		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 	/>
 
 	{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
@@ -54,7 +54,7 @@
 			{/snippet}
 
 			{#snippet mainValue()}
-				<SwapImpact {swapAmount} {receiveAmount} />
+				<SwapImpact {receiveAmount} {swapAmount} />
 			{/snippet}
 		</ModalValue>
 	{/if}
@@ -80,17 +80,16 @@
 				{#if $failedSwapError.message === $i18n.swap.error.withdraw_failed && nonNullish($failedSwapError?.url)}
 					{$i18n.swap.error.withdraw_failed_first_part}
 					<ExternalLink
-						iconSize="15"
-						href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
 						ariaLabel={$i18n.swap.text.open_instructions_link}
-						>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
+						href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
+						iconSize="15">{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
 					>
 					{$i18n.swap.error.withdraw_failed_second_part}
 
 					<ExternalLink
-						iconSize="15"
+						ariaLabel={$i18n.swap.text.open_icp_swap}
 						href={$failedSwapError.url.url}
-						ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
+						iconSize="15">{$failedSwapError.url.text}</ExternalLink
 					>
 				{:else}
 					{$failedSwapError.message}

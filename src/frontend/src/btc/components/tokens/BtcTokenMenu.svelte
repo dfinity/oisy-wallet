@@ -38,11 +38,11 @@
 	{#if nonNullish(explorerAddressUrl)}
 		<div in:fade>
 			<ExternalLink
+				ariaLabel={$i18n.tokens.alt.open_blockstream}
 				asMenuItem
 				asMenuItemCondensed
 				fullWidth
 				href={explorerAddressUrl}
-				ariaLabel={$i18n.tokens.alt.open_blockstream}
 				iconVisible={false}
 				testId="btc-explorer-link"
 			>

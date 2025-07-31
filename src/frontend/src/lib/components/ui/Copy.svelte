@@ -26,12 +26,12 @@
 </script>
 
 <ButtonIcon
+	ariaLabel={`${$i18n.core.text.copy}: ${value}`}
+	height={inline ? 'h-6' : undefined}
+	onclick={handleClick}
 	styleClass={`${inline ? 'inline-block align-sub' : 'flex'}`}
 	{testId}
-	onclick={handleClick}
-	ariaLabel={`${$i18n.core.text.copy}: ${value}`}
 	width={inline ? 'w-6' : undefined}
-	height={inline ? 'h-6' : undefined}
 	{...rest}
 >
 	{#snippet icon()}

@@ -18,7 +18,7 @@
 
 <ModalHero>
 	{#snippet logo()}
-		<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+		<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 	{/snippet}
 
 	{#snippet subtitle()}

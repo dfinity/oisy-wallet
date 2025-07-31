@@ -29,11 +29,11 @@
 
 <div class="relative">
 	<Logo
-		src={icon}
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
-		size={logoSize}
 		{color}
 		{ring}
+		size={logoSize}
+		src={icon}
 		{testId}
 	/>
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
@@ -47,13 +47,13 @@
 	{:else if badge?.type === 'network' && nonNullish(network)}
 		<div
 			class="absolute"
-			class:scale-60={logoSize === 'xs'}
+			class:-bottom-1={logoSize === 'xs'}
 			class:-right-1={logoSize !== 'xs'}
 			class:-right-1.75={logoSize === 'xs'}
 			class:bottom-0={logoSize !== 'xs'}
-			class:-bottom-1={logoSize === 'xs'}
+			class:scale-60={logoSize === 'xs'}
 		>
-			<NetworkLogo {network} {color} testId={`network-${badgeTestId}`} />
+			<NetworkLogo {color} {network} testId={`network-${badgeTestId}`} />
 		</div>
 	{:else if badge?.type === 'icon'}
 		<!-- TODO: use new mapping color when merged -->

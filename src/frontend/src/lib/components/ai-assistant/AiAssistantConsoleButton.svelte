@@ -16,9 +16,9 @@
 
 {#if $authSignedIn && AI_ASSISTANT_CONSOLE_ENABLED}
 	<button
-		aria-label={replaceOisyPlaceholders($i18n.footer.text.ai_assistant_console_button)}
-		class={`group flex items-center justify-center overflow-hidden rounded-full bg-primary duration-500 ${styleClass ?? ''}`}
 		style={`width: ${size}px; height: ${size}px;`}
+		class={`group flex items-center justify-center overflow-hidden rounded-full bg-primary duration-500 ${styleClass ?? ''}`}
+		aria-label={replaceOisyPlaceholders($i18n.footer.text.ai_assistant_console_button)}
 		data-tid={AI_ASSISTANT_CONSOLE_BUTTON}
 		onclick={() => aiAssistantStore.open()}
 	>

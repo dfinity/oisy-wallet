@@ -30,7 +30,7 @@
 	class="flex w-full flex-col items-center md:items-start"
 	class:md:items-center={licenseAlignment === 'center'}
 >
-	<ButtonAuthenticate {onclick} {fullWidth} />
+	<ButtonAuthenticate {fullWidth} {onclick} />
 
 	<span
 		class="mt-4 flex flex-col text-sm text-tertiary"

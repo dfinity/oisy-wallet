@@ -53,7 +53,7 @@
 	let isFormValid = $derived(validName && validAddress);
 </script>
 
-<form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
+<form class="flex w-full flex-col items-center" method="POST" onsubmit={handleSubmit}>
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
 		<Avatar name={editingContact?.name} variant="xl"></Avatar>
 		<div class="w-full text-2xl font-bold text-primary md:text-3xl">
@@ -63,9 +63,9 @@
 		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
 			<InputAddressAlias
 				disableAddressField={nonNullish(modalDataAddress)}
+				{disabled}
 				bind:address={addressModel}
 				bind:isValid={validAddress}
-				{disabled}
 			/>
 		</div>
 
@@ -73,11 +73,11 @@
 			<ButtonGroup>
 				<ButtonCancel {disabled} onclick={onBack} testId={ADDRESS_BOOK_CANCEL_BUTTON} />
 				<Button
-					type="submit"
 					colorStyle="primary"
 					disabled={!isFormValid}
-					testId={ADDRESS_BOOK_SAVE_BUTTON}
 					loading={disabled}
+					testId={ADDRESS_BOOK_SAVE_BUTTON}
+					type="submit"
 				>
 					{$i18n.core.text.create}
 				</Button>

@@ -102,6 +102,6 @@
 	};
 </script>
 
-<SwapButtonWithModal onOpen={onOpenSwap} isOpen={$modalSwap}>
+<SwapButtonWithModal isOpen={$modalSwap} onOpen={onOpenSwap}>
 	<SwapModal on:nnsClose />
 </SwapButtonWithModal>

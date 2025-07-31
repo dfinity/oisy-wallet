@@ -37,15 +37,15 @@
 </script>
 
 <button
-	type="button"
+	bind:this={button}
 	class={`${colorStyle} icon flex flex-col text-center text-xs font-normal ${styleClass} ${width} ${height}`}
 	class:link
 	class:transparent
-	bind:this={button}
-	{onclick}
 	aria-label={ariaLabel}
 	data-tid={testId}
 	{disabled}
+	{onclick}
+	type="button"
 >
 	{@render icon()}
 	<span class="visually-hidden">{@render children?.()}</span>

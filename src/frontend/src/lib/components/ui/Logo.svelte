@@ -23,23 +23,23 @@
 </script>
 
 <div
+	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 	class="flex items-center justify-center overflow-hidden rounded-full ring-primary"
 	class:bg-off-white={color === 'off-white' && !isReady}
 	class:bg-white={color === 'white' && !isReady}
 	class:opacity-10={!isReady}
 	class:ring-2={ring}
-	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 	data-tid={testId}
 >
 	{#if nonNullish(src) && !loadingError}
 		<Img
-			{src}
 			{alt}
 			fitHeight
 			height={sizePx}
-			onLoad={() => (loadingError = false)}
 			onError={() => (loadingError = true)}
+			onLoad={() => (loadingError = false)}
 			rounded
+			{src}
 		/>
 	{:else}
 		<IconRandom size={sizePx} text={alt} />

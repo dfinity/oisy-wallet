@@ -28,12 +28,12 @@
 
 <span class="flex flex-col gap-1">
 	<output
-		data-tid={AMOUNT_DATA}
 		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
+		data-tid={AMOUNT_DATA}
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol)}
 			{#if $isPrivacyMode}
-				<IconDots variant="lg" times={6} styleClass="my-4.25" />
+				<IconDots styleClass="my-4.25" times={6} variant="lg" />
 			{:else}
 				<Amount
 					amount={token.balance}
@@ -44,7 +44,7 @@
 		{:else}
 			<span class:animate-pulse={$loading}>
 				{#if $isPrivacyMode}
-					<IconDots variant="lg" times={6} styleClass="my-4.25" />
+					<IconDots styleClass="my-4.25" times={6} variant="lg" />
 				{:else}
 					0.00
 				{/if}
@@ -53,25 +53,25 @@
 	</output>
 	<div class="flex flex-col items-center">
 		<Button
-			transparent
-			fullWidth
 			ariaLabel={$i18n.hero.alt.toggle_privacy_mode}
-			styleClass="bg-transparent p-0 text-xl font-medium"
+			fullWidth
 			ondblclick={() =>
 				setPrivacyMode({
 					enabled: !$isPrivacyMode,
 					withToast: false,
 					source: 'Hero - Double click on the Balance'
 				})}
+			styleClass="bg-transparent p-0 text-xl font-medium"
+			transparent
 		>
 			{#if !$isPrivacyMode}
 				<DelayedTooltip text={$i18n.hero.text.tooltip_toggle_balance}>
 					<TokenExchangeBalance
 						balance={token?.balance}
-						usdBalance={token?.usdBalance}
 						nullishBalanceMessage={replacePlaceholders($i18n.hero.text.unavailable_balance, {
 							$currencySymbol: $currentCurrencySymbol
 						})}
+						usdBalance={token?.usdBalance}
 					/>
 				</DelayedTooltip>
 			{:else}

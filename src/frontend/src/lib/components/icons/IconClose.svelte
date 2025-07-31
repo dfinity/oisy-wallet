@@ -1,15 +1,15 @@
 <!-- source: DFINITY foundation -->
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
 	<path
-		fill-rule="evenodd"
 		clip-rule="evenodd"
 		d="M24.9426 7.05727C25.4633 7.57797 25.4633 8.42219 24.9426 8.94289L8.94265 24.9429C8.42195 25.4636 7.57773 25.4636 7.05703 24.9429C6.53633 24.4222 6.53633 23.578 7.05703 23.0573L23.057 7.05727C23.5777 6.53657 24.4219 6.53657 24.9426 7.05727Z"
 		fill="white"
+		fill-rule="evenodd"
 	/>
 	<path
-		fill-rule="evenodd"
 		clip-rule="evenodd"
 		d="M7.05703 7.05727C7.57773 6.53657 8.42195 6.53657 8.94265 7.05727L24.9426 23.0573C25.4633 23.578 25.4633 24.4222 24.9426 24.9429C24.4219 25.4636 23.5777 25.4636 23.057 24.9429L7.05703 8.94289C6.53633 8.42219 6.53633 7.57797 7.05703 7.05727Z"
 		fill="white"
+		fill-rule="evenodd"
 	/>
 </svg>

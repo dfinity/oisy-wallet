@@ -24,7 +24,7 @@
 	>
 		<div class="w-full md:h-md:mt-auto">
 			{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
-				<Img {src} alt={ariaLabel} />
+				<Img alt={ariaLabel} {src} />
 			{/await}
 		</div>
 	</div>

@@ -25,8 +25,8 @@
 		bind:this={dropdown}
 		ariaLabel={$i18n.core.alt.switch_language}
 		asModalOnMobile
-		buttonFullWidth
 		buttonBorder
+		buttonFullWidth
 	>
 		{currentLang}
 
@@ -35,16 +35,16 @@
 		{/snippet}
 
 		{#snippet items()}
-			<List noPadding condensed testId={LANGUAGE_DROPDOWN}>
+			<List condensed noPadding testId={LANGUAGE_DROPDOWN}>
 				{#each SUPPORTED_LANGUAGES as [langKey, langVal], index (index + langKey)}
 					<ListItem>
 						<Button
-							onclick={() => handleLangChange(langKey)}
-							fullWidth
 							alignLeft
+							colorStyle="tertiary-alt"
+							fullWidth
+							onclick={() => handleLangChange(langKey)}
 							paddingSmall
 							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
-							colorStyle="tertiary-alt"
 							transparent
 						>
 							<span class="pt-0.75 w-[20px] text-brand-primary">

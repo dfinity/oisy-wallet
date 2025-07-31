@@ -24,13 +24,13 @@
 
 <span class="float-right flex pl-1.5 align-top">
 	{#if nonNullish(copyAddress) && nonNullish(copyAddressText)}
-		<Copy value={copyAddress} text={copyAddressText} inline testId={copyAddressTestId} />
+		<Copy inline testId={copyAddressTestId} text={copyAddressText} value={copyAddress} />
 	{/if}
 	{#if nonNullish(explorerUrl) && nonNullish(explorerUrlAriaLabel)}
 		<ExternalLink
-			iconSize="18"
-			href={explorerUrl}
 			ariaLabel={explorerUrlAriaLabel}
+			href={explorerUrl}
+			iconSize="18"
 			testId={explorerUrlTestId}
 		/>
 	{/if}

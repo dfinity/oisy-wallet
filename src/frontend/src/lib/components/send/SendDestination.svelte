@@ -31,9 +31,9 @@
 		{#snippet logo()}
 			<div class="mr-2">
 				<AvatarWithBadge
-					contact={selectedContact}
 					address={destination}
 					badge={{ type: 'addressType', address: destination }}
+					contact={selectedContact}
 				/>
 			</div>
 		{/snippet}
@@ -42,7 +42,7 @@
 			{#if isNullish(selectedContact)}
 				{addressToDisplay}
 			{:else}
-				<SendContactName contact={selectedContact} address={destination} />
+				<SendContactName address={destination} contact={selectedContact} />
 
 				<span class="text-sm text-tertiary">{addressToDisplay}</span>
 			{/if}
@@ -51,8 +51,8 @@
 		{#snippet actions()}
 			<button
 				class="text-brand-primary"
-				onclick={onIcSendDestinationStep}
 				aria-label={$i18n.core.text.back}
+				onclick={onIcSendDestinationStep}
 			>
 				<IconPenLine />
 			</button>

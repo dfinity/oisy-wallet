@@ -30,7 +30,7 @@
 	})} ${symbol}`;
 </script>
 
-<div transition:fade class="flex gap-4">
+<div class="flex gap-4" transition:fade>
 	{displayAmount}
 
 	{#if nonNullish(usdAmount)}

@@ -64,10 +64,10 @@
 	});
 </script>
 
-<form onsubmit={handleSave} method="POST" class="flex w-full flex-col items-center">
+<form class="flex w-full flex-col items-center" method="POST" onsubmit={handleSave}>
 	<ContentWithToolbar styleClass="flex flex-col gap-6 items-center w-full">
 		<Avatar name={editingContact?.name} image={editingContact?.image} variant="xl"></Avatar>
-		<InputContactName bind:contact={editingContact} bind:isValid={isFormValid} {disabled} />
+		<InputContactName {disabled} bind:contact={editingContact} bind:isValid={isFormValid} />
 
 		<!-- TODO Add address list here -->
 
@@ -76,11 +76,11 @@
 				<ButtonCancel {disabled} onclick={() => onClose()} testId={ADDRESS_BOOK_CANCEL_BUTTON}
 				></ButtonCancel>
 				<Button
-					type="submit"
 					colorStyle="primary"
 					disabled={!isFormValid}
 					loading={disabled}
 					testId={ADDRESS_BOOK_SAVE_BUTTON}
+					type="submit"
 				>
 					{$i18n.core.text.save}
 				</Button>

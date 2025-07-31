@@ -33,18 +33,18 @@
 </script>
 
 <img
-	{src}
-	{role}
+	style={fitHeight ? `max-width: inherit; height: ${height};` : undefined}
+	class={styleClass}
+	class:grayscale
+	class:rounded-full={rounded}
 	{alt}
-	{loading}
-	{width}
-	{height}
 	data-tid={testId}
 	decoding="async"
+	{height}
+	{loading}
+	{role}
+	{src}
+	{width}
 	onload={onLoad}
 	onerror={onError}
-	class:rounded-full={rounded}
-	class:grayscale
-	class={styleClass}
-	style={fitHeight ? `max-width: inherit; height: ${height};` : undefined}
 />

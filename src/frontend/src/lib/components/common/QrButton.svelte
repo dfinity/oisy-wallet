@@ -4,11 +4,11 @@
 </script>
 
 <button
-	type="button"
-	data-tid="qr-code-scanner-button"
-	on:click|preventDefault
-	aria-label={$i18n.send.text.open_qr_modal}
 	class="text-brand-primary hover:text-inherit active:text-inherit"
+	aria-label={$i18n.send.text.open_qr_modal}
+	data-tid="qr-code-scanner-button"
+	type="button"
+	on:click|preventDefault
 >
 	<IconScanLine />
 </button>

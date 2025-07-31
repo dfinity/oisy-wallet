@@ -10,6 +10,6 @@
 	let { onclick, testId }: Props = $props();
 </script>
 
-<Button colorStyle="primary" paddingSmall {testId} fullWidth type="button" {onclick}>
+<Button colorStyle="primary" fullWidth {onclick} paddingSmall {testId} type="button">
 	{$i18n.core.text.done}
 </Button>

@@ -36,44 +36,44 @@
 		</p>
 		<p>
 			<ExternalLink
-				styleClass="font-semibold"
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_introduction)}
 				href={OISY_DOCS_URL}
-				testId={HELP_AUTH_INTRODUCTION_LINK}
 				iconAsLast
+				styleClass="font-semibold"
+				testId={HELP_AUTH_INTRODUCTION_LINK}
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_introduction)}
 			</ExternalLink>
 		</p>
 		<p>
 			<ExternalLink
-				styleClass="font-semibold"
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_docs)}
 				href={OISY_INTERNET_IDENTITY_URL}
-				testId={HELP_AUTH_DOCS_LINK}
 				iconAsLast
+				styleClass="font-semibold"
+				testId={HELP_AUTH_DOCS_LINK}
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_docs)}
 			</ExternalLink>
 		</p>
 		<p>
 			<ExternalLink
-				styleClass="font-semibold"
 				ariaLabel={$i18n.auth.help.alt.other_private_key}
 				href={OISY_FAQ_URL}
-				testId={HELP_AUTH_PRIVATE_KEY_LINK}
 				iconAsLast
+				styleClass="font-semibold"
+				testId={HELP_AUTH_PRIVATE_KEY_LINK}
 			>
 				{$i18n.auth.help.text.other_private_key}
 			</ExternalLink>
 		</p>
 		<p class="mb-0">
 			<ExternalLink
-				styleClass="font-semibold"
 				ariaLabel={replaceOisyPlaceholders($i18n.auth.help.alt.other_asset_control)}
 				href={OISY_ACCESS_CONTROL_URL}
-				testId={HELP_AUTH_ASSET_CONTROL_LINK}
 				iconAsLast
+				styleClass="font-semibold"
+				testId={HELP_AUTH_ASSET_CONTROL_LINK}
 			>
 				{replaceOisyPlaceholders($i18n.auth.help.text.other_asset_control)}
 			</ExternalLink>

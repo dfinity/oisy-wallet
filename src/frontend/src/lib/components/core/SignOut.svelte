@@ -20,11 +20,11 @@
 
 <span class="mb-1 mt-2">
 	<Button
-		onclick={logout}
 		colorStyle="secondary"
-		testId={LOGOUT_BUTTON}
-		styleClass="py-2"
 		fullWidth
+		onclick={logout}
+		styleClass="py-2"
+		testId={LOGOUT_BUTTON}
 	>
 		<IconLogout />
 		{$i18n.auth.text.logout}

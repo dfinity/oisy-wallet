@@ -30,15 +30,15 @@
 </script>
 
 <Transaction
-	onClick={() => modalStore.openBtcTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
-	{type}
-	timestamp={Number(timestamp)}
-	{status}
-	{token}
-	{iconType}
-	to={nonNullish(to?.[0]) ? to[0] : undefined}
 	{from}
+	{iconType}
+	onClick={() => modalStore.openBtcTransaction({ id: modalId, data: { transaction, token } })}
+	{status}
+	timestamp={Number(timestamp)}
+	to={nonNullish(to?.[0]) ? to[0] : undefined}
+	{token}
+	{type}
 >
 	{label}
 </Transaction>

@@ -13,7 +13,7 @@
 	let { networkName = $bindable(), availableNetworks, disabled = false }: Props = $props();
 </script>
 
-<Value ref="network" element="div">
+<Value element="div" ref="network">
 	{#snippet label()}
 		{$i18n.tokens.manage.text.network}:
 	{/snippet}
@@ -21,12 +21,12 @@
 	{#snippet content()}
 		<div
 			id="network"
+			style={`${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
 			class="network mt-1 pt-0.5"
 			class:disabled
-			style={`${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
 		>
-			<Dropdown name="network" bind:selectedValue={networkName} {disabled}>
-				<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
+			<Dropdown name="network" {disabled} bind:selectedValue={networkName}>
+				<option class:hidden={nonNullish(networkName)} disabled selected value={undefined}
 					>{$i18n.tokens.manage.placeholder.select_network}</option
 				>
 				{#each availableNetworks as network (network.id)}

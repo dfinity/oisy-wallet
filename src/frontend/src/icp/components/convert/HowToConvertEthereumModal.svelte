@@ -58,13 +58,13 @@
 	};
 </script>
 
-<ConvertContexts {sourceToken} {destinationToken}>
+<ConvertContexts {destinationToken} {sourceToken}>
 	<WizardModal
+		bind:this={modal}
+		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
+		onClose={close}
 		{steps}
 		bind:currentStep
-		bind:this={modal}
-		onClose={close}
-		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 

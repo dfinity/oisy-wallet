@@ -25,17 +25,17 @@
 </script>
 
 <ExternalLink
+	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.documentation)}
 	{asMenuItem}
 	{asMenuItemCondensed}
 	href={OISY_DOCS_URL}
-	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.documentation)}
 	iconVisible={false}
 	styleClass={asMenuItem ? '' : 'font-bold'}
+	{testId}
 	trackEvent={{
 		name: TRACK_COUNT_OPEN_DOCUMENTATION,
 		metadata: { source: trackEventSource ?? '' }
 	}}
-	{testId}
 >
 	{#if asMenuItem}
 		<IconBook />

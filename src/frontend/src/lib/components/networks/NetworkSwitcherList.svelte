@@ -34,22 +34,22 @@
 </script>
 
 <NetworkButton
-	usdBalance={mainnetTokensUsdBalance}
-	{selectedNetworkId}
 	{delayOnNetworkSelect}
 	{labelsSize}
 	{onSelected}
+	{selectedNetworkId}
+	usdBalance={mainnetTokensUsdBalance}
 />
 
 <ul class="flex list-none flex-col">
 	{#each $networksMainnets as network (network.id)}
 		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
 			><MainnetNetwork
-				{network}
-				{selectedNetworkId}
 				{delayOnNetworkSelect}
 				{labelsSize}
+				{network}
 				{onSelected}
+				{selectedNetworkId}
 			/></li
 		>
 	{/each}
@@ -64,11 +64,11 @@
 		{#each $networksTestnets as network (network.id)}
 			<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
 				><Network
-					{network}
-					{selectedNetworkId}
 					{delayOnNetworkSelect}
 					{labelsSize}
+					{network}
 					{onSelected}
+					{selectedNetworkId}
 				/></li
 			>
 		{/each}

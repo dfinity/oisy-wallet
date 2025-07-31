@@ -56,11 +56,11 @@
 </script>
 
 <WizardModal
-	{steps}
-	bind:currentStep
 	bind:this={modal}
 	onClose={() => dispatch('nnsClose')}
+	{steps}
 	testId={RECEIVE_TOKENS_MODAL}
+	bind:currentStep
 >
 	{#snippet title()}
 		{#if currentStep?.name === steps[1].name}
@@ -72,13 +72,13 @@
 
 	{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
 		<ReceiveAddressQrCode
-			on:icBack={displayAddresses}
 			{address}
 			{addressLabel}
 			{addressToken}
+			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
 			network={addressToken.network}
 			qrCodeAction={{ enabled: false }}
-			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
+			on:icBack={displayAddresses}
 		/>
 	{:else}
 		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />

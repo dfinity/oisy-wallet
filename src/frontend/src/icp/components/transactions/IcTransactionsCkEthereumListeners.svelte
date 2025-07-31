@@ -27,8 +27,8 @@
 	);
 </script>
 
-<IcCkListener initFn={initCkETHMinterInfoWorker} token={ckEthereumNativeToken} {minterCanisterId} />
+<IcCkListener initFn={initCkETHMinterInfoWorker} {minterCanisterId} token={ckEthereumNativeToken} />
 
-<CkEthereumPendingTransactionsListener {token} {ckEthereumNativeToken} />
+<CkEthereumPendingTransactionsListener {ckEthereumNativeToken} {token} />
 
 {@render children?.()}

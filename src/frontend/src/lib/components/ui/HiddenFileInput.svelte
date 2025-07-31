@@ -17,9 +17,9 @@
 
 <input
 	bind:this={fileInput}
-	type="file"
+	class="visually-hidden"
 	accept="image/*"
 	data-tid={testId}
-	class="visually-hidden"
 	onchange={(e: Event) => onChange?.(e)}
+	type="file"
 />

@@ -51,23 +51,23 @@
 </script>
 
 <a
+	style={`${inline ? 'vertical-align: sub;' : ''}`}
+	class="inline-flex items-center gap-2 no-underline {styleClass}"
+	class:active:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
+	class:active:text-inherit={color === 'blue' && !asButton && !asMenuItem}
+	class:as-button={asButton}
+	class:flex-row-reverse={iconAsLast}
+	class:hover:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
+	class:hover:text-inherit={color === 'blue' && !asButton && !asMenuItem}
+	class:text-brand-primary-alt={!asButton && !asMenuItem}
+	aria-label={ariaLabel}
 	{href}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="inline-flex items-center gap-2 no-underline {styleClass}"
-	aria-label={ariaLabel}
-	style={`${inline ? 'vertical-align: sub;' : ''}`}
 	data-tid={testId}
-	class:as-button={asButton}
-	class:text-brand-primary-alt={!asButton && !asMenuItem}
-	class:hover:text-inherit={color === 'blue' && !asButton && !asMenuItem}
-	class:active:text-inherit={color === 'blue' && !asButton && !asMenuItem}
-	class:hover:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
-	class:active:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
 	class:w-full={fullWidth}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
-	class:flex-row-reverse={iconAsLast}
 	{onclick}
 >
 	{#if iconVisible}
