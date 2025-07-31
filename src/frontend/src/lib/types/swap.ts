@@ -26,7 +26,7 @@ export enum VeloraSwapTypes {
 export enum SwapErrorCodes {
 	WITHDRAW_FAILED = 'withdraw_failed',
 	DEPOSIT_FAILED = 'deposit_error',
-	SWAP_FAILED_WITHDRAW_SUCESS = 'swap_failed_withdraw_success',
+	SWAP_FAILED_WITHDRAW_SUCCESS = 'swap_failed_withdraw_success',
 	SWAP_SUCCESS_WITHDRAW_FAILED = 'swap_success_withdraw_failed',
 	SWAP_FAILED_2ND_WITHDRAW_SUCCESS = 'swap_failed_2nd_withdraw_success',
 	SWAP_FAILED_WITHDRAW_FAILED = 'swap_failed_withdraw_failed',

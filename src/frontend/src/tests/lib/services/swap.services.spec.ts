@@ -203,7 +203,7 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 		const result = await withdrawICPSwapAfterFailedSwap(baseParams);
 
 		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
-		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS);
+		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS);
 	});
 
 	it('should succeed on second withdraw attempt after first fails', async () => {

@@ -327,7 +327,7 @@ export const fetchIcpSwap = async ({
 		}
 		// Inform the user that the swap failed, but refund was successful
 		throwSwapError({
-			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS,
+			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
 			message: get(i18n).swap.error.swap_failed_withdraw_success
 		});
 	}
@@ -393,7 +393,7 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 		await withdraw(baseParams);
 
 		return {
-			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS,
+			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
 			message: get(i18n).swap.error.swap_failed_withdraw_success
 		};
 	} catch (_: unknown) {

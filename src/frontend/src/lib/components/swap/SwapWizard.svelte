@@ -144,7 +144,7 @@
 				} else {
 					if (
 						err.code === SwapErrorCodes.DEPOSIT_FAILED ||
-						err.code === SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCESS
+						err.code === SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS
 					) {
 						failedSwapError.set({
 							message: $i18n.swap.error[err.code],
