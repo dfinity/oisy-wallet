@@ -37,6 +37,16 @@
 		failedSwapError.set(undefined);
 		dispatch('icBack');
 	};
+
+	const onClose = () => {
+		failedSwapError.set(undefined);
+		dispatch('icClose');
+	};
+
+	let isManualWithdrawSuccess: boolean;
+	$: isManualWithdrawSuccess =
+		$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS &&
+		$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success;
 </script>
 
 <ContentWithToolbar>
@@ -109,11 +119,17 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={onClick} />
+			{#if isManualWithdrawSuccess}
+				<Button onclick={onClose}>{$i18n.core.text.close}</Button>
+			{:else}
+				<ButtonBack onclick={onClick} />
 
-			<Button onclick={() => dispatch('icSwap')}>
-				{$i18n.swap.text.swap_button}
-			</Button>
+				<Button onclick={() => dispatch('icSwap')}>
+					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
+						? $i18n.transaction.type.withdraw
+						: $i18n.swap.text.swap_button}
+				</Button>
+			{/if}
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>
