@@ -1,5 +1,6 @@
 import type { SwapErrorCodes } from '$lib/types/swap';
 
+//TODO: revisit throwSwapError
 export const throwSwapError = ({
 	code,
 	message,

@@ -122,7 +122,8 @@
 						$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED),
 				withdrawDestinationTokens:
 					nonNullish($failedSwapError?.errorType) &&
-					$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED
+					($failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
+						$failedSwapError?.swapSucceded)
 			});
 
 			progress(ProgressStepsSwap.DONE);
@@ -157,6 +158,7 @@
 					message: err.message,
 					variant: err.variant ?? 'info',
 					errorType: err.code,
+					swapSucceded: err.swapSucceded,
 					url: {
 						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
 						text: 'icpswap.com'
