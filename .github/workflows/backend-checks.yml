@@ -48,7 +48,8 @@ jobs:
       - name: Check if backend files changed
         id: changes
         uses: ./.github/actions/check-backend-changes
-      - if: steps.changes.outputs.any == 'true'
+      - name: Install yq
+        if: steps.changes.outputs.any == 'true'
         run: sudo snap install yq
       - name: Dependencies are defined in the workspace
         if: steps.changes.outputs.any == 'true'
