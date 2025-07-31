@@ -43,7 +43,11 @@
 					}
 				] as ProgressSteps)
 			: []),
-
+		{
+			step: ProgressStepsSwap.SWAP,
+			text: $i18n.swap.text.swapping,
+			state: 'next'
+		},
 		...(swapWithWithdrawing
 			? ([
 					{
@@ -53,11 +57,6 @@
 					}
 				] as ProgressSteps)
 			: []),
-		{
-			step: ProgressStepsSwap.SWAP,
-			text: $i18n.swap.text.swapping,
-			state: 'next'
-		},
 		{
 			step: ProgressStepsSwap.UPDATE_UI,
 			text: $i18n.swap.text.refreshing_ui,
