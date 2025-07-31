@@ -1,0 +1,31 @@
+name: Check Backend Changes
+
+description: Check for changes in the backend-related code and return a boolean output.
+
+outputs:
+  any:
+    description: 'True if any relevant backend file changed'
+    value: ${{ steps.changes.outputs.any }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check for changes
+      uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+      id: changes
+      with:
+        # Scripts, GitHub actions that contain 'backend' in their path.
+        # The backend source code.
+        # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
+        # The dockerfile used in this CI run, and the scripts it COPY's.
+        # There may be some files in the frontend folder that contains 'backend' in their name.
+        filters: |
+          any:
+            - '**/*backend*'
+            - 'src/backend/**'
+            - 'src/shared/**'
+            - '**/Cargo*'
+            - '**/*rust*'
+            - 'Dockerfile'
+            - 'docker/**'
+            - '!src/frontend/**'
