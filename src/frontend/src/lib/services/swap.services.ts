@@ -231,6 +231,8 @@ export const fetchIcpSwap = async ({
 		ledgerCanisterId: sourceLedgerCanisterId
 	};
 
+	// TODO: Revisit this logic once `tryToWithdraw` and `withdrawDestinationTokens` are provided.
+	// Let's keep it like this for now and adjust it later.
 	if (tryToWithdraw) {
 		if (!withdrawDestinationTokens) {
 			setFailedProgressStep?.(ProgressStepsSwap.SWAP);
