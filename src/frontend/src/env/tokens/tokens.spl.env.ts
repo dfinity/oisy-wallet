@@ -13,6 +13,7 @@ import { DEVNET_EURC_TOKEN, EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eur
 import { GLDX_TOKEN } from '$env/tokens/tokens-spl/tokens.gldx.env';
 import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
 import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
+import { HDX_TOKEN } from '$env/tokens/tokens-spl/tokens.hdx.env';
 import { HONX_TOKEN } from '$env/tokens/tokens-spl/tokens.honx.env';
 import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
@@ -25,6 +26,7 @@ import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
 import { PEPX_TOKEN } from '$env/tokens/tokens-spl/tokens.pepx.env';
+import { PGX_TOKEN } from '$env/tokens/tokens-spl/tokens.pgx.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { QQQX_TOKEN } from '$env/tokens/tokens-spl/tokens.qqqx.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
@@ -58,6 +60,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	GLDX_TOKEN,
 	GMEX_TOKEN,
 	GOOGLX_TOKEN,
+	HDX_TOKEN,
 	HONX_TOKEN,
 	HOODX_TOKEN,
 	JUP_TOKEN,
@@ -70,6 +73,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	ORCA_TOKEN,
 	PENGU_TOKEN,
 	PEPX_TOKEN,
+	PGX_TOKEN,
 	POPCAT_TOKEN,
 	QQQX_TOKEN,
 	RAY_TOKEN,
