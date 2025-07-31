@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { isEmptyString, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isEmptyString, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
