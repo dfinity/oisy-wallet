@@ -39,6 +39,7 @@
 		receiveAmount: number | undefined;
 		slippageValue: OptionAmount;
 		swapProgressStep: string;
+		swapFailedProgressSteps?: string[];
 		currentStep: WizardStep | undefined;
 	}
 	let {
@@ -46,6 +47,8 @@
 		receiveAmount = $bindable<number | undefined>(),
 		slippageValue = $bindable<OptionAmount>(),
 		swapProgressStep = $bindable<string>(),
+		swapFailedProgressSteps = $bindable<string[]>(),
+
 		currentStep
 	}: Props = $props();
 
@@ -57,6 +60,16 @@
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContextType>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
+
+	const setFailedProgressStep = (step: ProgressStepsSwap) => {
+		if (!swapFailedProgressSteps.includes(step)) {
+			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
+		}
+	};
+
+	const clearFailedProgressStep = () => {
+		swapFailedProgressSteps = [];
+	};
 
 	const dispatch = createEventDispatcher();
 
@@ -90,7 +103,7 @@
 		dispatch('icNext');
 
 		try {
-			failedSwapError.set(undefined);
+			clearFailedProgressStep();
 
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
@@ -102,6 +115,7 @@
 				slippageValue,
 				sourceTokenFee,
 				isSourceTokenIcrc2: $isSourceTokenIcrc2,
+				setFailedProgressStep,
 				tryToWithdraw:
 					nonNullish($failedSwapError?.errorType) &&
 					($failedSwapError?.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED ||
