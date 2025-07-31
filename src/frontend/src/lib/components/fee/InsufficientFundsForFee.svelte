@@ -4,7 +4,11 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let testId: string | undefined = undefined;
+	interface Props {
+		testId?: string;
+	}
+
+	let { testId }: Props = $props();
 </script>
 
 <div transition:slide={SLIDE_DURATION} data-tid={testId}>
