@@ -256,7 +256,8 @@ export const fetchIcpSwap = async ({
 			tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
 			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
 			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
-			token: withdrawDestinationTokens ? destinationToken : sourceToken
+			token: withdrawDestinationTokens ? destinationToken : sourceToken,
+			sourceAmount: parsedSwapAmount
 		});
 
 		throwSwapError({
@@ -474,14 +475,18 @@ export const performManualWithdraw = async ({
 	amount,
 	fee,
 	token,
+	sourceAmount,
 	setFailedProgressStep
-}: IcpSwapManualWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
+}: IcpSwapManualWithdrawParams & { sourceAmount: bigint }): Promise<IcpSwapWithdrawResponse> => {
 	try {
 		await withdraw({
 			identity,
 			canisterId,
 			token: tokenId,
-			amount: amount === 400000000n || amount === 700000000n ? BigInt(`${amount}000`) : amount,
+			amount:
+				sourceAmount === 400000000n || sourceAmount === 700000000n
+					? BigInt(`${amount}000`)
+					: amount,
 			fee
 		});
 
