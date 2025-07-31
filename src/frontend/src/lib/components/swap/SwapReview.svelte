@@ -23,8 +23,6 @@
 	export let receiveAmount: number | undefined;
 	export let slippageValue: OptionAmount;
 
-	let isManualWithdrawSuccess: boolean;
-
 	const dispatch = createEventDispatcher();
 
 	const {
@@ -45,6 +43,7 @@
 		dispatch('icClose');
 	};
 
+	let isManualWithdrawSuccess: boolean;
 	$: isManualWithdrawSuccess =
 		$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS &&
 		$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success;
