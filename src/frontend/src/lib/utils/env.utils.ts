@@ -7,13 +7,10 @@ import type { OptionString } from '$lib/types/string';
 export const parseBoolEnvVar = (value: OptionString, check = true): boolean => {
 	const normalised = value?.toLowerCase();
 	if (normalised === '') {
-		// Try to extract the source location for better debugging
-		const { stack } = new Error();
-		const callerLine = stack?.split('\n')[2] ?? '';
-		const filePathMatch = callerLine.match(/[/\\][^/\\]+$/);
-		const fileName = filePathMatch?.[0]?.replace(/^\/|\\/, '') ?? 'unknown';
 		throw new Error(
-			"[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow."
+			'[parseBoolEnvVar] Empty string received as environment variable. ' +
+				'Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. ' +
+				"If you don't want to set it as GitHub secret, remove it from the workflow."
 		);
 	}
 	return JSON.parse(normalised ?? 'false') === check;
