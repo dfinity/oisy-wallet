@@ -54,6 +54,10 @@ describe('env.utils', () => {
 
 		it('should throw for empty strings', () => {
 			expect(() => parseBoolEnvVar('')).toThrow('Unexpected end of JSON input');
+
+			expect(console.error).toHaveBeenCalledExactlyOnceWith(
+				"[parseBoolEnvVar] Empty string received as environment variable. Defaulting to 'false'. Caller file: env.utils.spec.ts:56:17"
+			);
 		});
 
 		it('should return false for nullish values', () => {
@@ -94,6 +98,10 @@ describe('env.utils', () => {
 
 		it('should throw for empty strings', () => {
 			expect(() => parseBoolEnvVar('')).toThrow('Unexpected end of JSON input');
+
+			expect(console.error).toHaveBeenCalledExactlyOnceWith(
+				"[parseBoolEnvVar] Empty string received as environment variable. Defaulting to 'false'. Caller file: env.utils.spec.ts:100:17"
+			);
 		});
 
 		it('should return false for nullish values', () => {
