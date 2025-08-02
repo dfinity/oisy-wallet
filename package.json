@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.5.11",
+	"version": "1.6.1",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -33,9 +33,9 @@
 		"test:merge": "tsc --project tsconfig.spec.json --noEmit && vitest run --coverage --merge-reports",
 		"cargo:test": "./scripts/test.backend.sh",
 		"clippy": "./scripts/lint.rust.sh",
-		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint .",
+		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint --cache .",
 		"format:file": "prettier --write \"${npm_config_file}\" && eslint --fix \"${npm_config_file}\"",
-		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint --fix .",
+		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint --fix --cache .",
 		"format:backend": "./scripts/format.sh",
 		"generate": "scripts/generate.sh",
 		"deploy": "scripts/deploy.sh",
@@ -69,7 +69,7 @@
 		"@dfinity/candid": "^2.4.1",
 		"@dfinity/ckbtc": "^3.1.14",
 		"@dfinity/cketh": "^3.4.11",
-		"@dfinity/gix-components": "^6.0.0-next-2025-07-11.1",
+		"@dfinity/gix-components": "^7.0.0-next-2025-07-30",
 		"@dfinity/ledger-icp": "^4.0.0",
 		"@dfinity/ledger-icrc": "^2.9.1",
 		"@dfinity/oisy-wallet-signer": "^0.2.3",
@@ -100,7 +100,7 @@
 		"zod": "^3.25.75"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.1.14",
+		"@dfinity/eslint-config-oisy-wallet": "^0.2.1",
 		"@dfinity/ic-management": "^6.2.1",
 		"@dfinity/identity-secp256k1": "^2.4.1",
 		"@dfinity/internet-identity-playwright": "^0.0.5",

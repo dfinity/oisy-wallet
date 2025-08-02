@@ -6,14 +6,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		onclick: () => void;
+		onClick: () => void;
 	}
 
-	let { onclick }: Props = $props();
+	let { onClick }: Props = $props();
 </script>
 
 <ButtonHero
-	{onclick}
+	onclick={onClick}
 	disabled={$isBusy}
 	ariaLabel={$i18n.receive.text.receive}
 	testId={RECEIVE_TOKENS_MODAL_OPEN_BUTTON}

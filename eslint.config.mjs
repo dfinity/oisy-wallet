@@ -7,6 +7,7 @@ export default [
 
 	{
 		rules: {
+			'local-rules/use-option-type-wrapper': 'error',
 			// TODO: re-enable this rule when it includes `expect` statements nested in callable functions.
 			'vitest/expect-expect': ['off']
 		}
@@ -17,6 +18,7 @@ export default [
 			'**/.DS_Store',
 			'**/node_modules',
 			'build',
+			'.dfx',
 			'.svelte-kit',
 			'package',
 			'**/.env',

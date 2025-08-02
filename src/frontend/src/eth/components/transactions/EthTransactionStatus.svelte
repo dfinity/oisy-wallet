@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
@@ -9,14 +9,18 @@
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
 
-	export let blockNumber: number;
-	export let token: Token;
+	interface Props {
+		blockNumber: number;
+		token: Token;
+	}
+
+	let { blockNumber, token }: Props = $props();
 
 	//TODO: upgrade component to svelte 5 and check if async works properly in onMount component
 
-	let listener: WebSocketListener | undefined = undefined;
+	let listener = $state<WebSocketListener | undefined>();
 
-	let currentBlockNumber: number | undefined;
+	let currentBlockNumber = $state<number | undefined>(undefined);
 
 	const loadCurrentBlockNumber = async () => {
 		try {
@@ -40,21 +44,27 @@
 
 	const debounceLoadCurrentBlockNumber = debounce(loadCurrentBlockNumber);
 
-	onMount(() => {
-		loadCurrentBlockNumber();
-
+	const initListener = () => {
 		listener = initMinedTransactionsListener({
 			// eslint-disable-next-line require-await
 			callback: async () => debounceLoadCurrentBlockNumber(),
 			networkId: token.network.id
 		});
+	};
+
+	onMount(() => {
+		loadCurrentBlockNumber();
 	});
 
 	onDestroy(disconnect);
 
-	let status: 'included' | 'safe' | 'finalised' | undefined;
+	let status = $state<'included' | 'safe' | 'finalised' | undefined>();
 
-	$: (() => {
+	$effect(() => {
+		if (status === 'finalised') {
+			return;
+		}
+
 		if (isNullish(currentBlockNumber)) {
 			status = undefined;
 			return;
@@ -73,9 +83,20 @@
 		}
 
 		status = 'finalised';
+	});
 
-		disconnect();
-	})();
+	$effect(() => {
+		if (status === 'finalised') {
+			disconnect();
+			return;
+		}
+
+		if (nonNullish(untrack(() => listener))) {
+			return;
+		}
+
+		initListener();
+	});
 </script>
 
 <label for="to">{$i18n.transaction.text.status}</label>

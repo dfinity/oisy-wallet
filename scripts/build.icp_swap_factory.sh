@@ -19,7 +19,7 @@ EOF
 DFX_NETWORK="${DFX_NETWORK:-local}"
 export ICP_SWAP_FACTORY_BUILDENV="$DFX_NETWORK"
 
-FACTORY_RELEASE_URL="https://raw.githubusercontent.com/ICPSwap-Labs/docs/82ce96a5c401d78c5b3d34b001495943c169bc29/_canister/SwapFactory"
+FACTORY_RELEASE_URL="https://raw.githubusercontent.com/ICPSwap-Labs/docs/ac989c62fb65ed39769dbebfa94eb57f90c86d8f/_canister/SwapFactory"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${FACTORY_RELEASE_URL}/SwapFactory.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
@@ -66,7 +66,8 @@ cat <<EOF >"$ARG_FILE"
   principal "$GOVERNANCE_CID",
   principal "$PASSCODE_MANAGER_CID",
   principal "$BACKUP_CID",
-  opt principal "$FEE_RECEIVER_CID"
+  opt principal "$FEE_RECEIVER_CID",
+  principal "$INFO_CID",
 )
 EOF
 

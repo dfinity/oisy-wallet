@@ -8,7 +8,13 @@ import type { NetworkId } from '$lib/types/network';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
+import {
+	Alchemy,
+	AlchemySubscription,
+	type AlchemyEventType,
+	type AlchemySettings,
+	type Network
+} from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -52,18 +58,19 @@ export const initMinedTransactionsListener = ({
 }): WebSocketListener => {
 	let provider: Alchemy | null = new Alchemy(alchemyConfig(networkId));
 
-	provider.ws.on(
-		{
-			method: AlchemySubscription.MINED_TRANSACTIONS,
-			hashesOnly: true,
-			addresses: nonNullish(toAddress) ? [{ to: toAddress }] : undefined
-		},
-		listener
-	);
+	const event: AlchemyEventType = {
+		method: AlchemySubscription.MINED_TRANSACTIONS,
+		hashesOnly: true,
+		addresses: nonNullish(toAddress) ? [{ to: toAddress }] : undefined
+	};
+
+	provider.ws.on(event, listener);
 
 	return {
 		// eslint-disable-next-line require-await
 		disconnect: async () => {
+			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have the effect of doubling the triggers. That's why we reset it to null.
+			provider?.ws.off(event);
 			provider?.ws.removeAllListeners();
 			provider = null;
 		}
@@ -83,19 +90,19 @@ export const initPendingTransactionsListener = ({
 }): WebSocketListener => {
 	let provider: Alchemy | null = new Alchemy(alchemyConfig(networkId));
 
-	provider.ws.on(
-		{
-			method: AlchemySubscription.PENDING_TRANSACTIONS,
-			toAddress,
-			hashesOnly
-		},
-		listener
-	);
+	const event: AlchemyEventType = {
+		method: AlchemySubscription.PENDING_TRANSACTIONS,
+		toAddress,
+		hashesOnly
+	};
+
+	provider.ws.on(event, listener);
 
 	return {
 		// eslint-disable-next-line require-await
 		disconnect: async () => {
-			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have for effect to double the triggers. That's why we reset it to null.
+			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have the effect of doubling the triggers. That's why we reset it to null.
+			provider?.ws.off(event);
 			provider?.ws.removeAllListeners();
 			provider = null;
 		}

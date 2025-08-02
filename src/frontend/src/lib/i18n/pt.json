@@ -102,6 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Descentralizado",
 			"logout": "Sair",
+			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP e mais",
 			"instant_and_private": "Acesso instantâneo e privado em qualquer lugar",
@@ -465,12 +466,12 @@
 		"error": {
 			"no_alchemy_config": "Nenhuma configuração Alchemy para a rede $network",
 			"no_alchemy_provider": "Nenhum provedor Alchemy para a rede $network",
-			"no_alchemy_erc20_provider": "Nenhum provedor Alchemy ERC20 para a rede $network",
 			"no_etherscan_provider": "Nenhum provedor Etherscan para a rede $network",
 			"no_infura_provider": "Nenhum provedor Infura para a rede $network",
 			"no_infura_cketh_provider": "Nenhum provedor Infura CkETH para a rede $network",
 			"no_infura_erc20_provider": "Nenhum provedor Infura ERC20 para a rede $network",
 			"no_infura_erc721_provider": "Nenhum provedor Infura ERC721 para a rede $network",
+			"no_infura_erc1155_provider": "Nenhum provedor Infura ERC1155 para a rede $network",
 			"no_infura_erc20_icp_provider": "Nenhum provedor Infura ERC20 ICP para a rede $network",
 			"no_solana_network": "Nenhuma rede Solana para a rede $network",
 			"eth_address_unknown": "Endereço ETH desconhecido.",
@@ -492,9 +493,10 @@
 			"transaction_price": "Erro ao carregar a estimativa do preço de uma transação.",
 			"icrc_canisters": "Erro ao carregar os canisters ICRC.",
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
+			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",
+			"erc1155_custom_tokens": "Erro ao carregar o token personalizado ERC1155.",
 			"erc20_user_tokens": "Erro ao carregar os tokens de usuário ERC20.",
 			"spl_custom_tokens": "Erro ao carregar o token personalizado SPL.",
-			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",
 			"erc20_user_token": "Erro ao habilitar o token gêmeo ERC20.",
 			"icrc_custom_token": "Erro ao carregar o token personalizado ICRC.",
 			"loading_wallet_timeout": "Sua carteira requer alguns dados iniciais que ainda não foram carregados. Por favor, tente novamente.",
@@ -506,7 +508,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Seu saldo",
-			"unavailable_balance": "$ valor não disponível",
+			"unavailable_balance": "$currencySymbol valor não disponível",
 			"hidden_balance": "O seu saldo está escondido",
 			"top_up": "Carregue sua carteira para começar a usá-la!",
 			"learn_more_about_erc20_icp": "Saiba mais sobre ERC20 ICP no Ethereum.",
@@ -818,8 +820,10 @@
 			"select": "Selecionar >",
 			"select_swap_provider": "Selecionar provedor de troca",
 			"open_icp_swap": "Abrir site do ICP Swap",
+			"open_instructions_link": "Abrir o link com as instruções",
 			"select_token": "Selecionar token",
-			"select_network_filter": "Selecionar rede"
+			"select_network_filter": "Selecionar rede",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",
@@ -827,9 +831,16 @@
 			"unexpected_missing_data": "Algo deu errado ao iniciar uma transação de troca.",
 			"slippage_exceeded": "$oisy_short protege você: A negociação está fora da sua tolerância de deslizamento de $maxSlippage%. Por favor, ajuste o deslizamento máximo e tente novamente.",
 			"pool_not_found": "Troca falhou. Pool não encontrada.",
-			"deposit_error": "Troca falhou. Não foi possível depositar seus tokens no pool. Por favor, tente novamente.",
+			"deposit_error": "O depósito dos fundos para a troca falhou. Tente novamente ou altere o provedor da troca.",
 			"withdraw_failed": "A troca falhou e a retirada também falhou. Por favor, verifique seu saldo não utilizado e tente a retirada manual: ",
-			"swap_failed_withdraw_success": "Troca falhou. Seus tokens foram reembolsados com sucesso. Você pode tentar novamente ou aumentar a tolerância a deslizamento."
+			"swap_failed_withdraw_success": "A troca falhou e seus tokens foram reembolsados com sucesso. Tente novamente ou altere o provedor da troca.",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
+			"swap_failed_instruction_link": "estas instruções ",
+			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
@@ -908,7 +919,7 @@
 				"custom_tokens_not_supported": "A rede selecionada não suporta tokens personalizados."
 			},
 			"error": {
-				"loading_metadata": "Erro ao carregar os metadados do token.",
+				"loading_metadata": "O endereço fornecido não corresponde a um token válido na rede selecionada.",
 				"no_metadata": "Nenhum metadado para o token é fornecido. Isso é inesperado.",
 				"unexpected_ledger": "Algo deu errado ao validar o canister Ledger.",
 				"unexpected_index": "Algo deu errado ao validar o canister Index.",
@@ -977,7 +988,6 @@
 			"unexpected": "Algo deu errado ao salvar o token.",
 			"unexpected_hiding": "Algo deu errado ao ocultar o token.",
 			"already_available": "Token já disponível.",
-			"loading_metadata": "Erro ao carregar os metadados do token.",
 			"not_toggleable": "O token não é alternável, não pode ser ocultado.",
 			"incomplete_metadata": "Nenhum nome ou símbolo é fornecido nos metadados.",
 			"duplicate_metadata": "Um token com nome ou símbolo semelhante já existe.",
@@ -988,7 +998,15 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT"
+			"title": "NFT",
+			"title_empty": "Seus NFT aparecerão aqui",
+			"description_empty": "Parece que você ainda não recebeu NFT"
+		},
+		"alt": {
+			"placeholder_image": "Nenhum NFT por enquanto",
+			"card": {
+				"image": "Imagem do NFT com token ID: $tokenId"
+			}
 		}
 	},
 	"fee": {
@@ -1277,7 +1295,14 @@
 		},
 		"avatar": {
 			"default": "Avatar padrão",
-			"avatar_for": "Avatar para"
+			"avatar_for": "Avatar para",
+			"avatar_loading": "O avatar está carregando"
+		},
+		"edit_avatar": {
+			"menu_title": "Imagem do Contato",
+			"upload_image": "Carregar",
+			"replace_image": "Trocar",
+			"remove_image": "Remover"
 		},
 		"show_contact": {
 			"title": "Contato",
