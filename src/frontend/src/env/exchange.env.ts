@@ -6,6 +6,7 @@ export const TEST_ENV_VAR = true;
 
 console.log(
 	'TEST_ENV_VAR',
+	import.meta.env.VITE_TEST_ENV_VAR,
 	import.meta.env['VITE_TEST_ENV_VAR'],
 	typeof import.meta.env['VITE_TEST_ENV_VAR']
 );
