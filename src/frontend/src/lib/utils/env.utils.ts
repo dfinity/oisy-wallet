@@ -13,7 +13,7 @@ export const parseBoolEnvVar = (value: OptionString, check = true): boolean => {
 		const filePathMatch = callerLine.match(/[/\\][^/\\]+$/);
 		const fileName = filePathMatch?.[0]?.replace(/^\/|\\/, '') ?? 'unknown';
 		console.error(
-			`[parseBoolEnvVar] Empty string received as environment variable. Caller file: ${fileName}`
+			`[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow. Caller file: ${fileName}`
 		);
 	}
 	return JSON.parse(normalised ?? 'false') === check;
