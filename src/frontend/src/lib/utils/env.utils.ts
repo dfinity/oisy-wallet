@@ -12,8 +12,7 @@ export const parseBoolEnvVar = (value: OptionString, check = true): boolean => {
 		const { stack } = new Error();
 		const location = stack?.split('\n')[2]?.trim();
 		console.warn(
-			`[parseBoolEnvVar] Empty string received as environment variable. ` +
-				`Defaulting to 'false'. Caller: ${location ?? 'unknown'}`
+			`[parseBoolEnvVar] Empty string received as environment variable. Defaulting to 'false'. Caller: ${location ?? 'unknown'}`
 		);
 		return false;
 	}
