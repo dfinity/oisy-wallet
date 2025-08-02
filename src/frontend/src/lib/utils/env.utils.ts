@@ -15,6 +15,7 @@ export const parseBoolEnvVar = (value: OptionString, check = true): boolean => {
 			`[parseBoolEnvVar] Empty string received as environment variable. ` +
 				`Defaulting to 'false'. Caller: ${location ?? 'unknown'}`
 		);
+		return false;
 	}
 	return JSON.parse(normalised ?? 'false') === check;
 };
