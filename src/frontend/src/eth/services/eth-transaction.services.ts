@@ -2,6 +2,7 @@ import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { reloadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import type { LoadEthereumTransactionsParamsForMapping } from '$eth/types/eth-transactions';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
@@ -15,24 +16,26 @@ import { get } from 'svelte/store';
 
 export const processTransactionSent = async ({
 	token,
-	transaction
+	transaction,
+	...rest
 }: {
 	token: Token;
 	transaction: TransactionResponse;
-}) => {
+} & LoadEthereumTransactionsParamsForMapping) => {
 	if (isSupportedEthTokenId(token.id) || isSupportedEvmNativeTokenId(token.id)) {
-		await processEthTransaction({ hash: transaction.hash, token });
+		await processEthTransaction({ hash: transaction.hash, token, ...rest });
 		return;
 	}
 
 	// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
 	const value = decodeErc20AbiDataValue({ data: transaction.data });
 
-	await processErc20Transaction({ hash: transaction.hash, value, token, type: 'pending' });
+	await processErc20Transaction({ hash: transaction.hash, value, token, type: 'pending', ...rest });
 };
 
-export const processEthTransaction = async (params: { hash: string; token: Token }) =>
-	await processPendingTransaction(params);
+export const processEthTransaction = async (
+	params: { hash: string; token: Token } & LoadEthereumTransactionsParamsForMapping
+) => await processPendingTransaction(params);
 
 export const processErc20Transaction = async ({
 	type,
@@ -42,7 +45,7 @@ export const processErc20Transaction = async ({
 	value: bigint;
 	token: Token;
 	type: 'pending' | 'mined';
-}) => {
+} & LoadEthereumTransactionsParamsForMapping) => {
 	if (type === 'mined') {
 		await processMinedTransaction({ ...rest });
 		return;
@@ -54,12 +57,13 @@ export const processErc20Transaction = async ({
 const processPendingTransaction = async ({
 	hash,
 	token,
-	value
+	value,
+	...rest
 }: {
 	hash: string;
 	token: Token;
 	value?: bigint;
-}) => {
+} & LoadEthereumTransactionsParamsForMapping) => {
 	const {
 		id: tokenId,
 		network: { id: networkId }
@@ -81,14 +85,14 @@ const processPendingTransaction = async ({
 		return;
 	}
 
-	const { to, ...rest } = transaction;
+	const { to, ...transactionRest } = transaction;
 
 	ethTransactionsStore.add({
 		tokenId,
 		transactions: [
 			{
 				data: {
-					...rest,
+					...transactionRest,
 					// For ERC20 pending transactions, we noticed that the `to` field is not correct, since it shows the token address instead of the recipient address.
 					// To avoid confusion on the user side, we prefer not to display the `to` field for ERC20 pending transactions.
 					...(!isTokenErc20(token) && { to }),
@@ -105,21 +109,24 @@ const processPendingTransaction = async ({
 
 	await wait();
 
-	await processMinedTransaction({ token });
+	await processMinedTransaction({ token, ...rest });
 };
 
 // At some point in the past, we were fetching the transactions from the provider. But, with ERC20 transactions,
 // we noticed that, even if the transaction is mined, the source or the destination address is not
 // the real address, but the token address. That gave wrong data in the UI.
 // So, we decided to call the service that reloads all transactions.
-const processMinedTransaction = async ({ token }: { token: Token }) => {
+const processMinedTransaction = async ({
+	token,
+	...rest
+}: { token: Token } & LoadEthereumTransactionsParamsForMapping) => {
 	const {
 		id: tokenId,
 		network: { id: networkId }
 	} = token;
 
 	// Reload transactions as a transaction has been mined
-	await reloadEthereumTransactions({ tokenId, networkId });
+	await reloadEthereumTransactions({ tokenId, networkId, ...rest });
 
 	// Reload balance as a transaction has been mined
 	await reloadEthereumBalance(token);

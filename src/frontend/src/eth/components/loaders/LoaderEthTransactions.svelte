@@ -3,19 +3,28 @@
 	import { onMount } from 'svelte';
 	import { ethTransactionsInitialized } from '$eth/derived/eth-transactions.derived';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
+	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import {
 		loadEthereumTransactions,
 		reloadEthereumTransactions
 	} from '$eth/services/eth-transactions.services';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+	import type { LoadEthereumTransactionsParams } from '$eth/types/eth-transactions';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+			import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { syncTransactionsFromCache } from '$lib/services/listener.services';
+		import { syncTransactionsFromCache } from '$lib/services/listener.services';
+	import type { EthAddress } from '$lib/types/address';
 	import type { TokenId } from '$lib/types/token';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+
+	let ckMinterInfoAddresses: EthAddress[] = [];
+	$: ckMinterInfoAddresses = toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId]);
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
@@ -57,13 +66,19 @@
 
 		tokenIdLoaded = tokenId;
 
+		const params: LoadEthereumTransactionsParams = {
+			tokenId,
+			networkId,
+			ckMinterInfoAddresses,
+			ethAddress: $ethAddress
+		};
+
 		const { success } = reload
 			? await reloadEthereumTransactions({
-					tokenId,
-					networkId,
+					...params,
 					silent: failedReloadCounter + 1 <= FAILURE_THRESHOLD
 				})
-			: await loadEthereumTransactions({ tokenId, networkId });
+			: await loadEthereumTransactions(params);
 
 		if (!success) {
 			tokenIdLoaded = undefined;
@@ -78,7 +93,12 @@
 		loading = false;
 	};
 
-	$: ($tokenWithFallback, $tokenNotInitialized, (async () => await load())());
+	$: ($tokenWithFallback,
+		$tokenNotInitialized,
+		$ckEthMinterInfoStore,
+		$ethereumTokenId,
+		$ethAddress,
+		(async () => await load())());
 
 	const reload = async () => {
 		await load({ reload: true });
