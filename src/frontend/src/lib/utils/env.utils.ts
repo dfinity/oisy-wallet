@@ -10,11 +10,13 @@ export const parseBoolEnvVar = (value: OptionString, check = true): boolean => {
 	if (isEmptyString(normalised)) {
 		// Try to extract the source location for better debugging
 		const { stack } = new Error();
-		const location = stack?.split('\n')[2]?.trim();
-		console.warn(
-			`[parseBoolEnvVar] Empty string received as environment variable. Defaulting to 'false'. Caller: ${location ?? 'unknown'}`
+		const callerLine = stack?.split('\n')[2] ?? '';
+		const filePathMatch = callerLine.match(/[/\\][^/\\]+$/);
+		const fileName = filePathMatch?.[0]?.replace(/^\/|\\/, '') ?? 'unknown';
+		console.error(
+			`[parseBoolEnvVar] Empty string received as environment variable. ` +
+				`Defaulting to 'false'. Caller file: ${fileName ?? 'unknown'}`
 		);
-		return false;
 	}
 	return JSON.parse(normalised ?? 'false') === check;
 };
