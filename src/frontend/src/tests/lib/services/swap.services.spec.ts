@@ -289,7 +289,7 @@ describe('performManualWithdraw', () => {
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			metadata: {
 				token: 'ICP',
-				tokenOrigin: 'receive'
+				tokenDirection: 'receive'
 			}
 		});
 		expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);

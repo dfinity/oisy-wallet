@@ -22,6 +22,23 @@ describe('SwapError Service', () => {
 			).toThrow(SwapError);
 		});
 
+		it('throws SwapError without swapSucceded', () => {
+			expect(() =>
+				throwSwapError({
+					code: SwapErrorCodes.WITHDRAW_FAILED
+				})
+			).toThrow(SwapError);
+		});
+
+		it('throws SwapError with swapSucceded', () => {
+			expect(() =>
+				throwSwapError({
+					code: SwapErrorCodes.WITHDRAW_FAILED,
+					swapSucceded: true
+				})
+			).toThrow(SwapError);
+		});
+
 		it('throws correct message when provided', () => {
 			expect(() =>
 				throwSwapError({

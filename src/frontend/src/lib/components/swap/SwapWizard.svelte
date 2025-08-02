@@ -48,7 +48,6 @@
 		slippageValue = $bindable<OptionAmount>(),
 		swapProgressStep = $bindable<string>(),
 		swapFailedProgressSteps = $bindable<string[]>(),
-
 		currentStep
 	}: Props = $props();
 
@@ -123,7 +122,8 @@
 						$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED),
 				withdrawDestinationTokens:
 					nonNullish($failedSwapError?.errorType) &&
-					$failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED
+					($failedSwapError?.errorType === SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED ||
+						$failedSwapError?.swapSucceded)
 			});
 
 			progress(ProgressStepsSwap.DONE);
@@ -158,6 +158,7 @@
 					message: err.message,
 					variant: err.variant ?? 'info',
 					errorType: err.code,
+					swapSucceded: err.swapSucceded,
 					url: {
 						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
 						text: 'icpswap.com'
@@ -226,6 +227,7 @@
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				bind:swapProgressStep
+				bind:failedSteps={swapFailedProgressSteps}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}
 			/>
