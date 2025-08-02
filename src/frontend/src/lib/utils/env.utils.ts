@@ -13,8 +13,7 @@ export const parseBoolEnvVar = (value: OptionString, check = true): boolean => {
 		const filePathMatch = callerLine.match(/[/\\][^/\\]+$/);
 		const fileName = filePathMatch?.[0]?.replace(/^\/|\\/, '') ?? 'unknown';
 		console.error(
-			`[parseBoolEnvVar] Empty string received as environment variable. ` +
-				`Defaulting to 'false'. Caller file: ${fileName ?? 'unknown'}`
+			`[parseBoolEnvVar] Empty string received as environment variable. Caller file: ${fileName ?? 'unknown'}`
 		);
 	}
 	return JSON.parse(normalised ?? 'false') === check;
