@@ -54,7 +54,7 @@ describe('env.utils', () => {
 
 		it('should throw for empty strings', () => {
 			expect(() => parseBoolEnvVar('')).toThrow(
-				"[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow."
+				"[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow: it will default to 'false'."
 			);
 		});
 
@@ -96,7 +96,7 @@ describe('env.utils', () => {
 
 		it('should throw for empty strings', () => {
 			expect(() => parseBoolEnvVar('')).toThrow(
-				"[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow."
+				"[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow: it will default to 'false'."
 			);
 		});
 
