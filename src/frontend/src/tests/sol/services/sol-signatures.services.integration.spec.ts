@@ -4,10 +4,18 @@ import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { notEmptyString } from '@dfinity/utils';
 
 describe('sol-signatures.services integration', () => {
 	describe('getSolTransactions', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			mockAuthStore();
+		});
+
 		it('should match the total balance of an account', async () => {
 			// If the Alchemy API is empty, the test will fail, since it is required to fetch real data.
 			assert(
@@ -23,6 +31,7 @@ describe('sol-signatures.services integration', () => {
 				lastSignature?: string | undefined
 			): Promise<SolTransactionUi[]> => {
 				const transactions = await getSolTransactions({
+					identity: mockIdentity,
 					address,
 					network: SolanaNetworks.mainnet,
 					before: lastSignature,
