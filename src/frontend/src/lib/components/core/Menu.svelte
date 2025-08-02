@@ -210,7 +210,7 @@
 		<Hr />
 
 		<div class="flex max-w-80 flex-col gap-3 pt-3">
-			{#if LOCK_SCREEN_ENABLED}
+			{#if LOCK_SCREEN_ENABLED || TEST_ENV_VAR}
 				<LockOrSignOut onHidePopover={hidePopover} />
 			{:else}
 				<SignOut on:icLogoutTriggered={hidePopover} />
