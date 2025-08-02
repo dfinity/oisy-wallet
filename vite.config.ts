@@ -87,8 +87,6 @@ const config: UserConfig = {
 	}
 };
 
-console.log('process env', { ...process.env });
-
 export default defineConfig((): UserConfig => {
 	// Expand environment - .env files - with canister IDs
 	process.env = {
