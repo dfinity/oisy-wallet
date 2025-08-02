@@ -1,9 +1,11 @@
+import { USE_NATIVE_CURRENCY_LOCALE } from '$env/currency.env';
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
-import type { Currency } from '$lib/enums/currency';
+import { Currency } from '$lib/enums/currency';
 import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
 import type { CurrencyExchangeData } from '$lib/types/currency';
+import { getCurrencyDecimalDigits } from '$lib/utils/currency.utils';
 import { isNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import Decimal from 'decimal.js';
@@ -171,11 +173,19 @@ export const formatSecondsToNormalizedDate = ({
 export const formatCurrency = ({
 	value,
 	currency,
-	exchangeRate: { exchangeRateToUsd, currency: exchangeRateCurrency }
+	exchangeRate: { exchangeRateToUsd, currency: exchangeRateCurrency },
+	language,
+	notBelowThreshold = false,
+	hideSymbol = false,
+	normalizeSeparators = false
 }: {
 	value: number;
 	currency: Currency;
 	exchangeRate: CurrencyExchangeData;
+	language: Languages;
+	notBelowThreshold?: boolean;
+	hideSymbol?: boolean;
+	normalizeSeparators?: boolean;
 }): string | undefined => {
 	if (currency !== exchangeRateCurrency) {
 		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
@@ -187,12 +197,47 @@ export const formatCurrency = ({
 		return;
 	}
 
+	const locale = USE_NATIVE_CURRENCY_LOCALE[language] ? language : 'en-US';
+
 	const convertedValue = value / exchangeRateToUsd;
 
-	return new Intl.NumberFormat('en-US', {
+	const currencyFormatter = new Intl.NumberFormat(locale, {
 		style: 'currency',
-		currency: currency.toUpperCase()
-	})
+		currency: currency.toUpperCase(),
+		...(hideSymbol && { currencyDisplay: 'code' })
+	});
+
+	if (notBelowThreshold) {
+		const decimalDigits = getCurrencyDecimalDigits({ currency, language });
+		const minThreshold = 1 / Math.pow(10, decimalDigits);
+
+		if (Math.abs(convertedValue) < minThreshold) {
+			return `< ${currencyFormatter.format(minThreshold)}`;
+		}
+	}
+
+	const formatted = currencyFormatter
 		.format(convertedValue)
-		.replace(/,/g, '’');
+		.replace(hideSymbol ? currency.toUpperCase() : '', '')
+		.trim();
+
+	if (normalizeSeparators) {
+		const parts = currencyFormatter.formatToParts(123456.78);
+		const groupSep = parts.find((p) => p.type === 'group')?.value ?? '';
+		const decimalSep = parts.find((p) => p.type === 'decimal')?.value ?? '.';
+
+		return (
+			formatted
+				// Remove group separators (thousands)
+				.replaceAll(groupSep, '')
+				// Replace decimal separator with '.'
+				.replace(decimalSep, '.')
+		);
+	}
+
+	if (currency === Currency.CHF) {
+		return formatted.replace(/,/g, '’');
+	}
+
+	return formatted;
 };

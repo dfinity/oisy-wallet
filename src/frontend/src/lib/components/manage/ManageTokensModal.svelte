@@ -1,32 +1,39 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
+	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
+	import { isInterfaceErc721 } from '$eth/services/erc721.services';
 	import {
+		saveErc1155CustomTokens,
 		saveErc20UserTokens,
 		saveErc721CustomTokens
 	} from '$eth/services/manage-tokens.services';
 	import { saveErc20CustomTokens } from '$eth/services/manage-tokens.services.js';
+	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
+	import type { ValidateTokenData } from '$icp/services/ic-add-custom-tokens.service';
 	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import { TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.contants';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -98,6 +105,7 @@
 
 		await saveIcrc([
 			{
+				...icrcMetadata,
 				enabled: true,
 				networkKey: 'Icrc',
 				ledgerCanisterId,
@@ -121,34 +129,56 @@
 			return;
 		}
 
-		if (ethMetadata.decimals > 0) {
-			await saveErc20Deprecated([
-				{
-					address: ethContractAddress,
-					...ethMetadata,
-					network: network as EthereumNetwork,
-					enabled: true
-				}
-			]);
+		// This does not happen at this point, but it is useful type-wise
+		assertNonNullish(network);
 
-			await saveErc20([
-				{
-					address: ethContractAddress,
-					...ethMetadata,
-					network: network as EthereumNetwork,
-					enabled: true
-				}
-			]);
-		} else {
-			await saveErc721([
-				{
-					address: ethContractAddress,
-					...ethMetadata,
-					network: network as EthereumNetwork,
-					enabled: true
-				}
-			]);
+		const newToken = {
+			address: ethContractAddress,
+			...ethMetadata,
+			network: network as EthereumNetwork,
+			enabled: true
+		};
+
+		const isErc721 = await isInterfaceErc721({
+			address: ethContractAddress,
+			networkId: network.id
+		});
+
+		if (isErc721) {
+			await saveErc721([newToken]);
+
+			return;
 		}
+
+		const isErc1155 = await isInterfaceErc1155({
+			address: ethContractAddress,
+			networkId: network.id
+		});
+
+		if (isErc1155) {
+			await saveErc1155([newToken]);
+
+			return;
+		}
+
+		if (ethMetadata.decimals > 0) {
+			await saveErc20Deprecated([newToken]);
+
+			await saveErc20([newToken]);
+
+			return;
+		}
+
+		trackEvent({
+			name: TRACK_UNRECOGNISED_ERC_INTERFACE,
+			metadata: {
+				address: newToken.address,
+				network: `${newToken.network.id.description}`
+			}
+		});
+
+		// TODO: Warn the user that if no interface is encountered, it falls back to standard ERC721
+		await saveErc721([newToken]);
 	};
 
 	const saveSplToken = () => {
@@ -219,6 +249,16 @@
 			identity: $authIdentity
 		});
 
+	const saveErc1155 = (tokens: SaveErc1155CustomToken[]): Promise<void> =>
+		saveErc1155CustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal?.set(3),
+			onSuccess: close,
+			onError: () => modal?.set(0),
+			identity: $authIdentity
+		});
+
 	const saveSpl = (tokens: SaveSplCustomToken[]): Promise<void> =>
 		saveSplCustomTokens({
 			tokens,
@@ -238,6 +278,7 @@
 
 	let ledgerCanisterId: string | undefined = $state();
 	let indexCanisterId: string | undefined = $state();
+	let icrcMetadata: ValidateTokenData | undefined = $state();
 
 	let ethContractAddress: string | undefined = $state();
 	let ethMetadata: Erc20Metadata | Erc721Metadata | undefined = $state();
@@ -270,6 +311,7 @@
 				on:icSave={addIcrcToken}
 				{ledgerCanisterId}
 				{indexCanisterId}
+				bind:metadata={icrcMetadata}
 			/>
 		{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
 			<EthAddTokenReview

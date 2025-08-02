@@ -7,9 +7,12 @@ import {
 } from '$lib/services/worker.exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { currencyStore } from '$lib/stores/currency.store';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('ExchangeWorker', () => {
+	const mockSnippet = createMockSnippet('Mock Snippet');
+
 	const stopExchangeTimer = vi.fn();
 	const startExchangeTimer = vi.fn();
 	const destroy = vi.fn();
@@ -34,15 +37,15 @@ describe('ExchangeWorker', () => {
 	});
 
 	it('should initialize the worker on mount', async () => {
-		render(ExchangeWorker);
+		render(ExchangeWorker, { children: mockSnippet });
 
 		await waitTimer();
 
-		expect(initExchangeWorker).toHaveBeenCalledTimes(1);
+		expect(initExchangeWorker).toHaveBeenCalledOnce();
 	});
 
 	it('should start the worker once when mounted', async () => {
-		render(ExchangeWorker);
+		render(ExchangeWorker, { children: mockSnippet });
 
 		await waitTimer();
 
@@ -57,7 +60,7 @@ describe('ExchangeWorker', () => {
 	});
 
 	it('should handle currency change', async () => {
-		render(ExchangeWorker);
+		render(ExchangeWorker, { children: mockSnippet });
 
 		await waitTimer();
 
@@ -100,7 +103,7 @@ describe('ExchangeWorker', () => {
 	});
 
 	it('should not be triggered by current currency exchange rate', async () => {
-		render(ExchangeWorker);
+		render(ExchangeWorker, { children: mockSnippet });
 
 		await waitTimer();
 

@@ -23,13 +23,12 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { createMockErc20Tokens, mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { MockedClass } from 'vitest';
 
 vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
@@ -56,7 +55,7 @@ describe('eth-balance.services', () => {
 		const mockError = new Error('Error loading ETH balance');
 
 		const mockGetBalance = vi.fn();
-		const mockProvider = InfuraProviderLib as MockedClass<typeof InfuraProviderLib>;
+		const mockProvider = vi.mocked(InfuraProviderLib);
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -188,7 +187,7 @@ describe('eth-balance.services', () => {
 		const mockError = new Error('Error loading ETH balance');
 
 		const mockGetBalance = vi.fn();
-		const mockContract = Contract as MockedClass<typeof Contract>;
+		const mockContract = vi.mocked(Contract);
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -318,8 +317,8 @@ describe('eth-balance.services', () => {
 		const mockBalance = 123n;
 
 		const mockGetBalance = vi.fn();
-		const mockProvider = InfuraProviderLib as MockedClass<typeof InfuraProviderLib>;
-		const mockContract = Contract as MockedClass<typeof Contract>;
+		const mockProvider = vi.mocked(InfuraProviderLib);
+		const mockContract = vi.mocked(Contract);
 
 		beforeEach(() => {
 			vi.clearAllMocks();
