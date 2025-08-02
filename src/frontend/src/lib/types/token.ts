@@ -37,7 +37,11 @@ export type TokenWithLinkedData = Token & TokenLinkedData;
 
 export type NonRequiredProps = TokenAppearance & TokenBuyable & TokenGroup;
 
-export type RequiredToken<T extends Token = Token> = RequiredExcept<T, keyof NonRequiredProps>;
+export type RequiredToken<T extends Token = Token, M extends object = {}> = RequiredExcept<
+	T,
+	keyof NonRequiredProps,
+	M
+>;
 
 export type RequiredTokenWithLinkedData = RequiredToken<TokenWithLinkedData>;
 

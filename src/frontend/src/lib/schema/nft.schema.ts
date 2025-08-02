@@ -17,8 +17,8 @@ export const NftMetadataSchema = z.object({
 export const NftSchema = z.object({
 	contract: z.object({
 		address: z.string(),
-		enabled: z.boolean(),
-		name: z.string()
+		name: z.string(),
+		symbol: z.string()
 	}),
 	...NftMetadataSchema.shape
 });

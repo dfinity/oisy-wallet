@@ -1,17 +1,16 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { Address } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 
 export interface TransactionsStoreCheckParams {
-	// TODO: set unified type when we harmonize the transaction stores
 	transactionsStoreData:
-		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
-		| EthTransactionsData;
+		| BtcCertifiedTransactionsData
+		| EthCertifiedTransactionsData
+		| IcCertifiedTransactionsData
+		| SolCertifiedTransactionsData;
 	tokens: Token[];
 }
 

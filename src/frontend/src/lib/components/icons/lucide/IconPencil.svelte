@@ -1,6 +1,10 @@
 <!-- source: ISC Lucide - please visit https://lucide.dev/license -->
 <script lang="ts">
-	export let size = '16';
+	interface Props {
+		size?: string;
+	}
+
+	let { size = '16' }: Props = $props();
 </script>
 
 <svg

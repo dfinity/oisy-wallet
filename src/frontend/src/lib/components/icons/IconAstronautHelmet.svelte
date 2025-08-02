@@ -1,6 +1,10 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
-	export let testId: string | undefined = undefined;
+	interface Props {
+		testId?: string;
+	}
+
+	let { testId }: Props = $props();
 </script>
 
 <svg
