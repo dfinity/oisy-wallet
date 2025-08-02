@@ -53,10 +53,8 @@ describe('env.utils', () => {
 		});
 
 		it('should throw for empty strings', () => {
-			expect(() => parseBoolEnvVar('')).toThrow('Unexpected end of JSON input');
-
-			expect(console.error).toHaveBeenCalledExactlyOnceWith(
-				"[parseBoolEnvVar] Empty string received as environment variable. Defaulting to 'false'. Caller file: env.utils.spec.ts:56:17"
+			expect(() => parseBoolEnvVar('')).toThrow(
+				"[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow."
 			);
 		});
 
@@ -97,10 +95,8 @@ describe('env.utils', () => {
 		});
 
 		it('should throw for empty strings', () => {
-			expect(() => parseBoolEnvVar('')).toThrow('Unexpected end of JSON input');
-
-			expect(console.error).toHaveBeenCalledExactlyOnceWith(
-				"[parseBoolEnvVar] Empty string received as environment variable. Defaulting to 'false'. Caller file: env.utils.spec.ts:100:17"
+			expect(() => parseBoolEnvVar('')).toThrow(
+				"[parseBoolEnvVar] Empty string received as environment variable. Verify that all the environment variables that are being set in the deployment CI workflow exist as secrets in GitHub. If you don't want to set it as GitHub secret, remove it from the workflow."
 			);
 		});
 
