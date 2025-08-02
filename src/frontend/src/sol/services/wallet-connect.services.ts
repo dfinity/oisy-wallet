@@ -68,6 +68,8 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
+	console.log('parsedTransactionMessage', parsedTransactionMessage);
+
 	return mapSolTransactionMessage(parsedTransactionMessage);
 };
 
@@ -118,6 +120,8 @@ export const sign = ({
 				transactionMessage: base64EncodedTransactionMessage,
 				rpc: solanaHttpRpc(solNetwork)
 			});
+
+			console.log('parsedTransactionMessage', parsedTransactionMessage);
 
 			const { amount, destination } = mapSolTransactionMessage(parsedTransactionMessage);
 
