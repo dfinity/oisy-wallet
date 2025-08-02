@@ -15,10 +15,10 @@
 	import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-			import { ethAddress } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
-		import { syncTransactionsFromCache } from '$lib/services/listener.services';
+	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 	import type { EthAddress } from '$lib/types/address';
 	import type { TokenId } from '$lib/types/token';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
