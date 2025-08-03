@@ -20,7 +20,7 @@ runs:
         # The dockerfile used in this CI run, and the scripts it COPY's.
         # There may be some files in the frontend folder that contains 'backend' in their name.
         filters: |
-          any:
+          backend:
             - '**/*backend*'
             - 'src/backend/**'
             - 'src/shared/**'
