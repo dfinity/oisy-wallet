@@ -78,48 +78,6 @@ import {
 } from '@solana-program/token';
 import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/kit';
 
-const mapComputeBudgetParsedInstruction = ({
-	type,
-	info
-}: {
-	type: string;
-	info: object;
-}): SolMappedTransaction | undefined => {
-	console.log('mapComputeBudgetParsedInstruction', type, info);
-
-	throw new Error('not implemented yet');
-
-	if (type === 'createAccount') {
-		// We need to cast the type since it is not implied
-		const {
-			source: from,
-			newAccount: to,
-			lamports: value
-		} = info as {
-			source: SolAddress;
-			newAccount: SolAddress;
-			lamports: bigint;
-		};
-
-		return { value, from, to };
-	}
-
-	if (type === 'transfer') {
-		// We need to cast the type since it is not implied
-		const {
-			destination: to,
-			lamports: value,
-			source: from
-		} = info as {
-			destination: SolAddress;
-			lamports: bigint;
-			source: SolAddress;
-		};
-
-		return { value, from, to };
-	}
-};
-
 const mapSystemParsedInstruction = ({
 	type,
 	info
@@ -367,7 +325,7 @@ const mapAssociatedTokenAccountInstruction = ({
 
 export const mapSolParsedInstruction = async ({
 	identity,
-	instruction: putativeParsedInstruction,
+	instruction,
 	network,
 	cumulativeBalances,
 	addressToToken
@@ -378,26 +336,6 @@ export const mapSolParsedInstruction = async ({
 	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
 }): Promise<SolMappedTransaction | undefined> => {
-	// const instruction =
-	// 	'parsed' in putativeParsedInstruction
-	// 		? putativeParsedInstruction
-	// 		: nonNullish(putativeParsedInstruction.data)
-	// 			? parseSolInstruction({
-	// 					...putativeParsedInstruction,
-	// 					data: getBase58Encoder().encode(putativeParsedInstruction.data),
-	// 					accounts: putativeParsedInstruction.accounts.map((address) => ({
-	// 						address,
-	// 						role: AccountRole.READONLY
-	// 					}))
-	// 				} as SolInstruction)
-	// 			: undefined;
-
-	const instruction = putativeParsedInstruction;
-
-	if (isNullish(instruction)) {
-		return;
-	}
-
 	if (!('parsed' in instruction)) {
 		return;
 	}
@@ -409,10 +347,6 @@ export const mapSolParsedInstruction = async ({
 
 	if (isNullish(info)) {
 		return;
-	}
-
-	if (programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
-		return mapComputeBudgetParsedInstruction({ type, info });
 	}
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
