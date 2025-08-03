@@ -3,9 +3,9 @@ name: Check Backend Changes
 description: Check for changes in the backend-related code and return a boolean output.
 
 outputs:
-  any:
+  backend:
     description: 'True if any relevant backend file changed'
-    value: ${{ steps.changes.outputs.any }}
+    value: ${{ steps.changes.outputs.backend }}
 
 runs:
   using: 'composite'
