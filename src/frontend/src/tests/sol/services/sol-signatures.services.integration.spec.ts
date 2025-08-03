@@ -27,7 +27,7 @@ vi.mock('@solana-program/token', () => ({
 
 describe('sol-signatures.services integration', () => {
 	describe('getSolTransactions', () => {
-		// We use a real address to test the function. Ideally, the address is a very active one.
+		// We use real addresses to test the function. Ideally, the addresses are very active ones.
 		const addresses = [
 			'7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
 			'GZvi7ndzTYkTrbvfiwfz9ZequdCMacHCzCtadruT3e5f',
