@@ -26,7 +26,6 @@ import type {
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
-import { extractPriorityFee } from '$sol/utils/sol-transactions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
@@ -35,7 +34,7 @@ import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
-const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
+export const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
 
 export const fetchSolTransactionsForSignature = async ({
@@ -99,8 +98,6 @@ export const fetchSolTransactionsForSignature = async ({
 				})
 			: [undefined];
 
-	const priorityFee = await extractPriorityFee(transactionDetail);
-
 	const { parsedTransactions } = await allInstructions.reduce<
 		Promise<{
 			parsedTransactions: SolTransactionUi[];
@@ -145,7 +142,7 @@ export const fetchSolTransactionsForSignature = async ({
 
 			// The cumulative balances are updated for every instruction, so we can keep track of the
 			// SOL balance of the address and its associated token account at any given time.
-			// It is useful when mapping for example a `closeAccount` instruction, where the redeemed value
+			// It is useful when mapping, for example, a `closeAccount` instruction, where the redeemed value
 			// is not provided in the data and must be calculated as the latest total SOL balance of the Associated Token Account.
 			const cumulativeBalances = {
 				...accCumulativeBalances,
@@ -190,9 +187,7 @@ export const fetchSolTransactionsForSignature = async ({
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
 				// However, we should have it anyway saved in the transaction, so we can display it in the UI.
-				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO }),
-				...(nonNullish(priorityFee) &&
-					nonNullish(feePayer) && { priorityFee: address === feePayer ? priorityFee : ZERO })
+				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO })
 			};
 
 			return {

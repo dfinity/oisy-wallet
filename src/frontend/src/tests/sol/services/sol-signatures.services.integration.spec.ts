@@ -5,15 +5,21 @@ import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { last } from '$lib/utils/array.utils';
-import { loadSolLamportsBalance, loadTokenBalance } from '$sol/api/solana.api';
+import {
+	fetchSignatures,
+	fetchTransactionDetailForSignature,
+	loadSolLamportsBalance,
+	loadTokenBalance
+} from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
+import { extractFeePayer } from '$sol/services/sol-transactions.services';
 import { SolanaNetworks } from '$sol/types/network';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { notEmptyString } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
-import { address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
+import { signature, address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
 
 vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
@@ -70,7 +76,9 @@ describe('sol-signatures.services integration', () => {
 			mockAuthStore();
 		});
 
-		it.each(['EAQ6MUJMEEd42u9xHZ8XHrwabG5NNVhndKnTgBzZcMtt'])(
+		it.each(addresses)(
+			// it.each(['EAQ6MUJMEEd42u9xHZ8XHrwabG5NNVhndKnTgBzZcMtt'])(
+			// it.each(['FLAevxSbe182oYzjNqDB53g11rbvhWMF1iUCoCHFfHV4'])(
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
 				const loadTransactions = async (
@@ -95,33 +103,69 @@ describe('sol-signatures.services integration', () => {
 					return [...transactions, ...nextTransactions];
 				};
 
+				const loadSignatures = async (
+					lastSignature?: string | undefined
+				): Promise<SolSignature[]> => {
+					const wallet = solAddress(address);
+
+					const beforeSignature = nonNullish(lastSignature) ? signature(lastSignature) : undefined;
+
+					const signatures: SolSignature[] = await fetchSignatures({
+						wallet,
+						network: SolanaNetworks.mainnet,
+						before: beforeSignature,
+						limit: 10
+					});
+
+					if (signatures.length === 0) {
+						return signatures;
+					}
+
+					const nextSignatures: SolSignature[] = await loadSignatures(last(signatures)?.signature);
+
+					return [...signatures, ...nextSignatures];
+				};
+
 				const transactions = await loadTransactions();
 
-				const {
-					solBalance: transactionSolBalance,
-					totalFee,
-					totalPriorityFee
-				} = transactions.reduce<{
+				const signatures = await loadSignatures();
+
+				const totalFee = await signatures.reduce<Promise<bigint>>(async (acc, signature) => {
+					const accTotalFee = await acc;
+
+					const transactionDetail: SolRpcTransaction | null =
+						await fetchTransactionDetailForSignature({
+							signature,
+							network: SolanaNetworks.mainnet
+						});
+
+					if (isNullish(transactionDetail)) {
+						return acc;
+					}
+
+					const {
+						transaction: {
+							message: { accountKeys }
+						},
+						meta
+					} = transactionDetail;
+
+					const { fee } = meta ?? {};
+					const { pubkey: feePayer } = extractFeePayer([...(accountKeys ?? [])]) ?? {};
+
+					return accTotalFee + (feePayer === address ? (fee ?? 0n) : 0n);
+				}, Promise.resolve(0n));
+
+				const { solBalance: transactionSolBalance } = transactions.reduce<{
 					solBalance: bigint;
-					totalFee: bigint;
-					totalPriorityFee: bigint;
 					signatures: string[];
 				}>(
-					(
-						{ solBalance, totalFee, totalPriorityFee, signatures },
-						{ value, type, fee, priorityFee, signature }
-					) => ({
+					({ solBalance, signatures }, { value, type, signature }) => ({
 						solBalance: solBalance + (value ?? 0n) * (type === 'send' ? -1n : 1n),
-						totalFee: signatures.includes(signature) ? totalFee : totalFee + (fee ?? 0n),
-						totalPriorityFee: signatures.includes(signature)
-							? totalPriorityFee
-							: totalPriorityFee + (priorityFee ?? 0n),
 						signatures: [...signatures, signature]
 					}),
 					{
 						solBalance: 0n,
-						totalFee: 0n,
-						totalPriorityFee: 0n,
 						signatures: []
 					}
 				);
@@ -137,7 +181,7 @@ describe('sol-signatures.services integration', () => {
 				// FIXME: What is missing is calculating the priority fees, which are not included in the transaction fee
 				// FIXME: They can be calculated as priority_fee_lamports = (computeUnitsConsumed * computeUnitPrice) / 1_000_000;
 				// FIXME: To do that we need a parsed SetComputeUnitPrice instruction, but we receive only encoded data
-				expect(transactionSolBalance - totalFee - totalPriorityFee).toBe(fetchedSolBalance);
+				expect(transactionSolBalance - totalFee).toBe(fetchedSolBalance);
 			},
 			600000
 		);
