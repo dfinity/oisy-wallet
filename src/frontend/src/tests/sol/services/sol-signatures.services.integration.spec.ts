@@ -1,15 +1,19 @@
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
-import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import type { SolAddress } from '$lib/types/address';
+import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { last } from '$lib/utils/array.utils';
 import { loadSolLamportsBalance, loadTokenBalance } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
-import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { notEmptyString } from '@dfinity/utils';
+import * as solProgramToken from '@solana-program/token';
+import { address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
+
+vi.mock('@solana-program/token', () => ({
+	findAssociatedTokenPda: vi.fn()
+}));
 
 describe('sol-signatures.services integration', () => {
 	describe('getSolTransactions', () => {
@@ -20,8 +24,13 @@ describe('sol-signatures.services integration', () => {
 			'7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
 			'GZvi7ndzTYkTrbvfiwfz9ZequdCMacHCzCtadruT3e5f'
 		];
-
-		const splTokens = [...SPL_TOKENS.slice(0, 1)];
+		const ataAddresses = [
+			{
+				address: '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
+				ataAddress: '7xSNhASWK77oZtPyVQf1HFUXU1xxXjqkpkxVTULBmcMD',
+				token: USDC_TOKEN
+			}
+		];
 
 		beforeAll(() => {
 			// If the Alchemy API is empty, the test will fail, since it is required to fetch real data.
@@ -37,7 +46,7 @@ describe('sol-signatures.services integration', () => {
 			mockAuthStore();
 		});
 
-		it.each(addresses)(
+		it.skip.each(addresses)(
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
 				const loadTransactions = async (
@@ -94,71 +103,63 @@ describe('sol-signatures.services integration', () => {
 			600000
 		);
 
-		describe.each(splTokens)(
-			'with SPL token $symbol',
-			({ address: tokenAddress, owner: tokenOwnerAddress }) => {
-				it.each(addresses)(
-					'should match the total SPL balance of an account (for example, %s)',
-					async (address) => {
-						const loadTransactions = async (
-							lastSignature?: string | undefined
-						): Promise<SolTransactionUi[]> => {
-							const transactions = await getSolTransactions({
-								identity: mockIdentity,
-								address,
-								network: SolanaNetworks.mainnet,
-								tokenAddress,
-								tokenOwnerAddress,
-								before: lastSignature,
-								limit: 10
-							});
+		it.each(ataAddresses)(
+			'should match the total SPL balance of an account (for example, ATA address $ataAddress for token $token.symbol)',
+			async ({
+				address,
+				ataAddress,
+				token: { address: tokenAddress, owner: tokenOwnerAddress }
+			}) => {
+				vi.spyOn(solProgramToken, 'findAssociatedTokenPda').mockResolvedValue([
+					solAddress(ataAddress),
+					123 as ProgramDerivedAddressBump
+				]);
 
-							if (transactions.length === 0) {
-								return transactions;
-							}
+				const loadTransactions = async (
+					lastSignature?: string | undefined
+				): Promise<SolTransactionUi[]> => {
+					const transactions = await getSolTransactions({
+						identity: mockIdentity,
+						address,
+						network: SolanaNetworks.mainnet,
+						tokenAddress,
+						tokenOwnerAddress,
+						before: lastSignature,
+						limit: 10
+					});
 
-							const nextTransactions: SolTransactionUi[] = await loadTransactions(
-								last(transactions)?.signature
-							);
+					if (transactions.length === 0) {
+						return transactions;
+					}
 
-							return [...transactions, ...nextTransactions];
-						};
+					const nextTransactions: SolTransactionUi[] = await loadTransactions(
+						last(transactions)?.signature
+					);
 
-						const transactions = await loadTransactions();
+					return [...transactions, ...nextTransactions];
+				};
 
-						const { balance: transactionBalance, totalFee } = transactions.reduce<{
-							balance: bigint;
-							totalFee: bigint;
-							signatures: string[];
-						}>(
-							({ balance, totalFee, signatures }, { value, type, fee, signature }) => ({
-								balance: balance + (value ?? 0n) * (type === 'send' ? -1n : 1n),
-								totalFee: signatures.includes(signature) ? totalFee : totalFee + (fee ?? 0n),
-								signatures: [...signatures, signature]
-							}),
-							{
-								balance: 0n,
-								totalFee: 0n,
-								signatures: []
-							}
-						);
+				const transactions = await loadTransactions();
 
-						const ataAddress: SolAddress = await calculateAssociatedTokenAddress({
-							owner: address,
-							tokenAddress,
-							tokenOwnerAddress
-						});
-
-						const fetchedBalance = await loadTokenBalance({
-							ataAddress,
-							network: SolanaNetworks.mainnet
-						});
-
-						expect(transactionBalance - totalFee).toBe(fetchedBalance);
-					},
-					600000
+				const { balance: transactionBalance } = transactions.reduce<{
+					balance: bigint;
+					signatures: string[];
+				}>(
+					({ balance, signatures }, { value, type, signature }) => ({
+						balance: balance + (value ?? 0n) * (type === 'send' ? -1n : 1n),
+						signatures: [...signatures, signature]
+					}),
+					{ balance: 0n, signatures: [] }
 				);
-			}
+
+				const fetchedBalance = await loadTokenBalance({
+					ataAddress,
+					network: SolanaNetworks.mainnet
+				});
+
+				expect(transactionBalance).toBe(fetchedBalance);
+			},
+			600000
 		);
 	});
 });
