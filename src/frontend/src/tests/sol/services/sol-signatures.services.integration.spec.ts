@@ -70,7 +70,7 @@ describe('sol-signatures.services integration', () => {
 			mockAuthStore();
 		});
 
-		it.skip.each(addresses)(
+		it.each(['EAQ6MUJMEEd42u9xHZ8XHrwabG5NNVhndKnTgBzZcMtt'])(
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
 				const loadTransactions = async (
@@ -97,19 +97,31 @@ describe('sol-signatures.services integration', () => {
 
 				const transactions = await loadTransactions();
 
-				const { solBalance: transactionSolBalance, totalFee } = transactions.reduce<{
+				const {
+					solBalance: transactionSolBalance,
+					totalFee,
+					totalPriorityFee
+				} = transactions.reduce<{
 					solBalance: bigint;
 					totalFee: bigint;
+					totalPriorityFee: bigint;
 					signatures: string[];
 				}>(
-					({ solBalance, totalFee, signatures }, { value, type, fee, signature }) => ({
+					(
+						{ solBalance, totalFee, totalPriorityFee, signatures },
+						{ value, type, fee, priorityFee, signature }
+					) => ({
 						solBalance: solBalance + (value ?? 0n) * (type === 'send' ? -1n : 1n),
 						totalFee: signatures.includes(signature) ? totalFee : totalFee + (fee ?? 0n),
+						totalPriorityFee: signatures.includes(signature)
+							? totalPriorityFee
+							: totalPriorityFee + (priorityFee ?? 0n),
 						signatures: [...signatures, signature]
 					}),
 					{
 						solBalance: 0n,
 						totalFee: 0n,
+						totalPriorityFee: 0n,
 						signatures: []
 					}
 				);
@@ -122,7 +134,10 @@ describe('sol-signatures.services integration', () => {
 				// FIXME: I already verified that transactionSolBalance matches the sum of the amounts in the Transfer page https://solscan.io/account/GZvi7ndzTYkTrbvfiwfz9ZequdCMacHCzCtadruT3e5f#transfers
 				// FIXME: The fetched balance matches too
 				// FIXME: The issue is that the total fee is not correctly calculated
-				expect(transactionSolBalance - totalFee).toBe(fetchedSolBalance);
+				// FIXME: What is missing is calculating the priority fees, which are not included in the transaction fee
+				// FIXME: They can be calculated as priority_fee_lamports = (computeUnitsConsumed * computeUnitPrice) / 1_000_000;
+				// FIXME: To do that we need a parsed SetComputeUnitPrice instruction, but we receive only encoded data
+				expect(transactionSolBalance - totalFee - totalPriorityFee).toBe(fetchedSolBalance);
 			},
 			600000
 		);
