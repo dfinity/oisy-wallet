@@ -26,6 +26,7 @@ import type {
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import { extractPriorityFee } from '$sol/utils/sol-transactions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
@@ -75,7 +76,7 @@ export const fetchSolTransactionsForSignature = async ({
 
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
 
-	// Inside the instructions there could be some that we are unable to decode, but that may have
+	// Inside the instructions, there could be some that we are unable to decode, but that may have
 	// simpler (and decoded) inner instructions. We should try to map those as well.
 	// They are inserted in the instructions array in the order they refer to the main instruction.
 	const { allInstructions } = [...putativeInnerInstructions]
@@ -97,6 +98,8 @@ export const fetchSolTransactionsForSignature = async ({
 					mint: solAddress(tokenAddress)
 				})
 			: [undefined];
+
+	const priorityFee = await extractPriorityFee(transactionDetail);
 
 	const { parsedTransactions } = await allInstructions.reduce<
 		Promise<{
@@ -159,7 +162,7 @@ export const fetchSolTransactionsForSignature = async ({
 			}
 
 			// If the token address is not the one we are looking for, we can skip this instruction.
-			// In case of Solana native tokens, the token address is undefined.
+			// In the case of Solana native tokens, the token address is undefined.
 			if (mappedTokenAddress !== tokenAddress) {
 				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
@@ -187,7 +190,9 @@ export const fetchSolTransactionsForSignature = async ({
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
 				// However, we should have it anyway saved in the transaction, so we can display it in the UI.
-				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO })
+				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO }),
+				...(nonNullish(priorityFee) &&
+					nonNullish(feePayer) && { priorityFee: address === feePayer ? priorityFee : ZERO })
 			};
 
 			return {
