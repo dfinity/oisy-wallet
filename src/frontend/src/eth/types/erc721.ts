@@ -4,7 +4,8 @@ import type { RequiredToken, Token, TokenMetadata, TokenStandard } from '$lib/ty
 
 type Erc721Standard = Extract<TokenStandard, 'erc721'>;
 
-export type Erc721Token = Erc721Contract & Erc721Metadata &
+export type Erc721Token = Erc721Contract &
+	Erc721Metadata &
 	Omit<Token, 'network' | 'standard'> & { network: EthereumNetwork; standard: Erc721Standard };
 
 export type RequiredErc721Token = RequiredToken<Erc721Token>;
