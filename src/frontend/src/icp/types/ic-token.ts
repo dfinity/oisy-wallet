@@ -1,5 +1,4 @@
 import type {
-	IcTokenMetadataSchema,
 	IcCanistersSchema,
 	IcCanistersStrictSchema,
 	IcCkInterfaceSchema,
@@ -8,6 +7,7 @@ import type {
 	IcCkTokenSchema,
 	IcFeeSchema,
 	IcInterfaceSchema,
+	IcTokenMetadataSchema,
 	IcTokenSchema,
 	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
