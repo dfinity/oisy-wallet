@@ -12,11 +12,11 @@ import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 
 describe('erc1155.utils', () => {
 	describe('isTokenErc721UserToken', () => {
-
-		it.each(MOCK_ERC1155_TOKENS.map((token) => ({
-			...token,
-			enabled: Math.random() < 0.5
-		}))
+		it.each(
+			MOCK_ERC1155_TOKENS.map((token) => ({
+				...token,
+				enabled: Math.random() < 0.5
+			}))
 		)('should return true for token $name that has the enabled field', (token) => {
 			expect(isTokenErc1155CustomToken(token)).toBeTruthy();
 		});
