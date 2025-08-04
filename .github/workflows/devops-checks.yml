@@ -23,15 +23,15 @@ jobs:
         id: change
         with:
           filters: |
-            any:
+            shell:
               - '**/*.sh'
 
       - name: Install shellcheck
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.shell == 'true'
         run: ./scripts/setup shellcheck
 
       - name: Lint shell scripts
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.shell == 'true'
         run: scripts/lint.sh.sh
 
   lint-github-actions:
@@ -48,17 +48,17 @@ jobs:
         id: change
         with:
           filters: |
-            any:
+            actions:
               - '.github/**/*'
               - '**/*.yml'
               - '**/*.yaml'
 
       - name: Install zizmor
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.actions == 'true'
         run: ./scripts/setup cargo-binstall zizmor
 
       - name: Lint GitHub workflows
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.actions == 'true'
         run: scripts/lint.github.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,17 +82,17 @@ jobs:
         id: change
         with:
           filters: |
-            any:
+            src:
               - scripts/download-canister-api.test
               - scripts/download-canister-api
               - .github/workflows/devops-checks.yml
 
       - name: Install dfx
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.src == 'true'
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
       - name: Run test
-        if: steps.change.outputs.any == 'true'
+        if: steps.change.outputs.src == 'true'
         run: scripts/download-canister-api.test
 
   devops-checks-pass:
