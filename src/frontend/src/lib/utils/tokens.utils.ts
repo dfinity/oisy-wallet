@@ -218,7 +218,7 @@ export const filterTokens = <T extends Token>({
 }): T[] => {
 	const matchingToken = (token: Token) =>
 		token.name.toLowerCase().includes(filter.toLowerCase()) ||
-		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
+		(token.symbol?.toLowerCase() ?? '').includes(filter.toLowerCase()) ||
 		(icTokenIcrcCustomToken(token) &&
 			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase()));
 

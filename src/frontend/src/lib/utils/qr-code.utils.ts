@@ -111,7 +111,7 @@ export const decodeQrCode = ({
 
 	const { token: symbol, identifier: destination, amount } = payment;
 
-	if (nonNullish(expectedToken) && symbol.toLowerCase() !== expectedToken.symbol.toLowerCase()) {
+	if (nonNullish(expectedToken) && symbol.toLowerCase() !== expectedToken.symbol?.toLowerCase()) {
 		return { status: 'token_incompatible' };
 	}
 

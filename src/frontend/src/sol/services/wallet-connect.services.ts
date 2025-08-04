@@ -218,7 +218,7 @@ export const sign = ({
 				trackEvent({
 					name: TRACK_COUNT_WC_SOL_SEND_SUCCESS,
 					metadata: {
-						token: token.symbol
+						token: token.symbol ?? ''
 					}
 				});
 
@@ -227,7 +227,7 @@ export const sign = ({
 				trackEvent({
 					name: TRACK_COUNT_WC_SOL_SEND_ERROR,
 					metadata: {
-						token: token.symbol
+						token: token.symbol ?? ''
 					}
 				});
 

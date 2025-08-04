@@ -226,4 +226,4 @@ export const findTwinToken = ({
  * @returns the symbol to display for the token
  */
 export const getTokenDisplaySymbol = (token: Token | CardData): string =>
-	token.oisySymbol?.oisySymbol ?? token.symbol;
+	token.oisySymbol?.oisySymbol ?? token.symbol ?? '';

@@ -8,7 +8,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 
 const getFilterCondition = ({ filter, token }: { filter: string; token: TokenUi }): boolean =>
 	token.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
-	token.symbol.toLowerCase().indexOf(filter.toLowerCase()) >= 0;
+	(token.symbol?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0;
 
 export const getFilteredTokenList = ({
 	filter,
