@@ -1,9 +1,10 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
+import * as infuraErc1155SpyProviders from '$eth/providers/infura-erc1155.providers';
+import { InfuraErc1155Provider } from '$eth/providers/infura-erc1155.providers';
 import * as infuraErc20SpyProviders from '$eth/providers/infura-erc20.providers';
 import { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
 import * as infuraErc721SpyProviders from '$eth/providers/infura-erc721.providers';
-import * as infuraErc1155SpyProviders from '$eth/providers/infura-erc1155.providers';
 import { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
@@ -14,7 +15,6 @@ import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
-import { InfuraErc1155Provider } from '$eth/providers/infura-erc1155.providers';
 
 describe('EthAddTokenReview', () => {
 	const mockErc721CustomToken: Erc721CustomToken = {
@@ -27,7 +27,9 @@ describe('EthAddTokenReview', () => {
 		enabled: true
 	};
 
-	const mockErc1155Metadata = vi.fn().mockResolvedValue({ name: 'Test Token4', symbol: 'WUK', decimals: 0 });
+	const mockErc1155Metadata = vi
+		.fn()
+		.mockResolvedValue({ name: 'Test Token4', symbol: 'WUK', decimals: 0 });
 	const mockErc721Metadata = vi
 		.fn()
 		.mockResolvedValue({ name: 'Test Token', symbol: 'TTK', decimals: 0 });
@@ -94,7 +96,9 @@ describe('EthAddTokenReview', () => {
 
 		vi.spyOn(infuraErc20SpyProviders, 'infuraErc20Providers').mockReturnValue(mockErc20Provider);
 		vi.spyOn(infuraErc721SpyProviders, 'infuraErc721Providers').mockReturnValue(mockErc721Provider);
-		vi.spyOn(infuraErc1155SpyProviders, 'infuraErc1155Providers').mockReturnValue(mockErc1155Provider);
+		vi.spyOn(infuraErc1155SpyProviders, 'infuraErc1155Providers').mockReturnValue(
+			mockErc1155Provider
+		);
 
 		render(EthAddTokenReview, {
 			props: {
