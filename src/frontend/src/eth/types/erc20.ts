@@ -12,7 +12,7 @@ import type { Option } from '$lib/types/utils';
 
 type Erc20Standard = Extract<TokenStandard, 'erc20'>;
 
-export type Erc20Token = Erc20Contract &
+export type Erc20Token = Erc20Contract & Erc20Metadata &
 	Omit<Token, 'network' | 'standard'> & { network: EthereumNetwork; standard: Erc20Standard };
 
 export type RequiredErc20Token = RequiredToken<Erc20Token>;
