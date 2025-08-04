@@ -43,6 +43,7 @@ import type { NetworkEnvironment } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { last } from '$lib/utils/array.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Token } from '$lib/types/token';
 
 export const IC_CYCLES_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
@@ -93,7 +94,7 @@ const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 				minterCanisterId: LOCAL_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
 				position: 3,
-				twinToken: BTC_TESTNET_TOKEN
+				twinToken: BTC_TESTNET_TOKEN as Token & { symbol: string }
 			}
 		: undefined;
 
@@ -108,7 +109,7 @@ const CKBTC_STAGING_DATA: IcCkInterface | undefined =
 				minterCanisterId: STAGING_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
 				position: 2,
-				twinToken: BTC_TESTNET_TOKEN,
+				twinToken: BTC_TESTNET_TOKEN as Token & { symbol: string },
 				explorerUrl: CKBTC_TESTNET_EXPLORER_URL
 			}
 		: undefined;
@@ -121,7 +122,7 @@ const CKBTC_IC_DATA: IcCkInterface | undefined =
 				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
 				position: 1,
-				twinToken: BTC_MAINNET_TOKEN,
+				twinToken: BTC_MAINNET_TOKEN as Token & { symbol: string },
 				groupData: BTC_TOKEN_GROUP,
 				explorerUrl: CKBTC_EXPLORER_URL
 			}
