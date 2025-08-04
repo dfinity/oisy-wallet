@@ -1,6 +1,6 @@
 import { IcTokenDeprecatedSchema } from '$icp/schema/ic-token-deprecated.schema';
 import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
-import { TokenSchema } from '$lib/schema/token.schema';
+import { TokenMetadataSchema, TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
 import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
@@ -39,8 +39,13 @@ export const IcInterfaceSchema = z.object({
 	...IcAppMetadataSchema.shape
 });
 
+export const IcTokenMetadataSchema = TokenMetadataSchema.extend({
+	symbol: z.string() // Make symbol required by removing optional()
+});
+
 export const IcTokenSchema = z.object({
 	...TokenSchema.shape,
+	...IcTokenMetadataSchema.shape,
 	...IcFeeSchema.shape,
 	...IcInterfaceSchema.shape,
 	...IcTokenDeprecatedSchema.shape
