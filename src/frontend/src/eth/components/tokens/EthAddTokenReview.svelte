@@ -2,10 +2,13 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { erc721Tokens } from '$eth/derived/erc721.derived';
+	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
+	import type { Erc1155Metadata } from '$eth/types/erc1155';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -21,9 +24,6 @@
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
-	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
-	import type { Erc1155Metadata } from '$eth/types/erc1155';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | Erc721Metadata | Erc1155Metadata | undefined;
@@ -98,8 +98,10 @@
 				metadata = await metadataApiErc20({ address: contractAddress });
 				validateMetadata();
 			} else {
-				const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(network.id);
-				if (await isInterfaceErc721({address: contractAddress})) {
+				const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(
+					network.id
+				);
+				if (await isInterfaceErc721({ address: contractAddress })) {
 					metadata = await metadataApiErc721({ address: contractAddress });
 					validateMetadata();
 				} else {

@@ -44,9 +44,8 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 			...(nonNullish(name) && { name }),
 			...(nonNullish(symbol) && { symbol }),
 			decimals: 0 // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-		}
-
-	}
+		};
+	};
 
 	getNftMetadata = async ({
 		contractAddress,
