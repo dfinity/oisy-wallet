@@ -6,10 +6,9 @@ type Erc1155Standard = Extract<TokenStandard, 'erc1155'>;
 
 export type Erc1155Token = Erc1155Contract &
 	Omit<Token, 'network' | 'standard' | 'name' | 'symbol' | 'decimals'> &
-	Erc1155Metadata &
-	{
+	Erc1155Metadata & {
 		network: EthereumNetwork;
-		standard: Erc1155Standard
+		standard: Erc1155Standard;
 	};
 
 export type RequiredErc1155Token = RequiredToken<Erc1155Token>;
