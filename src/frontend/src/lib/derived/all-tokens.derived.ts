@@ -1,8 +1,8 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
-import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
