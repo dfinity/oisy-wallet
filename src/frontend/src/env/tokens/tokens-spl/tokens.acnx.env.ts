@@ -12,16 +12,16 @@ export const ACNX_SYMBOL = 'ACNx';
 export const ACNX_TOKEN_ID: TokenId = parseTokenId(ACNX_SYMBOL);
 
 export const ACNX_TOKEN: RequiredSplToken = {
-        id: ACNX_TOKEN_ID,
-        network: SOLANA_MAINNET_NETWORK,
-        standard: 'spl',
-        category: 'default',
-        name: 'Accenture xStock',
-        symbol: ACNX_SYMBOL,
-        decimals: ACNX_DECIMALS,
-        icon: acnx,
-        address: 'Xs5UJzmCRQ8DWZjskExdSQDnbE6iLkRu2jjrRAB1JSU',
-        owner: TOKEN_2022_PROGRAM_ADDRESS,
+	id: ACNX_TOKEN_ID,
+	network: SOLANA_MAINNET_NETWORK,
+	standard: 'spl',
+	category: 'default',
+	name: 'Accenture xStock',
+	symbol: ACNX_SYMBOL,
+	decimals: ACNX_DECIMALS,
+	icon: acnx,
+	address: 'Xs5UJzmCRQ8DWZjskExdSQDnbE6iLkRu2jjrRAB1JSU',
+	owner: TOKEN_2022_PROGRAM_ADDRESS,
 	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
 	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };
