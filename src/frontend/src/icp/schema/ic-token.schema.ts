@@ -26,7 +26,7 @@ export const IcCanistersStrictSchema = IcCanistersSchema.extend({
 });
 
 export const IcCkLinkedAssetsSchema = z.object({
-	twinToken: TokenSchema,
+	twinToken: TokenSchema.extend({symbol: z.string()}),
 	feeLedgerCanisterId: CanisterIdTextSchema.optional()
 });
 
