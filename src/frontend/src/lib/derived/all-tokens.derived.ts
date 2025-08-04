@@ -2,6 +2,7 @@ import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
+import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
@@ -61,6 +62,8 @@ export const allTokens = derived(
 		erc20Tokens,
 		// The entire list of Erc721 tokens to display to the user.
 		erc721Tokens,
+		// The entire list of Erc1155 tokens to display to the user.
+		erc1155Tokens,
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		allIcrcTokens,
@@ -71,6 +74,7 @@ export const allTokens = derived(
 	([
 		$erc20Tokens,
 		$erc721Tokens,
+		$erc1155Tokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$allIcrcTokens,
@@ -88,6 +92,7 @@ export const allTokens = derived(
 		...$enabledEvmTokens.map((token) => ({ ...token, enabled: true })),
 		...$erc20Tokens,
 		...$erc721Tokens,
+		...$erc1155Tokens,
 		...$allIcrcTokens,
 		...$splTokens
 	]

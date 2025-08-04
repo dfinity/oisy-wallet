@@ -10,6 +10,7 @@
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
+	import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 
 	interface Props {
 		token: Token;
@@ -21,7 +22,7 @@
 
 {#if icTokenIcrcCustomToken(token)}
 	<IcManageTokenToggle {token} on:icToken={(t) => onToggle(t)} />
-{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token) || isTokenErc721CustomToken(token)}
+{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token)}
 	<ManageTokenToggle {token} on:icShowOrHideToken={(t) => onToggle(t)} />
 {:else if isBitcoinToken(token)}
 	<BtcManageTokenToggle />

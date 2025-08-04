@@ -55,6 +55,7 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 
 	interface Props {
 		children: Snippet;
@@ -96,6 +97,7 @@
 		await Promise.all([
 			loadErc20Tokens({ identity: $authIdentity }),
 			loadErc721Tokens({ identity: $authIdentity }),
+			loadErc1155Tokens({identity: $authIdentity}),
 			loadIcrcTokens({ identity: $authIdentity }),
 			loadSplTokens({ identity: $authIdentity })
 		]);
