@@ -984,6 +984,7 @@
 			"invalid_contract_address": "Địa chỉ hợp đồng không hợp lệ.",
 			"invalid_token_address": "Địa chỉ token không hợp lệ.",
 			"invalid_ledger": "Token đã chọn không được liên kết với canister ledger của Icrc.",
+			"unrecognised_erc_interface": "",
 			"no_metadata": "Không có metadata nào được tìm thấy.",
 			"unexpected": "Đã xảy ra lỗi trong khi lưu token.",
 			"unexpected_hiding": "Đã xảy ra lỗi trong khi ẩn token.",
