@@ -7,7 +7,7 @@ import type { UserTokenState } from '$lib/types/token-toggleable';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 type MapErc20TokenParams = Erc20Contract &
-	Erc20Metadata & { network: EthereumNetwork } & Pick<Token, 'category'> &
+	Erc20Metadata & { network: EthereumNetwork, symbol: string } & Pick<Token, 'category'> &
 	Partial<Pick<Token, 'id'>>;
 
 export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams): Erc20Token => ({

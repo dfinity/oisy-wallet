@@ -14,7 +14,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const reloadEthereumBalance = (token: Token): Promise<ResultSuccess> => {
@@ -113,7 +113,7 @@ const loadErc20Balance = async ({
 				error: `${err}`
 			},
 			warning: `${replacePlaceholders(loading_balance, {
-				$symbol: contract.symbol,
+				$symbol: contract.symbol ?? '',
 				$network: contract.network.name
 			})} ${err}`
 		});

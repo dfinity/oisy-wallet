@@ -291,7 +291,7 @@ const loadCustomTokensWithMetadata = async (
 
 			const metadata = await safeLoadMetadata({ networkId, address });
 
-			return nonNullish(metadata)
+			return nonNullish(metadata) && nonNullish(metadata.symbol)
 				? [...(await acc), { ...token, icon: mapErc20Icon(metadata.symbol), ...metadata }]
 				: acc;
 		}, Promise.resolve([]));
