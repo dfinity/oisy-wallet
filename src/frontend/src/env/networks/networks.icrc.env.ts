@@ -40,10 +40,10 @@ import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { last } from '$lib/utils/array.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Token } from '$lib/types/token';
 
 export const IC_CYCLES_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
