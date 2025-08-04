@@ -7,7 +7,7 @@ import {
 	ODINDOG_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
+import type { IcCkInterface, IcFee, IcInterface, IcToken, IcTokenMetadata } from '$icp/types/ic-token';
 import type {
 	IcTokenExtended,
 	IcTokenWithoutIdExtended,
@@ -107,7 +107,7 @@ export const mapIcrcToken = ({
 	};
 };
 
-type IcrcTokenMetadata = TokenMetadata & IcFee;
+type IcrcTokenMetadata = IcTokenMetadata & IcFee;
 
 const mapOptionalToken = (response: IcrcTokenMetadataResponse): IcrcTokenMetadata | undefined =>
 	mapTokenMetadata(response);
