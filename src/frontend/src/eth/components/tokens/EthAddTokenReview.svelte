@@ -128,18 +128,20 @@
 		{#snippet content()}{contractAddress}{/snippet}
 	</Value>
 
-	<Value ref="contractName" element="div">
-		{#snippet label()}
-			{$i18n.core.text.name}
-		{/snippet}
-		{#snippet content()}
-			{#if isNullish(metadata)}
-				&#8203;
-			{:else}
-				<span in:fade>{metadata.name}</span>
-			{/if}
-		{/snippet}
-	</Value>
+	{#if nonNullish(metadata) && nonNullish(metadata.name)}
+		<Value ref="contractName" element="div">
+			{#snippet label()}
+				{$i18n.core.text.name}
+			{/snippet}
+			{#snippet content()}
+				{#if isNullish(metadata)}
+					&#8203;
+				{:else}
+					<span in:fade>{metadata.name}</span>
+				{/if}
+			{/snippet}
+		</Value>
+	{/if}
 
 	<Value ref="network" element="div">
 		{#snippet label()}
@@ -150,18 +152,20 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractSymbol" element="div">
-		{#snippet label()}
-			{$i18n.core.text.symbol}
-		{/snippet}
-		{#snippet content()}
-			{#if isNullish(metadata)}
-				&#8203;
-			{:else}
-				<span in:fade>{metadata.symbol}</span>
-			{/if}
-		{/snippet}
-	</Value>
+	{#if nonNullish(metadata) && nonNullish(metadata.symbol)}
+		<Value ref="contractSymbol" element="div">
+			{#snippet label()}
+				{$i18n.core.text.symbol}
+			{/snippet}
+			{#snippet content()}
+				{#if isNullish(metadata)}
+					&#8203;
+				{:else}
+					<span in:fade>{metadata.symbol}</span>
+				{/if}
+			{/snippet}
+		</Value>
+	{/if}
 
 	{#if nonNullish(metadata) && metadata.decimals > 0}
 		<Value ref="contractDecimals" element="div">
