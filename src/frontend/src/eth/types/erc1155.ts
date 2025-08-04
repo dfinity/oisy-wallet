@@ -12,7 +12,10 @@ export type RequiredErc1155Token = RequiredToken<Erc1155Token>;
 export type Erc1155ContractAddress = ContractAddress;
 export type Erc1155Contract = Erc1155ContractAddress;
 
-export type Erc1155Metadata = TokenMetadata;
+export type Erc1155Metadata = Omit<TokenMetadata, 'name' | 'symbol'> & {
+	name?: string;
+	symbol?: string;
+};
 
 // https://eips.ethereum.org/EIPS/eip-1155#erc-1155-metadata-uri-json-schema
 export interface Erc1155UriJson {
