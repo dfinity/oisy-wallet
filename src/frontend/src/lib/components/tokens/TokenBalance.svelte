@@ -21,7 +21,7 @@
 </script>
 
 <TokenBalanceSkeleton {data}>
-	<output class="break-all" data-tid={testId}>
+	<output data-tid={testId}>
 		{#if nonNullish(data.balance)}
 			{#if hideBalance}
 				{@render privacyBalance?.()}
