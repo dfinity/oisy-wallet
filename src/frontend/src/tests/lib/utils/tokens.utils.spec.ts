@@ -46,6 +46,7 @@ import i18nMock from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
@@ -682,15 +683,15 @@ describe('tokens.utils', () => {
 		it('should return empty arrays if no tokens passed', () => {
 			const result = groupTogglableTokens({});
 
-			expect(result).toEqual({ icrc: [], erc20: [], erc721: [], spl: [] });
+			expect(result).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
 		});
 
 		it('should return empty arrays if invalid data passed', () => {
 			const result1 = groupTogglableTokens({ invalidkey: ICP_TOKEN });
 			const result2 = groupTogglableTokens(null as unknown as Record<string, Token>);
 
-			expect(result1).toEqual({ icrc: [], erc20: [], erc721: [], spl: [] });
-			expect(result2).toEqual({ icrc: [], erc20: [], erc721: [], spl: [] });
+			expect(result1).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
+			expect(result2).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
 		});
 
 		it('should group the tokens correctly', () => {
@@ -698,12 +699,14 @@ describe('tokens.utils', () => {
 			const mockToggleableIcToken2 = { ...mockValidIcrcToken, name: 'token2', enabled: true };
 			const mockToggleableErc20Token = { ...mockValidErc20Token, enabled: true };
 			const mockToggleableErc721Token = { ...mockValidErc721Token, enabled: true };
+			const mockToggleableErc1155Token = { ...mockValidErc1155Token, enabled: true };
 			const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 
-			const { icrc, spl, erc20, erc721 } = groupTogglableTokens({
+			const { icrc, spl, erc20, erc721, erc1155 } = groupTogglableTokens({
 				SOL: mockToggleableSplToken,
 				ETH: mockToggleableErc20Token,
 				erc721: mockToggleableErc721Token,
+				erc1155: mockToggleableErc1155Token,
 				'ICP-t1': mockToggleableIcToken1,
 				'ICP-t2': mockToggleableIcToken2
 			});
@@ -712,6 +715,7 @@ describe('tokens.utils', () => {
 			expect(spl).toEqual([mockToggleableSplToken]);
 			expect(erc20).toEqual([mockToggleableErc20Token]);
 			expect(erc721).toEqual([mockToggleableErc721Token]);
+			expect(erc1155).toEqual([mockToggleableErc1155Token]);
 		});
 	});
 

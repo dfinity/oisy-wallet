@@ -1,4 +1,5 @@
 import {
+	saveErc1155CustomTokens,
 	saveErc20CustomTokens,
 	saveErc20UserTokens,
 	saveErc721CustomTokens
@@ -33,6 +34,8 @@ import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -272,24 +275,27 @@ export const groupTogglableTokens = (
 	icrc: IcrcCustomToken[];
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
 	erc721: Erc721CustomToken[];
+	erc1155: Erc1155CustomToken[];
 	spl: SplTokenToggleable[];
 } =>
 	Object.values(tokens ?? {}).reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
+		erc1155: Erc1155CustomToken[];
 		spl: SplTokenToggleable[];
 	}>(
-		({ icrc, erc20, erc721, spl }, token) => ({
+		({ icrc, erc20, erc721, erc1155, spl }, token) => ({
 			icrc: [
 				...icrc,
 				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 			],
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
+			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
 			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 		}),
-		{ icrc: [], erc20: [], erc721: [], spl: [] }
+		{ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
 
 export const saveAllCustomTokens = async ({
@@ -309,9 +315,9 @@ export const saveAllCustomTokens = async ({
 	$authIdentity: OptionIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
-	const { icrc, erc20, erc721, spl } = groupTogglableTokens(tokens);
+	const { icrc, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
 
-	if (icrc.length === 0 && erc20.length === 0 && erc721.length === 0 && spl.length === 0) {
+	if (icrc.length === 0 && erc20.length === 0 && erc721.length === 0 && erc1155.length === 0 && spl.length === 0) {
 		toastsShow({
 			text: $i18n.tokens.manage.info.no_changes,
 			level: 'info',
@@ -379,6 +385,14 @@ export const saveAllCustomTokens = async ({
 						tokens: erc721
 					})
 				]
+			: []),
+		...(erc1155.length > 0
+			? [
+				saveErc1155CustomTokens({
+					...commonParams,
+					tokens: erc1155
+				})
+			]
 			: []),
 		...(spl.length > 0
 			? [
