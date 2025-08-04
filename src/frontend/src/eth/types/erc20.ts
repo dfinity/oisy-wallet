@@ -21,6 +21,6 @@ export type RequiredAdditionalErc20Token = Omit<RequiredErc20Token, keyof TokenL
 export type Erc20ContractAddress = ContractAddress;
 export type Erc20Contract = Erc20ContractAddress & { exchange: Exchange } & TokenLinkedData;
 
-export type Erc20Metadata = TokenMetadata;
+export type Erc20Metadata = Omit<TokenMetadata, 'symbol'> & { symbol: string };
 
 export type OptionErc20Token = Option<Erc20Token>;
