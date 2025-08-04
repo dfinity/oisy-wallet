@@ -21,9 +21,12 @@
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
+	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
+	import type { Erc1155Metadata } from '$eth/types/erc1155';
 
 	export let contractAddress: string | undefined;
-	export let metadata: Erc20Metadata | Erc721Metadata | undefined;
+	export let metadata: Erc20Metadata | Erc721Metadata | Erc1155Metadata | undefined;
 	export let network: Network;
 
 	const validateMetadata = () => {
@@ -72,7 +75,7 @@
 		}
 
 		if (
-			[...$erc20Tokens, ...$erc721Tokens]?.find(
+			[...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens]?.find(
 				({ address, network: tokenNetwork }) =>
 					areAddressesEqual({
 						address1: address,
@@ -93,11 +96,17 @@
 		try {
 			if (await isErc20({ contractAddress })) {
 				metadata = await metadataApiErc20({ address: contractAddress });
+				validateMetadata();
 			} else {
-				const { metadata: metadataApiErc721 } = infuraErc721Providers(network.id);
-				metadata = await metadataApiErc721({ address: contractAddress });
+				const { metadata: metadataApiErc721, isInterfaceErc721 } = infuraErc721Providers(network.id);
+				if (await isInterfaceErc721({address: contractAddress})) {
+					metadata = await metadataApiErc721({ address: contractAddress });
+					validateMetadata();
+				} else {
+					const { metadata: metadataApiErc1155 } = infuraErc1155Providers(network.id);
+					metadata = await metadataApiErc1155({ address: contractAddress });
+				}
 			}
-			validateMetadata();
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 

@@ -4,7 +4,7 @@ import { Erc165Identifier } from '$eth/constants/erc.constants';
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import { fetchMetadataFromUri } from '$eth/services/erc.services';
-import type { Erc1155ContractAddress } from '$eth/types/erc1155';
+import type { Erc1155ContractAddress, Erc1155Metadata } from '$eth/types/erc1155';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId, NftMetadata } from '$lib/types/nft';
@@ -19,6 +19,34 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 
 	private supportsMetadataExtension = (contract: Erc1155ContractAddress): Promise<boolean> =>
 		this.isSupportedInterface({ contract, interfaceId: Erc165Identifier.ERC1155_METADATA_URI });
+
+	metadata = async ({
+		address
+	}: Pick<Erc1155ContractAddress, 'address'>): Promise<Erc1155Metadata> => {
+		const erc1155Contract = new Contract(address, ERC1155_ABI, this.provider);
+
+		let name;
+		let symbol;
+
+		try {
+			name = await erc1155Contract.name();
+		} catch (_: unknown) {
+			// Since erc1155 contracts do not have to implement 'name', we don't have to handle the error here.
+		}
+
+		try {
+			symbol = await erc1155Contract.symbol();
+		} catch (_: unknown) {
+			// Since erc1155 contracts do not have to implement 'symbol', we don't have to handle the error here.
+		}
+
+		return {
+			...(nonNullish(name) && { name }),
+			...(nonNullish(symbol) && { symbol }),
+			decimals: 0 // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
+		}
+
+	}
 
 	getNftMetadata = async ({
 		contractAddress,
