@@ -177,8 +177,10 @@
 			}
 		});
 
-		// TODO: Warn the user that if no interface is encountered, it falls back to standard ERC721
-		await saveErc721([newToken]);
+		// In case we are not able to determine the token standard, we display an error message
+		toastsError({
+			msg: {text: $i18n.tokens.error.unrecognised_erc_interface}
+		})
 	};
 
 	const saveSplToken = () => {
