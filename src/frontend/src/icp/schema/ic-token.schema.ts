@@ -25,8 +25,15 @@ export const IcCanistersStrictSchema = IcCanistersSchema.extend({
 	indexCanisterId: CanisterIdTextSchema
 });
 
+export const IcTokenMetadataSchema = TokenMetadataSchema.extend({
+	symbol: z.string()
+});
+
 export const IcCkLinkedAssetsSchema = z.object({
-	twinToken: TokenSchema,
+	twinToken: z.object({
+		...TokenSchema.shape,
+		...IcTokenMetadataSchema.shape
+	}),
 	feeLedgerCanisterId: CanisterIdTextSchema.optional()
 });
 
@@ -37,10 +44,6 @@ export const IcCkMetadataSchema = IcCkLinkedAssetsSchema.partial().extend({
 export const IcInterfaceSchema = z.object({
 	...IcCanistersSchema.shape,
 	...IcAppMetadataSchema.shape
-});
-
-export const IcTokenMetadataSchema = TokenMetadataSchema.extend({
-	symbol: z.string() // Make symbol required by removing optional()
 });
 
 export const IcTokenSchema = z.object({
