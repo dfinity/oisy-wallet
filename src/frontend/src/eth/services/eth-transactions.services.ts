@@ -194,7 +194,7 @@ const loadErc20Transactions = async ({
 				error: `${err}`
 			},
 			warning: `${replacePlaceholders(loading_transactions_symbol, {
-				$symbol: token.symbol ?? ''
+				$symbol: token.symbol
 			})} ${err}`
 		});
 

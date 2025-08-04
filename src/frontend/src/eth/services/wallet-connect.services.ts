@@ -168,7 +168,7 @@ export const send = ({
 				trackEvent({
 					name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
 					metadata: {
-						token: token.symbol ?? ''
+						token: token.symbol
 					}
 				});
 
@@ -177,7 +177,7 @@ export const send = ({
 				trackEvent({
 					name: TRACK_COUNT_WC_ETH_SEND_ERROR,
 					metadata: {
-						token: token.symbol ?? ''
+						token: token.symbol
 					}
 				});
 

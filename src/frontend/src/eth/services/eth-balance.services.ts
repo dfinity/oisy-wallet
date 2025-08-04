@@ -113,7 +113,7 @@ const loadErc20Balance = async ({
 				error: `${err}`
 			},
 			warning: `${replacePlaceholders(loading_balance, {
-				$symbol: contract.symbol ?? '',
+				$symbol: contract.symbol,
 				$network: contract.network.name
 			})} ${err}`
 		});

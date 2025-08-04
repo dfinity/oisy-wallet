@@ -23,8 +23,8 @@ export const TokenStandardSchema = z.enum([
 export const TokenCategorySchema = z.enum(['default', 'custom']);
 
 export const TokenMetadataSchema = z.object({
-	name: z.string().optional(),
-	symbol: z.string().optional(),
+	name: z.string(),
+	symbol: z.string(),
 	decimals: z.number(),
 	icon: z.string().optional()
 });
