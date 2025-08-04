@@ -179,8 +179,8 @@
 
 		// In case we are not able to determine the token standard, we display an error message
 		toastsError({
-			msg: {text: $i18n.tokens.error.unrecognised_erc_interface}
-		})
+			msg: { text: $i18n.tokens.error.unrecognised_erc_interface }
+		});
 	};
 
 	const saveSplToken = () => {
