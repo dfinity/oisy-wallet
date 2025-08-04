@@ -41,8 +41,8 @@
 		if (
 			[...$erc20Tokens, ...$erc721Tokens]?.find(
 				({ symbol, name, network: tokenNetwork }) =>
-					(symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
-						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')) &&
+					(symbol.toLowerCase() === (metadata?.symbol?.toLowerCase() ?? '') ||
+						name.toLowerCase() === (metadata?.name?.toLowerCase() ?? '')) &&
 					tokenNetwork.chainId === (network as EthereumNetwork).chainId
 			) !== undefined
 		) {
