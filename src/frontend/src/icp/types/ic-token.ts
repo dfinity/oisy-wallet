@@ -1,14 +1,15 @@
-import {
-	type IcCanistersSchema,
-	type IcCanistersStrictSchema,
-	type IcCkInterfaceSchema,
-	type IcCkLinkedAssetsSchema,
-	type IcCkMetadataSchema,
-	type IcCkTokenSchema,
-	type IcFeeSchema,
-	type IcInterfaceSchema, IcTokenMetadataSchema,
-	type IcTokenSchema,
-	type IcTokenWithoutIdSchema
+import type {
+	IcTokenMetadataSchema,
+	IcCanistersSchema,
+	IcCanistersStrictSchema,
+	IcCkInterfaceSchema,
+	IcCkLinkedAssetsSchema,
+	IcCkMetadataSchema,
+	IcCkTokenSchema,
+	IcFeeSchema,
+	IcInterfaceSchema,
+	IcTokenSchema,
+	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
 import type { Option } from '$lib/types/utils';
 import type * as z from 'zod/v4';

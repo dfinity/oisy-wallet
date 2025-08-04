@@ -7,7 +7,13 @@ import {
 	ODINDOG_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCkInterface, IcFee, IcInterface, IcToken, IcTokenMetadata } from '$icp/types/ic-token';
+import type {
+	IcCkInterface,
+	IcFee,
+	IcInterface,
+	IcToken,
+	IcTokenMetadata
+} from '$icp/types/ic-token';
 import type {
 	IcTokenExtended,
 	IcTokenWithoutIdExtended,
@@ -15,7 +21,7 @@ import type {
 } from '$icp/types/icrc-custom-token';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { TokenCategory, TokenMetadata } from '$lib/types/token';
+import type { TokenCategory } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import {
