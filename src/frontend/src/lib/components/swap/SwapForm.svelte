@@ -84,8 +84,18 @@
 	let swapAmountsLoading = $derived(
 		nonNullish(swapAmount) &&
 			Number(swapAmount) > 0 &&
-			(isNullish($swapAmountsStore?.amountForSwap) ||
-				Number(swapAmount) !== $swapAmountsStore.amountForSwap)
+			// Якщо є store і сума відрізняється - завантажується
+			((nonNullish($swapAmountsStore?.amountForSwap) &&
+				Number(swapAmount) !== $swapAmountsStore.amountForSwap) ||
+				// Якщо store null але є валідна сума - НЕ завантажується (вже завершено з помилкою)
+				false)
+	);
+
+	let shouldShowError = $derived(
+		($swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore)) &&
+			!swapAmountsLoading &&
+			nonNullish(swapAmount) &&
+			Number(swapAmount) > 0
 	);
 
 	let disableSwitchTokens = $derived(
@@ -152,17 +162,17 @@
 	});
 
 	$effect(() => {
-	console.log('Debug swap condition:', {
-		store: $swapAmountsStore,
-		swapsLength: $swapAmountsStore?.swaps?.length,
-		loading: swapAmountsLoading,
-		amount: swapAmount,
-		amountNumber: Number(swapAmount),
-		condition1: $swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore),
-		condition2: !swapAmountsLoading,
-		condition3: nonNullish(swapAmount) && Number(swapAmount) > 0
+		console.log('Debug swap condition:', {
+			store: $swapAmountsStore,
+			swapsLength: $swapAmountsStore?.swaps?.length,
+			loading: swapAmountsLoading,
+			amount: swapAmount,
+			amountNumber: Number(swapAmount),
+			condition1: $swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore),
+			condition2: !swapAmountsLoading,
+			condition3: nonNullish(swapAmount) && Number(swapAmount) > 0
+		});
 	});
-});
 </script>
 
 <ContentWithToolbar>
@@ -228,7 +238,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if ($swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore)) && !swapAmountsLoading && nonNullish(swapAmount) && Number(swapAmount) > 0}
+						{#if shouldShowError}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
