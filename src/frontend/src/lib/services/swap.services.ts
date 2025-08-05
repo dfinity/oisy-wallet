@@ -4,6 +4,7 @@ import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-t
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
@@ -244,6 +245,14 @@ export const fetchIcpSwap = async ({
 		ledgerCanisterId: sourceLedgerCanisterId
 	};
 
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId: poolCanisterId,
+		principal: identity.getPrincipal()
+	});
+
+	console.log({ balance0, balance1 });
+
 	// TODO: Revisit this logic once `tryToWithdraw` and `withdrawDestinationTokens` are provided.
 	// Let's keep it like this for now and adjust it later.
 	if (tryToWithdraw) {
@@ -372,18 +381,11 @@ export const fetchIcpSwap = async ({
 		});
 	} catch (_: unknown) {
 		try {
-			await withdraw({
+			await withdrawUserUnusedBalance({
 				identity,
 				canisterId: poolCanisterId,
-				token: destinationLedgerCanisterId,
-				amount:
-					sourceToken.id === ICP_TOKEN.id &&
-					(parsedSwapAmount === 600000000n ||
-						parsedSwapAmount === 700000000n ||
-						parsedSwapAmount === 800000000n)
-						? BigInt(`${receiveAmount}000`)
-						: receiveAmount,
-				fee: destinationTokenFee
+				sourceToken,
+				destinationToken
 			});
 
 			progress(ProgressStepsSwap.UPDATE_UI);
@@ -486,50 +488,15 @@ export const performManualWithdraw = async ({
 	setFailedProgressStep
 }: any): Promise<IcpSwapWithdrawResponse> => {
 	try {
-		const { balance0, balance1 } = await getUserUnusedBalanceForToken({ identity, canisterId });
+		await withdrawUserUnusedBalance({ identity, canisterId, sourceToken, destinationToken });
 
-		// console.log({ unusedBalance });
-
-		if (balance0 !== 0n) {
-			await withdraw({
-				identity,
-				canisterId,
-				token: destinationToken.ledgerCanisterId,
-				amount: balance0,
-				fee: destinationToken.fee
-			});
-		}
-
-		if (balance1 !== 0n) {
-			await withdraw({
-				identity,
-				canisterId,
-				token: sourceToken.ledgerCanisterId,
-				amount: balance1,
-				fee: sourceToken.fee
-			});
-		}
-
-		console.log('Swap succeded');
-
-		// await withdraw({
-		// 	identity,
-		// 	canisterId,
-		// 	token: tokenId,
-		// 	amount:
-		// 		sourceAmount === 400000000n || sourceAmount === 700000000n
-		// 			? BigInt(`${amount}000`)
-		// 			: amount,
-		// 	fee
-		// });
-
-		// trackEvent({
-		// 	name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
-		// 	metadata: {
-		// 		token: token.symbol,
-		// 		tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
-		// 	}
-		// });
+		trackEvent({
+			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+			metadata: {
+				token: token.symbol,
+				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
+			}
+		});
 
 		return {
 			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
@@ -555,18 +522,40 @@ export const performManualWithdraw = async ({
 	}
 };
 
-export const getUserUnusedBalanceForToken = async ({
+export const withdrawUserUnusedBalance = async ({
 	identity,
-	canisterId
+	canisterId,
+	sourceToken,
+	destinationToken
 }: {
 	identity: Identity;
 	canisterId: string;
-}): Promise<{
-	balance0: bigint;
-	balance1: bigint;
-}> =>
-	await getUserUnusedBalance({
+	sourceToken: IcTokenToggleable;
+	destinationToken: IcTokenToggleable;
+}): Promise<void> => {
+	const { balance0, balance1 } = await getUserUnusedBalance({
 		identity,
 		canisterId,
 		principal: identity.getPrincipal()
 	});
+
+	if (balance0 !== 0n) {
+		await withdraw({
+			identity,
+			canisterId,
+			token: destinationToken.ledgerCanisterId,
+			amount: balance0,
+			fee: destinationToken.fee
+		});
+	}
+
+	if (balance1 !== 0n) {
+		await withdraw({
+			identity,
+			canisterId,
+			token: sourceToken.ledgerCanisterId,
+			amount: balance1,
+			fee: sourceToken.fee
+		});
+	}
+};
