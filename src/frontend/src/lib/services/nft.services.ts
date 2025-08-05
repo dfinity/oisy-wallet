@@ -161,7 +161,7 @@ const loadNftMetadata = async ({
 	try {
 		if (token.standard === 'erc721') {
 			return await infuraErc721Provider.getNftMetadata({
-				contractAddress,
+				contractAddress: token.address,
 				tokenId
 			});
 		}
