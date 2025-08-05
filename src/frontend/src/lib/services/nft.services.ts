@@ -1,12 +1,13 @@
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
 import {
-	infuraErc1155Providers,
-	InfuraErc1155Provider
+	InfuraErc1155Provider,
+	infuraErc1155Providers
 } from '$eth/providers/infura-erc1155.providers';
+import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import {
-	infuraErc721Providers,
-	InfuraErc721Provider
+	InfuraErc721Provider,
+	infuraErc721Providers
 } from '$eth/providers/infura-erc721.providers';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
@@ -15,7 +16,6 @@ import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 
 export const loadNfts = async ({
 	tokens,
@@ -50,7 +50,7 @@ export const loadNfts = async ({
 					loadedNfts,
 					walletAddress
 				});
-			} else {
+			} 
 				const infuraErc1155Provider = infuraErc1155Providers(token.network.id);
 
 				return loadNftsOfToken({
@@ -61,7 +61,7 @@ export const loadNfts = async ({
 					loadedNfts,
 					walletAddress
 				});
-			}
+			
 		})
 	);
 };
