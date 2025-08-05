@@ -17,6 +17,10 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
+import type { NftId } from '$lib/types/nft';
+import { parseNftId } from '$lib/validation/nft.validation';
+import type { Erc721ContractAddress } from '$eth/types/erc721';
+import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -135,6 +139,23 @@ export class AlchemyProvider {
 			gasPrice: gasPrice?.toBigInt(),
 			chainId: BigInt(chainId)
 		};
+	};
+
+	getNftIdsForOwner = async ({
+		 address,
+		 contractAddress
+	 }: {
+		address: EthAddress;
+		contractAddress: Erc721ContractAddress['address'] | Erc1155ContractAddress['address'];
+	}): Promise<NftId[]> => {
+		const result = await this.provider.nft.getNftsForOwner(address, {
+			contractAddresses: [contractAddress],
+			omitMetadata: true
+		});
+
+		console.log(result);
+
+		return result.ownedNfts.map((nft) => parseNftId(parseInt(nft.tokenId)));
 	};
 }
 
