@@ -82,9 +82,10 @@
 	});
 
 	let swapAmountsLoading = $derived(
-		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
-			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
-			: false
+		nonNullish(swapAmount) &&
+			Number(swapAmount) > 0 &&
+			(isNullish($swapAmountsStore?.amountForSwap) ||
+				Number(swapAmount) !== $swapAmountsStore.amountForSwap)
 	);
 
 	let disableSwitchTokens = $derived(
@@ -214,7 +215,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if (isNullish($swapAmountsStore) && swapAmountsLoading) || ($swapAmountsStore?.swaps.length === 0 && !swapAmountsLoading)}
+						{#if ($swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore)) && !swapAmountsLoading && nonNullish(swapAmount) && Number(swapAmount) > 0}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
