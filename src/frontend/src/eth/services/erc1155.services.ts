@@ -90,7 +90,9 @@ const loadCustomTokensWithMetadata = async (
 					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
 				);
 
-				const metadata = await infuraErc1155Providers(network.id).metadata({address: tokenAddress});
+				const metadata = await infuraErc1155Providers(network.id).metadata({
+					address: tokenAddress
+				});
 
 				return {
 					...{
