@@ -9,7 +9,7 @@
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
 	import { erc1155CustomTokensInitialized } from '$eth/derived/erc1155.derived';
-	import { erc721CustomTokensInitialized, erc721Tokens } from '$eth/derived/erc721.derived';
+	import { erc721CustomTokensInitialized } from '$eth/derived/erc721.derived';
 	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
