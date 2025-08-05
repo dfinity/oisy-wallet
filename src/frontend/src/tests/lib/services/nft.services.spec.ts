@@ -1,4 +1,9 @@
+import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
+import {
+	infuraErc1155Providers,
+	type InfuraErc1155Provider
+} from '$eth/providers/infura-erc1155.providers';
 import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
@@ -8,14 +13,12 @@ import { loadNfts } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { waitFor } from '@testing-library/svelte';
 import { Network } from 'ethers/providers';
 import { get } from 'svelte/store';
-import { type AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
-import { type InfuraErc1155Provider, infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
-import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 
 vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn(),
@@ -55,7 +58,6 @@ describe('nft.services', () => {
 		getNftIdsForOwner: vi.fn()
 	} as unknown as AlchemyProvider;
 
-
 	const mockInfuraErc721Provider = {
 		network: new Network('ethereum', 1),
 		chainId: 1,
@@ -72,7 +74,7 @@ describe('nft.services', () => {
 
 	describe('loadNfts', () => {
 		const erc721AzukiToken = { ...AZUKI_ELEMENTAL_BEANS_TOKEN, version: BigInt(1), enabled: true };
-		const erc1155NyanCatToken = {...NYAN_CAT_TOKEN, version: BigInt(1), enabled: true}
+		const erc1155NyanCatToken = { ...NYAN_CAT_TOKEN, version: BigInt(1), enabled: true };
 		const mockWalletAddress = mockEthAddress;
 
 		beforeEach(() => {
