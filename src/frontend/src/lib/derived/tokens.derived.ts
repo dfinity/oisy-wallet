@@ -34,6 +34,7 @@ export const tokens: Readable<Token[]> = derived(
 	[
 		erc20Tokens,
 		erc721Tokens,
+		erc1155Tokens,
 		sortedIcrcTokens,
 		splTokens,
 		enabledEthereumTokens,
@@ -44,6 +45,7 @@ export const tokens: Readable<Token[]> = derived(
 	([
 		$erc20Tokens,
 		$erc721Tokens,
+		$erc1155Tokens,
 		$icrcTokens,
 		$splTokens,
 		$enabledEthereumTokens,
@@ -58,6 +60,7 @@ export const tokens: Readable<Token[]> = derived(
 		...$enabledEvmTokens,
 		...$erc20Tokens,
 		...$erc721Tokens,
+		...$erc1155Tokens,
 		...$icrcTokens,
 		...$splTokens
 	]

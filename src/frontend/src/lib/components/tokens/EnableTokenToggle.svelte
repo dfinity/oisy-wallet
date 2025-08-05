@@ -1,6 +1,7 @@
 <script lang="ts">
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
+	import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 	import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
@@ -21,7 +22,7 @@
 
 {#if icTokenIcrcCustomToken(token)}
 	<IcManageTokenToggle {token} on:icToken={(t) => onToggle(t)} />
-{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token) || isTokenErc721CustomToken(token)}
+{:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token)}
 	<ManageTokenToggle {token} on:icShowOrHideToken={(t) => onToggle(t)} />
 {:else if isBitcoinToken(token)}
 	<BtcManageTokenToggle />

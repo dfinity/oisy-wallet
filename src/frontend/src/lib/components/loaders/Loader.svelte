@@ -9,6 +9,7 @@
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
 	import { erc721CustomTokensInitialized, erc721Tokens } from '$eth/derived/erc721.derived';
+	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
@@ -96,6 +97,7 @@
 		await Promise.all([
 			loadErc20Tokens({ identity: $authIdentity }),
 			loadErc721Tokens({ identity: $authIdentity }),
+			loadErc1155Tokens({ identity: $authIdentity }),
 			loadIcrcTokens({ identity: $authIdentity }),
 			loadSplTokens({ identity: $authIdentity })
 		]);
