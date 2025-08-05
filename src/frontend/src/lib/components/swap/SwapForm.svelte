@@ -214,7 +214,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if (isNullish($swapAmountsStore) || $swapAmountsStore.swaps.length === 0) && !swapAmountsLoading}
+						{#if isNullish($swapAmountsStore) && swapAmountsLoading}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
