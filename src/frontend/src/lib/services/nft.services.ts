@@ -171,14 +171,16 @@ const loadNftMetadata = async ({
 	await randomWait({ min: 0, max: 2000 });
 
 	try {
-		if (token.standard === 'erc721' && infuraProvider instanceof InfuraErc721Provider) {
-			return await infuraProvider.getNftMetadata({
+		if (token.standard === 'erc721') {
+			const infuraErc721Provider = infuraProvider as InfuraErc721Provider;
+			return await infuraErc721Provider.getNftMetadata({
 				contractAddress: token.address,
 				tokenId
 			});
 		}
-		if (token.standard === 'erc1155' && infuraProvider instanceof InfuraErc1155Provider) {
-			return await infuraProvider.getNftMetadata({
+		if (token.standard === 'erc1155') {
+			const infuraErc1155Provider = infuraProvider as InfuraErc1155Provider;
+			return await infuraErc1155Provider.getNftMetadata({
 				contractAddress: token.address,
 				tokenId
 			});
