@@ -2,7 +2,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { i18n } from '$lib/stores/i18n.store';
-import type { EthAddress } from '$lib/types/address';
+import type { Address, EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
@@ -17,6 +17,8 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
+import type { NftId } from '$lib/types/nft';
+import { parseNftId } from '$lib/validation/nft.validation';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -136,6 +138,18 @@ export class AlchemyProvider {
 			chainId: BigInt(chainId)
 		};
 	};
+
+	getNftIdsForOwner = async ({
+										 address,
+										 contractAddress
+									 }: {
+		address: EthAddress;
+		contractAddress: Address;
+	}): Promise<NftId[]> => {
+		const result = await this.provider.nft.getNftsForOwner(address, {contractAddresses: [contractAddress], omitMetadata: true});
+
+		return result.ownedNfts.map(nft => parseNftId(parseInt(nft.tokenId)));
+	}
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = [
