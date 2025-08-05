@@ -14,7 +14,7 @@ const NYAN_CAT_SYMBOL = 'NYAN';
 
 const NYAN_CAT_TOKEN_ID: TokenId = parseTokenId(NYAN_CAT_SYMBOL);
 
-const NYAN_CAT_TOKEN: RequiredErc1155Token = {
+export const NYAN_CAT_TOKEN: RequiredErc1155Token = {
 	id: NYAN_CAT_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: 'erc1155',
