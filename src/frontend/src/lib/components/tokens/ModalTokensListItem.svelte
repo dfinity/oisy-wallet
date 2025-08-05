@@ -43,7 +43,9 @@
 	{/snippet}
 
 	{#snippet titleEnd()}
-		<TokenBalance data={token} />
+		<span class="block min-w-12 text-nowrap">
+			<TokenBalance data={token} />
+		</span>
 	{/snippet}
 
 	{#snippet descriptionEnd()}
