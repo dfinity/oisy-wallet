@@ -65,7 +65,7 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 		const tokenUri = await erc1155Contract.uri(tokenId);
 
 		const { metadata, imageUrl } = await fetchMetadataFromUri({
-			metadataUrl: tokenUri,
+			metadataUrl: tokenUri.replace(/{id}/g, tokenId.toString()),
 			contractAddress,
 			tokenId
 		});
