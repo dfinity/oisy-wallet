@@ -1,5 +1,5 @@
-import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
-import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import {
 	infuraErc1155Providers,
 	type InfuraErc1155Provider
