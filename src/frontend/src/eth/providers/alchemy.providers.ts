@@ -1,8 +1,11 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
+import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
+import type { Erc1155ContractAddress } from '$eth/types/erc1155';
+import type { Erc721ContractAddress } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
-import type { Address, EthAddress } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId } from '$lib/types/nft';
@@ -144,9 +147,9 @@ export class AlchemyProvider {
 		contractAddress
 	}: {
 		address: EthAddress;
-		contractAddress: Address;
+		contractAddress: Erc721ContractAddress['address'] | Erc1155ContractAddress['address'];
 	}): Promise<NftId[]> => {
-		const result = await this.provider.nft.getNftsForOwner(address, {
+		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
 			contractAddresses: [contractAddress],
 			omitMetadata: true
 		});
