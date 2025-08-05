@@ -43,7 +43,7 @@
 	{/snippet}
 
 	{#snippet titleEnd()}
-		<div class="min-w-12 text-nowrap">
+		<div class="ml-1 min-w-12 text-nowrap">
 			<TokenBalance data={token} />
 		</div>
 	{/snippet}
