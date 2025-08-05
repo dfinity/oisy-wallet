@@ -1,4 +1,10 @@
+import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
+import {
+	infuraErc1155Providers,
+	type InfuraErc1155Provider
+} from '$eth/providers/infura-erc1155.providers';
+import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
@@ -10,9 +16,6 @@ import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { type AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
-import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
-import { type InfuraErc1155Provider, infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 
 export const loadNfts = async ({
 	tokens,
@@ -67,7 +70,7 @@ export const loadNfts = async ({
 const loadNftsOfToken = async ({
 	etherscanProvider,
 	infuraProvider,
-																 alchemyProvider,
+	alchemyProvider,
 	token,
 	loadedNfts,
 	walletAddress
@@ -203,7 +206,7 @@ const createBatches = ({
 
 const loadHoldersTokenIds = async ({
 	etherscanProvider,
-																		 alchemyProvider,
+	alchemyProvider,
 	walletAddress,
 	token
 }: {
