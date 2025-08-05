@@ -25,13 +25,11 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
-import type { OptionIdentity } from '$lib/types/identity';
 import {
 	SwapErrorCodes,
 	SwapProvider,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
-	type IcpSwapManualWithdrawParams,
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
 	type SwapMappedResult,
@@ -260,11 +258,13 @@ export const fetchIcpSwap = async ({
 			setFailedProgressStep,
 			identity,
 			canisterId: poolCanisterId,
-			tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
-			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
-			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
-			token: withdrawDestinationTokens ? destinationToken : sourceToken,
-			sourceAmount: parsedSwapAmount
+			sourceToken,
+			destinationToken
+			// tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
+			// amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
+			// fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
+			// token: withdrawDestinationTokens ? destinationToken : sourceToken,
+			// sourceAmount: parsedSwapAmount
 		});
 
 		throwSwapError({
@@ -480,17 +480,37 @@ export const performManualWithdraw = async ({
 	withdrawDestinationTokens,
 	identity,
 	canisterId,
-	tokenId,
-	amount,
-	fee,
+	sourceToken,
+	destinationToken,
 	token,
-	sourceAmount,
 	setFailedProgressStep
-}: IcpSwapManualWithdrawParams & { sourceAmount: bigint }): Promise<IcpSwapWithdrawResponse> => {
+}: any): Promise<IcpSwapWithdrawResponse> => {
 	try {
-		const unusedBalance = await getUserUnusedBalanceForToken({ identity, canisterId });
+		const { balance0, balance1 } = await getUserUnusedBalanceForToken({ identity, canisterId });
 
-		console.log({ unusedBalance });
+		// console.log({ unusedBalance });
+
+		if (balance0 !== 0n) {
+			await withdraw({
+				identity,
+				canisterId,
+				token: destinationToken.ledgerCanisterId,
+				amount: balance0,
+				fee: destinationToken.fee
+			});
+		}
+
+		if (balance1 !== 0n) {
+			await withdraw({
+				identity,
+				canisterId,
+				token: sourceToken.ledgerCanisterId,
+				amount: balance1,
+				fee: sourceToken.fee
+			});
+		}
+
+		console.log('Swap succeded');
 
 		// await withdraw({
 		// 	identity,
@@ -539,22 +559,14 @@ export const getUserUnusedBalanceForToken = async ({
 	identity,
 	canisterId
 }: {
-	identity: OptionIdentity;
+	identity: Identity;
 	canisterId: string;
-}): Promise<
-	| {
-			balance0: bigint;
-			balance1: bigint;
-	  }
-	| undefined
-> => {
-	if (isNullish(identity)) {
-		return;
-	}
-
-	return await getUserUnusedBalance({
+}): Promise<{
+	balance0: bigint;
+	balance1: bigint;
+}> =>
+	await getUserUnusedBalance({
 		identity,
 		canisterId,
 		principal: identity.getPrincipal()
 	});
-};
