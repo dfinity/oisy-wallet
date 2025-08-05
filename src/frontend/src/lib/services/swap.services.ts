@@ -488,7 +488,7 @@ export const withdrawUserUnusedBalance = async ({
 		principal: identity.getPrincipal()
 	});
 
-	if (balance0 !== 0n) {
+	if (balance0 !== ZERO) {
 		await withdraw({
 			identity,
 			canisterId,
