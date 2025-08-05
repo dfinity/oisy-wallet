@@ -16,6 +16,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ChatMessage } from '$lib/types/ai-assistant';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
@@ -24,10 +25,13 @@
 	let disabled = $derived(loading || isNullishOrEmpty(userInput));
 
 	let messagesToDisplay = $derived(
-		$aiAssistantChatMessages.filter(({ role }) => role !== 'system')
+		$aiAssistantChatMessages.reduce<ChatMessage[]>(
+			(acc, { data, role }) => [...acc, ...(role !== 'system' ? [{ role, data }] : [])],
+			[]
+		)
 	);
 
-	const sendMessage = async (message: string) => {
+	const sendMessage = async (messageText: string) => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
@@ -35,27 +39,36 @@
 
 		aiAssistantStore.appendMessage({
 			role: 'user',
-			content: message
+			data: { text: messageText }
 		});
 
 		try {
 			loading = true;
 
-			const result = await askLlm({
+			const { text, tool } = await askLlm({
 				messages: $aiAssistantLlmMessages,
 				identity: $authIdentity
 			});
 
 			aiAssistantStore.appendMessage({
 				role: 'assistant',
-				content: isNullishOrEmpty(result) ? $i18n.ai_assistant.errors.no_response : result
+				data:
+					(tool?.calls ?? []).length > 0 && (tool?.results ?? []).length > 0
+						? {
+								tool
+							}
+						: {
+								text: isNullishOrEmpty(text) ? $i18n.ai_assistant.errors.no_response : text
+							}
 			});
 		} catch (err: unknown) {
 			console.error($i18n.ai_assistant.errors.unknown, err);
 
 			aiAssistantStore.appendMessage({
 				role: 'assistant',
-				content: $i18n.ai_assistant.errors.unknown
+				data: {
+					text: $i18n.ai_assistant.errors.unknown
+				}
 			});
 		}
 

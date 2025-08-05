@@ -11,7 +11,7 @@ import { get } from 'svelte/store';
 describe('ai-assistant.derived', () => {
 	const message = {
 		role: 'user',
-		content: 'hey'
+		data: { text: 'hey' }
 	} as ChatMessage;
 
 	beforeEach(() => {
@@ -32,7 +32,7 @@ describe('ai-assistant.derived', () => {
 		it('should return correct values', () => {
 			const defaultMessage = {
 				role: 'system',
-				content: AI_ASSISTANT_SYSTEM_PROMPT
+				data: { text: AI_ASSISTANT_SYSTEM_PROMPT }
 			} as ChatMessage;
 
 			expect(get(aiAssistantChatMessages)).toStrictEqual([defaultMessage]);
@@ -59,7 +59,7 @@ describe('ai-assistant.derived', () => {
 				defaultLlmMessage,
 				{
 					user: {
-						content: message.content
+						content: message.data.text
 					}
 				}
 			]);

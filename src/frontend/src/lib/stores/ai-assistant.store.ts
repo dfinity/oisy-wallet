@@ -19,7 +19,7 @@ const initialState = {
 	chatHistory: [
 		{
 			role: 'system',
-			content: AI_ASSISTANT_SYSTEM_PROMPT
+			data: { text: AI_ASSISTANT_SYSTEM_PROMPT }
 		}
 	]
 } as AiAssistant;

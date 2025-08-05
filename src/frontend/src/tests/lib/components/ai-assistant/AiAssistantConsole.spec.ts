@@ -16,7 +16,7 @@ vi.mock('$lib/api/llm.api');
 describe('AiAssistantConsole', () => {
 	const message = {
 		role: 'user',
-		content: 'hey'
+		data: { text: 'hey' }
 	} as ChatMessage;
 	const newMessageContent = 'new message';
 	const responseContent = 'content';
@@ -47,7 +47,7 @@ describe('AiAssistantConsole', () => {
 
 		await waitFor(() => {
 			expect(() => getByText(en.ai_assistant.text.welcome_message)).toThrow();
-			expect(getByText(message.content)).toBeInTheDocument();
+			expect(getByText(message.data.text ?? '')).toBeInTheDocument();
 		});
 	});
 

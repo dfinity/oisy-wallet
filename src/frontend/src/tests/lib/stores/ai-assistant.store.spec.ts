@@ -11,7 +11,9 @@ describe('ai-assistant.store', () => {
 		chatHistory: [
 			{
 				role: 'system',
-				content: AI_ASSISTANT_SYSTEM_PROMPT
+				data: {
+					text: AI_ASSISTANT_SYSTEM_PROMPT
+				}
 			}
 		]
 	};
@@ -44,7 +46,7 @@ describe('ai-assistant.store', () => {
 	it('should append a message', () => {
 		const message = {
 			role: 'user',
-			content: 'hey'
+			data: { text: 'hey' }
 		} as ChatMessage;
 
 		aiAssistantStore.appendMessage(message);
