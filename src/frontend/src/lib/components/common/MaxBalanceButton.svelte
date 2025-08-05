@@ -35,6 +35,11 @@
 		}
 	};
 
+	$: console.log({
+		fee,
+		maxAmount
+	});
+
 	/**
 	 * Reevaluate max amount if user has used the "Max" button and fee is changing.
 	 */

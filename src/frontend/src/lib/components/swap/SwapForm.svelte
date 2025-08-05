@@ -132,6 +132,13 @@
 					isSwapFlow: true
 				})
 			: undefined;
+
+	$effect(() => {
+		console.log({
+			destinationToken: $destinationToken,
+			swapAmountsStoreLength: $swapAmountsStore?.swaps.length
+		});
+	});
 </script>
 
 <ContentWithToolbar>
