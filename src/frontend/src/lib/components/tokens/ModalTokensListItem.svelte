@@ -43,9 +43,9 @@
 	{/snippet}
 
 	{#snippet titleEnd()}
-		<span class="block min-w-12 text-nowrap">
+		<div class="min-w-12 text-nowrap">
 			<TokenBalance data={token} />
-		</span>
+		</div>
 	{/snippet}
 
 	{#snippet descriptionEnd()}
