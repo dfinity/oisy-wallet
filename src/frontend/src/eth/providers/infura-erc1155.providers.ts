@@ -57,7 +57,7 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 		const supportsMetadata = await this.supportsMetadataExtension({ address: contractAddress });
 
 		if (!supportsMetadata) {
-			return {id: tokenId}
+			return { id: tokenId };
 		}
 
 		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);

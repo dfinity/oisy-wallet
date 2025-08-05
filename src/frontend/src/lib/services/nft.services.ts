@@ -1,4 +1,9 @@
+import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
+import {
+	infuraErc1155Providers,
+	type InfuraErc1155Provider
+} from '$eth/providers/infura-erc1155.providers';
 import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
@@ -10,8 +15,6 @@ import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { type AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
-import { type InfuraErc1155Provider, infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 
 export const loadNfts = async ({
 	tokens,
@@ -80,7 +83,12 @@ const loadNftsOfToken = async ({
 	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
 	for (const tokenIds of tokenIdBatches) {
 		try {
-			const nfts = await loadNftsOfBatch({ infuraErc721Provider, infuraErc1155Provider, token, tokenIds });
+			const nfts = await loadNftsOfBatch({
+				infuraErc721Provider,
+				infuraErc1155Provider,
+				token,
+				tokenIds
+			});
 
 			nftStore.addAll(nfts);
 		} catch (err: unknown) {
@@ -91,7 +99,7 @@ const loadNftsOfToken = async ({
 
 const loadNftsOfBatch = async ({
 	infuraErc721Provider,
-											 infuraErc1155Provider,
+	infuraErc1155Provider,
 	token,
 	tokenIds
 }: {
@@ -115,7 +123,7 @@ const loadNftsOfBatch = async ({
 
 const loadNftsMetadata = async ({
 	infuraErc721Provider,
-																	infuraErc1155Provider,
+	infuraErc1155Provider,
 	token,
 	tokenIds
 }: {
@@ -145,7 +153,7 @@ const loadNftsMetadata = async ({
 
 const loadNftMetadata = async ({
 	infuraErc721Provider,
-																 infuraErc1155Provider,
+	infuraErc1155Provider,
 	token,
 	tokenId
 }: {
@@ -166,7 +174,10 @@ const loadNftMetadata = async ({
 			});
 		}
 		if (token.standard === 'erc1155') {
-			return await infuraErc1155Provider.getNftMetadata({contractAddress: token.address, tokenId})
+			return await infuraErc1155Provider.getNftMetadata({
+				contractAddress: token.address,
+				tokenId
+			});
 		}
 
 		return { id: parseNftId(tokenId) };
@@ -202,13 +213,13 @@ const loadHoldersTokenIds = async ({
 		if (token.standard === 'erc721') {
 			return await etherscanProvider.erc721TokenInventory({
 				address: walletAddress,
-				contractAddress: token.address,
+				contractAddress: token.address
 			});
 		}
 		if (token.standard === 'erc1155') {
 			return await alchemyProvider.getNftIdsForOwner({
 				address: walletAddress,
-				contractAddress: token.address,
+				contractAddress: token.address
 			});
 		}
 
