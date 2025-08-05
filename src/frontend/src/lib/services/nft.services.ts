@@ -50,18 +50,17 @@ export const loadNfts = async ({
 					loadedNfts,
 					walletAddress
 				});
-			} 
-				const infuraErc1155Provider = infuraErc1155Providers(token.network.id);
+			}
+			const infuraErc1155Provider = infuraErc1155Providers(token.network.id);
 
-				return loadNftsOfToken({
-					etherscanProvider,
-					infuraProvider: infuraErc1155Provider,
-					alchemyProvider,
-					token,
-					loadedNfts,
-					walletAddress
-				});
-			
+			return loadNftsOfToken({
+				etherscanProvider,
+				infuraProvider: infuraErc1155Provider,
+				alchemyProvider,
+				token,
+				loadedNfts,
+				walletAddress
+			});
 		})
 	);
 };
