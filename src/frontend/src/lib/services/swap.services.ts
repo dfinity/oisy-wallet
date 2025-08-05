@@ -8,7 +8,13 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
-import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-swap-pool.api';
+import {
+	deposit,
+	depositFrom,
+	getUserUnusedBalance,
+	swap as swapIcp,
+	withdraw
+} from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
@@ -19,6 +25,7 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { OptionIdentity } from '$lib/types/identity';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -481,24 +488,28 @@ export const performManualWithdraw = async ({
 	setFailedProgressStep
 }: IcpSwapManualWithdrawParams & { sourceAmount: bigint }): Promise<IcpSwapWithdrawResponse> => {
 	try {
-		await withdraw({
-			identity,
-			canisterId,
-			token: tokenId,
-			amount:
-				sourceAmount === 400000000n || sourceAmount === 700000000n
-					? BigInt(`${amount}000`)
-					: amount,
-			fee
-		});
+		const unusedBalance = await getUserUnusedBalanceForToken({ identity, canisterId });
 
-		trackEvent({
-			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
-			metadata: {
-				token: token.symbol,
-				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
-			}
-		});
+		console.log({ unusedBalance });
+
+		// await withdraw({
+		// 	identity,
+		// 	canisterId,
+		// 	token: tokenId,
+		// 	amount:
+		// 		sourceAmount === 400000000n || sourceAmount === 700000000n
+		// 			? BigInt(`${amount}000`)
+		// 			: amount,
+		// 	fee
+		// });
+
+		// trackEvent({
+		// 	name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+		// 	metadata: {
+		// 		token: token.symbol,
+		// 		tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
+		// 	}
+		// });
 
 		return {
 			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
@@ -523,4 +534,28 @@ export const performManualWithdraw = async ({
 			swapSucceded: withdrawDestinationTokens
 		};
 	}
+};
+
+export const getUserUnusedBalanceForToken = async ({
+	identity,
+	canisterId
+}: {
+	identity: OptionIdentity;
+	canisterId: string;
+}): Promise<
+	| {
+			balance0: bigint;
+			balance1: bigint;
+	  }
+	| undefined
+> => {
+	if (isNullish(identity)) {
+		return;
+	}
+
+	return await getUserUnusedBalance({
+		identity,
+		canisterId,
+		principal: identity.getPrincipal()
+	});
 };
