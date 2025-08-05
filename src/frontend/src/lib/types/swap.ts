@@ -121,7 +121,7 @@ export type SwapErrorKey = keyof I18n['swap']['error'];
 export type SwapProviderConfig = KongSwapProvider | IcpSwapProvider;
 
 export interface SwapParams {
-	identity: OptionIdentity;
+	identity: Identity;
 	progress: (step: ProgressStepsSwap) => void;
 	sourceToken: IcTokenToggleable;
 	destinationToken: IcTokenToggleable;
@@ -144,9 +144,13 @@ export interface IcpSwapWithdrawParams {
 	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
 }
 
-export interface IcpSwapManualWithdrawParams extends IcpSwapWithdrawParams {
+export interface IcpSwapManualWithdrawParams {
+	identity: Identity;
 	withdrawDestinationTokens: boolean;
-	token: IcTokenToggleable;
+	canisterId: string;
+	sourceToken: IcTokenToggleable;
+	destinationToken: IcTokenToggleable;
+	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
 }
 
 export interface IcpSwapWithdrawResponse {

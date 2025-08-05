@@ -7,7 +7,13 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
-import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-swap-pool.api';
+import {
+	deposit,
+	depositFrom,
+	getUserUnusedBalance,
+	swap as swapIcp,
+	withdraw
+} from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
@@ -245,10 +251,8 @@ export const fetchIcpSwap = async ({
 			setFailedProgressStep,
 			identity,
 			canisterId: poolCanisterId,
-			tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
-			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
-			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
-			token: withdrawDestinationTokens ? destinationToken : sourceToken
+			sourceToken,
+			destinationToken
 		});
 
 		throwSwapError({
@@ -343,12 +347,11 @@ export const fetchIcpSwap = async ({
 		});
 	} catch (_: unknown) {
 		try {
-			await withdraw({
+			await withdrawUserUnusedBalance({
 				identity,
 				canisterId: poolCanisterId,
-				token: destinationLedgerCanisterId,
-				amount: receiveAmount,
-				fee: destinationTokenFee
+				sourceToken,
+				destinationToken
 			});
 
 			progress(ProgressStepsSwap.UPDATE_UI);
@@ -430,25 +433,17 @@ export const performManualWithdraw = async ({
 	withdrawDestinationTokens,
 	identity,
 	canisterId,
-	tokenId,
-	amount,
-	fee,
-	token,
-	setFailedProgressStep
+	setFailedProgressStep,
+	sourceToken,
+	destinationToken
 }: IcpSwapManualWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
 	try {
-		await withdraw({
-			identity,
-			canisterId,
-			token: tokenId,
-			amount,
-			fee
-		});
+		await withdrawUserUnusedBalance({ identity, canisterId, sourceToken, destinationToken });
 
 		trackEvent({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
-				token: token.symbol,
+				token: withdrawDestinationTokens ? destinationToken.symbol : sourceToken.symbol,
 				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
 			}
 		});
@@ -463,7 +458,7 @@ export const performManualWithdraw = async ({
 		trackEvent({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			metadata: {
-				token: token.symbol,
+				token: withdrawDestinationTokens ? destinationToken.symbol : sourceToken.symbol,
 				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
 			}
 		});
@@ -475,5 +470,41 @@ export const performManualWithdraw = async ({
 			variant: 'error',
 			swapSucceded: withdrawDestinationTokens
 		};
+	}
+};
+
+export const withdrawUserUnusedBalance = async ({
+	identity,
+	canisterId,
+	sourceToken,
+	destinationToken
+}: Omit<
+	IcpSwapManualWithdrawParams,
+	'setFailedProgressStep' | 'withdrawDestinationTokens'
+>): Promise<void> => {
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId,
+		principal: identity.getPrincipal()
+	});
+
+	if (balance0 !== 0n) {
+		await withdraw({
+			identity,
+			canisterId,
+			token: destinationToken.ledgerCanisterId,
+			amount: balance0,
+			fee: destinationToken.fee
+		});
+	}
+
+	if (balance1 !== 0n) {
+		await withdraw({
+			identity,
+			canisterId,
+			token: sourceToken.ledgerCanisterId,
+			amount: balance1,
+			fee: sourceToken.fee
+		});
 	}
 };
