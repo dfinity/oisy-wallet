@@ -18,10 +18,10 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
-																 tokens,
-																 loadedNfts,
-																 walletAddress
-															 }: {
+	tokens,
+	loadedNfts,
+	walletAddress
+}: {
 	tokens: NonFungibleToken[];
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
@@ -61,11 +61,11 @@ export const loadNfts = async ({
 };
 
 const loadNftsOfToken = async ({
-																 infuraProvider,
-																 token,
-																 loadedNfts,
-																 walletAddress
-															 }: {
+	infuraProvider,
+	token,
+	loadedNfts,
+	walletAddress
+}: {
 	infuraProvider: InfuraErc165Provider;
 	token: NonFungibleToken;
 	loadedNfts: Nft[];
@@ -96,10 +96,10 @@ const loadNftsOfToken = async ({
 };
 
 const loadNftsOfBatch = async ({
-																 infuraProvider,
-																 token,
-																 tokenIds
-															 }: {
+	infuraProvider,
+	token,
+	tokenIds
+}: {
 	infuraProvider: InfuraErc165Provider;
 	token: NonFungibleToken;
 	tokenIds: NftId[];
@@ -117,10 +117,10 @@ const loadNftsOfBatch = async ({
 };
 
 const loadNftsMetadata = async ({
-																	infuraProvider,
-																	token,
-																	tokenIds
-																}: {
+	infuraProvider,
+	token,
+	tokenIds
+}: {
 	infuraProvider: InfuraErc165Provider;
 	token: NonFungibleToken;
 	tokenIds: NftId[];
@@ -145,10 +145,10 @@ const loadNftsMetadata = async ({
 };
 
 const loadNftMetadata = async ({
-																 infuraProvider,
-																 token,
-																 tokenId
-															 }: {
+	infuraProvider,
+	token,
+	tokenId
+}: {
 	infuraProvider: InfuraErc165Provider;
 	token: NonFungibleToken;
 	tokenId: NftId;
@@ -181,9 +181,9 @@ const loadNftMetadata = async ({
 };
 
 const createBatches = ({
-												 tokenIds,
-												 batchSize
-											 }: {
+	tokenIds,
+	batchSize
+}: {
 	tokenIds: NftId[];
 	batchSize: number;
 }): NftId[][] =>
@@ -192,9 +192,9 @@ const createBatches = ({
 	);
 
 const loadHoldersTokenIds = async ({
-																		 walletAddress,
-																		 token
-																	 }: {
+	walletAddress,
+	token
+}: {
 	walletAddress: string;
 	token: NonFungibleToken;
 }): Promise<NftId[]> => {
@@ -223,12 +223,12 @@ const loadHoldersTokenIds = async ({
 };
 
 const getLoadedNfts = ({
-												 token: {
-													 network: { id: networkId },
-													 address
-												 },
-												 loadedNftsByNetwork
-											 }: {
+	token: {
+		network: { id: networkId },
+		address
+	},
+	loadedNftsByNetwork
+}: {
 	token: NonFungibleToken;
 	loadedNftsByNetwork: NftsByNetwork;
 }): Nft[] => {
