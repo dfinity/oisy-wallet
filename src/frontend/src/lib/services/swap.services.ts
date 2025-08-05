@@ -268,11 +268,11 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			sourceToken,
-			destinationToken
+			destinationToken,
 			// tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
 			// amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
 			// fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
-			// token: withdrawDestinationTokens ? destinationToken : sourceToken,
+			token: withdrawDestinationTokens ? destinationToken : sourceToken
 			// sourceAmount: parsedSwapAmount
 		});
 
