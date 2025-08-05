@@ -11,7 +11,7 @@
 		"url": "https://github.com/dfinity/oisy-wallet"
 	},
 	"scripts": {
-		"build:compress": "./scripts/build.compress.sh",
+		"build:compress": "powershell -ExecutionPolicy Bypass -File scripts/build.compress.ps1",
 		"build:csp": "node scripts/build.csp.mjs",
 		"build:metadata": "node scripts/build.metadata.mjs",
 		"build:style": "node scripts/build.style.mjs",
@@ -45,10 +45,10 @@
 		"i18n": "npm run i18n:types && npm run i18n:keys",
 		"playwright:install": "playwright install --with-deps",
 		"e2e": "npm run playwright:install && playwright test",
-		"e2e:dev": "npm run playwright:install && NODE_ENV=development playwright test",
+		"e2e:dev": "npm run playwright:install && set NODE_ENV=development && playwright test",
 		"e2e:ci": "npm run playwright:install && playwright test --update-snapshots=changed --reporter=html,list",
 		"e2e:snapshots": "npm run playwright:install && npx playwright test --update-snapshots=changed --reporter=list",
-		"e2e:snapshots:dev": "npm run playwright:install && NODE_ENV=development npx playwright test --update-snapshots=changed --reporter=list",
+		"e2e:snapshots:dev": "npm run playwright:install && set NODE_ENV=development && npx playwright test --update-snapshots=changed --reporter=list",
 		"e2e:report": "npx playwright show-report",
 		"erc20:check": "vite-node scripts/check.tokens.erc20.ts",
 		"update:agent": "npm rm @dfinity/{agent,auth-client,candid,principal,identity-secp256k1} && npm i @dfinity/{agent,auth-client,candid,principal} && npm i @dfinity/identity-secp256k1 -D",

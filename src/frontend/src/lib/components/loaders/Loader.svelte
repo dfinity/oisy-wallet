@@ -199,7 +199,7 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
+						{#await ($themeStore ?? 'light') === 'dark' ? import('$lib/assets/banner-dark.svg') : import('$lib/assets/banner-light.svg') then { default: src }}
 							<ImgBanner
 								{src}
 								alt={replacePlaceholders(replaceOisyPlaceholders($i18n.init.alt.loader_banner), {
