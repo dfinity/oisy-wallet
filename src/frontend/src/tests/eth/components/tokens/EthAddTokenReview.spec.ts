@@ -1,5 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
+import * as infuraErc1155SpyProviders from '$eth/providers/infura-erc1155.providers';
+import { InfuraErc1155Provider } from '$eth/providers/infura-erc1155.providers';
 import * as infuraErc20SpyProviders from '$eth/providers/infura-erc20.providers';
 import { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
 import * as infuraErc721SpyProviders from '$eth/providers/infura-erc721.providers';
@@ -25,6 +27,9 @@ describe('EthAddTokenReview', () => {
 		enabled: true
 	};
 
+	const mockErc1155Metadata = vi
+		.fn()
+		.mockResolvedValue({ name: 'Test Token4', symbol: 'WUK', decimals: 0 });
 	const mockErc721Metadata = vi
 		.fn()
 		.mockResolvedValue({ name: 'Test Token', symbol: 'TTK', decimals: 0 });
@@ -68,6 +73,47 @@ describe('EthAddTokenReview', () => {
 		});
 	});
 
+	it('should load erc1155 metadata for erc1155 contract address', async () => {
+		const mockErc20Provider = {
+			isErc20: vi.fn().mockResolvedValue(false),
+			metadata: mockErc20Metadata,
+			provider: new InfuraErc20Provider(ETHEREUM_NETWORK.providers.infura),
+			network: ETHEREUM_NETWORK
+		} as unknown as InfuraErc20Provider;
+
+		const mockErc721Provider = {
+			isInterfaceErc721: vi.fn().mockResolvedValue(false),
+			metadata: mockErc721Metadata,
+			provider: new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura),
+			network: ETHEREUM_NETWORK
+		} as unknown as InfuraErc721Provider;
+
+		const mockErc1155Provider = {
+			metadata: mockErc1155Metadata,
+			provider: new InfuraErc1155Provider(ETHEREUM_NETWORK.providers.infura),
+			network: ETHEREUM_NETWORK
+		} as unknown as InfuraErc1155Provider;
+
+		vi.spyOn(infuraErc20SpyProviders, 'infuraErc20Providers').mockReturnValue(mockErc20Provider);
+		vi.spyOn(infuraErc721SpyProviders, 'infuraErc721Providers').mockReturnValue(mockErc721Provider);
+		vi.spyOn(infuraErc1155SpyProviders, 'infuraErc1155Providers').mockReturnValue(
+			mockErc1155Provider
+		);
+
+		render(EthAddTokenReview, {
+			props: {
+				contractAddress: mockEthAddress,
+				network: ETHEREUM_NETWORK
+			}
+		});
+
+		await vi.waitFor(() => {
+			expect(mockErc20Metadata).not.toHaveBeenCalled();
+			expect(mockErc721Metadata).not.toHaveBeenCalled();
+			expect(mockErc1155Metadata).toHaveBeenCalledWith({ address: mockEthAddress });
+		});
+	});
+
 	it('should load erc721 metadata for erc721 contract address', async () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(false),
@@ -77,6 +123,7 @@ describe('EthAddTokenReview', () => {
 		} as unknown as InfuraErc20Provider;
 
 		const mockErc721Provider = {
+			isInterfaceErc721: vi.fn().mockResolvedValue(true),
 			metadata: mockErc721Metadata,
 			provider: new InfuraErc721Provider(ETHEREUM_NETWORK.providers.infura),
 			network: ETHEREUM_NETWORK
@@ -95,6 +142,7 @@ describe('EthAddTokenReview', () => {
 		await vi.waitFor(() => {
 			expect(mockErc20Metadata).not.toHaveBeenCalled();
 			expect(mockErc721Metadata).toHaveBeenCalledWith({ address: mockEthAddress });
+			expect(mockErc1155Metadata).not.toHaveBeenCalled();
 		});
 	});
 
@@ -118,10 +166,11 @@ describe('EthAddTokenReview', () => {
 		await vi.waitFor(() => {
 			expect(mockErc20Metadata).toHaveBeenCalledWith({ address: mockEthAddress });
 			expect(mockErc721Metadata).not.toHaveBeenCalled();
+			expect(mockErc1155Metadata).not.toHaveBeenCalled();
 		});
 	});
 
-	it('should render an error if metadata does not contain a symbol', async () => {
+	it('should render an error if metadata for erc20 or erc721 does not contain a symbol', async () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(true),
 			metadata: vi.fn().mockResolvedValue({ name: 'Test Token', decimals: 0 }),
@@ -145,7 +194,7 @@ describe('EthAddTokenReview', () => {
 		});
 	});
 
-	it('should render an error if metadata does not contain a name', async () => {
+	it('should render an error if metadata for erc20 or erc721 does not contain a name', async () => {
 		const mockErc20Provider = {
 			isErc20: vi.fn().mockResolvedValue(true),
 			metadata: vi.fn().mockResolvedValue({ symbol: 'HSI', decimals: 0 }),
@@ -180,6 +229,7 @@ describe('EthAddTokenReview', () => {
 		} as unknown as InfuraErc20Provider;
 
 		const mockErc721Provider = {
+			isInterfaceErc721: vi.fn().mockResolvedValue(true),
 			metadata: vi.fn().mockResolvedValue({
 				name: mockErc721CustomToken.name,
 				symbol: mockErc721CustomToken.symbol,
