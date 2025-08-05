@@ -173,14 +173,14 @@ describe('infura-erc1155.providers', () => {
 				});
 			});
 
-			it('should return undefined if the contract does not support ERC1155', async () => {
+			it('should handle metadata gracefully if the contract does not support IERC1155MetadataURI', async () => {
 				mockSupportsInterface.mockResolvedValueOnce(false);
 
 				const provider = new InfuraErc1155Provider(infura);
 
 				const result = await provider.getNftMetadata(mockParams);
 
-				expect(result).toBeUndefined();
+				expect(result).toEqual({ id: tokenId });
 			});
 
 			it('should call the uri method of the contract', async () => {

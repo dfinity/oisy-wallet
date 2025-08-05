@@ -53,11 +53,11 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 	}: {
 		contractAddress: Erc1155ContractAddress['address'];
 		tokenId: NftId;
-	}): Promise<NftMetadata | undefined> => {
+	}): Promise<NftMetadata> => {
 		const supportsMetadata = await this.supportsMetadataExtension({ address: contractAddress });
 
 		if (!supportsMetadata) {
-			return;
+			return { id: tokenId };
 		}
 
 		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);
