@@ -71,9 +71,15 @@
 			: undefined
 	);
 
-	let totalFee: bigint | undefined = $derived(
-		(sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
-	);
+	let totalFee: bigint | undefined = $state(undefined);
+
+	$effect(() => {
+		if (nonNullish(sourceTokenFee) && nonNullish($isSourceTokenIcrc2)) {
+			totalFee = sourceTokenFee * ($isSourceTokenIcrc2 ? 2n : 1n);
+		} else {
+			totalFee = undefined;
+		}
+	});
 
 	let swapAmountsLoading = $derived(
 		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
