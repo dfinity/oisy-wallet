@@ -175,7 +175,7 @@
 					</svelte:fragment>
 
 					<svelte:fragment slot="balance">
-						{#if nonNullish($sourceToken) && isNullish(sourceTokenFee)}
+						{#if nonNullish($sourceToken) && nonNullish(sourceTokenFee)}
 							<MaxBalanceButton
 								bind:amountSetToMax
 								bind:amount={swapAmount}
@@ -206,7 +206,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if isNullish($swapAmountsStore?.amountForSwap) && swapAmountsLoading}
+						{#if isNullish($swapAmountsStore?.amountForSwap) && !swapAmountsLoading}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
