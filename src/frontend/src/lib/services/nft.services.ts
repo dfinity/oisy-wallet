@@ -34,18 +34,13 @@ export const loadNfts = async ({
 
 	await Promise.all(
 		tokens.map((token) => {
-			const etherscanProvider = etherscanProviders(token.network.id);
-			const alchemyProvider = alchemyProviders(token.network.id);
-
 			const loadedNfts = getLoadedNfts({ token, loadedNftsByNetwork });
 
 			if (token.standard === 'erc721') {
 				const infuraErc721Provider = infuraErc721Providers(token.network.id);
 
 				return loadNftsOfToken({
-					etherscanProvider,
 					infuraProvider: infuraErc721Provider,
-					alchemyProvider,
 					token,
 					loadedNfts,
 					walletAddress
@@ -55,9 +50,7 @@ export const loadNfts = async ({
 				const infuraErc1155Provider = infuraErc1155Providers(token.network.id);
 
 				return loadNftsOfToken({
-					etherscanProvider,
 					infuraProvider: infuraErc1155Provider,
-					alchemyProvider,
 					token,
 					loadedNfts,
 					walletAddress
@@ -68,23 +61,17 @@ export const loadNfts = async ({
 };
 
 const loadNftsOfToken = async ({
-	etherscanProvider,
 	infuraProvider,
-	alchemyProvider,
 	token,
 	loadedNfts,
 	walletAddress
 }: {
-	etherscanProvider: EtherscanProvider;
 	infuraProvider: InfuraErc165Provider;
-	alchemyProvider: AlchemyProvider;
 	token: NonFungibleToken;
 	loadedNfts: Nft[];
 	walletAddress: string;
 }) => {
 	const holdersTokenIds = await loadHoldersTokenIds({
-		etherscanProvider,
-		alchemyProvider,
 		walletAddress,
 		token
 	});
@@ -205,24 +192,24 @@ const createBatches = ({
 	);
 
 const loadHoldersTokenIds = async ({
-	etherscanProvider,
-	alchemyProvider,
 	walletAddress,
 	token
 }: {
-	etherscanProvider: EtherscanProvider;
-	alchemyProvider: AlchemyProvider;
 	walletAddress: string;
 	token: NonFungibleToken;
 }): Promise<NftId[]> => {
 	try {
 		if (token.standard === 'erc721') {
+			const etherscanProvider = etherscanProviders(token.network.id);
+
 			return await etherscanProvider.erc721TokenInventory({
 				address: walletAddress,
 				contractAddress: token.address
 			});
 		}
 		if (token.standard === 'erc1155') {
+			const alchemyProvider = alchemyProviders(token.network.id);
+
 			return await alchemyProvider.getNftIdsForOwner({
 				address: walletAddress,
 				contractAddress: token.address
