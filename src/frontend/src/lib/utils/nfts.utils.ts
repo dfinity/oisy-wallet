@@ -1,6 +1,5 @@
-import type { Erc721Token } from '$eth/types/erc721';
 import type { NftError } from '$lib/types/errors';
-import type { Nft, NftsByNetwork } from '$lib/types/nft';
+import type { Nft, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -8,7 +7,7 @@ export const getNftsByNetworks = ({
 	tokens,
 	nfts
 }: {
-	tokens: Erc721Token[];
+	tokens: NonFungibleToken[];
 	nfts: Nft[];
 }): NftsByNetwork => {
 	const nftsByToken: NftsByNetwork = {};
