@@ -43,6 +43,10 @@
 			destination,
 			networkId: $sendTokenNetworkId
 		}) || invalidAmount(amount);
+
+	$: console.warn('disableSend changed:', invalid);
+
+
 </script>
 
 <SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
