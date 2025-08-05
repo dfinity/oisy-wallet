@@ -150,6 +150,19 @@
 			isSourceTokenIcrc2: $isSourceTokenIcrc2
 		});
 	});
+
+	$effect(() => {
+	console.log('Debug swap condition:', {
+		store: $swapAmountsStore,
+		swapsLength: $swapAmountsStore?.swaps?.length,
+		loading: swapAmountsLoading,
+		amount: swapAmount,
+		amountNumber: Number(swapAmount),
+		condition1: $swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore),
+		condition2: !swapAmountsLoading,
+		condition3: nonNullish(swapAmount) && Number(swapAmount) > 0
+	});
+});
 </script>
 
 <ContentWithToolbar>
