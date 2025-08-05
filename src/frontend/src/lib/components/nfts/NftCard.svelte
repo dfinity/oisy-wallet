@@ -22,6 +22,7 @@
 				alt={replacePlaceholders($i18n.nfts.alt.card.image, {
 					$tokenId: nft.id.toString()
 				})}
+				styleClass="h-48 object-cover"
 				testId={`${testId}-image`}
 			/>
 		{:else}
