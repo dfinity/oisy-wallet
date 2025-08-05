@@ -3,8 +3,11 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import * as infuraProvidersModule from '$eth/providers/infura-erc1155.providers';
+import type { InfuraErc1155Provider } from '$eth/providers/infura-erc1155.providers';
 import { loadCustomTokens, loadErc1155Tokens } from '$eth/services/erc1155.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
+import type { Erc1155Metadata } from '$eth/types/erc1155';
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -15,9 +18,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
-import type { Erc1155Metadata } from '$eth/types/erc1155';
-import * as infuraProvidersModule from '$eth/providers/infura-erc1155.providers';
-import { InfuraErc1155Provider } from '$eth/providers/infura-erc1155.providers';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/api/backend.api', () => ({
@@ -65,7 +65,7 @@ describe('erc1155.services', () => {
 	const mockMetadata1: Erc1155Metadata = {
 		name: 'Test Token',
 		symbol: 'MetadataTTK',
-		decimals: 0,
+		decimals: 0
 	};
 
 	const mockMetadata2: Erc1155Metadata = {
@@ -86,7 +86,7 @@ describe('erc1155.services', () => {
 				address: mockEthAddress,
 				decimals: 0,
 				name: mockMetadata1.name,
-				symbol: mockMetadata1.symbol,
+				symbol: mockMetadata1.symbol
 			}
 		},
 		{
@@ -100,7 +100,7 @@ describe('erc1155.services', () => {
 				address: mockEthAddress2.toUpperCase(),
 				decimals: 0,
 				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol,
+				symbol: mockMetadata2.symbol
 			}
 		},
 		{
@@ -114,7 +114,7 @@ describe('erc1155.services', () => {
 				address: mockEthAddress3,
 				decimals: 0,
 				name: mockMetadata2.name,
-				symbol: mockMetadata2.symbol,
+				symbol: mockMetadata2.symbol
 			}
 		}
 	];
