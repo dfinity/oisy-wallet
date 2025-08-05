@@ -512,10 +512,9 @@ export const performManualWithdraw = async ({
 		// });
 
 		return {
-			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
-			message: withdrawDestinationTokens
-				? get(i18n).swap.error.swap_sucess_manually_withdraw_success
-				: get(i18n).swap.error.manually_withdraw_success
+			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
+			variant: 'error',
+			swapSucceded: withdrawDestinationTokens
 		};
 	} catch (_: unknown) {
 		trackEvent({
