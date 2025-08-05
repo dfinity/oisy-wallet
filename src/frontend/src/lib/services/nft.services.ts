@@ -1,13 +1,13 @@
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
 import {
-	type InfuraErc1155Provider,
-	infuraErc1155Providers
+	infuraErc1155Providers,
+	type InfuraErc1155Provider
 } from '$eth/providers/infura-erc1155.providers';
 import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import {
-	type InfuraErc721Provider,
-	infuraErc721Providers
+	infuraErc721Providers,
+	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
