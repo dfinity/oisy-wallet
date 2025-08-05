@@ -1,12 +1,17 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
+import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
+import type { Erc1155ContractAddress } from '$eth/types/erc1155';
+import type { Erc721ContractAddress } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
+import type { NftId } from '$lib/types/nft';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
@@ -17,11 +22,6 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
-import type { NftId } from '$lib/types/nft';
-import { parseNftId } from '$lib/validation/nft.validation';
-import type { Erc721ContractAddress } from '$eth/types/erc721';
-import type { Erc1155ContractAddress } from '$eth/types/erc1155';
-import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -143,9 +143,9 @@ export class AlchemyProvider {
 	};
 
 	getNftIdsForOwner = async ({
-		 address,
-		 contractAddress
-	 }: {
+		address,
+		contractAddress
+	}: {
 		address: EthAddress;
 		contractAddress: Erc721ContractAddress['address'] | Erc1155ContractAddress['address'];
 	}): Promise<NftId[]> => {

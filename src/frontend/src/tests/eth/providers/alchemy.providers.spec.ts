@@ -4,10 +4,10 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
 import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Alchemy } from 'alchemy-sdk';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -39,12 +39,8 @@ describe('alchemy.providers', () => {
 
 	describe('getNftIdsForOwner', () => {
 		const mockApiResponse = {
-			ownedNfts: [
-				{ tokenId: '1' },
-				{ tokenId: '2' },
-				{ tokenId: '3' }
-			]
-		}
+			ownedNfts: [{ tokenId: '1' }, { tokenId: '2' }, { tokenId: '3' }]
+		};
 
 		const expectedTokenIds = [1, 2, 3];
 
@@ -67,7 +63,7 @@ describe('alchemy.providers', () => {
 				contractAddress: mockValidErc1155Token.address
 			});
 
-			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce()
+			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
 
 			expect(tokenIds).toStrictEqual(expectedTokenIds);
 		});
