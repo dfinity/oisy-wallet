@@ -8,6 +8,7 @@ import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
+import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { loadNfts } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
@@ -19,7 +20,6 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { waitFor } from '@testing-library/svelte';
 import { Network } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 
 vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn(),
@@ -166,13 +166,15 @@ describe('nft.services', () => {
 			const loadedTokenIds = [1, 2, 3, 4, 5, 6].map(parseNftId);
 			const notLoadedTokenIds = [7, 8, 9, 10, 11, 12].map(parseNftId);
 
-			const loadedNfts: Nft[] = [...loadedTokenIds.map((tokenId) => ({
-				id: tokenId,
-				contract: erc721AzukiToken
-			})), ...loadedTokenIds.map((tokenId) => ({
-				id: tokenId,
-				contract: erc1155NyanCatToken
-			}))
+			const loadedNfts: Nft[] = [
+				...loadedTokenIds.map((tokenId) => ({
+					id: tokenId,
+					contract: erc721AzukiToken
+				})),
+				...loadedTokenIds.map((tokenId) => ({
+					id: tokenId,
+					contract: erc1155NyanCatToken
+				}))
 			];
 
 			const tokenIds = [...loadedTokenIds, ...notLoadedTokenIds];
@@ -196,17 +198,20 @@ describe('nft.services', () => {
 
 			await loadNfts({ tokens, loadedNfts, walletAddress: mockWalletAddress });
 
-			const expectedNfts = [...notLoadedTokenIds.map((tokenId) => ({
-				id: tokenId,
-				name: `Test NFT #${tokenId}`,
-				imageUrl: `https://test.com/image-${tokenId}.png`,
-				contract: erc721AzukiToken
-			})), ...notLoadedTokenIds.map((tokenId) => ({
-				id: tokenId,
-				name: `Test NFT #${tokenId}`,
-				imageUrl: `https://test.com/image-${tokenId}.png`,
-				contract: erc1155NyanCatToken
-			}))];
+			const expectedNfts = [
+				...notLoadedTokenIds.map((tokenId) => ({
+					id: tokenId,
+					name: `Test NFT #${tokenId}`,
+					imageUrl: `https://test.com/image-${tokenId}.png`,
+					contract: erc721AzukiToken
+				})),
+				...notLoadedTokenIds.map((tokenId) => ({
+					id: tokenId,
+					name: `Test NFT #${tokenId}`,
+					imageUrl: `https://test.com/image-${tokenId}.png`,
+					contract: erc1155NyanCatToken
+				}))
+			];
 
 			await waitFor(() => {
 				loadedTokenIds.forEach((tokenId) => {
@@ -291,13 +296,15 @@ describe('nft.services', () => {
 
 			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
-			const expectedNfts = [...tokenIds.map((tokenId) => ({
-				id: tokenId,
-				contract: erc721AzukiToken
-			})), ...tokenIds.map((tokenId) => ({
-				id: tokenId,
-				contract: erc1155NyanCatToken
-			}))
+			const expectedNfts = [
+				...tokenIds.map((tokenId) => ({
+					id: tokenId,
+					contract: erc721AzukiToken
+				})),
+				...tokenIds.map((tokenId) => ({
+					id: tokenId,
+					contract: erc1155NyanCatToken
+				}))
 			];
 
 			await waitFor(() => {
