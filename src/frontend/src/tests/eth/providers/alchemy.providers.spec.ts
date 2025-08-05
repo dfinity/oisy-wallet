@@ -6,10 +6,8 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { Alchemy } from 'alchemy-sdk';
-import { assertIsInstructionWithAccounts } from '@solana/kit';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
-import { Network } from 'ethers/providers';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -28,26 +26,27 @@ describe('alchemy.providers', () => {
 
 	const networks: EthereumNetwork[] = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS];
 
-	// it('should create the correct map of providers', () => {
-	// 	expect(Alchemy).toHaveBeenCalledTimes(networks.length);
-	//
-	// 	networks.forEach(({ providers: { alchemy } }, index) => {
-	// 		expect(Alchemy).toHaveBeenNthCalledWith(index + 1, {
-	// 			apiKey: ALCHEMY_API_KEY,
-	// 			network: alchemy
-	// 		});
-	// 	});
-	// });
+	it('should create the correct map of providers', () => {
+		expect(Alchemy).toHaveBeenCalledTimes(networks.length);
+
+		networks.forEach(({ providers: { alchemy } }, index) => {
+			expect(Alchemy).toHaveBeenNthCalledWith(index + 1, {
+				apiKey: ALCHEMY_API_KEY,
+				network: alchemy
+			});
+		});
+	});
 
 	describe('getNftIdsForOwner', () => {
-		const mockApiResponse = [
-			{
-				ownedNfts: [
-					{ tokenId: '1' },
-					{ tokenId: '2' }
-				]
-			}
-		]
+		const mockApiResponse = {
+			ownedNfts: [
+				{ tokenId: '1' },
+				{ tokenId: '2' },
+				{ tokenId: '3' }
+			]
+		}
+
+		const expectedTokenIds = [1, 2, 3];
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -60,33 +59,37 @@ describe('alchemy.providers', () => {
 			});
 		});
 
-		it('Wusch', async () => {
+		it('should fetch and map token ids correctly', async () => {
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
 			const tokenIds = await provider.getNftIdsForOwner({
 				address: mockEthAddress,
 				contractAddress: mockValidErc1155Token.address
 			});
+
+			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce()
+
+			expect(tokenIds).toStrictEqual(expectedTokenIds);
 		});
 	});
 
-	// describe('alchemyProviders', () => {
-	// 	networks.forEach(({ id, name }) => {
-	// 		it(`should return the correct provider for ${name} network`, () => {
-	// 			const provider = alchemyProviders(id);
-	//
-	// 			expect(provider).toBeInstanceOf(AlchemyProvider);
-	//
-	// 			expect(provider).toHaveProperty('provider');
-	// 		});
-	// 	});
-	//
-	// 	it('should throw an error for an unsupported network ID', () => {
-	// 		expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrow(
-	// 			replacePlaceholders(en.init.error.no_alchemy_provider, {
-	// 				$network: ICP_NETWORK_ID.toString()
-	// 			})
-	// 		);
-	// 	});
-	// });
+	describe('alchemyProviders', () => {
+		networks.forEach(({ id, name }) => {
+			it(`should return the correct provider for ${name} network`, () => {
+				const provider = alchemyProviders(id);
+
+				expect(provider).toBeInstanceOf(AlchemyProvider);
+
+				expect(provider).toHaveProperty('provider');
+			});
+		});
+
+		it('should throw an error for an unsupported network ID', () => {
+			expect(() => alchemyProviders(ICP_NETWORK_ID)).toThrow(
+				replacePlaceholders(en.init.error.no_alchemy_provider, {
+					$network: ICP_NETWORK_ID.toString()
+				})
+			);
+		});
+	});
 });
