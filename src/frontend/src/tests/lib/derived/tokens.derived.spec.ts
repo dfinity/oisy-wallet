@@ -149,8 +149,9 @@ describe('tokens.derived', () => {
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
 				{ ...mockErc721CustomToken, id: result[10].id },
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[11].id },
-				{ ...mockIcrcCustomToken, id: result[12].id },
+				{ ...mockErc1155CustomToken, id: result[11].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[12].id },
+				{ ...mockIcrcCustomToken, id: result[13].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
