@@ -498,7 +498,7 @@ export const withdrawUserUnusedBalance = async ({
 		});
 	}
 
-	if (balance1 !== 0n) {
+	if (balance1 !== ZERO) {
 		await withdraw({
 			identity,
 			canisterId,
