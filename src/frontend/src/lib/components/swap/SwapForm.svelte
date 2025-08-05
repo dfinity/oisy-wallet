@@ -136,7 +136,9 @@
 	$effect(() => {
 		console.log({
 			destinationToken: $destinationToken,
-			swapAmountsStoreLength: $swapAmountsStore?.swaps.length
+			swapAmountsStoreLength: $swapAmountsStore?.swaps.length,
+			sourceTokenFee,
+			isSourceTokenIcrc2: $isSourceTokenIcrc2
 		});
 	});
 </script>
@@ -204,7 +206,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if $swapAmountsStore?.swaps.length === 0}
+						{#if isNullish($swapAmountsStore?.swaps) || $swapAmountsStore.swaps.length === 0}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
