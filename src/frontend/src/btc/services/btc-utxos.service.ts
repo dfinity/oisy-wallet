@@ -31,8 +31,6 @@ export const prepareBtcSend = async ({
 	amount,
 	source
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
-	console.warn('Start prepareBtcSend: ', { network, amount, source });
-
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
@@ -90,9 +88,6 @@ export const prepareBtcSend = async ({
 		amountSatoshis,
 		feeRateSatoshisPerVByte
 	});
-
-	console.warn('UTXO selection result:', selection);
-
 	// Check if there were insufficient funds during UTXO selection
 	if (!selection.sufficientFunds) {
 		return {
