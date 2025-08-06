@@ -2,7 +2,7 @@ import { nftStore } from '$lib/stores/nft.store';
 import type { Nft } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockEthAddress2 } from '$tests/mocks/eth.mock';
-import { mockValidNft } from '$tests/mocks/nfts.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { get } from 'svelte/store';
 
 describe('nftStore', () => {
@@ -16,8 +16,8 @@ describe('nftStore', () => {
 
 	describe('addAll', () => {
 		it('should add NFTs to store', () => {
-			const mockNft1 = mockValidNft;
-			const mockNft2 = { ...mockValidNft, id: parseNftId(837364) };
+			const mockNft1 = mockValidErc721Nft;
+			const mockNft2 = { ...mockValidErc721Nft, id: parseNftId(837364) };
 
 			nftStore.addAll([mockNft1, mockNft2]);
 
@@ -25,26 +25,26 @@ describe('nftStore', () => {
 		});
 
 		it('should not add already existing NFTs to store', () => {
-			const duplicateNft = { ...mockValidNft };
+			const duplicateNft = { ...mockValidErc721Nft };
 
-			nftStore.addAll([mockValidNft]);
+			nftStore.addAll([mockValidErc721Nft]);
 
-			expect(get(nftStore)).toEqual([mockValidNft]);
+			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
 
 			nftStore.addAll([duplicateNft]);
 
-			expect(get(nftStore)).toEqual([mockValidNft]);
+			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
 		});
 
 		it('should add NFT with same token id but different contract address', () => {
 			const similarNft: Nft = {
-				...mockValidNft,
-				contract: { ...mockValidNft.contract, address: mockEthAddress2 }
+				...mockValidErc721Nft,
+				contract: { ...mockValidErc721Nft.contract, address: mockEthAddress2 }
 			};
 
-			nftStore.addAll([mockValidNft, similarNft]);
+			nftStore.addAll([mockValidErc721Nft, similarNft]);
 
-			expect(get(nftStore)).toEqual([mockValidNft, similarNft]);
+			expect(get(nftStore)).toEqual([mockValidErc721Nft, similarNft]);
 		});
 	});
 });
