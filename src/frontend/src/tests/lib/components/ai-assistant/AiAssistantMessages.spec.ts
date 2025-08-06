@@ -9,9 +9,9 @@ describe('AiAssistantUserMessages', () => {
 	const systemMessage = 'system message';
 
 	const messages = [
-		{ role: 'user', content: userMessage },
-		{ role: 'assistant', content: assistantMessage },
-		{ role: 'system', content: systemMessage }
+		{ role: 'user', data: { text: userMessage } },
+		{ role: 'assistant', data: { text: assistantMessage } },
+		{ role: 'system', data: { text: systemMessage } }
 	] as ChatMessage[];
 
 	it('renders correctly if loading is false', async () => {
