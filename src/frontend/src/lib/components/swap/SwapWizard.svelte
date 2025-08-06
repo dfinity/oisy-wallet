@@ -59,7 +59,7 @@
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContextType>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
-	
+
 	let isSwapAmountsLoading = $state(false);
 
 	const setFailedProgressStep = (step: ProgressStepsSwap) => {
