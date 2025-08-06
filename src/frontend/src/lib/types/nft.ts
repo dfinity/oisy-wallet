@@ -1,6 +1,7 @@
 import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc721Token } from '$eth/types/erc721';
 import type {
+	CollectionSchema,
 	NftAttributeSchema,
 	NftIdSchema,
 	NftMetadataSchema,
@@ -16,12 +17,14 @@ export type NftAttributes = z.infer<typeof NftAttributeSchema>;
 
 export type NftMetadata = z.infer<typeof NftMetadataSchema>;
 
+export type Collection = z.infer<typeof CollectionSchema> & {
+	id: TokenId;
+	network: Network;
+	standard: TokenStandard;
+}
+
 export type Nft = z.infer<typeof NftSchema> & {
-	contract: {
-		id: TokenId;
-		network: Network;
-		standard: TokenStandard;
-	};
+	contract: Collection
 };
 
 export type NftsByNetwork = Record<NetworkId, Record<string, Nft[]>>;
