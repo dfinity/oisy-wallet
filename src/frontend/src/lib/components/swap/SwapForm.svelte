@@ -287,10 +287,10 @@
 									bind:displayUnit={exchangeValueUnit}
 								/>
 
-								{#if isSwapAmountsLoading}
-									<div class="w-6 sm:w-8">
+								{#if swapAmountsLoading}
+									<span class="w-10">
 										<SkeletonText />
-									</div>
+									</span>
 								{:else}
 									<SwapValueDifference {swapAmount} {receiveAmount} />
 								{/if}
