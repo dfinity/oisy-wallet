@@ -18,9 +18,7 @@ export type NftMetadata = z.infer<typeof NftMetadataSchema>;
 
 export type Collection = z.infer<typeof CollectionSchema>;
 
-export type Nft = z.infer<typeof NftSchema> & {
-	contract: Collection;
-};
+export type Nft = z.infer<typeof NftSchema>;
 
 export type NftsByNetwork = Record<NetworkId, Record<string, Nft[]>>;
 
