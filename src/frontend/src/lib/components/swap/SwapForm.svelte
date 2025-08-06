@@ -288,7 +288,7 @@
 								/>
 
 								{#if swapAmountsLoading}
-									<span class="w-10 mt-2">
+									<span class="w-10 mt-1">
 										<SkeletonText />
 									</span>
 								{:else}
