@@ -97,12 +97,22 @@ export const prepareBtcSend = async ({
 
 	// Check if there were insufficient funds during UTXO selection
 	if (!selection.sufficientFunds) {
+		console.warn('Insufficient funds during UTXO selection:', {
+			feeSatoshis: selection.feeSatoshis,
+			utxos: filteredUtxos,
+			error: BtcPrepareSendError.InsufficientBalanceForFee
+		});
 		return {
 			feeSatoshis: selection.feeSatoshis,
 			utxos: filteredUtxos,
 			error: BtcPrepareSendError.InsufficientBalanceForFee
 		};
 	}
+
+	console.warn('Sufficient funds during UTXO selection:', {
+		feeSatoshis: selection.feeSatoshis,
+		utxos: filteredUtxos
+	});
 
 	// Fee is already calculated in the selection process
 	return {
