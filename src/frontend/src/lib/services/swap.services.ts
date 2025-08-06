@@ -133,7 +133,8 @@ export const fetchSwapAmounts = async ({
 	destinationToken,
 	amount,
 	tokens,
-	slippage
+	slippage,
+	isSourceTokenIcrc2
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -160,8 +161,10 @@ export const fetchSwapAmounts = async ({
 				const swap = result.value as SwapAmountsReply;
 				mapped = provider.mapQuoteResult({ swap, tokens });
 			} else if (provider.key === SwapProvider.ICP_SWAP) {
-				const swap = result.value as ICPSwapResult;
-				mapped = provider.mapQuoteResult({ swap, slippage });
+				if (isSourceTokenIcrc2) {
+					const swap = result.value as ICPSwapResult;
+					mapped = provider.mapQuoteResult({ swap, slippage });
+				}
 			}
 
 			if (mapped && Number(mapped.receiveAmount) > 0) {
@@ -303,6 +306,8 @@ export const fetchIcpSwap = async ({
 			});
 		}
 	} catch (err: unknown) {
+		console.log('Deposit failed:');
+
 		console.error(err);
 
 		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
