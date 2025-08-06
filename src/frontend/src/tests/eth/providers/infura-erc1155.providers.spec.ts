@@ -12,10 +12,10 @@ import {
 import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
@@ -236,7 +236,7 @@ describe('infura-erc1155.providers', () => {
 		describe('balanceOf', () => {
 			const mockBalanceOf = vi.fn();
 
-			const tokenId = parseNftId(12345)
+			const tokenId = parseNftId(12345);
 
 			const mockParams = {
 				contractAddress,
@@ -251,7 +251,8 @@ describe('infura-erc1155.providers', () => {
 
 				mockBalanceOf.mockResolvedValue(mockBalance);
 
-				mockContract.prototype.balanceOf = mockBalanceOf as unknown as typeof mockContract.prototype.balanceOf;
+				mockContract.prototype.balanceOf =
+					mockBalanceOf as unknown as typeof mockContract.prototype.balanceOf;
 			});
 
 			it('should return the balance of the token ID for a specific wallet', async () => {
@@ -259,12 +260,10 @@ describe('infura-erc1155.providers', () => {
 
 				const result = await provider.balanceOf(mockParams);
 
-				expect(mockBalanceOf).toHaveBeenCalledExactlyOnceWith(
-					mockEthAddress, tokenId
-				);
+				expect(mockBalanceOf).toHaveBeenCalledExactlyOnceWith(mockEthAddress, tokenId);
 
 				expect(result).toEqual(mockBalance);
-			})
+			});
 
 			it('should throw an error', async () => {
 				const errorMessage = 'Error loading balance';
