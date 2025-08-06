@@ -9,14 +9,13 @@ import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
-import { CollectionSchema } from '$lib/schema/nft.schema';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
 import { getNftsByNetworks, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
 	tokens,
