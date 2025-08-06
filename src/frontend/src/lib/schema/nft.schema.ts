@@ -18,7 +18,7 @@ export const CollectionSchema = z.object({
 	address: z.string(),
 	name: z.string(),
 	symbol: z.string()
-})
+});
 
 export const NftSchema = z.object({
 	contract: CollectionSchema,

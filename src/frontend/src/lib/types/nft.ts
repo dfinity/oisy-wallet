@@ -21,10 +21,10 @@ export type Collection = z.infer<typeof CollectionSchema> & {
 	id: TokenId;
 	network: Network;
 	standard: TokenStandard;
-}
+};
 
 export type Nft = z.infer<typeof NftSchema> & {
-	contract: Collection
+	contract: Collection;
 };
 
 export type NftsByNetwork = Record<NetworkId, Record<string, Nft[]>>;
