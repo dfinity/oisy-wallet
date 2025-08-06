@@ -96,6 +96,9 @@
 	let shouldShowError = $derived(
 		($swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore)) &&
 			!isSwapAmountsLoading &&
+			nonNullish($swapAmountsStore?.amountForSwap) &&
+			Number(swapAmount) === $swapAmountsStore.amountForSwap &&
+			!isSwapAmountsLoading &&
 			nonNullish(swapAmount) &&
 			Number(swapAmount) > 0
 	);
