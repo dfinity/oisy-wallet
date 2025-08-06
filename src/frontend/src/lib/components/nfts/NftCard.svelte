@@ -45,7 +45,9 @@
 	</div>
 
 	<div class="px-2 pt-2">
-		<h3 class="truncate text-xs font-semibold text-tertiary">{nft.contract.name}</h3>
+		{#if nonNullish(nft.contract.name)}
+			<h3 class="truncate text-xs font-semibold text-tertiary">{nft.contract.name}</h3>
+		{/if}
 		<span class="text-xs text-tertiary">{`#${nft.id}`}</span>
 	</div>
 </div>
