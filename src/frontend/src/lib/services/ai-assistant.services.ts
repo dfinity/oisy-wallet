@@ -5,6 +5,15 @@ import type { ChatMessageContent } from '$lib/types/ai-assistant';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, toNullable } from '@dfinity/utils';
 
+/**
+ * Gets a text or a tool response from LLM for the provided messages array.
+ *
+ * @async
+ * @param {Object} params - The parameters required to initiate an LLM request.
+ * @param {Array} params.messages - Array of messages that should be sent to LLM.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<ChatMessageContent>} - Resolves with a text content or with a parsed LLM tool result
+ */
 export const askLlm = async ({
 	messages,
 	identity
