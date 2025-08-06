@@ -103,6 +103,31 @@
 			Number(swapAmount) > 0
 	);
 
+	$effect(() => {
+		const c1 = $swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore);
+		const c2 = !isSwapAmountsLoading;
+		const c3 = nonNullish($swapAmountsStore?.amountForSwap);
+		const c4 = Number(swapAmount) === $swapAmountsStore?.amountForSwap;
+		const c5 = nonNullish(swapAmount);
+		const c6 = Number(swapAmount) > 0;
+
+		console.log('🔍 Error conditions:', {
+			'📦 store empty/null': c1,
+			'⏳ not loading': c2,
+			'✅ has amountForSwap': c3,
+			'🎯 amounts match': c4,
+			'💰 swapAmount exists': c5,
+			'➕ amount > 0': c6,
+			'---': '---',
+			'🏪 store': $swapAmountsStore,
+			'📊 swaps length': $swapAmountsStore?.swaps?.length,
+			'🔢 amountForSwap': $swapAmountsStore?.amountForSwap,
+			'💵 swapAmount': swapAmount,
+			'🔄 isLoading': isSwapAmountsLoading,
+			'🚨 RESULT': shouldShowError
+		});
+	});
+
 	let disableSwitchTokens = $derived(
 		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading
 	);
