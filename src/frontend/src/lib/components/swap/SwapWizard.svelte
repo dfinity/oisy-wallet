@@ -162,7 +162,7 @@
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
-					usdSourceValue: sourceTokenUsdValue || 
+					usdSourceValue: sourceTokenUsdValue || ''
 				}
 			});
 
