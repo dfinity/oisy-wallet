@@ -36,12 +36,14 @@
 		swapAmount: OptionAmount;
 		receiveAmount: number | undefined;
 		slippageValue: OptionAmount;
+		isSwapAmountsLoading: boolean;
 	}
 
 	let {
 		swapAmount = $bindable<OptionAmount>(),
 		receiveAmount = $bindable<number | undefined>(),
-		slippageValue = $bindable<OptionAmount>()
+		slippageValue = $bindable<OptionAmount>(),
+		isSwapAmountsLoading
 	}: Props = $props();
 
 	const {
@@ -93,7 +95,7 @@
 
 	let shouldShowError = $derived(
 		($swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore)) &&
-			!swapAmountsLoading &&
+			!isSwapAmountsLoading &&
 			nonNullish(swapAmount) &&
 			Number(swapAmount) > 0
 	);

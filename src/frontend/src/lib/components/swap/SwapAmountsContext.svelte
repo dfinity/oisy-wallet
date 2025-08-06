@@ -12,6 +12,7 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { swap } from '$eth/services/swap.services';
 
 	interface Props {
 		amount: OptionAmount;
@@ -19,9 +20,17 @@
 		destinationToken: IcToken | undefined;
 		slippageValue: OptionAmount;
 		children?: Snippet;
+		swapAmountsLoading: boolean;
 	}
 
-	let { amount, sourceToken, destinationToken, slippageValue, children }: Props = $props();
+	let {
+		amount,
+		sourceToken,
+		destinationToken,
+		slippageValue,
+		children,
+		swapAmountsLoading = $bindable(false)
+	}: Props = $props();
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -43,6 +52,8 @@
 		if (nonNullish($store) && $store.amountForSwap === parsedAmount) {
 			return;
 		}
+
+		swapAmountsLoading = true;
 
 		try {
 			const swapAmounts = await fetchSwapAmounts({
@@ -71,6 +82,10 @@
 				amountForSwap: parsedAmount,
 				selectedProvider: undefined
 			});
+		} finally {
+			setTimeout(() => {
+				swapAmountsLoading = false;
+			}, 200);
 		}
 	};
 	const debounceLoadSwapAmounts = debounce(loadSwapAmounts);

@@ -60,6 +60,8 @@
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 
+	let swapAmountsLoading = $state(false);
+
 	const setFailedProgressStep = (step: ProgressStepsSwap) => {
 		if (!swapFailedProgressSteps.includes(step)) {
 			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
@@ -204,6 +206,7 @@
 		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
 		{slippageValue}
+		bind:swapAmountsLoading
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapForm
@@ -214,6 +217,7 @@
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue
+				isSwapAmountsLoading={swapAmountsLoading}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
