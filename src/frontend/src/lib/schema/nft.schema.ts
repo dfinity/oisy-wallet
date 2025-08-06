@@ -28,5 +28,5 @@ export const CollectionSchema = z.object({
 export const NftSchema = z.object({
 	balance: z.number().optional(),
 	...NftMetadataSchema.shape,
-	contract: CollectionSchema
+	collection: CollectionSchema
 });

@@ -39,7 +39,7 @@ describe('nftStore', () => {
 		it('should add NFT with same token id but different contract address', () => {
 			const similarNft: Nft = {
 				...mockValidErc721Nft,
-				contract: { ...mockValidErc721Nft.contract, address: mockEthAddress2 }
+				collection: { ...mockValidErc721Nft.collection, address: mockEthAddress2 }
 			};
 
 			nftStore.addAll([mockValidErc721Nft, similarNft]);
