@@ -20,7 +20,7 @@ export const CollectionSchema = z.object({
 	address: z.string(),
 	name: z.string(),
 	symbol: z.string(),
-	id: TokenIdSchema,
+	id: z.custom<TokenIdSchema>(),
 	network: NetworkSchema,
 	standard: TokenStandardSchema
 });
