@@ -19,9 +19,17 @@
 		destinationToken: IcToken | undefined;
 		slippageValue: OptionAmount;
 		children?: Snippet;
+		isSourceTokenIcrc2: boolean;
 	}
 
-	let { amount, sourceToken, destinationToken, slippageValue, children }: Props = $props();
+	let {
+		amount,
+		sourceToken,
+		destinationToken,
+		slippageValue,
+		children,
+		isSourceTokenIcrc2
+	}: Props = $props();
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -51,7 +59,8 @@
 				destinationToken,
 				amount,
 				tokens: $tokens,
-				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE
+				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
+				isSourceTokenIcrc2
 			});
 
 			if (swapAmounts.length === 0) {

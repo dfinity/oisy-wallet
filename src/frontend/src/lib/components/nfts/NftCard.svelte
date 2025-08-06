@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft } from '$lib/types/nft';
@@ -22,13 +23,18 @@
 				alt={replacePlaceholders($i18n.nfts.alt.card.image, {
 					$tokenId: nft.id.toString()
 				})}
+				styleClass="h-48 object-contain bg-black"
 				testId={`${testId}-image`}
 			/>
 		{:else}
 			<div class="bg-black/16 h-48 rounded-lg" data-tid={`${testId}-placeholder`}></div>
 		{/if}
 
-		<div class="absolute bottom-2 right-2">
+		<div class="absolute bottom-2 right-2 flex items-center gap-1">
+			{#if nonNullish(nft.balance)}
+				<Badge variant="outline" testId={`${testId}-balance`}>{nft.balance}x</Badge>
+			{/if}
+
 			<NetworkLogo
 				network={nft.contract.network}
 				size="xs"

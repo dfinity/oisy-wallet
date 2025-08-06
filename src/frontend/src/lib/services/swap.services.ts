@@ -139,7 +139,8 @@ export const fetchSwapAmounts = async ({
 	destinationToken,
 	amount,
 	tokens,
-	slippage
+	slippage,
+	isSourceTokenIcrc2
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -165,7 +166,7 @@ export const fetchSwapAmounts = async ({
 			if (provider.key === SwapProvider.KONG_SWAP) {
 				const swap = result.value as SwapAmountsReply;
 				mapped = provider.mapQuoteResult({ swap, tokens });
-			} else if (provider.key === SwapProvider.ICP_SWAP) {
+			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
 				mapped = provider.mapQuoteResult({ swap, slippage });
 			}
