@@ -100,65 +100,69 @@ describe('nft.services', () => {
 			expect(mockInfuraErc1155Provider.getNftMetadata).not.toHaveBeenCalled();
 		});
 
-		it('should load NFTs of tokens', async () => {
-			const tokens: NonFungibleToken[] = [erc721AzukiToken, erc1155NyanCatToken];
-			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
+		it(
+			'should load NFTs of tokens',
+			async () => {
+				const tokens: NonFungibleToken[] = [erc721AzukiToken, erc1155NyanCatToken];
+				const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
 
-			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
-			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(tokenIds);
-			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
-				Promise.resolve({
-					id: tokenId,
-					name: `Test NFT #${tokenId}`,
-					imageUrl: `https://test.com/image-${tokenId}.png`
-				})
-			);
-			vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
-				Promise.resolve({
-					id: tokenId,
-					name: `Test NFT #${tokenId}`,
-					imageUrl: `https://test.com/image-${tokenId}.png`
-				})
-			);
+				vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
+				vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(tokenIds);
+				vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
+					Promise.resolve({
+						id: tokenId,
+						name: `Test NFT #${tokenId}`,
+						imageUrl: `https://test.com/image-${tokenId}.png`
+					})
+				);
+				vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
+					Promise.resolve({
+						id: tokenId,
+						name: `Test NFT #${tokenId}`,
+						imageUrl: `https://test.com/image-${tokenId}.png`
+					})
+				);
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+				await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
-			const expectedNfts = [
-				...tokenIds.map((tokenId) => ({
-					id: tokenId,
-					name: `Test NFT #${tokenId}`,
-					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc721AzukiToken
-				})),
-				...tokenIds.map((tokenId) => ({
-					id: tokenId,
-					name: `Test NFT #${tokenId}`,
-					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc1155NyanCatToken
-				}))
-			];
+				const expectedNfts = [
+					...tokenIds.map((tokenId) => ({
+						id: tokenId,
+						name: `Test NFT #${tokenId}`,
+						imageUrl: `https://test.com/image-${tokenId}.png`,
+						contract: erc721AzukiToken
+					})),
+					...tokenIds.map((tokenId) => ({
+						id: tokenId,
+						name: `Test NFT #${tokenId}`,
+						imageUrl: `https://test.com/image-${tokenId}.png`,
+						contract: erc1155NyanCatToken
+					}))
+				];
 
-			await waitFor(() => {
-				tokenIds.forEach((tokenId) => {
-					expect(mockInfuraErc721Provider.getNftMetadata).toHaveBeenCalledWith(
-						expect.objectContaining({
-							tokenId,
-							contractAddress: AZUKI_ELEMENTAL_BEANS_TOKEN.address
-						})
-					);
+				await waitFor(() => {
+					tokenIds.forEach((tokenId) => {
+						expect(mockInfuraErc721Provider.getNftMetadata).toHaveBeenCalledWith(
+							expect.objectContaining({
+								tokenId,
+								contractAddress: AZUKI_ELEMENTAL_BEANS_TOKEN.address
+							})
+						);
 
-					expect(mockInfuraErc1155Provider.getNftMetadata).toHaveBeenCalledWith(
-						expect.objectContaining({
-							tokenId,
-							contractAddress: NYAN_CAT_TOKEN.address
-						})
-					);
+						expect(mockInfuraErc1155Provider.getNftMetadata).toHaveBeenCalledWith(
+							expect.objectContaining({
+								tokenId,
+								contractAddress: NYAN_CAT_TOKEN.address
+							})
+						);
+					});
+
+					expect(get(nftStore)?.length).toEqual(expectedNfts.length);
+					expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
 				});
-
-				expect(get(nftStore)?.length).toEqual(expectedNfts.length);
-				expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
-			});
-		}, {timeout: 10000});
+			},
+			{ timeout: 10000 }
+		);
 
 		it('should skip already loaded NFTs', async () => {
 			const tokens: NonFungibleToken[] = [erc721AzukiToken, erc1155NyanCatToken];
@@ -281,52 +285,56 @@ describe('nft.services', () => {
 			expect(mockInfuraErc1155Provider.getNftMetadata).not.toHaveBeenCalled();
 		});
 
-		it('should handle metadata fetch error gracefully', async () => {
-			const tokens: NonFungibleToken[] = [erc721AzukiToken, erc1155NyanCatToken];
-			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
+		it(
+			'should handle metadata fetch error gracefully',
+			async () => {
+				const tokens: NonFungibleToken[] = [erc721AzukiToken, erc1155NyanCatToken];
+				const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
 
-			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
-			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(tokenIds);
-			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockRejectedValue(
-				new Error('Metadata Error')
-			);
-			vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockRejectedValue(
-				new Error('Metadata Error')
-			);
+				vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
+				vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(tokenIds);
+				vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockRejectedValue(
+					new Error('Metadata Error')
+				);
+				vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockRejectedValue(
+					new Error('Metadata Error')
+				);
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+				await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
-			const expectedNfts = [
-				...tokenIds.map((tokenId) => ({
-					id: tokenId,
-					contract: erc721AzukiToken
-				})),
-				...tokenIds.map((tokenId) => ({
-					id: tokenId,
-					contract: erc1155NyanCatToken
-				}))
-			];
+				const expectedNfts = [
+					...tokenIds.map((tokenId) => ({
+						id: tokenId,
+						contract: erc721AzukiToken
+					})),
+					...tokenIds.map((tokenId) => ({
+						id: tokenId,
+						contract: erc1155NyanCatToken
+					}))
+				];
 
-			await waitFor(() => {
-				tokenIds.forEach((tokenId) => {
-					expect(mockInfuraErc721Provider.getNftMetadata).toHaveBeenCalledWith(
-						expect.objectContaining({
-							tokenId,
-							contractAddress: AZUKI_ELEMENTAL_BEANS_TOKEN.address
-						})
-					);
+				await waitFor(() => {
+					tokenIds.forEach((tokenId) => {
+						expect(mockInfuraErc721Provider.getNftMetadata).toHaveBeenCalledWith(
+							expect.objectContaining({
+								tokenId,
+								contractAddress: AZUKI_ELEMENTAL_BEANS_TOKEN.address
+							})
+						);
 
-					expect(mockInfuraErc1155Provider.getNftMetadata).toHaveBeenCalledWith(
-						expect.objectContaining({
-							tokenId,
-							contractAddress: NYAN_CAT_TOKEN.address
-						})
-					);
+						expect(mockInfuraErc1155Provider.getNftMetadata).toHaveBeenCalledWith(
+							expect.objectContaining({
+								tokenId,
+								contractAddress: NYAN_CAT_TOKEN.address
+							})
+						);
+					});
+
+					expect(get(nftStore)?.length).toEqual(expectedNfts.length);
+					expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
 				});
-
-				expect(get(nftStore)?.length).toEqual(expectedNfts.length);
-				expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
-			});
-		}, {timeout: 10000});
+			},
+			{ timeout: 10000 }
+		);
 	});
 });
