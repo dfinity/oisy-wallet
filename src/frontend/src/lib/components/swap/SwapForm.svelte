@@ -94,15 +94,18 @@
 	);
 
 	let shouldShowError = $derived(
-		($swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore)) &&
-			!isSwapAmountsLoading &&
-			nonNullish($swapAmountsStore?.amountForSwap) &&
-			Number(swapAmount) === $swapAmountsStore.amountForSwap &&
+		(isNullish($swapAmountsStore) &&
 			!isSwapAmountsLoading &&
 			nonNullish(swapAmount) &&
-			Number(swapAmount) > 0
+			Number(swapAmount) > 0) ||
+			(nonNullish($swapAmountsStore) &&
+				$swapAmountsStore.swaps.length === 0 &&
+				nonNullish($swapAmountsStore.amountForSwap) &&
+				Number(swapAmount) === $swapAmountsStore.amountForSwap &&
+				!isSwapAmountsLoading &&
+				nonNullish(swapAmount) &&
+				Number(swapAmount) > 0)
 	);
-
 	$effect(() => {
 		const c1 = $swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore);
 		const c2 = !isSwapAmountsLoading;
