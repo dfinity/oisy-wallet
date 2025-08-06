@@ -37,7 +37,7 @@ describe('NftCard', () => {
 	it('should render image placeholder if no image is defined', () => {
 		const { container, getByText } = render(NftCard, {
 			props: {
-				nft: { ...mockValidErc721Nft, imageUrl: undefined },
+				nft: { ...mockValidErc721Nft, imageUrl: null },
 				testId
 			}
 		});
