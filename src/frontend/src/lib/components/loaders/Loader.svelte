@@ -174,7 +174,11 @@
 	});
 
 	$effect(() => {
-		if (($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized) && nonNullish($ethAddress) && $nonFungibleTokens.length > 0) {
+		if (
+			($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized) &&
+			nonNullish($ethAddress) &&
+			$nonFungibleTokens.length > 0
+		) {
 			debounceLoadNfts();
 		}
 	});
