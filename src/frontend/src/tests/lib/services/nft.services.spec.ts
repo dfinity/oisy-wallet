@@ -132,13 +132,13 @@ describe('nft.services', () => {
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: mapTokenToCollection(erc721AzukiToken)
+					collection: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: mapTokenToCollection(erc1155NyanCatToken),
+					collection: mapTokenToCollection(erc1155NyanCatToken),
 					balance: 2
 				}))
 			];
@@ -182,11 +182,11 @@ describe('nft.services', () => {
 			const loadedNfts: Nft[] = [
 				...loadedTokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: erc721AzukiToken
+					collection: erc721AzukiToken
 				})),
 				...loadedTokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: erc1155NyanCatToken,
+					collection: erc1155NyanCatToken,
 					balance: 3
 				}))
 			];
@@ -218,13 +218,13 @@ describe('nft.services', () => {
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: mapTokenToCollection(erc721AzukiToken)
+					collection: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...notLoadedTokenIds.map((tokenId) => ({
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: mapTokenToCollection(erc1155NyanCatToken),
+					collection: mapTokenToCollection(erc1155NyanCatToken),
 					balance: 2
 				}))
 			];
@@ -334,11 +334,11 @@ describe('nft.services', () => {
 			const expectedNfts = [
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: mapTokenToCollection(erc721AzukiToken)
+					collection: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: mapTokenToCollection(erc1155NyanCatToken),
+					collection: mapTokenToCollection(erc1155NyanCatToken),
 					balance: 2
 				}))
 			];
@@ -395,7 +395,7 @@ describe('nft.services', () => {
 				id: tokenId,
 				name: `Test NFT #${tokenId}`,
 				imageUrl: `https://test.com/image-${tokenId}.png`,
-				contract: mapTokenToCollection(erc1155NyanCatToken)
+				collection: mapTokenToCollection(erc1155NyanCatToken)
 			}));
 
 			await waitFor(() => {
