@@ -73,7 +73,7 @@ const loadCustomTokensWithMetadata = async (
 				(customToken): customToken is CustomToken & { token: { Erc1155: ErcToken } } =>
 					'Erc1155' in customToken.token
 			)
-			.map(({ token, enabled, version: versionNullable }) => {
+			.map(async ({ token, enabled, version: versionNullable }) => {
 				const version = fromNullable(versionNullable);
 
 				const {
@@ -90,8 +90,9 @@ const loadCustomTokensWithMetadata = async (
 					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
 				);
 
-				// TODO: Fetch metadata from the contract using the URI
-				const metadata = {};
+				const metadata = await infuraErc1155Providers(network.id).metadata({
+					address: tokenAddress
+				});
 
 				return {
 					...{
