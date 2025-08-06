@@ -1,5 +1,6 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
 describe('NftCard', () => {
@@ -30,7 +31,9 @@ describe('NftCard', () => {
 
 		expect(balance).toBeInTheDocument();
 
-		expect(getByText(mockValidErc1155Nft.contract.name)).toBeInTheDocument();
+		assertNonNullish(mockValidErc1155Nft.collection?.name);
+
+		expect(getByText(mockValidErc1155Nft.collection.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidErc1155Nft.id}`)).toBeInTheDocument();
 	});
 
@@ -51,7 +54,9 @@ describe('NftCard', () => {
 
 		expect(networkLogo).toBeInTheDocument();
 
-		expect(getByText(mockValidErc721Nft.contract.name)).toBeInTheDocument();
+		assertNonNullish(mockValidErc721Nft.collection?.name);
+
+		expect(getByText(mockValidErc721Nft.collection.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
 	});
 });

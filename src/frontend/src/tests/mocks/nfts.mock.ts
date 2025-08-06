@@ -12,7 +12,7 @@ export const mockValidErc721Nft: Nft = {
 		{ traitType: 'Background', value: 'Crimson Red' },
 		{ traitType: 'Type', value: 'Tone 4' }
 	],
-	contract: {
+	collection: {
 		id: parseTokenId('TokenId'),
 		address: mockEthAddress,
 		network: ETHEREUM_NETWORK,
@@ -31,7 +31,7 @@ export const mockValidErc1155Nft: Nft = {
 		{ traitType: 'Type', value: 'Tone 4' }
 	],
 	balance: 2,
-	contract: {
+	collection: {
 		id: parseTokenId('TokenId'),
 		address: mockEthAddress,
 		network: ETHEREUM_NETWORK,

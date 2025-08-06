@@ -4,7 +4,11 @@ import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
-import { getNftsByNetworks, parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
+import {
+	getNftsByNetworks,
+	mapTokenToCollection,
+	parseMetadataResourceUrl
+} from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -18,8 +22,8 @@ describe('nfts.utils', () => {
 
 	const mockNft1: Nft = {
 		...mockValidErc721Nft,
-		contract: {
-			...mockValidErc721Nft.contract,
+		collection: {
+			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
@@ -28,8 +32,8 @@ describe('nfts.utils', () => {
 	const mockNft2: Nft = {
 		...mockValidErc721Nft,
 		id: parseNftId(12632),
-		contract: {
-			...mockValidErc721Nft.contract,
+		collection: {
+			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
@@ -38,8 +42,8 @@ describe('nfts.utils', () => {
 	const mockNft3: Nft = {
 		...mockValidErc721Nft,
 		id: parseNftId(843764),
-		contract: {
-			...mockValidErc721Nft.contract,
+		collection: {
+			...mockValidErc721Nft.collection,
 			address: DE_GODS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
@@ -59,12 +63,12 @@ describe('nfts.utils', () => {
 
 			const customMockNft1: Nft = {
 				...mockNft1,
-				contract: { ...mockNft1.contract, network: ETHEREUM_NETWORK }
+				collection: { ...mockNft1.collection, network: ETHEREUM_NETWORK }
 			};
 
 			const customMockNft2: Nft = {
 				...mockNft2,
-				contract: { ...mockNft2.contract, network: ETHEREUM_NETWORK }
+				collection: { ...mockNft2.collection, network: ETHEREUM_NETWORK }
 			};
 
 			const result: NftsByNetwork = getNftsByNetworks({
@@ -103,15 +107,15 @@ describe('nfts.utils', () => {
 		it('should return empty lists for tokens that do not have matching nfts', () => {
 			const customMockNft1: Nft = {
 				...mockNft1,
-				contract: { ...mockNft1.contract, address: mockEthAddress }
+				collection: { ...mockNft1.collection, address: mockEthAddress }
 			};
 			const customMockNft2: Nft = {
 				...mockNft2,
-				contract: { ...mockNft2.contract, address: mockEthAddress }
+				collection: { ...mockNft2.collection, address: mockEthAddress }
 			};
 			const customMockNft3: Nft = {
 				...mockNft3,
-				contract: { ...mockNft3.contract, address: mockEthAddress }
+				collection: { ...mockNft3.collection, address: mockEthAddress }
 			};
 
 			const result: NftsByNetwork = getNftsByNetworks({
@@ -219,6 +223,32 @@ describe('nfts.utils', () => {
 			const url = 'http://localhost:3000/some-data';
 
 			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+		});
+	});
+
+	describe('mapTokenToCollection', () => {
+		it('should map token correctly', () => {
+			const result = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN);
+
+			expect(result).toEqual({
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
+				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
+				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
+				network: AZUKI_ELEMENTAL_BEANS_TOKEN.network,
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+			});
+		});
+
+		it('should not map empty name and symbol', () => {
+			const result = mapTokenToCollection({ ...AZUKI_ELEMENTAL_BEANS_TOKEN, name: '', symbol: '' });
+
+			expect(result).toEqual({
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
+				network: AZUKI_ELEMENTAL_BEANS_TOKEN.network,
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+			});
 		});
 	});
 });
