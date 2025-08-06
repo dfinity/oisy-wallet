@@ -20,5 +20,6 @@ export const NftSchema = z.object({
 		name: z.string(),
 		symbol: z.string()
 	}),
+	balance: z.number().optional(),
 	...NftMetadataSchema.shape
 });
