@@ -984,6 +984,7 @@
 			"invalid_contract_address": "Adresa smlouvy je neplatná.",
 			"invalid_token_address": "Adresa tokenu je neplatná.",
 			"invalid_ledger": "Vybraný token není propojen s kanystrem účetní knihy Icrc.",
+			"unrecognised_erc_interface": "",
 			"no_metadata": "Nebyly načteny žádné metadata.",
 			"unexpected": "Při ukládání tokenu se něco pokazilo.",
 			"unexpected_hiding": "Při skrývání tokenu se něco pokazilo.",

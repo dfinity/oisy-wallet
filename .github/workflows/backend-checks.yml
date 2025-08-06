@@ -20,7 +20,7 @@ jobs:
         id: changes
         uses: ./.github/actions/check-backend-changes
       - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         with:
           path: |
             ~/.cargo/registry
@@ -28,13 +28,13 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
       - name: Install rust
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         run: ./scripts/setup rust
       - name: Lint rust
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         run: ./scripts/lint.rust.sh
       - name: Lint candid
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         run: ./scripts/lint.did.sh
 
   workspace-dependencies:
@@ -49,10 +49,10 @@ jobs:
         id: changes
         uses: ./.github/actions/check-backend-changes
       - name: Install yq
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         run: sudo snap install yq
       - name: Dependencies are defined in the workspace
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         run: ./scripts/lint.cargo-workspace-dependencies.sh
 
   backend-checks-pass:

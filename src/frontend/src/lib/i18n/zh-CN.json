@@ -984,6 +984,7 @@
 			"invalid_contract_address": "合约地址无效。",
 			"invalid_token_address": "代币地址无效。",
 			"invalid_ledger": "所选代币未链接至 ICRC Ledger Canister。",
+			"unrecognised_erc_interface": "",
 			"no_metadata": "未获取到任何元数据。",
 			"unexpected": "保存代币时发生错误。",
 			"unexpected_hiding": "隐藏代币时发生错误。",

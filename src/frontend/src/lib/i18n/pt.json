@@ -984,6 +984,7 @@
 			"invalid_contract_address": "Endereço do contrato inválido.",
 			"invalid_token_address": "Endereço do token inválido.",
 			"invalid_ledger": "O token selecionado não está vinculado a um canister Ledger do ICRC.",
+			"unrecognised_erc_interface": "",
 			"no_metadata": "Nenhum metadado foi encontrado.",
 			"unexpected": "Algo deu errado ao salvar o token.",
 			"unexpected_hiding": "Algo deu errado ao ocultar o token.",

@@ -23,7 +23,7 @@ jobs:
         uses: ./.github/actions/check-backend-changes
 
       - name: Build Base Docker Image
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         uses: ./.github/actions/docker-build-base
 
   docker-build:
@@ -48,7 +48,7 @@ jobs:
         uses: ./.github/actions/check-backend-changes
 
       - name: Build canister WASM
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         uses: ./.github/actions/docker-build-backend
         with:
           name: ${{ matrix.name }}
@@ -70,7 +70,7 @@ jobs:
         uses: ./.github/actions/check-backend-changes
 
       - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         with:
           path: |
             ~/.cargo/registry
@@ -79,18 +79,18 @@ jobs:
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
 
       - name: Download backend.wasm.gz
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: backend.wasm.gz
           path: .
 
       - name: Install dfx
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
       - name: 'Run backend tests'
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         working-directory: .
         run: ./scripts/test.backend.sh
 
@@ -112,7 +112,7 @@ jobs:
         id: changes
         uses: ./.github/actions/check-backend-changes
       - name: 'Run when backend candid interface changes'
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         # Goal: Run only when the backend candid interface changes, otherwise
         # every PR after a breaking change will also have to be marked as a breaking change
         # until deployment to production.  As it is, any PRs that change the backend candid
@@ -125,7 +125,7 @@ jobs:
             api:
               - 'src/backend/backend.did'
       - name: 'Check whether the PR description & title mention "breaking interface"'
-        if: steps.changes.outputs.any == 'true'
+        if: steps.changes.outputs.backend == 'true'
         id: conventional-commit
         run: |
           # See the conventional commit conventions for how to mark a breaking change: https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with-both--and-breaking-change-footer
