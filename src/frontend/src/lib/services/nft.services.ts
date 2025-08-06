@@ -231,7 +231,7 @@ const getNft = async ({
 
 	return {
 		...nftMetadata,
-		contract: mapTokenToCollection(token),
+		collection: mapTokenToCollection(token),
 		...(nonNullish(balance) && { balance })
 	};
 };

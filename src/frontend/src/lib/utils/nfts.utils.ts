@@ -22,7 +22,7 @@ export const getNftsByNetworks = ({
 
 	nfts.forEach((nft) => {
 		const {
-			contract: {
+			collection: {
 				network: { id: networkId },
 				address
 			}
