@@ -32,7 +32,7 @@
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
 			{#if nonNullish(nft.balance)}
-				<Badge variant="outline">{nft.balance}x</Badge>
+				<Badge variant="outline" testId={`${testId}-balance`}>{nft.balance}x</Badge>
 			{/if}
 
 			<NetworkLogo
