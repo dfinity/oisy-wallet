@@ -75,7 +75,8 @@ export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: N
 	return adaptedUrl;
 };
 
-export const mapTokenToCollection = (token: NonFungibleToken): Collection => CollectionSchema.parse({
+export const mapTokenToCollection = (token: NonFungibleToken): Collection =>
+	CollectionSchema.parse({
 		address: token.address,
 		id: token.id,
 		network: token.network,
