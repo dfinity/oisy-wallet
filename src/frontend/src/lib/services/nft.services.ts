@@ -191,29 +191,48 @@ const getNfts = async ({
 	walletAddress: EthAddress;
 	nftsMetadata: NftMetadata[];
 }) => {
-	const nfts = [];
+	const nftPromises = nftsMetadata.map((nftMetadata) => getNft({infuraProvider, token, walletAddress, nftMetadata}));
 
-	for (const nftMetadata of nftsMetadata) {
-		let balance;
-		if (token.standard === 'erc1155') {
-			const infuraErc1155Provider = infuraProvider as InfuraErc1155Provider;
-			balance = await loadBalance({
-				infuraProvider: infuraErc1155Provider,
-				contractAddress: token.address,
-				walletAddress,
-				tokenId: nftMetadata.id
-			});
+	const results = await Promise.allSettled(nftPromises);
+	return results.reduce<Nft[]>((acc, result) => {
+		if (result.status !== 'fulfilled') {
+			console.warn(result.reason);
+			return acc;
 		}
 
-		nfts.push({
-			...nftMetadata,
-			contract: token,
-			...(nonNullish(balance) && { balance })
+		const { value } = result;
+		return nonNullish(value) ? [...acc, value] : acc;
+	}, []);
+};
+
+const getNft = async ({
+												 infuraProvider,
+												 token,
+												 walletAddress,
+												 nftMetadata
+											 }: {
+	infuraProvider: InfuraErc165Provider;
+	token: NonFungibleToken;
+	walletAddress: EthAddress;
+	nftMetadata: NftMetadata;
+}): Promise<Nft> => {
+	let balance;
+	if (token.standard === 'erc1155') {
+		const infuraErc1155Provider = infuraProvider as InfuraErc1155Provider;
+		balance = await loadBalance({
+			infuraProvider: infuraErc1155Provider,
+			contractAddress: token.address,
+			walletAddress,
+			tokenId: nftMetadata.id
 		});
 	}
 
-	return nfts;
-};
+	return {
+		...nftMetadata,
+		contract: token,
+		...(nonNullish(balance) && { balance })
+	}
+}
 
 const loadBalance = async ({
 	infuraProvider,
