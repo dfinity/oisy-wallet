@@ -20,6 +20,7 @@
 		slippageValue: OptionAmount;
 		children?: Snippet;
 		isSourceTokenIcrc2: boolean;
+		isSwapAmountsLoading: boolean;
 	}
 
 	let {
@@ -28,7 +29,8 @@
 		destinationToken,
 		slippageValue,
 		children,
-		isSourceTokenIcrc2
+		isSourceTokenIcrc2,
+		isSwapAmountsLoading = $bindable(false)
 	}: Props = $props();
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -52,6 +54,8 @@
 			return;
 		}
 
+		isSwapAmountsLoading = true;
+
 		try {
 			const swapAmounts = await fetchSwapAmounts({
 				identity: $authIdentity,
@@ -64,7 +68,11 @@
 			});
 
 			if (swapAmounts.length === 0) {
-				store.reset();
+				store.setSwaps({
+					swaps: [],
+					amountForSwap: parsedAmount,
+					selectedProvider: undefined
+				});
 				return;
 			}
 
@@ -80,6 +88,8 @@
 				amountForSwap: parsedAmount,
 				selectedProvider: undefined
 			});
+		} finally {
+			isSwapAmountsLoading = false;
 		}
 	};
 	const debounceLoadSwapAmounts = debounce(loadSwapAmounts);
