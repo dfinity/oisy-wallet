@@ -6,13 +6,13 @@ import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import { fetchMetadataFromUri } from '$eth/services/erc.services';
 import type { Erc1155ContractAddress, Erc1155Metadata } from '$eth/types/erc1155';
 import { i18n } from '$lib/stores/i18n.store';
+import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
-import type { Address } from '$lib/types/address';
 
 export class InfuraErc1155Provider extends InfuraErc165Provider {
 	isInterfaceErc1155 = (contract: Erc1155ContractAddress): Promise<boolean> =>
@@ -109,17 +109,17 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 	};
 
 	balanceOf = async ({
-											 contractAddress,
+		contractAddress,
 		walletAddress,
-											 tokenId
-										 }: {
+		tokenId
+	}: {
 		contractAddress: Erc1155ContractAddress['address'];
 		walletAddress: Address;
 		tokenId: NftId;
 	}): Promise<number> => {
 		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);
-		return await erc1155Contract.balanceOf(walletAddress, tokenId)
-	}
+		return await erc1155Contract.balanceOf(walletAddress, tokenId);
+	};
 }
 
 const providers: Record<NetworkId, InfuraErc1155Provider> = [

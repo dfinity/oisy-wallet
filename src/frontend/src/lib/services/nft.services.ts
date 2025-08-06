@@ -98,7 +98,7 @@ const loadNftsOfToken = async ({
 
 const loadNftsOfBatch = async ({
 	infuraProvider,
-																 walletAddress,
+	walletAddress,
 	token,
 	tokenIds
 }: {
@@ -113,7 +113,7 @@ const loadNftsOfBatch = async ({
 		tokenIds
 	});
 
-	return await getNfts({infuraProvider, token, walletAddress, nftsMetadata})
+	return await getNfts({ infuraProvider, token, walletAddress, nftsMetadata });
 };
 
 const loadNftsMetadata = async ({
@@ -180,15 +180,29 @@ const loadNftMetadata = async ({
 	}
 };
 
-const getNfts = async ({infuraProvider, token, walletAddress, nftsMetadata}:
-											 {infuraProvider: InfuraErc165Provider, token: NonFungibleToken, walletAddress: EthAddress, nftsMetadata: NftMetadata[]}) => {
+const getNfts = async ({
+	infuraProvider,
+	token,
+	walletAddress,
+	nftsMetadata
+}: {
+	infuraProvider: InfuraErc165Provider;
+	token: NonFungibleToken;
+	walletAddress: EthAddress;
+	nftsMetadata: NftMetadata[];
+}) => {
 	const nfts = [];
 
 	for (const nftMetadata of nftsMetadata) {
 		let balance;
 		if (token.standard === 'erc1155') {
 			const infuraErc1155Provider = infuraProvider as InfuraErc1155Provider;
-			balance = await loadBalance({infuraProvider: infuraErc1155Provider, contractAddress: token.address, walletAddress, tokenId: nftMetadata.id})
+			balance = await loadBalance({
+				infuraProvider: infuraErc1155Provider,
+				contractAddress: token.address,
+				walletAddress,
+				tokenId: nftMetadata.id
+			});
 		}
 
 		nfts.push({
@@ -199,16 +213,25 @@ const getNfts = async ({infuraProvider, token, walletAddress, nftsMetadata}:
 	}
 
 	return nfts;
-}
+};
 
-const loadBalance = async ({infuraProvider, contractAddress, walletAddress, tokenId}:
-													 {infuraProvider: InfuraErc1155Provider, contractAddress: EthAddress, walletAddress: EthAddress , tokenId: NftId}): Promise<number | undefined> => {
+const loadBalance = async ({
+	infuraProvider,
+	contractAddress,
+	walletAddress,
+	tokenId
+}: {
+	infuraProvider: InfuraErc1155Provider;
+	contractAddress: EthAddress;
+	walletAddress: EthAddress;
+	tokenId: NftId;
+}): Promise<number | undefined> => {
 	try {
-		return await infuraProvider.balanceOf({contractAddress, walletAddress, tokenId })
+		return await infuraProvider.balanceOf({ contractAddress, walletAddress, tokenId });
 	} catch (err: unknown) {
 		console.warn('Failed to load balance', err);
 	}
-}
+};
 
 const createBatches = ({
 	tokenIds,
