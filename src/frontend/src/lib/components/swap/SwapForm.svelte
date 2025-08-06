@@ -94,24 +94,18 @@
 				false)
 	);
 
-	let shouldShowError = $derived(() => {
-		const amount = Number(swapAmount);
-
-		if (!nonNullish(swapAmount) || amount <= 0) return false;
-		if (isSwapAmountsLoading) return false;
-
-		if (isNullish($swapAmountsStore)) return true;
-
-		if (
-			$swapAmountsStore.swaps.length === 0 &&
-			nonNullish($swapAmountsStore.amountForSwap) &&
-			amount === $swapAmountsStore.amountForSwap
-		) {
-			return true;
-		}
-
-		return false;
-	});
+	let shouldShowError = $derived(
+		nonNullish(swapAmount) &&
+			Number(swapAmount) > 0 &&
+			!isSwapAmountsLoading &&
+			// Випадок 1: Store null
+			(isNullish($swapAmountsStore) ||
+				// Випадок 2: Store є, swaps пустий, запит завершено
+				(nonNullish($swapAmountsStore) &&
+					$swapAmountsStore.swaps.length === 0 &&
+					nonNullish($swapAmountsStore.amountForSwap) &&
+					Number(swapAmount) === $swapAmountsStore.amountForSwap))
+	);
 
 	$effect(() => {
 		const c1 = $swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore);
@@ -248,11 +242,7 @@
 
 					<svelte:fragment slot="balance">
 						{#if nonNullish($sourceToken) && nonNullish(sourceTokenFee)}
-							{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol])}
-								<div class="w-14 sm:w-16">
-									<SkeletonText />
-								</div>
-							{:else}
+							{#if nonNullish($icTokenFeeStore?.[$sourceToken.symbol])}
 								<MaxBalanceButton
 									bind:amountSetToMax
 									bind:amount={swapAmount}
@@ -261,6 +251,10 @@
 									token={$sourceToken}
 									fee={totalFee}
 								/>
+							{:else}
+								<div class="w-14 sm:w-16">
+									<SkeletonText />
+								</div>
 							{/if}
 						{/if}
 					</svelte:fragment>
