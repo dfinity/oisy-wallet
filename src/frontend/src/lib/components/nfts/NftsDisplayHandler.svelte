@@ -14,7 +14,7 @@
 	$effect(() => {
 		nfts = ($nftStore ?? []).filter(
 			({
-				contract: {
+				collection: {
 					address: nftContractAddress,
 					network: { id: nftContractNetworkId }
 				}

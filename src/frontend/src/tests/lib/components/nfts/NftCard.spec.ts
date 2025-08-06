@@ -31,9 +31,9 @@ describe('NftCard', () => {
 
 		expect(balance).toBeInTheDocument();
 
-		assertNonNullish(mockValidErc1155Nft.contract?.name);
+		assertNonNullish(mockValidErc1155Nft.collection?.name);
 
-		expect(getByText(mockValidErc1155Nft.contract.name)).toBeInTheDocument();
+		expect(getByText(mockValidErc1155Nft.collection.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidErc1155Nft.id}`)).toBeInTheDocument();
 	});
 
@@ -54,9 +54,9 @@ describe('NftCard', () => {
 
 		expect(networkLogo).toBeInTheDocument();
 
-		assertNonNullish(mockValidErc721Nft.contract?.name);
+		assertNonNullish(mockValidErc721Nft.collection?.name);
 
-		expect(getByText(mockValidErc721Nft.contract.name)).toBeInTheDocument();
+		expect(getByText(mockValidErc721Nft.collection.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
 	});
 });

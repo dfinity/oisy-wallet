@@ -22,8 +22,8 @@ describe('nfts.utils', () => {
 
 	const mockNft1: Nft = {
 		...mockValidErc721Nft,
-		contract: {
-			...mockValidErc721Nft.contract,
+		collection: {
+			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
@@ -32,8 +32,8 @@ describe('nfts.utils', () => {
 	const mockNft2: Nft = {
 		...mockValidErc721Nft,
 		id: parseNftId(12632),
-		contract: {
-			...mockValidErc721Nft.contract,
+		collection: {
+			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
@@ -42,8 +42,8 @@ describe('nfts.utils', () => {
 	const mockNft3: Nft = {
 		...mockValidErc721Nft,
 		id: parseNftId(843764),
-		contract: {
-			...mockValidErc721Nft.contract,
+		collection: {
+			...mockValidErc721Nft.collection,
 			address: DE_GODS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
@@ -63,12 +63,12 @@ describe('nfts.utils', () => {
 
 			const customMockNft1: Nft = {
 				...mockNft1,
-				contract: { ...mockNft1.contract, network: ETHEREUM_NETWORK }
+				collection: { ...mockNft1.collection, network: ETHEREUM_NETWORK }
 			};
 
 			const customMockNft2: Nft = {
 				...mockNft2,
-				contract: { ...mockNft2.contract, network: ETHEREUM_NETWORK }
+				collection: { ...mockNft2.collection, network: ETHEREUM_NETWORK }
 			};
 
 			const result: NftsByNetwork = getNftsByNetworks({
@@ -107,15 +107,15 @@ describe('nfts.utils', () => {
 		it('should return empty lists for tokens that do not have matching nfts', () => {
 			const customMockNft1: Nft = {
 				...mockNft1,
-				contract: { ...mockNft1.contract, address: mockEthAddress }
+				collection: { ...mockNft1.collection, address: mockEthAddress }
 			};
 			const customMockNft2: Nft = {
 				...mockNft2,
-				contract: { ...mockNft2.contract, address: mockEthAddress }
+				collection: { ...mockNft2.collection, address: mockEthAddress }
 			};
 			const customMockNft3: Nft = {
 				...mockNft3,
-				contract: { ...mockNft3.contract, address: mockEthAddress }
+				collection: { ...mockNft3.collection, address: mockEthAddress }
 			};
 
 			const result: NftsByNetwork = getNftsByNetworks({

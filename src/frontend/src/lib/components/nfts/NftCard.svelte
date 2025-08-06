@@ -36,7 +36,7 @@
 			{/if}
 
 			<NetworkLogo
-				network={nft.contract.network}
+				network={nft.collection.network}
 				size="xs"
 				color="white"
 				testId={`${testId}-network`}
@@ -45,7 +45,7 @@
 	</div>
 
 	<div class="px-2 pt-2">
-		<h3 class="text-xs font-semibold text-tertiary">{nft.contract.name}</h3>
+		<h3 class="text-xs font-semibold text-tertiary">{nft.collection.name}</h3>
 		<span class="text-xs text-tertiary">{`#${nft.id}`}</span>
 	</div>
 </div>
