@@ -13,7 +13,7 @@ import { CollectionSchema } from '$lib/schema/nft.schema';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
-import { getNftsByNetworks } from '$lib/utils/nfts.utils';
+import { getNftsByNetworks, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
@@ -232,14 +232,7 @@ const getNft = async ({
 
 	return {
 		...nftMetadata,
-		contract: CollectionSchema.parse({
-			address: token.address,
-			id: token.id,
-			network: token.network,
-			standard: token.standard,
-			...(notEmptyString(token.symbol) && { symbol: token.symbol }),
-			...(notEmptyString(token.name) && { name: token.name })
-		}),
+		contract: mapTokenToCollection(token),
 		...(nonNullish(balance) && { balance })
 	};
 };
