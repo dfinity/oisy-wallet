@@ -1,3 +1,4 @@
+import { BTC_DUST_THRESHOLD_SATOSHIS } from '$btc/constants/btc.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 import { uint8ArrayToHexString } from '@dfinity/utils';
@@ -47,21 +48,10 @@ export const estimateTransactionSize = ({
 	return baseSize + numInputs * inputSize + numOutputs * outputSize;
 };
 
-// Dust threshold for P2WPKH outputs
-const DUST_THRESHOLD = 294n;
-
-/**
- * Represents a transaction fee scenario with or without change output
- */
-interface FeeScenario {
-	fee: bigint;
-	changeAmount: bigint;
-	numOutputs: number;
-}
-
 /**
  * Main function to select UTXOs for a transaction with fee consideration
  * This function iteratively selects UTXOs and calculates fees until sufficient funds are found
+ * It mirrors the backend behavior for dust change handling
  */
 export const calculateUtxoSelection = ({
 	availableUtxos,
@@ -82,10 +72,7 @@ export const calculateUtxoSelection = ({
 		};
 	}
 
-	// Sort UTXOs by value in descending order (largest-first greedy strategy)
-	// This approach minimizes the number of inputs needed, reducing transaction size and fees.
-	// Trade-offs: Uses fewer UTXOs (lower fees) but may fragment the UTXO set over time. A more complex
-	// strategy could be introduced in the future to balance between these trade-offs.
+	// Sort UTXOs by value in descending order
 	const sortedUtxos = [...availableUtxos].sort((a, b) => {
 		const aValue = BigInt(a.value);
 		const bValue = BigInt(b.value);
@@ -94,51 +81,82 @@ export const calculateUtxoSelection = ({
 
 	const selectedUtxos: Utxo[] = [];
 	let totalInputValue = ZERO;
+	let estimatedFee = ZERO;
 
 	// Iteratively add UTXOs until we have enough to cover amount and fee
 	for (const utxo of sortedUtxos) {
 		selectedUtxos.push(utxo);
 		totalInputValue += BigInt(utxo.value);
 
-		const optimalScenario = selectOptimalFeeScenario({
+		// Calculate current transaction size and fee
+		// Start with 1 output (recipient), may add change output if needed
+		let numOutputs = 1;
+		let txSize = estimateTransactionSize({
 			numInputs: selectedUtxos.length,
-			totalInputValue,
-			amountSatoshis,
-			feeRateSatoshisPerVByte
+			numOutputs
 		});
+		estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
+		let totalRequired = amountSatoshis + estimatedFee;
 
-		if (
-			hasSufficientFunds({
-				totalInputValue,
-				amountSatoshis,
-				fee: optimalScenario.fee
-			})
-		) {
-			return {
-				selectedUtxos,
-				totalInputValue,
-				changeAmount: optimalScenario.changeAmount,
-				sufficientFunds: true,
-				feeSatoshis: optimalScenario.fee
-			};
+		// Check if we have enough to cover amount and fee
+		if (totalInputValue >= totalRequired) {
+			const changeAmount = totalInputValue - totalRequired;
+
+			// Check if change would be dust (mirroring backend logic)
+			if (changeAmount > ZERO && changeAmount < BTC_DUST_THRESHOLD_SATOSHIS) {
+				// Backend won't create dust change output, so dust goes to fee
+				// No need for change output, so keep numOutputs = 1
+				const finalFee = estimatedFee + changeAmount;
+
+				return {
+					selectedUtxos,
+					totalInputValue,
+					changeAmount: ZERO, // No change output will be created
+					sufficientFunds: true,
+					feeSatoshis: finalFee
+				};
+			}
+			if (changeAmount > ZERO) {
+				// Normal case: change >= dust threshold, create change output
+				numOutputs = 2; // Recipient + change output
+				txSize = estimateTransactionSize({
+					numInputs: selectedUtxos.length,
+					numOutputs
+				});
+				estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
+				totalRequired = amountSatoshis + estimatedFee;
+
+				if (totalInputValue >= totalRequired) {
+					const finalChangeAmount = totalInputValue - totalRequired;
+
+					return {
+						selectedUtxos,
+						totalInputValue,
+						changeAmount: finalChangeAmount,
+						sufficientFunds: true,
+						feeSatoshis: estimatedFee
+					};
+				}
+			} else {
+				// Exact amount, no change
+				return {
+					selectedUtxos,
+					totalInputValue,
+					changeAmount: ZERO,
+					sufficientFunds: true,
+					feeSatoshis: estimatedFee
+				};
+			}
 		}
 	}
 
 	// If we get here, we don't have sufficient funds
-	const failureFee =
-		BigInt(
-			estimateTransactionSize({
-				numInputs: selectedUtxos.length,
-				numOutputs: 2
-			})
-		) * feeRateSatoshisPerVByte;
-
 	return {
 		selectedUtxos,
 		totalInputValue,
 		changeAmount: ZERO,
 		sufficientFunds: false,
-		feeSatoshis: failureFee
+		feeSatoshis: estimatedFee
 	};
 };
 
@@ -190,112 +208,3 @@ export const filterAvailableUtxos = ({
 		pendingTxIds
 	});
 };
-
-/**
- * Calculates fee and change for a transaction with one output (no change)
- */
-const calculateNoChangeScenario = ({
-	numInputs,
-	totalInputValue,
-	amountSatoshis,
-	feeRateSatoshisPerVByte
-}: {
-	numInputs: number;
-	totalInputValue: bigint;
-	amountSatoshis: bigint;
-	feeRateSatoshisPerVByte: bigint;
-}): FeeScenario => {
-	const txSize = estimateTransactionSize({ numInputs, numOutputs: 1 });
-	const fee = BigInt(txSize) * feeRateSatoshisPerVByte;
-	const changeAmount = totalInputValue - amountSatoshis - fee;
-
-	return {
-		fee,
-		changeAmount,
-		numOutputs: 1
-	};
-};
-
-/**
- * Calculates fee and change for a transaction with two outputs (with change)
- */
-const calculateWithChangeScenario = ({
-	numInputs,
-	totalInputValue,
-	amountSatoshis,
-	feeRateSatoshisPerVByte
-}: {
-	numInputs: number;
-	totalInputValue: bigint;
-	amountSatoshis: bigint;
-	feeRateSatoshisPerVByte: bigint;
-}): FeeScenario => {
-	const txSize = estimateTransactionSize({ numInputs, numOutputs: 2 });
-	const fee = BigInt(txSize) * feeRateSatoshisPerVByte;
-	const changeAmount = totalInputValue - amountSatoshis - fee;
-
-	return {
-		fee,
-		changeAmount,
-		numOutputs: 2
-	};
-};
-
-/**
- * Determines whether change should be created or absorbed as extra fee
- * Returns true if change amount is meaningful (above dust threshold)
- */
-const shouldCreateChangeOutput = ({ changeAmount }: { changeAmount: bigint }): boolean =>
-	changeAmount >= DUST_THRESHOLD;
-
-/**
- * Selects the optimal fee scenario between no-change and with-change options
- */
-const selectOptimalFeeScenario = ({
-	numInputs,
-	totalInputValue,
-	amountSatoshis,
-	feeRateSatoshisPerVByte
-}: {
-	numInputs: number;
-	totalInputValue: bigint;
-	amountSatoshis: bigint;
-	feeRateSatoshisPerVByte: bigint;
-}): FeeScenario => {
-	const noChangeScenario = calculateNoChangeScenario({
-		numInputs,
-		totalInputValue,
-		amountSatoshis,
-		feeRateSatoshisPerVByte
-	});
-
-	const withChangeScenario = calculateWithChangeScenario({
-		numInputs,
-		totalInputValue,
-		amountSatoshis,
-		feeRateSatoshisPerVByte
-	});
-
-	// Use change scenario only if change is meaningful and we have enough funds
-	if (
-		shouldCreateChangeOutput({ changeAmount: withChangeScenario.changeAmount }) &&
-		withChangeScenario.changeAmount >= 0
-	) {
-		return withChangeScenario;
-	}
-
-	return noChangeScenario;
-};
-
-/**
- * Checks if we have sufficient funds for the transaction
- */
-const hasSufficientFunds = ({
-	totalInputValue,
-	amountSatoshis,
-	fee
-}: {
-	totalInputValue: bigint;
-	amountSatoshis: bigint;
-	fee: bigint;
-}): boolean => totalInputValue >= amountSatoshis + fee;

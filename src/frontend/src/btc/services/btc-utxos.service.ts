@@ -34,7 +34,6 @@ export const prepareBtcSend = async ({
 	console.warn('Start prepareBtcSend: ', { network, amount, source });
 
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
-
 	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 	// Get pending transactions to exclude locked UTXOs
@@ -85,23 +84,17 @@ export const prepareBtcSend = async ({
 		};
 	}
 
-	// Step 4: Select UTXOs with fee consideration
+	// Step 4: Select UTXOs with fee consideration and dust change handling
 	const selection = calculateUtxoSelection({
 		availableUtxos: filteredUtxos,
 		amountSatoshis,
 		feeRateSatoshisPerVByte
 	});
 
-	console.warn('Calling calculateUtxoSelection: Input', { network, amount, source, selection });
-	console.warn('Calling calculateUtxoSelection: Output', { selection });
+	console.warn('UTXO selection result:', selection);
 
 	// Check if there were insufficient funds during UTXO selection
 	if (!selection.sufficientFunds) {
-		console.warn('Insufficient funds during UTXO selection:', {
-			feeSatoshis: selection.feeSatoshis,
-			utxos: filteredUtxos,
-			error: BtcPrepareSendError.InsufficientBalanceForFee
-		});
 		return {
 			feeSatoshis: selection.feeSatoshis,
 			utxos: filteredUtxos,
@@ -109,12 +102,7 @@ export const prepareBtcSend = async ({
 		};
 	}
 
-	console.warn('Sufficient funds during UTXO selection:', {
-		feeSatoshis: selection.feeSatoshis,
-		utxos: filteredUtxos
-	});
-
-	// Fee is already calculated in the selection process
+	// Return the successful selection
 	return {
 		feeSatoshis: selection.feeSatoshis,
 		utxos: selection.selectedUtxos

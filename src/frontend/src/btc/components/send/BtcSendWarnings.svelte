@@ -37,6 +37,14 @@
 			>
 		</MessageBox>
 	</div>
+{:else if utxosFee?.error === BtcPrepareSendError.AmountBelowDustThreshold}
+	<div class="w-full" in:fade>
+		<MessageBox level="warning">
+			<span data-tid="btc-send-form-amount-below-dust-threshold"
+				>{$i18n.send.assertion.amount_below_dust_threshold}</span
+			>
+		</MessageBox>
+	</div>
 {:else if utxosFee?.utxos.length === 0}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
