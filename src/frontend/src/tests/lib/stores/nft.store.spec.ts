@@ -36,7 +36,7 @@ describe('nftStore', () => {
 			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
 		});
 
-		it('should add NFT with same token id but different contract address', () => {
+		it('should add NFT with same token id but different collection address', () => {
 			const similarNft: Nft = {
 				...mockValidErc721Nft,
 				collection: { ...mockValidErc721Nft.collection, address: mockEthAddress2 }
