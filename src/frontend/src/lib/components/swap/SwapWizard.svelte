@@ -91,15 +91,15 @@
 	);
 
 	let sourceTokenUsdValue = $derived(
-		(nonNullish($sourceTokenExchangeRate) &&
+		nonNullish($sourceTokenExchangeRate) &&
 			nonNullish($sourceToken) &&
-			nonNullish(swapAmount) &&
-			usdValue({
-				decimals: $sourceToken.decimals,
-				balance: BigInt(swapAmount),
-				exchangeRate: $sourceTokenExchangeRate
-			}).toString()) ||
-			''
+			nonNullish(swapAmount) ? 
+			formatCurrency({
+				value:Number(swapAmount) * $sourceTokenExchangeRate,
+				currency: Currency.USD,
+				exchangeRate: $currencyExchangeStore,
+				language: Languages.ENGLISH
+			}) : undefined
 	);
 
 	$effect(() => {
@@ -162,7 +162,7 @@
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
-					usdSourceValue: sourceTokenUsdValue
+					usdSourceValue: sourceTokenUsdValue || 
 				}
 			});
 
@@ -215,7 +215,7 @@
 						destinationToken: $destinationToken.symbol,
 						dApp: $swapAmountsStore.selectedProvider.provider,
 						errorKey: isSwapError(err) ? err.code : '',
-						usdSourceValue: sourceTokenUsdValue
+						usdSourceValue: sourceTokenUsdValue ?? ''
 					}
 				});
 			}
