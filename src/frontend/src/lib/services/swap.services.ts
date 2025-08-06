@@ -216,6 +216,8 @@ export const fetchIcpSwap = async ({
 		throw new Error(get(i18n).swap.error.pool_not_found);
 	}
 
+	console.log('ICPSwap pool found:', pool);
+
 	const poolCanisterId = pool.canisterId.toString();
 
 	const slippageMinimum = calculateSlippage({
@@ -261,6 +263,8 @@ export const fetchIcpSwap = async ({
 
 	try {
 		if (!isSourceTokenIcrc2) {
+			console.log('Sending ICP/ICRC1 token to the pool...');
+
 			await sendIcrc(transferParams);
 			await deposit({
 				identity,
@@ -270,6 +274,8 @@ export const fetchIcpSwap = async ({
 				fee: sourceTokenFee
 			});
 		} else {
+			console.log('Approving and depositing ICRC2 token to the pool...');
+
 			await approve({
 				identity,
 				ledgerCanisterId: sourceLedgerCanisterId,
@@ -278,6 +284,14 @@ export const fetchIcpSwap = async ({
 				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
 				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
 				spender: { owner: pool.canisterId }
+			});
+
+			console.log('Depositing ICRC2 token to the pool...', {
+				identity,
+				canisterId: poolCanisterId,
+				token: sourceLedgerCanisterId,
+				amount: parsedSwapAmount,
+				fee: sourceTokenFee
 			});
 
 			await depositFrom({
@@ -300,6 +314,14 @@ export const fetchIcpSwap = async ({
 	}
 
 	try {
+		console.log('Performing the actual token swap...', {
+			identity,
+			canisterId: poolCanisterId,
+			amountIn: parsedSwapAmount.toString(),
+			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
+			amountOutMinimum: slippageMinimum.toString()
+		});
+
 		// Perform the actual token swap after a successful deposit
 		await swapIcp({
 			identity,
