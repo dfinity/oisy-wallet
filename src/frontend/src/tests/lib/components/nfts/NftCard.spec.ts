@@ -1,7 +1,7 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import { render } from '@testing-library/svelte';
 import { assertNonNullish } from '@dfinity/utils';
+import { render } from '@testing-library/svelte';
 
 describe('NftCard', () => {
 	const testId = 'nft-card';
