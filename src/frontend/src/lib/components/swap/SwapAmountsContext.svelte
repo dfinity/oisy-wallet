@@ -68,14 +68,18 @@
 			});
 
 			if (swapAmounts.length === 0) {
-				store.reset();
+				store.setSwaps({
+					swaps: [],
+					amountForSwap: parsedAmount,
+					selectedProvider: undefined
+				});
 				return;
 			}
 
 			store.setSwaps({
-				swaps: [],
+				swaps: swapAmounts,
 				amountForSwap: parsedAmount,
-				selectedProvider: undefined
+				selectedProvider: swapAmounts[0]
 			});
 		} catch (_err: unknown) {
 			// if kongSwapAmounts fails, it means no pool is currently available for the provided tokens
