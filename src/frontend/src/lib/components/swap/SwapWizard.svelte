@@ -33,6 +33,11 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
+	import { Languages } from '$lib/enums/languages';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+	import { Currency } from '$lib/enums/currency';
+	import { usdValue } from '$lib/utils/exchange.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -51,8 +56,13 @@
 		currentStep
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, isSourceTokenIcrc2, failedSwapError } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		isSourceTokenIcrc2,
+		failedSwapError,
+		sourceTokenExchangeRate
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -79,6 +89,22 @@
 			? $icTokenFeeStore[$sourceToken.symbol]
 			: undefined
 	);
+
+	let sourceTokenUsdValue = $derived(
+		(nonNullish($sourceTokenExchangeRate) &&
+			nonNullish($sourceToken) &&
+			nonNullish(swapAmount) &&
+			usdValue({
+				decimals: $sourceToken.decimals,
+				balance: BigInt(swapAmount),
+				exchangeRate: $sourceTokenExchangeRate
+			}).toString()) ||
+			''
+	);
+
+	$effect(() => {
+		console.log('sourceTokenUsdValue', sourceTokenUsdValue);
+	});
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
@@ -135,7 +161,8 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					usdSourceValue: sourceTokenUsdValue
 				}
 			});
 
@@ -187,7 +214,8 @@
 						sourceToken: $sourceToken.symbol,
 						destinationToken: $destinationToken.symbol,
 						dApp: $swapAmountsStore.selectedProvider.provider,
-						errorKey: isSwapError(err) ? err.code : ''
+						errorKey: isSwapError(err) ? err.code : '',
+						usdSourceValue: sourceTokenUsdValue
 					}
 				});
 			}
