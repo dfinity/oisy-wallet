@@ -1,8 +1,8 @@
+import { CollectionSchema } from '$lib/schema/nft.schema';
 import type { NftError } from '$lib/types/errors';
 import type { Collection, Nft, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-import { CollectionSchema } from '$lib/schema/nft.schema';
 
 export const getNftsByNetworks = ({
 	tokens,
