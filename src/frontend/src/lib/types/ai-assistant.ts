@@ -34,7 +34,7 @@ export interface ToolCall {
 
 export interface ToolResult {
 	type: 'show_contacts';
-	result: ContactUi[];
+	result?: ContactUi[];
 }
 
 export interface AiAssistantContactUi

@@ -1,3 +1,6 @@
+import type { tool } from '$declarations/llm/llm.did';
+import { toNullable } from '@dfinity/utils';
+
 export const AI_ASSISTANT_LLM_MODEL = 'qwen3:32b';
 
 // TODO: find a way to use OISY docs as a source for the system prompt
@@ -34,5 +37,34 @@ Return ONLY this JSON schema:
 
 Do NOT include json or any Markdown.
 Do NOT include extra text.`;
+
+export const AI_ASSISTANT_TOOLS = [
+	{
+		function: {
+			name: 'show_contacts',
+			description: toNullable(
+				"Retrieve contacts from the user's address book. If filters are provided, semantic filtering will be applied in a second step."
+			),
+			parameters: toNullable({
+				type: 'object',
+				properties: toNullable([
+					{
+						type: 'string',
+						name: 'searchQuery',
+						enum: toNullable(),
+						description: toNullable('Optional search term. Can be vague (e.g., "fruit", "crypto").')
+					},
+					{
+						type: 'array',
+						name: 'addressType',
+						enum: toNullable(['Btc', 'Eth', 'Sol', 'Icrcv2']),
+						description: toNullable("Optional filter for address types. Example: ['Btc', 'Eth'].")
+					}
+				]),
+				required: toNullable()
+			})
+		}
+	}
+] as tool[];
 
 export const MAX_DISPLAYED_ADDRESSES_NUMBER = 4;

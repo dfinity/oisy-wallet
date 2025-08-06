@@ -1,5 +1,6 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
-import { mockValidNft } from '$tests/mocks/nfts.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
 describe('NftCard', () => {
@@ -8,11 +9,12 @@ describe('NftCard', () => {
 	const imageSelector = `img[data-tid="${testId}-image"]`;
 	const imagePlaceholderSelector = `div[data-tid="${testId}-placeholder"]`;
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
+	const balanceSelector = `span[data-tid="${testId}-balance"]`;
 
 	it('should render nft with metadata', () => {
 		const { container, getByText } = render(NftCard, {
 			props: {
-				nft: mockValidNft,
+				nft: mockValidErc1155Nft,
 				testId
 			}
 		});
@@ -25,14 +27,20 @@ describe('NftCard', () => {
 
 		expect(networkLogo).toBeInTheDocument();
 
-		expect(getByText(mockValidNft.contract.name)).toBeInTheDocument();
-		expect(getByText(`#${mockValidNft.id}`)).toBeInTheDocument();
+		const balance: HTMLSpanElement | null = container.querySelector(balanceSelector);
+
+		expect(balance).toBeInTheDocument();
+
+		assertNonNullish(mockValidErc1155Nft.collection?.name);
+
+		expect(getByText(mockValidErc1155Nft.collection.name)).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc1155Nft.id}`)).toBeInTheDocument();
 	});
 
 	it('should render image placeholder if no image is defined', () => {
 		const { container, getByText } = render(NftCard, {
 			props: {
-				nft: { ...mockValidNft, imageUrl: null },
+				nft: { ...mockValidErc721Nft, imageUrl: null },
 				testId
 			}
 		});
@@ -46,7 +54,9 @@ describe('NftCard', () => {
 
 		expect(networkLogo).toBeInTheDocument();
 
-		expect(getByText(mockValidNft.contract.name)).toBeInTheDocument();
-		expect(getByText(`#${mockValidNft.id}`)).toBeInTheDocument();
+		assertNonNullish(mockValidErc721Nft.collection?.name);
+
+		expect(getByText(mockValidErc721Nft.collection.name)).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
 	});
 });
