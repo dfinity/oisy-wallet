@@ -204,6 +204,7 @@
 		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
 		{slippageValue}
+		isSourceTokenIcrc2={$isSourceTokenIcrc2}
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapForm
