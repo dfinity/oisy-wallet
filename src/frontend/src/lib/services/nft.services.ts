@@ -191,7 +191,9 @@ const getNfts = async ({
 	walletAddress: EthAddress;
 	nftsMetadata: NftMetadata[];
 }) => {
-	const nftPromises = nftsMetadata.map((nftMetadata) => getNft({infuraProvider, token, walletAddress, nftMetadata}));
+	const nftPromises = nftsMetadata.map((nftMetadata) =>
+		getNft({ infuraProvider, token, walletAddress, nftMetadata })
+	);
 
 	const results = await Promise.allSettled(nftPromises);
 	return results.reduce<Nft[]>((acc, result) => {
@@ -206,11 +208,11 @@ const getNfts = async ({
 };
 
 const getNft = async ({
-												 infuraProvider,
-												 token,
-												 walletAddress,
-												 nftMetadata
-											 }: {
+	infuraProvider,
+	token,
+	walletAddress,
+	nftMetadata
+}: {
 	infuraProvider: InfuraErc165Provider;
 	token: NonFungibleToken;
 	walletAddress: EthAddress;
@@ -231,8 +233,8 @@ const getNft = async ({
 		...nftMetadata,
 		contract: token,
 		...(nonNullish(balance) && { balance })
-	}
-}
+	};
+};
 
 const loadBalance = async ({
 	infuraProvider,
