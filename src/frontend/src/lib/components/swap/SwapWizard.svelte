@@ -33,6 +33,10 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
+	import { Currency } from '$lib/enums/currency';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+	import { Languages } from '$lib/enums/languages';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -51,8 +55,13 @@
 		currentStep
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, isSourceTokenIcrc2, failedSwapError } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		isSourceTokenIcrc2,
+		failedSwapError,
+		sourceTokenExchangeRate
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -65,6 +74,17 @@
 			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
 		}
 	};
+
+	let sourceTokenUsdValue = $derived(
+		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
+			? formatCurrency({
+					value: Number(swapAmount) * $sourceTokenExchangeRate,
+					currency: Currency.USD,
+					exchangeRate: $currencyExchangeStore,
+					language: Languages.ENGLISH
+				})
+			: undefined
+	);
 
 	const clearFailedProgressStep = () => {
 		swapFailedProgressSteps = [];
@@ -133,7 +153,8 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					usdSourceValue: sourceTokenUsdValue || ''
 				}
 			});
 
@@ -185,7 +206,8 @@
 						sourceToken: $sourceToken.symbol,
 						destinationToken: $destinationToken.symbol,
 						dApp: $swapAmountsStore.selectedProvider.provider,
-						errorKey: isSwapError(err) ? err.code : ''
+						errorKey: isSwapError(err) ? err.code : '',
+						usdSourceValue: sourceTokenUsdValue || ''
 					}
 				});
 			}
