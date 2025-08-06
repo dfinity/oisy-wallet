@@ -4,7 +4,11 @@ import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
-import { getNftsByNetworks, parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
+import {
+	getNftsByNetworks,
+	mapTokenToCollection,
+	parseMetadataResourceUrl
+} from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -219,6 +223,32 @@ describe('nfts.utils', () => {
 			const url = 'http://localhost:3000/some-data';
 
 			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+		});
+	});
+
+	describe('mapTokenToCollection', () => {
+		it('should map token correctly', () => {
+			const result = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN);
+
+			expect(result).toEqual({
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
+				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
+				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
+				network: AZUKI_ELEMENTAL_BEANS_TOKEN.network,
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+			});
+		});
+
+		it('should not map empty name and symbol', () => {
+			const result = mapTokenToCollection({ ...AZUKI_ELEMENTAL_BEANS_TOKEN, name: '', symbol: '' });
+
+			expect(result).toEqual({
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
+				network: AZUKI_ELEMENTAL_BEANS_TOKEN.network,
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+			});
 		});
 	});
 });
