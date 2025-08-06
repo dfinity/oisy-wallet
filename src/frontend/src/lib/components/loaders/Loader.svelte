@@ -8,7 +8,8 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
-	import { erc721CustomTokensInitialized, erc721Tokens } from '$eth/derived/erc721.derived';
+	import { erc1155CustomTokensInitialized } from '$eth/derived/erc1155.derived';
+	import { erc721CustomTokensInitialized } from '$eth/derived/erc721.derived';
 	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
@@ -41,6 +42,7 @@
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { initLoader } from '$lib/services/loader.services';
 	import { loadNfts } from '$lib/services/nft.services';
@@ -165,14 +167,18 @@
 
 	const debounceLoadNfts = debounce(async () => {
 		await loadNfts({
-			tokens: $erc721Tokens ?? [],
+			tokens: $nonFungibleTokens ?? [],
 			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
 		});
 	});
 
 	$effect(() => {
-		if ($erc721CustomTokensInitialized && nonNullish($ethAddress) && $erc721Tokens) {
+		if (
+			($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized) &&
+			nonNullish($ethAddress) &&
+			$nonFungibleTokens.length > 0
+		) {
 			debounceLoadNfts();
 		}
 	});

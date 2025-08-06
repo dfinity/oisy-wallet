@@ -70,7 +70,7 @@ export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =
 	$tokens.filter(isTokenFungible)
 );
 
-const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
+export const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
 	[erc721Tokens, erc1155Tokens],
 	([$erc721Tokens, $erc1155Tokens]) => [...$erc721Tokens, ...$erc1155Tokens]
 );
