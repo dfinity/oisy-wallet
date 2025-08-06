@@ -31,17 +31,20 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
 		receiveAmount: number | undefined;
 		slippageValue: OptionAmount;
+		isSwapAmountsLoading: boolean;
 	}
 
 	let {
 		swapAmount = $bindable<OptionAmount>(),
 		receiveAmount = $bindable<number | undefined>(),
-		slippageValue = $bindable<OptionAmount>()
+		slippageValue = $bindable<OptionAmount>(),
+		isSwapAmountsLoading
 	}: Props = $props();
 
 	const {
@@ -79,6 +82,14 @@
 		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
 			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
 			: false
+	);
+
+	let showSwapNotOfferedError = $derived(
+		nonNullish($swapAmountsStore) &&
+			$swapAmountsStore.swaps.length === 0 &&
+			!isSwapAmountsLoading &&
+			nonNullish(swapAmount) &&
+			Number(swapAmount) > 0
 	);
 
 	let disableSwitchTokens = $derived(
@@ -166,7 +177,7 @@
 					</svelte:fragment>
 
 					<svelte:fragment slot="balance">
-						{#if nonNullish($sourceToken)}
+						{#if nonNullish(sourceTokenFee)}
 							<MaxBalanceButton
 								bind:amountSetToMax
 								bind:amount={swapAmount}
@@ -175,6 +186,10 @@
 								token={$sourceToken}
 								fee={totalFee}
 							/>
+						{:else}
+							<div class="w-14 sm:w-16">
+								<SkeletonText />
+							</div>
 						{/if}
 					</svelte:fragment>
 				</TokenInput>
@@ -197,7 +212,7 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if $swapAmountsStore?.swaps.length === 0}
+						{#if showSwapNotOfferedError}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
@@ -210,7 +225,13 @@
 									bind:displayUnit={exchangeValueUnit}
 								/>
 
-								<SwapValueDifference {swapAmount} {receiveAmount} />
+								{#if swapAmountsLoading}
+									<span class="mt-0.5 w-10">
+										<SkeletonText />
+									</span>
+								{:else}
+									<SwapValueDifference {swapAmount} {receiveAmount} />
+								{/if}
 							</div>
 						{/if}
 					{/if}

@@ -20,6 +20,7 @@
 		slippageValue: OptionAmount;
 		children?: Snippet;
 		isSourceTokenIcrc2: boolean;
+		isSwapAmountsLoading: boolean;
 	}
 
 	let {
@@ -28,7 +29,8 @@
 		destinationToken,
 		slippageValue,
 		children,
-		isSourceTokenIcrc2
+		isSourceTokenIcrc2,
+		isSwapAmountsLoading = $bindable(false)
 	}: Props = $props();
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -52,6 +54,8 @@
 			return;
 		}
 
+		isSwapAmountsLoading = true;
+
 		try {
 			const swapAmounts = await fetchSwapAmounts({
 				identity: $authIdentity,
@@ -69,9 +73,9 @@
 			}
 
 			store.setSwaps({
-				swaps: swapAmounts,
+				swaps: [],
 				amountForSwap: parsedAmount,
-				selectedProvider: swapAmounts[0]
+				selectedProvider: undefined
 			});
 		} catch (_err: unknown) {
 			// if kongSwapAmounts fails, it means no pool is currently available for the provided tokens
@@ -80,6 +84,8 @@
 				amountForSwap: parsedAmount,
 				selectedProvider: undefined
 			});
+		} finally {
+			isSwapAmountsLoading = false;
 		}
 	};
 	const debounceLoadSwapAmounts = debounce(loadSwapAmounts);
