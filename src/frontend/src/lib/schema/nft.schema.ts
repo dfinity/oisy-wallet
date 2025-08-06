@@ -18,8 +18,8 @@ export const NftMetadataSchema = z.object({
 
 export const CollectionSchema = z.object({
 	address: z.string(),
-	name: z.string(),
-	symbol: z.string(),
+	name: z.string().optional(),
+	symbol: z.string().optional(),
 	id: z.custom<TokenId>(),
 	network: z.custom<Network>(),
 	standard: z.custom<TokenStandard>()

@@ -15,7 +15,8 @@ import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$
 import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { CollectionSchema } from '$lib/schema/nft.schema';
 
 export const loadNfts = async ({
 	tokens,
@@ -231,7 +232,14 @@ const getNft = async ({
 
 	return {
 		...nftMetadata,
-		contract: token,
+		contract: CollectionSchema.parse({
+			address: token.address,
+			id: token.id,
+			network: token.network,
+			standard: token.standard,
+			...(notEmptyString(token.symbol) && {symbol: token.symbol}),
+			...(notEmptyString(token.name) && {name: token.name})
+		}),
 		...(nonNullish(balance) && { balance })
 	};
 };
