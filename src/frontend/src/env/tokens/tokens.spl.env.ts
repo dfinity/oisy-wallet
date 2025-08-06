@@ -1,6 +1,7 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
 import { AAPLX_TOKEN } from '$env/tokens/tokens-spl/tokens.aaplx.env';
 import { ABBVX_TOKEN } from '$env/tokens/tokens-spl/tokens.abbvx.env';
+import { ACNX_TOKEN } from '$env/tokens/tokens-spl/tokens.acnx.env';
 import { AMBRX_TOKEN } from '$env/tokens/tokens-spl/tokens.ambrx.env';
 import { AMZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.amznx.env';
 import { AZNX_TOKEN } from '$env/tokens/tokens-spl/tokens.aznx.env';
@@ -18,6 +19,7 @@ import { HDX_TOKEN } from '$env/tokens/tokens-spl/tokens.hdx.env';
 import { HONX_TOKEN } from '$env/tokens/tokens-spl/tokens.honx.env';
 import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { KOX_TOKEN } from '$env/tokens/tokens-spl/tokens.kox.env';
 import { LLYX_TOKEN } from '$env/tokens/tokens-spl/tokens.llyx.env';
 import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
@@ -46,6 +48,7 @@ import type { RequiredSplToken } from '$sol/types/spl';
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	AAPLX_TOKEN,
 	ABBVX_TOKEN,
+	ACNX_TOKEN,
 	AMBRX_TOKEN,
 	AMZNX_TOKEN,
 	AZNX_TOKEN,
@@ -63,6 +66,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	HONX_TOKEN,
 	HOODX_TOKEN,
 	JUP_TOKEN,
+	KOX_TOKEN,
 	LLYX_TOKEN,
 	MCDX_TOKEN,
 	METAX_TOKEN,
