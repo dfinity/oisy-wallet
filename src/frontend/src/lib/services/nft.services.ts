@@ -98,7 +98,7 @@ const loadNftsOfToken = async ({
 
 const loadNftsOfBatch = async ({
 	infuraProvider,
-																 walletAddress,
+	walletAddress,
 	token,
 	tokenIds
 }: {
@@ -181,11 +181,11 @@ const loadNftMetadata = async ({
 };
 
 const getNfts = async ({
-												 infuraProvider,
-												 token,
-												 walletAddress,
-												 nftsMetadata
-											 }: {
+	infuraProvider,
+	token,
+	walletAddress,
+	nftsMetadata
+}: {
 	infuraProvider: InfuraErc165Provider;
 	token: NonFungibleToken;
 	walletAddress: EthAddress;
@@ -208,11 +208,11 @@ const getNfts = async ({
 };
 
 const getNft = async ({
-												infuraProvider,
-												token,
-												walletAddress,
-												nftMetadata
-											}: {
+	infuraProvider,
+	token,
+	walletAddress,
+	nftMetadata
+}: {
 	infuraProvider: InfuraErc165Provider;
 	token: NonFungibleToken;
 	walletAddress: EthAddress;
@@ -237,11 +237,11 @@ const getNft = async ({
 };
 
 const loadBalance = async ({
-														 infuraProvider,
-														 contractAddress,
-														 walletAddress,
-														 tokenId
-													 }: {
+	infuraProvider,
+	contractAddress,
+	walletAddress,
+	tokenId
+}: {
 	infuraProvider: InfuraErc1155Provider;
 	contractAddress: EthAddress;
 	walletAddress: EthAddress;
