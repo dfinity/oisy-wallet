@@ -14,6 +14,7 @@ import {
 	swap as swapIcp,
 	withdraw
 } from '$lib/api/icp-swap-pool.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { icpSwapAmounts } from '$lib/services/icp-swap.services';
 import { fetchIcpSwap } from '$lib/services/swap.services';
@@ -199,7 +200,7 @@ describe('fetchIcpSwap', () => {
 
 	it('Handles tryToWithdraw with withdrawDestinationTokens = false', async () => {
 		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
-		vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: 1n, balance1: 0n });
+		vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: 1n, balance1: ZERO });
 		vi.mocked(withdraw).mockResolvedValueOnce(1n);
 
 		try {
@@ -217,7 +218,7 @@ describe('fetchIcpSwap', () => {
 
 	it('Handles tryToWithdraw with withdrawDestinationTokens = true', async () => {
 		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
-		vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: 1n, balance1: 0n });
+		vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: 1n, balance1: ZERO });
 		vi.mocked(withdraw).mockResolvedValueOnce(1n);
 
 		try {

@@ -15,7 +15,11 @@ import {
 	withdraw
 } from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
-import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
+import {
+	KONG_BACKEND_CANISTER_ID,
+	NANO_SECONDS_IN_MINUTE,
+	ZERO
+} from '$lib/constants/app.constants';
 import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
