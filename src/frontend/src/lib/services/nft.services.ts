@@ -190,7 +190,7 @@ const getNfts = async ({
 	token: NonFungibleToken;
 	walletAddress: EthAddress;
 	nftsMetadata: NftMetadata[];
-}) => {
+}): Promise<Nft[]> => {
 	const nftPromises = nftsMetadata.map((nftMetadata) =>
 		getNft({ infuraProvider, token, walletAddress, nftMetadata })
 	);
