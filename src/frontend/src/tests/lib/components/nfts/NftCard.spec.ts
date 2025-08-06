@@ -37,7 +37,7 @@ describe('NftCard', () => {
 	it('should render image placeholder if no image is defined', () => {
 		const { container, getByText } = render(NftCard, {
 			props: {
-				nft: { ...mockValidNft, imageUrl: null },
+				nft: { ...mockValidErc721Nft, imageUrl: null },
 				testId
 			}
 		});
@@ -51,7 +51,7 @@ describe('NftCard', () => {
 
 		expect(networkLogo).toBeInTheDocument();
 
-		expect(getByText(mockValidNft.contract.name)).toBeInTheDocument();
-		expect(getByText(`#${mockValidNft.id}`)).toBeInTheDocument();
+		expect(getByText(mockValidErc721Nft.contract.name)).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
 	});
 });
