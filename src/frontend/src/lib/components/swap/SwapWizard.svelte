@@ -154,7 +154,7 @@
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
-					usdSourceValue: sourceTokenUsdValue || ''
+					usdSourceValue: sourceTokenUsdValue ?? ''
 				}
 			});
 
@@ -207,7 +207,7 @@
 						destinationToken: $destinationToken.symbol,
 						dApp: $swapAmountsStore.selectedProvider.provider,
 						errorKey: isSwapError(err) ? err.code : '',
-						usdSourceValue: sourceTokenUsdValue || ''
+						usdSourceValue: sourceTokenUsdValue ?? ''
 					}
 				});
 			}
