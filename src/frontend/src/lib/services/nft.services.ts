@@ -247,6 +247,10 @@ const loadBalance = async ({
 	walletAddress: EthAddress;
 	tokenId: NftId;
 }): Promise<number | undefined> => {
+	// We want to wait for a random amount of time between 0 and 2 seconds to avoid triggering rate limits.
+	// Since we are handling batch sizes of 10, on average, we should wait for 0.2 seconds between each nft.
+	await randomWait({ min: 0, max: 2000 });
+
 	try {
 		return await infuraProvider.balanceOf({ contractAddress, walletAddress, tokenId });
 	} catch (err: unknown) {
