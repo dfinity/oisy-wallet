@@ -20,6 +20,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { waitFor } from '@testing-library/svelte';
 import { Network } from 'ethers/providers';
 import { get } from 'svelte/store';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 
 vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn(),
@@ -131,13 +132,13 @@ describe('nft.services', () => {
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc721AzukiToken
+					contract: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc1155NyanCatToken,
+					contract: mapTokenToCollection(erc1155NyanCatToken),
 					balance: 2
 				}))
 			];
@@ -217,13 +218,13 @@ describe('nft.services', () => {
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc721AzukiToken
+					contract: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...notLoadedTokenIds.map((tokenId) => ({
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc1155NyanCatToken,
+					contract: mapTokenToCollection(erc1155NyanCatToken),
 					balance: 2
 				}))
 			];
@@ -333,11 +334,11 @@ describe('nft.services', () => {
 			const expectedNfts = [
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: erc721AzukiToken
+					contract: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: erc1155NyanCatToken,
+					contract: mapTokenToCollection(erc1155NyanCatToken),
 					balance: 2
 				}))
 			];
