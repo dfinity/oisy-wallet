@@ -8,7 +8,7 @@ import { getNftsByNetworks, parseMetadataResourceUrl } from '$lib/utils/nfts.uti
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockValidNft } from '$tests/mocks/nfts.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('nfts.utils', () => {
 	const erc721Tokens: Erc721CustomToken[] = [
@@ -17,29 +17,29 @@ describe('nfts.utils', () => {
 	];
 
 	const mockNft1: Nft = {
-		...mockValidNft,
+		...mockValidErc721Nft,
 		contract: {
-			...mockValidNft.contract,
+			...mockValidErc721Nft.contract,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
 	};
 
 	const mockNft2: Nft = {
-		...mockValidNft,
+		...mockValidErc721Nft,
 		id: parseNftId(12632),
 		contract: {
-			...mockValidNft.contract,
+			...mockValidErc721Nft.contract,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
 	};
 
 	const mockNft3: Nft = {
-		...mockValidNft,
+		...mockValidErc721Nft,
 		id: parseNftId(843764),
 		contract: {
-			...mockValidNft.contract,
+			...mockValidErc721Nft.contract,
 			address: DE_GODS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}

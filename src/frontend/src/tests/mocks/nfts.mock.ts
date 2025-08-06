@@ -4,7 +4,7 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 
-export const mockValidNft: Nft = {
+export const mockValidErc721Nft: Nft = {
 	name: 'Beanz 123',
 	id: parseNftId(173563),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/27.png',

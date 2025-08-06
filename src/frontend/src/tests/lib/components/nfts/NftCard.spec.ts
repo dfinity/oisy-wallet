@@ -1,5 +1,5 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
-import { mockValidNft } from '$tests/mocks/nfts.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { render } from '@testing-library/svelte';
 
 describe('NftCard', () => {
@@ -12,7 +12,7 @@ describe('NftCard', () => {
 	it('should render nft with metadata', () => {
 		const { container, getByText } = render(NftCard, {
 			props: {
-				nft: mockValidNft,
+				nft: mockValidErc721Nft,
 				testId
 			}
 		});
@@ -25,14 +25,14 @@ describe('NftCard', () => {
 
 		expect(networkLogo).toBeInTheDocument();
 
-		expect(getByText(mockValidNft.contract.name)).toBeInTheDocument();
-		expect(getByText(`#${mockValidNft.id}`)).toBeInTheDocument();
+		expect(getByText(mockValidErc721Nft.contract.name)).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
 	});
 
 	it('should render image placeholder if no image is defined', () => {
 		const { container, getByText } = render(NftCard, {
 			props: {
-				nft: { ...mockValidNft, imageUrl: null },
+				nft: { ...mockValidErc721Nft, imageUrl: null },
 				testId
 			}
 		});
@@ -46,7 +46,7 @@ describe('NftCard', () => {
 
 		expect(networkLogo).toBeInTheDocument();
 
-		expect(getByText(mockValidNft.contract.name)).toBeInTheDocument();
-		expect(getByText(`#${mockValidNft.id}`)).toBeInTheDocument();
+		expect(getByText(mockValidErc721Nft.contract.name)).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
 	});
 });
