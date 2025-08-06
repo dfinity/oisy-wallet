@@ -21,6 +21,7 @@ const config: UserConfig = {
 	},
 	...CSS_CONFIG_OPTIONS,
 	build: {
+		sourcemap: true,
 		target: 'es2020',
 		rollupOptions: {
 			output: {
