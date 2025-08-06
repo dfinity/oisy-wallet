@@ -187,7 +187,8 @@ const getNfts = async ({infuraProvider, token, walletAddress, nftsMetadata}:
 	for (const nftMetadata of nftsMetadata) {
 		let balance;
 		if (token.standard === 'erc1155') {
-			balance = await loadBalance({infuraProvider, contractAddress: token.address, walletAddress, tokenId: nftMetadata.id})
+			const infuraErc1155Provider = infuraProvider as InfuraErc1155Provider;
+			balance = await loadBalance({infuraProvider: infuraErc1155Provider, contractAddress: token.address, walletAddress, tokenId: nftMetadata.id})
 		}
 
 		nfts.push({
