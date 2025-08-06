@@ -236,10 +236,12 @@ describe('infura-erc1155.providers', () => {
 		describe('balanceOf', () => {
 			const mockBalanceOf = vi.fn();
 
+			const tokenId = parseNftId(12345)
+
 			const mockParams = {
 				contractAddress,
 				walletAddress: mockEthAddress,
-				tokenId: parseNftId(12345)
+				tokenId
 			};
 
 			const mockBalance = 2;
@@ -256,6 +258,10 @@ describe('infura-erc1155.providers', () => {
 				const provider = new InfuraErc1155Provider(infura);
 
 				const result = await provider.balanceOf(mockParams);
+
+				expect(mockBalanceOf).toHaveBeenCalledExactlyOnceWith(
+					mockEthAddress, tokenId
+				);
 
 				expect(result).toEqual(mockBalance);
 			})
