@@ -12,6 +12,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
+import type { Address } from '$lib/types/address';
 
 export class InfuraErc1155Provider extends InfuraErc165Provider {
 	isInterfaceErc1155 = (contract: Erc1155ContractAddress): Promise<boolean> =>
@@ -106,6 +107,19 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 			...(mappedProperties.length > 0 && { attributes: [...mappedAttributes, ...mappedProperties] })
 		};
 	};
+
+	balanceOf = async ({
+											 contractAddress,
+		walletAddress,
+											 tokenId
+										 }: {
+		contractAddress: Erc1155ContractAddress['address'];
+		walletAddress: Address;
+		tokenId: NftId;
+	}): Promise<number> => {
+		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);
+		return await erc1155Contract.balanceOf(walletAddress, tokenId)
+	}
 }
 
 const providers: Record<NetworkId, InfuraErc1155Provider> = [
