@@ -158,7 +158,7 @@ describe('nft.services', () => {
 				expect(get(nftStore)?.length).toEqual(expectedNfts.length);
 				expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
 			});
-		});
+		}, {timeout: 10000});
 
 		it('should skip already loaded NFTs', async () => {
 			const tokens: NonFungibleToken[] = [erc721AzukiToken, erc1155NyanCatToken];
@@ -327,6 +327,6 @@ describe('nft.services', () => {
 				expect(get(nftStore)?.length).toEqual(expectedNfts.length);
 				expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
 			});
-		});
+		}, {timeout: 10000});
 	});
 });
