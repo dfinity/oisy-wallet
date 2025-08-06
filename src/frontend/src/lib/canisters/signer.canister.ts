@@ -16,7 +16,7 @@ import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { GetSchnorrPublicKeyParams, SendBtcParams, SignWithSchnorrParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
-import { Canister, createServices, fromDefinedNullable, toNullable } from '@dfinity/utils';
+import { Canister, createServices, fromDefinedNullable, jsonReplacer, toNullable } from '@dfinity/utils';
 import {
 	mapSignerCanisterBtcError,
 	mapSignerCanisterGetEthAddressError,
@@ -186,7 +186,7 @@ export class SignerCanister extends Canister<SignerService> {
 			...rest
 		};
 
-		console.warn('Calling endpoint btc_caller_send: ', payload);
+		console.warn('Calling endpoint btc_caller_send: ', JSON.stringify(payload, jsonReplacer));
 
 		const response = await btc_caller_send(payload, [SIGNER_PAYMENT_TYPE]);
 

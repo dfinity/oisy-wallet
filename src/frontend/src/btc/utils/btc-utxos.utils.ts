@@ -81,82 +81,93 @@ export const calculateUtxoSelection = ({
 
 	const selectedUtxos: Utxo[] = [];
 	let totalInputValue = ZERO;
-	let estimatedFee = ZERO;
 
 	// Iteratively add UTXOs until we have enough to cover amount and fee
 	for (const utxo of sortedUtxos) {
 		selectedUtxos.push(utxo);
 		totalInputValue += BigInt(utxo.value);
 
-		// Calculate current transaction size and fee
-		// Start with 1 output (recipient), may add change output if needed
-		let numOutputs = 1;
-		let txSize = estimateTransactionSize({
+		// Calculate fee assuming we might need a change output
+		const txSizeWithChange = estimateTransactionSize({
 			numInputs: selectedUtxos.length,
-			numOutputs
+			numOutputs: 2 // recipient + change
 		});
-		estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
-		let totalRequired = amountSatoshis + estimatedFee;
+		const feeWithChange = BigInt(txSizeWithChange) * feeRateSatoshisPerVByte;
+		const totalRequiredWithChange = amountSatoshis + feeWithChange;
 
-		// Check if we have enough to cover amount and fee
-		if (totalInputValue >= totalRequired) {
-			const changeAmount = totalInputValue - totalRequired;
+		// Check if we have enough for amount + fee with change output
+		if (totalInputValue >= totalRequiredWithChange) {
+			const changeAmount = totalInputValue - totalRequiredWithChange;
 
-			// Check if change would be dust (mirroring backend logic)
+			// If change would be dust, recalculate without change output
 			if (changeAmount > ZERO && changeAmount < BTC_DUST_THRESHOLD_SATOSHIS) {
-				// Backend won't create dust change output, so dust goes to fee
-				// No need for change output, so keep numOutputs = 1
-				const finalFee = estimatedFee + changeAmount;
-
-				return {
-					selectedUtxos,
-					totalInputValue,
-					changeAmount: ZERO, // No change output will be created
-					sufficientFunds: true,
-					feeSatoshis: finalFee
-				};
-			}
-			if (changeAmount > ZERO) {
-				// Normal case: change >= dust threshold, create change output
-				numOutputs = 2; // Recipient + change output
-				txSize = estimateTransactionSize({
+				// Recalculate fee for transaction without change output
+				const txSizeNoChange = estimateTransactionSize({
 					numInputs: selectedUtxos.length,
-					numOutputs
+					numOutputs: 1 // only recipient
 				});
-				estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
-				totalRequired = amountSatoshis + estimatedFee;
+				const feeNoChange = BigInt(txSizeNoChange) * feeRateSatoshisPerVByte;
+				const totalRequiredNoChange = amountSatoshis + feeNoChange;
 
-				if (totalInputValue >= totalRequired) {
-					const finalChangeAmount = totalInputValue - totalRequired;
+				// Check if we still have enough (we should, since we're paying less fee)
+				if (totalInputValue >= totalRequiredNoChange) {
+					// The "dust" becomes part of the fee (backend behavior)
+					const actualFee = totalInputValue - amountSatoshis;
 
 					return {
 						selectedUtxos,
 						totalInputValue,
-						changeAmount: finalChangeAmount,
+						changeAmount: ZERO,
 						sufficientFunds: true,
-						feeSatoshis: estimatedFee
+						feeSatoshis: actualFee
 					};
 				}
 			} else {
-				// Exact amount, no change
+				// Normal case: change is either zero or >= dust threshold
 				return {
 					selectedUtxos,
 					totalInputValue,
-					changeAmount: ZERO,
+					changeAmount,
 					sufficientFunds: true,
-					feeSatoshis: estimatedFee
+					feeSatoshis: feeWithChange
 				};
 			}
+		}
+
+		// Also try without change output in case we can make exact payment
+		const txSizeNoChange = estimateTransactionSize({
+			numInputs: selectedUtxos.length,
+			numOutputs: 1
+		});
+		const feeNoChange = BigInt(txSizeNoChange) * feeRateSatoshisPerVByte;
+		const totalRequiredNoChange = amountSatoshis + feeNoChange;
+
+		if (totalInputValue >= totalRequiredNoChange) {
+			const changeAmount = totalInputValue - totalRequiredNoChange;
+
+			return {
+				selectedUtxos,
+				totalInputValue,
+				changeAmount,
+				sufficientFunds: true,
+				feeSatoshis: feeNoChange
+			};
 		}
 	}
 
 	// If we get here, we don't have sufficient funds
+	const finalTxSize = estimateTransactionSize({
+		numInputs: selectedUtxos.length,
+		numOutputs: 2
+	});
+	const finalFee = BigInt(finalTxSize) * feeRateSatoshisPerVByte;
+
 	return {
 		selectedUtxos,
 		totalInputValue,
 		changeAmount: ZERO,
 		sufficientFunds: false,
-		feeSatoshis: estimatedFee
+		feeSatoshis: finalFee
 	};
 };
 
