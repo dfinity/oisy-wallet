@@ -1,12 +1,15 @@
 import {
+	saveErc1155CustomTokens,
 	saveErc20CustomTokens,
 	saveErc20UserTokens,
 	saveErc721CustomTokens
 } from '$eth/services/manage-tokens.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20CustomToken, SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
@@ -272,24 +275,27 @@ export const groupTogglableTokens = (
 	icrc: IcrcCustomToken[];
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
 	erc721: Erc721CustomToken[];
+	erc1155: Erc1155CustomToken[];
 	spl: SplTokenToggleable[];
 } =>
 	Object.values(tokens ?? {}).reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
+		erc1155: Erc1155CustomToken[];
 		spl: SplTokenToggleable[];
 	}>(
-		({ icrc, erc20, erc721, spl }, token) => ({
+		({ icrc, erc20, erc721, erc1155, spl }, token) => ({
 			icrc: [
 				...icrc,
 				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 			],
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
 			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
+			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
 			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 		}),
-		{ icrc: [], erc20: [], erc721: [], spl: [] }
+		{ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
 
 export const saveAllCustomTokens = async ({
@@ -309,9 +315,15 @@ export const saveAllCustomTokens = async ({
 	$authIdentity: OptionIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
-	const { icrc, erc20, erc721, spl } = groupTogglableTokens(tokens);
+	const { icrc, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
 
-	if (icrc.length === 0 && erc20.length === 0 && erc721.length === 0 && spl.length === 0) {
+	if (
+		icrc.length === 0 &&
+		erc20.length === 0 &&
+		erc721.length === 0 &&
+		erc1155.length === 0 &&
+		spl.length === 0
+	) {
 		toastsShow({
 			text: $i18n.tokens.manage.info.no_changes,
 			level: 'info',
@@ -377,6 +389,14 @@ export const saveAllCustomTokens = async ({
 					saveErc721CustomTokens({
 						...commonParams,
 						tokens: erc721
+					})
+				]
+			: []),
+		...(erc1155.length > 0
+			? [
+					saveErc1155CustomTokens({
+						...commonParams,
+						tokens: erc1155
 					})
 				]
 			: []),

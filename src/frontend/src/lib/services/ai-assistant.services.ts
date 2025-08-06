@@ -1,6 +1,7 @@
 import type { chat_message_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import { AI_ASSISTANT_LLM_MODEL } from '$lib/constants/ai-assistant.constants';
+import type { ChatMessageContent } from '$lib/types/ai-assistant';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, toNullable } from '@dfinity/utils';
 
@@ -10,7 +11,7 @@ export const askLlm = async ({
 }: {
 	messages: chat_message_v1[];
 	identity: Identity;
-}): Promise<string | undefined> => {
+}): Promise<ChatMessageContent> => {
 	const {
 		message: { content }
 	} = await llmChat({
@@ -23,5 +24,11 @@ export const askLlm = async ({
 		identity
 	});
 
-	return fromNullable(content);
+	return {
+		text: fromNullable(content),
+		tool: {
+			calls: [],
+			results: []
+		}
+	};
 };

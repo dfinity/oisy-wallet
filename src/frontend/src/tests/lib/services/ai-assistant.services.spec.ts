@@ -28,7 +28,13 @@ describe('ai-assistant.services', () => {
 			});
 
 			expect(llmChat).toHaveBeenCalledOnce();
-			expect(result).toStrictEqual(fromNullable(response.message.content));
+			expect(result).toStrictEqual({
+				text: fromNullable(response.message.content),
+				tool: {
+					calls: [],
+					results: []
+				}
+			});
 		});
 	});
 });
