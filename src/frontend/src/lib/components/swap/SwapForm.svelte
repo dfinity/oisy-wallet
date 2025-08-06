@@ -94,19 +94,25 @@
 				false)
 	);
 
-	let shouldShowError = $derived(
-		(isNullish($swapAmountsStore) &&
-			!isSwapAmountsLoading &&
-			nonNullish(swapAmount) &&
-			Number(swapAmount) > 0) ||
-			(nonNullish($swapAmountsStore) &&
-				$swapAmountsStore.swaps.length === 0 &&
-				nonNullish($swapAmountsStore.amountForSwap) &&
-				Number(swapAmount) === $swapAmountsStore.amountForSwap &&
-				!isSwapAmountsLoading &&
-				nonNullish(swapAmount) &&
-				Number(swapAmount) > 0)
-	);
+	let shouldShowError = $derived(() => {
+		const amount = Number(swapAmount);
+
+		if (!nonNullish(swapAmount) || amount <= 0) return false;
+		if (isSwapAmountsLoading) return false;
+
+		if (isNullish($swapAmountsStore)) return true;
+
+		if (
+			$swapAmountsStore.swaps.length === 0 &&
+			nonNullish($swapAmountsStore.amountForSwap) &&
+			amount === $swapAmountsStore.amountForSwap
+		) {
+			return true;
+		}
+
+		return false;
+	});
+
 	$effect(() => {
 		const c1 = $swapAmountsStore?.swaps.length === 0 || isNullish($swapAmountsStore);
 		const c2 = !isSwapAmountsLoading;
@@ -241,19 +247,21 @@
 					</svelte:fragment>
 
 					<svelte:fragment slot="balance">
-						{#if nonNullish($sourceToken) && nonNullish(sourceTokenFee) && nonNullish($icTokenFeeStore?.[$sourceToken.symbol])}
-							<MaxBalanceButton
-								bind:amountSetToMax
-								bind:amount={swapAmount}
-								error={nonNullish(errorType)}
-								balance={$sourceTokenBalance}
-								token={$sourceToken}
-								fee={totalFee}
-							/>
-						{:else}
-							<div class="w-14 sm:w-16">
-								<SkeletonText />
-							</div>
+						{#if nonNullish($sourceToken) && nonNullish(sourceTokenFee)}
+							{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol])}
+								<div class="w-14 sm:w-16">
+									<SkeletonText />
+								</div>
+							{:else}
+								<MaxBalanceButton
+									bind:amountSetToMax
+									bind:amount={swapAmount}
+									error={nonNullish(errorType)}
+									balance={$sourceTokenBalance}
+									token={$sourceToken}
+									fee={totalFee}
+								/>
+							{/if}
 						{/if}
 					</svelte:fragment>
 				</TokenInput>

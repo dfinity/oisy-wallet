@@ -83,9 +83,7 @@
 				selectedProvider: undefined
 			});
 		} finally {
-			setTimeout(() => {
-				swapAmountsLoading = false;
-			}, 200);
+			swapAmountsLoading = false;
 		}
 	};
 	const debounceLoadSwapAmounts = debounce(loadSwapAmounts);
