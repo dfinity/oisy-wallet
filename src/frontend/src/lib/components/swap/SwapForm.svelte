@@ -95,16 +95,12 @@
 	);
 
 	let shouldShowError = $derived(
-		nonNullish(swapAmount) &&
-			Number(swapAmount) > 0 &&
+		nonNullish($swapAmountsStore) &&
+			$swapAmountsStore.swaps.length === 0 &&
 			!isSwapAmountsLoading &&
-			// Випадок 1: Store null
-			(isNullish($swapAmountsStore) ||
-				// Випадок 2: Store є, swaps пустий, запит завершено
-				(nonNullish($swapAmountsStore) &&
-					$swapAmountsStore.swaps.length === 0 &&
-					nonNullish($swapAmountsStore.amountForSwap) &&
-					Number(swapAmount) === $swapAmountsStore.amountForSwap))
+			nonNullish(swapAmount) &&
+			Number(swapAmount) > 0
+		// Не перевіряємо amountForSwap, бо воно undefined при пустому результаті
 	);
 
 	$effect(() => {
@@ -241,8 +237,8 @@
 					</svelte:fragment>
 
 					<svelte:fragment slot="balance">
-						{#if nonNullish($sourceToken) && nonNullish(sourceTokenFee)}
-							{#if nonNullish($icTokenFeeStore?.[$sourceToken.symbol])}
+						{#if nonNullish($sourceToken)}
+							{#if nonNullish(sourceTokenFee)}
 								<MaxBalanceButton
 									bind:amountSetToMax
 									bind:amount={swapAmount}

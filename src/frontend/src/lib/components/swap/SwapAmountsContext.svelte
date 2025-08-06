@@ -66,7 +66,11 @@
 			});
 
 			if (swapAmounts.length === 0) {
-				store.reset();
+				store.setSwaps({
+					swaps: [],
+					amountForSwap: parsedAmount,
+					selectedProvider: undefined
+				});
 				return;
 			}
 
