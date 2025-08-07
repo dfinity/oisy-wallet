@@ -29,9 +29,11 @@ export const parseFromAiAssistantContacts = ({
 			...acc,
 			{
 				...extendedAddressContacts[`${id}`],
-				addresses: extendedAddressContacts[`${id}`].addresses.filter(({ id: addressId }) =>
-					addresses.some((filteredAddress) => filteredAddress.id === addressId)
-				)
+				addresses: extendedAddressContacts[`${id}`].addresses
+					.filter(({ id: addressId }) =>
+						addresses.some((filteredAddress) => filteredAddress.id === addressId)
+					)
+					.map(({ id: _, ...rest }) => ({ ...rest }))
 			}
 		],
 		[]
