@@ -132,16 +132,21 @@ export const getFeeRateFromPercentiles = async ({
 	const feeRateSatsPerVByte = medianFeeMillisatsPerVByte / 1000n;
 
 	// Apply minimum and maximum limits
-	const MIN_FEE_RATE = 10n; // 2 sat/vbyte minimum
+	const MIN_FEE_RATE = 10n; // 10 sat/vbyte minimum
 	const MAX_FEE_RATE = 100n; // 100 sat/vbyte maximum
 
 	if (feeRateSatsPerVByte < MIN_FEE_RATE) {
-		console.warn('Fee rate below minimum, using minimum instead');
+		console.warn(
+			`Fee rate of ${feeRateSatsPerVByte} sat/vbyte is below minimum. Using minimum of ${MIN_FEE_RATE} sat/vbyte instead.`
+		);
+
 		return MIN_FEE_RATE;
 	}
 
 	if (feeRateSatsPerVByte > MAX_FEE_RATE) {
-		console.warn('Fee rate below minimum, using minimum instead');
+		console.warn(
+			`Fee rate of ${feeRateSatsPerVByte} sat/vbyte is above maximum. Using maximum of ${MAX_FEE_RATE} sat/vbyte instead.`
+		);
 		return MAX_FEE_RATE;
 	}
 
