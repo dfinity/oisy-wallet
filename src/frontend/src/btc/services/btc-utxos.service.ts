@@ -128,6 +128,8 @@ export const getFeeRateFromPercentiles = async ({
 	const medianIndex = Math.floor(fee_percentiles.length / 2);
 	const medianFeeMillisatsPerVByte = fee_percentiles[medianIndex];
 
+	console.warn('medianFeeMillisatsPerVByte: ', medianFeeMillisatsPerVByte);
+
 	// Convert from millisats to sats (divide by 1000)
 	const feeRateSatsPerVByte = medianFeeMillisatsPerVByte / 1000n;
 
