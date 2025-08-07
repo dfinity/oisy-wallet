@@ -9,8 +9,12 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { signOut } from '$lib/services/auth.services';
+	import { signIn } from '$lib/services/auth.services';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
+	const modalId = Symbol();
 
 	let src = $state<string | undefined>(undefined);
 	let width = $state<number>(window.innerWidth);
@@ -32,8 +36,16 @@
 			.catch(() => console.error('Failed to load background image'));
 	});
 
-	const handleUnlock = () => console.log('Unlock clicked');
-	const handleLogout = () => console.log('Logout clicked');
+	const handleUnlock = async () => {
+		const { success } = await signIn({});
+
+		if (success === 'cancelled' || success === 'error') {
+			modalStore.openAuthHelp({ id: modalId, data: false });
+		}
+	};
+	const handleLogout = async () =>  {
+		await signOut({ resetUrl: true });
+	};
 </script>
 
 <div class="background-overlay flex flex-col">
