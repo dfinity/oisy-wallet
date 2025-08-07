@@ -20,7 +20,7 @@ describe('ai-assistant.services', () => {
 			arguments: [{ value: 'Btc', name: 'addressType' }]
 		}
 	};
-	const noArgumentsToolCall = {
+	const noAgumentsToolCall = {
 		...toolCall,
 		function: {
 			...toolCall.function,
@@ -33,7 +33,7 @@ describe('ai-assistant.services', () => {
 			vi.resetAllMocks();
 		});
 
-		it('calls API correctly', async () => {
+		it('parses API response without tool_calls correctly', async () => {
 			const response = {
 				message: {
 					content: toNullable('content'),
@@ -54,6 +54,36 @@ describe('ai-assistant.services', () => {
 				tool: {
 					calls: [],
 					results: []
+				}
+			});
+		});
+
+		it('parses API response with tool_calls correctly', async () => {
+			const response = {
+				message: {
+					content: toNullable(),
+					tool_calls: toNullable(noAgumentsToolCall)
+				}
+			} as chat_response_v1;
+
+			vi.mocked(llmChat).mockResolvedValue(response);
+
+			const result = await askLlm({
+				identity: mockIdentity,
+				messages: [{ user: { content: 'test' } }]
+			});
+
+			expect(llmChat).toHaveBeenCalledOnce();
+			expect(result).toStrictEqual({
+				text: fromNullable(response.message.content),
+				tool: {
+					calls: [noAgumentsToolCall],
+					results: [
+						{
+							result: [],
+							type: 'show_contacts'
+						}
+					]
 				}
 			});
 		});
@@ -126,7 +156,7 @@ describe('ai-assistant.services', () => {
 		it('parses show_contacts tool and returns all contacts if no filter params provided', async () => {
 			const result = await executeTool({
 				identity: mockIdentity,
-				toolCall: noArgumentsToolCall
+				toolCall: noAgumentsToolCall
 			});
 
 			expect(result).toEqual({
