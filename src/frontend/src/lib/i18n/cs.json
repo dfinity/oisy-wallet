@@ -33,7 +33,7 @@
 			"more_items": "+$items další",
 			"select": "Vybrat",
 			"language": "Jazyk",
-			"currency": ""
+			"currency": "Měna"
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!"
@@ -45,7 +45,7 @@
 			"open_details": "Otevřít podrobnosti",
 			"close_details": "Zavřít podrobnosti",
 			"switch_language": "Přepnout jazyk",
-			"switch_currency": ""
+			"switch_currency": "Přepnout měnu"
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena"
@@ -102,7 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralizované",
 			"logout": "Odhlásit se",
-			"lock": "",
+			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP a další",
 			"instant_and_private": "Okamžitý a soukromý přístup kdekoli",
@@ -515,7 +515,7 @@
 			"tooltip_toggle_balance": "Dvojitým kliknutím skryjete/zobrazíte zůstatek"
 		},
 		"alt": {
-			"toggle_privacy_mode": ""
+			"toggle_privacy_mode": "Zapnutí a vypnutí režimu soukromí"
 		}
 	},
 	"settings": {
@@ -820,10 +820,10 @@
 			"select": "Vybrat >",
 			"select_swap_provider": "Vybrat poskytovatele výměny",
 			"open_icp_swap": "Otevřít webové stránky ICP Swap",
-			"open_instructions_link": "",
-			"select_token": "",
-			"select_network_filter": "",
-			"withdrawing": ""
+			"open_instructions_link": "Otevřít odkaz na pokyny",
+			"select_token": "Vyberte token",
+			"select_network_filter": "Vybrat síť",
+			"withdrawing": "Stažení..."
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
@@ -831,16 +831,16 @@
 			"unexpected_missing_data": "Při zahájení transakce výměny se něco pokazilo.",
 			"slippage_exceeded": "$oisy_short vás chrání: Obchod je mimo vaši toleranci skluzu $maxSlippage%. Upravte prosím maximální skluz a zkuste to znovu.",
 			"pool_not_found": "Výměna se nezdařila. Pool nebyl nalezen.",
-			"deposit_error": "",
+			"deposit_error": "Vklad finančních prostředků na váš swap selhal. Zkuste to prosím znovu nebo změňte poskytovatele swapu.",
 			"withdraw_failed": "Výměna se nezdařila a výběr také selhal. Zkontrolujte prosím svůj nevyužitý zůstatek a zkuste ruční výběr: ",
-			"swap_failed_withdraw_success": "",
-			"withdraw_failed_first_part": "",
-			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": "",
-			"manually_withdraw_success": "",
-			"manually_withdraw_failed": "",
-			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": ""
+			"swap_failed_withdraw_success": "Výměna se nezdařila a vaše tokeny byly úspěšně vráceny. Zkuste to prosím znovu nebo změňte poskytovatele výměny.",
+			"withdraw_failed_first_part": "Výměna se nezdařila a vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
+			"withdraw_failed_second_part": "abyste si je mohli kdykoli později stáhnout přímo z jejich webových stránek: ",
+			"swap_failed_instruction_link": "tyto pokyny ",
+			"manually_withdraw_success": "Tokeny z vašeho předchozího neúspěšného swapu byly úspěšně vybrány. Můžete zkusit swap znovu nebo změnit poskytovatele swapu.",
+			"manually_withdraw_failed": "Výběr vašich finančních prostředků selhal.<br>Zkuste to prosím znovu nebo sledujte ",
+			"swap_sucess_withdraw_failed": "Výměna byla dokončena, ale vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
+			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít."
 		}
 	},
 	"buy": {
@@ -919,7 +919,7 @@
 				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny."
 			},
 			"error": {
-				"loading_metadata": "",
+				"loading_metadata": "Zadaná adresa není platným tokenem ve vybrané síti.",
 				"no_metadata": "Pro token nejsou k dispozici žádná metadata. To je neočekávané.",
 				"unexpected_ledger": "Při ověřování kanystru účetní knihy se něco pokazilo.",
 				"unexpected_index": "Při ověřování kanystru indexu se něco pokazilo.",
@@ -984,7 +984,7 @@
 			"invalid_contract_address": "Adresa smlouvy je neplatná.",
 			"invalid_token_address": "Adresa tokenu je neplatná.",
 			"invalid_ledger": "Vybraný token není propojen s kanystrem účetní knihy Icrc.",
-			"unrecognised_erc_interface": "",
+			"unrecognised_erc_interface": "Nerozpoznané rozhraní ERC.",
 			"no_metadata": "Nebyly načteny žádné metadata.",
 			"unexpected": "Při ukládání tokenu se něco pokazilo.",
 			"unexpected_hiding": "Při skrývání tokenu se něco pokazilo.",
@@ -1297,13 +1297,13 @@
 		"avatar": {
 			"default": "Výchozí avatar",
 			"avatar_for": "Avatar pro",
-			"avatar_loading": ""
+			"avatar_loading": "Avatar se načítá..."
 		},
 		"edit_avatar": {
-			"menu_title": "",
-			"upload_image": "",
-			"replace_image": "",
-			"remove_image": ""
+			"menu_title": "Kontaktní obrázek",
+			"upload_image": "Nahrát",
+			"replace_image": "Nahradit",
+			"remove_image": "Odstranit"
 		},
 		"show_contact": {
 			"title": "Kontakt",

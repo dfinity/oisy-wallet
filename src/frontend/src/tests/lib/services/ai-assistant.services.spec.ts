@@ -90,7 +90,7 @@ describe('ai-assistant.services', () => {
 				filterParams: [{ value: 'Btc', name: 'addressType' }]
 			});
 
-			expect(result).toStrictEqual([...Object.values(storeData)]);
+			expect(result).toStrictEqual([...contacts]);
 		});
 	});
 });
