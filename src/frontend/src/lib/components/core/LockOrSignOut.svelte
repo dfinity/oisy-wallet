@@ -6,6 +6,8 @@
 	import { LOCK_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { lockSession } from '$lib/services/auth.services';
+	import { lockedPageShow } from '$lib/utils/locked.utils';
 
 	interface Props {
 		onHidePopover?: () => void;
@@ -28,6 +30,13 @@
 	const handleLogoutTriggered = () => {
 		onHidePopover?.();
 	};
+
+	const handleLock = async () => {
+		onHidePopover?.();
+		lockedPageShow.set(true);
+		await lockSession({ resetUrl: true });
+	};
+
 </script>
 
 <div class="mb-1 mt-2">
@@ -36,6 +45,7 @@
 			colorStyle="tertiary"
 			styleClass="w-full py-2 flex-1 border-tertiary hover:text-brand-primary hover:bg-brand-subtle-10"
 			testId={LOCK_BUTTON}
+			onclick={handleLock}
 		>
 			{$i18n.auth.text.lock}
 			<IconLock />

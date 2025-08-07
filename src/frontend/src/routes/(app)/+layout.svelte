@@ -23,6 +23,8 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
+	import LockPage from '$lib/components/auth/LockPage.svelte';
+	import { lockedPageShow } from '$lib/utils/locked.utils';
 
 	interface Props {
 		children: Snippet;
@@ -54,6 +56,10 @@
 		});
 	});
 </script>
+
+{#if $authNotSignedIn && $lockedPageShow}
+	<LockPage /> 
+{:else}
 
 <div class:h-dvh={$authNotSignedIn}>
 	<div
@@ -111,3 +117,4 @@
 		{/if}
 	</div>
 </div>
+{/if}
