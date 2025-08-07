@@ -50,7 +50,7 @@ export const estimateTransactionSize = ({
 /**
  * Converts satoshis to BTC string representation
  */
-export const satoshisToBtc = (satoshis: bigint): string => {
+const satoshisToBtc = (satoshis: bigint): string => {
 	const BTC_DECIMALS = 8;
 	const btcValue = Number(satoshis) / 10 ** BTC_DECIMALS;
 	return btcValue.toFixed(8);

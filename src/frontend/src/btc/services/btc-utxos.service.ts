@@ -3,12 +3,8 @@ import {
 	UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 } from '$btc/constants/btc.constants';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
-import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import {
-	calculateUtxoSelection,
-	filterAvailableUtxos,
-	satoshisToBtc
-} from '$btc/utils/btc-utxos.utils';
+import { convertNumberToSatoshis, convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
+import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
@@ -55,7 +51,7 @@ export const prepareBtcSend = async ({
 			feeSatoshis: ZERO,
 			utxos: [],
 			error: BtcPrepareSendError.AmountBelowDustThreshold,
-			errorParam: satoshisToBtc(BTC_DUST_THRESHOLD_SATOSHIS)
+			errorParam: convertSatoshisToBtc(BTC_DUST_THRESHOLD_SATOSHIS)
 		};
 	}
 
