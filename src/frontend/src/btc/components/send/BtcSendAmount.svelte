@@ -10,7 +10,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
-	import { invalidAmount } from '$lib/utils/input.utils';
+	import { invalidAmount, invalidSendAmount } from '$lib/utils/input.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
@@ -30,6 +30,10 @@
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
+		}
+
+		if (invalidSendAmount(Number(userAmount))) {
+			return new BtcAmountAssertionError($i18n.send.assertion.amount_below_dust_threshold);
 		}
 
 		if (userAmount > ($sendBalance ?? ZERO)) {
