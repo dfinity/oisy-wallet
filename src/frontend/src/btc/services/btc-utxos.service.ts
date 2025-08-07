@@ -118,6 +118,8 @@ export const getFeeRateFromPercentiles = async ({
 		network: mappedNetwork
 	});
 
+	console.warn('getCurrentBtcFeePercentiles() response: ', fee_percentiles);
+
 	if (isNullish(fee_percentiles) || fee_percentiles.length === 0) {
 		throw new Error('No fee percentiles available - cannot calculate transaction fee');
 	}
