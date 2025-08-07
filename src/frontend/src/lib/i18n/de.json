@@ -1520,6 +1520,7 @@
 			"action_button_contacts_prompt": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"no_contacts_found_message": "",
 			"loading": ""
 		},
 		"errors": {

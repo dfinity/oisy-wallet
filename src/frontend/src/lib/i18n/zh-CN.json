@@ -1520,6 +1520,7 @@
 			"action_button_contacts_prompt": "联系人提示按钮",
 			"send_message": "发送消息",
 			"send_message_input_placeholder": "发送消息输入占位符",
+			"no_contacts_found_message": "",
 			"loading": "加载中"
 		},
 		"errors": {

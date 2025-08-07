@@ -29,9 +29,15 @@
 	let restAddressesNumber = $derived(allAddresses.length - addressesToDisplay.length);
 </script>
 
-{#each addressesToDisplay as { contact, address }, index (index)}
-	<AiAssistantShowContactsToolItem {address} {contact} />
-{/each}
+{#if addressesToDisplay.length > 0}
+	{#each addressesToDisplay as { contact, address }, index (index)}
+		<AiAssistantShowContactsToolItem {address} {contact} />
+	{/each}
+{:else}
+	<span class="text-sm">
+		{$i18n.ai_assistant.text.no_contacts_found_message}
+	</span>
+{/if}
 
 {#if restAddressesNumber > 0}
 	<div class="mt-2 text-center text-sm">
