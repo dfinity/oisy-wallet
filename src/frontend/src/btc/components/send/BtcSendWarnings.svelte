@@ -9,9 +9,10 @@
 	export let utxosFee: UtxosFee | undefined = undefined;
 
 	// Create error message with minimum amount parameter
-	$: dustErrorMessage = utxosFee?.errorParam && utxosFee?.error === BtcPrepareSendError.AmountBelowDustThreshold
-		? $i18n.send.assertion.amount_below_dust_threshold.replace('{minimum}', utxosFee.errorParam)
-		: $i18n.send.assertion.amount_below_dust_threshold;
+	$: dustErrorMessage =
+		utxosFee?.errorParam && utxosFee?.error === BtcPrepareSendError.AmountBelowDustThreshold
+			? $i18n.send.assertion.amount_below_dust_threshold.replace('{minimum}', utxosFee.errorParam)
+			: $i18n.send.assertion.amount_below_dust_threshold;
 </script>
 
 {#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
@@ -38,16 +39,14 @@
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
 			<span data-tid="btc-send-form-insufficient-funds-for-fee"
-			>{$i18n.fee.assertion.insufficient_funds_for_fee}</span
+				>{$i18n.fee.assertion.insufficient_funds_for_fee}</span
 			>
 		</MessageBox>
 	</div>
 {:else if utxosFee?.error === BtcPrepareSendError.AmountBelowDustThreshold}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
-			<span data-tid="btc-send-form-amount-below-dust-threshold"
-			>{dustErrorMessage}</span
-			>
+			<span data-tid="btc-send-form-amount-below-dust-threshold">{dustErrorMessage}</span>
 		</MessageBox>
 	</div>
 {:else if utxosFee?.utxos.length === 0}
