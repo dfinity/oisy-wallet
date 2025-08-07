@@ -6,7 +6,7 @@ export enum Currency {
 	CAD = 'cad',
 	CHF = 'chf',
 	CNY = 'cny',
-  CZK = 'czk',
+	CZK = 'czk',
 	EUR = 'eur',
 	GBP = 'gbp',
 	INR = 'inr',
