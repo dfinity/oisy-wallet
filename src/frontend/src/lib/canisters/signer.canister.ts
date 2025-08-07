@@ -1,32 +1,22 @@
 import type {
+	_SERVICE as SignerService,
 	BitcoinNetwork,
 	EthAddressRequest,
 	EthPersonalSignRequest,
 	EthSignPrehashRequest,
 	EthSignTransactionRequest,
 	GetBalanceRequest,
-	SendBtcResponse,
-	_SERVICE as SignerService
+	SendBtcResponse
 } from '$declarations/signer/signer.did';
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
-import type {
-	GetSchnorrPublicKeyParams,
-	SendBtcParams,
-	SignWithSchnorrParams
-} from '$lib/types/api';
+import type { GetSchnorrPublicKeyParams, SendBtcParams, SignWithSchnorrParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
-import {
-	Canister,
-	createServices,
-	fromDefinedNullable,
-	jsonReplacer,
-	toNullable
-} from '@dfinity/utils';
+import { Canister, createServices, fromDefinedNullable, jsonReplacer, toNullable } from '@dfinity/utils';
 import {
 	mapSignerCanisterBtcError,
 	mapSignerCanisterGetEthAddressError,
@@ -201,6 +191,7 @@ export class SignerCanister extends Canister<SignerService> {
 		const response = await btc_caller_send(payload, [SIGNER_PAYMENT_TYPE]);
 
 		if ('Ok' in response) {
+			console.warn('Response from btc_caller_send: ', JSON.stringify(response, jsonReplacer));
 			const { Ok } = response;
 			return Ok;
 		}
