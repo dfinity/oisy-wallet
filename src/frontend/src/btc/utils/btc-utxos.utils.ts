@@ -59,10 +59,13 @@ const satoshisToBtc = (satoshis: bigint): string => {
 /**
  * Calculates the minimum viable send amount to avoid dust change
  */
-export const calculateMinimumViableSendAmount = (
-	utxoValue: bigint,
-	estimatedFee: bigint
-): bigint => {
+export const calculateMinimumViableSendAmount = ({
+	utxoValue,
+	estimatedFee
+}: {
+	utxoValue: bigint;
+	estimatedFee: bigint;
+}): bigint => {
 	// Minimum send amount = UTXO value - Fee - Dust threshold
 	// This ensures any change will be >= dust threshold
 	const minimumSend = utxoValue - estimatedFee - BTC_DUST_THRESHOLD_SATOSHIS;
@@ -120,7 +123,10 @@ export const calculateUtxoSelection = ({
 			// Check if change would create dust
 			if (changeAmount > ZERO && changeAmount < BTC_DUST_THRESHOLD_SATOSHIS) {
 				// Calculate what the minimum viable send amount would be
-				const minimumViableAmount = calculateMinimumViableSendAmount(totalInputValue, estimatedFee);
+				const minimumViableAmount = calculateMinimumViableSendAmount({
+					utxoValue: totalInputValue,
+					estimatedFee
+				});
 
 				// Store only the minimum amount as error parameter
 				const errorParam = satoshisToBtc(minimumViableAmount);
