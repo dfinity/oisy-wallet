@@ -57,6 +57,8 @@ export const prepareBtcSend = async ({
 		minConfirmations: requiredMinConfirmations
 	});
 
+	console.warn('UTXOs response:', response);
+
 	const allUtxos = response.utxos;
 
 	if (allUtxos.length === 0) {

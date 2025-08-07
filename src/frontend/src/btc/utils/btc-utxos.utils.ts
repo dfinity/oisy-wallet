@@ -136,7 +136,8 @@ export const calculateUtxoSelection = ({
 			return {
 				selectedUtxos,
 				sufficientFunds: true,
-				feeSatoshis: estimatedFee
+				feeSatoshis: estimatedFee,
+				dustErrorParam: undefined
 			};
 		}
 	}
