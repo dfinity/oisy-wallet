@@ -1,7 +1,7 @@
 import type { chat_response_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
-import { askLlm, askLlmToFilterContacts } from '$lib/services/ai-assistant.services';
+import { askLlm, askLlmToFilterContacts, executeTool } from '$lib/services/ai-assistant.services';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { parseToAiAssistantContacts } from '$lib/utils/ai-assistant.utils';
@@ -13,6 +13,21 @@ import { get } from 'svelte/store';
 vi.mock('$lib/api/llm.api');
 
 describe('ai-assistant.services', () => {
+	const toolCall = {
+		id: 'test',
+		function: {
+			name: 'show_contacts',
+			arguments: [{ value: 'Btc', name: 'addressType' }]
+		}
+	};
+	const noArgumentsToolCall = {
+		...toolCall,
+		function: {
+			...toolCall.function,
+			arguments: []
+		}
+	};
+
 	describe('askLlm', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -91,6 +106,45 @@ describe('ai-assistant.services', () => {
 			});
 
 			expect(result).toStrictEqual([...contacts]);
+		});
+	});
+
+	describe('executeTool', () => {
+		const contacts = getMockContactsUi({
+			n: 1,
+			name: 'Test name',
+			addresses: [mockContactBtcAddressUi]
+		}) as unknown as ContactUi[];
+
+		beforeEach(() => {
+			contactsStore.reset();
+			vi.clearAllMocks();
+
+			contactsStore.set([...contacts]);
+		});
+
+		it('parses show_contacts tool and returns all contacts if no filter params provided', async () => {
+			const result = await executeTool({
+				identity: mockIdentity,
+				toolCall: noArgumentsToolCall
+			});
+
+			expect(result).toEqual({
+				type: 'show_contacts',
+				result: contacts
+			});
+		});
+
+		it('parses show_contacts tool and returns contacts if filter params provided', async () => {
+			const result = await executeTool({
+				identity: mockIdentity,
+				toolCall
+			});
+
+			expect(result).toEqual({
+				type: 'show_contacts',
+				result: contacts
+			});
 		});
 	});
 });
