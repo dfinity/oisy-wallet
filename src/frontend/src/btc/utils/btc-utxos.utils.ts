@@ -67,11 +67,11 @@ export const calculateUtxoSelection = ({
 		};
 	}
 
-	// Sort UTXOs by value in descending order
+	// Sort UTXOs by value in ascending order
 	const sortedUtxos = [...availableUtxos].sort((a, b) => {
 		const aValue = BigInt(a.value);
 		const bValue = BigInt(b.value);
-		return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+		return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
 	});
 
 	const selectedUtxos: Utxo[] = [];
