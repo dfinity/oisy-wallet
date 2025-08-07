@@ -31,6 +31,8 @@ export const prepareBtcSend = async ({
 	amount,
 	source
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
+	console.warn('Start prepareBtcSend: ', { network, amount, source });
+
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
@@ -89,21 +91,24 @@ export const prepareBtcSend = async ({
 		feeRateSatoshisPerVByte
 	});
 
+	console.warn('UTXO selection result:', selection);
+
 	// Check if there were insufficient funds during UTXO selection
 	if (!selection.sufficientFunds) {
+		// Check if this is a dust-related issue
+		if (selection.dustErrorParam) {
+			return {
+				feeSatoshis: selection.feeSatoshis,
+				utxos: selection.selectedUtxos,
+				error: BtcPrepareSendError.AmountBelowDustThreshold,
+				errorParam: selection.dustErrorParam
+			};
+		}
+
 		return {
 			feeSatoshis: selection.feeSatoshis,
 			utxos: filteredUtxos,
 			error: BtcPrepareSendError.InsufficientBalanceForFee
-		};
-	}
-
-	// Check if change would be dust (problematic for Bitcoin network)
-	if (selection.changeWouldBeDust) {
-		return {
-			feeSatoshis: selection.feeSatoshis,
-			utxos: selection.selectedUtxos,
-			error: BtcPrepareSendError.AmountBelowDustThreshold
 		};
 	}
 
@@ -128,8 +133,6 @@ export const getFeeRateFromPercentiles = async ({
 		network: mappedNetwork
 	});
 
-	console.warn('getCurrentBtcFeePercentiles() response: ', fee_percentiles);
-
 	if (isNullish(fee_percentiles) || fee_percentiles.length === 0) {
 		throw new Error('No fee percentiles available - cannot calculate transaction fee');
 	}
@@ -138,27 +141,18 @@ export const getFeeRateFromPercentiles = async ({
 	const medianIndex = Math.floor(fee_percentiles.length / 2);
 	const medianFeeMillisatsPerVByte = fee_percentiles[medianIndex];
 
-	console.warn('medianFeeMillisatsPerVByte: ', medianFeeMillisatsPerVByte);
-
 	// Convert from millisats to sats (divide by 1000)
 	const feeRateSatsPerVByte = medianFeeMillisatsPerVByte / 1000n;
 
 	// Apply minimum and maximum limits
-	const MIN_FEE_RATE = 10n; // 10 sat/vbyte minimum
+	const MIN_FEE_RATE = 10n; // 10 sat/vbyte minimum for reliability
 	const MAX_FEE_RATE = 100n; // 100 sat/vbyte maximum
 
 	if (feeRateSatsPerVByte < MIN_FEE_RATE) {
-		console.warn(
-			`Fee rate of ${feeRateSatsPerVByte} sat/vbyte is below minimum. Using minimum of ${MIN_FEE_RATE} sat/vbyte instead.`
-		);
-
 		return MIN_FEE_RATE;
 	}
 
 	if (feeRateSatsPerVByte > MAX_FEE_RATE) {
-		console.warn(
-			`Fee rate of ${feeRateSatsPerVByte} sat/vbyte is above maximum. Using maximum of ${MAX_FEE_RATE} sat/vbyte instead.`
-		);
 		return MAX_FEE_RATE;
 	}
 

@@ -12,4 +12,5 @@ export interface UtxosFee {
 	feeSatoshis: bigint;
 	utxos: Utxo[];
 	error?: BtcPrepareSendError;
+	errorParam?: string; // Generic string parameter for error context
 }
