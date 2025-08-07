@@ -88,12 +88,22 @@ export const prepareBtcSend = async ({
 		amountSatoshis,
 		feeRateSatoshisPerVByte
 	});
+
 	// Check if there were insufficient funds during UTXO selection
 	if (!selection.sufficientFunds) {
 		return {
 			feeSatoshis: selection.feeSatoshis,
 			utxos: filteredUtxos,
 			error: BtcPrepareSendError.InsufficientBalanceForFee
+		};
+	}
+
+	// Check if change would be dust (problematic for Bitcoin network)
+	if (selection.changeWouldBeDust) {
+		return {
+			feeSatoshis: selection.feeSatoshis,
+			utxos: selection.selectedUtxos,
+			error: BtcPrepareSendError.AmountBelowDustThreshold
 		};
 	}
 

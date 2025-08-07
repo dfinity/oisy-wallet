@@ -6,6 +6,7 @@ export interface UtxoSelectionResult {
 	selectedUtxos: Utxo[];
 	sufficientFunds: boolean;
 	feeSatoshis: bigint;
+	changeWouldBeDust: boolean;
 }
 
 /**
@@ -59,11 +60,14 @@ export const calculateUtxoSelection = ({
 	amountSatoshis: bigint;
 	feeRateSatoshisPerVByte: bigint;
 }): UtxoSelectionResult => {
+	const DUST_THRESHOLD = 1000n; // Match backend DUST_THRESHOLD
+
 	if (availableUtxos.length === 0) {
 		return {
 			selectedUtxos: [],
 			sufficientFunds: false,
-			feeSatoshis: ZERO
+			feeSatoshis: ZERO,
+			changeWouldBeDust: false
 		};
 	}
 
@@ -93,10 +97,15 @@ export const calculateUtxoSelection = ({
 
 		// Check if we have enough to cover amount and fee
 		if (totalInputValue >= totalRequired) {
+			// Calculate potential change amount
+			const changeAmount = totalInputValue - totalRequired;
+			const changeWouldBeDust = changeAmount > ZERO && changeAmount < DUST_THRESHOLD;
+
 			return {
 				selectedUtxos,
 				sufficientFunds: true,
-				feeSatoshis: estimatedFee // Send normal fee - let backend handle dust
+				feeSatoshis: estimatedFee,
+				changeWouldBeDust
 			};
 		}
 	}
@@ -111,7 +120,8 @@ export const calculateUtxoSelection = ({
 	return {
 		selectedUtxos,
 		sufficientFunds: false,
-		feeSatoshis: finalFee
+		feeSatoshis: finalFee,
+		changeWouldBeDust: false
 	};
 };
 

@@ -1,12 +1,18 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import { BTC_DUST_THRESHOLD_SATOSHIS } from '$btc/constants/btc.constants';
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
+	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
 	export let utxosFee: UtxosFee | undefined = undefined;
+
+	// Convert dust threshold to BTC for display
+	export let dustThresholdBtc =
+		Number(BTC_DUST_THRESHOLD_SATOSHIS) / (10 ** BTC_DECIMALS).toFixed(8);
 </script>
 
 {#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
@@ -41,7 +47,10 @@
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
 			<span data-tid="btc-send-form-amount-below-dust-threshold"
-				>{$i18n.send.assertion.amount_below_dust_threshold}</span
+				>{$i18n.send.assertion.amount_below_dust_threshold.replace(
+					'{amount}',
+					dustThresholdBtc
+				)}</span
 			>
 		</MessageBox>
 	</div>
