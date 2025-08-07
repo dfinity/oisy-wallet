@@ -1244,6 +1244,7 @@ interface I18nAi_assistant {
 		action_button_contacts_prompt: string;
 		send_message: string;
 		send_message_input_placeholder: string;
+		no_contacts_found_message: string;
 		loading: string;
 	};
 	errors: { unknown: string; no_response: string };

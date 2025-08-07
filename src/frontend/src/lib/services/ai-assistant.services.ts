@@ -6,11 +6,16 @@ import {
 	AI_ASSISTANT_SYSTEM_PROMPT,
 	AI_ASSISTANT_TOOLS
 } from '$lib/constants/ai-assistant.constants';
-import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
+import {
+	contacts,
+	extendedAddressContacts as extendedAddressContactsStore
+} from '$lib/derived/contacts.derived';
 import type {
 	AiAssistantContactUi,
 	ChatMessageContent,
-	ToolCallArgument
+	ToolCall,
+	ToolCallArgument,
+	ToolResult
 } from '$lib/types/ai-assistant';
 import type { ContactUi } from '$lib/types/contact';
 import {
@@ -18,7 +23,7 @@ import {
 	parseToAiAssistantContacts
 } from '$lib/utils/ai-assistant.utils';
 import type { Identity } from '@dfinity/agent';
-import { fromNullable, jsonReplacer, toNullable } from '@dfinity/utils';
+import { fromNullable, isNullish, jsonReplacer, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -38,22 +43,30 @@ export const askLlm = async ({
 	identity: Identity;
 }): Promise<ChatMessageContent> => {
 	const {
-		message: { content }
+		message: { content, tool_calls }
 	} = await llmChat({
 		request: {
 			model: AI_ASSISTANT_LLM_MODEL,
 			messages,
-			// TODO: implement tools
-			tools: toNullable()
+			tools: toNullable(AI_ASSISTANT_TOOLS)
 		},
 		identity
 	});
+	const toolResults: ToolResult[] = [];
+
+	if (nonNullish(tool_calls) && tool_calls.length > 0) {
+		for (const toolCall of tool_calls) {
+			const result = await executeTool({ toolCall, identity });
+
+			nonNullish(result) && toolResults.push(result);
+		}
+	}
 
 	return {
 		text: fromNullable(content),
 		tool: {
-			calls: [],
-			results: []
+			calls: tool_calls,
+			results: toolResults
 		}
 	};
 };
@@ -111,4 +124,36 @@ export const askLlmToFilterContacts = async ({
 		aiAssistantContacts: filteredAiAssistantContacts,
 		extendedAddressContacts
 	});
+};
+
+/**
+ * Executes a tool based on the name param returned by LLM.
+ *
+ * @async
+ * @param {Object} params - The parameters required to launch a tool.
+ * @param {Array} params.toolCall - A tool call description object returned by LLM.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<ChatMessageContent>} - Resolves with a tool result or undefined if tool name is unknown.
+ */
+export const executeTool = async ({
+	toolCall,
+	identity
+}: {
+	toolCall: ToolCall;
+	identity: Identity;
+}): Promise<ToolResult | undefined> => {
+	const {
+		function: { name, arguments: filterParams }
+	} = toolCall;
+
+	let result: ToolResult['result'] | undefined;
+
+	if (name === 'show_contacts') {
+		result =
+			isNullish(filterParams) || filterParams.length === 0
+				? get(contacts)
+				: await askLlmToFilterContacts({ filterParams, identity });
+	}
+
+	return { type: name as ToolResult['type'], result };
 };
