@@ -1520,6 +1520,7 @@
 			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
 			"send_message": "Gửi tin nhắn",
 			"send_message_input_placeholder": "Bạn muốn làm gì?",
+			"no_contacts_found_message": "",
 			"loading": "Đang suy nghĩ..."
 		},
 		"errors": {
