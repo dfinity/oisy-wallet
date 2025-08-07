@@ -33,7 +33,7 @@
 			"more_items": "+$items další",
 			"select": "Vybrat",
 			"language": "Jazyk",
-			"currency": ""
+			"currency": "Měna"
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!"
@@ -45,7 +45,7 @@
 			"open_details": "Otevřít podrobnosti",
 			"close_details": "Zavřít podrobnosti",
 			"switch_language": "Přepnout jazyk",
-			"switch_currency": ""
+			"switch_currency": "Přepnout měnu"
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena"
@@ -102,7 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralizované",
 			"logout": "Odhlásit se",
-			"lock": "",
+			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP a další",
 			"instant_and_private": "Okamžitý a soukromý přístup kdekoli",
@@ -515,7 +515,7 @@
 			"tooltip_toggle_balance": "Dvojitým kliknutím skryjete/zobrazíte zůstatek"
 		},
 		"alt": {
-			"toggle_privacy_mode": ""
+			"toggle_privacy_mode": "Zapnutí a vypnutí režimu soukromí"
 		}
 	},
 	"settings": {
@@ -820,10 +820,10 @@
 			"select": "Vybrat >",
 			"select_swap_provider": "Vybrat poskytovatele výměny",
 			"open_icp_swap": "Otevřít webové stránky ICP Swap",
-			"open_instructions_link": "",
-			"select_token": "",
-			"select_network_filter": "",
-			"withdrawing": ""
+			"open_instructions_link": "Otevřít odkaz na pokyny",
+			"select_token": "Vyberte token",
+			"select_network_filter": "Vybrat síť",
+			"withdrawing": "Stažení..."
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
@@ -1297,13 +1297,13 @@
 		"avatar": {
 			"default": "Výchozí avatar",
 			"avatar_for": "Avatar pro",
-			"avatar_loading": ""
+			"avatar_loading": "Avatar se načítá..."
 		},
 		"edit_avatar": {
-			"menu_title": "",
-			"upload_image": "",
-			"replace_image": "",
-			"remove_image": ""
+			"menu_title": "Kontaktní obrázek",
+			"upload_image": "Nahrát",
+			"replace_image": "Nahradit",
+			"remove_image": "Odstranit"
 		},
 		"show_contact": {
 			"title": "Kontakt",
