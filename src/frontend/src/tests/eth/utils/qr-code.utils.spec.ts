@@ -7,7 +7,6 @@ import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
-import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/qr-code.utils', () => ({
 	decodeQrCodeUrn: vi.fn()
@@ -28,7 +27,7 @@ describe('decodeQrCode', () => {
 		erc20Tokens: get(enabledErc20Tokens)
 	};
 
-	const mockDecodeQrCodeUrn = decodeQrCodeUrn as MockedFunction<typeof decodeQrCodeUrn>;
+	const mockDecodeQrCodeUrn = vi.mocked(decodeQrCodeUrn);
 
 	beforeEach(() => {
 		vi.clearAllMocks();

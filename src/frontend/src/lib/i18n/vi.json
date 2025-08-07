@@ -33,7 +33,7 @@
 			"more_items": "+$items mục khác",
 			"select": "Chọn",
 			"language": "Ngôn ngữ",
-			"currency": ""
+			"currency": "Tiền tệ"
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!"
@@ -45,7 +45,7 @@
 			"open_details": "Mở chi tiết",
 			"close_details": "Đóng chi tiết",
 			"switch_language": "Chuyển đổi ngôn ngữ",
-			"switch_currency": ""
+			"switch_currency": "Chuyển đổi tiền tệ"
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất"
@@ -102,6 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Phi tập trung",
 			"logout": "Đăng xuất",
+			"lock": "",
 			"authenticate": "Mở hoặc Tạo",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP và hơn thế nữa",
 			"instant_and_private": "Nhanh và riêng tư mọi lúc mọi nơi",
@@ -184,13 +185,13 @@
 			"website": "Hình ảnh của $dAppName"
 		},
 		"categories": {
-			"defi": "Tài chính phí tập trung",
+			"defi": "DeFi",
 			"social_media": "Mạng xã hội",
-			"verifiable_credentials": "Thông tin xác thực có thể xác minh",
+			"verifiable_credentials": "Thông tin xác thực",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
-			"game": "Game",
-			"tools": ""
+			"game": "Trò chơi",
+			"tools": "Khí cụ"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -465,12 +466,12 @@
 		"error": {
 			"no_alchemy_config": "Không có cấu hình Alchemy cho mạng $network",
 			"no_alchemy_provider": "Không có nhà cung cấp Alchemy cho mạng $network",
-			"no_alchemy_erc20_provider": "Không có nhà cung cấp Alchemy ERC20 cho mạng $network",
 			"no_etherscan_provider": "Không có nhà cung cấp Etherscan cho mạng $network",
 			"no_infura_provider": "Không có nhà cung cấp Infura cho mạng $network",
 			"no_infura_cketh_provider": "Không có nhà cung cấp Infura CkETH cho mạng $network",
 			"no_infura_erc20_provider": "Không có nhà cung cấp Infura ERC20 cho mạng $network",
-			"no_infura_erc721_provider": "",
+			"no_infura_erc721_provider": "Không có nhà cung cấp Infura ERC721 cho mạng $network",
+			"no_infura_erc1155_provider": "Không có nhà cung cấp Infura ERC1155 cho mạng $network",
 			"no_infura_erc20_icp_provider": "Không có nhà cung cấp Infura ERC20 Icp cho mạng $network",
 			"no_solana_network": "Không có mạng Solana cho mạng $network",
 			"eth_address_unknown": "Địa chỉ ETH không xác định.",
@@ -492,9 +493,10 @@
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
 			"erc20_custom_tokens": "",
+			"erc721_custom_tokens": "",
+			"erc1155_custom_tokens": "",
 			"erc20_user_tokens": "Lỗi khi tải các token người dùng ERC20.",
 			"spl_custom_tokens": "",
-			"erc721_custom_tokens": "",
 			"erc20_user_token": "Lỗi khi bật token đôi ERC20.",
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
@@ -506,7 +508,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Số dư của bạn",
-			"unavailable_balance": "Giá trị $ không khả dụng",
+			"unavailable_balance": "Giá trị $currencySymbol không khả dụng",
 			"hidden_balance": "Số dư của bạn bị ẩn",
 			"top_up": "Nạp tiền vào ví của bạn để bắt đầu sử dụng!",
 			"learn_more_about_erc20_icp": "Tìm hiểu thêm về ERC20 ICP trên Ethereum.",
@@ -658,7 +660,7 @@
 			"sending": "Đang gửi...",
 			"signing": "Đang ký...",
 			"signing_message": "Đang ký tin nhắn...",
-			"confirming": "",
+			"confirming": "Xác nhận...",
 			"network": "Mạng",
 			"source_network": "Mạng nguồn",
 			"destination_network": "Mạng đích",
@@ -818,8 +820,10 @@
 			"select": "Chọn >",
 			"select_swap_provider": "Chọn nhà cung cấp hoán đổi",
 			"open_icp_swap": "Mở trang web ICP Swap",
+			"open_instructions_link": "",
 			"select_token": "",
-			"select_network_filter": ""
+			"select_network_filter": "",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
@@ -827,9 +831,16 @@
 			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch hoán đổi.",
 			"slippage_exceeded": "$oisy_short bảo vệ bạn: Giao dịch nằm ngoài giới hạn trượt giá $maxSlippage% của bạn. Vui lòng điều chỉnh độ trượt tối đa và thử lại.",
 			"pool_not_found": "Hoán đổi thất bại. Không tìm thấy bể thanh khoản.",
-			"deposit_error": "Hoán đổi thất bại. Chúng tôi không thể gửi token của bạn vào bể thanh khoản. Vui lòng thử lại.",
+			"deposit_error": "",
 			"withdraw_failed": "Hoán đổi thất bại và rút tiền cũng thất bại. Vui lòng kiểm tra số dư chưa sử dụng của bạn và thử rút tiền thủ công: ",
-			"swap_failed_withdraw_success": "Hoán đổi thất bại. Token của bạn đã được hoàn lại thành công. Bạn có thể thử lại hoặc tăng giới hạn trượt giá."
+			"swap_failed_withdraw_success": "",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
+			"swap_failed_instruction_link": "",
+			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
@@ -908,7 +919,7 @@
 				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh."
 			},
 			"error": {
-				"loading_metadata": "Lỗi khi tải metadata của token.",
+				"loading_metadata": "",
 				"no_metadata": "Không có metadata nào được cung cấp cho token. Điều này không mong muốn.",
 				"unexpected_ledger": "Đã xảy ra lỗi trong khi xác thực ledger canister.",
 				"unexpected_index": "Đã xảy ra lỗi trong khi xác thực index canister.",
@@ -931,7 +942,7 @@
 				"import_token": "Nhập token",
 				"network": "Mạng",
 				"all_tokens_zero_balance": "Tất cả các token có số dư bằng 0.",
-				"enable_more_assets": ""
+				"enable_more_assets": "Kích hoạt thêm token"
 			},
 			"placeholder": {
 				"select_network": "Chọn mạng"
@@ -973,11 +984,11 @@
 			"invalid_contract_address": "Địa chỉ hợp đồng không hợp lệ.",
 			"invalid_token_address": "Địa chỉ token không hợp lệ.",
 			"invalid_ledger": "Token đã chọn không được liên kết với canister ledger của Icrc.",
+			"unrecognised_erc_interface": "",
 			"no_metadata": "Không có metadata nào được tìm thấy.",
 			"unexpected": "Đã xảy ra lỗi trong khi lưu token.",
 			"unexpected_hiding": "Đã xảy ra lỗi trong khi ẩn token.",
 			"already_available": "Token đã có sẵn.",
-			"loading_metadata": "Lỗi khi tải metadata của token.",
 			"not_toggleable": "Token không thể chuyển đổi, không thể ẩn.",
 			"incomplete_metadata": "Không có tên hoặc ký hiệu được cung cấp trong metadata.",
 			"duplicate_metadata": "Đã tồn tại một token có tên hoặc ký hiệu tương tự.",
@@ -988,7 +999,15 @@
 	},
 	"nfts": {
 		"text": {
-			"title": ""
+			"title": "",
+			"title_empty": "",
+			"description_empty": ""
+		},
+		"alt": {
+			"placeholder_image": "",
+			"card": {
+				"image": ""
+			}
 		}
 	},
 	"fee": {
@@ -1064,7 +1083,7 @@
 			"disconnected": "WalletConnect đã ngắt kết nối.",
 			"session_ended": "Phiên WalletConnect đã kết thúc.",
 			"connected": "WalletConnect đã kết nối.",
-			"transaction_executed": "",
+			"transaction_executed": "WalletConnect \"$method\" yêu cầu được thực hiện.",
 			"sign_executed": "Yêu cầu ký của WalletConnect đã được thực hiện."
 		},
 		"error": {
@@ -1123,11 +1142,11 @@
 			"unconfirmed": "Chưa xác nhận"
 		},
 		"type": {
-			"send": "",
-			"receive": "",
-			"withdraw": "",
-			"deposit": "",
-			"approve": "",
+			"send": "Gửi",
+			"receive": "Nhận",
+			"withdraw": "Rút",
+			"deposit": "Tiền gửi",
+			"approve": "Chấp thuận",
 			"burn": "",
 			"mint": ""
 		},
@@ -1277,13 +1296,14 @@
 		},
 		"avatar": {
 			"default": "Ảnh đại diện mặc định",
-			"avatar_for": "Ảnh đại diện cho"
+			"avatar_for": "Ảnh đại diện cho",
+			"avatar_loading": ""
 		},
 		"edit_avatar": {
-			"menu_title": "",
-			"upload_image": "",
-			"replace_image": "",
-			"remove_image": ""
+			"menu_title": "Chỉnh sửa hình đại diện",
+			"upload_image": "Tải hình đại diện lên",
+			"replace_image": "Thay thế hình đại diện",
+			"remove_image": "Xóa hình đại diện"
 		},
 		"show_contact": {
 			"title": "Liên hệ",
@@ -1459,52 +1479,52 @@
 	},
 	"earning": {
 		"text": {
-			"title": ""
+			"title": "Kiếm tiền"
 		},
 		"cards": {
-			"gold_title": "",
-			"gold_description": "",
-			"stablecoins_title": "",
-			"stablecoins_description": "",
-			"sprinkles_title": "",
-			"sprinkles_description": ""
+			"gold_title": "Vàng",
+			"gold_description": "GLDT Staking",
+			"stablecoins_title": "Stablecoins",
+			"stablecoins_description": "Sắp ra mắt",
+			"sprinkles_title": "Sprinkles",
+			"sprinkles_description": "Phần thưởng OISY"
 		}
 	},
 	"welcome": {
-		"title": "",
-		"subtitle": "",
-		"description": ""
+		"title": "Chào mừng đến với $oisy_short!",
+		"subtitle": "Sẵn sàng kiếm tiền?",
+		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu 4 người bạn và nhận một khoản tiền thưởng."
 	},
 	"temporal": {
 		"seconds_to_duration": {
-			"year": "",
-			"year_plural": "",
-			"month": "",
-			"month_plural": "",
-			"day": "",
-			"day_plural": "",
-			"hour": "",
-			"hour_plural": "",
-			"minute": "",
-			"minute_plural": "",
-			"second": "",
-			"second_plural": ""
+			"year": "năm",
+			"year_plural": "năm",
+			"month": "tháng",
+			"month_plural": "tháng",
+			"day": "ngày",
+			"day_plural": "ngày",
+			"hour": "giờ",
+			"hour_plural": "giờ",
+			"minute": "phút",
+			"minute_plural": "phút",
+			"second": "giây",
+			"second_plural": "giây"
 		}
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "",
-			"welcome_message": "",
-			"action_button_contacts_title": "",
-			"action_button_contacts_subtitle": "",
-			"action_button_contacts_prompt": "",
-			"send_message": "",
-			"send_message_input_placeholder": "",
-			"loading": ""
+			"title": "Trợ lý AI $oisy_short",
+			"welcome_message": "Xin chào! 👋 Tôi là OISY, trợ lý AI cá nhân của bạn. Đây là cách tôi có thể giúp bạn:",
+			"action_button_contacts_title": "Hiển thị danh bạ",
+			"action_button_contacts_subtitle": "Hiển thị danh bạ đã lưu của bạn",
+			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
+			"send_message": "Gửi tin nhắn",
+			"send_message_input_placeholder": "Bạn muốn làm gì?",
+			"loading": "Đang suy nghĩ..."
 		},
 		"errors": {
-			"unknown": "",
-			"no_response": ""
+			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",
+			"no_response": "Xin lỗi, tôi không nhận được phản hồi từ LLM."
 		}
 	}
 }

@@ -14,10 +14,9 @@
 		networkICP,
 		networkSolana
 	} from '$lib/derived/network.derived';
-	import { tokenToggleable } from '$lib/derived/token.derived';
+	import { pageToken, pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
@@ -29,8 +28,8 @@
 	const { testId, children }: Props = $props();
 
 	let visible = $state(false);
-	let button: HTMLButtonElement | undefined = $state();
-	let fromRoute: NavigationTarget | undefined = $state();
+	let button = $state<HTMLButtonElement | undefined>();
+	let fromRoute = $state<NavigationTarget | undefined>();
 
 	afterNavigate(({ from }) => {
 		fromRoute = from ?? undefined;
@@ -71,9 +70,9 @@
 		visible = false;
 	};
 
-	let hideTokenLabel: string = $derived(
+	let hideTokenLabel = $derived(
 		replacePlaceholders($i18n.tokens.hide.token, {
-			$token: nonNullish($token) ? getTokenDisplaySymbol($token) : ''
+			$token: nonNullish($pageToken) ? getTokenDisplaySymbol($pageToken) : ''
 		})
 	);
 </script>
@@ -91,7 +90,7 @@
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
 	<div class="flex flex-col gap-1">
-		{#if $tokenToggleable}
+		{#if $pageTokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} onclick={hideToken}>
 				{hideTokenLabel}
 			</ButtonMenu>

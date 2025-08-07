@@ -21,5 +21,7 @@ export const SPYX_TOKEN: RequiredSplToken = {
 	decimals: SPYX_DECIMALS,
 	icon: spyx,
 	address: 'XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W',
-	owner: TOKEN_2022_PROGRAM_ADDRESS
+	owner: TOKEN_2022_PROGRAM_ADDRESS,
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };

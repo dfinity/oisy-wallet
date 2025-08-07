@@ -46,7 +46,7 @@ import { splTokens } from '$sol/derived/spl.derived';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';

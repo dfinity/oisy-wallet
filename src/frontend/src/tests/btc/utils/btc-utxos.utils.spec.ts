@@ -9,7 +9,6 @@ import {
 } from '$btc/utils/btc-utxos.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
-import { describe, expect, it } from 'vitest';
 
 describe('btc-utxos.utils', () => {
 	const createMockUtxo = ({

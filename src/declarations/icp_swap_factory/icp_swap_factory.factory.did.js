@@ -35,6 +35,16 @@ export const idlFactory = ({ IDL }) => {
 		canisterId: IDL.Principal
 	});
 	const Result_8 = IDL.Variant({ ok: PoolData, err: Error });
+	const CreatePoolRecord = IDL.Record({
+		err: IDL.Opt(IDL.Text),
+		fee: IDL.Nat,
+		status: IDL.Text,
+		token0: Token,
+		token1: Token,
+		timestamp: IDL.Int,
+		caller: IDL.Principal,
+		poolId: IDL.Opt(IDL.Principal)
+	});
 	const PoolUpgradeTaskStep = IDL.Record({
 		isDone: IDL.Bool,
 		timestamp: IDL.Nat
@@ -68,6 +78,7 @@ export const idlFactory = ({ IDL }) => {
 	const Result_10 = IDL.Variant({
 		ok: IDL.Record({
 			infoCid: IDL.Principal,
+			positionIndexCid: IDL.Principal,
 			trustedCanisterManagerCid: IDL.Principal,
 			governanceCid: IDL.Opt(IDL.Principal),
 			passcodeManagerCid: IDL.Principal,
@@ -156,18 +167,20 @@ export const idlFactory = ({ IDL }) => {
 	const UpgradePoolArgs = IDL.Record({ poolIds: IDL.Vec(IDL.Principal) });
 	const Result = IDL.Variant({ ok: IDL.Text, err: Error });
 	const SwapFactory = IDL.Service({
+		activateWasm: IDL.Func([], [], []),
 		addPasscode: IDL.Func([IDL.Principal, Passcode], [Result_1], []),
-		addPoolControllers: IDL.Func([IDL.Principal, IDL.Vec(IDL.Principal)], [], []),
 		addPoolInstallers: IDL.Func([IDL.Vec(PoolInstaller)], [], []),
 		addPoolInstallersValidate: IDL.Func(
 			[IDL.Vec(PoolInstaller)],
 			[IDL.Variant({ Ok: IDL.Text, Err: IDL.Text })],
 			[]
 		),
+		batchAddInstallerControllers: IDL.Func([IDL.Vec(IDL.Principal)], [], []),
 		batchAddPoolControllers: IDL.Func([IDL.Vec(IDL.Principal), IDL.Vec(IDL.Principal)], [], []),
 		batchClearRemovedPool: IDL.Func([IDL.Vec(IDL.Principal)], [], []),
 		batchRemovePoolControllers: IDL.Func([IDL.Vec(IDL.Principal), IDL.Vec(IDL.Principal)], [], []),
 		batchRemovePools: IDL.Func([IDL.Vec(IDL.Principal)], [Result_1], []),
+		batchSetInstallerAdmins: IDL.Func([IDL.Vec(IDL.Principal)], [], []),
 		batchSetPoolAdmins: IDL.Func([IDL.Vec(IDL.Principal), IDL.Vec(IDL.Principal)], [], []),
 		batchSetPoolAvailable: IDL.Func([IDL.Vec(IDL.Principal), IDL.Bool], [], []),
 		batchSetPoolIcrc28TrustedOrigins: IDL.Func(
@@ -176,12 +189,16 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		batchSetPoolLimitOrderAvailable: IDL.Func([IDL.Vec(IDL.Principal), IDL.Bool], [], []),
+		clearChunks: IDL.Func([], [], []),
 		clearPoolUpgradeTaskHis: IDL.Func([], [], []),
-		clearRemovedPool: IDL.Func([IDL.Principal], [IDL.Text], []),
 		clearUpgradeFailedPoolList: IDL.Func([], [], []),
+		combineWasmChunks: IDL.Func([], [], []),
 		createPool: IDL.Func([CreatePoolArgs], [Result_8], []),
 		deletePasscode: IDL.Func([IDL.Principal, Passcode], [Result_1], []),
+		getActiveWasm: IDL.Func([], [IDL.Vec(IDL.Nat8)], ['query']),
 		getAdmins: IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
+		getCreatePoolRecords: IDL.Func([], [IDL.Vec(CreatePoolRecord)], ['query']),
+		getCreatePoolRecordsByCaller: IDL.Func([IDL.Principal], [IDL.Vec(CreatePoolRecord)], ['query']),
 		getCurrentUpgradeTask: IDL.Func([], [Result_13], ['query']),
 		getCycleInfo: IDL.Func([], [Result_12], []),
 		getGovernanceCid: IDL.Func([], [Result_11], ['query']),
@@ -197,8 +214,10 @@ export const idlFactory = ({ IDL }) => {
 		getPools: IDL.Func([], [Result_4], ['query']),
 		getPrincipalPasscodes: IDL.Func([], [Result_5], ['query']),
 		getRemovedPools: IDL.Func([], [Result_4], ['query']),
+		getStagingWasm: IDL.Func([], [IDL.Vec(IDL.Nat8)], ['query']),
 		getUpgradeFailedPoolList: IDL.Func([], [Result_3], ['query']),
 		getVersion: IDL.Func([], [IDL.Text], ['query']),
+		getWasmActiveStatus: IDL.Func([], [IDL.Bool], ['query']),
 		icrc10_supported_standards: IDL.Func(
 			[],
 			[IDL.Vec(IDL.Record({ url: IDL.Text, name: IDL.Text }))],
@@ -210,8 +229,6 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		icrc28_trusted_origins: IDL.Func([], [Icrc28TrustedOriginsResponse], []),
-		removePool: IDL.Func([GetPoolArgs], [IDL.Text], []),
-		removePoolControllers: IDL.Func([IDL.Principal, IDL.Vec(IDL.Principal)], [], []),
 		removePoolInstaller: IDL.Func([IDL.Principal], [], []),
 		removePoolInstallerValidate: IDL.Func(
 			[IDL.Principal],
@@ -227,10 +244,11 @@ export const idlFactory = ({ IDL }) => {
 			[IDL.Variant({ Ok: IDL.Text, Err: IDL.Text })],
 			[]
 		),
-		setPoolAdmins: IDL.Func([IDL.Principal, IDL.Vec(IDL.Principal)], [], []),
-		setPoolAvailable: IDL.Func([IDL.Principal, IDL.Bool], [], []),
+		setNextPoolVersion: IDL.Func([IDL.Text], [], []),
 		setUpgradePoolList: IDL.Func([UpgradePoolArgs], [Result_1], []),
-		upgradePoolTokenStandard: IDL.Func([IDL.Principal, IDL.Principal], [Result], [])
+		setWasmActive: IDL.Func([IDL.Bool], [], []),
+		upgradePoolTokenStandard: IDL.Func([IDL.Principal, IDL.Principal], [Result], []),
+		uploadWasmChunk: IDL.Func([IDL.Vec(IDL.Nat8)], [IDL.Nat], [])
 	});
 	return SwapFactory;
 };
@@ -242,6 +260,7 @@ export const init = ({ IDL }) => {
 		IDL.Principal,
 		IDL.Principal,
 		IDL.Principal,
-		IDL.Opt(IDL.Principal)
+		IDL.Opt(IDL.Principal),
+		IDL.Principal
 	];
 };

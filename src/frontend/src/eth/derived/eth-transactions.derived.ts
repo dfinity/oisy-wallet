@@ -1,5 +1,5 @@
 import { ethereumTokenId } from '$eth/derived/token.derived';
-import { ethTransactionsStore, type TransactionsData } from '$eth/stores/eth-transactions.store';
+import { ethTransactionsStore, type EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
@@ -7,13 +7,13 @@ import { ethAddress } from '$lib/derived/address.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
-import type { AnyTransactionUiWithToken, Transaction } from '$lib/types/transaction';
+import type { AnyTransactionUiWithToken } from '$lib/types/transaction';
 import type { KnownDestinations } from '$lib/types/transactions';
 import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const sortedEthTransactions: Readable<NonNullable<TransactionsData<Transaction>>> = derived(
+export const sortedEthTransactions: Readable<NonNullable<EthTransactionsData>> = derived(
 	[ethTransactionsStore, tokenWithFallback],
 	([$transactionsStore, { id: $tokenId }]) =>
 		($transactionsStore?.[$tokenId] ?? []).sort(

@@ -29,7 +29,10 @@
 
 	onDestroy(reset);
 
-	$: $authIdentity, init();
+	$effect(() => {
+		[$authIdentity];
+		init();
+	});
 
 	// We use specific fade parameters for the idle state due to the asynchronous communication between the relying party and the wallet.
 	// Because the idle state might be displayed when a client starts communication with the wallet, we add a small delay to prevent a minor glitch where the idle animation is briefly shown before the actual action is rendered.

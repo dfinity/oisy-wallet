@@ -4,7 +4,7 @@ import {
 	IC_CKETH_MINTER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import { eip1559TransactionPrice, withdrawErc20, withdrawEth } from '$icp/api/cketh-minter.api';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {

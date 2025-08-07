@@ -21,5 +21,7 @@ export const NFLXX_TOKEN: RequiredSplToken = {
 	decimals: NFLXX_DECIMALS,
 	icon: nflxx,
 	address: 'XsEH7wWfJJu2ZT3UCFeVfALnVA6CP5ur7Ee11KmzVpL',
-	owner: TOKEN_2022_PROGRAM_ADDRESS
+	owner: TOKEN_2022_PROGRAM_ADDRESS,
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };

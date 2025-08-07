@@ -18,7 +18,7 @@ import {
 	mockErc20HelperContractAddress,
 	mockEthHelperContractAddress
 } from '$tests/mocks/ck-minter.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import type { MinterInfo } from '@dfinity/cketh';
 
 const transaction: Transaction = {

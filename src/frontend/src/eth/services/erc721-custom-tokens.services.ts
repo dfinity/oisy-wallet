@@ -1,5 +1,4 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { loadCustomTokens } from '$eth/services/erc721.services';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
@@ -22,7 +21,7 @@ export const saveCustomTokens = async ({
 	const customTokens: CustomToken[] = tokens.map((token) =>
 		toCustomToken({
 			...token,
-			chainId: ETHEREUM_NETWORK.chainId,
+			chainId: token.network.chainId,
 			networkKey: 'Erc721'
 		})
 	);

@@ -21,5 +21,7 @@ export const MCDX_TOKEN: RequiredSplToken = {
 	decimals: MCDX_DECIMALS,
 	icon: mcdx,
 	address: 'XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2',
-	owner: TOKEN_2022_PROGRAM_ADDRESS
+	owner: TOKEN_2022_PROGRAM_ADDRESS,
+	mintAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs',
+	freezeAuthority: 'JDq14BWvqCRFNu1krb12bcRpbGtJZ1FLEakMw6FdxJNs'
 };

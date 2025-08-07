@@ -9,7 +9,9 @@
 	import {
 		CONTACT_POPOVER_TRIGGER,
 		CONTACT_POPOVER_MENU,
-		CONTACT_POPOVER_MENU_ITEM
+		CONTACT_POPOVER_MENU_ITEM,
+		CONTACT_REPLACE_MENU_ITEM,
+		CONTACT_REMOVE_MENU_ITEM
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -17,13 +19,13 @@
 		fileInput?: HTMLInputElement;
 		onReplaceImage: () => void;
 		onRemoveImage: () => void;
-		imageUrl?: string;
+		imageUrl?: string | null;
 	}
 
 	const {
 		fileInput = $bindable<HTMLInputElement | undefined>(),
-		onReplaceImage = () => {},
-		onRemoveImage = () => {},
+		onReplaceImage,
+		onRemoveImage,
 		imageUrl
 	}: Props = $props();
 
@@ -31,29 +33,31 @@
 
 	let button = $state<HTMLButtonElement | undefined>();
 
-	const avatarMenuItems = nonNullish(imageUrl)
-		? [
-				{
-					logo: IconImage,
-					title: $i18n.address_book.edit_avatar.replace_image,
-					action: onReplaceImage
-				},
-				{
-					logo: IconTrash,
-					title: $i18n.address_book.edit_avatar.remove_image,
-					action: onRemoveImage,
-					testId: 'IconTrash'
-				}
-			]
-		: [
-				{
-					logo: IconImage,
-					title: $i18n.address_book.edit_avatar.upload_image,
-					action: onReplaceImage
-				}
-			];
-
-	const items = $derived(avatarMenuItems);
+	const items = $derived(
+		nonNullish(imageUrl)
+			? [
+					{
+						logo: IconImage,
+						title: $i18n.address_book.edit_avatar.replace_image,
+						action: onReplaceImage,
+						testId: CONTACT_REPLACE_MENU_ITEM
+					},
+					{
+						logo: IconTrash,
+						title: $i18n.address_book.edit_avatar.remove_image,
+						action: onRemoveImage,
+						testId: CONTACT_REMOVE_MENU_ITEM
+					}
+				]
+			: [
+					{
+						logo: IconImage,
+						title: $i18n.address_book.edit_avatar.upload_image,
+						action: onReplaceImage,
+						testId: CONTACT_REPLACE_MENU_ITEM
+					}
+				]
+	);
 </script>
 
 <ButtonIcon

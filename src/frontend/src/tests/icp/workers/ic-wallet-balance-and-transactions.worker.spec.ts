@@ -19,7 +19,7 @@ import {
 	type IcrcIndexNgTransactionWithId
 } from '@dfinity/ledger-icrc';
 import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
-import { describe, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('ic-wallet-balance-and-transactions.worker', () => {

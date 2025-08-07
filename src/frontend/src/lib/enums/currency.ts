@@ -1,11 +1,20 @@
 // These are three-letter ISO 4217 currency codes
 // https://www.iso.org/iso-4217-currency-codes.html
 export enum Currency {
-	USD = 'usd',
-	EUR = 'eur',
+	AED = 'aed',
+	BRL = 'brl',
+	CAD = 'cad',
 	CHF = 'chf',
-	GBP = 'gbp',
-	JPY = 'jpy',
 	CNY = 'cny',
-	CZK = 'czk'
+  CZK = 'czk',
+	EUR = 'eur',
+	GBP = 'gbp',
+	INR = 'inr',
+	JPY = 'jpy',
+	KRW = 'krw',
+	NGN = 'ngn',
+	SAR = 'sar',
+	SGD = 'sgd',
+	USD = 'usd',
+	VND = 'vnd'
 }

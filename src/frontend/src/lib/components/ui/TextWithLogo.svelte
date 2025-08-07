@@ -1,9 +1,15 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 
-	export let name: string;
-	export let logo: 'start' | 'end' = 'end';
-	export let description: string | undefined = undefined;
+	interface Props {
+		name: string;
+		logo?: 'start' | 'end';
+		description?: string;
+		icon: Snippet;
+	}
+
+	let { name, logo = 'end', description, icon }: Props = $props();
 </script>
 
 <span
@@ -19,5 +25,5 @@
 			<span class="text-left text-xs leading-none text-tertiary">{description}</span>
 		{/if}
 	</span>
-	<slot name="icon" />
+	{@render icon()}
 </span>

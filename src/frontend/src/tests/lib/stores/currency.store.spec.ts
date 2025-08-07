@@ -1,14 +1,21 @@
+import { TRACK_CHANGE_CURRENCY } from '$lib/constants/analytics.contants';
 import { Currency } from '$lib/enums/currency';
+import * as analytics from '$lib/services/analytics.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { initCurrencyStore, type CurrencyStore } from '$lib/stores/currency.store';
 import type { CurrencyData } from '$lib/types/currency';
 import { get as getStorage } from '$lib/utils/storage.utils';
+import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/utils/storage.utils', () => ({
 	set: vi.fn(),
 	get: vi.fn(),
 	del: vi.fn()
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('currency.store', () => {
@@ -104,6 +111,34 @@ describe('currency.store', () => {
 					2,
 					Currency.USD
 				);
+			});
+
+			it('should track event when switching currency', () => {
+				const spyTrackEvent = vi.spyOn(analytics, 'trackEvent');
+
+				mockStore.switchCurrency(Currency.CHF);
+
+				expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_CHANGE_CURRENCY,
+					metadata: {
+						currency: Currency.CHF,
+						source: 'landing-page'
+					}
+				});
+
+				vi.clearAllMocks();
+
+				mockAuthSignedIn();
+
+				mockStore.switchCurrency(Currency.EUR);
+
+				expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_CHANGE_CURRENCY,
+					metadata: {
+						currency: Currency.EUR,
+						source: 'app'
+					}
+				});
 			});
 		});
 	});

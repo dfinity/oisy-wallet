@@ -26,10 +26,10 @@
 	export let tokenData: Partial<AddTokenData>;
 
 	let networkName: string | undefined = network?.name;
-	$: networkName,
+	$: (networkName,
 		(network = nonNullish(networkName)
 			? $networks.find(({ name }) => name === networkName)
-			: undefined);
+			: undefined));
 
 	let isIcpNetwork = false;
 	$: isIcpNetwork = isNetworkIdICP(network?.id);

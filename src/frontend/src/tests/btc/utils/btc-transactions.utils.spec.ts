@@ -148,6 +148,53 @@ describe('mapBtcTransaction', () => {
 
 		expect(result).toEqual(expectedResult);
 	});
+
+	it('should map correctly a self-transaction', () => {
+		const transaction = {
+			...sendTransaction,
+			block_index: mockBtcTransactionUi.blockNumber,
+			inputs: [
+				{
+					...mockBtcTransaction.inputs[0],
+					prev_out: {
+						...mockBtcTransaction.inputs[0].prev_out,
+						addr: mockBtcAddress,
+						value: 45_235
+					}
+				}
+			],
+			out: [
+				{
+					...mockBtcTransaction.out[0],
+					addr: mockBtcAddress,
+					spent: false,
+					value: 1_000
+				},
+				{
+					...mockBtcTransaction.out[1],
+					addr: mockBtcAddress,
+					spent: true,
+					value: 43_955
+				}
+			]
+		} as BitcoinTransaction;
+		const result = mapBtcTransaction({
+			transaction,
+			btcAddress: mockBtcAddress,
+			latestBitcoinBlockHeight:
+				(mockBtcTransactionUi.blockNumber ?? 0) + CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+		});
+		const expectedResult = {
+			...mockBtcTransactionUi,
+			from: mockBtcAddress,
+			to: [mockBtcAddress],
+			value: BigInt(transaction.inputs[0].prev_out.value),
+			type: 'send',
+			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
+		};
+
+		expect(result).toEqual(expectedResult);
+	});
 });
 
 describe('sortBtcTransactions', () => {

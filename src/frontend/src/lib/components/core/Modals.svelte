@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import HideTokenModal from '$eth/components/tokens/HideTokenModal.svelte';
+	import EthHideTokenModal from '$eth/components/tokens/EthHideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
@@ -35,7 +35,7 @@
 
 {#if $authSignedIn}
 	{#if $modalHideToken}
-		<HideTokenModal fromRoute={$modalHideTokenData} />
+		<EthHideTokenModal fromRoute={$modalHideTokenData} />
 	{:else if $modalIcHideToken}
 		<IcHideTokenModal fromRoute={$modalIcHideTokenData} />
 	{:else if $modalSolHideToken}

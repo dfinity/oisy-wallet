@@ -122,31 +122,25 @@ const emptyIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<v
 	}
 };
 
-const emptyIdbBtcAddressMainnet = (): Promise<void> => emptyIdbStore(deleteIdbBtcAddressMainnet);
-
-const emptyIdbEthAddress = (): Promise<void> => emptyIdbStore(deleteIdbEthAddress);
-
-const emptyIdbSolAddress = (): Promise<void> => emptyIdbStore(deleteIdbSolAddressMainnet);
-
-const emptyIdbIcTokens = (): Promise<void> => emptyIdbStore(deleteIdbIcTokens);
-
-// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
-const emptyIdbEthTokensDeprecated = (): Promise<void> =>
-	emptyIdbStore(deleteIdbEthTokensDeprecated);
-
-const emptyIdbEthTokens = (): Promise<void> => emptyIdbStore(deleteIdbEthTokens);
-
-const emptyIdbSolTokens = (): Promise<void> => emptyIdbStore(deleteIdbSolTokens);
-
-const emptyIdbBtcTransactions = (): Promise<void> => emptyIdbStore(deleteIdbBtcTransactions);
-
-const emptyIdbEthTransactions = (): Promise<void> => emptyIdbStore(deleteIdbEthTransactions);
-
-const emptyIdbIcTransactions = (): Promise<void> => emptyIdbStore(deleteIdbIcTransactions);
-
-const emptyIdbSolTransactions = (): Promise<void> => emptyIdbStore(deleteIdbSolTransactions);
-
-const emptyIdbBalances = (): Promise<void> => emptyIdbStore(deleteIdbBalances);
+const deleteIdbStoreList = [
+	// Addresses
+	deleteIdbBtcAddressMainnet,
+	deleteIdbEthAddress,
+	deleteIdbSolAddressMainnet,
+	// Tokens
+	deleteIdbIcTokens,
+	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+	deleteIdbEthTokensDeprecated,
+	deleteIdbEthTokens,
+	deleteIdbSolTokens,
+	// Transactions
+	deleteIdbBtcTransactions,
+	deleteIdbEthTransactions,
+	deleteIdbIcTransactions,
+	deleteIdbSolTransactions,
+	// Balances
+	deleteIdbBalances
+];
 
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
@@ -166,20 +160,7 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([
-			emptyIdbBtcAddressMainnet(),
-			emptyIdbEthAddress(),
-			emptyIdbSolAddress(),
-			emptyIdbIcTokens(),
-			emptyIdbEthTokensDeprecated(),
-			emptyIdbEthTokens(),
-			emptyIdbSolTokens(),
-			emptyIdbBtcTransactions(),
-			emptyIdbEthTransactions(),
-			emptyIdbIcTransactions(),
-			emptyIdbSolTransactions(),
-			emptyIdbBalances()
-		]);
+		await Promise.all(deleteIdbStoreList.map(emptyIdbStore));
 	}
 
 	await clearSessionStorage();
@@ -197,7 +178,7 @@ const logout = async ({
 	// Auth: Delegation and identity are cleared from indexedDB by agent-js so, we do not need to clear these
 
 	// Preferences: We do not clear local storage as well. It contains anonymous information such as the selected theme.
-	// Information the user want to preserve across sign-in. e.g. if I select the light theme, logout and sign-in again, I am happy if the dapp still uses the light theme.
+	// Information the user wants to preserve across sign-in. e.g. if I select the light theme, logout and sign-in again, I am happy if the dapp still uses the light theme.
 
 	// We reload the page to make sure all the states are cleared
 	window.location.reload();

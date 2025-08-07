@@ -31,7 +31,9 @@
 
 <SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={invalid}>
 	<EthFeeDisplay slot="fee">
-		<Html slot="label" text={$i18n.fee.text.max_fee_eth} />
+		{#snippet label()}
+			<Html text={$i18n.fee.text.max_fee_eth} />
+		{/snippet}
 	</EthFeeDisplay>
 
 	<ReviewNetwork slot="network" sourceNetwork={$sendToken.network} />

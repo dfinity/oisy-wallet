@@ -1,12 +1,18 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
-import { getNftsByNetworks } from '$lib/utils/nfts.utils';
+import {
+	getNftsByNetworks,
+	mapTokenToCollection,
+	parseMetadataResourceUrl
+} from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
-import { mockValidNft } from '$tests/mocks/nfts.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('nfts.utils', () => {
 	const erc721Tokens: Erc721CustomToken[] = [
@@ -15,29 +21,29 @@ describe('nfts.utils', () => {
 	];
 
 	const mockNft1: Nft = {
-		...mockValidNft,
-		contract: {
-			...mockValidNft.contract,
+		...mockValidErc721Nft,
+		collection: {
+			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
 	};
 
 	const mockNft2: Nft = {
-		...mockValidNft,
+		...mockValidErc721Nft,
 		id: parseNftId(12632),
-		contract: {
-			...mockValidNft.contract,
+		collection: {
+			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
 	};
 
 	const mockNft3: Nft = {
-		...mockValidNft,
+		...mockValidErc721Nft,
 		id: parseNftId(843764),
-		contract: {
-			...mockValidNft.contract,
+		collection: {
+			...mockValidErc721Nft.collection,
 			address: DE_GODS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
 		}
@@ -57,12 +63,12 @@ describe('nfts.utils', () => {
 
 			const customMockNft1: Nft = {
 				...mockNft1,
-				contract: { ...mockNft1.contract, network: ETHEREUM_NETWORK }
+				collection: { ...mockNft1.collection, network: ETHEREUM_NETWORK }
 			};
 
 			const customMockNft2: Nft = {
 				...mockNft2,
-				contract: { ...mockNft2.contract, network: ETHEREUM_NETWORK }
+				collection: { ...mockNft2.collection, network: ETHEREUM_NETWORK }
 			};
 
 			const result: NftsByNetwork = getNftsByNetworks({
@@ -101,15 +107,15 @@ describe('nfts.utils', () => {
 		it('should return empty lists for tokens that do not have matching nfts', () => {
 			const customMockNft1: Nft = {
 				...mockNft1,
-				contract: { ...mockNft1.contract, address: mockEthAddress }
+				collection: { ...mockNft1.collection, address: mockEthAddress }
 			};
 			const customMockNft2: Nft = {
 				...mockNft2,
-				contract: { ...mockNft2.contract, address: mockEthAddress }
+				collection: { ...mockNft2.collection, address: mockEthAddress }
 			};
 			const customMockNft3: Nft = {
 				...mockNft3,
-				contract: { ...mockNft3.contract, address: mockEthAddress }
+				collection: { ...mockNft3.collection, address: mockEthAddress }
 			};
 
 			const result: NftsByNetwork = getNftsByNetworks({
@@ -157,6 +163,92 @@ describe('nfts.utils', () => {
 			const expectedResult = {};
 
 			expect(result).toEqual(expectedResult);
+		});
+	});
+
+	describe('parseMetadataResourceUrl', () => {
+		const mockError = new NftError(123456, PEPE_TOKEN.address);
+
+		it('should raise an error if URL is not a parseable URL', () => {
+			const url = 'invalid-url';
+
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+		});
+
+		it('should return the same URL if not IPFS protocol', () => {
+			const url = 'https://example.com/metadata.json';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result).toBeInstanceOf(URL);
+			expect(result?.href).toBe(url);
+		});
+
+		it('should transform a valid ipfs:// URL to ipfs.io', () => {
+			const url = 'ipfs://Qm12345abcde/metadata.json';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result).toBeInstanceOf(URL);
+			expect(result?.href).toBe('https://ipfs.io/ipfs/Qm12345abcde/metadata.json');
+		});
+
+		it('should handle malformed IPFS path', () => {
+			const url = 'ipfs://';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('https://ipfs.io/ipfs/');
+		});
+
+		it('should handle transformed IPFS URL with emojis', () => {
+			const url = 'ipfs://??//💣';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('https://ipfs.io/ipfs/??//%F0%9F%92%A3');
+		});
+
+		it('should handle IPFS URL that is not valid per UrlSchema', () => {
+			const url = 'ipfs:??//💣';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('ipfs:??//%F0%9F%92%A3');
+		});
+
+		it('should handle empty IPFS string', () => {
+			const url = 'ipfs:// ';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('ipfs:/');
+		});
+
+		it('should not allow URL with localhost', () => {
+			const url = 'http://localhost:3000/some-data';
+
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+		});
+	});
+
+	describe('mapTokenToCollection', () => {
+		it('should map token correctly', () => {
+			const result = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN);
+
+			expect(result).toEqual({
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
+				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
+				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
+				network: AZUKI_ELEMENTAL_BEANS_TOKEN.network,
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+			});
+		});
+
+		it('should not map empty name and symbol', () => {
+			const result = mapTokenToCollection({ ...AZUKI_ELEMENTAL_BEANS_TOKEN, name: '', symbol: '' });
+
+			expect(result).toEqual({
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
+				network: AZUKI_ELEMENTAL_BEANS_TOKEN.network,
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+			});
 		});
 	});
 });

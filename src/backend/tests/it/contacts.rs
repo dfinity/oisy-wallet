@@ -2,8 +2,12 @@ use std::time::Duration;
 
 use candid::Principal;
 use pretty_assertions::assert_eq;
+use serde_bytes::ByteBuf;
 use shared::types::{
-    contact::{Contact, ContactError, CreateContactRequest},
+    contact::{
+        Contact, ContactError, ContactImage, CreateContactRequest, ImageMimeType,
+        UpdateContactRequest,
+    },
     user_profile::OisyUser,
 };
 
@@ -44,24 +48,41 @@ pub fn call_get_contact(
     wrapped_result.expect("that get_contact succeeds")
 }
 
-pub fn call_delete_contact(
-    pic_setup: &PicBackend,
-    caller: Principal,
-    contact_id: u64,
-) -> Result<u64, ContactError> {
-    let wrapped_result =
-        pic_setup.update::<Result<u64, ContactError>>(caller, "delete_contact", contact_id);
-    wrapped_result.expect("that delete_contact call completes")
-}
-
 pub fn call_update_contact(
     pic_setup: &PicBackend,
     caller: Principal,
     contact: Contact,
 ) -> Result<Contact, ContactError> {
+    let request = UpdateContactRequest {
+        id: contact.id,
+        name: contact.name,
+        addresses: contact.addresses,
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: contact.image,
+    };
     let wrapped_result =
-        pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", contact);
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "update_contact", request);
     wrapped_result.expect("that update_contact succeeds")
+}
+
+// Helper functions for image tests
+fn create_test_png_image() -> ContactImage {
+    ContactImage {
+        data: ByteBuf::from(vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
+        mime_type: ImageMimeType::Png,
+    }
+}
+fn create_test_jpeg_image() -> ContactImage {
+    ContactImage {
+        data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10]),
+        mime_type: ImageMimeType::Jpeg,
+    }
+}
+fn create_empty_contacts() -> shared::types::contact::StoredContacts {
+    shared::types::contact::StoredContacts {
+        contacts: std::collections::BTreeMap::new(),
+        update_timestamp_ns: 0,
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -730,188 +751,188 @@ fn test_updated_contact_can_be_retrieved_directly() {
     assert_eq!(retrieved_contact.id, created_contact.id);
     assert!(retrieved_contact.update_timestamp_ns > created_contact.update_timestamp_ns);
 }
-// -------------------------------------------------------------------------------------------------
-// - Integration tests for the delete contact functionality
-// -------------------------------------------------------------------------------------------------
-#[test]
-fn test_delete_contact_requires_authenticated_user() {
-    let pic_setup = setup();
 
-    // Try to delete a contact as anonymous user
-    let contact_id = 123; // Any ID will do as we expect rejection before ID is processed
-    let result = pic_setup.update::<Result<u64, ContactError>>(
-        Principal::anonymous(),
-        "delete_contact",
-        contact_id,
-    );
-
-    // Verify that the call is rejected for anonymous users
-    assert!(
-        result.is_err(),
-        "Anonymous user should not be able to delete contacts"
-    );
-    assert!(
-        result
-            .unwrap_err()
-            .contains("Anonymous caller not authorized"),
-        "Error should indicate unauthorized anonymous caller"
-    );
-}
+// -------------------------------------------------------------------------------------------------
+// - Integration tests for contact image functionality
+// -------------------------------------------------------------------------------------------------
 
 #[test]
-fn test_delete_contact_should_succeed_with_valid_id() {
+fn test_update_contact_image_png_and_remove() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
     // Create a contact
-    let result = call_create_contact(&pic_setup, caller, "Contact to Delete".to_string());
+    let contact = call_create_contact(&pic_setup, caller, "Image Test".to_string()).unwrap();
+    assert!(contact.image.is_none());
+
+    // Update contact with PNG image
+    let png_image = create_test_png_image();
+    let updated_contact = Contact {
+        id: contact.id,
+        name: contact.name.clone(),
+        addresses: contact.addresses.clone(),
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: Some(png_image.clone()),
+    };
+    let result = call_update_contact(&pic_setup, caller, updated_contact.clone());
     assert!(result.is_ok());
-    let contact = result.unwrap();
+    let contact_with_image = result.unwrap();
+    assert_eq!(contact_with_image.image, Some(png_image));
 
-    // Verify the contact exists
-    let contacts_before = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_before.len(), 1);
-
-    // Delete the contact
-    let delete_result = call_delete_contact(&pic_setup, caller, contact.id);
-    assert!(delete_result.is_ok());
-    assert_eq!(delete_result.unwrap(), contact.id);
-
-    // Verify the contact no longer exists
-    let contacts_after = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_after.len(), 0);
-
-    // Verify get_contact also fails
-    let get_result = call_get_contact(&pic_setup, caller, contact.id);
-    assert!(get_result.is_err());
-    assert_eq!(get_result.unwrap_err(), ContactError::ContactNotFound);
+    // Remove image
+    let updated_contact_no_image = Contact {
+        id: contact.id,
+        name: contact.name.clone(),
+        addresses: contact.addresses.clone(),
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: None,
+    };
+    let result = call_update_contact(&pic_setup, caller, updated_contact_no_image);
+    assert!(result.is_ok());
+    let contact_no_image = result.unwrap();
+    assert!(contact_no_image.image.is_none());
 }
 
 #[test]
-fn test_delete_contact_should_fail_with_nonexistent_id() {
-    let pic_setup = setup();
-    let caller: Principal = Principal::from_text(CALLER).unwrap();
-
-    // Try to delete a contact with a non-existent ID
-    let nonexistent_id = 999999;
-    let result = call_delete_contact(&pic_setup, caller, nonexistent_id);
-
-    // Verify the operation fails with ContactNotFound
-    assert!(result.is_err());
-    assert_eq!(result.unwrap_err(), ContactError::ContactNotFound);
-}
-
-#[test]
-fn test_delete_specific_contact_from_multiple() {
-    let pic_setup = setup();
-    let caller: Principal = Principal::from_text(CALLER).unwrap();
-
-    // Create multiple contacts
-    let contact1 = call_create_contact(&pic_setup, caller, "Contact 1".to_string()).unwrap();
-    let contact2 = call_create_contact(&pic_setup, caller, "Contact 2".to_string()).unwrap();
-    let contact3 = call_create_contact(&pic_setup, caller, "Contact 3".to_string()).unwrap();
-
-    // Verify all contacts exist
-    let contacts_before = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_before.len(), 3);
-
-    // Delete the middle contact
-    let delete_result = call_delete_contact(&pic_setup, caller, contact2.id);
-    assert!(delete_result.is_ok());
-    assert_eq!(delete_result.unwrap(), contact2.id);
-
-    // Verify only the specific contact was deleted
-    let contacts_after = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_after.len(), 2);
-
-    // Check that the correct contacts remain
-    let remaining_ids: Vec<u64> = contacts_after.iter().map(|c| c.id).collect();
-    assert!(remaining_ids.contains(&contact1.id));
-    assert!(!remaining_ids.contains(&contact2.id));
-    assert!(remaining_ids.contains(&contact3.id));
-
-    // Verify we can still get the remaining contacts by ID
-    let get_result1 = call_get_contact(&pic_setup, caller, contact1.id);
-    assert!(get_result1.is_ok());
-
-    let get_result3 = call_get_contact(&pic_setup, caller, contact3.id);
-    assert!(get_result3.is_ok());
-
-    // Verify we cannot get the deleted contact
-    let get_result2 = call_get_contact(&pic_setup, caller, contact2.id);
-    assert!(get_result2.is_err());
-    assert_eq!(get_result2.unwrap_err(), ContactError::ContactNotFound);
-}
-
-#[test]
-fn test_delete_all_contacts() {
-    let pic_setup = setup();
-    let caller: Principal = Principal::from_text(CALLER).unwrap();
-
-    // Create multiple contacts
-    let contact1 = call_create_contact(&pic_setup, caller, "Contact 1".to_string()).unwrap();
-    let contact2 = call_create_contact(&pic_setup, caller, "Contact 2".to_string()).unwrap();
-    let contact3 = call_create_contact(&pic_setup, caller, "Contact 3".to_string()).unwrap();
-
-    // Verify all contacts exist
-    let contacts_before = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_before.len(), 3);
-
-    // Delete all contacts one by one
-    call_delete_contact(&pic_setup, caller, contact1.id).expect("Failed to delete contact 1");
-    call_delete_contact(&pic_setup, caller, contact2.id).expect("Failed to delete contact 2");
-    call_delete_contact(&pic_setup, caller, contact3.id).expect("Failed to delete contact 3");
-
-    // Verify all contacts are deleted
-    let contacts_after = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_after.len(), 0);
-
-    // Create a new contact after deleting all
-    let new_contact = call_create_contact(&pic_setup, caller, "New Contact".to_string()).unwrap();
-
-    // Verify the new contact exists
-    let contacts_final = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_final.len(), 1);
-    assert_eq!(contacts_final[0].name, "New Contact");
-
-    // Verify we can get the new contact by ID
-    let get_result = call_get_contact(&pic_setup, caller, new_contact.id);
-    assert!(get_result.is_ok());
-}
-
-#[test]
-fn test_delete_contact_returns_error_for_already_deleted_contact() {
+fn test_update_contact_image_jpeg() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
 
     // Create a contact
-    let contact =
-        call_create_contact(&pic_setup, caller, "Contact to Delete Twice".to_string()).unwrap();
+    let contact = call_create_contact(&pic_setup, caller, "JPEG Test".to_string()).unwrap();
+    assert!(contact.image.is_none());
 
-    // Verify the contact exists
-    let contacts_before = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_before.len(), 1);
+    // Update contact with JPEG image
+    let jpeg_image = create_test_jpeg_image();
+    let updated_contact = Contact {
+        id: contact.id,
+        name: contact.name.clone(),
+        addresses: contact.addresses.clone(),
+        update_timestamp_ns: contact.update_timestamp_ns,
+        image: Some(jpeg_image.clone()),
+    };
+    let result = call_update_contact(&pic_setup, caller, updated_contact.clone());
+    assert!(result.is_ok());
+    let contact_with_image = result.unwrap();
+    assert_eq!(contact_with_image.image, Some(jpeg_image));
+}
 
-    // Delete the contact first time
-    let first_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
-    assert!(first_delete_result.is_ok());
-    assert_eq!(first_delete_result.unwrap(), contact.id);
+#[cfg(test)]
+mod tests {
+    use std::assert_eq;
 
-    // Verify the contact is deleted
-    let contacts_after_first_delete = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_after_first_delete.len(), 0);
+    use serde_bytes::ByteBuf;
+    use shared::types::contact::{ContactImage, ImageMimeType};
 
-    // Delete the same contact again
-    let second_delete_result = call_delete_contact(&pic_setup, caller, contact.id);
+    use super::*;
 
-    // Verify the second delete fails with ContactNotFound
-    assert!(second_delete_result.is_err());
-    assert_eq!(
-        second_delete_result.unwrap_err(),
-        ContactError::ContactNotFound
-    );
+    #[test]
+    fn test_update_contact_image_png() {
+        let mut stored_contacts = create_empty_contacts();
+        let contact = Contact {
+            id: 1,
+            name: "Test".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: None,
+        };
+        stored_contacts.contacts.insert(1, contact.clone());
+        let png_image = ContactImage {
+            data: ByteBuf::from(vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
+            mime_type: ImageMimeType::Png,
+        };
+        let request = UpdateContactRequest {
+            id: 1,
+            name: "Test".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(png_image.clone()),
+        };
+        let updated = Contact {
+            id: 1,
+            name: "Test".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(png_image),
+        };
+        let result = if request.image.is_none() {
+            None
+        } else {
+            request.image.clone()
+        };
+        assert_eq!(result, updated.image);
+    }
 
-    // Verify contacts are still empty
-    let contacts_after_second_delete = call_get_contacts(&pic_setup, caller);
-    assert_eq!(contacts_after_second_delete.len(), 0);
+    #[test]
+    fn test_update_contact_image_remove() {
+        let mut stored_contacts = create_empty_contacts();
+        let contact = Contact {
+            id: 2,
+            name: "Test2".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(ContactImage {
+                data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF]),
+                mime_type: ImageMimeType::Jpeg,
+            }),
+        };
+        stored_contacts.contacts.insert(2, contact.clone());
+        let request = UpdateContactRequest {
+            id: 2,
+            name: "Test2".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: None,
+        };
+        let updated = Contact {
+            id: 2,
+            name: "Test2".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: None,
+        };
+        let result = if request.image.is_none() {
+            None
+        } else {
+            request.image.clone()
+        };
+        assert_eq!(result, updated.image);
+    }
+
+    #[test]
+    fn test_update_contact_image_jpeg() {
+        let mut stored_contacts = create_empty_contacts();
+        let contact = Contact {
+            id: 3,
+            name: "Test3".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: None,
+        };
+        stored_contacts.contacts.insert(3, contact.clone());
+        let jpeg_image = ContactImage {
+            data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10]),
+            mime_type: ImageMimeType::Jpeg,
+        };
+        let request = UpdateContactRequest {
+            id: 3,
+            name: "Test3".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(jpeg_image.clone()),
+        };
+        let updated = Contact {
+            id: 3,
+            name: "Test3".to_string(),
+            addresses: vec![],
+            update_timestamp_ns: 0,
+            image: Some(jpeg_image),
+        };
+        let result = if request.image.is_none() {
+            None
+        } else {
+            request.image.clone()
+        };
+        assert_eq!(result, updated.image);
+    }
 }

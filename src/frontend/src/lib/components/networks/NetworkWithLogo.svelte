@@ -12,5 +12,7 @@
 </script>
 
 <TextWithLogo name={network.name} {logo}>
-	<NetworkLogo slot="icon" {network} />
+	{#snippet icon()}
+		<NetworkLogo {network} />
+	{/snippet}
 </TextWithLogo>

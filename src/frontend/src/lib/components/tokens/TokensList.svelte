@@ -5,7 +5,6 @@
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import Listener from '$lib/components/core/Listener.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -138,11 +137,9 @@
 					{:else}
 						{@const { token } = tokenOrGroup}
 
-						<Listener {token}>
-							<div class="transition duration-300 hover:bg-primary">
-								<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
-							</div>
-						</Listener>
+						<div class="transition duration-300 hover:bg-primary">
+							<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+						</div>
 					{/if}
 				</div>
 			{/each}

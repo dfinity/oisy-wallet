@@ -15,7 +15,7 @@ import {
 	type BuildOnramperLinkParams
 } from '$lib/utils/onramper.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
 
 describe('onramper.utils', () => {
