@@ -4,14 +4,37 @@ import type {
 	ExtendedAddressContactUi
 } from '$lib/types/contact';
 
+export interface ChatMessageContent {
+	text?: string;
+	tool?: {
+		calls: ToolCall[];
+		results: ToolResult[];
+	};
+}
+
 export interface ChatMessage {
 	role: 'user' | 'assistant' | 'system';
-	content: string;
+	data: ChatMessageContent;
+}
+
+export interface ToolCallArgument {
+	name: string;
+	value: string;
+}
+
+interface ToolFunction {
+	name: string;
+	arguments: ToolCallArgument[];
+}
+
+export interface ToolCall {
+	id: string;
+	function: ToolFunction;
 }
 
 export interface ToolResult {
 	type: 'show_contacts';
-	result: ContactUi[];
+	result?: ContactUi[];
 }
 
 export interface AiAssistantContactUi
