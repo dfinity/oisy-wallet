@@ -5,7 +5,6 @@ import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
 import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
-import type { OptionIdentity } from './identity';
 import type { Amount, OptionAmount } from './send';
 
 export type SwapSelectTokenType = 'source' | 'destination';
@@ -137,11 +136,13 @@ export interface SwapParams {
 }
 
 export interface IcpSwapWithdrawParams {
-	identity: OptionIdentity;
+	identity: Identity;
 	canisterId: string;
 	tokenId: string;
 	amount: bigint;
 	fee: bigint;
+	sourceToken: IcTokenToggleable;
+	destinationToken: IcTokenToggleable;
 	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
 }
 

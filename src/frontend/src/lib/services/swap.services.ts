@@ -328,7 +328,9 @@ export const fetchIcpSwap = async ({
 			tokenId: sourceLedgerCanisterId,
 			amount: parsedSwapAmount,
 			fee: sourceTokenFee,
-			setFailedProgressStep
+			setFailedProgressStep,
+			sourceToken,
+			destinationToken
 		});
 
 		progress(ProgressStepsSwap.UPDATE_UI);
@@ -401,7 +403,9 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 	tokenId,
 	amount,
 	fee,
-	setFailedProgressStep
+	setFailedProgressStep,
+	sourceToken,
+	destinationToken
 }: IcpSwapWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
 	const baseParams = {
 		identity,
@@ -420,7 +424,12 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 	} catch (_: unknown) {
 		try {
 			// Second withdrawal attempt
-			await withdraw(baseParams);
+			await withdrawUserUnusedBalance({
+				identity,
+				canisterId,
+				sourceToken,
+				destinationToken
+			});
 
 			return {
 				code: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS,
