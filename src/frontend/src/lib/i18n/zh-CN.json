@@ -102,7 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% 去中心化",
 			"logout": "退出登录",
-			"lock": "",
+			"lock": "锁定",
 			"authenticate": "打开或创建",
 			"asset_types": "比特币、Solana、以太坊、ICP 等",
 			"instant_and_private": "随时随地实现即时且私密的访问",
@@ -426,7 +426,7 @@
 			"by": "来自",
 			"dfinity_foundation": "DFINITY 基金会",
 			"copyright": "© 2025",
-			"ai_assistant_console_button": ""
+			"ai_assistant_console_button": "AI助手控制台按钮"
 		},
 		"alt": {
 			"dfinity": "访问 DFINITY 基金会官网"
@@ -515,7 +515,7 @@
 			"tooltip_toggle_balance": "双击隐藏/显示余额"
 		},
 		"alt": {
-			"toggle_privacy_mode": ""
+			"toggle_privacy_mode": "切换隐私模式"
 		}
 	},
 	"settings": {
@@ -736,7 +736,7 @@
 			"unexpected_utxos_fee": "计算交易手续费时发生错误。",
 			"unable_to_retrieve_amount": "无法获取金额（n/a）",
 			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
-			"solana_confirmation_failed": ""
+			"solana_confirmation_failed": "Solana确认失败"
 		}
 	},
 	"convert": {
@@ -820,10 +820,10 @@
 			"select": "选择 >",
 			"select_swap_provider": "选择兑换服务商",
 			"open_icp_swap": "打开 ICP Swap 网站",
-			"open_instructions_link": "",
+			"open_instructions_link": "打开说明链接",
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
-			"withdrawing": ""
+			"withdrawing": "正在取款"
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -831,16 +831,16 @@
 			"unexpected_missing_data": "初始化兑换交易时发生错误。",
 			"slippage_exceeded": "$oisy_short 已保护你：本次交易超过了你设置的 $maxSlippage% 滑点容忍度。请调整最大滑点后再试。",
 			"pool_not_found": "兑换失败，未找到兑换池。",
-			"deposit_error": "",
+			"deposit_error": "存款错误",
 			"withdraw_failed": "兑换失败，退款也失败。请检查未使用余额并尝试手动提现：",
-			"swap_failed_withdraw_success": "",
-			"withdraw_failed_first_part": "",
-			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": "",
-			"manually_withdraw_success": "",
-			"manually_withdraw_failed": "",
-			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": ""
+			"swap_failed_withdraw_success": "兑换失败，取款成功",
+			"withdraw_failed_first_part": "取款失败第一部分",
+			"withdraw_failed_second_part": "取款失败第二部分",
+			"swap_failed_instruction_link": "兑换失败说明链接",
+			"manually_withdraw_success": "手动取款成功",
+			"manually_withdraw_failed": "手动取款失败",
+			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
+			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功"
 		}
 	},
 	"buy": {
@@ -919,7 +919,7 @@
 				"custom_tokens_not_supported": "所选网络不支持自定义代币。"
 			},
 			"error": {
-				"loading_metadata": "",
+				"loading_metadata": "正在加载元数据",
 				"no_metadata": "未提供代币的元数据。此为异常情况。",
 				"unexpected_ledger": "验证账本 Canister 时发生错误。",
 				"unexpected_index": "验证索引 Canister 时发生错误。",
@@ -984,7 +984,7 @@
 			"invalid_contract_address": "合约地址无效。",
 			"invalid_token_address": "代币地址无效。",
 			"invalid_ledger": "所选代币未链接至 ICRC Ledger Canister。",
-			"unrecognised_erc_interface": "",
+			"unrecognised_erc_interface": "无法识别的ERC接口",
 			"no_metadata": "未获取到任何元数据。",
 			"unexpected": "保存代币时发生错误。",
 			"unexpected_hiding": "隐藏代币时发生错误。",
@@ -999,14 +999,14 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "",
-			"title_empty": "",
-			"description_empty": ""
+			"title": "标题",
+			"title_empty": "标题为空",
+			"description_empty": "描述为空"
 		},
 		"alt": {
-			"placeholder_image": "",
+			"placeholder_image": "图片占位",
 			"card": {
-				"image": ""
+				"image": "图片"
 			}
 		}
 	},
@@ -1297,7 +1297,7 @@
 		"avatar": {
 			"default": "默认头像",
 			"avatar_for": "$contact 的头像",
-			"avatar_loading": ""
+			"avatar_loading": "头像加载中"
 		},
 		"edit_avatar": {
 			"menu_title": "联系人图片",
@@ -1513,18 +1513,18 @@
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "",
-			"welcome_message": "",
-			"action_button_contacts_title": "",
-			"action_button_contacts_subtitle": "",
-			"action_button_contacts_prompt": "",
-			"send_message": "",
-			"send_message_input_placeholder": "",
-			"loading": ""
+			"title": "标题",
+			"welcome_message": "欢迎信息",
+			"action_button_contacts_title": "联系人标题按钮",
+			"action_button_contacts_subtitle": "联系人副标题按钮",
+			"action_button_contacts_prompt": "联系人提示按钮",
+			"send_message": "发送消息",
+			"send_message_input_placeholder": "发送消息输入占位符",
+			"loading": "加载中"
 		},
 		"errors": {
-			"unknown": "",
-			"no_response": ""
+			"unknown": "未知",
+			"no_response": "无响应"
 		}
 	}
 }
