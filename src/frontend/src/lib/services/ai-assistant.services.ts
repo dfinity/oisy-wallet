@@ -23,7 +23,7 @@ import {
 	parseToAiAssistantContacts
 } from '$lib/utils/ai-assistant.utils';
 import type { Identity } from '@dfinity/agent';
-import { fromNullable, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
+import { fromNullable, isNullish, jsonReplacer, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -43,22 +43,30 @@ export const askLlm = async ({
 	identity: Identity;
 }): Promise<ChatMessageContent> => {
 	const {
-		message: { content }
+		message: { content, tool_calls }
 	} = await llmChat({
 		request: {
 			model: AI_ASSISTANT_LLM_MODEL,
 			messages,
-			// TODO: implement tools
-			tools: toNullable()
+			tools: toNullable(AI_ASSISTANT_TOOLS)
 		},
 		identity
 	});
+	const toolResults: ToolResult[] = [];
+
+	if (nonNullish(tool_calls) && tool_calls.length > 0) {
+		for (const toolCall of tool_calls) {
+			const result = await executeTool({ toolCall, identity });
+
+			nonNullish(result) && toolResults.push(result);
+		}
+	}
 
 	return {
 		text: fromNullable(content),
 		tool: {
-			calls: [],
-			results: []
+			calls: tool_calls,
+			results: toolResults
 		}
 	};
 };
