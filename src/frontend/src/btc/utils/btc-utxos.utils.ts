@@ -1,12 +1,9 @@
-import { BTC_DUST_THRESHOLD_SATOSHIS } from '$btc/constants/btc.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 import { uint8ArrayToHexString } from '@dfinity/utils';
 
 export interface UtxoSelectionResult {
 	selectedUtxos: Utxo[];
-	totalInputValue: bigint;
-	changeAmount: bigint;
 	sufficientFunds: boolean;
 	feeSatoshis: bigint;
 }
@@ -50,8 +47,8 @@ export const estimateTransactionSize = ({
 
 /**
  * Main function to select UTXOs for a transaction with fee consideration
- * This function iteratively selects UTXOs and calculates fees until sufficient funds are found
- * It mirrors the backend behavior for dust change handling
+ * This function calculates fees for the frontend estimation, but lets the backend
+ * handle actual dust change behavior in build_p2wpkh_transaction
  */
 export const calculateUtxoSelection = ({
 	availableUtxos,
@@ -65,8 +62,6 @@ export const calculateUtxoSelection = ({
 	if (availableUtxos.length === 0) {
 		return {
 			selectedUtxos: [],
-			totalInputValue: ZERO,
-			changeAmount: ZERO,
 			sufficientFunds: false,
 			feeSatoshis: ZERO
 		};
@@ -87,70 +82,21 @@ export const calculateUtxoSelection = ({
 		selectedUtxos.push(utxo);
 		totalInputValue += BigInt(utxo.value);
 
-		// Calculate fee assuming we might need a change output
-		const txSizeWithChange = estimateTransactionSize({
+		// Calculate fee assuming we need a change output (worst case)
+		// The backend will handle dust change by not creating the output
+		const txSize = estimateTransactionSize({
 			numInputs: selectedUtxos.length,
-			numOutputs: 2 // recipient + change
+			numOutputs: 2 // recipient + potential change
 		});
-		const feeWithChange = BigInt(txSizeWithChange) * feeRateSatoshisPerVByte;
-		const totalRequiredWithChange = amountSatoshis + feeWithChange;
+		const estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
+		const totalRequired = amountSatoshis + estimatedFee;
 
-		// Check if we have enough for amount + fee with change output
-		if (totalInputValue >= totalRequiredWithChange) {
-			const changeAmount = totalInputValue - totalRequiredWithChange;
-
-			// If change would be dust, recalculate without change output
-			if (changeAmount > ZERO && changeAmount < BTC_DUST_THRESHOLD_SATOSHIS) {
-				// Recalculate fee for transaction without change output
-				const txSizeNoChange = estimateTransactionSize({
-					numInputs: selectedUtxos.length,
-					numOutputs: 1 // only recipient
-				});
-				const feeNoChange = BigInt(txSizeNoChange) * feeRateSatoshisPerVByte;
-				const totalRequiredNoChange = amountSatoshis + feeNoChange;
-
-				// Check if we still have enough (we should, since we're paying less fee)
-				if (totalInputValue >= totalRequiredNoChange) {
-					// The "dust" becomes part of the fee (backend behavior)
-					const actualFee = totalInputValue - amountSatoshis;
-
-					return {
-						selectedUtxos,
-						totalInputValue,
-						changeAmount: ZERO,
-						sufficientFunds: true,
-						feeSatoshis: actualFee
-					};
-				}
-			} else {
-				// Normal case: change is either zero or >= dust threshold
-				return {
-					selectedUtxos,
-					totalInputValue,
-					changeAmount,
-					sufficientFunds: true,
-					feeSatoshis: feeWithChange
-				};
-			}
-		}
-
-		// Also try without change output in case we can make exact payment
-		const txSizeNoChange = estimateTransactionSize({
-			numInputs: selectedUtxos.length,
-			numOutputs: 1
-		});
-		const feeNoChange = BigInt(txSizeNoChange) * feeRateSatoshisPerVByte;
-		const totalRequiredNoChange = amountSatoshis + feeNoChange;
-
-		if (totalInputValue >= totalRequiredNoChange) {
-			const changeAmount = totalInputValue - totalRequiredNoChange;
-
+		// Check if we have enough to cover amount and fee
+		if (totalInputValue >= totalRequired) {
 			return {
 				selectedUtxos,
-				totalInputValue,
-				changeAmount,
 				sufficientFunds: true,
-				feeSatoshis: feeNoChange
+				feeSatoshis: estimatedFee // Send normal fee - let backend handle dust
 			};
 		}
 	}
@@ -164,8 +110,6 @@ export const calculateUtxoSelection = ({
 
 	return {
 		selectedUtxos,
-		totalInputValue,
-		changeAmount: ZERO,
 		sufficientFunds: false,
 		feeSatoshis: finalFee
 	};
