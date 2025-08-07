@@ -15,7 +15,6 @@ import {
 } from '$lib/services/swap.services';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import type { OptionIdentity } from '$lib/types/identity';
 import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -29,6 +28,14 @@ vi.mock(import('$env/icp-swap.env'), async (importOriginal) => {
 		ICP_SWAP_ENABLED: true
 	};
 });
+
+// vi.mock('$lib/services/swap.services', async () => {
+// 	const actual = await vi.importActual('$lib/services/swap.services');
+// 	return {
+// 		...actual,
+// 		withdrawUserUnusedBalance: vi.fn().mockResolvedValue(undefined)
+// 	};
+// });
 
 vi.mock('$lib/api/kong_backend.api', () => ({
 	kongSwapAmounts: vi.fn(),
@@ -207,18 +214,22 @@ describe('loadKongSwapTokens', () => {
 });
 
 describe('withdrawICPSwapAfterFailedSwap', () => {
-	const identity = {} as OptionIdentity;
+	const identity = mockIdentity;
 	const canisterId = 'test-canister-id';
 	const tokenId = 'icp';
 	const amount = 1000n;
 	const fee = 10n;
+	const sourceToken = mockValidIcToken as IcTokenToggleable;
+	const destinationToken = mockValidIcrcToken as IcTokenToggleable;
 
 	const baseParams = {
 		identity,
 		canisterId,
 		tokenId,
 		amount,
-		fee
+		fee,
+		sourceToken,
+		destinationToken
 	};
 
 	beforeEach(() => {
@@ -237,25 +248,36 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 	it('should succeed on second withdraw attempt after first fails', async () => {
 		vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail'));
 
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 100n,
+			balance1: 0n
+		});
+
+		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
+
 		const result = await withdrawICPSwapAfterFailedSwap(baseParams);
 
 		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
 		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS);
 	});
 
 	it('should return failed code if both attempts fail and call setFailedProgressStep', async () => {
 		const setFailedProgressStep = vi.fn();
 
-		vi.mocked(icpSwapPool.withdraw)
-			.mockRejectedValueOnce(new Error('fail1'))
-			.mockRejectedValueOnce(new Error('fail2'));
+		vi.mocked(icpSwapPool.withdraw).mockRejectedValue(new Error('fail1'));
+
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 0n,
+			balance1: 0n
+		});
 
 		const result = await withdrawICPSwapAfterFailedSwap({
 			...baseParams,
 			setFailedProgressStep
 		});
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
+		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
 		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED);
 	});
 });

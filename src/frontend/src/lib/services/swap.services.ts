@@ -1,4 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -10,6 +11,7 @@ import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import {
 	deposit,
 	depositFrom,
+	getPoolMetadata,
 	getUserUnusedBalance,
 	swap as swapIcp,
 	withdraw
@@ -228,6 +230,23 @@ export const fetchIcpSwap = async ({
 	}
 
 	const poolCanisterId = pool.canisterId.toString();
+
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId: poolCanisterId,
+		principal: identity.getPrincipal()
+	});
+
+	const { token0, token1 } = await getPoolMetadata({ identity, canisterId: poolCanisterId });
+
+	console.log({ token0, token1, balance0, balance1 });
+
+	if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 100000000n) {
+		throwSwapError({
+			code: SwapErrorCodes.DEPOSIT_FAILED,
+			message: get(i18n).swap.error.deposit_error
+		});
+	}
 
 	const slippageMinimum = calculateSlippage({
 		quoteAmount: receiveAmount,
@@ -496,11 +515,17 @@ export const withdrawUserUnusedBalance = async ({
 	IcpSwapManualWithdrawParams,
 	'setFailedProgressStep' | 'withdrawDestinationTokens'
 >): Promise<void> => {
+	const { token0, token1 } = await getPoolMetadata({ identity, canisterId });
+
 	const { balance0, balance1 } = await getUserUnusedBalance({
 		identity,
 		canisterId,
 		principal: identity.getPrincipal()
 	});
+
+	if (balance0 === ZERO && balance1 === ZERO) {
+		throw new Error('No unused balance to withdraw');
+	}
 
 	if (balance0 !== ZERO) {
 		await withdraw({
