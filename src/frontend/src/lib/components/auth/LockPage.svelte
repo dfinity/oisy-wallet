@@ -28,7 +28,10 @@
 
 	const handleUnlock = async () => {
 		const { success } = await signIn({});
-		authLocked.set(false);
+		authLocked.setLock({
+			locked: false,
+			source: 'login from lock page'
+		});
 
 		if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
@@ -36,7 +39,10 @@
 	};
 
 	const handleLogout = async () => {
-		authLocked.set(false);
+		authLocked.setLock({
+			locked: false,
+			source: 'logout from lock page'
+		});
 		await signOut({ resetUrl: true });
 	};
 </script>
@@ -69,10 +75,12 @@
 			class="flex w-full max-w-md flex-col content-center items-center justify-center gap-5 rounded-[24px] bg-[var(--color-background-surface)] p-6 text-center text-[var(--color-text-primary)] shadow-lg transition-all duration-500 ease-in-out md:rounded-[28px] md:p-8"
 		>
 			<OisyWalletLogoLink />
+
 			<div class="my-7">
 				<h2 class="mb-2 text-2xl font-semibold"> {$i18n.lock.text.title_part_1}</h2>
 				<span class="text-gray-600 mb-6">{$i18n.lock.text.title_part_2}</span>
 			</div>
+
 			<div class="w-full">
 				<Button fullWidth styleClass="w-full mb-3" onclick={handleUnlock}
 					>{$i18n.lock.text.unlock}
@@ -83,7 +91,8 @@
 					<IconLogout />
 				</Button>
 			</div>
-			<p class="text-gray-500 text-xs">
+
+			<p class="tertiary text-xs">
 				{$i18n.lock.text.logout_clear_cash_message}
 			</p>
 		</div>
@@ -113,5 +122,4 @@
 		backdrop-filter: blur(35px);
 		z-index: -1;
 	}
-
 </style>

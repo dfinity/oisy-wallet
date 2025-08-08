@@ -33,7 +33,9 @@
 
 	const handleLock = async () => {
 		onHidePopover?.();
-		authLocked.set(true);
+		authLocked.toggleLock({
+			source: 'menu lock button'
+		});
 		await lockSession({ resetUrl: false });
 	};
 </script>
