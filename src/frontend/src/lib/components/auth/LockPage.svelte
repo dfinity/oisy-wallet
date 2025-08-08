@@ -20,7 +20,7 @@
 
 	$effect(() => {
 		const currentTheme = $themeStore ?? 'light';
-		 
+
 		import(`$lib/assets/lockpage_assets/lock-image-1440-${currentTheme}.webp`)
 			.then((mod) => (src = mod.default))
 			.catch(() => console.error('Failed to load background image'));
@@ -39,20 +39,27 @@
 		authLocked.set(false);
 		await signOut({ resetUrl: true });
 	};
-
 </script>
 
 <div class="background-overlay flex flex-col">
 	<div class="background-blur">
 		{#if src}
 			<Responsive up="xl">
-				<Img src={src} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
+				<Img {src} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
 			</Responsive>
 			<Responsive up="md" down="lg">
-				<Img src={src.replace('1440', '768')} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
+				<Img
+					src={src.replace('1440', '768')}
+					alt={ariaLabel}
+					styleClass="h-full object-contain mx-auto object-top"
+				/>
 			</Responsive>
 			<Responsive down="sm">
-				<Img src={src.replace('1440', '480')} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
+				<Img
+					src={src.replace('1440', '480')}
+					alt={ariaLabel}
+					styleClass="h-full object-contain mx-auto object-top"
+				/>
 			</Responsive>
 		{/if}
 	</div>
