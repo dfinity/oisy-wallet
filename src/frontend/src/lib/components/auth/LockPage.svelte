@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { themeStore } from '@dfinity/gix-components';
-	import { onMount } from 'svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import IconKey from '$lib/components/icons/IconKey.svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { signOut, signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -17,21 +17,11 @@
 	const modalId = Symbol();
 
 	let src = $state<string | undefined>(undefined);
-	let width = $state<number>(window.innerWidth);
-
-	onMount(() => {
-		const handleResize = () => (width = window.innerWidth);
-		window.addEventListener('resize', handleResize);
-		return () => window.removeEventListener('resize', handleResize);
-	});
-
-	const resolution = $derived(width >= 1440 ? '1440' : width >= 480 ? '768' : '480');
 
 	$effect(() => {
-		const currentResolution = resolution;
 		const currentTheme = $themeStore ?? 'light';
-
-		import(`$lib/assets/lockpage_assets/lock-image-${currentResolution}-${currentTheme}.webp`)
+		 
+		import(`$lib/assets/lockpage_assets/lock-image-1440-${currentTheme}.webp`)
 			.then((mod) => (src = mod.default))
 			.catch(() => console.error('Failed to load background image'));
 	});
@@ -44,10 +34,12 @@
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
 	};
+
 	const handleLogout = async () => {
 		authLocked.set(false);
 		await signOut({ resetUrl: true });
 	};
+	
 </script>
 
 <div class="background-overlay flex flex-col">
@@ -56,7 +48,15 @@
 		style="background-color: color-mix(in srgb, var(--color-background-page) 30%, transparent); backdrop-filter: blur(35px);"
 	>
 		{#if src}
-			<Img {src} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
+			<Responsive up="xl">
+				<Img src={src} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
+			</Responsive>
+			<Responsive up="md" down="lg">
+				<Img src={src.replace('1440', '768')} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
+			</Responsive>
+			<Responsive down="sm">
+				<Img src={src.replace('1440', '480')} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
+			</Responsive>
 		{/if}
 	</div>
 
