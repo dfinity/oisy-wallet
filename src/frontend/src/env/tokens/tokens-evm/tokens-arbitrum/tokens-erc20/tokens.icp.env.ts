@@ -3,7 +3,7 @@ import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import type { RequiredEvmErc20Token } from '$evm/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import icp from 'icp/assets/icp-light.svg';
+import icp from '$icp/assets/icp-light.svg';
 
 export const ICP_DECIMALS = 8;
 
