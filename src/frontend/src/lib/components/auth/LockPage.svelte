@@ -7,11 +7,10 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { signOut } from '$lib/services/auth.services';
-	import { signIn } from '$lib/services/auth.services';
+	import { signOut , signIn } from '$lib/services/auth.services';
+		import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { lockedPageShow } from '$lib/utils/locked.utils';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
@@ -45,7 +44,7 @@
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
 	};
-	const handleLogout = async () =>  {
+	const handleLogout = async () => {
 		lockedPageShow.set(false);
 		await signOut({ resetUrl: true });
 	};
