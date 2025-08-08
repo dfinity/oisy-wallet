@@ -39,14 +39,11 @@
 		authLocked.set(false);
 		await signOut({ resetUrl: true });
 	};
-	
+
 </script>
 
 <div class="background-overlay flex flex-col">
-	<div
-		class="fixed inset-0 z-[-1] flex items-center justify-center"
-		style="background-color: color-mix(in srgb, var(--color-background-page) 30%, transparent); backdrop-filter: blur(35px);"
-	>
+	<div class="background-blur">
 		{#if src}
 			<Responsive up="xl">
 				<Img src={src} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
@@ -97,6 +94,17 @@
 		height: 100%;
 		z-index: 4;
 		background-color: var(--color-background-page);
-		backdrop-filter: blur(35px);
 	}
+
+	.background-blur {
+		position: fixed;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: color-mix(in srgb, var(--color-background-page) 30%, transparent);
+		backdrop-filter: blur(35px);
+		z-index: -1;
+	}
+
 </style>
