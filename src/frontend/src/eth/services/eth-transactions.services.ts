@@ -2,7 +2,9 @@ import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import type { LoadEthereumTransactionsParams } from '$eth/types/eth-transactions';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
@@ -18,42 +20,31 @@ import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadEthereumTransactions = ({
-	networkId,
 	tokenId,
-	updateOnly = false,
-	silent = false
-}: {
-	tokenId: TokenId;
-	networkId: NetworkId;
-	updateOnly?: boolean;
-	silent?: boolean;
-}): Promise<ResultSuccess> => {
+	silent = false,
+	...rest
+}: LoadEthereumTransactionsParams): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(tokenId) || isSupportedEvmNativeTokenId(tokenId)) {
-		return loadEthTransactions({ networkId, tokenId, updateOnly, silent });
+		return loadEthTransactions({ tokenId, silent, ...rest });
 	}
 
-	return loadErc20Transactions({ networkId, tokenId, updateOnly });
+	return loadErc20Transactions({ tokenId, ...rest });
 };
 
 // If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
 // Plus, we add new transactions to the existing ones.
-export const reloadEthereumTransactions = (params: {
-	tokenId: TokenId;
-	networkId: NetworkId;
-	silent?: boolean;
-}): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
+export const reloadEthereumTransactions = (
+	params: LoadEthereumTransactionsParams
+): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
 const loadEthTransactions = async ({
 	networkId,
 	tokenId,
+	ckMinterInfoAddresses,
+	ethAddress,
 	updateOnly = false,
 	silent = false
-}: {
-	networkId: NetworkId;
-	tokenId: TokenId;
-	updateOnly?: boolean;
-	silent?: boolean;
-}): Promise<ResultSuccess> => {
+}: LoadEthereumTransactionsParams): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
@@ -75,7 +66,7 @@ const loadEthTransactions = async ({
 		const transactions = await transactionsProviders({ address });
 
 		const certifiedTransactions = transactions.map((transaction) => ({
-			data: transaction,
+			data: mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress }),
 			// We set the certified property to false because we don't have a way to certify ETH transactions for now.
 			certified: false
 		}));
@@ -119,6 +110,8 @@ const loadEthTransactions = async ({
 const loadErc20Transactions = async ({
 	networkId,
 	tokenId,
+	ckMinterInfoAddresses,
+	ethAddress,
 	updateOnly = false
 }: {
 	networkId: NetworkId;
@@ -165,7 +158,7 @@ const loadErc20Transactions = async ({
 		});
 
 		const certifiedTransactions = transactions.map((transaction) => ({
-			data: transaction,
+			data: mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress }),
 			// We set the certified property to false because we don't have a way to certify ERC20 transactions for now.
 			certified: false
 		}));
