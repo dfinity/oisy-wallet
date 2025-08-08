@@ -5,6 +5,7 @@ import {
 	ICP_NETWORK
 } from '$env/networks/networks.icp.env';
 import icpLight from '$icp/assets/icp-light.svg';
+import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic-token';
 import type { RequiredToken, TokenId } from '$lib/types/token';
@@ -32,6 +33,7 @@ export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated'>> = {
 	ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
 	indexCanisterId: ICP_INDEX_CANISTER_ID,
 	explorerUrl: ICP_EXPLORER_URL,
+	groupData: ICP_TOKEN_GROUP,
 	buy: {
 		onramperId: 'icp_icp'
 	}
