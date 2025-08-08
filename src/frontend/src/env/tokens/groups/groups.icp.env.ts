@@ -1,6 +1,6 @@
+import icp from '$icp/assets/icp-light.svg';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
-import icp from '$icp/assets/icp-light.svg';
 
 const ICP_TOKEN_GROUP_SYMBOL = 'ICP';
 
