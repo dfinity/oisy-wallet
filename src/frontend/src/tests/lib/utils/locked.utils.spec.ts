@@ -1,4 +1,3 @@
-import { TRACK_PRIVACY_MODE_CHANGE } from '$lib/constants/analytics.contants';
 import * as analytics from '$lib/services/analytics.services';
 import * as storageUtils from '$lib/utils/storage.utils';
 import { authLocked } from '$lib/utils/locked.utils';
@@ -18,7 +17,7 @@ describe('authLocked store', () => {
 
 
   describe('toggleLock', () => {
-    
+
     it('should toggle from false to true', () => {
       spyStorageGet.mockReturnValueOnce(false);
       
