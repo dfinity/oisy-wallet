@@ -106,6 +106,12 @@ export const idleSignOut = (): Promise<void> =>
 		clearStorages: false
 	});
 
+export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
+	logout({
+		resetUrl,
+		clearStorages: false
+	});
+
 const emptyIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
 	const { identity } = get(authStore);
 
