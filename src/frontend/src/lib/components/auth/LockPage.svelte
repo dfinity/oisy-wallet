@@ -96,7 +96,7 @@
 				{$i18n.lock.text.logout_clear_cash_message}
 			</p>
 		</div>
-		<ExternalLink href="#" ariaLabel="Go to example.com" iconAsLast styleClass="mt-4">
+		<ExternalLink href="https://docs.oisy.com/using-oisy-wallet/how-tos/locking-and-logging-out" ariaLabel="Go to example.com" iconAsLast styleClass="mt-4">
 			{$i18n.lock.text.learn_more}
 		</ExternalLink>
 	</div>
