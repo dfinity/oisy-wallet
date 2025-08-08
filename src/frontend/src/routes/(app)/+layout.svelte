@@ -23,7 +23,7 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { lockedPageShow } from '$lib/utils/locked.utils';
+	import { authLocked } from '$lib/utils/locked.utils';
 	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -57,7 +57,7 @@
 	});
 </script>
 
-{#if $authNotSignedIn && $lockedPageShow}
+{#if $authNotSignedIn && $authLocked}
 	<LockPage />
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>

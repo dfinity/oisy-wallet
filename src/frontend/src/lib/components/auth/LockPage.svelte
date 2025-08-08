@@ -11,7 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { lockedPageShow } from '$lib/utils/locked.utils';
+	import { authLocked } from '$lib/utils/locked.utils';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 	const modalId = Symbol();
@@ -38,14 +38,14 @@
 
 	const handleUnlock = async () => {
 		const { success } = await signIn({});
-		lockedPageShow.set(false);
+		authLocked.set(false);
 
 		if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
 	};
 	const handleLogout = async () => {
-		lockedPageShow.set(false);
+		authLocked.set(false);
 		await signOut({ resetUrl: true });
 	};
 </script>

@@ -7,7 +7,7 @@
 	import { lockSession } from '$lib/services/auth.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { lockedPageShow } from '$lib/utils/locked.utils';
+	import { authLocked } from '$lib/utils/locked.utils';
 
 	interface Props {
 		onHidePopover?: () => void;
@@ -33,8 +33,8 @@
 
 	const handleLock = async () => {
 		onHidePopover?.();
-		lockedPageShow.set(true);
-		await lockSession({ resetUrl: true });
+		authLocked.set(true);
+		await lockSession({ resetUrl: false });
 	};
 </script>
 
