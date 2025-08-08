@@ -119,7 +119,6 @@
 			},
 			"source": ["build/"],
 			"type": "assets",
-			"build": "${FRONTEND_BUILD_COMMAND:-npm run build:dev}",
 			"remote": {
 				"id": {
 					"test_be_1": "tewsx-xaaaa-aaaad-aadia-cai"
