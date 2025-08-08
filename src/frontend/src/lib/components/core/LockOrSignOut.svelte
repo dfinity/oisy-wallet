@@ -4,9 +4,9 @@
 	import IconLock from '$lib/components/icons/IconLock.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { LOCK_BUTTON } from '$lib/constants/test-ids.constants';
+	import { lockSession } from '$lib/services/auth.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { lockSession } from '$lib/services/auth.services';
 	import { lockedPageShow } from '$lib/utils/locked.utils';
 
 	interface Props {
@@ -36,7 +36,6 @@
 		lockedPageShow.set(true);
 		await lockSession({ resetUrl: true });
 	};
-
 </script>
 
 <div class="mb-1 mt-2">
