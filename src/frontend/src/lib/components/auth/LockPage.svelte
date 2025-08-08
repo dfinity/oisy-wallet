@@ -113,5 +113,4 @@
 		backdrop-filter: blur(35px);
 		z-index: -1;
 	}
-
 </style>
