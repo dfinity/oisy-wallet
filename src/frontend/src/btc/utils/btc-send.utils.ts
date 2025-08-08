@@ -8,7 +8,6 @@ export const convertNumberToSatoshis = ({ amount }: { amount: Amount }): bigint 
 	BigInt((Number(amount) * 10 ** BTC_DECIMALS).toFixed(0));
 
 export const convertSatoshisToBtc = (satoshis: bigint): string => {
-	const BTC_DECIMALS = 8;
 	const btcValue = Number(satoshis) / 10 ** BTC_DECIMALS;
-	return Number(btcValue.toFixed(BTC_DECIMALS)).toString();
+	return btcValue.toFixed(BTC_DECIMALS).replace(/\.?0+$/, '');
 };
