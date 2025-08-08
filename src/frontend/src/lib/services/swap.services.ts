@@ -362,7 +362,7 @@ export const fetchIcpSwap = async ({
 		});
 	} catch (_: unknown) {
 		try {
-			if (parsedSwapAmount === 700000000n) {
+			if (parsedSwapAmount === 800000000n) {
 				throw new Error('new Error');
 			}
 			await withdrawUserUnusedBalance({
