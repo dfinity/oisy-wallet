@@ -187,5 +187,8 @@
 		"fee": {
 			"__bigint__": "10"
 		}
+	},
+	"SGLDT": {
+		"ledgerCanisterId": "i2s4q-syaaa-aaaan-qz4sq-cai"
 	}
 }
