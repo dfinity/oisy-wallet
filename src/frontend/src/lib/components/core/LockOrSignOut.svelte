@@ -29,7 +29,7 @@
 	const handleLogoutTriggered = () => {
 		onHidePopover?.();
 	};
-	const handleLock = async () => {
+	const handleLock = () => {
 		onHidePopover?.();
 		authLocked.toggleLock({
 			source: 'menu lock button'
