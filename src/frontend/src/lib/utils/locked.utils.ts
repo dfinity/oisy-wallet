@@ -1,4 +1,3 @@
-// auth.store.ts
 import { TRACK_lOCK_MODE_ACTIVATED } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { initStorageStore } from '$lib/stores/storage.store';
