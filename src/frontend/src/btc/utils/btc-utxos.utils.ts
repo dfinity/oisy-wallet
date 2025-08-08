@@ -1,13 +1,13 @@
-import { BTC_DUST_THRESHOLD_SATOSHIS } from '$btc/constants/btc.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 import { uint8ArrayToHexString } from '@dfinity/utils';
 
 export interface UtxoSelectionResult {
 	selectedUtxos: Utxo[];
+	totalInputValue: bigint;
+	changeAmount: bigint;
 	sufficientFunds: boolean;
 	feeSatoshis: bigint;
-	dustErrorParam?: string; // Generic string for dust error context
 }
 
 /**
@@ -48,33 +48,8 @@ export const estimateTransactionSize = ({
 };
 
 /**
- * Converts satoshis to BTC string representation
- */
-const satoshisToBtc = (satoshis: bigint): string => {
-	const BTC_DECIMALS = 8;
-	const btcValue = Number(satoshis) / 10 ** BTC_DECIMALS;
-	return btcValue.toFixed(8);
-};
-
-/**
- * Calculates the minimum viable send amount to avoid dust change
- */
-export const calculateMinimumViableSendAmount = ({
-	utxoValue,
-	estimatedFee
-}: {
-	utxoValue: bigint;
-	estimatedFee: bigint;
-}): bigint => {
-	// Minimum send amount = UTXO value - Fee - Dust threshold
-	// This ensures any change will be >= dust threshold
-	const minimumSend = utxoValue - estimatedFee - BTC_DUST_THRESHOLD_SATOSHIS;
-	return minimumSend > ZERO ? minimumSend : ZERO;
-};
-
-/**
  * Main function to select UTXOs for a transaction with fee consideration
- * This function calculates fees and provides context for dust threshold errors
+ * This function iteratively selects UTXOs and calculates fees until sufficient funds are found
  */
 export const calculateUtxoSelection = ({
 	availableUtxos,
@@ -88,6 +63,8 @@ export const calculateUtxoSelection = ({
 	if (availableUtxos.length === 0) {
 		return {
 			selectedUtxos: [],
+			totalInputValue: ZERO,
+			changeAmount: ZERO,
 			sufficientFunds: false,
 			feeSatoshis: ZERO
 		};
@@ -102,63 +79,43 @@ export const calculateUtxoSelection = ({
 
 	const selectedUtxos: Utxo[] = [];
 	let totalInputValue = ZERO;
+	let estimatedFee = ZERO;
 
 	// Iteratively add UTXOs until we have enough to cover amount and fee
 	for (const utxo of sortedUtxos) {
 		selectedUtxos.push(utxo);
 		totalInputValue += BigInt(utxo.value);
 
-		// Calculate fee assuming we need a change output (worst case)
+		// Calculate current transaction size and fee
+		// 2 outputs: one for recipient, one for change (if needed)
 		const txSize = estimateTransactionSize({
 			numInputs: selectedUtxos.length,
-			numOutputs: 2 // recipient + potential change
+			numOutputs: 2
 		});
-		const estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
+		estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
 		const totalRequired = amountSatoshis + estimatedFee;
 
 		// Check if we have enough to cover amount and fee
 		if (totalInputValue >= totalRequired) {
 			const changeAmount = totalInputValue - totalRequired;
 
-			// Check if change would create dust
-			if (changeAmount > ZERO && changeAmount < BTC_DUST_THRESHOLD_SATOSHIS) {
-				// Calculate what the minimum viable send amount would be
-				const minimumViableAmount = calculateMinimumViableSendAmount({
-					utxoValue: totalInputValue,
-					estimatedFee
-				});
-
-				// Store only the minimum amount as error parameter
-				const errorParam = satoshisToBtc(minimumViableAmount);
-
-				return {
-					selectedUtxos,
-					sufficientFunds: false, // Mark as insufficient due to dust
-					feeSatoshis: estimatedFee,
-					dustErrorParam: errorParam
-				};
-			}
-
 			return {
 				selectedUtxos,
+				totalInputValue,
+				changeAmount,
 				sufficientFunds: true,
-				feeSatoshis: estimatedFee,
-				dustErrorParam: undefined
+				feeSatoshis: estimatedFee
 			};
 		}
 	}
 
 	// If we get here, we don't have sufficient funds
-	const finalTxSize = estimateTransactionSize({
-		numInputs: selectedUtxos.length,
-		numOutputs: 2
-	});
-	const finalFee = BigInt(finalTxSize) * feeRateSatoshisPerVByte;
-
 	return {
 		selectedUtxos,
+		totalInputValue,
+		changeAmount: ZERO,
 		sufficientFunds: false,
-		feeSatoshis: finalFee
+		feeSatoshis: estimatedFee
 	};
 };
 

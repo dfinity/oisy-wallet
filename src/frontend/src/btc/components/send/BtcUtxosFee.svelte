@@ -47,8 +47,6 @@
 						source
 					})
 				: undefined;
-
-			console.warn('BtcUtxosFee.svelte: utxosFee=', utxosFee);
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected_utxos_fee },

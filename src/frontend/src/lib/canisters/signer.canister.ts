@@ -20,13 +20,7 @@ import type {
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
-import {
-	Canister,
-	createServices,
-	fromDefinedNullable,
-	jsonReplacer,
-	toNullable
-} from '@dfinity/utils';
+import { Canister, createServices, fromDefinedNullable, toNullable } from '@dfinity/utils';
 import {
 	mapSignerCanisterBtcError,
 	mapSignerCanisterGetEthAddressError,
@@ -189,19 +183,17 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const payload = {
-			address_type: P2WPKH,
-			utxos_to_spend: utxosToSpend,
-			fee_satoshis: feeSatoshis,
-			...rest
-		};
-
-		console.warn('Calling endpoint btc_caller_send: ', JSON.stringify(payload, jsonReplacer));
-
-		const response = await btc_caller_send(payload, [SIGNER_PAYMENT_TYPE]);
+		const response = await btc_caller_send(
+			{
+				address_type: P2WPKH,
+				utxos_to_spend: utxosToSpend,
+				fee_satoshis: feeSatoshis,
+				...rest
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
 
 		if ('Ok' in response) {
-			console.warn('Response from btc_caller_send: ', JSON.stringify(response, jsonReplacer));
 			const { Ok } = response;
 			return Ok;
 		}

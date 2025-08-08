@@ -1,9 +1,6 @@
-import {
-	BTC_DUST_THRESHOLD_SATOSHIS,
-	UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
-} from '$btc/constants/btc.constants';
+import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
-import { convertNumberToSatoshis, convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
+import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
@@ -34,9 +31,8 @@ export const prepareBtcSend = async ({
 	amount,
 	source
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
-	console.warn('Start prepareBtcSend: ', { network, amount, source });
-
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
+
 	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 	// Get pending transactions to exclude locked UTXOs
@@ -44,16 +40,6 @@ export const prepareBtcSend = async ({
 
 	// Convert amount to satoshis
 	const amountSatoshis = convertNumberToSatoshis({ amount });
-
-	// Check if this is a dust-related issue
-	if (amountSatoshis <= BTC_DUST_THRESHOLD_SATOSHIS) {
-		return {
-			feeSatoshis: ZERO,
-			utxos: [],
-			error: BtcPrepareSendError.AmountBelowDustThreshold,
-			errorParam: convertSatoshisToBtc(BTC_DUST_THRESHOLD_SATOSHIS)
-		};
-	}
 
 	// Step 1: Get current fee percentiles from backend
 	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
@@ -69,8 +55,6 @@ export const prepareBtcSend = async ({
 		network,
 		minConfirmations: requiredMinConfirmations
 	});
-
-	console.warn('UTXOs response:', response);
 
 	const allUtxos = response.utxos;
 
@@ -99,14 +83,12 @@ export const prepareBtcSend = async ({
 		};
 	}
 
-	// Step 4: Select UTXOs with fee consideration and dust change handling
+	// Step 4: Select UTXOs with fee consideration
 	const selection = calculateUtxoSelection({
 		availableUtxos: filteredUtxos,
 		amountSatoshis,
 		feeRateSatoshisPerVByte
 	});
-
-	console.warn('UTXO selection result:', selection);
 
 	// Check if there were insufficient funds during UTXO selection
 	if (!selection.sufficientFunds) {
@@ -117,7 +99,7 @@ export const prepareBtcSend = async ({
 		};
 	}
 
-	// Return the successful selection
+	// Fee is already calculated in the selection process
 	return {
 		feeSatoshis: selection.feeSatoshis,
 		utxos: selection.selectedUtxos
