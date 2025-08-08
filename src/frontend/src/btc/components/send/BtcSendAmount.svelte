@@ -3,6 +3,7 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
+	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -37,7 +38,7 @@
 		if (invalidSendAmount(Number(userAmount))) {
 			return new BtcAmountAssertionError(
 				replacePlaceholders($i18n.send.assertion.minimum_btc_amount, {
-					$amount: BTC_MINIMUM_AMOUNT
+					$amount: convertSatoshisToBtc(BTC_MINIMUM_AMOUNT)
 				})
 			);
 		}
