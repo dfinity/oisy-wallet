@@ -316,7 +316,7 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			amountIn:
-				parsedSwapAmount === 400000000n || parsedSwapAmount === 500000000n
+				parsedSwapAmount === 100000000n || parsedSwapAmount === 200000000n
 					? `${parsedSwapAmount}000`
 					: parsedSwapAmount.toString(),
 			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
@@ -355,14 +355,14 @@ export const fetchIcpSwap = async ({
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
 			amount:
-				parsedSwapAmount === 700000000n || parsedSwapAmount === 800000000n
+				parsedSwapAmount === 300000000n || parsedSwapAmount === 400000000n
 					? BigInt(`${receiveAmount}000`)
 					: receiveAmount,
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {
 		try {
-			if (parsedSwapAmount === 800000000n) {
+			if (parsedSwapAmount === 400000000n) {
 				throw new Error('new Error');
 			}
 			await withdrawUserUnusedBalance({
@@ -430,7 +430,7 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 			identity,
 			canisterId,
 			token: tokenId,
-			amount: amount === 400000000n || amount === 500000000n ? BigInt(`${amount}000`) : amount,
+			amount: amount === 100000000n || amount === 200000000n ? BigInt(`${amount}000`) : amount,
 			fee
 		});
 
@@ -440,7 +440,7 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 		};
 	} catch (_: unknown) {
 		try {
-			if (amount === 500000000n) {
+			if (amount === 200000000n) {
 				throw new Error('new Error');
 			}
 			// Second withdrawal attempt
