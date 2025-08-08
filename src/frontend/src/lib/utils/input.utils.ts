@@ -10,4 +10,4 @@ export const invalidAmount = (amount: OptionAmount): boolean =>
 	isNullish(amount) || Number(amount) < 0;
 
 export const invalidSendAmount = (amount: OptionAmount): boolean =>
-	isNullish(amount) || Number(amount) <= BTC_DUST_THRESHOLD_SATOSHIS;
+	isNullish(amount) || Number(amount) < BTC_DUST_THRESHOLD_SATOSHIS;

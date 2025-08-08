@@ -17,4 +17,4 @@ export const BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION = 10;
 
 // Backend dust threshold (1,000 satoshis) which is a ligned with backend to prevent transactions that create
 // non-standard change outputs. This is more conservative than Bitcoin's standard 546 satoshi threshold.
-export const BTC_DUST_THRESHOLD_SATOSHIS = 400n;
+export const BTC_DUST_THRESHOLD_SATOSHIS = 700n;
