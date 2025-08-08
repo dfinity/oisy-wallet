@@ -64,14 +64,12 @@
 		<div
 			class="flex w-full max-w-md flex-col content-center items-center justify-center gap-5 rounded-[24px] bg-[var(--color-background-surface)] p-6 text-center text-[var(--color-text-primary)] shadow-lg transition-all duration-500 ease-in-out md:rounded-[28px] md:p-8"
 		>
-			<div class="pointer-events-auto">
 				<OisyWalletLogoLink />
-			</div>
-			<div class="lock_title_wrapper my-7">
+			<div class="my-7">
 				<h2 class="mb-2 text-2xl font-semibold"> {$i18n.lock.text.title_part_1}</h2>
 				<span class="text-gray-600 mb-6">{$i18n.lock.text.title_part_2}</span>
 			</div>
-			<div class="lock_button_wrapper w-full">
+			<div class="w-full">
 				<Button fullWidth styleClass="w-full mb-3" onclick={handleUnlock}
 					>{$i18n.lock.text.unlock}
 					<IconKey />
