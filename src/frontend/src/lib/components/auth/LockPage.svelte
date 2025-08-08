@@ -7,8 +7,8 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { signOut , signIn } from '$lib/services/auth.services';
-		import { i18n } from '$lib/stores/i18n.store';
+	import { signOut, signIn } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { lockedPageShow } from '$lib/utils/locked.utils';
