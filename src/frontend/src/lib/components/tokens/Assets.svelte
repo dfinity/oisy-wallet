@@ -15,8 +15,15 @@
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { AppPath } from '$lib/constants/routes.constants';
 
-	let activeTab = $state(TokenTypes.TOKENS);
+	interface Props {
+		tab?: TokenTypes;
+	}
+
+	let { tab = TokenTypes.TOKENS }: Props = $props();
+
+	let activeTab = $state(tab);
 
 	let { initialSearch, message } = $derived(
 		nonNullish($modalManageTokensData)
@@ -35,8 +42,8 @@
 							<Tabs
 								bind:activeTab
 								tabs={[
-									{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS },
-									{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS }
+									{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS, path: AppPath.Tokens },
+									{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
 								]}
 								tabVariant="menu"
 							/>

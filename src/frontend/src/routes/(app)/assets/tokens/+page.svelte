@@ -1,6 +1,6 @@
 <script lang="ts">
 	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
-	import Tokens from '$lib/components/tokens/Tokens.svelte';
+	import Assets from '$lib/components/tokens/Assets.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 </script>
 
@@ -10,4 +10,4 @@
 	</div>
 </Responsive>
 
-<Tokens />
+<Assets />
