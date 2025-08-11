@@ -15,80 +15,65 @@
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 	const modalId = Symbol();
-
-	let src = $state<string | undefined>(undefined);
-
-	$effect(() => {
-		const currentTheme = $themeStore ?? 'light';
-
-		import(`$lib/assets/lockpage_assets/lock-image-1440-${currentTheme}.webp`)
-			.then((mod) => (src = mod.default))
-			.catch(() => console.error('Failed to load background image'));
-	});
+	const imgStyleClass = 'h-full object-contain mx-auto object-top';
 
 	const handleUnlock = async () => {
 		const { success } = await signIn({});
-		authLocked.unlock({
-			source: 'login from lock page'
-		});
 
-		if (success === 'cancelled' || success === 'error') {
+		if (success === 'ok') {
+			authLocked.unlock({ source: 'login from lock page' });
+		} else if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
 	};
 
 	const handleLogout = async () => {
-		authLocked.unlock({
-			source: 'logout from lock page'
-		});
+		authLocked.unlock({ source: 'logout from lock page' });
 		await signOut({ resetUrl: true });
 	};
 </script>
 
-<div class="z-4 fixed inset-0 flex h-full w-full flex-col bg-[var(--color-background-page)]">
-	<div
-		class="fixed inset-0 z-[-1]
-		       bg-[color-mix(in_srgb,var(--color-background-page)_30%,transparent)] backdrop-blur-[35px]"
-	>
-		{#if src}
+<div class="z-4 fixed inset-0 flex h-full w-full flex-col bg-page">
+	<div class="backdrop-blur-xs fixed inset-0 -z-10 bg-overlay-page-30">
+		{#await import(`$lib/assets/lockpage_assets/lock-image-1440-${$themeStore ?? 'light'}.webp`) then { default: src }}
 			<Responsive up="xl">
-				<Img {src} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
+				<Img {src} alt={ariaLabel} styleClass={imgStyleClass}/>
 			</Responsive>
 			<Responsive up="md" down="lg">
 				<Img
 					src={src.replace('1440', '768')}
 					alt={ariaLabel}
-					styleClass="h-full object-contain mx-auto object-top"
+					styleClass={imgStyleClass}
 				/>
 			</Responsive>
 			<Responsive down="sm">
 				<Img
 					src={src.replace('1440', '480')}
 					alt={ariaLabel}
-					styleClass="h-full object-contain mx-auto object-top"
+					styleClass={imgStyleClass}
 				/>
 			</Responsive>
-		{/if}
+		{/await}
 	</div>
 
 	<div class="flex h-screen flex-col items-center justify-center px-4">
 		<div
-			class="flex w-full max-w-md flex-col content-center items-center justify-center gap-5 rounded-4xl bg-surface p-6 text-center text-primary shadow-lg transition-all duration-500 ease-in-out md:p-8">
-		
+			class="rounded-4xl flex w-full max-w-md flex-col content-center items-center justify-center gap-5 bg-surface p-6 text-center text-primary shadow-lg transition-all duration-500 ease-in-out md:p-8"
+		>
 			<OisyWalletLogoLink />
 
-			<div class="my-7">
-				<h2 class="mb-2 text-2xl font-semibold"> {$i18n.lock.text.title_part_1}</h2>
+			<div class="my-6">
+				<h2 class="mb-2 text-2xl font-semibold">{$i18n.lock.text.title_part_1}</h2>
 				<span class="text-gray-600 mb-6">{$i18n.lock.text.title_part_2}</span>
 			</div>
 
 			<div class="w-full">
-				<Button fullWidth styleClass="w-full mb-3" onclick={handleUnlock}
-					>{$i18n.lock.text.unlock}
+				<Button fullWidth styleClass="mb-3 w-full" onclick={handleUnlock}>
+					{$i18n.lock.text.unlock}
 					<IconKey />
 				</Button>
-				<Button fullWidth colorStyle="secondary-light" onclick={handleLogout}
-					>{$i18n.lock.text.logout}
+				<Button fullWidth colorStyle="secondary-light" onclick={handleLogout}>
+					{$i18n.lock.text.logout}
 					<IconLogout />
 				</Button>
 			</div>
@@ -97,9 +82,10 @@
 				{$i18n.lock.text.logout_clear_cash_message}
 			</p>
 		</div>
+
 		<ExternalLink
 			href="https://docs.oisy.com/using-oisy-wallet/how-tos/locking-and-logging-out"
-			ariaLabel="Go to example.com"
+			ariaLabel={$i18n.lock.text.learn_more}
 			iconAsLast
 			styleClass="mt-4"
 		>
