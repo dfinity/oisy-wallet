@@ -205,7 +205,7 @@ describe('btc-utxos.service', () => {
 
 			const result = await prepareBtcSend(defaultParams);
 
-			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledTimes(1);
+			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledOnce();
 			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledWith(
 				expect.objectContaining({
 					address: mockBtcAddress,
@@ -249,8 +249,8 @@ describe('btc-utxos.service', () => {
 
 			const result = await prepareBtcSend(defaultParams);
 
-			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledTimes(1);
-			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledTimes(1);
+			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledOnce();
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledOnce();
 
 			// First call should use getUtxosQuery
 			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledWith(
@@ -319,8 +319,8 @@ describe('btc-utxos.service', () => {
 
 			const result = await prepareBtcSend(defaultParams);
 
-			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledTimes(1);
-			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledTimes(1);
+			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledOnce();
+			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledOnce();
 
 			// Second call should convert number array to Uint8Array
 			expect(bitcoinApi.getUtxosQueryPaged).toHaveBeenCalledWith(
