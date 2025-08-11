@@ -45,7 +45,6 @@ export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 export const ERC20_CONTRACT_ICP: Erc20Contract = {
 	// ICP
 	address: '0x054B8f99D15cC5B35a42a926635977d62692F25b',
-	symbol: 'ICP (ERC20)',
 	exchange: 'icp'
 };
 
