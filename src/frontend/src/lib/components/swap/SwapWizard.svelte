@@ -2,7 +2,6 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { balance } from '$icp/api/icrc-ledger.api';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
