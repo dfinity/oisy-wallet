@@ -1,4 +1,4 @@
-import { syncWallet } from '$icp/services/ic-listener.services';
+import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
@@ -8,7 +8,8 @@ import type { WalletWorker } from '$lib/types/listener';
 import { mockIndexCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 
 vi.mock('$icp/services/ic-listener.services', () => ({
-	syncWallet: vi.fn()
+	syncWallet: vi.fn(),
+	syncWalletFromCache: vi.fn()
 }));
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
@@ -101,6 +102,13 @@ describe('worker.icrc-wallet.services', () => {
 				});
 
 				expect(workerInstance.terminate).toHaveBeenCalledOnce();
+			});
+
+			it('should sync one time from cache', () => {
+				expect(syncWalletFromCache).toHaveBeenCalledExactlyOnceWith({
+					tokenId: mockToken.id,
+					networkId: mockToken.network.id
+				});
 			});
 
 			describe('onmessage', () => {

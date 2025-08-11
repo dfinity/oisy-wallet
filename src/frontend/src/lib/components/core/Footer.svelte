@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
@@ -13,7 +13,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 
-	$: isHomePage = isRouteTokens($page);
+	let isHomePage = $derived(isRouteTokens(page));
 </script>
 
 <footer

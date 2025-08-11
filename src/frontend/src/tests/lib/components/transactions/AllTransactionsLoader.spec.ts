@@ -200,7 +200,7 @@ describe('AllTransactionsLoader', () => {
 		ethTransactions.forEach(({ transaction, token: { id: tokenId } }) => {
 			ethTransactionsStore.add({
 				tokenId,
-				transactions: [transaction as Transaction]
+				transactions: [{ data: transaction as Transaction, certified: false }]
 			});
 		});
 

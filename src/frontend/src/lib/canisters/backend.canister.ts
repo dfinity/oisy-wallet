@@ -309,7 +309,7 @@ export class BackendCanister extends Canister<BackendService> {
 
 	createContact = async (name: string): Promise<Contact> => {
 		const { create_contact } = this.caller({ certified: true });
-		const response = await create_contact({ name });
+		const response = await create_contact({ name, image: [] });
 
 		if ('Ok' in response) {
 			return response.Ok;

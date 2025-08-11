@@ -1,7 +1,11 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
-	export let styleClass: string | undefined = undefined;
-	export let size = '24';
+	interface Props {
+		styleClass?: string;
+		size?: string;
+	}
+
+	let { styleClass, size = '24' }: Props = $props();
 </script>
 
 <svg

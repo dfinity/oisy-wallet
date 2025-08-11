@@ -177,7 +177,20 @@ export const idlFactory = ({ IDL }) => {
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
-	const CreateContactRequest = IDL.Record({ name: IDL.Text });
+	const ImageMimeType = IDL.Variant({
+		'image/gif': IDL.Null,
+		'image/png': IDL.Null,
+		'image/jpeg': IDL.Null,
+		'image/webp': IDL.Null
+	});
+	const ContactImage = IDL.Record({
+		data: IDL.Vec(IDL.Nat8),
+		mime_type: ImageMimeType
+	});
+	const CreateContactRequest = IDL.Record({
+		name: IDL.Text,
+		image: IDL.Opt(ContactImage)
+	});
 	const BtcAddress = IDL.Variant({
 		P2WPKH: IDL.Text,
 		P2PKH: IDL.Text,
@@ -207,12 +220,19 @@ export const idlFactory = ({ IDL }) => {
 		id: IDL.Nat64,
 		name: IDL.Text,
 		update_timestamp_ns: IDL.Nat64,
-		addresses: IDL.Vec(ContactAddressData)
+		addresses: IDL.Vec(ContactAddressData),
+		image: IDL.Opt(ContactImage)
 	});
 	const ContactError = IDL.Variant({
 		InvalidContactData: IDL.Null,
+		CanisterMemoryNearCapacity: IDL.Null,
+		InvalidImageFormat: IDL.Null,
 		ContactNotFound: IDL.Null,
-		RandomnessError: IDL.Null
+		ImageTooLarge: IDL.Null,
+		RandomnessError: IDL.Null,
+		ImageExceedsMaxSize: IDL.Null,
+		CanisterStatusError: IDL.Null,
+		TooManyContactsWithImages: IDL.Null
 	});
 	const CreateContactResult = IDL.Variant({
 		Ok: Contact,
@@ -342,11 +362,9 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
-	const Erc20Token = IDL.Record({
-		decimals: IDL.Opt(IDL.Nat8),
+	const ErcToken = IDL.Record({
 		token_address: IDL.Text,
-		chain_id: IDL.Nat64,
-		symbol: IDL.Opt(IDL.Text)
+		chain_id: IDL.Nat64
 	});
 	const IcrcToken = IDL.Record({
 		ledger_id: IDL.Principal,
@@ -358,10 +376,12 @@ export const idlFactory = ({ IDL }) => {
 		symbol: IDL.Opt(IDL.Text)
 	});
 	const Token = IDL.Variant({
-		Erc20: Erc20Token,
+		Erc20: ErcToken,
 		Icrc: IcrcToken,
+		Erc721: ErcToken,
 		SplDevnet: SplToken,
-		SplMainnet: SplToken
+		SplMainnet: SplToken,
+		Erc1155: ErcToken
 	});
 	const CustomToken = IDL.Record({
 		token: Token,

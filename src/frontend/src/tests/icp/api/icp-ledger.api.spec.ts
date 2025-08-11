@@ -1,6 +1,11 @@
 import { icrc1Transfer, transfer } from '$icp/api/icp-ledger.api';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { mockIdentity, mockPrincipal2, mockPrincipalText2 } from '$tests/mocks/identity.mock';
+import {
+	mockAccountIdentifierText,
+	mockIdentity,
+	mockPrincipal2,
+	mockPrincipalText2
+} from '$tests/mocks/identity.mock';
 import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@dfinity/ledger-icp';
 import type { IcrcAccount, IcrcBlockIndex } from '@dfinity/ledger-icrc';
 import { toNullable } from '@dfinity/utils';
@@ -23,7 +28,7 @@ describe('icp-ledger.api', () => {
 		const amount = 1_000_000n;
 
 		const params = {
-			to: mockPrincipalText2,
+			to: mockAccountIdentifierText,
 			amount,
 			identity: mockIdentity
 		};
@@ -42,12 +47,16 @@ describe('icp-ledger.api', () => {
 			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
 			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
 				amount,
-				to: AccountIdentifier.fromHex(mockPrincipalText2)
+				to: AccountIdentifier.fromHex(mockAccountIdentifierText)
 			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
 			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
+		});
+
+		it('throws an error if provided "to" string is not a valid AccountIdentifier', async () => {
+			await expect(transfer({ ...params, to: mockPrincipalText2 })).rejects.toThrow();
 		});
 	});
 

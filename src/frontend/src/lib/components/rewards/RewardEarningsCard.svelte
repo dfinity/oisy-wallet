@@ -5,7 +5,10 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
-	import { formatToken, formatUSD } from '$lib/utils/format.utils';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 
 	interface Props {
 		amount: bigint;
@@ -25,7 +28,14 @@
 		})
 	);
 
-	const displayUsdAmount = $derived(formatUSD({ value: usdAmount }));
+	const displayUsdAmount = $derived(
+		formatCurrency({
+			value: usdAmount,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		})
+	);
 </script>
 
 {#if nonNullish(token)}

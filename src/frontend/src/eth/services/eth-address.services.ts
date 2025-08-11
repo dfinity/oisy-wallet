@@ -13,7 +13,7 @@ import {
 	loadTokenAddress,
 	validateAddress
 } from '$lib/services/address.services';
-import { ethAddressStore, type StorageAddressData } from '$lib/stores/address.store';
+import { ethAddressStore, type AddressStoreData } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { LoadIdbAddressError } from '$lib/types/errors';
@@ -62,7 +62,7 @@ const certifyEthAddress = (address: EthAddress): Promise<ResultSuccess<string>> 
 		addressStore: ethAddressStore
 	});
 
-export const validateEthAddress = async ($addressStore: StorageAddressData<EthAddress>) =>
+export const validateEthAddress = async ($addressStore: AddressStoreData<EthAddress>) =>
 	await validateAddress<EthAddress>({
 		$addressStore,
 		certifyAddress: certifyEthAddress

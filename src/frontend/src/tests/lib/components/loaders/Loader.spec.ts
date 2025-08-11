@@ -27,8 +27,9 @@ import {
 } from '$sol/services/sol-address.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockNetworksSettings,
@@ -95,11 +96,15 @@ vi.mock('$sol/services/sol-address.services', () => ({
 	})
 }));
 
-vi.mock('$lib/services/erc20.services', () => ({
+vi.mock('$eth/services/erc20.services', () => ({
 	loadErc20Tokens: vi.fn(() => Promise.resolve())
 }));
 
-vi.mock('$lib/services/icrc.services', () => ({
+vi.mock('$eth/services/erc721.services', () => ({
+	loadErc721Tokens: vi.fn(() => Promise.resolve())
+}));
+
+vi.mock('$icp/services/icrc.services', () => ({
 	loadIcrcTokens: vi.fn(() => Promise.resolve())
 }));
 
@@ -108,6 +113,8 @@ vi.mock('$sol/services/spl.services', () => ({
 }));
 
 describe('Loader', () => {
+	const mockSnippet = createMockSnippet('Mock Snippet');
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
@@ -118,7 +125,7 @@ describe('Loader', () => {
 	});
 
 	it('should not render modal if not loading', async () => {
-		const { queryByTestId } = render(Loader);
+		const { queryByTestId } = render(Loader, { children: mockSnippet });
 
 		await waitFor(() => {
 			expect(queryByTestId(LOADER_MODAL)).toBeNull();
@@ -128,7 +135,7 @@ describe('Loader', () => {
 	});
 
 	it('should initialize the user profile and the mainnet addresses', async () => {
-		render(Loader);
+		render(Loader, { children: mockSnippet });
 
 		await waitFor(() => {
 			expect(initLoader).toHaveBeenCalledOnce();
@@ -147,7 +154,7 @@ describe('Loader', () => {
 		});
 
 		it('should render modal', async () => {
-			const { getByTestId } = render(Loader);
+			const { getByTestId } = render(Loader, { children: mockSnippet });
 
 			await waitFor(() => {
 				expect(getByTestId(LOADER_MODAL)).toBeInTheDocument();
@@ -155,7 +162,7 @@ describe('Loader', () => {
 		});
 
 		it('should render the banner image', async () => {
-			const { getByAltText } = render(Loader);
+			const { getByAltText } = render(Loader, { children: mockSnippet });
 
 			const altText = replacePlaceholders(replaceOisyPlaceholders(en.init.alt.loader_banner), {
 				$theme: 'light'
@@ -174,7 +181,7 @@ describe('Loader', () => {
 
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
-			render(Loader);
+			render(Loader, { children: mockSnippet });
 
 			await waitFor(() => {
 				expect(loadEthAddress).not.toHaveBeenCalled();
@@ -219,7 +226,7 @@ describe('Loader', () => {
 			it('should call only mainnet loaders if addresses are not loaded yet', async () => {
 				setupTestnetsStore('disabled');
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				// Toggle the reactive statement
 				setupUserNetworksStore('allDisabled');
@@ -240,7 +247,7 @@ describe('Loader', () => {
 				btcAddressMainnetStore.set({ data: mockBtcAddress, certified: false });
 				solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				// Toggle the reactive statement
 				setupUserNetworksStore('allDisabled');
@@ -256,7 +263,7 @@ describe('Loader', () => {
 			it('should call loaders only for the enabled mainnet networks', async () => {
 				setupUserNetworksStore('allDisabled');
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				userProfileStore.set({
 					certified: false,
@@ -293,7 +300,7 @@ describe('Loader', () => {
 			it('should call loaders only for the enabled networks', async () => {
 				setupUserNetworksStore('allDisabled');
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				userProfileStore.set({
 					certified: false,
@@ -324,7 +331,7 @@ describe('Loader', () => {
 			it('should call testnet loaders if addresses are not loaded yet', async () => {
 				setupUserNetworksStore('allDisabled');
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				setupUserNetworksStore('allEnabled');
 
@@ -343,7 +350,7 @@ describe('Loader', () => {
 				btcAddressTestnetStore.set({ data: mockBtcAddress, certified: false });
 				solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				// Toggle the reactive statement
 				setupUserNetworksStore('allDisabled');
@@ -359,7 +366,7 @@ describe('Loader', () => {
 			it('should call local addresses loaders when in local env', async () => {
 				vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				// Toggle the reactive statement
 				setupUserNetworksStore('allDisabled');

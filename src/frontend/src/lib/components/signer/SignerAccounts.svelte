@@ -27,7 +27,7 @@
 		resetPrompt();
 	};
 
-	$: $payload, (async () => await onAccountsPrompt())();
+	$: ($payload, (async () => await onAccountsPrompt())());
 </script>
 
 <slot />

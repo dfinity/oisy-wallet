@@ -35,7 +35,7 @@ describe('custom-token.utils', () => {
 			});
 		});
 
-		it('should return correct type for Icrc network', () => {
+		it('should return correct type for Icrc network key', () => {
 			const networkKey = 'Icrc';
 
 			expect(
@@ -72,30 +72,64 @@ describe('custom-token.utils', () => {
 			});
 		});
 
-		it('should return correct type for Ethereum/EVM network', () => {
+		it('should return correct type for Ethereum/EVM Erc20 network key', () => {
 			expect(
 				toCustomToken({
 					...mockParams,
 					networkKey: 'Erc20',
 					address: 'mock-token-address',
-					chainId: 123n,
-					decimals: 8,
-					symbol: 'mock-symbol'
+					chainId: 123n
 				})
 			).toEqual({
 				...partialExpected,
 				token: {
 					Erc20: {
 						token_address: 'mock-token-address',
-						chain_id: 123n,
-						decimals: [8],
-						symbol: ['mock-symbol']
+						chain_id: 123n
 					}
 				}
 			});
 		});
 
-		it('should return correct type for SplMainnet network', () => {
+		it('should return correct type for Ethereum/EVM Erc721 network key', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'Erc721',
+					address: 'mock-token-address',
+					chainId: 123n
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					Erc721: {
+						token_address: 'mock-token-address',
+						chain_id: 123n
+					}
+				}
+			});
+		});
+
+		it('should return correct type for Ethereum/EVM Erc1155 network key', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'Erc1155',
+					address: 'mock-token-address',
+					chainId: 123n
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					Erc1155: {
+						token_address: 'mock-token-address',
+						chain_id: 123n
+					}
+				}
+			});
+		});
+
+		it('should return correct type for SplMainnet network key', () => {
 			expect(
 				toCustomToken({
 					...mockParams,
@@ -116,7 +150,7 @@ describe('custom-token.utils', () => {
 			});
 		});
 
-		it('should return correct type for SplDevnet network', () => {
+		it('should return correct type for SplDevnet network key', () => {
 			expect(
 				toCustomToken({
 					...mockParams,

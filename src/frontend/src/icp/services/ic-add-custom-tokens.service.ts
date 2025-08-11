@@ -150,10 +150,7 @@ const loadMetadata = async ({
 			...rest
 		});
 	} catch (err: unknown) {
-		toastsError({
-			msg: { text: get(i18n).tokens.import.error.loading_metadata },
-			err
-		});
+		toastsError({ msg: { text: get(i18n).tokens.import.error.loading_metadata } });
 
 		throw err;
 	}

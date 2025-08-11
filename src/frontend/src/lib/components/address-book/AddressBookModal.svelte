@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import type { ContactImage } from '$declarations/backend/backend.did';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookQrCodeStep from '$lib/components/address-book/AddressBookQrCodeStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
@@ -23,7 +24,11 @@
 		TRACK_CONTACT_DELETE_ERROR,
 		TRACK_CONTACT_DELETE_SUCCESS,
 		TRACK_CONTACT_UPDATE_ERROR,
-		TRACK_CONTACT_UPDATE_SUCCESS
+		TRACK_CONTACT_UPDATE_SUCCESS,
+		TRACK_AVATAR_UPDATE_SUCCESS,
+		TRACK_AVATAR_UPDATE_ERROR,
+		TRACK_AVATAR_DELETE_SUCCESS,
+		TRACK_AVATAR_DELETE_ERROR
 	} from '$lib/constants/analytics.contants';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -98,7 +103,7 @@
 		)
 	);
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<AddressBookSteps> = [
 		{
 			name: AddressBookSteps.ADDRESS_BOOK,
 			title: $i18n.address_book.text.title
@@ -144,9 +149,9 @@
 			name: AddressBookSteps.DELETE_ADDRESS,
 			title: $i18n.address.delete.title
 		}
-	] satisfies { name: AddressBookSteps; title: string }[] as WizardSteps;
+	];
 
-	let currentStep: WizardStep | undefined = $state();
+	let currentStep: WizardStep<AddressBookSteps> | undefined = $state();
 
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 
@@ -164,7 +169,7 @@
 		addressBookStore.reset();
 	});
 
-	let modal: WizardModal | undefined = $state();
+	let modal: WizardModal<AddressBookSteps> | undefined = $state();
 	const close = () => {
 		if (nonNullish(modalData?.entrypoint?.onComplete)) {
 			modalData.entrypoint.onComplete();
@@ -173,7 +178,7 @@
 		modalStore.close();
 	};
 
-	let currentStepName = $derived(currentStep?.name as AddressBookSteps | undefined);
+	let currentStepName = $derived(currentStep?.name);
 	let previousStepName = $state<AddressBookSteps | undefined>();
 	let editContactNameStep = $state<EditContactNameStep>();
 	let editContactNameTitle = $state($i18n.contact.form.add_new_contact);
@@ -245,6 +250,31 @@
 		gotoStep(AddressBookSteps.SHOW_CONTACT);
 	};
 
+	const handleAddAvatar = async (image: ContactImage | null) => {
+		if (isNullish(currentContact)) {
+			return;
+		}
+
+		const contact = { ...currentContact };
+		const isDeleting = isNullish(image);
+
+		const tracking = {
+			success: isDeleting ? TRACK_AVATAR_DELETE_SUCCESS : TRACK_AVATAR_UPDATE_SUCCESS,
+			error: isDeleting ? TRACK_AVATAR_DELETE_ERROR : TRACK_AVATAR_UPDATE_ERROR
+		};
+
+		const callUpdateAvatar = callWithState(
+			wrapCallWith({
+				methodToCall: updateContact,
+				toastErrorMessage: $i18n.contact.error.update,
+				trackEventNames: tracking,
+				identity: $authIdentity
+			})
+		);
+
+		await callUpdateAvatar({ contact, image });
+	};
+
 	const handleSaveAddress = async (address: ContactAddressUi) => {
 		if (isNullish(currentContact) || isNullish(currentAddressIndex)) {
 			return;
@@ -296,13 +326,14 @@
 	bind:this={modal}
 	disablePointerEvents={loading}
 	testId={ADDRESS_BOOK_MODAL}
-	on:nnsClose={close}
+	onClose={close}
 >
-	<svelte:fragment slot="title">
+	{#snippet title()}
 		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentContact?.name)}
 			<div class="flex flex-wrap items-center gap-2">
 				<Avatar
 					name={currentContact.name}
+					image={currentContact.image}
 					variant="xs"
 					styleClass="rounded-full flex items-center justify-center"
 				/>
@@ -317,7 +348,7 @@
 		{:else}
 			{currentStep?.title}
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
@@ -369,6 +400,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
+				onAvatarEdit={handleAddAvatar}
 				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
@@ -394,6 +426,7 @@
 					currentContact = contact;
 					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
 				}}
+				onAvatarEdit={handleAddAvatar}
 				onEditAddress={(index) => {
 					currentAddressIndex = index;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);

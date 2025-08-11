@@ -1,5 +1,12 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
+
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
 </script>
 
 <header
@@ -13,5 +20,5 @@
 <main
 	class="mx-0 mt-10 flex flex-col items-center justify-center px-8 pb-10 lg:mx-auto lg:w-md lg:px-0 1.5lg:mt-28"
 >
-	<slot />
+	{@render children()}
 </main>

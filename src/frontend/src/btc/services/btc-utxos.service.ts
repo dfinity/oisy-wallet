@@ -94,7 +94,7 @@ export const prepareBtcSend = async ({
 	// Check if there were insufficient funds during UTXO selection
 	if (!selection.sufficientFunds) {
 		return {
-			feeSatoshis: ZERO,
+			feeSatoshis: selection.feeSatoshis,
 			utxos: filteredUtxos,
 			error: BtcPrepareSendError.InsufficientBalanceForFee
 		};

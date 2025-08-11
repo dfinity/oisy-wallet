@@ -31,7 +31,7 @@ export const simplePrice = ({
 	});
 
 /**
- * Get current price of tokens (using contract addresses) for a given platform in any other currency that you need.
+ * Get the current price of tokens (using contract addresses) for a given platform in any other currency that you need.
  *
  * Documentation:
  * - https://www.coingecko.com/api/documentation

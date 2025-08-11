@@ -1,8 +1,8 @@
 import type { SolAddress } from '$lib/types/address';
 import type { OneOf } from '$lib/utils/ts.utils';
 
-interface Erc20AddTokenData {
-	erc20ContractAddress: string;
+interface EthAddTokenData {
+	ethContractAddress: string;
 }
 
 interface IcAddTokenData {
@@ -14,4 +14,4 @@ interface SplAddTokenData {
 	splTokenAddress: SolAddress;
 }
 
-export type AddTokenData = OneOf<[Erc20AddTokenData, IcAddTokenData, SplAddTokenData]>;
+export type AddTokenData = OneOf<[EthAddTokenData, IcAddTokenData, SplAddTokenData]>;

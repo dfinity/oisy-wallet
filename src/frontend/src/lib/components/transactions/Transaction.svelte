@@ -9,6 +9,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -111,7 +112,7 @@
 			{#snippet description()}
 				<span data-tid="receive-tokens-modal-transaction-timestamp">
 					{#if nonNullish(timestamp)}
-						{formatSecondsToDate({ seconds: Number(timestamp), i18n: $i18n })}
+						{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}
 					{/if}
 				</span>
 				<TransactionStatusComponent {status} />

@@ -133,6 +133,7 @@ export interface Contact {
 	name: string;
 	update_timestamp_ns: bigint;
 	addresses: Array<ContactAddressData>;
+	image: [] | [ContactImage];
 }
 export interface ContactAddressData {
 	label: [] | [string];
@@ -140,8 +141,18 @@ export interface ContactAddressData {
 }
 export type ContactError =
 	| { InvalidContactData: null }
+	| { CanisterMemoryNearCapacity: null }
+	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
-	| { RandomnessError: null };
+	| { ImageTooLarge: null }
+	| { RandomnessError: null }
+	| { ImageExceedsMaxSize: null }
+	| { CanisterStatusError: null }
+	| { TooManyContactsWithImages: null };
+export interface ContactImage {
+	data: Uint8Array | number[];
+	mime_type: ImageMimeType;
+}
 export type CreateChallengeError =
 	| { ChallengeInProgress: null }
 	| { MissingUserProfile: null }
@@ -154,6 +165,7 @@ export interface CreateChallengeResponse {
 }
 export interface CreateContactRequest {
 	name: string;
+	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
 export type CreatePowChallengeResult =
@@ -183,11 +195,9 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
-export interface Erc20Token {
-	decimals: [] | [number];
+export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
-	symbol: [] | [string];
 }
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
@@ -227,6 +237,11 @@ export type Icrcv2AccountId =
 				subaccount: [] | [Uint8Array | number[]];
 			};
 	  };
+export type ImageMimeType =
+	| { 'image/gif': null }
+	| { 'image/png': null }
+	| { 'image/jpeg': null }
+	| { 'image/webp': null };
 export interface InitArg {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
@@ -317,10 +332,12 @@ export interface TestnetsSettings {
 	show_testnets: boolean;
 }
 export type Token =
-	| { Erc20: Erc20Token }
+	| { Erc20: ErcToken }
 	| { Icrc: IcrcToken }
+	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
-	| { SplMainnet: SplToken };
+	| { SplMainnet: SplToken }
+	| { Erc1155: ErcToken };
 export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }

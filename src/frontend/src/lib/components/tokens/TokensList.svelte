@@ -5,8 +5,6 @@
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import Listener from '$lib/components/core/Listener.svelte';
-	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -14,11 +12,9 @@
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -90,15 +86,6 @@
 		untrack(() => debouncedFilterList({ filter, selectedNetwork: network })); // we untrack the function so it only updates the list on filter change
 	});
 
-	let {
-		initialSearch,
-		message
-	}: { initialSearch: string | undefined; message?: string | undefined } = $derived(
-		nonNullish($modalManageTokensData)
-			? $modalManageTokensData
-			: { initialSearch: undefined, message: undefined }
-	);
-
 	let saveLoading = $state(false);
 
 	const onSave = async () => {
@@ -150,11 +137,9 @@
 					{:else}
 						{@const { token } = tokenOrGroup}
 
-						<Listener {token}>
-							<div class="transition duration-300 hover:bg-primary">
-								<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
-							</div>
-						</Listener>
+						<div class="transition duration-300 hover:bg-primary">
+							<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+						</div>
 					{/if}
 				</div>
 			{/each}
@@ -206,18 +191,6 @@
 					</div>
 				{/each}
 			</div>
-		{/if}
-
-		{#if $modalManageTokens}
-			<ManageTokensModal {initialSearch}>
-				{#snippet infoElement()}
-					{#if nonNullish(message)}
-						<MessageBox level="info">
-							{message}
-						</MessageBox>
-					{/if}
-				{/snippet}
-			</ManageTokensModal>
 		{/if}
 	</TokensSkeletons>
 </TokensDisplayHandler>
