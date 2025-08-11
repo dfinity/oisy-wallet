@@ -1,6 +1,6 @@
 import {
-	TRACK_lOCK_MODE_ACTIVATED,
-	TRACK_lOCK_MODE_DEACTIVATED
+	TRACK_LOCK_MODE_ACTIVATED,
+	TRACK_LOCK_MODE_DEACTIVATED
 } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { initStorageStore } from '$lib/stores/storage.store';
@@ -22,12 +22,9 @@ const createAuthLockStore = (): AuthLockStore => {
 	const updateLock = ({
 		newValue,
 		source = 'unknown'
-	}: {
-		newValue: boolean;
-		source?: string;
-	}): void => {
+	}: { newValue: boolean } & ToggleLockOptions): void => {
 		trackEvent({
-			name: newValue ? TRACK_lOCK_MODE_ACTIVATED : TRACK_lOCK_MODE_DEACTIVATED,
+			name: newValue ? TRACK_LOCK_MODE_ACTIVATED : TRACK_LOCK_MODE_DEACTIVATED,
 			metadata: { locked: String(newValue), source }
 		});
 		store.set({ key: 'authLocked', value: newValue });
