@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
+	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
+	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -10,6 +13,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	export let amount: OptionAmount = undefined;
@@ -30,6 +34,14 @@
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
 			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
+		}
+
+		if (invalidSendAmount(Number(userAmount))) {
+			return new BtcAmountAssertionError(
+				replacePlaceholders($i18n.send.assertion.minimum_btc_amount, {
+					$amount: convertSatoshisToBtc(BTC_MINIMUM_AMOUNT)
+				})
+			);
 		}
 
 		if (userAmount > ($sendBalance ?? ZERO)) {
