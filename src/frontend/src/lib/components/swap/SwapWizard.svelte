@@ -39,6 +39,7 @@
 	import { isSwapError } from '$lib/utils/swap.utils';
 	import { balance } from '$icp/api/icrc-ledger.api';
 	import { usdValue } from '$lib/utils/exchange.utils';
+	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -81,26 +82,8 @@
 
 	let sourceTokenUsdValue = $derived(
 		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
-			? formatCurrency({
-					value: Number(swapAmount) * $sourceTokenExchangeRate,
-					currency: Currency.USD,
-					exchangeRate: $currencyExchangeStore,
-					language: Languages.ENGLISH
-				})
+			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
 			: undefined
-	);
-
-	$effect(() =>
-		console.log({
-			sourceTokenExchangeRate: $sourceTokenExchangeRate,
-			sourceToken: $sourceToken,
-			value: Number(swapAmount) * $sourceTokenExchangeRate!,
-			usdValue: usdValue({
-				balance: BigInt(Number(swapAmount)),
-				decimals: Number($sourceToken?.decimals),
-				exchangeRate: $sourceTokenExchangeRate!
-			})
-		})
 	);
 
 	const clearFailedProgressStep = () => {
