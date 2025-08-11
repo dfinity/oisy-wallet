@@ -711,7 +711,8 @@
 			"minter_info_not_loaded": "请稍后再试，ckETH 配置参数尚未加载。",
 			"minter_info_not_certified": "请稍后再试，ckETH 配置参数尚未认证。",
 			"cketh_max_transaction_fee_missing": "ckETH 的最大交易费用缺失。",
-			"utxos_fee_missing": "UTXO 手续费缺失。"
+			"utxos_fee_missing": "UTXO 手续费缺失。",
+			"minimum_btc_amount": "最小金额为 $amount BTC。"
 		},
 		"error": {
 			"unexpected": "发送交易时发生错误。",

@@ -711,7 +711,8 @@
 			"minter_info_not_loaded": "Versuche es in ein paar Sekunden erneut; ein ckETH-Konfigurationsparameter ist noch nicht geladen.",
 			"minter_info_not_certified": "Versuche es in ein paar Sekunden erneut; ein ckETH-Konfigurationsparameter ist noch nicht zertifiziert.",
 			"cketh_max_transaction_fee_missing": "Die maximale Transaktionsgebühr für ckETH fehlt.",
-			"utxos_fee_missing": "UTXOs-Gebühr fehlt."
+			"utxos_fee_missing": "UTXOs-Gebühr fehlt.",
+			"minimum_btc_amount": "Der Mindestbetrag beträgt $amount BTC."
 		},
 		"error": {
 			"unexpected": "Beim Senden der Transaktion ist etwas schiefgelaufen.",
