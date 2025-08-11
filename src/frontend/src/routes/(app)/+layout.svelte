@@ -22,7 +22,7 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	interface Props {
 		children: Snippet;
@@ -32,9 +32,11 @@
 
 	let tokensRoute = $derived(isRouteTokens(page));
 
+	let nftsRoute = $derived(isRouteNfts(page));
+
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
-	let showHero = $derived(tokensRoute || transactionsRoute);
+	let showHero = $derived(tokensRoute || nftsRoute || transactionsRoute);
 
 	$effect(() => {
 		token.set($pageToken);
@@ -72,7 +74,7 @@
 			<SplitPane>
 				{#snippet menu()}
 					<NavigationMenu>
-						{#if tokensRoute}
+						{#if tokensRoute || nftsRoute}
 							<Responsive up="xl">
 								<div transition:fade class="hidden xl:block">
 									<DappsCarousel />
