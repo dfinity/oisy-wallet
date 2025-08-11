@@ -106,7 +106,7 @@
 </script>
 
 {#if $userProfileLoaded && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
-	<div class={wrapperClass || undefined}>
+	<div class={wrapperClass ?? undefined}>
 		<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
 		<Carousel
 			bind:this={carousel}
