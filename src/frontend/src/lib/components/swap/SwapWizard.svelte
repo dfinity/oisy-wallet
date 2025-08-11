@@ -16,14 +16,11 @@
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { Currency } from '$lib/enums/currency';
-	import { Languages } from '$lib/enums/languages';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swapService } from '$lib/services/swap.services';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -34,7 +31,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
-	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
 
@@ -79,12 +75,7 @@
 
 	let sourceTokenUsdValue = $derived(
 		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
-			? formatCurrency({
-					value: Number(swapAmount) * $sourceTokenExchangeRate,
-					currency: Currency.USD,
-					exchangeRate: $currencyExchangeStore,
-					language: Languages.ENGLISH
-				})
+			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
 			: undefined
 	);
 
