@@ -25,10 +25,10 @@
 		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings,
-		isRouteTokens,
 		isRouteTransactions,
 		networkUrl,
-		isRouteEarning
+		isRouteEarning,
+		isRouteAssets
 	} from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -57,7 +57,7 @@
 		fromRoute
 	})}
 	ariaLabel={$i18n.navigation.alt.tokens}
-	selected={isRouteTokens(page) || isRouteTransactions(page)}
+	selected={isRouteAssets(page) || isRouteTransactions(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
 	{#snippet icon()}
