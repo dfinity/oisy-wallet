@@ -13,15 +13,15 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import {
+		TRACK_OPEN_DOCUMENTATION,
+		TRACK_OPEN_EXTERNAL_LINK
+	} from '$lib/constants/analytics.contants';
 	import { OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK } from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
-	import {
-		TRACK_OPEN_DOCUMENTATION,
-		TRACK_OPEN_EXTERNAL_LINK
-	} from '$lib/constants/analytics.contants';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
