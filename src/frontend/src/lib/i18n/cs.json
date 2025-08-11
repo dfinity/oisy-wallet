@@ -1233,6 +1233,7 @@
 				"reward_received": "Vítejte v $oisy_short!",
 				"reward_failed": "Kód vypršel",
 				"reward_received_description": "Svůj uvítací dárek obdržíte kdykoli.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Požádejte o nový a zkuste to znovu"
 			},
 			"error": {
