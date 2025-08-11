@@ -449,6 +449,7 @@ export const performManualWithdraw = async ({
 		trackEvent({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
+				dApp: SwapProvider.ICP_SWAP,
 				token: token.symbol,
 				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
 			}
@@ -464,6 +465,7 @@ export const performManualWithdraw = async ({
 		trackEvent({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			metadata: {
+				dApp: SwapProvider.ICP_SWAP,
 				token: token.symbol,
 				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
 			}
