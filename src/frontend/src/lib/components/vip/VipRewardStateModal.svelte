@@ -79,8 +79,9 @@
 			src={isSuccessful
 				? codeType === QrCodeType.VIP
 					? successfulVipReward
-					: codeType === QrCodeType.GOLD ? successfulBinanceReward
-					: successfulVipReward
+					: codeType === QrCodeType.GOLD
+						? successfulBinanceReward
+						: successfulVipReward
 				: failedVipReward}
 			styleClass="aspect-auto"
 			testId={VIP_STATE_IMAGE_BANNER}
