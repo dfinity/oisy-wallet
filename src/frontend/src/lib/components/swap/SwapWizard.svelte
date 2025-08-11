@@ -37,6 +37,8 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
+	import { balance } from '$icp/api/icrc-ledger.api';
+	import { usdValue } from '$lib/utils/exchange.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -86,6 +88,19 @@
 					language: Languages.ENGLISH
 				})
 			: undefined
+	);
+
+	$effect(() =>
+		console.log({
+			sourceTokenExchangeRate: $sourceTokenExchangeRate,
+			sourceToken: $sourceToken,
+			value: Number(swapAmount) * $sourceTokenExchangeRate!,
+			usdValue: usdValue({
+				balance: BigInt(Number(swapAmount)),
+				decimals: Number($sourceToken?.decimals),
+				exchangeRate: $sourceTokenExchangeRate!
+			})
+		})
 	);
 
 	const clearFailedProgressStep = () => {
