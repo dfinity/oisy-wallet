@@ -224,7 +224,6 @@ interface I18nDapps {
 		aave: { name: string; one_liner: string; call_to_action: string; description: string };
 		eigenlayer: { name: string; one_liner: string; call_to_action: string; description: string };
 		curve_finance: { name: string; one_liner: string; call_to_action: string; description: string };
-		zkpoker: { name: string; one_liner: string; call_to_action: string; description: string };
 		sonic: {
 			name: string;
 			one_liner: string;

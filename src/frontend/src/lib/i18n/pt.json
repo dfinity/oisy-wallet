@@ -273,12 +273,6 @@
 				"call_to_action": "Pronto para ficar warped?",
 				"description": "A Curve Finance é uma exchange descentralizada líder, fornecedora de stablecoins e plataforma de empréstimos em blockchains compatíveis com Ethereum e EVM. É conhecida pelos seus criadores de mercado automatizados avançados para stablecoins e ativos voláteis, além do seu sistema único de liquidação suave para empréstimos."
 			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Criptografia de ponta e blockchain se entrelaçam para criar um ambiente de jogo seguro e transparente para todos.",
-				"call_to_action": "Você está convidado",
-				"description": "Criptografia de ponta e blockchain se unem para proporcionar um ambiente de jogo seguro e transparente para todos.<br/><br/>Jogue com qualquer escolha sua de ativos digitais — ICP agora, com BTC, ETH, SOL e USDC em breve. Totalmente on-chain, sem pontos centrais de falha. Nosso RNG baseado em blockchain garante jogos comprovadamente justos, utilizando tecnologia de código aberto da equipa de desenvolvimento da Dfinity."
-			},
 			"sonic": {
 				"name": "Sonic",
 				"one_liner": "Libere todo o potencial do DeFi e da negociação simplificada. Troque tokens, ganhe como provedor de liquidez e aproveite o AMM líder da Bitfinity EVM.",

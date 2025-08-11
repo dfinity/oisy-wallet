@@ -273,12 +273,6 @@
 				"call_to_action": "体验曲面",
 				"description": "Curve Finance 是在以太坊和 EVM 兼容链上领先的去中心化交易所、稳定币提供商和借贷平台。它以其针对稳定币和波动性资产的先进自动做市商以及其独特的贷款软清算系统而闻名。"
 			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "尖端密码学与区块链交织，为所有人提供一个安全透明的博弈环境。",
-				"call_to_action": "诚邀您加入",
-				"description": "尖端密码学与区块链交织，为所有人提供一个安全透明的博弈环境。<br/><br/>用您选择的数字资产玩游戏——现在是 ICP，稍后将支持 BTC、ETH、SOL 和 USDC。完全链上，无中心化故障点。我们基于区块链的随机数生成器确保了可证明的公平游戏，使用来自 Dfinity 研发团队的开源技术。"
-			},
 			"sonic": {
 				"name": "Sonic",
 				"one_liner": "释放 DeFi 的全部潜能和简化的交易流程。兑换代币，作为流动性提供者赚取收益，并利用 Bitfinity EVM 领先的 AMM。",
