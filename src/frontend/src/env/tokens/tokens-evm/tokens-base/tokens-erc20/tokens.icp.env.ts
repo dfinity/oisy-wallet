@@ -7,7 +7,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 
 export const ICP_DECIMALS = 8;
 
-export const ICP_SYMBOL = 'ICP';
+export const ICP_SYMBOL = 'ICP•OneSec';
 
 export const ICP_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
 
