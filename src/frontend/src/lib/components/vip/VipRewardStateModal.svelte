@@ -7,6 +7,7 @@
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
+	import successfulClickBeeReward from '$lib/assets/successful-clickbee-reward.svg';
 	import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -79,7 +80,9 @@
 			src={isSuccessful
 				? codeType === QrCodeType.VIP
 					? successfulVipReward
-					: successfulBinanceReward
+					: codeType === QrCodeType.GOLD
+						? successfulBinanceReward
+						: successfulClickBeeReward
 				: failedVipReward}
 			styleClass="aspect-auto"
 			testId={VIP_STATE_IMAGE_BANNER}
