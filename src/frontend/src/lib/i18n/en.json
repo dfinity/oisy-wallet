@@ -711,7 +711,8 @@
 			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
 			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
 			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing.",
-			"utxos_fee_missing": "UTXOs fee is missing."
+			"utxos_fee_missing": "UTXOs fee is missing.",
+			"minimum_btc_amount": "Amount too small. Please enter at least $amount BTC."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
