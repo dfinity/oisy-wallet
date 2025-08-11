@@ -79,7 +79,11 @@
 
 	$effect(() => {
 		const timestamp = lastTimestamp;
-		untrack(() => handleWelcomeModal(timestamp));
+		untrack(() => {
+			if (nonNullish(timestamp)) {
+				handleWelcomeModal(timestamp);
+			}
+		});
 	});
 </script>
 
