@@ -12,33 +12,34 @@ interface ToggleLockOptions {
 
 export interface AuthLockStore extends ReturnType<typeof initStorageStore<boolean>> {
 	toggleLock: (options: ToggleLockOptions) => void;
+    lock: (options: ToggleLockOptions) => void;  
+    unlock: (options: ToggleLockOptions) => void; 
 }
 
 const createAuthLockStore = (): AuthLockStore => {
-	const store = initStorageStore<boolean>({
-		key: 'authLocked',
-		defaultValue: false
-	});
+	const store = initStorageStore<boolean>({ key: 'authLocked', defaultValue: false });
 
-	const toggleLock = ({ source }: ToggleLockOptions): void => {
-		const current = get(store);
-		const newValue = !current;
+    const updateLock = (newValue: boolean, source: string): void => {
+        trackEvent({
+            name: newValue ? TRACK_lOCK_MODE_ACTIVATED : TRACK_lOCK_MODE_DEACTIVATED,
+            metadata: { locked: String(newValue), source }
+        });
+        store.set({ key: 'authLocked', value: newValue });
+    };
 
-		trackEvent({
-			name: newValue ? TRACK_lOCK_MODE_ACTIVATED : TRACK_lOCK_MODE_DEACTIVATED,
-			metadata: {
-				locked: String(newValue),
-				source: `${source}`
-			}
-		});
+    const toggleLock = ({ source }: ToggleLockOptions): void => {
+        updateLock(!get(store), source ?? 'unknown');
+    };
 
-		store.set({ key: 'authLocked', value: newValue });
-	};
+    const lock = ({ source }: ToggleLockOptions): void => {
+        updateLock(true, source ?? 'unknown');
+    };
 
-	return {
-		...store,
-		toggleLock
-	};
+    const unlock = ({ source }: ToggleLockOptions): void => {
+        updateLock(false, source ?? 'unknown');
+    };
+
+    return { ...store, toggleLock, lock, unlock };
 };
 
 export const authLocked = createAuthLockStore();
