@@ -16,8 +16,6 @@
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { Currency } from '$lib/enums/currency';
-	import { Languages } from '$lib/enums/languages';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
