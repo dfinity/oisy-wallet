@@ -3,12 +3,13 @@
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
 	import { NFT_CARD } from '$lib/constants/test-ids.constants';
-	import type { Nft } from '$lib/types/nft';
+	import type { Nft, NftCollection } from '$lib/types/nft';
 
 	let nfts: Nft[] = $state([]);
+	let nftCollections: NftCollection[] = $state([]);
 </script>
 
-<NftsDisplayHandler bind:nfts>
+<NftsDisplayHandler bind:nfts bind:nftCollections>
 	{#if nfts.length === 0}
 		<EmptyNftsList />
 	{:else}
