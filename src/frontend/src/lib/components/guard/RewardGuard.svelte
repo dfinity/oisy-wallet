@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount, type Snippet, untrack } from 'svelte';
 	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
@@ -51,14 +51,14 @@
 		}
 	});
 
-	$effect(() => {
+	const handleWelcomeModal = (timestamp: bigint) => {
 		const season1Episode4Campaign = rewardCampaigns.find(
 			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
 		);
 
 		if (
-			nonNullish(lastTimestamp) &&
-			lastTimestamp === ZERO &&
+			nonNullish(timestamp) &&
+			timestamp === ZERO &&
 			nonNullish(season1Episode4Campaign) &&
 			isOngoingCampaign({
 				startDate: season1Episode4Campaign.startDate,
@@ -75,6 +75,11 @@
 			});
 			modalStore.openWelcome(welcomeModalId);
 		}
+	}
+
+	$effect(() => {
+		const timestamp = lastTimestamp
+		untrack(() => handleWelcomeModal(timestamp));
 	});
 </script>
 
