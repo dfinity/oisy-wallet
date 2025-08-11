@@ -132,7 +132,8 @@ export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
 export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
 
 // Lock mode activated
-export const TRACK_lOCK_MODE_ACTIVATED = 'lock_mode_activated';
+export const TRACK_LOCK_MODE_ACTIVATED = 'lock_mode_activated';
+export const TRACK_LOCK_MODE_DEACTIVATED = 'lock_mode_deactivated';
 
 // Temporary events
 // We have sudden spikes in the number of getLogs calls to Infura, which is causing issues.
@@ -140,3 +141,7 @@ export const TRACK_lOCK_MODE_ACTIVATED = 'lock_mode_activated';
 // This event is used to track the number of calls to Infura's getLogs endpoint.
 // TODO: Remove these events once the issue is resolved.
 export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';
+
+//Links
+export const TRACK_OPEN_DOCUMENTATION = 'open_documentation';
+export const TRACK_OPEN_EXTERNAL_LINK = 'open_external_link';

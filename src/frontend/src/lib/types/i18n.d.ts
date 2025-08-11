@@ -235,7 +235,6 @@ interface I18nDapps {
 		aave: { name: string; one_liner: string; call_to_action: string; description: string };
 		eigenlayer: { name: string; one_liner: string; call_to_action: string; description: string };
 		curve_finance: { name: string; one_liner: string; call_to_action: string; description: string };
-		zkpoker: { name: string; one_liner: string; call_to_action: string; description: string };
 		sonic: {
 			name: string;
 			one_liner: string;
@@ -599,6 +598,7 @@ interface I18nSend {
 		minter_info_not_certified: string;
 		cketh_max_transaction_fee_missing: string;
 		utxos_fee_missing: string;
+		minimum_btc_amount: string;
 	};
 	error: {
 		unexpected: string;
