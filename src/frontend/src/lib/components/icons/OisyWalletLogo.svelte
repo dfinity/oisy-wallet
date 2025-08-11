@@ -7,8 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let ariaLabel: string;
-	$: ariaLabel = replacePlaceholders($i18n.core.alt.logo, { $name: OISY_NAME });
+	let ariaLabel = $derived(replacePlaceholders($i18n.core.alt.logo, { $name: OISY_NAME }));
 </script>
 
 <div class="mr-3">

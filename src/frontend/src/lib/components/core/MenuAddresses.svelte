@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import BtcWalletAddress from '$btc/components/core/BtcWalletAddress.svelte';
 	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
 	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
@@ -14,9 +13,11 @@
 	} from '$lib/derived/network.derived';
 	import SolWalletAddress from '$sol/components/core/SolWalletAddress.svelte';
 
-	const dispatch = createEventDispatcher();
+	interface Props {
+		onReceiveClick?: () => void;
+	}
 
-	const click = () => dispatch('icMenuClick');
+	let { onReceiveClick }: Props = $props();
 </script>
 
 {#if $networkICP}
@@ -28,5 +29,5 @@
 {:else if $networkSolana}
 	<SolWalletAddress />
 {:else if $pseudoNetworkChainFusion}
-	<WalletAddresses on:icReceiveTriggered={click} />
+	<WalletAddresses onClick={onReceiveClick} />
 {/if}

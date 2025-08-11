@@ -20,7 +20,11 @@ export enum ProgressStepsConvert {
 
 export enum ProgressStepsSwap {
 	INITIALIZATION = 'initialization',
+	SIGN_APPROVE = 'sign_approve',
+	APPROVE = 'approve',
+	SIGN_TRANSFER = 'sign_transfer',
 	SWAP = 'swap',
+	WITHDRAW = 'withdraw',
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }

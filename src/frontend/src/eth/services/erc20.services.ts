@@ -41,7 +41,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { UserTokenState } from '$lib/types/token-toggleable';
 import type { LoadUserTokenParams } from '$lib/types/user-token';
 import type { ResultSuccess } from '$lib/types/utils';
-import { parseTokenId } from '$lib/validation/token.validation';
+import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import {
 	assertNonNullish,
 	fromNullable,
@@ -217,7 +217,7 @@ const loadCustomTokensWithMetadata = async (
 				const version = fromNullable(versionNullable);
 
 				const {
-					Erc20: { symbol, decimals, token_address: tokenAddress, chain_id: tokenChainId }
+					Erc20: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
 				const existingToken = ALL_DEFAULT_ERC20_TOKENS.find(
@@ -244,12 +244,12 @@ const loadCustomTokensWithMetadata = async (
 					[
 						...accNonExisting,
 						{
-							id: parseTokenId(`custom-token#${symbol}#${network.chainId}`),
+							id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
 							name: tokenAddress,
 							address: tokenAddress,
 							network,
-							symbol: fromNullable(symbol) ?? '',
-							decimals: fromNullable(decimals) ?? ETHEREUM_DEFAULT_DECIMALS,
+							symbol: tokenAddress,
+							decimals: ETHEREUM_DEFAULT_DECIMALS,
 							standard: 'erc20' as const,
 							category: 'custom' as const,
 							exchange: 'erc20' as const,

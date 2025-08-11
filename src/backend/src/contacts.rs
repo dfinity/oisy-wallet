@@ -125,11 +125,10 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
             return Err(ContactError::ContactNotFound);
         };
 
-        // Check if the contact exists and get the existing contact
-        let existing_contact = stored_contacts
-            .contacts
-            .get(&request.id)
-            .ok_or(ContactError::ContactNotFound)?;
+        // Check if the contact exists
+        if !stored_contacts.contacts.contains_key(&request.id) {
+            return Err(ContactError::ContactNotFound);
+        }
 
         // Create an updated contact with current timestamp
         let updated_contact = Contact {
@@ -137,9 +136,7 @@ pub fn update_contact(request: UpdateContactRequest) -> Result<Contact, ContactE
             name: request.name,
             addresses: request.addresses,
             update_timestamp_ns: current_time,
-            image: request.image.or_else(|| existing_contact.image.clone()), /* Use request image
-                                                                              * or preserve
-                                                                              * existing */
+            image: request.image,
         };
 
         // Update the contact in the stored contacts

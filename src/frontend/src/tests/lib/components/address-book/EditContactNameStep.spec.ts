@@ -7,7 +7,6 @@ import {
 import type { ContactUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('EditContactNameStep', () => {
 	it('should render the add contact step with form and buttons', () => {

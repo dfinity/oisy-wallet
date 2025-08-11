@@ -14,7 +14,6 @@ import {
 	getFilteredTokenGroup,
 	getFilteredTokenList
 } from '$lib/utils/token-list.utils';
-import { describe, expect, it, type Mock } from 'vitest';
 
 // Mock data for tokens
 const token1: TokenUi = BTC_MAINNET_TOKEN;
@@ -124,7 +123,7 @@ describe('token-list.utils', () => {
 				enabled: false
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -141,7 +140,7 @@ describe('token-list.utils', () => {
 				enabled: false
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(false);
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(false);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -160,7 +159,7 @@ describe('token-list.utils', () => {
 				enabled: true
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -177,7 +176,7 @@ describe('token-list.utils', () => {
 				enabled: true
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -194,7 +193,7 @@ describe('token-list.utils', () => {
 				enabled: false
 			} as unknown as TokenToggleable<Token>;
 
-			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
@@ -227,7 +226,7 @@ describe('token-list.utils', () => {
 				} as unknown as TokenToggleable<Token>
 			];
 
-			(showTokenFilteredBySelectedNetwork as Mock).mockReturnValue(true);
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
 			const modifiedTokens = {
 				'net-1-b': tokens[1] as Token

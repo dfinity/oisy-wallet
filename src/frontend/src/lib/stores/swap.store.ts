@@ -10,6 +10,8 @@ export interface SwapError {
 	variant: 'error' | 'warning' | 'info';
 	message: string;
 	url?: { url: string; text: string };
+	errorType?: string;
+	swapSucceded?: boolean;
 }
 
 export interface SwapData {

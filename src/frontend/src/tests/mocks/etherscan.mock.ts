@@ -2,7 +2,7 @@ import type {
 	EtherscanProviderInternalTransaction,
 	EtherscanProviderTransaction
 } from '$eth/types/etherscan-transaction';
-import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 
 export const createMockEtherscanTransactions = (n: number): EtherscanProviderTransaction[] =>
 	Array.from({ length: n }, (_, i) => ({

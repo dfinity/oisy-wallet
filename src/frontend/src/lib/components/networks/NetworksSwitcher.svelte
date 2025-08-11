@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { SUPPORTED_MAINNET_NETWORKS, SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import NetworkSwitcherList from '$lib/components/networks/NetworkSwitcherList.svelte';
@@ -13,34 +13,38 @@
 	import { SettingsModalType } from '$lib/enums/settings-modal-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { NetworkId } from '$lib/types/network';
+	import type { OptionNetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 
-	export let disabled = false;
+	interface Props {
+		disabled?: boolean;
+	}
 
-	let dropdown: Dropdown | undefined;
+	let { disabled = false }: Props = $props();
 
-	const onNetworkSelect = async ({ detail: networkId }: CustomEvent<NetworkId>) => {
+	let dropdown = $state<Dropdown | undefined>();
+
+	const onNetworkSelect = async (networkId: OptionNetworkId) => {
 		await switchNetwork(networkId);
 
-		if (isRouteTransactions($page)) {
+		if (isRouteTransactions(page)) {
 			await gotoReplaceRoot();
 		}
 
 		dropdown?.close();
 	};
 
-	let enabledNetworks: number;
-	$: enabledNetworks =
+	let enabledNetworks = $derived(
 		$networksMainnets.length +
-		($testnetsEnabled && $networksTestnets.length > 0 ? $networksTestnets.length : 0);
+			($testnetsEnabled && $networksTestnets.length > 0 ? $networksTestnets.length : 0)
+	);
 
-	let totalNetworks: number;
-	$: totalNetworks =
+	let totalNetworks = $derived(
 		$testnetsEnabled && $networksTestnets.length > 0
 			? SUPPORTED_NETWORKS.length
-			: SUPPORTED_MAINNET_NETWORKS.length;
+			: SUPPORTED_MAINNET_NETWORKS.length
+	);
 
 	const modalId = Symbol();
 </script>
@@ -61,7 +65,7 @@
 	{/snippet}
 
 	{#snippet items()}
-		<NetworkSwitcherList on:icSelected={onNetworkSelect} selectedNetworkId={$networkId} />
+		<NetworkSwitcherList onSelected={onNetworkSelect} selectedNetworkId={$networkId} />
 
 		<div class="mb-3 ml-2 mt-6 flex flex-row justify-between text-nowrap">
 			<span class="flex">

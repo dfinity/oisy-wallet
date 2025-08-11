@@ -1,3 +1,4 @@
+import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_KEY_ID,
@@ -12,6 +13,7 @@ import {
 	updateIdbSolAddressMainnetLastUsage
 } from '$lib/api/idb-addresses.api';
 import { getSchnorrPublicKey } from '$lib/api/signer.api';
+import { deriveSolAddress } from '$lib/ic-pub-key/src/cli';
 import {
 	certifyAddress,
 	loadIdbTokenAddress,
@@ -23,8 +25,9 @@ import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
 	solAddressMainnetStore,
-	type StorageAddressData
+	type AddressStoreData
 } from '$lib/stores/address.store';
+import { i18n } from '$lib/stores/i18n.store';
 import type { SolAddress } from '$lib/types/address';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { LoadIdbAddressError } from '$lib/types/errors';
@@ -33,16 +36,35 @@ import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
+import { assertNonNullish } from '@dfinity/utils';
 import { getAddressDecoder } from '@solana/kit';
+import { get } from 'svelte/store';
 
-const getSolanaPublicKey = async (
-	params: CanisterApiFunctionParams<{ derivationPath: string[] }>
-): Promise<Uint8Array | number[]> =>
-	await getSchnorrPublicKey({
-		...params,
+const getSolanaPublicKey = async ({
+	derivationPath,
+	identity,
+	...rest
+}: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array | number[]> => {
+	if (FRONTEND_DERIVATION_ENABLED) {
+		// We use the same logic of the canister method. The potential error will be handled in the consumer.
+		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+
+		// HACK: This is working right now ONLY in Beta and Prod because the library is aware of the production Chain Fusion Signer's public key (used by both envs), but not for the staging Chain Fusion Signer (used by all other envs).
+		const publicKey = await deriveSolAddress(identity.getPrincipal().toString(), [
+			SOLANA_DERIVATION_PATH_PREFIX,
+			...derivationPath
+		]);
+
+		return Buffer.from(publicKey, 'hex');
+	}
+
+	return await getSchnorrPublicKey({
+		...rest,
+		identity,
 		keyId: SOLANA_KEY_ID,
-		derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...params.derivationPath]
+		derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath]
 	});
+};
 
 const getSolAddress = async ({
 	identity,
@@ -134,7 +156,7 @@ const certifySolAddressMainnet = (address: SolAddress): Promise<ResultSuccess<st
 		addressStore: solAddressMainnetStore
 	});
 
-export const validateSolAddressMainnet = async ($addressStore: StorageAddressData<SolAddress>) =>
+export const validateSolAddressMainnet = async ($addressStore: AddressStoreData<SolAddress>) =>
 	await validateAddress<SolAddress>({
 		$addressStore,
 		certifyAddress: certifySolAddressMainnet

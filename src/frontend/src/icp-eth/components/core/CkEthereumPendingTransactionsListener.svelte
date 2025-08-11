@@ -134,9 +134,12 @@
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
-	$: $balance, toContractAddress, debounceLoadPendingTransactions();
+	$: ($balance, toContractAddress, debounceLoadPendingTransactions());
 
-	onDestroy(async () => await listener?.disconnect());
+	onDestroy(async () => {
+		await listener?.disconnect();
+		listener = undefined;
+	});
 </script>
 
 <slot />

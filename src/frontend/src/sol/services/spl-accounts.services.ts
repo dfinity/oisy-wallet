@@ -32,16 +32,19 @@ export const calculateAssociatedTokenAddress = async ({
 export const createAtaInstruction = async ({
 	signer,
 	destination,
-	tokenAddress
+	tokenAddress,
+	tokenOwnerAddress
 }: {
 	signer: TransactionSigner;
 	destination: SolAddress;
 	tokenAddress: SplTokenAddress;
+	tokenOwnerAddress: SolAddress;
 }): Promise<SolInstruction> =>
 	await getCreateAssociatedTokenInstructionAsync({
 		payer: signer,
+		owner: solAddress(destination),
 		mint: solAddress(tokenAddress),
-		owner: solAddress(destination)
+		tokenProgram: solAddress(tokenOwnerAddress)
 	});
 
 /**

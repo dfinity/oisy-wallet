@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
+	import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
 	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 	import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -8,7 +9,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
-	export let token: EthereumUserToken | SplTokenToggleable | Erc721TokenToggleable;
+	export let token:
+		| EthereumUserToken
+		| SplTokenToggleable
+		| Erc721TokenToggleable
+		| Erc1155TokenToggleable;
 	export let testIdPrefix = MANAGE_TOKENS_MODAL_TOKEN_TOGGLE;
 
 	let disabled = false;

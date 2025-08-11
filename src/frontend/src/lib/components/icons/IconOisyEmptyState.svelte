@@ -3,8 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 
 	// soften icon for dark mode
-	let isDarkMode: boolean;
-	$: isDarkMode = nonNullish($themeStore) ? $themeStore === Theme.DARK : false;
+	let isDarkMode = $derived(nonNullish($themeStore) ? $themeStore === Theme.DARK : false);
 </script>
 
 <!-- source: DFINITY foundation -->

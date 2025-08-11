@@ -3,6 +3,9 @@
 .idea/
 **/*~
 
+# ESLint and Prettier
+.eslintcache
+
 # Mac OSX temporary files
 .DS_Store
 **/.DS_Store

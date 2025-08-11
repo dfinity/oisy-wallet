@@ -5,7 +5,7 @@ import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import { getNetworkContactKey } from '$lib/utils/contact.utils';
 import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 

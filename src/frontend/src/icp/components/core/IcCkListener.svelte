@@ -28,7 +28,7 @@
 		worker?.start();
 	};
 
-	$: worker, syncTimer();
+	$: (worker, syncTimer());
 
 	const triggerTimer = () => worker?.trigger();
 </script>

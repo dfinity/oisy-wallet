@@ -11,18 +11,16 @@ import * as clipboardUtils from '$lib/utils/clipboard.utils';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('ShowContactStep', () => {
 	const mockContact: ContactUi = {
 		id: 1n,
 		name: 'Test Contact',
 		addresses: [],
-		updateTimestampNs: BigInt(Date.now()),
-		image: []
+		updateTimestampNs: BigInt(Date.now())
 	};
 
 	const mockContactWithAddresses: ContactUi = {
@@ -40,8 +38,7 @@ describe('ShowContactStep', () => {
 				addressType: 'Btc'
 			}
 		],
-		updateTimestampNs: BigInt(Date.now()),
-		image: []
+		updateTimestampNs: BigInt(Date.now())
 	};
 
 	const mockClose = vi.fn();

@@ -4,7 +4,7 @@ import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores
 import type { Token } from '$lib/types/token';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { knownDestinations } from '$tests/mocks/transactions.mock';

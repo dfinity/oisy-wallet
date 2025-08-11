@@ -2,7 +2,6 @@ import { KONGSWAP_API_URL } from '$env/rest/kongswap.env';
 import { fetchBatchKongSwapPrices, getKongSwapTokenById } from '$lib/rest/kongswap.rest';
 import { MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2 } from '$tests/mocks/exchanges.mock';
 import { createMockKongSwapToken } from '$tests/mocks/kongswap.mock';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const EXPECTED_ENDPOINT = `${KONGSWAP_API_URL}/tokens/${MOCK_CANISTER_ID_1}`;
 const mockTokenResponse = createMockKongSwapToken({});

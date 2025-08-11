@@ -14,26 +14,24 @@ import {
 	getIdbSolTransactions,
 	setIdbTransactionsStore
 } from '$lib/api/idb-transactions.api';
+import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 import { get } from 'svelte/store';
-import { expect, vi } from 'vitest';
-
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
 
 vi.mock('$app/environment', () => ({
 	browser: true
+}));
+
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
+
+vi.mock('$lib/utils/idb.utils', () => ({
+	delMultiKeysByPrincipal: vi.fn()
 }));
 
 describe('idb-transactions.api', () => {
@@ -61,7 +59,8 @@ describe('idb-transactions.api', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		ethTransactionsStore.resetAll();
+		ethTransactionsStore.reset(mockToken1.id);
+		ethTransactionsStore.reset(mockToken3.id);
 
 		ethTransactionsStore.set({
 			tokenId: mockToken1.id,
@@ -281,10 +280,10 @@ describe('idb-transactions.api', () => {
 		it('should delete BTC tokens', async () => {
 			await deleteIdbBtcTransactions(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
-				mockPrincipal.toText(),
-				expect.any(Object)
-			);
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
+				principal: mockPrincipal,
+				store: expect.any(Object)
+			});
 		});
 	});
 
@@ -292,10 +291,10 @@ describe('idb-transactions.api', () => {
 		it('should delete ETH transactions', async () => {
 			await deleteIdbEthTransactions(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
-				mockPrincipal.toText(),
-				expect.any(Object)
-			);
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
+				principal: mockPrincipal,
+				store: expect.any(Object)
+			});
 		});
 	});
 
@@ -303,10 +302,10 @@ describe('idb-transactions.api', () => {
 		it('should delete IC transactions', async () => {
 			await deleteIdbIcTransactions(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
-				mockPrincipal.toText(),
-				expect.any(Object)
-			);
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
+				principal: mockPrincipal,
+				store: expect.any(Object)
+			});
 		});
 	});
 
@@ -314,10 +313,10 @@ describe('idb-transactions.api', () => {
 		it('should delete SOL transactions', async () => {
 			await deleteIdbSolTransactions(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
-				mockPrincipal.toText(),
-				expect.any(Object)
-			);
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledExactlyOnceWith({
+				principal: mockPrincipal,
+				store: expect.any(Object)
+			});
 		});
 	});
 });

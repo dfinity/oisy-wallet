@@ -1,5 +1,9 @@
 <script lang="ts">
-	export let styleClass: string | undefined = undefined;
+	interface Props {
+		styleClass?: string;
+	}
+
+	let { styleClass }: Props = $props();
 </script>
 
 <!-- source: DFINITY foundation -->

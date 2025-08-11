@@ -66,6 +66,8 @@ export interface TransactionUiCommon {
 	blockNumber?: number;
 }
 
+export type AnyTransaction = BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi;
+
 export type AnyTransactionUi =
 	| BtcTransactionUi
 	| EthTransactionUi

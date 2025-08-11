@@ -68,7 +68,7 @@
 				: undefined;
 	};
 
-	$: $payload, onPayload();
+	$: ($payload, onPayload());
 
 	type Text = { title: string; content: string } | undefined;
 

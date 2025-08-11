@@ -3,11 +3,14 @@ import * as loadUserServices from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { emit } from '$lib/utils/events.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('LoaderUserProfile', () => {
+	const mockSnippet = createMockSnippet('Mock Snippet');
+
 	beforeEach(() => {
 		vi.restoreAllMocks();
 
@@ -26,7 +29,7 @@ describe('LoaderUserProfile', () => {
 			return { success: true };
 		});
 
-		render(LoaderUserProfile);
+		render(LoaderUserProfile, { children: mockSnippet });
 
 		expect(spy).toHaveBeenCalledOnce();
 
@@ -36,7 +39,7 @@ describe('LoaderUserProfile', () => {
 	it('should re-load user profile on event', () => {
 		const spy = vi.spyOn(loadUserServices, 'loadUserProfile').mockImplementationOnce(vi.fn());
 
-		render(LoaderUserProfile);
+		render(LoaderUserProfile, { children: mockSnippet });
 
 		expect(spy).toHaveBeenCalledOnce();
 
@@ -66,7 +69,7 @@ describe('LoaderUserProfile', () => {
 		it('should not load user profile', () => {
 			const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
 
-			render(LoaderUserProfile);
+			render(LoaderUserProfile, { children: mockSnippet });
 
 			expect(spy).not.toHaveBeenCalled();
 		});
@@ -76,7 +79,7 @@ describe('LoaderUserProfile', () => {
 
 			const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
 
-			render(LoaderUserProfile);
+			render(LoaderUserProfile, { children: mockSnippet });
 
 			expect(spy).not.toHaveBeenCalled();
 

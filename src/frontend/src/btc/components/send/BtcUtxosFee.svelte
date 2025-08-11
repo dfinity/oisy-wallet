@@ -70,5 +70,5 @@
 	symbol={$sendTokenSymbol}
 	exchangeRate={$sendTokenExchangeRate}
 >
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+	{#snippet label()}{$i18n.fee.text.fee}{/snippet}
 </FeeDisplay>

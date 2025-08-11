@@ -3,7 +3,6 @@ import { INFURA_API_KEY, INFURA_GAS_REST_URL } from '$env/rest/infura.env';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import { parseToken } from '$lib/utils/parse.utils';
 import type { FeeData } from 'ethers/providers';
-import type { MockedFunction } from 'vitest';
 
 global.fetch = vi.fn();
 
@@ -58,7 +57,7 @@ describe('infura.rest', () => {
 				json: () => mockApiResponse
 			} as unknown as Response);
 
-			const mockFetch = fetch as MockedFunction<typeof fetch>;
+			const mockFetch = vi.mocked(fetch);
 
 			const infuraRest = new InfuraGasRest(chainId);
 

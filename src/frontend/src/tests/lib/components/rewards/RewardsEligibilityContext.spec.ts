@@ -5,7 +5,6 @@ import * as rewardStore from '$lib/stores/reward.store';
 import type { CampaignEligibility } from '$lib/types/reward';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { render } from '@testing-library/svelte';
-import { expect, vi } from 'vitest';
 
 describe('RewardsEligibilityContext', () => {
 	beforeEach(() => {

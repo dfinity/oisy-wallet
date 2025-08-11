@@ -24,7 +24,9 @@
 			symbol={$symbol}
 			exchangeRate={$sendTokenExchangeRate}
 		>
-			<span slot="label">{$i18n.fee.text.fee}</span>
+			{#snippet label()}
+				<span>{$i18n.fee.text.fee}</span>
+			{/snippet}
 		</FeeDisplay>
 	{/if}
 
@@ -35,7 +37,9 @@
 			symbol={$symbol}
 			exchangeRate={$sendTokenExchangeRate}
 		>
-			<span slot="label">{$i18n.fee.text.ata_fee}</span>
+			{#snippet label()}
+				<span>{$i18n.fee.text.ata_fee}</span>
+			{/snippet}
 		</FeeDisplay>
 	{/if}
 {/if}

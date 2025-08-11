@@ -32,7 +32,7 @@
 
 	const debounceValidateInit = debounce(init);
 
-	$: destination, tokenStandard, networkId, debounceValidateInit();
+	$: (destination, tokenStandard, networkId, debounceValidateInit());
 
 	let inputPlaceholder: string;
 	$: inputPlaceholder = isNetworkIdEthereum(networkId)

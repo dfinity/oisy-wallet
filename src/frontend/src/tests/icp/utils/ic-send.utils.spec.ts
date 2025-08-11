@@ -5,7 +5,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 

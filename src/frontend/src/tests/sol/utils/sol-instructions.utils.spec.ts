@@ -31,8 +31,18 @@ describe('sol-instructions.utils', () => {
 		programAddress: address(mockSolAddress)
 	};
 
+	let originalMapGet = Map.prototype.get;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		originalMapGet = Map.prototype.get;
+
+		vi.spyOn(Map.prototype, 'get').mockReturnValue(undefined);
+	});
+
+	afterEach(() => {
+		Map.prototype.get = originalMapGet;
 	});
 
 	describe('mapSolParsedInstruction', () => {

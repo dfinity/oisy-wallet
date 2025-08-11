@@ -35,12 +35,7 @@ import { networks, networksMainnets, networksTestnets } from '$lib/derived/netwo
 import { pageToken } from '$lib/derived/page-token.derived';
 import { hideZeroBalances, showZeroBalances } from '$lib/derived/settings.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
-import {
-	tokenId,
-	tokenStandard,
-	tokenToggleable,
-	tokenWithFallback
-} from '$lib/derived/token.derived';
+import { tokenId, tokenWithFallback } from '$lib/derived/token.derived';
 import {
 	enabledErc20Tokens,
 	enabledIcTokens,
@@ -93,8 +88,6 @@ const derivedList: Record<string, Readable<unknown>> = {
 	showZeroBalances,
 	testnetsEnabled,
 	tokenId,
-	tokenStandard,
-	tokenToggleable,
 	tokenWithFallback,
 	tokenWithFallbackAsIcToken,
 	tokens,

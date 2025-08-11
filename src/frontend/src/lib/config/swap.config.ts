@@ -14,5 +14,17 @@ export const swapWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<Wizard
 	{
 		name: WizardStepsSwap.SWAPPING,
 		title: i18n.swap.text.executing_transaction
+	},
+	{
+		name: WizardStepsSwap.TOKENS_LIST,
+		title: i18n.send.text.select_token
+	},
+	{
+		name: WizardStepsSwap.FILTER_NETWORKS,
+		title: i18n.send.text.select_network_filter
+	},
+	{
+		name: WizardStepsSwap.SELECT_PROVIDER,
+		title: i18n.swap.text.select_swap_provider
 	}
 ];

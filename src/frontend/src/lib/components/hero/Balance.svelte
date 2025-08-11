@@ -8,10 +8,12 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
+	import { currentCurrencySymbol } from '$lib/derived/currency.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
@@ -53,7 +55,7 @@
 		<Button
 			transparent
 			fullWidth
-			ariaLabel="Set privacy mode on and off"
+			ariaLabel={$i18n.hero.alt.toggle_privacy_mode}
 			styleClass="bg-transparent p-0 text-xl font-medium"
 			ondblclick={() =>
 				setPrivacyMode({
@@ -67,7 +69,9 @@
 					<TokenExchangeBalance
 						balance={token?.balance}
 						usdBalance={token?.usdBalance}
-						nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
+						nullishBalanceMessage={replacePlaceholders($i18n.hero.text.unavailable_balance, {
+							$currencySymbol: $currentCurrencySymbol
+						})}
 					/>
 				</DelayedTooltip>
 			{:else}

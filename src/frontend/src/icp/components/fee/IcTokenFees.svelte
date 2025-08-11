@@ -74,7 +74,7 @@
 	symbol={sourceToken.symbol}
 	zeroAmountLabel={$i18n.fee.text.zero_fee}
 >
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+	{#snippet label()}{$i18n.fee.text.fee}{/snippet}
 </FeeDisplay>
 
 {#if nonNullish(bitcoinEstimatedFee)}
@@ -84,7 +84,7 @@
 		exchangeRate={bitcoinFeeExchangeRate}
 		symbol={BTC_MAINNET_SYMBOL}
 	>
-		<svelte:fragment slot="label">{$i18n.fee.text.estimated_btc}</svelte:fragment>
+		{#snippet label()}{$i18n.fee.text.estimated_btc}{/snippet}
 	</FeeDisplay>
 {/if}
 
@@ -95,7 +95,7 @@
 		exchangeRate={sourceTokenExchangeRate}
 		symbol={sourceToken.symbol}
 	>
-		<svelte:fragment slot="label">{$i18n.fee.text.estimated_inter_network}</svelte:fragment>
+		{#snippet label()}{$i18n.fee.text.estimated_inter_network}{/snippet}
 	</FeeDisplay>
 {/if}
 
@@ -106,6 +106,6 @@
 		exchangeRate={ethereumFeeExchangeRate}
 		symbol={ethereumFeeToken.symbol}
 	>
-		<svelte:fragment slot="label">{$i18n.fee.text.estimated_eth}</svelte:fragment>
+		{#snippet label()}{$i18n.fee.text.estimated_eth}{/snippet}
 	</FeeDisplay>
 {/if}

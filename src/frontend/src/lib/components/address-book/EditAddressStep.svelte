@@ -87,7 +87,7 @@
 
 <form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-		<Avatar variant="xl" name={contact.name} />
+		<Avatar variant="xl" name={contact.name} image={contact.image} />
 
 		<div class="text-2xl font-bold text-primary md:text-3xl">
 			{contact.name}

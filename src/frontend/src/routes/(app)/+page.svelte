@@ -5,9 +5,7 @@
 </script>
 
 <Responsive down="xl">
-	<div class="mb-6 flex justify-center xl:hidden">
-		<DappsCarousel />
-	</div>
+	<DappsCarousel wrapperStyleClass="mb-6 flex justify-center xl:hidden" />
 </Responsive>
 
 <Tokens />

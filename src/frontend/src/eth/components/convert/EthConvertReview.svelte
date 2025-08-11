@@ -18,7 +18,9 @@
 
 <ConvertReview on:icConvert on:icBack {sendAmount} {receiveAmount}>
 	<EthFeeDisplay slot="fee">
-		<Html slot="label" text={$i18n.fee.text.convert_fee} />
+		{#snippet label()}
+			<Html text={$i18n.fee.text.convert_fee} />
+		{/snippet}
 	</EthFeeDisplay>
 
 	<div slot="info-message" class="mt-4">

@@ -1,6 +1,6 @@
 import { invalidSolAddress, isSolAddress } from '$sol/utils/sol-address.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 
 describe('sol-address.utils', () => {

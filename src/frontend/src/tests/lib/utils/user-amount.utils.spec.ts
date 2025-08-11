@@ -13,7 +13,7 @@ import { mockCkBtcMinterInfo as mockCkBtcMinterInfoData } from '$tests/mocks/ckb
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh/dist/candid/minter';
-import { vi, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 describe('validateUserAmount', () => {
 	const userAmount = 200000n;

@@ -9,10 +9,10 @@ import {
 } from '$eth/providers/infura-erc721.providers';
 import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import en from '$tests/mocks/i18n.mock';
 import { Contract } from 'ethers/contract';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
-import { describe, type MockedClass } from 'vitest';
 
 vi.mock('$env/rest/infura.env', () => ({
 	INFURA_API_KEY: 'test-api-key'
@@ -33,10 +33,10 @@ describe('infura-erc721.providers', () => {
 		} = ETHEREUM_NETWORK;
 		const { address: contractAddress } = PEPE_TOKEN;
 
-		const mockProvider = InfuraProviderLib as MockedClass<typeof InfuraProviderLib>;
+		const mockProvider = vi.mocked(InfuraProviderLib);
 		const expectedContractParams = [contractAddress, ERC721_ABI];
 
-		const mockContract = Contract as MockedClass<typeof Contract>;
+		const mockContract = vi.mocked(Contract);
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -50,8 +50,8 @@ describe('infura-erc721.providers', () => {
 		});
 
 		describe('metadata', () => {
-			const mockName = vi.fn() as unknown as typeof mockContract.prototype.name;
-			const mockSymbol = vi.fn() as unknown as typeof mockContract.prototype.symbol;
+			const mockName = vi.fn();
+			const mockSymbol = vi.fn();
 
 			const mockParams = {
 				address: contractAddress
@@ -63,8 +63,9 @@ describe('infura-erc721.providers', () => {
 				mockName.mockResolvedValue('mock-name');
 				mockSymbol.mockResolvedValue('mock-symbol');
 
-				mockContract.prototype.name = mockName;
-				mockContract.prototype.symbol = mockSymbol;
+				mockContract.prototype.name = mockName as unknown as typeof mockContract.prototype.name;
+				mockContract.prototype.symbol =
+					mockSymbol as unknown as typeof mockContract.prototype.symbol;
 			});
 
 			it('should return the fetched metadata', async () => {
@@ -108,45 +109,61 @@ describe('infura-erc721.providers', () => {
 			});
 		});
 
-		describe('isErc721', () => {
-			const mockSupportsInterface =
-				vi.fn() as unknown as typeof mockContract.prototype.supportsInterface;
+		describe('getNftMetadata', () => {
+			const mockTokenUri = vi.fn();
 
 			const mockParams = {
-				contractAddress
+				contractAddress,
+				tokenId: parseNftId(123456)
+			};
+
+			const mockMetadata = {
+				name: 'Elemental Bean #123456',
+				image: 'https://elementals-images.azuki.com/2.gif',
+				attributes: [{ trait_type: 'Color', value: 'Blue' }]
 			};
 
 			beforeEach(() => {
 				vi.clearAllMocks();
 
-				mockSupportsInterface.mockResolvedValue(true);
+				mockTokenUri.mockResolvedValue(
+					'ipfs://bafybeig4s66nv3qbczmjxekn4tjk7pjdhcqbbshjj4kxwgdruvzym3rsbm/27'
+				);
 
-				mockContract.prototype.supportsInterface = mockSupportsInterface;
+				global.fetch = vi.fn().mockResolvedValue({
+					json: () => Promise.resolve(mockMetadata)
+				});
+
+				mockContract.prototype.tokenURI =
+					mockTokenUri as unknown as typeof mockContract.prototype.tokenURI;
 			});
 
-			it('should return true if contract is erc721', async () => {
+			it('should return nft metadata for token id', async () => {
 				const provider = new InfuraErc721Provider(infura);
 
-				const result = await provider.isErc721(mockParams);
+				const metadata = await provider.getNftMetadata(mockParams);
 
-				expect(result).toBeTruthy();
+				expect(metadata).toStrictEqual({
+					name: 'Elemental Bean #123456',
+					id: 123456,
+					attributes: [{ traitType: 'Color', value: 'Blue' }],
+					imageUrl: 'https://elementals-images.azuki.com/2.gif'
+				});
 			});
 
-			it('should return false on error', async () => {
+			it('should handle errors gracefully', async () => {
 				const errorMessage = 'Error fetching metadata';
-				mockSupportsInterface.mockRejectedValue(new Error(errorMessage));
+				mockTokenUri.mockRejectedValue(new Error(errorMessage));
 
 				const provider = new InfuraErc721Provider(infura);
 
-				const result = await provider.isErc721(mockParams);
-
-				expect(result).toBeFalsy();
+				await expect(provider.getNftMetadata(mockParams)).rejects.toThrow(errorMessage);
 			});
 
-			it('should call the supportsInterface method of the contract', async () => {
+			it('should call the tokenURI method of the contract', async () => {
 				const provider = new InfuraErc721Provider(infura);
 
-				await provider.isErc721(mockParams);
+				await provider.getNftMetadata(mockParams);
 
 				expect(provider).toBeDefined();
 
@@ -158,7 +175,7 @@ describe('infura-erc721.providers', () => {
 					new mockProvider()
 				);
 
-				expect(mockSupportsInterface).toHaveBeenCalledOnce();
+				expect(mockTokenUri).toHaveBeenCalledOnce();
 			});
 		});
 

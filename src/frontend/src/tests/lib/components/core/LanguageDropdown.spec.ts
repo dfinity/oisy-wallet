@@ -2,13 +2,12 @@ import { LANGUAGES, SUPPORTED_LANGUAGES } from '$env/i18n';
 import LanguageDropdown from '$lib/components/core/LanguageDropdown.svelte';
 import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
 import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
+import { currentLanguage } from '$lib/derived/i18n.derived';
+import { Languages } from '$lib/enums/languages';
 import { trackEvent } from '$lib/services/analytics.services';
-import { i18n } from '$lib/stores/i18n.store';
 import type { TrackEventParams } from '$lib/types/analytics';
-import { Languages } from '$lib/types/languages';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import { beforeEach, expect } from 'vitest';
 
 describe('LanguageDropdown', () => {
 	beforeEach(() => {
@@ -27,7 +26,7 @@ describe('LanguageDropdown', () => {
 		const { container } = render(LanguageDropdown, {});
 
 		expect(container.querySelector('.dropdown-button')).toContainHTML(
-			LANGUAGES[get(i18n).lang as keyof typeof LANGUAGES]
+			LANGUAGES[get(currentLanguage) as keyof typeof LANGUAGES]
 		);
 	});
 

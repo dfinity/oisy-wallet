@@ -9,7 +9,6 @@ import { emit } from '$lib/utils/events.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { cleanWorkers, loadWorker, waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import { expect } from 'vitest';
 
 describe('wallet.utils', () => {
 	describe('waitAndTriggerWallet', () => {
@@ -55,15 +54,34 @@ describe('wallet.utils', () => {
 		const stopA = vi.fn();
 		const stopB = vi.fn();
 
+		const destroyA = vi.fn();
+		const destroyB = vi.fn();
+
 		let mockWorkers: Map<TokenId, WalletWorker>;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 
 			mockWorkers = new Map<TokenId, WalletWorker>([
-				[tokenA.id, { ...mockWorker, stop: stopA }],
-				[tokenB.id, { ...mockWorker, stop: stopB }]
+				[tokenA.id, { ...mockWorker, stop: stopA, destroy: destroyA }],
+				[tokenB.id, { ...mockWorker, stop: stopB, destroy: destroyB }]
 			]);
+		});
+
+		it('should correctly cleanup workers', () => {
+			cleanWorkers({ workers: mockWorkers, tokens: [tokenA] });
+
+			// Check that worker.stop() was called for the removed worker
+			expect(stopB).toHaveBeenCalledOnce();
+			expect(stopA).not.toHaveBeenCalled();
+
+			// Check that worker.destroy() was called for the removed worker
+			expect(destroyB).toHaveBeenCalledOnce();
+			expect(destroyA).not.toHaveBeenCalled();
+
+			// Verify the token entry was removed from the workers map
+			expect(mockWorkers.has(tokenB.id)).toBeFalsy();
+			expect(mockWorkers.has(tokenA.id)).toBeTruthy();
 		});
 
 		it('should remove workers not in the tokens list', () => {

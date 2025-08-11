@@ -4,7 +4,6 @@ import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { mockPendingUtxo } from '$tests/mocks/ckbtc.mock';
 import type { PendingUtxo } from '@dfinity/ckbtc';
 import { get } from 'svelte/store';
-import { vi } from 'vitest';
 
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');

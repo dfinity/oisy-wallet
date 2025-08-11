@@ -19,7 +19,7 @@ import {
 	mockBackendContactAddressSol,
 	mockContactBtcAddressUi
 } from '$tests/mocks/contacts.mock';
-import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
@@ -86,8 +86,7 @@ describe('contact.utils', () => {
 					address: mockEthAddress3,
 					addressType: 'Eth'
 				}
-			],
-			image: []
+			]
 		};
 
 		it('should map backend contact to frontend contact', () => {
@@ -324,8 +323,7 @@ describe('contact.utils', () => {
 			name: 'Mock Contact',
 			id: BigInt(1),
 			updateTimestampNs: 123456789n,
-			addresses: mockAddresses,
-			image: []
+			addresses: mockAddresses
 		};
 
 		it('should return undefined if contact is nullish', () => {

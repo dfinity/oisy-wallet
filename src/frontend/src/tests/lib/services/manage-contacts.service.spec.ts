@@ -1,14 +1,21 @@
+import type { ContactImage } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
-import { loadContacts } from '$lib/services/manage-contacts.service';
+import { createContact, loadContacts, updateContact } from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
+import type { ContactUi } from '$lib/types/contact';
 import {
 	mockBackendContactAddressBtc,
 	mockBackendContactAddressEth,
 	mockBackendContactAddressSol
 } from '$tests/mocks/contacts.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { vi } from 'vitest';
+
+const mockContactImage: ContactImage | null = {
+	data: new Uint8Array([1, 2, 3]),
+	mime_type: { 'image/png': null }
+};
 
 describe('manage-contacts.service', () => {
 	describe('loadContacts', () => {
@@ -91,6 +98,144 @@ describe('manage-contacts.service', () => {
 
 			// Verify that addresses array is empty
 			expect(contact.addresses).toHaveLength(0);
+		});
+	});
+
+	describe('createContact', () => {
+		const mockCreateContact = vi.spyOn(backendApi, 'createContact');
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+			contactsStore.reset();
+		});
+
+		it('should create a new contact', async () => {
+			const mockNewContact = {
+				id: BigInt(1),
+				name: 'New Contact',
+				update_timestamp_ns: BigInt(Date.now()),
+				addresses: [],
+				image: toNullable(mockContactImage)
+			};
+
+			mockCreateContact.mockResolvedValue(mockNewContact);
+
+			const result = await createContact({
+				name: 'New Contact',
+				identity: mockIdentity
+			});
+
+			expect(mockCreateContact).toHaveBeenCalled();
+			expect(result.name).toBe('New Contact');
+		});
+	});
+
+	describe('updateContact', () => {
+		const mockUpdateContact = vi.spyOn(backendApi, 'updateContact');
+		let updateContactSpy: ReturnType<typeof vi.spyOn>;
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+			contactsStore.reset();
+
+			updateContactSpy = vi.spyOn(contactsStore, 'updateContact');
+		});
+
+		it('should update contact with image', async () => {
+			const mockUpdatedContact = {
+				id: BigInt(1),
+				name: 'Updated Contact',
+				update_timestamp_ns: BigInt(Date.now()),
+				addresses: [],
+				image: toNullable(mockContactImage)
+			};
+
+			mockUpdateContact.mockResolvedValue(mockUpdatedContact);
+
+			const contact: ContactUi = {
+				id: BigInt(1),
+				name: 'Updated Contact',
+				updateTimestampNs: BigInt(Date.now()),
+				addresses: []
+			};
+
+			const result = await updateContact({
+				contact,
+				identity: mockIdentity,
+				image: mockContactImage
+			});
+
+			expect(mockUpdateContact).toHaveBeenCalledOnce();
+			expect(updateContactSpy).toHaveBeenCalledWith(
+				expect.objectContaining({
+					image: mockContactImage
+				})
+			);
+			expect(result.image).toEqual(mockContactImage);
+		});
+
+		it('should remove image when null is provided', async () => {
+			const mockUpdatedContact = {
+				id: BigInt(1),
+				name: 'No Image Contact',
+				update_timestamp_ns: BigInt(Date.now()),
+				addresses: [],
+				image: toNullable() as []
+			};
+
+			mockUpdateContact.mockResolvedValue(mockUpdatedContact);
+
+			const contact: ContactUi = {
+				id: BigInt(1),
+				name: 'No Image Contact',
+				updateTimestampNs: BigInt(Date.now()),
+				addresses: [],
+				image: mockContactImage
+			};
+
+			const result = await updateContact({
+				contact,
+				identity: mockIdentity,
+				image: null
+			});
+
+			expect(mockUpdateContact).toHaveBeenCalledWith(
+				expect.objectContaining({
+					contact: expect.objectContaining({
+						image: toNullable(null)
+					})
+				})
+			);
+			expect(result.image).toBeUndefined();
+		});
+
+		it('should maintain existing image when undefined is provided', async () => {
+			const existingContact: ContactUi = {
+				id: BigInt(1),
+				name: 'Existing Contact',
+				updateTimestampNs: BigInt(Date.now()),
+				addresses: [],
+				image: mockContactImage
+			};
+
+			contactsStore.set([existingContact]);
+
+			const mockUpdatedContact = {
+				id: BigInt(1),
+				name: 'Existing Contact',
+				update_timestamp_ns: BigInt(Date.now()),
+				addresses: [],
+				image: toNullable(mockContactImage)
+			};
+
+			mockUpdateContact.mockResolvedValue(mockUpdatedContact);
+
+			const result = await updateContact({
+				contact: existingContact,
+				identity: mockIdentity
+			});
+
+			expect(result.image).toEqual(mockContactImage);
 		});
 	});
 });
