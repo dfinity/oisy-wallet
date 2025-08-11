@@ -711,7 +711,8 @@
 			"minter_info_not_loaded": "Zkuste to znovu za několik sekund, parametr konfigurace ckETH ještě není načten.",
 			"minter_info_not_certified": "Zkuste to znovu za několik sekund, parametr konfigurace ckETH nebyl certifikován.",
 			"cketh_max_transaction_fee_missing": "Chybí maximální poplatek za transakci pro ckETH.",
-			"utxos_fee_missing": "Chybí poplatek UTXO."
+			"utxos_fee_missing": "Chybí poplatek UTXO.",
+			"minimum_btc_amount": "Minimální částka je $amount BTC."
 		},
 		"error": {
 			"unexpected": "Při odesílání transakce se něco pokazilo.",

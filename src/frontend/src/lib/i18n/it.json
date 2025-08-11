@@ -711,7 +711,8 @@
 			"minter_info_not_loaded": "Riprova tra qualche secondo, un parametro di configurazione ckETH non è ancora stato caricato.",
 			"minter_info_not_certified": "Riprova tra qualche secondo, un parametro di configurazione ckETH non è stato certificato.",
 			"cketh_max_transaction_fee_missing": "Manca la fee massima di transazione per ckETH.",
-			"utxos_fee_missing": "Mancano le fee UTXO."
+			"utxos_fee_missing": "Mancano le fee UTXO.",
+			"minimum_btc_amount": "L'importo minimo è $amount BTC."
 		},
 		"error": {
 			"unexpected": "Qualcosa è andato storto durante l'invio della transazione.",
