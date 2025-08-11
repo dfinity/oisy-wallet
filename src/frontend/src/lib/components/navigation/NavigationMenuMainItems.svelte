@@ -25,7 +25,6 @@
 		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings,
-		isRouteTokens,
 		isRouteTransactions,
 		networkUrl,
 		isRouteEarning,
