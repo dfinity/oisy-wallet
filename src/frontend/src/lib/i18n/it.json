@@ -273,12 +273,6 @@
 				"call_to_action": "Entra nel warp",
 				"description": "Curve Finance è un DEX leader, fornitore di stablecoin e piattaforma di prestito su Ethereum e catene compatibili con EVM. È noto per i suoi market maker automatizzati avanzati per stablecoin e asset volatili e per il suo sistema unico di liquidazione soft per i prestiti."
 			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Crittografia e blockchain all'avanguardia si intrecciano per offrire un ambiente di gioco sicuro e trasparente per tutti.",
-				"call_to_action": "Sei invitato",
-				"description": "Crittografia e blockchain all'avanguardia si intrecciano per offrire un ambiente di gioco sicuro e trasparente per tutti.<br/><br/>Gioca con la tua scelta di asset digitali—ora ICP, con BTC, ETH, SOL e USDC in arrivo. Completamente on-chain, nessun punto di fallimento centrale. Il nostro RNG basato su blockchain garantisce un gioco dimostrabilmente equo, utilizzando la tecnologia open-source del team di ricerca e sviluppo di Dfinity."
-			},
 			"sonic": {
 				"name": "Sonic",
 				"one_liner": "Sblocca il pieno potenziale della DeFi e del trading semplificato. Scambia token, guadagna come fornitore di liquidità e sfrutta l'AMM leader di Bitfinity EVM.",

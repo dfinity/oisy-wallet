@@ -273,12 +273,6 @@
 				"call_to_action": "Nechte se warpovat",
 				"description": "Curve Finance je přední decentralizovaná burza, poskytovatel stablecoinů a úvěrová platforma na Ethereu a řetězcích kompatibilních s EVM. Je známá svými pokročilými automatizovanými tvůrci trhu pro stablecoiny a volatilní aktiva a svým jedinečným systémem měkké likvidace pro půjčky."
 			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Špičková kryptografie a blockchain se prolínají a vytvářejí bezpečné a transparentní herní prostředí pro všechny.",
-				"call_to_action": "Jste zváni",
-				"description": "Špičková kryptografie a blockchain se prolínají a vytvářejí bezpečné a transparentní herní prostředí pro všechny.<br/><br/>Hrajte s výběrem digitálních aktiv – nyní ICP, brzy přibudou BTC, ETH, SOL a USDC. Plně on-chain, žádné centrální body selhání. Náš RNG založený na blockchainu zajišťuje prokazatelně spravedlivé hraní pomocí technologie s otevřeným zdrojovým kódem od týmu R&D společnosti Dfinity."
-			},
 			"sonic": {
 				"name": "Sonic",
 				"one_liner": "Uvolněte plný potenciál DeFi a zjednodušeného obchodování. Vyměňujte tokeny, vydělávejte jako poskytovatel likvidity a využívejte přední AMM Bitfinity EVM.",
