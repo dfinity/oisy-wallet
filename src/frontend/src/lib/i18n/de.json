@@ -273,12 +273,6 @@
 				"call_to_action": "Gehe zu Curve",
 				"description": "Curve Finance ist eine führende dezentrale Börse, ein Stablecoin-Anbieter und eine Kreditplattform auf Ethereum- und EVM-kompatiblen Blockchains. Das Unternehmen ist bekannt für seine fortschrittlichen automatisierten Market Maker für Stablecoins und volatile Vermögenswerte sowie sein einzigartiges Soft-Liquidation-System für Kredite."
 			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Modernste Kryptografie und Blockchain verflechten sich zu einer sicheren und transparenten Spielumgebung für alle.",
-				"call_to_action": "Spiele jetzt!",
-				"description": "Modernste Kryptografie und Blockchain verschmelzen zu einer sicheren und transparenten Spielumgebung für alle.<br/><br/>Spielen Sie mit den digitalen Assets Ihrer Wahl – jetzt ICP, bald auch BTC, ETH, SOL und USDC. Vollständig on-chain, keine zentralen Fehlerquellen. Unser Blockchain-basierter Zufallsgenerator (RNG) sorgt für nachweislich faires Spielen und nutzt Open-Source-Technologie des Forschungs- und Entwicklungsteams von Dfinity."
-			},
 			"sonic": {
 				"name": "Sonic",
 				"one_liner": "Schöpfen Sie das volle Potenzial von DeFi und optimiertem Handel aus. Tauschen Sie Token, verdienen Sie als Liquiditätsanbieter und nutzen Sie das führende AMM von Bitfinity EVM.",

@@ -273,12 +273,6 @@
 				"call_to_action": "Bị cuốn hút",
 				"description": "Curve Finance là một sàn giao dịch phi tập trung, nhà cung cấp stablecoin và nền tảng cho vay hàng đầu trên Ethereum và các chuỗi tương thích với EVM. Nó nổi tiếng với các nhà tạo lập thị trường tự động tiên tiến cho stablecoin và các tài sản biến động, và hệ thống thanh lý mềm độc đáo cho các khoản vay."
 			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Mật mã và chuỗi khối tiên tiến đan xen vào nhau để tạo ra một môi trường chơi an toàn và minh bạch cho tất cả mọi người.",
-				"call_to_action": "Bạn được mời",
-				"description": "Mật mã và chuỗi khối tiên tiến đan xen vào nhau để tạo ra một môi trường chơi an toàn và minh bạch cho tất cả mọi người.<br/><br/>Chơi với lựa chọn tài sản kỹ thuật số của bạn—hiện tại là ICP, sắp có BTC, ETH, SOL và USDC. Hoàn toàn trên chuỗi, không có điểm lỗi trung tâm. RNG dựa trên chuỗi khối của chúng tôi đảm bảo chơi game công bằng có thể chứng minh được, sử dụng công nghệ mã nguồn mở từ nhóm R&D của Dfinity."
-			},
 			"sonic": {
 				"name": "Sonic",
 				"one_liner": "Mở khóa toàn bộ tiềm năng của DeFi và giao dịch hợp lý. Hoán đổi token, kiếm tiền với tư cách là nhà cung cấp thanh khoản và khai thác AMM hàng đầu của Bitfinity EVM.",
