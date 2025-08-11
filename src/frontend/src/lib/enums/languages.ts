@@ -1,8 +1,8 @@
 export enum Languages {
 	ENGLISH = 'en',
 	CZECH = 'cs',
-	FRENCH = 'fr',
 	GERMAN = 'de',
+	FRENCH = 'fr',
 	ITALIAN = 'it',
 	PORTUGUESE = 'pt',
 	VIETNAMESE = 'vi',
