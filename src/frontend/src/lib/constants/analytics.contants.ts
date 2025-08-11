@@ -141,3 +141,7 @@ export const TRACK_lOCK_MODE_DEACTIVATED = 'lock_mode_deactivated';
 // This event is used to track the number of calls to Infura's getLogs endpoint.
 // TODO: Remove these events once the issue is resolved.
 export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';
+
+//Links
+export const TRACK_OPEN_DOCUMENTATION = 'open_documentation';
+export const TRACK_OPEN_EXTERNAL_LINK = 'open_external_link';
