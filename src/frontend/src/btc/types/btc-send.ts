@@ -3,8 +3,9 @@ import type { Utxo } from '@dfinity/ckbtc';
 export class BtcAmountAssertionError extends Error {}
 
 export enum BtcPrepareSendError {
-	InsufficientBalance = 'InsufficientBalance',
-	InsufficientBalanceForFee = 'InsufficientBalanceForFee'
+	InsufficientBalance = 'insufficient_balance',
+	InsufficientBalanceForFee = 'insufficient_balance_for_fee',
+	MinimumBalance = 'minimum_btc_amount'
 }
 
 export interface UtxosFee {
