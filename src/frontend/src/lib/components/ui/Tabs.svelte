@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { goto } from '$app/navigation';
 	import type { TabVariant } from '$lib/types/style';
 	import type { NonEmptyArray } from '$lib/types/utils';
-	import { isNullish } from '@dfinity/utils';
-	import { goto } from '$app/navigation';
 
 	interface Props {
 		tabs: NonEmptyArray<{ label: string; id: string; path?: string }>;
