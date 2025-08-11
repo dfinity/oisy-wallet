@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import icp from '$icp/assets/icp-dark.svg';
 import type { TokenId } from '$lib/types/token';
@@ -20,5 +21,6 @@ export const ICP_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: ICP_DECIMALS,
 	icon: icp,
 	address: '0x00f3C42833C3170159af4E92dbb451Fb3F708917',
-	exchange: 'erc20'
+	exchange: 'erc20',
+	groupData: ICP_TOKEN_GROUP
 };
