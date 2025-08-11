@@ -1,5 +1,5 @@
 import { warnSignOut } from '$lib/services/auth.services';
-import type { AddressStore, StorageAddressData } from '$lib/stores/address.store';
+import type { AddressStore, AddressStoreData } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -168,7 +168,7 @@ export const validateAddress = async <T extends Address>({
 	$addressStore,
 	certifyAddress
 }: {
-	$addressStore: StorageAddressData<T>;
+	$addressStore: AddressStoreData<T>;
 	certifyAddress: (address: T) => Promise<ResultSuccess<string>>;
 }) => {
 	if (isNullish($addressStore)) {

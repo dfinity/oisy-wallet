@@ -1,7 +1,6 @@
 import * as manageContactsService from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
-import { vi } from 'vitest';
 
 export const mockManageContactsService = () => {
 	// Mock createContact
@@ -11,8 +10,7 @@ export const mockManageContactsService = () => {
 				id: BigInt(Date.now()),
 				name,
 				updateTimestampNs: BigInt(Date.now()),
-				addresses: [],
-				image: []
+				addresses: []
 			};
 
 			contactsStore.addContact(newContact);

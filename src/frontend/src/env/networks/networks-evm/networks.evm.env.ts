@@ -22,7 +22,7 @@ export const SUPPORTED_EVM_MAINNET_NETWORKS: Network[] = SUPPORTED_EVM_NETWORKS.
 	({ env }) => env === 'mainnet'
 );
 
-const SUPPORTED_EVM_TESTNET_NETWORKS: Network[] = SUPPORTED_EVM_NETWORKS.filter(
+export const SUPPORTED_EVM_TESTNET_NETWORKS: Network[] = SUPPORTED_EVM_NETWORKS.filter(
 	({ env }) => env === 'testnet'
 );
 

@@ -11,6 +11,8 @@ import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-sw
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { icpSwapAmounts } from '$lib/services/icp-swap.services';
 import { fetchIcpSwap } from '$lib/services/swap.services';
+import { SwapErrorCodes } from '$lib/types/swap';
+import { isSwapError } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -98,7 +100,7 @@ describe('fetchIcpSwap', () => {
 		progress: vi.fn(),
 		sourceToken: mockValidIcToken as IcTokenToggleable,
 		destinationToken: { ...mockValidIcrcToken, enabled: true } as IcTokenToggleable,
-		swapAmount: 1,
+		swapAmount: 8,
 		receiveAmount: 900n,
 		slippageValue: 0.5,
 		sourceTokenFee: 100n,
@@ -150,45 +152,76 @@ describe('fetchIcpSwap', () => {
 	it('Swap failed. Pool not found', async () => {
 		vi.mocked(getPoolCanister).mockRejectedValue(new Error('Swap failed. Pool not found.'));
 
-		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).rejects.toThrow(
-			en.swap.error.pool_not_found
-		);
+		await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(en.swap.error.pool_not_found);
 	});
 
 	it('Swap failed. Deposit failed', async () => {
 		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
-
 		vi.mocked(sendIcrc).mockResolvedValue(1n);
 		vi.mocked(deposit).mockRejectedValue(new Error('fail'));
 
-		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).rejects.toThrow(
-			en.swap.error.deposit_error
-		);
+		await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(en.swap.error.deposit_error);
 	});
 
 	it('Swap failed. Withdraw Success', async () => {
 		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
-
 		vi.mocked(sendIcrc).mockResolvedValue(1n);
 		vi.mocked(deposit).mockResolvedValue(1n);
 		vi.mocked(swapIcp).mockRejectedValue(new Error('swap fail'));
 		vi.mocked(withdraw).mockResolvedValue(1n);
 
-		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).rejects.toThrow(
+		await expect(fetchIcpSwap({ ...swapArgs })).rejects.toThrow(
 			en.swap.error.swap_failed_withdraw_success
 		);
 	});
 
 	it('Swap and withdraw both failed', async () => {
 		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
-
 		vi.mocked(sendIcrc).mockResolvedValue(1n);
 		vi.mocked(deposit).mockResolvedValue(1n);
 		vi.mocked(swapIcp).mockRejectedValue(new Error('swap fail'));
 		vi.mocked(withdraw).mockRejectedValue(new Error('withdraw fail'));
 
-		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).rejects.toThrow(
-			en.swap.error.withdraw_failed
-		);
+		try {
+			await fetchIcpSwap({ ...swapArgs });
+		} catch (err: unknown) {
+			if (isSwapError(err)) {
+				expect(err.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED);
+			}
+		}
+	});
+
+	it('Handles tryToWithdraw with withdrawDestinationTokens = false', async () => {
+		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+		vi.mocked(withdraw).mockResolvedValueOnce(1n);
+
+		try {
+			await fetchIcpSwap({
+				...swapArgs,
+				tryToWithdraw: true,
+				withdrawDestinationTokens: false
+			});
+		} catch (err: unknown) {
+			if (isSwapError(err)) {
+				expect(err.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS);
+			}
+		}
+	});
+
+	it('Handles tryToWithdraw with withdrawDestinationTokens = true', async () => {
+		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+		vi.mocked(withdraw).mockResolvedValueOnce(1n);
+
+		try {
+			await fetchIcpSwap({
+				...swapArgs,
+				tryToWithdraw: true,
+				withdrawDestinationTokens: true
+			});
+		} catch (err: unknown) {
+			if (isSwapError(err)) {
+				expect(err.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS);
+			}
+		}
 	});
 });

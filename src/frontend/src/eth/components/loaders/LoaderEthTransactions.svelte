@@ -1,12 +1,19 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { ethTransactionsInitialized } from '$eth/derived/eth-transactions.derived';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import {
 		loadEthereumTransactions,
 		reloadEthereumTransactions
 	} from '$eth/services/eth-transactions.services';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+	import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 	import type { TokenId } from '$lib/types/token';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 
@@ -71,11 +78,36 @@
 		loading = false;
 	};
 
-	$: $tokenWithFallback, $tokenNotInitialized, (async () => await load())();
+	$: ($tokenWithFallback, $tokenNotInitialized, (async () => await load())());
 
 	const reload = async () => {
 		await load({ reload: true });
 	};
+
+	onMount(async () => {
+		if ($ethTransactionsInitialized) {
+			return;
+		}
+
+		const principal = $authIdentity?.getPrincipal();
+
+		if (isNullish(principal)) {
+			return;
+		}
+
+		const {
+			network: { id: networkId },
+			id: tokenId
+		} = $tokenWithFallback;
+
+		await syncTransactionsFromCache({
+			principal,
+			tokenId,
+			networkId,
+			getIdbTransactions: getIdbEthTransactions,
+			transactionsStore: ethTransactionsStore
+		});
+	});
 </script>
 
 <IntervalLoader onLoad={reload} interval={WALLET_TIMER_INTERVAL_MILLIS}>

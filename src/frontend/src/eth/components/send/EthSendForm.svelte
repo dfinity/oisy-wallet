@@ -48,7 +48,9 @@
 	/>
 
 	<EthFeeDisplay slot="fee">
-		<Html slot="label" text={$i18n.fee.text.max_fee_eth} />
+		{#snippet label()}
+			<Html text={$i18n.fee.text.max_fee_eth} />
+		{/snippet}
 	</EthFeeDisplay>
 
 	<SendFeeInfo

@@ -1,7 +1,6 @@
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 import { render } from '@testing-library/svelte';
-import { expect } from 'vitest';
 
 describe('NetworkLogo', () => {
 	const mockNetwork = ICP_NETWORK;

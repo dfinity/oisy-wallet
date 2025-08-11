@@ -1,9 +1,15 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { getIdbBalances } from '$lib/api/idb-balances.api';
 import { syncWalletFromIdbCache } from '$lib/services/listener.services';
+import { balancesStore } from '$lib/stores/balances.store';
 import type { TransactionsStore } from '$lib/stores/transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+
+vi.mock('$lib/api/idb-balances.api', () => ({
+	getIdbBalances: vi.fn()
+}));
 
 describe('listener.services', () => {
 	describe('syncWalletFromIdbCache', () => {
@@ -29,6 +35,10 @@ describe('listener.services', () => {
 			vi.clearAllMocks();
 
 			mockAuthStore();
+
+			vi.spyOn(balancesStore, 'set');
+
+			balancesStore.reset(mockTokenId);
 		});
 
 		it('should return early if identity is nullish', async () => {
@@ -52,8 +62,40 @@ describe('listener.services', () => {
 			expect(mockAppend).not.toHaveBeenCalled();
 		});
 
-		it('should return early if getIdbTransactions returns nullish', async () => {
-			mockGetIdbTransactions.mockResolvedValue(undefined);
+		it('should call getIdbBalances with correct parameters', async () => {
+			await syncWalletFromIdbCache(mockParams);
+
+			expect(getIdbBalances).toHaveBeenCalledWith({
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				principal: mockIdentity.getPrincipal()
+			});
+
+			expect(balancesStore.set).not.toHaveBeenCalled();
+		});
+
+		it('should not return early if getIdbTransactions returns nullish', async () => {
+			mockGetIdbTransactions.mockResolvedValueOnce(undefined);
+
+			await syncWalletFromIdbCache(mockParams);
+
+			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				principal: mockIdentity.getPrincipal()
+			});
+
+			expect(mockAppend).not.toHaveBeenCalled();
+
+			expect(getIdbBalances).toHaveBeenCalledWith({
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				principal: mockIdentity.getPrincipal()
+			});
+		});
+
+		it('should return early if getIdbBalances returns nullish', async () => {
+			vi.mocked(getIdbBalances).mockResolvedValueOnce(undefined);
 
 			await syncWalletFromIdbCache(mockParams);
 
@@ -64,6 +106,14 @@ describe('listener.services', () => {
 			});
 
 			expect(mockTransactionsStore.append).not.toHaveBeenCalled();
+
+			expect(getIdbBalances).toHaveBeenCalledWith({
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				principal: mockIdentity.getPrincipal()
+			});
+
+			expect(balancesStore.set).not.toHaveBeenCalled();
 		});
 
 		it('should append transactions to store', async () => {
@@ -88,9 +138,31 @@ describe('listener.services', () => {
 			});
 		});
 
+		it('should set balance in balancesStore', async () => {
+			const mockBalance = 123n;
+
+			vi.mocked(getIdbBalances).mockResolvedValue(mockBalance);
+
+			await syncWalletFromIdbCache(mockParams);
+
+			expect(getIdbBalances).toHaveBeenCalledWith({
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				principal: mockIdentity.getPrincipal()
+			});
+
+			expect(balancesStore.set).toHaveBeenCalledWith({
+				id: mockTokenId,
+				data: {
+					data: mockBalance,
+					certified: false
+				}
+			});
+		});
+
 		it('should throw if getIdbTransactions throws an error', async () => {
 			const mockError = new Error('Database error');
-			mockGetIdbTransactions.mockRejectedValue(mockError);
+			mockGetIdbTransactions.mockRejectedValueOnce(mockError);
 
 			await expect(syncWalletFromIdbCache(mockParams)).rejects.toThrow(mockError);
 
@@ -101,6 +173,29 @@ describe('listener.services', () => {
 			});
 
 			expect(mockAppend).not.toHaveBeenCalled();
+
+			expect(getIdbBalances).not.toHaveBeenCalled();
+		});
+
+		it('should throw if getIdbBalances throws an error', async () => {
+			const mockError = new Error('Database error');
+			vi.mocked(getIdbBalances).mockRejectedValueOnce(mockError);
+
+			await expect(syncWalletFromIdbCache(mockParams)).rejects.toThrow(mockError);
+
+			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				principal: mockIdentity.getPrincipal()
+			});
+
+			expect(getIdbBalances).toHaveBeenCalledWith({
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				principal: mockIdentity.getPrincipal()
+			});
+
+			expect(balancesStore.set).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -76,9 +76,11 @@
 <Responsive up="md">
 	<div class="modal-expandable-values">
 		<Collapsible bind:expanded initiallyExpanded={expanded}>
-			<div class="flex w-[calc(100%-1.5rem)] items-center" slot="header">
-				{@render contentHeader({ isInBottomSheet: false })}
-			</div>
+			{#snippet header()}
+				<div class="flex w-[calc(100%-1.5rem)] items-center">
+					{@render contentHeader({ isInBottomSheet: false })}
+				</div>
+			{/snippet}
 
 			{@render content()}
 		</Collapsible>

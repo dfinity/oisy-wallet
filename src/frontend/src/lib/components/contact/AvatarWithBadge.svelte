@@ -44,7 +44,7 @@
 
 <div class="relative flex">
 	{#if nonNullish(contact)}
-		<Avatar name={contact.name} {variant} />
+		<Avatar name={contact.name} {variant} image={contact.image} />
 
 		{#if nonNullish(badge)}
 			<AddressesBadge

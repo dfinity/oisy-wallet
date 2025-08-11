@@ -18,7 +18,7 @@ export const initDip20WalletWorker = async ({
 	network: { env, id: networkId }
 }: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new WalletWorker.default();
+	let worker: Worker | null = new WalletWorker.default();
 
 	await syncWalletFromCache({ tokenId, networkId });
 
@@ -57,14 +57,16 @@ export const initDip20WalletWorker = async ({
 	};
 
 	const stop = () => {
-		worker.postMessage({
+		worker?.postMessage({
 			msg: 'stopDip20WalletTimer'
 		});
 	};
 
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startDip20WalletTimer',
 				data: {
 					ledgerCanisterId,
@@ -74,7 +76,7 @@ export const initDip20WalletWorker = async ({
 		},
 		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'triggerDip20WalletTimer',
 				data: {
 					ledgerCanisterId,
@@ -83,8 +85,14 @@ export const initDip20WalletWorker = async ({
 			});
 		},
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stop();
-			worker.terminate();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

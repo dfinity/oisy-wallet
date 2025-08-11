@@ -38,20 +38,11 @@ pub struct ErcTokenId(pub String);
 /// IDs may be found on: <https://chainlist.org/>
 pub type ChainId = u64;
 
-/// An ERC20 compliant token on the Ethereum or EVM-compatible networks.
+/// An ERC compliant token on the Ethereum or EVM-compatible networks (for example, ERC20, ERC721,
+/// ERC1155).
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 #[serde(remote = "Self")]
-pub struct Erc20Token {
-    pub token_address: ErcTokenId,
-    pub chain_id: ChainId,
-    pub symbol: Option<String>,
-    pub decimals: Option<u8>,
-}
-
-/// An ERC721 compliant token on the Ethereum or EVM-compatible networks.
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-#[serde(remote = "Self")]
-pub struct Erc721Token {
+pub struct ErcToken {
     pub token_address: ErcTokenId,
     pub chain_id: ChainId,
 }
@@ -63,8 +54,9 @@ pub enum Token {
     Icrc(IcrcToken) = 0,
     SplMainnet(SplToken) = 1,
     SplDevnet(SplToken) = 2,
-    Erc20(Erc20Token) = 3,
-    Erc721(Erc721Token) = 4,
+    Erc20(ErcToken) = 3,
+    Erc721(ErcToken) = 4,
+    Erc1155(ErcToken) = 5,
 }
 
 /// User preferences for any token

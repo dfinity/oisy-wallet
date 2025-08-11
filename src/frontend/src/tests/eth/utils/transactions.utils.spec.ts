@@ -18,7 +18,7 @@ import {
 	mockErc20HelperContractAddress,
 	mockEthHelperContractAddress
 } from '$tests/mocks/ck-minter.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import type { MinterInfo } from '@dfinity/cketh';
 
 const transaction: Transaction = {
@@ -34,7 +34,7 @@ const transaction: Transaction = {
 
 const ckMinterInfoAddresses: EthAddress[] = ['0xffff'];
 
-const $ethAddress: OptionEthAddress = '0xffff';
+const ethAddress: OptionEthAddress = '0xffff';
 
 describe('transactions.utils', () => {
 	describe('mapAddressToName', () => {
@@ -162,7 +162,7 @@ describe('transactions.utils', () => {
 		it('should map to "withdraw" when the "from" address is in ckMinterInfoAddresses', () => {
 			const ckMinterInfoAddresses: EthAddress[] = ['0x1234'];
 
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).toBe('withdraw');
 		});
@@ -170,32 +170,32 @@ describe('transactions.utils', () => {
 		it('should map to "deposit" when the "to" address is in ckMinterInfoAddresses', () => {
 			const ckMinterInfoAddresses: EthAddress[] = ['0xabcd'];
 
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).toBe('deposit');
 		});
 
-		it('should map to "send" when the "from" address matches the $ethAddress', () => {
+		it('should map to "send" when the "from" address matches the ethAddress', () => {
 			const result = mapEthTransactionUi({
 				transaction,
 				ckMinterInfoAddresses,
-				$ethAddress: '0x1234'
+				ethAddress: '0x1234'
 			});
 
 			expect(result.type).toBe('send');
 		});
 
 		it('should map to "receive" when none of the other conditions match', () => {
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).toBe('receive');
 		});
 
-		it('should map to "receive" when it does not match MinterInfoAddresses and $ethAddress is undefined', () => {
+		it('should map to "receive" when it does not match MinterInfoAddresses and ethAddress is undefined', () => {
 			const result = mapEthTransactionUi({
 				transaction,
 				ckMinterInfoAddresses,
-				$ethAddress: undefined
+				ethAddress: undefined
 			});
 
 			expect(result.type).toBe('receive');
@@ -204,7 +204,7 @@ describe('transactions.utils', () => {
 		it('should not map to "withdraw" or to "deposit" when the MinterInfoAddresses are empty', () => {
 			const ckMinterInfoAddresses: EthAddress[] = [];
 
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).not.toBe('withdraw');
 			expect(result.type).not.toBe('deposit');
@@ -214,14 +214,14 @@ describe('transactions.utils', () => {
 			const result = mapEthTransactionUi({
 				transaction: { ...transaction, hash: '0x1234' },
 				ckMinterInfoAddresses,
-				$ethAddress
+				ethAddress
 			});
 
 			expect(result.id).toBe('0x1234');
 		});
 
 		it('should map an ID to empty string if the transaction hash does not exist', () => {
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.id).toBe('');
 		});

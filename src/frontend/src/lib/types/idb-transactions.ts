@@ -1,19 +1,17 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { Principal } from '@dfinity/principal';
 
 export type IdbTransactionsStoreData =
-	| CertifiedStoreData<TransactionsData<BtcTransactionUi>>
-	| EthTransactionsData
-	| CertifiedStoreData<TransactionsData<IcTransactionUi>>
-	| CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+	| BtcCertifiedTransactionsData
+	| EthCertifiedTransactionsData
+	| IcCertifiedTransactionsData
+	| SolCertifiedTransactionsData;
 
 export interface SetIdbTransactionsParams<T extends IdbTransactionsStoreData> {
 	identity: OptionIdentity;

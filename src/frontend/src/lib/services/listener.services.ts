@@ -1,15 +1,59 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { getIdbBalances } from '$lib/api/idb-balances.api';
 import { authIdentity } from '$lib/derived/auth.derived';
+import { balancesStore } from '$lib/stores/balances.store';
 import type { TransactionsStore } from '$lib/stores/transactions.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { AnyTransaction } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const syncWalletFromIdbCache = async <
-	T extends BtcTransactionUi | IcTransactionUi | SolTransactionUi
->({
+export const syncTransactionsFromCache = async <T extends AnyTransaction>({
+	tokenId,
+	getIdbTransactions,
+	transactionsStore,
+	...params
+}: GetIdbTransactionsParams & {
+	getIdbTransactions: (params: GetIdbTransactionsParams) => Promise<T[] | undefined>;
+	transactionsStore: TransactionsStore<T>;
+}) => {
+	const transactions = await getIdbTransactions({
+		...params,
+		tokenId
+	});
+
+	if (isNullish(transactions)) {
+		return;
+	}
+
+	transactionsStore.append({
+		tokenId,
+		transactions: transactions.map((transaction) => ({
+			data: transaction,
+			certified: false
+		}))
+	});
+};
+
+export const syncBalancesFromCache = async ({ tokenId, ...params }: GetIdbTransactionsParams) => {
+	const balance = await getIdbBalances({
+		...params,
+		tokenId
+	});
+
+	if (isNullish(balance)) {
+		return;
+	}
+
+	balancesStore.set({
+		id: tokenId,
+		data: {
+			data: balance,
+			certified: false
+		}
+	});
+};
+
+export const syncWalletFromIdbCache = async <T extends AnyTransaction>({
 	tokenId,
 	getIdbTransactions,
 	transactionsStore,
@@ -26,21 +70,19 @@ export const syncWalletFromIdbCache = async <
 		return;
 	}
 
-	const transactions = await getIdbTransactions({
-		...params,
+	const principal = identity.getPrincipal();
+
+	await syncTransactionsFromCache<T>({
 		tokenId,
-		principal: identity.getPrincipal()
+		getIdbTransactions,
+		transactionsStore,
+		principal,
+		...params
 	});
 
-	if (isNullish(transactions)) {
-		return;
-	}
-
-	transactionsStore.append({
+	await syncBalancesFromCache({
 		tokenId,
-		transactions: transactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}))
+		principal,
+		...params
 	});
 };

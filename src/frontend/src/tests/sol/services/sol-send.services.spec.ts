@@ -8,6 +8,7 @@ import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.provid
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import type { SolInstruction } from '$sol/types/sol-instructions';
+import type { SplToken } from '$sol/types/spl';
 import * as networkUtils from '$sol/utils/safe-network.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -16,10 +17,11 @@ import {
 	mockAtaAddress2,
 	mockAtaAddress3,
 	mockSolAddress,
-	mockSolAddress2
+	mockSolAddress2,
+	mockSolAddress3
 } from '$tests/mocks/sol.mock';
 import { getTransferSolInstruction } from '@solana-program/system';
-import { getTransferInstruction } from '@solana-program/token';
+import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
 import * as solanaWeb3 from '@solana/kit';
 import {
 	appendTransactionMessageInstructions,
@@ -73,7 +75,8 @@ vi.mock('@solana-program/system', () => ({
 }));
 
 vi.mock('@solana-program/token', () => ({
-	getTransferInstruction: vi.fn().mockReturnValue('mock-transfer-instruction')
+	getTransferInstruction: vi.fn().mockReturnValue('mock-transfer-instruction'),
+	getTransferCheckedInstruction: vi.fn().mockReturnValue('mock-transfer-checked-instruction')
 }));
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
@@ -211,8 +214,7 @@ describe('sol-send.services', () => {
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-instruction'],
 				mockTx
 			);
@@ -220,6 +222,34 @@ describe('sol-send.services', () => {
 				{
 					source: mockAtaAddress,
 					destination: mockAtaAddress2,
+					authority: mockSigner,
+					amount: mockAmount
+				},
+				{ programAddress: DEVNET_USDC_TOKEN.owner }
+			);
+		});
+
+		it('should send SPL tokens with mint authority successfully', async () => {
+			await expect(
+				sendSol({
+					...mockParams,
+					token: { ...DEVNET_USDC_TOKEN, mintAuthority: mockSolAddress3 } as SplToken
+				})
+			).resolves.not.toThrow();
+
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
+
+			expect(pipe).toHaveBeenCalledTimes(4);
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
+				['mock-transfer-checked-instruction'],
+				mockTx
+			);
+			expect(getTransferCheckedInstruction).toHaveBeenCalledWith(
+				{
+					source: mockAtaAddress,
+					destination: mockAtaAddress2,
+					mint: DEVNET_USDC_TOKEN.address,
+					decimals: DEVNET_USDC_TOKEN.decimals,
 					authority: mockSigner,
 					amount: mockAmount
 				},
@@ -248,7 +278,12 @@ describe('sol-send.services', () => {
 			).resolves.not.toThrow();
 
 			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledTimes(2);
-			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
+			expect(spyCreateAtaInstruction).toHaveBeenCalledExactlyOnceWith({
+				signer: mockSigner,
+				destination: mockSolAddress2,
+				tokenAddress: DEVNET_USDC_TOKEN.address,
+				tokenOwnerAddress: DEVNET_USDC_TOKEN.owner
+			});
 
 			expect(pipe).toHaveBeenCalledTimes(4);
 			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();

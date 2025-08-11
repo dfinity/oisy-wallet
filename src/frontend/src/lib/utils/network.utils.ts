@@ -103,6 +103,18 @@ export const showTokenFilteredBySelectedNetwork = ({
 	($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && token.network.env !== 'testnet') ||
 	$selectedNetwork?.id === token.network.id;
 
+export const showTokenFilteredBySelectedNetworks = ({
+	token,
+	$selectedNetworks,
+	$pseudoNetworkChainFusion
+}: {
+	token: Token;
+	$selectedNetworks: NetworkId[] | undefined;
+	$pseudoNetworkChainFusion: boolean;
+}): boolean =>
+	($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && token.network.env !== 'testnet') ||
+	(nonNullish($selectedNetworks) && $selectedNetworks?.includes(token.network.id));
+
 /**
  * Filter the tokens that either lives on the selected network or, if no network is provided, pseud Chain Fusion, then those that are not testnets.
  */
@@ -113,6 +125,15 @@ export const filterTokensForSelectedNetwork = <T extends Token>([
 ]: [T[], Network | undefined, boolean]): T[] =>
 	$tokens.filter((token) =>
 		showTokenFilteredBySelectedNetwork({ token, $selectedNetwork, $pseudoNetworkChainFusion })
+	);
+
+export const filterTokensForSelectedNetworks = <T extends Token>([
+	$tokens,
+	$selectedNetworks,
+	$pseudoNetworkChainFusion
+]: [T[], NetworkId[] | undefined, boolean]): T[] =>
+	$tokens.filter((token) =>
+		showTokenFilteredBySelectedNetworks({ token, $selectedNetworks, $pseudoNetworkChainFusion })
 	);
 
 export const mapToSignerBitcoinNetwork = ({

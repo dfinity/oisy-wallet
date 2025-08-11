@@ -4,7 +4,6 @@ import type { ChatMessage } from '$lib/types/ai-assistant';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('ai-assistant.store', () => {
 	const defaultState = {
@@ -12,7 +11,9 @@ describe('ai-assistant.store', () => {
 		chatHistory: [
 			{
 				role: 'system',
-				content: AI_ASSISTANT_SYSTEM_PROMPT
+				data: {
+					text: AI_ASSISTANT_SYSTEM_PROMPT
+				}
 			}
 		]
 	};
@@ -45,7 +46,7 @@ describe('ai-assistant.store', () => {
 	it('should append a message', () => {
 		const message = {
 			role: 'user',
-			content: 'hey'
+			data: { text: 'hey' }
 		} as ChatMessage;
 
 		aiAssistantStore.appendMessage(message);

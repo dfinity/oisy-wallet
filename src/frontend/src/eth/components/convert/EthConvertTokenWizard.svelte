@@ -12,6 +12,7 @@
 	import { send as executeSend } from '$eth/services/send.services';
 	import { ETH_FEE_CONTEXT_KEY } from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
@@ -30,7 +31,6 @@
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -123,7 +123,7 @@
 			await executeSend({
 				from: $ethAddress,
 				to: isErc20Icp($sourceToken) ? destination : mapAddressStartsWith0x(destination),
-				progress: (step: ProgressStepsSend) => (convertProgressStep = step),
+				progress: (step: ProgressStep) => (convertProgressStep = step),
 				token: $sourceToken,
 				amount: parseToken({
 					value: `${sendAmount}`,

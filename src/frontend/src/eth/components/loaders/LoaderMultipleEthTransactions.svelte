@@ -1,14 +1,19 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		batchLoadTransactions,
 		batchResultsToTokenId
 	} from '$eth/services/eth-transactions-batch.services';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+	import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
+	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 	import type { TokenId } from '$lib/types/token';
 
 	// TODO: make it more functional
@@ -45,7 +50,33 @@
 
 	const debounceLoad = debounce(onLoad, 1000);
 
-	$: $enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad();
+	$: ($enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad());
+
+	onMount(async () => {
+		const principal = $authIdentity?.getPrincipal();
+
+		if (isNullish(principal)) {
+			return;
+		}
+
+		await Promise.allSettled(
+			[...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens].map(
+				async ({ id: tokenId, network: { id: networkId } }) => {
+					if (nonNullish($ethTransactionsStore?.[tokenId])) {
+						return;
+					}
+
+					await syncTransactionsFromCache({
+						principal,
+						tokenId,
+						networkId,
+						getIdbTransactions: getIdbEthTransactions,
+						transactionsStore: ethTransactionsStore
+					});
+				}
+			)
+		);
+	});
 </script>
 
 <IntervalLoader {onLoad} interval={WALLET_TIMER_INTERVAL_MILLIS}>

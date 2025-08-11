@@ -10,34 +10,39 @@
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let totalFee: bigint | undefined = undefined;
+	interface Props {
+		totalFee?: bigint;
+	}
+
+	let { totalFee = $bindable() }: Props = $props();
 
 	const { sourceToken, sourceTokenExchangeRate, destinationToken } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	const { store: storeUtxosFeeData } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
-	let kytFee: bigint | undefined;
-	$: kytFee = $ckBtcMinterInfoStore?.[$destinationToken.id]?.data.kyt_fee;
+	let kytFee = $derived($ckBtcMinterInfoStore?.[$destinationToken.id]?.data.kyt_fee);
 
-	let satoshisFee: bigint | undefined;
-	$: satoshisFee = $storeUtxosFeeData?.utxosFee?.feeSatoshis;
+	let satoshisFee = $derived($storeUtxosFeeData?.utxosFee?.feeSatoshis);
 
-	$: totalFee =
-		nonNullish(kytFee) && nonNullish(satoshisFee)
-			? BTC_CONVERT_FEE + kytFee + satoshisFee
-			: undefined;
+	$effect(() => {
+		totalFee =
+			nonNullish(kytFee) && nonNullish(satoshisFee)
+				? BTC_CONVERT_FEE + kytFee + satoshisFee
+				: undefined;
+	});
 </script>
 
 <ModalExpandableValues>
-	<ConvertFeeTotal
-		slot="list-header"
-		feeAmount={totalFee}
-		decimals={$sourceToken.decimals}
-		exchangeRate={$sourceTokenExchangeRate}
-	/>
+	{#snippet listHeader()}
+		<ConvertFeeTotal
+			feeAmount={totalFee}
+			decimals={$sourceToken.decimals}
+			exchangeRate={$sourceTokenExchangeRate}
+		/>
+	{/snippet}
 
-	<svelte:fragment slot="list-items">
+	{#snippet listItems()}
 		<FeeDisplay
 			feeAmount={BTC_CONVERT_FEE}
 			decimals={$sourceToken.decimals}
@@ -45,7 +50,7 @@
 			symbol={$sourceToken.symbol}
 			zeroAmountLabel={$i18n.fee.text.zero_fee}
 		>
-			<svelte:fragment slot="label">{$i18n.fee.text.convert_fee}</svelte:fragment>
+			{#snippet label()}{$i18n.fee.text.convert_fee}{/snippet}
 		</FeeDisplay>
 
 		<FeeDisplay
@@ -54,7 +59,7 @@
 			exchangeRate={$sourceTokenExchangeRate}
 			symbol={$sourceToken.symbol}
 		>
-			<svelte:fragment slot="label">{$i18n.fee.text.convert_inter_network_fee}</svelte:fragment>
+			{#snippet label()}{$i18n.fee.text.convert_inter_network_fee}{/snippet}
 		</FeeDisplay>
 
 		<FeeDisplay
@@ -63,7 +68,7 @@
 			exchangeRate={$sourceTokenExchangeRate}
 			symbol={$sourceToken.symbol}
 		>
-			<svelte:fragment slot="label">{$i18n.fee.text.convert_btc_network_fee}</svelte:fragment>
+			{#snippet label()}{$i18n.fee.text.convert_btc_network_fee}{/snippet}
 		</FeeDisplay>
-	</svelte:fragment>
+	{/snippet}
 </ModalExpandableValues>
