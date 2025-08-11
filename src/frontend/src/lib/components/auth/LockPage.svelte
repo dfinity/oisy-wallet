@@ -11,7 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { authLocked } from '$lib/utils/locked.utils';
+	import { authLocked } from '$lib/stores/locked.store';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 	const modalId = Symbol();
@@ -28,8 +28,7 @@
 
 	const handleUnlock = async () => {
 		const { success } = await signIn({});
-		authLocked.setLock({
-			locked: false,
+		authLocked.unlock({
 			source: 'login from lock page'
 		});
 
@@ -39,16 +38,19 @@
 	};
 
 	const handleLogout = async () => {
-		authLocked.setLock({
-			locked: false,
+		authLocked.unlock({
 			source: 'logout from lock page'
 		});
 		await signOut({ resetUrl: true });
 	};
 </script>
 
-<div class="background-overlay flex flex-col">
-	<div class="background-blur">
+<div class="fixed inset-0 w-full h-full z-40 bg-[var(--color-background-page)] flex flex-col">
+	<div
+		class="fixed inset-0 flex items-center justify-center
+		       bg-[color-mix(in_srgb,var(--color-background-page)_30%,transparent)]
+		       backdrop-blur-[35px] z-[-1]"
+	>
 		{#if src}
 			<Responsive up="xl">
 				<Img {src} alt={ariaLabel} styleClass="h-full object-contain mx-auto object-top" />
