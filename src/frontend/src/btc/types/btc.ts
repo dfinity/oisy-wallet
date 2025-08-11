@@ -20,33 +20,34 @@ export interface BtcTransactionUi extends Omit<TransactionUiCommon, 'to'> {
 }
 
 /**
- * Represents a structured Bitcoin balance with different states
+ * Represents a structured Bitcoin balance with different confirmation states
+ * Based on Bitcoin transaction lifecycle: PENDING → UNCONFIRMED → CONFIRMED
  */
-export interface BtcBalance {
+export interface BtcWalletBalance {
 	/**
-	 * Spendable balance (confirmed balance minus pending outgoing transactions)
-	 * This is the amount that can actually be spent in new transactions
+	 * Confirmed spendable balance (6+ confirmations)
+	 * UTXOs that can be spent immediately in new transactions
 	 */
-	available: bigint;
+	confirmed: bigint;
 
 	/**
-	 * Amount locked in pending outgoing transactions
-	 * These are UTXOs that have been spent but not yet confirmed
+	 * Balance in unconfirmed transactions (1-5 confirmations)
+	 * UTXOs that have been spent but need more confirmations
 	 */
-	pending: bigint;
+	unconfirmed: bigint;
 
 	/**
-	 * Complete wallet value (available + pending)
-	 * This represents the total amount in the wallet
+	 * Total wallet balance (confirmed + unconfirmed)
+	 * Represents the complete amount owned by the wallet
 	 */
 	total: bigint;
 }
 
 /**
- * Type alias for BTC balance data that can be null
+ * Type alias for BTC wallet balance data that can be null
  * Used in stores and components where balance might not be loaded yet
  */
-export type BtcBalanceData = BtcBalance | null;
+export type BtcWalletBalanceData = BtcWalletBalance | null;
 
 /**
  * Legacy type for backward compatibility
