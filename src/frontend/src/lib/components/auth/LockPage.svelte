@@ -9,9 +9,9 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { signOut, signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { authLocked } from '$lib/stores/locked.store';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 	const modalId = Symbol();
@@ -45,11 +45,11 @@
 	};
 </script>
 
-<div class="fixed inset-0 w-full h-full z-40 bg-[var(--color-background-page)] flex flex-col">
+<div class="fixed inset-0 z-40 flex h-full w-full flex-col bg-[var(--color-background-page)]">
 	<div
-		class="fixed inset-0 flex items-center justify-center
-		       bg-[color-mix(in_srgb,var(--color-background-page)_30%,transparent)]
-		       backdrop-blur-[35px] z-[-1]"
+		class="fixed inset-0 z-[-1] flex items-center
+		       justify-center
+		       bg-[color-mix(in_srgb,var(--color-background-page)_30%,transparent)] backdrop-blur-[35px]"
 	>
 		{#if src}
 			<Responsive up="xl">
