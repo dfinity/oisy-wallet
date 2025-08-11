@@ -21,7 +21,7 @@
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { shouldShowLockPage } from '$lib/derived/locked.derived';
+	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
@@ -57,7 +57,7 @@
 	});
 </script>
 
-{#if $shouldShowLockPage}
+{#if $isAuthLocked}
 	<LockPage />
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>
