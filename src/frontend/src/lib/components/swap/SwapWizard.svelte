@@ -2,6 +2,7 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { balance } from '$icp/api/icrc-ledger.api';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
@@ -32,11 +33,10 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
+	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
-	import { balance } from '$icp/api/icrc-ledger.api';
-	import { usdValue } from '$lib/utils/exchange.utils';
 	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 
 	interface Props {
