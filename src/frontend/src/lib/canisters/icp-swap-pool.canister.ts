@@ -1,5 +1,6 @@
 import type {
 	DepositArgs,
+	PoolMetadata,
 	Result,
 	SwapArgs,
 	_SERVICE as SwapPoolService,
@@ -128,6 +129,17 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 	): Promise<{ balance0: bigint; balance1: bigint }> => {
 		const { getUserUnusedBalance } = this.caller({ certified: false });
 		const response = await getUserUnusedBalance(principal);
+
+		if ('ok' in response) {
+			return response.ok;
+		}
+
+		throw mapIcpSwapFactoryError(response.err);
+	};
+
+	getPoolMetadata = async (): Promise<PoolMetadata> => {
+		const { metadata } = this.caller({ certified: false });
+		const response = await metadata();
 
 		if ('ok' in response) {
 			return response.ok;
