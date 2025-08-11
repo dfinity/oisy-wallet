@@ -45,10 +45,9 @@
 	};
 </script>
 
-<div class="fixed inset-0 z-40 flex h-full w-full flex-col bg-[var(--color-background-page)]">
+<div class="fixed z-4 inset-0 flex h-full w-full flex-col bg-[var(--color-background-page)]">
 	<div
-		class="fixed inset-0 z-[-1] flex items-center
-		       justify-center
+		class="fixed inset-0 z-[-1]
 		       bg-[color-mix(in_srgb,var(--color-background-page)_30%,transparent)] backdrop-blur-[35px]"
 	>
 		{#if src}
