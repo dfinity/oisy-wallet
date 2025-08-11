@@ -1,4 +1,4 @@
-import { authLocked } from '$lib/utils/locked.utils';
+import { authLocked } from '$lib/stores/locked.store';
 import * as storageUtils from '$lib/utils/storage.utils';
 import type { MockInstance } from 'vitest';
 

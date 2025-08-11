@@ -133,6 +133,8 @@ export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
 
 // Lock mode activated
 export const TRACK_lOCK_MODE_ACTIVATED = 'lock_mode_activated';
+export const TRACK_lOCK_MODE_DEACTIVATED = 'lock_mode_deactivated';
+
 
 // Temporary events
 // We have sudden spikes in the number of getLogs calls to Infura, which is causing issues.

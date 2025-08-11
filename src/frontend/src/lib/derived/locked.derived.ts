@@ -1,13 +1,13 @@
 import { authNotSignedIn } from '$lib/derived/auth.derived';
-import { authLocked } from '$lib/utils/locked.utils';
+import { authLocked } from '$lib/stores/locked.store';
 import { derived, type Readable } from 'svelte/store';
 
-export const isAuthLocked: Readable<boolean> = derived(
+export const isLocked: Readable<boolean> = derived(
 	[authLocked],
 	([$authLocked]) => $authLocked
 );
 
-export const shouldShowLockPage: Readable<boolean> = derived(
+export const isAuthLocked: Readable<boolean> = derived(
 	[authNotSignedIn, authLocked],
 	([$authNotSignedIn, $authLocked]) => $authNotSignedIn && $authLocked
 );
