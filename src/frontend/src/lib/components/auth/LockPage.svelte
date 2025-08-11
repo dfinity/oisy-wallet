@@ -73,8 +73,8 @@
 
 	<div class="flex h-screen flex-col items-center justify-center px-4">
 		<div
-			class="flex w-full max-w-md flex-col content-center items-center justify-center gap-5 rounded-[24px] bg-[var(--color-background-surface)] p-6 text-center text-[var(--color-text-primary)] shadow-lg transition-all duration-500 ease-in-out md:rounded-[28px] md:p-8"
-		>
+			class="flex w-full max-w-md flex-col content-center items-center justify-center gap-5 rounded-4xl bg-surface p-6 text-center text-primary shadow-lg transition-all duration-500 ease-in-out md:p-8">
+		
 			<OisyWalletLogoLink />
 
 			<div class="my-7">
@@ -93,7 +93,7 @@
 				</Button>
 			</div>
 
-			<p class="tertiary text-xs">
+			<p class="tertiary mb-0 text-xs">
 				{$i18n.lock.text.logout_clear_cash_message}
 			</p>
 		</div>
