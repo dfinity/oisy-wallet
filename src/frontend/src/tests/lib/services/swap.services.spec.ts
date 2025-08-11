@@ -292,7 +292,8 @@ describe('performManualWithdraw', () => {
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
 				token: 'ICP',
-				tokenDirection: 'receive'
+				tokenDirection: 'receive',
+				dApp: SwapProvider.ICP_SWAP
 			}
 		});
 		expect(result.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS);
@@ -314,7 +315,8 @@ describe('performManualWithdraw', () => {
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			metadata: {
 				token: 'ICP',
-				tokenDirection: 'receive'
+				tokenDirection: 'receive',
+				dApp: SwapProvider.ICP_SWAP
 			}
 		});
 		expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);
@@ -334,7 +336,8 @@ describe('performManualWithdraw', () => {
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
 				token: 'ICP',
-				tokenDirection: 'pay'
+				tokenDirection: 'pay',
+				dApp: SwapProvider.ICP_SWAP
 			}
 		});
 	});
