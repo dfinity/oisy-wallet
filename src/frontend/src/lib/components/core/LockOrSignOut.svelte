@@ -4,6 +4,7 @@
 	import IconLock from '$lib/components/icons/IconLock.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { LOCK_BUTTON } from '$lib/constants/test-ids.constants';
+	import { lockSession } from '$lib/services/auth.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/utils/locked.utils';
@@ -29,8 +30,10 @@
 	const handleLogoutTriggered = () => {
 		onHidePopover?.();
 	};
-	const handleLock = () => {
+
+	const handleLock = async () => {
 		onHidePopover?.();
+		await lockSession({ resetUrl: false });
 		authLocked.toggleLock({
 			source: 'menu lock button'
 		});
