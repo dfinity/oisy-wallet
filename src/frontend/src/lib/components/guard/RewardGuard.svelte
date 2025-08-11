@@ -75,10 +75,10 @@
 			});
 			modalStore.openWelcome(welcomeModalId);
 		}
-	}
+	};
 
 	$effect(() => {
-		const timestamp = lastTimestamp
+		const timestamp = lastTimestamp;
 		untrack(() => handleWelcomeModal(timestamp));
 	});
 </script>
