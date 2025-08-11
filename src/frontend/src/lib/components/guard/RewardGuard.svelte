@@ -23,7 +23,7 @@
 	const rewardModalId = Symbol();
 	const welcomeModalId = Symbol();
 
-	let lastTimestamp = $state();
+	let lastTimestamp = $state<bigint | undefined>(undefined);
 	let hasDisplayedWelcome = $state(false);
 
 	onMount(async () => {
@@ -78,7 +78,7 @@
 	};
 
 	$effect(() => {
-		const timestamp = lastTimestamp;
+		const timestamp: bigint | undefined = lastTimestamp;
 		untrack(() => {
 			if (nonNullish(timestamp)) {
 				handleWelcomeModal(timestamp);
