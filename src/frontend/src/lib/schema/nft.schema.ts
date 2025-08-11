@@ -16,7 +16,7 @@ export const NftMetadataSchema = z.object({
 	attributes: z.array(NftAttributeSchema).optional()
 });
 
-export const CollectionSchema = z.object({
+export const NftCollectionSchema = z.object({
 	address: z.string(),
 	name: z.string().optional(),
 	symbol: z.string().optional(),
@@ -28,5 +28,5 @@ export const CollectionSchema = z.object({
 export const NftSchema = z.object({
 	balance: z.number().optional(),
 	...NftMetadataSchema.shape,
-	collection: CollectionSchema
+	collection: NftCollectionSchema
 });
