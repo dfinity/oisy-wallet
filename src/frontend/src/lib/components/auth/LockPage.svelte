@@ -108,25 +108,3 @@
 		</ExternalLink>
 	</div>
 </div>
-
-<style lang="scss">
-	.background-overlay {
-		position: fixed;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		z-index: 4;
-		background-color: var(--color-background-page);
-	}
-
-	.background-blur {
-		position: fixed;
-		inset: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background-color: color-mix(in srgb, var(--color-background-page) 30%, transparent);
-		backdrop-filter: blur(35px);
-		z-index: -1;
-	}
-</style>
