@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import icp from '$icp/assets/icp-dark.svg';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
+import icp from '$icp/assets/icp-dark.svg';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
