@@ -23,7 +23,7 @@
 	const rewardModalId = Symbol();
 	const welcomeModalId = Symbol();
 
-	let lastTimestamp = $state()
+	let lastTimestamp = $state();
 	let hasDisplayedWelcome = $state(false);
 
 	onMount(async () => {
@@ -64,7 +64,9 @@
 				startDate: season1Episode4Campaign.startDate,
 				endDate: season1Episode4Campaign.endDate
 			}) &&
-			isNullish($modalStore?.type) && !hasDisplayedWelcome && !$hasUrlCode
+			isNullish($modalStore?.type) &&
+			!hasDisplayedWelcome &&
+			!$hasUrlCode
 		) {
 			hasDisplayedWelcome = true;
 			trackEvent({
@@ -73,7 +75,7 @@
 			});
 			modalStore.openWelcome(welcomeModalId);
 		}
-	})
+	});
 </script>
 
 {@render children?.()}

@@ -9,8 +9,8 @@
 	import { claimVipReward, setReferrer } from '$lib/services/reward.services';
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { removeSearchParam } from '$lib/utils/nav.utils';
 	import { hasUrlCode } from '$lib/stores/url-code.store';
+	import { removeSearchParam } from '$lib/utils/nav.utils';
 
 	interface Props {
 		children?: Snippet;
