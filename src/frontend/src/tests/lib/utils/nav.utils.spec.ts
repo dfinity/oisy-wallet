@@ -19,7 +19,6 @@ import {
 	isNftsPath,
 	isRewardsPath,
 	isRouteActivity,
-	isRouteAssets,
 	isRouteDappExplorer,
 	isRouteEarning,
 	isRouteNfts,
@@ -494,25 +493,6 @@ describe('nav.utils', () => {
 				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
 				expect(isRouteEarning(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
-			});
-		});
-
-		describe('isRouteAssets', () => {
-			it('should return true when route id is any subroute of the Assets path', () => {
-				expect(isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`))).toBeTruthy();
-				expect(
-					isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Assets}/subroute`))
-				).toBeTruthy();
-			});
-
-			it('should return false when route id does not match Assets path', () => {
-				expect(isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
-
-				expect(isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
-
-				expect(isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
-
-				expect(isRouteAssets(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
 			});
 		});
 
