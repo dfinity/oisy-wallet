@@ -4,6 +4,9 @@ import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
+import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
+import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
@@ -12,19 +15,14 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
+import type { Transaction } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
-import type { Transaction } from '$lib/types/transaction';
-import type { Address } from '$lib/types/address';
-import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
-import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
-import { transactions } from '$icp/api/xtc-ledger.api';
-import { assertIsInstructionWithAccounts } from '@solana/kit';
 
 export const loadEthereumTransactions = ({
 	networkId,
@@ -156,8 +154,15 @@ const loadErcTransactions = async ({
 		return { success: false };
 	}
 
-	const tokens = [...get(enabledErc20Tokens), ...get(enabledErc721Tokens), ...get(enabledErc1155Tokens)];
-	const token = tokens.find(({ id, network, standard: tokenStandard }) => id === tokenId && network.id === networkId && tokenStandard === standard);
+	const tokens = [
+		...get(enabledErc20Tokens),
+		...get(enabledErc721Tokens),
+		...get(enabledErc1155Tokens)
+	];
+	const token = tokens.find(
+		({ id, network, standard: tokenStandard }) =>
+			id === tokenId && network.id === networkId && tokenStandard === standard
+	);
 
 	if (isNullish(token)) {
 		const {
@@ -174,10 +179,14 @@ const loadErcTransactions = async ({
 	}
 
 	try {
-		const transactions = token.standard === 'erc20'
-			? await loadErc20Transactions({ networkId, token, address })
-			: token.standard === 'erc721' ? await loadErc721Transactions({ networkId, token, address })
-				: token.standard === 'erc1155' ? await loadErc1155Transactions({ networkId, token, address }) : [];
+		const transactions =
+			token.standard === 'erc20'
+				? await loadErc20Transactions({ networkId, token, address })
+				: token.standard === 'erc721'
+					? await loadErc721Transactions({ networkId, token, address })
+					: token.standard === 'erc1155'
+						? await loadErc1155Transactions({ networkId, token, address })
+						: [];
 
 		const certifiedTransactions = transactions.map((transaction) => ({
 			data: transaction,
@@ -217,7 +226,7 @@ const loadErcTransactions = async ({
 	}
 
 	return { success: true };
-}
+};
 
 const loadErc20Transactions = async ({
 	networkId,
@@ -232,13 +241,13 @@ const loadErc20Transactions = async ({
 	return await retryWithDelay({
 		request: async () => await erc20Transactions({ contract: token, address })
 	});
-}
+};
 
 const loadErc721Transactions = async ({
-																			 networkId,
-																			 token,
-																			 address
-																		 }: {
+	networkId,
+	token,
+	address
+}: {
 	networkId: NetworkId;
 	token: Erc721TokenToggleable;
 	address: Address;
@@ -247,13 +256,13 @@ const loadErc721Transactions = async ({
 	return await retryWithDelay({
 		request: async () => await erc721Transactions({ contract: token, address })
 	});
-}
+};
 
 const loadErc1155Transactions = async ({
-																				networkId,
-																				token,
-																				address
-																			}: {
+	networkId,
+	token,
+	address
+}: {
 	networkId: NetworkId;
 	token: Erc1155TokenToggleable;
 	address: Address;
@@ -262,4 +271,4 @@ const loadErc1155Transactions = async ({
 	return await retryWithDelay({
 		request: async () => await erc1155Transactions({ contract: token, address })
 	});
-}
+};
