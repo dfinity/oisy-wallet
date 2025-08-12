@@ -79,37 +79,34 @@ export const signIn = async (
 };
 
 export const signOut = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> => {
-	const logoutPromise = logout({ resetUrl });
 	trackSignOut({ name: TRACK_COUNT_SIGN_OUT_SUCCESS, meta: { reason: 'user', resetUrl } });
-	return logoutPromise;
+	return logout({ resetUrl });
 };
 
 export const errorSignOut = (text: string): Promise<void> => {
-	const logoutPromise = logout({
+	trackSignOut({
+		name: TRACK_SIGN_OUT_ERROR_COUNT,
+		meta: { reason: 'error', level: 'error', text }
+	});
+	return logout({
 		msg: {
 			text,
 			level: 'error'
 		}
 	});
-	trackSignOut({
-		name: TRACK_SIGN_OUT_ERROR_COUNT,
-		meta: { reason: 'error', level: 'error', text }
-	});
-	return logoutPromise;
 };
 
 export const warnSignOut = (text: string): Promise<void> => {
-	const logoutPromise = logout({
+	trackSignOut({
+		name: TRACK_SIGN_OUT_WITH_WARNING,
+		meta: { reason: 'warning', level: 'warn', text }
+	});
+	return logout({
 		msg: {
 			text,
 			level: 'warn'
 		}
 	});
-	trackSignOut({
-		name: TRACK_SIGN_OUT_WITH_WARNING,
-		meta: { reason: 'warning', level: 'warn', text }
-	});
-	return logoutPromise;
 };
 
 export const nullishSignOut = (): Promise<void> =>
@@ -274,8 +271,8 @@ const trackSignOut = ({
 		reason?: string;
 		level?: 'warn' | 'error';
 		text?: string;
-		resetUrl?: boolean;
-		clearStorages?: boolean;
+		resetUrl?: string;
+		clearStorages?: string;
 	};
 }) => {
 	trackEvent({
@@ -284,8 +281,8 @@ const trackSignOut = ({
 			reason: meta.reason ?? 'user',
 			level: meta.level ?? '',
 			text: meta.text ?? '',
-			resetUrl: String(Boolean(meta.resetUrl)),
-			clearStorages: String(Boolean(meta.clearStorages))
+			resetUrl: `${meta.resetUrl ?? false}`,
+			clearStorages: `${meta.clearStorages ?? false}`
 		}
 	});
 };
