@@ -10,6 +10,7 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { CMCSAX_TOKEN } from '$env/tokens/tokens-spl/tokens.cmcsax.env';
 import { COINX_TOKEN } from '$env/tokens/tokens-spl/tokens.coinx.env';
 import { CRCLX_TOKEN } from '$env/tokens/tokens-spl/tokens.crclx.env';
+import { CRWDX_TOKEN } from '$env/tokens/tokens-spl/tokens.crwdx.env';
 import { CSCOX_TOKEN } from '$env/tokens/tokens-spl/tokens.cscox.env';
 import { DFDVX_TOKEN } from '$env/tokens/tokens-spl/tokens.dfdvx.env';
 import { DHRX_TOKEN } from '$env/tokens/tokens-spl/tokens.dhrx.env';
@@ -59,6 +60,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	CMCSAX_TOKEN,
 	COINX_TOKEN,
 	CRCLX_TOKEN,
+	CRWDX_TOKEN,
 	CSCOX_TOKEN,
 	DFDVX_TOKEN,
 	DHRX_TOKEN,
