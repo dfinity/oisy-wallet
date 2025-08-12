@@ -26,7 +26,6 @@
 		modalIcTransaction,
 		modalSolTransaction
 	} from '$lib/derived/modal.derived';
-	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
