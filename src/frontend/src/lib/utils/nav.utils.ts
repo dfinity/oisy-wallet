@@ -25,13 +25,11 @@ export const isDappExplorerPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
 export const isActivityPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Activity}`;
-export const isAssetsPath = (path: string | null) =>
-	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Assets}`) ?? false;
 export const isTokensPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Tokens}` ||
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 export const isNftsPath = (path: string | null) =>
-	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`;
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`) ?? false;
 export const isRewardsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarningPath = (path: string | null) =>
@@ -47,8 +45,6 @@ export const isRouteSettings = ({ route: { id } }: Page): boolean => isSettingsP
 export const isRouteDappExplorer = ({ route: { id } }: Page): boolean => isDappExplorerPath(id);
 
 export const isRouteActivity = ({ route: { id } }: Page): boolean => isActivityPath(id);
-
-export const isRouteAssets = ({ route: { id } }: Page): boolean => isAssetsPath(id);
 
 // The page of the link for WalletConnect is the same as the page where we show the Tokens list
 export const isRouteTokens = ({ route: { id } }: Page): boolean => isTokensPath(id);

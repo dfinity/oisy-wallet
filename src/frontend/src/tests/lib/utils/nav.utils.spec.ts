@@ -13,13 +13,11 @@ import {
 	back,
 	gotoReplaceRoot,
 	isActivityPath,
-	isAssetsPath,
 	isDappExplorerPath,
 	isEarningPath,
 	isNftsPath,
 	isRewardsPath,
 	isRouteActivity,
-	isRouteAssets,
 	isRouteDappExplorer,
 	isRouteEarning,
 	isRouteNfts,
@@ -497,28 +495,13 @@ describe('nav.utils', () => {
 			});
 		});
 
-		describe('isRouteAssets', () => {
-			it('should return true when route id is any subroute of the Assets path', () => {
-				expect(isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`))).toBeTruthy();
-				expect(
-					isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Assets}/subroute`))
-				).toBeTruthy();
-			});
-
-			it('should return false when route id does not match Assets path', () => {
-				expect(isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
-
-				expect(isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
-
-				expect(isRouteAssets(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
-
-				expect(isRouteAssets(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
-			});
-		});
-
 		describe('isRouteNfts', () => {
 			it('should return true when route id matches Nfts path', () => {
 				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`))).toBeTruthy();
+			});
+
+			it('should return true when route id is any subroute of the Nfts path', () => {
+				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}/subroute`))).toBeTruthy();
 			});
 
 			it('should return false when route id does not match Nfts path', () => {
@@ -577,13 +560,6 @@ describe('nav.utils', () => {
 			expect(isNftsPath('/(app)/assets/nfts/subpath')).toBeFalsy();
 			expect(isNftsPath('/(app)/wrong')).toBeFalsy();
 			expect(isNftsPath(null)).toBeFalsy();
-		});
-
-		it('isAssetsPath', () => {
-			expect(isAssetsPath(withAppPrefix(AppPath.Tokens))).toBeTruthy();
-			expect(isAssetsPath(withAppPrefix(AppPath.Nfts))).toBeTruthy();
-			expect(isAssetsPath('/(app)/assets/whatever')).toBeTruthy();
-			expect(isAssetsPath(null)).toBeFalsy();
 		});
 
 		it('isRewardsPath', () => {
