@@ -2,12 +2,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component } from 'svelte';
 	import noNftImage from '$lib/assets/nfts/no-nft-image.svg';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	interface Props {
 		nft: Nft;
@@ -29,7 +29,11 @@
 		badgeTestId
 	}: Props = $props();
 
-	const { imageUrl, name, collection: {network} } = $derived(nft);
+	const {
+		imageUrl,
+		name,
+		collection: { network }
+	} = $derived(nft);
 </script>
 
 <div class="relative">
@@ -52,7 +56,6 @@
 		>
 			<NetworkLogo {network} {color} testId={`network-${badgeTestId}`} />
 		</div>
-
 	{:else if nonNullish(badge) && badge?.type === 'icon'}
 		<div
 			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
