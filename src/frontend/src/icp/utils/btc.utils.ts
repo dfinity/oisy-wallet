@@ -164,6 +164,7 @@ export const getPendingTransactionsBalance = ({
 	return {
 		confirmed: adjustedConfirmedBalance > ZERO ? adjustedConfirmedBalance : ZERO,
 		unconfirmed: unconfirmedBalance,
+		locked: lockedBalance,
 		total: adjustedTotalBalance > ZERO ? adjustedTotalBalance : ZERO
 	};
 };

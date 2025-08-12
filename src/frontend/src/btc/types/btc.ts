@@ -37,6 +37,12 @@ export interface BtcWalletBalance {
 	unconfirmed: bigint;
 
 	/**
+	 * Locked balance from pending outgoing transactions
+	 * UTXOs that are spent in pending transactions and cannot be used again
+	 */
+	locked: bigint;
+
+	/**
 	 * Total wallet balance (confirmed + unconfirmed)
 	 * Represents the complete amount owned by the wallet
 	 */
