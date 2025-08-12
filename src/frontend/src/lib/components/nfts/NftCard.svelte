@@ -6,6 +6,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { goto } from '$app/navigation';
+	import { AppPath } from '$lib/constants/routes.constants';
 
 	interface Props {
 		nft: Nft;
@@ -15,8 +17,12 @@
 	let { nft, testId }: Props = $props();
 </script>
 
-<div data-tid={testId}>
-	<div class="relative overflow-hidden rounded-lg">
+<button
+	class="flex-col text-left"
+	data-tid={testId}
+	onclick={() => goto(AppPath.Nfts + nft.collection.symbol + '/' + nft.id)}
+>
+	<div class="relative overflow-hidden rounded-xl">
 		{#if nonNullish(nft.imageUrl)}
 			<Img
 				src={nft.imageUrl}
@@ -44,8 +50,8 @@
 		</div>
 	</div>
 
-	<div class="px-2 pt-2">
+	<div class="w-full px-2 pt-2">
 		<h3 class="truncate text-xs font-semibold text-tertiary">{nft.collection.name}</h3>
 		<span class="text-xs text-tertiary">{`#${nft.id}`}</span>
 	</div>
-</div>
+</button>
