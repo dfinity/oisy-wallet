@@ -2,16 +2,8 @@ import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-t
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { getBtcSourceAddress } from '$btc/utils/btc-address.utils';
-import {
-	BTC_MAINNET_NETWORK_ID,
-	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.btc.env';
-import {
-	BTC_MAINNET_TOKEN_ID,
-	BTC_REGTEST_TOKEN_ID,
-	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens/tokens.btc.env';
+import { BTC_MAINNET_NETWORK_ID, BTC_REGTEST_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { BTC_MAINNET_TOKEN_ID, BTC_REGTEST_TOKEN_ID, BTC_TESTNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { getBtcWalletBalance } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
 import { authIdentity } from '$lib/derived/auth.derived';
@@ -36,9 +28,7 @@ export const syncWallet = async ({
 	const {
 		wallet: {
 			balance: { certified, data: totalBalance },
-			newTransactions,
-			address,
-			network
+			newTransactions
 		}
 	} = data;
 
