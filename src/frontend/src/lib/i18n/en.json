@@ -161,6 +161,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "Wallet locked",
+			"title_part_2": "Unlock to continue in OISY",
+			"unlock": "Unlock",
+			"logout": "Log out",
+			"logout_clear_cash_message": "Logging out will clear all cached data",
+			"learn_more": "Learn more"
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "All apps",
