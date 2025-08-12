@@ -1,19 +1,9 @@
-import {
-	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
-	UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
-} from '$btc/constants/btc.constants';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedData } from '$lib/types/store';
-import {
-	isNullish,
-	jsonReplacer,
-	jsonReviver,
-	notEmptyString,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { isNullish, jsonReplacer, jsonReviver, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -127,82 +117,53 @@ export const getPendingTransactionsBalance = ({
 	newTransactions: string;
 }): BtcWalletBalance => {
 	const pendingTransactions = getPendingTransactions(address);
+
+	// Parse new transactions from the worker
 	const transactions: BtcTransactionUi[] = JSON.parse(newTransactions, jsonReviver);
 
-	// Create efficient lookup map for newTransactions by transaction ID
+	// Create efficient lookup map for transactions by their ID
 	const transactionLookup = new Map<string, BtcTransactionUi>();
 	transactions.forEach((tx) => {
 		transactionLookup.set(tx.id, tx);
 	});
 
-	// Create a Set of pending transaction IDs for efficient lookup
-	const pendingTxIds = new Set<string>();
-	if (!isNullish(pendingTransactions?.data)) {
-		pendingTransactions.data.forEach((tx) => {
-			const txid = convertPendingTransactionTxid(tx);
-			if (txid) {
-				pendingTxIds.add(txid);
-			}
-		});
-	}
-
-	// Calculate balance adjustments from transactions
-	const { confirmedBalance, unconfirmedBalance, totalSentAmount } = transactions.reduce(
-		(acc, transaction) => {
-			const value = transaction.value ?? ZERO;
-			const confirmations = transaction.confirmations ?? 0;
-			const txid = transaction.id;
-
-			if (transaction.type === 'send') {
-				// For send transactions, check if they match pending transactions
-				// If they match, use the pending transaction as the trusted source
-				if (pendingTxIds.has(txid)) {
-					// This transaction is in our pending store - use pending data as master
-					// The amount will be calculated from pending transaction UTXOs below
-				} else {
-					// This is a send transaction not in our pending store
-					// Subtract from balance immediately
-					acc.totalSentAmount += value;
-				}
-			} else if (transaction.type === 'receive') {
-				// Incoming transactions add to balance based on confirmation state
-				if (confirmations >= CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS) {
-					acc.confirmedBalance += value;
-				} else if (confirmations >= UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS) {
-					acc.unconfirmedBalance += value;
-				}
-			}
-
-			return acc;
-		},
-		{
-			confirmedBalance: ZERO,
-			unconfirmedBalance: ZERO,
-			totalSentAmount: ZERO
-		}
-	);
-
-	// Calculate locked balance from pending transactions (trusted source)
-	const lockedBalance = isNullish(pendingTransactions?.data)
-		? ZERO
+	// Calculate locked balance and unconfirmed balance from pending transactions
+	const { lockedBalance, pendingTxIds, unconfirmedBalance } = isNullish(pendingTransactions?.data)
+		? { lockedBalance: ZERO, pendingTxIds: new Set<string>(), unconfirmedBalance: ZERO }
 		: pendingTransactions.data.reduce(
-				(sum: bigint, tx: PendingTransaction) =>
-					sum + tx.utxos.reduce((utxoSum: bigint, utxo) => utxoSum + BigInt(utxo.value), 0n),
-				0n
+				(acc, tx) => {
+					// Calculate total UTXO value for this pending transaction
+					const txUtxoValue = tx.utxos.reduce((utxoSum, utxo) => utxoSum + BigInt(utxo.value), 0n);
+					acc.lockedBalance += txUtxoValue;
+
+					// Add transaction ID to the set for correlation
+					const txid = convertPendingTransactionTxid(tx);
+					if (txid) {
+						acc.pendingTxIds.add(txid);
+
+						// Look up the transaction in newTransactions to get the confirmation count
+						const matchedTransaction = transactionLookup.get(txid);
+						if (matchedTransaction) {
+							const confirmations = matchedTransaction.confirmations ?? 0;
+
+							// If transaction has 0-5 confirmations, add to unconfirmed balance
+							if (confirmations >= 0 && confirmations <= 5) {
+								acc.unconfirmedBalance += txUtxoValue;
+							}
+						}
+					}
+
+					return acc;
+				},
+				{ lockedBalance: ZERO, pendingTxIds: new Set<string>(), unconfirmedBalance: ZERO }
 			);
 
-	// Calculate final balances
-	// Start with totalBalance from canister and subtract sent amounts and locked amounts
-	const adjustedTotalBalance = totalBalance - totalSentAmount - lockedBalance;
-	const adjustedConfirmedBalance =
-		confirmedBalance > ZERO
-			? Math.max(0, Number(confirmedBalance - lockedBalance))
-			: Math.max(0, Number(adjustedTotalBalance));
-	const adjustedUnconfirmedBalance = unconfirmedBalance;
+	const adjustedTotalBalance = totalBalance - lockedBalance;
+	const adjustedConfirmedBalance = adjustedTotalBalance - unconfirmedBalance;
 
 	return {
-		confirmed: BigInt(adjustedConfirmedBalance),
-		unconfirmed: adjustedUnconfirmedBalance,
+		confirmed: adjustedConfirmedBalance > ZERO ? adjustedConfirmedBalance : ZERO,
+		unconfirmed: unconfirmedBalance,
 		total: adjustedTotalBalance > ZERO ? adjustedTotalBalance : ZERO
 	};
 };
