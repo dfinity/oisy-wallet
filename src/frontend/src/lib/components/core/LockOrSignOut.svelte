@@ -4,7 +4,6 @@
 	import IconLock from '$lib/components/icons/IconLock.svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonTextIcon from '$lib/components/ui/ButtonTextIcon.svelte';
 	import { LOCK_BUTTON, LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { lockSession, signOut } from '$lib/services/auth.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
@@ -48,7 +47,6 @@
 			colorStyle="tertiary"
 			paddingSmall
 			styleClass="flex w-full rounded-lg py-2 flex-1 border-tertiary hover:text-brand-primary hover:bg-brand-subtle-10"
-			style="border-radius: var(--border-radius);"
 			testId={LOCK_BUTTON}
 			onclick={handleLock}
 		>
@@ -56,7 +54,7 @@
 			<IconLock />
 		</Button>
 
-		<ButtonTextIcon
+		<Button
 			onclick={handleLogoutTriggered}
 			paddingSmall
 			colorStyle="secondary"
@@ -64,10 +62,8 @@
 			styleClass="flex items-center w-full gap-2 rounded-lg py-2 flex-1"
 		>
 			{$i18n.auth.text.logout}
-			{#snippet icon()}
-				<IconLogout />
-			{/snippet}
-		</ButtonTextIcon>
+			<IconLogout />
+		</Button>
 	</div>
 
 	{#if nonNullish(remainingTimeMs)}
