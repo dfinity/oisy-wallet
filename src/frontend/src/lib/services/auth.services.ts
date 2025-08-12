@@ -95,15 +95,13 @@ export const signOut = ({
 }: {
 	resetUrl?: boolean;
 	clearAllPrincipalsStorages?: boolean;
-}): Promise<void> => 
-{
+}): Promise<void> => {
 	trackSignOut({
 		name: TRACK_COUNT_SIGN_OUT_SUCCESS,
 		meta: { reason: 'user', resetUrl: String(resetUrl) }
 	});
 	return logout({ resetUrl, clearAllPrincipalsStorages });
-}
-
+};
 
 export const errorSignOut = (text: string): Promise<void> => {
 	trackSignOut({
@@ -134,7 +132,7 @@ export const warnSignOut = (text: string): Promise<void> => {
 export const nullishSignOut = (): Promise<void> =>
 	warnSignOut(get(i18n).auth.warning.not_signed_in);
 
-export const idleSignOut = (): Promise<void> =>{
+export const idleSignOut = (): Promise<void> => {
 	const text = get(i18n).auth.warning.session_expired;
 	trackEvent({
 		name: TRACK_SIGN_OUT_WITH_WARNING,
