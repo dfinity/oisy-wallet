@@ -37,11 +37,11 @@ export const loadEthereumTransactions = ({
 
 	if (standard === 'erc20') {
 		return loadErc20Transactions({ networkId, tokenId, updateOnly });
-	} if (standard === 'erc721') {
+	}
+	if (standard === 'erc721') {
 		return loadErc721Transactions({ networkId, tokenId, updateOnly });
 	}
-		return Promise.resolve({ success: true });
-
+	return Promise.resolve({ success: true });
 };
 
 // If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
