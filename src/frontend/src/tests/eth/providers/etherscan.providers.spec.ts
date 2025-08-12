@@ -12,6 +12,7 @@ import type {
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
@@ -21,7 +22,6 @@ import {
 } from '$tests/mocks/etherscan.mock';
 import en from '$tests/mocks/i18n.mock';
 import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
-import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 
 vi.mock('$env/rest/etherscan.env', () => ({
 	ETHERSCAN_API_KEY: 'test-api-key'
@@ -390,7 +390,10 @@ describe('etherscan.providers', () => {
 					mockFetch.mockRejectedValue(new Error('Network error'));
 
 					await expect(
-						provider.erc1155Transactions({ address: mockEthAddress, contract: mockValidErc1155Token })
+						provider.erc1155Transactions({
+							address: mockEthAddress,
+							contract: mockValidErc1155Token
+						})
 					).rejects.toThrow('Network error');
 				});
 			});

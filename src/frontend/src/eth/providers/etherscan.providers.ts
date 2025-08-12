@@ -190,9 +190,9 @@ export class EtherscanProvider {
 	};
 
 	erc721Transactions = async ({
-																address,
-																contract: { address: contractAddress }
-															}: {
+		address,
+		contract: { address: contractAddress }
+	}: {
 		address: EthAddress;
 		contract: Erc721Token;
 	}): Promise<Transaction[]> => {
@@ -214,16 +214,16 @@ export class EtherscanProvider {
 
 		return result.map(
 			({
-				 nonce,
-				 gas,
-				 gasPrice,
-				 hash,
-				 blockNumber,
-				 timeStamp,
-				 from,
-				 to,
-				 tokenID
-			 }: EtherscanProviderErc721TokenTransferTransaction): Transaction => ({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				tokenID
+			}: EtherscanProviderErc721TokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),
@@ -240,9 +240,9 @@ export class EtherscanProvider {
 	};
 
 	erc1155Transactions = async ({
-																 address,
-																 contract: { address: contractAddress }
-															 }: {
+		address,
+		contract: { address: contractAddress }
+	}: {
 		address: EthAddress;
 		contract: Erc1155Token;
 	}): Promise<Transaction[]> => {
@@ -264,17 +264,17 @@ export class EtherscanProvider {
 
 		return result.map(
 			({
-				 nonce,
-				 gas,
-				 gasPrice,
-				 hash,
-				 blockNumber,
-				 timeStamp,
-				 from,
-				 to,
-				 tokenID,
-				 tokenValue
-			 }: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				tokenID,
+				tokenValue
+			}: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),
