@@ -7,13 +7,7 @@ import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedData } from '$lib/types/store';
-import {
-	isNullish,
-	jsonReplacer,
-	nonNullish,
-	notEmptyString,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { isNullish, jsonReplacer, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -83,35 +77,32 @@ export const getPendingTransactionIds = (address: string): string[] => {
 };
 
 /**
- * Calculates a comprehensive BTC wallet balance structure with immediate transaction effects.
+ * Calculates a comprehensive BTC wallet balance structure accounting for all pending transactions.
  *
  * This function combines multiple data sources to provide an accurate, real-time balance:
  *
  * **Data Sources:**
- * 1. totalBalance: Canonical balance from Bitcoin canister (trusted, but may be stale)
- * 2. newTransactions: Recent BTC transaction data from external providers containing transaction.type ('send'/'receive'), transaction.value (amount), and transaction.confirmations (confirmation count)
- * 3. pendingTransactions: User-initiated transactions stored locally (trusted, represents locked UTXOs)
+ * 1. totalBalance: Canonical balance from Bitcoin canister (trusted baseline)
+ * 2. providerTransactions: Recent BTC transaction data from external providers containing transaction.type ('send'/'receive'), transaction.value (amount), and transaction.confirmations (confirmation count)
+ * 3. pendingTransactions: User-initiated outgoing transactions stored locally (trusted, represents locked UTXOs)
  *
- * **Balance Categories:**
- * - confirmed: UTXOs with 6+ confirmations, immediately spendable
- * - unconfirmed: UTXOs with 1-5 confirmations, awaiting full confirmation
- * - total: All available balance (confirmed and unconfirmed)
- *
-
  * **Transaction Processing Logic:**
- * - User sends BTC → Balance drops immediately, even before blockchain confirmation
- * - User receives BTC → Balance increases based on confirmation state
- * - Pending transactions → Locked amounts are subtracted from spendable balance
+ * - Outgoing transactions: Lock UTXOs immediately, subtract from confirmed balance
+ * - Incoming transactions: Add to unconfirmed until 6+ confirmations
+ * - Net unconfirmed: Algebraic sum of all unconfirmed transactions (±)
  *
- * **Example Flow:**
- * 1. totalBalance = 1.0 BTC (from canister)
- * 2. User sends 0.1 BTC → Appears in newTransactions as 'send' type
- * 3. Result: total = 0.9 BTC (immediate reduction)
- * 4. Later: 0.05 BTC received with 3 confirmations → unconfirmed increases by 0.05 BTC
- * 5. Final: { confirmed: 0.9, unconfirmed: 0.05, total: 0.95 }
+ * **Example Scenarios:**
+ * 1. **Simple outgoing**: totalBalance=1.0 BTC, send 0.1 BTC (2 confirmations)
+ *    → confirmed: 0.9, unconfirmed: -0.1, locked: 0.1, total: 0.8
  *
- * @param params - Parameters object containing address, totalBalance, and newTransactions
- * @returns BtcWalletBalance with confirmed, unconfirmed, and total balances (all in satoshis)
+ * 2. **Mixed transactions**: totalBalance=1.0 BTC, send 0.1 BTC + receive 0.05 BTC (both unconfirmed)
+ *    → confirmed: 0.9, unconfirmed: -0.05, locked: 0.1, total: 0.85
+ *
+ * 3. **Net incoming**: totalBalance=1.0 BTC, receive 0.2 BTC (3 confirmations)
+ *    → confirmed: 1.0, unconfirmed: +0.2, locked: 0.0, total: 1.2
+ *
+ * @param params - Parameters object containing address, totalBalance, and providerTransactions
+ * @returns BtcWalletBalance with all balance categories in satoshis
  */
 export const getBtcWalletBalance = ({
 	address,
@@ -135,38 +126,48 @@ export const getBtcWalletBalance = ({
 		? { lockedBalance: ZERO, unconfirmedBalance: ZERO }
 		: pendingTransactions.data.reduce(
 				(acc, tx) => {
-					// Calculate total UTXO value for this pending transaction
+					// Calculate total UTXO value for this pending transaction (always outgoing for pending)
 					const txUtxoValue = tx.utxos.reduce((utxoSum, utxo) => utxoSum + BigInt(utxo.value), 0n);
 					acc.lockedBalance += txUtxoValue;
 
-					// Add transaction ID to the set for correlation
+					// Add transaction ID for correlation with provider transactions
 					const txid = convertPendingTransactionTxid(tx);
 					if (txid) {
-						// Look up the transaction in newTransactions to get the confirmation count
+						// Look up the transaction in providerTransactions to get confirmation count and type
 						const matchedTransaction = transactionLookup.get(txid);
 						if (matchedTransaction && nonNullish(matchedTransaction.value)) {
 							const confirmations =
 								matchedTransaction.confirmations ?? UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-							// If transaction has 0-5 confirmations, add to unconfirmed balance
+							// If transaction has 0-5 confirmations, calculate net unconfirmed balance
 							if (
 								confirmations >= UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS &&
 								confirmations < CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 							) {
-								acc.unconfirmedBalance += matchedTransaction.value;
+								// Account for transaction direction in unconfirmed balance
+								if (matchedTransaction.type === 'send') {
+									// Outgoing: subtract from unconfirmed balance (negative contribution)
+									acc.unconfirmedBalance -= matchedTransaction.value;
+								} else if (matchedTransaction.type === 'receive') {
+									// Incoming: add to unconfirmed balance (positive contribution)
+									acc.unconfirmedBalance += matchedTransaction.value;
+								}
 							}
 						}
 					}
-
 					return acc;
 				},
-				{ lockedBalance: ZERO, pendingTxIds: new Set<string>(), unconfirmedBalance: ZERO }
+				{ lockedBalance: ZERO, unconfirmedBalance: ZERO }
 			);
 
+	// Calculate final balance structure
+	const confirmedBalance = totalBalance - lockedBalance;
+	const actualTotalBalance = confirmedBalance + unconfirmedBalance;
+
 	return {
-		confirmed: totalBalance - lockedBalance,
+		confirmed: confirmedBalance > ZERO ? confirmedBalance : ZERO,
 		unconfirmed: unconfirmedBalance,
 		locked: lockedBalance,
-		total: totalBalance
+		total: actualTotalBalance > ZERO ? actualTotalBalance : ZERO
 	};
 };

@@ -31,8 +31,12 @@ export interface BtcWalletBalance {
 	confirmed: bigint;
 
 	/**
-	 * Balance in unconfirmed transactions (1-5 confirmations)
-	 * UTXOs that have been spent but need more confirmations
+	 * Balance in unconfirmed transactions (0-5 confirmations)
+	 * Net result of all unconfirmed transactions, can be:
+	 * - Positive: Net incoming unconfirmed transactions (more money coming in)
+	 * - Negative: Net outgoing unconfirmed transactions (more money going out)
+	 * - Zero: No unconfirmed transactions or balanced in/out amounts
+	 * - Represents the algebraic sum when multiple parallel transactions exist
 	 */
 	unconfirmed: bigint;
 
