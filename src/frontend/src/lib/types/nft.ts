@@ -1,8 +1,8 @@
 import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc721Token } from '$eth/types/erc721';
 import type {
-	CollectionSchema,
 	NftAttributeSchema,
+	NftCollectionSchema,
 	NftIdSchema,
 	NftMetadataSchema,
 	NftSchema
@@ -16,7 +16,7 @@ export type NftAttributes = z.infer<typeof NftAttributeSchema>;
 
 export type NftMetadata = z.infer<typeof NftMetadataSchema>;
 
-export type Collection = z.infer<typeof CollectionSchema>;
+export type NftCollection = z.infer<typeof NftCollectionSchema>;
 
 export type Nft = z.infer<typeof NftSchema>;
 

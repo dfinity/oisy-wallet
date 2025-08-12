@@ -1233,6 +1233,7 @@
 				"reward_received": "Bem-vindo ao $oisy_short!",
 				"reward_failed": "O código expirou",
 				"reward_received_description": "Você receberá seu presente de boas-vindas a qualquer momento.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Solicite um novo e tente novamente"
 			},
 			"error": {

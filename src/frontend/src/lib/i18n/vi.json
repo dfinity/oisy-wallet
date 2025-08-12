@@ -1233,6 +1233,7 @@
 				"reward_received": "Chào mừng đến với $oisy_short!",
 				"reward_failed": "Mã đã hết hạn",
 				"reward_received_description": "Bạn sẽ nhận được món quà chào mừng của mình bất cứ lúc nào.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Yêu cầu một cái mới và thử lại"
 			},
 			"error": {
