@@ -6,6 +6,7 @@
 	import type { LogoSize } from '$lib/types/components';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import noNftImage from '$lib/assets/nfts/no-nft-image.svg'
 
 	interface Props {
 		nft: Nft;
@@ -31,9 +32,8 @@
 </script>
 
 <div class="relative">
-	<!-- TODO add fallback logo for nfts -->
 	<Logo
-		src={imageUrl ?? ''}
+		src={imageUrl ?? noNftImage}
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
 		size={logoSize}
 		rounded={false}
