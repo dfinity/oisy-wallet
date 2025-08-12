@@ -71,7 +71,7 @@
 	aria-label={ariaLabel}
 >
 	<span
-		class="flex min-w-0 justify-center items-center gap-2"
+		class="flex min-w-0 items-center justify-center gap-2"
 		class:w-full={contentFullWidth}
 		class:transition={loading}
 		class:duration-500={loading}
