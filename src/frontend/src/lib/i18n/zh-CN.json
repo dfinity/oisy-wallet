@@ -161,6 +161,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "",
+			"title_part_2": "",
+			"unlock": "",
+			"logout": "",
+			"logout_clear_cash_message": "",
+			"learn_more": ""
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "所有应用",

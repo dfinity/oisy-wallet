@@ -156,6 +156,17 @@ interface I18nAuth {
 	};
 }
 
+interface I18nLock {
+	text: {
+		title_part_1: string;
+		title_part_2: string;
+		unlock: string;
+		logout: string;
+		logout_clear_cash_message: string;
+		learn_more: string;
+	};
+}
+
 interface I18nDapps {
 	text: {
 		all_dapps: string;
@@ -1251,6 +1262,7 @@ interface I18n {
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
+	lock: I18nLock;
 	dapps: I18nDapps;
 	rewards: I18nRewards;
 	footer: I18nFooter;
