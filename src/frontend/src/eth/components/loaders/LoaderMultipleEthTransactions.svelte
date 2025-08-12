@@ -31,7 +31,8 @@
 		if (
 			isNullish($enabledEthereumTokens) ||
 			isNullish($enabledErc20Tokens) ||
-			isNullish($enabledEvmTokens)
+			isNullish($enabledEvmTokens) ||
+			isNullish($enabledNonFungibleTokens)
 		) {
 			return;
 		}
@@ -55,7 +56,7 @@
 
 	const debounceLoad = debounce(onLoad, 1000);
 
-	$: ($enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad());
+	$: ($enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, $enabledNonFungibleTokens, debounceLoad());
 
 	onMount(async () => {
 		const principal = $authIdentity?.getPrincipal();
@@ -65,7 +66,7 @@
 		}
 
 		await Promise.allSettled(
-			[...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens].map(
+			[...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens, ...$enabledNonFungibleTokens].map(
 				async ({ id: tokenId, network: { id: networkId } }) => {
 					if (nonNullish($ethTransactionsStore?.[tokenId])) {
 						return;
