@@ -235,4 +235,53 @@ describe('icp_swap_pool.canister', () => {
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
 	});
+
+	describe('getPoolMetadata', () => {
+		it('returns pool metadata successfully', async () => {
+			const mockPoolMetadata = {
+				fee: BigInt(3000),
+				key: 'pool-icp-wtn',
+				sqrtPriceX96: BigInt('3950336'),
+				tick: BigInt(12345),
+				liquidity: BigInt(500000000000n),
+				token0: {
+					address: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+					standard: 'icrc1'
+				},
+				token1: {
+					address: 'qaa6y-5yaaa-aaaaa-aaafa-cai',
+					standard: 'icrc2'
+				},
+				maxLiquidityPerTick: BigInt('913129639935'),
+				nextPositionId: BigInt(42)
+			};
+			service.metadata.mockResolvedValue({ ok: mockPoolMetadata });
+			const { getPoolMetadata } = await createPool({ serviceOverride: service });
+			const result = await getPoolMetadata();
+
+			expect(result).toEqual(mockPoolMetadata);
+		});
+
+		it('throws CanisterInternalError on error variant', async () => {
+			service.metadata.mockResolvedValue({
+				err: { InternalError: 'Failed to get pool metadata' }
+			});
+			const { getPoolMetadata } = await createPool({ serviceOverride: service });
+			const result = getPoolMetadata();
+
+			await expect(result).rejects.toThrow(
+				new CanisterInternalError('Internal error: Failed to get pool metadata')
+			);
+		});
+
+		it('throws raw error if getPoolMetadata throws', async () => {
+			service.metadata.mockImplementation(() => {
+				throw mockResponseError;
+			});
+			const { getPoolMetadata } = await createPool({ serviceOverride: service });
+			const result = getPoolMetadata();
+
+			await expect(result).rejects.toThrow(mockResponseError);
+		});
+	});
 });
