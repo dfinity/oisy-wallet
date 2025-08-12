@@ -36,6 +36,7 @@ export const loadBtcPendingSentTransactions = async ({
 				err: new Error(errMessage)
 			};
 		}
+		console.warn('Loading pending transactions for address:', address);
 		const pendingTransactions = await getPendingBtcTransactions({
 			identity,
 			address,

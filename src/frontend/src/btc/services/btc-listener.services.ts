@@ -1,13 +1,10 @@
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
-import {
-	BTC_MAINNET_NETWORK_ID,
-	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.btc.env';
+import { BTC_MAINNET_NETWORK_ID, BTC_REGTEST_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { getBtcWalletBalance } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
+import { btcAddressMainnet, btcAddressRegtest, btcAddressTestnet } from '$lib/derived/address.derived';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { syncWalletFromIdbCache } from '$lib/services/listener.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -16,6 +13,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
+import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -46,17 +44,27 @@ export const syncWallet = async ({
 		 * balance (confirmed, unconfirmed, total) using newTransactions data to determine confirmation states.
 		 */
 		const identity = get(authIdentity);
+		const networkId = mapBitcoinNetworkToNetworkId(network);
+
+		// Get the source address the same way as in other components (e.g. BtcConvertTokenWizard))
+		const sourceAddress =
+			(isNetworkIdBTCTestnet(networkId)
+				? get(btcAddressTestnet)
+				: isNetworkIdBTCRegtest(networkId)
+					? get(btcAddressRegtest)
+					: get(btcAddressMainnet)) ?? '';
 
 		// Wait for pending transactions to be loaded before calculating balance
 		await loadBtcPendingSentTransactions({
 			identity,
-			networkId: mapBitcoinNetworkToNetworkId(network),
-			address
+			networkId,
+			address: sourceAddress
 		});
 
 		// Calculate the structured balance using newTransactions to determine confirmation states
+		// Use sourceAddress to ensure consistency with the address used for pending transactions
 		const btcWalletBalance = getBtcWalletBalance({
-			address,
+			address: sourceAddress,
 			totalBalance,
 			newTransactions
 		});
