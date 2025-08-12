@@ -1052,7 +1052,6 @@ interface I18nVip {
 		error: {
 			loading_reward: string;
 			loading_user_data: string;
-			claiming_reward: string;
 			loading_eligibility: string;
 		};
 	};
