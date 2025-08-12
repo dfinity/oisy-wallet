@@ -2,7 +2,7 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { USDT_TOKEN, USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import {
@@ -56,7 +56,8 @@ describe('eth-transactions.services', () => {
 			const {
 				id: mockTokenId,
 				network: { id: mockNetworkId },
-				symbol: mockSymbol
+				symbol: mockSymbol,
+				standard: mockStandard
 			} = USDC_TOKEN;
 
 			const mockTransactions = createMockEthTransactions(3);
@@ -74,7 +75,8 @@ describe('eth-transactions.services', () => {
 
 				const result = await loadEthereumTransactions({
 					networkId: mockNetworkId,
-					tokenId: mockTokenId
+					tokenId: mockTokenId,
+					standard: mockStandard
 				});
 
 				expect(spyToastsError).toHaveBeenCalledWith({
@@ -86,7 +88,8 @@ describe('eth-transactions.services', () => {
 			it('should raise an error if token is not enabled', async () => {
 				const result = await loadEthereumTransactions({
 					networkId: ETHEREUM_NETWORK_ID,
-					tokenId: USDT_TOKEN_ID
+					tokenId: USDT_TOKEN_ID,
+					standard: USDT_TOKEN.standard
 				});
 
 				expect(spyToastsError).toHaveBeenCalledWith({
@@ -100,7 +103,8 @@ describe('eth-transactions.services', () => {
 
 				await loadEthereumTransactions({
 					networkId: mockNetworkId,
-					tokenId: mockTokenId
+					tokenId: mockTokenId,
+					standard: mockStandard
 				});
 
 				expect(mockErc20Transactions).toHaveBeenCalledWith({
@@ -114,7 +118,8 @@ describe('eth-transactions.services', () => {
 
 				const result = await loadEthereumTransactions({
 					networkId: mockNetworkId,
-					tokenId: mockTokenId
+					tokenId: mockTokenId,
+					standard: mockStandard
 				});
 
 				expect(result).toEqual({ success: true });
@@ -141,6 +146,7 @@ describe('eth-transactions.services', () => {
 				const result = await loadEthereumTransactions({
 					networkId: mockNetworkId,
 					tokenId: mockTokenId,
+					standard: mockStandard,
 					updateOnly: true
 				});
 
@@ -167,7 +173,8 @@ describe('eth-transactions.services', () => {
 
 				const result = await loadEthereumTransactions({
 					networkId: mockNetworkId,
-					tokenId: mockTokenId
+					tokenId: mockTokenId,
+					standard: mockStandard
 				});
 
 				expect(result).toEqual({ success: false });
@@ -195,7 +202,8 @@ describe('eth-transactions.services', () => {
 
 		const {
 			id: mockTokenId,
-			network: { id: mockNetworkId }
+			network: { id: mockNetworkId },
+			standard: mockStandard,
 		} = USDC_TOKEN;
 
 		const mockTransactions = createMockEthTransactions(3);
@@ -222,7 +230,8 @@ describe('eth-transactions.services', () => {
 
 			const result = await reloadEthereumTransactions({
 				networkId: mockNetworkId,
-				tokenId: mockTokenId
+				tokenId: mockTokenId,
+				standard: mockStandard
 			});
 
 			expect(result).toEqual({ success: true });
