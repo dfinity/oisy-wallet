@@ -8,9 +8,7 @@
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
 		loading?: boolean;
-		loadingAsSkeleton?: boolean;
 		fullWidth?: boolean;
-		contentFullWidth?: boolean;
 		alignLeft?: boolean;
 		link?: boolean;
 		inlineLink?: boolean;
@@ -42,12 +40,12 @@
 		onclick,
 		ondblclick,
 		children,
-		icon = () => {}       
+		icon = () => {}
 	}: Props = $props();
 </script>
 
 <button
-	class={`${colorStyle} flex text-center justify-center gap-1 ${styleClass}`}
+	class={`${colorStyle} flex justify-center gap-1 text-center ${styleClass}`}
 	class:flex-1={!inlineLink}
 	class:font-normal={inlineLink}
 	class:text-tertiary={inlineLink}
@@ -70,7 +68,6 @@
 	data-tid={testId}
 	aria-label={ariaLabel}
 >
-{@render children()}
-<span class="shrink-0 [margin-left:clamp(0,0.25rem,0.5rem)]">{@render icon()}</span>
+	{@render children()}
+	<span class="shrink-0 [margin-left:clamp(0,0.25rem,0.5rem)]">{@render icon()}</span>
 </button>
-

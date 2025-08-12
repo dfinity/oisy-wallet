@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import ButtonTextIcon from '$lib/components/ui/ButtonTextIcon.svelte';
 	import IconLock from '$lib/components/icons/IconLock.svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonTextIcon from '$lib/components/ui/ButtonTextIcon.svelte';
 	import { LOCK_BUTTON, LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
-	import { lockSession , signOut } from '$lib/services/auth.services';
-		import { authRemainingTimeStore } from '$lib/stores/auth.store';
+	import { lockSession, signOut } from '$lib/services/auth.services';
+	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 
@@ -65,7 +65,7 @@
 		>
 			{$i18n.auth.text.logout}
 			{#snippet icon()}
-			<IconLogout />
+				<IconLogout />
 			{/snippet}
 		</ButtonTextIcon>
 	</div>
