@@ -39,11 +39,15 @@ export type WalletBalanceData = WalletBalance | null;
 /**
  * Creates a WalletBalance object
  */
-export const createWalletBalance = (
-	confirmed: bigint,
-	unconfirmed: bigint,
-	total: bigint
-): WalletBalance => ({
+export const createWalletBalance = ({
+	confirmed,
+	unconfirmed,
+	total
+}: {
+	confirmed: bigint;
+	unconfirmed: bigint;
+	total: bigint;
+}): WalletBalance => ({
 	confirmed,
 	unconfirmed,
 	total

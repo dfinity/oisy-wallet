@@ -1,11 +1,7 @@
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
-import {
-	BTC_MAINNET_NETWORK_ID,
-	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.btc.env';
+import { BTC_MAINNET_NETWORK_ID, BTC_REGTEST_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { getPendingTransactionsBalance } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
 import { authIdentity } from '$lib/derived/auth.derived';
@@ -43,7 +39,7 @@ export const syncWallet = async ({
 		 * Web Workers have isolated execution contexts and cannot directly access Svelte stores from the main thread.
 		 *
 		 * The worker provides the confirmed balance from the Bitcoin canister, and we calculate the structured
-		 * balance (available, pending, total) here where we have access to the pending transactions data.
+		 * balance (confirmed, unconfirmed, total) using newTransactions data to determine confirmation states.
 		 */
 		const identity = get(authIdentity);
 
@@ -54,14 +50,12 @@ export const syncWallet = async ({
 			address
 		});
 
-		const pendingBalance = getPendingTransactionsBalance(address);
-
-		// Calculate the structured balance
-		const structuredBalance = {
-			available: totalBalance - pendingBalance,
-			pending: pendingBalance,
-			total: totalBalance
-		};
+		// Calculate the structured balance using newTransactions to determine confirmation states
+		const structuredBalance = await getPendingTransactionsBalance(
+			address,
+			totalBalance,
+			newTransactions
+		);
 
 		console.warn('Storing BTC balance:', JSON.stringify(structuredBalance, jsonReplacer));
 
