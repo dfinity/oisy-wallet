@@ -68,7 +68,7 @@ describe('auth.services', () => {
 			expect(sessionStorage.getItem('key')).toBeNull();
 		});
 
-		it('should clean the IDB storage', async () => {
+		it('should clean the IDB storage for the current principal', async () => {
 			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
 				fn({ identity: mockIdentity });
 				return () => {};
@@ -81,6 +81,13 @@ describe('auth.services', () => {
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
+		});
+
+		it('should clean the IDB storage for all principals', async () => {
+			await signOut({ clearAllPrincipalsStorages: true });
+
+			// 3 addresses + 3(+1) tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
 		});
 	});
 });
