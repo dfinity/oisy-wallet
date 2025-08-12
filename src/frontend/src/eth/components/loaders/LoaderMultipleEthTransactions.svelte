@@ -37,7 +37,12 @@
 		}
 
 		const loader = batchLoadTransactions({
-			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens, ...$enabledNonFungibleTokens],
+			tokens: [
+				...$enabledEthereumTokens,
+				...$enabledErc20Tokens,
+				...$enabledEvmTokens,
+				...$enabledNonFungibleTokens
+			],
 			tokensAlreadyLoaded
 		});
 

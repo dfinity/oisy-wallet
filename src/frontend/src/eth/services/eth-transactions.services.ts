@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -16,7 +17,6 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 
 export const loadEthereumTransactions = ({
 	networkId,
@@ -37,11 +37,11 @@ export const loadEthereumTransactions = ({
 
 	if (standard === 'erc20') {
 		return loadErc20Transactions({ networkId, tokenId, updateOnly });
-	} else if (standard === 'erc721') {
+	} if (standard === 'erc721') {
 		return loadErc721Transactions({ networkId, tokenId, updateOnly });
-	} else {
-		return Promise.resolve({ success: true });
 	}
+		return Promise.resolve({ success: true });
+
 };
 
 // If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
@@ -215,10 +215,10 @@ const loadErc20Transactions = async ({
 };
 
 const loadErc721Transactions = async ({
-				 networkId,
-				 tokenId,
-				 updateOnly = false
-			 }: {
+	networkId,
+	tokenId,
+	updateOnly = false
+}: {
 	networkId: NetworkId;
 	tokenId: TokenId;
 	updateOnly?: boolean;
@@ -300,4 +300,4 @@ const loadErc721Transactions = async ({
 	}
 
 	return { success: true };
-}
+};
