@@ -73,6 +73,9 @@ export const themeVariables = {
 			'7': 'var(--color-background-contact-7)',
 			'8': 'var(--color-background-contact-8)',
 			'9': 'var(--color-background-contact-9)'
+		},
+		overlay: {
+			'page-30': 'color-mix(in srgb, var(--color-background-page) 30%, transparent)'
 		}
 	},
 	border: {

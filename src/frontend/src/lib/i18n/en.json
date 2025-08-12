@@ -161,6 +161,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "Wallet locked",
+			"title_part_2": "Unlock to continue in OISY",
+			"unlock": "Unlock",
+			"logout": "Log out",
+			"logout_clear_cash_message": "Logging out will clear all cached data",
+			"learn_more": "Learn more"
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "All apps",
@@ -1233,12 +1243,12 @@
 				"reward_received": "Welcome to $oisy_short!",
 				"reward_failed": "Code is expired",
 				"reward_received_description": "You will receive your welcome gift any moment.",
+				"brand_reward_received_description": "Want to earn more? Refer a friend and earn for every person who joins.",
 				"reward_failed_description": "Request a new one and try again"
 			},
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward.",
 				"loading_eligibility": "Error while loading campaign eligibility."
 			}
 		},
