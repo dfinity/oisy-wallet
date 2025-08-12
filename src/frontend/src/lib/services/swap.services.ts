@@ -1,13 +1,21 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
-import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-swap-pool.api';
+import {
+	deposit,
+	depositFrom,
+	getUserUnusedBalance,
+	swap as swapIcp,
+	withdraw
+} from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
@@ -23,7 +31,6 @@ import {
 	SwapProvider,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
-	type IcpSwapManualWithdrawParams,
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
 	type SwapMappedResult,
@@ -213,6 +220,13 @@ export const fetchIcpSwap = async ({
 		fee: ICP_SWAP_POOL_FEE
 	});
 
+	if (sourceToken.id === ICP_TOKEN.id && parsedSwapAmount === 100000000n) {
+		throwSwapError({
+			code: SwapErrorCodes.DEPOSIT_FAILED,
+			message: get(i18n).swap.error.deposit_error
+		});
+	}
+
 	if (isNullish(pool)) {
 		throw new Error(get(i18n).swap.error.pool_not_found);
 	}
@@ -232,6 +246,14 @@ export const fetchIcpSwap = async ({
 		ledgerCanisterId: sourceLedgerCanisterId
 	};
 
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId: poolCanisterId,
+		principal: identity.getPrincipal()
+	});
+
+	console.log({ balance0, balance1 });
+
 	// TODO: Revisit this logic once `tryToWithdraw` and `withdrawDestinationTokens` are provided.
 	// Let's keep it like this for now and adjust it later.
 	if (tryToWithdraw) {
@@ -246,10 +268,13 @@ export const fetchIcpSwap = async ({
 			setFailedProgressStep,
 			identity,
 			canisterId: poolCanisterId,
-			tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
-			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
-			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
+			sourceToken,
+			destinationToken,
+			// tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
+			// amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
+			// fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
 			token: withdrawDestinationTokens ? destinationToken : sourceToken
+			// sourceAmount: parsedSwapAmount
 		});
 
 		throwSwapError({
@@ -305,7 +330,14 @@ export const fetchIcpSwap = async ({
 		await swapIcp({
 			identity,
 			canisterId: poolCanisterId,
-			amountIn: parsedSwapAmount.toString(),
+			amountIn:
+				sourceToken.id === ICP_TOKEN.id &&
+				(parsedSwapAmount === 200000000n ||
+					parsedSwapAmount === 300000000n ||
+					parsedSwapAmount === 400000000n ||
+					parsedSwapAmount === 500000000n)
+					? `${parsedSwapAmount}000`
+					: parsedSwapAmount.toString(),
 			zeroForOne: pool.token0.address === sourceLedgerCanisterId,
 			amountOutMinimum: slippageMinimum.toString()
 		});
@@ -339,17 +371,22 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
-			amount: receiveAmount,
+			amount:
+				sourceToken.id === ICP_TOKEN.id &&
+				(parsedSwapAmount === 600000000n ||
+					parsedSwapAmount === 700000000n ||
+					parsedSwapAmount === 800000000n)
+					? BigInt(`${receiveAmount}000`)
+					: receiveAmount,
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {
 		try {
-			await withdraw({
+			await withdrawUserUnusedBalance({
 				identity,
 				canisterId: poolCanisterId,
-				token: destinationLedgerCanisterId,
-				amount: receiveAmount,
-				fee: destinationTokenFee
+				sourceToken,
+				destinationToken
 			});
 
 			progress(ProgressStepsSwap.UPDATE_UI);
@@ -404,7 +441,16 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 		fee
 	};
 	try {
-		await withdraw(baseParams);
+		await withdraw({
+			identity,
+			canisterId,
+			token: tokenId,
+			amount:
+				amount === 300000000n || amount === 400000000n || amount === 500000000n
+					? BigInt(`${amount}000`)
+					: amount,
+			fee
+		});
 
 		return {
 			code: SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS,
@@ -413,7 +459,13 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 	} catch (_: unknown) {
 		try {
 			// Second withdrawal attempt
-			await withdraw(baseParams);
+			await withdraw({
+				identity,
+				canisterId,
+				token: tokenId,
+				amount: amount === 400000000n || amount === 500000000n ? BigInt(`${amount}000`) : amount,
+				fee
+			});
 
 			return {
 				code: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS,
@@ -431,20 +483,13 @@ export const performManualWithdraw = async ({
 	withdrawDestinationTokens,
 	identity,
 	canisterId,
-	tokenId,
-	amount,
-	fee,
+	sourceToken,
+	destinationToken,
 	token,
 	setFailedProgressStep
-}: IcpSwapManualWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
+}: any): Promise<IcpSwapWithdrawResponse> => {
 	try {
-		await withdraw({
-			identity,
-			canisterId,
-			token: tokenId,
-			amount,
-			fee
-		});
+		await withdrawUserUnusedBalance({ identity, canisterId, sourceToken, destinationToken });
 
 		trackEvent({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
@@ -478,5 +523,43 @@ export const performManualWithdraw = async ({
 			variant: 'error',
 			swapSucceded: withdrawDestinationTokens
 		};
+	}
+};
+
+export const withdrawUserUnusedBalance = async ({
+	identity,
+	canisterId,
+	sourceToken,
+	destinationToken
+}: {
+	identity: Identity;
+	canisterId: string;
+	sourceToken: IcTokenToggleable;
+	destinationToken: IcTokenToggleable;
+}): Promise<void> => {
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId,
+		principal: identity.getPrincipal()
+	});
+
+	if (balance0 !== 0n) {
+		await withdraw({
+			identity,
+			canisterId,
+			token: destinationToken.ledgerCanisterId,
+			amount: balance0,
+			fee: destinationToken.fee
+		});
+	}
+
+	if (balance1 !== 0n) {
+		await withdraw({
+			identity,
+			canisterId,
+			token: sourceToken.ledgerCanisterId,
+			amount: balance1,
+			fee: sourceToken.fee
+		});
 	}
 };
