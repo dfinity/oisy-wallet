@@ -1,3 +1,7 @@
+import {
+	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
+	UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+} from '$btc/constants/btc.constants';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
@@ -135,10 +139,14 @@ export const getBtcWalletBalance = ({
 						// Look up the transaction in newTransactions to get the confirmation count
 						const matchedTransaction = transactionLookup.get(txid);
 						if (matchedTransaction && nonNullish(matchedTransaction.value)) {
-							const confirmations = matchedTransaction.confirmations ?? 0;
+							const confirmations =
+								matchedTransaction.confirmations ?? UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 							// If transaction has 0-5 confirmations, add to unconfirmed balance
-							if (confirmations >= 0 && confirmations <= 5) {
+							if (
+								confirmations >= UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS &&
+								confirmations < CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+							) {
 								acc.unconfirmedBalance += matchedTransaction.value;
 							}
 						}
