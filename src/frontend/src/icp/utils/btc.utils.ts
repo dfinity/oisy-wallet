@@ -152,7 +152,7 @@ export const getBtcWalletBalance = ({
 			);
 
 	return {
-		confirmed: totalBalance + unconfirmedBalance,
+		confirmed: totalBalance - lockedBalance,
 		unconfirmed: unconfirmedBalance,
 		locked: lockedBalance,
 		total: totalBalance
