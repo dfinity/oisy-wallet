@@ -501,9 +501,7 @@ describe('nav.utils', () => {
 			});
 
 			it('should return true when route id is any subroute of the Nfts path', () => {
-				expect(
-					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}/subroute`))
-				).toBeTruthy();
+				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}/subroute`))).toBeTruthy();
 			});
 
 			it('should return false when route id does not match Nfts path', () => {
