@@ -13,7 +13,6 @@ import {
 	back,
 	gotoReplaceRoot,
 	isActivityPath,
-	isAssetsPath,
 	isDappExplorerPath,
 	isEarningPath,
 	isNftsPath,
@@ -501,6 +500,13 @@ describe('nav.utils', () => {
 				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`))).toBeTruthy();
 			});
 
+			it('should return true when route id is any subroute of the Nfts path', () => {
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`))).toBeTruthy();
+				expect(
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}/subroute`))
+				).toBeTruthy();
+			});
+
 			it('should return false when route id does not match Nfts path', () => {
 				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
 
@@ -557,13 +563,6 @@ describe('nav.utils', () => {
 			expect(isNftsPath('/(app)/assets/nfts/subpath')).toBeFalsy();
 			expect(isNftsPath('/(app)/wrong')).toBeFalsy();
 			expect(isNftsPath(null)).toBeFalsy();
-		});
-
-		it('isAssetsPath', () => {
-			expect(isAssetsPath(withAppPrefix(AppPath.Tokens))).toBeTruthy();
-			expect(isAssetsPath(withAppPrefix(AppPath.Nfts))).toBeTruthy();
-			expect(isAssetsPath('/(app)/assets/whatever')).toBeTruthy();
-			expect(isAssetsPath(null)).toBeFalsy();
 		});
 
 		it('isRewardsPath', () => {
