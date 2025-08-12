@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
+import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
@@ -17,7 +18,6 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
 
 export const loadEthereumTransactions = ({
 	networkId,
@@ -308,10 +308,10 @@ const loadErc721Transactions = async ({
 };
 
 const loadErc1155Transactions = async ({
-																				networkId,
-																				tokenId,
-																				updateOnly = false
-																			}: {
+	networkId,
+	tokenId,
+	updateOnly = false
+}: {
 	networkId: NetworkId;
 	tokenId: TokenId;
 	updateOnly?: boolean;
@@ -393,4 +393,4 @@ const loadErc1155Transactions = async ({
 	}
 
 	return { success: true };
-}
+};

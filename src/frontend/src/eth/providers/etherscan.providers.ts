@@ -1,14 +1,16 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc721Token } from '$eth/types/erc721';
 import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 import type {
-	EtherscanProviderInternalTransaction,
+	EtherscanProviderErc1155TokenTransferTransaction,
 	EtherscanProviderErc721TokenTransferTransaction,
+	EtherscanProviderInternalTransaction,
 	EtherscanProviderTokenTransferTransaction,
-	EtherscanProviderTransaction, EtherscanProviderErc1155TokenTransferTransaction
+	EtherscanProviderTransaction
 } from '$eth/types/etherscan-transaction';
 import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
@@ -25,7 +27,6 @@ import {
 	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { Erc1155Token } from '$eth/types/erc1155';
 
 interface TransactionsParams {
 	address: EthAddress;
@@ -267,9 +268,9 @@ export class EtherscanProvider {
 	};
 
 	erc1155Transactions = async ({
-																address,
-																contract: { address: contractAddress }
-															}: {
+		address,
+		contract: { address: contractAddress }
+	}: {
 		address: EthAddress;
 		contract: Erc1155Token;
 	}): Promise<Transaction[]> => {
@@ -291,17 +292,17 @@ export class EtherscanProvider {
 
 		return result.map(
 			({
-				 nonce,
-				 gas,
-				 gasPrice,
-				 hash,
-				 blockNumber,
-				 timeStamp,
-				 from,
-				 to,
-				 tokenID,
-					tokenValue
-			 }: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				tokenID,
+				tokenValue
+			}: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),

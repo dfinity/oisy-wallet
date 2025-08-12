@@ -39,7 +39,7 @@ export const erc1155Tokens: Readable<Erc1155TokenToggleable[]> = derived(
 export const enabledErc1155Tokens: Readable<Erc1155TokenToggleable[]> = derived(
 	[erc1155Tokens],
 	([$erc1155Tokens]) => $erc1155Tokens.filter(({ enabled }) => enabled)
-)
+);
 
 export const erc1155CustomTokensInitialized: Readable<boolean> = derived(
 	[erc1155CustomTokensStore],

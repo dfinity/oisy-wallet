@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component, Snippet } from 'svelte';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
@@ -23,7 +24,6 @@
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 
 	interface Props {
 		amount?: bigint;
