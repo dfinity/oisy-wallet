@@ -86,7 +86,7 @@
 			: to
 	);
 
-	const nft: Nft | undefined = $derived(nonNullish($nftStore) && nonNullish(token) && isTokenNonFungible(token) && nonNullish(transaction.tokenId) && findNft({nfts: $nftStore, token, tokenId: transaction.tokenId}))
+	const nft = $derived((nonNullish($nftStore) && nonNullish(token) && isTokenNonFungible(token) && nonNullish(transaction.tokenId)) ? findNft({nfts: $nftStore, token, tokenId: transaction.tokenId}) : undefined)
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
