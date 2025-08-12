@@ -239,6 +239,7 @@ export class EtherscanProvider {
 		);
 	};
 
+	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc1155-token-transfer-events-by-address
 	erc1155Transactions = async ({
 		address,
 		contract: { address: contractAddress }
