@@ -189,6 +189,107 @@ export class EtherscanProvider {
 		);
 	};
 
+	erc721Transactions = async ({
+																address,
+																contract: { address: contractAddress }
+															}: {
+		address: EthAddress;
+		contract: Erc721Token;
+	}): Promise<Transaction[]> => {
+		const params = {
+			action: 'tokennfttx',
+			contractAddress,
+			address,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderErc721TokenTransferTransaction[] | string =
+			await this.provider.fetch('account', params);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(
+			({
+				 nonce,
+				 gas,
+				 gasPrice,
+				 hash,
+				 blockNumber,
+				 timeStamp,
+				 from,
+				 to,
+				 tokenID
+			 }: EtherscanProviderErc721TokenTransferTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				value: BigInt(1),
+				tokenId: parseInt(tokenID),
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
+				chainId: this.chainId
+			})
+		);
+	};
+
+	erc1155Transactions = async ({
+																 address,
+																 contract: { address: contractAddress }
+															 }: {
+		address: EthAddress;
+		contract: Erc1155Token;
+	}): Promise<Transaction[]> => {
+		const params = {
+			action: 'token1155tx',
+			contractAddress,
+			address,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderErc1155TokenTransferTransaction[] | string =
+			await this.provider.fetch('account', params);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(
+			({
+				 nonce,
+				 gas,
+				 gasPrice,
+				 hash,
+				 blockNumber,
+				 timeStamp,
+				 from,
+				 to,
+				 tokenID,
+				 tokenValue
+			 }: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				value: BigInt(tokenValue),
+				tokenId: parseInt(tokenID),
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
+				chainId: this.chainId
+			})
+		);
+	};
+
 	erc721TokenInventory = async ({
 		address,
 		contractAddress
@@ -215,107 +316,6 @@ export class EtherscanProvider {
 		}
 
 		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(parseInt(TokenId)));
-	};
-
-	erc721Transactions = async ({
-		address,
-		contract: { address: contractAddress }
-	}: {
-		address: EthAddress;
-		contract: Erc721Token;
-	}): Promise<Transaction[]> => {
-		const params = {
-			action: 'tokennfttx',
-			contractAddress,
-			address,
-			startblock: 0,
-			endblock: 99999999,
-			sort: 'desc'
-		};
-
-		const result: EtherscanProviderErc721TokenTransferTransaction[] | string =
-			await this.provider.fetch('account', params);
-
-		if (typeof result === 'string') {
-			throw new Error(result);
-		}
-
-		return result.map(
-			({
-				nonce,
-				gas,
-				gasPrice,
-				hash,
-				blockNumber,
-				timeStamp,
-				from,
-				to,
-				tokenID
-			}: EtherscanProviderErc721TokenTransferTransaction): Transaction => ({
-				hash,
-				blockNumber: parseInt(blockNumber),
-				timestamp: parseInt(timeStamp),
-				from,
-				to,
-				value: BigInt(1),
-				tokenId: parseInt(tokenID),
-				nonce: parseInt(nonce),
-				gasLimit: BigInt(gas),
-				gasPrice: BigInt(gasPrice),
-				chainId: this.chainId
-			})
-		);
-	};
-
-	erc1155Transactions = async ({
-		address,
-		contract: { address: contractAddress }
-	}: {
-		address: EthAddress;
-		contract: Erc1155Token;
-	}): Promise<Transaction[]> => {
-		const params = {
-			action: 'token1155tx',
-			contractAddress,
-			address,
-			startblock: 0,
-			endblock: 99999999,
-			sort: 'desc'
-		};
-
-		const result: EtherscanProviderErc1155TokenTransferTransaction[] | string =
-			await this.provider.fetch('account', params);
-
-		if (typeof result === 'string') {
-			throw new Error(result);
-		}
-
-		return result.map(
-			({
-				nonce,
-				gas,
-				gasPrice,
-				hash,
-				blockNumber,
-				timeStamp,
-				from,
-				to,
-				tokenID,
-				tokenValue
-			}: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
-				hash,
-				blockNumber: parseInt(blockNumber),
-				timestamp: parseInt(timeStamp),
-				from,
-				to,
-				value: BigInt(tokenValue),
-				tokenId: parseInt(tokenID),
-				nonce: parseInt(nonce),
-				gasLimit: BigInt(gas),
-				gasPrice: BigInt(gasPrice),
-				chainId: this.chainId
-			})
-		);
 	};
 }
 
