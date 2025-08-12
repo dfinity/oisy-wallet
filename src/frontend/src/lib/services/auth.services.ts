@@ -29,10 +29,10 @@ import {
 } from '$lib/api/idb-transactions.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
-	TRACK_COUNT_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
 	TRACK_SIGN_IN_ERROR_COUNT,
-	TRACK_SIGN_OUT_ERROR_COUNT,
+	TRACK_SIGN_OUT_ERROR,
+	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -97,7 +97,7 @@ export const signOut = ({
 	clearAllPrincipalsStorages?: boolean;
 }): Promise<void> => {
 	trackSignOut({
-		name: TRACK_COUNT_SIGN_OUT_SUCCESS,
+		name: TRACK_SIGN_OUT_SUCCESS,
 		meta: { reason: 'user', resetUrl: String(resetUrl) }
 	});
 	return logout({ resetUrl, clearAllPrincipalsStorages });
@@ -105,7 +105,7 @@ export const signOut = ({
 
 export const errorSignOut = (text: string): Promise<void> => {
 	trackSignOut({
-		name: TRACK_SIGN_OUT_ERROR_COUNT,
+		name: TRACK_SIGN_OUT_ERROR,
 		meta: { reason: 'error', level: 'error', text }
 	});
 	return logout({

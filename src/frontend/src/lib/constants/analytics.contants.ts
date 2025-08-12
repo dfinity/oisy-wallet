@@ -10,8 +10,8 @@ export const TRACK_HELP_SIGNING_IN = 'help_signing_in';
 export const TRACK_HELP_CONCERNED_ABOUT_SECURITY = 'help_concerned_about_security';
 export const TRACK_HELP_GOT_CONFUSED = 'help_got_confused';
 export const TRACK_HELP_OTHER = 'help_other';
-export const TRACK_COUNT_SIGN_OUT_SUCCESS = 'sign_out_success';
-export const TRACK_SIGN_OUT_ERROR_COUNT = 'sign_out_error';
+export const TRACK_SIGN_OUT_SUCCESS = 'sign_out_success';
+export const TRACK_SIGN_OUT_ERROR = 'sign_out_error';
 export const TRACK_SIGN_OUT_WITH_WARNING = 'sign_out_with_warning';
 
 // Bitcoin
