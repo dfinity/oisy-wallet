@@ -30,6 +30,10 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
+	import { isTokenNonFungible } from '$lib/utils/nft.utils';
+	import { nftStore } from '$lib/stores/nft.store';
+	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -80,6 +84,12 @@
 			: to
 	);
 
+	const nft = $derived(
+		isTokenNonFungible(token) && nonNullish(transaction.tokenId)
+			? $nftStore?.find(({ id }) => id === transaction.tokenId)
+			: undefined
+	);
+
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
 			id: Symbol(),
@@ -95,14 +105,18 @@
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					{#if isTokenNonFungible(token) && nonNullish(nft)}
+						<NftLogo {nft} badge={{ type: 'network' }} />
+					{:else}
+						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					{/if}
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
 				<span class="capitalize">{type}</span>
 			{/snippet}
 			{#snippet title()}
-				{#if nonNullish(token) && nonNullish(value)}
+				{#if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
 					<output class:text-success-primary={type === 'receive'}>
 						{formatToken({
 							value,
@@ -206,7 +220,7 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(token)}
+			{#if nonNullish(token) && !isTokenErc721(token)}
 				<ListItem>
 					<span>{$i18n.core.text.amount}</span>
 					<output>
@@ -216,6 +230,15 @@
 							displayDecimals: token.decimals
 						})}
 						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
+
+			{#if nonNullish(token) && isTokenNonFungible(token) && nonNullish(transaction.tokenId)}
+				<ListItem>
+					<span>{$i18n.core.text.tokenId}</span>
+					<output>
+						{transaction.tokenId}
 					</output>
 				</ListItem>
 			{/if}

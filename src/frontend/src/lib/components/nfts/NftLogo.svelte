@@ -7,13 +7,14 @@
 	import type { LogoSize } from '$lib/types/components';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 
 	interface Props {
 		nft: Nft;
 		logoSize?: LogoSize;
 		color?: 'off-white' | 'white';
 		ring?: boolean;
-		badge?: { type: 'icon'; icon: Component; ariaLabel: string };
+		badge?: { type: 'network' } | { type: 'icon'; icon: Component; ariaLabel: string };
 		testId?: string;
 		badgeTestId?: string;
 	}
@@ -28,7 +29,7 @@
 		badgeTestId
 	}: Props = $props();
 
-	const { imageUrl, name } = nft;
+	const { imageUrl, name, collection: {network} } = $derived(nft);
 </script>
 
 <div class="relative">
@@ -42,7 +43,17 @@
 		{testId}
 	/>
 
-	{#if nonNullish(badge) && badge?.type === 'icon'}
+	{#if nonNullish(badge) && badge?.type === 'network'}
+		<div
+			class="absolute -bottom-1"
+			class:scale-60={logoSize === 'xs'}
+			class:-right-1={logoSize !== 'xs'}
+			class:-right-1.75={logoSize === 'xs'}
+		>
+			<NetworkLogo {network} {color} testId={`network-${badgeTestId}`} />
+		</div>
+
+	{:else if nonNullish(badge) && badge?.type === 'icon'}
 		<div
 			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
 			aria-label={badge.ariaLabel}
