@@ -23,6 +23,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
+	import type { Nft } from '$lib/types/nft';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction';
@@ -35,7 +36,6 @@
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
-	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -86,7 +86,14 @@
 			: to
 	);
 
-	const nft = $derived((nonNullish($nftStore) && nonNullish(token) && isTokenNonFungible(token) && nonNullish(transaction.tokenId)) ? findNft({nfts: $nftStore, token, tokenId: transaction.tokenId}) : undefined)
+	const nft = $derived(
+		nonNullish($nftStore) &&
+			nonNullish(token) &&
+			isTokenNonFungible(token) &&
+			nonNullish(transaction.tokenId)
+			? findNft({ nfts: $nftStore, token, tokenId: transaction.tokenId })
+			: undefined
+	);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
