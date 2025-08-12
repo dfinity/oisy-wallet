@@ -162,6 +162,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "",
+			"title_part_2": "",
+			"unlock": "",
+			"logout": "",
+			"logout_clear_cash_message": "",
+			"learn_more": ""
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "Tutte le app",
@@ -1234,12 +1244,12 @@
 				"reward_received": "Benvenuto su $oisy_short!",
 				"reward_failed": "Il codice è scaduto",
 				"reward_received_description": "Riceverai il tuo regalo di benvenuto a breve.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Richiedine uno nuovo e riprova"
 			},
 			"error": {
 				"loading_reward": "Errore durante il caricamento di un nuovo codice ricompensa.",
 				"loading_user_data": "Impossibile caricare i dati utente dal canister delle ricompense.",
-				"claiming_reward": "Errore durante la richiesta della ricompensa.",
 				"loading_eligibility": "Errore durante il caricamento dell'idoneità della campagna."
 			}
 		},
