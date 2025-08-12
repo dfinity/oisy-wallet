@@ -4,6 +4,7 @@ import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 import type {
+	EtherscanProviderErc1155TokenTransferTransaction,
 	EtherscanProviderInternalTransaction,
 	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
@@ -23,6 +24,7 @@ import {
 	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
+import type { Erc1155Token } from '$eth/types/erc1155';
 
 interface TransactionsParams {
 	address: EthAddress;
@@ -180,6 +182,58 @@ export class EtherscanProvider {
 				gasLimit: BigInt(gas),
 				gasPrice: BigInt(gasPrice),
 				value: BigInt(value),
+				chainId: this.chainId
+			})
+		);
+	};
+
+	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc1155-token-transfer-events-by-address
+	erc1155Transactions = async ({
+																 address,
+																 contract: { address: contractAddress }
+															 }: {
+		address: EthAddress;
+		contract: Erc1155Token;
+	}): Promise<Transaction[]> => {
+		const params = {
+			action: 'token1155tx',
+			contractAddress,
+			address,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderErc1155TokenTransferTransaction[] | string =
+			await this.provider.fetch('account', params);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(
+			({
+				 nonce,
+				 gas,
+				 gasPrice,
+				 hash,
+				 blockNumber,
+				 timeStamp,
+				 from,
+				 to,
+				 tokenID,
+				 tokenValue
+			 }: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				value: BigInt(tokenValue),
+				tokenId: parseInt(tokenID),
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
 				chainId: this.chainId
 			})
 		);
