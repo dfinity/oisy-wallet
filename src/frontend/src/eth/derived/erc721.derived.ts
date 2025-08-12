@@ -33,6 +33,11 @@ export const erc721Tokens: Readable<Erc721TokenToggleable[]> = derived(
 	([$erc721CustomTokens]) => [...$erc721CustomTokens]
 );
 
+export const enabledErc721Tokens: Readable<Erc721TokenToggleable[]> = derived(
+	[erc721Tokens],
+	([$erc721Tokens]) => $erc721Tokens.filter(({ enabled }) => enabled)
+)
+
 export const erc721CustomTokensInitialized: Readable<boolean> = derived(
 	[erc721CustomTokensStore],
 	([$erc721CustomTokensStore]) => nonNullish($erc721CustomTokensStore)

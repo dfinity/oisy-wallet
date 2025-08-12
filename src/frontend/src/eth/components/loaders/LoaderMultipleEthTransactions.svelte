@@ -12,7 +12,7 @@
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
+	import { enabledErc20Tokens, enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 	import type { TokenId } from '$lib/types/token';
 
@@ -37,7 +37,7 @@
 		}
 
 		const loader = batchLoadTransactions({
-			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens],
+			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens, ...$enabledNonFungibleTokens],
 			tokensAlreadyLoaded
 		});
 

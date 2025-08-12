@@ -3,6 +3,7 @@
 	import type { Component, Snippet } from 'svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
@@ -12,12 +13,14 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
@@ -31,6 +34,7 @@
 		iconType: 'token' | 'transaction';
 		to?: string;
 		from?: string;
+		tokenId?: number;
 		children?: Snippet;
 		onClick?: () => void;
 	}
@@ -45,27 +49,30 @@
 		iconType = 'transaction',
 		to,
 		from,
+		tokenId,
 		children,
 		onClick
 	}: Props = $props();
 
-	let cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
+	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
-	let iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
+	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
-	let contactAddress: string | undefined = $derived(
+	const contactAddress: string | undefined = $derived(
 		type === 'send' ? to : type === 'receive' ? from : undefined
 	);
 
-	let contact: ContactUi | undefined = $derived(
+	const contact: ContactUi | undefined = $derived(
 		nonNullish(contactAddress)
 			? getContactForAddress({ addressString: contactAddress, contactList: $contacts })
 			: undefined
 	);
 
-	let addressAlias: string | undefined = $derived(
+	const addressAlias: string | undefined = $derived(
 		filterAddressFromContact({ contact, address: contactAddress })?.label
 	);
+
+	const nft = $derived(isTokenNonFungible(token) && nonNullish(tokenId) ? $nftStore.find(({ id }) => id === tokenId) : undefined);
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
@@ -87,7 +94,11 @@
 			{#snippet icon()}
 				<div>
 					{#if iconType === 'token'}
-						<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+						{#if isTokenNonFungible(token) && nonNullish(nft)}
+							<NftLogo {nft} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+						{:else}
+							<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+						{/if}
 					{:else}
 						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
 					{/if}
@@ -95,7 +106,7 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(cardAmount)}
+				{#if nonNullish(cardAmount) && !isTokenNonFungible(token)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
