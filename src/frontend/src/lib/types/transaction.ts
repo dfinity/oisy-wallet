@@ -39,6 +39,7 @@ export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
 		timestamp?: number;
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
+		tokenId?: number;
 	};
 
 export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {

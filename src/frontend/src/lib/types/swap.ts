@@ -164,3 +164,9 @@ export interface FormatSlippageParams {
 }
 
 export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
+
+export interface GetWithdrawableTokenParams {
+	tokenAddress: string;
+	sourceToken: IcTokenToggleable;
+	destinationToken: IcTokenToggleable;
+}
