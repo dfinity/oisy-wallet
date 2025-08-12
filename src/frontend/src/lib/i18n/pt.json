@@ -1243,12 +1243,12 @@
 				"reward_received": "Bem-vindo ao $oisy_short!",
 				"reward_failed": "O código expirou",
 				"reward_received_description": "Você receberá seu presente de boas-vindas a qualquer momento.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Solicite um novo e tente novamente"
 			},
 			"error": {
 				"loading_reward": "Erro ao carregar um novo código de recompensa.",
 				"loading_user_data": "Falha ao carregar dados do usuário do canister de recompensa.",
-				"claiming_reward": "Erro ao reivindicar recompensa.",
 				"loading_eligibility": "Erro ao carregar a elegibilidade para a campanha."
 			}
 		},

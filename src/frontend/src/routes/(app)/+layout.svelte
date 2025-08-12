@@ -24,7 +24,7 @@
 	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	interface Props {
 		children: Snippet;
@@ -34,9 +34,11 @@
 
 	let tokensRoute = $derived(isRouteTokens(page));
 
+	let nftsRoute = $derived(isRouteNfts(page));
+
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
-	let showHero = $derived(tokensRoute || transactionsRoute);
+	let showHero = $derived(tokensRoute || nftsRoute || transactionsRoute);
 
 	$effect(() => {
 		token.set($pageToken);
@@ -73,19 +75,19 @@
 		>
 			<Header />
 
-			<AuthGuard>
-				<SplitPane>
-					{#snippet menu()}
-						<NavigationMenu>
-							{#if tokensRoute}
-								<Responsive up="xl">
-									<div transition:fade class="hidden xl:block">
-										<DappsCarousel />
-									</div>
-								</Responsive>
-							{/if}
-						</NavigationMenu>
-					{/snippet}
+		<AuthGuard>
+			<SplitPane>
+				{#snippet menu()}
+					<NavigationMenu>
+						{#if tokensRoute || nftsRoute}
+							<Responsive up="xl">
+								<div transition:fade class="hidden xl:block">
+									<DappsCarousel />
+								</div>
+							</Responsive>
+						{/if}
+					</NavigationMenu>
+				{/snippet}
 
 					{#if showHero}
 						<Hero />
