@@ -47,7 +47,7 @@
 			aria-label={badge.ariaLabel}
 			data-tid={`icon-${badgeTestId}`}
 		>
-			<svelte:component this={badge.icon} size="16" />
+			<badge.icon size="16" />
 		</div>
 	{/if}
 </div>
