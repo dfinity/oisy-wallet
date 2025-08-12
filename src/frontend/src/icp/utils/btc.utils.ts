@@ -3,13 +3,7 @@ import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedData } from '$lib/types/store';
-import {
-	isNullish,
-	jsonReplacer,
-	jsonReviver,
-	notEmptyString,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { isNullish, jsonReplacer, jsonReviver, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -164,13 +158,10 @@ export const getPendingTransactionsBalance = ({
 				{ lockedBalance: ZERO, pendingTxIds: new Set<string>(), unconfirmedBalance: ZERO }
 			);
 
-	const adjustedTotalBalance = totalBalance - lockedBalance;
-	const adjustedConfirmedBalance = adjustedTotalBalance - unconfirmedBalance;
-
 	return {
-		confirmed: adjustedConfirmedBalance > ZERO ? adjustedConfirmedBalance : ZERO,
+		confirmed: totalBalance + unconfirmedBalance,
 		unconfirmed: unconfirmedBalance,
 		locked: lockedBalance,
-		total: adjustedTotalBalance > ZERO ? adjustedTotalBalance : ZERO
+		total: totalBalance
 	};
 };
