@@ -1,3 +1,4 @@
+import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
@@ -10,12 +11,13 @@ import {
 	fetchSwapAmounts,
 	loadKongSwapTokens,
 	performManualWithdraw,
-	withdrawICPSwapAfterFailedSwap
+	withdrawICPSwapAfterFailedSwap,
+	withdrawUserUnusedBalance
 } from '$lib/services/swap.services';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import type { OptionIdentity } from '$lib/types/identity';
 import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
+import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { get } from 'svelte/store';
@@ -38,7 +40,9 @@ vi.mock('$lib/services/icp-swap.services', () => ({
 }));
 
 vi.mock('$lib/api/icp-swap-pool.api', () => ({
-	withdraw: vi.fn()
+	withdraw: vi.fn(),
+	getUserUnusedBalance: vi.fn(),
+	getPoolMetadata: vi.fn()
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -204,18 +208,22 @@ describe('loadKongSwapTokens', () => {
 });
 
 describe('withdrawICPSwapAfterFailedSwap', () => {
-	const identity = {} as OptionIdentity;
+	const identity = mockIdentity;
 	const canisterId = 'test-canister-id';
 	const tokenId = 'icp';
 	const amount = 1000n;
 	const fee = 10n;
+	const sourceToken = mockValidIcToken as IcTokenToggleable;
+	const destinationToken = mockValidIcrcToken as IcTokenToggleable;
 
 	const baseParams = {
 		identity,
 		canisterId,
 		tokenId,
 		amount,
-		fee
+		fee,
+		sourceToken,
+		destinationToken
 	};
 
 	beforeEach(() => {
@@ -231,51 +239,82 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS);
 	});
 
-	it('should succeed on second withdraw attempt after first fails', async () => {
+	it('succeeds on second attempt via unused balance (real path)', async () => {
 		vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail'));
 
-		const result = await withdrawICPSwapAfterFailedSwap(baseParams);
+		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+		} as PoolMetadata);
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
-		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS);
-	});
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 100n,
+			balance1: 0n
+		});
 
-	it('should return failed code if both attempts fail and call setFailedProgressStep', async () => {
-		const setFailedProgressStep = vi.fn();
-
-		vi.mocked(icpSwapPool.withdraw)
-			.mockRejectedValueOnce(new Error('fail1'))
-			.mockRejectedValueOnce(new Error('fail2'));
+		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
 
 		const result = await withdrawICPSwapAfterFailedSwap({
 			...baseParams,
-			setFailedProgressStep
+			sourceToken,
+			destinationToken
 		});
 
 		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
+		expect(icpSwapPool.withdraw).toHaveBeenNthCalledWith(
+			2,
+			expect.objectContaining({
+				identity,
+				canisterId,
+				token: sourceToken.ledgerCanisterId,
+				amount: 100n,
+				fee: sourceToken.fee
+			})
+		);
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS);
+	});
+
+	it('should return failed code if both attempts fail and call setFailedProgressStep (real path)', async () => {
+		const setFailedProgressStep = vi.fn();
+
+		vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail1'));
+
+		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+		} as PoolMetadata);
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 0n,
+			balance1: 0n
+		});
+
+		const result = await withdrawICPSwapAfterFailedSwap({
+			...baseParams,
+			setFailedProgressStep,
+			sourceToken,
+			destinationToken
+		});
+
+		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);
 		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED);
 	});
 });
 
 describe('performManualWithdraw', () => {
-	const identity = {} as OptionIdentity;
+	const identity = mockIdentity;
 	const canisterId = 'test-canister-id';
-	const tokenId = 'icp';
-	const amount = 1000n;
-	const fee = 10n;
-
-	const token = {
-		symbol: 'ICP'
-	} as IcTokenToggleable;
+	const sourceToken = mockValidIcToken as IcTokenToggleable;
+	const destinationToken = mockValidIcrcToken as IcTokenToggleable;
 
 	const baseParams = {
 		withdrawDestinationTokens: true,
 		identity,
 		canisterId,
-		tokenId,
-		amount,
-		fee,
-		token
+		sourceToken,
+		destinationToken
 	};
 
 	beforeEach(() => {
@@ -283,15 +322,26 @@ describe('performManualWithdraw', () => {
 	});
 
 	it('should track success event and return success code', async () => {
-		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
+		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+		} as PoolMetadata);
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 1n,
+			balance1: 0n
+		});
+		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
 
 		const result = await performManualWithdraw(baseParams);
 
+		expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledOnce();
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
 		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
-				token: 'ICP',
+				token: destinationToken.symbol,
 				tokenDirection: 'receive',
 				dApp: SwapProvider.ICP_SWAP
 			}
@@ -303,18 +353,28 @@ describe('performManualWithdraw', () => {
 	it('should track failed event, call setFailedProgressStep and return error code', async () => {
 		const setFailedProgressStep = vi.fn();
 
-		vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail'));
+		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+		} as PoolMetadata);
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 0n,
+			balance1: 0n
+		});
 
 		const result = await performManualWithdraw({
 			...baseParams,
 			setFailedProgressStep
 		});
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+		expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledOnce();
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
+
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			metadata: {
-				token: 'ICP',
+				token: destinationToken.symbol,
 				tokenDirection: 'receive',
 				dApp: SwapProvider.ICP_SWAP
 			}
@@ -325,7 +385,15 @@ describe('performManualWithdraw', () => {
 	});
 
 	it('should track tokenDirection correctly when withdrawDestinationTokens is false', async () => {
-		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1000n);
+		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+		} as PoolMetadata);
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 0n,
+			balance1: 1n
+		});
+		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
 
 		await performManualWithdraw({
 			...baseParams,
@@ -335,10 +403,125 @@ describe('performManualWithdraw', () => {
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
-				token: 'ICP',
+				token: sourceToken.symbol,
 				tokenDirection: 'pay',
 				dApp: SwapProvider.ICP_SWAP
 			}
+		});
+	});
+});
+
+describe('withdrawUserUnusedBalance', () => {
+	const identity = mockIdentity;
+	const canisterId = 'test-canister-id';
+
+	const sourceToken = mockValidIcToken as IcTokenToggleable;
+
+	const destinationToken = mockValidIcrcToken as IcTokenToggleable;
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	it('should withdraw both tokens if both balances are non-zero', async () => {
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 1000n,
+			balance1: 2000n
+		});
+
+		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+		} as PoolMetadata);
+
+		await withdrawUserUnusedBalance({
+			identity,
+			canisterId,
+			sourceToken,
+			destinationToken
+		});
+
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
+	});
+
+	it('should reject if both balances are zero', async () => {
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 0n,
+			balance1: 0n
+		});
+
+		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+		} as PoolMetadata);
+
+		await expect(
+			withdrawUserUnusedBalance({
+				identity,
+				canisterId,
+				sourceToken,
+				destinationToken
+			})
+		).rejects.toThrow('No unused balance to withdraw');
+
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
+	});
+
+	it('should only withdraw destinationToken if only balance0 is non-zero', async () => {
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 1500n,
+			balance1: 0n
+		});
+
+		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+		} as PoolMetadata);
+
+		await withdrawUserUnusedBalance({
+			identity,
+			canisterId,
+			sourceToken,
+			destinationToken
+		});
+
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(icpSwapPool.withdraw).toHaveBeenCalledWith({
+			identity,
+			canisterId,
+			token: destinationToken.ledgerCanisterId,
+			amount: 1500n,
+			fee: destinationToken.fee
+		});
+	});
+
+	it('should only withdraw sourceToken if only balance1 is non-zero', async () => {
+		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+			balance0: 0n,
+			balance1: 1500n
+		});
+
+		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+		} as PoolMetadata);
+
+		await withdrawUserUnusedBalance({
+			identity,
+			canisterId,
+			sourceToken,
+			destinationToken
+		});
+
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(icpSwapPool.withdraw).toHaveBeenCalledWith({
+			identity,
+			canisterId,
+			token: sourceToken.ledgerCanisterId,
+			amount: 1500n,
+			fee: sourceToken.fee
 		});
 	});
 });
