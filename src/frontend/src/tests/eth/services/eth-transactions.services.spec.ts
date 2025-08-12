@@ -203,7 +203,7 @@ describe('eth-transactions.services', () => {
 		const {
 			id: mockTokenId,
 			network: { id: mockNetworkId },
-			standard: mockStandard,
+			standard: mockStandard
 		} = USDC_TOKEN;
 
 		const mockTransactions = createMockEthTransactions(3);
