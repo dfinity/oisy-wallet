@@ -22,9 +22,9 @@
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
+	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
-	import { findNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		amount?: bigint;
