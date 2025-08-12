@@ -1233,6 +1233,7 @@
 				"reward_received": "Welcome to $oisy_short!",
 				"reward_failed": "Code is expired",
 				"reward_received_description": "You will receive your welcome gift any moment.",
+				"brand_reward_received_description": "Want to earn more? Refer a friend and earn for every person who joins.",
 				"reward_failed_description": "Request a new one and try again"
 			},
 			"error": {

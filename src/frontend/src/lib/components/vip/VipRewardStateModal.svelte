@@ -95,7 +95,9 @@
 		>
 		<span class="block w-full text-center"
 			>{isSuccessful
-				? $i18n.vip.reward.text.reward_received_description
+				? codeType === QrCodeType.VIP
+					? $i18n.vip.reward.text.reward_received_description
+					: $i18n.vip.reward.text.brand_reward_received_description
 				: $i18n.vip.reward.text.reward_failed_description}</span
 		>
 

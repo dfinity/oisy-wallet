@@ -1233,6 +1233,7 @@
 				"reward_received": "欢迎加入 $oisy_short！",
 				"reward_failed": "邀请码已过期",
 				"reward_received_description": "您的欢迎礼包即将送达。",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "请申请一个新的邀请码并重试"
 			},
 			"error": {
