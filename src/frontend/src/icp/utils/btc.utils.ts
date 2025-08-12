@@ -7,7 +7,6 @@ import {
 	isNullish,
 	jsonReplacer,
 	jsonReviver,
-	nonNullish,
 	notEmptyString,
 	uint8ArrayToHexString
 } from '@dfinity/utils';
