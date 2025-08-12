@@ -34,7 +34,7 @@
 <div class="relative">
 	<Logo
 		src={imageUrl ?? noNftImage}
-		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
+		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
 		size={logoSize}
 		rounded={false}
 		{color}
