@@ -1,16 +1,27 @@
 import {
+	clearIdbBtcAddressMainnet,
+	clearIdbEthAddress,
+	clearIdbSolAddressMainnet,
 	deleteIdbBtcAddressMainnet,
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet
 } from '$lib/api/idb-addresses.api';
-import { deleteIdbBalances } from '$lib/api/idb-balances.api';
+import { clearIdbBalances, deleteIdbBalances } from '$lib/api/idb-balances.api';
 import {
+	clearIdbEthTokens,
+	clearIdbEthTokensDeprecated,
+	clearIdbIcTokens,
+	clearIdbSolTokens,
 	deleteIdbEthTokens,
 	deleteIdbEthTokensDeprecated,
 	deleteIdbIcTokens,
 	deleteIdbSolTokens
 } from '$lib/api/idb-tokens.api';
 import {
+	clearIdbBtcTransactions,
+	clearIdbEthTransactions,
+	clearIdbIcTransactions,
+	clearIdbSolTransactions,
 	deleteIdbBtcTransactions,
 	deleteIdbEthTransactions,
 	deleteIdbIcTransactions,
@@ -78,13 +89,21 @@ export const signIn = async (
 	}
 };
 
-export const signOut = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> => {
+export const signOut = ({
+	resetUrl = false,
+	clearAllPrincipalsStorages = false
+}: {
+	resetUrl?: boolean;
+	clearAllPrincipalsStorages?: boolean;
+}): Promise<void> => 
+{
 	trackSignOut({
 		name: TRACK_COUNT_SIGN_OUT_SUCCESS,
 		meta: { reason: 'user', resetUrl: String(resetUrl) }
 	});
-	return logout({ resetUrl });
-};
+	return logout({ resetUrl, clearAllPrincipalsStorages });
+}
+
 
 export const errorSignOut = (text: string): Promise<void> => {
 	trackSignOut({
@@ -115,25 +134,28 @@ export const warnSignOut = (text: string): Promise<void> => {
 export const nullishSignOut = (): Promise<void> =>
 	warnSignOut(get(i18n).auth.warning.not_signed_in);
 
-export const idleSignOut = (): Promise<void> => {
+export const idleSignOut = (): Promise<void> =>{
 	const text = get(i18n).auth.warning.session_expired;
 	trackEvent({
 		name: TRACK_SIGN_OUT_WITH_WARNING,
 		metadata: { level: 'warn', text, reason: 'session_expired', clearStorages: 'false' }
 	});
 	return logout({
-		msg: { text, level: 'warn' },
-		clearStorages: false
+		msg: {
+			text: get(i18n).auth.warning.session_expired,
+			level: 'warn'
+		},
+		clearCurrentPrincipalStorages: false
 	});
 };
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
 	logout({
 		resetUrl,
-		clearStorages: false
+		clearCurrentPrincipalStorages: false
 	});
 
-const emptyIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
+const emptyPrincipalIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<void>) => {
 	const { identity } = get(authStore);
 
 	if (isNullish(identity)) {
@@ -142,6 +164,16 @@ const emptyIdbStore = async (deleteIdbStore: (principal: Principal) => Promise<v
 
 	try {
 		await deleteIdbStore(identity.getPrincipal());
+	} catch (err: unknown) {
+		// We silence the error.
+		// Effective logout is more important here.
+		console.error(err);
+	}
+};
+
+const clearIdbStore = async (clearIdbStore: () => Promise<void>) => {
+	try {
+		await clearIdbStore();
 	} catch (err: unknown) {
 		// We silence the error.
 		// Effective logout is more important here.
@@ -169,6 +201,26 @@ const deleteIdbStoreList = [
 	deleteIdbBalances
 ];
 
+const clearIdbStoreList = [
+	// Addresses
+	clearIdbBtcAddressMainnet,
+	clearIdbEthAddress,
+	clearIdbSolAddressMainnet,
+	// Tokens
+	clearIdbIcTokens,
+	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+	clearIdbEthTokensDeprecated,
+	clearIdbEthTokens,
+	clearIdbSolTokens,
+	// Transactions
+	clearIdbBtcTransactions,
+	clearIdbEthTransactions,
+	clearIdbIcTransactions,
+	clearIdbSolTransactions,
+	// Balances
+	clearIdbBalances
+];
+
 // eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
 	sessionStorage.clear();
@@ -176,18 +228,23 @@ const clearSessionStorage = async () => {
 
 const logout = async ({
 	msg = undefined,
-	clearStorages = true,
+	clearCurrentPrincipalStorages = true,
+	clearAllPrincipalsStorages = false,
 	resetUrl = false
 }: {
 	msg?: ToastMsg;
-	clearStorages?: boolean;
+	clearCurrentPrincipalStorages?: boolean;
+	clearAllPrincipalsStorages?: boolean;
 	resetUrl?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
 
-	if (clearStorages) {
-		await Promise.all(deleteIdbStoreList.map(emptyIdbStore));
+	if (clearCurrentPrincipalStorages) {
+		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
+	}
+	if (clearAllPrincipalsStorages) {
+		await Promise.all(clearIdbStoreList.map(clearIdbStore));
 	}
 
 	await clearSessionStorage();
