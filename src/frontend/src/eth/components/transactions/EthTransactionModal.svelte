@@ -84,7 +84,7 @@
 			: to
 	);
 
-	const nft = $derived(
+	const nft = $derived(nonNullish(token) &&
 		isTokenNonFungible(token) && nonNullish(transaction.tokenId)
 			? $nftStore?.find(({ id }) => id === transaction.tokenId)
 			: undefined
