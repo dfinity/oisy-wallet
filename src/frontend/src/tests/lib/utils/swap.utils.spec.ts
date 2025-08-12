@@ -6,6 +6,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	ICP_SWAP_PROVIDER,
@@ -25,6 +26,7 @@ import {
 	getLiquidityFees,
 	getNetworkFee,
 	getSwapRoute,
+	getWithdrawableToken,
 	isSwapError,
 	mapIcpSwapResult,
 	mapKongSwapResult,
@@ -471,6 +473,48 @@ describe('swap utils', () => {
 			expect(isSwapError(undefined)).toBeFalsy();
 			expect(isSwapError('string')).toBeFalsy();
 			expect(isSwapError({ code: 'deposit_error' })).toBeFalsy();
+		});
+	});
+
+	describe('getWithdrawableToken', () => {
+		const sourceToken = {
+			ledgerCanisterId: 'source-ledger-id',
+			name: 'Source Token'
+		} as IcTokenToggleable;
+
+		const destinationToken = {
+			ledgerCanisterId: 'destination-ledger-id',
+			name: 'Destination Token'
+		} as IcTokenToggleable;
+
+		it('should return sourceToken if tokenAddress matches sourceToken.ledgerCanisterId', () => {
+			const result = getWithdrawableToken({
+				tokenAddress: 'source-ledger-id',
+				sourceToken,
+				destinationToken
+			});
+
+			expect(result).toBe(sourceToken);
+		});
+
+		it('should return destinationToken if tokenAddress matches destinationToken.ledgerCanisterId', () => {
+			const result = getWithdrawableToken({
+				tokenAddress: 'destination-ledger-id',
+				sourceToken,
+				destinationToken
+			});
+
+			expect(result).toBe(destinationToken);
+		});
+
+		it('should throw an error if tokenAddress matches neither', () => {
+			expect(() =>
+				getWithdrawableToken({
+					tokenAddress: 'unknown-ledger-id',
+					sourceToken,
+					destinationToken
+				})
+			).toThrow('Unknown token address');
 		});
 	});
 });

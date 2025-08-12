@@ -13,6 +13,7 @@ import {
 	SwapProvider,
 	VeloraSwapTypes,
 	type FormatSlippageParams,
+	type GetWithdrawableTokenParams,
 	type ICPSwapResult,
 	type ProviderFee,
 	type Slippage,
@@ -26,6 +27,7 @@ import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
 
 import type { Erc20Token } from '$eth/types/erc20';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { SwapError } from '$lib/services/swap-errors.services';
 import { formatToken } from './format.utils';
 import { isNullishOrEmpty } from './input.utils';
@@ -188,3 +190,19 @@ export const geSwapEthTokenAddress = (token: Erc20Token) => {
 };
 
 export const isSwapError = (err: unknown): err is SwapError => err instanceof SwapError;
+
+export const getWithdrawableToken = ({
+	tokenAddress,
+	sourceToken,
+	destinationToken
+}: GetWithdrawableTokenParams): IcTokenToggleable => {
+	if (tokenAddress === sourceToken.ledgerCanisterId) {
+		return sourceToken;
+	}
+
+	if (tokenAddress === destinationToken.ledgerCanisterId) {
+		return destinationToken;
+	}
+
+	throw new Error(`Unknown token address`);
+};
