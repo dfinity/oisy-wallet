@@ -63,7 +63,6 @@ export interface EtherscanProviderTokenTransferTransaction {
 	confirmations: string;
 }
 
-
 // https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc1155-token-transfer-events-by-address
 export interface EtherscanProviderErc1155TokenTransferTransaction {
 	blockNumber: string;

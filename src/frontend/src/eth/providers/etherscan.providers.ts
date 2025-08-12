@@ -1,6 +1,7 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 import type {
@@ -24,7 +25,6 @@ import {
 	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { Erc1155Token } from '$eth/types/erc1155';
 
 interface TransactionsParams {
 	address: EthAddress;
@@ -189,9 +189,9 @@ export class EtherscanProvider {
 
 	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc1155-token-transfer-events-by-address
 	erc1155Transactions = async ({
-																 address,
-																 contract: { address: contractAddress }
-															 }: {
+		address,
+		contract: { address: contractAddress }
+	}: {
 		address: EthAddress;
 		contract: Erc1155Token;
 	}): Promise<Transaction[]> => {
@@ -213,17 +213,17 @@ export class EtherscanProvider {
 
 		return result.map(
 			({
-				 nonce,
-				 gas,
-				 gasPrice,
-				 hash,
-				 blockNumber,
-				 timeStamp,
-				 from,
-				 to,
-				 tokenID,
-				 tokenValue
-			 }: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				tokenID,
+				tokenValue
+			}: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),
