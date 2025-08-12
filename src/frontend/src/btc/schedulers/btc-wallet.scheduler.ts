@@ -34,7 +34,6 @@ interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	shouldFetchTransactions?: boolean;
 	minterCanisterId?: OptionCanisterIdText;
 }
-
 interface BtcWalletStore {
 	balance: CertifiedData<bigint | null> | undefined;
 	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;
@@ -47,8 +46,8 @@ interface BtcWalletData {
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
+
 	private failedSyncCounter = 0;
-	private currentBtcAddress: BtcAddress = '';
 
 	private store: BtcWalletStore = {
 		balance: undefined,
@@ -171,9 +170,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const btcAddress = data?.btcAddress.data;
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
-		// Store the current BTC address
-		this.currentBtcAddress = btcAddress;
-
 		await queryAndUpdate<BtcWalletData>({
 			request: ({ identity: _, certified }) =>
 				this.loadWalletData({
@@ -185,7 +181,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					minterCanisterId: data?.minterCanisterId
 				}),
 			onLoad: ({ certified: _, ...rest }) => {
-				this.syncWalletData({ ...rest, bitcoinNetwork });
+				this.syncWalletData(rest);
 				this.failedSyncCounter = 0;
 			},
 			identity,
@@ -200,11 +196,9 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	};
 
 	private syncWalletData = ({
-		response: { balance, uncertifiedTransactions },
-		bitcoinNetwork
+		response: { balance, uncertifiedTransactions }
 	}: {
 		response: BtcWalletData;
-		bitcoinNetwork: BitcoinNetwork;
 	}) => {
 		const newBalance =
 			isNullish(this.store.balance) ||
@@ -237,9 +231,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		this.postMessageWallet({
 			wallet: {
 				balance,
-				newTransactions: JSON.stringify(uncertifiedTransactions, jsonReplacer),
-				address: this.currentBtcAddress,
-				network: bitcoinNetwork
+				newTransactions: JSON.stringify(uncertifiedTransactions, jsonReplacer)
 			}
 		});
 	};
