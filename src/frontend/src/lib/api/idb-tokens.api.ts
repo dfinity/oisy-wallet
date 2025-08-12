@@ -7,7 +7,7 @@ import { nullishSignOut } from '$lib/services/auth.services';
 import type { DeleteIdbTokenParams, SetIdbTokensParams } from '$lib/types/idb-tokens';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
+import { clear, createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
 const idbTokensStore = (key: string): UseStore =>
@@ -214,3 +214,12 @@ export const deleteIdbSolToken = async ({
 		});
 	}
 };
+
+export const clearIdbIcTokens = (): Promise<void> => clear(idbIcTokensStore);
+
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+export const clearIdbEthTokensDeprecated = (): Promise<void> => clear(idbEthTokensStoreDeprecated);
+
+export const clearIdbEthTokens = (): Promise<void> => clear(idbEthTokensStore);
+
+export const clearIdbSolTokens = (): Promise<void> => clear(idbSolTokensStore);
