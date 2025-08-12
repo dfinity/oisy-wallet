@@ -1239,7 +1239,6 @@
 			"error": {
 				"loading_reward": "Erro ao carregar um novo código de recompensa.",
 				"loading_user_data": "Falha ao carregar dados do usuário do canister de recompensa.",
-				"claiming_reward": "Erro ao reivindicar recompensa.",
 				"loading_eligibility": "Erro ao carregar a elegibilidade para a campanha."
 			}
 		},

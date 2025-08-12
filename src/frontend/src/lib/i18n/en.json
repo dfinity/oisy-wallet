@@ -1239,7 +1239,6 @@
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward.",
 				"loading_eligibility": "Error while loading campaign eligibility."
 			}
 		},

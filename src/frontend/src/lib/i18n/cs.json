@@ -1239,7 +1239,6 @@
 			"error": {
 				"loading_reward": "Chyba při načítání nového kódu odměny.",
 				"loading_user_data": "Nepodařilo se načíst uživatelská data z kanystru odměn.",
-				"claiming_reward": "Chyba při nárokování odměny.",
 				"loading_eligibility": "Chyba při načítání způsobilosti ke kampani."
 			}
 		},
