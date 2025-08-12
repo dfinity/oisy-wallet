@@ -1239,7 +1239,6 @@
 			"error": {
 				"loading_reward": "加载新的奖励码时出错。",
 				"loading_user_data": "从奖励 canister 加载用户数据失败。",
-				"claiming_reward": "领取奖励时发生错误。",
 				"loading_eligibility": "加载活动资格时发生错误。"
 			}
 		},

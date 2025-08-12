@@ -1239,7 +1239,6 @@
 			"error": {
 				"loading_reward": "Fehler beim Laden eines neuen Belohnungscodes.",
 				"loading_user_data": "Fehler beim Laden der Benutzerdaten aus dem Belohnungs-Canister.",
-				"claiming_reward": "Fehler beim Einlösen der Belohnung.",
 				"loading_eligibility": "Fehler beim Laden der Kampagnenberechtigung."
 			}
 		},

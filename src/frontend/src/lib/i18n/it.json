@@ -1239,7 +1239,6 @@
 			"error": {
 				"loading_reward": "Errore durante il caricamento di un nuovo codice ricompensa.",
 				"loading_user_data": "Impossibile caricare i dati utente dal canister delle ricompense.",
-				"claiming_reward": "Errore durante la richiesta della ricompensa.",
 				"loading_eligibility": "Errore durante il caricamento dell'idoneità della campagna."
 			}
 		},

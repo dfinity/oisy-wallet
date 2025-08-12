@@ -1239,7 +1239,6 @@
 			"error": {
 				"loading_reward": "Lỗi khi tải mã phần thưởng mới.",
 				"loading_user_data": "Không tải được dữ liệu người dùng từ canister phần thưởng.",
-				"claiming_reward": "Lỗi khi yêu cầu phần thưởng.",
 				"loading_eligibility": "Lỗi khi tải tính đủ điều kiện của chiến dịch."
 			}
 		},
