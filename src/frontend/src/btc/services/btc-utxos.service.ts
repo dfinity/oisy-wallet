@@ -46,7 +46,7 @@ export const prepareBtcSend = async ({
 	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
 		identity,
 		network,
-		speed: BtcTransactionSpeed.fast
+		speed: BtcTransactionSpeed.normal
 	});
 
 	// Step 2: Fetch all available UTXOs using query call (fast and no cycle cost)

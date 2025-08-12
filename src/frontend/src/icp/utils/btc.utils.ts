@@ -95,11 +95,6 @@ export const getPendingTransactionIds = (address: string): string[] => {
  * - total: All available balance (confirmed and unconfirmed)
  *
  * **Transaction Processing Logic:**
- * - SEND transactions: Immediately reduce total balance (instant feedback to user)
- * - RECEIVE transactions: Add to confirmed/unconfirmed based on confirmation count
- * - Pending transactions: Lock UTXOs to prevent double-spending
- *
- * **Use Cases:**
  * - User sends BTC → Balance drops immediately, even before blockchain confirmation
  * - User receives BTC → Balance increases based on confirmation state
  * - Pending transactions → Locked amounts are subtracted from spendable balance
