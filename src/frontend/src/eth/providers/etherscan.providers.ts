@@ -189,6 +189,7 @@ export class EtherscanProvider {
 		);
 	};
 
+	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc721-token-transfer-events-by-address
 	erc721Transactions = async ({
 		address,
 		contract: { address: contractAddress }
