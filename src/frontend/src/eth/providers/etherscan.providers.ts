@@ -2,9 +2,11 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc721Token } from '$eth/types/erc721';
 import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 import type {
-	EtherscanProviderInternalTransaction, EtherscanProviderNftTokenTransferTransaction,
+	EtherscanProviderInternalTransaction,
+	EtherscanProviderNftTokenTransferTransaction,
 	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
 } from '$eth/types/etherscan-transaction';
@@ -23,7 +25,6 @@ import {
 	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { Erc721Token } from '$eth/types/erc721';
 
 interface TransactionsParams {
 	address: EthAddress;
@@ -215,9 +216,9 @@ export class EtherscanProvider {
 	};
 
 	erc721Transactions = async ({
-															 address,
-															 contract: { address: contractAddress }
-														 }: {
+		address,
+		contract: { address: contractAddress }
+	}: {
 		address: EthAddress;
 		contract: Erc721Token;
 	}): Promise<Transaction[]> => {
@@ -230,10 +231,8 @@ export class EtherscanProvider {
 			sort: 'desc'
 		};
 
-		const result: EtherscanProviderNftTokenTransferTransaction[] | string = await this.provider.fetch(
-			'account',
-			params
-		);
+		const result: EtherscanProviderNftTokenTransferTransaction[] | string =
+			await this.provider.fetch('account', params);
 
 		if (typeof result === 'string') {
 			throw new Error(result);
@@ -241,16 +240,16 @@ export class EtherscanProvider {
 
 		return result.map(
 			({
-				 nonce,
-				 gas,
-				 gasPrice,
-				 hash,
-				 blockNumber,
-				 timeStamp,
-				 from,
-				 to,
-				 tokenID
-			 }: EtherscanProviderNftTokenTransferTransaction): Transaction => ({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				tokenID
+			}: EtherscanProviderNftTokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),
@@ -264,7 +263,7 @@ export class EtherscanProvider {
 				chainId: this.chainId
 			})
 		);
-	}
+	};
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = [

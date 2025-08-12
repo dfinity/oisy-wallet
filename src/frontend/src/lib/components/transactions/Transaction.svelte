@@ -72,7 +72,11 @@
 		filterAddressFromContact({ contact, address: contactAddress })?.label
 	);
 
-	const nft = $derived(isTokenNonFungible(token) && nonNullish(tokenId) ? $nftStore.find(({ id }) => id === tokenId) : undefined);
+	const nft = $derived(
+		isTokenNonFungible(token) && nonNullish(tokenId)
+			? $nftStore.find(({ id }) => id === tokenId)
+			: undefined
+	);
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
