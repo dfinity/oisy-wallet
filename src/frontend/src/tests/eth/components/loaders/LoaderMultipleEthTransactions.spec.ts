@@ -146,8 +146,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 	});
 
@@ -160,8 +160,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 
 		await vi.advanceTimersByTimeAsync(timeout);
@@ -185,8 +185,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		expectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 
 		expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
@@ -207,8 +207,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedTokens.length);
 
-		expectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		expectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 
 		expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
@@ -233,8 +233,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 
 		erc20UserTokensStore.resetAll();
@@ -269,8 +269,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 
 		erc20UserTokensStore.resetAll();
@@ -330,8 +330,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 
 		erc20UserTokensStore.resetAll();
