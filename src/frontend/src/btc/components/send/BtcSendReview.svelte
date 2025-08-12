@@ -24,7 +24,7 @@
 	// let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
 
-	$: console.warn('hasPendingTransactionsStore changed:', $hasPendingTransactionsStore);
+	// $: console.warn('hasPendingTransactionsStore changed:', $hasPendingTransactionsStore);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;

@@ -1,4 +1,3 @@
-import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { getBtcSourceAddress } from '$btc/utils/btc-address.utils';
@@ -50,11 +49,11 @@ export const syncWallet = async ({
 		const sourceAddress = getBtcSourceAddress(networkId);
 
 		// Wait for pending transactions to be loaded before calculating balance
-		await loadBtcPendingSentTransactions({
+		/*await loadBtcPendingSentTransactions({
 			identity,
 			networkId,
 			address: sourceAddress
-		});
+		});*/
 
 		// Calculate the structured balance using newTransactions to determine confirmation states
 		// Use sourceAddress to ensure consistency with the address used for pending transactions

@@ -6,7 +6,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapNetworkIdToBitcoinNetwork, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadBtcPendingSentTransactions = async ({
@@ -36,12 +36,14 @@ export const loadBtcPendingSentTransactions = async ({
 				err: new Error(errMessage)
 			};
 		}
-		console.warn('Loading pending transactions for address:', address);
 		const pendingTransactions = await getPendingBtcTransactions({
 			identity,
 			address,
 			network: mapToSignerBitcoinNetwork({ network })
 		});
+		console.warn(
+			`loadBtcPendingSentTransactions(${address}, ${networkId?.toString()}) -> ${JSON.stringify(pendingTransactions, jsonReplacer, 2)}`
+		);
 		btcPendingSentTransactionsStore.setPendingTransactions({
 			address,
 			pendingTransactions
