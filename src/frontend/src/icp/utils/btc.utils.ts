@@ -3,7 +3,14 @@ import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedData } from '$lib/types/store';
-import { isNullish, jsonReplacer, jsonReviver, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
+import {
+	isNullish,
+	jsonReplacer,
+	jsonReviver,
+	nonNullish,
+	notEmptyString,
+	uint8ArrayToHexString
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -143,12 +150,12 @@ export const getBtcWalletBalance = ({
 
 						// Look up the transaction in newTransactions to get the confirmation count
 						const matchedTransaction = transactionLookup.get(txid);
-						if (matchedTransaction) {
+						if (matchedTransaction && nonNullish(matchedTransaction.value)) {
 							const confirmations = matchedTransaction.confirmations ?? 0;
 
 							// If transaction has 0-5 confirmations, add to unconfirmed balance
 							if (confirmations >= 0 && confirmations <= 5) {
-								acc.unconfirmedBalance += txUtxoValue;
+								acc.unconfirmedBalance += matchedTransaction.value;
 							}
 						}
 					}
