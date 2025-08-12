@@ -1,8 +1,12 @@
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
-import { BTC_MAINNET_NETWORK_ID, BTC_REGTEST_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
-import { getPendingTransactionsBalance } from '$icp/utils/btc.utils';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
+import { getBtcWalletBalance } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { syncWalletFromIdbCache } from '$lib/services/listener.services';
@@ -51,7 +55,7 @@ export const syncWallet = async ({
 		});
 
 		// Calculate the structured balance using newTransactions to determine confirmation states
-		const btcWalletBalance = getPendingTransactionsBalance({
+		const btcWalletBalance = getBtcWalletBalance({
 			address,
 			totalBalance,
 			newTransactions

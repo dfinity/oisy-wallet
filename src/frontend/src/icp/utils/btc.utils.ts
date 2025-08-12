@@ -3,7 +3,13 @@ import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedData } from '$lib/types/store';
-import { isNullish, jsonReplacer, jsonReviver, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
+import {
+	isNullish,
+	jsonReplacer,
+	jsonReviver,
+	notEmptyString,
+	uint8ArrayToHexString
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -107,7 +113,7 @@ export const getPendingTransactionIds = (address: string): string[] => {
  * @param params - Parameters object containing address, totalBalance, and newTransactions
  * @returns BtcWalletBalance with confirmed, unconfirmed, and total balances (all in satoshis)
  */
-export const getPendingTransactionsBalance = ({
+export const getBtcWalletBalance = ({
 	address,
 	totalBalance,
 	newTransactions
