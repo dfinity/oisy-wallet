@@ -1,17 +1,10 @@
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { getBtcSourceAddress } from '$btc/utils/btc-address.utils';
-import {
-	BTC_MAINNET_NETWORK_ID,
-	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.btc.env';
-import {
-	BTC_MAINNET_TOKEN_ID,
-	BTC_REGTEST_TOKEN_ID,
-	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens/tokens.btc.env';
+import { BTC_MAINNET_NETWORK_ID, BTC_REGTEST_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { BTC_MAINNET_TOKEN_ID, BTC_REGTEST_TOKEN_ID, BTC_TESTNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { getBtcWalletBalance } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
 import { authIdentity } from '$lib/derived/auth.derived';
@@ -21,6 +14,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { NetworkId } from '$lib/types/network';
+import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
@@ -39,6 +33,12 @@ export const syncWallet = async ({
 			newTransactions
 		}
 	} = data;
+
+	// Parse new transactions here in the listener
+	const providerTransactions: CertifiedData<BtcTransactionUi>[] = JSON.parse(
+		newTransactions,
+		jsonReviver
+	);
 
 	if (nonNullish(totalBalance)) {
 		/*
@@ -64,12 +64,12 @@ export const syncWallet = async ({
 			address: sourceAddress
 		});
 
-		// Calculate the structured balance using newTransactions to determine confirmation states
+		// Calculate the structured balance using parsed transactions
 		// Use sourceAddress to ensure consistency with the address used for pending transactions
 		const btcWalletBalance = getBtcWalletBalance({
 			address: sourceAddress,
 			totalBalance,
-			newTransactions
+			providerTransactions
 		});
 
 		console.warn('Storing BTC balance:', JSON.stringify(btcWalletBalance, jsonReplacer));
@@ -87,7 +87,7 @@ export const syncWallet = async ({
 
 	btcTransactionsStore.prepend({
 		tokenId,
-		transactions: JSON.parse(newTransactions, jsonReviver)
+		transactions: providerTransactions
 	});
 };
 

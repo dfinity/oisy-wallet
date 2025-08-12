@@ -3,14 +3,7 @@ import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedData } from '$lib/types/store';
-import {
-	isNullish,
-	jsonReplacer,
-	jsonReviver,
-	nonNullish,
-	notEmptyString,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { isNullish, jsonReplacer, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -94,6 +87,7 @@ export const getPendingTransactionIds = (address: string): string[] => {
  * - unconfirmed: UTXOs with 1-5 confirmations, awaiting full confirmation
  * - total: All available balance (confirmed and unconfirmed)
  *
+
  * **Transaction Processing Logic:**
  * - User sends BTC → Balance drops immediately, even before blockchain confirmation
  * - User receives BTC → Balance increases based on confirmation state
@@ -112,21 +106,18 @@ export const getPendingTransactionIds = (address: string): string[] => {
 export const getBtcWalletBalance = ({
 	address,
 	totalBalance,
-	newTransactions
+	providerTransactions
 }: {
 	address: string;
 	totalBalance: bigint;
-	newTransactions: string;
+	providerTransactions: CertifiedData<BtcTransactionUi>[];
 }): BtcWalletBalance => {
 	const pendingTransactions = getPendingTransactions(address);
 
-	// Parse new transactions from the worker
-	const transactions: BtcTransactionUi[] = JSON.parse(newTransactions, jsonReviver);
-
 	// Create efficient lookup map for transactions by their ID
 	const transactionLookup = new Map<string, BtcTransactionUi>();
-	transactions.forEach((tx) => {
-		transactionLookup.set(tx.id, tx);
+	providerTransactions.forEach((tx) => {
+		transactionLookup.set(tx.data.id, tx.data);
 	});
 
 	// Calculate locked balance and unconfirmed balance from pending transactions
