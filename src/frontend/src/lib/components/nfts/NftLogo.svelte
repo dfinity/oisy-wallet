@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component } from 'svelte';
+	import noNftImage from '$lib/assets/nfts/no-nft-image.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import noNftImage from '$lib/assets/nfts/no-nft-image.svg'
 
 	interface Props {
 		nft: Nft;
