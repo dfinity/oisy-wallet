@@ -40,8 +40,19 @@ export const getNftsByNetworks = ({
 	return nftsByToken;
 };
 
-export const findNft = ({nfts, token, tokenId}: {nfts: Nft[], token: NonFungibleToken, tokenId: number}) =>
-	nfts.find(({ id, collection: {address, network} }) => address === token.address && network === token.network && id === tokenId)
+export const findNft = ({
+	nfts,
+	token,
+	tokenId
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	tokenId: number;
+}) =>
+	nfts.find(
+		({ id, collection: { address, network } }) =>
+			address === token.address && network === token.network && id === tokenId
+	);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
