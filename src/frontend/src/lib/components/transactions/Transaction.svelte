@@ -23,6 +23,7 @@
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 
 	interface Props {
 		amount?: bigint;
@@ -110,7 +111,7 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(cardAmount) && !isTokenNonFungible(token)}
+				{#if nonNullish(cardAmount) && !isTokenErc721(token)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}

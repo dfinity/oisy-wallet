@@ -33,6 +33,9 @@ export const erc721Tokens: Readable<Erc721TokenToggleable[]> = derived(
 	([$erc721CustomTokens]) => [...$erc721CustomTokens]
 );
 
+/**
+ * The list of all enabled ERC721 tokens.
+ */
 export const enabledErc721Tokens: Readable<Erc721TokenToggleable[]> = derived(
 	[erc721Tokens],
 	([$erc721Tokens]) => $erc721Tokens.filter(({ enabled }) => enabled)

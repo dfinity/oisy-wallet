@@ -33,6 +33,14 @@ export const erc1155Tokens: Readable<Erc1155TokenToggleable[]> = derived(
 	([$erc1155CustomTokens]) => [...$erc1155CustomTokens]
 );
 
+/**
+ * The list of all enabled ERC1155 tokens.
+ */
+export const enabledErc1155Tokens: Readable<Erc1155TokenToggleable[]> = derived(
+	[erc1155Tokens],
+	([$erc1155Tokens]) => $erc1155Tokens.filter(({ enabled }) => enabled)
+)
+
 export const erc1155CustomTokensInitialized: Readable<boolean> = derived(
 	[erc1155CustomTokensStore],
 	([$erc1155CustomTokensStore]) => nonNullish($erc1155CustomTokensStore)

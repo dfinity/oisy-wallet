@@ -6,9 +6,9 @@ import type { Erc721Token } from '$eth/types/erc721';
 import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 import type {
 	EtherscanProviderInternalTransaction,
-	EtherscanProviderNftTokenTransferTransaction,
+	EtherscanProviderErc721TokenTransferTransaction,
 	EtherscanProviderTokenTransferTransaction,
-	EtherscanProviderTransaction
+	EtherscanProviderTransaction, EtherscanProviderErc1155TokenTransferTransaction
 } from '$eth/types/etherscan-transaction';
 import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
@@ -25,6 +25,7 @@ import {
 	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
+import type { Erc1155Token } from '$eth/types/erc1155';
 
 interface TransactionsParams {
 	address: EthAddress;
@@ -231,7 +232,7 @@ export class EtherscanProvider {
 			sort: 'desc'
 		};
 
-		const result: EtherscanProviderNftTokenTransferTransaction[] | string =
+		const result: EtherscanProviderErc721TokenTransferTransaction[] | string =
 			await this.provider.fetch('account', params);
 
 		if (typeof result === 'string') {
@@ -249,13 +250,64 @@ export class EtherscanProvider {
 				from,
 				to,
 				tokenID
-			}: EtherscanProviderNftTokenTransferTransaction): Transaction => ({
+			}: EtherscanProviderErc721TokenTransferTransaction): Transaction => ({
 				hash,
 				blockNumber: parseInt(blockNumber),
 				timestamp: parseInt(timeStamp),
 				from,
 				to,
 				value: BigInt(1),
+				tokenId: parseInt(tokenID),
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
+				chainId: this.chainId
+			})
+		);
+	};
+
+	erc1155Transactions = async ({
+																address,
+																contract: { address: contractAddress }
+															}: {
+		address: EthAddress;
+		contract: Erc1155Token;
+	}): Promise<Transaction[]> => {
+		const params = {
+			action: 'token1155tx',
+			contractAddress,
+			address,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderErc1155TokenTransferTransaction[] | string =
+			await this.provider.fetch('account', params);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(
+			({
+				 nonce,
+				 gas,
+				 gasPrice,
+				 hash,
+				 blockNumber,
+				 timeStamp,
+				 from,
+				 to,
+				 tokenID,
+					tokenValue
+			 }: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				value: BigInt(tokenValue),
 				tokenId: parseInt(tokenID),
 				nonce: parseInt(nonce),
 				gasLimit: BigInt(gas),
