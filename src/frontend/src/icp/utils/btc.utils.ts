@@ -89,7 +89,7 @@ export const getPendingTransactionIds = (address: string): string[] => {
  * **Balance Categories:**
  * - confirmed: UTXOs with 6+ confirmations, immediately spendable
  * - unconfirmed: UTXOs with 1-5 confirmations, awaiting full confirmation
- * - total: All available balance (confirmed + unconfirmed)
+ * - total: All available balance (confirmed and unconfirmed)
  *
  * **Transaction Processing Logic:**
  * - SEND transactions: Immediately reduce total balance (instant feedback to user)
@@ -105,23 +105,29 @@ export const getPendingTransactionIds = (address: string): string[] => {
  * 1. totalBalance = 1.0 BTC (from canister)
  * 2. User sends 0.1 BTC → Appears in newTransactions as 'send' type
  * 3. Result: total = 0.9 BTC (immediate reduction)
- * 4. Later: 0.05 BTC received with 3 confirmations → unconfirmed += 0.05 BTC
+ * 4. Later: 0.05 BTC received with 3 confirmations → unconfirmed increases by 0.05 BTC
  * 5. Final: { confirmed: 0.9, unconfirmed: 0.05, total: 0.95 }
  *
- * @param address - Bitcoin address to calculate balance for
- * @param totalBalance - Canonical balance from Bitcoin canister (in satoshis)
- * @param newTransactions - JSON string of recent transactions from external BTC data provider
+ * @param params - Parameters object containing address, totalBalance, and newTransactions
  * @returns BtcWalletBalance with confirmed, unconfirmed, and total balances (all in satoshis)
  */
-export const getPendingTransactionsBalance = async (
-	address: string,
-	totalBalance: bigint,
-	newTransactions: string
-): Promise<BtcWalletBalance> => {
+export const getPendingTransactionsBalance = ({
+	address,
+	totalBalance,
+	newTransactions
+}: {
+	address: string;
+	totalBalance: bigint;
+	newTransactions: string;
+}): BtcWalletBalance => {
 	const pendingTransactions = getPendingTransactions(address);
-
-	// Parse new transactions from the worker
 	const transactions: BtcTransactionUi[] = JSON.parse(newTransactions, jsonReviver);
+
+	// Create efficient lookup map for newTransactions by transaction ID
+	const transactionLookup = new Map<string, BtcTransactionUi>();
+	transactions.forEach((tx) => {
+		transactionLookup.set(tx.id, tx);
+	});
 
 	// Create a Set of pending transaction IDs for efficient lookup
 	const pendingTxIds = new Set<string>();

@@ -51,18 +51,18 @@ export const syncWallet = async ({
 		});
 
 		// Calculate the structured balance using newTransactions to determine confirmation states
-		const structuredBalance = await getPendingTransactionsBalance(
+		const structuredBalance = getPendingTransactionsBalance({
 			address,
 			totalBalance,
 			newTransactions
-		);
+		});
 
 		console.warn('Storing BTC balance:', JSON.stringify(structuredBalance, jsonReplacer));
 
 		balancesStore.set({
 			id: tokenId,
 			data: {
-				data: structuredBalance.total, // Use total for compatibility with existing Balance type
+				data: structuredBalance.total,
 				certified
 			}
 		});
