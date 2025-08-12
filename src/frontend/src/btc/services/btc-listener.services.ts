@@ -36,7 +36,9 @@ export const syncWallet = async ({
 	const {
 		wallet: {
 			balance: { certified, data: totalBalance },
-			newTransactions
+			newTransactions,
+			address,
+			network
 		}
 	} = data;
 
