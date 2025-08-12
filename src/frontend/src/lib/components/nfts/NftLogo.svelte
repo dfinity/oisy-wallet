@@ -31,8 +31,9 @@
 </script>
 
 <div class="relative">
+	<!-- TODO add fallback logo for nfts -->
 	<Logo
-		src={imageUrl}
+		src={imageUrl ?? ''}
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
 		size={logoSize}
 		rounded={false}

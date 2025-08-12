@@ -65,7 +65,7 @@
 					standard,
 					silent: failedReloadCounter + 1 <= FAILURE_THRESHOLD
 				})
-			: await loadEthereumTransactions({ tokenId, networkId });
+			: await loadEthereumTransactions({ tokenId, networkId, standard });
 
 		if (!success) {
 			tokenIdLoaded = undefined;
