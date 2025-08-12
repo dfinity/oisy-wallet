@@ -75,19 +75,19 @@
 		>
 			<Header />
 
-		<AuthGuard>
-			<SplitPane>
-				{#snippet menu()}
-					<NavigationMenu>
-						{#if tokensRoute || nftsRoute}
-							<Responsive up="xl">
-								<div transition:fade class="hidden xl:block">
-									<DappsCarousel />
-								</div>
-							</Responsive>
-						{/if}
-					</NavigationMenu>
-				{/snippet}
+			<AuthGuard>
+				<SplitPane>
+					{#snippet menu()}
+						<NavigationMenu>
+							{#if tokensRoute || nftsRoute}
+								<Responsive up="xl">
+									<div transition:fade class="hidden xl:block">
+										<DappsCarousel />
+									</div>
+								</Responsive>
+							{/if}
+						</NavigationMenu>
+					{/snippet}
 
 					{#if showHero}
 						<Hero />
