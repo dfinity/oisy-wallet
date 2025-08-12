@@ -1,4 +1,7 @@
 import {
+	clearIdbBtcAddressMainnet,
+	clearIdbEthAddress,
+	clearIdbSolAddressMainnet,
 	deleteIdbBtcAddressMainnet,
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet,
@@ -162,6 +165,30 @@ describe('idb-addresses.api', () => {
 			await updateIdbSolAddressMainnetLastUsage(mockPrincipal);
 
 			expect(idbKeyval.update).toHaveBeenCalled();
+		});
+	});
+
+	describe('clearIdbBtcAddressMainnet', () => {
+		it('should clear BTC addresses', async () => {
+			await clearIdbBtcAddressMainnet();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbEthAddress', () => {
+		it('should clear ETH addresses', async () => {
+			await clearIdbEthAddress();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbSolAddressMainnet', () => {
+		it('should clear SOL addresses', async () => {
+			await clearIdbSolAddressMainnet();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
 		});
 	});
 
