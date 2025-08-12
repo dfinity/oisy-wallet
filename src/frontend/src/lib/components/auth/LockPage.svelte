@@ -35,25 +35,23 @@
 
 <div class="z-4 fixed inset-0 flex h-full w-full flex-col bg-page">
 	<div class="backdrop-blur-xs fixed inset-0 -z-10 bg-overlay-page-30">
-		{#await import(`$lib/assets/lockpage_assets/lock-image-1440-${$themeStore ?? 'light'}.webp`) then { default: src }}
-			<Responsive up="xl">
-				<Img {src} alt={ariaLabel} styleClass={imgStyleClass}/>
-			</Responsive>
-			<Responsive up="md" down="lg">
-				<Img
-					src={src.replace('1440', '768')}
-					alt={ariaLabel}
-					styleClass={imgStyleClass}
-				/>
-			</Responsive>
-			<Responsive down="sm">
-				<Img
-					src={src.replace('1440', '480')}
-					alt={ariaLabel}
-					styleClass={imgStyleClass}
-				/>
-			</Responsive>
-		{/await}
+		<Responsive up="xl">
+			{#await import(`$lib/assets/lockpage_assets/lock-image-1440-${$themeStore ?? 'light'}.webp`) then { default: src1440 }}
+				<Img src={src1440} alt={ariaLabel} styleClass={imgStyleClass} />
+			{/await}
+		</Responsive>
+
+		<Responsive up="md" down="lg">
+			{#await import(`$lib/assets/lockpage_assets/lock-image-768-${$themeStore ?? 'light'}.webp`) then { default: src768 }}
+				<Img src={src768} alt={ariaLabel} styleClass={imgStyleClass} />
+			{/await}
+		</Responsive>
+
+		<Responsive down="sm">
+			{#await import(`$lib/assets/lockpage_assets/lock-image-480-${$themeStore ?? 'light'}.webp`) then { default: src480 }}
+				<Img src={src480} alt={ariaLabel} styleClass={imgStyleClass} />
+			{/await}
+		</Responsive>
 	</div>
 
 	<div class="flex h-screen flex-col items-center justify-center px-4">
