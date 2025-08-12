@@ -3,13 +3,7 @@ import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedData } from '$lib/types/store';
-import {
-	isNullish,
-	jsonReplacer,
-	nonNullish,
-	notEmptyString,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { isNullish, jsonReplacer, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -127,8 +121,8 @@ export const getBtcWalletBalance = ({
 	});
 
 	// Calculate locked balance and unconfirmed balance from pending transactions
-	const { lockedBalance, pendingTxIds, unconfirmedBalance } = isNullish(pendingTransactions?.data)
-		? { lockedBalance: ZERO, pendingTxIds: new Set<string>(), unconfirmedBalance: ZERO }
+	const { lockedBalance, unconfirmedBalance } = isNullish(pendingTransactions?.data)
+		? { lockedBalance: ZERO, unconfirmedBalance: ZERO }
 		: pendingTransactions.data.reduce(
 				(acc, tx) => {
 					// Calculate total UTXO value for this pending transaction
@@ -138,8 +132,6 @@ export const getBtcWalletBalance = ({
 					// Add transaction ID to the set for correlation
 					const txid = convertPendingTransactionTxid(tx);
 					if (txid) {
-						acc.pendingTxIds.add(txid);
-
 						// Look up the transaction in newTransactions to get the confirmation count
 						const matchedTransaction = transactionLookup.get(txid);
 						if (matchedTransaction && nonNullish(matchedTransaction.value)) {
