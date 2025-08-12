@@ -24,6 +24,7 @@
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import { findNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		amount?: bigint;
@@ -73,11 +74,7 @@
 		filterAddressFromContact({ contact, address: contactAddress })?.label
 	);
 
-	const nft = $derived(
-		isTokenNonFungible(token) && nonNullish(tokenId)
-			? $nftStore?.find(({ id, collection: {address, network} }) => id === tokenId && address === token.address && network === token.network)
-			: undefined
-	);
+	const nft = $derived(findNft({nfts: $nftStore, token, tokenId}))
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>

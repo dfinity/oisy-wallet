@@ -34,6 +34,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
+	import { findNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -84,11 +85,7 @@
 			: to
 	);
 
-	const nft = $derived(
-		nonNullish(token) && isTokenNonFungible(token) && nonNullish(transaction.tokenId)
-			? $nftStore?.find(({ id }) => id === transaction.tokenId)
-			: undefined
-	);
+	const nft = $derived(findNft({nfts: $nftStore, token, tokenId: transaction.tokenId}))
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openEthTransaction({
