@@ -177,8 +177,8 @@ describe('LoaderMultipleEthTransactions', () => {
 		// same number of calls as before
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(allExpectedTokens.length);
 
-		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		allExpectedTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 	});
 
@@ -270,8 +270,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 
 		expect(loadEthereumTransactions).not.toHaveBeenCalledTimes(
@@ -310,8 +310,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 
 		const mockNewAdditionalTokens = createMockErc20UserTokens({
@@ -337,8 +337,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokensWithSepolia.length);
 
-		expectedNewTokensWithSepolia.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		expectedNewTokensWithSepolia.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 	});
 
@@ -375,8 +375,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		expect(loadEthereumTransactions).toHaveBeenCalledTimes(expectedNewTokens.length);
 
-		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId } }, index) => {
-			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId });
+		expectedNewTokens.forEach(({ id: tokenId, network: { id: networkId }, standard }, index) => {
+			expect(loadEthereumTransactions).toHaveBeenNthCalledWith(index + 1, { tokenId, networkId, standard });
 		});
 	});
 });
