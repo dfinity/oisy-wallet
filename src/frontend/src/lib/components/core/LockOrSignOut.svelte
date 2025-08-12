@@ -59,7 +59,7 @@
 			paddingSmall
 			colorStyle="secondary"
 			testId={LOGOUT_BUTTON}
-			styleClass="flex items-center w-full gap-2 rounded-lg py-2 flex-1"
+			styleClass="flex items-center w-full rounded-lg py-2 flex-1"
 		>
 			{$i18n.auth.text.logout}
 			<IconLogout />
