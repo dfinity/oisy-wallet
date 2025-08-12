@@ -79,7 +79,10 @@ export const signIn = async (
 };
 
 export const signOut = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> => {
-	trackSignOut({ name: TRACK_COUNT_SIGN_OUT_SUCCESS, meta: { reason: 'user', resetUrl } });
+	trackSignOut({
+		name: TRACK_COUNT_SIGN_OUT_SUCCESS,
+		meta: { reason: 'user', resetUrl: String(resetUrl) }
+	});
 	return logout({ resetUrl });
 };
 
