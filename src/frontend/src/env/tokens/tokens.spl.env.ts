@@ -24,6 +24,7 @@ import { HOODX_TOKEN } from '$env/tokens/tokens-spl/tokens.hoodx.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { KOX_TOKEN } from '$env/tokens/tokens-spl/tokens.kox.env';
 import { LLYX_TOKEN } from '$env/tokens/tokens-spl/tokens.llyx.env';
+import { MAX_TOKEN } from '$env/tokens/tokens-spl/tokens.max.env';
 import { MCDX_TOKEN } from '$env/tokens/tokens-spl/tokens.mcdx.env';
 import { METAX_TOKEN } from '$env/tokens/tokens-spl/tokens.metax.env';
 import { MSTRX_TOKEN } from '$env/tokens/tokens-spl/tokens.mstrx.env';
@@ -75,6 +76,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	JUP_TOKEN,
 	KOX_TOKEN,
 	LLYX_TOKEN,
+	MAX_TOKEN,
 	MCDX_TOKEN,
 	METAX_TOKEN,
 	MSTRX_TOKEN,
