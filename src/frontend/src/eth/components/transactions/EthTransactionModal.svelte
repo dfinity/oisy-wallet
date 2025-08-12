@@ -23,7 +23,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft } from '$lib/types/nft';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction';
