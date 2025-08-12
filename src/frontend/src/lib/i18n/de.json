@@ -161,6 +161,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "",
+			"title_part_2": "",
+			"unlock": "",
+			"logout": "",
+			"logout_clear_cash_message": "",
+			"learn_more": ""
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "Alle Apps",
@@ -1233,12 +1243,12 @@
 				"reward_received": "Willkommen bei $oisy_short!",
 				"reward_failed": "Code ist abgelaufen",
 				"reward_received_description": "Du erhältst dein Willkommensgeschenk in Kürze.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Fordere einen neuen an und versuche es erneut"
 			},
 			"error": {
 				"loading_reward": "Fehler beim Laden eines neuen Belohnungscodes.",
 				"loading_user_data": "Fehler beim Laden der Benutzerdaten aus dem Belohnungs-Canister.",
-				"claiming_reward": "Fehler beim Einlösen der Belohnung.",
 				"loading_eligibility": "Fehler beim Laden der Kampagnenberechtigung."
 			}
 		},

@@ -161,6 +161,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "",
+			"title_part_2": "",
+			"unlock": "",
+			"logout": "",
+			"logout_clear_cash_message": "",
+			"learn_more": ""
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "Tất cả ứng dụng",
@@ -1233,12 +1243,12 @@
 				"reward_received": "Chào mừng đến với $oisy_short!",
 				"reward_failed": "Mã đã hết hạn",
 				"reward_received_description": "Bạn sẽ nhận được món quà chào mừng của mình bất cứ lúc nào.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Yêu cầu một cái mới và thử lại"
 			},
 			"error": {
 				"loading_reward": "Lỗi khi tải mã phần thưởng mới.",
 				"loading_user_data": "Không tải được dữ liệu người dùng từ canister phần thưởng.",
-				"claiming_reward": "Lỗi khi yêu cầu phần thưởng.",
 				"loading_eligibility": "Lỗi khi tải tính đủ điều kiện của chiến dịch."
 			}
 		},
