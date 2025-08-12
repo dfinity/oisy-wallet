@@ -42,7 +42,7 @@ export const getNftsByNetworks = ({
 
 export const findNft = ({
 	nfts,
-	token,
+	token: { address: tokenAddress, network: tokenNetwork },
 	tokenId
 }: {
 	nfts: Nft[];
@@ -51,7 +51,7 @@ export const findNft = ({
 }) =>
 	nfts.find(
 		({ id, collection: { address, network } }) =>
-			address === token.address && network === token.network && id === tokenId
+			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
