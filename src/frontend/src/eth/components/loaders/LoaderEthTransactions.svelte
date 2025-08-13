@@ -62,7 +62,7 @@
 			? await reloadEthereumTransactions({
 					tokenId,
 					networkId,
-				standard,
+					standard,
 					silent: failedReloadCounter + 1 <= FAILURE_THRESHOLD
 				})
 			: await loadEthereumTransactions({ tokenId, networkId, standard });
