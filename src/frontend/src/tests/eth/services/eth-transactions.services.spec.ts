@@ -17,15 +17,13 @@ import { ethAddressStore } from '$lib/stores/address.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
-	createMockNftTransactions,
-	createMockNftTransactionsUi,
 	createMockEthTransactions
 } from '$tests/mocks/eth-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import { createMockErc721CustomTokens, mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { assertNonNullish } from '@dfinity/utils';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
@@ -59,6 +57,26 @@ describe('eth-transactions.services', () => {
 	describe('loadEthereumTransactions', () => {
 		describe('when token is ERC', () => {
 			let etherscanProvidersSpy: MockInstance;
+
+			const mockErcTransactions = vi.fn();
+
+			const mockTransactions = createMockEthTransactions(3);
+
+			beforeEach(() => {
+				etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
+
+				etherscanProvidersSpy.mockReturnValue({
+					erc20Transactions: mockErcTransactions,
+					erc721Transactions: mockErcTransactions,
+					erc1155Transactions: mockErcTransactions
+				} as unknown as EtherscanProvider);
+
+				erc721CustomTokensStore.resetAll();
+				erc721CustomTokensStore.setAll([{ data: { ...mockValidErc721Token, enabled: true }, certified: false }]);
+
+				erc1155CustomTokensStore.resetAll();
+				erc1155CustomTokensStore.setAll([{ data: { ...mockValidErc1155Token, enabled: true }, certified: false }]);
+			});
 
 			it('should raise an error if the Ethereum address store is empty', async () => {
 				ethAddressStore.reset();
@@ -94,381 +112,137 @@ describe('eth-transactions.services', () => {
 				expect(result).toEqual({ success: false });
 			});
 
-			describe('when token is ERC20', () => {
-				const mockErc20Transactions = vi.fn();
+			const tokens = [USDC_TOKEN, mockValidErc721Token, mockValidErc1155Token]
 
-				const mockTransactions = createMockEthTransactions(3);
-
+			it.each(tokens)('should call the transaction function for $standard tokens', async (token) => {
 				const {
 					id: mockTokenId,
 					network: { id: mockNetworkId },
-					symbol: mockSymbol,
 					standard: mockStandard
-				} = USDC_TOKEN;
+				} = token;
 
-				beforeEach(() => {
-					etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
+				mockErcTransactions.mockResolvedValueOnce([]);
 
-					etherscanProvidersSpy.mockReturnValue({
-						erc20Transactions: mockErc20Transactions
-					} as unknown as EtherscanProvider);
+				await loadEthereumTransactions({
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					standard: mockStandard
 				});
 
-				it('should call the transaction function', async () => {
-					mockErc20Transactions.mockResolvedValueOnce([]);
+				expect(mockErcTransactions).toHaveBeenCalledWith({
+					contract: { ...token, enabled: true },
+					address: mockEthAddress
+				});
+			})
 
-					await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard
-					});
+			it.each(tokens)('should handle token transactions correctly for $standard tokens', async (token) => {
+				const {
+					id: mockTokenId,
+					network: { id: mockNetworkId },
+					standard: mockStandard
+				} = token;
 
-					expect(mockErc20Transactions).toHaveBeenCalledWith({
-						contract: { ...USDC_TOKEN, enabled: true },
-						address: mockEthAddress
-					});
+				mockErcTransactions.mockResolvedValueOnce(mockTransactions);
+
+				const result = await loadEthereumTransactions({
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					standard: mockStandard
 				});
 
-				it('should handle token transactions correctly', async () => {
-					mockErc20Transactions.mockResolvedValueOnce(mockTransactions);
+				expect(result).toEqual({ success: true });
 
-					const result = await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard
-					});
+				const transactionStore = get(ethTransactionsStore);
+				assertNonNullish(transactionStore);
 
-					expect(result).toEqual({ success: true });
-					expect(get(ethTransactionsStore)).toEqual({
-						[mockTokenId]: mockTransactions.map((data) => ({
-							data,
-							certified: false
-						}))
-					});
-				});
-
-				it('should handle token transactions correctly when it is update only', async () => {
-					mockErc20Transactions.mockResolvedValueOnce(mockTransactions);
-
-					const existingTransactions = createMockEthTransactions(5);
-					ethTransactionsStore.set({
-						tokenId: mockTokenId,
-						transactions: [...existingTransactions, mockTransactions[0]].map((data) => ({
-							data,
-							certified: false
-						}))
-					});
-
-					const result = await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard,
-						updateOnly: true
-					});
-
-					expect(result).toEqual({ success: true });
-					expect(get(ethTransactionsStore)).toEqual({
-						[mockTokenId]: [...existingTransactions, ...mockTransactions].map((data) => ({
-							data,
-							certified: false
-						}))
-					});
-				});
-
-				it('should handle errors during transaction fetching gracefully', async () => {
-					ethTransactionsStore.set({
-						tokenId: mockTokenId,
-						transactions: mockTransactions.map((data) => ({
-							data,
-							certified: false
-						}))
-					});
-
-					const mockError = new Error('Mock Error');
-					mockErc20Transactions.mockRejectedValue(mockError);
-
-					const result = await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard
-					});
-
-					expect(result).toEqual({ success: false });
-					expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: null });
-
-					expect(trackEvent).toHaveBeenCalledWith({
-						name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
-						metadata: {
-							tokenId: mockTokenId.description,
-							networkId: mockNetworkId.description,
-							error: mockError.toString()
-						},
-						warning: `${replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
-							$symbol: mockSymbol
-						})} ${mockError}`
-					});
-				});
+				expect(transactionStore[mockTokenId]).toEqual(
+					mockTransactions.map((data) => ({
+						data,
+						certified: false
+					}))
+				);
 			});
 
-			describe('when token is ERC721', () => {
-				const mockErc721Transactions = vi.fn();
-
-				const mockTransactions = createMockNftTransactions(3);
-
+			it.each(tokens)('should handle $standard token transactions correctly when it is update only', async (token) => {
 				const {
 					id: mockTokenId,
 					network: { id: mockNetworkId },
-					symbol: mockSymbol,
 					standard: mockStandard
-				} = mockValidErc721Token;
+				} = token;
 
-				beforeEach(() => {
-					etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
+				mockErcTransactions.mockResolvedValueOnce(mockTransactions);
 
-					erc721CustomTokensStore.resetAll();
-					erc721CustomTokensStore.setAll([{ data: { ...mockValidErc721Token, enabled: true }, certified: false }]);
-
-					etherscanProvidersSpy.mockReturnValue({
-						erc721Transactions: mockErc721Transactions
-					} as unknown as EtherscanProvider);
+				const existingTransactions = createMockEthTransactions(5);
+				ethTransactionsStore.set({
+					tokenId: mockTokenId,
+					transactions: [...existingTransactions, mockTransactions[0]].map((data) => ({
+						data,
+						certified: false
+					}))
 				});
 
-				it('should call the transaction function', async () => {
-					mockErc721Transactions.mockResolvedValueOnce([]);
-
-					await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard
-					});
-
-					expect(mockErc721Transactions).toHaveBeenCalledWith({
-						contract: { ...mockValidErc721Token, enabled: true },
-						address: mockEthAddress
-					});
+				const result = await loadEthereumTransactions({
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					standard: mockStandard,
+					updateOnly: true
 				});
 
-				it('should handle token transactions correctly', async () => {
-					mockErc721Transactions.mockResolvedValueOnce(mockTransactions);
+				expect(result).toEqual({ success: true });
 
-					const result = await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard
-					});
+				const transactionStore = get(ethTransactionsStore);
+				assertNonNullish(transactionStore);
 
-					expect(result).toEqual({ success: true });
-
-					const transactionStore = get(ethTransactionsStore);
-					assertNonNullish(transactionStore);
-
-					expect(transactionStore[mockTokenId]).toEqual(
-						mockTransactions.map((data) => ({
-							data,
-							certified: false
-						}))
-					);
-				});
-
-				it('should handle token transactions correctly when it is update only', async () => {
-					mockErc721Transactions.mockResolvedValueOnce(mockTransactions);
-
-					const existingTransactions = createMockNftTransactions(5);
-					ethTransactionsStore.set({
-						tokenId: mockTokenId,
-						transactions: [...existingTransactions, mockTransactions[0]].map((data) => ({
-							data,
-							certified: false
-						}))
-					});
-
-					const result = await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard,
-						updateOnly: true
-					});
-
-					expect(result).toEqual({ success: true });
-
-					const transactionStore = get(ethTransactionsStore);
-					assertNonNullish(transactionStore);
-
-					expect(transactionStore[mockTokenId]).toEqual(
-						[...existingTransactions, ...mockTransactions].map((data) => ({
-							data,
-							certified: false
-						}))
-					);
-				});
-
-				it('should handle errors during transaction fetching gracefully', async () => {
-					ethTransactionsStore.set({
-						tokenId: mockTokenId,
-						transactions: mockTransactions.map((data) => ({
-							data,
-							certified: false
-						}))
-					});
-
-					const mockError = new Error('Mock Error');
-					mockErc721Transactions.mockRejectedValue(mockError);
-
-					const result = await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard
-					});
-
-					expect(result).toEqual({ success: false });
-
-					const transactionStore = get(ethTransactionsStore);
-					assertNonNullish(transactionStore);
-
-					expect(transactionStore[mockTokenId]).toEqual(null);
-
-					expect(trackEvent).toHaveBeenCalledWith({
-						name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
-						metadata: {
-							tokenId: mockTokenId.description,
-							networkId: mockNetworkId.description,
-							error: mockError.toString()
-						},
-						warning: `${replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
-							$symbol: mockSymbol
-						})} ${mockError}`
-					});
-				});
+				expect(transactionStore[mockTokenId]).toEqual(
+					[...existingTransactions, ...mockTransactions].map((data) => ({
+						data,
+						certified: false
+					}))
+				);
 			});
 
-			describe('when token is ERC1155', () => {
-				const mockErc1155Transactions = vi.fn();
-
-				const mockTransactions = createMockNftTransactions(3);
-
+			it.each(tokens)('should handle errors during $standard transaction fetching gracefully', async (token) => {
 				const {
 					id: mockTokenId,
 					network: { id: mockNetworkId },
-					symbol: mockSymbol,
+					standard: mockStandard,
+					symbol: mockSymbol
+				} = token;
+
+				ethTransactionsStore.set({
+					tokenId: mockTokenId,
+					transactions: mockTransactions.map((data) => ({
+						data,
+						certified: false
+					}))
+				});
+
+				const mockError = new Error('Mock Error');
+				mockErcTransactions.mockRejectedValue(mockError);
+
+				const result = await loadEthereumTransactions({
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
 					standard: mockStandard
-				} = mockValidErc1155Token;
-
-				beforeEach(() => {
-					etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
-
-					erc1155CustomTokensStore.resetAll();
-					erc1155CustomTokensStore.setAll([{ data: { ...mockValidErc1155Token, enabled: true }, certified: false }]);
-
-					etherscanProvidersSpy.mockReturnValue({
-						erc1155Transactions: mockErc1155Transactions
-					} as unknown as EtherscanProvider);
 				});
 
-				it('should call the transaction function', async () => {
-					mockErc1155Transactions.mockResolvedValueOnce([]);
+				expect(result).toEqual({ success: false });
 
-					await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard
-					});
+				const transactionStore = get(ethTransactionsStore);
+				assertNonNullish(transactionStore);
 
-					expect(mockErc1155Transactions).toHaveBeenCalledWith({
-						contract: { ...mockValidErc1155Token, enabled: true },
-						address: mockEthAddress
-					});
-				});
+				expect(transactionStore[mockTokenId]).toEqual(null);
 
-				it('should handle token transactions correctly', async () => {
-					mockErc1155Transactions.mockResolvedValueOnce(mockTransactions);
-
-					const result = await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard
-					});
-
-					expect(result).toEqual({ success: true });
-
-					const transactionStore = get(ethTransactionsStore);
-					assertNonNullish(transactionStore);
-
-					expect(transactionStore[mockTokenId]).toEqual(
-						mockTransactions.map((data) => ({
-							data,
-							certified: false
-						}))
-					);
-				});
-
-				it('should handle token transactions correctly when it is update only', async () => {
-					mockErc1155Transactions.mockResolvedValueOnce(mockTransactions);
-
-					const existingTransactions = createMockNftTransactions(5);
-					ethTransactionsStore.set({
-						tokenId: mockTokenId,
-						transactions: [...existingTransactions, mockTransactions[0]].map((data) => ({
-							data,
-							certified: false
-						}))
-					});
-
-					const result = await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard,
-						updateOnly: true
-					});
-
-					expect(result).toEqual({ success: true });
-
-					const transactionStore = get(ethTransactionsStore);
-					assertNonNullish(transactionStore);
-
-					expect(transactionStore[mockTokenId]).toEqual(
-						[...existingTransactions, ...mockTransactions].map((data) => ({
-							data,
-							certified: false
-						}))
-					);
-				});
-
-				it('should handle errors during transaction fetching gracefully', async () => {
-					ethTransactionsStore.set({
-						tokenId: mockTokenId,
-						transactions: mockTransactions.map((data) => ({
-							data,
-							certified: false
-						}))
-					});
-
-					const mockError = new Error('Mock Error');
-					mockErc1155Transactions.mockRejectedValue(mockError);
-
-					const result = await loadEthereumTransactions({
-						networkId: mockNetworkId,
-						tokenId: mockTokenId,
-						standard: mockStandard
-					});
-
-					expect(result).toEqual({ success: false });
-
-					const transactionStore = get(ethTransactionsStore);
-					assertNonNullish(transactionStore);
-
-					expect(transactionStore[mockTokenId]).toEqual(null);
-
-					expect(trackEvent).toHaveBeenCalledWith({
-						name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
-						metadata: {
-							tokenId: mockTokenId.description,
-							networkId: mockNetworkId.description,
-							error: mockError.toString()
-						},
-						warning: `${replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
-							$symbol: mockSymbol
-						})} ${mockError}`
-					});
+				expect(trackEvent).toHaveBeenCalledWith({
+					name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
+					metadata: {
+						tokenId: mockTokenId.description,
+						networkId: mockNetworkId.description,
+						error: mockError.toString()
+					},
+					warning: `${replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
+						$symbol: mockSymbol
+					})} ${mockError}`
 				});
 			});
 		}, 60000);
