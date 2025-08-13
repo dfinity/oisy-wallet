@@ -62,3 +62,26 @@ export interface EtherscanProviderTokenTransferTransaction {
 	input: string;
 	confirmations: string;
 }
+
+// https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc721-token-transfer-events-by-address
+export interface EtherscanProviderErc721TokenTransferTransaction {
+	blockNumber: string;
+	timeStamp: string;
+	hash: string;
+	nonce: string;
+	blockHash: string;
+	from: string;
+	contractAddress: string;
+	to: string;
+	tokenID: string;
+	tokenName: string;
+	tokenSymbol: string;
+	tokenDecimal: string;
+	transactionIndex: string;
+	gas: string;
+	gasPrice: string;
+	gasUsed: string;
+	cumulativeGasUsed: string;
+	input: string;
+	confirmations: string;
+}
