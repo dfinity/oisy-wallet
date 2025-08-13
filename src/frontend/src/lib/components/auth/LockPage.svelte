@@ -41,7 +41,7 @@
 			{/await}
 		</Responsive>
 
-		<Responsive up="md" down="lg">
+		<Responsive up="md" down="xl">
 			{#await import(`$lib/assets/lockpage_assets/lock-image-768-${$themeStore ?? 'light'}.webp`) then { default: src768 }}
 				<Img src={src768} alt={ariaLabel} styleClass={imgStyleClass} />
 			{/await}
