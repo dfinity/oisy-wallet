@@ -108,11 +108,11 @@ export const getPendingTransactionIds = (address: string): string[] => {
  */
 export const getBtcWalletBalance = ({
 	address,
-	certifiedBalance,
+	latestBalance,
 	providerTransactions
 }: {
 	address: string;
-	certifiedBalance: bigint;
+	latestBalance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[];
 }): BtcWalletBalance => {
 	console.warn('🎯 [btc.utils.ts -> getBtcWalletBalance] Received providerTransactions:', {
@@ -194,7 +194,7 @@ export const getBtcWalletBalance = ({
 			);
 
 	// Calculate confirmed balance: certified balance minus locked UTXOs
-	const confirmedBalance = certifiedBalance - lockedBalance;
+	const confirmedBalance = latestBalance - lockedBalance;
 
 	//  User's actual actual total wealth after all pending activity.This gives users the most accurate picture of their
 	//  real BTC holdings.

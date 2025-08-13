@@ -34,6 +34,10 @@ export const syncWallet = async ({
 		}
 	} = data;
 
+	if (certified) {
+		return;
+	}
+
 	// Parse new transactions here in the listener
 	const providerTransactions: CertifiedData<BtcTransactionUi>[] = JSON.parse(
 		newTransactions,
@@ -68,7 +72,7 @@ export const syncWallet = async ({
 		// Use sourceAddress to ensure consistency with the address used for pending transactions
 		const btcWalletBalance = getBtcWalletBalance({
 			address: sourceAddress,
-			certifiedBalance: totalBalance,
+			latestBalance: totalBalance,
 			providerTransactions
 		});
 
