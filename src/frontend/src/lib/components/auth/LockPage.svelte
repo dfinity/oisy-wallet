@@ -29,7 +29,7 @@
 
 	const handleLogout = async () => {
 		authLocked.unlock({ source: 'logout from lock page' });
-		await signOut({ resetUrl: true, clearAllPrincipalsStorages: true });
+		await signOut({ resetUrl: true, clearAllPrincipalsStorages: true, source: 'lock-page' });
 	};
 </script>
 

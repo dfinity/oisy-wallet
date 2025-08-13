@@ -19,7 +19,7 @@
 	const logout = async () => {
 		dispatch('icLogoutTriggered');
 		onHidePopover?.();
-		await signOut({ resetUrl: true });
+		await signOut({ resetUrl: true, clearAllPrincipalsStorages: true, source: 'menu-button' });
 	};
 
 	const remainingTimeMilliseconds = $derived($authRemainingTimeStore);
