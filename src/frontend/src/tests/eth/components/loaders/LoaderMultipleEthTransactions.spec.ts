@@ -9,14 +9,12 @@ import {
 import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 import * as appContants from '$lib/constants/app.constants';
 import { syncTransactionsFromCache } from '$lib/services/listener.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
-import { createMockErc721CustomTokens } from '$tests/mocks/erc721-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -47,21 +45,6 @@ describe('LoaderMultipleEthTransactions', () => {
 	const mockErc20CertifiedUserTokens = [
 		...mockMainnetErc20CertifiedUserTokens,
 		...mockSepoliaErc20CertifiedUserTokens
-	];
-
-	const mockMainnetErc721CustomTokens = createMockErc721CustomTokens({
-		n: 3,
-		networkEnv: 'mainnet'
-	});
-
-	const mockTestnetErc721CustomTokens = createMockErc721CustomTokens({
-		n: 3,
-		networkEnv: 'testnet'
-	});
-
-	const mockErc721CertifiedCustomTokens = [
-		...mockMainnetErc721CustomTokens,
-		...mockTestnetErc721CustomTokens
 	];
 
 	const mockAdditionalCertifiedTokens = createMockErc20UserTokens({
@@ -98,9 +81,6 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		erc20UserTokensStore.resetAll();
 		erc20UserTokensStore.setAll(mockErc20CertifiedUserTokens);
-
-		erc721CustomTokensStore.resetAll();
-		erc721CustomTokensStore.setAll(mockErc721CertifiedCustomTokens);
 	});
 
 	afterEach(() => {
