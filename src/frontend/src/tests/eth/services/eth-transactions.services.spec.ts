@@ -24,6 +24,8 @@ import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 
 vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn()
@@ -63,12 +65,18 @@ describe('eth-transactions.services', () => {
 
 				etherscanProvidersSpy.mockReturnValue({
 					erc20Transactions: mockErcTransactions,
-					erc721Transactions: mockErcTransactions
+					erc721Transactions: mockErcTransactions,
+					erc1155Transactions: mockErcTransactions
 				} as unknown as EtherscanProvider);
 
 				erc721CustomTokensStore.resetAll();
 				erc721CustomTokensStore.setAll([
 					{ data: { ...mockValidErc721Token, enabled: true }, certified: false }
+				]);
+
+				erc1155CustomTokensStore.resetAll();
+				erc1155CustomTokensStore.setAll([
+					{ data: { ...mockValidErc1155Token, enabled: true }, certified: false }
 				]);
 			});
 
@@ -106,7 +114,7 @@ describe('eth-transactions.services', () => {
 				expect(result).toEqual({ success: false });
 			});
 
-			const tokens = [USDC_TOKEN, mockValidErc721Token];
+			const tokens = [USDC_TOKEN, mockValidErc721Token, mockValidErc1155Token];
 
 			it.each(tokens)(
 				'should call the transaction function for $standard tokens',

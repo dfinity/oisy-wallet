@@ -21,6 +21,8 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
+import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
 
 export const loadEthereumTransactions = ({
 	networkId,
@@ -151,7 +153,7 @@ const loadErcTransactions = async ({
 		return { success: false };
 	}
 
-	const tokens = [...get(enabledErc20Tokens), ...get(enabledErc721Tokens)];
+	const tokens = [...get(enabledErc20Tokens), ...get(enabledErc721Tokens), ...get(enabledErc1155Tokens)];
 	const token = tokens.find(
 		({ id, network, standard: tokenStandard }) =>
 			id === tokenId && network.id === networkId && tokenStandard === standard
@@ -177,7 +179,9 @@ const loadErcTransactions = async ({
 				? await loadErc20Transactions({ networkId, token, address })
 				: token.standard === 'erc721'
 					? await loadErc721Transactions({ networkId, token, address })
-					: [];
+					: token.standard === 'erc1155'
+						? await loadErc1155Transactions({ networkId, token, address })
+						: [];
 
 		const certifiedTransactions = transactions.map((transaction) => ({
 			data: transaction,
@@ -246,5 +250,20 @@ const loadErc721Transactions = async ({
 	const { erc721Transactions } = etherscanProviders(networkId);
 	return await retryWithDelay({
 		request: async () => await erc721Transactions({ contract: token, address })
+	});
+};
+
+const loadErc1155Transactions = async ({
+																				 networkId,
+																				 token,
+																				 address
+																			 }: {
+	networkId: NetworkId;
+	token: Erc1155TokenToggleable;
+	address: Address;
+}): Promise<Transaction[]> => {
+	const { erc1155Transactions } = etherscanProviders(networkId);
+	return await retryWithDelay({
+		request: async () => await erc1155Transactions({ contract: token, address })
 	});
 };
