@@ -59,7 +59,7 @@ describe('eth-transactions-batch.services', () => {
 				expect(loadEthereumTransactions).toHaveBeenCalledWith({
 					tokenId: token.id,
 					networkId: token.network.id,
-					standard: token.standard,
+					standard: token.standard
 				});
 			});
 
@@ -81,7 +81,7 @@ describe('eth-transactions-batch.services', () => {
 				expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
 					tokenId: token.id,
 					networkId: token.network.id,
-					standard: token.standard,
+					standard: token.standard
 				});
 			});
 		});
