@@ -127,7 +127,10 @@ export const getBtcWalletBalance = ({
 
 	// Process pending transactions to calculate locked and unconfirmed balances
 	const { lockedBalance, unconfirmedBalance } = isNullish(pendingTransactions?.data)
-		? { lockedBalance: ZERO, unconfirmedBalance: ZERO }
+		? (() => {
+				console.warn('⚠️ No pending transactions data available for address:', address);
+				return { lockedBalance: ZERO, unconfirmedBalance: ZERO };
+			})()
 		: pendingTransactions.data.reduce(
 				(acc, tx) => {
 					// Sum all UTXO values for this pending outgoing transaction
@@ -165,7 +168,6 @@ export const getBtcWalletBalance = ({
 				{ lockedBalance: ZERO, unconfirmedBalance: ZERO }
 			);
 
-	// What user can actually spend right now
 	// We subtract lockedBalance because those UTXOs cannot be spent again (prevents double-spending)
 	const confirmedBalance = totalBalance - lockedBalance;
 
@@ -202,7 +204,7 @@ const logPendingTransactions = (pendingTransactions: ReturnType<typeof getPendin
 
 			const transactionLines = [
 				`📄 Transaction ${index + 1}`,
-				`   TxID: ${txidString || 'Unable to convert'}`,
+				`   TxID: ${txidString ?? 'Unable to convert'}`,
 				`   UTXOs Count: ${tx.utxos.length}`,
 				`   Total UTXO Value: ${totalUtxoValue.toString()} satoshis`
 			];
