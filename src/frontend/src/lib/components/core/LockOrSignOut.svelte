@@ -28,7 +28,7 @@
 
 	const handleLogoutTriggered = async () => {
 		onHidePopover?.();
-		await signOut({ resetUrl: true });
+		await signOut({ resetUrl: true, clearAllPrincipalsStorages: true, source: 'menu-button' });
 	};
 
 	const handleLock = async () => {

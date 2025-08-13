@@ -91,14 +91,16 @@ export const signIn = async (
 
 export const signOut = ({
 	resetUrl = false,
-	clearAllPrincipalsStorages = false
+	clearAllPrincipalsStorages = false,
+	source = ''
 }: {
 	resetUrl?: boolean;
 	clearAllPrincipalsStorages?: boolean;
+	source?: string;
 }): Promise<void> => {
 	trackSignOut({
 		name: TRACK_SIGN_OUT_SUCCESS,
-		meta: { reason: 'user', resetUrl: String(resetUrl) }
+		meta: { reason: 'user', resetUrl, source }
 	});
 	return logout({ resetUrl, clearAllPrincipalsStorages });
 };
@@ -329,8 +331,9 @@ const trackSignOut = ({
 		reason?: string;
 		level?: 'warn' | 'error';
 		text?: string;
-		resetUrl?: string;
-		clearStorages?: string;
+		source?: string;
+		resetUrl?: boolean;
+		clearStorages?: boolean;
 	};
 }) => {
 	trackEvent({
@@ -339,8 +342,9 @@ const trackSignOut = ({
 			reason: meta.reason ?? 'user',
 			level: meta.level ?? '',
 			text: meta.text ?? '',
+			source: meta.source ?? 'app',
 			resetUrl: `${meta.resetUrl ?? false}`,
-			clearStorages: `${meta.clearStorages ?? false}`
+			clearStorages: `${meta.clearStorages ?? true}`
 		}
 	});
 };
