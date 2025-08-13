@@ -1,16 +1,9 @@
-import type {
-	BitcoinNetwork,
-	EthSignTransactionRequest,
-	SendBtcResponse
-} from '$declarations/signer/signer.did';
+import type { BitcoinNetwork, EthSignTransactionRequest, SendBtcResponse } from '$declarations/signer/signer.did';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
-import type {
-	GetSchnorrPublicKeyParams,
-	SendBtcParams,
-	SignWithSchnorrParams
-} from '$lib/types/api';
+import type { GetSchnorrPublicKeyParams, SendBtcParams, SignWithSchnorrParams } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -87,9 +80,21 @@ export const sendBtc = async ({
 }: CanisterApiFunctionParams<SendBtcParams>): Promise<SendBtcResponse> => {
 	const { sendBtc } = await signerCanister({ identity });
 	const result = await sendBtc(params);
-	console.warn(
-		`🔧 sendBtc | Input: ${JSON.stringify(params, (key, value) => (typeof value === 'bigint' ? value.toString() : value))} | Output: ${JSON.stringify(result, (key, value) => (typeof value === 'bigint' ? value.toString() : value))}`
-	);
+	console.warn('🎯 [signer.api.ts -> sendBtc] Called sendBtc(..):', {
+		timestamp: new Date().toISOString(),
+		input: {
+			...params,
+			utxosToSpend: params.utxosToSpend.map((utxo) => ({
+				...utxo,
+				outpoint: {
+					...utxo.outpoint,
+					txid: utxoTxIdToString(utxo.outpoint.txid)
+				}
+			}))
+		},
+		output: result
+	});
+
 	return result;
 };
 

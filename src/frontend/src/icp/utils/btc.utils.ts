@@ -123,16 +123,20 @@ export const getBtcWalletBalance = ({
 	});
 
 	const pendingTransactions = getPendingTransactions(address);
-	console.warn('🎯 [btc.utils.ts -> getBtcWalletBalance] Called getPendingTransactions(..):', {
+	console.warn('🎯 [btc.utils.ts -> getPendingTransactions] Called getPendingTransactions(..):', {
 		timestamp: new Date().toISOString(),
 		input: {
 			address
 		},
 		output: {
-			pendingTransactions
+			...pendingTransactions,
+			data:
+				pendingTransactions?.data?.map((tx) => ({
+					...tx,
+					txid: utxoTxIdToString(tx.txid)
+				})) ?? null
 		}
 	});
-
 	// Create efficient lookup map for correlation between pending and provider transactions
 	const transactionLookup = new Map<string, BtcTransactionUi>();
 	providerTransactions.forEach((tx) => {
