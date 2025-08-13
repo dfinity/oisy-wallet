@@ -1,9 +1,17 @@
-import type { BitcoinNetwork, EthSignTransactionRequest, SendBtcResponse } from '$declarations/signer/signer.did';
+import type {
+	BitcoinNetwork,
+	EthSignTransactionRequest,
+	SendBtcResponse
+} from '$declarations/signer/signer.did';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
-import type { GetSchnorrPublicKeyParams, SendBtcParams, SignWithSchnorrParams } from '$lib/types/api';
+import type {
+	GetSchnorrPublicKeyParams,
+	SendBtcParams,
+	SignWithSchnorrParams
+} from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
