@@ -7,6 +7,7 @@
 	import { goto } from '$app/navigation';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
+	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 
 	interface Props {
 		collection: NftCollection;
@@ -14,6 +15,8 @@
 	}
 
 	const { collection, nfts }: Props = $props();
+
+	const breadcrumbItems = [{ label: 'Assets', url: AppPath.Nfts }];
 </script>
 
 <div class="relative overflow-hidden rounded-xl">
@@ -26,10 +29,7 @@
 	{/if}
 
 	<div class="bg-primary p-4">
-		<div class="flex gap-2 text-xs font-bold">
-			<a href={AppPath.Nfts} class="text-brand-primary no-underline">Assets</a>
-			/
-		</div>
+		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		<h1 class="my-3">{collection.name}</h1>
 

@@ -20,9 +20,11 @@
 	class="flex w-full flex-col gap-2 p-1 text-left no-underline"
 >
 	<div
-		class="relative grid aspect-square grid-cols-2 gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5 duration-200"
+		class="relative grid aspect-square gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5 duration-200"
 		class:hover:bg-brand-subtle-20={!disabled}
 		class:opacity-50={disabled}
+		class:grid-cols-2={collection.nfts.length > 1}
+		class:grid-cols-1={collection.nfts.length === 1}
 	>
 		{#each collection.nfts as nft, index}
 			{#if index < 4 && nonNullish(nft.imageUrl)}

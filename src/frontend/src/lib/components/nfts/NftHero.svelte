@@ -9,19 +9,23 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		nft: Nft;
 	}
 
 	const { nft }: Props = $props();
+
+	const breadcrumbItems = [
+		{ label: 'Assets', url: AppPath.Nfts },
+		{ label: nft.collection.name ?? '', url: AppPath.Nfts + nft.collection.symbol }
+	];
 </script>
 
 <div class="relative overflow-hidden rounded-xl">
-	<div class="absolute left-0 top-0 m-3">
-		<ButtonBack onclick={() => goto(AppPath.Nfts)} />
-	</div>
-
 	{#if nft?.imageUrl}
 		<div class="relative h-64 w-full overflow-hidden">
 			<div
@@ -42,14 +46,7 @@
 	{/if}
 
 	<div class="bg-primary p-4">
-		<div class="flex gap-2 text-xs font-bold">
-			<a href={AppPath.Nfts} class="text-brand-primary no-underline">Assets</a>
-			/
-			<a href={AppPath.Nfts + nft.collection.symbol} class="text-brand-primary no-underline"
-				>{nft.collection.name}</a
-			>
-			/
-		</div>
+		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		<h1 class="my-3">{nft.name} #{nft.id}</h1>
 
@@ -59,7 +56,24 @@
 			<ListItem
 				><span>Token standard</span><span class="uppercase">{nft.collection.standard}</span
 				></ListItem
-			><ListItem><span>Quantity</span><span class="uppercase">{nft.balance}</span></ListItem>
+			>
+			{#if nft.collection.standard === 'erc1155'}
+				<ListItem><span>Quantity</span><span class="uppercase">{nft.balance}</span></ListItem>
+			{/if}
+			{#if nonNullish(nft.attributes) && nft.attributes.length > 0}
+				<ListItem>Item traits</ListItem>
+				<div class="mt-2 flex gap-2">
+					{#each nft.attributes as trait}
+						<div class="flex">
+							<Badge variant="nft-trait"
+								><span class="font-normal text-tertiary">{trait.traitType}</span><br /><span
+									class="font-bold text-primary">{trait.value}</span
+								></Badge
+							>
+						</div>
+					{/each}
+				</div>
+			{/if}
 		</List>
 	</div>
 </div>
