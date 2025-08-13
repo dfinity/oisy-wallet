@@ -86,7 +86,6 @@ export const sendBtc = async ({
 	...params
 }: CanisterApiFunctionParams<SendBtcParams>): Promise<SendBtcResponse> => {
 	const { sendBtc } = await signerCanister({ identity });
-
 	return sendBtc(params);
 };
 

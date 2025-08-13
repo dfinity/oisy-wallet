@@ -7,13 +7,7 @@ import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedData } from '$lib/types/store';
-import {
-	isNullish,
-	jsonReplacer,
-	nonNullish,
-	notEmptyString,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { isNullish, jsonReplacer, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -85,26 +79,31 @@ export const getPendingTransactionIds = (address: string): string[] => {
 /**
  * Calculates a comprehensive BTC wallet balance structure accounting for all pending transactions.
  *
- * This function combines multiple data sources to provide an accurate, real-time balance:
- *
  * **Data Sources:**
  * 1. totalBalance: Canonical balance from Bitcoin canister (trusted baseline)
- * 2. providerTransactions: Recent BTC transaction data from external providers containing transaction.type ('send'/'receive'), transaction.value (amount), and transaction.confirmations (confirmation count)
- * 3. pendingTransactions: User-initiated outgoing transactions stored locally (trusted, represents locked UTXOs)
+ * 2. providerTransactions: Recent transaction data from external providers with confirmations and types
+ * 3. pendingTransactions: User-initiated outgoing transactions stored locally (trusted, locked UTXOs)
  *
- * **Transaction Processing Logic:**
- * - Outgoing transactions: Lock UTXOs immediately, subtract from confirmed balance
- * - Incoming transactions: Add to unconfirmed until 6+ confirmations
- * - Net unconfirmed: Algebraic sum of all unconfirmed transactions (±)
+ * **Balance Calculations:**
+ * - confirmed = totalBalance - lockedBalance (what user can spend right now)
+ * - unconfirmed = net pending activity with 0-5 confirmations (can be ± or zero)
+ * - locked = total UTXOs locked in pending outgoing transactions (always >= 0)
+ * - total = confirmed + unconfirmed (user's actual total wealth)
+ *
+ * **Usage Guidelines:**
+ * - Use `confirmed` for transfer validation (prevents double-spending)
+ * - Use `total` for primary balance display (shows true financial position)
+ * - Use `unconfirmed` to show pending activity direction and amount
+ * - Use `locked` for transparency about unavailable funds
  *
  * **Example Scenarios:**
- * 1. **Simple outgoing**: totalBalance=1.0 BTC, send 0.1 BTC (2 confirmations)
+ * 1. Simple outgoing: totalBalance=1.0 BTC, send 0.1 BTC (2 confirmations)
  *    → confirmed: 0.9, unconfirmed: -0.1, locked: 0.1, total: 0.8
  *
- * 2. **Mixed transactions**: totalBalance=1.0 BTC, send 0.1 BTC + receive 0.05 BTC (both unconfirmed)
+ * 2. Mixed activity: totalBalance=1.0 BTC, send 0.1 BTC + receive 0.05 BTC (both unconfirmed)
  *    → confirmed: 0.9, unconfirmed: -0.05, locked: 0.1, total: 0.85
  *
- * 3. **Net incoming**: totalBalance=1.0 BTC, receive 0.2 BTC (3 confirmations)
+ * 3. Net incoming: totalBalance=1.0 BTC, receive 0.2 BTC (3 confirmations)
  *    → confirmed: 1.0, unconfirmed: +0.2, locked: 0.0, total: 1.2
  *
  * @param params - Parameters object containing address, totalBalance, and providerTransactions
@@ -121,22 +120,22 @@ export const getBtcWalletBalance = ({
 }): BtcWalletBalance => {
 	const pendingTransactions = getPendingTransactions(address);
 
-	// Create efficient lookup map for transactions by their ID
+	// Create efficient lookup map for correlation between pending and provider transactions
 	const transactionLookup = new Map<string, BtcTransactionUi>();
 	providerTransactions.forEach((tx) => {
 		transactionLookup.set(tx.data.id, tx.data);
 	});
 
-	// Calculate locked balance and unconfirmed balance from pending transactions
+	// Process pending transactions to calculate locked and unconfirmed balances
 	const { lockedBalance, unconfirmedBalance } = isNullish(pendingTransactions?.data)
 		? { lockedBalance: ZERO, unconfirmedBalance: ZERO }
 		: pendingTransactions.data.reduce(
 				(acc, tx) => {
-					// Calculate total UTXO value for this pending transaction (always outgoing for pending)
+					// Sum all UTXO values for this pending outgoing transaction
+					// These UTXOs are locked and cannot be spent again (prevents double-spending)
 					const txUtxoValue = tx.utxos.reduce((utxoSum, utxo) => utxoSum + BigInt(utxo.value), 0n);
 					acc.lockedBalance += txUtxoValue;
 
-					// Add transaction ID for correlation with provider transactions
 					const txid = convertPendingTransactionTxid(tx);
 					if (txid) {
 						// Look up the transaction in providerTransactions to get confirmation count and type
@@ -150,7 +149,7 @@ export const getBtcWalletBalance = ({
 								confirmations >= UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS &&
 								confirmations < CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 							) {
-								// Account for transaction direction in unconfirmed balance
+								// Apply directional impact to unconfirmed balance
 								if (matchedTransaction.type === 'send') {
 									// Outgoing: subtract from unconfirmed balance (negative contribution)
 									acc.unconfirmedBalance -= matchedTransaction.value;
@@ -166,14 +165,22 @@ export const getBtcWalletBalance = ({
 				{ lockedBalance: ZERO, unconfirmedBalance: ZERO }
 			);
 
-	// Calculate final balance structure
+	// What user can actually spend right now
+	// We subtract lockedBalance because those UTXOs cannot be spent again (prevents double-spending)
 	const confirmedBalance = totalBalance - lockedBalance;
+
+	//  User's actual actual total wealth after all pending activity.This gives users the most accurate picture of their
+	//  real BTC holdings.
 	const actualTotalBalance = confirmedBalance + unconfirmedBalance;
 
 	return {
+		// For transfer validation - ensures users can only spend available funds
 		confirmed: confirmedBalance > ZERO ? confirmedBalance : ZERO,
+		// For showing net pending activity direction and amount
 		unconfirmed: unconfirmedBalance,
+		// For transparency about funds locked in outgoing transactions
 		locked: lockedBalance,
+		// For primary balance display - shows user's true financial position
 		total: actualTotalBalance > ZERO ? actualTotalBalance : ZERO
 	};
 };

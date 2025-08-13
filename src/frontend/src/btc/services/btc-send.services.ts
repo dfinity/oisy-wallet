@@ -32,9 +32,6 @@ export const sendBtc = async ({
 	onProgress,
 	...rest
 }: SendBtcParams): Promise<void> => {
-	// In sendBtc function, add logging before addPendingBtcTransaction
-	console.warn('Adding pending transaction for source address:', source);
-
 	// TODO: use txid returned by this method to register it as a pending transaction in BE
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
 

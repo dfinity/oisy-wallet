@@ -3,16 +3,8 @@ import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { getBtcSourceAddress } from '$btc/utils/btc-address.utils';
-import {
-	BTC_MAINNET_NETWORK_ID,
-	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.btc.env';
-import {
-	BTC_MAINNET_TOKEN_ID,
-	BTC_REGTEST_TOKEN_ID,
-	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens/tokens.btc.env';
+import { BTC_MAINNET_NETWORK_ID, BTC_REGTEST_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { BTC_MAINNET_TOKEN_ID, BTC_REGTEST_TOKEN_ID, BTC_TESTNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { getBtcWalletBalance } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
 import { authIdentity } from '$lib/derived/auth.derived';
@@ -25,7 +17,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
+import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const syncWallet = async ({
@@ -80,12 +72,26 @@ export const syncWallet = async ({
 			providerTransactions
 		});
 
-		console.warn('Storing BTC balance:', JSON.stringify(btcWalletBalance, jsonReplacer));
+		console.warn('🎯 [btc-listener.services.ts] syncWallet BALANCE CALCULATION:', {
+			input: {
+				sourceAddress,
+				totalBalance: totalBalance.toString(),
+				providerTransactionsCount: providerTransactions.length
+			},
+			output: {
+				confirmed: btcWalletBalance.confirmed.toString(),
+				unconfirmed: btcWalletBalance.unconfirmed.toString(),
+				locked: btcWalletBalance.locked.toString(),
+				total: btcWalletBalance.total.toString()
+			},
+			balanceStoreValue: btcWalletBalance.confirmed.toString(),
+			timestamp: new Date().toISOString()
+		});
 
 		balancesStore.set({
 			id: tokenId,
 			data: {
-				data: btcWalletBalance.confirmed,
+				data: btcWalletBalance.total,
 				certified
 			}
 		});

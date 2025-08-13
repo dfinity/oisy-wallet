@@ -20,35 +20,71 @@ export interface BtcTransactionUi extends Omit<TransactionUiCommon, 'to'> {
 }
 
 /**
- * Represents a structured Bitcoin balance with different confirmation states
+ * Represents a structured Bitcoin balance with different confirmation states and pending activity.
  * Based on Bitcoin transaction lifecycle: PENDING → UNCONFIRMED → CONFIRMED
+ *
+ * **Usage Guidelines:**
+ * - Use `confirmed` for transfer validation (what user can spend)
+ * - Use `total` for primary balance display (what user actually owns)
+ * - Use `unconfirmed` to show pending activity status
+ * - Use `locked` for transparency about outgoing transactions
  */
 export interface BtcWalletBalance {
 	/**
-	 * Confirmed spendable balance (6+ confirmations)
-	 * UTXOs that can be spent immediately in new transactions
+	 * Confirmed spendable balance (what user can spend right now)
+	 *
+	 * Calculation: totalBalance - lockedBalance
+	 *
+	 * This represents immediately available funds with 6+ confirmations,
+	 * minus any UTXOs locked in pending outgoing transactions.
+	 * Used for transfer validation to prevent double-spending.
+	 *
+	 * Always >= 0
 	 */
 	confirmed: bigint;
 
 	/**
-	 * Balance in unconfirmed transactions (0-5 confirmations)
-	 * Net result of all unconfirmed transactions, can be:
-	 * - Positive: Net incoming unconfirmed transactions (more money coming in)
-	 * - Negative: Net outgoing unconfirmed transactions (more money going out)
+	 * Net balance in unconfirmed transactions (0-5 confirmations)
+	 *
+	 * This is the algebraic sum of all pending transactions with low confirmations:
+	 * - Positive: Net incoming unconfirmed (more money coming in than going out)
+	 * - Negative: Net outgoing unconfirmed (more money going out than coming in)
 	 * - Zero: No unconfirmed transactions or balanced in/out amounts
-	 * - Represents the algebraic sum when multiple parallel transactions exist
+	 *
+	 * Represents pending activity that affects the user's total wealth
+	 * but isn't yet available for spending.
+	 *
+	 * Can be positive, negative, or zero
 	 */
 	unconfirmed: bigint;
 
 	/**
 	 * Locked balance from pending outgoing transactions
-	 * UTXOs that are spent in pending transactions and cannot be used again
+	 *
+	 * Total amount of UTXOs that are spent in pending outgoing transactions
+	 * and cannot be used again (prevents double-spending).
+	 * This amount has been subtracted from the confirmed balance.
+	 *
+	 * Used for transparency to show users why their spendable balance
+	 * might be lower than expected.
+	 *
+	 * Always >= 0
 	 */
 	locked: bigint;
 
 	/**
-	 * Total wallet balance (confirmed + unconfirmed)
-	 * Represents the complete amount owned by the wallet
+	 * Total wallet balance accounting for all pending activity
+	 *
+	 * Calculation: confirmed + unconfirmed
+	 *
+	 * This represents the user's actual total wealth after accounting for:
+	 * - Immediate outgoing transactions (locked UTXOs)
+	 * - Pending incoming/outgoing activity (unconfirmed)
+	 *
+	 * Provides the most accurate picture of the user's true financial position.
+	 * Use this for primary balance display to users.
+	 *
+	 * Always >= 0
 	 */
 	total: bigint;
 }
