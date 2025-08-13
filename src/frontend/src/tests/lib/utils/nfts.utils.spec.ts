@@ -171,17 +171,25 @@ describe('nfts.utils', () => {
 		it('should return existing nft', () => {
 			const nfts = [mockNft1, mockNft2, mockNft3];
 
-			const result = findNft({nfts, token: AZUKI_ELEMENTAL_BEANS_TOKEN, tokenId: parseNftId(12632)})
+			const result = findNft({
+				nfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				tokenId: parseNftId(12632)
+			});
 
-			expect(result).toEqual(mockNft2)
+			expect(result).toEqual(mockNft2);
 		});
 
 		it('should return undefined if no nft is found', () => {
 			const nfts = [mockNft1, mockNft2, mockNft3];
 
-			const result = findNft({nfts, token: AZUKI_ELEMENTAL_BEANS_TOKEN, tokenId: parseNftId(837373)})
+			const result = findNft({
+				nfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				tokenId: parseNftId(837373)
+			});
 
-			expect(result).toBeUndefined()
+			expect(result).toBeUndefined();
 		});
 	});
 
