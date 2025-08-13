@@ -1,9 +1,9 @@
-import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import { render } from '@testing-library/svelte';
+import IconSend from '$lib/components/icons/IconSend.svelte';
 import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
-import IconSend from '$lib/components/icons/IconSend.svelte';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { render } from '@testing-library/svelte';
 
 describe('NftLogo', () => {
 	it('should render the main logo', () => {
@@ -12,11 +12,13 @@ describe('NftLogo', () => {
 				nft: mockValidErc721Nft,
 				testId: 'nft-logo'
 			}
-		})
+		});
 
 		expect(getByTestId('nft-logo')).toBeInTheDocument();
 
-		const expected = replacePlaceholders(en.core.alt.logo, { $name: mockValidErc721Nft.name ?? '' });
+		const expected = replacePlaceholders(en.core.alt.logo, {
+			$name: mockValidErc721Nft.name ?? ''
+		});
 
 		expect(getByAltText(expected)).toBeInTheDocument();
 	});
