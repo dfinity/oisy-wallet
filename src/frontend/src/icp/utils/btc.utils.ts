@@ -123,7 +123,7 @@ export const getBtcWalletBalance = ({
 	});
 
 	const pendingTransactions = getPendingTransactions(address);
-	console.warn('🎯 [btc.utils.ts -> getPendingTransactions] Called getPendingTransactions(..):', {
+	console.warn('🎯 [btc.utils.ts -> getBtcWalletBalance] Called getPendingTransactions(..):', {
 		timestamp: new Date().toISOString(),
 		input: {
 			address
