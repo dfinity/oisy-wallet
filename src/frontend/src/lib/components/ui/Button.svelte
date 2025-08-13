@@ -18,6 +18,7 @@
 		testId?: string;
 		ariaLabel?: string;
 		styleClass?: string;
+		innerStyleClass?: string;
 		transparent?: boolean;
 		onclick?: MouseEventHandler<HTMLButtonElement>;
 		ondblclick?: MouseEventHandler<HTMLButtonElement>;
@@ -39,6 +40,7 @@
 		testId,
 		ariaLabel,
 		styleClass = '',
+		innerStyleClass = '',
 		transparent,
 		onclick,
 		ondblclick,
@@ -71,7 +73,7 @@
 	aria-label={ariaLabel}
 >
 	<span
-		class="flex min-w-0 gap-2"
+		class={`flex min-w-0 gap-2 ${innerStyleClass}`}
 		class:w-full={contentFullWidth}
 		class:transition={loading}
 		class:duration-500={loading}
