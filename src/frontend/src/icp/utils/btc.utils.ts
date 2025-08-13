@@ -180,7 +180,7 @@ export const getBtcWalletBalance = ({
 							// fallback if BTC API provider is n/a or trx is missing from providerTransactions
 							console.warn('Missing transaction data from API provider', txid);
 							// Since this should only happen for outgoing transactions, we treat it as such
-							acc.unconfirmedBalance -= txUtxoValue;
+							// acc.unconfirmedBalance -= txUtxoValue;
 						}
 					}
 					return acc;
