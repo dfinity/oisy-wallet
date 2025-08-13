@@ -88,25 +88,6 @@
 			"__bigint__": "10"
 		}
 	},
-	"XP": {
-		"ledgerCanisterId": "wqihv-qyaaa-aaaak-afjoa-cai",
-		"indexCanisterId": "7hwgv-uaaaa-aaaao-qjv7q-cai",
-		"decimals": 8,
-		"name": "WindogeXP",
-		"symbol": "XP",
-		"fee": {
-			"__bigint__": "100000000"
-		}
-	},
-	"EXE": {
-		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
-		"fee": {
-			"__bigint__": "100000"
-		},
-		"name": "Windoge98",
-		"symbol": "EXE",
-		"decimals": 8
-	},
 	"BOB": {
 		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
 		"decimals": 8,
