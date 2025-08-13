@@ -7,7 +7,7 @@ import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * The list of ERC1155 tokens the user has added, enabled or disabled.
+ * The list of ERC1155 custom tokens the user has added, enabled or disabled.
  */
 export const erc1155CustomTokens: Readable<Erc1155CustomToken[]> = derived(
 	[erc1155CustomTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],

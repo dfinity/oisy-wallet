@@ -7,7 +7,7 @@ import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * The list of ERC721 tokens the user has added, enabled or disabled.
+ * The list of ERC721 custom tokens the user has added, enabled or disabled.
  */
 export const erc721CustomTokens: Readable<Erc721CustomToken[]> = derived(
 	[erc721CustomTokensStore, enabledEthereumNetworksIds, enabledEvmNetworksIds],
