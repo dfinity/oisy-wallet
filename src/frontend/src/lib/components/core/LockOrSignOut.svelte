@@ -11,9 +11,8 @@
 
 	interface Props {
 		onHidePopover?: () => void;
-		onIcLogoutTriggered?: () => void;
 	}
-	let { onHidePopover, onIcLogoutTriggered }: Props = $props();
+	let { onHidePopover }: Props = $props();
 
 	let remainingTimeMs = $derived($authRemainingTimeStore);
 
@@ -29,7 +28,6 @@
 
 	const handleLogoutTriggered = async () => {
 		onHidePopover?.();
-		onIcLogoutTriggered?.();
 		await signOut({ resetUrl: true });
 	};
 
