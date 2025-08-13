@@ -3,6 +3,7 @@ import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/net
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import type {
+	EtherscanProviderErc721TokenTransferTransaction,
 	EtherscanProviderInternalTransaction,
 	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
@@ -183,7 +184,7 @@ describe('etherscan.providers', () => {
 				await expect(provider.transactions({ address })).rejects.toThrow('Network error');
 			});
 
-			describe('erc20Transactions method', () => {
+			describe('erc20Transactions', () => {
 				const mockApiResponse: EtherscanProviderTokenTransferTransaction[] = [
 					{
 						nonce: '1',
@@ -248,6 +249,76 @@ describe('etherscan.providers', () => {
 
 					await expect(
 						provider.erc20Transactions({ address: mockEthAddress, contract: mockValidErc20Token })
+					).rejects.toThrow('Network error');
+				});
+			});
+
+			describe('erc721Transactions', () => {
+				const mockApiResponse: EtherscanProviderErc721TokenTransferTransaction[] = [
+					{
+						nonce: '1',
+						gas: '21000',
+						gasPrice: '20000000000',
+						hash: '0x123abc',
+						blockNumber: '123456',
+						blockHash: '0x456def',
+						timeStamp: '1697049600',
+						confirmations: '10',
+						from: '0xabc...',
+						to: '0xdef...',
+						tokenID: '132',
+						contractAddress: mockValidErc721Token.address,
+						tokenName: mockValidErc721Token.name,
+						tokenSymbol: mockValidErc721Token.symbol,
+						tokenDecimal: mockValidErc721Token.decimals.toString(),
+						transactionIndex: '0',
+						gasUsed: '21000',
+						cumulativeGasUsed: '21000',
+						input: '0x'
+					}
+				];
+
+				const expectedTransactions: Transaction[] = [
+					{
+						hash: '0x123abc',
+						blockNumber: 123456,
+						timestamp: 1697049600,
+						from: '0xabc...',
+						to: '0xdef...',
+						nonce: 1,
+						gasLimit: 21000n,
+						gasPrice: 20000000000n,
+						value: BigInt(1),
+						tokenId: 132,
+						chainId
+					}
+				];
+
+				beforeEach(() => {
+					mockFetch.mockResolvedValue(mockApiResponse);
+				});
+
+				it('should fetch and map transactions correctly', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+
+					const result = await provider.erc721Transactions({
+						address: mockEthAddress,
+						contract: mockValidErc721Token
+					});
+
+					expect(provider).toBeDefined();
+
+					expect(mockFetch).toHaveBeenCalledOnce();
+
+					expect(result).toStrictEqual(expectedTransactions);
+				});
+
+				it('should throw an error if the API call fails', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+					mockFetch.mockRejectedValue(new Error('Network error'));
+
+					await expect(
+						provider.erc721Transactions({ address: mockEthAddress, contract: mockValidErc721Token })
 					).rejects.toThrow('Network error');
 				});
 			});
