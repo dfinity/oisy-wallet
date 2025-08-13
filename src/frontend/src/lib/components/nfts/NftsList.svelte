@@ -27,7 +27,7 @@
 		<EmptyNftsList />
 	{:else}
 		<div class="grid grid-cols-3 gap-2 gap-y-4 pt-4">
-			{#each nfts as nft, index (nft.id)}
+			{#each nfts as nft, index (`${String(nft.id)}-${index}`)}
 				<NftCard {nft} />
 			{/each}
 		</div>
