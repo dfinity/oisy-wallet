@@ -25,6 +25,7 @@
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
 		amount?: bigint;
@@ -76,7 +77,7 @@
 
 	const nft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
-			? findNft({ nfts: $nftStore, token, tokenId })
+			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
 			: undefined
 	);
 </script>
