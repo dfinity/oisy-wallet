@@ -8,18 +8,31 @@
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
+
+	let group = $state(false);
 </script>
 
 <NftsDisplayHandler bind:nfts bind:nftCollections>
-	{#if nftCollections.length === 0}
+	<button onclick={() => (group = !group)}>{group ? 'ungroup' : 'group'}</button>
+
+	{#if group}
+		{#if nftCollections.length === 0}
+			<EmptyNftsList />
+		{:else}
+			<div class="grid grid-cols-3 gap-2 gap-y-4 pt-4">
+				{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
+					{#if collection.nfts.length > 0}
+						<NftCollectionCard {collection} />
+					{/if}
+				{/each}
+			</div>
+		{/if}
+	{:else if nftCollections.length === 0}
 		<EmptyNftsList />
 	{:else}
 		<div class="grid grid-cols-3 gap-2 gap-y-4 pt-4">
-			{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
-				<NftCollectionCard {collection} />
-				<NftCollectionCard {collection} />
-				<NftCollectionCard {collection} />
-				<NftCollectionCard {collection} />
+			{#each nfts as nft, index (nft.id)}
+				<NftCard {nft} />
 			{/each}
 		</div>
 	{/if}

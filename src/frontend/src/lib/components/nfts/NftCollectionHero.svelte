@@ -3,42 +3,96 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import { goto } from '$app/navigation';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { onMount } from 'svelte';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import { fade } from 'svelte/transition';
 
 	interface Props {
-		collection: NftCollection;
+		collection?: NftCollection;
 		nfts: Nft[];
 	}
 
 	const { collection, nfts }: Props = $props();
 
 	const breadcrumbItems = [{ label: 'Assets', url: AppPath.Nfts }];
+
+	let timeout: NodeJS.Timeout | undefined = $state();
+
+	onMount(() => {
+		timeout = setTimeout(() => {
+			if (isNullish(collection)) {
+				goto(AppPath.Nfts);
+				toastsError({ msg: { text: 'Could not load collection' } });
+			}
+		}, 10000);
+
+		return () => {
+			if (nonNullish(timeout)) {
+				clearTimeout(timeout);
+			}
+		};
+	});
 </script>
 
-<div class="relative overflow-hidden rounded-xl">
-	{#if nfts?.[0]?.imageUrl}
-		<div
-			class="flex h-64 w-full bg-cover bg-center"
-			style={'background-image: url(' + nfts[0].imageUrl + ')'}
-		>
-		</div>
-	{/if}
+<div class="relative overflow-hidden rounded-xl" in:fade>
+	<div
+		class="flex h-64 w-full bg-cover bg-center"
+		style={'background-image: url(' + nfts?.[0]?.imageUrl + ')'}
+		class:animate-pulse={isNullish(nfts?.[0])}
+		class:bg-disabled-alt={isNullish(nfts?.[0])}
+	>
+	</div>
 
 	<div class="bg-primary p-4">
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
-		<h1 class="my-3">{collection.name}</h1>
+		<h1 class="my-3">
+			{#if nonNullish(collection)}
+				{collection.name}
+			{:else}
+				<span class="block max-w-40">
+					<SkeletonText />
+				</span>
+			{/if}
+		</h1>
 
 		<List condensed styleClass="text-sm text-tertiary">
-			<ListItem><span>Collection contract address</span>{collection.address}</ListItem>
-			<ListItem><span>Network</span><NetworkWithLogo network={collection.network} /></ListItem>
 			<ListItem
-				><span>Token standard</span><span class="uppercase">{collection.standard}</span></ListItem
-			>
+				><span>Collection contract address</span>
+
+				{#if nonNullish(collection)}
+					{collection.address}
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
+			<ListItem>
+				<span>Network</span>
+				{#if nonNullish(collection)}
+					<NetworkWithLogo network={collection.network} />
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
+			<ListItem>
+				<span>Token standard</span>
+				{#if nonNullish(collection)}
+					<span class="uppercase">{collection.standard}</span>
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
 		</List>
 	</div>
 </div>

@@ -44,9 +44,11 @@
 		</span>
 	</div>
 
-	<div class="flex flex-col gap-1">
-		<span class="text-sm font-bold" class:text-primary={!disabled} class:text-disabled={disabled}
-			>{collection.collection.name}</span
+	<div class="flex w-full flex-col gap-1">
+		<span
+			class="truncate text-sm font-bold"
+			class:text-primary={!disabled}
+			class:text-disabled={disabled}>{collection.collection.name}</span
 		>
 		<span class="text-xs" class:text-tertiary={!disabled} class:text-disabled={disabled}
 			>{collection.nfts.length} items</span

@@ -3,6 +3,8 @@
 	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NftCollection, Nft, NftCollectionUi } from '$lib/types/nft';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { getEnabledNfts, getNftCollectionUi } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		children: Snippet;
@@ -12,29 +14,11 @@
 
 	let { children, nfts = $bindable([]), nftCollections = $bindable([]) }: Props = $props();
 
+	console.log($nonFungibleTokens);
+
 	$effect(() => {
-		let nfts = ($nftStore ?? []).filter(
-			({
-				collection: {
-					address: nftContractAddress,
-					network: { id: nftContractNetworkId }
-				}
-			}) =>
-				$enabledNonFungibleNetworkTokens.some(
-					({ address: contractAddress, network: { id: contractNetworkId } }) =>
-						contractAddress === nftContractAddress && contractNetworkId === nftContractNetworkId
-				)
-		);
-
-		nftCollections = nfts.reduce<NftCollectionUi[]>((acc, item) => {
-			const i = acc.findIndex((g) => g.collection.address === item.collection.address);
-
-			if (i === -1) {
-				return [...acc, { collection: item.collection, nfts: [item] }];
-			}
-
-			return acc.map((g, idx) => (idx === i ? { ...g, nfts: [...g.nfts, item] } : g));
-		}, []);
+		nfts = getEnabledNfts({ $nftStore, $enabledNonFungibleNetworkTokens });
+		nftCollections = getNftCollectionUi({ $nftStore, $nonFungibleTokens });
 	});
 </script>
 
