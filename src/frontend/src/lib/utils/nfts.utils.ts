@@ -41,10 +41,10 @@ export const getNftsByNetworks = ({
 };
 
 export const findNft = ({
-													nfts,
-													token: { address: tokenAddress, network: tokenNetwork },
-													tokenId
-												}: {
+	nfts,
+	token: { address: tokenAddress, network: tokenNetwork },
+	tokenId
+}: {
 	nfts: Nft[];
 	token: NonFungibleToken;
 	tokenId: NftId;
