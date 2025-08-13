@@ -5,6 +5,7 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import {
+	findNft,
 	getNftsByNetworks,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
@@ -163,6 +164,32 @@ describe('nfts.utils', () => {
 			const expectedResult = {};
 
 			expect(result).toEqual(expectedResult);
+		});
+	});
+
+	describe('findNft', () => {
+		it('should return existing nft', () => {
+			const nfts = [mockNft1, mockNft2, mockNft3];
+
+			const result = findNft({
+				nfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				tokenId: parseNftId(12632)
+			});
+
+			expect(result).toEqual(mockNft2);
+		});
+
+		it('should return undefined if no nft is found', () => {
+			const nfts = [mockNft1, mockNft2, mockNft3];
+
+			const result = findNft({
+				nfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				tokenId: parseNftId(837373)
+			});
+
+			expect(result).toBeUndefined();
 		});
 	});
 
