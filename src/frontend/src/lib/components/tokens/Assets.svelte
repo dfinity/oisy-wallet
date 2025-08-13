@@ -16,6 +16,8 @@
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import NftsSortMenu from '$lib/components/nfts/NftsSortMenu.svelte';
+	import NftsSettingsMenu from '$lib/components/nfts/NftsSettingsMenu.svelte';
 
 	interface Props {
 		tab?: TokenTypes;
@@ -53,9 +55,18 @@
 					{/snippet}
 				</TokensFilter>
 			</div>
-			<div class="flex">
-				<TokensMenu />
-			</div>
+			{#if tab === TokenTypes.TOKENS}
+				<div class="flex">
+					<TokensMenu />
+				</div>
+			{:else}
+				<div class="flex">
+					<NftsSortMenu />
+				</div>
+				<div class="flex">
+					<NftsSettingsMenu />
+				</div>
+			{/if}
 		</div>
 	</StickyHeader>
 

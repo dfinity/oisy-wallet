@@ -125,3 +125,5 @@ export const getNftCollectionUi = ({
 				nft.collection.address === coll.address && nft.collection.network.id === coll.network.id
 		)
 	}));
+
+//export const filterSortNfts = ({nfts: Nft[], filter: string, sort:}) => {}

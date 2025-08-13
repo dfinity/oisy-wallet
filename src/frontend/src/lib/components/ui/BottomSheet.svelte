@@ -1,0 +1,36 @@
+<script lang="ts">
+	import { BottomSheet, Backdrop } from '@dfinity/gix-components';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		visible: boolean;
+		content: Snippet;
+	}
+
+	let { visible = $bindable(), content }: Props = $props();
+</script>
+
+{#if visible}
+	<div class="z-14 fixed inset-0">
+		<BottomSheet on:nnsClose={() => (visible = false)} transition>
+			<div slot="header" class="w-full p-4">
+				<ButtonIcon
+					onclick={() => (visible = false)}
+					styleClass="text-disabled float-right"
+					ariaLabel={$i18n.core.alt.close_details}
+				>
+					{#snippet icon()}
+						<IconClose size="24" />
+					{/snippet}
+				</ButtonIcon>
+			</div>
+			<div class="min-h-[35vh] w-full p-4">
+				{@render content()}
+			</div>
+		</BottomSheet>
+		<Backdrop on:nnsClose={() => (visible = false)} />
+	</div>
+{/if}
