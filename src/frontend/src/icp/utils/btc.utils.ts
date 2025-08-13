@@ -127,10 +127,7 @@ export const getBtcWalletBalance = ({
 
 	// Process pending transactions to calculate locked and unconfirmed balances
 	const { lockedBalance, unconfirmedBalance } = isNullish(pendingTransactions?.data)
-		? (() => {
-				console.warn('⚠️ No pending transactions data available for address:', address);
-				return { lockedBalance: ZERO, unconfirmedBalance: ZERO };
-			})()
+		? { lockedBalance: ZERO, unconfirmedBalance: ZERO }
 		: pendingTransactions.data.reduce(
 				(acc, tx) => {
 					// Sum all UTXO values for this pending outgoing transaction
