@@ -104,7 +104,8 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 			...(nonNullish(metadata.name) && { name: metadata.name }),
 			...('decimals' in metadata &&
 				nonNullish(metadata.decimals) && { decimals: metadata.decimals }),
-			...(nonNullish(metadata.description) && notEmptyString(metadata.description) && {description: metadata.description }),
+			...(nonNullish(metadata.description) &&
+				notEmptyString(metadata.description) && { description: metadata.description }),
 			...(mappedProperties.length > 0 && { attributes: [...mappedAttributes, ...mappedProperties] })
 		};
 	};
