@@ -102,7 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Phi tập trung",
 			"logout": "Đăng xuất",
-			"lock": "",
+			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP và hơn thế nữa",
 			"instant_and_private": "Nhanh và riêng tư mọi lúc mọi nơi",
@@ -163,12 +163,12 @@
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"unlock": "",
-			"logout": "",
-			"logout_clear_cash_message": "",
-			"learn_more": ""
+			"title_part_1": "Mở khóa để tiếp tục",
+			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
+			"unlock": "Mở khóa",
+			"logout": "Đăng xuất",
+			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",
+			"learn_more": "Tìm hiểu thêm"
 		}
 	},
 	"dapps": {
