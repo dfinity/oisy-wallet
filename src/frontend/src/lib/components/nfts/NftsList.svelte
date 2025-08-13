@@ -2,20 +2,16 @@
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
-	import { NFT_CARD } from '$lib/constants/test-ids.constants';
-	import type { Nft, NftCollection, NftCollectionUi } from '$lib/types/nft';
+	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
+	import { nftListStore } from '$lib/stores/nft-list.store';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
-
-	let group = $state(false);
 </script>
 
 <NftsDisplayHandler bind:nfts bind:nftCollections>
-	<button onclick={() => (group = !group)}>{group ? 'ungroup' : 'group'}</button>
-
-	{#if group}
+	{#if $nftListStore.groupByCollection}
 		{#if nftCollections.length === 0}
 			<EmptyNftsList />
 		{:else}

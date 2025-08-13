@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Backdrop, Popover } from '@dfinity/gix-components';
+	import { Backdrop, Popover, Toggle } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconHide from '$lib/components/icons/IconHide.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
@@ -14,20 +14,22 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
+	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
+	import { LANGUAGES, SUPPORTED_LANGUAGES } from '$env/i18n';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import IconCheck from '$lib/components/icons/IconCheck.svelte';
+	import List from '$lib/components/common/List.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { nftListStore } from '$lib/stores/nft-list.store';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import IconWarning from '$lib/components/icons/IconWarning.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
 
-	const manageTokensId = Symbol();
-
-	const toggleHideZeros = () => {
-		document.dispatchEvent(new CustomEvent('toggleHideZeros'));
-		emit({ message: 'oisyToggleZeroBalances' });
-	};
-
-	const openManageTokens = () => {
-		modalStore.openManageTokens({ id: manageTokensId });
-		visible = false;
+	const setGrouping = (grouping: boolean) => {
+		nftListStore.update((p) => ({ ...p, groupByCollection: grouping }));
 	};
 </script>
 
@@ -41,39 +43,78 @@
 	styleClass={visible ? 'active' : ''}
 >
 	{#snippet icon()}
-		<NotificationBlob display={$hideZeroBalances} position="top-right">
-			<IconManage />
-		</NotificationBlob>
+		<IconManage />
 	{/snippet}
 </ButtonIcon>
 
 {#snippet content()}
-	<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
-	<ul class="flex list-none flex-col">
-		<li class="logo-button-list-item">
-			<LogoButton dividers onClick={toggleHideZeros}>
-				{#snippet logo()}
-					<IconHide />
-				{/snippet}
-				{#snippet title()}
-					<span class="text-sm font-normal">{$i18n.tokens.text.hide_zero_balances}</span>
-				{/snippet}
-				{#snippet action()}
-					<TokensZeroBalanceToggle />
-				{/snippet}
-			</LogoButton>
-		</li>
-		<li class="logo-button-list-item">
-			<LogoButton dividers onClick={openManageTokens}>
-				{#snippet logo()}
-					<IconManage />
-				{/snippet}
-				{#snippet title()}
-					<span class="text-sm font-normal">{$i18n.tokens.manage.text.title}</span>
-				{/snippet}
-			</LogoButton>
-		</li>
-	</ul>
+	<span class="mb-2 flex text-sm font-bold">Grouping</span>
+
+	<List noPadding>
+		<ListItem>
+			<Button
+				onclick={() => setGrouping(false)}
+				fullWidth
+				alignLeft
+				paddingSmall
+				styleClass="py-1 rounded-md text-primary underline-none pl-0.5 min-w-28"
+				colorStyle="tertiary-alt"
+				transparent
+			>
+				<span class="pt-0.75 w-[20px] text-brand-primary">
+					{#if !$nftListStore.groupByCollection}
+						<IconCheck size="20" />
+					{/if}
+				</span>
+				<span class="font-normal">Show as plain list</span>
+			</Button>
+		</ListItem>
+		<ListItem>
+			<Button
+				onclick={() => setGrouping(true)}
+				fullWidth
+				alignLeft
+				paddingSmall
+				styleClass="py-1 rounded-md text-primary underline-none pl-0.5 min-w-28"
+				colorStyle="tertiary-alt"
+				transparent
+			>
+				<span class="pt-0.75 w-[20px] text-brand-primary">
+					{#if $nftListStore.groupByCollection}
+						<IconCheck size="20" />
+					{/if}
+				</span>
+				<span class="font-normal">Group by collection</span>
+			</Button>
+		</ListItem>
+	</List>
+
+	<span class="mb-2 mt-3 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
+
+	<List>
+		<ListItem>
+			<span class="flex gap-2">
+				<span class="flex">
+					<IconWarning />
+				</span>
+				<span class="font-normal">Show spam</span>
+			</span>
+			<span>
+				<Toggle disabled checked={false} ariaLabel="" />
+			</span>
+		</ListItem>
+		<ListItem>
+			<span class="flex gap-2">
+				<span class="flex">
+					<IconEyeOff />
+				</span>
+				<span class="font-normal">Show hidden</span>
+			</span>
+			<span>
+				<Toggle disabled checked={false} ariaLabel="" />
+			</span>
+		</ListItem>
+	</List>
 {/snippet}
 
 <Responsive up="sm">
