@@ -123,6 +123,8 @@ export const getBtcWalletBalance = ({
 		transactionLookup.set(tx.data.id, tx.data);
 	});
 
+	logPendingTransactions(pendingTransactions);
+
 	// Process pending transactions to calculate locked and unconfirmed balances
 	const { lockedBalance, unconfirmedBalance } = isNullish(pendingTransactions?.data)
 		? { lockedBalance: ZERO, unconfirmedBalance: ZERO }
@@ -131,6 +133,7 @@ export const getBtcWalletBalance = ({
 					// Sum all UTXO values for this pending outgoing transaction
 					// These UTXOs are locked and cannot be spent again (prevents double-spending)
 					const txUtxoValue = tx.utxos.reduce((utxoSum, utxo) => utxoSum + BigInt(utxo.value), 0n);
+
 					acc.lockedBalance += txUtxoValue;
 
 					const txid = convertPendingTransactionTxid(tx);
@@ -180,4 +183,41 @@ export const getBtcWalletBalance = ({
 		// For primary balance display - shows user's true financial position
 		total: actualTotalBalance > ZERO ? actualTotalBalance : ZERO
 	};
+};
+
+const logPendingTransactions = (pendingTransactions: ReturnType<typeof getPendingTransactions>) => {
+	if (isNullish(pendingTransactions?.data)) {
+		console.warn('📋 Pending Transactions: None');
+		return;
+	}
+
+	const formattedOutput = [
+		'📋 PENDING TRANSACTIONS SUMMARY',
+		`   Count: ${pendingTransactions.data.length}`,
+		`   Certified: ${pendingTransactions.certified}`,
+		'',
+		...pendingTransactions.data.flatMap((tx, index) => {
+			const txidString = convertPendingTransactionTxid(tx);
+			const totalUtxoValue = tx.utxos.reduce((sum, utxo) => sum + BigInt(utxo.value), 0n);
+
+			const transactionLines = [
+				`📄 Transaction ${index + 1}`,
+				`   TxID: ${txidString || 'Unable to convert'}`,
+				`   UTXOs Count: ${tx.utxos.length}`,
+				`   Total UTXO Value: ${totalUtxoValue.toString()} satoshis`
+			];
+
+			// Add individual UTXOs
+			const utxoLines = tx.utxos.flatMap((utxo, utxoIndex) => [
+				`   💰 UTXO ${utxoIndex + 1}:`,
+				`      Value: ${utxo.value} satoshis`,
+				`      OutPoint: ${utxo.outpoint.txid}:${utxo.outpoint.vout}`
+			]);
+
+			return [...transactionLines, ...utxoLines];
+		}),
+		'📋 END PENDING TRANSACTIONS'
+	].join('\n');
+
+	console.warn(formattedOutput);
 };
