@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import IconLock from '$lib/components/icons/IconLock.svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -12,11 +11,11 @@
 
 	interface Props {
 		onHidePopover?: () => void;
+		onIcLogoutTriggered?: () => void;
 	}
-	let { onHidePopover }: Props = $props();
+	let { onHidePopover, onIcLogoutTriggered }: Props = $props();
 
 	let remainingTimeMs = $derived($authRemainingTimeStore);
-	const dispatch = createEventDispatcher();
 
 	const formatDuration = (ms: number) => {
 		if (ms <= 0) {
@@ -29,8 +28,8 @@
 	};
 
 	const handleLogoutTriggered = async () => {
-		dispatch('icLogoutTriggered');
 		onHidePopover?.();
+		onIcLogoutTriggered?.();
 		await signOut({ resetUrl: true });
 	};
 
@@ -45,21 +44,22 @@
 	<div class="flex justify-between gap-[12px]">
 		<Button
 			colorStyle="tertiary"
-			paddingSmall
-			styleClass="flex w-full rounded-lg py-2 flex-1 border-tertiary hover:text-brand-primary hover:bg-brand-subtle-10"
-			testId={LOCK_BUTTON}
 			onclick={handleLock}
+			paddingSmall
+			styleClass="w-full rounded-lg py-2 flex-1 border-tertiary hover:text-brand-primary hover:bg-brand-subtle-10"
+			testId={LOCK_BUTTON}
 		>
 			{$i18n.auth.text.lock}
 			<IconLock />
 		</Button>
 
 		<Button
+			colorStyle="secondary"
 			onclick={handleLogoutTriggered}
 			paddingSmall
-			colorStyle="secondary"
+			styleClass="w-full rounded-lg py-2 flex-1"
+			innerStyleClass="items-center justify-center"
 			testId={LOGOUT_BUTTON}
-			styleClass="flex items-center w-full rounded-lg py-2 flex-1"
 		>
 			{$i18n.auth.text.logout}
 			<IconLogout />
