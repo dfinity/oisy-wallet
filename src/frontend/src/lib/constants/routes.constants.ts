@@ -1,7 +1,6 @@
 export enum AppPath {
-	Assets = '/assets/',
-	Tokens = '/assets/tokens/',
-	Nfts = '/assets/nfts/',
+	Tokens = '/',
+	Nfts = '/nfts/',
 	Explore = '/explore/',
 	Settings = '/settings/',
 	Transactions = '/transactions/',
