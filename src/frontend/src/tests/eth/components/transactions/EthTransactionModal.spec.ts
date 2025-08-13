@@ -1,10 +1,13 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import { createMockEthTransactionsUi, createMockNftTransactionsUi } from '$tests/mocks/eth-transactions.mock';
-import { render } from '@testing-library/svelte';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import {
+	createMockEthTransactionsUi,
+	createMockNftTransactionsUi
+} from '$tests/mocks/eth-transactions.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import { render } from '@testing-library/svelte';
 
 const [mockEthTransactionUi] = createMockEthTransactionsUi(1);
 const [mockErc721TransactionUi] = createMockNftTransactionsUi(1);

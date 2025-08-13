@@ -5,6 +5,7 @@
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import { mapAddressToName } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -12,6 +13,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
@@ -20,6 +22,7 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction';
@@ -30,12 +33,9 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
-	import { nftStore } from '$lib/stores/nft.store';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
-	import { parseNftId } from '$lib/validation/nft.validation';
 	import { findNft } from '$lib/utils/nfts.utils';
-	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -95,9 +95,9 @@
 
 	const nft = $derived(
 		nonNullish($nftStore) &&
-		nonNullish(token) &&
-		isTokenNonFungible(token) &&
-		nonNullish(transaction.tokenId)
+			nonNullish(token) &&
+			isTokenNonFungible(token) &&
+			nonNullish(transaction.tokenId)
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(transaction.tokenId) })
 			: undefined
 	);
