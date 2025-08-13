@@ -11,7 +11,7 @@
 		size?: LogoSize;
 		color?: 'off-white' | 'white';
 		ring?: boolean;
-		rounded?: boolean;
+		circle?: boolean;
 		testId?: string;
 	}
 
@@ -21,7 +21,7 @@
 		size = 'xxs',
 		color = 'off-white',
 		ring = false,
-		rounded = true,
+		circle = true,
 		testId
 	}: Props = $props();
 
@@ -37,8 +37,8 @@
 	class:bg-white={color === 'white' && !isReady}
 	class:opacity-10={!isReady}
 	class:ring-2={ring}
-	class:rounded-full={rounded}
-	class:rounded-lg={!rounded}
+	class:rounded-full={circle}
+	class:rounded-lg={!circle}
 	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 	data-tid={testId}
 >

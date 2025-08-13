@@ -41,7 +41,7 @@
 		src={imageUrl ?? noNftImage}
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
 		size={logoSize}
-		rounded={false}
+		circle={false}
 		{color}
 		{ring}
 		{testId}
