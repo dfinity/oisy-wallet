@@ -163,12 +163,12 @@
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"unlock": "",
-			"logout": "",
-			"logout_clear_cash_message": "",
-			"learn_more": ""
+			"title_part_1": "Desbloqueie para continuar",
+			"title_part_2": "Você bloqueou sua carteira anteriormente para mantê-la segura. Continue de onde parou ou saia.",
+			"unlock": "Bloquear",
+			"logout": "Sair",
+			"logout_clear_cash_message": "Sair limpará todos os dados armazenados em cache",
+			"learn_more": "Saber mais"
 		}
 	},
 	"dapps": {

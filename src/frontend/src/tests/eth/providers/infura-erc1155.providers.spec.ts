@@ -151,6 +151,7 @@ describe('infura-erc1155.providers', () => {
 					id: tokenId,
 					name: mockMetadata.name,
 					imageUrl: mockMetadata.image,
+					description: mockMetadata.description,
 					attributes: [
 						{ traitType: 'Issuance Month', value: '2022/06' },
 						{ traitType: 'Pepe', value: 'No' },
