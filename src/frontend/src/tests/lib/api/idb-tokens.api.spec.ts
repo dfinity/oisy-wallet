@@ -3,6 +3,10 @@ import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { toUserToken } from '$icp-eth/services/user-token.services';
 import {
+	clearIdbEthTokens,
+	clearIdbEthTokensDeprecated,
+	clearIdbIcTokens,
+	clearIdbSolTokens,
 	deleteIdbEthToken,
 	deleteIdbEthTokenDeprecated,
 	deleteIdbEthTokens,
@@ -442,6 +446,38 @@ describe('idb-tokens.api', () => {
 			});
 
 			expect(signOutSpy).toHaveBeenCalled();
+		});
+	});
+
+	describe('clearIdbIcTokens', () => {
+		it('should clear IC tokens', async () => {
+			await clearIdbIcTokens();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbEthTokensDeprecated', () => {
+		it('should clear deprecated ETH tokens', async () => {
+			await clearIdbEthTokensDeprecated();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbEthTokens', () => {
+		it('should clear ETH tokens', async () => {
+			await clearIdbEthTokens();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbSolTokens', () => {
+		it('should clear SOL tokens', async () => {
+			await clearIdbSolTokens();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
 		});
 	});
 });
