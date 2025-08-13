@@ -22,6 +22,13 @@ export const createMockEthTransactions = (n: number): Transaction[] =>
 		hash: Math.random().toString(36).substring(7)
 	}));
 
+export const createMockNftTransactions = (n: number): Transaction[] =>
+	Array.from({ length: n }, () => ({
+		...mockEthTransaction,
+		hash: Math.random().toString(36).substring(7),
+		tokenId: 123
+	}));
+
 export const createMockEthCertifiedTransactions = (n: number): EthCertifiedTransaction[] =>
 	createMockEthTransactions(n).map((data) => ({ data, certified: false }));
 
@@ -33,7 +40,7 @@ export const createMockEthTransactionsUi = (n: number): EthTransactionUi[] =>
 		type: 'send'
 	}));
 
-export const createMockErc721TransactionsUi = (n: number): EthTransactionUi[] =>
+export const createMockNftTransactionsUi = (n: number): EthTransactionUi[] =>
 	Array.from({ length: n }, () => ({
 		...mockEthTransaction,
 		id: Math.random().toString(36).substring(7),

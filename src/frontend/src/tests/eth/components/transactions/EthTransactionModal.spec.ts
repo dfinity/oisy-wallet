@@ -3,14 +3,14 @@ import EthTransactionModal from '$eth/components/transactions/EthTransactionModa
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import {
-	createMockErc721TransactionsUi,
+	createMockNftTransactionsUi,
 	createMockEthTransactionsUi
 } from '$tests/mocks/eth-transactions.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
 const [mockEthTransactionUi] = createMockEthTransactionsUi(1);
-const [mockErc721TransactionUi] = createMockErc721TransactionsUi(1);
+const [mockErc721TransactionUi] = createMockNftTransactionsUi(1);
 
 describe('EthTransactionModal', () => {
 	it('should render the ETH transaction modal', () => {
