@@ -161,11 +161,16 @@ export const getBtcWalletBalance = ({
 									acc.unconfirmedBalance += matchedTransaction.value;
 								}
 							}
+						} else {
+							// fallback if BTC API provider is n/a or trx is missing from providerTransactions
+							console.warn('Missing transaction data for pending transaction:', txid);
+							acc.unconfirmedBalance += txUtxoValue;
 						}
 					}
 					return acc;
 				},
-				{ lockedBalance: ZERO, unconfirmedBalance: ZERO }
+				//  when no pending transactions we assume so the actualTotalBalance becomes totalBalance
+				{ lockedBalance: ZERO, unconfirmedBalance: totalBalance }
 			);
 
 	// We subtract lockedBalance because those UTXOs cannot be spent again (prevents double-spending)
