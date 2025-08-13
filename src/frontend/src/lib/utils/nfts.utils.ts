@@ -1,6 +1,6 @@
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import type { NftError } from '$lib/types/errors';
-import type { Nft, NftCollection, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
+import type { Nft, NftCollection, NftId, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -47,7 +47,7 @@ export const findNft = ({
 }: {
 	nfts: Nft[];
 	token: NonFungibleToken;
-	tokenId: number;
+	tokenId: NftId;
 }): Nft | undefined =>
 	nfts.find(
 		({ id, collection: { address, network } }) =>
