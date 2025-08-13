@@ -10,20 +10,20 @@ import {
 	reloadEthereumTransactions
 } from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import { assertNonNullish } from '@dfinity/utils';
 
 vi.mock('$eth/providers/etherscan.providers', () => ({
 	etherscanProviders: vi.fn()
