@@ -41,13 +41,13 @@
 			{/await}
 		</Responsive>
 
-		<Responsive up="md" down="lg">
+		<Responsive up="sm" down="xl">
 			{#await import(`$lib/assets/lockpage_assets/lock-image-768-${$themeStore ?? 'light'}.webp`) then { default: src768 }}
 				<Img src={src768} alt={ariaLabel} styleClass={imgStyleClass} />
 			{/await}
 		</Responsive>
 
-		<Responsive down="sm">
+		<Responsive down="xs">
 			{#await import(`$lib/assets/lockpage_assets/lock-image-480-${$themeStore ?? 'light'}.webp`) then { default: src480 }}
 				<Img src={src480} alt={ariaLabel} styleClass={imgStyleClass} />
 			{/await}
@@ -56,7 +56,7 @@
 
 	<div class="flex h-screen flex-col items-center justify-center px-4">
 		<div
-			class="rounded-4xl flex w-full max-w-md flex-col content-center items-center justify-center gap-5 bg-surface p-6 text-center text-primary shadow-lg transition-all duration-500 ease-in-out md:p-8"
+			class="rounded-4xl flex w-full max-w-md flex-col content-center items-center justify-center gap-5 bg-surface p-6 text-center text-primary shadow-lg transition-all duration-500 ease-in-out sm:p-8"
 		>
 			<OisyWalletLogoLink />
 
@@ -66,11 +66,21 @@
 			</div>
 
 			<div class="w-full">
-				<Button fullWidth styleClass="mb-3 w-full" onclick={handleUnlock}>
+				<Button
+					fullWidth
+					styleClass="mb-3 w-full"
+					innerStyleClass="items-center justify-center"
+					onclick={handleUnlock}
+				>
 					{$i18n.lock.text.unlock}
 					<IconKey />
 				</Button>
-				<Button fullWidth colorStyle="secondary-light" onclick={handleLogout}>
+				<Button
+					fullWidth
+					colorStyle="secondary-light"
+					innerStyleClass="items-center justify-center"
+					onclick={handleLogout}
+				>
 					{$i18n.lock.text.logout}
 					<IconLogout />
 				</Button>
