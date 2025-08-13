@@ -81,6 +81,16 @@ vi.mock('ethers/providers', () => {
 	};
 });
 
+vi.mock('idb-keyval', () => ({
+	createStore: vi.fn(() => ({})),
+	set: vi.fn(),
+	get: vi.fn(),
+	del: vi.fn(),
+	delMany: vi.fn(),
+	keys: vi.fn(() => []),
+	update: vi.fn()
+}));
+
 failTestsThatLogToConsole();
 
 if (process.env.ALLOW_LOGGING_FOR_DEBUGGING) {

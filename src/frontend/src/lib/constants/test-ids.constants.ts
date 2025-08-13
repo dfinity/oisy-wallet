@@ -17,6 +17,7 @@ export const CURRENCY_SWITCHER_DROPDOWN_BUTTON = 'currency-switcher-dropdown-but
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
+export const LOCK_BUTTON = 'lock-button';
 export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';

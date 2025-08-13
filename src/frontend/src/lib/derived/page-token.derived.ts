@@ -8,7 +8,8 @@ import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-import type { OptionToken, OptionTokenStandard } from '$lib/types/token';
+import { defaultFallbackToken } from '$lib/derived/token.derived';
+import type { OptionToken, OptionTokenStandard, Token } from '$lib/types/token';
 import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -63,6 +64,14 @@ export const pageToken: Readable<OptionToken> = derived(
 				name === $routeToken && networkId.description === $routeNetwork
 		);
 	}
+);
+
+/**
+ * A derived store which can be used for code convenience reasons.
+ */
+export const pageTokenWithFallback: Readable<Token> = derived(
+	[pageToken, defaultFallbackToken],
+	([$pageToken, $defaultFallbackToken]) => $pageToken ?? $defaultFallbackToken
 );
 
 export const pageTokenStandard: Readable<OptionTokenStandard> = derived(

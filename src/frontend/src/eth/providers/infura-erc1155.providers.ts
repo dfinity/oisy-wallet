@@ -3,44 +3,108 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { Erc165Identifier } from '$eth/constants/erc.constants';
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
-import type { Erc1155ContractAddress } from '$eth/types/erc1155';
+import { fetchMetadataFromUri } from '$eth/services/erc.services';
+import type { Erc1155ContractAddress, Erc1155Metadata } from '$eth/types/erc1155';
 import { i18n } from '$lib/stores/i18n.store';
-import { InvalidTokenUri } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
-import type { NftId } from '$lib/types/nft';
+import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { parseMetadataResourceUrl } from '$lib/utils/nfts.utils';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
 
 export class InfuraErc1155Provider extends InfuraErc165Provider {
+	isInterfaceErc1155 = (contract: Erc1155ContractAddress): Promise<boolean> =>
+		this.isSupportedInterface({ contract, interfaceId: Erc165Identifier.ERC1155 });
+
 	private supportsMetadataExtension = (contract: Erc1155ContractAddress): Promise<boolean> =>
 		this.isSupportedInterface({ contract, interfaceId: Erc165Identifier.ERC1155_METADATA_URI });
 
-	uri = async ({
-		contract,
-		tokenId
-	}: {
-		contract: Erc1155ContractAddress;
-		tokenId: NftId;
-	}): Promise<URL | undefined> => {
-		const supportsMetadata = await this.supportsMetadataExtension(contract);
+	metadata = async ({
+		address
+	}: Pick<Erc1155ContractAddress, 'address'>): Promise<Erc1155Metadata> => {
+		const erc1155Contract = new Contract(address, ERC1155_ABI, this.provider);
 
-		if (!supportsMetadata) {
-			return;
+		let name;
+		let symbol;
+
+		try {
+			name = await erc1155Contract.name();
+		} catch (_: unknown) {
+			// Since erc1155 contracts do not have to implement 'name', we don't have to handle the error here.
 		}
 
-		const { address: contractAddress } = contract;
+		try {
+			symbol = await erc1155Contract.symbol();
+		} catch (_: unknown) {
+			// Since erc1155 contracts do not have to implement 'symbol', we don't have to handle the error here.
+		}
+
+		return {
+			...(nonNullish(name) && { name }),
+			...(nonNullish(symbol) && { symbol }),
+			decimals: 0 // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
+		};
+	};
+
+	getNftMetadata = async ({
+		contractAddress,
+		tokenId
+	}: {
+		contractAddress: Erc1155ContractAddress['address'];
+		tokenId: NftId;
+	}): Promise<NftMetadata> => {
+		const supportsMetadata = await this.supportsMetadataExtension({ address: contractAddress });
+
+		if (!supportsMetadata) {
+			return { id: tokenId };
+		}
 
 		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);
 
-		const rawUri = await erc1155Contract.uri(tokenId);
+		const tokenUri = await erc1155Contract.uri(tokenId);
 
-		return parseMetadataResourceUrl({
-			url: rawUri,
-			error: new InvalidTokenUri(tokenId, contractAddress)
+		const { metadata, imageUrl } = await fetchMetadataFromUri({
+			metadataUrl: tokenUri.replace(/{id}/g, tokenId.toString()),
+			contractAddress,
+			tokenId
 		});
+
+		if (isNullish(metadata)) {
+			return { id: tokenId, ...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }) };
+		}
+
+		const mappedAttributes =
+			'attributes' in metadata
+				? (metadata.attributes ?? []).map(({ trait_type: traitType, value }) => ({
+						traitType,
+						value: value.toString()
+					}))
+				: [];
+
+		const mappedProperties =
+			'properties' in metadata
+				? Object.entries(metadata.properties ?? {}).map(([key, entry]) =>
+						typeof entry === 'object' && !Array.isArray(entry)
+							? {
+									traitType: entry.name?.toString(),
+									value: entry.display_value?.toString() ?? entry.value?.toString()
+								}
+							: {
+									traitType: key,
+									value: entry.toString()
+								}
+					)
+				: [];
+
+		return {
+			id: tokenId,
+			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
+			...(nonNullish(metadata.name) && { name: metadata.name }),
+			...('decimals' in metadata &&
+				nonNullish(metadata.decimals) && { decimals: metadata.decimals }),
+			...(mappedProperties.length > 0 && { attributes: [...mappedAttributes, ...mappedProperties] })
+		};
 	};
 }
 

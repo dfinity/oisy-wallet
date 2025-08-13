@@ -101,6 +101,7 @@ interface I18nAuth {
 		title_part_1: string;
 		title_part_2: string;
 		logout: string;
+		lock: string;
 		authenticate: string;
 		asset_types: string;
 		instant_and_private: string;
@@ -344,7 +345,6 @@ interface I18nInit {
 	error: {
 		no_alchemy_config: string;
 		no_alchemy_provider: string;
-		no_alchemy_erc20_provider: string;
 		no_etherscan_provider: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
@@ -372,9 +372,10 @@ interface I18nInit {
 		transaction_price: string;
 		icrc_canisters: string;
 		erc20_custom_tokens: string;
+		erc721_custom_tokens: string;
+		erc1155_custom_tokens: string;
 		erc20_user_tokens: string;
 		spl_custom_tokens: string;
-		erc721_custom_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
@@ -688,6 +689,7 @@ interface I18nSwap {
 		open_instructions_link: string;
 		select_token: string;
 		select_network_filter: string;
+		withdrawing: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -701,6 +703,10 @@ interface I18nSwap {
 		withdraw_failed_first_part: string;
 		withdraw_failed_second_part: string;
 		swap_failed_instruction_link: string;
+		manually_withdraw_success: string;
+		manually_withdraw_failed: string;
+		swap_sucess_withdraw_failed: string;
+		swap_sucess_manually_withdraw_success: string;
 	};
 }
 
@@ -820,6 +826,7 @@ interface I18nTokens {
 		invalid_contract_address: string;
 		invalid_token_address: string;
 		invalid_ledger: string;
+		unrecognised_erc_interface: string;
 		no_metadata: string;
 		unexpected: string;
 		unexpected_hiding: string;

@@ -1,21 +1,33 @@
-import type { SwapErrorKey } from '$lib/types/swap';
+import type { SwapErrorCodes } from '$lib/types/swap';
 
+//TODO: revisit throwSwapError
 export const throwSwapError = ({
 	code,
-	message
+	message,
+	variant,
+	swapSucceded
 }: {
-	code: SwapErrorKey;
-	message: string;
+	code: SwapErrorCodes;
+	message?: string;
+	variant?: 'error' | 'warning' | 'info';
+	swapSucceded?: boolean;
 }): never => {
-	throw new SwapError(code, message);
+	throw new SwapError(code, message, variant, swapSucceded);
 };
 
 export class SwapError extends Error {
+	public readonly variant?: 'error' | 'warning' | 'info';
+	public readonly swapSucceded?: boolean;
+
 	constructor(
-		public readonly code: SwapErrorKey,
-		message: string
+		public readonly code: SwapErrorCodes,
+		message?: string,
+		variant?: 'error' | 'warning' | 'info',
+		swapSucceded?: boolean
 	) {
 		super(message);
 		this.name = 'SwapError';
+		this.variant = variant;
+		this.swapSucceded = swapSucceded;
 	}
 }

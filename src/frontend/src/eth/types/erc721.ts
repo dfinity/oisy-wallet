@@ -13,3 +13,13 @@ export type Erc721ContractAddress = ContractAddress;
 export type Erc721Contract = Erc721ContractAddress;
 
 export type Erc721Metadata = TokenMetadata;
+
+export interface Erc721UriJson {
+	name?: string;
+	image?: string;
+	image_url?: string;
+	attributes?: {
+		trait_type: string;
+		value: string | number;
+	}[];
+}

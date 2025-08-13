@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import AllNetworksLogo from '$lib/components/networks/AllNetworksLogo.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -12,7 +11,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
-	import type { Network, NetworkId } from '$lib/types/network';
+	import type { Network, NetworkId, OptionNetworkId } from '$lib/types/network';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -23,6 +22,7 @@
 		testId?: string;
 		delayOnNetworkSelect?: boolean;
 		labelsSize?: LabelSize;
+		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
 	let {
@@ -32,16 +32,15 @@
 		isTestnet = false,
 		testId,
 		delayOnNetworkSelect = true,
-		labelsSize = 'md'
+		labelsSize = 'md',
+		onSelected
 	}: Props = $props();
-
-	const dispatch = createEventDispatcher();
-
-	const onIcSelected = () => dispatch('icSelected', network?.id);
 
 	const onClick = () => {
 		// If rendered in the dropdown, we add a small delay to give the user a visual feedback that the network is checked
-		delayOnNetworkSelect ? setTimeout(onIcSelected, 500) : onIcSelected();
+		delayOnNetworkSelect
+			? setTimeout(() => onSelected?.(network?.id), 500)
+			: onSelected?.(network?.id);
 	};
 </script>
 

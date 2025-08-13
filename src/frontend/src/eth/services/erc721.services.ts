@@ -3,6 +3,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import type { Erc721ContractAddress } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
@@ -10,9 +11,22 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
-import { parseTokenId } from '$lib/validation/token.validation';
+import type { NetworkId } from '$lib/types/network';
+import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+export const isInterfaceErc721 = async ({
+	networkId,
+	address
+}: {
+	networkId: NetworkId;
+	address: Erc721ContractAddress['address'];
+}): Promise<boolean> => {
+	const { isInterfaceErc721 } = infuraErc721Providers(networkId);
+
+	return await isInterfaceErc721({ address });
+};
 
 export const loadErc721Tokens = async ({
 	identity
@@ -83,7 +97,7 @@ const loadCustomTokensWithMetadata = async (
 
 				return {
 					...{
-						id: parseTokenId(`custom-token#${symbol}#${network.chainId}`),
+						id: parseCustomTokenId({ identifier: symbol, chainId: network.chainId }),
 						name: tokenAddress,
 						address: tokenAddress,
 						network,

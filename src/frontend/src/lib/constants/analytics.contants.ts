@@ -11,6 +11,10 @@ export const TRACK_HELP_CONCERNED_ABOUT_SECURITY = 'help_concerned_about_securit
 export const TRACK_HELP_GOT_CONFUSED = 'help_got_confused';
 export const TRACK_HELP_OTHER = 'help_other';
 
+// Bitcoin
+export const TRACK_COUNT_BTC_SEND_SUCCESS = 'btc_send_success';
+export const TRACK_COUNT_BTC_SEND_ERROR = 'btc_send_error';
+
 // Ethereum
 export const TRACK_COUNT_ETH_SEND_SUCCESS = 'eth_send_success';
 export const TRACK_COUNT_ETH_SEND_ERROR = 'eth_send_error';
@@ -69,6 +73,7 @@ export const TRACK_COUNT_SWAP_ERROR = 'swap_error';
 export const TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS = 'manage_tokens_enable_success';
 export const TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS = 'manage_tokens_disable_success';
 export const TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR = 'manage_tokens_save_error';
+export const TRACK_UNRECOGNISED_ERC_INTERFACE = 'unrecognised_erc_interface';
 
 // Contacts
 export const TRACK_CONTACT_CREATE_SUCCESS = 'contact_create_success';

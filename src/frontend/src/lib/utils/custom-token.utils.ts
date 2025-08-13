@@ -5,12 +5,18 @@ import type {
 	SplToken,
 	Token
 } from '$declarations/backend/backend.did';
+import type { ContractAddress } from '$eth/types/address';
+import type { EthereumChainId } from '$eth/types/network';
 import type {
 	ErcSaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
+import type { TokenId, TokenMetadata } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
+import type { SolanaChainId } from '$sol/types/network';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
 
@@ -86,3 +92,16 @@ export const toCustomToken = ({
 		token: toCustomTokenMap()
 	};
 };
+
+export const parseCustomTokenId = ({
+	identifier,
+	chainId
+}:
+	| {
+			identifier: ContractAddress['address'] | TokenMetadata['symbol'];
+			chainId: EthereumChainId;
+	  }
+	| {
+			identifier: SplTokenAddress | TokenMetadata['symbol'];
+			chainId: SolanaChainId['chainId'];
+	  }): TokenId => parseTokenId(`custom-token#${identifier}#${chainId}`);

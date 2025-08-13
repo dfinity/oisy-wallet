@@ -11,8 +11,8 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { hardenMetadata } from '$lib/utils/metadata.utils';
-import { parseTokenId } from '$lib/validation/token.validation';
 import { getTokenInfo } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
@@ -107,7 +107,10 @@ const loadCustomTokensWithMetadata = async (
 				}
 
 				const newToken = {
-					id: parseTokenId(`custom-token#${fromNullable(symbol)}#${tokenNetwork.chainId}`),
+					id: parseCustomTokenId({
+						identifier: fromNullable(symbol) ?? tokenAddress,
+						chainId: tokenNetwork.chainId
+					}),
 					name: tokenAddress,
 					address: tokenAddress,
 					// TODO: save this value to the backend too

@@ -2,18 +2,6 @@ import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { delMany, keys, type UseStore } from 'idb-keyval';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	delMany: vi.fn(),
-	keys: vi.fn(),
-	update: vi.fn()
-}));
-
 describe('idb.utils', () => {
 	describe('delMultiKeysByPrincipal', () => {
 		const expectedKeys = [

@@ -102,6 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralized",
 			"logout": "Logout",
+			"lock": "Lock",
 			"authenticate": "Open or Create",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Instant and private access anywhere",
@@ -465,7 +466,6 @@
 		"error": {
 			"no_alchemy_config": "No Alchemy config for network $network",
 			"no_alchemy_provider": "No Alchemy provider for network $network",
-			"no_alchemy_erc20_provider": "No Alchemy ERC20 provider for network $network",
 			"no_etherscan_provider": "No Etherscan provider for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
@@ -493,9 +493,10 @@
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
+			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
+			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
 			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
-			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
@@ -821,7 +822,8 @@
 			"open_icp_swap": "Open ICP Swap website",
 			"open_instructions_link": "Open instructions link",
 			"select_token": "Select token",
-			"select_network_filter": "Select network"
+			"select_network_filter": "Select network",
+			"withdrawing": "Withdrawing..."
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -832,9 +834,13 @@
 			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",
 			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
 			"swap_failed_withdraw_success": "The swap failed and your tokens were successfully refunded. Please try again or change the swap provider.",
-			"withdraw_failed_first_part": "The swap failed and the sent tokens could not be automatically withdrawn. Please follow ",
-			"withdraw_failed_second_part": "to withdraw them manually on ",
-			"swap_failed_instruction_link": "these instructions "
+			"withdraw_failed_first_part": "The swap failed and your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow ",
+			"withdraw_failed_second_part": "to withdraw them anytime later directly from their website: ",
+			"swap_failed_instruction_link": "these instructions ",
+			"manually_withdraw_success": "The tokens from your previous failed swap were successfully withdrawn. You can try the swap again or change the swap provider.",
+			"manually_withdraw_failed": "Withdrawing your funds failed. <br> Please try again or follow",
+			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
+			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal."
 		}
 	},
 	"buy": {
@@ -978,6 +984,7 @@
 			"invalid_contract_address": "Contract address is invalid.",
 			"invalid_token_address": "Token address is invalid.",
 			"invalid_ledger": "The selected token is not linked with an ICRC Ledger canister.",
+			"unrecognised_erc_interface": "Unrecognised ERC interface.",
 			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",

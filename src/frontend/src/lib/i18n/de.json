@@ -102,6 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Dezentralisiert",
 			"logout": "Abmelden",
+			"lock": "",
 			"authenticate": "Anmelden",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Sofortiger und privater Zugriff überall",
@@ -465,7 +466,6 @@
 		"error": {
 			"no_alchemy_config": "Keine Alchemy-Konfiguration für Netzwerk $network",
 			"no_alchemy_provider": "Kein Alchemy-Anbieter für Netzwerk $network",
-			"no_alchemy_erc20_provider": "Kein Alchemy-ERC20-Anbieter für Netzwerk $network",
 			"no_etherscan_provider": "Kein Etherscan-Anbieter für Netzwerk $network",
 			"no_infura_provider": "Kein Infura-Anbieter für Netzwerk $network",
 			"no_infura_cketh_provider": "Kein Infura CkETH-Anbieter für Netzwerk $network",
@@ -493,9 +493,10 @@
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
+			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
+			"erc1155_custom_tokens": "Fehler beim Laden der ERC1155-Benutzertoken.",
 			"erc20_user_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
-			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
@@ -821,7 +822,8 @@
 			"open_icp_swap": "ICP Swap-Website öffnen",
 			"open_instructions_link": "Link mit Anweisungen öffnen",
 			"select_token": "Token auswählen",
-			"select_network_filter": "Netzwerk auswählen"
+			"select_network_filter": "Netzwerk auswählen",
+			"withdrawing": ""
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
@@ -832,9 +834,13 @@
 			"deposit_error": "Das Senden der Token für den Tausch ist fehlgeschlagen. Please try again or change the swap provider. Versuche es erneut oder wähle einen anderen Anbieter.",
 			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
 			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Tokens wurden erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
-			"withdraw_failed_first_part": "Der Tausch ist fehlgeschlagen und deine Tokens konnten nicht automatisch zurückgeholt werden. Folge ",
-			"withdraw_failed_second_part": "um sie manuell zurückzuholen von ",
-			"swap_failed_instruction_link": "diesen Anweisungen "
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
+			"swap_failed_instruction_link": "diesen Anweisungen ",
+			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
@@ -978,6 +984,7 @@
 			"invalid_contract_address": "Vertragsadresse ist ungültig.",
 			"invalid_token_address": "Token-Adresse ist ungültig.",
 			"invalid_ledger": "Das ausgewählte Token ist nicht mit einem ICRC-Ledger-Canister verknüpft.",
+			"unrecognised_erc_interface": "",
 			"no_metadata": "Es wurden keine Metadaten abgerufen.",
 			"unexpected": "Beim Speichern des Tokens ist etwas schiefgelaufen.",
 			"unexpected_hiding": "Beim Verbergen des Tokens ist etwas schiefgelaufen.",
