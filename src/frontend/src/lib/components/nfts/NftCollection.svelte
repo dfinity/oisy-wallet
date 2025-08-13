@@ -8,10 +8,8 @@
 	const collectionId = $derived($page.params.collectionId);
 
 	const collectionNfts: Nft[] = $derived(
-		($nftStore ?? []).filter((c) => c.collection.symbol === collectionId)
+		($nftStore ?? []).filter((c) => c.collection.address === collectionId)
 	);
-
-	console.log(collectionNfts, $nftStore);
 </script>
 
 <NftCollectionHero collection={collectionNfts?.[0]?.collection} nfts={collectionNfts} />

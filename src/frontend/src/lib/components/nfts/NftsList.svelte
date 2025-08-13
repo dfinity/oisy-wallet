@@ -8,6 +8,10 @@
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
+
+	$effect(() => {
+		console.log(nftCollections);
+	});
 </script>
 
 <NftsDisplayHandler bind:nfts bind:nftCollections>

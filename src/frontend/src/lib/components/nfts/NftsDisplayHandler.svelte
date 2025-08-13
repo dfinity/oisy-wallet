@@ -14,8 +14,6 @@
 
 	let { children, nfts = $bindable([]), nftCollections = $bindable([]) }: Props = $props();
 
-	console.log($nonFungibleTokens);
-
 	$effect(() => {
 		nfts = getEnabledNfts({ $nftStore, $enabledNonFungibleNetworkTokens });
 		nftCollections = getNftCollectionUi({ $nftStore, $nonFungibleTokens });

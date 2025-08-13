@@ -26,7 +26,7 @@
 		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
 			breadcrumbs = [
 				...breadcrumbs,
-				{ label: nft.collection.name, url: AppPath.Nfts + nft.collection.symbol }
+				{ label: nft.collection.name, url: AppPath.Nfts + nft.collection.address }
 			];
 		}
 		return breadcrumbs;
@@ -61,9 +61,8 @@
 		</div>
 		{#if nonNullish(nft?.imageUrl)}
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
-				<div class="h-54 w-54 relative flex overflow-hidden rounded-xl border-2 border-off-white">
-					<Img src={nft.imageUrl} />
-
+				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
+					<Img src={nft?.imageUrl} />
 					<span class="absolute bottom-0 right-0 m-2.5">
 						<NetworkLogo network={nft.collection.network} size="xs" color="white" />
 					</span>
