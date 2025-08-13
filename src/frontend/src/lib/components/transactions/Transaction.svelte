@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component, Snippet } from 'svelte';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
@@ -12,20 +14,18 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { isTokenNonFungible } from '$lib/utils/nft.utils';
+	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
-	import { nftStore } from '$lib/stores/nft.store';
-	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import { findNft } from '$lib/utils/nfts.utils';
-	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 
 	interface Props {
 		amount?: bigint;
