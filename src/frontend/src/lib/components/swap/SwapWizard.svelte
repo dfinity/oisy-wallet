@@ -51,8 +51,13 @@
 		currentStep
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, isSourceTokenIcrc2, failedSwapError } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		isSourceTokenIcrc2,
+		failedSwapError,
+		sourceTokenExchangeRate
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -60,11 +65,19 @@
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 
+	let isSwapAmountsLoading = $state(false);
+
 	const setFailedProgressStep = (step: ProgressStepsSwap) => {
 		if (!swapFailedProgressSteps.includes(step)) {
 			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
 		}
 	};
+
+	let sourceTokenUsdValue = $derived(
+		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
+			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
+			: undefined
+	);
 
 	const clearFailedProgressStep = () => {
 		swapFailedProgressSteps = [];
@@ -133,7 +146,8 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					usdSourceValue: sourceTokenUsdValue ?? ''
 				}
 			});
 
@@ -185,7 +199,8 @@
 						sourceToken: $sourceToken.symbol,
 						destinationToken: $destinationToken.symbol,
 						dApp: $swapAmountsStore.selectedProvider.provider,
-						errorKey: isSwapError(err) ? err.code : ''
+						errorKey: isSwapError(err) ? err.code : '',
+						usdSourceValue: sourceTokenUsdValue ?? ''
 					}
 				});
 			}
@@ -204,6 +219,8 @@
 		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
 		{slippageValue}
+		isSourceTokenIcrc2={$isSourceTokenIcrc2}
+		bind:isSwapAmountsLoading
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapForm
@@ -214,6 +231,7 @@
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue
+				{isSwapAmountsLoading}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview

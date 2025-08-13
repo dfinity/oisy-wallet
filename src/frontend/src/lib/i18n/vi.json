@@ -102,7 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Phi tập trung",
 			"logout": "Đăng xuất",
-			"lock": "",
+			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP và hơn thế nữa",
 			"instant_and_private": "Nhanh và riêng tư mọi lúc mọi nơi",
@@ -159,6 +159,16 @@
 				"other_asset_control": "Nhận thông tin về Kiểm soát tài sản, Phục hồi và Quản trị trong Ví $oisy_short",
 				"sign_in": "Cần giúp đỡ để đăng nhập?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Mở khóa để tiếp tục",
+			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
+			"unlock": "Mở khóa",
+			"logout": "Đăng xuất",
+			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",
+			"learn_more": "Tìm hiểu thêm"
 		}
 	},
 	"dapps": {
@@ -272,12 +282,6 @@
 				"one_liner": "DEX hàng đầu, nhà cung cấp stablecoin và nền tảng cho vay trên Ethereum và các chuỗi tương thích với EVM.",
 				"call_to_action": "Bị cuốn hút",
 				"description": "Curve Finance là một sàn giao dịch phi tập trung, nhà cung cấp stablecoin và nền tảng cho vay hàng đầu trên Ethereum và các chuỗi tương thích với EVM. Nó nổi tiếng với các nhà tạo lập thị trường tự động tiên tiến cho stablecoin và các tài sản biến động, và hệ thống thanh lý mềm độc đáo cho các khoản vay."
-			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Mật mã và chuỗi khối tiên tiến đan xen vào nhau để tạo ra một môi trường chơi an toàn và minh bạch cho tất cả mọi người.",
-				"call_to_action": "Bạn được mời",
-				"description": "Mật mã và chuỗi khối tiên tiến đan xen vào nhau để tạo ra một môi trường chơi an toàn và minh bạch cho tất cả mọi người.<br/><br/>Chơi với lựa chọn tài sản kỹ thuật số của bạn—hiện tại là ICP, sắp có BTC, ETH, SOL và USDC. Hoàn toàn trên chuỗi, không có điểm lỗi trung tâm. RNG dựa trên chuỗi khối của chúng tôi đảm bảo chơi game công bằng có thể chứng minh được, sử dụng công nghệ mã nguồn mở từ nhóm R&D của Dfinity."
 			},
 			"sonic": {
 				"name": "Sonic",
@@ -717,7 +721,8 @@
 			"minter_info_not_loaded": "Thử lại sau vài giây, tham số cấu hình ckETH chưa được tải.",
 			"minter_info_not_certified": "Thử lại sau vài giây, tham số cấu hình ckETH chưa được chứng nhận.",
 			"cketh_max_transaction_fee_missing": "Phí giao dịch tối đa cho ckETH bị thiếu.",
-			"utxos_fee_missing": "Phí UTXO bị thiếu."
+			"utxos_fee_missing": "Phí UTXO bị thiếu.",
+			"minimum_btc_amount": "Số tiền tối thiểu là $amount BTC."
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
@@ -1238,12 +1243,12 @@
 				"reward_received": "Chào mừng đến với $oisy_short!",
 				"reward_failed": "Mã đã hết hạn",
 				"reward_received_description": "Bạn sẽ nhận được món quà chào mừng của mình bất cứ lúc nào.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Yêu cầu một cái mới và thử lại"
 			},
 			"error": {
 				"loading_reward": "Lỗi khi tải mã phần thưởng mới.",
 				"loading_user_data": "Không tải được dữ liệu người dùng từ canister phần thưởng.",
-				"claiming_reward": "Lỗi khi yêu cầu phần thưởng.",
 				"loading_eligibility": "Lỗi khi tải tính đủ điều kiện của chiến dịch."
 			}
 		},
@@ -1520,6 +1525,7 @@
 			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
 			"send_message": "Gửi tin nhắn",
 			"send_message_input_placeholder": "Bạn muốn làm gì?",
+			"no_contacts_found_message": "",
 			"loading": "Đang suy nghĩ..."
 		},
 		"errors": {

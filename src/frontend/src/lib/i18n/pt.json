@@ -161,6 +161,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "Desbloqueie para continuar",
+			"title_part_2": "Você bloqueou sua carteira anteriormente para mantê-la segura. Continue de onde parou ou saia.",
+			"unlock": "Bloquear",
+			"logout": "Sair",
+			"logout_clear_cash_message": "Sair limpará todos os dados armazenados em cache",
+			"learn_more": "Saber mais"
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "Todos os aplicativos",
@@ -272,12 +282,6 @@
 				"one_liner": "DEX líder, fornecedor de stablecoins e plataforma de empréstimos em cadeias compatíveis com Ethereum e EVM.",
 				"call_to_action": "Pronto para ficar warped?",
 				"description": "A Curve Finance é uma exchange descentralizada líder, fornecedora de stablecoins e plataforma de empréstimos em blockchains compatíveis com Ethereum e EVM. É conhecida pelos seus criadores de mercado automatizados avançados para stablecoins e ativos voláteis, além do seu sistema único de liquidação suave para empréstimos."
-			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Criptografia de ponta e blockchain se entrelaçam para criar um ambiente de jogo seguro e transparente para todos.",
-				"call_to_action": "Você está convidado",
-				"description": "Criptografia de ponta e blockchain se unem para proporcionar um ambiente de jogo seguro e transparente para todos.<br/><br/>Jogue com qualquer escolha sua de ativos digitais — ICP agora, com BTC, ETH, SOL e USDC em breve. Totalmente on-chain, sem pontos centrais de falha. Nosso RNG baseado em blockchain garante jogos comprovadamente justos, utilizando tecnologia de código aberto da equipa de desenvolvimento da Dfinity."
 			},
 			"sonic": {
 				"name": "Sonic",
@@ -717,7 +721,8 @@
 			"minter_info_not_loaded": "Tente novamente em alguns segundos, um parâmetro de configuração ckETH ainda não foi carregado.",
 			"minter_info_not_certified": "Tente novamente em alguns segundos, um parâmetro de configuração ckETH não foi certificado.",
 			"cketh_max_transaction_fee_missing": "A taxa máxima de transação para ckETH está faltando.",
-			"utxos_fee_missing": "A taxa de UTXOs está faltando."
+			"utxos_fee_missing": "A taxa de UTXOs está faltando.",
+			"minimum_btc_amount": "O valor mínimo é $amount BTC."
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",
@@ -1238,12 +1243,12 @@
 				"reward_received": "Bem-vindo ao $oisy_short!",
 				"reward_failed": "O código expirou",
 				"reward_received_description": "Você receberá seu presente de boas-vindas a qualquer momento.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Solicite um novo e tente novamente"
 			},
 			"error": {
 				"loading_reward": "Erro ao carregar um novo código de recompensa.",
 				"loading_user_data": "Falha ao carregar dados do usuário do canister de recompensa.",
-				"claiming_reward": "Erro ao reivindicar recompensa.",
 				"loading_eligibility": "Erro ao carregar a elegibilidade para a campanha."
 			}
 		},
@@ -1520,6 +1525,7 @@
 			"action_button_contacts_prompt": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"no_contacts_found_message": "",
 			"loading": ""
 		},
 		"errors": {

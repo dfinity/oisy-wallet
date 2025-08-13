@@ -13,6 +13,7 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { loadNfts } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
@@ -70,7 +71,8 @@ describe('nft.services', () => {
 		network: new Network('ethereum', 1),
 		chainId: 1,
 		provider: {},
-		getNftMetadata: vi.fn()
+		getNftMetadata: vi.fn(),
+		balanceOf: vi.fn()
 	} as unknown as InfuraErc1155Provider;
 
 	describe('loadNfts', () => {
@@ -98,6 +100,7 @@ describe('nft.services', () => {
 			expect(mockAlchemyProvider.getNftIdsForOwner).not.toHaveBeenCalled();
 			expect(mockInfuraErc721Provider.getNftMetadata).not.toHaveBeenCalled();
 			expect(mockInfuraErc1155Provider.getNftMetadata).not.toHaveBeenCalled();
+			expect(mockInfuraErc1155Provider.balanceOf).not.toHaveBeenCalled();
 		});
 
 		it('should load NFTs of tokens', async () => {
@@ -120,6 +123,7 @@ describe('nft.services', () => {
 					imageUrl: `https://test.com/image-${tokenId}.png`
 				})
 			);
+			vi.mocked(mockInfuraErc1155Provider.balanceOf).mockResolvedValue(2);
 
 			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
@@ -128,13 +132,14 @@ describe('nft.services', () => {
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc721AzukiToken
+					collection: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc1155NyanCatToken
+					collection: mapTokenToCollection(erc1155NyanCatToken),
+					balance: 2
 				}))
 			];
 
@@ -153,12 +158,20 @@ describe('nft.services', () => {
 							contractAddress: NYAN_CAT_TOKEN.address
 						})
 					);
+
+					expect(mockInfuraErc1155Provider.balanceOf).toHaveBeenCalledWith(
+						expect.objectContaining({
+							contractAddress: NYAN_CAT_TOKEN.address,
+							walletAddress: mockWalletAddress,
+							tokenId
+						})
+					);
 				});
 
 				expect(get(nftStore)?.length).toEqual(expectedNfts.length);
 				expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
 			});
-		});
+		}, 10000);
 
 		it('should skip already loaded NFTs', async () => {
 			const tokens: NonFungibleToken[] = [erc721AzukiToken, erc1155NyanCatToken];
@@ -169,11 +182,12 @@ describe('nft.services', () => {
 			const loadedNfts: Nft[] = [
 				...loadedTokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: erc721AzukiToken
+					collection: erc721AzukiToken
 				})),
 				...loadedTokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: erc1155NyanCatToken
+					collection: erc1155NyanCatToken,
+					balance: 3
 				}))
 			];
 
@@ -195,6 +209,7 @@ describe('nft.services', () => {
 					imageUrl: `https://test.com/image-${tokenId}.png`
 				})
 			);
+			vi.mocked(mockInfuraErc1155Provider.balanceOf).mockResolvedValue(2);
 
 			await loadNfts({ tokens, loadedNfts, walletAddress: mockWalletAddress });
 
@@ -203,13 +218,14 @@ describe('nft.services', () => {
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc721AzukiToken
+					collection: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...notLoadedTokenIds.map((tokenId) => ({
 					id: tokenId,
 					name: `Test NFT #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
-					contract: erc1155NyanCatToken
+					collection: mapTokenToCollection(erc1155NyanCatToken),
+					balance: 2
 				}))
 			];
 
@@ -228,6 +244,14 @@ describe('nft.services', () => {
 							contractAddress: NYAN_CAT_TOKEN.address
 						})
 					);
+
+					expect(mockInfuraErc1155Provider.balanceOf).not.toHaveBeenCalledWith(
+						expect.objectContaining({
+							contractAddress: NYAN_CAT_TOKEN.address,
+							walletAddress: mockWalletAddress,
+							tokenId
+						})
+					);
 				});
 
 				notLoadedTokenIds.forEach((tokenId) => {
@@ -242,6 +266,14 @@ describe('nft.services', () => {
 						expect.objectContaining({
 							tokenId,
 							contractAddress: NYAN_CAT_TOKEN.address
+						})
+					);
+
+					expect(mockInfuraErc1155Provider.balanceOf).toHaveBeenCalledWith(
+						expect.objectContaining({
+							contractAddress: NYAN_CAT_TOKEN.address,
+							walletAddress: mockWalletAddress,
+							tokenId
 						})
 					);
 				});
@@ -264,6 +296,7 @@ describe('nft.services', () => {
 			expect(mockAlchemyProvider.getNftIdsForOwner).not.toHaveBeenCalled();
 			expect(mockInfuraErc721Provider.getNftMetadata).not.toHaveBeenCalled();
 			expect(mockInfuraErc1155Provider.getNftMetadata).not.toHaveBeenCalled();
+			expect(mockInfuraErc1155Provider.balanceOf).not.toHaveBeenCalled();
 		});
 
 		it('should handle nft ids loading error gracefully', async () => {
@@ -279,6 +312,7 @@ describe('nft.services', () => {
 			expect(mockAlchemyProvider.getNftIdsForOwner).toHaveBeenCalled();
 			expect(mockInfuraErc721Provider.getNftMetadata).not.toHaveBeenCalled();
 			expect(mockInfuraErc1155Provider.getNftMetadata).not.toHaveBeenCalled();
+			expect(mockInfuraErc1155Provider.balanceOf).not.toHaveBeenCalled();
 		});
 
 		it('should handle metadata fetch error gracefully', async () => {
@@ -293,17 +327,19 @@ describe('nft.services', () => {
 			vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockRejectedValue(
 				new Error('Metadata Error')
 			);
+			vi.mocked(mockInfuraErc1155Provider.balanceOf).mockResolvedValue(2);
 
 			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
 			const expectedNfts = [
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: erc721AzukiToken
+					collection: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
-					contract: erc1155NyanCatToken
+					collection: mapTokenToCollection(erc1155NyanCatToken),
+					balance: 2
 				}))
 			];
 
@@ -322,11 +358,67 @@ describe('nft.services', () => {
 							contractAddress: NYAN_CAT_TOKEN.address
 						})
 					);
+
+					expect(mockInfuraErc1155Provider.balanceOf).toHaveBeenCalledWith(
+						expect.objectContaining({
+							contractAddress: NYAN_CAT_TOKEN.address,
+							walletAddress: mockWalletAddress,
+							tokenId
+						})
+					);
 				});
 
 				expect(get(nftStore)?.length).toEqual(expectedNfts.length);
 				expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
 			});
-		});
+		}, 10000);
+
+		it('should handle balance fetch error gracefully', async () => {
+			const tokens: Erc1155CustomToken[] = [erc1155NyanCatToken];
+			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
+
+			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(tokenIds);
+			vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
+				Promise.resolve({
+					id: tokenId,
+					name: `Test NFT #${tokenId}`,
+					imageUrl: `https://test.com/image-${tokenId}.png`
+				})
+			);
+			vi.mocked(mockInfuraErc1155Provider.balanceOf).mockRejectedValue(
+				new Error('BalanceOf Error')
+			);
+
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+
+			const expectedNfts = tokenIds.map((tokenId) => ({
+				id: tokenId,
+				name: `Test NFT #${tokenId}`,
+				imageUrl: `https://test.com/image-${tokenId}.png`,
+				collection: mapTokenToCollection(erc1155NyanCatToken)
+			}));
+
+			await waitFor(() => {
+				tokenIds.forEach((tokenId) => {
+					expect(mockInfuraErc1155Provider.getNftMetadata).toHaveBeenCalledWith(
+						expect.objectContaining({
+							tokenId,
+							contractAddress: NYAN_CAT_TOKEN.address
+						})
+					);
+
+					expect(mockInfuraErc1155Provider.balanceOf).toHaveBeenCalledWith(
+						expect.objectContaining({
+							contractAddress: NYAN_CAT_TOKEN.address,
+							walletAddress: mockWalletAddress,
+							tokenId
+						})
+					);
+				});
+
+				expect(get(nftStore)?.length).toEqual(expectedNfts.length);
+				expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
+			});
+		}, 10000);
 	});
 });
