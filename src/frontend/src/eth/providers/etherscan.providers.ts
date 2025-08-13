@@ -6,8 +6,8 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc721Token } from '$eth/types/erc721';
 import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 import type {
-	EtherscanProviderErc721TokenTransferTransaction,
 	EtherscanProviderErc1155TokenTransferTransaction,
+	EtherscanProviderErc721TokenTransferTransaction,
 	EtherscanProviderInternalTransaction,
 	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
