@@ -3,8 +3,8 @@ import EthTransactionModal from '$eth/components/transactions/EthTransactionModa
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import {
-	createMockNftTransactionsUi,
-	createMockEthTransactionsUi
+	createMockEthTransactionsUi,
+	createMockNftTransactionsUi
 } from '$tests/mocks/eth-transactions.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
