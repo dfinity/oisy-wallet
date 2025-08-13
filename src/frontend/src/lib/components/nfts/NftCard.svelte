@@ -6,7 +6,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { goto } from '$app/navigation';
 	import { AppPath } from '$lib/constants/routes.constants';
 
 	interface Props {
