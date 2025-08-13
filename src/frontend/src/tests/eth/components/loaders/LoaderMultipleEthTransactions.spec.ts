@@ -72,15 +72,12 @@ describe('LoaderMultipleEthTransactions', () => {
 
 	const mockErc20UserTokens = mockErc20CertifiedUserTokens.map(({ data: token }) => token);
 
-	const mockErc721CustomTokens = mockErc721CertifiedCustomTokens.map(({ data: token }) => token);
-
 	const mockAdditionalTokens = mockAdditionalCertifiedTokens.map(({ data: token }) => token);
 
 	const allExpectedTokens = [
 		...SUPPORTED_ETHEREUM_TOKENS,
 		...mockErc20UserTokens,
-		...SUPPORTED_EVM_TOKENS,
-		...mockErc721CustomTokens
+		...SUPPORTED_EVM_TOKENS
 	];
 
 	beforeEach(() => {
