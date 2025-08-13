@@ -167,7 +167,7 @@ export const getBtcWalletBalance = ({
 					return acc;
 				},
 				//  when no pending transactions we assume so the actualTotalBalance becomes totalBalance
-				{ lockedBalance: ZERO, unconfirmedBalance: totalBalance }
+				{ lockedBalance: ZERO, unconfirmedBalance: ZERO }
 			);
 
 	// We subtract lockedBalance because those UTXOs cannot be spent again (prevents double-spending)
