@@ -108,11 +108,11 @@ export const getPendingTransactionIds = (address: string): string[] => {
  */
 export const getBtcWalletBalance = ({
 	address,
-	totalBalance,
+	certifiedBalance,
 	providerTransactions
 }: {
 	address: string;
-	totalBalance: bigint;
+	certifiedBalance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[];
 }): BtcWalletBalance => {
 	console.warn('🎯 [btc.utils.ts -> getBtcWalletBalance] Received providerTransactions:', {
@@ -137,6 +137,7 @@ export const getBtcWalletBalance = ({
 				})) ?? null
 		}
 	});
+
 	// Create efficient lookup map for correlation between pending and provider transactions
 	const transactionLookup = new Map<string, BtcTransactionUi>();
 	providerTransactions.forEach((tx) => {
@@ -158,13 +159,16 @@ export const getBtcWalletBalance = ({
 					if (txid) {
 						// Look up the transaction in providerTransactions to get confirmation count and type
 						const matchedTransaction = transactionLookup.get(txid);
+
 						if (matchedTransaction && nonNullish(matchedTransaction.value)) {
 							const confirmations =
 								matchedTransaction.confirmations ?? UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-							// If transaction has 0-5 confirmations, calculate net unconfirmed balance
+							// Only add to unconfirmed balance when transaction has 0/1-5 confirmations
+							// 0 confirmations: only locked (no unconfirmed impact to avoid double counting)
+							// 6+ confirmations: transaction will be removed from pending store by cleanup
 							if (
-								confirmations >= UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS &&
+								confirmations >= UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1 && // Start from 1 confirmation
 								confirmations < CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 							) {
 								// Apply directional impact to unconfirmed balance
@@ -176,21 +180,21 @@ export const getBtcWalletBalance = ({
 									acc.unconfirmedBalance += matchedTransaction.value;
 								}
 							}
+							// If confirmations === 0: only locked, no unconfirmed impact (avoids double accounting)
 						} else {
-							// fallback if BTC API provider is n/a or trx is missing from providerTransactions
-							console.warn('Missing transaction data from API provider', txid);
-							// Since this should only happen for outgoing transactions, we treat it as such
-							// acc.unconfirmedBalance -= txUtxoValue;
+							// Missing transaction data from API provider - this indicates 0 confirmations
+							// Only count as locked (already added above), no unconfirmed impact
+							// This avoids double accounting while the transaction is not yet indexed by the provider
+							console.warn('Missing transaction data from API provider (0 confirmations):', txid);
 						}
 					}
 					return acc;
 				},
-				//  when no pending transactions we assume so the actualTotalBalance becomes totalBalance
 				{ lockedBalance: ZERO, unconfirmedBalance: ZERO }
 			);
 
-	// We subtract lockedBalance because those UTXOs cannot be spent again (prevents double-spending)
-	const confirmedBalance = totalBalance - lockedBalance;
+	// Calculate confirmed balance: certified balance minus locked UTXOs
+	const confirmedBalance = certifiedBalance - lockedBalance;
 
 	//  User's actual actual total wealth after all pending activity.This gives users the most accurate picture of their
 	//  real BTC holdings.
