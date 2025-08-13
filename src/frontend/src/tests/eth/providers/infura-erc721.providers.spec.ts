@@ -149,7 +149,7 @@ describe('infura-erc721.providers', () => {
 					id: 123456,
 					attributes: [{ traitType: 'Color', value: 'Blue' }],
 					imageUrl: mockMetadata.image,
-					description: mockMetadata.description,
+					description: mockMetadata.description
 				});
 			});
 

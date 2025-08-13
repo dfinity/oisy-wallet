@@ -64,7 +64,8 @@ export class InfuraErc721Provider extends InfuraErc165Provider {
 			id: tokenId,
 			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
 			...(nonNullish(metadata.name) && { name: metadata.name }),
-			...(nonNullish(metadata.description) && notEmptyString(metadata.description) && {description: metadata.description }),
+			...(nonNullish(metadata.description) &&
+				notEmptyString(metadata.description) && { description: metadata.description }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
 		};
 	};
