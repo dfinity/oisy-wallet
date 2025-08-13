@@ -1,8 +1,10 @@
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
+import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -21,8 +23,6 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
-import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
 
 export const loadEthereumTransactions = ({
 	networkId,
@@ -153,7 +153,11 @@ const loadErcTransactions = async ({
 		return { success: false };
 	}
 
-	const tokens = [...get(enabledErc20Tokens), ...get(enabledErc721Tokens), ...get(enabledErc1155Tokens)];
+	const tokens = [
+		...get(enabledErc20Tokens),
+		...get(enabledErc721Tokens),
+		...get(enabledErc1155Tokens)
+	];
 	const token = tokens.find(
 		({ id, network, standard: tokenStandard }) =>
 			id === tokenId && network.id === networkId && tokenStandard === standard
@@ -254,10 +258,10 @@ const loadErc721Transactions = async ({
 };
 
 const loadErc1155Transactions = async ({
-																				 networkId,
-																				 token,
-																				 address
-																			 }: {
+	networkId,
+	token,
+	address
+}: {
 	networkId: NetworkId;
 	token: Erc1155TokenToggleable;
 	address: Address;
