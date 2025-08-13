@@ -7,7 +7,7 @@ import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CertifiedData } from '$lib/types/store';
-import { isNullish, jsonReplacer, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -53,9 +53,6 @@ export const getPendingTransactions = (
 } => {
 	const storeData = get(btcPendingSentTransactionsStore);
 	const pendingTransactions = storeData[address];
-	console.warn(
-		`getPendingTransactions(${address}) -> ${JSON.stringify(pendingTransactions, jsonReplacer, 2)}`
-	);
 
 	return pendingTransactions;
 };
