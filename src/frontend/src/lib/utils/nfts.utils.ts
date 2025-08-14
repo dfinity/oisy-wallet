@@ -3,6 +3,7 @@ import type { NftListSortingType } from '$lib/stores/nft-list.store';
 import type { NftError } from '$lib/types/errors';
 import type {
 	Nft,
+	NftId,
 	NftCollection,
 	NftCollectionUi,
 	NftsByNetwork,
@@ -46,6 +47,20 @@ export const getNftsByNetworks = ({
 
 	return nftsByToken;
 };
+
+export const findNft = ({
+	nfts,
+	token: { address: tokenAddress, network: tokenNetwork },
+	tokenId
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	tokenId: NftId;
+}): Nft | undefined =>
+	nfts.find(
+		({ id, collection: { address, network } }) =>
+			address === tokenAddress && network === tokenNetwork && id === tokenId
+	);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';

@@ -30,7 +30,10 @@ import {
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
-	TRACK_SIGN_IN_ERROR_COUNT
+	TRACK_SIGN_IN_ERROR_COUNT,
+	TRACK_SIGN_OUT_ERROR,
+	TRACK_SIGN_OUT_SUCCESS,
+	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
@@ -88,39 +91,63 @@ export const signIn = async (
 
 export const signOut = ({
 	resetUrl = false,
-	clearAllPrincipalsStorages = false
+	clearAllPrincipalsStorages = false,
+	source = ''
 }: {
 	resetUrl?: boolean;
 	clearAllPrincipalsStorages?: boolean;
-}): Promise<void> => logout({ resetUrl, clearAllPrincipalsStorages });
+	source?: string;
+}): Promise<void> => {
+	trackSignOut({
+		name: TRACK_SIGN_OUT_SUCCESS,
+		meta: { reason: 'user', resetUrl, source }
+	});
+	return logout({ resetUrl, clearAllPrincipalsStorages });
+};
 
-export const errorSignOut = (text: string): Promise<void> =>
-	logout({
+export const errorSignOut = (text: string): Promise<void> => {
+	trackSignOut({
+		name: TRACK_SIGN_OUT_ERROR,
+		meta: { reason: 'error', level: 'error', text }
+	});
+	return logout({
 		msg: {
 			text,
 			level: 'error'
 		}
 	});
+};
 
-export const warnSignOut = (text: string): Promise<void> =>
-	logout({
+export const warnSignOut = (text: string): Promise<void> => {
+	trackSignOut({
+		name: TRACK_SIGN_OUT_WITH_WARNING,
+		meta: { reason: 'warning', level: 'warn', text }
+	});
+	return logout({
 		msg: {
 			text,
 			level: 'warn'
 		}
 	});
+};
 
 export const nullishSignOut = (): Promise<void> =>
 	warnSignOut(get(i18n).auth.warning.not_signed_in);
 
-export const idleSignOut = (): Promise<void> =>
-	logout({
+export const idleSignOut = (): Promise<void> => {
+	const text = get(i18n).auth.warning.session_expired;
+	trackEvent({
+		name: TRACK_SIGN_OUT_WITH_WARNING,
+		metadata: { level: 'warn', text, reason: 'session_expired', clearStorages: 'false' }
+	});
+	return logout({
 		msg: {
 			text: get(i18n).auth.warning.session_expired,
 			level: 'warn'
 		},
 		clearCurrentPrincipalStorages: false
 	});
+};
 
 export const lockSession = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
 	logout({
@@ -289,4 +316,35 @@ const cleanUpMsgUrl = () => {
 	url.searchParams.delete(PARAM_LEVEL);
 
 	replaceHistory(url);
+};
+
+/**
+ * Track sign-out events with optional metadata
+ */
+
+const trackSignOut = ({
+	name,
+	meta = {}
+}: {
+	name: string;
+	meta?: {
+		reason?: string;
+		level?: 'warn' | 'error';
+		text?: string;
+		source?: string;
+		resetUrl?: boolean;
+		clearStorages?: boolean;
+	};
+}) => {
+	trackEvent({
+		name,
+		metadata: {
+			reason: meta.reason ?? 'user',
+			level: meta.level ?? '',
+			text: meta.text ?? '',
+			source: meta.source ?? 'app',
+			resetUrl: `${meta.resetUrl ?? false}`,
+			clearStorages: `${meta.clearStorages ?? true}`
+		}
+	});
 };

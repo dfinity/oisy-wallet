@@ -102,7 +102,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Dezentralisiert",
 			"logout": "Abmelden",
-			"lock": "",
+			"lock": "Sperren",
 			"authenticate": "Anmelden",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Sofortiger und privater Zugriff überall",
@@ -163,12 +163,12 @@
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"unlock": "",
-			"logout": "",
-			"logout_clear_cash_message": "",
-			"learn_more": ""
+			"title_part_1": "Deine Wallet ist gesichert",
+			"title_part_2": "Du hast deine Wallet gesperrt. Entsperre sie um fortzufahren, oder logge dich aus.",
+			"unlock": "Entsperren",
+			"logout": "Ausloggen",
+			"logout_clear_cash_message": "Ausloggen wird alle lokal gecachten Daten löschen",
+			"learn_more": "Erfahre mehr"
 		}
 	},
 	"dapps": {
