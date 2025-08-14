@@ -1519,7 +1519,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short Assistente AI",
-			"welcome_message": "Olá! \uD83D\uDC4B Só o OISY, o seu assistente pessoal de AI. Veja como posso ajudar:",
+			"welcome_message": "Olá! 👋 Só o OISY, o seu assistente pessoal de AI. Veja como posso ajudar:",
 			"action_button_contacts_title": "Mostrar contatos",
 			"action_button_contacts_subtitle": "Mostrar os seus contatos salvos",
 			"action_button_contacts_prompt": "Mostrar meus contatos.",
