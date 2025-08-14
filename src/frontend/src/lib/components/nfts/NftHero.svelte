@@ -54,7 +54,7 @@
 	<div class="relative h-64 w-full overflow-hidden">
 		<div
 			class="absolute flex h-64 w-full bg-cover bg-center blur"
-			style={'background-image: url(' + nft?.imageUrl + ')'}
+			style={'background-image: url(' + nft?.imageUrl + '); box-shadow: inset 0 -1px #0000000d'}
 			class:animate-pulse={isNullish(nft)}
 			class:bg-disabled-alt={isNullish(nft)}
 		>
