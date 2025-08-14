@@ -47,7 +47,7 @@ export const validateUtxosForSend = ({
 
 	// 1. Check if UTXOs array is not empty
 	if (utxos.length === 0) {
-		throw new BtcValidationError(BtcSendValidationError.InsufficientBalance, 'No UTXOs provided');
+		throw new BtcValidationError(BtcSendValidationError.InsufficientBalance);
 	}
 
 	// 2. Validate UTXO ownership (basic structure validation)
@@ -60,10 +60,7 @@ export const validateUtxosForSend = ({
 			!utxo.height ||
 			utxo.height < 0
 		) {
-			throw new BtcValidationError(
-				BtcSendValidationError.InvalidUtxoData,
-				'Invalid UTXO data structure or values'
-			);
+			throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
 		}
 	}
 
@@ -73,10 +70,7 @@ export const validateUtxosForSend = ({
 		const providedUtxoTxIds = extractUtxoTxIds(utxos);
 		for (const utxoTxId of providedUtxoTxIds) {
 			if (pendingTxIds.includes(utxoTxId)) {
-				throw new BtcValidationError(
-					BtcSendValidationError.UtxoLocked,
-					`UTXO ${utxoTxId} is locked by a pending transaction`
-				);
+				throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 			}
 		}
 	}
@@ -84,16 +78,13 @@ export const validateUtxosForSend = ({
 	// 4. Verify UTXO values and calculate totals
 	const totalUtxoValue = utxos.reduce((sum, utxo) => sum + BigInt(utxo.value), 0n);
 	if (totalUtxoValue <= 0n) {
-		throw new BtcValidationError(
-			BtcSendValidationError.InvalidUtxoData,
-			'Total UTXO value is zero or negative'
-		);
+		throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
 	}
 
-	// 5. Validate fee calculation matches expected transaction structure
+	// 5. Validate fee calculation matches expected transaction structure ( recipient + change)
 	const estimatedTxSize = estimateTransactionSize({
 		numInputs: utxos.length,
-		numOutputs: 2 // recipient + change
+		numOutputs: 2
 	});
 	const expectedMinFee = BigInt(estimatedTxSize) * feeRateSatoshisPerVByte;
 
@@ -103,19 +94,13 @@ export const validateUtxosForSend = ({
 	const maxAcceptableFee = expectedMinFee + feeToleranceRange;
 
 	if (feeSatoshis < minAcceptableFee || feeSatoshis > maxAcceptableFee) {
-		throw new BtcValidationError(
-			BtcSendValidationError.InvalidFeeCalculation,
-			`Fee validation failed: provided ${feeSatoshis} satoshis, expected range ${minAcceptableFee}-${maxAcceptableFee} satoshis`
-		);
+		throw new BtcValidationError(BtcSendValidationError.InvalidFeeCalculation);
 	}
 
 	// 6. Verify sufficient funds for amount + fee
 	const totalRequired = amountSatoshis + feeSatoshis;
 	if (totalUtxoValue < totalRequired) {
-		throw new BtcValidationError(
-			BtcSendValidationError.InsufficientBalanceForFee,
-			`Insufficient funds: need ${totalRequired} satoshis, but UTXOs only provide ${totalUtxoValue} satoshis`
-		);
+		throw new BtcValidationError(BtcSendValidationError.InsufficientBalanceForFee);
 	}
 
 	// TODO we must solve the dust issue first in prepareBtcSend before implementing this validation:

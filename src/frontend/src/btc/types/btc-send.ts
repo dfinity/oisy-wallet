@@ -9,11 +9,8 @@ export enum BtcPrepareSendError {
 }
 
 export class BtcValidationError extends Error {
-	constructor(
-		public readonly type: BtcSendValidationError,
-		message: string
-	) {
-		super(message);
+	constructor(public readonly type: BtcSendValidationError) {
+		super(type.toString());
 		this.name = 'BtcSendValidationError';
 	}
 }
