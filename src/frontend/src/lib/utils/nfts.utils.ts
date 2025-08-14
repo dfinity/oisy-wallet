@@ -3,9 +3,9 @@ import type { NftListSortingType } from '$lib/stores/nft-list.store';
 import type { NftError } from '$lib/types/errors';
 import type {
 	Nft,
-	NftId,
 	NftCollection,
 	NftCollectionUi,
+	NftId,
 	NftsByNetwork,
 	NonFungibleToken
 } from '$lib/types/nft';
@@ -149,7 +149,7 @@ const collator = new Intl.Collator(undefined, {
 
 const cmpByCollectionName =
 	(dir: number) =>
-	(a: Nft | NftCollectionUi, b: Nft | NftCollectionUi): number => {
+	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number => {
 		const an = a.collection?.name ?? '';
 		const bn = b.collection?.name ?? '';
 		return collator.compare(an, bn) * dir;
@@ -157,7 +157,7 @@ const cmpByCollectionName =
 
 const cmpByDate =
 	(dir: number) =>
-	(a: Nft | NftCollectionUi, b: Nft | NftCollectionUi): number => {
+	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number => {
 		// todo
 		return collator.compare('', '') * dir;
 	};
@@ -181,7 +181,7 @@ export const filterSortNfts = ({
 		const dir = sort.order === 'asc' ? 1 : -1;
 		const comparator = sort.type === 'collection-name' ? cmpByCollectionName(dir) : cmpByDate(dir);
 
-		nfts = [...nfts].sort(comparator);
+		nfts = [...nfts].sort((a, b) => comparator({ a, b }));
 	}
 
 	return nfts;
@@ -206,7 +206,7 @@ export const filterSortNftCollections = ({
 		const dir = sort.order === 'asc' ? 1 : -1;
 		const comparator = sort.type === 'collection-name' ? cmpByCollectionName(dir) : cmpByDate(dir);
 
-		nftCollections = [...nftCollections].sort(comparator);
+		nftCollections = [...nftCollections].sort((a, b) => comparator({ a, b }));
 	}
 
 	return nftCollections;
