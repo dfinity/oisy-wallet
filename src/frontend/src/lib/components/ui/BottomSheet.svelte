@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { BottomSheet, Backdrop } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
-	import type { Snippet } from 'svelte';
-	import { nonNullish } from '@dfinity/utils';
 	interface Props {
 		visible: boolean;
 		content: Snippet;
