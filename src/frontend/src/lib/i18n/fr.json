@@ -101,8 +101,8 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% décentralisé",
-			"logout": "Déconnexion",
-			"lock": "",
+			"logout": "Se déconnecter",
+			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP, et plus encore",
 			"instant_and_private": "Accès instantané et privé partout",
@@ -163,12 +163,12 @@
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"unlock": "",
-			"logout": "",
-			"logout_clear_cash_message": "",
-			"learn_more": ""
+			"title_part_1": "Déverrouillez pour continuer",
+			"title_part_2": "Vous avez précédemment verrouillé votre portefeuille pour le protéger. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
+			"unlock": "Ouvrir",
+			"logout": "Se déconnecter",
+			"logout_clear_cash_message": "La déconnexion effacera toutes les données mises en cache",
+			"learn_more": "Apprendre encore plus"
 		}
 	},
 	"dapps": {

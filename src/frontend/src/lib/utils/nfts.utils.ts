@@ -1,6 +1,6 @@
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import type { NftError } from '$lib/types/errors';
-import type { Nft, NftCollection, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
+import type { Nft, NftCollection, NftId, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -39,6 +39,20 @@ export const getNftsByNetworks = ({
 
 	return nftsByToken;
 };
+
+export const findNft = ({
+	nfts,
+	token: { address: tokenAddress, network: tokenNetwork },
+	tokenId
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	tokenId: NftId;
+}): Nft | undefined =>
+	nfts.find(
+		({ id, collection: { address, network } }) =>
+			address === tokenAddress && network === tokenNetwork && id === tokenId
+	);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
