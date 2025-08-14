@@ -25,6 +25,7 @@ describe('BreadcrumbNavigation', () => {
 		render(BreadcrumbNavigation, { items });
 
 		const labelsInDom = screen.getAllByRole('link').map((a) => a.textContent);
+
 		expect(labelsInDom).toEqual(items.map((i) => i.label));
 	});
 
