@@ -1,3 +1,4 @@
+import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
@@ -31,17 +32,19 @@ export type SendBtcParams = BtcSendServiceParams & {
  * @param params - Object containing all validation parameters
  * @throws BtcValidationError with specific error type if any validation fails
  */
-export const validateUtxosForSend = ({
+export const validateUtxosForSend = async ({
 	utxosFee,
 	source,
 	amount,
-	feeRateSatoshisPerVByte = 1n
+	network,
+	identity
 }: {
 	utxosFee: UtxosFee;
 	source: BtcAddress;
 	amount: Amount;
-	feeRateSatoshisPerVByte?: bigint;
-}): void => {
+	network: BitcoinNetwork;
+	identity: Identity;
+}): Promise<void> => {
 	const { utxos, feeSatoshis } = utxosFee;
 	const amountSatoshis = convertNumberToSatoshis({ amount });
 
@@ -81,7 +84,11 @@ export const validateUtxosForSend = ({
 		throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
 	}
 
-	// 5. Validate fee calculation matches expected transaction structure ( recipient + change)
+	// 6. Validate fee calculation matches expected transaction structure ( recipient + change)
+	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
+		network,
+		identity
+	});
 	const estimatedTxSize = estimateTransactionSize({
 		numInputs: utxos.length,
 		numOutputs: 2
@@ -97,14 +104,14 @@ export const validateUtxosForSend = ({
 		throw new BtcValidationError(BtcSendValidationError.InvalidFeeCalculation);
 	}
 
-	// 6. Verify sufficient funds for amount + fee
+	// 7. Verify sufficient funds for amount + fee
 	const totalRequired = amountSatoshis + feeSatoshis;
 	if (totalUtxoValue < totalRequired) {
 		throw new BtcValidationError(BtcSendValidationError.InsufficientBalanceForFee);
 	}
 
 	// TODO we must solve the dust issue first in prepareBtcSend before implementing this validation:
-	// 7. Check for dust amounts in change output
+	// 8. Check for dust amounts in change output
 	// const changeAmount = totalUtxoValue - totalRequired;
 	// const DUST_THRESHOLD = 546n; // Standard Bitcoin dust threshold
 	// if (changeAmount > 0n && changeAmount < DUST_THRESHOLD) {
