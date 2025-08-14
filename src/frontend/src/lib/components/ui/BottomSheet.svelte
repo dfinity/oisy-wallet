@@ -5,11 +5,13 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import type { Snippet } from 'svelte';
 	import { nonNullish } from '@dfinity/utils';
+
 	interface Props {
 		visible: boolean;
 		content: Snippet;
 		footer?: Snippet;
 	}
+
 	let { visible = $bindable(), content, footer }: Props = $props();
 </script>
 
