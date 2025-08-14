@@ -8,10 +8,6 @@
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
-
-	$effect(() => {
-		console.log(nftCollections);
-	});
 </script>
 
 <NftsDisplayHandler bind:nfts bind:nftCollections>
@@ -19,6 +15,7 @@
 		{#if nftCollections.length === 0}
 			<EmptyNftsList />
 		{:else}
+			<h5 class="mt-5">Collections</h5>
 			<div class="grid grid-cols-3 gap-2 gap-y-4 pt-4">
 				{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
 					{#if collection.nfts.length > 0}
@@ -30,6 +27,7 @@
 	{:else if nftCollections.length === 0}
 		<EmptyNftsList />
 	{:else}
+		<h5 class="mt-5">All Assets</h5>
 		<div class="grid grid-cols-3 gap-2 gap-y-4 pt-4">
 			{#each nfts as nft, index (`${String(nft.id)}-${index}`)}
 				<NftCard {nft} />

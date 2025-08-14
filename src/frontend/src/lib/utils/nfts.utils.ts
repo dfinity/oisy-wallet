@@ -133,16 +133,19 @@ const collator = new Intl.Collator(undefined, {
 });
 
 const cmpByCollectionName =
-	(dir: number) => (a: Nft | NftCollectionUi, b: Nft | NftCollectionUi) => {
+	(dir: number) =>
+	(a: Nft | NftCollectionUi, b: Nft | NftCollectionUi): number => {
 		const an = a.collection?.name ?? '';
 		const bn = b.collection?.name ?? '';
 		return collator.compare(an, bn) * dir;
 	};
 
-const cmpByDate = (dir: number) => (a: Nft | NftCollectionUi, b: Nft | NftCollectionUi) => {
-	// todo
-	return collator.compare('', '') * dir;
-};
+const cmpByDate =
+	(dir: number) =>
+	(a: Nft | NftCollectionUi, b: Nft | NftCollectionUi): number => {
+		// todo
+		return collator.compare('', '') * dir;
+	};
 
 export const filterSortNfts = ({
 	nfts,
@@ -152,9 +155,11 @@ export const filterSortNfts = ({
 	nfts: Nft[];
 	filter?: string;
 	sort?: NftListSortingType;
-}) => {
+}): Nft[] => {
 	if (nonNullish(filter)) {
-		nfts = nfts.filter((nft) => nft?.name?.indexOf(filter) ?? -1 >= 0);
+		nfts = nfts.filter(
+			(nft) => (nft?.collection?.name?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0
+		);
 	}
 
 	if (nonNullish(sort)) {
@@ -175,7 +180,7 @@ export const filterSortNftCollections = ({
 	nftCollections: NftCollectionUi[];
 	filter?: string;
 	sort?: NftListSortingType;
-}) => {
+}): NftCollectionUi[] => {
 	if (nonNullish(filter)) {
 		nftCollections = [...nftCollections].filter(
 			(coll) => (coll?.collection?.name?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0

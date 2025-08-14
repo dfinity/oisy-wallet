@@ -12,8 +12,8 @@ interface NftListStoreData {
 
 export const nftListStore = writable<NftListStoreData>({
 	sort: {
-		order: 'desc',
-		type: 'date'
+		order: 'asc',
+		type: 'collection-name'
 	},
 	groupByCollection: true
 });

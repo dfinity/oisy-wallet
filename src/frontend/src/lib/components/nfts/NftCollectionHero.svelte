@@ -51,7 +51,7 @@
 	<div class="bg-primary p-4">
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
-		<h1 class="my-3">
+		<h1 class="my-3 truncate">
 			{#if nonNullish(collection)}
 				{collection.name}
 			{:else}
