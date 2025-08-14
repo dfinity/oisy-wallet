@@ -161,15 +161,6 @@ export const sendBtc = async ({
 	onProgress,
 	...rest
 }: SendBtcParams): Promise<void> => {
-	// Validate UTXOs comprehensively and throw BtcValidationError if any validation fails
-	validateUtxosForSend({
-		utxosFee,
-		source,
-		amount,
-		// Use a reasonable default fee rate for validation
-		feeRateSatoshisPerVByte: 2n
-	});
-
 	const { txid } = await send({ onProgress, utxosFee, network, identity, amount, ...rest });
 
 	onProgress?.();
