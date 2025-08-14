@@ -4,22 +4,22 @@
 
 	interface Props {
 		visible: boolean;
-		content: () => string;
-		footer?: () => string;
+		contentTest: string;
+		footerTest?: string;
 	}
 
-	let { visible = $bindable(), content, footer }: Props = $props();
+	let { visible = $bindable(), contentTest, footerTest }: Props = $props();
 
 	export { visible };
 </script>
 
 <BottomSheet bind:visible>
 	{#snippet content()}
-		{content()}
+		{contentTest}
 	{/snippet}
 	{#snippet footer()}
-		{#if nonNullish(footer)}
-			{footer()}
+		{#if nonNullish(footerTest)}
+			{footerTest}
 		{/if}
 	{/snippet}
 </BottomSheet>

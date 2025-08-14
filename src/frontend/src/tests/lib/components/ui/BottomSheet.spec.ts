@@ -6,7 +6,7 @@ describe('BottomSheet component', () => {
 	it('renders content when visible', () => {
 		render(BottomSheetTest, {
 			visible: true,
-			content: () => 'Hello content'
+			contentTest: 'Hello content'
 		});
 
 		expect(screen.getByText('Hello content')).toBeInTheDocument();
@@ -15,7 +15,7 @@ describe('BottomSheet component', () => {
 	it('does not render when visible is false', () => {
 		render(BottomSheetTest, {
 			visible: false,
-			content: () => 'Hidden content'
+			contentTest: 'Hidden content'
 		});
 
 		expect(screen.queryByText('Hidden content')).not.toBeInTheDocument();
@@ -24,8 +24,8 @@ describe('BottomSheet component', () => {
 	it('renders footer if provided', () => {
 		render(BottomSheetTest, {
 			visible: true,
-			content: () => 'Main content',
-			footer: () => 'Footer content'
+			contentTest: 'Main content',
+			footerTest: 'Footer content'
 		});
 
 		expect(screen.getByText('Footer content')).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('BottomSheet component', () => {
 	it('closes when close button is clicked', async () => {
 		const { component } = render(BottomSheetTest, {
 			visible: true,
-			content: () => 'Close me'
+			contentTest: 'Close me'
 		});
 
 		// simulate clicking the close button
@@ -47,7 +47,7 @@ describe('BottomSheet component', () => {
 	it('closes when backdrop is clicked', async () => {
 		const { component } = render(BottomSheetTest, {
 			visible: true,
-			content: () => 'Back content'
+			contentTest: 'Back content'
 		});
 
 		const backdrop = screen.getByTestId('backdrop');
