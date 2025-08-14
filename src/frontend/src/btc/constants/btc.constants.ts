@@ -15,3 +15,6 @@ export const BTC_CONVERT_FEE = 0n;
 export const DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE = 0.00001;
 export const BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION = 10;
 export const BTC_MINIMUM_AMOUNT = 700n;
+// this variable must be in sync with the constant DUST_THRESHOLD defined by the chain fusion signer
+// https://github.com/dfinity/chain-fusion-signer/blob/main/src/signer/canister/src/sign/bitcoin/tx_utils.rs
+export const BTC_DUST_THRESHOLD = 1000n;

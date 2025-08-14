@@ -6,7 +6,7 @@
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import { sendBtc } from '$btc/services/btc-send.services';
-	import type { UtxosFee } from '$btc/types/btc-send';
+	import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_BTC_SEND_ERROR,
@@ -103,6 +103,64 @@
 
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
+			return;
+		}
+
+		// Validate UTXOs before proceeding
+		try {
+			validateUtxosForSend({
+				utxosFee,
+				source,
+				amount,
+				feeRateSatoshisPerVByte: 2n
+			});
+		} catch (err: unknown) {
+			// Handle BtcValidationError with specific toastsError for each type
+			if (err instanceof BtcValidationError) {
+				switch (err.type) {
+					case BtcSendValidationError.InsufficientBalance:
+						toastsError({
+							msg: { text: $i18n.send.assertion.btc_insufficient_balance }
+						});
+						break;
+					case BtcSendValidationError.InsufficientBalanceForFee:
+						toastsError({
+							msg: { text: $i18n.send.assertion.btc_insufficient_balance_for_fee }
+						});
+						break;
+					case BtcSendValidationError.InvalidUtxoData:
+						toastsError({
+							msg: { text: $i18n.send.assertion.btc_invalid_utxo_data }
+						});
+						break;
+					case BtcSendValidationError.UtxoLocked:
+						toastsError({
+							msg: { text: $i18n.send.assertion.btc_utxo_locked }
+						});
+						break;
+					case BtcSendValidationError.InvalidFeeCalculation:
+						toastsError({
+							msg: { text: $i18n.send.assertion.btc_invalid_fee_calculation }
+						});
+						break;
+					case BtcSendValidationError.MinimumBalance:
+						toastsError({
+							msg: { text: $i18n.send.assertion.minimum_btc_amount }
+						});
+						break;
+					default:
+						toastsError({
+							msg: { text: $i18n.send.error.unexpected },
+							err
+						});
+						break;
+				}
+			} else {
+				toastsError({
+					msg: { text: $i18n.send.error.unexpected },
+					err
+				});
+			}
 			return;
 		}
 
