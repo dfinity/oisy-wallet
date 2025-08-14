@@ -11,8 +11,6 @@
 	}
 
 	const { collection, disabled }: Props = $props();
-
-	console.log(collection);
 </script>
 
 <a
@@ -26,7 +24,7 @@
 		class:grid-cols-2={collection.nfts.length > 1}
 		class:grid-cols-1={collection.nfts.length === 1}
 	>
-		{#each collection.nfts as nft, index}
+		{#each collection.nfts as nft, index (nft.id + index)}
 			{#if index < 4 && nonNullish(nft.imageUrl)}
 				<div class="aspect-square overflow-hidden rounded-lg">
 					<Img src={nft.imageUrl} />

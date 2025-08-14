@@ -15,7 +15,7 @@
 <NftCollectionHero collection={collectionNfts?.[0]?.collection} nfts={collectionNfts} />
 
 <div class="mt-4 grid grid-cols-3 gap-2 gap-y-4 pt-4">
-	{#each collectionNfts as nft}
+	{#each collectionNfts as nft, index (nft.id + index)}
 		<NftCard {nft} />
 	{/each}
 </div>

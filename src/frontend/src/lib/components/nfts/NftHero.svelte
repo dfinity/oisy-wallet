@@ -121,7 +121,7 @@
 			{#if nonNullish(nft?.attributes) && nft.attributes.length > 0}
 				<ListItem>Item traits</ListItem>
 				<div class="mt-2 flex gap-2">
-					{#each nft.attributes as trait}
+					{#each nft.attributes as trait, index (trait.value + index)}
 						<div class="flex">
 							<Badge variant="nft-trait"
 								><span class="font-normal text-tertiary">{trait.traitType}</span><br /><span

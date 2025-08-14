@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { NftCollection, Nft, NftCollectionUi } from '$lib/types/nft';
+	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import {
 		filterSortNftCollections,
