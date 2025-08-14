@@ -16,12 +16,12 @@ import {
 	withdraw
 } from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
-import { ICP_SWAP_POOL_FEE, SWAP_MODE, SWAP_SIDE } from '$lib/constants/swap.constants';
 import {
 	KONG_BACKEND_CANISTER_ID,
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
+import { ICP_SWAP_POOL_FEE, SWAP_MODE, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { i18n } from '$lib/stores/i18n.store';
@@ -564,6 +564,7 @@ const fetchVeloraSwapAmount = async ({
 	}
 
 	return null;
+};
 
 export const withdrawUserUnusedBalance = async ({
 	identity,

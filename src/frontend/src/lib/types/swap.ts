@@ -7,7 +7,6 @@ import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
 import type { BridgePrice, DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 import type { EthAddress } from './address';
-import type { OptionIdentity } from './identity';
 import type { Amount, OptionAmount } from './send';
 
 export type SwapSelectTokenType = 'source' | 'destination';

@@ -18,7 +18,6 @@ import {
 } from '$lib/services/swap.services';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import type { OptionIdentity } from '$lib/types/identity';
 import {
 	SwapErrorCodes,
 	SwapProvider,
