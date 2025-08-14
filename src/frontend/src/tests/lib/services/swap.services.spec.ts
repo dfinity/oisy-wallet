@@ -1,5 +1,6 @@
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
@@ -9,6 +10,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import {
 	fetchSwapAmounts,
+	fetchSwapAmountsEVM,
 	loadKongSwapTokens,
 	performManualWithdraw,
 	withdrawICPSwapAfterFailedSwap,
@@ -16,10 +18,21 @@ import {
 } from '$lib/services/swap.services';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
+import {
+	SwapErrorCodes,
+	SwapProvider,
+	type SwapMappedResult,
+	type VeloraSwapDetails
+} from '$lib/types/swap';
+import {
+	geSwapEthTokenAddress,
+	mapVeloraMarketSwapResult,
+	mapVeloraSwapResult
+} from '$lib/utils/swap.utils';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
+import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
 vi.mock(import('$env/icp-swap.env'), async (importOriginal) => {
@@ -48,6 +61,39 @@ vi.mock('$lib/api/icp-swap-pool.api', () => ({
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
 }));
+
+vi.mock('@velora-dex/sdk', () => ({
+	constructSimpleSDK: vi.fn()
+}));
+
+vi.mock('$lib/utils/swap.utils', async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...(actual as Record<string, unknown>),
+		geSwapEthTokenAddress: vi.fn(),
+
+		mapVeloraSwapResult: vi.fn(
+			(): SwapMappedResult => ({
+				provider: SwapProvider.VELORA,
+				receiveAmount: 1n,
+				receiveOutMinimum: 2n,
+				swapDetails: {} as VeloraSwapDetails,
+				type: 'delta'
+			})
+		),
+
+		mapVeloraMarketSwapResult: vi.fn(
+			(): SwapMappedResult => ({
+				provider: SwapProvider.VELORA,
+				receiveAmount: 1n,
+				receiveOutMinimum: 2n,
+				swapDetails: {} as VeloraSwapDetails,
+				type: 'market'
+			})
+		)
+	};
+});
 
 describe('fetchSwapAmounts', () => {
 	const mockTokens = [
@@ -180,6 +226,87 @@ describe('fetchSwapAmounts', () => {
 
 		expect(result).toHaveLength(1);
 		expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
+	});
+});
+
+describe('fetchSwapAmountsEVM', () => {
+	const sourceToken = {
+		symbol: 'SRC',
+		decimals: 18,
+		network: { chainId: '1' },
+		address: '0xSrcAddress'
+	} as unknown as Erc20Token;
+
+	const destinationToken = {
+		symbol: 'DST',
+		decimals: 6,
+		network: { chainId: '137' },
+		address: '0xDestAddress'
+	} as unknown as Erc20Token;
+
+	const amount = '1000000000000000000';
+	const userAddress = '0xUser';
+
+	const mockGetQuote = vi.fn();
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		vi.mocked(constructSimpleSDK).mockReturnValue({
+			quote: { getQuote: mockGetQuote }
+		} as unknown as ReturnType<typeof constructSimpleSDK>);
+	});
+
+	afterEach(() => {
+		mockGetQuote.mockReset();
+	});
+
+	it('returns [] when quote has neither delta nor market', async () => {
+		mockGetQuote.mockResolvedValue({});
+
+		const result = await fetchSwapAmountsEVM({
+			sourceToken,
+			destinationToken,
+			amount,
+			userAddress
+		});
+
+		expect(mapVeloraSwapResult).not.toHaveBeenCalled();
+		expect(mapVeloraMarketSwapResult).not.toHaveBeenCalled();
+		expect(result).toEqual([]);
+	});
+
+	it('calls delta mapper when quote contains delta and returns single-item array', async () => {
+		mockGetQuote.mockResolvedValue({ delta: { receiveAmount: '123' } });
+
+		const result = await fetchSwapAmountsEVM({
+			sourceToken,
+			destinationToken,
+			amount,
+			userAddress
+		});
+
+		expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
+		expect(mapVeloraSwapResult).toHaveBeenCalledOnce();
+		expect(mapVeloraMarketSwapResult).not.toHaveBeenCalled();
+		expect(result).toHaveLength(1);
+		expect(result[0].provider).toBe(SwapProvider.VELORA);
+	});
+
+	it('calls market mapper when quote contains market and returns single-item array', async () => {
+		mockGetQuote.mockResolvedValue({ market: { receiveAmount: '456' } });
+
+		const result = await fetchSwapAmountsEVM({
+			sourceToken,
+			destinationToken,
+			amount,
+			userAddress
+		});
+
+		expect(mapVeloraMarketSwapResult).toHaveBeenCalledOnce();
+		expect(mapVeloraSwapResult).not.toHaveBeenCalled();
+		expect(result).toHaveLength(1);
+		expect(result[0].provider).toBe(SwapProvider.VELORA);
 	});
 });
 
