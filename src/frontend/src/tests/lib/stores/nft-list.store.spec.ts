@@ -1,19 +1,33 @@
-import * as storageUtils from '$lib/utils/storage.utils';
-import type { MockInstance } from 'vitest';
+import { nftListStore, type NftListSortingType } from '$lib/stores/nft-list.store';
+import { get } from 'svelte/store';
 
-describe('nft-list store', () => {
-	let spyStorageSet: MockInstance;
-	let spyStorageGet: MockInstance;
+describe('nft-list.store', () => {
+	let initialValue: ReturnType<typeof get<typeof nftListStore>>;
 
-	beforeEach(() => {
-		vi.resetAllMocks();
-		spyStorageSet = vi.spyOn(storageUtils, 'set');
-		spyStorageGet = vi.spyOn(storageUtils, 'get').mockReturnValue(undefined);
+	it('has correct initial state', () => {
+		expect(get(nftListStore)).toEqual({
+			sort: { order: 'asc', type: 'collection-name' },
+			groupByCollection: true
+		});
 	});
 
-	describe('toggleLock', () => {
-		it('should toggle from false to true', () => {});
+	it('setSort updates the sort property', () => {
+		const newSort: NftListSortingType = { order: 'desc', type: 'date' };
+		nftListStore.setSort(newSort);
 
-		it('should toggle from true to false', () => {});
+		const value = get(nftListStore);
+		expect(value.sort).toEqual(newSort);
+		// groupByCollection should be unchanged
+		expect(value.groupByCollection).toBe(true);
+	});
+
+	it('setGroupByCollection updates the groupByCollection property', () => {
+		const valueBeforeUpdate = get(nftListStore);
+		nftListStore.setGroupByCollection(false);
+
+		const value = get(nftListStore);
+		expect(value.groupByCollection).toBe(false);
+		// sort should be unchanged
+		expect(valueBeforeUpdate.sort).toEqual(value.sort);
 	});
 });
