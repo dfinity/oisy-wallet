@@ -2,8 +2,6 @@ import { nftListStore, type NftListSortingType } from '$lib/stores/nft-list.stor
 import { get } from 'svelte/store';
 
 describe('nft-list.store', () => {
-	let initialValue: ReturnType<typeof get<typeof nftListStore>>;
-
 	it('has correct initial state', () => {
 		expect(get(nftListStore)).toEqual({
 			sort: { order: 'asc', type: 'collection-name' },
