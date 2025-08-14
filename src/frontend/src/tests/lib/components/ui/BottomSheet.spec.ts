@@ -1,7 +1,6 @@
 import BottomSheetTest from '$tests/lib/components/ui/BottomSheetTest.svelte';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
-
 describe('BottomSheet component', () => {
 	it('renders content when visible', () => {
 		render(BottomSheetTest, {
