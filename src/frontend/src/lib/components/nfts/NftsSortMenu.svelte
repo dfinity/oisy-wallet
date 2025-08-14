@@ -1,16 +1,8 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconHide from '$lib/components/icons/IconHide.svelte';
-	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
-	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
-	import { hideZeroBalances } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { emit } from '$lib/utils/events.utils';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -19,11 +11,10 @@
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
-
-	const manageTokensId = Symbol();
 
 	const setSorting = (sort: NftListSortingType) => {
 		nftListStore.update((p) => ({ ...p, sort }));
@@ -131,5 +122,9 @@
 	</Popover>
 </Responsive>
 <Responsive down="sm">
-	<BottomSheet {content} bind:visible />
+	<BottomSheet {content} bind:visible>
+		{#snippet footer()}
+			<ButtonDone variant="secondary-light" onclick={() => (visible = false)} />
+		{/snippet}
+	</BottomSheet>
 </Responsive>

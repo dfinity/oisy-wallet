@@ -24,6 +24,7 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -123,5 +124,9 @@
 	</Popover>
 </Responsive>
 <Responsive down="sm">
-	<BottomSheet {content} bind:visible />
+	<BottomSheet {content} bind:visible>
+		{#snippet footer()}
+			<ButtonDone variant="secondary-light" onclick={() => (visible = false)} />
+		{/snippet}
+	</BottomSheet>
 </Responsive>

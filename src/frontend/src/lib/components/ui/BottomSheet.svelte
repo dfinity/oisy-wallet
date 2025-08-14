@@ -4,13 +4,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import type { Snippet } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		visible: boolean;
 		content: Snippet;
+		footer?: Snippet;
 	}
 
-	let { visible = $bindable(), content }: Props = $props();
+	let { visible = $bindable(), content, footer }: Props = $props();
 </script>
 
 {#if visible}
@@ -27,9 +29,14 @@
 					{/snippet}
 				</ButtonIcon>
 			</div>
-			<div class="min-h-[35vh] w-full p-4">
+			<div class="min-h-[30vh] w-full p-4">
 				{@render content()}
 			</div>
+			{#if nonNullish(footer)}
+				<div class="border-t-1 overflow-hidden border-primary p-4">
+					{@render footer()}
+				</div>
+			{/if}
 		</BottomSheet>
 		<Backdrop on:nnsClose={() => (visible = false)} />
 	</div>
