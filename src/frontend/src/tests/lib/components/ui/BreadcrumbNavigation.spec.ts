@@ -12,6 +12,7 @@ describe('BreadcrumbNavigation', () => {
 		render(BreadcrumbNavigation, { items });
 
 		const links = screen.getAllByRole('link');
+
 		expect(links).toHaveLength(items.length);
 
 		links.forEach((link, i) => {
@@ -44,6 +45,7 @@ describe('BreadcrumbNavigation', () => {
 		const separators = Array.from(container.querySelectorAll('span')).filter(
 			(el) => el.textContent === '/'
 		);
+
 		expect(separators).toHaveLength(items.length);
 	});
 
@@ -56,6 +58,7 @@ describe('BreadcrumbNavigation', () => {
 		const seps = Array.from(container.querySelectorAll('span')).filter(
 			(el) => el.textContent === '/'
 		);
+
 		expect(seps).toHaveLength(0);
 	});
 
