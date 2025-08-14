@@ -25,7 +25,8 @@
 		warning: 'bg-warning-subtle-20 text-warning-primary',
 		success: 'bg-success-subtle-20 text-success-primary',
 		outline: 'border border-tertiary bg-off-white',
-		disabled: 'bg-tertiary-inverted text-white'
+		disabled: 'bg-tertiary-inverted text-white',
+		'nft-trait': 'border border-secondary bg-primary'
 	};
 </script>
 
