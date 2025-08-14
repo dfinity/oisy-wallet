@@ -1,9 +1,9 @@
 import { writable } from 'svelte/store';
 
-export type NftListSortingType = {
+export interface NftListSortingType {
 	order: 'asc' | 'desc';
 	type: 'collection-name' | 'date';
-};
+}
 
 interface NftListStoreData {
 	sort: NftListSortingType;
