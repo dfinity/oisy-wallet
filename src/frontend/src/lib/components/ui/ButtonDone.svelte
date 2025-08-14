@@ -5,7 +5,7 @@
 	interface Props {
 		onclick: () => void;
 		testId?: string;
-		variant?: 'primary' | 'secondary' | 'secondary-light';
+		variant?: 'primary' | 'secondary-light';
 	}
 
 	let { onclick, testId, variant = 'primary' }: Props = $props();
