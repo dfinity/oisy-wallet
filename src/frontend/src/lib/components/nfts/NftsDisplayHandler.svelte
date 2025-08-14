@@ -4,7 +4,14 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NftCollection, Nft, NftCollectionUi } from '$lib/types/nft';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
-	import { getEnabledNfts, getNftCollectionUi } from '$lib/utils/nfts.utils';
+	import {
+		filterSortNftCollections,
+		getEnabledNfts,
+		getNftCollectionUi
+	} from '$lib/utils/nfts.utils';
+	import { filterSortNfts } from '$lib/utils/nfts.utils.js';
+	import { tokenListStore } from '$lib/stores/token-list.store';
+	import { nftListStore } from '$lib/stores/nft-list.store';
 
 	interface Props {
 		children: Snippet;
@@ -15,8 +22,16 @@
 	let { children, nfts = $bindable([]), nftCollections = $bindable([]) }: Props = $props();
 
 	$effect(() => {
-		nfts = getEnabledNfts({ $nftStore, $enabledNonFungibleNetworkTokens });
-		nftCollections = getNftCollectionUi({ $nftStore, $nonFungibleTokens });
+		nfts = filterSortNfts({
+			nfts: getEnabledNfts({ $nftStore, $enabledNonFungibleNetworkTokens }),
+			filter: $tokenListStore.filter,
+			sort: $nftListStore.sort
+		});
+		nftCollections = filterSortNftCollections({
+			nftCollections: getNftCollectionUi({ $nftStore, $nonFungibleTokens }),
+			filter: $tokenListStore.filter,
+			sort: $nftListStore.sort
+		});
 	});
 </script>
 

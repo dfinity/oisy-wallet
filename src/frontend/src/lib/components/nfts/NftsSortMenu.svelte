@@ -36,6 +36,7 @@
 	<List noPadding>
 		<ListItem>
 			<Button
+				disabled
 				onclick={() => setSorting({ order: 'asc', type: 'date' })}
 				fullWidth
 				alignLeft
@@ -54,6 +55,7 @@
 		</ListItem>
 		<ListItem>
 			<Button
+				disabled
 				onclick={() => setSorting({ order: 'desc', type: 'date' })}
 				fullWidth
 				alignLeft
