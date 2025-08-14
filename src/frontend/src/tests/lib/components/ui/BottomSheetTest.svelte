@@ -1,6 +1,6 @@
 <script lang="ts">
-	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 
 	interface Props {
 		visible: boolean;

@@ -1,6 +1,6 @@
 import BottomSheetTest from '$tests/lib/components/ui/BottomSheetTest.svelte';
 import { fireEvent, render, screen } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
+
 
 describe('BottomSheet component', () => {
 	it('renders content when visible', () => {
@@ -41,7 +41,7 @@ describe('BottomSheet component', () => {
 		await fireEvent.click(screen.getByRole('button', { name: 'Close details' }));
 
 		// check that visible changed to false
-		expect(component.visible).toBe(false);
+		expect(component.visible).toBeFalsy();
 	});
 
 	it('closes when backdrop is clicked', async () => {
@@ -53,6 +53,6 @@ describe('BottomSheet component', () => {
 		const backdrop = screen.getByTestId('backdrop');
 		await fireEvent.click(backdrop);
 
-		expect(component.visible).toBe(false);
+		expect(component.visible).toBeFalsy();
 	});
 });
