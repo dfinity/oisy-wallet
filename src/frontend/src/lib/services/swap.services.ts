@@ -21,7 +21,7 @@ import {
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
-import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
+import { ICP_SWAP_POOL_FEE, SWAP_MODE, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { i18n } from '$lib/stores/i18n.store';
@@ -33,20 +33,29 @@ import {
 	SwapErrorCodes,
 	SwapProvider,
 	type FetchSwapAmountsParams,
+	type GetQuoteParams,
 	type ICPSwapResult,
 	type IcpSwapManualWithdrawParams,
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
 	type SwapMappedResult,
-	type SwapParams
+	type SwapParams,
+	type VeloraQuoteParams
 } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
-import { calculateSlippage, getWithdrawableToken } from '$lib/utils/swap.utils';
+import {
+	calculateSlippage,
+	geSwapEthTokenAddress,
+	getWithdrawableToken,
+	mapVeloraMarketSwapResult,
+	mapVeloraSwapResult
+} from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 import { trackEvent } from './analytics.services';
 import { throwSwapError } from './swap-errors.services';
@@ -488,6 +497,74 @@ export const performManualWithdraw = async ({
 			swapSucceded: withdrawDestinationTokens
 		};
 	}
+};
+
+// This wrapper keeps the return type uniform (array of SwapMappedResult),
+// so we can plug in more DEX quote providers later without changing callers.
+// Each provider can push its mapped result into the array, easy extendability.
+export const fetchSwapAmountsEVM = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress
+}: VeloraQuoteParams): Promise<SwapMappedResult[]> => {
+	const swapAmountsResults = await fetchVeloraSwapAmount({
+		sourceToken,
+		destinationToken,
+		amount,
+		userAddress
+	});
+
+	if (isNullish(swapAmountsResults)) {
+		return [];
+	}
+
+	return [swapAmountsResults];
+};
+
+const fetchVeloraSwapAmount = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress
+}: VeloraQuoteParams): Promise<SwapMappedResult | null> => {
+	const {
+		network: { chainId: destChainId }
+	} = destinationToken;
+
+	const {
+		network: { chainId: srcChainId }
+	} = sourceToken;
+
+	const sdk = constructSimpleSDK({
+		chainId: Number(srcChainId),
+		fetch: window.fetch
+	});
+
+	const baseParams: GetQuoteParams = {
+		amount,
+		srcToken: geSwapEthTokenAddress(sourceToken),
+		destToken: geSwapEthTokenAddress(destinationToken),
+		srcDecimals: sourceToken.decimals,
+		destDecimals: destinationToken.decimals,
+		mode: SWAP_MODE,
+		side: SWAP_SIDE,
+		userAddress
+	};
+
+	const data = await sdk.quote.getQuote(
+		srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
+	);
+
+	if ('delta' in data) {
+		return mapVeloraSwapResult(data.delta);
+	}
+
+	if ('market' in data) {
+		return mapVeloraMarketSwapResult(data.market);
+	}
+
+	return null;
 };
 
 export const withdrawUserUnusedBalance = async ({
