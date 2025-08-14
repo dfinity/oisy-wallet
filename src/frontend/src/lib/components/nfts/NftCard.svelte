@@ -20,7 +20,7 @@
 <a
 	class="flex w-full flex-col gap-2 p-1 text-left no-underline"
 	data-tid={testId}
-	href={`${AppPath.Nfts + nft.collection.address  }/${  nft.id}`}
+	href={`${AppPath.Nfts + nft.collection.address}/${nft.id}`}
 >
 	<div class="relative aspect-square overflow-hidden rounded-xl">
 		{#if nonNullish(nft.imageUrl)}

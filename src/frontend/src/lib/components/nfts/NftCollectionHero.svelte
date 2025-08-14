@@ -42,7 +42,7 @@
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div
 		class="flex h-64 w-full bg-cover bg-center"
-		style={`background-image: url(${  nfts?.[0]?.imageUrl  }); box-shadow: inset 0 -1px #0000000d`}
+		style={`background-image: url(${nfts?.[0]?.imageUrl}); box-shadow: inset 0 -1px #0000000d`}
 		class:animate-pulse={isNullish(nfts?.[0])}
 		class:bg-disabled-alt={isNullish(nfts?.[0])}
 	>

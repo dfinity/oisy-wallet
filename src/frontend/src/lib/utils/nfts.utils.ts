@@ -157,11 +157,9 @@ const cmpByCollectionName =
 
 const cmpByDate =
 	(dir: number) =>
-	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number => 
+	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number =>
 		// todo
-		 collator.compare('', '') * dir
-	;
-
+		collator.compare('', '') * dir;
 export const filterSortNfts = ({
 	nfts,
 	filter,

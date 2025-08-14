@@ -18,7 +18,10 @@ export type NftMetadata = z.infer<typeof NftMetadataSchema>;
 
 export type NftCollection = z.infer<typeof NftCollectionSchema>;
 
-export interface NftCollectionUi { collection: NftCollection; nfts: Nft[] }
+export interface NftCollectionUi {
+	collection: NftCollection;
+	nfts: Nft[];
+}
 
 export type Nft = z.infer<typeof NftSchema>;
 
