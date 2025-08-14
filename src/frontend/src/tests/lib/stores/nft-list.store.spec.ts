@@ -12,8 +12,8 @@ describe('nft-list store', () => {
 	});
 
 	describe('toggleLock', () => {
-		it('should toggle from false to true', () => {});
+		it.todo('should toggle from false to true');
 
-		it('should toggle from true to false', () => {});
+		it.todo('should toggle from true to false');
 	});
 });
