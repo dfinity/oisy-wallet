@@ -1,6 +1,13 @@
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import type { NftError } from '$lib/types/errors';
-import type { Nft, NftCollection, NftId, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
+import type {
+	Nft,
+	NftCollection,
+	NftCollectionUi,
+	NftId,
+	NftsByNetwork,
+	NonFungibleToken
+} from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -98,3 +105,38 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
 		...(notEmptyString(token.name) && { name: token.name })
 	});
+
+export const getEnabledNfts = ({
+	$nftStore,
+	$enabledNonFungibleNetworkTokens
+}: {
+	$nftStore: Nft[] | undefined;
+	$enabledNonFungibleNetworkTokens: NonFungibleToken[];
+}): Nft[] =>
+	($nftStore ?? []).filter(
+		({
+			collection: {
+				address: nftContractAddress,
+				network: { id: nftContractNetworkId }
+			}
+		}) =>
+			$enabledNonFungibleNetworkTokens.some(
+				({ address: contractAddress, network: { id: contractNetworkId } }) =>
+					contractAddress === nftContractAddress && contractNetworkId === nftContractNetworkId
+			)
+	);
+
+export const getNftCollectionUi = ({
+	$nonFungibleTokens,
+	$nftStore
+}: {
+	$nonFungibleTokens: NonFungibleToken[];
+	$nftStore: Nft[] | undefined;
+}): NftCollectionUi[] =>
+	$nonFungibleTokens.map(mapTokenToCollection).map((coll) => ({
+		collection: coll,
+		nfts: ($nftStore ?? []).filter(
+			(nft) =>
+				nft.collection.address === coll.address && nft.collection.network.id === coll.network.id
+		)
+	}));
