@@ -27,28 +27,6 @@ export type SendBtcParams = BtcSendServiceParams & {
 };
 
 /**
- * Maps BtcPrepareSendError to i18n message key
- */
-export const mapBtcSendErrorToI18nKey = (errorType: BtcSendValidationError): string => {
-	switch (errorType) {
-		case BtcSendValidationError.InsufficientBalance:
-			return 'send.assertion.btc_insufficient_balance';
-		case BtcSendValidationError.InsufficientBalanceForFee:
-			return 'send.assertion.btc_insufficient_balance_for_fee';
-		case BtcSendValidationError.InvalidUtxoData:
-			return 'send.assertion.btc_invalid_utxo_data';
-		case BtcSendValidationError.UtxoLocked:
-			return 'send.assertion.btc_utxo_locked';
-		case BtcSendValidationError.InvalidFeeCalculation:
-			return 'send.assertion.btc_invalid_fee_calculation';
-		case BtcSendValidationError.MinimumBalance:
-			return 'send.assertion.minimum_btc_amount';
-		default:
-			return 'send.error.unexpected';
-	}
-};
-
-/**
  * Validates all aspects of the provided UTXOs before sending Bitcoin transaction
  * @param params - Object containing all validation parameters
  * @throws BtcValidationError with specific error type if any validation fails
