@@ -13,7 +13,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { onMount } from 'svelte';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { fade } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 
 	interface Props {
 		nft?: Nft;
@@ -50,7 +50,7 @@
 	});
 </script>
 
-<div class="relative overflow-hidden rounded-xl" in:fade>
+<div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="relative h-64 w-full overflow-hidden">
 		<div
 			class="absolute flex h-64 w-full bg-cover bg-center blur"
