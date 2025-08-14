@@ -31,8 +31,7 @@
 				onclick={() => setSorting({ order: 'asc', type: 'date' })}
 				fullWidth
 				alignLeft
-				paddingSmall
-				styleClass="py-1 rounded-md text-primary underline-none pl-0.5 min-w-28"
+				styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
 				colorStyle="tertiary-alt"
 				transparent
 			>
@@ -50,8 +49,7 @@
 				onclick={() => setSorting({ order: 'desc', type: 'date' })}
 				fullWidth
 				alignLeft
-				paddingSmall
-				styleClass="py-1 rounded-md text-primary underline-none pl-0.5 min-w-28"
+				styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
 				colorStyle="tertiary-alt"
 				transparent
 			>
@@ -68,8 +66,7 @@
 				onclick={() => setSorting({ order: 'asc', type: 'collection-name' })}
 				fullWidth
 				alignLeft
-				paddingSmall
-				styleClass="py-1 rounded-md text-primary underline-none pl-0.5 min-w-28"
+				styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
 				colorStyle="tertiary-alt"
 				transparent
 			>
@@ -86,8 +83,7 @@
 				onclick={() => setSorting({ order: 'desc', type: 'collection-name' })}
 				fullWidth
 				alignLeft
-				paddingSmall
-				styleClass="py-1 rounded-md text-primary underline-none pl-0.5 min-w-28"
+				styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
 				colorStyle="tertiary-alt"
 				transparent
 			>

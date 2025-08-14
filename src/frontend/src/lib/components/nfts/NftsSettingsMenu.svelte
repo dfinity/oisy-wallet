@@ -1,27 +1,17 @@
 <script lang="ts">
-	import { Backdrop, Popover, Toggle } from '@dfinity/gix-components';
+	import { Popover, Toggle } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconHide from '$lib/components/icons/IconHide.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
-	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import NotificationBlob from '$lib/components/ui/NotificationBlob.svelte';
-	import { hideZeroBalances } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { emit } from '$lib/utils/events.utils';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
-	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
-	import { LANGUAGES, SUPPORTED_LANGUAGES } from '$env/i18n';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import List from '$lib/components/common/List.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { nftListStore } from '$lib/stores/nft-list.store';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
@@ -57,8 +47,7 @@
 				onclick={() => setGrouping(false)}
 				fullWidth
 				alignLeft
-				paddingSmall
-				styleClass="py-1 rounded-md text-primary underline-none pl-0.5 min-w-28"
+				styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
 				colorStyle="tertiary-alt"
 				transparent
 			>
@@ -75,8 +64,7 @@
 				onclick={() => setGrouping(true)}
 				fullWidth
 				alignLeft
-				paddingSmall
-				styleClass="py-1 rounded-md text-primary underline-none pl-0.5 min-w-28"
+				styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
 				colorStyle="tertiary-alt"
 				transparent
 			>
@@ -92,28 +80,32 @@
 
 	<span class="mb-2 mt-3 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 
-	<List>
+	<List noPadding condensed>
 		<ListItem>
-			<span class="flex gap-2">
-				<span class="flex">
+			<LogoButton fullWidth>
+				{#snippet logo()}
 					<IconWarning />
-				</span>
-				<span class="font-normal">Show spam</span>
-			</span>
-			<span>
-				<Toggle disabled checked={false} ariaLabel="" />
-			</span>
+				{/snippet}
+				{#snippet title()}
+					<span class="text-sm font-normal">Show spam</span>
+				{/snippet}
+				{#snippet action()}
+					<Toggle disabled checked={false} ariaLabel="" />
+				{/snippet}
+			</LogoButton>
 		</ListItem>
 		<ListItem>
-			<span class="flex gap-2">
-				<span class="flex">
+			<LogoButton fullWidth>
+				{#snippet logo()}
 					<IconEyeOff />
-				</span>
-				<span class="font-normal">Show hidden</span>
-			</span>
-			<span>
-				<Toggle disabled checked={false} ariaLabel="" />
-			</span>
+				{/snippet}
+				{#snippet title()}
+					<span class="text-sm font-normal">Show hidden</span>
+				{/snippet}
+				{#snippet action()}
+					<Toggle disabled checked={false} ariaLabel="" />
+				{/snippet}
+			</LogoButton>
 		</ListItem>
 	</List>
 {/snippet}

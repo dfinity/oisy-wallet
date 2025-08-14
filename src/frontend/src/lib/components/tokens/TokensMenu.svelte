@@ -11,6 +11,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
+	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
@@ -44,11 +49,11 @@
 	{/snippet}
 </ButtonIcon>
 
-<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+{#snippet content()}
 	<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
-	<ul class="flex flex-col">
-		<li class="logo-button-list-item">
-			<LogoButton dividers onClick={toggleHideZeros}>
+	<List noPadding condensed>
+		<ListItem>
+			<LogoButton onClick={toggleHideZeros} fullWidth>
 				{#snippet logo()}
 					<IconHide />
 				{/snippet}
@@ -59,9 +64,9 @@
 					<TokensZeroBalanceToggle />
 				{/snippet}
 			</LogoButton>
-		</li>
-		<li class="logo-button-list-item">
-			<LogoButton dividers onClick={openManageTokens}>
+		</ListItem>
+		<ListItem>
+			<LogoButton onClick={openManageTokens} fullWidth>
 				{#snippet logo()}
 					<IconManage />
 				{/snippet}
@@ -69,6 +74,19 @@
 					<span class="text-sm font-normal">{$i18n.tokens.manage.text.title}</span>
 				{/snippet}
 			</LogoButton>
-		</li>
-	</ul>
-</Popover>
+		</ListItem>
+	</List>
+{/snippet}
+
+<Responsive up="sm">
+	<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+		{@render content()}
+	</Popover>
+</Responsive>
+<Responsive down="sm">
+	<BottomSheet {content} bind:visible>
+		{#snippet footer()}
+			<ButtonDone variant="secondary-light" onclick={() => (visible = false)} />
+		{/snippet}
+	</BottomSheet>
+</Responsive>
