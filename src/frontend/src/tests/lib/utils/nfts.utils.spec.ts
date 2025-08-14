@@ -588,14 +588,5 @@ describe('nfts.utils', () => {
 			});
 			expect(res).not.toBe(input);
 		});
-
-		it('with sort.type="date" leaves order unchanged (placeholder comparator)', () => {
-			const input = [...collections];
-			const res = filterSortNftCollections({
-				nftCollections: input,
-				sort: { type: 'date', order: 'desc' }
-			});
-			expect(res).toEqual(input);
-		});
 	});
 });
