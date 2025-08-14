@@ -52,7 +52,7 @@
 	<!-- to avoid lower sticky headers to peek in front when using multiple, we add px-1 and add one SPACING_UNIT to the width below -->
 	<!-- and whitespace-nowrap is needed to ensure when we first calc the height its the correct size which is given if no linebreaks -->
 	<div
-		class="z-2 whitespace-nowrap px-1"
+		class="z-3 whitespace-nowrap px-1"
 		bind:this={alignmentElement}
 		class:absolute={nonNullish(originalHeight)}
 		class:bg-page={scrolledSoon}
