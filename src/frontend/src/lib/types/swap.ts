@@ -1,10 +1,12 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
-import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
+import type { BridgePrice, DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
+import type { EthAddress } from './address';
 import type { Amount, OptionAmount } from './send';
 
 export type SwapSelectTokenType = 'source' | 'destination';
@@ -169,6 +171,17 @@ export interface FormatSlippageParams {
 }
 
 export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
+
+export interface GetQuoteParams extends QuoteParams<'all'> {
+	destChainId?: number;
+}
+
+export interface VeloraQuoteParams {
+	sourceToken: Erc20Token;
+	destinationToken: Erc20Token;
+	amount: string;
+	userAddress: EthAddress;
+}
 
 export interface GetWithdrawableTokenParams {
 	tokenAddress: string;
