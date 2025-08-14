@@ -3,3 +3,5 @@ import type { LoadEvent } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = ($event: LoadEvent): RouteParams => loadRouteParams($event);
+
+export const prerender = false;
