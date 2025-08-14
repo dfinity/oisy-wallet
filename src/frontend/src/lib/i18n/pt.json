@@ -165,9 +165,9 @@
 		"text": {
 			"title_part_1": "Desbloqueie para continuar",
 			"title_part_2": "Você bloqueou sua carteira anteriormente para mantê-la segura. Continue de onde parou ou saia.",
-			"unlock": "Bloquear",
+			"unlock": "Desbloquear",
 			"logout": "Sair",
-			"logout_clear_cash_message": "Sair limpará todos os dados armazenados em cache",
+			"logout_clear_cash_message": "Saída limpa, mensagem de cache",
 			"learn_more": "Saber mais"
 		}
 	},
@@ -430,7 +430,7 @@
 			"by": "por",
 			"dfinity_foundation": "DFINITY Foundation",
 			"copyright": "© 2025",
-			"ai_assistant_console_button": ""
+			"ai_assistant_console_button": "$oisy_short Assistente"
 		},
 		"alt": {
 			"dfinity": "Ir para o site da DFINITY Foundation"
@@ -828,7 +828,7 @@
 			"open_instructions_link": "Abrir o link com as instruções",
 			"select_token": "Selecionar token",
 			"select_network_filter": "Selecionar rede",
-			"withdrawing": ""
+			"withdrawing": "A retirar..."
 		},
 		"error": {
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",
@@ -839,13 +839,13 @@
 			"deposit_error": "O depósito dos fundos para a troca falhou. Tente novamente ou altere o provedor da troca.",
 			"withdraw_failed": "A troca falhou e a retirada também falhou. Por favor, verifique seu saldo não utilizado e tente a retirada manual: ",
 			"swap_failed_withdraw_success": "A troca falhou e seus tokens foram reembolsados com sucesso. Tente novamente ou altere o provedor da troca.",
-			"withdraw_failed_first_part": "",
-			"withdraw_failed_second_part": "",
+			"withdraw_failed_first_part": "A troca falhou e seus tokens não puderam ser retirados automaticamente. Clique no botão Retirar abaixo para retirá-los manualmente.<br> Ou siga ",
+			"withdraw_failed_second_part": "Para retirá-los a qualquer momento diretamente de seu site:",
 			"swap_failed_instruction_link": "estas instruções ",
-			"manually_withdraw_success": "",
-			"manually_withdraw_failed": "",
-			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": ""
+			"manually_withdraw_success": "Os tokens de sua troca anterior com falha foram retirados com sucesso. Você pode tentar a troca novamente ou alterar o provedor de troca.",
+			"manually_withdraw_failed": "Levantamento manual falhou",
+			"swap_sucess_withdraw_failed": "A retirada de seus fundos falhou.<br> Por favor, tente novamente ou siga ",
+			"swap_sucess_manually_withdraw_success": "A troca foi concluída, mas seus tokens não puderam ser retirados automaticamente. Clique no botão Retirar abaixo para retirá-los manualmente-<br> Ou siga"
 		}
 	},
 	"buy": {
@@ -989,7 +989,7 @@
 			"invalid_contract_address": "Endereço do contrato inválido.",
 			"invalid_token_address": "Endereço do token inválido.",
 			"invalid_ledger": "O token selecionado não está vinculado a um canister Ledger do ICRC.",
-			"unrecognised_erc_interface": "",
+			"unrecognised_erc_interface": "Interface erc não reconhecida",
 			"no_metadata": "Nenhum metadado foi encontrado.",
 			"unexpected": "Algo deu errado ao salvar o token.",
 			"unexpected_hiding": "Algo deu errado ao ocultar o token.",
@@ -1243,7 +1243,7 @@
 				"reward_received": "Bem-vindo ao $oisy_short!",
 				"reward_failed": "O código expirou",
 				"reward_received_description": "Você receberá seu presente de boas-vindas a qualquer momento.",
-				"brand_reward_received_description": "",
+				"brand_reward_received_description": "Quer ganhar mais? Refere um amigo e ganhe por cada pessoa que entrar",
 				"reward_failed_description": "Solicite um novo e tente novamente"
 			},
 			"error": {
@@ -1518,19 +1518,19 @@
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "",
-			"welcome_message": "",
-			"action_button_contacts_title": "",
-			"action_button_contacts_subtitle": "",
-			"action_button_contacts_prompt": "",
-			"send_message": "",
-			"send_message_input_placeholder": "",
-			"no_contacts_found_message": "",
-			"loading": ""
+			"title": "$oisy_short Assistente AI",
+			"welcome_message": "Olá! 👋 Só o OISY, o seu assistente pessoal de AI. Veja como posso ajudar:",
+			"action_button_contacts_title": "Mostrar contatos",
+			"action_button_contacts_subtitle": "Mostrar os seus contatos salvos",
+			"action_button_contacts_prompt": "Mostrar meus contatos.",
+			"send_message": "Enviar mensagem",
+			"send_message_input_placeholder": "O que você quer fazer?",
+			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
+			"loading": "A pensar..."
 		},
 		"errors": {
-			"unknown": "",
-			"no_response": ""
+			"unknown": "Desculpe, ocorreu um erro ao obter uma resposta do LLM.",
+			"no_response": "Desculpe, não recebi uma resposta do LLM."
 		}
 	}
 }
