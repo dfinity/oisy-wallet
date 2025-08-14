@@ -1,6 +1,8 @@
-import type { UtxosFee } from '$btc/types/btc-send';
+import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
+import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
+import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import type { BtcAddress } from '$lib/types/address';
@@ -24,16 +26,151 @@ export type SendBtcParams = BtcSendServiceParams & {
 	onProgress?: () => void;
 };
 
+/**
+ * Maps BtcPrepareSendError to i18n message key
+ */
+export const mapBtcSendErrorToI18nKey = (errorType: BtcSendValidationError): string => {
+	switch (errorType) {
+		case BtcSendValidationError.InsufficientBalance:
+			return 'send.assertion.btc_insufficient_balance';
+		case BtcSendValidationError.InsufficientBalanceForFee:
+			return 'send.assertion.btc_insufficient_balance_for_fee';
+		case BtcSendValidationError.InvalidUtxoData:
+			return 'send.assertion.btc_invalid_utxo_data';
+		case BtcSendValidationError.UtxoLocked:
+			return 'send.assertion.btc_utxo_locked';
+		case BtcSendValidationError.InvalidFeeCalculation:
+			return 'send.assertion.btc_invalid_fee_calculation';
+		case BtcSendValidationError.MinimumBalance:
+			return 'send.assertion.minimum_btc_amount';
+		default:
+			return 'send.error.unexpected';
+	}
+};
+
+/**
+ * Validates all aspects of the provided UTXOs before sending Bitcoin transaction
+ * @param params - Object containing all validation parameters
+ * @throws BtcValidationError with specific error type if any validation fails
+ */
+export const validateUtxosForSend = ({
+	utxosFee,
+	source,
+	amount,
+	feeRateSatoshisPerVByte = 1n
+}: {
+	utxosFee: UtxosFee;
+	source: BtcAddress;
+	amount: Amount;
+	feeRateSatoshisPerVByte?: bigint;
+}): void => {
+	const { utxos, feeSatoshis } = utxosFee;
+	const amountSatoshis = convertNumberToSatoshis({ amount });
+
+	// 1. Check if UTXOs array is not empty
+	if (utxos.length === 0) {
+		throw new BtcValidationError(BtcSendValidationError.InsufficientBalance, 'No UTXOs provided');
+	}
+
+	// 2. Validate UTXO ownership (basic structure validation)
+	for (const utxo of utxos) {
+		if (
+			!utxo.outpoint?.txid ||
+			utxo.outpoint.vout === undefined ||
+			!utxo.value ||
+			BigInt(utxo.value) <= 0n ||
+			!utxo.height ||
+			utxo.height < 0
+		) {
+			throw new BtcValidationError(
+				BtcSendValidationError.InvalidUtxoData,
+				'Invalid UTXO data structure or values'
+			);
+		}
+	}
+
+	// 3. Check if UTXOs are still unspent (not locked by pending transactions)
+	const pendingTxIds = getPendingTransactionIds(source);
+	if (pendingTxIds.length > 0) {
+		const providedUtxoTxIds = extractUtxoTxIds(utxos);
+		for (const utxoTxId of providedUtxoTxIds) {
+			if (pendingTxIds.includes(utxoTxId)) {
+				throw new BtcValidationError(
+					BtcSendValidationError.UtxoLocked,
+					`UTXO ${utxoTxId} is locked by a pending transaction`
+				);
+			}
+		}
+	}
+
+	// 4. Verify UTXO values and calculate totals
+	const totalUtxoValue = utxos.reduce((sum, utxo) => sum + BigInt(utxo.value), 0n);
+	if (totalUtxoValue <= 0n) {
+		throw new BtcValidationError(
+			BtcSendValidationError.InvalidUtxoData,
+			'Total UTXO value is zero or negative'
+		);
+	}
+
+	// 5. Validate fee calculation matches expected transaction structure
+	const estimatedTxSize = estimateTransactionSize({
+		numInputs: utxos.length,
+		numOutputs: 2 // recipient + change
+	});
+	const expectedMinFee = BigInt(estimatedTxSize) * feeRateSatoshisPerVByte;
+
+	// Allow some tolerance for fee calculation differences (±10%)
+	const feeToleranceRange = expectedMinFee / 10n;
+	const minAcceptableFee = expectedMinFee - feeToleranceRange;
+	const maxAcceptableFee = expectedMinFee + feeToleranceRange;
+
+	if (feeSatoshis < minAcceptableFee || feeSatoshis > maxAcceptableFee) {
+		throw new BtcValidationError(
+			BtcSendValidationError.InvalidFeeCalculation,
+			`Fee validation failed: provided ${feeSatoshis} satoshis, expected range ${minAcceptableFee}-${maxAcceptableFee} satoshis`
+		);
+	}
+
+	// 6. Verify sufficient funds for amount + fee
+	const totalRequired = amountSatoshis + feeSatoshis;
+	if (totalUtxoValue < totalRequired) {
+		throw new BtcValidationError(
+			BtcSendValidationError.InsufficientBalanceForFee,
+			`Insufficient funds: need ${totalRequired} satoshis, but UTXOs only provide ${totalUtxoValue} satoshis`
+		);
+	}
+
+	// TODO we must solve the dust issue first in prepareBtcSend before implementing this validation:
+	// 7. Check for dust amounts in change output
+	// const changeAmount = totalUtxoValue - totalRequired;
+	// const DUST_THRESHOLD = 546n; // Standard Bitcoin dust threshold
+	// if (changeAmount > 0n && changeAmount < DUST_THRESHOLD) {
+	//	throw new Error(
+	//		`Transaction would create dust: change amount ${changeAmount} satoshis ` +
+	//			`is below dust threshold ${DUST_THRESHOLD} satoshis`
+	//	);
+	// }
+};
+
 export const sendBtc = async ({
 	utxosFee,
 	network,
 	source,
 	identity,
+	amount,
 	onProgress,
 	...rest
 }: SendBtcParams): Promise<void> => {
-	// TODO: use txid returned by this method to register it as a pending transaction in BE
-	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
+	// Validate UTXOs comprehensively and throw BtcValidationError if any validation fails
+	validateUtxosForSend({
+		utxosFee,
+		source,
+		amount,
+		// Use a reasonable default fee rate for validation
+		feeRateSatoshisPerVByte: 2n
+	});
+
+	const { txid } = await send({ onProgress, utxosFee, network, identity, amount, ...rest });
 
 	onProgress?.();
 
