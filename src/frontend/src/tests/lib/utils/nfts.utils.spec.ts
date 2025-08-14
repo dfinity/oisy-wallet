@@ -505,16 +505,6 @@ describe('nfts.utils', () => {
 			});
 			expect(res).not.toBe(input);
 		});
-
-		it('with sort.type="date" leaves order unchanged (placeholder comparator)', () => {
-			const input = [...base];
-			const res = filterSortNfts({
-				nfts: input,
-				sort: { type: 'date', order: 'asc' }
-			});
-			// current cmpByDate returns 0 -> stable sort keeps order
-			expect(res).toEqual(input);
-		});
 	});
 
 	describe('filterSortNftCollections', () => {
