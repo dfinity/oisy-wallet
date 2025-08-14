@@ -163,12 +163,12 @@
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "Título parte 1",
-			"title_part_2": "Título parte 2",
+			"title_part_1": "Desbloqueie para continuar",
+			"title_part_2": "Você bloqueou sua carteira anteriormente para mantê-la segura. Continue de onde parou ou saia.",
 			"unlock": "Desbloquear",
-			"logout": "sair",
-			"logout_clear_cash_message": "saída limpa, mensagem de cache",
-			"learn_more": "saber mais"
+			"logout": "Sair",
+			"logout_clear_cash_message": "Saída limpa, mensagem de cache",
+			"learn_more": "Saber mais"
 		}
 	},
 	"dapps": {
@@ -828,7 +828,7 @@
 			"open_instructions_link": "Abrir o link com as instruções",
 			"select_token": "Selecionar token",
 			"select_network_filter": "Selecionar rede",
-			"withdrawing": "A Retirar..."
+			"withdrawing": "A retirar..."
 		},
 		"error": {
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",
@@ -1243,7 +1243,7 @@
 				"reward_received": "Bem-vindo ao $oisy_short!",
 				"reward_failed": "O código expirou",
 				"reward_received_description": "Você receberá seu presente de boas-vindas a qualquer momento.",
-				"brand_reward_received_description": Quer ganhar mais? Refere um amigo e ganhe por cada pessoa que entrar",
+				"brand_reward_received_description": "Quer ganhar mais? Refere um amigo e ganhe por cada pessoa que entrar",
 				"reward_failed_description": "Solicite um novo e tente novamente"
 			},
 			"error": {
