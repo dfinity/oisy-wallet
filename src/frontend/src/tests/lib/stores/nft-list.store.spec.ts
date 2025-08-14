@@ -14,9 +14,10 @@ describe('nft-list.store', () => {
 		nftListStore.setSort(newSort);
 
 		const value = get(nftListStore);
+
 		expect(value.sort).toEqual(newSort);
 		// groupByCollection should be unchanged
-		expect(value.groupByCollection).toBe(true);
+		expect(value.groupByCollection).toBeTruthy();
 	});
 
 	it('setGroupByCollection updates the groupByCollection property', () => {
@@ -24,7 +25,8 @@ describe('nft-list.store', () => {
 		nftListStore.setGroupByCollection(false);
 
 		const value = get(nftListStore);
-		expect(value.groupByCollection).toBe(false);
+
+		expect(value.groupByCollection).toBeFalsy();
 		// sort should be unchanged
 		expect(valueBeforeUpdate.sort).toEqual(value.sort);
 	});
