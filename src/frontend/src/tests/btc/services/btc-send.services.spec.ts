@@ -1,4 +1,4 @@
-import { sendBtc, type SendBtcParams, validateUtxosForSend } from '$btc/services/btc-send.services';
+import { sendBtc, validateUtxosForSend, type SendBtcParams } from '$btc/services/btc-send.services';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import * as btcUtxosUtils from '$btc/utils/btc-utxos.utils';
