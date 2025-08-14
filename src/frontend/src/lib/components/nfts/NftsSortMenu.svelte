@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { type NftListSortingType, nftListStore } from '$lib/stores/nft-list.store';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
+	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { type NftListSortingType, nftListStore } from '$lib/stores/nft-list.store';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();

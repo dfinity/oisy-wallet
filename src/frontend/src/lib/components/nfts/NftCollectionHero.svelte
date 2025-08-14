@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { Nft, NftCollection } from '$lib/types/nft';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import { goto } from '$app/navigation';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { onMount } from 'svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { slide } from 'svelte/transition';
+	import type { Nft, NftCollection } from '$lib/types/nft';
 
 	interface Props {
 		collection?: NftCollection;
@@ -42,7 +42,7 @@
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div
 		class="flex h-64 w-full bg-cover bg-center"
-		style={'background-image: url(' + nfts?.[0]?.imageUrl + '); box-shadow: inset 0 -1px #0000000d'}
+		style={`background-image: url(${  nfts?.[0]?.imageUrl  }); box-shadow: inset 0 -1px #0000000d`}
 		class:animate-pulse={isNullish(nfts?.[0])}
 		class:bg-disabled-alt={isNullish(nfts?.[0])}
 	>

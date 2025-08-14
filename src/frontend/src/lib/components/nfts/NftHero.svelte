@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { AppPath } from '$lib/constants/routes.constants.js';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import List from '$lib/components/common/List.svelte';
-	import type { Nft } from '$lib/types/nft';
-	import Img from '$lib/components/ui/Img.svelte';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { onMount } from 'svelte';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import { slide } from 'svelte/transition';
+	import { goto } from '$app/navigation';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
+	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
 		nft?: Nft;
@@ -54,7 +54,7 @@
 	<div class="relative h-64 w-full overflow-hidden">
 		<div
 			class="absolute flex h-64 w-full bg-cover bg-center blur"
-			style={'background-image: url(' + nft?.imageUrl + '); box-shadow: inset 0 -1px #0000000d'}
+			style={`background-image: url(${  nft?.imageUrl  }); box-shadow: inset 0 -1px #0000000d`}
 			class:animate-pulse={isNullish(nft)}
 			class:bg-disabled-alt={isNullish(nft)}
 		>

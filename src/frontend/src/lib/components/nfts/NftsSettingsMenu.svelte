@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { Popover, Toggle } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
+	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
-	import List from '$lib/components/common/List.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { nftListStore } from '$lib/stores/nft-list.store';
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { nftListStore } from '$lib/stores/nft-list.store';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
