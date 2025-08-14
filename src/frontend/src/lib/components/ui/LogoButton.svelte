@@ -22,6 +22,7 @@
 		descriptionEnd?: Snippet;
 		action?: Snippet;
 		onClick?: () => void;
+		fullWidth?: boolean;
 	}
 
 	let {
@@ -40,13 +41,14 @@
 		description,
 		descriptionEnd,
 		action,
-		onClick
+		onClick,
+		fullWidth = false
 	}: Props = $props();
 </script>
 
 <div
 	class={`flex ${styleClass ?? ''}`}
-	class:w-full={dividers}
+	class:w-full={dividers || fullWidth}
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
 >
