@@ -23,7 +23,7 @@
 </script>
 
 {#snippet content()}
-	<span class="mb-2 flex text-sm font-bold">{$i18n.nfts.text.grouping}</span>
+	<span class="mb-2 flex text-sm font-bold">{$i18n.nfts.text.sorting}</span>
 
 	<List noPadding>
 		<ListItem>
