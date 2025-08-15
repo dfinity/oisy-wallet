@@ -5,6 +5,7 @@
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import { mapAddressToName } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -12,6 +13,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
@@ -20,6 +22,7 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction';
@@ -30,6 +33,9 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
+	import { isTokenNonFungible } from '$lib/utils/nft.utils';
+	import { findNft } from '$lib/utils/nfts.utils';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -86,6 +92,15 @@
 			data: data as OpenTransactionParams<EthTransactionUi>
 		});
 	};
+
+	const nft = $derived(
+		nonNullish($nftStore) &&
+			nonNullish(token) &&
+			isTokenNonFungible(token) &&
+			nonNullish(transaction.tokenId)
+			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(transaction.tokenId) })
+			: undefined
+	);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -95,14 +110,18 @@
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					{#if isTokenNonFungible(token) && nonNullish(nft)}
+						<NftLogo {nft} badge={{ type: 'network' }} />
+					{:else}
+						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					{/if}
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
 				<span class="capitalize">{type}</span>
 			{/snippet}
 			{#snippet title()}
-				{#if nonNullish(token) && nonNullish(value)}
+				{#if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
 					<output class:text-success-primary={type === 'receive'}>
 						{formatToken({
 							value,
@@ -206,7 +225,7 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(token)}
+			{#if nonNullish(token) && !isTokenErc721(token)}
 				<ListItem>
 					<span>{$i18n.core.text.amount}</span>
 					<output>
@@ -216,6 +235,15 @@
 							displayDecimals: token.decimals
 						})}
 						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
+
+			{#if nonNullish(token) && isTokenNonFungible(token) && nonNullish(transaction.tokenId)}
+				<ListItem>
+					<span>{$i18n.core.text.tokenId}</span>
+					<output>
+						{transaction.tokenId}
 					</output>
 				</ListItem>
 			{/if}
