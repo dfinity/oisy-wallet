@@ -5,6 +5,7 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import {
+	filterSortByCollection,
 	findNft,
 	getEnabledNfts,
 	getNftCollectionUi,
@@ -96,6 +97,21 @@ describe('nfts.utils', () => {
 			network: ETHEREUM_NETWORK
 		}
 	};
+
+	// Same collator settings as in the impl
+	const collator = new Intl.Collator(new Intl.Locale(navigator.language), {
+		sensitivity: 'base',
+		numeric: true
+	});
+
+	// Build a case-insensitive substring from the Azuki name for filtering
+	const azukiName = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN).name ?? '';
+	const deGodsName = mapTokenToCollection(DE_GODS_TOKEN).name ?? '';
+
+	const filterSub =
+		azukiName && azukiName.length >= 3
+			? azukiName.slice(1, 4).toLowerCase()
+			: azukiName.toLowerCase();
 
 	describe('getNftsByNetworks', () => {
 		it('should return nfts for a given list of tokens and networks', () => {
@@ -418,6 +434,154 @@ describe('nfts.utils', () => {
 			});
 
 			expect(res).toEqual([]);
+		});
+	});
+
+	describe('filterSortByCollection', () => {
+		const base = [
+			// Purposely shuffled order to make sorting assertions meaningful
+			nftDeGods, // "DeGods"
+			nftAzuki2, // "Azuki Elemental Beans"
+			nftAzuki1 // "Azuki Elemental Beans"
+		];
+
+		const collections = (() => {
+			const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
+			const ui = getNftCollectionUi({
+				$nonFungibleTokens: tokens,
+				$nftStore: [nftAzuki1, nftAzuki2, nftDeGods]
+			});
+			// Shuffle to make sorting meaningful
+			return [ui[1], ui[0]];
+		})();
+
+		it('filters by collection name (case-insensitive substring)', () => {
+			const res = filterSortByCollection({
+				items: base,
+				filter: 'azu' // lowercase
+			});
+
+			expect(res).toEqual([nftAzuki2, nftAzuki1]);
+		});
+
+		it('sorts by collection name ascending', () => {
+			const res = filterSortByCollection({
+				items: base,
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+
+			// "Azuki..." then "DeGods"
+			expect(res.map((n) => n.collection.name)).toEqual([
+				'Azuki Elemental Beans',
+				'Azuki Elemental Beans',
+				'DeGods'
+			]);
+		});
+
+		it('sorts by collection name descending', () => {
+			const res = filterSortByCollection({
+				items: base,
+				sort: { type: 'collection-name', order: 'desc' }
+			});
+
+			// "DeGods" then "Azuki..."
+			expect(res.map((n) => n.collection.name)).toEqual([
+				'DeGods',
+				'Azuki Elemental Beans',
+				'Azuki Elemental Beans'
+			]);
+		});
+
+		it('applies filter then sort', () => {
+			const res = filterSortByCollection({
+				items: base,
+				filter: 'god',
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+
+			// Only DeGods remains; sorted trivially
+			expect(res).toEqual([nftDeGods]);
+		});
+
+		it('returns the same reference when neither filter nor sort is provided', () => {
+			const input = [...base];
+			const res = filterSortByCollection({ items: input });
+
+			expect(res).toBe(input);
+		});
+
+		it('returns a new array when sort is provided (immutability)', () => {
+			const input = [...base];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+
+			expect(res).not.toBe(input);
+		});
+
+		it('filters collections by collection.name (case-insensitive substring)', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				filter: filterSub
+			});
+
+			expect(res).toHaveLength(1);
+			expect(res[0].collection.address).toBe(AZUKI_ELEMENTAL_BEANS_TOKEN.address);
+		});
+
+		it('sorts collections by name ascending', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+
+			const expectedOrder = [azukiName, deGodsName].sort((a, b) =>
+				collator.compare(a ?? '', b ?? '')
+			);
+
+			expect(res.map((c) => c.collection.name ?? '')).toEqual(expectedOrder);
+		});
+
+		it('sorts collections by name descending', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				sort: { type: 'collection-name', order: 'desc' }
+			});
+
+			const expectedOrder = [azukiName, deGodsName]
+				.sort((a, b) => collator.compare(a ?? '', b ?? ''))
+				.reverse();
+
+			expect(res.map((c) => c.collection.name ?? '')).toEqual(expectedOrder);
+		});
+
+		it('applies filter for collection then sort', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				filter: 'god',
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+
+			expect(res).toHaveLength(1);
+			expect(res[0].collection.address).toBe(DE_GODS_TOKEN.address);
+		});
+
+		it('returns the same reference when neither filter nor sort is provided for collections', () => {
+			const input = [...collections];
+			const res = filterSortByCollection({ items: input });
+
+			expect(res).toBe(input);
+		});
+
+		it('returns a new array when sort is provided for collections (immutability)', () => {
+			const input = [...collections];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+
+			expect(res).not.toBe(input);
 		});
 	});
 });
