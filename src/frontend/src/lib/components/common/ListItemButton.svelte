@@ -1,7 +1,9 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/Button.svelte';
+
 	import type { Snippet } from 'svelte';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+
 
 	interface Props {
 		onclick: () => void;
