@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { nftStore } from '$lib/stores/nft.store';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
-	import type { Nft } from '$lib/types/nft';
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
+	import { nftStore } from '$lib/stores/nft.store';
+	import type { Nft } from '$lib/types/nft';
 
 	const collectionId = $derived($page.params.collectionId);
 

@@ -4,6 +4,8 @@
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NftsList from '$lib/components/nfts/NftsList.svelte';
+	import NftsSettingsMenu from '$lib/components/nfts/NftsSettingsMenu.svelte';
+	import NftsSortMenu from '$lib/components/nfts/NftsSortMenu.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
@@ -16,8 +18,6 @@
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import NftsSortMenu from '$lib/components/nfts/NftsSortMenu.svelte';
-	import NftsSettingsMenu from '$lib/components/nfts/NftsSettingsMenu.svelte';
 
 	interface Props {
 		tab?: TokenTypes;

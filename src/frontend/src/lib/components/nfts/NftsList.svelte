@@ -1,10 +1,10 @@
 <script lang="ts">
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
-	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
-	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
+	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
 	import { nftListStore } from '$lib/stores/nft-list.store';
+	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);

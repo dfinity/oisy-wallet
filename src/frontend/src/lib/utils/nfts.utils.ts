@@ -133,31 +133,16 @@ export const getNftCollectionUi = ({
 }: {
 	$nonFungibleTokens: NonFungibleToken[];
 	$nftStore: Nft[] | undefined;
-}): NftCollectionUi[] => {
-	// key uses exact address + network.id (no lowercasing, matches your original)
-	const keyOf = ({ addr, netId }: { addr: string; netId: string | number }) => `${netId}:${addr}`;
+}): NftCollectionUi[] =>
+	$nonFungibleTokens.map(mapTokenToCollection).map((coll) => ({
+		collection: coll,
+		nfts: ($nftStore ?? []).filter(
+			(nft) =>
+				nft.collection.address === coll.address && nft.collection.network.id === coll.network.id
+		)
+	}));
 
-	const index = new Map<string, NftCollectionUi>();
-
-	return [...$nonFungibleTokens, ...($nftStore ?? [])].reduce<NftCollectionUi[]>((acc, item) => {
-		if ('collection' in item) {
-			const k = keyOf({ addr: item.collection.address, netId: String(item.collection.network.id) });
-			const entry = index.get(k);
-			if (entry) {
-				entry.nfts = [...entry.nfts, item];
-			} // only attach if the token exists
-			return acc;
-		}
-		const coll = mapTokenToCollection(item);
-		const k = keyOf({ addr: coll.address, netId: String(coll.network.id) });
-		const entry: NftCollectionUi = { collection: coll, nfts: [] };
-		index.set(k, entry);
-		acc = [...acc, entry];
-		return acc;
-	}, []);
-};
-
-const collator = new Intl.Collator(new Intl.Locale(navigator.language), {
+const collator = new Intl.Collator(undefined, {
 	sensitivity: 'base', // case-insensitive
 	numeric: true // natural sort for names with numbers
 });
@@ -170,50 +155,57 @@ const cmpByCollectionName =
 		return collator.compare(an, bn) * dir;
 	};
 
-// Overloads (so TS keeps the exact array element type on return)
-interface NftBaseFilterAndSortParams<T> {
-	items: T[];
-	filter?: string;
-	sort?: NftListSortingType;
-}
-
-interface NftFilterAndSortParams extends NftBaseFilterAndSortParams<Nft> {
-	items: Nft[];
-}
-
-interface NftCollectionFilterAndSortParams extends NftBaseFilterAndSortParams<NftCollectionUi> {
-	items: NftCollectionUi[];
-}
-
-interface FilterSortByCollection {
-	(params: NftFilterAndSortParams): Nft[];
-	(params: NftCollectionFilterAndSortParams): NftCollectionUi[];
-}
-
-// Single implementation (T is Nft or NftCollectionUi)
-export const filterSortByCollection: FilterSortByCollection = <T extends Nft | NftCollectionUi>({
-	items,
+const cmpByDate =
+	(dir: number) =>
+	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number =>
+		// todo
+		collator.compare('', '') * dir;
+export const filterSortNfts = ({
+	nfts,
 	filter,
 	sort
-}: NftBaseFilterAndSortParams<T>): T[] => {
-	let result = items;
-
+}: {
+	nfts: Nft[];
+	filter?: string;
+	sort?: NftListSortingType;
+}): Nft[] => {
 	if (nonNullish(filter)) {
-		result = result.filter((it) =>
-			(it.collection?.name?.toLowerCase() ?? '').includes(filter.toLowerCase())
+		nfts = nfts.filter(
+			(nft) => (nft?.collection?.name?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0
 		);
 	}
 
 	if (nonNullish(sort)) {
 		const dir = sort.order === 'asc' ? 1 : -1;
+		const comparator = sort.type === 'collection-name' ? cmpByCollectionName(dir) : cmpByDate(dir);
 
-		if (sort.type === 'collection-name') {
-			result = [...result].sort((a, b) => cmpByCollectionName(dir)({ a, b }));
-		} else {
-			// extendable, for now we return a copy of the list
-			result = [...result];
-		}
+		nfts = [...nfts].sort((a, b) => comparator({ a, b }));
 	}
 
-	return result;
+	return nfts;
+};
+
+export const filterSortNftCollections = ({
+	nftCollections,
+	filter,
+	sort
+}: {
+	nftCollections: NftCollectionUi[];
+	filter?: string;
+	sort?: NftListSortingType;
+}): NftCollectionUi[] => {
+	if (nonNullish(filter)) {
+		nftCollections = [...nftCollections].filter(
+			(coll) => (coll?.collection?.name?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0
+		);
+	}
+
+	if (nonNullish(sort)) {
+		const dir = sort.order === 'asc' ? 1 : -1;
+		const comparator = sort.type === 'collection-name' ? cmpByCollectionName(dir) : cmpByDate(dir);
+
+		nftCollections = [...nftCollections].sort((a, b) => comparator({ a, b }));
+	}
+
+	return nftCollections;
 };

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { NftCollectionUi } from '$lib/types/nft';
-	import Img from '$lib/components/ui/Img.svelte';
 	import { nonNullish } from '@dfinity/utils';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
+	import type { NftCollectionUi } from '$lib/types/nft';
 
 	interface Props {
 		collection: NftCollectionUi;
