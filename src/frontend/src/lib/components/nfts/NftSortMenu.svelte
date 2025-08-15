@@ -6,9 +6,9 @@
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type NftListSortingType, nftListStore } from '$lib/stores/nft-list.store';
-	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
 
 	let visible = $state(false);
 
