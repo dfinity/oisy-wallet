@@ -195,8 +195,8 @@
 					{erc20Approve}
 					{sourceNetwork}
 					{targetNetwork}
-					on:icApprove={send}
-					on:icReject={reject}
+					onApprove={send}
+					onReject={reject}
 				/>
 			{/if}
 		</CkEthLoader>
