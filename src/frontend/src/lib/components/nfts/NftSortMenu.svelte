@@ -23,7 +23,7 @@
 </script>
 
 {#snippet content()}
-	<span class="mb-2 flex text-sm font-bold">Grouping</span>
+	<span class="mb-2 flex text-sm font-bold">{$i18n.nfts.text.grouping}</span>
 
 	<List noPadding>
 		<ListItem>
@@ -41,7 +41,7 @@
 						<IconCheck size="20" />
 					{/if}
 				</span>
-				<span class="font-normal">Recents first</span>
+				<span class="font-normal">{$i18n.nfts.text.recents_first}</span>
 			</Button>
 		</ListItem>
 		<ListItem>
@@ -59,7 +59,7 @@
 						<IconCheck size="20" />
 					{/if}
 				</span>
-				<span class="font-normal">Oldest first</span>
+				<span class="font-normal">{$i18n.nfts.text.oldest_first}</span>
 			</Button>
 		</ListItem>
 		<ListItem>
@@ -76,7 +76,7 @@
 						<IconCheck size="20" />
 					{/if}
 				</span>
-				<span class="font-normal">Collection name A-Z</span>
+				<span class="font-normal">{$i18n.nfts.text.collection_atoz}</span>
 			</Button>
 		</ListItem>
 		<ListItem>
@@ -93,7 +93,7 @@
 						<IconCheck size="20" />
 					{/if}
 				</span>
-				<span class="font-normal">Collection name Z-A</span>
+				<span class="font-normal">{$i18n.nfts.text.collection_ztoa}</span>
 			</Button>
 		</ListItem>
 	</List>
