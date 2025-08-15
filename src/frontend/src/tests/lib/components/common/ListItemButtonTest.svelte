@@ -14,6 +14,8 @@
 
 <ListItemButton {...props}>
 	{#snippet children()}
-		{label}
+		<span>
+			{label}
+		</span>
 	{/snippet}
 </ListItemButton>

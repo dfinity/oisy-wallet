@@ -45,7 +45,7 @@ describe('ListItemButton', () => {
 			testId
 		});
 
-		const host = container.querySelector(`[data-tid="${testId}"]`)!;
+		const host = container.querySelector(`[data-tid="${testId}"]`);
 		expect(host.querySelector('svg')).not.toBeInTheDocument();
 	});
 
@@ -59,7 +59,7 @@ describe('ListItemButton', () => {
 			testId
 		});
 
-		const host = container.querySelector(`[data-tid="${testId}"]`)!;
+		const host = container.querySelector(`[data-tid="${testId}"]`);
 		const selectableSpan = host.querySelector('span.w-\\[20px\\]');
 		expect(selectableSpan).toBeInTheDocument();
 		expect(host.querySelector('svg')).not.toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('ListItemButton', () => {
 			testId
 		});
 
-		const host = container.querySelector(`[data-tid="${testId}"]`)!;
+		const host = container.querySelector(`[data-tid="${testId}"]`);
 		expect(host.querySelector('svg')).toBeInTheDocument();
 	});
 });
