@@ -43,14 +43,14 @@ describe('nfts.derived', () => {
 
 	describe('nftListGroupByCollection', () => {
 		it('should reflect groupByCollection from the main store', () => {
-			expect(get(nftListGroupByCollection)).toBe(true);
+			expect(get(nftListGroupByCollection)).toBeTruthy();
 
 			nftListStore.set({
 				sort: { order: 'asc', type: 'collection-name' },
 				groupByCollection: false
 			});
 
-			expect(get(nftListGroupByCollection)).toBe(false);
+			expect(get(nftListGroupByCollection)).toBeFalsy();
 		});
 	});
 });
