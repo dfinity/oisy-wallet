@@ -196,8 +196,9 @@ export function filterSortByCollection<T extends Nft | NftCollectionUi>({
 	let result = items;
 
 	if (nonNullish(filter)) {
-		const lowercased = filter.toLowerCase();
-		result = result.filter((it) => (it.collection?.name?.toLowerCase() ?? '').includes(lowercased));
+		result = result.filter((it) =>
+			(it.collection?.name?.toLowerCase() ?? '').includes(filter.toLowerCase())
+		);
 	}
 
 	if (nonNullish(sort)) {
