@@ -1,16 +1,16 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
-	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { nftListStore } from '$lib/stores/nft-list.store';
+	import { nftStore } from '$lib/stores/nft.store';
+	import { tokenListStore } from '$lib/stores/token-list.store';
+	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import {
 		filterSortByCollection,
 		getEnabledNfts,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
-	import { tokenListStore } from '$lib/stores/token-list.store';
-	import { nftListStore } from '$lib/stores/nft-list.store';
 
 	interface Props {
 		children: Snippet;
