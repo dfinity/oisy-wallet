@@ -722,7 +722,12 @@
 			"minter_info_not_certified": "Tente novamente em alguns segundos, um parâmetro de configuração ckETH não foi certificado.",
 			"cketh_max_transaction_fee_missing": "A taxa máxima de transação para ckETH está faltando.",
 			"utxos_fee_missing": "A taxa de UTXOs está faltando.",
-			"minimum_btc_amount": "O valor mínimo é $amount BTC."
+			"minimum_btc_amount": "O valor mínimo é $amount BTC.",
+			"btc_insufficient_balance": "",
+			"btc_insufficient_balance_for_fee": "",
+			"btc_invalid_utxo_data": "",
+			"btc_utxo_locked": "",
+			"btc_invalid_fee_calculation": ""
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",

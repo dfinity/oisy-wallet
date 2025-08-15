@@ -722,7 +722,12 @@
 			"minter_info_not_certified": "请稍后再试，ckETH 配置参数尚未认证。",
 			"cketh_max_transaction_fee_missing": "ckETH 的最大交易费用缺失。",
 			"utxos_fee_missing": "UTXO 手续费缺失。",
-			"minimum_btc_amount": "最小金额为 $amount BTC。"
+			"minimum_btc_amount": "最小金额为 $amount BTC。",
+			"btc_insufficient_balance": "",
+			"btc_insufficient_balance_for_fee": "",
+			"btc_invalid_utxo_data": "",
+			"btc_utxo_locked": "",
+			"btc_invalid_fee_calculation": ""
 		},
 		"error": {
 			"unexpected": "发送交易时发生错误。",

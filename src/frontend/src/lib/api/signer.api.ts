@@ -3,6 +3,7 @@ import type {
 	EthSignTransactionRequest,
 	SendBtcResponse
 } from '$declarations/signer/signer.did';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
@@ -86,8 +87,23 @@ export const sendBtc = async ({
 	...params
 }: CanisterApiFunctionParams<SendBtcParams>): Promise<SendBtcResponse> => {
 	const { sendBtc } = await signerCanister({ identity });
+	const result = await sendBtc(params);
+	console.warn('🎯 [signer.api.ts -> sendBtc] Called sendBtc(..):', {
+		timestamp: new Date().toISOString(),
+		input: {
+			...params,
+			utxosToSpend: params.utxosToSpend.map((utxo) => ({
+				...utxo,
+				outpoint: {
+					...utxo.outpoint,
+					txid: utxoTxIdToString(utxo.outpoint.txid)
+				}
+			}))
+		},
+		output: result
+	});
 
-	return sendBtc(params);
+	return result;
 };
 
 export const getSchnorrPublicKey = async ({
