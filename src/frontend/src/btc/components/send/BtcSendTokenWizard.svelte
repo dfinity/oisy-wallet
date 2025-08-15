@@ -20,6 +20,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet, mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	export let currentStep: WizardStep | undefined;
