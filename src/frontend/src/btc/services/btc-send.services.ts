@@ -199,6 +199,16 @@ export const handleBtcValidationError = async ({
 	err: BtcValidationError;
 	i18nStore: I18n;
 }) => {
+	// Safety check: ensure error object exists and has the expected structure
+	if (!err || typeof err !== 'object' || !('type' in err) || !err.type) {
+		console.error('Invalid error object passed to handleBtcValidationError:', err);
+		toastsError({
+			msg: { text: i18nStore.send.error.unexpected },
+			err
+		});
+		return;
+	}
+
 	switch (err.type) {
 		case BtcSendValidationError.AuthenticationRequired:
 			await nullishSignOut();
