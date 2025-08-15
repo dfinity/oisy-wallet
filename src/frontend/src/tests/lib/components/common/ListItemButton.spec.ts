@@ -21,7 +21,8 @@ describe('ListItemButton', () => {
 		});
 
 		await fireEvent.click(getByRole('button', { name: LABEL }));
-		expect(onClick).toHaveBeenCalledTimes(1);
+
+		expect(onClick).toHaveBeenCalledOnce();
 	});
 
 	it('forwards testId to the underlying Button element', () => {
@@ -34,6 +35,7 @@ describe('ListItemButton', () => {
 
 		// The base Button uses data-tid
 		const el = container.querySelector(`[data-tid="${testId}"]`);
+
 		expect(el).toBeInTheDocument();
 	});
 
@@ -46,6 +48,7 @@ describe('ListItemButton', () => {
 		});
 
 		const host = container.querySelector(`[data-tid="${testId}"]`);
+
 		expect(host?.querySelector('svg')).not.toBeInTheDocument();
 	});
 
@@ -61,7 +64,9 @@ describe('ListItemButton', () => {
 
 		const host = container.querySelector(`[data-tid="${testId}"]`);
 		const selectableSpan = host?.querySelector('span.w-\\[20px\\]');
+
 		expect(selectableSpan).toBeInTheDocument();
+
 		expect(host?.querySelector('svg')).not.toBeInTheDocument();
 	});
 
@@ -76,6 +81,7 @@ describe('ListItemButton', () => {
 		});
 
 		const host = container.querySelector(`[data-tid="${testId}"]`);
+
 		expect(host?.querySelector('svg')).toBeInTheDocument();
 	});
 });
