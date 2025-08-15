@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import { Popover } from '@dfinity/gix-components';
-	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import type { Snippet } from 'svelte';
+	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	interface Props {
 		visible: boolean;
