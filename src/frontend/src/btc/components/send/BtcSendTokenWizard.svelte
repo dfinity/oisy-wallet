@@ -5,11 +5,22 @@
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import { handleBtcValidationError, sendBtc, validateUtxosForSend } from '$btc/services/btc-send.services';
+	import {
+		handleBtcValidationError,
+		sendBtc,
+		validateUtxosForSend
+	} from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import { TRACK_COUNT_BTC_SEND_ERROR, TRACK_COUNT_BTC_SEND_SUCCESS } from '$lib/constants/analytics.contants';
-	import { btcAddressMainnet, btcAddressRegtest, btcAddressTestnet } from '$lib/derived/address.derived';
+	import {
+		TRACK_COUNT_BTC_SEND_ERROR,
+		TRACK_COUNT_BTC_SEND_SUCCESS
+	} from '$lib/constants/analytics.contants';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -21,7 +32,11 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet, mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdBTCRegtest,
+		isNetworkIdBTCTestnet,
+		mapNetworkIdToBitcoinNetwork
+	} from '$lib/utils/network.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
