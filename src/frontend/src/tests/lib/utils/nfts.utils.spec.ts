@@ -99,7 +99,10 @@ describe('nfts.utils', () => {
 	};
 
 	// Same collator settings as in the impl
-	const collator = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true });
+	const collator = new Intl.Collator(new Intl.Locale(navigator.language), {
+		sensitivity: 'base',
+		numeric: true
+	});
 
 	// Build a case-insensitive substring from the Azuki name for filtering
 	const azukiName = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN).name ?? '';

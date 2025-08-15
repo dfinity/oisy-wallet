@@ -157,7 +157,7 @@ export const getNftCollectionUi = ({
 	}, []);
 };
 
-const collator = new Intl.Collator(undefined, {
+const collator = new Intl.Collator(new Intl.Locale(navigator.language), {
 	sensitivity: 'base', // case-insensitive
 	numeric: true // natural sort for names with numbers
 });
