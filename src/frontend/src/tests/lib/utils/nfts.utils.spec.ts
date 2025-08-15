@@ -6,6 +6,8 @@ import { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import {
 	findNft,
+	getEnabledNfts,
+	getNftCollectionUi,
 	getNftsByNetworks,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
@@ -47,6 +49,51 @@ describe('nfts.utils', () => {
 			...mockValidErc721Nft.collection,
 			address: DE_GODS_TOKEN.address,
 			network: POLYGON_AMOY_NETWORK
+		}
+	};
+
+	const nftAzuki1 = {
+		...mockValidErc721Nft,
+		id: parseNftId(1),
+		collection: {
+			...mockValidErc721Nft.collection,
+			name: 'Azuki Elemental Beans',
+			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+			network: POLYGON_AMOY_NETWORK
+		}
+	};
+
+	const nftAzuki2 = {
+		...mockValidErc721Nft,
+		id: parseNftId(2),
+		collection: {
+			...mockValidErc721Nft.collection,
+			name: 'Azuki Elemental Beans',
+			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+			network: POLYGON_AMOY_NETWORK
+		}
+	};
+
+	const nftDeGods = {
+		...mockValidErc721Nft,
+		id: parseNftId(3),
+		collection: {
+			...mockValidErc721Nft.collection,
+			name: 'DeGods',
+			address: DE_GODS_TOKEN.address,
+			network: POLYGON_AMOY_NETWORK
+		}
+	};
+
+	const nftOtherNetwork = {
+		...mockValidErc721Nft,
+		id: parseNftId(4),
+		collection: {
+			...mockValidErc721Nft.collection,
+			name: 'Azuki Elemental Beans',
+			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+			// same address as AZUKI, but **different** network
+			network: ETHEREUM_NETWORK
 		}
 	};
 
@@ -276,6 +323,101 @@ describe('nfts.utils', () => {
 				network: AZUKI_ELEMENTAL_BEANS_TOKEN.network,
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
 			});
+		});
+	});
+
+	describe('getEnabledNfts', () => {
+		it('returns only NFTs whose (address, network) exists in enabled tokens', () => {
+			const enabledTokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
+
+			const res = getEnabledNfts({
+				$nftStore: [nftAzuki1, nftAzuki2, nftDeGods, nftOtherNetwork],
+				$enabledNonFungibleNetworkTokens: enabledTokens
+			});
+
+			// nftOtherNetwork should be filtered out (wrong network)
+			expect(res).toEqual([nftAzuki1, nftAzuki2, nftDeGods]);
+		});
+
+		it('returns empty when $nftStore is undefined', () => {
+			const enabledTokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
+
+			const res = getEnabledNfts({
+				$nftStore: undefined,
+				$enabledNonFungibleNetworkTokens: enabledTokens
+			});
+
+			expect(res).toEqual([]);
+		});
+
+		it('returns empty when no enabled tokens', () => {
+			const res = getEnabledNfts({
+				$nftStore: [nftAzuki1, nftAzuki2, nftDeGods],
+				$enabledNonFungibleNetworkTokens: []
+			});
+
+			expect(res).toEqual([]);
+		});
+
+		it('matches by both address and network id (mismatch network is excluded)', () => {
+			const enabledTokens = [
+				// Only enable AZUKI on Polygon
+				{ ...AZUKI_ELEMENTAL_BEANS_TOKEN, network: POLYGON_AMOY_NETWORK }
+			];
+
+			const res = getEnabledNfts({
+				$nftStore: [nftAzuki1, nftOtherNetwork],
+				$enabledNonFungibleNetworkTokens: enabledTokens
+			});
+
+			expect(res).toEqual([nftAzuki1]);
+		});
+	});
+
+	describe('getNftCollectionUi', () => {
+		it('creates a UI entry for each token and groups matching NFTs', () => {
+			const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
+
+			const res = getNftCollectionUi({
+				$nonFungibleTokens: tokens,
+				$nftStore: [nftAzuki1, nftAzuki2, nftDeGods, nftOtherNetwork]
+			});
+
+			// Two collections (one per token)
+			expect(res).toHaveLength(2);
+
+			const [azukiUi, deGodsUi] =
+				res[0].collection.address === AZUKI_ELEMENTAL_BEANS_TOKEN.address ? res : [res[1], res[0]];
+
+			// collection info matches mapTokenToCollection
+			expect(azukiUi.collection).toEqual(mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN));
+			expect(deGodsUi.collection).toEqual(mapTokenToCollection(DE_GODS_TOKEN));
+
+			// nfts grouped by collection AND network (the ETH one must be excluded)
+			expect(azukiUi.nfts).toEqual([nftAzuki1, nftAzuki2]);
+			expect(deGodsUi.nfts).toEqual([nftDeGods]);
+		});
+
+		it('returns empty nfts arrays for tokens with no matching NFTs', () => {
+			const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
+
+			const res = getNftCollectionUi({
+				$nonFungibleTokens: tokens,
+				$nftStore: []
+			});
+
+			expect(res).toHaveLength(2);
+			expect(res[0].nfts).toEqual([]);
+			expect(res[1].nfts).toEqual([]);
+		});
+
+		it('returns an empty array when no tokens are provided', () => {
+			const res = getNftCollectionUi({
+				$nonFungibleTokens: [],
+				$nftStore: [nftAzuki1]
+			});
+
+			expect(res).toEqual([]);
 		});
 	});
 });
