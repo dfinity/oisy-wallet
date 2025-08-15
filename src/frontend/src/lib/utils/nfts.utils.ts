@@ -180,7 +180,7 @@ export const filterSortNfts = ({
 	sort?: NftListSortingType;
 }): Nft[] => {
 	if (nonNullish(filter)) {
-		nfts = nfts.filter(
+		nfts = [...nfts].filter(
 			(nft) => (nft?.collection?.name?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0
 		);
 	}
