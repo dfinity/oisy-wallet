@@ -1,6 +1,5 @@
-import { AppPath } from '$lib/constants/routes.constants';
-import { redirect } from '@sveltejs/kit';
+import { loadRouteParams, type RouteParams } from '$lib/utils/nav.utils';
+import type { LoadEvent } from '@sveltejs/kit';
+import type { PageLoad } from './$types';
 
-export const load = () => {
-	throw redirect(308, AppPath.Tokens); // 308 permanent redirect status code
-};
+export const load: PageLoad = ($event: LoadEvent): RouteParams => loadRouteParams($event);

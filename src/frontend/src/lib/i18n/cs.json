@@ -161,6 +161,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "Chcete-li pokračovat, odemkněte",
+			"title_part_2": "Předtím jste si pro bezpečnost zamkli peněženku. Pokračujte tam, kde jste skončili, nebo se odhlaste.",
+			"unlock": "Odemknout",
+			"logout": "Odhlásit se",
+			"logout_clear_cash_message": "Odhlášením se vymažou všechna data v mezipaměti",
+			"learn_more": "Zjistěte více"
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "Všechny aplikace",
@@ -1233,12 +1243,12 @@
 				"reward_received": "Vítejte v $oisy_short!",
 				"reward_failed": "Kód vypršel",
 				"reward_received_description": "Svůj uvítací dárek obdržíte kdykoli.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Požádejte o nový a zkuste to znovu"
 			},
 			"error": {
 				"loading_reward": "Chyba při načítání nového kódu odměny.",
 				"loading_user_data": "Nepodařilo se načíst uživatelská data z kanystru odměn.",
-				"claiming_reward": "Chyba při nárokování odměny.",
 				"loading_eligibility": "Chyba při načítání způsobilosti ke kampani."
 			}
 		},
