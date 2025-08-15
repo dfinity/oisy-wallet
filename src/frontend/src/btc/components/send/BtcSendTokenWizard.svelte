@@ -5,11 +5,8 @@
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import {
-		handleBtcValidationError,
-		sendBtc,
-		validateBtcSend
-	} from '$btc/services/btc-send.services';
+	import BtcSendValidation from '$btc/components/send/BtcSendValidation.svelte';
+	import { sendBtc, validateBtcSend } from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
@@ -48,6 +45,7 @@
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
 	let utxosFee: UtxosFee | undefined = undefined;
+	let btcSendValidation: BtcSendValidation;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sendToken.network.id;
@@ -65,7 +63,30 @@
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
 	const send = async () => {
-		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
+		// Early validation of required parameters
+		if (
+			!nonNullish($authIdentity) ||
+			!nonNullish(networkId) ||
+			!nonNullish(amount) ||
+			!nonNullish(utxosFee)
+		) {
+			toastsError({
+				msg: { text: $i18n.send.error.unexpected }
+			});
+			dispatch('icBack');
+			return;
+		}
+
+		const network = mapNetworkIdToBitcoinNetwork(networkId);
+
+		// Validate that network mapping was successful
+		if (!nonNullish(network)) {
+			toastsError({
+				msg: { text: $i18n.send.error.unexpected }
+			});
+			dispatch('icBack');
+			return;
+		}
 
 		// Validate UTXOs before proceeding
 		try {
@@ -79,7 +100,7 @@
 		} catch (err: unknown) {
 			// Handle BtcValidationError with specific toastsError for each type
 			if (err instanceof BtcValidationError) {
-				await handleBtcValidationError(err, $i18n);
+				await btcSendValidation.handleBtcValidationError({ err });
 			} else {
 				trackEvent({
 					name: TRACK_COUNT_BTC_SEND_ERROR,
@@ -97,6 +118,7 @@
 
 			// go back to the previous step so the user can correct/ try again
 			dispatch('icBack');
+			return;
 		}
 
 		dispatch('icNext');
@@ -149,6 +171,7 @@
 	};
 </script>
 
+<BtcSendValidation bind:this={btcSendValidation} />
 {#if currentStep?.name === WizardStepsSend.REVIEW}
 	<BtcSendReview
 		on:icBack
