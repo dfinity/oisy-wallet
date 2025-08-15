@@ -77,7 +77,7 @@
 
 	let worker = $state<
 		| {
-				syncAuthIdle: (auth: AuthStoreData, locked?: boolean) => void;
+				syncAuthIdle: (args: { auth: AuthStoreData; locked?: boolean }) => void;
 		  }
 		| undefined
 	>();
@@ -86,7 +86,7 @@
 
 	$effect(() => {
 		[worker, $authStore, $isLocked];
-		worker?.syncAuthIdle($authStore, $isLocked);
+		worker?.syncAuthIdle({ auth: $authStore, locked: $isLocked });
 	});
 
 	/**
