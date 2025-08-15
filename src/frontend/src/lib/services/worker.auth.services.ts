@@ -22,8 +22,8 @@ export const initAuthWorker = async () => {
 	};
 
 	return {
-		syncAuthIdle: (auth: AuthStoreData) => {
-			if (!auth.identity) {
+		syncAuthIdle: (auth: AuthStoreData, locked?: boolean) => {
+			if (locked || !auth.identity) {
 				authWorker.postMessage({ msg: 'stopIdleTimer' });
 				return;
 			}
