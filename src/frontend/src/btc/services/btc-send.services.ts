@@ -35,7 +35,7 @@ export type SendBtcParams = BtcSendServiceParams & {
  * @param params - Object containing all validation parameters
  * @throws BtcValidationError with specific error type if any validation fails
  */
-export const validateUtxosForSend = async ({
+export const validateBtcSend = async ({
 	utxosFee,
 	source,
 	amount,
@@ -56,16 +56,16 @@ export const validateUtxosForSend = async ({
 		}
 	}));
 
-	console.warn('validateUtxosForSend Parameters:', {
-		utxosFee: {
-			...utxosFee,
-			utxos: utxosWithStringTxids
-		},
-		source,
-		amount,
-		network,
-		identity: identity?.getPrincipal()?.toString()
-	});
+	// console.warn('validateUtxosForSend Parameters:', {
+	// 	utxosFee: {
+	// 		...utxosFee,
+	// 		utxos: utxosWithStringTxids
+	// 	},
+	// 	source,
+	// 	amount,
+	// 	network,
+	// 	identity: identity?.getPrincipal()?.toString()
+	// });
 
 	const { utxos, feeSatoshis } = utxosFee;
 	const amountSatoshis = convertNumberToSatoshis({ amount });
@@ -90,6 +90,7 @@ export const validateUtxosForSend = async ({
 	for (const utxo of utxos) {
 		if (
 			!utxo.outpoint?.txid ||
+			utxo.outpoint?.txid.length === 0 ||
 			utxo.outpoint.vout === undefined ||
 			!utxo.value ||
 			BigInt(utxo.value) <= 0n ||

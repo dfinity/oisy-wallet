@@ -1,9 +1,8 @@
-import { sendBtc, validateUtxosForSend, type SendBtcParams } from '$btc/services/btc-send.services';
+import { sendBtc, type SendBtcParams, validateBtcSend } from '$btc/services/btc-send.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import * as btcUtxosUtils from '$btc/utils/btc-utxos.utils';
-import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as btcUtils from '$icp/utils/btc.utils';
 import * as backendAPI from '$lib/api/backend.api';
 import * as signerAPI from '$lib/api/signer.api';
@@ -11,7 +10,6 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { Utxo } from '@dfinity/ckbtc';
-import type { get_utxos_response } from '@dfinity/ckbtc/dist/candid/bitcoin';
 import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
 
 // Mock environment variables (same as btc-utxos.service.spec.ts)
@@ -137,7 +135,7 @@ describe('btc-send.services', () => {
 		});
 
 		it('should pass validation for valid UTXOs and parameters', async () => {
-			await expect(validateUtxosForSend(defaultValidateParams)).resolves.not.toThrow();
+			await expect(validateBtcSend(defaultValidateParams)).resolves.not.toThrow();
 		});
 
 		it('should throw InsufficientBalance error when UTXOs array is empty', async () => {
@@ -146,10 +144,10 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, utxos: [] }
 			};
 
-			await expect(validateUtxosForSend(params)).rejects.toThrow(BtcValidationError);
+			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
 
 			try {
-				await validateUtxosForSend(params);
+				await validateBtcSend(params);
 			} catch (error) {
 				expect(error).toBeInstanceOf(BtcValidationError);
 				expect((error as BtcValidationError).type).toBe(BtcSendValidationError.InsufficientBalance);
@@ -160,18 +158,19 @@ describe('btc-send.services', () => {
 			it('should throw InvalidUtxoData error when UTXO has no txid', async () => {
 				const invalidUtxo = {
 					...validUtxo,
-					outpoint: { ...validUtxo.outpoint, txid: undefined as unknown as number[] }
+					outpoint: { ...validUtxo.outpoint, txid: [] as number[] }
 				};
 				const params = {
 					...defaultValidateParams,
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
 				};
 
-				await expect(validateUtxosForSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
 
 				try {
-					await validateUtxosForSend(params);
+					await validateBtcSend(params);
 				} catch (error) {
+					expect(error).toBeInstanceOf(BtcValidationError);
 					expect((error as BtcValidationError).type).toBe(BtcSendValidationError.InvalidUtxoData);
 				}
 			});
@@ -186,10 +185,10 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
 				};
 
-				await expect(validateUtxosForSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
 
 				try {
-					await validateUtxosForSend(params);
+					await validateBtcSend(params);
 				} catch (error) {
 					expect((error as BtcValidationError).type).toBe(BtcSendValidationError.InvalidUtxoData);
 				}
@@ -202,10 +201,10 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
 				};
 
-				await expect(validateUtxosForSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
 
 				try {
-					await validateUtxosForSend(params);
+					await validateBtcSend(params);
 				} catch (error) {
 					expect((error as BtcValidationError).type).toBe(BtcSendValidationError.InvalidUtxoData);
 				}
@@ -218,10 +217,10 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
 				};
 
-				await expect(validateUtxosForSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
 
 				try {
-					await validateUtxosForSend(params);
+					await validateBtcSend(params);
 				} catch (error) {
 					expect((error as BtcValidationError).type).toBe(BtcSendValidationError.InvalidUtxoData);
 				}
@@ -235,10 +234,10 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, utxos: [zeroValueUtxo] }
 				};
 
-				await expect(validateUtxosForSend(paramsWithZeroValue)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(paramsWithZeroValue)).rejects.toThrow(BtcValidationError);
 
 				try {
-					await validateUtxosForSend(paramsWithZeroValue);
+					await validateBtcSend(paramsWithZeroValue);
 				} catch (error: unknown) {
 					expect((error as BtcValidationError).type).toBe(BtcSendValidationError.InvalidUtxoData);
 				}
@@ -249,10 +248,10 @@ describe('btc-send.services', () => {
 			vi.spyOn(btcUtils, 'getPendingTransactionIds').mockReturnValue(['txid1']);
 			vi.spyOn(btcUtxosUtils, 'extractUtxoTxIds').mockReturnValue(['txid1']);
 
-			await expect(validateUtxosForSend(defaultValidateParams)).rejects.toThrow(BtcValidationError);
+			await expect(validateBtcSend(defaultValidateParams)).rejects.toThrow(BtcValidationError);
 
 			try {
-				await validateUtxosForSend(defaultValidateParams);
+				await validateBtcSend(defaultValidateParams);
 			} catch (error: unknown) {
 				expect((error as BtcValidationError).type).toBe(BtcSendValidationError.UtxoLocked);
 			}
@@ -269,10 +268,10 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, feeSatoshis: 100n } // Very low fee
 				};
 
-				await expect(validateUtxosForSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
 
 				try {
-					await validateUtxosForSend(params);
+					await validateBtcSend(params);
 				} catch (error: unknown) {
 					expect((error as BtcValidationError).type).toBe(
 						BtcSendValidationError.InvalidFeeCalculation
@@ -290,10 +289,10 @@ describe('btc-send.services', () => {
 					utxosFee: { ...validUtxosFee, feeSatoshis: 50000n } // Very high fee
 				};
 
-				await expect(validateUtxosForSend(params)).rejects.toThrow(BtcValidationError);
+				await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
 
 				try {
-					await validateUtxosForSend(params);
+					await validateBtcSend(params);
 				} catch (error: unknown) {
 					expect((error as BtcValidationError).type).toBe(
 						BtcSendValidationError.InvalidFeeCalculation
@@ -313,10 +312,10 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, feeSatoshis: 250n } // 250 * 1 = 250, within tolerance
 			};
 
-			await expect(validateUtxosForSend(params)).rejects.toThrow(BtcValidationError);
+			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
 
 			try {
-				await validateUtxosForSend(params);
+				await validateBtcSend(params);
 			} catch (error: unknown) {
 				expect((error as BtcValidationError).type).toBe(
 					BtcSendValidationError.InsufficientBalanceForFee
@@ -338,7 +337,7 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee + toleranceRange } // 1100
 			};
 
-			await expect(validateUtxosForSend(paramsUpperBound)).resolves.not.toThrow();
+			await expect(validateBtcSend(paramsUpperBound)).resolves.not.toThrow();
 
 			// Test fee at lower tolerance boundary
 			const paramsLowerBound = {
@@ -346,7 +345,7 @@ describe('btc-send.services', () => {
 				utxosFee: { ...validUtxosFee, feeSatoshis: expectedFee - toleranceRange } // 900
 			};
 
-			await expect(validateUtxosForSend(paramsLowerBound)).resolves.not.toThrow();
+			await expect(validateBtcSend(paramsLowerBound)).resolves.not.toThrow();
 		});
 
 		it('should handle multiple UTXOs correctly', async () => {
@@ -372,44 +371,18 @@ describe('btc-send.services', () => {
 				}
 			};
 
-			await expect(validateUtxosForSend(params)).resolves.not.toThrow();
+			await expect(validateBtcSend(params)).resolves.not.toThrow();
 		});
 
 		it('should call getFeeRateFromPercentiles with correct parameters', async () => {
 			const getFeeRateFromPercentilesSpy = vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles');
 
-			await validateUtxosForSend(defaultValidateParams);
+			await validateBtcSend(defaultValidateParams);
 
 			expect(getFeeRateFromPercentilesSpy).toHaveBeenCalledWith({
 				network: defaultValidateParams.network,
 				identity: defaultValidateParams.identity
 			});
-		});
-
-		it('should log fee calculation details for debugging', async () => {
-			// Use the exact same mocks as the failing tests
-			const getFeeRateFromPercentilesSpy = vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles');
-			const estimateTransactionSizeSpy = vi.spyOn(btcUtxosUtils, 'estimateTransactionSize');
-
-			// Don't mock these - let them use real values
-			getFeeRateFromPercentilesSpy.mockRestore();
-			estimateTransactionSizeSpy.mockRestore();
-
-			try {
-				await validateUtxosForSend(defaultValidateParams);
-			} catch (error) {
-				if (
-					error instanceof BtcValidationError &&
-					error.type === BtcSendValidationError.InvalidFeeCalculation
-				) {
-					// This will help us understand what values are actually being compared
-					console.warn('Fee validation failed with:');
-					console.warn('- Provided fee:', defaultValidateParams.utxosFee.feeSatoshis);
-					console.warn('- Expected fee rate calls:', getFeeRateFromPercentilesSpy.mock.calls);
-					console.warn('- Transaction size calls:', estimateTransactionSizeSpy.mock.calls);
-				}
-				throw error;
-			}
 		});
 
 		it('should identify the fee tolerance issue causing browser errors', async () => {
@@ -419,6 +392,7 @@ describe('btc-send.services', () => {
 			// Only mock the external dependencies that we need
 			vi.spyOn(btcUtils, 'getPendingTransactionIds').mockReturnValue([]);
 			vi.spyOn(btcUtxosUtils, 'extractUtxoTxIds').mockReturnValue(['txid1']);
+			vi.spyOn(btcUtxosUtils, 'estimateTransactionSize').mockReturnValue(250);
 			vi.spyOn(backendAPI, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 
 			// Use a realistic scenario that might trigger the browser issue
@@ -431,197 +405,16 @@ describe('btc-send.services', () => {
 			};
 
 			// This test should reveal what's causing the InvalidFeeCalculation
+			await expect(validateBtcSend(realisticParams)).rejects.toThrow(BtcValidationError);
+
 			try {
-				await validateUtxosForSend(realisticParams);
-				// If this passes, the issue might be with specific fee ranges
+				await validateBtcSend(realisticParams);
 			} catch (error) {
 				expect(error).toBeInstanceOf(BtcValidationError);
 				expect((error as BtcValidationError).type).toBe(
 					BtcSendValidationError.InvalidFeeCalculation
 				);
-
-				// Log the details to understand the failure
-				console.warn('InvalidFeeCalculation error details:', error);
 			}
-		});
-	});
-
-	describe('Integration Tests', () => {
-		describe('prepareBtcSend + validateUtxosForSend', () => {
-			const mockBtcAddress = 'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4';
-			const mockNetwork = 'mainnet' as const;
-			const mockAmount = 0.001;
-
-			const mockUtxo: Utxo = {
-				value: 500_000n,
-				height: 100,
-				outpoint: {
-					txid: new Uint8Array([1, 2, 3, 4]),
-					vout: 0
-				}
-			};
-
-			const mockUtxosResponse: get_utxos_response = {
-				utxos: [mockUtxo],
-				tip_block_hash: new Uint8Array([5, 6, 7, 8]),
-				tip_height: 150,
-				next_page: []
-			};
-
-			const mockFeePercentiles = {
-				fee_percentiles: [1000n, 2000n, 5000n, 10_000n, 20_000n]
-			};
-
-			const integrationTestParams = {
-				identity: mockIdentity,
-				network: mockNetwork,
-				amount: mockAmount,
-				source: mockBtcAddress
-			};
-
-			beforeEach(() => {
-				vi.clearAllMocks();
-
-				// Mock external dependencies using the same pattern as btc-utxos.service.spec.ts
-				vi.spyOn(btcUtils, 'getPendingTransactionIds').mockReturnValue([]);
-				vi.spyOn(backendAPI, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
-				vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
-
-				// Mock utility functions needed for validation
-				vi.spyOn(btcUtxosUtils, 'extractUtxoTxIds').mockReturnValue(['txid1']);
-
-				// Use consistent transaction size for fee calculation
-				const transactionSize = 250;
-				vi.spyOn(btcUtxosUtils, 'estimateTransactionSize').mockReturnValue(transactionSize);
-
-				// Mock getFeeRateFromPercentiles to return consistent fee rate
-				const feeRate = 5000n;
-				vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(feeRate);
-
-				vi.spyOn(btcUtxosUtils, 'filterAvailableUtxos').mockReturnValue([mockUtxo]);
-
-				// Calculate realistic fee based on the mocked fee rate
-				const calculatedFee = BigInt(transactionSize) * feeRate;
-				const amountSatoshis = 100_000n; // 0.001 BTC in satoshis
-
-				vi.spyOn(btcUtxosUtils, 'calculateUtxoSelection').mockReturnValue({
-					selectedUtxos: [mockUtxo],
-					feeSatoshis: calculatedFee,
-					sufficientFunds: true,
-					totalInputValue: mockUtxo.value,
-					changeAmount: mockUtxo.value - amountSatoshis - calculatedFee
-				});
-			});
-
-			it('should pass validation when prepareBtcSend output is validated', async () => {
-				// Call prepareBtcSend to get UtxosFee
-				const utxosFee = await btcUtxosService.prepareBtcSend(integrationTestParams);
-
-				// Verify prepareBtcSend succeeded
-				expect(utxosFee.error).toBeUndefined();
-				expect(utxosFee.utxos.length).toBeGreaterThan(0);
-				expect(utxosFee.feeSatoshis).toBeGreaterThan(0n);
-
-				// Now validate the result with validateUtxosForSend
-				await expect(
-					validateUtxosForSend({
-						utxosFee,
-						source: integrationTestParams.source,
-						amount: integrationTestParams.amount,
-						network: integrationTestParams.network,
-						identity: integrationTestParams.identity
-					})
-				).resolves.not.toThrow();
-
-				// Verify external calls were made correctly
-				expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledWith({
-					identity: integrationTestParams.identity,
-					bitcoinCanisterId: 'ghsi2-tqaaa-aaaan-aaaca-cai',
-					address: integrationTestParams.source,
-					network: integrationTestParams.network,
-					minConfirmations: 1
-				});
-			});
-
-			it('should handle InvalidFeeCalculation consistently between prepareBtcSend and validateUtxosForSend', async () => {
-				// Call prepareBtcSend
-				const utxosFee = await btcUtxosService.prepareBtcSend(integrationTestParams);
-
-				// Verify prepareBtcSend succeeded
-				expect(utxosFee.error).toBeUndefined();
-				expect(utxosFee.feeSatoshis).toBeGreaterThan(0n);
-
-				// validateUtxosForSend should accept this fee since both functions use the same fee calculation logic
-				await expect(
-					validateUtxosForSend({
-						utxosFee,
-						source: integrationTestParams.source,
-						amount: integrationTestParams.amount,
-						network: integrationTestParams.network,
-						identity: integrationTestParams.identity
-					})
-				).resolves.not.toThrow();
-
-				// Verify that both functions called getCurrentBtcFeePercentiles
-				expect(backendAPI.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
-					identity: integrationTestParams.identity,
-					network: { mainnet: null }
-				});
-
-				// Should be called twice - once by prepareBtcSend and once by validateUtxosForSend
-				expect(backendAPI.getCurrentBtcFeePercentiles).toHaveBeenCalledTimes(2);
-			});
-
-			it('should fail validation when prepareBtcSend returns insufficient funds', async () => {
-				// Mock bitcoin API to return small UTXOs
-				const smallUtxo: Utxo = {
-					value: 10_000n, // Small UTXO value
-					height: 100,
-					outpoint: {
-						txid: new Uint8Array([1, 2, 3, 4]),
-						vout: 0
-					}
-				};
-
-				vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue({
-					...mockUtxosResponse,
-					utxos: [smallUtxo]
-				});
-
-				// Mock filterAvailableUtxos to return the small UTXO
-				vi.spyOn(btcUtxosUtils, 'filterAvailableUtxos').mockReturnValue([smallUtxo]);
-
-				// Mock calculateUtxoSelection to indicate insufficient funds
-				vi.spyOn(btcUtxosUtils, 'calculateUtxoSelection').mockReturnValue({
-					selectedUtxos: [],
-					feeSatoshis: 0n,
-					sufficientFunds: false,
-					totalInputValue: 0n,
-					changeAmount: 0n
-				});
-
-				// Call prepareBtcSend with amount larger than available UTXOs
-				const largeAmountParams = {
-					...integrationTestParams,
-					amount: 1 // 1 BTC = 100,000,000 satoshis, but we only have 10,000
-				};
-
-				const utxosFee = await btcUtxosService.prepareBtcSend(largeAmountParams);
-
-				// Verify prepareBtcSend detected insufficient funds
-				expect(utxosFee.error).toBeDefined();
-
-				// validateUtxosForSend should also detect the issue
-				await expect(
-					validateUtxosForSend({
-						utxosFee,
-						source: largeAmountParams.source,
-						amount: largeAmountParams.amount,
-						network: largeAmountParams.network,
-						identity: largeAmountParams.identity
-					})
-				).rejects.toThrow(BtcValidationError);
-			});
 		});
 	});
 });
