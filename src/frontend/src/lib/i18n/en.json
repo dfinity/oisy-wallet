@@ -1006,7 +1006,17 @@
 		"text": {
 			"title": "NFTs",
 			"title_empty": "Your NFTs will appear here",
-			"description_empty": "It looks like you haven't received NFTs yet"
+			"description_empty": "It looks like you haven't received NFTs yet",
+			"grouping": "Grouping",
+			"as_plain_list": "Show as plain list",
+			"by_collection": "Group by collection",
+			"show_spam": "Show spam",
+			"show_hidden": "Show hidden",
+			"sorting": "Sorting",
+			"recents_first": "Recents first",
+			"oldest_first": "Oldest first",
+			"collection_atoz": "Collection name A-Z",
+			"collection_ztoa": "Collection name Z-A"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",

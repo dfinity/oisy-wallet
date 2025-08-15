@@ -1004,14 +1004,24 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "",
-			"title_empty": "",
-			"description_empty": ""
+			"title": "NFTs",
+			"title_empty": "Deine NFTs erscheinen hier",
+			"description_empty": "Es scheint als hättest du noch keine NFTs erhalten",
+			"grouping": "Gruppierung",
+			"as_plain_list": "Als Liste anzeigen",
+			"by_collection": "Nach Kollektion gruppieren",
+			"show_spam": "Spam anzeigen",
+			"show_hidden": "Versteckte anzeigen",
+			"sorting": "Sortierung",
+			"recents_first": "Neue zuerst",
+			"oldest_first": "Älteste zuerst",
+			"collection_atoz": "Kollektionsname A-Z",
+			"collection_ztoa": "Kollektionsname Z-A"
 		},
 		"alt": {
-			"placeholder_image": "",
+			"placeholder_image": "Noch keine NFTs",
 			"card": {
-				"image": ""
+				"image": "NFT Bild mit token ID: $tokenId"
 			}
 		}
 	},

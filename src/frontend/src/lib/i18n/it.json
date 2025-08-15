@@ -1006,7 +1006,17 @@
 		"text": {
 			"title": "NFT",
 			"title_empty": "I tuoi NFT appariranno qui",
-			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT"
+			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
