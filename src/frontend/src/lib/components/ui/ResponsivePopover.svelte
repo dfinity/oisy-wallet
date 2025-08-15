@@ -7,7 +7,7 @@
 
 	interface Props {
 		visible: boolean;
-		button: HTMLButtonElement | undefined;
+		button?: HTMLButtonElement;
 		content: Snippet;
 	}
 
