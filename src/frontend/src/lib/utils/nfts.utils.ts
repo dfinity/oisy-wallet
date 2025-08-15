@@ -134,13 +134,13 @@ export const getNftCollectionUi = ({
 	$nftStore: Nft[] | undefined;
 }): NftCollectionUi[] => {
 	// key uses exact address + network.id (no lowercasing, matches your original)
-	const keyOf = (addr: string, netId: string | number) => `${netId}:${addr}`;
+	const keyOf = ({ addr, netId }: { addr: string; netId: string | number }) => `${netId}:${addr}`;
 
 	const index = new Map<string, NftCollectionUi>();
 
 	return [...$nonFungibleTokens, ...($nftStore ?? [])].reduce<NftCollectionUi[]>((acc, item) => {
 		if ('collection' in item) {
-			const k = keyOf(item.collection.address, String(item.collection.network.id));
+			const k = keyOf({ addr: item.collection.address, netId: String(item.collection.network.id) });
 			const entry = index.get(k);
 			if (entry) {
 				entry.nfts = [...entry.nfts, item];
@@ -148,7 +148,7 @@ export const getNftCollectionUi = ({
 			return acc;
 		} else {
 			const coll = mapTokenToCollection(item as NonFungibleToken);
-			const k = keyOf(coll.address, String(coll.network.id));
+			const k = keyOf({ addr: coll.address, netId: String(coll.network.id) });
 			const entry: NftCollectionUi = { collection: coll, nfts: [] };
 			index.set(k, entry);
 			acc = [...acc, entry];
