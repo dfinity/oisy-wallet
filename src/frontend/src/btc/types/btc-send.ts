@@ -16,12 +16,18 @@ export class BtcValidationError extends Error {
 }
 
 export enum BtcSendValidationError {
-	InsufficientBalance = 'insufficient_balance',
-	InsufficientBalanceForFee = 'insufficient_balance_for_fee',
-	MinimumBalance = 'minimum_btc_amount',
-	InvalidUtxoData = 'invalid_utxo_data',
-	UtxoLocked = 'utxo_locked',
-	InvalidFeeCalculation = 'invalid_fee_calculation'
+	InsufficientBalance = 'InsufficientBalance',
+	InsufficientBalanceForFee = 'InsufficientBalanceForFee',
+	InvalidUtxoData = 'InvalidUtxoData',
+	UtxoLocked = 'UtxoLocked',
+	InvalidFeeCalculation = 'InvalidFeeCalculation',
+	MinimumBalance = 'MinimumBalance',
+	AuthenticationRequired = 'AuthenticationRequired',
+	NoNetworkId = 'NoNetworkId',
+	InvalidDestination = 'InvalidDestination',
+	InvalidAmount = 'InvalidAmount',
+	UtxoFeeMissing = 'UtxoFeeMissing',
+	TokenUndefined = 'TokenUndefined'
 }
 
 export interface UtxosFee {
