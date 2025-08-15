@@ -40,7 +40,7 @@
 </ButtonIcon>
 
 {#snippet content()}
-	<span class="mb-2 flex text-sm font-bold">Grouping</span>
+	<span class="mb-2 flex text-sm font-bold">{$i18n.nfts.text.grouping}</span>
 
 	<List noPadding>
 		<ListItem>
@@ -57,7 +57,7 @@
 						<IconCheck size="20" />
 					{/if}
 				</span>
-				<span class="font-normal">Show as plain list</span>
+				<span class="font-normal">{$i18n.nfts.text.as_plain_list}</span>
 			</Button>
 		</ListItem>
 		<ListItem>
@@ -74,7 +74,7 @@
 						<IconCheck size="20" />
 					{/if}
 				</span>
-				<span class="font-normal">Group by collection</span>
+				<span class="font-normal">{$i18n.nfts.text.by_collection}</span>
 			</Button>
 		</ListItem>
 	</List>
@@ -88,10 +88,10 @@
 					<IconWarning />
 				{/snippet}
 				{#snippet title()}
-					<span class="text-sm font-normal">Show spam</span>
+					<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
 				{/snippet}
 				{#snippet action()}
-					<Toggle disabled checked={false} ariaLabel="" />
+					<Toggle disabled checked={false} ariaLabel={$i18n.nfts.text.show_spam} />
 				{/snippet}
 			</LogoButton>
 		</ListItem>
@@ -101,10 +101,10 @@
 					<IconEyeOff />
 				{/snippet}
 				{#snippet title()}
-					<span class="text-sm font-normal">Show hidden</span>
+					<span class="text-sm font-normal">{$i18n.nfts.text.show_hidden}</span>
 				{/snippet}
 				{#snippet action()}
-					<Toggle disabled checked={false} ariaLabel="" />
+					<Toggle disabled checked={false} ariaLabel={$i18n.nfts.text.show_hidden} />
 				{/snippet}
 			</LogoButton>
 		</ListItem>
