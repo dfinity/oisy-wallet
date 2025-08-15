@@ -1006,7 +1006,17 @@
 		"text": {
 			"title": "",
 			"title_empty": "",
-			"description_empty": ""
+			"description_empty": "",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": ""
 		},
 		"alt": {
 			"placeholder_image": "",
