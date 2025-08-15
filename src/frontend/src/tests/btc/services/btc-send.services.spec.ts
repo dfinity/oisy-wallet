@@ -1,4 +1,4 @@
-import { sendBtc, validateBtcSend, type SendBtcParams } from '$btc/services/btc-send.services';
+import { sendBtc, type SendBtcParams, validateBtcSend } from '$btc/services/btc-send.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
@@ -111,10 +111,6 @@ describe('btc-send.services', () => {
 			utxos: [validUtxo]
 		};
 
-		const mockFeePercentiles = {
-			fee_percentiles: [1000n, 2000n, 5000n, 10_000n, 20_000n]
-		};
-
 		const defaultValidateParams = {
 			utxosFee: validUtxosFee,
 			source: 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7',
@@ -141,7 +137,7 @@ describe('btc-send.services', () => {
 		it('should throw AuthenticationRequired error when identity is null', async () => {
 			const params = {
 				...defaultValidateParams,
-				identity: null as any
+				identity: null as unknown as typeof mockIdentity
 			};
 
 			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
@@ -159,7 +155,7 @@ describe('btc-send.services', () => {
 		it('should throw NoNetworkId error when network is null', async () => {
 			const params = {
 				...defaultValidateParams,
-				network: null as any
+				network: null as unknown as 'mainnet'
 			};
 
 			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
@@ -191,7 +187,7 @@ describe('btc-send.services', () => {
 		it('should throw UtxoFeeMissing error when utxosFee is null', async () => {
 			const params = {
 				...defaultValidateParams,
-				utxosFee: null as any
+				utxosFee: null as unknown as UtxosFee
 			};
 
 			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
@@ -295,7 +291,10 @@ describe('btc-send.services', () => {
 			});
 
 			it('should throw InvalidUtxoData error when UTXO outpoint is missing', async () => {
-				const invalidUtxo = { ...validUtxo, outpoint: undefined as any };
+				const invalidUtxo = {
+					...validUtxo,
+					outpoint: undefined as unknown as typeof validUtxo.outpoint
+				};
 				const params = {
 					...defaultValidateParams,
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }
