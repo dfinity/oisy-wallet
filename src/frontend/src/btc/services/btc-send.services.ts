@@ -48,7 +48,43 @@ export const validateBtcSend = async ({
 	network: BitcoinNetwork;
 	identity: Identity;
 }): Promise<void> => {
-	const utxosWithStringTxids = utxosFee.utxos.map((utxo) => ({
+	// 1. Validate general input parameters first before accessing any properties
+	if (isNullish(identity)) {
+		throw new BtcValidationError(BtcSendValidationError.AuthenticationRequired);
+	}
+	// Check for missing network
+	if (isNullish(network)) {
+		throw new BtcValidationError(BtcSendValidationError.NoNetworkId);
+	}
+	if (invalidAmount(amount) || isNullish(amount)) {
+		throw new BtcValidationError(BtcSendValidationError.InvalidAmount);
+	}
+	if (isNullish(utxosFee)) {
+		throw new BtcValidationError(BtcSendValidationError.UtxoFeeMissing);
+	}
+
+	const { utxos, feeSatoshis } = utxosFee;
+	const amountSatoshis = convertNumberToSatoshis({ amount });
+
+	if (utxos.length === 0) {
+		throw new BtcValidationError(BtcSendValidationError.InsufficientBalance);
+	}
+	for (const utxo of utxos) {
+		if (
+			!utxo.outpoint ||
+			!utxo.outpoint.txid ||
+			utxo.outpoint.txid.length === 0 ||
+			utxo.outpoint.vout === undefined ||
+			!utxo.value ||
+			BigInt(utxo.value) <= 0n ||
+			!utxo.height ||
+			utxo.height < 0
+		) {
+			throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
+		}
+	}
+
+	const utxosWithStringTxids = utxos.map((utxo) => ({
 		...utxo,
 		outpoint: {
 			...utxo.outpoint,
@@ -66,40 +102,6 @@ export const validateBtcSend = async ({
 	// 	network,
 	// 	identity: identity?.getPrincipal()?.toString()
 	// });
-
-	const { utxos, feeSatoshis } = utxosFee;
-	const amountSatoshis = convertNumberToSatoshis({ amount });
-
-	// 1. Validate general input parameters
-	if (isNullish(identity)) {
-		throw new BtcValidationError(BtcSendValidationError.AuthenticationRequired);
-	}
-	// Check for missing network
-	if (isNullish(network)) {
-		throw new BtcValidationError(BtcSendValidationError.NoNetworkId);
-	}
-	if (invalidAmount(amount) || isNullish(amount)) {
-		throw new BtcValidationError(BtcSendValidationError.InvalidAmount);
-	}
-	if (isNullish(utxosFee)) {
-		throw new BtcValidationError(BtcSendValidationError.UtxoFeeMissing);
-	}
-	if (utxos.length === 0) {
-		throw new BtcValidationError(BtcSendValidationError.InsufficientBalance);
-	}
-	for (const utxo of utxos) {
-		if (
-			!utxo.outpoint?.txid ||
-			utxo.outpoint?.txid.length === 0 ||
-			utxo.outpoint.vout === undefined ||
-			!utxo.value ||
-			BigInt(utxo.value) <= 0n ||
-			!utxo.height ||
-			utxo.height < 0
-		) {
-			throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
-		}
-	}
 
 	// 2. Check if UTXOs are still unspent (not locked by pending transactions)
 	const pendingTxIds = getPendingTransactionIds(source);
