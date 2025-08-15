@@ -171,14 +171,14 @@ const cmpByCollectionName =
 	};
 
 // Overloads (so TS keeps the exact array element type on return)
-type FilterSortByCollection = {
+interface FilterSortByCollection {
 	(params: { items: Nft[]; filter?: string; sort?: NftListSortingType }): Nft[];
 	(params: {
 		items: NftCollectionUi[];
 		filter?: string;
 		sort?: NftListSortingType;
 	}): NftCollectionUi[];
-};
+}
 
 // Single implementation (T is Nft or NftCollectionUi)
 export const filterSortByCollection: FilterSortByCollection = <T extends Nft | NftCollectionUi>({
