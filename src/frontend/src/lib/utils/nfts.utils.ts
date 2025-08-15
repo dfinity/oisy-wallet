@@ -171,20 +171,17 @@ const cmpByCollectionName =
 	};
 
 // Overloads (so TS keeps the exact array element type on return)
-export function filterSortByCollection(params: {
-	items: Nft[];
-	filter?: string;
-	sort?: NftListSortingType;
-}): Nft[];
-
-export function filterSortByCollection(params: {
-	items: NftCollectionUi[];
-	filter?: string;
-	sort?: NftListSortingType;
-}): NftCollectionUi[];
+type FilterSortByCollection = {
+	(params: { items: Nft[]; filter?: string; sort?: NftListSortingType }): Nft[];
+	(params: {
+		items: NftCollectionUi[];
+		filter?: string;
+		sort?: NftListSortingType;
+	}): NftCollectionUi[];
+};
 
 // Single implementation (T is Nft or NftCollectionUi)
-export function filterSortByCollection<T extends Nft | NftCollectionUi>({
+export const filterSortByCollection: FilterSortByCollection = <T extends Nft | NftCollectionUi>({
 	items,
 	filter,
 	sort
@@ -192,7 +189,7 @@ export function filterSortByCollection<T extends Nft | NftCollectionUi>({
 	items: T[];
 	filter?: string;
 	sort?: NftListSortingType;
-}): T[] {
+}): T[] => {
 	let result = items;
 
 	if (nonNullish(filter)) {
@@ -213,4 +210,4 @@ export function filterSortByCollection<T extends Nft | NftCollectionUi>({
 	}
 
 	return result;
-}
+};

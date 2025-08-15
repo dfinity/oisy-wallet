@@ -556,7 +556,7 @@ describe('nfts.utils', () => {
 			expect(res.map((c) => c.collection.name ?? '')).toEqual(expectedOrder);
 		});
 
-		it('applies filter then sort', () => {
+		it('applies filter for collection then sort', () => {
 			const res = filterSortByCollection({
 				items: collections,
 				filter: 'god',
@@ -567,14 +567,14 @@ describe('nfts.utils', () => {
 			expect(res[0].collection.address).toBe(DE_GODS_TOKEN.address);
 		});
 
-		it('returns the same reference when neither filter nor sort is provided', () => {
+		it('returns the same reference when neither filter nor sort is provided for collections', () => {
 			const input = [...collections];
 			const res = filterSortByCollection({ items: input });
 
 			expect(res).toBe(input);
 		});
 
-		it('returns a new array when sort is provided (immutability)', () => {
+		it('returns a new array when sort is provided for collections (immutability)', () => {
 			const input = [...collections];
 			const res = filterSortByCollection({
 				items: input,
