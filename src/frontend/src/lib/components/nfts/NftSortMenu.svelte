@@ -2,13 +2,12 @@
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type NftListSortingType, nftListStore } from '$lib/stores/nft-list.store';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
 
 	let visible = $state(false);
 
@@ -39,74 +38,42 @@
 
 		<List noPadding>
 			<ListItem>
-				<Button
-					disabled
+				<ListItemButton
 					onclick={() => setSorting({ order: 'asc', type: 'date' })}
-					fullWidth
-					alignLeft
-					styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
-					colorStyle="tertiary-alt"
-					transparent
+					selectable
+					selected={$nftListStore.sort.type === 'date' && $nftListStore.sort.order === 'asc'}
 				>
-					<span class="pt-0.75 w-[20px] text-brand-primary">
-						{#if $nftListStore.sort.type === 'date' && $nftListStore.sort.order === 'asc'}
-							<IconCheck size="20" />
-						{/if}
-					</span>
-					<span class="font-normal">{$i18n.nfts.text.recents_first}</span>
-				</Button>
+					{$i18n.nfts.text.recents_first}
+				</ListItemButton>
 			</ListItem>
 			<ListItem>
-				<Button
-					disabled
+				<ListItemButton
 					onclick={() => setSorting({ order: 'desc', type: 'date' })}
-					fullWidth
-					alignLeft
-					styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
-					colorStyle="tertiary-alt"
-					transparent
+					selectable
+					selected={$nftListStore.sort.type === 'date' && $nftListStore.sort.order === 'desc'}
 				>
-					<span class="pt-0.75 w-[20px] text-brand-primary">
-						{#if $nftListStore.sort.type === 'date' && $nftListStore.sort.order === 'desc'}
-							<IconCheck size="20" />
-						{/if}
-					</span>
-					<span class="font-normal">{$i18n.nfts.text.oldest_first}</span>
-				</Button>
+					{$i18n.nfts.text.oldest_first}
+				</ListItemButton>
 			</ListItem>
 			<ListItem>
-				<Button
+				<ListItemButton
 					onclick={() => setSorting({ order: 'asc', type: 'collection-name' })}
-					fullWidth
-					alignLeft
-					styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
-					colorStyle="tertiary-alt"
-					transparent
+					selectable
+					selected={$nftListStore.sort.type === 'collection-name' &&
+						$nftListStore.sort.order === 'asc'}
 				>
-					<span class="pt-0.75 w-[20px] text-brand-primary">
-						{#if $nftListStore.sort.type === 'collection-name' && $nftListStore.sort.order === 'asc'}
-							<IconCheck size="20" />
-						{/if}
-					</span>
-					<span class="font-normal">{$i18n.nfts.text.collection_atoz}</span>
-				</Button>
+					{$i18n.nfts.text.collection_atoz}
+				</ListItemButton>
 			</ListItem>
 			<ListItem>
-				<Button
+				<ListItemButton
 					onclick={() => setSorting({ order: 'desc', type: 'collection-name' })}
-					fullWidth
-					alignLeft
-					styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
-					colorStyle="tertiary-alt"
-					transparent
+					selectable
+					selected={$nftListStore.sort.type === 'collection-name' &&
+						$nftListStore.sort.order === 'desc'}
 				>
-					<span class="pt-0.75 w-[20px] text-brand-primary">
-						{#if $nftListStore.sort.type === 'collection-name' && $nftListStore.sort.order === 'desc'}
-							<IconCheck size="20" />
-						{/if}
-					</span>
-					<span class="font-normal">{$i18n.nfts.text.collection_ztoa}</span>
-				</Button>
+					{$i18n.nfts.text.collection_ztoa}
+				</ListItemButton>
 			</ListItem>
 		</List>
 	{/snippet}
