@@ -22,15 +22,13 @@ export const initAuthWorker = async () => {
 	};
 
 	return {
-		syncAuthIdle: (auth: AuthStoreData, locked?: boolean) => {
+		syncAuthIdle: ({ auth, locked = false }: { auth: AuthStoreData; locked?: boolean }) => {
 			if (locked || !auth.identity) {
 				authWorker.postMessage({ msg: 'stopIdleTimer' });
 				return;
 			}
 
-			authWorker.postMessage({
-				msg: 'startIdleTimer'
-			});
+			authWorker.postMessage({ msg: 'startIdleTimer' });
 		}
 	};
 };
