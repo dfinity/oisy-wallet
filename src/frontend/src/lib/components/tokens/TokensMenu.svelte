@@ -16,11 +16,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { emit } from '$lib/utils/events.utils';
-	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
-	import List from '$lib/components/common/List.svelte';
-	import ListItem from '$lib/components/common/ListItem.svelte';
 
 	let visible = $state(false);
 	let button = $state<HTMLButtonElement | undefined>();
