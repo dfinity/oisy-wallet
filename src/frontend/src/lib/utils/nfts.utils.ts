@@ -170,52 +170,46 @@ const cmpByCollectionName =
 		return collator.compare(an, bn) * dir;
 	};
 
-export const filterSortNfts = ({
-	nfts,
+// Overloads (so TS keeps the exact array element type on return)
+export function filterSortByCollection(params: {
+	items: Nft[];
+	filter?: string;
+	sort?: NftListSortingType;
+}): Nft[];
+
+export function filterSortByCollection(params: {
+	items: NftCollectionUi[];
+	filter?: string;
+	sort?: NftListSortingType;
+}): NftCollectionUi[];
+
+// Single implementation (T is Nft or NftCollectionUi)
+export function filterSortByCollection<T extends Nft | NftCollectionUi>({
+	items,
 	filter,
 	sort
 }: {
-	nfts: Nft[];
+	items: T[];
 	filter?: string;
 	sort?: NftListSortingType;
-}): Nft[] => {
+}): T[] {
+	let result = items;
+
 	if (nonNullish(filter)) {
-		nfts = [...nfts].filter(
-			(nft) => (nft?.collection?.name?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0
-		);
+		const lowercased = filter.toLowerCase();
+		result = result.filter((it) => (it.collection?.name?.toLowerCase() ?? '').includes(lowercased));
 	}
 
 	if (nonNullish(sort)) {
 		const dir = sort.order === 'asc' ? 1 : -1;
-		const comparator = cmpByCollectionName(dir);
 
-		nfts = [...nfts].sort((a, b) => comparator({ a, b }));
+		if (sort.type === 'collection-name') {
+			result = [...result].sort((a, b) => cmpByCollectionName(dir)({ a, b }));
+		} else {
+			// extendable, for now we return a copy of the list
+			result = [...result];
+		}
 	}
 
-	return nfts;
-};
-
-export const filterSortNftCollections = ({
-	nftCollections,
-	filter,
-	sort
-}: {
-	nftCollections: NftCollectionUi[];
-	filter?: string;
-	sort?: NftListSortingType;
-}): NftCollectionUi[] => {
-	if (nonNullish(filter)) {
-		nftCollections = [...nftCollections].filter(
-			(coll) => (coll?.collection?.name?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0
-		);
-	}
-
-	if (nonNullish(sort)) {
-		const dir = sort.order === 'asc' ? 1 : -1;
-		const comparator = cmpByCollectionName(dir);
-
-		nftCollections = [...nftCollections].sort((a, b) => comparator({ a, b }));
-	}
-
-	return nftCollections;
-};
+	return result;
+}
