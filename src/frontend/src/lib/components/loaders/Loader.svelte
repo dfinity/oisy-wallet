@@ -2,6 +2,7 @@
 	import { Modal, themeStore } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
+	import { readable } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import {
 		loadBtcAddressMainnet,
@@ -23,7 +24,6 @@
 		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet,
-		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet
@@ -58,6 +58,8 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+
+	const ethAddress = readable('0xffce06ddc814537ff78076df32bf4bce108ec66f');
 
 	interface Props {
 		children: Snippet;
