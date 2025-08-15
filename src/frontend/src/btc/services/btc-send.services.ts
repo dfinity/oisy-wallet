@@ -1,9 +1,10 @@
+import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
 import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
-import { getPendingTransactionIds, utxoTxIdToString } from '$icp/utils/btc.utils';
+import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { nullishSignOut } from '$lib/services/auth.services';
@@ -84,25 +85,6 @@ export const validateBtcSend = async ({
 		}
 	}
 
-	const utxosWithStringTxids = utxos.map((utxo) => ({
-		...utxo,
-		outpoint: {
-			...utxo.outpoint,
-			txid: utxoTxIdToString(utxo.outpoint.txid)
-		}
-	}));
-
-	// console.warn('validateUtxosForSend Parameters:', {
-	// 	utxosFee: {
-	// 		...utxosFee,
-	// 		utxos: utxosWithStringTxids
-	// 	},
-	// 	source,
-	// 	amount,
-	// 	network,
-	// 	identity: identity?.getPrincipal()?.toString()
-	// });
-
 	// 2. Check if UTXOs are still unspent (not locked by pending transactions)
 	const pendingTxIds = getPendingTransactionIds(source);
 	if (pendingTxIds.length > 0) {
@@ -132,7 +114,7 @@ export const validateBtcSend = async ({
 	const expectedMinFee = BigInt(estimatedTxSize) * feeRateSatoshisPerVByte;
 
 	// Allow some tolerance for fee calculation differences (±10%)
-	const feeToleranceRange = expectedMinFee / 10n;
+	const feeToleranceRange = expectedMinFee / BTC_SEND_FEE_TOLERANCE_PERCENTAGE;
 	const minAcceptableFee = expectedMinFee - feeToleranceRange;
 	const maxAcceptableFee = expectedMinFee + feeToleranceRange;
 
