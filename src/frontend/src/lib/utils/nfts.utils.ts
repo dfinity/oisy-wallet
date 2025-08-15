@@ -185,10 +185,10 @@ interface NftCollectionFilterAndSortParams extends NftBaseFilterAndSortParams<Nf
 	items: NftCollectionUi[];
 }
 
-type FilterSortByCollection = {
+interface FilterSortByCollection {
 	(params: NftFilterAndSortParams): Nft[];
 	(params: NftCollectionFilterAndSortParams): NftCollectionUi[];
-};
+}
 
 // Single implementation (T is Nft or NftCollectionUi)
 export const filterSortByCollection: FilterSortByCollection = <T extends Nft | NftCollectionUi>({
