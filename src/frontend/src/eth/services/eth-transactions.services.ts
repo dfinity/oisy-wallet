@@ -138,6 +138,7 @@ const loadErcTransactions = async ({
 	updateOnly?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
+	// const address = '0xffce06ddc814537ff78076df32bf4bce108ec66f'; // TODO replace address
 
 	if (isNullish(address)) {
 		const {

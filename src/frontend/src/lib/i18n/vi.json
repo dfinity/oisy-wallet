@@ -14,6 +14,7 @@
 			"symbol": "Ký hiệu",
 			"decimals": "Số thập phân",
 			"amount": "Số lượng",
+			"tokenId": "",
 			"max": "Tối đa",
 			"destination": "Đích",
 			"reject": "Từ chối",
