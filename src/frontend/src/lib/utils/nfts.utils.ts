@@ -1,4 +1,5 @@
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
+import type { NftListSortingType } from '$lib/stores/nft-list.store';
 import type { NftError } from '$lib/types/errors';
 import type {
 	Nft,
@@ -154,4 +155,67 @@ export const getNftCollectionUi = ({
 		acc = [...acc, entry];
 		return acc;
 	}, []);
+};
+
+const collator = new Intl.Collator(undefined, {
+	sensitivity: 'base', // case-insensitive
+	numeric: true // natural sort for names with numbers
+});
+
+const cmpByCollectionName =
+	(dir: number) =>
+	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number => {
+		const an = a.collection?.name ?? '';
+		const bn = b.collection?.name ?? '';
+		return collator.compare(an, bn) * dir;
+	};
+
+export const filterSortNfts = ({
+	nfts,
+	filter,
+	sort
+}: {
+	nfts: Nft[];
+	filter?: string;
+	sort?: NftListSortingType;
+}): Nft[] => {
+	if (nonNullish(filter)) {
+		nfts = nfts.filter(
+			(nft) => (nft?.collection?.name?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0
+		);
+	}
+
+	if (nonNullish(sort)) {
+		const dir = sort.order === 'asc' ? 1 : -1;
+		const comparator = cmpByCollectionName(dir);
+
+		nfts = [...nfts].sort((a, b) => comparator({ a, b }));
+	}
+
+	return nfts;
+};
+
+export const filterSortNftCollections = ({
+	nftCollections,
+	filter,
+	sort
+}: {
+	nftCollections: NftCollectionUi[];
+	filter?: string;
+	sort?: NftListSortingType;
+}): NftCollectionUi[] => {
+	if (nonNullish(filter)) {
+		nftCollections = [...nftCollections].filter(
+			(coll) => (coll?.collection?.name?.toLowerCase() ?? '').indexOf(filter.toLowerCase()) >= 0
+		);
+	}
+
+	if (nonNullish(sort)) {
+		const dir = sort.order === 'asc' ? 1 : -1;
+		const comparator = cmpByCollectionName(dir);
+
+		nftCollections = [...nftCollections].sort((a, b) => comparator({ a, b }));
+	}
+
+	return nftCollections;
 };
