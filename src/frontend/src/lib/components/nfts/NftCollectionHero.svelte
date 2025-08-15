@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { slide } from 'svelte/transition';
+	import { slide, fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -11,6 +11,7 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	interface Props {
 		collection?: NftCollection;
@@ -41,11 +42,11 @@
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div
-		class="flex h-64 w-full bg-cover bg-center"
-		style={`background-image: url(${nfts?.[0]?.imageUrl}); box-shadow: inset 0 -1px #0000000d`}
+		class="flex h-64 w-full"
 		class:animate-pulse={isNullish(nfts?.[0])}
 		class:bg-disabled-alt={isNullish(nfts?.[0])}
 	>
+		<BgImg imageUrl={nfts?.[0]?.imageUrl} size="cover" />
 	</div>
 
 	<div class="bg-primary p-4">

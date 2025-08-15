@@ -4,6 +4,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { NftCollectionUi } from '$lib/types/nft';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -26,15 +27,14 @@
 	>
 		{#each collection.nfts as nft, index (nft.id + index)}
 			{#if index < 4 && nonNullish(nft.imageUrl)}
-				<div class="aspect-square overflow-hidden rounded-lg">
-					<Img src={nft.imageUrl} />
+				<div class="relative aspect-square overflow-hidden rounded-lg">
+					<BgImg imageUrl={nft?.imageUrl} size="cover" />
 				</div>
 			{/if}
 		{/each}
 
 		<span
-			style="background: linear-gradient(-45deg, #382792A6 -100%, rgba(0, 0, 0, 0) 35%);"
-			class="absolute m-[1px] h-full w-full"
+			class="bg-linear-to-tl -from-100% absolute m-[1px] h-full w-full from-[#382792A6] to-[#00000000] to-45% opacity-35"
 		></span>
 
 		<span class="absolute bottom-0 right-0 m-2.5">

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { slide } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -14,6 +14,7 @@
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft } from '$lib/types/nft';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	interface Props {
 		nft?: Nft;
@@ -50,15 +51,10 @@
 	});
 </script>
 
-<div class="relative overflow-hidden rounded-xl" in:slide>
+<div class="relative overflow-hidden rounded-xl" in:fade>
 	<div class="relative h-64 w-full overflow-hidden">
-		<div
-			class="absolute flex h-64 w-full bg-cover bg-center blur"
-			style={`background-image: url(${nft?.imageUrl}); box-shadow: inset 0 -1px #0000000d`}
-			class:animate-pulse={isNullish(nft)}
-			class:bg-disabled-alt={isNullish(nft)}
-		>
-		</div>
+		<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass="absolute blur" />
+
 		{#if nonNullish(nft?.imageUrl)}
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
