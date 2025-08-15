@@ -146,13 +146,13 @@ export const getNftCollectionUi = ({
 				entry.nfts = [...entry.nfts, item];
 			} // only attach if the token exists
 			return acc;
-		} else {
-			const coll = mapTokenToCollection(item as NonFungibleToken);
+		} 
+			const coll = mapTokenToCollection(item);
 			const k = keyOf({ addr: coll.address, netId: String(coll.network.id) });
 			const entry: NftCollectionUi = { collection: coll, nfts: [] };
 			index.set(k, entry);
 			acc = [...acc, entry];
 			return acc;
-		}
+		
 	}, []);
 };
