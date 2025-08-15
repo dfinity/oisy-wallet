@@ -6,12 +6,12 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
-	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	interface Props {
 		collection?: NftCollection;
