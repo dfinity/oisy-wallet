@@ -146,13 +146,12 @@ export const getNftCollectionUi = ({
 				entry.nfts = [...entry.nfts, item];
 			} // only attach if the token exists
 			return acc;
-		} 
-			const coll = mapTokenToCollection(item);
-			const k = keyOf(coll.address, String(coll.network.id));
-			const entry: NftCollectionUi = { collection: coll, nfts: [] };
-			index.set(k, entry);
-			acc = [...acc, entry];
-			return acc;
-		
+		}
+		const coll = mapTokenToCollection(item);
+		const k = keyOf(coll.address, String(coll.network.id));
+		const entry: NftCollectionUi = { collection: coll, nfts: [] };
+		index.set(k, entry);
+		acc = [...acc, entry];
+		return acc;
 	}, []);
 };
