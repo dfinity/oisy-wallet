@@ -41,10 +41,10 @@ export const validateBtcSend = async ({
 	network,
 	identity
 }: {
-	utxosFee: UtxosFee | undefined;
+	utxosFee: UtxosFee;
 	source: BtcAddress;
 	amount: Amount;
-	network: BitcoinNetwork | undefined;
+	network: BitcoinNetwork;
 	identity: Identity;
 }): Promise<void> => {
 	// 1. Validate general input parameters first before accessing any properties
