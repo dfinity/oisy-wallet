@@ -14,7 +14,11 @@
 		TRACK_COUNT_BTC_SEND_SUCCESS,
 		TRACK_COUNT_BTC_VALIDATION_ERROR
 	} from '$lib/constants/analytics.contants';
-	import { btcAddressMainnet, btcAddressRegtest, btcAddressTestnet } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
