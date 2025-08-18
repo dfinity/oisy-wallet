@@ -5,18 +5,15 @@
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import { sendBtc } from '$btc/services/btc-send.services';
-	import type { UtxosFee } from '$btc/types/btc-send';
+	import { handleBtcValidationError, sendBtc } from '$btc/services/btc-send.services';
+	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_BTC_SEND_ERROR,
-		TRACK_COUNT_BTC_SEND_SUCCESS
+		TRACK_COUNT_BTC_SEND_SUCCESS,
+		TRACK_COUNT_BTC_VALIDATION_ERROR
 	} from '$lib/constants/analytics.contants';
-	import {
-		btcAddressMainnet,
-		btcAddressRegtest,
-		btcAddressTestnet
-	} from '$lib/derived/address.derived';
+	import { btcAddressMainnet, btcAddressRegtest, btcAddressTestnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -29,11 +26,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import {
-		isNetworkIdBTCRegtest,
-		isNetworkIdBTCTestnet,
-		mapNetworkIdToBitcoinNetwork
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet, mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -138,19 +131,29 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			trackEvent({
-				name: TRACK_COUNT_BTC_SEND_ERROR,
-				metadata: {
-					token: $sendToken.symbol,
-					network: `${networkId.description}`
-				}
-			});
+			if (err instanceof BtcValidationError) {
+				await handleBtcValidationError({ err });
+				trackEvent({
+					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+					metadata: {
+						token: $sendToken.symbol,
+						network: `${networkId?.description ?? 'unknown'}`
+					}
+				});
+			} else {
+				trackEvent({
+					name: TRACK_COUNT_BTC_SEND_ERROR,
+					metadata: {
+						token: $sendToken.symbol,
+						network: `${networkId.description}`
+					}
+				});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
-
+				toastsError({
+					msg: { text: $i18n.send.error.unexpected },
+					err
+				});
+			}
 			dispatch('icBack');
 		}
 	};
