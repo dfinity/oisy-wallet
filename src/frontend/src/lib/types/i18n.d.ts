@@ -867,6 +867,9 @@ interface I18nNfts {
 		oldest_first: string;
 		collection_atoz: string;
 		collection_ztoa: string;
+		collection_items_count: string;
+		collection_address: string;
+		token_standard: string;
 	};
 	alt: { placeholder_image: string; card: { image: string } };
 }
