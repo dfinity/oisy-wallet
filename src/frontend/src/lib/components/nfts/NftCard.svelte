@@ -16,10 +16,11 @@
 </script>
 
 <a
-	class="flex w-full flex-col gap-2 p-1 text-left no-underline"
+	class="flex w-full flex-col gap-2 p-1 text-left no-underline hover:text-inherit"
 	data-tid={testId}
 	href={`${AppPath.Nfts + nft.collection.address}/${nft.id}`}
 	onclick={disabled ? (e) => e.preventDefault() : undefined}
+	class:cursor-not-allowed={disabled}
 >
 	<div class="relative aspect-square overflow-hidden rounded-xl" class:opacity-50={disabled}>
 		{#if nonNullish(nft.imageUrl)}
