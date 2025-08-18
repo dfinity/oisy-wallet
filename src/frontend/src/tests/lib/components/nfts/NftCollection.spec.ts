@@ -6,7 +6,7 @@ import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import { beforeAll, expect } from 'vitest';
+
 
 describe('NftCollection', () => {
 	const mockNfts = [
@@ -14,6 +14,7 @@ describe('NftCollection', () => {
 		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId(1) },
 		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
 	];
+
 	beforeAll(() => {
 		nftStore.addAll(mockNfts);
 
