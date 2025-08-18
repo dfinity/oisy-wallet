@@ -58,7 +58,11 @@
 		}
 	}
 
-	const handleErc721 = async () => {
+	const handleErc721 = async (token: NonFungibleToken) => {
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
 		const etherscanProvider = etherscanProviders(token.network.id);
 		const infuraErc721Provider = infuraErc721Providers(token.network.id);
 
@@ -83,7 +87,11 @@
 		}
 	}
 
-	const handleErc1155 = async () => {
+	const handleErc1155 = async (token: NonFungibleToken) => {
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
 		const alchemyProvider = alchemyProviders(token.network.id);
 
 		const inventory = await alchemyProvider.getNftIdsForOwner({
@@ -114,10 +122,10 @@
 	const onLoad = async () => {
 		for (const token of $enabledNonFungibleTokens) {
 			if (token.standard === 'erc721') {
-				await handleErc721();
+				await handleErc721(token);
 			}
 			if (token.standard === 'erc1155') {
-				await handleErc1155();
+				await handleErc1155(token);
 			}
 		}
 	};
