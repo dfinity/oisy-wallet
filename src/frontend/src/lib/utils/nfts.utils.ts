@@ -77,7 +77,7 @@ export const findRemovedNftIds = ({
 				(nftId) =>
 					nftId === nft.id &&
 					token.network === nft.collection.network &&
-					nft.collection.address === token.address
+					token.address === nft.collection.address
 			)
 		)
 	);
