@@ -44,22 +44,14 @@
 			}
 
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
-
-			if (nonNullish(network)) {
-				const utxosFee = await prepareBtcSend({
+			utxosFee = nonNullish(network)
+				? await prepareBtcSend({
 					identity: $authIdentity,
 					network,
 					amount,
 					source
-				});
-
-				store.setUtxosFee({
-					utxosFee,
-					amountForFee: amount
-				});
-			} else {
-				store.reset();
-			}
+				})
+				: undefined;
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected_utxos_fee },
@@ -69,6 +61,7 @@
 			dispatch('icBack');
 		}
 	};
+
 
 	const startScheduler = () => {
 		// Clear any existing timer

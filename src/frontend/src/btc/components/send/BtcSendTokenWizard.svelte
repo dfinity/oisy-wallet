@@ -1,17 +1,12 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import { sendBtc } from '$btc/services/btc-send.services';
-	import {
-		initUtxosFeeStore,
-		UTXOS_FEE_CONTEXT_KEY,
-		type UtxosFeeContext,
-		type UtxosFeeContext as UtxosFeeContextType
-	} from '$btc/stores/utxos-fee.store';
+	import type { UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_BTC_SEND_ERROR,
@@ -45,17 +40,12 @@
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
 	export let selectedContact: ContactUi | undefined = undefined;
-	const { utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	// Initialize the UtxosFeeStore context for the entire send flow
-	setContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY, {
-		store: initUtxosFeeStore()
-	});
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
-	let utxosFee: $utxosFeeStore.utxosFee;
+	let utxosFee: UtxosFee | undefined = undefined;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sendToken.network.id;

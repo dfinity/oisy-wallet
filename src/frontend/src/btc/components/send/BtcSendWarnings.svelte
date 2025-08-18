@@ -1,14 +1,12 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
-	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
-	import { BtcPrepareSendError } from '$btc/types/btc-send';
+	import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	const { utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
+
 	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
-	export let utxosFee: $utxosFeeStore.utxosFee;
+	export let utxosFee: UtxosFee | undefined = undefined;
 </script>
 
 {#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
