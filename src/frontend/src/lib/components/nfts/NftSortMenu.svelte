@@ -8,6 +8,7 @@
 	import { type NftListSortingType, nftListStore } from '$lib/stores/nft-list.store';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
 	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
+	import { nftListSortOrder, nftListSortType } from '$lib/derived/nfts.derived';
 
 	let visible = $state(false);
 
@@ -41,7 +42,7 @@
 				<ListItemButton
 					onclick={() => setSorting({ order: 'asc', type: 'date' })}
 					selectable
-					selected={$nftListStore.sort.type === 'date' && $nftListStore.sort.order === 'asc'}
+					selected={$nftListSortType === 'date' && $nftListSortOrder === 'asc'}
 				>
 					{$i18n.nfts.text.recents_first}
 				</ListItemButton>
@@ -50,7 +51,7 @@
 				<ListItemButton
 					onclick={() => setSorting({ order: 'desc', type: 'date' })}
 					selectable
-					selected={$nftListStore.sort.type === 'date' && $nftListStore.sort.order === 'desc'}
+					selected={$nftListSortType === 'date' && $nftListSortOrder === 'desc'}
 				>
 					{$i18n.nfts.text.oldest_first}
 				</ListItemButton>
@@ -59,8 +60,7 @@
 				<ListItemButton
 					onclick={() => setSorting({ order: 'asc', type: 'collection-name' })}
 					selectable
-					selected={$nftListStore.sort.type === 'collection-name' &&
-						$nftListStore.sort.order === 'asc'}
+					selected={$nftListSortType === 'collection-name' && $nftListSortOrder === 'asc'}
 				>
 					{$i18n.nfts.text.collection_atoz}
 				</ListItemButton>
@@ -69,8 +69,7 @@
 				<ListItemButton
 					onclick={() => setSorting({ order: 'desc', type: 'collection-name' })}
 					selectable
-					selected={$nftListStore.sort.type === 'collection-name' &&
-						$nftListStore.sort.order === 'desc'}
+					selected={$nftListSortType === 'collection-name' && $nftListSortOrder === 'desc'}
 				>
 					{$i18n.nfts.text.collection_ztoa}
 				</ListItemButton>
