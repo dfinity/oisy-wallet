@@ -4,8 +4,8 @@
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import NftsList from '$lib/components/nfts/NftsList.svelte';
-	import NftsSettingsMenu from '$lib/components/nfts/NftsSettingsMenu.svelte';
-	import NftsSortMenu from '$lib/components/nfts/NftsSortMenu.svelte';
+	import NftSettingsMenu from '$lib/components/nfts/NftSettingsMenu.svelte';
+	import NftSortMenu from '$lib/components/nfts/NftSortMenu.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
@@ -61,10 +61,10 @@
 				</div>
 			{:else}
 				<div class="flex">
-					<NftsSortMenu />
+					<NftSortMenu />
 				</div>
 				<div class="flex">
-					<NftsSettingsMenu />
+					<NftSettingsMenu />
 				</div>
 			{/if}
 		</div>
