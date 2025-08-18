@@ -12,6 +12,7 @@
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
 	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
+	import { nftListGroupByCollection } from '$lib/derived/nfts.derived';
 
 	let visible = $state(false);
 
@@ -45,7 +46,7 @@
 				<ListItemButton
 					onclick={() => setGrouping(false)}
 					selectable
-					selected={!$nftListStore.groupByCollection}
+					selected={!$nftListGroupByCollection}
 				>
 					{$i18n.nfts.text.as_plain_list}
 				</ListItemButton>
@@ -54,7 +55,7 @@
 				<ListItemButton
 					onclick={() => setGrouping(true)}
 					selectable
-					selected={$nftListStore.groupByCollection}
+					selected={$nftListGroupByCollection}
 				>
 					{$i18n.nfts.text.by_collection}
 				</ListItemButton>
