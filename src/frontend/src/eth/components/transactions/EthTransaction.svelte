@@ -20,6 +20,7 @@
 	let type: EthTransactionType;
 	let to: string | undefined;
 	let from: string | undefined;
+	let tokenId: number | undefined;
 
 	let pending: boolean;
 	$: pending = isTransactionPending(transaction);
@@ -27,7 +28,7 @@
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
-	$: ({ value, timestamp, displayTimestamp, type, to, from } = transaction);
+	$: ({ value, timestamp, displayTimestamp, type, to, from, tokenId } = transaction);
 
 	let ckTokenSymbol: string;
 	$: ckTokenSymbol = isSupportedEthToken(token)
@@ -80,6 +81,7 @@
 	{iconType}
 	{to}
 	{from}
+	{tokenId}
 >
 	{label}
 </Transaction>
