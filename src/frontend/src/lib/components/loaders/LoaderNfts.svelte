@@ -20,7 +20,7 @@
 
 	let { children }: Props = $props();
 
-	const handleRemovedNfts = async ({token, nftIds}: {token: NonFungibleToken, nftIds: NftId[]}) => {
+	const handleRemovedNfts = ({token, nftIds}: {token: NonFungibleToken, nftIds: NftId[]}) => {
 		const removedNfts = findRemovedNfts({ nfts: $nftStore ?? [], token, nftIds });
 
 		if (removedNfts.length > 0) {
@@ -28,7 +28,7 @@
 		}
 	}
 
-	const handleUpdatedNfts = async ({token, ownedNfts}: {token: NonFungibleToken, ownedNfts: OwnedNft[]}) => {
+	const handleUpdatedNfts = ({token, ownedNfts}: {token: NonFungibleToken, ownedNfts: OwnedNft[]}) => {
 		const updatedNfts = ($nftStore ?? [])
 			.filter((nft) => {
 				if (
