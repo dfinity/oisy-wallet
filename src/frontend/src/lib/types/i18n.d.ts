@@ -870,6 +870,8 @@ interface I18nNfts {
 		collection_items_count: string;
 		collection_address: string;
 		token_standard: string;
+		quantity: string;
+		item_traits: string;
 	};
 	alt: { placeholder_image: string; card: { image: string } };
 }

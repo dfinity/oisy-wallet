@@ -1021,8 +1021,8 @@
 			"collection_items_count": "$count item(s)",
 			"collection_address": "Collection contract address",
 			"token_standard": "Token standard",
-            "quantity": "Quantity",
-            "item_traits": "Item traits"
+			"quantity": "Quantity",
+			"item_traits": "Item traits"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
