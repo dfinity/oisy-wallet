@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { createEventDispatcher, getContext, onMount, onDestroy } from 'svelte';
 	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
+	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -26,12 +27,16 @@
 		source
 	}: Props = $props();
 
+	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
+
 	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
-	const selectUtxosFee = async () => {
+	let schedulerTimer: NodeJS.Timeout | undefined;
+
+	const updatePrepareBtcSend = async () => {
 		try {
 			// all required params should be already defined at this stage
 			if (isNullish(amount) || isNullish(networkId) || isNullish($authIdentity)) {
@@ -39,14 +44,22 @@
 			}
 
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
-			utxosFee = nonNullish(network)
-				? await prepareBtcSend({
-						identity: $authIdentity,
-						network,
-						amount,
-						source
-					})
-				: undefined;
+
+			if (nonNullish(network)) {
+				const utxosFee = await prepareBtcSend({
+					identity: $authIdentity,
+					network,
+					amount,
+					source
+				});
+
+				store.setUtxosFee({
+					utxosFee,
+					amountForFee: amount
+				});
+			} else {
+				store.reset();
+			}
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected_utxos_fee },
@@ -57,10 +70,41 @@
 		}
 	};
 
+	const startScheduler = () => {
+		// Clear any existing timer
+		if (schedulerTimer) {
+			clearTimeout(schedulerTimer);
+		}
+
+		// Start the recurring scheduler
+		const scheduleNext = () => {
+			schedulerTimer = setTimeout(async () => {
+				await updatePrepareBtcSend();
+				scheduleNext();
+			}, 30000);
+		};
+
+		scheduleNext();
+	};
+
+	const stopScheduler = () => {
+		if (schedulerTimer) {
+			clearTimeout(schedulerTimer);
+			schedulerTimer = undefined;
+		}
+	};
+
 	onMount(async () => {
 		if (isNullish(utxosFee)) {
-			await selectUtxosFee();
+			await updatePrepareBtcSend();
 		}
+
+		// Start the scheduler after initial load
+		startScheduler();
+	});
+
+	onDestroy(() => {
+		stopScheduler();
 	});
 </script>
 
