@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import type { Nft } from '$lib/types/nft';
+import type { Nft, NftCollectionUi } from '$lib/types/nft';
+import type { TokenId } from '$lib/types/token';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -38,5 +39,17 @@ export const mockValidErc1155Nft: Nft = {
 		standard: 'erc1155',
 		symbol: 'NYAN',
 		name: 'MyContract'
+	}
+};
+
+export const mockNftollectionUi: NftCollectionUi = {
+	nfts: [{ ...mockValidErc1155Nft, imageUrl: 'https://example.com/nft.png' }, mockValidErc1155Nft],
+	collection: {
+		name: 'Testcollection',
+		address: mockEthAddress,
+		network: ETHEREUM_NETWORK,
+		standard: 'erc1155',
+		symbol: 'testcollection',
+		id: 'testcollection' as unknown as TokenId
 	}
 };
