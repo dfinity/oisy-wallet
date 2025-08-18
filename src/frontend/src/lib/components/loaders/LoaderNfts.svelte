@@ -112,7 +112,7 @@
 				infuraProvider: infuraErc1155Provider,
 				token,
 				tokenIds: newNftIds,
-				walletAddress: address
+				walletAddress: $ethAddress
 			});
 		}
 	}
