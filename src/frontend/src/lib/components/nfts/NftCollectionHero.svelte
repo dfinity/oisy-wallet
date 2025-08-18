@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -22,11 +22,7 @@
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
-	<div
-		class="flex h-64 w-full"
-		class:animate-pulse={isNullish(nfts?.[0])}
-		class:bg-disabled-alt={isNullish(nfts?.[0])}
-	>
+	<div class="flex h-64 w-full">
 		<BgImg imageUrl={nfts?.[0]?.imageUrl} size="cover" />
 	</div>
 
