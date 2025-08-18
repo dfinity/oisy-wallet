@@ -1020,7 +1020,9 @@
 			"collection_ztoa": "",
 			"collection_items_count": "",
 			"collection_address": "",
-			"token_standard": ""
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",

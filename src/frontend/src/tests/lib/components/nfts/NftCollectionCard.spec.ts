@@ -37,7 +37,7 @@ describe('NftCollectionCard', () => {
 		expect(getByText(mockNftollectionUi.collection.name)).toBeInTheDocument();
 		expect(
 			getByText(
-				`${replacePlaceholders(get(i18n).nfts.text.collection_items_count, { count: String(mockNftollectionUi.nfts.length) })}`
+				`${replacePlaceholders(get(i18n).nfts.text.collection_items_count, { $count: String(mockNftollectionUi.nfts.length) })}`
 			)
 		).toBeInTheDocument();
 	});

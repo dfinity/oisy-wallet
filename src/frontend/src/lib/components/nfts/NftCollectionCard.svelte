@@ -62,7 +62,7 @@
 		>
 		<span class="text-xs" class:text-tertiary={!disabled} class:text-disabled={disabled}
 			>{replacePlaceholders($i18n.nfts.text.collection_items_count, {
-				count: String(collection.nfts.length)
+				$count: String(collection.nfts.length)
 			})}</span
 		>
 	</div>
