@@ -13,6 +13,7 @@ describe('BgImg', () => {
 		});
 
 		const el = getByLabelText('hero image');
+
 		expect(el).toBeInTheDocument();
 		expect(el).toHaveStyle(`background-image: url(${IMG})`);
 		// default shadow is "inset"
@@ -35,6 +36,7 @@ describe('BgImg', () => {
 		// contained
 		await rerender({ imageUrl: IMG, ariaLabel: 'sized', size: 'contained', styleClass: '' });
 		el = getByLabelText('sized');
+
 		expect(el).toHaveClass('bg-contained');
 		expect(el).not.toHaveClass('bg-cover');
 		expect(el).not.toHaveClass('bg-auto');
@@ -42,6 +44,7 @@ describe('BgImg', () => {
 		// auto (default too)
 		await rerender({ imageUrl: IMG, ariaLabel: 'sized', size: 'auto', styleClass: '' });
 		el = getByLabelText('sized');
+
 		expect(el).toHaveClass('bg-auto');
 		expect(el).not.toHaveClass('bg-cover');
 		expect(el).not.toHaveClass('bg-contained');
@@ -54,6 +57,7 @@ describe('BgImg', () => {
 		});
 
 		const el = getByLabelText('loading');
+
 		expect(el).toHaveClass('animate-pulse');
 		expect(el).toHaveClass('bg-disabled-alt');
 	});
@@ -65,6 +69,7 @@ describe('BgImg', () => {
 		});
 
 		const el = getByLabelText('loaded');
+
 		expect(el).not.toHaveClass('animate-pulse');
 		expect(el).not.toHaveClass('bg-disabled-alt');
 	});
@@ -77,6 +82,7 @@ describe('BgImg', () => {
 		});
 
 		const el = getByLabelText('auto-size');
+
 		expect(el).toHaveClass('w-full');
 		expect(el).toHaveClass('h-full');
 	});
@@ -89,6 +95,7 @@ describe('BgImg', () => {
 		});
 
 		const el = getByLabelText('fixed-width');
+
 		expect(el).not.toHaveClass('w-full'); // because styleClass contains "w-"
 		expect(el).toHaveClass('h-full'); // height fallback still applies
 	});
@@ -101,6 +108,7 @@ describe('BgImg', () => {
 		});
 
 		const el = getByLabelText('fixed-height');
+
 		expect(el).toHaveClass('w-full'); // width fallback still applies
 		expect(el).not.toHaveClass('h-full'); // because styleClass contains "h-"
 	});
@@ -123,6 +131,7 @@ describe('BgImg', () => {
 		});
 
 		const el = getByLabelText('no-shadow');
+
 		expect(el).not.toHaveStyle('box-shadow: inset 0px 0px 5px 1px #0000000D');
 	});
 
@@ -134,6 +143,7 @@ describe('BgImg', () => {
 		});
 
 		const el = getByLabelText('classes');
+
 		expect(el).toHaveClass('flex', 'bg-center'); // base classes
 		expect(el).toHaveClass('rounded-xl', 'p-2'); // custom classes
 	});
