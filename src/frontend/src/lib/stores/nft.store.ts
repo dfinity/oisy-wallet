@@ -40,12 +40,15 @@ const initNftStore = (): NftStore => {
 					return currentNfts;
 				}
 
-				return currentNfts.filter((currentNft) => !nfts.some((nftToRemove) => {
-						return currentNft.id === nftToRemove.id &&
-							currentNft.collection.address == nftToRemove.collection.address &&
-							currentNft.collection.network === nftToRemove.collection.network
-					}))
-			})
+				return currentNfts.filter(
+					(currentNft) =>
+						!nfts.some((nftToRemove) => (
+								currentNft.id === nftToRemove.id &&
+								currentNft.collection.address == nftToRemove.collection.address &&
+								currentNft.collection.network === nftToRemove.collection.network
+							))
+				);
+			});
 		},
 		updateAll: (nfts: Nft[]) => {
 			update((currentNfts) => {
@@ -54,14 +57,14 @@ const initNftStore = (): NftStore => {
 				}
 
 				return currentNfts.map((currentNft) => {
-					const updatedNft = nfts.find((nft) => {
-						return nft.id === currentNft.id &&
+					const updatedNft = nfts.find((nft) => (
+							nft.id === currentNft.id &&
 							nft.collection.address === currentNft.collection.address &&
 							nft.collection.network === currentNft.collection.network
-					})
+						));
 
-					return nonNullish(updatedNft) ? updatedNft : currentNft
-				})
+					return nonNullish(updatedNft) ? updatedNft : currentNft;
+				});
 			});
 		},
 		resetAll: () => set(undefined)

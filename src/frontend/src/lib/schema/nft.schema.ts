@@ -35,4 +35,4 @@ export const NftSchema = z.object({
 export const OwnedNftSchema = z.object({
 	id: NftIdSchema,
 	balance: z.number()
-})
+});

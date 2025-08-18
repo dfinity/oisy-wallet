@@ -1,11 +1,12 @@
 import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc721Token } from '$eth/types/erc721';
-import {
-	type NftAttributeSchema,
-	type NftCollectionSchema,
-	type NftIdSchema,
-	type NftMetadataSchema,
-	type NftSchema, type OwnedNftSchema
+import type {
+	NftAttributeSchema,
+	NftCollectionSchema,
+	NftIdSchema,
+	NftMetadataSchema,
+	NftSchema,
+	OwnedNftSchema
 } from '$lib/schema/nft.schema';
 import type { NetworkId } from '$lib/types/network';
 import type * as z from 'zod';

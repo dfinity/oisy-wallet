@@ -61,11 +61,11 @@ export const loadNfts = async ({
 };
 
 const loadNftsOfToken = async ({
-																 infuraProvider,
-																 token,
-																 loadedNfts,
-																 walletAddress
-															 }: {
+	infuraProvider,
+	token,
+	loadedNfts,
+	walletAddress
+}: {
 	infuraProvider: InfuraErc165Provider;
 	token: NonFungibleToken;
 	loadedNfts: Nft[];
@@ -79,13 +79,13 @@ const loadNftsOfToken = async ({
 	const loadedTokenIds: NftId[] = loadedNfts.map((nft) => nft.id);
 	const tokenIdsToLoad = holdersTokenIds.filter((id: NftId) => !loadedTokenIds.includes(id));
 
-	await loadNftIdsOfToken({infuraProvider, token, tokenIds: tokenIdsToLoad, walletAddress});
-}
+	await loadNftIdsOfToken({ infuraProvider, token, tokenIds: tokenIdsToLoad, walletAddress });
+};
 
 export const loadNftIdsOfToken = async ({
 	infuraProvider,
 	token,
-																	 tokenIds,
+	tokenIds,
 	walletAddress
 }: {
 	infuraProvider: InfuraErc165Provider;
@@ -302,10 +302,12 @@ const loadHoldersTokenIds = async ({
 		if (token.standard === 'erc1155') {
 			const alchemyProvider = alchemyProviders(token.network.id);
 
-			return (await alchemyProvider.getNftIdsForOwner({
-				address: walletAddress,
-				contractAddress: token.address
-			})).map((ownedNft) => parseNftId(ownedNft.id));
+			return (
+				await alchemyProvider.getNftIdsForOwner({
+					address: walletAddress,
+					contractAddress: token.address
+				})
+			).map((ownedNft) => parseNftId(ownedNft.id));
 		}
 
 		return [];

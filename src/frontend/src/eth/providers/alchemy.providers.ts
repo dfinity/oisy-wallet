@@ -8,7 +8,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { NftId, OwnedNft } from '$lib/types/nft';
+import type { OwnedNft } from '$lib/types/nft';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -156,7 +156,7 @@ export class AlchemyProvider {
 
 		return result.ownedNfts.map((ownedNft) => ({
 			id: parseNftId(parseInt(ownedNft.tokenId)),
-			balance: parseInt(ownedNft.balance),
+			balance: parseInt(ownedNft.balance)
 		}));
 	};
 }

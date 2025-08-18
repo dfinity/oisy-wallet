@@ -62,10 +62,25 @@ export const findNft = ({
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
 
-export const findRemovedNftIds = ({nfts, token, nftIds}: {nfts: Nft[], token: NonFungibleToken, nftIds: NftId[]}): NftId[] =>
-	 nfts.filter((nft) => isNullish(nftIds
-		 .find((nftId) => nftId === nft.id && token.network === nft.collection.network && nft.collection.address === token.address)))
-
+export const findRemovedNftIds = ({
+	nfts,
+	token,
+	nftIds
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	nftIds: NftId[];
+}): NftId[] =>
+	nfts.filter((nft) =>
+		isNullish(
+			nftIds.find(
+				(nftId) =>
+					nftId === nft.id &&
+					token.network === nft.collection.network &&
+					nft.collection.address === token.address
+			)
+		)
+	);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
