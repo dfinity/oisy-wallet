@@ -1020,7 +1020,9 @@
 			"collection_ztoa": "Kollektionsname Z-A",
 			"collection_items_count": "$count Element(e)",
 			"collection_address": "Kollektions-Contract Adresse",
-			"token_standard": "Token Standard"
+			"token_standard": "Token Standard",
+			"quantity": "Menge",
+			"item_traits": "Eigenschaften"
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
