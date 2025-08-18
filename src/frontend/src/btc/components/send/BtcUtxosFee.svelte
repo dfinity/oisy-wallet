@@ -35,6 +35,9 @@
 	let schedulerTimer: NodeJS.Timeout | undefined;
 
 	const updatePrepareBtcSend = async () => {
+
+		console.warn("updatePrepareBtcSend()");
+
 		try {
 			// all required params should be already defined at this stage
 			if (isNullish(amount) || isNullish(networkId) || isNullish($authIdentity)) {
