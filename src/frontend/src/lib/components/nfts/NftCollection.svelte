@@ -18,7 +18,9 @@
 
 	const collection: NftCollection | undefined = $derived(collectionNfts?.[0]?.collection);
 
+	// redirect to assets page if collection cant be loaded within 10s
 	let timeout: NodeJS.Timeout | undefined = $state();
+
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(collection)) {
