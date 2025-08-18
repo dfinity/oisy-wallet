@@ -13,7 +13,11 @@
 		TRACK_COUNT_BTC_SEND_SUCCESS,
 		TRACK_COUNT_BTC_VALIDATION_ERROR
 	} from '$lib/constants/analytics.contants';
-	import { btcAddressMainnet, btcAddressRegtest, btcAddressTestnet } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -26,7 +30,11 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet, mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdBTCRegtest,
+		isNetworkIdBTCTestnet,
+		mapNetworkIdToBitcoinNetwork
+	} from '$lib/utils/network.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
