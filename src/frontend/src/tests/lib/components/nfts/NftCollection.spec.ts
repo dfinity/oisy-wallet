@@ -7,7 +7,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
-
 describe('NftCollection', () => {
 	const mockNfts = [
 		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId(0) },
