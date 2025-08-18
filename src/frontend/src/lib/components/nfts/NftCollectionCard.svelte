@@ -4,13 +4,16 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { NftCollectionUi } from '$lib/types/nft';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		collection: NftCollectionUi;
 		disabled?: boolean;
+		testId?: string;
 	}
 
-	const { collection, disabled }: Props = $props();
+	const { collection, disabled, testId }: Props = $props();
 </script>
 
 <a
@@ -27,7 +30,12 @@
 		{#each collection.nfts as nft, index (nft.id + index)}
 			{#if index < 4 && nonNullish(nft.imageUrl)}
 				<div class="relative aspect-square overflow-hidden rounded-lg bg-primary-light">
-					<BgImg imageUrl={nft?.imageUrl} size="contain" shadow="inset" />
+					<BgImg
+						imageUrl={nft?.imageUrl}
+						size="contain"
+						shadow="inset"
+						testId={`${testId}-image-${index}`}
+					/>
 				</div>
 			{/if}
 		{/each}
@@ -37,7 +45,12 @@
 		></span>
 
 		<span class="absolute bottom-0 right-0 m-2.5">
-			<NetworkLogo network={collection.collection.network} size="xs" color="white" />
+			<NetworkLogo
+				network={collection.collection.network}
+				size="xs"
+				color="white"
+				testId={`${testId}-network`}
+			/>
 		</span>
 	</div>
 
@@ -48,7 +61,9 @@
 			class:text-disabled={disabled}>{collection.collection.name}</span
 		>
 		<span class="text-xs" class:text-tertiary={!disabled} class:text-disabled={disabled}
-			>{collection.nfts.length} items</span
+			>{replacePlaceholders($i18n.nfts.text.collection_items_count, {
+				count: String(collection.nfts.length)
+			})}</span
 		>
 	</div>
 </a>

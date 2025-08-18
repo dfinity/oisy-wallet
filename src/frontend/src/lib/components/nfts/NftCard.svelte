@@ -2,9 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
-	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	interface Props {
 		nft: Nft;
@@ -27,7 +27,7 @@
 		class:opacity-50={disabled}
 	>
 		{#if nonNullish(nft.imageUrl)}
-			<BgImg imageUrl={nft?.imageUrl} size="contain" shadow="none" />
+			<BgImg imageUrl={nft?.imageUrl} size="contain" shadow="none" testId={`${testId}-image`} />
 		{:else}
 			<div class="bg-black/16 rounded-lg" data-tid={`${testId}-placeholder`}></div>
 		{/if}
