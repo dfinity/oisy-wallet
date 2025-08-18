@@ -3,9 +3,9 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		collection: NftCollectionUi;
