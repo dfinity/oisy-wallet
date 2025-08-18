@@ -1,4 +1,7 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
+	import type { NetworkId } from '$lib/types/network';
 	import {
 		isNetworkIdArbitrum,
 		isNetworkIdBase,
@@ -6,9 +9,6 @@
 		isNetworkIdICP,
 		isNetworkIdPolygon
 	} from '$lib/utils/network.utils';
-	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
-	import type { NetworkId } from '$lib/types/network';
-	import type { Snippet } from 'svelte';
 	interface Props {
 		tokenNetworkId?: NetworkId;
 		tokenInput: Snippet;
