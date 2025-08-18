@@ -9,9 +9,10 @@
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftIdsOfToken } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft, NftId, OwnedNft } from '$lib/types/nft';
+	import type { Nft, NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 	import { findNft, findRemovedNfts, mapTokenToCollection } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import { ethAddress } from '$lib/derived/address.derived';
 
 	interface Props {
 		children?: Snippet;
@@ -19,92 +20,104 @@
 
 	let { children }: Props = $props();
 
+	const handleRemovedNfts = async ({token, nftIds}: {token: NonFungibleToken, nftIds: NftId[]}) => {
+		const removedNfts = findRemovedNfts({ nfts: $nftStore ?? [], token, nftIds });
+
+		if (removedNfts.length > 0) {
+			nftStore.removeAll(removedNfts);
+		}
+	}
+
+	const handleUpdatedNfts = async ({token, ownedNfts}: {token: NonFungibleToken, ownedNfts: OwnedNft[]}) => {
+		const updatedNfts = ($nftStore ?? [])
+			.filter((nft) => {
+				if (
+					nft.collection.address !== token.address ||
+					nft.collection.network !== token.network
+				) {
+					return false;
+				}
+
+				const ownedNft = ownedNfts.find((ownedNft) => ownedNft.id === nft.id);
+				return nonNullish(ownedNft) && nft.balance !== ownedNft.balance;
+			})
+			.map((nft) => {
+				const ownedNft = ownedNfts.find((ownedNft) => ownedNft.id === nft.id);
+				if (isNullish(ownedNft)) {
+					return nft;
+				}
+
+				return {
+					...nft,
+					balance: ownedNft.balance
+				};
+			});
+
+		if (updatedNfts.length > 0) {
+			nftStore.updateAll(updatedNfts);
+		}
+	}
+
+	const handleErc721 = async () => {
+		const etherscanProvider = etherscanProviders(token.network.id);
+		const infuraErc721Provider = infuraErc721Providers(token.network.id);
+
+		const inventory: NftId[] = await etherscanProvider.erc721TokenInventory({
+			address: $ethAddress,
+			contractAddress: token.address
+		});
+
+		const newNftIds = inventory.filter((tokenId) =>
+			isNullish(findNft({ nfts: $nftStore ?? [], token, tokenId }))
+		);
+
+		await handleRemovedNfts({token, nftIds: inventory})
+
+		if (newNftIds.length > 0) {
+			await loadNftIdsOfToken({
+				infuraProvider: infuraErc721Provider,
+				token,
+				tokenIds: newNftIds,
+				walletAddress: address
+			});
+		}
+	}
+
+	const handleErc1155 = async () => {
+		const alchemyProvider = alchemyProviders(token.network.id);
+
+		const inventory = await alchemyProvider.getNftIdsForOwner({
+			address: ethAddress,
+			contractAddress: token.address
+		});
+
+		const newNftIds = inventory
+			.filter((ownedNft) =>
+				isNullish(findNft({ nfts: $nftStore ?? [], token, tokenId: ownedNft.id }))
+			)
+			.map((ownedNft) => ownedNft.id);
+
+		await handleRemovedNfts({token, nftIds: inventory.map((ownedNft) => ownedNft.id)})
+		await handleUpdatedNfts({token, ownedNfts: inventory})
+
+		if (newNftIds.length > 0) {
+			const infuraErc1155Provider = infuraErc1155Providers(token.network.id);
+			await loadNftIdsOfToken({
+				infuraProvider: infuraErc1155Provider,
+				token,
+				tokenIds: newNftIds,
+				walletAddress: address
+			});
+		}
+	}
+
 	const onLoad = async () => {
-		const address = '0xffce06ddc814537ff78076df32bf4bce108ec66f';
-
 		for (const token of $enabledNonFungibleTokens) {
-			const etherscanProvider = etherscanProviders(token.network.id);
-
 			if (token.standard === 'erc721') {
-				const infuraErc721Provider = infuraErc721Providers(token.network.id);
-
-				const inventory: NftId[] = await etherscanProvider.erc721TokenInventory({
-					address,
-					contractAddress: token.address
-				});
-
-				const newNftIds = inventory.filter((tokenId) =>
-					isNullish(findNft({ nfts: $nftStore ?? [], token, tokenId }))
-				);
-				const removedNfts = findRemovedNfts({ nfts: $nftStore ?? [], token, nftIds: inventory });
-
-				await loadNftIdsOfToken({
-					infuraProvider: infuraErc721Provider,
-					token,
-					tokenIds: newNftIds,
-					walletAddress: address
-				});
+				await handleErc721();
 			}
 			if (token.standard === 'erc1155') {
-				const alchemyProvider = alchemyProviders(token.network.id);
-
-				const inventory = await alchemyProvider.getNftIdsForOwner({
-					address,
-					contractAddress: token.address
-				});
-
-				const newNftIds = inventory
-					.filter((ownedNft) =>
-						isNullish(findNft({ nfts: $nftStore ?? [], token, tokenId: ownedNft.id }))
-					)
-					.map((ownedNft) => ownedNft.id);
-				const removedNfts = findRemovedNfts({
-					nfts: $nftStore ?? [],
-					token,
-					nftIds: inventory.map((ownedNft) => ownedNft.id)
-				});
-
-				const updatedNfts = ($nftStore ?? [])
-					.filter((nft) => {
-						if (
-							nft.collection.address !== token.address ||
-							nft.collection.network !== token.network
-						) {
-							return false;
-						}
-
-						const inventoryNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
-						return nonNullish(inventoryNft) && nft.balance !== inventoryNft.balance;
-					})
-					.map((nft) => {
-						const inventoryNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
-						if (isNullish(inventoryNft)) {
-							return nft;
-						}
-
-						return {
-							...nft,
-							balance: inventoryNft.balance
-						};
-					});
-
-				if (newNftIds.length > 0) {
-					const infuraErc1155Provider = infuraErc1155Providers(token.network.id);
-					await loadNftIdsOfToken({
-						infuraProvider: infuraErc1155Provider,
-						token,
-						tokenIds: newNftIds,
-						walletAddress: address
-					});
-				}
-
-				if (updatedNfts.length > 0) {
-					nftStore.updateAll(updatedNfts);
-				}
-
-				if (removedNfts.length > 0) {
-					nftStore.removeAll(removedNfts);
-				}
+				await handleErc1155();
 			}
 		}
 	};
