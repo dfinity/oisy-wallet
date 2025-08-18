@@ -8,8 +8,8 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import type { Nft, NftCollection } from '$lib/types/nft';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Nft, NftCollection } from '$lib/types/nft';
 
 	interface Props {
 		collection?: NftCollection;
