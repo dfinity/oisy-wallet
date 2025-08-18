@@ -2,7 +2,7 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { USDT_TOKEN, USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import {
@@ -105,7 +105,7 @@ describe('eth-transactions.services', () => {
 				const result = await loadEthereumTransactions({
 					networkId: ETHEREUM_NETWORK_ID,
 					tokenId: USDT_TOKEN_ID,
-					standard: USDC_TOKEN.standard
+					standard: USDT_TOKEN.standard
 				});
 
 				expect(spyToastsError).toHaveBeenCalledWith({
