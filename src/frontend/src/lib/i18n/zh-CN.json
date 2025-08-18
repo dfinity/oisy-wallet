@@ -14,6 +14,7 @@
 			"symbol": "符号",
 			"decimals": "小数位数",
 			"amount": "金额",
+			"tokenId": "",
 			"max": "最大",
 			"destination": "目标地址",
 			"reject": "拒绝",
