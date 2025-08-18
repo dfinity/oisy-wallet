@@ -27,7 +27,7 @@
 		class:opacity-50={disabled}
 	>
 		{#if nonNullish(nft.imageUrl)}
-			<BgImg imageUrl={nft?.imageUrl} size="contain" shadow="none" />
+			<BgImg imageUrl={nft?.imageUrl} size="contain" shadow="none" testId={`${testId}-image`} />
 		{:else}
 			<div class="bg-black/16 rounded-lg" data-tid={`${testId}-placeholder`}></div>
 		{/if}
