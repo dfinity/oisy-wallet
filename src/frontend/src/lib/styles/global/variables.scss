@@ -21,5 +21,7 @@
 	--border-radius-md: calc(var(--border-radius-sm) * 2);
 	--border-radius-lg: calc(var(--border-radius-sm) * 4);
 
+	--touch-target-min-height: 2.75rem;
+
 	--backdrop: var(--color-background-modal-overlay);
 }

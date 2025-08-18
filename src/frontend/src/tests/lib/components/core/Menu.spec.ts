@@ -161,7 +161,7 @@ describe('Menu', () => {
 		const logoutButton = await screen.findByTestId(LOGOUT_BUTTON);
 
 		expect(logoutButton).toBeInTheDocument();
-		expect(logoutButton).toHaveTextContent(/logout/i);
+		expect(logoutButton).toHaveTextContent(/log out/i);
 
 		expect(screen.queryByTestId(LOCK_BUTTON)).not.toBeInTheDocument();
 	});

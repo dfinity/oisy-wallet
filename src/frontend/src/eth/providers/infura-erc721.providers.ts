@@ -9,7 +9,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
 
@@ -64,6 +64,8 @@ export class InfuraErc721Provider extends InfuraErc165Provider {
 			id: tokenId,
 			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
 			...(nonNullish(metadata.name) && { name: metadata.name }),
+			...(nonNullish(metadata.description) &&
+				notEmptyString(metadata.description) && { description: metadata.description }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
 		};
 	};
