@@ -1,6 +1,9 @@
 <script lang="ts">
+	import { IconExpandMore } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -13,9 +16,6 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
-	import { IconExpandMore } from '@dfinity/gix-components';
-	import List from '$lib/components/common/List.svelte';
-	import ListItem from '$lib/components/common/ListItem.svelte';
 
 	let {
 		networkSelectorViewOnly = false,
