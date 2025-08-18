@@ -34,22 +34,12 @@ export type SendBtcParams = BtcSendServiceParams & {
 
 /**
  * This function handles the validation errors thrown by the validateUtxosForSend function
- * It has been moved to a component so it can be shared between the BTC Send and Convert Wizard
+ * It has been moved to a service so it can be shared between the BTC Send and Convert Wizard
  * @param err BtcValidationError - The validation error that was thrown
  * @param $i18n I18n - The i18n store containing translation strings
  * @returns Promise<void> - Returns void if successful, may throw errors if validation fails
  */
 export const handleBtcValidationError = async ({ err }: { err: BtcValidationError }) => {
-	// Safety check: ensure error object exists and has the expected structure
-	if (!err || typeof err !== 'object' || !('type' in err) || !err.type) {
-		console.error('Invalid error object passed to handleBtcValidationError:', err);
-		toastsError({
-			msg: { text: get(i18n).send.error.unexpected },
-			err
-		});
-		return;
-	}
-
 	switch (err.type) {
 		case BtcSendValidationError.AuthenticationRequired:
 			await nullishSignOut();
