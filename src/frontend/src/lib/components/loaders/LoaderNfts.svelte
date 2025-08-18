@@ -64,8 +64,6 @@
 		}
 
 		const etherscanProvider = etherscanProviders(token.network.id);
-		const infuraErc721Provider = infuraErc721Providers(token.network.id);
-
 		const inventory: NftId[] = await etherscanProvider.erc721TokenInventory({
 			address: $ethAddress,
 			contractAddress: token.address
@@ -78,11 +76,12 @@
 		await handleRemovedNfts({token, nftIds: inventory})
 
 		if (newNftIds.length > 0) {
+			const infuraErc721Provider = infuraErc721Providers(token.network.id);
 			await loadNftIdsOfToken({
 				infuraProvider: infuraErc721Provider,
 				token,
 				tokenIds: newNftIds,
-				walletAddress: address
+				walletAddress: $ethAddress
 			});
 		}
 	}
@@ -93,9 +92,8 @@
 		}
 
 		const alchemyProvider = alchemyProviders(token.network.id);
-
 		const inventory = await alchemyProvider.getNftIdsForOwner({
-			address: ethAddress,
+			address: $ethAddress,
 			contractAddress: token.address
 		});
 
