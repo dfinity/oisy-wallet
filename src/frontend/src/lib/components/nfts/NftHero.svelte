@@ -12,6 +12,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import type { Nft } from '$lib/types/nft';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		nft?: Nft;
@@ -20,7 +21,7 @@
 	const { nft }: Props = $props();
 
 	const breadcrumbItems = $derived.by(() => {
-		let breadcrumbs = [{ label: 'Assets', url: AppPath.Nfts as string }];
+		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];
 		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
 			breadcrumbs = [
 				...breadcrumbs,
@@ -62,7 +63,7 @@
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem>
-				<span>Collection contract address</span>
+				<span>{$i18n.nfts.text.collection_address}</span>
 				{#if nonNullish(nft)}
 					{nft.collection.address}
 				{:else}
@@ -72,7 +73,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>Network</span>
+				<span>{$i18n.networks.network}</span>
 				{#if nonNullish(nft)}
 					<NetworkWithLogo network={nft.collection.network} />
 				{:else}
@@ -82,7 +83,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>Token standard</span>
+				<span>{$i18n.nfts.text.token_standard}</span>
 				{#if nonNullish(nft)}
 					<span class="uppercase">{nft.collection.standard}</span>
 				{:else}
@@ -92,10 +93,13 @@
 				{/if}
 			</ListItem>
 			{#if nft?.collection.standard === 'erc1155'}
-				<ListItem><span>Quantity</span><span class="uppercase">{nft.balance}</span></ListItem>
+				<ListItem
+					><span>{$i18n.nfts.text.quantity}</span><span class="uppercase">{nft.balance}</span
+					></ListItem
+				>
 			{/if}
 			{#if nonNullish(nft?.attributes) && nft.attributes.length > 0}
-				<ListItem>Item traits</ListItem>
+				<ListItem>{$i18n.nfts.text.item_traits}</ListItem>
 				<div class="mt-2 flex gap-2">
 					{#each nft.attributes as trait, index (trait.value + index)}
 						<div class="flex">
