@@ -8,6 +8,7 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
 
 	interface Props {
@@ -17,7 +18,7 @@
 
 	const { collection, nfts }: Props = $props();
 
-	const breadcrumbItems = [{ label: 'Assets', url: AppPath.Nfts }];
+	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
@@ -44,7 +45,7 @@
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem
-				><span>Collection contract address</span>
+				><span>{$i18n.nfts.text.collection_address}</span>
 
 				{#if nonNullish(collection)}
 					{collection.address}
@@ -55,7 +56,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>Network</span>
+				<span>{$i18n.networks.network}</span>
 				{#if nonNullish(collection)}
 					<NetworkWithLogo network={collection.network} />
 				{:else}
@@ -65,7 +66,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>Token standard</span>
+				<span>{$i18n.nfts.text.token_standard}</span>
 				{#if nonNullish(collection)}
 					<span class="uppercase">{collection.standard}</span>
 				{:else}
