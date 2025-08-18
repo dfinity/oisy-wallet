@@ -3,13 +3,13 @@ import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/net
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
 import type { EthereumNetwork } from '$eth/types/network';
+import type { OwnedNft } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Alchemy } from 'alchemy-sdk';
-import type { OwnedNft } from '$lib/types/nft';
-import { parseNftId } from '$lib/validation/nft.validation';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -41,10 +41,18 @@ describe('alchemy.providers', () => {
 
 	describe('getNftIdsForOwner', () => {
 		const mockApiResponse = {
-			ownedNfts: [{ tokenId: '1', balance: '1' }, { tokenId: '2', balance: '4' }, { tokenId: '3', balance: '1' }]
+			ownedNfts: [
+				{ tokenId: '1', balance: '1' },
+				{ tokenId: '2', balance: '4' },
+				{ tokenId: '3', balance: '1' }
+			]
 		};
 
-		const expectedTokenIds: OwnedNft[] = [{id: parseNftId(1), balance: 1}, {id: parseNftId(2), balance: 4}, {id: parseNftId(3), balance: 1}];
+		const expectedTokenIds: OwnedNft[] = [
+			{ id: parseNftId(1), balance: 1 },
+			{ id: parseNftId(2), balance: 4 },
+			{ id: parseNftId(3), balance: 1 }
+		];
 
 		beforeEach(() => {
 			vi.clearAllMocks();
