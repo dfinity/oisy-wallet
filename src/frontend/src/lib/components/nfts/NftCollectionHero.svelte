@@ -8,8 +8,8 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import type { Nft, NftCollection } from '$lib/types/nft';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Nft, NftCollection } from '$lib/types/nft';
 
 	interface Props {
 		collection?: NftCollection;
@@ -45,7 +45,7 @@
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem
-				><span>{$i18n.nfts.collection_address}</span>
+				><span>{$i18n.nfts.text.collection_address}</span>
 
 				{#if nonNullish(collection)}
 					{collection.address}
@@ -66,7 +66,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>{$i18n.nfts.token_standard}</span>
+				<span>{$i18n.nfts.text.token_standard}</span>
 				{#if nonNullish(collection)}
 					<span class="uppercase">{collection.standard}</span>
 				{:else}
