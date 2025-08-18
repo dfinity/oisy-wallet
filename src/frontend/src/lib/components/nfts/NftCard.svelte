@@ -23,7 +23,7 @@
 	class:cursor-not-allowed={disabled}
 >
 	<div
-		class="bg-primary-light relative aspect-square overflow-hidden rounded-xl"
+		class="relative aspect-square overflow-hidden rounded-xl bg-primary-light"
 		class:opacity-50={disabled}
 	>
 		{#if nonNullish(nft.imageUrl)}
