@@ -1017,7 +1017,8 @@
 			"recents_first": "",
 			"oldest_first": "",
 			"collection_atoz": "",
-			"collection_ztoa": ""
+			"collection_ztoa": "",
+			"collection_items_count": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
