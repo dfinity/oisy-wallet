@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -10,7 +10,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
 
-	const collectionId = $derived($page.params.collectionId);
+	const collectionId = $derived(page.params.collectionId);
 
 	const collectionNfts: Nft[] = $derived(
 		($nftStore ?? []).filter((c) => c.collection.address === collectionId)
