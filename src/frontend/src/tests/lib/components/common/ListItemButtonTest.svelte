@@ -13,9 +13,5 @@
 </script>
 
 <ListItemButton {...props}>
-	{#snippet children()}
-		<span>
-			{label}
-		</span>
-	{/snippet}
+	{label}
 </ListItemButton>
