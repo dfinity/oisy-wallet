@@ -237,6 +237,8 @@ export const sendBtc = async ({
 	onProgress,
 	...rest
 }: SendBtcParams): Promise<void> => {
+	onProgress?.();
+
 	await validateBtcSend({
 		amount,
 		utxosFee,
@@ -246,8 +248,6 @@ export const sendBtc = async ({
 	});
 
 	const { txid } = await send({ onProgress, utxosFee, network, amount, identity, ...rest });
-
-	onProgress?.();
 
 	await addPendingBtcTransaction({
 		identity,
