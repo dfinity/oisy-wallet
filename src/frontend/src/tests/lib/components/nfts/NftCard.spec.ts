@@ -6,7 +6,7 @@ import { render } from '@testing-library/svelte';
 describe('NftCard', () => {
 	const testId = 'nft-card';
 
-	const imageSelector = `img[data-tid="${testId}-image"]`;
+	const imageSelector = `div[data-tid="${testId}-image"]`;
 	const imagePlaceholderSelector = `div[data-tid="${testId}-placeholder"]`;
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
 	const balanceSelector = `span[data-tid="${testId}-balance"]`;
@@ -19,7 +19,7 @@ describe('NftCard', () => {
 			}
 		});
 
-		const image: HTMLImageElement | null = container.querySelector(imageSelector);
+		const image: HTMLDivElement | null = container.querySelector(imageSelector);
 
 		expect(image).toBeInTheDocument();
 
