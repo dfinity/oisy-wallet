@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { NftCollectionUi } from '$lib/types/nft';
-	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	interface Props {
 		collection: NftCollectionUi;

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		imageUrl?: string;
