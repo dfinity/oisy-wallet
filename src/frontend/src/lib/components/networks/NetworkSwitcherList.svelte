@@ -15,7 +15,7 @@
 		selectedNetworkId?: NetworkId;
 		delayOnNetworkSelect?: boolean;
 		labelsSize?: LabelSize;
-		supportedNeworks?: NetworkType[];
+		supportedNetworks?: NetworkType[];
 		allNetworksEnabled?: boolean;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
@@ -24,12 +24,12 @@
 		selectedNetworkId,
 		delayOnNetworkSelect = true,
 		labelsSize = 'md',
-		supportedNeworks,
+		supportedNetworks,
 		allNetworksEnabled = true,
 		onSelected
 	}: Props = $props();
 
-	let enabledNetworks = $derived(supportedNeworks ?? $networksMainnets);
+	let enabledNetworks = $derived(supportedNetworks ?? $networksMainnets);
 
 	let mainnetTokensUsdBalance = $derived<number>(
 		enabledNetworks.reduce(
