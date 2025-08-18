@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount, onDestroy } from 'svelte';
+	import { BTC_UTXOS_FEE_UPDATE_INTERVAL } from '$btc/constants/btc.constants';
 	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
-	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -61,17 +61,15 @@
 	};
 
 	const startScheduler = () => {
-		// Clear any existing timer
-		if (schedulerTimer) {
-			clearTimeout(schedulerTimer);
-		}
+		// Stop existing scheduler if it exists
+		stopScheduler();
 
 		// Start the recurring scheduler
 		const scheduleNext = () => {
 			schedulerTimer = setTimeout(async () => {
 				await updatePrepareBtcSend();
 				scheduleNext();
-			}, 30000);
+			}, BTC_UTXOS_FEE_UPDATE_INTERVAL);
 		};
 
 		scheduleNext();
@@ -79,6 +77,7 @@
 
 	const stopScheduler = () => {
 		if (schedulerTimer) {
+			// Clear existing timer
 			clearTimeout(schedulerTimer);
 			schedulerTimer = undefined;
 		}
