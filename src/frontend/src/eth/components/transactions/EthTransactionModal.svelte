@@ -35,7 +35,7 @@
 	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
-	import { parseNftId } from '$lib/validation/nft.validation.js';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -86,6 +86,13 @@
 			: to
 	);
 
+	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
+		modalStore.openEthTransaction({
+			id: Symbol(),
+			data: data as OpenTransactionParams<EthTransactionUi>
+		});
+	};
+
 	const nft = $derived(
 		nonNullish($nftStore) &&
 			nonNullish(token) &&
@@ -94,13 +101,6 @@
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(transaction.tokenId) })
 			: undefined
 	);
-
-	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
-		modalStore.openEthTransaction({
-			id: Symbol(),
-			data: data as OpenTransactionParams<EthTransactionUi>
-		});
-	};
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
