@@ -42,11 +42,12 @@ const initNftStore = (): NftStore => {
 
 				return currentNfts.filter(
 					(currentNft) =>
-						!nfts.some((nftToRemove) => (
+						!nfts.some(
+							(nftToRemove) =>
 								currentNft.id === nftToRemove.id &&
 								currentNft.collection.address == nftToRemove.collection.address &&
 								currentNft.collection.network === nftToRemove.collection.network
-							))
+						)
 				);
 			});
 		},
@@ -57,11 +58,12 @@ const initNftStore = (): NftStore => {
 				}
 
 				return currentNfts.map((currentNft) => {
-					const updatedNft = nfts.find((nft) => (
+					const updatedNft = nfts.find(
+						(nft) =>
 							nft.id === currentNft.id &&
 							nft.collection.address === currentNft.collection.address &&
 							nft.collection.network === currentNft.collection.network
-						));
+					);
 
 					return nonNullish(updatedNft) ? updatedNft : currentNft;
 				});
