@@ -14,6 +14,7 @@
 			"symbol": "Ký hiệu",
 			"decimals": "Số thập phân",
 			"amount": "Số lượng",
+			"tokenId": "",
 			"max": "Tối đa",
 			"destination": "Đích",
 			"reject": "Từ chối",
@@ -1011,7 +1012,17 @@
 		"text": {
 			"title": "NFT",
 			"title_empty": "NFT của bạn sẽ hiện ở đây",
-			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào."
+			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào.",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": ""
 		},
 		"alt": {
 			"placeholder_image": "Không có ảnh NFT",

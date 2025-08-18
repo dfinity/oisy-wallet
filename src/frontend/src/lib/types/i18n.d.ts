@@ -17,6 +17,7 @@ interface I18nCore {
 		symbol: string;
 		decimals: string;
 		amount: string;
+		tokenId: string;
 		max: string;
 		destination: string;
 		reject: string;
@@ -857,7 +858,21 @@ interface I18nTokens {
 }
 
 interface I18nNfts {
-	text: { title: string; title_empty: string; description_empty: string };
+	text: {
+		title: string;
+		title_empty: string;
+		description_empty: string;
+		grouping: string;
+		as_plain_list: string;
+		by_collection: string;
+		show_spam: string;
+		show_hidden: string;
+		sorting: string;
+		recents_first: string;
+		oldest_first: string;
+		collection_atoz: string;
+		collection_ztoa: string;
+	};
 	alt: { placeholder_image: string; card: { image: string } };
 }
 
