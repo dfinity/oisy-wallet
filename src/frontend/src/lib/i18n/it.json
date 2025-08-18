@@ -1017,7 +1017,12 @@
 			"recents_first": "",
 			"oldest_first": "",
 			"collection_atoz": "",
-			"collection_ztoa": ""
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
