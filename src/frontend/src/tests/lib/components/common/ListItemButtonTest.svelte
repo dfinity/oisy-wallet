@@ -13,7 +13,5 @@
 </script>
 
 <ListItemButton {...props}>
-	{#snippet children()}
-		{label}
-	{/snippet}
+	{label}
 </ListItemButton>

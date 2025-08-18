@@ -21,7 +21,8 @@ describe('ListItemButton', () => {
 		});
 
 		await fireEvent.click(getByRole('button', { name: LABEL }));
-		expect(onClick).toHaveBeenCalledTimes(1);
+
+		expect(onClick).toHaveBeenCalledOnce();
 	});
 
 	it('forwards testId to the underlying Button element', () => {
@@ -34,6 +35,7 @@ describe('ListItemButton', () => {
 
 		// The base Button uses data-tid
 		const el = container.querySelector(`[data-tid="${testId}"]`);
+
 		expect(el).toBeInTheDocument();
 	});
 
@@ -45,8 +47,9 @@ describe('ListItemButton', () => {
 			testId
 		});
 
-		const host = container.querySelector(`[data-tid="${testId}"]`)!;
-		expect(host.querySelector('svg')).not.toBeInTheDocument();
+		const host = container.querySelector(`[data-tid="${testId}"]`);
+
+		expect(host?.querySelector('svg')).not.toBeInTheDocument();
 	});
 
 	it('renders selectable wrapper but no icon when selected=false', () => {
@@ -59,10 +62,12 @@ describe('ListItemButton', () => {
 			testId
 		});
 
-		const host = container.querySelector(`[data-tid="${testId}"]`)!;
-		const selectableSpan = host.querySelector('span.w-\\[20px\\]');
+		const host = container.querySelector(`[data-tid="${testId}"]`);
+		const selectableSpan = host?.querySelector('span.w-\\[20px\\]');
+
 		expect(selectableSpan).toBeInTheDocument();
-		expect(host.querySelector('svg')).not.toBeInTheDocument();
+
+		expect(host?.querySelector('svg')).not.toBeInTheDocument();
 	});
 
 	it('renders the check icon when selectable=true and selected=true', () => {
@@ -75,7 +80,8 @@ describe('ListItemButton', () => {
 			testId
 		});
 
-		const host = container.querySelector(`[data-tid="${testId}"]`)!;
-		expect(host.querySelector('svg')).toBeInTheDocument();
+		const host = container.querySelector(`[data-tid="${testId}"]`);
+
+		expect(host?.querySelector('svg')).toBeInTheDocument();
 	});
 });
