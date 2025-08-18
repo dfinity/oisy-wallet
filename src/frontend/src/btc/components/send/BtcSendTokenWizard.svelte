@@ -5,8 +5,11 @@
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import BtcSendValidation from '$btc/components/send/BtcSendValidation.svelte';
-	import { sendBtc, validateBtcSend } from '$btc/services/btc-send.services';
+	import {
+		sendBtc,
+		validateBtcSend,
+		handleBtcValidationError
+	} from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
@@ -48,7 +51,6 @@
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
 	let utxosFee: UtxosFee | undefined = undefined;
-	let btcSendValidation: BtcSendValidation;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sendToken.network.id;
@@ -113,7 +115,7 @@
 		} catch (err: unknown) {
 			// Handle BtcValidationError with specific toastsError for each type
 			if (err instanceof BtcValidationError) {
-				await btcSendValidation.handleBtcValidationError({ err });
+				await handleBtcValidationError({ err });
 			} else {
 				trackEvent({
 					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
@@ -184,7 +186,6 @@
 	};
 </script>
 
-<BtcSendValidation bind:this={btcSendValidation} />
 {#if currentStep?.name === WizardStepsSend.REVIEW}
 	<BtcSendReview
 		on:icBack
