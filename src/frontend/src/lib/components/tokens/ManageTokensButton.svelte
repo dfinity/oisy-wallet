@@ -6,9 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	let disabled = $derived(
-		$erc20UserTokensNotInitialized || $authNotSignedIn
-	);
+	let disabled = $derived($erc20UserTokensNotInitialized || $authNotSignedIn);
 
 	const manageTokensId = $state(Symbol());
 </script>

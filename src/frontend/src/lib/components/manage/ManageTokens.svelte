@@ -147,7 +147,10 @@
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
-			<Button colorStyle="secondary-light" onclick={() => dispatch('icAddToken')} disabled={$pseudoNetworkICPTestnet}
+			<Button
+				colorStyle="secondary-light"
+				onclick={() => dispatch('icAddToken')}
+				disabled={$pseudoNetworkICPTestnet}
 				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
 			>
 			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} onclick={save}>
