@@ -12,12 +12,12 @@
 	interface Props {
 		tokenNetworkId?: NetworkId;
 		tokenInput: Snippet;
-		showWrapper: boolean;
+		showGradient: boolean;
 	}
-	let { tokenNetworkId, tokenInput, showWrapper }: Props = $props();
+	let { tokenNetworkId, tokenInput, showGradient }: Props = $props();
 </script>
 
-{#if showWrapper}
+{#if showGradient}
 	<div
 		class="bg-linear-to-b relative z-0 mb-2 rounded-xl py-0.5 pl-1.5 pr-0.5"
 		class:from-eth-0={isNetworkIdETH(tokenNetworkId)}
