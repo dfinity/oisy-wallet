@@ -1,13 +1,13 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
-	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft } from '$lib/types/nft';
-	import { onMount } from 'svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { goto } from '$app/navigation';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { Nft } from '$lib/types/nft';
 
 	const [collectionId, nftId] = $derived([$page.params.collectionId, $page.params.nftId]);
 
