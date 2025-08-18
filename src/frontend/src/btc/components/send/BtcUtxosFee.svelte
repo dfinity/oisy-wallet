@@ -27,8 +27,6 @@
 		source
 	}: Props = $props();
 
-	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
-
 	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -46,11 +44,11 @@
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
 			utxosFee = nonNullish(network)
 				? await prepareBtcSend({
-					identity: $authIdentity,
-					network,
-					amount,
-					source
-				})
+						identity: $authIdentity,
+						network,
+						amount,
+						source
+					})
 				: undefined;
 		} catch (err: unknown) {
 			toastsError({
@@ -61,7 +59,6 @@
 			dispatch('icBack');
 		}
 	};
-
 
 	const startScheduler = () => {
 		// Clear any existing timer
