@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Dezimalstellen",
 			"amount": "Betrag",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Ziel",
 			"reject": "Ablehnen",

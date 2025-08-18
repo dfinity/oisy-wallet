@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Desetinná místa",
 			"amount": "Částka",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Cíl",
 			"reject": "Odmítnout",

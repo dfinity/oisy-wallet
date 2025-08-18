@@ -32,3 +32,12 @@ export const createMockEthTransactionsUi = (n: number): EthTransactionUi[] =>
 		hash: Math.random().toString(36).substring(7),
 		type: 'send'
 	}));
+
+export const createMockNftTransactionsUi = (n: number): EthTransactionUi[] =>
+	Array.from({ length: n }, () => ({
+		...mockEthTransaction,
+		id: Math.random().toString(36).substring(7),
+		hash: Math.random().toString(36).substring(7),
+		type: 'send',
+		tokenId: 123
+	}));
