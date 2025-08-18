@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
-	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
