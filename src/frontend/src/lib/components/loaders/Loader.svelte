@@ -167,11 +167,11 @@
 	});
 
 	const debounceLoadNfts = debounce(async () => {
-		// await loadNfts({
-		// 	tokens: $nonFungibleTokens ?? [],
-		// 	loadedNfts: $nftStore ?? [],
-		// 	walletAddress: '0xffce06ddc814537ff78076df32bf4bce108ec66f'
-		// });
+		await loadNfts({
+			tokens: $nonFungibleTokens ?? [],
+			loadedNfts: $nftStore ?? [],
+			walletAddress: $ethAddress
+		});
 	});
 
 	$effect(() => {
