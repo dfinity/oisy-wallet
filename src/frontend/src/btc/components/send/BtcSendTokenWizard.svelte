@@ -5,7 +5,11 @@
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import { handleBtcValidationError, sendBtc } from '$btc/services/btc-send.services';
+	import {
+		sendBtc,
+		validateBtcSend,
+		handleBtcValidationError
+	} from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
@@ -29,7 +33,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBTCRegtest,
 		isNetworkIdBTCTestnet,
@@ -63,7 +67,6 @@
 
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
-
 	const send = async () => {
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 
@@ -107,6 +110,39 @@
 			return;
 		}
 
+		// Validate UTXOs before proceeding
+		try {
+			await validateBtcSend({
+				utxosFee,
+				source,
+				amount,
+				network,
+				identity: $authIdentity
+			});
+		} catch (err: unknown) {
+			// Handle BtcValidationError with specific toastsError for each type
+			if (err instanceof BtcValidationError) {
+				await handleBtcValidationError({ err });
+			} else {
+				trackEvent({
+					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+					metadata: {
+						token: $sendToken.symbol,
+						network: `${networkId?.description ?? 'unknown'}`
+					}
+				});
+
+				toastsError({
+					msg: { text: $i18n.send.error.unexpected },
+					err
+				});
+			}
+
+			// go back to the previous step so the user can correct/ try again
+			dispatch('icBack');
+			return;
+		}
+
 		dispatch('icNext');
 
 		try {
@@ -139,16 +175,6 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			if (err instanceof BtcValidationError) {
-				await handleBtcValidationError({ err });
-				trackEvent({
-					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-					metadata: {
-						token: $sendToken.symbol,
-						network: `${networkId?.description ?? 'unknown'}`
-					}
-				});
-			} else {
 				trackEvent({
 					name: TRACK_COUNT_BTC_SEND_ERROR,
 					metadata: {
@@ -161,7 +187,7 @@
 					msg: { text: $i18n.send.error.unexpected },
 					err
 				});
-			}
+
 			dispatch('icBack');
 		}
 	};
