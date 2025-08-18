@@ -20,7 +20,7 @@ describe('BgImg', () => {
 		expect(el).toHaveStyle('box-shadow: inset 0px 0px 5px 1px #0000000D');
 	});
 
-	it('applies correct size classes (cover / contained / auto)', async () => {
+	it('applies correct size classes (cover / contain / auto)', async () => {
 		const { rerender, getByLabelText } = render(BgImg, {
 			imageUrl: IMG,
 			ariaLabel: 'sized',
@@ -30,14 +30,14 @@ describe('BgImg', () => {
 		let el = getByLabelText('sized');
 
 		expect(el).toHaveClass('bg-cover');
-		expect(el).not.toHaveClass('bg-contained');
+		expect(el).not.toHaveClass('bg-contain');
 		expect(el).not.toHaveClass('bg-auto');
 
-		// contained
-		await rerender({ imageUrl: IMG, ariaLabel: 'sized', size: 'contained', styleClass: '' });
+		// contain
+		await rerender({ imageUrl: IMG, ariaLabel: 'sized', size: 'contain', styleClass: '' });
 		el = getByLabelText('sized');
 
-		expect(el).toHaveClass('bg-contained');
+		expect(el).toHaveClass('bg-contain');
 		expect(el).not.toHaveClass('bg-cover');
 		expect(el).not.toHaveClass('bg-auto');
 
@@ -47,7 +47,7 @@ describe('BgImg', () => {
 
 		expect(el).toHaveClass('bg-auto');
 		expect(el).not.toHaveClass('bg-cover');
-		expect(el).not.toHaveClass('bg-contained');
+		expect(el).not.toHaveClass('bg-contain');
 	});
 
 	it('shows loading styles when imageUrl is nullish', () => {
