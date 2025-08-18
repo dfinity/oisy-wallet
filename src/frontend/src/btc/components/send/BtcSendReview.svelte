@@ -9,18 +9,18 @@
 		BtcPendingSentTransactionsStatus,
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
-	import type { UtxosFee } from '$btc/types/btc-send';
+	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
-
+	const { utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let source: string;
-	export let utxosFee: UtxosFee | undefined = undefined;
+	export let utxosFee: $utxosFeeStore.utxosFee;
 	export let selectedContact: ContactUi | undefined = undefined;
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);

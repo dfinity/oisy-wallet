@@ -9,9 +9,9 @@
 	import {
 		initUtxosFeeStore,
 		UTXOS_FEE_CONTEXT_KEY,
+		type UtxosFeeContext,
 		type UtxosFeeContext as UtxosFeeContextType
 	} from '$btc/stores/utxos-fee.store';
-	import type { UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_BTC_SEND_ERROR,
@@ -45,7 +45,7 @@
 	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
 	export let selectedContact: ContactUi | undefined = undefined;
-
+	const { utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// Initialize the UtxosFeeStore context for the entire send flow
@@ -55,7 +55,7 @@
 
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
-	let utxosFee: UtxosFee | undefined = undefined;
+	let utxosFee: $utxosFeeStore.utxosFee;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sendToken.network.id;
