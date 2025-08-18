@@ -10,6 +10,9 @@ export const TRACK_HELP_SIGNING_IN = 'help_signing_in';
 export const TRACK_HELP_CONCERNED_ABOUT_SECURITY = 'help_concerned_about_security';
 export const TRACK_HELP_GOT_CONFUSED = 'help_got_confused';
 export const TRACK_HELP_OTHER = 'help_other';
+export const TRACK_SIGN_OUT_SUCCESS = 'sign_out_success';
+export const TRACK_SIGN_OUT_ERROR = 'sign_out_error';
+export const TRACK_SIGN_OUT_WITH_WARNING = 'sign_out_with_warning';
 
 // Bitcoin
 export const TRACK_COUNT_BTC_SEND_SUCCESS = 'btc_send_success';
@@ -131,9 +134,17 @@ export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
 // Privacymode change
 export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
 
+// Lock mode activated
+export const TRACK_LOCK_MODE_ACTIVATED = 'lock_mode_activated';
+export const TRACK_LOCK_MODE_DEACTIVATED = 'lock_mode_deactivated';
+
 // Temporary events
 // We have sudden spikes in the number of getLogs calls to Infura, which is causing issues.
 // However, we are not sure when and how they happen.
 // This event is used to track the number of calls to Infura's getLogs endpoint.
 // TODO: Remove these events once the issue is resolved.
 export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';
+
+//Links
+export const TRACK_OPEN_DOCUMENTATION = 'open_documentation';
+export const TRACK_OPEN_EXTERNAL_LINK = 'open_external_link';
