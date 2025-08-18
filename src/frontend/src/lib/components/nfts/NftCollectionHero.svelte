@@ -18,7 +18,7 @@
 
 	const { collection, nfts }: Props = $props();
 
-	const breadcrumbItems = [{ label: 'Assets', url: AppPath.Nfts }];
+	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
