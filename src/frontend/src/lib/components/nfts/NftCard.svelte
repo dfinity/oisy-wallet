@@ -2,12 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import BgImg from '$lib/components/ui/BgImg.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft } from '$lib/types/nft';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	interface Props {
 		nft: Nft;
@@ -22,8 +19,9 @@
 	class="flex w-full flex-col gap-2 p-1 text-left no-underline"
 	data-tid={testId}
 	href={`${AppPath.Nfts + nft.collection.address}/${nft.id}`}
+	onclick={disabled ? (e) => e.preventDefault() : undefined}
 >
-	<div class="relative aspect-square overflow-hidden rounded-xl">
+	<div class="relative aspect-square overflow-hidden rounded-xl" class:opacity-50={disabled}>
 		{#if nonNullish(nft.imageUrl)}
 			<BgImg imageUrl={nft?.imageUrl} size="cover" />
 		{:else}
