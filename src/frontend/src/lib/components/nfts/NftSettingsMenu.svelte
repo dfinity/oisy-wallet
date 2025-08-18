@@ -10,9 +10,9 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import { nftListGroupByCollection } from '$lib/derived/nfts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
-	import { nftListGroupByCollection } from '$lib/derived/nfts.derived';
 
 	let visible = $state(false);
 
