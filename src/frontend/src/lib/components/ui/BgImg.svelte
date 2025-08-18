@@ -19,11 +19,18 @@
 		styleClass,
 		children
 	}: Props = $props();
+
+	const { hasWidthClass, hasHeightClass } = $derived.by(() => ({
+		hasWidthClass: styleClass?.includes('w-') ?? false,
+		hasHeightClass: styleClass?.includes('h-') ?? false
+	}));
 </script>
 
 <div
 	aria-label={ariaLabel}
 	class={`flex h-full w-full bg-center ${styleClass}`}
+	class:w-full={!hasWidthClass}
+	class:h-full={!hasHeightClass}
 	class:bg-cover={size === 'cover'}
 	class:bg-contained={size === 'contained'}
 	class:bg-auto={size === 'auto'}
