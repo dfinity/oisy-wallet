@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Desetinná místa",
 			"amount": "Částka",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Cíl",
 			"reject": "Odmítnout",
@@ -163,12 +164,12 @@
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"unlock": "",
-			"logout": "",
-			"logout_clear_cash_message": "",
-			"learn_more": ""
+			"title_part_1": "Chcete-li pokračovat, odemkněte",
+			"title_part_2": "Předtím jste si pro bezpečnost zamkli peněženku. Pokračujte tam, kde jste skončili, nebo se odhlaste.",
+			"unlock": "Odemknout",
+			"logout": "Odhlásit se",
+			"logout_clear_cash_message": "Odhlášením se vymažou všechna data v mezipaměti",
+			"learn_more": "Zjistěte více"
 		}
 	},
 	"dapps": {
@@ -1006,7 +1007,17 @@
 		"text": {
 			"title": "",
 			"title_empty": "",
-			"description_empty": ""
+			"description_empty": "",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": ""
 		},
 		"alt": {
 			"placeholder_image": "",

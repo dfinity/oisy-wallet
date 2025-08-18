@@ -14,6 +14,7 @@
 			"symbol": "Simbolo",
 			"decimals": "Decimali",
 			"amount": "Importo",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Destinazione",
 			"reject": "Rifiuta",
@@ -101,7 +102,7 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralizzato",
-			"logout": "Logout",
+			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP e altro",
@@ -163,12 +164,12 @@
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"unlock": "",
-			"logout": "",
-			"logout_clear_cash_message": "",
-			"learn_more": ""
+			"title_part_1": "Sblocca per continuare",
+			"title_part_2": "In precedenza hai bloccato il tuo wallet per tenerlo al sicuro. Riprendi da dove eri rimasto o esci.",
+			"unlock": "Sblocca",
+			"logout": "Esci",
+			"logout_clear_cash_message": "La disconnessione cancellerà tutti i dati memorizzati nella cache",
+			"learn_more": "Saperne di più"
 		}
 	},
 	"dapps": {
@@ -1006,7 +1007,17 @@
 		"text": {
 			"title": "NFT",
 			"title_empty": "I tuoi NFT appariranno qui",
-			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT"
+			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",

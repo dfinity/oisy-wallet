@@ -14,6 +14,7 @@
 			"symbol": "符号",
 			"decimals": "小数位数",
 			"amount": "金额",
+			"tokenId": "",
 			"max": "最大",
 			"destination": "目标地址",
 			"reject": "拒绝",
@@ -163,12 +164,12 @@
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"unlock": "",
-			"logout": "",
-			"logout_clear_cash_message": "",
-			"learn_more": ""
+			"title_part_1": "解锁以继续",
+			"title_part_2": "您之前已锁定钱包以确保其安全。请从上次中断的地方继续操作或退出。",
+			"unlock": "开锁",
+			"logout": "退出登录",
+			"logout_clear_cash_message": "注销将清除所有缓存数据",
+			"learn_more": "了解更多"
 		}
 	},
 	"dapps": {
@@ -1006,7 +1007,17 @@
 		"text": {
 			"title": "标题",
 			"title_empty": "标题为空",
-			"description_empty": "描述为空"
+			"description_empty": "描述为空",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",

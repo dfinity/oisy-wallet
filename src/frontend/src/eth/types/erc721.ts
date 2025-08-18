@@ -18,6 +18,7 @@ export interface Erc721UriJson {
 	name?: string;
 	image?: string;
 	image_url?: string;
+	description?: string;
 	attributes?: {
 		trait_type: string;
 		value: string | number;
