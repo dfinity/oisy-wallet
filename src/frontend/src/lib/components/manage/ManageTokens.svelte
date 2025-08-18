@@ -12,7 +12,7 @@
 	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { pseudoNetworkICPTestnet, selectedNetwork } from '$lib/derived/network.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -147,7 +147,10 @@
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
-			<Button colorStyle="secondary-light" onclick={() => dispatch('icAddToken')}
+			<Button
+				colorStyle="secondary-light"
+				onclick={() => dispatch('icAddToken')}
+				disabled={$pseudoNetworkICPTestnet}
 				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
 			>
 			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} onclick={save}>
