@@ -11,8 +11,8 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
-	import type { Nft } from '$lib/types/nft';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
 		nft?: Nft;
