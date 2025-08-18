@@ -22,9 +22,12 @@
 	onclick={disabled ? (e) => e.preventDefault() : undefined}
 	class:cursor-not-allowed={disabled}
 >
-	<div class="relative aspect-square overflow-hidden rounded-xl" class:opacity-50={disabled}>
+	<div
+		class="relative aspect-square overflow-hidden rounded-xl bg-primary-light"
+		class:opacity-50={disabled}
+	>
 		{#if nonNullish(nft.imageUrl)}
-			<BgImg imageUrl={nft?.imageUrl} size="cover" />
+			<BgImg imageUrl={nft?.imageUrl} size="contain" shadow="none" />
 		{:else}
 			<div class="bg-black/16 rounded-lg" data-tid={`${testId}-placeholder`}></div>
 		{/if}

@@ -6,7 +6,7 @@
 		imageUrl?: string;
 		ariaLabel?: string;
 		shadow?: 'inset' | 'none';
-		size?: 'auto' | 'contained' | 'cover';
+		size?: 'auto' | 'contain' | 'cover';
 		styleClass?: string;
 		children?: Snippet;
 	}
@@ -28,11 +28,11 @@
 
 <div
 	aria-label={ariaLabel}
-	class={`flex bg-center ${styleClass}`}
+	class={`flex bg-center bg-no-repeat ${styleClass}`}
 	class:w-full={!hasWidthClass}
 	class:h-full={!hasHeightClass}
 	class:bg-cover={size === 'cover'}
-	class:bg-contained={size === 'contained'}
+	class:bg-contain={size === 'contain'}
 	class:bg-auto={size === 'auto'}
 	class:animate-pulse={isNullish(imageUrl)}
 	class:bg-disabled-alt={isNullish(imageUrl)}

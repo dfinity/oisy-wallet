@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { NftCollectionUi } from '$lib/types/nft';
 
@@ -27,8 +26,8 @@
 	>
 		{#each collection.nfts as nft, index (nft.id + index)}
 			{#if index < 4 && nonNullish(nft.imageUrl)}
-				<div class="relative aspect-square overflow-hidden rounded-lg">
-					<BgImg imageUrl={nft?.imageUrl} size="cover" />
+				<div class="relative aspect-square overflow-hidden rounded-lg bg-primary-light">
+					<BgImg imageUrl={nft?.imageUrl} size="contain" shadow="inset" />
 				</div>
 			{/if}
 		{/each}
