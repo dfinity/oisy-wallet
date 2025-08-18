@@ -58,6 +58,7 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -166,11 +167,11 @@
 	});
 
 	const debounceLoadNfts = debounce(async () => {
-		await loadNfts({
-			tokens: $nonFungibleTokens ?? [],
-			loadedNfts: $nftStore ?? [],
-			walletAddress: $ethAddress
-		});
+		// await loadNfts({
+		// 	tokens: $nonFungibleTokens ?? [],
+		// 	loadedNfts: $nftStore ?? [],
+		// 	walletAddress: '0xffce06ddc814537ff78076df32bf4bce108ec66f'
+		// });
 	});
 
 	$effect(() => {
@@ -225,7 +226,9 @@
 	{/if}
 {:else}
 	<div in:fade>
-		{@render children()}
+		<LoaderNfts>
+			{@render children()}
+		</LoaderNfts>
 	</div>
 {/if}
 
