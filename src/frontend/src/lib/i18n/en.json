@@ -1018,7 +1018,11 @@
 			"oldest_first": "Oldest first",
 			"collection_atoz": "Collection name A-Z",
 			"collection_ztoa": "Collection name Z-A",
-			"collection_items_count": "$count item(s)"
+			"collection_items_count": "$count item(s)",
+			"collection_address": "Collection contract address",
+			"token_standard": "Token standard",
+			"quantity": "Quantity",
+			"item_traits": "Item traits"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
