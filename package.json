@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.6.3",
+	"version": "1.6.4",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -75,8 +75,8 @@
 		"@dfinity/oisy-wallet-signer": "^0.2.3",
 		"@dfinity/principal": "^2.4.1",
 		"@dfinity/utils": "^2.13.2",
-		"@dfinity/verifiable-credentials": "^0.0.4",
-		"@dfinity/zod-schemas": "^1.0.0",
+		"@dfinity/verifiable-credentials": "^1.1.0",
+		"@dfinity/zod-schemas": "^1.1.0",
 		"@metamask/detect-provider": "^2.0.0",
 		"@noble/ed25519": "^2.3.0",
 		"@noble/hashes": "^1.8.0",
@@ -148,6 +148,7 @@
 		"axios": "^1.8.2"
 	},
 	"engines": {
+		"npm": ">=10.9.0 <11.0.0",
 		"node": "^22"
 	}
 }

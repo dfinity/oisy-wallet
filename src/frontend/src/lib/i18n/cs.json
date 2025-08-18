@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Desetinná místa",
 			"amount": "Částka",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Cíl",
 			"reject": "Odmítnout",
@@ -159,6 +160,16 @@
 				"other_asset_control": "Získejte informace o kontrole aktiv, obnově a správě v peněžence $oisy_short",
 				"sign_in": "Potřebujete pomoc s přihlášením?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Chcete-li pokračovat, odemkněte",
+			"title_part_2": "Předtím jste si pro bezpečnost zamkli peněženku. Pokračujte tam, kde jste skončili, nebo se odhlaste.",
+			"unlock": "Odemknout",
+			"logout": "Odhlásit se",
+			"logout_clear_cash_message": "Odhlášením se vymažou všechna data v mezipaměti",
+			"learn_more": "Zjistěte více"
 		}
 	},
 	"dapps": {
@@ -996,7 +1007,17 @@
 		"text": {
 			"title": "",
 			"title_empty": "",
-			"description_empty": ""
+			"description_empty": "",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": ""
 		},
 		"alt": {
 			"placeholder_image": "",
@@ -1233,12 +1254,12 @@
 				"reward_received": "Vítejte v $oisy_short!",
 				"reward_failed": "Kód vypršel",
 				"reward_received_description": "Svůj uvítací dárek obdržíte kdykoli.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Požádejte o nový a zkuste to znovu"
 			},
 			"error": {
 				"loading_reward": "Chyba při načítání nového kódu odměny.",
 				"loading_user_data": "Nepodařilo se načíst uživatelská data z kanystru odměn.",
-				"claiming_reward": "Chyba při nárokování odměny.",
 				"loading_eligibility": "Chyba při načítání způsobilosti ke kampani."
 			}
 		},

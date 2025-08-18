@@ -14,6 +14,7 @@
 			"symbol": "Symbole",
 			"decimals": "Décimales",
 			"amount": "Montant",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Destination",
 			"reject": "Rejeter",
@@ -101,8 +102,8 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% décentralisé",
-			"logout": "Déconnexion",
-			"lock": "",
+			"logout": "Se déconnecter",
+			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP, et plus encore",
 			"instant_and_private": "Accès instantané et privé partout",
@@ -159,6 +160,16 @@
 				"other_asset_control": "Obtenir des informations sur le contrôle des actifs, la récupération et la gouvernance dans le portefeuille $oisy_short",
 				"sign_in": "Besoin d'aide pour vous connecter ?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Déverrouillez pour continuer",
+			"title_part_2": "Vous avez précédemment verrouillé votre portefeuille pour le protéger. Reprenez là où vous vous étiez arrêté ou déconnectez-vous.",
+			"unlock": "Ouvrir",
+			"logout": "Se déconnecter",
+			"logout_clear_cash_message": "La déconnexion effacera toutes les données mises en cache",
+			"learn_more": "Apprendre encore plus"
 		}
 	},
 	"dapps": {
@@ -996,7 +1007,17 @@
 		"text": {
 			"title": "NFT",
 			"title_empty": "Vos NFT apparaîtront ici",
-			"description_empty": "Il semble que vous n'ayez pas encore reçu de NFT"
+			"description_empty": "Il semble que vous n'ayez pas encore reçu de NFT",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
@@ -1233,12 +1254,12 @@
 				"reward_received": "Bienvenue sur $oisy_short !",
 				"reward_failed": "Le code a expiré",
 				"reward_received_description": "Vous recevrez votre cadeau de bienvenue à tout moment.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Demandez-en un nouveau et réessayez"
 			},
 			"error": {
 				"loading_reward": "Erreur lors du chargement d'un nouveau code de récompense.",
 				"loading_user_data": "Échec du chargement des données utilisateur depuis le canister de récompense.",
-				"claiming_reward": "Erreur lors de la réclamation de la récompense.",
 				"loading_eligibility": "Erreur lors du chargement de l'éligibilité de la campagne."
 			}
 		},
