@@ -38,7 +38,12 @@
 		}
 
 		const loader = batchLoadTransactions({
-			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens, ...$enabledNonFungibleTokens],
+			tokens: [
+				...$enabledEthereumTokens,
+				...$enabledErc20Tokens,
+				...$enabledEvmTokens,
+				...$enabledNonFungibleTokens
+			],
 			tokensAlreadyLoaded
 		});
 
@@ -51,7 +56,11 @@
 
 	const debounceLoad = debounce(onLoad, 1000);
 
-	$: ($enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, $enabledNonFungibleTokens, debounceLoad());
+	$: ($enabledEthereumTokens,
+		$enabledErc20Tokens,
+		$enabledEvmTokens,
+		$enabledNonFungibleTokens,
+		debounceLoad());
 
 	onMount(async () => {
 		const principal = $authIdentity?.getPrincipal();
@@ -61,21 +70,24 @@
 		}
 
 		await Promise.allSettled(
-			[...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens, ...$enabledNonFungibleTokens].map(
-				async ({ id: tokenId, network: { id: networkId } }) => {
-					if (nonNullish($ethTransactionsStore?.[tokenId])) {
-						return;
-					}
-
-					await syncTransactionsFromCache({
-						principal,
-						tokenId,
-						networkId,
-						getIdbTransactions: getIdbEthTransactions,
-						transactionsStore: ethTransactionsStore
-					});
+			[
+				...$enabledEthereumTokens,
+				...$enabledErc20Tokens,
+				...$enabledEvmTokens,
+				...$enabledNonFungibleTokens
+			].map(async ({ id: tokenId, network: { id: networkId } }) => {
+				if (nonNullish($ethTransactionsStore?.[tokenId])) {
+					return;
 				}
-			)
+
+				await syncTransactionsFromCache({
+					principal,
+					tokenId,
+					networkId,
+					getIdbTransactions: getIdbEthTransactions,
+					transactionsStore: ethTransactionsStore
+				});
+			})
 		);
 	});
 </script>

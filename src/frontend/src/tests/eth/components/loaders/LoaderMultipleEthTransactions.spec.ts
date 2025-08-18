@@ -8,22 +8,22 @@ import {
 } from '$env/tokens/tokens.eth.env';
 import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
+import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 import * as appContants from '$lib/constants/app.constants';
 import { syncTransactionsFromCache } from '$lib/services/listener.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { createMockErc1155CustomTokens } from '$tests/mocks/erc1155-tokens.mock';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
+import { createMockErc721CustomTokens } from '$tests/mocks/erc721-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { createMockErc721CustomTokens } from '$tests/mocks/erc721-tokens.mock';
-import { createMockErc1155CustomTokens } from '$tests/mocks/erc1155-tokens.mock';
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
 	loadEthereumTransactions: vi.fn()
