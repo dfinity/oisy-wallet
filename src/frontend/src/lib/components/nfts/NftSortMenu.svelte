@@ -2,13 +2,13 @@
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
+	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import { nftListSortOrder, nftListSortType } from '$lib/derived/nfts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type NftListSortingType, nftListStore } from '$lib/stores/nft-list.store';
-	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
-	import { nftListSortOrder, nftListSortType } from '$lib/derived/nfts.derived';
 
 	let visible = $state(false);
 
