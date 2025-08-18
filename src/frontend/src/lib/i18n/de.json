@@ -1018,7 +1018,9 @@
 			"oldest_first": "Älteste zuerst",
 			"collection_atoz": "Kollektionsname A-Z",
 			"collection_ztoa": "Kollektionsname Z-A",
-			"collection_items_count": "$count Element(e)"
+			"collection_items_count": "$count Element(e)",
+			"collection_address": "Kollektions-Contract Adresse",
+			"token_standard": "Token Standard"
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
