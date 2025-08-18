@@ -2,7 +2,6 @@
 	import type { Snippet } from 'svelte';
 	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
 	import type { NetworkId } from '$lib/types/network';
-	
 	import {
 		isNetworkIdArbitrum,
 		isNetworkIdBase,
@@ -10,13 +9,13 @@
 		isNetworkIdICP,
 		isNetworkIdPolygon
 	} from '$lib/utils/network.utils';
-	
+
 	interface Props {
 		tokenNetworkId?: NetworkId;
 		tokenInput: Snippet;
 		showGradient: boolean;
 	}
-	
+
 	let { tokenNetworkId, tokenInput, showGradient }: Props = $props();
 </script>
 
