@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { goto } from '$app/navigation';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -13,7 +11,6 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
@@ -31,23 +28,6 @@
 			];
 		}
 		return breadcrumbs;
-	});
-
-	let timeout: NodeJS.Timeout | undefined = $state();
-
-	onMount(() => {
-		timeout = setTimeout(() => {
-			if (isNullish(nft)) {
-				goto(AppPath.Nfts);
-				toastsError({ msg: { text: 'Could not load NFT' } });
-			}
-		}, 10000);
-
-		return () => {
-			if (nonNullish(timeout)) {
-				clearTimeout(timeout);
-			}
-		};
 	});
 </script>
 

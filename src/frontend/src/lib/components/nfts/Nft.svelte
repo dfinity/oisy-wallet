@@ -3,6 +3,11 @@
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft } from '$lib/types/nft';
+	import { onMount } from 'svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
+	import { AppPath } from '$lib/constants/routes.constants';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	const [collectionId, nftId] = $derived([$page.params.collectionId, $page.params.nftId]);
 
@@ -11,6 +16,23 @@
 			(nft) => String(nft.id) === nftId && nft.collection.address === collectionId
 		)
 	);
+
+	let timeout: NodeJS.Timeout | undefined = $state();
+
+	onMount(() => {
+		timeout = setTimeout(() => {
+			if (isNullish(nft)) {
+				goto(AppPath.Nfts);
+				toastsError({ msg: { text: 'Could not load NFT' } });
+			}
+		}, 10000);
+
+		return () => {
+			if (nonNullish(timeout)) {
+				clearTimeout(timeout);
+			}
+		};
+	});
 </script>
 
 <NftHero {nft} />

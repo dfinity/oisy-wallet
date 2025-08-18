@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
-	import { slide, fade } from 'svelte/transition';
-	import { goto } from '$app/navigation';
+	import { slide } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -10,7 +8,6 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
 
 	interface Props {
@@ -21,23 +18,6 @@
 	const { collection, nfts }: Props = $props();
 
 	const breadcrumbItems = [{ label: 'Assets', url: AppPath.Nfts }];
-
-	let timeout: NodeJS.Timeout | undefined = $state();
-
-	onMount(() => {
-		timeout = setTimeout(() => {
-			if (isNullish(collection)) {
-				goto(AppPath.Nfts);
-				toastsError({ msg: { text: 'Could not load collection' } });
-			}
-		}, 10000);
-
-		return () => {
-			if (nonNullish(timeout)) {
-				clearTimeout(timeout);
-			}
-		};
-	});
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
