@@ -8,6 +8,7 @@
 		shadow?: 'inset' | 'none';
 		size?: 'auto' | 'contain' | 'cover';
 		styleClass?: string;
+		testId?: string;
 		children?: Snippet;
 	}
 
@@ -17,6 +18,7 @@
 		shadow = 'inset',
 		size = 'auto',
 		styleClass,
+		testId,
 		children
 	}: Props = $props();
 
@@ -27,6 +29,7 @@
 </script>
 
 <div
+	data-tid={testId}
 	aria-label={ariaLabel}
 	class={`flex bg-center bg-no-repeat ${styleClass}`}
 	class:w-full={!hasWidthClass}
