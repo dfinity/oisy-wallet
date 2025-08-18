@@ -33,7 +33,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBTCRegtest,
 		isNetworkIdBTCTestnet,
@@ -175,18 +175,18 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-				trackEvent({
-					name: TRACK_COUNT_BTC_SEND_ERROR,
-					metadata: {
-						token: $sendToken.symbol,
-						network: `${networkId.description}`
-					}
-				});
+			trackEvent({
+				name: TRACK_COUNT_BTC_SEND_ERROR,
+				metadata: {
+					token: $sendToken.symbol,
+					network: `${networkId.description}`
+				}
+			});
 
-				toastsError({
-					msg: { text: $i18n.send.error.unexpected },
-					err
-				});
+			toastsError({
+				msg: { text: $i18n.send.error.unexpected },
+				err
+			});
 
 			dispatch('icBack');
 		}
