@@ -6,13 +6,13 @@
 	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftIdsOfToken } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft, NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 	import { findNft, findRemovedNfts, mapTokenToCollection } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import { ethAddress } from '$lib/derived/address.derived';
 
 	interface Props {
 		children?: Snippet;
@@ -20,21 +20,24 @@
 
 	let { children }: Props = $props();
 
-	const handleRemovedNfts = ({token, nftIds}: {token: NonFungibleToken, nftIds: NftId[]}) => {
+	const handleRemovedNfts = ({ token, nftIds }: { token: NonFungibleToken; nftIds: NftId[] }) => {
 		const removedNfts = findRemovedNfts({ nfts: $nftStore ?? [], token, nftIds });
 
 		if (removedNfts.length > 0) {
 			nftStore.removeAll(removedNfts);
 		}
-	}
+	};
 
-	const handleUpdatedNfts = ({token, ownedNfts}: {token: NonFungibleToken, ownedNfts: OwnedNft[]}) => {
+	const handleUpdatedNfts = ({
+		token,
+		ownedNfts
+	}: {
+		token: NonFungibleToken;
+		ownedNfts: OwnedNft[];
+	}) => {
 		const updatedNfts = ($nftStore ?? [])
 			.filter((nft) => {
-				if (
-					nft.collection.address !== token.address ||
-					nft.collection.network !== token.network
-				) {
+				if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
 					return false;
 				}
 
@@ -56,7 +59,7 @@
 		if (updatedNfts.length > 0) {
 			nftStore.updateAll(updatedNfts);
 		}
-	}
+	};
 
 	const handleErc721 = async (token: NonFungibleToken) => {
 		if (isNullish($ethAddress)) {
@@ -73,7 +76,7 @@
 			isNullish(findNft({ nfts: $nftStore ?? [], token, tokenId }))
 		);
 
-		await handleRemovedNfts({token, nftIds: inventory})
+		await handleRemovedNfts({ token, nftIds: inventory });
 
 		if (newNftIds.length > 0) {
 			const infuraErc721Provider = infuraErc721Providers(token.network.id);
@@ -84,7 +87,7 @@
 				walletAddress: $ethAddress
 			});
 		}
-	}
+	};
 
 	const handleErc1155 = async (token: NonFungibleToken) => {
 		if (isNullish($ethAddress)) {
@@ -103,8 +106,8 @@
 			)
 			.map((ownedNft) => ownedNft.id);
 
-		await handleRemovedNfts({token, nftIds: inventory.map((ownedNft) => ownedNft.id)})
-		await handleUpdatedNfts({token, ownedNfts: inventory})
+		await handleRemovedNfts({ token, nftIds: inventory.map((ownedNft) => ownedNft.id) });
+		await handleUpdatedNfts({ token, ownedNfts: inventory });
 
 		if (newNftIds.length > 0) {
 			const infuraErc1155Provider = infuraErc1155Providers(token.network.id);
@@ -115,7 +118,7 @@
 				walletAddress: $ethAddress
 			});
 		}
-	}
+	};
 
 	const onLoad = async () => {
 		for (const token of $enabledNonFungibleTokens) {
