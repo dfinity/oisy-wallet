@@ -28,7 +28,7 @@
 
 <div
 	aria-label={ariaLabel}
-	class={`flex h-full w-full bg-center ${styleClass}`}
+	class={`flex bg-center ${styleClass}`}
 	class:w-full={!hasWidthClass}
 	class:h-full={!hasHeightClass}
 	class:bg-cover={size === 'cover'}
