@@ -34,7 +34,7 @@
 		class:to-icp-100={isNetworkIdICP(tokenNetworkId)}
 	>
 		{@render tokenInput?.()}
-		<div class="-z-1 absolute bottom-0.5 left-1.5 right-0.5 top-0.5 rounded-xl bg-secondary"></div>
+		<div class="-z-1 absolute inset-0.5 left-1.5 rounded-xl bg-secondary"></div>
 	</div>
 {:else}
 	<div class="mb-2">
