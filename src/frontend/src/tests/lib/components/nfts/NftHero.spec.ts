@@ -13,7 +13,9 @@ describe('NftHero', () => {
 
 		assertNonNullish(mockValidErc1155Nft.name);
 
-		const name: HTMLElement | null = getByText(mockValidErc1155Nft.name);
+		const name: HTMLElement | null = getByText(
+			`${mockValidErc1155Nft.name} #${String(mockValidErc1155Nft.id)}`
+		);
 
 		expect(name).toBeInTheDocument();
 
@@ -29,11 +31,15 @@ describe('NftHero', () => {
 
 		expect(network).toBeInTheDocument();
 
-		for (let attr in mockValidErc1155Nft.attributes) {
-			const attrEl: HTMLElement | null = getByText(attr);
+		mockValidErc1155Nft.attributes?.forEach((attr) => {
+			const attrTypeEl: HTMLElement | null = getByText(attr.traitType);
 
-			expect(attrEl).toBeInTheDocument();
-		}
+			expect(attrTypeEl).toBeInTheDocument();
+
+			const attrValEl: HTMLElement | null = getByText(attr.value);
+
+			expect(attrValEl).toBeInTheDocument();
+		});
 	});
 
 	it('should render the nft image in the banner', () => {
@@ -43,16 +49,10 @@ describe('NftHero', () => {
 			}
 		});
 
-		const parent = container.querySelector('.h-64');
-
-		assertNonNullish(parent);
-
-		const imageElement: HTMLDivElement | null = parent.querySelector('div');
+		const imageElement: HTMLImageElement | null = container.querySelector('img');
 
 		assertNonNullish(imageElement);
 
-		expect(imageElement.getAttribute('style')).toContain(
-			`background-image: url("${mockNftollectionUi.nfts[0].imageUrl}")`
-		);
+		expect(imageElement.getAttribute('src')).toContain(mockValidErc1155Nft.imageUrl);
 	});
 });
