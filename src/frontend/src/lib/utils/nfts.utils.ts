@@ -62,7 +62,7 @@ export const findNft = ({
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
 
-export const findRemovedNftIds = ({
+export const findRemovedNfts = ({
 	nfts,
 	token,
 	nftIds
@@ -70,16 +70,15 @@ export const findRemovedNftIds = ({
 	nfts: Nft[];
 	token: NonFungibleToken;
 	nftIds: NftId[];
-}): NftId[] =>
-	nfts.filter((nft) =>
-		isNullish(
-			nftIds.find(
-				(nftId) =>
-					nftId === nft.id &&
-					token.network === nft.collection.network &&
-					token.address === nft.collection.address
+}): Nft[] => nfts.filter((nft) =>
+			isNullish(
+				nftIds.find(
+					(nftId) =>
+						nftId === nft.id &&
+						token.network === nft.collection.network &&
+						token.address === nft.collection.address
+				)
 			)
-		)
 	);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {

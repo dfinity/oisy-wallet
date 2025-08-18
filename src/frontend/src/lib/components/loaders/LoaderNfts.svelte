@@ -10,7 +10,7 @@
 	import { loadNftIdsOfToken } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft, NftId, OwnedNft } from '$lib/types/nft';
-	import { findNft, findRemovedNftIds, mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import { findNft, findRemovedNfts, mapTokenToCollection } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
@@ -36,7 +36,7 @@
 				const newNftIds = inventory.filter((tokenId) =>
 					isNullish(findNft({ nfts: $nftStore ?? [], token, tokenId }))
 				);
-				const removedNfts = findRemovedNftIds({ nfts: $nftStore ?? [], token, nftIds: inventory });
+				const removedNfts = findRemovedNfts({ nfts: $nftStore ?? [], token, nftIds: inventory });
 
 				await loadNftIdsOfToken({
 					infuraProvider: infuraErc721Provider,
@@ -58,7 +58,7 @@
 						isNullish(findNft({ nfts: $nftStore ?? [], token, tokenId: ownedNft.id }))
 					)
 					.map((ownedNft) => ownedNft.id);
-				const removedNfts = findRemovedNftIds({
+				const removedNfts = findRemovedNfts({
 					nfts: $nftStore ?? [],
 					token,
 					nftIds: inventory.map((ownedNft) => ownedNft.id)
