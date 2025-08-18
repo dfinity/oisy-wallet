@@ -1017,7 +1017,8 @@
 			"recents_first": "Neue zuerst",
 			"oldest_first": "Älteste zuerst",
 			"collection_atoz": "Kollektionsname A-Z",
-			"collection_ztoa": "Kollektionsname Z-A"
+			"collection_ztoa": "Kollektionsname Z-A",
+          "collection_items_count": "$count Element(e)"
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
