@@ -39,6 +39,15 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 		expect(result).toEqual({});
 	});
 
+	it('skips tokenData where metrics.price is 0', () => {
+		const mock = createMockKongSwapToken({
+			metrics: { price: 0 }
+		});
+		const result = formatKongSwapToCoingeckoPrices([mock]);
+
+		expect(result).toEqual({});
+	});
+
 	it('parses even if some optional metrics fields are missing', () => {
 		const mock = createMockKongSwapToken({
 			token: { canister_id: MOCK_CANISTER_ID_1 },

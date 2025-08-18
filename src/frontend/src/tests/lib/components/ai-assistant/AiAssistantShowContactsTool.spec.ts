@@ -17,6 +17,16 @@ describe('AiAssistantShowContactsTool', () => {
 		contacts
 	};
 
+	it('renders no contacts found message', () => {
+		const { container } = render(AiAssistantShowContactsTool, {
+			props: {
+				contacts: []
+			}
+		});
+
+		expect(container).toHaveTextContent(en.ai_assistant.text.no_contacts_found_message);
+	});
+
 	it('renders all addresses if the array length is smaller than the max amount', () => {
 		const { container } = render(AiAssistantShowContactsTool, {
 			props

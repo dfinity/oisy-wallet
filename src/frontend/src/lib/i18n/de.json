@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Dezimalstellen",
 			"amount": "Betrag",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Ziel",
 			"reject": "Ablehnen",
@@ -102,6 +103,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Dezentralisiert",
 			"logout": "Abmelden",
+			"lock": "Sperren",
 			"authenticate": "Anmelden",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Sofortiger und privater Zugriff überall",
@@ -158,6 +160,16 @@
 				"other_asset_control": "Informationen zu Asset-Kontrolle, Wiederherstellung und Governance in $oisy_short Wallet erhalten",
 				"sign_in": "Hilfe bei der Anmeldung?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Deine Wallet ist gesichert",
+			"title_part_2": "Du hast deine Wallet gesperrt. Entsperre sie um fortzufahren, oder logge dich aus.",
+			"unlock": "Entsperren",
+			"logout": "Ausloggen",
+			"logout_clear_cash_message": "Ausloggen wird alle lokal gecachten Daten löschen",
+			"learn_more": "Erfahre mehr"
 		}
 	},
 	"dapps": {
@@ -271,12 +283,6 @@
 				"one_liner": "Führender DEX-, Stablecoin-Anbieter und Kreditplattform auf Ethereum- und EVM-kompatiblen Ketten.",
 				"call_to_action": "Gehe zu Curve",
 				"description": "Curve Finance ist eine führende dezentrale Börse, ein Stablecoin-Anbieter und eine Kreditplattform auf Ethereum- und EVM-kompatiblen Blockchains. Das Unternehmen ist bekannt für seine fortschrittlichen automatisierten Market Maker für Stablecoins und volatile Vermögenswerte sowie sein einzigartiges Soft-Liquidation-System für Kredite."
-			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Modernste Kryptografie und Blockchain verflechten sich zu einer sicheren und transparenten Spielumgebung für alle.",
-				"call_to_action": "Spiele jetzt!",
-				"description": "Modernste Kryptografie und Blockchain verschmelzen zu einer sicheren und transparenten Spielumgebung für alle.<br/><br/>Spielen Sie mit den digitalen Assets Ihrer Wahl – jetzt ICP, bald auch BTC, ETH, SOL und USDC. Vollständig on-chain, keine zentralen Fehlerquellen. Unser Blockchain-basierter Zufallsgenerator (RNG) sorgt für nachweislich faires Spielen und nutzt Open-Source-Technologie des Forschungs- und Entwicklungsteams von Dfinity."
 			},
 			"sonic": {
 				"name": "Sonic",
@@ -716,7 +722,8 @@
 			"minter_info_not_loaded": "Versuche es in ein paar Sekunden erneut; ein ckETH-Konfigurationsparameter ist noch nicht geladen.",
 			"minter_info_not_certified": "Versuche es in ein paar Sekunden erneut; ein ckETH-Konfigurationsparameter ist noch nicht zertifiziert.",
 			"cketh_max_transaction_fee_missing": "Die maximale Transaktionsgebühr für ckETH fehlt.",
-			"utxos_fee_missing": "UTXOs-Gebühr fehlt."
+			"utxos_fee_missing": "UTXOs-Gebühr fehlt.",
+			"minimum_btc_amount": "Der Mindestbetrag beträgt $amount BTC."
 		},
 		"error": {
 			"unexpected": "Beim Senden der Transaktion ist etwas schiefgelaufen.",
@@ -833,10 +840,12 @@
 			"deposit_error": "Das Senden der Token für den Tausch ist fehlgeschlagen. Please try again or change the swap provider. Versuche es erneut oder wähle einen anderen Anbieter.",
 			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
 			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Tokens wurden erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
-			"withdraw_failed_first_part": "Der Tausch ist fehlgeschlagen und deine Tokens konnten nicht automatisch zurückgeholt werden. Folge ",
-			"withdraw_failed_second_part": "um sie manuell zurückzuholen von ",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
 			"swap_failed_instruction_link": "diesen Anweisungen ",
 			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
@@ -981,6 +990,7 @@
 			"invalid_contract_address": "Vertragsadresse ist ungültig.",
 			"invalid_token_address": "Token-Adresse ist ungültig.",
 			"invalid_ledger": "Das ausgewählte Token ist nicht mit einem ICRC-Ledger-Canister verknüpft.",
+			"unrecognised_erc_interface": "",
 			"no_metadata": "Es wurden keine Metadaten abgerufen.",
 			"unexpected": "Beim Speichern des Tokens ist etwas schiefgelaufen.",
 			"unexpected_hiding": "Beim Verbergen des Tokens ist etwas schiefgelaufen.",
@@ -995,14 +1005,24 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "",
-			"title_empty": "",
-			"description_empty": ""
+			"title": "NFTs",
+			"title_empty": "Deine NFTs erscheinen hier",
+			"description_empty": "Es scheint als hättest du noch keine NFTs erhalten",
+			"grouping": "Gruppierung",
+			"as_plain_list": "Als Liste anzeigen",
+			"by_collection": "Nach Kollektion gruppieren",
+			"show_spam": "Spam anzeigen",
+			"show_hidden": "Versteckte anzeigen",
+			"sorting": "Sortierung",
+			"recents_first": "Neue zuerst",
+			"oldest_first": "Älteste zuerst",
+			"collection_atoz": "Kollektionsname A-Z",
+			"collection_ztoa": "Kollektionsname Z-A"
 		},
 		"alt": {
-			"placeholder_image": "",
+			"placeholder_image": "Noch keine NFTs",
 			"card": {
-				"image": ""
+				"image": "NFT Bild mit token ID: $tokenId"
 			}
 		}
 	},
@@ -1234,12 +1254,12 @@
 				"reward_received": "Willkommen bei $oisy_short!",
 				"reward_failed": "Code ist abgelaufen",
 				"reward_received_description": "Du erhältst dein Willkommensgeschenk in Kürze.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Fordere einen neuen an und versuche es erneut"
 			},
 			"error": {
 				"loading_reward": "Fehler beim Laden eines neuen Belohnungscodes.",
 				"loading_user_data": "Fehler beim Laden der Benutzerdaten aus dem Belohnungs-Canister.",
-				"claiming_reward": "Fehler beim Einlösen der Belohnung.",
 				"loading_eligibility": "Fehler beim Laden der Kampagnenberechtigung."
 			}
 		},
@@ -1516,6 +1536,7 @@
 			"action_button_contacts_prompt": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"no_contacts_found_message": "",
 			"loading": ""
 		},
 		"errors": {

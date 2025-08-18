@@ -17,6 +17,7 @@ interface I18nCore {
 		symbol: string;
 		decimals: string;
 		amount: string;
+		tokenId: string;
 		max: string;
 		destination: string;
 		reject: string;
@@ -101,6 +102,7 @@ interface I18nAuth {
 		title_part_1: string;
 		title_part_2: string;
 		logout: string;
+		lock: string;
 		authenticate: string;
 		asset_types: string;
 		instant_and_private: string;
@@ -152,6 +154,17 @@ interface I18nAuth {
 			other_asset_control: string;
 			sign_in: string;
 		};
+	};
+}
+
+interface I18nLock {
+	text: {
+		title_part_1: string;
+		title_part_2: string;
+		unlock: string;
+		logout: string;
+		logout_clear_cash_message: string;
+		learn_more: string;
 	};
 }
 
@@ -223,7 +236,6 @@ interface I18nDapps {
 		aave: { name: string; one_liner: string; call_to_action: string; description: string };
 		eigenlayer: { name: string; one_liner: string; call_to_action: string; description: string };
 		curve_finance: { name: string; one_liner: string; call_to_action: string; description: string };
-		zkpoker: { name: string; one_liner: string; call_to_action: string; description: string };
 		sonic: {
 			name: string;
 			one_liner: string;
@@ -587,6 +599,7 @@ interface I18nSend {
 		minter_info_not_certified: string;
 		cketh_max_transaction_fee_missing: string;
 		utxos_fee_missing: string;
+		minimum_btc_amount: string;
 	};
 	error: {
 		unexpected: string;
@@ -703,6 +716,8 @@ interface I18nSwap {
 		withdraw_failed_second_part: string;
 		swap_failed_instruction_link: string;
 		manually_withdraw_success: string;
+		manually_withdraw_failed: string;
+		swap_sucess_withdraw_failed: string;
 		swap_sucess_manually_withdraw_success: string;
 	};
 }
@@ -823,6 +838,7 @@ interface I18nTokens {
 		invalid_contract_address: string;
 		invalid_token_address: string;
 		invalid_ledger: string;
+		unrecognised_erc_interface: string;
 		no_metadata: string;
 		unexpected: string;
 		unexpected_hiding: string;
@@ -837,7 +853,21 @@ interface I18nTokens {
 }
 
 interface I18nNfts {
-	text: { title: string; title_empty: string; description_empty: string };
+	text: {
+		title: string;
+		title_empty: string;
+		description_empty: string;
+		grouping: string;
+		as_plain_list: string;
+		by_collection: string;
+		show_spam: string;
+		show_hidden: string;
+		sorting: string;
+		recents_first: string;
+		oldest_first: string;
+		collection_atoz: string;
+		collection_ztoa: string;
+	};
 	alt: { placeholder_image: string; card: { image: string } };
 }
 
@@ -1043,14 +1073,10 @@ interface I18nVip {
 			reward_received: string;
 			reward_failed: string;
 			reward_received_description: string;
+			brand_reward_received_description: string;
 			reward_failed_description: string;
 		};
-		error: {
-			loading_reward: string;
-			loading_user_data: string;
-			claiming_reward: string;
-			loading_eligibility: string;
-		};
+		error: { loading_reward: string; loading_user_data: string; loading_eligibility: string };
 	};
 	invitation: {
 		text: {
@@ -1240,6 +1266,7 @@ interface I18nAi_assistant {
 		action_button_contacts_prompt: string;
 		send_message: string;
 		send_message_input_placeholder: string;
+		no_contacts_found_message: string;
 		loading: string;
 	};
 	errors: { unknown: string; no_response: string };
@@ -1250,6 +1277,7 @@ interface I18n {
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
+	lock: I18nLock;
 	dapps: I18nDapps;
 	rewards: I18nRewards;
 	footer: I18nFooter;

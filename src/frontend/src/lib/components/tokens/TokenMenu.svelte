@@ -28,8 +28,8 @@
 	const { testId, children }: Props = $props();
 
 	let visible = $state(false);
-	let button: HTMLButtonElement | undefined = $state();
-	let fromRoute: NavigationTarget | undefined = $state();
+	let button = $state<HTMLButtonElement | undefined>();
+	let fromRoute = $state<NavigationTarget | undefined>();
 
 	afterNavigate(({ from }) => {
 		fromRoute = from ?? undefined;
@@ -70,7 +70,7 @@
 		visible = false;
 	};
 
-	let hideTokenLabel: string = $derived(
+	let hideTokenLabel = $derived(
 		replacePlaceholders($i18n.tokens.hide.token, {
 			$token: nonNullish($pageToken) ? getTokenDisplaySymbol($pageToken) : ''
 		})
