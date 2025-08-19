@@ -8,6 +8,7 @@ export const LANGUAGES = {
 	[Languages.CZECH]: 'Čeština',
 	[Languages.FRENCH]: 'Français',
 	[Languages.GERMAN]: 'Deutsch',
+	[Languages.HINDI]: 'हिन्दी',
 	[Languages.ITALIAN]: 'Italiano',
 	[Languages.PORTUGUESE]: 'Português',
 	[Languages.VIETNAMESE]: 'Tiếng việt',
