@@ -65,10 +65,10 @@
 
 			<div>
 				<ExternalLink
-					href={OISY_REWARDS_URL}
 					ariaLabel={$i18n.rewards.text.learn_more}
-					iconVisible={false}
 					asButton
+					href={OISY_REWARDS_URL}
+					iconVisible={false}
 					styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
 					testId={REWARDS_STATE_MODAL_LEARN_MORE_ANCHOR}
 					trackEvent={{
@@ -80,9 +80,9 @@
 				</ExternalLink>
 
 				<Share
+					href={resolveText({ i18n: $i18n, path: shareHref })}
 					testId={REWARDS_STATE_MODAL_SHARE_BUTTON}
 					text={$i18n.rewards.text.share}
-					href={resolveText({ i18n: $i18n, path: shareHref })}
 					trackEvent={{
 						name: TRACK_REWARD_CAMPAIGN_WIN_SHARE,
 						metadata: { campaignId: `${reward.id}`, type: rewardType }
@@ -93,7 +93,7 @@
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<Button onclick={modalStore.close} colorStyle="primary"
+				<Button colorStyle="primary" onclick={modalStore.close}
 					>{$i18n.rewards.text.open_wallet}</Button
 				>
 			</ButtonGroup>

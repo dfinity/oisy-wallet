@@ -11,6 +11,6 @@
 	let { children }: Props = $props();
 </script>
 
-<WalletWorkers tokens={$enabledIcTokens} {initWalletWorker}>
+<WalletWorkers {initWalletWorker} tokens={$enabledIcTokens}>
 	{@render children()}
 </WalletWorkers>

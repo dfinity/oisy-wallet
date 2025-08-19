@@ -51,6 +51,7 @@
 	<IcConvertTokenWizard
 		{currentStep}
 		{formCancelAction}
+		{onIcQrCodeBack}
 		bind:sendAmount
 		bind:receiveAmount
 		bind:convertProgressStep
@@ -61,7 +62,6 @@
 		on:icDestination
 		on:icDestinationBack
 		on:icQRCodeScan
-		{onIcQrCodeBack}
 	/>
 {:else}
 	<div class="mt-6"><MessageBox>{$i18n.convert.text.unsupported_token_conversion}</MessageBox></div>
