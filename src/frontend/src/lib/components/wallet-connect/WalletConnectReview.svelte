@@ -106,7 +106,7 @@
 			{#if displayCancel}
 				<div in:fade>
 					<ButtonGroup>
-						<ButtonCancel onclick={onCancel} disabled={$isBusy || $ethAddressNotCertified} />
+						<ButtonCancel disabled={$isBusy || $ethAddressNotCertified} onclick={onCancel} />
 					</ButtonGroup>
 				</div>
 			{/if}

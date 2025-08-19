@@ -14,7 +14,7 @@
 </script>
 
 <ButtonGroup>
-	<Button colorStyle="error" onclick={onReject} disabled={$isBusy}>{$i18n.core.text.reject}</Button>
+	<Button colorStyle="error" disabled={$isBusy} onclick={onReject}>{$i18n.core.text.reject}</Button>
 
 	{#if approve}
 		<Button colorStyle="success" disabled={$isBusy} onclick={onApprove}>

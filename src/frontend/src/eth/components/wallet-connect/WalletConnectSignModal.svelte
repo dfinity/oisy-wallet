@@ -72,6 +72,6 @@
 	{#if currentStep?.name === WizardStepsSign.SIGNING}
 		<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
 	{:else}
-		<WalletConnectSignReview {request} onApprove={approve} onReject={reject} />
+		<WalletConnectSignReview onApprove={approve} onReject={reject} {request} />
 	{/if}
 </WizardModal>

@@ -393,7 +393,7 @@
 		{/snippet}
 
 		{#if currentStep?.name === 'Review'}
-			<WalletConnectReview {proposal} onReject={reject} onApprove={approve} onCancel={cancel} />
+			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
 		{:else}
 			<WalletConnectForm on:icConnect={userConnect} />
 		{/if}

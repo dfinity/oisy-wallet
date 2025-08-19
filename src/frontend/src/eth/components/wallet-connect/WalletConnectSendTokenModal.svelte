@@ -193,10 +193,10 @@
 					{data}
 					{destination}
 					{erc20Approve}
-					{sourceNetwork}
-					{targetNetwork}
 					onApprove={send}
 					onReject={reject}
+					{sourceNetwork}
+					{targetNetwork}
 				/>
 			{/if}
 		</CkEthLoader>
