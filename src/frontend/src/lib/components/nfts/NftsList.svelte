@@ -3,9 +3,9 @@
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
-	import { i18n } from '$lib/stores/i18n.store';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
