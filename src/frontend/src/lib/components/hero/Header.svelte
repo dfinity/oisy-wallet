@@ -14,6 +14,7 @@
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 
+	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
 	let networkSwitcherOpen = $state(false);
 	let helpMenuOpen = $state(false);
 	let menuOpen = $state(false);
