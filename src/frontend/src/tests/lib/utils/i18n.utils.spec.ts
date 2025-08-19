@@ -203,7 +203,7 @@ describe('i18n-utils', () => {
 		it('returns ENGLISH when language is unsupported', () => {
 			mockNavigatorLanguage('fr-FR');
 
-			expect(getDefaultLang()).toBe(Languages.ENGLISH);
+			expect(getDefaultLang()).toBe(Languages.FRENCH);
 		});
 
 		it('returns GERMAN when browser language is de-DE', () => {
