@@ -2,6 +2,7 @@ import NftsList from '$lib/components/nfts/NftsList.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
 import * as networkTokens from '$lib/derived/network-tokens.derived';
 import * as tokens from '$lib/derived/tokens.derived';
+import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import {
@@ -11,7 +12,7 @@ import {
 } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 describe('NftsList', () => {
 	const mockNfts = [
@@ -20,7 +21,15 @@ describe('NftsList', () => {
 		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
 	];
 
-	beforeAll(() => {
+	beforeEach(() => {
+		nftStore.resetAll();
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it('should render a list of the collections', () => {
 		nftStore.addAll(mockNfts);
 
 		vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
@@ -29,9 +38,7 @@ describe('NftsList', () => {
 		vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
 			writable([mockNonFungibleToken1, mockNonFungibleToken2])
 		);
-	});
 
-	it('should render a list of the collections', () => {
 		const { container } = render(NftsList);
 
 		const grid = container.querySelector('.grid');
@@ -55,5 +62,15 @@ describe('NftsList', () => {
 				`background-image: url("${mockNfts[i].imageUrl}")`
 			);
 		}
+	});
+
+	it('should render a placeholder if no collections', () => {
+		const { getByText } = render(NftsList);
+
+		const h5 = getByText(get(i18n).nfts.text.title_empty);
+
+		assertNonNullish(h5);
+
+		expect(h5).toBeInTheDocument();
 	});
 });
