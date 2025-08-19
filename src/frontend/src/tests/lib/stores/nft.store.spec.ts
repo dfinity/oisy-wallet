@@ -1,10 +1,10 @@
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { get } from 'svelte/store';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 
 describe('nftStore', () => {
 	beforeEach(() => {
