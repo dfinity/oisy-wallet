@@ -3,6 +3,7 @@ export enum Languages {
 	CZECH = 'cs',
 	GERMAN = 'de',
 	ITALIAN = 'it',
+	JAPANESE = 'jp',
 	PORTUGUESE = 'pt',
 	VIETNAMESE = 'vi',
 	CHINESE_SIMPLIFIED = 'zh-CN'
