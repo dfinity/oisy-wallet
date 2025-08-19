@@ -6,8 +6,8 @@ export type NftStoreData = Nft[] | undefined;
 
 export interface NftStore extends Readable<NftStoreData> {
 	addAll: (nfts: Nft[]) => void;
-	resetAll: () => void;
 	removeSelectedNfts: (nfts: Nft[]) => void;
+	resetAll: () => void;
 }
 
 const initNftStore = (): NftStore => {
