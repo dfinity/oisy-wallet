@@ -89,8 +89,7 @@
 		<button
 			class="text flex gap-2 border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
 			on:click={async () => await receive()}
-			in:blur
-			><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
+			in:blur><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>
 	{/if}
 {/if}

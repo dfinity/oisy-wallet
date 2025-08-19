@@ -42,9 +42,9 @@
 	decoding="async"
 	{height}
 	{loading}
+	onerror={onError}
+	onload={onLoad}
 	{role}
 	{src}
 	{width}
-	onload={onLoad}
-	onerror={onError}
 />

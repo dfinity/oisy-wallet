@@ -68,9 +68,9 @@
 	aria-label={ariaLabel}
 	data-tid={testId}
 	disabled={disabled ?? loading}
-	{type}
 	{onclick}
 	{ondblclick}
+	{type}
 >
 	<span
 		class={`flex min-w-0 gap-2 ${innerStyleClass}`}

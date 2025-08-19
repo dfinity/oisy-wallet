@@ -59,8 +59,7 @@
 					ariaLabel={$i18n.address.save.create_contact}
 					link
 					onclick={onCreateContact}
-					paddingSmall
-					><IconPlus /> {$i18n.address.save.create_contact}</Button
+					paddingSmall><IconPlus /> {$i18n.address.save.create_contact}</Button
 				>
 			</span>
 		{/if}

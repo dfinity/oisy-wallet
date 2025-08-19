@@ -84,8 +84,7 @@
 			colorStyle={selectedTag === tag ? 'primary' : 'tertiary'}
 			onclick={() => onClickFilterBtn(tag)}
 			paddingSmall
-			styleClass="text-nowrap max-w-fit text-sm"
-			>{resolveText({ i18n: $i18n, path: tag })}</Button
+			styleClass="text-nowrap max-w-fit text-sm">{resolveText({ i18n: $i18n, path: tag })}</Button
 		>
 	{/each}
 </div>
