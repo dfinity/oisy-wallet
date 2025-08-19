@@ -37,8 +37,8 @@
 			inventory = [];
 		}
 
-		await handleRemovedNfts({ token, inventory });
-		await handleNewNfts({
+		handleRemovedNfts({ token, inventory });
+		handleNewNfts({
 			token,
 			inventory,
 			infuraProvider: infuraErc721Providers(token.network.id)
@@ -61,16 +61,16 @@
 			inventory = [];
 		}
 
-		await handleRemovedNfts({ token, inventory: inventory.map((ownedNft) => ownedNft.id) });
-		await handleUpdatedNfts({ token, inventory });
-		await handleNewNfts({
+		handleRemovedNfts({ token, inventory: inventory.map((ownedNft) => ownedNft.id) });
+		handleUpdatedNfts({ token, inventory });
+		handleNewNfts({
 			token,
 			inventory: inventory.map((ownedNft) => ownedNft.id),
 			infuraProvider: infuraErc1155Providers(token.network.id)
 		});
 	};
 
-	const handleNewNfts = async ({
+	const handleNewNfts = ({
 		token,
 		inventory,
 		infuraProvider
