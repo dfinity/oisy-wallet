@@ -1,7 +1,7 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import type { CertifiedData } from '$lib/types/store';
-import { isNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -64,5 +64,5 @@ export const getPendingTransactionIds = (address: string): string[] => {
 	// Use the utility function to convert txids and filter out nulls
 	return pendingTransactions.data
 		.map(convertPendingTransactionTxid)
-		.filter((txid): txid is string => nonNullish(txid);
+		.filter((txid): txid is string => nonNullish(txid));
 };
