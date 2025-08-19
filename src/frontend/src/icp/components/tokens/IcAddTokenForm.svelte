@@ -11,28 +11,28 @@
 
 <p class="mb-6 text-sm">{$i18n.tokens.import.text.info}</p>
 
-<label for="ledgerCanisterId" class="font-bold"
+<label class="font-bold" for="ledgerCanisterId"
 	>{$i18n.tokens.import.text.ledger_canister_id}:
 	<span class="text-brand-primary-alt">*</span></label
 >
 <div style={`${editMode ? '--input-background: var(--color-background-disabled);' : ''}`}>
 	<InputText
 		name="ledgerCanisterId"
-		bind:value={ledgerCanisterId}
 		disabled={editMode}
 		placeholder="_____-_____-_____-_____-cai"
+		bind:value={ledgerCanisterId}
 	/>
 </div>
 
-<label for="indexCanisterId" class="mt-6 block font-bold"
+<label class="mt-6 block font-bold" for="indexCanisterId"
 	>{$i18n.tokens.import.text.index_canister_id}:</label
 >
 <InputText
 	name="indexCanisterId"
-	bind:value={indexCanisterId}
-	testId={TOKEN_MODAL_INDEX_CANISTER_ID_INPUT}
 	placeholder="_____-_____-_____-_____-cai"
 	required={false}
+	testId={TOKEN_MODAL_INDEX_CANISTER_ID_INPUT}
+	bind:value={indexCanisterId}
 />
 
 <p class="mb-6 mt-2 text-sm">{replaceOisyPlaceholders($i18n.tokens.import.text.info_index)}</p>

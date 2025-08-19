@@ -62,5 +62,5 @@
 		</span>
 	</MessageBox>
 
-	<InProgress {progressStep} {steps} {failedSteps} />
+	<InProgress {failedSteps} {progressStep} {steps} />
 </div>

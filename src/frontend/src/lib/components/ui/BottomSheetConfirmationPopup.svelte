@@ -20,10 +20,10 @@
 		<div class="flex w-full flex-col">
 			<div class="w-full p-4">
 				<ButtonIcon
-					onclick={onCancel}
-					styleClass="text-disabled float-right"
 					ariaLabel={$i18n.core.alt.close_details}
 					{disabled}
+					onclick={onCancel}
+					styleClass="text-disabled float-right"
 				>
 					{#snippet icon()}
 						<IconClose size="24" />

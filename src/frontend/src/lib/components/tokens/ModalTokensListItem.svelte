@@ -20,7 +20,7 @@
 	const { oisyName, oisySymbol, symbol, name, network } = token;
 </script>
 
-<LogoButton {onClick} dividers={showDividers} fullWidth>
+<LogoButton dividers={showDividers} fullWidth {onClick}>
 	{#snippet title()}
 		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
 	{/snippet}
@@ -39,7 +39,7 @@
 
 	{#snippet logo()}
 		<div class="mr-2">
-			<TokenLogo data={token} color="white" badge={{ type: 'network' }} {logoSize} />
+			<TokenLogo badge={{ type: 'network' }} color="white" data={token} {logoSize} />
 		</div>
 	{/snippet}
 

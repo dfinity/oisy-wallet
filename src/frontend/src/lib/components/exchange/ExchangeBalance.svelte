@@ -40,14 +40,14 @@
 	<output class="mt-7 inline-block break-all text-5xl font-bold">
 		{#if $loaded && nonNullish(balance)}
 			{#if hideBalance}
-				<IconDots variant="lg" times={6} styleClass="my-4.25" />
+				<IconDots styleClass="my-4.25" times={6} variant="lg" />
 			{:else}
 				{balance}
 			{/if}
 		{:else}
 			<span class="animate-pulse">
 				{#if hideBalance}
-					<IconDots variant="lg" times={6} styleClass="my-4.25" />
+					<IconDots styleClass="my-4.25" times={6} variant="lg" />
 				{:else}
 					{formatCurrency({
 						value: 0,
@@ -61,23 +61,23 @@
 	</output>
 	<span
 		class="flex cursor-pointer flex-col items-center gap-4 text-xl font-medium text-brand-secondary-alt"
-		role="button"
-		tabindex="0"
 		ondblclick={() =>
 			setPrivacyMode({
 				enabled: !$isPrivacyMode,
 				withToast: false,
 				source: 'Hero - Double click on the ExchangeBalance'
 			})}
+		role="button"
+		tabindex="0"
 	>
 		{#if hideBalance}
-			<DelayedTooltip text={$i18n.hero.text.tooltip_toggle_balance} delay={2000}>
+			<DelayedTooltip delay={2000} text={$i18n.hero.text.tooltip_toggle_balance}>
 				<span class="flex items-center gap-2 sm:max-w-none">
 					<IconEyeOff />{$i18n.hero.text.hidden_balance}
 				</span>
 			</DelayedTooltip>
 		{:else}
-			<DelayedTooltip text={$i18n.hero.text.tooltip_toggle_balance} delay={2000}>
+			<DelayedTooltip delay={2000} text={$i18n.hero.text.tooltip_toggle_balance}>
 				{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
 			</DelayedTooltip>
 		{/if}

@@ -33,7 +33,7 @@
 	);
 </script>
 
-<TokenModal token={$pageToken} isDeletable={!undeletableToken} {fromRoute}>
+<TokenModal {fromRoute} isDeletable={!undeletableToken} token={$pageToken}>
 	{#if nonNullish(tokenAddress)}
 		<ModalListItem>
 			{#snippet label()}
@@ -43,16 +43,16 @@
 			{#snippet content()}
 				<output>{shortenWithMiddleEllipsis({ text: tokenAddress })}</output>
 
-				<Copy value={tokenAddress} text={$i18n.tokens.details.token_address_copied} inline />
+				<Copy inline text={$i18n.tokens.details.token_address_copied} value={tokenAddress} />
 
 				<ExternalLink
-					iconSize="18"
+					ariaLabel={$i18n.tokens.alt.open_token_address_block_explorer}
+					color="blue"
 					href={nonNullish(explorerUrl)
 						? replacePlaceholders(explorerUrl, { $args: `token/${tokenAddress}/` })
 						: ''}
-					ariaLabel={$i18n.tokens.alt.open_token_address_block_explorer}
+					iconSize="18"
 					inline
-					color="blue"
 				/>
 			{/snippet}
 		</ModalListItem>
