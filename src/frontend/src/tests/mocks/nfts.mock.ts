@@ -69,11 +69,11 @@ export const mockNftollectionUi: NftCollectionUi = {
 	}
 };
 
-export const [mockNonFungibleToken1]: NonFungibleToken = getMockNonFungibleToken({
+export const [mockNonFungibleToken1]: NonFungibleToken[] = getMockNonFungibleToken({
 	addresses: [mockEthAddress],
 	names: ['Nft 1']
 });
-export const [mockNonFungibleToken2]: NonFungibleToken = getMockNonFungibleToken({
+export const [mockNonFungibleToken2]: NonFungibleToken[] = getMockNonFungibleToken({
 	addresses: [mockEthAddress],
 	names: ['Nft 2']
 });
