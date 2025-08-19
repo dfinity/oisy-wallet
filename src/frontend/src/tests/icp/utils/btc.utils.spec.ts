@@ -1,7 +1,7 @@
-
-
 // Hoisted holder for values used/assigned inside the vi.mock factory
-interface TxEntry { txid: unknown }
+interface TxEntry {
+	txid: unknown;
+}
 type StoreValue = Record<string, { certified: true; data: Array<TxEntry> | null }>;
 const mockStoreApi = vi.hoisted(() => ({ setStoreValue: (_v: StoreValue) => {} }));
 
