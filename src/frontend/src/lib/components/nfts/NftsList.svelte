@@ -5,6 +5,7 @@
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
@@ -15,7 +16,7 @@
 		{#if nftCollections.length === 0}
 			<EmptyNftsList />
 		{:else}
-			<h5 class="mt-5">Collections</h5>
+			<h5 class="mt-5">{$i18n.nfts.text.collections}</h5>
 			<div class="grid grid-cols-3 gap-2 gap-y-4 pt-4">
 				{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
 					{#if collection.nfts.length > 0}
@@ -27,7 +28,7 @@
 	{:else if nftCollections.length === 0}
 		<EmptyNftsList />
 	{:else}
-		<h5 class="mt-5">All Assets</h5>
+		<h5 class="mt-5">{$i18n.nfts.text.all_assets}</h5>
 		<div class="grid grid-cols-3 gap-2 gap-y-4 pt-4">
 			{#each nfts as nft, index (`${String(nft.id)}-${index}`)}
 				<NftCard {nft} />
