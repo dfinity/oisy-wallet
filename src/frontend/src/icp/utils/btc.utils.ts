@@ -64,5 +64,5 @@ export const getPendingTransactionIds = (address: string): string[] => {
 	// Use the utility function to convert txids and filter out nulls
 	return pendingTransactions.data
 		.map(convertPendingTransactionTxid)
-		.filter((txid): txid is string => txid !== null);
+		.filter((txid): txid is string => nonNullish(txid);
 };
