@@ -22,13 +22,11 @@
 
 	let json = $state<unknown | undefined>();
 	$effect(() => {
-		(() => {
-			try {
-				json = JSON.parse(message);
-			} catch (_err: unknown) {
-				json = undefined;
-			}
-		})();
+		try {
+			json = JSON.parse(message);
+		} catch (_err: unknown) {
+			json = undefined;
+		}
 	});
 </script>
 
