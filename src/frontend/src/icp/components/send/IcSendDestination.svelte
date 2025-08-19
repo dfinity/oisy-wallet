@@ -43,12 +43,12 @@
 </script>
 
 <SendInputDestination
-	bind:destination
-	bind:invalidDestination
+	{inputPlaceholder}
 	{knownDestinations}
 	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
-	{inputPlaceholder}
-	on:icQRCodeScan
 	onQRButtonClick={() => dispatch('icQRCodeScan')}
+	bind:destination
+	bind:invalidDestination
+	on:icQRCodeScan
 />

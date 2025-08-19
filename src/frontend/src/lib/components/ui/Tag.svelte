@@ -23,17 +23,17 @@
 </script>
 
 <span
-	aria-hidden={ariaHidden}
 	class="rounded-md {variantClassNames[variant]}"
-	class:text-xs={size === 'sm'}
-	class:text-sm={size === 'xs' || size === 'md'}
-	class:px-1.5={size === 'xs'}
-	class:px-1={size === 'sm' || size === 'md'}
 	class:md:px-2={size === 'sm' || size === 'md'}
-	class:py-0={size === 'xs'}
 	class:md:py-0={size === 'xs'}
-	class:py-0.5={size === 'sm' || size === 'md'}
 	class:md:py-1={size === 'sm' || size === 'md'}
+	class:px-1={size === 'sm' || size === 'md'}
+	class:px-1.5={size === 'xs'}
+	class:py-0={size === 'xs'}
+	class:py-0.5={size === 'sm' || size === 'md'}
+	class:text-sm={size === 'xs' || size === 'md'}
+	class:text-xs={size === 'sm'}
+	aria-hidden={ariaHidden}
 >
 	{@render children?.()}
 </span>
