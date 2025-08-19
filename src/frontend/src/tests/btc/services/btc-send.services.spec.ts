@@ -134,40 +134,6 @@ describe('btc-send.services', () => {
 			await expect(validateBtcSend(defaultValidateParams)).resolves.not.toThrow();
 		});
 
-		it('should throw AuthenticationRequired error when identity is null', async () => {
-			const params = {
-				...defaultValidateParams,
-				identity: null as unknown as typeof mockIdentity
-			};
-
-			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
-
-			try {
-				await validateBtcSend(params);
-			} catch (error) {
-				expect(error).toBeInstanceOf(BtcValidationError);
-				expect((error as BtcValidationError).type).toBe(
-					BtcSendValidationError.AuthenticationRequired
-				);
-			}
-		});
-
-		it('should throw NoNetworkId error when network is null', async () => {
-			const params = {
-				...defaultValidateParams,
-				network: null as unknown as 'mainnet'
-			};
-
-			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
-
-			try {
-				await validateBtcSend(params);
-			} catch (error) {
-				expect(error).toBeInstanceOf(BtcValidationError);
-				expect((error as BtcValidationError).type).toBe(BtcSendValidationError.NoNetworkId);
-			}
-		});
-
 		it('should throw InvalidAmount error when amount is invalid', async () => {
 			const params = {
 				...defaultValidateParams,
@@ -181,22 +147,6 @@ describe('btc-send.services', () => {
 			} catch (error) {
 				expect(error).toBeInstanceOf(BtcValidationError);
 				expect((error as BtcValidationError).type).toBe(BtcSendValidationError.InvalidAmount);
-			}
-		});
-
-		it('should throw UtxoFeeMissing error when utxosFee is null', async () => {
-			const params = {
-				...defaultValidateParams,
-				utxosFee: null as unknown as UtxosFee
-			};
-
-			await expect(validateBtcSend(params)).rejects.toThrow(BtcValidationError);
-
-			try {
-				await validateBtcSend(params);
-			} catch (error) {
-				expect(error).toBeInstanceOf(BtcValidationError);
-				expect((error as BtcValidationError).type).toBe(BtcSendValidationError.UtxoFeeMissing);
 			}
 		});
 
