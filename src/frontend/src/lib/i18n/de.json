@@ -1025,8 +1025,8 @@
 			"item_traits": "Eigenschaften",
 			"collection_not_loaded": "Die Kollektion konnte nicht angezeigt werden weil sie noch nicht geladen wurde",
 			"nft_not_loaded": "Das NFT konnte nicht angezeigt werden weil es noch nicht geladen wurde",
-            "collections": "Kollektionen",
-            "all_assets": "Alle Assets"
+			"collections": "Kollektionen",
+			"all_assets": "Alle Assets"
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
