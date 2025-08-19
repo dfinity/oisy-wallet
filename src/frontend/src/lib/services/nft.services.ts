@@ -83,11 +83,11 @@ const loadNftsOfToken = async ({
 };
 
 export const loadNftIdsOfToken = async ({
-																					infuraProvider,
-																					token,
-																					tokenIds,
-																					walletAddress
-																				}: {
+	infuraProvider,
+	token,
+	tokenIds,
+	walletAddress
+}: {
 	infuraProvider: InfuraErc165Provider;
 	token: NonFungibleToken;
 	tokenIds: NftId[];
