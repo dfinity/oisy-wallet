@@ -38,23 +38,23 @@
 
 <div class="relative">
 	<Logo
-		src={imageUrl ?? noNftImage}
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
-		size={logoSize}
 		circle={false}
 		{color}
 		{ring}
+		size={logoSize}
+		src={imageUrl ?? noNftImage}
 		{testId}
 	/>
 
 	{#if nonNullish(badge) && badge?.type === 'network'}
 		<div
 			class="absolute -bottom-1"
-			class:scale-60={logoSize === 'xs'}
 			class:-right-1={logoSize !== 'xs'}
 			class:-right-1.75={logoSize === 'xs'}
+			class:scale-60={logoSize === 'xs'}
 		>
-			<NetworkLogo {network} {color} testId={`network-${badgeTestId}`} />
+			<NetworkLogo {color} {network} testId={`network-${badgeTestId}`} />
 		</div>
 	{:else if nonNullish(badge) && badge?.type === 'icon'}
 		<div

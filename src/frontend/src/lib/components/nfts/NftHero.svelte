@@ -41,7 +41,7 @@
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
 					<Img src={nft?.imageUrl} />
 					<span class="absolute bottom-0 right-0 m-2.5">
-						<NetworkLogo network={nft.collection.network} size="xs" color="white" />
+						<NetworkLogo color="white" network={nft.collection.network} size="xs" />
 					</span>
 				</div>
 			</div>

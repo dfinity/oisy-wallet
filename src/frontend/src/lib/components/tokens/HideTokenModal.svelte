@@ -120,11 +120,11 @@
 </script>
 
 <WizardModal
+	bind:this={modal}
+	disablePointerEvents={currentStep?.name === 'Hiding'}
+	onClose={close}
 	{steps}
 	bind:currentStep
-	bind:this={modal}
-	onClose={close}
-	disablePointerEvents={currentStep?.name === 'Hiding'}
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 

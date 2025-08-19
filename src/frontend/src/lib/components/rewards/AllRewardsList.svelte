@@ -32,23 +32,23 @@
 
 <RewardsEligibilityContext>
 	<RewardsFilter
-		bind:rewardState={selectedRewardState}
 		endedCampaignsAmount={endedCampaigns.length}
+		bind:rewardState={selectedRewardState}
 	/>
 
 	{#if selectedRewardState === RewardStates.ONGOING}
 		<RewardsGroup
-			rewards={ongoingCampaigns}
-			testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}
 			altImg={oisyEpisodeFour}
 			altText={replaceOisyPlaceholders($i18n.rewards.alt.coming_soon)}
+			rewards={ongoingCampaigns}
+			testId={REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}
 		/>
 
 		<RewardsGroup
-			title={replaceOisyPlaceholders($i18n.rewards.text.upcoming_campaigns)}
-			rewards={upcomingCampaigns}
 			altText={replaceOisyPlaceholders($i18n.rewards.alt.upcoming_campaigns)}
+			rewards={upcomingCampaigns}
 			testId={REWARDS_UPCOMING_CAMPAIGNS_CONTAINER}
+			title={replaceOisyPlaceholders($i18n.rewards.text.upcoming_campaigns)}
 		/>
 	{:else if selectedRewardState === RewardStates.ENDED}
 		<RewardsGroup rewards={endedCampaigns} testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER} />
