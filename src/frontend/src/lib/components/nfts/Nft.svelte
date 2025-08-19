@@ -9,6 +9,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft } from '$lib/types/nft';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const [networkId, collectionId, nftId] = $derived([
 		page.params.networkId,
@@ -32,7 +33,7 @@
 		timeout = setTimeout(() => {
 			if (isNullish(nft)) {
 				goto(`${AppPath.Nfts}${page.url.search}`);
-				toastsError({ msg: { text: 'Could not load NFT' } });
+				toastsError({ msg: { text: $i18n.nfts.text.nft_not_loaded } });
 			}
 		}, FALLBACK_TIMEOUT);
 
