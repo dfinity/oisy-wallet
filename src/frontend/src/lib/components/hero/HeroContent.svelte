@@ -110,19 +110,19 @@
 	class:from-gold-0={isGLDTToken}
 	class:from-icp-0={$networkICP && !isGLDTToken}
 	class:from-polygon-0={$networkPolygon}
+	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:from-trump-0={isTrumpToken}
+	class:to-arbitrum-100={$networkArbitrum}
+	class:to-base-100={$networkBase}
+	class:to-bsc-100={$networkBsc}
+	class:to-btc-100={$networkBitcoin}
 	class:to-default-100={$pseudoNetworkChainFusion}
 	class:to-eth-100={$networkEthereum}
 	class:to-gold-100={isGLDTToken}
 	class:to-icp-100={$networkICP && !isGLDTToken}
-	class:to-trump-100={isTrumpToken}
-	class:to-btc-100={$networkBitcoin}
-	class:to-base-100={$networkBase}
-	class:to-bsc-100={$networkBsc}
-	class:to-arbitrum-100={$networkArbitrum}
 	class:to-polygon-100={$networkPolygon}
-	class:from-sol-0={$networkSolana && !isTrumpToken}
 	class:to-sol-100={$networkSolana && !isTrumpToken}
+	class:to-trump-100={isTrumpToken}
 >
 	{#if isTransactionsPage}
 		<div class="flex w-full flex-col gap-6" in:slide={SLIDE_PARAMS}>
