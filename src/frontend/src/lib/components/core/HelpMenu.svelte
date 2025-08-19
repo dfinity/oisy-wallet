@@ -18,7 +18,11 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let visible = $state(false);
+	interface Props {
+		visible?: boolean;
+	}
+
+	let { visible = $bindable(false) }: Props = $props();
 
 	let button = $state<HTMLButtonElement | undefined>();
 

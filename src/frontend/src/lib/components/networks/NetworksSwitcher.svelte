@@ -18,10 +18,11 @@
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 
 	interface Props {
+		visible: boolean;
 		disabled?: boolean;
 	}
 
-	let { disabled = false }: Props = $props();
+	let { visible = $bindable(false), disabled = false }: Props = $props();
 
 	let dropdown = $state<Dropdown | undefined>();
 
@@ -50,6 +51,7 @@
 </script>
 
 <Dropdown
+	bind:visible
 	bind:this={dropdown}
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
