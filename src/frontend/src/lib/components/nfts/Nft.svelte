@@ -8,12 +8,21 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft } from '$lib/types/nft';
+	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
-	const [collectionId, nftId] = $derived([page.params.collectionId, page.params.nftId]);
+	const [networkId, collectionId, nftId] = $derived([
+		page.params.networkId,
+		page.params.collectionId,
+		page.params.nftId
+	]);
 
 	const nft: Nft | undefined = $derived(
 		($nftStore ?? []).find(
-			(nft) => String(nft.id) === nftId && nft.collection.address === collectionId
+			(nft) =>
+				String(nft.id) === nftId &&
+				nft.collection.address === collectionId &&
+				nft.collection.network.name === networkId
 		)
 	);
 
@@ -23,10 +32,10 @@
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(nft)) {
-				goto(AppPath.Nfts);
-				toastsError({ msg: { text: 'Could not load NFT' } });
+				goto(`${AppPath.Nfts}${page.url.search}`);
+				toastsError({ msg: { text: $i18n.nfts.text.nft_not_loaded } });
 			}
-		}, 10000);
+		}, FALLBACK_TIMEOUT);
 
 		return () => {
 			if (nonNullish(timeout)) {
