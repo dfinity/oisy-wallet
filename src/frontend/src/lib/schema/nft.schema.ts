@@ -31,3 +31,8 @@ export const NftSchema = z.object({
 	...NftMetadataSchema.shape,
 	collection: NftCollectionSchema
 });
+
+export const OwnedNftSchema = z.object({
+	id: NftIdSchema,
+	balance: z.number()
+});
