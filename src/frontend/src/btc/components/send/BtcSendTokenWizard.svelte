@@ -109,6 +109,7 @@
 			await nullishSignOut();
 			return;
 		}
+		dispatch('icNext');
 
 		// Validate UTXOs before proceeding
 		try {
@@ -143,10 +144,7 @@
 			return;
 		}
 
-		dispatch('icNext');
-
 		try {
-			// TODO: add tracking
 			await sendBtc({
 				destination,
 				amount,
@@ -155,9 +153,7 @@
 				source,
 				identity: $authIdentity,
 				onProgress: () => {
-					if (sendProgressStep === ProgressStepsSendBtc.INITIALIZATION) {
-						progress(ProgressStepsSendBtc.SEND);
-					} else if (sendProgressStep === ProgressStepsSendBtc.SEND) {
+					if (sendProgressStep === ProgressStepsSendBtc.SEND) {
 						progress(ProgressStepsSendBtc.DONE);
 					}
 				}
