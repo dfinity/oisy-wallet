@@ -2,13 +2,14 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { USDT_TOKEN, USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import {
 	loadEthereumTransactions,
 	reloadEthereumTransactions
 } from '$eth/services/eth-transactions.services';
+import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -17,6 +18,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -63,12 +65,18 @@ describe('eth-transactions.services', () => {
 
 				etherscanProvidersSpy.mockReturnValue({
 					erc20Transactions: mockErcTransactions,
-					erc721Transactions: mockErcTransactions
+					erc721Transactions: mockErcTransactions,
+					erc1155Transactions: mockErcTransactions
 				} as unknown as EtherscanProvider);
 
 				erc721CustomTokensStore.resetAll();
 				erc721CustomTokensStore.setAll([
 					{ data: { ...mockValidErc721Token, enabled: true }, certified: false }
+				]);
+
+				erc1155CustomTokensStore.resetAll();
+				erc1155CustomTokensStore.setAll([
+					{ data: { ...mockValidErc1155Token, enabled: true }, certified: false }
 				]);
 			});
 
@@ -97,7 +105,7 @@ describe('eth-transactions.services', () => {
 				const result = await loadEthereumTransactions({
 					networkId: ETHEREUM_NETWORK_ID,
 					tokenId: USDT_TOKEN_ID,
-					standard: USDC_TOKEN.standard
+					standard: USDT_TOKEN.standard
 				});
 
 				expect(spyToastsError).toHaveBeenCalledWith({
@@ -106,7 +114,7 @@ describe('eth-transactions.services', () => {
 				expect(result).toEqual({ success: false });
 			});
 
-			const tokens = [USDC_TOKEN, mockValidErc721Token];
+			const tokens = [USDC_TOKEN, mockValidErc721Token, mockValidErc1155Token];
 
 			it.each(tokens)(
 				'should call the transaction function for $standard tokens',
