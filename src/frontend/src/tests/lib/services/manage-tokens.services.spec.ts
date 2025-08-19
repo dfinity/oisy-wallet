@@ -129,10 +129,9 @@ describe('manage-tokens.services', () => {
 			});
 			expect(mockOnError).toHaveBeenCalledOnce();
 
-			expect(trackEvent).toHaveBeenCalledOnce();
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
-				metadata: { error: 'Error: Save failed' }
+				metadata: { error: 'Save failed' }
 			});
 		});
 	});
