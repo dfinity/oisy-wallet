@@ -4,6 +4,7 @@ import { Languages } from '$lib/enums/languages';
 import cs from '$lib/i18n/cs.json';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
+import fr from '$lib/i18n/fr.json';
 import it from '$lib/i18n/it.json';
 import pt from '$lib/i18n/pt.json';
 import vi from '$lib/i18n/vi.json';
@@ -26,6 +27,11 @@ const csI18n = (): I18n => ({
 const deI18n = (): I18n => ({
 	...mergeWithFallback({ refLang: enI18n(), targetLang: de as I18n }),
 	lang: Languages.GERMAN
+});
+
+const frI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: fr as I18n }),
+	lang: Languages.FRENCH
 });
 
 const itI18n = (): I18n => ({
@@ -54,6 +60,8 @@ const loadLang = (lang: Languages): I18n => {
 			return zhcnI18n();
 		case Languages.CZECH:
 			return csI18n();
+		case Languages.FRENCH:
+			return frI18n();
 		case Languages.GERMAN:
 			return deI18n();
 		case Languages.ITALIAN:
