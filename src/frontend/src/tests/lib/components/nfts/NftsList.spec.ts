@@ -1,13 +1,19 @@
-import NftCollection from '$lib/components/nfts/NftCollection.svelte';
+import NftsList from '$lib/components/nfts/NftsList.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
+import * as networkTokens from '$lib/derived/network-tokens.derived';
+import * as tokens from '$lib/derived/tokens.derived';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
-import { mockPage } from '$tests/mocks/page.store.mock';
+import {
+	mockNonFungibleToken1,
+	mockNonFungibleToken2,
+	mockValidErc1155Nft
+} from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
 
-describe('NftCollection', () => {
+describe('NftsList', () => {
 	const mockNfts = [
 		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId(0) },
 		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId(1) },
@@ -17,14 +23,16 @@ describe('NftCollection', () => {
 	beforeAll(() => {
 		nftStore.addAll(mockNfts);
 
-		mockPage.mockDynamicRoutes({
-			networkId: String(mockValidErc1155Nft.collection.network.id),
-			collectionId: mockValidErc1155Nft.collection.address
-		});
+		vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+			writable([mockNonFungibleToken1, mockNonFungibleToken2])
+		);
+		vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+			writable([mockNonFungibleToken1, mockNonFungibleToken2])
+		);
 	});
 
-	it('should render a list of the collections nfts', () => {
-		const { container } = render(NftCollection);
+	it('should render a list of the collections', () => {
+		const { container } = render(NftsList);
 
 		const grid = container.querySelector('.grid');
 
@@ -36,7 +44,7 @@ describe('NftCollection', () => {
 
 		for (let i = 0; i < links.length; i++) {
 			expect(links.item(i).getAttribute('href')).toContain(
-				`${AppPath.Nfts}${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}/${mockNfts[i].id}`
+				`${AppPath.Nfts}${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
 			);
 
 			const img = links.item(i).querySelector('.bg-contain');
