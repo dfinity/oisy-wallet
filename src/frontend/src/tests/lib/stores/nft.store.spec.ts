@@ -49,7 +49,7 @@ describe('nftStore', () => {
 		});
 	});
 
-	describe('removeAll', () => {
+	describe('removeSelectedNfts', () => {
 		const mockNft1 = mockValidErc721Nft;
 		const mockNft2 = { ...mockValidErc721Nft, id: parseNftId(837364) };
 		const mockNft3 = {
@@ -67,7 +67,7 @@ describe('nftStore', () => {
 		});
 
 		it('should remove NFTs from store', () => {
-			nftStore.removeAll([mockNft1, mockNft3]);
+			nftStore.removeSelectedNfts([mockNft1, mockNft3]);
 
 			expect(get(nftStore)).toEqual([mockNft2]);
 		});
@@ -75,7 +75,7 @@ describe('nftStore', () => {
 		it('should do nothing when trying to remove from undefined store', () => {
 			nftStore.resetAll();
 
-			nftStore.removeAll([mockNft1, mockNft3]);
+			nftStore.removeSelectedNfts([mockNft1, mockNft3]);
 
 			expect(get(nftStore)).toBeUndefined();
 		});
@@ -84,19 +84,19 @@ describe('nftStore', () => {
 			nftStore.resetAll();
 			nftStore.addAll([]);
 
-			nftStore.removeAll([mockNft1, mockNft3]);
+			nftStore.removeSelectedNfts([mockNft1, mockNft3]);
 
 			expect(get(nftStore)).toEqual([]);
 		});
 
 		it('should do nothing when removal array is empty', () => {
-			nftStore.removeAll([]);
+			nftStore.removeSelectedNfts([]);
 
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2, mockNft3]);
 		});
 
 		it('should handle tokens and networks correctly', () => {
-			nftStore.removeAll([
+			nftStore.removeSelectedNfts([
 				{
 					...mockNft2,
 					collection: {
