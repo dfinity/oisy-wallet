@@ -9,7 +9,8 @@ import {
 	findNft,
 	getEnabledNfts,
 	getNftCollectionUi,
-	getNftsByNetworks, getUpdatedNfts,
+	getNftsByNetworks,
+	getUpdatedNfts,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
 } from '$lib/utils/nfts.utils';

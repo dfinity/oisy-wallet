@@ -7,7 +7,8 @@ import type {
 	NftCollectionUi,
 	NftId,
 	NftsByNetwork,
-	NonFungibleToken, OwnedNft
+	NonFungibleToken,
+	OwnedNft
 } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
@@ -63,10 +64,10 @@ export const findNft = ({
 	);
 
 export const getUpdatedNfts = ({
-																 nfts,
-																 token,
-																 inventory
-															 }: {
+	nfts,
+	token,
+	inventory
+}: {
 	nfts: Nft[];
 	token: NonFungibleToken;
 	inventory: OwnedNft[];
