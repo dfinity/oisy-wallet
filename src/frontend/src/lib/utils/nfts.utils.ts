@@ -90,34 +90,30 @@ export const findRemovedNfts = ({
 	);
 
 export const getUpdatedNfts = ({
-	nfts,
-	token,
-	inventory
-}: {
+																 nfts,
+																 token,
+																 inventory
+															 }: {
 	nfts: Nft[];
 	token: NonFungibleToken;
 	inventory: OwnedNft[];
 }): Nft[] =>
-	(nfts ?? [])
-		.filter((nft) => {
-			if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
-				return false;
-			}
+	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
+		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
+			return acc;
+		}
 
-			const ownedNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
-			return nonNullish(ownedNft) && nft.balance !== ownedNft.balance;
-		})
-		.map((nft) => {
-			const ownedNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
-			if (isNullish(ownedNft)) {
-				return nft;
-			}
+		const ownedNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
 
-			return {
+		if (nonNullish(ownedNft) && nft.balance !== ownedNft.balance) {
+			acc.push({
 				...nft,
 				balance: ownedNft.balance
-			};
-		});
+			});
+		}
+
+		return acc;
+	}, [])
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
