@@ -3,8 +3,6 @@
 	import { fade } from 'svelte/transition';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
-	import NftSettingsMenu from '$lib/components/nfts/NftSettingsMenu.svelte';
-	import NftSortMenu from '$lib/components/nfts/NftSortMenu.svelte';
 	import NftsList from '$lib/components/nfts/NftsList.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
@@ -55,18 +53,9 @@
 					{/snippet}
 				</TokensFilter>
 			</div>
-			{#if tab === TokenTypes.TOKENS}
-				<div class="flex">
-					<TokensMenu />
-				</div>
-			{:else}
-				<div class="flex">
-					<NftSortMenu />
-				</div>
-				<div class="flex">
-					<NftSettingsMenu />
-				</div>
-			{/if}
+			<div class="flex">
+				<TokensMenu />
+			</div>
 		</div>
 	</StickyHeader>
 
