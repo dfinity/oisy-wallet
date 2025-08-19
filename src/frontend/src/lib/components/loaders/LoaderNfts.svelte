@@ -32,7 +32,11 @@
 		});
 
 		await handleRemovedNfts({ token, inventory });
-		await handleNewNfts({token, inventory, infuraProvider: infuraErc721Providers(token.network.id)})
+		await handleNewNfts({
+			token,
+			inventory,
+			infuraProvider: infuraErc721Providers(token.network.id)
+		});
 	};
 
 	const handleErc1155 = async (token: NonFungibleToken) => {
@@ -48,16 +52,27 @@
 
 		await handleRemovedNfts({ token, inventory: inventory.map((ownedNft) => ownedNft.id) });
 		await handleUpdatedNfts({ token, inventory });
-		await handleNewNfts({token, inventory: inventory.map((ownedNft) => ownedNft.id), infuraProvider: infuraErc1155Providers(token.network.id)})
+		await handleNewNfts({
+			token,
+			inventory: inventory.map((ownedNft) => ownedNft.id),
+			infuraProvider: infuraErc1155Providers(token.network.id)
+		});
 	};
 
-	const handleNewNfts = async ({ token, inventory, infuraProvider }:
-												 { token: NonFungibleToken; inventory: NftId[], infuraProvider: InfuraErc165Provider }) => {
+	const handleNewNfts = async ({
+		token,
+		inventory,
+		infuraProvider
+	}: {
+		token: NonFungibleToken;
+		inventory: NftId[];
+		infuraProvider: InfuraErc165Provider;
+	}) => {
 		if (isNullish($ethAddress)) {
 			return;
 		}
 
-		const newNftIds = findNewNftIds({nfts: $nftStore ?? [], token, inventory})
+		const newNftIds = findNewNftIds({ nfts: $nftStore ?? [], token, inventory });
 
 		if (newNftIds.length > 0) {
 			await loadNftIdsOfToken({
@@ -67,9 +82,15 @@
 				walletAddress: $ethAddress
 			});
 		}
-	}
+	};
 
-	const handleRemovedNfts = ({ token, inventory }: { token: NonFungibleToken; inventory: NftId[] }) => {
+	const handleRemovedNfts = ({
+		token,
+		inventory
+	}: {
+		token: NonFungibleToken;
+		inventory: NftId[];
+	}) => {
 		const removedNfts = findRemovedNfts({ nfts: $nftStore ?? [], token, inventory });
 
 		if (removedNfts.length > 0) {
@@ -78,9 +99,9 @@
 	};
 
 	const handleUpdatedNfts = ({
-															 token,
-															 inventory
-														 }: {
+		token,
+		inventory
+	}: {
 		token: NonFungibleToken;
 		inventory: OwnedNft[];
 	}) => {

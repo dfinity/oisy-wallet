@@ -7,7 +7,8 @@ import type {
 	NftCollectionUi,
 	NftId,
 	NftsByNetwork,
-	NonFungibleToken, OwnedNft
+	NonFungibleToken,
+	OwnedNft
 } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
@@ -62,10 +63,15 @@ export const findNft = ({
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
 
-export const findNewNftIds = ({nfts, token, inventory}:
-															{nfts: Nft[], token: NonFungibleToken, inventory: NftId[]}): NftId[] =>
-	inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId }))
-);
+export const findNewNftIds = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: NftId[];
+}): NftId[] => inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId })));
 
 export const findRemovedNfts = ({
 	nfts,
@@ -87,7 +93,15 @@ export const findRemovedNfts = ({
 		)
 	);
 
-export const findUpdatedNfts = ({nfts, token, inventory}: {nfts: Nft[], token: NonFungibleToken, inventory: OwnedNft[]}): Nft[] =>
+export const findUpdatedNfts = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: OwnedNft[];
+}): Nft[] =>
 	(nfts ?? [])
 		.filter((nft) => {
 			if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
