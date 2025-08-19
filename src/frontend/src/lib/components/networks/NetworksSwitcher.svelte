@@ -51,12 +51,12 @@
 </script>
 
 <Dropdown
-	bind:visible
 	bind:this={dropdown}
 	ariaLabel={$i18n.networks.title}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	{disabled}
 	asModalOnMobile
+	bind:visible
 >
 	<NetworkSwitcherLogo network={$selectedNetwork} />
 
