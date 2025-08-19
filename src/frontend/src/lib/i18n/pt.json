@@ -722,8 +722,13 @@
 			"minter_info_not_loaded": "Tente novamente em alguns segundos, um parâmetro de configuração ckETH ainda não foi carregado.",
 			"minter_info_not_certified": "Tente novamente em alguns segundos, um parâmetro de configuração ckETH não foi certificado.",
 			"cketh_max_transaction_fee_missing": "A taxa máxima de transação para ckETH está faltando.",
-			"utxos_fee_missing": "A taxa de UTXOs está faltando.",
-			"minimum_btc_amount": "O valor mínimo é $amount BTC."
+			"utxos_fee_missing": "Taxa UTXO está em falta.",
+			"minimum_btc_amount": "Valor muito pequeno. Por favor, insira pelo menos $amount BTC.",
+			"btc_insufficient_balance": "Nenhum UTXO Bitcoin disponível para transação",
+			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insuficiente para cobrir as taxas de transação",
+			"btc_invalid_utxo_data": "Dados de transação Bitcoin inválidos",
+			"btc_utxo_locked": "Fundos Bitcoin estão bloqueados por transações pendentes",
+			"btc_invalid_fee_calculation": "Validação de taxa de transação Bitcoin falhou"
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",

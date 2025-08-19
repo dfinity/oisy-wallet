@@ -722,8 +722,13 @@
 			"minter_info_not_loaded": "Versuche es in ein paar Sekunden erneut; ein ckETH-Konfigurationsparameter ist noch nicht geladen.",
 			"minter_info_not_certified": "Versuche es in ein paar Sekunden erneut; ein ckETH-Konfigurationsparameter ist noch nicht zertifiziert.",
 			"cketh_max_transaction_fee_missing": "Die maximale Transaktionsgebühr für ckETH fehlt.",
-			"utxos_fee_missing": "UTXOs-Gebühr fehlt.",
-			"minimum_btc_amount": "Der Mindestbetrag beträgt $amount BTC."
+			"utxos_fee_missing": "UTXO-Gebühr fehlt.",
+			"minimum_btc_amount": "Betrag zu klein. Bitte geben Sie mindestens $amount BTC ein.",
+			"btc_insufficient_balance": "Keine Bitcoin-UTXOs für Transaktion verfügbar",
+			"btc_insufficient_balance_for_fee": "Unzureichender Bitcoin-Saldo zur Deckung der Transaktionsgebühren",
+			"btc_invalid_utxo_data": "Ungültige Bitcoin-Transaktionsdaten",
+			"btc_utxo_locked": "Bitcoin-Guthaben durch ausstehende Transaktionen gesperrt",
+			"btc_invalid_fee_calculation": "Bitcoin-Transaktionsgebühren-Validierung fehlgeschlagen"
 		},
 		"error": {
 			"unexpected": "Beim Senden der Transaktion ist etwas schiefgelaufen.",

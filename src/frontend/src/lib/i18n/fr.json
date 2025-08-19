@@ -723,7 +723,12 @@
 			"minter_info_not_certified": "Réessayez dans quelques secondes, un paramètre de configuration ckETH n'a pas été certifié.",
 			"cketh_max_transaction_fee_missing": "Les frais de transaction maximum pour ckETH sont manquants.",
 			"utxos_fee_missing": "Les frais UTXO sont manquants.",
-			"minimum_btc_amount": ""
+			"minimum_btc_amount": "Montant trop petit. Veuillez saisir au moins $amount BTC.",
+			"btc_insufficient_balance": "Aucun UTXO Bitcoin disponible pour la transaction",
+			"btc_insufficient_balance_for_fee": "Solde Bitcoin insuffisant pour couvrir les frais de transaction",
+			"btc_invalid_utxo_data": "Données de transaction Bitcoin invalides",
+			"btc_utxo_locked": "Les fonds Bitcoin sont verrouillés par des transactions en attente",
+			"btc_invalid_fee_calculation": "Échec de la validation des frais de transaction Bitcoin"
 		},
 		"error": {
 			"unexpected": "Quelque chose s'est mal passé lors de l'envoi de la transaction.",
