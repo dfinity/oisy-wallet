@@ -113,7 +113,7 @@ export const getUpdatedNfts = ({
 		}
 
 		return acc;
-	}, [])
+	}, []);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
