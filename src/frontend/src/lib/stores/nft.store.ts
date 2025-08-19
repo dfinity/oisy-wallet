@@ -54,7 +54,7 @@ const initNftStore = (): NftStore => {
 		updateAll: (nfts: Nft[]) => {
 			update((currentNfts) => {
 				if (isNullish(currentNfts)) {
-					return nfts;
+					return currentNfts;
 				}
 
 				return currentNfts.map((currentNft) => {
