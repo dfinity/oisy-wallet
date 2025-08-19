@@ -79,7 +79,21 @@ const loadNftsOfToken = async ({
 	const loadedTokenIds: NftId[] = loadedNfts.map((nft) => nft.id);
 	const tokenIdsToLoad = holdersTokenIds.filter((id: NftId) => !loadedTokenIds.includes(id));
 
-	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
+	await loadNftIdsOfToken({ infuraProvider, token, tokenIds: tokenIdsToLoad, walletAddress });
+};
+
+export const loadNftIdsOfToken = async ({
+	infuraProvider,
+	token,
+	tokenIds,
+	walletAddress
+}: {
+	infuraProvider: InfuraErc165Provider;
+	token: NonFungibleToken;
+	tokenIds: NftId[];
+	walletAddress: EthAddress;
+}) => {
+	const tokenIdBatches = createBatches({ tokenIds, batchSize: 10 });
 	for (const tokenIds of tokenIdBatches) {
 		try {
 			const nfts = await loadNftsOfBatch({
