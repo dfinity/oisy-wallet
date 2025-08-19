@@ -7,20 +7,22 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
 describe('Nft', () => {
+	const mockNft = { ...mockValidErc1155Nft, name: 'Test NFT', id: parseNftId(1) };
+
 	beforeAll(() => {
-		nftStore.addAll([{ ...mockValidErc1155Nft, name: 'Test NFT', id: parseNftId(1) }]);
+		nftStore.addAll([mockNft]);
 
 		mockPage.mockDynamicRoutes({
 			networkId: mockValidErc1155Nft.collection.network.name,
 			collectionId: mockValidErc1155Nft.collection.address,
-			nftId: String(mockValidErc1155Nft.id)
+			nftId: String(mockNft.id)
 		});
 	});
 
 	it('should render the nft', () => {
 		const { container, getByText } = render(Nft);
 
-		const name: HTMLElement | null = getByText(`Test NFT #1`);
+		const name: HTMLElement | null = getByText(`${mockNft.name} #${mockNft.id}`);
 
 		expect(name).toBeInTheDocument();
 
@@ -28,6 +30,6 @@ describe('Nft', () => {
 
 		assertNonNullish(imageElement);
 
-		expect(imageElement.getAttribute('src')).toContain(mockValidErc1155Nft.imageUrl);
+		expect(imageElement.getAttribute('src')).toContain(mockNft.imageUrl);
 	});
 });

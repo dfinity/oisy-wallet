@@ -4,7 +4,6 @@
 	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { page as pageStore } from '$app/stores';
 	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
@@ -36,9 +35,7 @@
 	let tokensRoute = $derived(isRouteTokens(page));
 
 	let nftsRoute = $derived(isRouteNfts(page));
-	let nftsCollectionRoute = $derived(
-		isRouteNfts(page) && nonNullish($pageStore.params.collectionId)
-	);
+	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish(page.params.collectionId));
 
 	let transactionsRoute = $derived(isRouteTransactions(page));
 

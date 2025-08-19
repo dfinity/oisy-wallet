@@ -10,6 +10,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft } from '$lib/types/nft';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	const [networkId, collectionId, nftId] = $derived([
 		page.params.networkId,
@@ -20,7 +21,7 @@
 	const nft: Nft | undefined = $derived(
 		($nftStore ?? []).find(
 			(nft) =>
-				String(nft.id) === nftId &&
+				nft.id === parseNftId(Number(nftId)) &&
 				nft.collection.address === collectionId &&
 				nft.collection.network.name === networkId
 		)
