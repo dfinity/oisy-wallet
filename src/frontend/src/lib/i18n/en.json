@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
+			"tokenId": "Token id",
 			"max": "Max",
 			"destination": "Destination",
 			"reject": "Reject",
@@ -101,7 +102,7 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralized",
-			"logout": "Logout",
+			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
@@ -159,6 +160,16 @@
 				"other_asset_control": "Get information about Asset Control, Recovery, and Governance in $oisy_short Wallet",
 				"sign_in": "Need some help for signing in?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Unlock to continue",
+			"title_part_2": "You previously locked your wallet to keep it safe. Resume where you left off or log out.",
+			"unlock": "Unlock",
+			"logout": "Log out",
+			"logout_clear_cash_message": "Logging out will clear all cached data",
+			"learn_more": "Learn more"
 		}
 	},
 	"dapps": {
@@ -996,7 +1007,22 @@
 		"text": {
 			"title": "NFTs",
 			"title_empty": "Your NFTs will appear here",
-			"description_empty": "It looks like you haven't received NFTs yet"
+			"description_empty": "It looks like you haven't received NFTs yet",
+			"grouping": "Grouping",
+			"as_plain_list": "Show as plain list",
+			"by_collection": "Group by collection",
+			"show_spam": "Show spam",
+			"show_hidden": "Show hidden",
+			"sorting": "Sorting",
+			"recents_first": "Recents first",
+			"oldest_first": "Oldest first",
+			"collection_atoz": "Collection name A-Z",
+			"collection_ztoa": "Collection name Z-A",
+			"collection_items_count": "$count item(s)",
+			"collection_address": "Collection contract address",
+			"token_standard": "Token standard",
+			"quantity": "Quantity",
+			"item_traits": "Item traits"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
@@ -1233,12 +1259,12 @@
 				"reward_received": "Welcome to $oisy_short!",
 				"reward_failed": "Code is expired",
 				"reward_received_description": "You will receive your welcome gift any moment.",
+				"brand_reward_received_description": "Want to earn more? Refer a friend and earn for every person who joins.",
 				"reward_failed_description": "Request a new one and try again"
 			},
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward.",
 				"loading_eligibility": "Error while loading campaign eligibility."
 			}
 		},

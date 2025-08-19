@@ -14,6 +14,7 @@
 			"symbol": "符号",
 			"decimals": "小数位数",
 			"amount": "金额",
+			"tokenId": "",
 			"max": "最大",
 			"destination": "目标地址",
 			"reject": "拒绝",
@@ -159,6 +160,16 @@
 				"other_asset_control": "查看 $oisy_short 钱包中的资产控制、恢复和治理信息",
 				"sign_in": "登录时需要帮助？"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "解锁以继续",
+			"title_part_2": "您之前已锁定钱包以确保其安全。请从上次中断的地方继续操作或退出。",
+			"unlock": "开锁",
+			"logout": "退出登录",
+			"logout_clear_cash_message": "注销将清除所有缓存数据",
+			"learn_more": "了解更多"
 		}
 	},
 	"dapps": {
@@ -996,7 +1007,22 @@
 		"text": {
 			"title": "标题",
 			"title_empty": "标题为空",
-			"description_empty": "描述为空"
+			"description_empty": "描述为空",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
@@ -1233,12 +1259,12 @@
 				"reward_received": "欢迎加入 $oisy_short！",
 				"reward_failed": "邀请码已过期",
 				"reward_received_description": "您的欢迎礼包即将送达。",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "请申请一个新的邀请码并重试"
 			},
 			"error": {
 				"loading_reward": "加载新的奖励码时出错。",
 				"loading_user_data": "从奖励 canister 加载用户数据失败。",
-				"claiming_reward": "领取奖励时发生错误。",
 				"loading_eligibility": "加载活动资格时发生错误。"
 			}
 		},

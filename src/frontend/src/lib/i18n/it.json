@@ -14,6 +14,7 @@
 			"symbol": "Simbolo",
 			"decimals": "Decimali",
 			"amount": "Importo",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Destinazione",
 			"reject": "Rifiuta",
@@ -101,7 +102,7 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralizzato",
-			"logout": "Logout",
+			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP e altro",
@@ -159,6 +160,16 @@
 				"other_asset_control": "Ottieni informazioni sul controllo degli asset, recupero e governance nel wallet $oisy_short",
 				"sign_in": "Hai bisogno di aiuto per accedere?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Sblocca per continuare",
+			"title_part_2": "In precedenza hai bloccato il tuo wallet per tenerlo al sicuro. Riprendi da dove eri rimasto o esci.",
+			"unlock": "Sblocca",
+			"logout": "Esci",
+			"logout_clear_cash_message": "La disconnessione cancellerà tutti i dati memorizzati nella cache",
+			"learn_more": "Saperne di più"
 		}
 	},
 	"dapps": {
@@ -996,7 +1007,22 @@
 		"text": {
 			"title": "NFT",
 			"title_empty": "I tuoi NFT appariranno qui",
-			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT"
+			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
@@ -1233,12 +1259,12 @@
 				"reward_received": "Benvenuto su $oisy_short!",
 				"reward_failed": "Il codice è scaduto",
 				"reward_received_description": "Riceverai il tuo regalo di benvenuto a breve.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Richiedine uno nuovo e riprova"
 			},
 			"error": {
 				"loading_reward": "Errore durante il caricamento di un nuovo codice ricompensa.",
 				"loading_user_data": "Impossibile caricare i dati utente dal canister delle ricompense.",
-				"claiming_reward": "Errore durante la richiesta della ricompensa.",
 				"loading_eligibility": "Errore durante il caricamento dell'idoneità della campagna."
 			}
 		},

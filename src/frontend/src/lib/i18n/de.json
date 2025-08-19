@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Dezimalstellen",
 			"amount": "Betrag",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Ziel",
 			"reject": "Ablehnen",
@@ -102,7 +103,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Dezentralisiert",
 			"logout": "Abmelden",
-			"lock": "",
+			"lock": "Sperren",
 			"authenticate": "Anmelden",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Sofortiger und privater Zugriff überall",
@@ -159,6 +160,16 @@
 				"other_asset_control": "Informationen zu Asset-Kontrolle, Wiederherstellung und Governance in $oisy_short Wallet erhalten",
 				"sign_in": "Hilfe bei der Anmeldung?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Deine Wallet ist gesichert",
+			"title_part_2": "Du hast deine Wallet gesperrt. Entsperre sie um fortzufahren, oder logge dich aus.",
+			"unlock": "Entsperren",
+			"logout": "Ausloggen",
+			"logout_clear_cash_message": "Ausloggen wird alle lokal gecachten Daten löschen",
+			"learn_more": "Erfahre mehr"
 		}
 	},
 	"dapps": {
@@ -994,14 +1005,29 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "",
-			"title_empty": "",
-			"description_empty": ""
+			"title": "NFTs",
+			"title_empty": "Deine NFTs erscheinen hier",
+			"description_empty": "Es scheint als hättest du noch keine NFTs erhalten",
+			"grouping": "Gruppierung",
+			"as_plain_list": "Als Liste anzeigen",
+			"by_collection": "Nach Kollektion gruppieren",
+			"show_spam": "Spam anzeigen",
+			"show_hidden": "Versteckte anzeigen",
+			"sorting": "Sortierung",
+			"recents_first": "Neue zuerst",
+			"oldest_first": "Älteste zuerst",
+			"collection_atoz": "Kollektionsname A-Z",
+			"collection_ztoa": "Kollektionsname Z-A",
+			"collection_items_count": "$count Element(e)",
+			"collection_address": "Kollektions-Contract Adresse",
+			"token_standard": "Token Standard",
+			"quantity": "Menge",
+			"item_traits": "Eigenschaften"
 		},
 		"alt": {
-			"placeholder_image": "",
+			"placeholder_image": "Noch keine NFTs",
 			"card": {
-				"image": ""
+				"image": "NFT Bild mit token ID: $tokenId"
 			}
 		}
 	},
@@ -1233,12 +1259,12 @@
 				"reward_received": "Willkommen bei $oisy_short!",
 				"reward_failed": "Code ist abgelaufen",
 				"reward_received_description": "Du erhältst dein Willkommensgeschenk in Kürze.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Fordere einen neuen an und versuche es erneut"
 			},
 			"error": {
 				"loading_reward": "Fehler beim Laden eines neuen Belohnungscodes.",
 				"loading_user_data": "Fehler beim Laden der Benutzerdaten aus dem Belohnungs-Canister.",
-				"claiming_reward": "Fehler beim Einlösen der Belohnung.",
 				"loading_eligibility": "Fehler beim Laden der Kampagnenberechtigung."
 			}
 		},
