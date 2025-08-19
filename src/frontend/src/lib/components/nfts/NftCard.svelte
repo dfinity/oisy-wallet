@@ -18,7 +18,7 @@
 <a
 	class="flex w-full flex-col gap-2 p-1 text-left no-underline hover:text-inherit"
 	data-tid={testId}
-	href={`${AppPath.Nfts + nft.collection.address}/${nft.id}`}
+	href={`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`}
 	onclick={disabled ? (e) => e.preventDefault() : undefined}
 	class:cursor-not-allowed={disabled}
 >

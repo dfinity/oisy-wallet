@@ -1023,7 +1023,8 @@
 			"token_standard": "",
 			"quantity": "",
 			"item_traits": "",
-			"collection_not_loaded": ""
+			"collection_not_loaded": "",
+			"nft_not_loaded": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
