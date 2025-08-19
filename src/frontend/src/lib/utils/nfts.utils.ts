@@ -90,10 +90,10 @@ export const findRemovedNfts = ({
 	);
 
 export const getUpdatedNfts = ({
-																 nfts,
-																 token,
-																 inventory
-															 }: {
+	nfts,
+	token,
+	inventory
+}: {
 	nfts: Nft[];
 	token: NonFungibleToken;
 	inventory: OwnedNft[];
@@ -113,7 +113,7 @@ export const getUpdatedNfts = ({
 		}
 
 		return acc;
-	}, [])
+	}, []);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
