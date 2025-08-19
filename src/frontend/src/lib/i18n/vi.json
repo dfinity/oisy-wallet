@@ -1022,7 +1022,8 @@
 			"collection_address": "",
 			"token_standard": "",
 			"quantity": "",
-			"item_traits": ""
+			"item_traits": "",
+			"collection_not_loaded": ""
 		},
 		"alt": {
 			"placeholder_image": "Không có ảnh NFT",
