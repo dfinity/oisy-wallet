@@ -102,9 +102,9 @@
 				<div>
 					{#if iconType === 'token'}
 						{#if isTokenNonFungible(token) && nonNullish(nft)}
-							<NftLogo {nft} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+							<NftLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} {nft} />
 						{:else}
-							<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+							<TokenLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} data={token} />
 						{/if}
 					{:else}
 						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
@@ -120,8 +120,8 @@
 						<Amount
 							amount={cardAmount}
 							decimals={token.decimals}
-							symbol={getTokenDisplaySymbol(token)}
 							formatPositiveAmount
+							symbol={getTokenDisplaySymbol(token)}
 						/>
 					{/if}
 				{/if}

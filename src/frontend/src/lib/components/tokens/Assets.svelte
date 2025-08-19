@@ -40,12 +40,12 @@
 					{#snippet overflowableContent()}
 						{#if NFTS_ENABLED}
 							<Tabs
-								bind:activeTab
+								tabVariant="menu"
 								tabs={[
 									{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS, path: AppPath.Tokens },
 									{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
 								]}
-								tabVariant="menu"
+								bind:activeTab
 							/>
 						{:else}
 							<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
@@ -65,7 +65,7 @@
 		<NftsList />
 	{/if}
 
-	<div in:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
+	<div class="mb-4 mt-12 flex w-full justify-center sm:w-auto" in:fade>
 		<ManageTokensButton />
 	</div>
 </div>

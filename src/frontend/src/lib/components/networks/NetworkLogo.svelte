@@ -17,24 +17,24 @@
 
 <div class="dark-hidden block" data-tid={`${testId}-light-container`}>
 	<Logo
-		src={network.iconLight}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
 			$name: network.name
 		})}
-		{size}
 		{color}
+		{size}
+		src={network.iconLight}
 		testId={`${testId}-light`}
 	/>
 </div>
 
 <div class="dark-block hidden" data-tid={`${testId}-dark-container`}>
 	<Logo
-		src={network.iconDark}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
 			$name: network.name
 		})}
-		{size}
 		{color}
+		{size}
+		src={network.iconDark}
 		testId={`${testId}-dark`}
 	/>
 </div>

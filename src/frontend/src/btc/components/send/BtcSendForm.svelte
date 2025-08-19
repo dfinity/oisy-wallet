@@ -44,12 +44,12 @@
 </script>
 
 <SendForm
+	{destination}
+	disabled={invalid}
+	{invalidDestination}
+	{selectedContact}
 	on:icNext
 	on:icBack
-	{destination}
-	{selectedContact}
-	{invalidDestination}
-	disabled={invalid}
 >
 	<BtcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 

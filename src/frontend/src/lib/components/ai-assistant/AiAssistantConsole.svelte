@@ -98,8 +98,8 @@
 
 		<button
 			class="text-tertiary transition-colors hover:text-primary"
-			onclick={() => aiAssistantStore.close()}
 			aria-label={$i18n.core.text.close}
+			onclick={() => aiAssistantStore.close()}
 		>
 			<IconClose />
 		</button>
@@ -112,11 +112,11 @@
 			</h4>
 			<div class="my-6">
 				<AiAssistantActionButton
-					title={$i18n.ai_assistant.text.action_button_contacts_title}
-					subtitle={$i18n.ai_assistant.text.action_button_contacts_subtitle}
 					onClick={() => {
 						sendMessage($i18n.ai_assistant.text.action_button_contacts_prompt);
 					}}
+					subtitle={$i18n.ai_assistant.text.action_button_contacts_subtitle}
+					title={$i18n.ai_assistant.text.action_button_contacts_title}
 				>
 					{#snippet icon()}
 						<IconSend />
@@ -125,10 +125,10 @@
 			</div>
 		{:else}
 			<div in:fade>
-				<AiAssistantMessages messages={messagesToDisplay} {loading} />
+				<AiAssistantMessages {loading} messages={messagesToDisplay} />
 			</div>
 		{/if}
 	</div>
 
-	<AiAssistantForm {onMessageSubmit} {disabled} bind:value={userInput} />
+	<AiAssistantForm {disabled} {onMessageSubmit} bind:value={userInput} />
 </div>

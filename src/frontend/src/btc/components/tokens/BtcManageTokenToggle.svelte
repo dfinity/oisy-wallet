@@ -4,4 +4,4 @@
 </script>
 
 <!-- Bitcoin tokens are not manageable. -->
-<Toggle disabled ariaLabel={$i18n.tokens.text.hide_token} checked />
+<Toggle ariaLabel={$i18n.tokens.text.hide_token} checked disabled />

@@ -381,7 +381,7 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WizardModal {steps} bind:currentStep bind:this={modal} onClose={resetAndClose}>
+	<WizardModal bind:this={modal} onClose={resetAndClose} {steps} bind:currentStep>
 		{#snippet title()}
 			<WalletConnectModalTitle>
 				{`${

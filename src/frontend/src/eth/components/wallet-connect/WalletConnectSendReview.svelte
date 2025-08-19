@@ -32,16 +32,16 @@
 <ContentWithToolbar>
 	<SendData
 		amount={formatToken({ value: amountDisplay })}
-		{destination}
-		token={$sendToken}
 		balance={$balance}
+		{destination}
 		source={$ethAddress ?? ''}
+		token={$sendToken}
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
 		<EthFeeDisplay slot="fee" />
 
-		<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
+		<SendReviewNetwork slot="network" {sourceNetwork} {targetNetwork} token={$sendToken} />
 	</SendData>
 
 	{#snippet toolbar()}

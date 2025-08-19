@@ -17,23 +17,23 @@
 </script>
 
 <a
-	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 	class="flex w-full flex-col gap-2 p-1 text-left no-underline"
+	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 >
 	<div
 		class="relative grid aspect-square gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5 duration-200"
+		class:grid-cols-1={collection.nfts.length === 1}
+		class:grid-cols-2={collection.nfts.length > 1}
 		class:hover:bg-brand-subtle-20={!disabled}
 		class:opacity-50={disabled}
-		class:grid-cols-2={collection.nfts.length > 1}
-		class:grid-cols-1={collection.nfts.length === 1}
 	>
 		{#each collection.nfts as nft, index (nft.id + index)}
 			{#if index < 4 && nonNullish(nft.imageUrl)}
 				<div class="relative aspect-square overflow-hidden rounded-lg bg-primary-light">
 					<BgImg
 						imageUrl={nft?.imageUrl}
-						size="contain"
 						shadow="inset"
+						size="contain"
 						testId={`${testId}-image-${index}`}
 					/>
 				</div>
@@ -46,9 +46,9 @@
 
 		<span class="absolute bottom-0 right-0 m-2.5">
 			<NetworkLogo
+				color="white"
 				network={collection.collection.network}
 				size="xs"
-				color="white"
 				testId={`${testId}-network`}
 			/>
 		</span>
@@ -57,10 +57,10 @@
 	<div class="flex w-full flex-col gap-1">
 		<span
 			class="truncate text-sm font-bold"
-			class:text-primary={!disabled}
-			class:text-disabled={disabled}>{collection.collection.name}</span
+			class:text-disabled={disabled}
+			class:text-primary={!disabled}>{collection.collection.name}</span
 		>
-		<span class="text-xs" class:text-tertiary={!disabled} class:text-disabled={disabled}
+		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
 			>{replacePlaceholders($i18n.nfts.text.collection_items_count, {
 				$count: String(collection.nfts.length)
 			})}</span

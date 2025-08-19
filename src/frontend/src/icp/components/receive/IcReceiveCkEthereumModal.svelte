@@ -71,13 +71,13 @@
 	};
 </script>
 
-<ConvertContexts {sourceToken} {destinationToken}>
+<ConvertContexts {destinationToken} {sourceToken}>
 	<WizardModal
+		bind:this={modal}
+		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
+		onClose={close}
 		{steps}
 		bind:currentStep
-		bind:this={modal}
-		onClose={close}
-		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
@@ -109,12 +109,12 @@
 				/>
 			{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
 				<ReceiveAddressQrCode
-					on:icBack={modal?.back}
 					address={$icrcAccountIdentifierText ?? ''}
 					addressToken={ICP_TOKEN}
+					copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 					network={ICP_NETWORK}
 					qrCodeAction={{ enabled: false }}
-					copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+					on:icBack={modal?.back}
 				/>
 			{:else}
 				<IcReceiveInfoCkEthereum

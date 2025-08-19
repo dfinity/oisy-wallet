@@ -113,12 +113,12 @@
 </script>
 
 <WizardModal
+	bind:this={modal}
+	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
+	onClose={close}
 	{steps}
 	testId={SWAP_TOKENS_MODAL}
-	bind:this={modal}
 	bind:currentStep
-	onClose={close}
-	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
 >
 	{#snippet title()}{titleString}{/snippet}
 

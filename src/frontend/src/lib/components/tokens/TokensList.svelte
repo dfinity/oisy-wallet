@@ -124,11 +124,11 @@
 			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
 					class="overflow-hidden rounded-xl"
+					class:pointer-events-none={animating}
+					onanimationend={handleAnimationEnd}
+					onanimationstart={handleAnimationStart}
 					transition:fade
 					animate:flip={{ duration: 250 }}
-					onanimationstart={handleAnimationStart}
-					onanimationend={handleAnimationEnd}
-					class:pointer-events-none={animating}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
@@ -160,12 +160,12 @@
 						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
 						<div>
 							<Button
-								onclick={onSave}
 								disabled={saveDisabled || saveLoading}
-								paddingSmall
 								fullWidth={false}
-								styleClass="py-2"
 								loading={saveLoading}
+								onclick={onSave}
+								paddingSmall
+								styleClass="py-2"
 							>
 								{$i18n.core.text.apply}
 								{#if modifiedTokensLen > 0}({modifiedTokensLen}){/if}
@@ -177,11 +177,11 @@
 				{#each enableMoreTokensList as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 					<div
 						class="overflow-hidden rounded-xl"
+						class:pointer-events-none={animating}
+						onanimationend={handleAnimationEnd}
+						onanimationstart={handleAnimationStart}
 						transition:fade
 						animate:flip={{ duration: 250 }}
-						onanimationstart={handleAnimationStart}
-						onanimationend={handleAnimationEnd}
-						class:pointer-events-none={animating}
 					>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}

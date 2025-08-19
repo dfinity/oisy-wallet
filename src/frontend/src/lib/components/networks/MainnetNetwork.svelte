@@ -24,10 +24,10 @@
 </script>
 
 <NetworkComponent
-	{network}
-	{usdBalance}
-	{selectedNetworkId}
 	{delayOnNetworkSelect}
 	{labelsSize}
+	{network}
 	{onSelected}
+	{selectedNetworkId}
+	{usdBalance}
 />

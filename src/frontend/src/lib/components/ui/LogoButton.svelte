@@ -48,21 +48,21 @@
 
 <div
 	class={`flex ${styleClass ?? ''}`}
-	class:w-full={dividers || fullWidth}
 	class:hover:bg-brand-subtle-10={hover}
 	class:rounded-lg={rounded}
+	class:w-full={dividers || fullWidth}
 >
-	<button onclick={onClick} class="flex w-full border-0 px-2" data-tid={testId}>
+	<button class="flex w-full border-0 px-2" data-tid={testId} onclick={onClick}>
 		<span
 			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
-			class:py-3={!condensed}
-			class:py-1={condensed}
-			class:border-brand-subtle-20={dividers}
 			class:border-b={dividers}
+			class:border-brand-subtle-20={dividers}
+			class:py-1={condensed}
+			class:py-3={!condensed}
 		>
 			<span class="flex min-w-0 items-center">
 				{#if selectable}
-					<span in:fade class="mr-2 flex min-w-4 text-brand-primary">
+					<span class="mr-2 flex min-w-4 text-brand-primary" in:fade>
 						{#if selected}
 							<IconCheck size="16px" />
 						{/if}
@@ -104,7 +104,7 @@
 				</span>
 
 				{#if nonNullish(action)}
-					<span in:fade class="ml-2 flex text-brand-primary">{@render action()}</span>
+					<span class="ml-2 flex text-brand-primary" in:fade>{@render action()}</span>
 				{/if}
 			</span>
 		</span>

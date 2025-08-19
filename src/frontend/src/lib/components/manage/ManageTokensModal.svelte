@@ -297,38 +297,38 @@
 </script>
 
 <WizardModal
-	{steps}
-	bind:currentStep
 	bind:this={modal}
-	onClose={close}
 	disablePointerEvents={currentStep?.name === 'Saving'}
+	onClose={close}
+	{steps}
 	testId={MANAGE_TOKENS_MODAL}
+	bind:currentStep
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 	{#if currentStep?.name === 'Review'}
 		{#if isNetworkIdICP(network?.id)}
 			<IcAddTokenReview
+				{indexCanisterId}
+				{ledgerCanisterId}
 				on:icBack={modal.back}
 				on:icSave={addIcrcToken}
-				{ledgerCanisterId}
-				{indexCanisterId}
 				bind:metadata={icrcMetadata}
 			/>
 		{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
 			<EthAddTokenReview
-				on:icBack={modal.back}
-				on:icSave={saveEthToken}
 				contractAddress={ethContractAddress}
 				{network}
+				on:icBack={modal.back}
+				on:icSave={saveEthToken}
 				bind:metadata={ethMetadata}
 			/>
 		{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
 			<SolAddTokenReview
+				{network}
+				tokenAddress={splTokenAddress}
 				on:icBack={modal.back}
 				on:icSave={saveSplToken}
-				tokenAddress={splTokenAddress}
-				{network}
 				bind:metadata={splMetadata}
 			/>
 		{/if}
@@ -342,11 +342,11 @@
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}
 		<ManageTokens
+			{infoElement}
+			{initialSearch}
 			on:icClose={close}
 			on:icAddToken={modal.next}
 			on:icSave={saveTokens}
-			{initialSearch}
-			{infoElement}
 		/>
 	{/if}
 </WizardModal>

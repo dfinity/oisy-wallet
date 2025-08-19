@@ -15,7 +15,7 @@
 	};
 </script>
 
-<button onclick={openReceive} class="nav-item nav-item-condensed">
+<button class="nav-item nav-item-condensed" onclick={openReceive}>
 	<IconOisyMenu size="20" />
 	{$i18n.wallet.text.your_addresses}
 </button>

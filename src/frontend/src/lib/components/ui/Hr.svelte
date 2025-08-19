@@ -9,8 +9,8 @@
 </script>
 
 <hr
-	class="bg-brand-subtle-10"
-	class:my-6={spacing === 'lg'}
-	class:my-4={spacing === 'md'}
 	style="width: 100%; border: 0px; height: 1px"
+	class="bg-brand-subtle-10"
+	class:my-4={spacing === 'md'}
+	class:my-6={spacing === 'lg'}
 />

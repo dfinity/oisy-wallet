@@ -47,7 +47,7 @@
 {#if nonNullish(address)}
 	<AddressCard>
 		{#snippet logo()}
-			<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} />
+			<AvatarWithBadge badge={{ type: 'addressType', address }} {contact} />
 		{/snippet}
 		{#snippet content()}
 			<span class="mx-1 flex flex-col items-start text-left">
@@ -58,6 +58,8 @@
 
 				{#if isNullish(contact)}
 					<Button
+						ariaLabel={$i18n.address.save.title}
+						link
 						onclick={() =>
 							modalStore.openAddressBook({
 								id: Symbol(),
@@ -69,9 +71,7 @@
 									}
 								}
 							})}
-						link
 						styleClass="mt-3 text-sm"
-						ariaLabel={$i18n.address.save.title}
 						><IconUserSquare size="20px" /> {$i18n.address.save.title}</Button
 					>
 				{/if}

@@ -78,10 +78,10 @@
 						<div class="flex gap-2">
 							<div class="mt-1">
 								<Logo
-									src={swapDApp.logo}
 									alt={replacePlaceholders($i18n.dapps.alt.logo, {
 										$dAppName: resolveText({ i18n: $i18n, path: swapDApp.name })
 									})}
+									src={swapDApp.logo}
 								/>
 							</div>
 							<div class="mr-auto">

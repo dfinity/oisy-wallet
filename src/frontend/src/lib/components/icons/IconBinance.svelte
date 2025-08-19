@@ -7,7 +7,7 @@
 	let { size = '24' }: Props = $props();
 </script>
 
-<svg width={size} height={size} viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg fill="none" height={size} viewBox="0 0 22 22" width={size} xmlns="http://www.w3.org/2000/svg">
 	<g clip-path="url(#clip0_10767_21883)">
 		<path
 			d="M11 22C17.0751 22 22 17.0751 22 11C22 4.92487 17.0751 0 11 0C4.92487 0 0 4.92487 0 11C0 17.0751 4.92487 22 11 22Z"

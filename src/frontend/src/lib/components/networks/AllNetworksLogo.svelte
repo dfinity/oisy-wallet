@@ -17,24 +17,24 @@
 
 <div class="dark-hidden block">
 	<Logo
-		src={allNetworksIconLight}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
 			$name: $i18n.networks.chain_fusion
 		})}
-		{size}
 		{color}
+		{size}
+		src={allNetworksIconLight}
 		testId={`${testId}-light`}
 	/>
 </div>
 
 <div class="dark-block hidden">
 	<Logo
-		src={allNetworksIconDark}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
 			$name: $i18n.networks.chain_fusion
 		})}
-		{size}
 		{color}
+		{size}
+		src={allNetworksIconDark}
 		testId={`${testId}-dark`}
 	/>
 </div>

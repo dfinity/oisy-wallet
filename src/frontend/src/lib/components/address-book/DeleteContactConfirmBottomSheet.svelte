@@ -23,6 +23,6 @@
 	{/snippet}
 
 	{#snippet content()}
-		<DeleteContactConfirmContent {onCancel} {onDelete} {contact} {disabled} />
+		<DeleteContactConfirmContent {contact} {disabled} {onCancel} {onDelete} />
 	{/snippet}
 </BottomSheetConfirmationPopup>

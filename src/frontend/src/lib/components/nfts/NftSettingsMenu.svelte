@@ -24,20 +24,20 @@
 </script>
 
 <ButtonIcon
-	bind:button
-	onclick={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
+	colorStyle="muted"
 	disabled={$erc20UserTokensNotInitialized}
 	link={false}
-	colorStyle="muted"
+	onclick={() => (visible = true)}
 	styleClass={visible ? 'active' : ''}
+	bind:button
 >
 	{#snippet icon()}
 		<IconManage />
 	{/snippet}
 </ButtonIcon>
 
-<ResponsivePopover bind:visible {button}>
+<ResponsivePopover {button} bind:visible>
 	{#snippet content()}
 		<span class="mb-2 flex text-sm font-bold">{$i18n.nfts.text.grouping}</span>
 
@@ -64,7 +64,7 @@
 
 		<span class="mb-2 mt-3 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 
-		<List noPadding condensed>
+		<List condensed noPadding>
 			<ListItem>
 				<LogoButton fullWidth>
 					{#snippet logo()}
@@ -74,7 +74,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle disabled checked={false} ariaLabel={$i18n.nfts.text.show_spam} />
+						<Toggle ariaLabel={$i18n.nfts.text.show_spam} checked={false} disabled />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
@@ -87,7 +87,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_hidden}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle disabled checked={false} ariaLabel={$i18n.nfts.text.show_hidden} />
+						<Toggle ariaLabel={$i18n.nfts.text.show_hidden} checked={false} disabled />
 					{/snippet}
 				</LogoButton>
 			</ListItem>

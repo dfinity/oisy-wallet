@@ -32,10 +32,10 @@
 >
 	<GixInput {...props} bind:value on:nnsInput>
 		<svelte:fragment slot="inner-end">
-			<div bind:clientWidth={endWidth} class="flex items-center pl-2">
+			<div class="flex items-center pl-2" bind:clientWidth={endWidth}>
 				{#if nonNullish(value) && notEmptyString(value.toString()) && showResetButton}
 					<div transition:fade>
-						<ButtonReset onclick={() => (value = undefined)} ariaLabel={resetButtonAriaLabel} />
+						<ButtonReset ariaLabel={resetButtonAriaLabel} onclick={() => (value = undefined)} />
 					</div>
 					{#if nonNullish(innerEnd) || showPasteButton}
 						<div class="border-r-1 self-stretch border-black/20" transition:fade></div>

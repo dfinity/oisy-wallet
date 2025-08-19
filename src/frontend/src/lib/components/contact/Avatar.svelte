@@ -56,19 +56,19 @@
 
 <div
 	class={`${commonClasses} relative flex items-center justify-center ${isNullish(blobUrl) ? bgColor : ''}`}
-	data-tid={AVATAR_IMAGE}
 	aria-label={ariaLabel}
+	data-tid={AVATAR_IMAGE}
 >
 	{#if loading}
 		<LoaderWithOverlay
-			testId={AVATAR_LOADER}
 			ariaLabel={$i18n.address_book.avatar.avatar_loading}
+			testId={AVATAR_LOADER}
 		/>
 	{:else if nonNullish(blobUrl)}
-		<Img src={blobUrl} alt={ariaLabel} styleClass="h-full w-full object-cover" rounded />
+		<Img alt={ariaLabel} rounded src={blobUrl} styleClass="h-full w-full object-cover" />
 	{:else if nonNullish(initials)}
 		<span class="font-bold text-white">{initials}</span>
 	{:else}
-		<Img styleClass={size} src={emptyOisyLogo} alt={ariaLabel} />
+		<Img alt={ariaLabel} src={emptyOisyLogo} styleClass={size} />
 	{/if}
 </div>

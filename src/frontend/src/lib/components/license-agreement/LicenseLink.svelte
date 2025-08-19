@@ -11,10 +11,10 @@
 </script>
 
 <a
-	href="/license-agreement"
+	class:no-underline={noUnderline}
 	aria-label={replaceOisyPlaceholders($i18n.license_agreement.alt.license_agreement)}
 	data-tid={testId}
-	class:no-underline={noUnderline}
+	href="/license-agreement"
 >
 	{$i18n.license_agreement.text.accept_terms_link}
 </a>

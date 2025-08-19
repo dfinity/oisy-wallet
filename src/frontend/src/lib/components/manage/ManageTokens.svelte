@@ -116,8 +116,8 @@
 {:else}
 	<ModalTokensList
 		{loading}
-		on:icSelectNetworkFilter={onSelectNetwork}
 		networkSelectorViewOnly={nonNullish($selectedNetwork)}
+		on:icSelectNetworkFilter={onSelectNetwork}
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
@@ -131,7 +131,7 @@
 
 				{#snippet logo()}
 					<span class="mr-2">
-						<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+						<TokenLogo badge={{ type: 'network' }} color="white" data={token} />
 					</span>
 				{/snippet}
 
@@ -142,18 +142,18 @@
 				{/snippet}
 
 				{#snippet action()}
-					<EnableTokenToggle {token} {onToggle} />
+					<EnableTokenToggle {onToggle} {token} />
 				{/snippet}
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
 			<Button
 				colorStyle="secondary-light"
-				onclick={() => dispatch('icAddToken')}
 				disabled={$pseudoNetworkICPTestnet}
+				onclick={() => dispatch('icAddToken')}
 				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
 			>
-			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} onclick={save}>
+			<Button disabled={saveDisabled} onclick={save} testId={MANAGE_TOKENS_MODAL_SAVE}>
 				{$i18n.core.text.save}
 			</Button>
 		{/snippet}

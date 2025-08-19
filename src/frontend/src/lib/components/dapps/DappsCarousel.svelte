@@ -115,10 +115,10 @@
 		>
 			{#each dappsCarouselSlides as dappsCarouselSlide (dappsCarouselSlide.id)}
 				<DappsCarouselSlide
-					{dappsCarouselSlide}
 					airdrop={nonNullish(featuredAirdrop) && featuredAirdrop.id === dappsCarouselSlide.id
 						? featuredAirdrop
 						: undefined}
+					{dappsCarouselSlide}
 					on:icCloseCarouselSlide={closeSlide}
 				/>
 			{/each}

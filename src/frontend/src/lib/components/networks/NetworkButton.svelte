@@ -47,7 +47,7 @@
 <!--
 TODO: Find a way to have the "All networks" not be a fallback for undefined network, and without basically duplicating this component
 -->
-<LogoButton {testId} {onClick} selectable selected={network?.id === selectedNetworkId} dividers>
+<LogoButton dividers {onClick} selectable selected={network?.id === selectedNetworkId} {testId}>
 	{#snippet logo()}
 		{#if nonNullish(network)}
 			<NetworkLogo {network} />
@@ -59,10 +59,10 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 	{#snippet title()}
 		<span
 			class="mr-2 font-normal md:text-base"
-			class:text-sm={labelsSize === 'md'}
 			class:md:text-base={labelsSize === 'md'}
-			class:text-base={labelsSize === 'lg'}
 			class:md:text-lg={labelsSize === 'lg'}
+			class:text-base={labelsSize === 'lg'}
+			class:text-sm={labelsSize === 'md'}
 		>
 			{network?.name ?? $i18n.networks.chain_fusion}
 		</span>
@@ -70,7 +70,7 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 
 	{#snippet descriptionEnd()}
 		<span>
-			<span class:text-sm={labelsSize === 'lg'} class:md:text-base={labelsSize === 'lg'}>
+			<span class:md:text-base={labelsSize === 'lg'} class:text-sm={labelsSize === 'lg'}>
 				{#if nonNullish(usdBalance)}
 					{#if $isPrivacyMode}
 						<IconDots variant="xs" />

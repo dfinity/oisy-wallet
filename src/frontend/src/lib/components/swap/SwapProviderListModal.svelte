@@ -66,16 +66,16 @@
 			{#if nonNullish($destinationToken) && nonNullish($swapAmountsStore)}
 				<li class="logo-button-list-item" data-testid="provider-item">
 					<SwapProviderListItem
-						on:click={() => dispatch('icSelectProvider', swap)}
-						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						amount={swap.receiveAmount}
+						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						destinationToken={$destinationToken}
+						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
 						usdBalance={getUsdBalance({
 							amount: swap.receiveAmount,
 							token: $destinationToken,
 							exchangeRate: $destinationTokenExchangeRate
 						})}
-						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
+						on:click={() => dispatch('icSelectProvider', swap)}
 					/>
 				</li>
 			{/if}

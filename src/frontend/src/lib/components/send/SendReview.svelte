@@ -23,7 +23,7 @@
 </script>
 
 <ContentWithToolbar>
-	<SendTokenReview sendAmount={amount} token={$sendToken} exchangeRate={$sendTokenExchangeRate} />
+	<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken} />
 
 	<div class="mb-4">
 		<SendReviewDestination {destination} {selectedContact} />
