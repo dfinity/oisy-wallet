@@ -156,7 +156,7 @@ export class AlchemyProvider {
 
 		return result.ownedNfts.map((ownedNft) => ({
 			id: parseNftId(parseInt(ownedNft.tokenId)),
-			balance: parseInt(ownedNft.balance)
+			balance: BigInt(ownedNft.balance)
 		}));
 	};
 }
