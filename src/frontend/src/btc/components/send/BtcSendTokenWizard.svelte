@@ -68,6 +68,8 @@
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
 	const send = async () => {
+		progress(ProgressStepsSendBtc.INITIALIZATION);
+
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 
 		if (isNullish(network)) {
