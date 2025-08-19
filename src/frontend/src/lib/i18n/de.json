@@ -1028,7 +1028,8 @@
 			"token_standard": "Token Standard",
 			"quantity": "Menge",
 			"item_traits": "Eigenschaften",
-			"collection_not_loaded": "Die Kollektion konnte nicht angezeigt werden weil sie noch nicht geladen wurde"
+			"collection_not_loaded": "Die Kollektion konnte nicht angezeigt werden weil sie noch nicht geladen wurde",
+			"nft_not_loaded": "Das NFT konnte nicht angezeigt werden weil es noch nicht geladen wurde"
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
