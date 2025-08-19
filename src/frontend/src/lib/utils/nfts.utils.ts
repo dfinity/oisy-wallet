@@ -63,6 +63,16 @@ export const findNft = ({
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
 
+export const findNewNftIds = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: NftId[];
+}): NftId[] => inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId })));
+
 export const getUpdatedNfts = ({
 	nfts,
 	token,
