@@ -51,7 +51,7 @@
 		await handleNewNfts({token, inventory: inventory.map((ownedNft) => ownedNft.id), infuraProvider: infuraErc1155Providers(token.network.id)})
 	};
 
-	const handleNewNfts = ({ token, inventory, infuraProvider }:
+	const handleNewNfts = async ({ token, inventory, infuraProvider }:
 												 { token: NonFungibleToken; inventory: NftId[], infuraProvider: InfuraErc165Provider }) => {
 		const newNftIds = findNewNftIds({nfts: $nftStore, token, inventory})
 
