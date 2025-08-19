@@ -17,7 +17,7 @@
 </script>
 
 <a
-	href={AppPath.Nfts + collection.collection.address}
+	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 	class="flex w-full flex-col gap-2 p-1 text-left no-underline"
 >
 	<div
