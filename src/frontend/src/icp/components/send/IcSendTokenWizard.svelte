@@ -123,12 +123,12 @@
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
-	<IcSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} />
+	<IcSendReview {amount} {destination} {selectedContact} on:icBack on:icSend={send} />
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<IcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<IcSendForm on:icNext on:icBack on:icTokensList {selectedContact} bind:destination bind:amount>
-		<ButtonBack onclick={back} slot="cancel" />
+	<IcSendForm {selectedContact} on:icNext on:icBack on:icTokensList bind:destination bind:amount>
+		<ButtonBack slot="cancel" onclick={back} />
 	</IcSendForm>
 {:else}
 	<slot />

@@ -18,11 +18,11 @@
 
 <div class="mb-5 max-h-60 overflow-hidden rounded-2xl">
 	<Img
-		src={reward.cardBanner}
-		testId={REWARDS_MODAL_IMAGE_BANNER}
-		grayscale={hasEnded}
 		alt={replacePlaceholders($i18n.rewards.alt.reward_banner, {
 			$campaignName: resolveText({ i18n: $i18n, path: reward.cardTitle })
 		})}
+		grayscale={hasEnded}
+		src={reward.cardBanner}
+		testId={REWARDS_MODAL_IMAGE_BANNER}
 	/>
 </div>

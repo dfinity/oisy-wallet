@@ -53,9 +53,9 @@
 <Dropdown
 	bind:this={dropdown}
 	ariaLabel={$i18n.networks.title}
-	testId={NETWORKS_SWITCHER_DROPDOWN}
-	{disabled}
 	asModalOnMobile
+	{disabled}
+	testId={NETWORKS_SWITCHER_DROPDOWN}
 	bind:visible
 >
 	<NetworkSwitcherLogo network={$selectedNetwork} />

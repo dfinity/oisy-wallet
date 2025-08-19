@@ -111,9 +111,9 @@
 			{#snippet logo()}
 				{#if nonNullish(token)}
 					{#if isTokenNonFungible(token) && nonNullish(nft)}
-						<NftLogo {nft} badge={{ type: 'network' }} />
+						<NftLogo badge={{ type: 'network' }} {nft} />
 					{:else}
-						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+						<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 					{/if}
 				{/if}
 			{/snippet}
@@ -139,12 +139,12 @@
 
 		{#if nonNullish(to) && nonNullish(from)}
 			<TransactionContactCard
-				type={type === 'receive' ? 'receive' : 'send'}
-				{to}
 				{from}
-				{toExplorerUrl}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
+				{to}
+				{toExplorerUrl}
+				type={type === 'receive' ? 'receive' : 'send'}
 			/>
 		{/if}
 
