@@ -75,7 +75,7 @@
 		const newNftIds = findNewNftIds({ nfts: $nftStore ?? [], token, inventory });
 
 		if (newNftIds.length > 0) {
-			await loadNftIdsOfToken({
+			loadNftIdsOfToken({
 				infuraProvider,
 				token,
 				tokenIds: newNftIds,
