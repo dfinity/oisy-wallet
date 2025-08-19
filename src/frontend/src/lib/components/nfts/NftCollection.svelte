@@ -15,7 +15,7 @@
 
 	const collectionNfts: Nft[] = $derived(
 		($nftStore ?? []).filter(
-			(c) => c.collection.address === collectionId && String(c.collection.network.id) === networkId
+			(c) => c.collection.address === collectionId && c.collection.network.name === networkId
 		)
 	);
 
