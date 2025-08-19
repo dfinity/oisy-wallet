@@ -30,7 +30,7 @@
 		let inventory: NftId[];
 		try {
 			inventory = await etherscanProvider.erc721TokenInventory({
-				address: '0xffce06ddc814537ff78076df32bf4bce108ec66f',
+				address: $ethAddress,
 				contractAddress: token.address
 			});
 		} catch (_: unknown) {
@@ -54,7 +54,7 @@
 		let inventory: OwnedNft[];
 		try {
 			inventory = await alchemyProvider.getNftIdsForOwner({
-				address: '0xffce06ddc814537ff78076df32bf4bce108ec66f',
+				address: $ethAddress,
 				contractAddress: token.address
 			});
 		} catch (_: unknown) {
