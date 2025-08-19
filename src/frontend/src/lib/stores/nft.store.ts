@@ -6,6 +6,7 @@ export type NftStoreData = Nft[] | undefined;
 
 export interface NftStore extends Readable<NftStoreData> {
 	addAll: (nfts: Nft[]) => void;
+	removeSelectedNfts: (nfts: Nft[]) => void;
 	resetAll: () => void;
 }
 
@@ -30,6 +31,23 @@ const initNftStore = (): NftStore => {
 				);
 
 				return [...currentNfts, ...newNfts];
+			});
+		},
+		removeSelectedNfts: (nfts: Nft[]) => {
+			update((currentNfts) => {
+				if (isNullish(currentNfts)) {
+					return currentNfts;
+				}
+
+				return currentNfts.filter(
+					(currentNft) =>
+						!nfts.some(
+							(nftToRemove) =>
+								currentNft.id === nftToRemove.id &&
+								currentNft.collection.address == nftToRemove.collection.address &&
+								currentNft.collection.network === nftToRemove.collection.network
+						)
+				);
 			});
 		},
 		resetAll: () => set(undefined)
