@@ -6,7 +6,7 @@ import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
 import fr from '$lib/i18n/fr.json';
 import it from '$lib/i18n/it.json';
-import jp from '$lib/i18n/ja.json';
+import ja from '$lib/i18n/ja.json';
 import pt from '$lib/i18n/pt.json';
 import vi from '$lib/i18n/vi.json';
 import zhcn from '$lib/i18n/zh-CN.json';
