@@ -53,7 +53,7 @@
 
 	const handleNewNfts = async ({ token, inventory, infuraProvider }:
 												 { token: NonFungibleToken; inventory: NftId[], infuraProvider: InfuraErc165Provider }) => {
-		const newNftIds = findNewNftIds({nfts: $nftStore, token, inventory})
+		const newNftIds = findNewNftIds({nfts: $nftStore ?? [], token, inventory})
 
 		if (newNftIds.length > 0) {
 			await loadNftIdsOfToken({
