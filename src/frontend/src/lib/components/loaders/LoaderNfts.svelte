@@ -10,9 +10,8 @@
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftIdsOfToken } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft, NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
-	import { findNft, findRemovedNfts, mapTokenToCollection } from '$lib/utils/nfts.utils';
-	import { parseNftId } from '$lib/validation/nft.validation';
+	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
+	import { findNft, findRemovedNfts } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		children?: Snippet;
