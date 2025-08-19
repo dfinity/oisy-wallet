@@ -49,7 +49,7 @@ describe('nftStore', () => {
 		});
 	});
 
-	describe('removeAll', () => {
+	describe('removeSelectedNfts', () => {
 		const mockNft1 = mockValidErc721Nft;
 		const mockNft2 = { ...mockValidErc721Nft, id: parseNftId(837364) };
 		const mockNft3 = {
@@ -67,7 +67,7 @@ describe('nftStore', () => {
 		});
 
 		it('should remove NFTs from store', () => {
-			nftStore.removeAll([mockNft1, mockNft3]);
+			nftStore.removeSelectedNfts([mockNft1, mockNft3]);
 
 			expect(get(nftStore)).toEqual([mockNft2]);
 		});
@@ -75,7 +75,7 @@ describe('nftStore', () => {
 		it('should do nothing when trying to remove from undefined store', () => {
 			nftStore.resetAll();
 
-			nftStore.removeAll([mockNft1, mockNft3]);
+			nftStore.removeSelectedNfts([mockNft1, mockNft3]);
 
 			expect(get(nftStore)).toBeUndefined();
 		});
@@ -84,19 +84,19 @@ describe('nftStore', () => {
 			nftStore.resetAll();
 			nftStore.addAll([]);
 
-			nftStore.removeAll([mockNft1, mockNft3]);
+			nftStore.removeSelectedNfts([mockNft1, mockNft3]);
 
 			expect(get(nftStore)).toEqual([]);
 		});
 
 		it('should do nothing when removal array is empty', () => {
-			nftStore.removeAll([]);
+			nftStore.removeSelectedNfts([]);
 
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2, mockNft3]);
 		});
 
 		it('should handle tokens and networks correctly', () => {
-			nftStore.removeAll([
+			nftStore.removeSelectedNfts([
 				{
 					...mockNft2,
 					collection: {
@@ -111,7 +111,7 @@ describe('nftStore', () => {
 		});
 	});
 
-	describe('updateAll', () => {
+	describe('updateSelectedNfts', () => {
 		const mockNft1 = mockValidErc1155Nft;
 		const mockNft2 = { ...mockValidErc1155Nft, id: parseNftId(837364) };
 		const mockNft3 = {
@@ -133,7 +133,7 @@ describe('nftStore', () => {
 			const updatedNft1 = { ...mockNft1, balance: 10 };
 			const updatedNft2 = { ...mockNft2, balance: 10 };
 
-			nftStore.updateAll([updatedNft1, updatedNft2]);
+			nftStore.updateSelectedNfts([updatedNft1, updatedNft2]);
 
 			expect(get(nftStore)).toEqual([updatedNft1, updatedNft2, mockNft3]);
 		});
@@ -143,7 +143,7 @@ describe('nftStore', () => {
 
 			const updatedNft1 = { ...mockNft1, balance: 10 };
 
-			nftStore.updateAll([updatedNft1]);
+			nftStore.updateSelectedNfts([updatedNft1]);
 
 			expect(get(nftStore)).toBeUndefined();
 		});
@@ -152,19 +152,19 @@ describe('nftStore', () => {
 			nftStore.resetAll();
 			nftStore.addAll([]);
 
-			nftStore.updateAll([{ ...mockNft1, balance: 10 }]);
+			nftStore.updateSelectedNfts([{ ...mockNft1, balance: 10 }]);
 
 			expect(get(nftStore)).toEqual([]);
 		});
 
 		it('should do nothing when updating array is empty', () => {
-			nftStore.updateAll([]);
+			nftStore.updateSelectedNfts([]);
 
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2, mockNft3]);
 		});
 
 		it('should handle tokens and networks correctly', () => {
-			nftStore.updateAll([
+			nftStore.updateSelectedNfts([
 				{
 					...mockNft2,
 					collection: {

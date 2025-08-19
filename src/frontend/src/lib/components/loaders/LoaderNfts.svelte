@@ -105,7 +105,7 @@
 		const removedNfts = findRemovedNfts({ nfts: $nftStore ?? [], token, inventory });
 
 		if (removedNfts.length > 0) {
-			nftStore.removeAll(removedNfts);
+			nftStore.removeSelectedNfts(removedNfts);
 		}
 	};
 
@@ -119,7 +119,7 @@
 		const updatedNfts = getUpdatedNfts({ nfts: $nftStore ?? [], token, inventory });
 
 		if (updatedNfts.length > 0) {
-			nftStore.updateAll(updatedNfts);
+			nftStore.updateSelectedNfts(updatedNfts);
 		}
 	};
 
