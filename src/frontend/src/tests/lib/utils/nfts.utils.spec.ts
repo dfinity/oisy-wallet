@@ -6,7 +6,8 @@ import { NftError } from '$lib/types/errors';
 import type { Nft, NftsByNetwork } from '$lib/types/nft';
 import {
 	filterSortByCollection,
-	findNft, findRemovedNfts,
+	findNft,
+	findRemovedNfts,
 	getEnabledNfts,
 	getNftCollectionUi,
 	getNftsByNetworks,
