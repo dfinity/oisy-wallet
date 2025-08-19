@@ -63,10 +63,10 @@ export const findNft = ({
 	);
 
 export const findRemovedNfts = ({
-																	nfts,
-																	token,
-																	inventory
-																}: {
+	nfts,
+	token,
+	inventory
+}: {
 	nfts: Nft[];
 	token: NonFungibleToken;
 	inventory: NftId[];
