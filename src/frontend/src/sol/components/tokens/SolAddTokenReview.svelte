@@ -104,7 +104,7 @@
 </script>
 
 <ContentWithToolbar>
-	<Value ref="contractAddress" element="div">
+	<Value element="div" ref="contractAddress">
 		{#snippet label()}
 			{$i18n.tokens.text.token_address}{/snippet}
 		{#snippet content()}
@@ -112,7 +112,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractName" element="div">
+	<Value element="div" ref="contractName">
 		{#snippet label()}
 			{$i18n.core.text.name}
 		{/snippet}
@@ -126,7 +126,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="network" element="div">
+	<Value element="div" ref="network">
 		{#snippet label()}
 			{$i18n.tokens.manage.text.network}
 		{/snippet}
@@ -136,7 +136,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractSymbol" element="div">
+	<Value element="div" ref="contractSymbol">
 		{#snippet label()}
 			{$i18n.core.text.symbol}
 		{/snippet}
@@ -150,7 +150,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractDecimals" element="div">
+	<Value element="div" ref="contractDecimals">
 		{#snippet label()}
 			{$i18n.core.text.decimals}
 		{/snippet}

@@ -33,11 +33,11 @@
 	<!-- TODO: add address for devnet and testnet -->
 	<SendData
 		amount={amountDisplay}
-		{destination}
-		{token}
 		{balance}
-		source={$solAddressMainnet ?? ''}
+		{destination}
 		showNullishAmountLabel
+		source={$solAddressMainnet ?? ''}
+		{token}
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 

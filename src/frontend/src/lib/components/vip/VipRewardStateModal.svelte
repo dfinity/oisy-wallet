@@ -103,12 +103,12 @@
 
 		{#snippet toolbar()}
 			<Button
-				paddingSmall
 				colorStyle="secondary-light"
-				type="button"
 				fullWidth
 				onclick={close}
+				paddingSmall
 				testId={VIP_STATE_BUTTON}
+				type="button"
 			>
 				{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
 			</Button>
