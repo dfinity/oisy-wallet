@@ -89,7 +89,7 @@ export const findRemovedNfts = ({
 			isNullish(inventory.find((nftId) => nftId === nft.id))
 	);
 
-export const findUpdatedNfts = ({
+export const getUpdatedNfts = ({
 	nfts,
 	token,
 	inventory
