@@ -15,7 +15,7 @@
 </script>
 
 <div class="mt-6">
-	<label for="verification" class="font-bold"
+	<label class="font-bold" for="verification"
 		>{$i18n.wallet_connect.domain.title}:
 		{#if validation === 'VALID'}
 			{$i18n.wallet_connect.domain.valid}
