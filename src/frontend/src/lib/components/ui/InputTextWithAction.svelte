@@ -34,13 +34,13 @@
 
 <Input
 	{name}
-	inputType="text"
-	{required}
-	bind:value
-	{placeholder}
-	spellcheck={false}
 	autocomplete="off"
+	inputType="text"
+	{placeholder}
+	{required}
+	spellcheck={false}
 	{testId}
+	bind:value
 	on:nnsInput
 	on:blur
 	on:focus

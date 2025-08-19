@@ -11,6 +11,6 @@
 	let { onclick, testId, variant = 'primary' }: Props = $props();
 </script>
 
-<Button colorStyle={variant} paddingSmall {testId} fullWidth type="button" {onclick}>
+<Button colorStyle={variant} fullWidth {onclick} paddingSmall {testId} type="button">
 	{$i18n.core.text.done}
 </Button>
