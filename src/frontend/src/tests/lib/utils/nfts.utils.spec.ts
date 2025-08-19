@@ -6,6 +6,7 @@ import { NftError } from '$lib/types/errors';
 import type { Nft, NftId, NftsByNetwork } from '$lib/types/nft';
 import {
 	filterSortByCollection,
+	findNewNftIds,
 	findNft,
 	findRemovedNfts,
 	getEnabledNfts,
@@ -254,6 +255,47 @@ describe('nfts.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('findNewNftIds', () => {
+		it('should return new nft ids', () => {
+			const loadedNfts = [mockNft1, mockNft3];
+			const inventory = [mockNft1.id, mockNft2.id];
+
+			const result = findNewNftIds({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([mockNft2.id]);
+		});
+
+		it('should return empty array if no new nft ids exist', () => {
+			const loadedNfts = [mockNft1, mockNft3];
+			const inventory = [mockNft1.id];
+
+			const result = findNewNftIds({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should return empty array if inventory is empty', () => {
+			const loadedNfts = [mockNft1, mockNft3];
+			const inventory: NftId[] = [];
+
+			const result = findNewNftIds({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([]);
 		});
 	});
 
