@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { goto } from '$app/navigation';
 	import type { TabVariant } from '$lib/types/style';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
 	interface Props {
-		tabs: NonEmptyArray<{ label: string; id: string }>;
+		tabs: NonEmptyArray<{ label: string; id: string; path?: string }>;
 		activeTab: string;
 		children?: Snippet;
 		styleClass?: string;
@@ -18,12 +20,20 @@
 		styleClass,
 		tabVariant = 'default'
 	}: Props = $props();
+
+	const handleClick = ({ id, path }: { id: string; path?: string }): void => {
+		if (isNullish(path)) {
+			activeTab = id;
+		} else {
+			goto(path);
+		}
+	};
 </script>
 
 <div class={`flex items-center ${styleClass ?? ''}`}>
-	{#each tabs as { label, id }, index (id)}
+	{#each tabs as { label, id, path }, index (id)}
 		<button
-			onclick={() => (activeTab = id)}
+			onclick={() => handleClick({ id, path })}
 			aria-label={label}
 			class="justify-center rounded-none border-0 text-sm font-semibold transition hover:border-brand-primary sm:text-base"
 			class:ml-4={index !== 0}

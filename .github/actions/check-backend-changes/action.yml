@@ -3,9 +3,9 @@ name: Check Backend Changes
 description: Check for changes in the backend-related code and return a boolean output.
 
 outputs:
-  any:
+  backend:
     description: 'True if any relevant backend file changed'
-    value: ${{ steps.changes.outputs.any }}
+    value: ${{ steps.changes.outputs.backend }}
 
 runs:
   using: 'composite'
@@ -20,7 +20,7 @@ runs:
         # The dockerfile used in this CI run, and the scripts it COPY's.
         # There may be some files in the frontend folder that contains 'backend' in their name.
         filters: |
-          any:
+          backend:
             - '**/*backend*'
             - 'src/backend/**'
             - 'src/shared/**'

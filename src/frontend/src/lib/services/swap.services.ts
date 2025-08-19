@@ -7,10 +7,21 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
-import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-swap-pool.api';
+import {
+	deposit,
+	depositFrom,
+	getPoolMetadata,
+	getUserUnusedBalance,
+	swap as swapIcp,
+	withdraw
+} from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
-import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
-import { ICP_SWAP_POOL_FEE } from '$lib/constants/swap.constants';
+import {
+	KONG_BACKEND_CANISTER_ID,
+	NANO_SECONDS_IN_MINUTE,
+	ZERO
+} from '$lib/constants/app.constants';
+import { ICP_SWAP_POOL_FEE, SWAP_MODE, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { i18n } from '$lib/stores/i18n.store';
@@ -22,20 +33,29 @@ import {
 	SwapErrorCodes,
 	SwapProvider,
 	type FetchSwapAmountsParams,
+	type GetQuoteParams,
 	type ICPSwapResult,
 	type IcpSwapManualWithdrawParams,
 	type IcpSwapWithdrawParams,
 	type IcpSwapWithdrawResponse,
 	type SwapMappedResult,
-	type SwapParams
+	type SwapParams,
+	type VeloraQuoteParams
 } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
-import { calculateSlippage } from '$lib/utils/swap.utils';
+import {
+	calculateSlippage,
+	geSwapEthTokenAddress,
+	getWithdrawableToken,
+	mapVeloraMarketSwapResult,
+	mapVeloraSwapResult
+} from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 import { trackEvent } from './analytics.services';
 import { throwSwapError } from './swap-errors.services';
@@ -133,7 +153,8 @@ export const fetchSwapAmounts = async ({
 	destinationToken,
 	amount,
 	tokens,
-	slippage
+	slippage,
+	isSourceTokenIcrc2
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -159,7 +180,7 @@ export const fetchSwapAmounts = async ({
 			if (provider.key === SwapProvider.KONG_SWAP) {
 				const swap = result.value as SwapAmountsReply;
 				mapped = provider.mapQuoteResult({ swap, tokens });
-			} else if (provider.key === SwapProvider.ICP_SWAP) {
+			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
 				mapped = provider.mapQuoteResult({ swap, slippage });
 			}
@@ -240,21 +261,20 @@ export const fetchIcpSwap = async ({
 
 		progress(ProgressStepsSwap.WITHDRAW);
 
-		const { code, message, variant } = await performManualWithdraw({
+		const { code, message, variant, swapSucceded } = await performManualWithdraw({
 			withdrawDestinationTokens,
 			setFailedProgressStep,
 			identity,
 			canisterId: poolCanisterId,
-			tokenId: withdrawDestinationTokens ? destinationLedgerCanisterId : sourceLedgerCanisterId,
-			amount: withdrawDestinationTokens ? receiveAmount : parsedSwapAmount,
-			fee: withdrawDestinationTokens ? destinationTokenFee : sourceTokenFee,
-			token: withdrawDestinationTokens ? destinationToken : sourceToken
+			sourceToken,
+			destinationToken
 		});
 
 		throwSwapError({
 			code,
 			message,
-			variant
+			variant,
+			swapSucceded
 		});
 	}
 
@@ -318,7 +338,9 @@ export const fetchIcpSwap = async ({
 			tokenId: sourceLedgerCanisterId,
 			amount: parsedSwapAmount,
 			fee: sourceTokenFee,
-			setFailedProgressStep
+			setFailedProgressStep,
+			sourceToken,
+			destinationToken
 		});
 
 		progress(ProgressStepsSwap.UPDATE_UI);
@@ -342,12 +364,11 @@ export const fetchIcpSwap = async ({
 		});
 	} catch (_: unknown) {
 		try {
-			await withdraw({
+			await withdrawUserUnusedBalance({
 				identity,
 				canisterId: poolCanisterId,
-				token: destinationLedgerCanisterId,
-				amount: receiveAmount,
-				fee: destinationTokenFee
+				sourceToken,
+				destinationToken
 			});
 
 			progress(ProgressStepsSwap.UPDATE_UI);
@@ -356,7 +377,8 @@ export const fetchIcpSwap = async ({
 
 			throwSwapError({
 				code: SwapErrorCodes.SWAP_SUCCESS_WITHDRAW_FAILED,
-				variant: 'error'
+				variant: 'error',
+				swapSucceded: true
 			});
 		}
 	}
@@ -391,7 +413,9 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 	tokenId,
 	amount,
 	fee,
-	setFailedProgressStep
+	setFailedProgressStep,
+	sourceToken,
+	destinationToken
 }: IcpSwapWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
 	const baseParams = {
 		identity,
@@ -410,7 +434,12 @@ export const withdrawICPSwapAfterFailedSwap = async ({
 	} catch (_: unknown) {
 		try {
 			// Second withdrawal attempt
-			await withdraw(baseParams);
+			await withdrawUserUnusedBalance({
+				identity,
+				canisterId,
+				sourceToken,
+				destinationToken
+			});
 
 			return {
 				code: SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS,
@@ -428,25 +457,18 @@ export const performManualWithdraw = async ({
 	withdrawDestinationTokens,
 	identity,
 	canisterId,
-	tokenId,
-	amount,
-	fee,
-	token,
-	setFailedProgressStep
+	setFailedProgressStep,
+	sourceToken,
+	destinationToken
 }: IcpSwapManualWithdrawParams): Promise<IcpSwapWithdrawResponse> => {
 	try {
-		await withdraw({
-			identity,
-			canisterId,
-			token: tokenId,
-			amount,
-			fee
-		});
+		await withdrawUserUnusedBalance({ identity, canisterId, sourceToken, destinationToken });
 
 		trackEvent({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
-				token: token.symbol,
+				dApp: SwapProvider.ICP_SWAP,
+				token: withdrawDestinationTokens ? destinationToken.symbol : sourceToken.symbol,
 				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
 			}
 		});
@@ -461,8 +483,9 @@ export const performManualWithdraw = async ({
 		trackEvent({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			metadata: {
-				token: token.symbol,
-				tokenOrigin: withdrawDestinationTokens ? 'receive' : 'pay'
+				dApp: SwapProvider.ICP_SWAP,
+				token: withdrawDestinationTokens ? destinationToken.symbol : sourceToken.symbol,
+				tokenDirection: withdrawDestinationTokens ? 'receive' : 'pay'
 			}
 		});
 
@@ -470,7 +493,127 @@ export const performManualWithdraw = async ({
 
 		return {
 			code: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
-			variant: 'error'
+			variant: 'error',
+			swapSucceded: withdrawDestinationTokens
 		};
+	}
+};
+
+// This wrapper keeps the return type uniform (array of SwapMappedResult),
+// so we can plug in more DEX quote providers later without changing callers.
+// Each provider can push its mapped result into the array, easy extendability.
+export const fetchSwapAmountsEVM = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress
+}: VeloraQuoteParams): Promise<SwapMappedResult[]> => {
+	const swapAmountsResults = await fetchVeloraSwapAmount({
+		sourceToken,
+		destinationToken,
+		amount,
+		userAddress
+	});
+
+	if (isNullish(swapAmountsResults)) {
+		return [];
+	}
+
+	return [swapAmountsResults];
+};
+
+const fetchVeloraSwapAmount = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userAddress
+}: VeloraQuoteParams): Promise<SwapMappedResult | null> => {
+	const {
+		network: { chainId: destChainId }
+	} = destinationToken;
+
+	const {
+		network: { chainId: srcChainId }
+	} = sourceToken;
+
+	const sdk = constructSimpleSDK({
+		chainId: Number(srcChainId),
+		fetch: window.fetch
+	});
+
+	const baseParams: GetQuoteParams = {
+		amount,
+		srcToken: geSwapEthTokenAddress(sourceToken),
+		destToken: geSwapEthTokenAddress(destinationToken),
+		srcDecimals: sourceToken.decimals,
+		destDecimals: destinationToken.decimals,
+		mode: SWAP_MODE,
+		side: SWAP_SIDE,
+		userAddress
+	};
+
+	const data = await sdk.quote.getQuote(
+		srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
+	);
+
+	if ('delta' in data) {
+		return mapVeloraSwapResult(data.delta);
+	}
+
+	if ('market' in data) {
+		return mapVeloraMarketSwapResult(data.market);
+	}
+
+	return null;
+};
+
+export const withdrawUserUnusedBalance = async ({
+	identity,
+	canisterId,
+	sourceToken,
+	destinationToken
+}: Omit<
+	IcpSwapManualWithdrawParams,
+	'setFailedProgressStep' | 'withdrawDestinationTokens'
+>): Promise<void> => {
+	const { token0, token1 } = await getPoolMetadata({ identity, canisterId });
+	const { balance0, balance1 } = await getUserUnusedBalance({
+		identity,
+		canisterId,
+		principal: identity.getPrincipal()
+	});
+
+	if (balance0 === ZERO && balance1 === ZERO) {
+		throw new Error('No unused balance to withdraw');
+	}
+
+	if (balance0 !== ZERO) {
+		const token = getWithdrawableToken({
+			tokenAddress: token0.address,
+			sourceToken,
+			destinationToken
+		});
+		await withdraw({
+			identity,
+			canisterId,
+			token: token.ledgerCanisterId,
+			amount: balance0,
+			fee: token.fee
+		});
+	}
+
+	if (balance1 !== ZERO) {
+		const token = getWithdrawableToken({
+			tokenAddress: token1.address,
+			sourceToken,
+			destinationToken
+		});
+		await withdraw({
+			identity,
+			canisterId,
+			token: token.ledgerCanisterId,
+			amount: balance1,
+			fee: token.fee
+		});
 	}
 };

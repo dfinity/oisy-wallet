@@ -12,14 +12,15 @@
 		token: Token;
 		logoSize?: LogoSize;
 		onClick: () => void;
+		showDividers?: boolean;
 	}
 
-	let { token, logoSize = 'lg', onClick }: Props = $props();
+	let { token, logoSize = 'lg', onClick, showDividers = true }: Props = $props();
 
 	const { oisyName, oisySymbol, symbol, name, network } = token;
 </script>
 
-<LogoButton {onClick} dividers={true}>
+<LogoButton {onClick} dividers={showDividers} fullWidth>
 	{#snippet title()}
 		{nonNullish(oisySymbol) ? oisySymbol.oisySymbol : symbol}
 	{/snippet}
@@ -43,7 +44,9 @@
 	{/snippet}
 
 	{#snippet titleEnd()}
-		<TokenBalance data={token} />
+		<div class="ml-1 min-w-12 text-nowrap">
+			<TokenBalance data={token} />
+		</div>
 	{/snippet}
 
 	{#snippet descriptionEnd()}

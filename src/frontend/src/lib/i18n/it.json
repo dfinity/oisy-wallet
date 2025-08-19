@@ -14,6 +14,7 @@
 			"symbol": "Simbolo",
 			"decimals": "Decimali",
 			"amount": "Importo",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Destinazione",
 			"reject": "Rifiuta",
@@ -101,7 +102,8 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralizzato",
-			"logout": "Logout",
+			"logout": "Esci",
+			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Accesso istantaneo e privato ovunque",
@@ -158,6 +160,16 @@
 				"other_asset_control": "Ottieni informazioni sul controllo degli asset, recupero e governance nel wallet $oisy_short",
 				"sign_in": "Hai bisogno di aiuto per accedere?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Sblocca per continuare",
+			"title_part_2": "In precedenza hai bloccato il tuo wallet per tenerlo al sicuro. Riprendi da dove eri rimasto o esci.",
+			"unlock": "Sblocca",
+			"logout": "Esci",
+			"logout_clear_cash_message": "La disconnessione cancellerà tutti i dati memorizzati nella cache",
+			"learn_more": "Saperne di più"
 		}
 	},
 	"dapps": {
@@ -271,12 +283,6 @@
 				"one_liner": "DEX leader, fornitore di stablecoin e piattaforma di prestito su Ethereum e catene compatibili con EVM.",
 				"call_to_action": "Entra nel warp",
 				"description": "Curve Finance è un DEX leader, fornitore di stablecoin e piattaforma di prestito su Ethereum e catene compatibili con EVM. È noto per i suoi market maker automatizzati avanzati per stablecoin e asset volatili e per il suo sistema unico di liquidazione soft per i prestiti."
-			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Crittografia e blockchain all'avanguardia si intrecciano per offrire un ambiente di gioco sicuro e trasparente per tutti.",
-				"call_to_action": "Sei invitato",
-				"description": "Crittografia e blockchain all'avanguardia si intrecciano per offrire un ambiente di gioco sicuro e trasparente per tutti.<br/><br/>Gioca con la tua scelta di asset digitali—ora ICP, con BTC, ETH, SOL e USDC in arrivo. Completamente on-chain, nessun punto di fallimento centrale. Il nostro RNG basato su blockchain garantisce un gioco dimostrabilmente equo, utilizzando la tecnologia open-source del team di ricerca e sviluppo di Dfinity."
 			},
 			"sonic": {
 				"name": "Sonic",
@@ -716,7 +722,13 @@
 			"minter_info_not_loaded": "Riprova tra qualche secondo, un parametro di configurazione ckETH non è ancora stato caricato.",
 			"minter_info_not_certified": "Riprova tra qualche secondo, un parametro di configurazione ckETH non è stato certificato.",
 			"cketh_max_transaction_fee_missing": "Manca la fee massima di transazione per ckETH.",
-			"utxos_fee_missing": "Mancano le fee UTXO."
+			"utxos_fee_missing": "La commissione UTXO è mancante.",
+			"minimum_btc_amount": "Importo troppo piccolo. Inserisci almeno $amount BTC.",
+			"btc_insufficient_balance": "Nessun UTXO Bitcoin disponibile per la transazione",
+			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insufficiente per coprire le commissioni di transazione",
+			"btc_invalid_utxo_data": "Dati della transazione Bitcoin non validi",
+			"btc_utxo_locked": "I fondi Bitcoin sono bloccati da transazioni in sospeso",
+			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita"
 		},
 		"error": {
 			"unexpected": "Qualcosa è andato storto durante l'invio della transazione.",
@@ -833,10 +845,12 @@
 			"deposit_error": "Il deposito dei fondi per lo swap non è riuscito. Riprova oppure cambia il provider dello swap.",
 			"withdraw_failed": "Lo scambio è fallito e anche il prelievo è fallito. Controlla il tuo saldo inutilizzato e prova il prelievo manuale: ",
 			"swap_failed_withdraw_success": "Lo swap non è andato a buon fine e i tuoi token sono stati rimborsati con successo. Riprova oppure cambia il provider dello swap.",
-			"withdraw_failed_first_part": "Lo swap non è andato a buon fine e i token inviati non possono essere ritirati automaticamente. Segui ",
-			"withdraw_failed_second_part": "per ritirarli manualmente su ",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
 			"swap_failed_instruction_link": "queste istruzioni ",
 			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
@@ -981,6 +995,7 @@
 			"invalid_contract_address": "Indirizzo del contratto non valido.",
 			"invalid_token_address": "Indirizzo del token non valido.",
 			"invalid_ledger": "Il token selezionato non è collegato a un canister Ledger ICRC.",
+			"unrecognised_erc_interface": "",
 			"no_metadata": "Nessun metadato recuperato.",
 			"unexpected": "Qualcosa è andato storto durante il salvataggio del token.",
 			"unexpected_hiding": "Qualcosa è andato storto nel nascondere il token.",
@@ -997,7 +1012,24 @@
 		"text": {
 			"title": "NFT",
 			"title_empty": "I tuoi NFT appariranno qui",
-			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT"
+			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": "",
+			"collection_not_loaded": "",
+			"nft_not_loaded": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
@@ -1234,12 +1266,12 @@
 				"reward_received": "Benvenuto su $oisy_short!",
 				"reward_failed": "Il codice è scaduto",
 				"reward_received_description": "Riceverai il tuo regalo di benvenuto a breve.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Richiedine uno nuovo e riprova"
 			},
 			"error": {
 				"loading_reward": "Errore durante il caricamento di un nuovo codice ricompensa.",
 				"loading_user_data": "Impossibile caricare i dati utente dal canister delle ricompense.",
-				"claiming_reward": "Errore durante la richiesta della ricompensa.",
 				"loading_eligibility": "Errore durante il caricamento dell'idoneità della campagna."
 			}
 		},
@@ -1516,6 +1548,7 @@
 			"action_button_contacts_prompt": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"no_contacts_found_message": "",
 			"loading": ""
 		},
 		"errors": {

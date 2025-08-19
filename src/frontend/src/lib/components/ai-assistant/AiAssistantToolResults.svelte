@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import AiAssistantShowContactsTool from '$lib/components/ai-assistant/AiAssistantShowContactsTool.svelte';
 	import type { ToolResult } from '$lib/types/ai-assistant';
 
@@ -11,7 +12,7 @@
 
 <div class="mb-5">
 	{#each results as { result, type }, index (index)}
-		{#if type === 'show_contacts'}
+		{#if type === 'show_contacts' && nonNullish(result)}
 			<AiAssistantShowContactsTool contacts={result} />
 		{/if}
 	{/each}
