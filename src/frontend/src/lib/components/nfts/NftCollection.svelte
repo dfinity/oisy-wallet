@@ -27,7 +27,7 @@
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(collection)) {
-				goto(AppPath.Nfts, { replaceState: false });
+				goto(`${AppPath.Nfts}${page.url.search}`);
 				toastsError({ msg: { text: $i18n.nfts.text.collection_not_loaded } });
 			}
 		}, 10000);
