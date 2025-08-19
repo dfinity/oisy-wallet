@@ -17,10 +17,10 @@
 		<div class="flex flex-col">
 			{#each liquidityFees as { fee, token } (token.id)}
 				<FeeDisplay
-					feeAmount={fee}
-					symbol={getTokenDisplaySymbol(token)}
 					decimals={token.decimals}
 					displayExchangeRate={false}
+					feeAmount={fee}
+					symbol={getTokenDisplaySymbol(token)}
 				/>
 			{/each}
 		</div>

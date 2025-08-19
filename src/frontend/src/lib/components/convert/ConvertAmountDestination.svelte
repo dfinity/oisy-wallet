@@ -34,12 +34,12 @@
 </script>
 
 <TokenInput
-	token={$destinationToken}
 	amount={receiveAmount}
-	exchangeRate={$destinationTokenExchangeRate}
 	disabled={true}
-	isSelectable={false}
 	displayUnit={inputUnit}
+	exchangeRate={$destinationTokenExchangeRate}
+	isSelectable={false}
+	token={$destinationToken}
 >
 	<div slot="amount-info" class="text-tertiary">
 		<TokenInputAmountExchange
@@ -52,8 +52,8 @@
 
 	<TokenInputBalance
 		slot="balance"
+		balance={$destinationTokenBalance}
 		testId="convert-amount-destination-balance"
 		token={$destinationToken}
-		balance={$destinationTokenBalance}
 	/>
 </TokenInput>

@@ -50,10 +50,10 @@
 
 <button
 	class="font-semibold text-brand-primary-alt transition-all"
-	on:click|preventDefault={setMax}
-	class:text-error-primary={isZeroBalance || error}
 	class:text-brand-primary-alt={!isZeroBalance && !error}
+	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}
+	on:click|preventDefault={setMax}
 >
 	{$i18n.core.text.max}:
 	{nonNullish(maxAmount) && nonNullish(token)
