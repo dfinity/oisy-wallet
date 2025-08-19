@@ -17,7 +17,7 @@
 </script>
 
 <a
-	href={AppPath.Nfts + collection.collection.address}
+	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 	class="flex w-full flex-col gap-2 p-1 text-left no-underline"
 >
 	<div
@@ -62,7 +62,7 @@
 		>
 		<span class="text-xs" class:text-tertiary={!disabled} class:text-disabled={disabled}
 			>{replacePlaceholders($i18n.nfts.text.collection_items_count, {
-				count: String(collection.nfts.length)
+				$count: String(collection.nfts.length)
 			})}</span
 		>
 	</div>

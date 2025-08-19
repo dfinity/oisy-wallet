@@ -62,6 +62,32 @@ export const findNft = ({
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
 
+export const findNewNftIds = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: NftId[];
+}): NftId[] => inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId })));
+
+export const findRemovedNfts = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: NftId[];
+}): Nft[] =>
+	nfts.filter(
+		(nft) =>
+			nft.collection.network === token.network &&
+			nft.collection.address === token.address &&
+			isNullish(inventory.find((nftId) => nftId === nft.id))
+	);
+
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
 	const IPFS_GATEWAY = 'https://ipfs.io/ipfs/';

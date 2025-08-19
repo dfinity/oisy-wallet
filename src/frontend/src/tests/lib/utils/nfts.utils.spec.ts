@@ -3,10 +3,12 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
-import type { Nft, NftsByNetwork } from '$lib/types/nft';
+import type { Nft, NftId, NftsByNetwork } from '$lib/types/nft';
 import {
 	filterSortByCollection,
+	findNewNftIds,
 	findNft,
+	findRemovedNfts,
 	getEnabledNfts,
 	getNftCollectionUi,
 	getNftsByNetworks,
@@ -253,6 +255,97 @@ describe('nfts.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('findNewNftIds', () => {
+		it('should return new nft ids', () => {
+			const loadedNfts = [mockNft1, mockNft3];
+			const inventory = [mockNft1.id, mockNft2.id];
+
+			const result = findNewNftIds({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([mockNft2.id]);
+		});
+
+		it('should return empty array if no new nft ids exist', () => {
+			const loadedNfts = [mockNft1, mockNft3];
+			const inventory = [mockNft1.id];
+
+			const result = findNewNftIds({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should return empty array if inventory is empty', () => {
+			const loadedNfts = [mockNft1, mockNft3];
+			const inventory: NftId[] = [];
+
+			const result = findNewNftIds({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([]);
+		});
+	});
+
+	describe('findRemovedNfts', () => {
+		it('should return removed nfts', () => {
+			const loadedNfts = [mockNft1, mockNft2];
+			const inventory = [mockNft2.id];
+
+			const result = findRemovedNfts({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([mockNft1]);
+		});
+
+		it('should handle different tokens and networks correctly', () => {
+			const loadedNfts = [mockNft1, mockNft2, mockNft3];
+			const inventory: NftId[] = [];
+
+			const result = findRemovedNfts({ nfts: loadedNfts, token: DE_GODS_TOKEN, inventory });
+
+			expect(result).toEqual([mockNft3]);
+		});
+
+		it('should return empty array if not nfts were removed', () => {
+			const loadedNfts = [mockNft1, mockNft2];
+			const inventory = [mockNft1.id, mockNft2.id];
+
+			const result = findRemovedNfts({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should return empty array if not nfts are loaded yet', () => {
+			const loadedNfts: Nft[] = [];
+			const inventory = [mockNft1.id, mockNft2.id];
+
+			const result = findRemovedNfts({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([]);
 		});
 	});
 
