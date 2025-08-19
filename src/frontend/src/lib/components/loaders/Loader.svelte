@@ -23,6 +23,7 @@
 		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet,
+		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet
