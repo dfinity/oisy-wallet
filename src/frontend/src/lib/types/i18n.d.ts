@@ -600,6 +600,11 @@ interface I18nSend {
 		cketh_max_transaction_fee_missing: string;
 		utxos_fee_missing: string;
 		minimum_btc_amount: string;
+		btc_insufficient_balance: string;
+		btc_insufficient_balance_for_fee: string;
+		btc_invalid_utxo_data: string;
+		btc_utxo_locked: string;
+		btc_invalid_fee_calculation: string;
 	};
 	error: {
 		unexpected: string;
@@ -874,6 +879,8 @@ interface I18nNfts {
 		item_traits: string;
 		collection_not_loaded: string;
 		nft_not_loaded: string;
+		collections: string;
+		all_assets: string;
 	};
 	alt: { placeholder_image: string; card: { image: string } };
 }

@@ -31,7 +31,7 @@
 				{getTokenDisplaySymbol(token)}
 			</span>
 			<span class="text-sm text-tertiary">
-				<TokenInputAmountExchange disabled {amount} {exchangeRate} />
+				<TokenInputAmountExchange {amount} disabled {exchangeRate} />
 			</span>
 		</div>
 	</div>

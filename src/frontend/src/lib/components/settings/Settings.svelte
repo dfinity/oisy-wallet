@@ -67,7 +67,7 @@
 			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
 				{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
 			</output>
-			<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
+			<Copy inline text={$i18n.settings.text.principal_copied} value={principal?.toText() ?? ''} />
 		</svelte:fragment>
 		<svelte:fragment slot="info">
 			{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
@@ -102,9 +102,9 @@
 			<EnabledNetworksPreviewIcons />
 
 			<Button
-				testId={SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON}
 				link
 				onclick={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
+				testId={SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON}
 			>
 				{$i18n.core.text.edit} >
 			</Button>
@@ -123,7 +123,7 @@
 			<svelte:fragment slot="key">{$i18n.settings.text.pouh_credential}</svelte:fragment>
 			<svelte:fragment slot="value">
 				{#if $userHasPouhCredential}
-					<output in:fade class="mr-1.5">
+					<output class="mr-1.5" in:fade>
 						{$i18n.settings.text.pouh_credential_verified}
 					</output>
 				{:else}

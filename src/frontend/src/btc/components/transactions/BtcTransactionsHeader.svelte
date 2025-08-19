@@ -23,7 +23,7 @@
 	</div>
 
 	{#if isNetworkMainnet}
-		<Collapsible expandButton={false} externalToggle={true} bind:this={cmp}>
+		<Collapsible bind:this={cmp} expandButton={false} externalToggle={true}>
 			{#snippet header()}{/snippet}
 			<p class="mb-0 font-normal opacity-50">
 				{$i18n.transactions.text.mainnet_btc_transactions_info}

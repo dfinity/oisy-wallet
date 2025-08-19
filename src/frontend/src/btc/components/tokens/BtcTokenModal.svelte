@@ -10,4 +10,4 @@
 	let { fromRoute }: Props = $props();
 </script>
 
-<TokenModal token={$pageToken} {fromRoute} />
+<TokenModal {fromRoute} token={$pageToken} />

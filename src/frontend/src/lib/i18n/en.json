@@ -723,7 +723,12 @@
 			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
 			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing.",
 			"utxos_fee_missing": "UTXOs fee is missing.",
-			"minimum_btc_amount": "Amount too small. Please enter at least $amount BTC."
+			"minimum_btc_amount": "Amount too small. Please enter at least $amount BTC.",
+			"btc_insufficient_balance": "No Bitcoin UTXOs available for transaction",
+			"btc_insufficient_balance_for_fee": "Insufficient Bitcoin balance to cover transaction fees",
+			"btc_invalid_utxo_data": "Invalid Bitcoin transaction data",
+			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
+			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed"
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -1025,8 +1030,8 @@
 			"item_traits": "Item traits",
 			"collection_not_loaded": "The collection could not be displayed as it has not been loaded yet",
 			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
-            "collections": "Collections",
-            "all_assets": "All assets"
+			"collections": "Collections",
+			"all_assets": "All assets"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
