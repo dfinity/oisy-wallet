@@ -31,8 +31,8 @@ const initPageStoreMock = () => {
 			set({ data });
 			page.data = data;
 		},
-		mockNftCollection: (collectionId: string) => {
-			page.params = { collectionId };
+		mockDynamicRoutes: (params: { [key: string]: string }) => {
+			page.params = params;
 		},
 
 		reset: () => set(initialStoreValue)
