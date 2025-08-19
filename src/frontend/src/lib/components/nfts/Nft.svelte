@@ -4,11 +4,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
+	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft } from '$lib/types/nft';
-	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	const [networkId, collectionId, nftId] = $derived([
