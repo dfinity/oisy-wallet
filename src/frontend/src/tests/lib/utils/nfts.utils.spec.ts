@@ -5,7 +5,8 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId, NftsByNetwork } from '$lib/types/nft';
 import {
-	filterSortByCollection, findNewNftIds,
+	filterSortByCollection,
+	findNewNftIds,
 	findNft,
 	getEnabledNfts,
 	getNftCollectionUi,
