@@ -5,12 +5,12 @@
 	import { page } from '$app/state';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
+	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
-	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 
 	const [collectionId, networkId] = $derived([page.params.collectionId, page.params.networkId]);
 
