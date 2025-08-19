@@ -46,9 +46,7 @@ export const getPendingTransactions = (
 	certified: true;
 } => {
 	const storeData = get(btcPendingSentTransactionsStore);
-	const pendingTransactions = storeData[address];
-
-	return pendingTransactions;
+	return storeData[address];
 };
 
 /**
