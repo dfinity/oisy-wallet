@@ -51,10 +51,15 @@
 		}
 
 		const alchemyProvider = alchemyProviders(token.network.id);
-		const inventory = await alchemyProvider.getNftIdsForOwner({
-			address: $ethAddress,
-			contractAddress: token.address
-		});
+		let inventory: OwnedNft[];
+		try {
+			inventory = await alchemyProvider.getNftIdsForOwner({
+				address: '0xffce06ddc814537ff78076df32bf4bce108ec66f',
+				contractAddress: token.address
+			});
+		} catch (_: unknown) {
+			inventory = [];
+		}
 
 		await handleRemovedNfts({ token, inventory: inventory.map((ownedNft) => ownedNft.id) });
 		await handleUpdatedNfts({ token, inventory });
