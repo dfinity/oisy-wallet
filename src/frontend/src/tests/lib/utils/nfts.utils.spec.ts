@@ -3,9 +3,9 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
-import type { Nft, NftsByNetwork } from '$lib/types/nft';
+import type { Nft, NftId, NftsByNetwork } from '$lib/types/nft';
 import {
-	filterSortByCollection,
+	filterSortByCollection, findNewNftIds,
 	findNft,
 	getEnabledNfts,
 	getNftCollectionUi,
