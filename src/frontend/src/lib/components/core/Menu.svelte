@@ -51,7 +51,7 @@
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
 	interface Props {
-		visible: boolean;
+		visible?: boolean;
 	}
 
 	let { visible = $bindable(false) }: Props = $props();
