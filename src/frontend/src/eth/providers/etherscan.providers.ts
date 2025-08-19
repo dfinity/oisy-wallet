@@ -308,17 +308,10 @@ export class EtherscanProvider {
 			sort: 'desc'
 		};
 
-		let result: EtherscanProviderTokenId[] | string
-		try {
-			result = await this.provider.fetch(
-				'account',
-				params
-			);
-		} catch(_: unknown) {
-			// The api call throws a "Token not found" error if the given address does not hold any nfts.
-			// In this case we want to return an empty list.
-			return []
-		}
+		const result: EtherscanProviderTokenId[] | string = await this.provider.fetch(
+			'account',
+			params
+		);
 
 		if (typeof result === 'string') {
 			throw new Error(result);

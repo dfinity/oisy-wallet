@@ -26,10 +26,16 @@
 		}
 
 		const etherscanProvider = etherscanProviders(token.network.id);
-		const inventory: NftId[] = await etherscanProvider.erc721TokenInventory({
-			address: $ethAddress,
-			contractAddress: token.address
-		});
+
+		let inventory: NftId[];
+		try {
+			inventory = await etherscanProvider.erc721TokenInventory({
+				address: '0xffce06ddc814537ff78076df32bf4bce108ec66f',
+				contractAddress: token.address
+			});
+		} catch (_: unknown) {
+			inventory = [];
+		}
 
 		await handleRemovedNfts({ token, inventory });
 		await handleNewNfts({
