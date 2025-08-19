@@ -1022,7 +1022,8 @@
 			"collection_address": "Collection contract address",
 			"token_standard": "Token standard",
 			"quantity": "Quantity",
-			"item_traits": "Item traits"
+			"item_traits": "Item traits",
+            "collection_not_loaded": "The collection could not be displayed as it has not been loaded yet"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",

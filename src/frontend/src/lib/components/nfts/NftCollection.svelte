@@ -9,11 +9,14 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
+	import { i18n } from '$lib/stores/i18n.store';
 
-	const collectionId = $derived(page.params.collectionId);
+	const [collectionId, networkId] = $derived([page.params.collectionId, page.params.networkId]);
 
 	const collectionNfts: Nft[] = $derived(
-		($nftStore ?? []).filter((c) => c.collection.address === collectionId)
+		($nftStore ?? []).filter(
+			(c) => c.collection.address === collectionId && String(c.collection.network.id) === networkId
+		)
 	);
 
 	const collection: NftCollection | undefined = $derived(collectionNfts?.[0]?.collection);
@@ -24,8 +27,8 @@
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(collection)) {
-				goto(AppPath.Nfts);
-				toastsError({ msg: { text: 'Could not load collection' } });
+				goto(AppPath.Nfts, { replaceState: false });
+				toastsError({ msg: { text: $i18n.nfts.text.collection_not_loaded } });
 			}
 		}, 10000);
 
