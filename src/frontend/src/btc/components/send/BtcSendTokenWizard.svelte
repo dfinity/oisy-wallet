@@ -7,8 +7,8 @@
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import {
 		sendBtc,
-		validateBtcSend,
-		handleBtcValidationError
+		handleBtcValidationError,
+		validateBtcSend
 	} from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
