@@ -7,7 +7,7 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -111,7 +111,7 @@
 					<span>
 						<output>{shortenWithMiddleEllipsis({ text: id })}</output>
 
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={id}
 							copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
 								$hash: id
