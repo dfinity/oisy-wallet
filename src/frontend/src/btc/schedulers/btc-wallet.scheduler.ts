@@ -81,8 +81,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		try {
 			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
-			// this creates an huge overhead since we only select a single transaction from all transactions (that can include many hundres) related
-			// TODO replace with a more efficient solution
 			const newTransactions = fetchedTransactions.filter(({ hash }) =>
 				isNullish(this.store.transactions[`${hash}`])
 			);

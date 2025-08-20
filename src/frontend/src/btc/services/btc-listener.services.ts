@@ -41,10 +41,6 @@ export const syncWallet = async ({
 		}
 	} = data;
 
-	if (certified) {
-		return;
-	}
-
 	// Parse new transactions here in the listener
 	const providerTransactions: CertifiedData<BtcTransactionUi>[] = JSON.parse(
 		newTransactions,

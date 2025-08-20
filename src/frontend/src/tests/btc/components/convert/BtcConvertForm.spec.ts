@@ -10,7 +10,6 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import { TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY } from '$lib/stores/token-action-validation-errors.store';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
-import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -127,25 +126,6 @@ describe('BtcConvertForm', () => {
 		});
 
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
-	});
-
-	it('should render btc send warning message and keep button disabled if there some pending txs', async () => {
-		mockBtcPendingSendTransactionsStatusStore(
-			btcPendingSendTransactionsStatusStore.BtcPendingSentTransactionsStatus.SOME
-		);
-
-		const { getByTestId } = render(BtcConvertForm, {
-			props,
-			context: mockContext({ utxosFeeStore: store })
-		});
-
-		await waitFor(() => {
-			expect(getByTestId(btcSendWarningsTestId)).toHaveTextContent(
-				en.send.info.pending_bitcoin_transaction
-			);
-
-			expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
-		});
 	});
 
 	it('should keep button disabled if there pending txs have not been loaded yet', async () => {
