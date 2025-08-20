@@ -92,7 +92,10 @@ export const fetchKongSwap = async ({
 					...transferParams,
 					ledgerCanisterId
 				})
-			: await sendIcp(transferParams)
+			: await sendIcp({
+					...transferParams,
+					ledgerCanisterId
+				})
 		: undefined;
 
 	isSourceTokenIcrc2 &&
