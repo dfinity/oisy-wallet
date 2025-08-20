@@ -1,4 +1,4 @@
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import { ICP_INDEX_CANISTER_ID, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
@@ -8,6 +8,7 @@ import {
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcp,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
@@ -63,14 +64,16 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 	return {
 		start: () => {
 			worker?.postMessage({
-				msg: 'startIcpWalletTimer'
-			});
+				msg: 'startIcpWalletTimer',
+				data: { indexCanisterId: ICP_INDEX_CANISTER_ID }
+			} as PostMessage<PostMessageDataRequestIcp>);
 		},
 		stop,
 		trigger: () => {
 			worker?.postMessage({
-				msg: 'triggerIcpWalletTimer'
-			});
+				msg: 'triggerIcpWalletTimer',
+				data: { indexCanisterId: ICP_INDEX_CANISTER_ID }
+			} as PostMessage<PostMessageDataRequestIcp>);
 		},
 		destroy: () => {
 			if (isDestroying) {
