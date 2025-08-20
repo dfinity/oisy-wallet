@@ -13,6 +13,10 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import {
+		TRACK_OPEN_DOCUMENTATION,
+		TRACK_OPEN_EXTERNAL_LINK
+	} from '$lib/constants/analytics.contants';
 	import { OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK } from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
@@ -51,12 +55,12 @@
 
 <ContentWithToolbar>
 	<TokensReview
-		sendAmount={swapAmount}
-		{receiveAmount}
-		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
-		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 		destinationTokenExchangeRate={$destinationTokenExchangeRate}
+		{receiveAmount}
+		sendAmount={swapAmount}
+		sourceToken={$sourceToken}
+		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 	/>
 
 	{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
@@ -66,7 +70,7 @@
 			{/snippet}
 
 			{#snippet mainValue()}
-				<SwapImpact {swapAmount} {receiveAmount} />
+				<SwapImpact {receiveAmount} {swapAmount} />
 			{/snippet}
 		</ModalValue>
 	{/if}
@@ -98,17 +102,29 @@
 								: $i18n.swap.error.swap_sucess_withdraw_failed}
 					/>
 					<ExternalLink
-						iconSize="15"
-						href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
 						ariaLabel={$i18n.swap.text.open_instructions_link}
-						>{$i18n.swap.error.swap_failed_instruction_link}</ExternalLink
-					>
+						href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
+						iconSize="15"
+						trackEvent={{
+							name: TRACK_OPEN_DOCUMENTATION,
+							metadata: {
+								link: OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK
+							}
+						}}
+						>{$i18n.swap.error.swap_failed_instruction_link}
+					</ExternalLink>
 					{$i18n.swap.error.withdraw_failed_second_part}
 
 					<ExternalLink
-						iconSize="15"
+						ariaLabel={$i18n.swap.text.open_icp_swap}
 						href={$failedSwapError.url.url}
-						ariaLabel={$i18n.swap.text.open_icp_swap}>{$failedSwapError.url.text}</ExternalLink
+						iconSize="15"
+						trackEvent={{
+							name: TRACK_OPEN_EXTERNAL_LINK,
+							metadata: {
+								link: $failedSwapError.url.url
+							}
+						}}>{$failedSwapError.url.text}</ExternalLink
 					>
 				{:else}
 					{$failedSwapError.message}

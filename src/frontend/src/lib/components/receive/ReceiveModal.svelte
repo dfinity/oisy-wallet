@@ -31,11 +31,11 @@
 
 	<ContentWithToolbar>
 		<ReceiveAddressQrCodeContent
-			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
 			{address}
 			{addressToken}
-			{network}
 			{copyAriaLabel}
+			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
+			{network}
 			qrCodeAction={{ enabled: false }}
 		/>
 

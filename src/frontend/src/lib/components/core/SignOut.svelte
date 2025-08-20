@@ -19,17 +19,17 @@
 	const logout = async () => {
 		dispatch('icLogoutTriggered');
 		onHidePopover?.();
-		await signOut({ resetUrl: true });
+		await signOut({ resetUrl: true, clearAllPrincipalsStorages: true, source: 'menu-button' });
 	};
 
 	const remainingTimeMilliseconds = $derived($authRemainingTimeStore);
 </script>
 
 <Button
-	onclick={logout}
 	colorStyle="secondary"
-	testId={LOGOUT_BUTTON}
+	onclick={logout}
 	styleClass="w-full py-2 flex-1"
+	testId={LOGOUT_BUTTON}
 >
 	<IconLogout />
 	{$i18n.auth.text.logout}

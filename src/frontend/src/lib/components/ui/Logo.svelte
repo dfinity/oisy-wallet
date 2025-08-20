@@ -11,10 +11,19 @@
 		size?: LogoSize;
 		color?: 'off-white' | 'white';
 		ring?: boolean;
+		circle?: boolean;
 		testId?: string;
 	}
 
-	let { src, alt = '', size = 'xxs', color = 'off-white', ring = false, testId }: Props = $props();
+	let {
+		src,
+		alt = '',
+		size = 'xxs',
+		color = 'off-white',
+		ring = false,
+		circle = true,
+		testId
+	}: Props = $props();
 
 	let sizePx = $state(logoSizes[size]);
 
@@ -23,23 +32,24 @@
 </script>
 
 <div
-	class="flex items-center justify-center overflow-hidden rounded-full ring-primary"
+	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
+	class="flex items-center justify-center overflow-hidden ring-primary"
 	class:bg-off-white={color === 'off-white' && !isReady}
 	class:bg-white={color === 'white' && !isReady}
 	class:opacity-10={!isReady}
 	class:ring-2={ring}
-	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
+	class:rounded-full={circle}
+	class:rounded-lg={!circle}
 	data-tid={testId}
 >
 	{#if nonNullish(src) && !loadingError}
 		<Img
-			{src}
 			{alt}
 			fitHeight
 			height={sizePx}
-			onLoad={() => (loadingError = false)}
 			onError={() => (loadingError = true)}
-			rounded
+			onLoad={() => (loadingError = false)}
+			{src}
 		/>
 	{:else}
 		<IconRandom size={sizePx} text={alt} />

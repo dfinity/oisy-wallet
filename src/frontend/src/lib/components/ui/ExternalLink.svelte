@@ -51,24 +51,24 @@
 </script>
 
 <a
-	{href}
-	rel="external noopener noreferrer"
-	target="_blank"
-	class="inline-flex items-center gap-2 no-underline {styleClass}"
-	aria-label={ariaLabel}
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
-	data-tid={testId}
-	class:as-button={asButton}
-	class:text-brand-primary-alt={!asButton && !asMenuItem}
-	class:hover:text-inherit={color === 'blue' && !asButton && !asMenuItem}
-	class:active:text-inherit={color === 'blue' && !asButton && !asMenuItem}
-	class:hover:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
+	class="inline-flex items-center gap-2 no-underline {styleClass}"
 	class:active:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
-	class:w-full={fullWidth}
+	class:active:text-inherit={color === 'blue' && !asButton && !asMenuItem}
+	class:as-button={asButton}
+	class:flex-row-reverse={iconAsLast}
+	class:hover:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
+	class:hover:text-inherit={color === 'blue' && !asButton && !asMenuItem}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
-	class:flex-row-reverse={iconAsLast}
+	class:text-brand-primary-alt={!asButton && !asMenuItem}
+	class:w-full={fullWidth}
+	aria-label={ariaLabel}
+	data-tid={testId}
+	{href}
 	{onclick}
+	rel="external noopener noreferrer"
+	target="_blank"
 >
 	{#if iconVisible}
 		<IconExternalLink size={iconSize} />

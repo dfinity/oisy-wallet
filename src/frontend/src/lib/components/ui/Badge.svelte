@@ -25,15 +25,16 @@
 		warning: 'bg-warning-subtle-20 text-warning-primary',
 		success: 'bg-success-subtle-20 text-success-primary',
 		outline: 'border border-tertiary bg-off-white',
-		disabled: 'bg-tertiary-inverted text-white'
+		disabled: 'bg-tertiary-inverted text-white',
+		'nft-trait': 'border border-secondary bg-primary'
 	};
 </script>
 
 <span
-	data-tid={testId}
 	class="inline-flex h-fit items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold {variantClassNames[
 		variant
 	]} {styleClass ?? ''} {width}"
+	data-tid={testId}
 >
 	<span class="inline-block min-w-0 truncate">
 		{@render children?.()}

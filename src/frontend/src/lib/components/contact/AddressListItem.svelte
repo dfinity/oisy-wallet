@@ -33,9 +33,9 @@
 </script>
 
 <button
-	onclick={() => onClick?.()}
 	class={`flex w-full items-center gap-3 rounded-xl bg-primary p-2 text-left hover:bg-brand-subtle-10 ${styleClass}`}
 	data-tid={ADDRESS_LIST_ITEM_BUTTON}
+	onclick={() => onClick?.()}
 >
 	<IconAddressType addressType={address.addressType} size="32" />
 

@@ -11,6 +11,6 @@
 	let { testId }: Props = $props();
 </script>
 
-<div transition:slide={SLIDE_DURATION} data-tid={testId}>
+<div data-tid={testId} transition:slide={SLIDE_DURATION}>
 	<MessageBox level="error">{$i18n.fee.assertion.insufficient_funds_for_fee}</MessageBox>
 </div>

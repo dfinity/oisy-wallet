@@ -27,11 +27,11 @@
 
 <div class="my-6">
 	<Tabs
-		bind:activeTab={activeSendDestinationTab}
 		tabs={[
 			{ label: $i18n.send.text.recently_used_tab, id: 'recentlyUsed' },
 			{ label: $i18n.send.text.contacts_tab, id: 'contacts' }
 		]}
+		bind:activeTab={activeSendDestinationTab}
 	>
 		{#if activeSendDestinationTab === 'recentlyUsed'}
 			<KnownDestinationsComponent

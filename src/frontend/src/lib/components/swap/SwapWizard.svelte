@@ -7,6 +7,7 @@
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
 	} from '$icp/stores/ic-token-fee.store';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
@@ -51,8 +52,13 @@
 		currentStep
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, isSourceTokenIcrc2, failedSwapError } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		isSourceTokenIcrc2,
+		failedSwapError,
+		sourceTokenExchangeRate
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -60,11 +66,19 @@
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 
+	let isSwapAmountsLoading = $state(false);
+
 	const setFailedProgressStep = (step: ProgressStepsSwap) => {
 		if (!swapFailedProgressSteps.includes(step)) {
 			swapFailedProgressSteps = [...swapFailedProgressSteps, step];
 		}
 	};
+
+	let sourceTokenUsdValue = $derived(
+		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
+			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
+			: undefined
+	);
 
 	const clearFailedProgressStep = () => {
 		swapFailedProgressSteps = [];
@@ -107,8 +121,8 @@
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
 				progress,
-				sourceToken: $sourceToken,
-				destinationToken: $destinationToken,
+				sourceToken: $sourceToken as IcTokenToggleable,
+				destinationToken: $destinationToken as IcTokenToggleable,
 				swapAmount,
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
@@ -133,7 +147,8 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					usdSourceValue: sourceTokenUsdValue ?? ''
 				}
 			});
 
@@ -160,7 +175,7 @@
 					errorType: err.code,
 					swapSucceded: err.swapSucceded,
 					url: {
-						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcTokenToggleable).ledgerCanisterId}&output=${($destinationToken as IcTokenToggleable).ledgerCanisterId}`,
 						text: 'icpswap.com'
 					}
 				});
@@ -185,7 +200,8 @@
 						sourceToken: $sourceToken.symbol,
 						destinationToken: $destinationToken.symbol,
 						dApp: $swapAmountsStore.selectedProvider.provider,
-						errorKey: isSwapError(err) ? err.code : ''
+						errorKey: isSwapError(err) ? err.code : '',
+						usdSourceValue: sourceTokenUsdValue ?? ''
 					}
 				});
 			}
@@ -198,15 +214,18 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<IcTokenFeeContext token={$sourceToken}>
+<IcTokenFeeContext token={$sourceToken as IcTokenToggleable}>
 	<SwapAmountsContext
 		amount={swapAmount}
-		sourceToken={$sourceToken}
-		destinationToken={$destinationToken}
+		destinationToken={$destinationToken as IcTokenToggleable}
+		isSourceTokenIcrc2={$isSourceTokenIcrc2}
 		{slippageValue}
+		sourceToken={$sourceToken as IcTokenToggleable}
+		bind:isSwapAmountsLoading
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapForm
+				{isSwapAmountsLoading}
 				on:icClose
 				on:icNext
 				on:icShowTokensList
@@ -217,19 +236,19 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
+				{receiveAmount}
+				{slippageValue}
+				{swapAmount}
 				on:icSwap={swap}
 				on:icBack
 				on:icClose
-				{slippageValue}
-				{swapAmount}
-				{receiveAmount}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
-				bind:swapProgressStep
-				bind:failedSteps={swapFailedProgressSteps}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}
+				bind:swapProgressStep
+				bind:failedSteps={swapFailedProgressSteps}
 			/>
 		{/if}
 	</SwapAmountsContext>

@@ -65,7 +65,7 @@
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
@@ -91,12 +91,12 @@
 		{#if nonNullish(to) && nonNullish(from)}
 			{#each to as address, index (`${address}-${index}`)}
 				<TransactionContactCard
-					type={type === 'receive' ? 'receive' : 'send'}
-					to={address}
 					{from}
-					toExplorerUrl={nonNullish(explorerUrl) ? `${explorerUrl}/address/${address}` : undefined}
 					{fromExplorerUrl}
 					{onSaveAddressComplete}
+					to={address}
+					toExplorerUrl={nonNullish(explorerUrl) ? `${explorerUrl}/address/${address}` : undefined}
+					type={type === 'receive' ? 'receive' : 'send'}
 				/>
 			{/each}
 		{/if}

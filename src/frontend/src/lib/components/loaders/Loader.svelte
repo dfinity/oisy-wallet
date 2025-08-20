@@ -8,11 +8,14 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
-	import { erc721CustomTokensInitialized, erc721Tokens } from '$eth/derived/erc721.derived';
+	import { erc1155CustomTokensInitialized } from '$eth/derived/erc1155.derived';
+	import { erc721CustomTokensInitialized } from '$eth/derived/erc721.derived';
+	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
+	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -40,6 +43,7 @@
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { initLoader } from '$lib/services/loader.services';
 	import { loadNfts } from '$lib/services/nft.services';
@@ -96,6 +100,7 @@
 		await Promise.all([
 			loadErc20Tokens({ identity: $authIdentity }),
 			loadErc721Tokens({ identity: $authIdentity }),
+			loadErc1155Tokens({ identity: $authIdentity }),
 			loadIcrcTokens({ identity: $authIdentity }),
 			loadSplTokens({ identity: $authIdentity })
 		]);
@@ -163,14 +168,18 @@
 
 	const debounceLoadNfts = debounce(async () => {
 		await loadNfts({
-			tokens: $erc721Tokens ?? [],
+			tokens: $nonFungibleTokens ?? [],
 			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
 		});
 	});
 
 	$effect(() => {
-		if ($erc721CustomTokensInitialized && nonNullish($ethAddress) && $erc721Tokens) {
+		if (
+			($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized) &&
+			nonNullish($ethAddress) &&
+			$nonFungibleTokens.length > 0
+		) {
 			debounceLoadNfts();
 		}
 	});
@@ -193,16 +202,16 @@
 
 {#if $loading}
 	{#if progressModal}
-		<div in:fade={{ delay: 0, duration: 250 }} class="login-modal">
+		<div class="login-modal" in:fade={{ delay: 0, duration: 250 }}>
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
 						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
 							<ImgBanner
-								{src}
 								alt={replacePlaceholders(replaceOisyPlaceholders($i18n.init.alt.loader_banner), {
 									$theme: $themeStore ?? 'light'
 								})}
+								{src}
 								styleClass="aspect-auto"
 							/>
 						{/await}
@@ -217,7 +226,9 @@
 	{/if}
 {:else}
 	<div in:fade>
-		{@render children()}
+		<LoaderNfts>
+			{@render children()}
+		</LoaderNfts>
 	</div>
 {/if}
 

@@ -21,12 +21,12 @@
 
 <ModalTokensList
 	{loading}
+	networkSelectorViewOnly={nonNullish($selectedNetwork)}
 	on:icSelectNetworkFilter
 	on:icTokenButtonClick={onIcTokenButtonClick}
-	networkSelectorViewOnly={nonNullish($selectedNetwork)}
 >
 	{#snippet tokenListItem(token, onClick)}
-		<ModalTokensListItem {token} {onClick} />
+		<ModalTokensListItem {onClick} {token} />
 	{/snippet}
 	{#snippet noResults()}
 		<p class="text-primary">

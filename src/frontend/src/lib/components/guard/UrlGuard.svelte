@@ -9,6 +9,7 @@
 	import { claimVipReward, setReferrer } from '$lib/services/reward.services';
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { hasUrlCode } from '$lib/stores/url-code.store';
 	import { removeSearchParam } from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -24,6 +25,8 @@
 			if (!$loading && page.url.searchParams.has('code') && nonNullish($authIdentity)) {
 				const rewardCode = page.url.searchParams.get('code');
 				if (nonNullish(rewardCode)) {
+					hasUrlCode.set(true);
+
 					const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
 					removeSearchParam({ url: page.url, searchParam: 'code' });
@@ -57,7 +60,7 @@
 
 {#if $modalVipRewardState && nonNullish($modalVipRewardStateData)}
 	<VipRewardStateModal
-		isSuccessful={$modalVipRewardStateData.success}
 		codeType={$modalVipRewardStateData.codeType}
+		isSuccessful={$modalVipRewardStateData.success}
 	/>
 {/if}
