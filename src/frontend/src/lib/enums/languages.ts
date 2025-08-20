@@ -6,6 +6,6 @@ export enum Languages {
 	FRENCH = 'fr',
 	ITALIAN = 'it',
 	PORTUGUESE = 'pt',
-	VIETNAMESE = 'vi',	
+	VIETNAMESE = 'vi',
 	CHINESE_SIMPLIFIED = 'zh-CN'
 }
