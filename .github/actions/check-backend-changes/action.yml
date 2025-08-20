@@ -5,7 +5,7 @@ description: Check for changes in the backend-related code and return a boolean 
 outputs:
   backend:
     description: 'True if any relevant backend file changed'
-    value: ${{ steps.compute.outputs.backend }}
+    value: ${{ steps.changes.outputs.backend }}
 
 runs:
   using: 'composite'
@@ -18,10 +18,8 @@ runs:
         # The backend source code.
         # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
         # The dockerfile used in this CI run, and the scripts it COPY's.
-        # There may be some files in the frontend folder that contains 'backend' in their name.
-        # Split into `backend_raw` and `frontend` because negations (`!…`) don’t work with the default quantifier. We then combine results manually so frontend files named with "backend" don’t trigger false positives.
         filters: |
-          backend_raw:
+          backend:
             - '**/*backend*'
             - '**/*backend*/**'
             - 'src/backend/**'
@@ -30,18 +28,3 @@ runs:
             - '**/*rust*'
             - 'Dockerfile'
             - 'docker/**'
-          frontend:
-            - 'src/frontend/**'
-
-    - name: Compute final backend output
-      id: compute
-      shell: bash
-      run: |
-        if [[ "$BACKEND_RAW" == "true" && "$FRONTEND" != "true" ]]; then
-          echo "backend=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "backend=false" >> "$GITHUB_OUTPUT"
-        fi
-      env:
-        BACKEND_RAW: ${{ steps.changes.outputs.backend_raw }}
-        FRONTEND: ${{ steps.changes.outputs.frontend }}
