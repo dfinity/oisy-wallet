@@ -20,20 +20,20 @@
 </script>
 
 <ButtonIcon
-	bind:button
-	onclick={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
+	colorStyle="muted"
 	disabled={$erc20UserTokensNotInitialized}
 	link={false}
-	colorStyle="muted"
+	onclick={() => (visible = true)}
 	styleClass={visible ? 'active' : ''}
+	bind:button
 >
 	{#snippet icon()}
 		<IconArrowUpDown />
 	{/snippet}
 </ButtonIcon>
 
-<ResponsivePopover bind:visible {button}>
+<ResponsivePopover {button} bind:visible>
 	{#snippet content()}
 		<span class="mb-2 flex text-sm font-bold">{$i18n.nfts.text.sorting}</span>
 

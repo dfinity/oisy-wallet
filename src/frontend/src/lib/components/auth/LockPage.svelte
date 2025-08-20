@@ -37,19 +37,19 @@
 	<div class="backdrop-blur-xs fixed inset-0 -z-10 bg-overlay-page-30">
 		<Responsive up="xl">
 			{#await import(`$lib/assets/lockpage_assets/lock-image-1440-${$themeStore ?? 'light'}.webp`) then { default: src1440 }}
-				<Img src={src1440} alt={ariaLabel} styleClass={imgStyleClass} />
+				<Img alt={ariaLabel} src={src1440} styleClass={imgStyleClass} />
 			{/await}
 		</Responsive>
 
-		<Responsive up="sm" down="xl">
+		<Responsive down="xl" up="sm">
 			{#await import(`$lib/assets/lockpage_assets/lock-image-768-${$themeStore ?? 'light'}.webp`) then { default: src768 }}
-				<Img src={src768} alt={ariaLabel} styleClass={imgStyleClass} />
+				<Img alt={ariaLabel} src={src768} styleClass={imgStyleClass} />
 			{/await}
 		</Responsive>
 
 		<Responsive down="xs">
 			{#await import(`$lib/assets/lockpage_assets/lock-image-480-${$themeStore ?? 'light'}.webp`) then { default: src480 }}
-				<Img src={src480} alt={ariaLabel} styleClass={imgStyleClass} />
+				<Img alt={ariaLabel} src={src480} styleClass={imgStyleClass} />
 			{/await}
 		</Responsive>
 	</div>
@@ -68,16 +68,16 @@
 			<div class="w-full">
 				<Button
 					fullWidth
-					styleClass="mb-3 w-full"
 					innerStyleClass="items-center justify-center"
 					onclick={handleUnlock}
+					styleClass="mb-3 w-full"
 				>
 					{$i18n.lock.text.unlock}
 					<IconKey />
 				</Button>
 				<Button
-					fullWidth
 					colorStyle="secondary-light"
+					fullWidth
 					innerStyleClass="items-center justify-center"
 					onclick={handleLogout}
 				>
@@ -92,8 +92,8 @@
 		</div>
 
 		<ExternalLink
-			href="https://docs.oisy.com/using-oisy-wallet/how-tos/locking-and-logging-out"
 			ariaLabel={$i18n.lock.text.learn_more}
+			href="https://docs.oisy.com/using-oisy-wallet/how-tos/locking-and-logging-out"
 			iconAsLast
 			styleClass="mt-4"
 		>

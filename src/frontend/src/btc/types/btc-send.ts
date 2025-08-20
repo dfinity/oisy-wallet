@@ -8,6 +8,28 @@ export enum BtcPrepareSendError {
 	MinimumBalance = 'minimum_btc_amount'
 }
 
+export class BtcValidationError extends Error {
+	constructor(public readonly type: BtcSendValidationError) {
+		super(type.toString());
+		this.name = 'BtcSendValidationError';
+	}
+}
+
+export enum BtcSendValidationError {
+	InsufficientBalance = 'InsufficientBalance',
+	InsufficientBalanceForFee = 'InsufficientBalanceForFee',
+	InvalidUtxoData = 'InvalidUtxoData',
+	UtxoLocked = 'UtxoLocked',
+	InvalidFeeCalculation = 'InvalidFeeCalculation',
+	MinimumBalance = 'MinimumBalance',
+	AuthenticationRequired = 'AuthenticationRequired',
+	NoNetworkId = 'NoNetworkId',
+	InvalidDestination = 'InvalidDestination',
+	InvalidAmount = 'InvalidAmount',
+	UtxoFeeMissing = 'UtxoFeeMissing',
+	TokenUndefined = 'TokenUndefined'
+}
+
 export interface UtxosFee {
 	feeSatoshis: bigint;
 	utxos: Utxo[];

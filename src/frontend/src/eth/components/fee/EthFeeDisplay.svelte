@@ -16,10 +16,10 @@
 
 {#if nonNullish($feeSymbolStore) && nonNullish($feeDecimalsStore)}
 	<FeeDisplay
-		feeAmount={$maxGasFee}
 		decimals={$feeDecimalsStore}
-		symbol={$feeSymbolStore}
 		exchangeRate={$feeExchangeRateStore}
+		feeAmount={$maxGasFee}
 		{label}
+		symbol={$feeSymbolStore}
 	/>
 {/if}
