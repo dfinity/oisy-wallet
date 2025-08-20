@@ -21,8 +21,8 @@
 	{#snippet logo()}
 		<div class="mr-2">
 			<AvatarWithBadge
-				{contact}
 				badge={{ type: 'addressType', address: addressValue }}
+				{contact}
 				variant="sm"
 			/>
 		</div>

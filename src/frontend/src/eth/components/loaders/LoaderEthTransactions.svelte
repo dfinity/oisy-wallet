@@ -112,6 +112,6 @@
 	});
 </script>
 
-<IntervalLoader onLoad={reload} interval={WALLET_TIMER_INTERVAL_MILLIS}>
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} onLoad={reload}>
 	<slot />
 </IntervalLoader>

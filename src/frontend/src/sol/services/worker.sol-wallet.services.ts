@@ -94,14 +94,14 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 			worker?.postMessage({
 				msg: 'startSolWalletTimer',
 				data
-			});
+			} as PostMessage<PostMessageDataRequestSol>);
 		},
 		stop,
 		trigger: () => {
 			worker?.postMessage({
 				msg: 'triggerSolWalletTimer',
 				data
-			});
+			} as PostMessage<PostMessageDataRequestSol>);
 		},
 		destroy: () => {
 			if (isDestroying) {

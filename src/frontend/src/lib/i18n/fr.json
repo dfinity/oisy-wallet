@@ -14,6 +14,7 @@
 			"symbol": "Symbole",
 			"decimals": "Décimales",
 			"amount": "Montant",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Destination",
 			"reject": "Rejeter",
@@ -722,7 +723,12 @@
 			"minter_info_not_certified": "Réessayez dans quelques secondes, un paramètre de configuration ckETH n'a pas été certifié.",
 			"cketh_max_transaction_fee_missing": "Les frais de transaction maximum pour ckETH sont manquants.",
 			"utxos_fee_missing": "Les frais UTXO sont manquants.",
-			"minimum_btc_amount": ""
+			"minimum_btc_amount": "Montant trop petit. Veuillez saisir au moins $amount BTC.",
+			"btc_insufficient_balance": "Aucun UTXO Bitcoin disponible pour la transaction",
+			"btc_insufficient_balance_for_fee": "Solde Bitcoin insuffisant pour couvrir les frais de transaction",
+			"btc_invalid_utxo_data": "Données de transaction Bitcoin invalides",
+			"btc_utxo_locked": "Les fonds Bitcoin sont verrouillés par des transactions en attente",
+			"btc_invalid_fee_calculation": "Échec de la validation des frais de transaction Bitcoin"
 		},
 		"error": {
 			"unexpected": "Quelque chose s'est mal passé lors de l'envoi de la transaction.",
@@ -828,7 +834,10 @@
 			"open_instructions_link": "Ouvrir le lien des instructions",
 			"select_token": "Sélectionner le jeton",
 			"select_network_filter": "Sélectionner le réseau",
-			"withdrawing": ""
+			"withdrawing": "",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": ""
 		},
 		"error": {
 			"kong_not_available": "Il n'y a actuellement aucun échange disponible pour échanger des jetons. Veuillez réessayer plus tard.",
@@ -1006,7 +1015,26 @@
 		"text": {
 			"title": "NFT",
 			"title_empty": "Vos NFT apparaîtront ici",
-			"description_empty": "Il semble que vous n'ayez pas encore reçu de NFT"
+			"description_empty": "Il semble que vous n'ayez pas encore reçu de NFT",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": "",
+			"collection_not_loaded": "",
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",

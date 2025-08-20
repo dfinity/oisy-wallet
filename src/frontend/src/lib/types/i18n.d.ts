@@ -17,6 +17,7 @@ interface I18nCore {
 		symbol: string;
 		decimals: string;
 		amount: string;
+		tokenId: string;
 		max: string;
 		destination: string;
 		reject: string;
@@ -599,6 +600,11 @@ interface I18nSend {
 		cketh_max_transaction_fee_missing: string;
 		utxos_fee_missing: string;
 		minimum_btc_amount: string;
+		btc_insufficient_balance: string;
+		btc_insufficient_balance_for_fee: string;
+		btc_invalid_utxo_data: string;
+		btc_utxo_locked: string;
+		btc_invalid_fee_calculation: string;
 	};
 	error: {
 		unexpected: string;
@@ -701,6 +707,9 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
+		network_cost: string;
+		gasless: string;
+		swap_fees: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -852,7 +861,30 @@ interface I18nTokens {
 }
 
 interface I18nNfts {
-	text: { title: string; title_empty: string; description_empty: string };
+	text: {
+		title: string;
+		title_empty: string;
+		description_empty: string;
+		grouping: string;
+		as_plain_list: string;
+		by_collection: string;
+		show_spam: string;
+		show_hidden: string;
+		sorting: string;
+		recents_first: string;
+		oldest_first: string;
+		collection_atoz: string;
+		collection_ztoa: string;
+		collection_items_count: string;
+		collection_address: string;
+		token_standard: string;
+		quantity: string;
+		item_traits: string;
+		collection_not_loaded: string;
+		nft_not_loaded: string;
+		collections: string;
+		all_assets: string;
+	};
 	alt: { placeholder_image: string; card: { image: string } };
 }
 
