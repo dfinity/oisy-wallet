@@ -58,4 +58,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadErc20UserTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />
+<HideTokenModal {assertHide} {fromRoute} {hideToken} {updateUi} />
