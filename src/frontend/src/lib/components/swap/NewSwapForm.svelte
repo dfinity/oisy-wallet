@@ -143,22 +143,22 @@
 		<div class="relative">
 			<div class="mb-2">
 				<TokenInputNetworkWrapper
-					tokenNetworkId={$sourceToken?.network?.id}
 					showGradient={nonNullish($sourceToken) &&
 						nonNullish($destinationToken) &&
 						$sourceToken?.network?.id !== $destinationToken?.network.id}
+					tokenNetworkId={$sourceToken?.network?.id}
 				>
 					{#snippet tokenInput()}
 						<TokenInput
-							bind:amount={swapAmount}
+							customValidate={onCustomValidate}
 							displayUnit={inputUnit}
 							exchangeRate={$sourceTokenExchangeRate}
+							showTokenNetwork
+							token={$sourceToken}
+							bind:amount={swapAmount}
 							bind:errorType
 							bind:amountSetToMax
-							token={$sourceToken}
-							customValidate={onCustomValidate}
 							on:click={() => onShowTokensList('source')}
-							showTokenNetwork
 						>
 							<span slot="title">{$i18n.tokens.text.source_token_title}</span>
 
@@ -179,12 +179,12 @@
 								{#if nonNullish($sourceToken)}
 									{#if nonNullish(fee)}
 										<MaxBalanceButton
+											balance={$sourceTokenBalance}
+											error={nonNullish(errorType)}
+											{fee}
+											token={$sourceToken}
 											bind:amountSetToMax
 											bind:amount={swapAmount}
-											error={nonNullish(errorType)}
-											balance={$sourceTokenBalance}
-											token={$sourceToken}
-											{fee}
 										/>
 									{:else}
 										<div class="w-14 sm:w-16">
@@ -201,18 +201,18 @@
 			<SwapSwitchTokensButton disabled={disableSwitchTokens()} on:icSwitchTokens={onTokensSwitch} />
 
 			<TokenInputNetworkWrapper
-				tokenNetworkId={$destinationToken?.network?.id}
 				showGradient={$sourceToken?.network?.id !== $destinationToken?.network.id}
+				tokenNetworkId={$destinationToken?.network?.id}
 			>
 				{#snippet tokenInput()}
 					<TokenInput
-						token={$destinationToken}
 						amount={receiveAmount}
+						disabled={true}
 						displayUnit={inputUnit}
 						exchangeRate={$destinationTokenExchangeRate}
 						loading={swapAmountsLoading}
-						disabled={true}
 						showTokenNetwork
+						token={$destinationToken}
 						on:click={() => onShowTokensList('destination')}
 					>
 						<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
@@ -220,7 +220,7 @@
 						<svelte:fragment slot="amount-info">
 							{#if nonNullish($destinationToken)}
 								{#if showSwapNotOfferedError}
-									<div transition:slide={SLIDE_DURATION} class="text-error-primary"
+									<div class="text-error-primary" transition:slide={SLIDE_DURATION}
 										>{$i18n.swap.text.swap_is_not_offered}</div
 									>
 								{:else}
@@ -237,7 +237,7 @@
 												<SkeletonText />
 											</span>
 										{:else}
-											<SwapValueDifference {swapAmount} {receiveAmount} />
+											<SwapValueDifference {receiveAmount} {swapAmount} />
 										{/if}
 									</div>
 								{/if}
@@ -246,7 +246,7 @@
 
 						<svelte:fragment slot="balance">
 							{#if nonNullish($destinationToken)}
-								<TokenInputBalance token={$destinationToken} balance={$destinationTokenBalance} />
+								<TokenInputBalance balance={$destinationTokenBalance} token={$destinationToken} />
 							{/if}
 						</svelte:fragment>
 					</TokenInput>
