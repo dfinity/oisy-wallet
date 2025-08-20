@@ -29,7 +29,11 @@
 				</div>
 			{/if}
 		{:else}
-			<SkeletonText />
+			<span class="w-full">
+				<span class="mb-2 block"><SkeletonText /></span>
+				<span class="mb-2 block max-w-[90%]"><SkeletonText /></span>
+				<span><SkeletonText /></span>
+			</span>
 		{/if}
 	</div>
 {/if}
