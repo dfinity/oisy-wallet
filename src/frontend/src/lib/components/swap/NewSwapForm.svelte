@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -39,7 +39,7 @@
 		isSwapAmountsLoading: boolean;
 		swapDetails?: Snippet;
 		errorType?: TokenActionErrorType;
-		customValidate?: (userAmount: bigint) => TokenActionErrorType;
+		onCustomValidate: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
@@ -53,7 +53,7 @@
 		isSwapAmountsLoading,
 		swapDetails,
 		errorType = $bindable<TokenActionErrorType | undefined>(),
-		customValidate = $bindable<(userAmount: bigint) => TokenActionErrorType>(),
+		onCustomValidate = $bindable<(userAmount: bigint) => TokenActionErrorType>(),
 		fee,
 		onShowTokensList,
 		onClose,
@@ -156,7 +156,7 @@
 							bind:errorType
 							bind:amountSetToMax
 							token={$sourceToken}
-							{customValidate}
+							customValidate={onCustomValidate}
 							on:click={() => onShowTokensList('source')}
 							showTokenNetwork
 						>
