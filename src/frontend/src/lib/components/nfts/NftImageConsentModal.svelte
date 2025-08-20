@@ -77,13 +77,13 @@
 						<span class="flex">
 							#{nft.id} &nbsp;
 							<output class="text-tertiary"
-								>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 16 })}</output
+								>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 							>
 							<TransactionAddressActions
 								copyAddress={nft.imageUrl}
 								copyAddressText="Copied"
-								explorerUrl=""
-								explorerUrlAriaLabel=""
+								explorerUrl={nft.imageUrl}
+								explorerUrlAriaLabel="Open in new tab"
 							/>
 						</span>
 					{/each}
