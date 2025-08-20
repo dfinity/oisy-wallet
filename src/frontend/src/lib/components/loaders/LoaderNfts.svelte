@@ -111,9 +111,9 @@
 	};
 
 	const handleUpdatedNfts = ({
-															 token,
-															 inventory
-														 }: {
+		token,
+		inventory
+	}: {
 		token: NonFungibleToken;
 		inventory: OwnedNft[];
 	}) => {
