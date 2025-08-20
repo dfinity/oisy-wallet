@@ -8,6 +8,7 @@ import {
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcp,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
@@ -64,13 +65,13 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 		start: () => {
 			worker?.postMessage({
 				msg: 'startIcpWalletTimer'
-			});
+			} as PostMessage<PostMessageDataRequestIcp>);
 		},
 		stop,
 		trigger: () => {
 			worker?.postMessage({
 				msg: 'triggerIcpWalletTimer'
-			});
+			} as PostMessage<PostMessageDataRequestIcp>);
 		},
 		destroy: () => {
 			if (isDestroying) {

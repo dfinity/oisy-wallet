@@ -7,13 +7,14 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestDip20,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 
 export const initDip20WalletWorker = async ({
-	ledgerCanisterId,
+	ledgerCanisterId: canisterId,
 	id: tokenId,
 	network: { env, id: networkId }
 }: IcToken): Promise<WalletWorker> => {
@@ -69,20 +70,18 @@ export const initDip20WalletWorker = async ({
 			worker?.postMessage({
 				msg: 'startDip20WalletTimer',
 				data: {
-					ledgerCanisterId,
-					env
+					canisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestDip20>);
 		},
 		stop,
 		trigger: () => {
 			worker?.postMessage({
 				msg: 'triggerDip20WalletTimer',
 				data: {
-					ledgerCanisterId,
-					env
+					canisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestDip20>);
 		},
 		destroy: () => {
 			if (isDestroying) {
