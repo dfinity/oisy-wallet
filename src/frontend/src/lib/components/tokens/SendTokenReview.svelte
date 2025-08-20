@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -11,12 +12,13 @@
 		token: Token;
 		sendAmount?: OptionAmount;
 		exchangeRate?: number;
+		content?: Snippet;
 	}
 
-	let { token, sendAmount, exchangeRate }: Props = $props();
+	let { token, sendAmount, exchangeRate, content }: Props = $props();
 </script>
 
-<ModalHero>
+<ModalHero {content}>
 	{#snippet logo()}
 		<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 	{/snippet}
