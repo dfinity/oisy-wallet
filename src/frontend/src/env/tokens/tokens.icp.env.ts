@@ -2,7 +2,8 @@ import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import {
 	ICP_INDEX_CANISTER_ID,
 	ICP_LEDGER_CANISTER_ID,
-	ICP_NETWORK
+	ICP_NETWORK,
+	ICP_PSEUDO_TESTNET_NETWORK
 } from '$env/networks/networks.icp.env';
 import icpLight from '$icp/assets/icp-light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
@@ -35,4 +36,27 @@ export const ICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated'>> = {
 	buy: {
 		onramperId: 'icp_icp'
 	}
+};
+
+/**
+ * TESTICP
+ */
+export const TESTICP_SYMBOL = 'TESTICP';
+
+export const TESTICP_TOKEN_ID: TokenId = parseTokenId(TESTICP_SYMBOL);
+
+export const TESTICP_TOKEN: IcToken = {
+	id: TESTICP_TOKEN_ID,
+	network: ICP_PSEUDO_TESTNET_NETWORK,
+	standard: 'icp',
+	category: 'default',
+	position: 0,
+	name: 'Test ICP',
+	symbol: TESTICP_SYMBOL,
+	decimals: 8,
+	icon: icpLight,
+	fee: 10_000n,
+	ledgerCanisterId: 'xafvr-biaaa-aaaai-aql5q-cai',
+	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai',
+	explorerUrl: ICP_EXPLORER_URL
 };
