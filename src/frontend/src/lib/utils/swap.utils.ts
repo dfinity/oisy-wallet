@@ -10,9 +10,9 @@ import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
-	SWAP_ETH_TOKEN_PLACEHOLDER
+	SWAP_ETH_TOKEN_PLACEHOLDER,
+	swapProvidersDetails
 } from '$lib/constants/swap.constants';
-import { swapProvidersDetails } from '$lib/providers/swap.providers';
 import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
 import {
