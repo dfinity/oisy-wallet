@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { etherscanProviders } from '$eth/providers/etherscan.providers';
+	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
@@ -12,8 +14,6 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 	import { findNewNftIds } from '$lib/utils/nfts.utils';
-	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
-	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 
 	interface Props {
 		children?: Snippet;

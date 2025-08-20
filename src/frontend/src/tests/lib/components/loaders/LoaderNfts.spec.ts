@@ -1,22 +1,22 @@
+import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
-import * as infuraErc721ProvidersModule from '$eth/providers/infura-erc721.providers';
 import * as infuraErc1155ProvidersModule from '$eth/providers/infura-erc1155.providers';
+import * as infuraErc721ProvidersModule from '$eth/providers/infura-erc721.providers';
+import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 import * as addressStore from '$lib/derived/address.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import * as nftServicesModule from '$lib/services/nft.services';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
-import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
-import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
-import { AlchemyProvider } from '$eth/providers/alchemy.providers';
 
 describe('LoaderNfts', () => {
 	let etherscanProvidersSpy: MockInstance;
