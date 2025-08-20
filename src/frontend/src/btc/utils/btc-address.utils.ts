@@ -62,7 +62,7 @@ export const getBtcAddressString = (address: BtcAddress): string => {
 };
 
 /**
- * Get the BTC source address for a given network ID using the same logic as components
+ * Get the BTC source address for a given network ID
  * @param networkId - The network ID
  * @returns The source address string
  */

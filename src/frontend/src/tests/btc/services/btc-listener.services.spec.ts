@@ -14,8 +14,6 @@ describe('btc-listener', () => {
 	const tokenId: TokenId = parseTokenId('testTokenId');
 
 	const mockBalance = 1000n;
-	const mockAddress = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh';
-	const mockNetwork: BitcoinNetwork = 'mainnet';
 
 	const mockTransactions = [mockBtcTransactionUi, mockBtcTransactionUi];
 
@@ -27,9 +25,7 @@ describe('btc-listener', () => {
 
 	const mockPostMessage = ({
 		balance = mockBalance,
-		transactions = mockTransactions,
-		address = mockAddress,
-		network = mockNetwork
+		transactions = mockTransactions
 	}: {
 		balance?: bigint | null;
 		transactions?: BtcTransactionUi[];
@@ -41,9 +37,7 @@ describe('btc-listener', () => {
 				certified: true,
 				data: balance
 			},
-			newTransactions: JSON.stringify(mockCertifiedTransactions(transactions), jsonReplacer),
-			address,
-			network
+			newTransactions: JSON.stringify(mockCertifiedTransactions(transactions), jsonReplacer)
 		}
 	});
 

@@ -4,7 +4,6 @@ import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
-import { BtcTransactionSpeed } from '$icp/types/btc';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -45,8 +44,7 @@ export const prepareBtcSend = async ({
 	// Step 1: Get current fee percentiles from backend
 	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
 		identity,
-		network,
-		speed: BtcTransactionSpeed.normal
+		network
 	});
 
 	// Step 2: Fetch all available UTXOs using query call (fast and no cycle cost)
@@ -110,12 +108,10 @@ export const prepareBtcSend = async ({
 
 export const getFeeRateFromPercentiles = async ({
 	identity,
-	network,
-	speed = BtcTransactionSpeed.normal
+	network
 }: {
 	identity: Identity;
 	network: BitcoinNetwork;
-	speed?: BtcTransactionSpeed;
 }): Promise<bigint> => {
 	const mappedNetwork = mapToSignerBitcoinNetwork({ network });
 
@@ -128,33 +124,12 @@ export const getFeeRateFromPercentiles = async ({
 		throw new Error('No fee percentiles available - cannot calculate transaction fee');
 	}
 
-	// Select fee based on speed preference
-	let selectedFeeMillisatsPerVByte: bigint;
-
-	switch (speed) {
-		case BtcTransactionSpeed.slow: {
-			// Use lower percentile (25th) for slow (cheaper) transactions
-			const slowIndex = Math.floor(fee_percentiles.length * 0.25);
-			selectedFeeMillisatsPerVByte = fee_percentiles[slowIndex];
-			break;
-		}
-		case BtcTransactionSpeed.fast: {
-			// Use higher percentile (75th) for fast (more expensive) transactions
-			const fastIndex = Math.floor(fee_percentiles.length * 0.75);
-			selectedFeeMillisatsPerVByte = fee_percentiles[fastIndex];
-			break;
-		}
-		case BtcTransactionSpeed.normal:
-		default: {
-			// Use median fee percentile for normal speed
-			const medianIndex = Math.floor(fee_percentiles.length / 2);
-			selectedFeeMillisatsPerVByte = fee_percentiles[medianIndex];
-			break;
-		}
-	}
+	// Use median fee percentile
+	const medianIndex = Math.floor(fee_percentiles.length / 2);
+	const medianFeeMillisatsPerVByte = fee_percentiles[medianIndex];
 
 	// Convert from millisats to sats (divide by 1000)
-	const feeRateSatsPerVByte = selectedFeeMillisatsPerVByte / 1000n;
+	const feeRateSatsPerVByte = medianFeeMillisatsPerVByte / 1000n;
 
 	// Apply minimum and maximum limits
 	const MIN_FEE_RATE = 1n; // 1 sat/vbyte minimum

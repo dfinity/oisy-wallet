@@ -24,7 +24,6 @@ import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -37,7 +36,7 @@ export const syncWallet = async ({
 }) => {
 	const {
 		wallet: {
-			balance: { certified, data: totalBalance },
+			balance: { certified, data: balance },
 			newTransactions
 		}
 	} = data;
@@ -52,7 +51,7 @@ export const syncWallet = async ({
 		jsonReviver
 	);
 
-	if (nonNullish(totalBalance)) {
+	if (nonNullish(balance)) {
 		/*
 		 * Balance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
 		 * because the pending transactions store (btcPendingSentTransactionsStore) is not accessible from the worker context.
@@ -80,7 +79,7 @@ export const syncWallet = async ({
 		// Use sourceAddress to ensure consistency with the address used for pending transactions
 		const btcWalletBalance = getBtcWalletBalance({
 			address: sourceAddress,
-			latestBalance: totalBalance,
+			latestBalance: balance,
 			providerTransactions
 		});
 
@@ -88,7 +87,7 @@ export const syncWallet = async ({
 			timestamp: new Date().toISOString(),
 			input: {
 				sourceAddress,
-				totalBalance: totalBalance.toString(),
+				totalBalance: balance.toString(),
 				providerTransactionsCount: providerTransactions.length
 			},
 			output: {
@@ -149,26 +148,6 @@ export const syncWalletFromCache = (params: Omit<GetIdbTransactionsParams, 'prin
 		getIdbTransactions: getIdbBtcTransactions,
 		transactionsStore: btcTransactionsStore
 	});
-
-/**
- * Maps a BitcoinNetwork string to its corresponding NetworkId
- * @param bitcoinNetwork - The bitcoin network string ('mainnet', 'testnet', or 'regtest')
- * @returns The corresponding NetworkId or undefined if not found
- */
-export const mapBitcoinNetworkToNetworkId = (
-	bitcoinNetwork: BitcoinNetwork
-): NetworkId | undefined => {
-	switch (bitcoinNetwork) {
-		case 'mainnet':
-			return BTC_MAINNET_NETWORK_ID;
-		case 'testnet':
-			return BTC_TESTNET_NETWORK_ID;
-		case 'regtest':
-			return BTC_REGTEST_NETWORK_ID;
-		default:
-			return undefined;
-	}
-};
 
 /**
  * Get the NetworkId from a BTC TokenId

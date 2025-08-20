@@ -1,5 +1,4 @@
 import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
-import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as blockchainRest from '$lib/rest/blockchain.rest';
@@ -7,12 +6,10 @@ import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
-import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { BitcoinCanister, type BitcoinNetwork } from '@dfinity/ckbtc';
-import { jsonReplacer } from '@dfinity/utils';
 import { waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -28,8 +25,6 @@ describe('btc-wallet.worker', () => {
 
 	const mockBalance = 100n;
 
-	const latestBitcoinBlockHeight = 100;
-
 	const mockPostMessageStatusInProgress = {
 		msg: 'syncBtcWalletStatus',
 		data: {
@@ -43,44 +38,6 @@ describe('btc-wallet.worker', () => {
 			state: 'idle'
 		}
 	};
-
-	const mockPostMessage = ({
-		certified,
-		withTransactions
-	}: {
-		certified: boolean;
-		withTransactions: boolean;
-	}) => ({
-		msg: 'syncBtcWallet',
-		data: {
-			wallet: {
-				balance: {
-					certified,
-					data: {
-						available: mockBalance,
-						pending: 0n,
-						total: mockBalance
-					}
-				},
-				newTransactions: JSON.stringify(
-					withTransactions
-						? [
-								{
-									data: mapBtcTransaction({
-										transaction: mockBtcTransaction,
-										latestBitcoinBlockHeight,
-										btcAddress: mockBtcAddress
-									}),
-									// TODO: use "certified" instead of hardcoded value when we have a way of certifying BTC txs
-									certified: false
-								}
-							]
-						: [],
-					jsonReplacer
-				)
-			}
-		}
-	});
 
 	const postMessageMock = vi.fn();
 

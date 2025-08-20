@@ -60,7 +60,7 @@
 	<svelte:fragment slot="message">
 		{#if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
-				<BtcSendWarnings pendingTransactionsStatus={$hasPendingTransactionsStore} {utxosFee} />
+				<BtcSendWarnings {utxosFee} />
 			</div>
 		{/if}
 	</svelte:fragment>
