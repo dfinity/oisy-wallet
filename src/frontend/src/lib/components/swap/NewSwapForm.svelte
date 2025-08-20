@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import TokenInputNetworkWrapper from '$lib/components/tokens/TokenInputNetworkWrapper.svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
@@ -11,6 +10,7 @@
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
+	import TokenInputNetworkWrapper from '$lib/components/tokens/TokenInputNetworkWrapper.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -41,6 +41,9 @@
 		errorType?: TokenActionErrorType;
 		customValidate?: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
+		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onClose: () => void;
+		onNext: () => void;
 	}
 
 	let {
@@ -51,7 +54,10 @@
 		swapDetails,
 		errorType = $bindable<TokenActionErrorType | undefined>(),
 		customValidate = $bindable<(userAmount: bigint) => TokenActionErrorType>(),
-		fee
+		fee,
+		onShowTokensList,
+		onClose,
+		onNext
 	}: Props = $props();
 
 	const {
@@ -123,8 +129,6 @@
 		}
 	});
 
-	const dispatch = createEventDispatcher();
-
 	const onTokensSwitch = () => {
 		const tempAmount = receiveAmount;
 		swapAmountsStore.reset();
@@ -153,9 +157,7 @@
 							bind:amountSetToMax
 							token={$sourceToken}
 							{customValidate}
-							on:click={() => {
-								dispatch('icShowTokensList', 'source');
-							}}
+							on:click={() => onShowTokensList('source')}
 							showTokenNetwork
 						>
 							<span slot="title">{$i18n.tokens.text.source_token_title}</span>
@@ -211,9 +213,7 @@
 						loading={swapAmountsLoading}
 						disabled={true}
 						showTokenNetwork
-						on:click={() => {
-							dispatch('icShowTokensList', 'destination');
-						}}
+						on:click={() => onShowTokensList('destination')}
 					>
 						<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
 
@@ -261,9 +261,9 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonCancel onclick={() => dispatch('icClose')} />
+			<ButtonCancel onclick={onClose} />
 
-			<Button disabled={invalid} onclick={() => dispatch('icNext')}>
+			<Button disabled={invalid} onclick={onNext}>
 				{$i18n.swap.text.review_button}
 			</Button>
 		</ButtonGroup>
