@@ -16,7 +16,7 @@ import type {
 export const initDip20WalletWorker = async ({
 	ledgerCanisterId: canisterId,
 	id: tokenId,
-	network: { env, id: networkId }
+	network: { id: networkId }
 }: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	let worker: Worker | null = new WalletWorker.default();
