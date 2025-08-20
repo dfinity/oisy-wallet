@@ -7,13 +7,13 @@
 	import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftIdsOfToken } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 	import { findNewNftIds, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
-	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 
 	interface Props {
 		children?: Snippet;
