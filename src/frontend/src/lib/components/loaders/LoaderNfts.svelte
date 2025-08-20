@@ -135,6 +135,6 @@
 	};
 </script>
 
-<IntervalLoader {onLoad} interval={20000}>
+<IntervalLoader interval={20000} {onLoad}>
 	{@render children?.()}
 </IntervalLoader>
