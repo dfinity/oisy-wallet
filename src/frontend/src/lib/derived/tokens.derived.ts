@@ -12,6 +12,7 @@ import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
+import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
@@ -37,6 +38,7 @@ export const tokens: Readable<Token[]> = derived(
 		erc1155Tokens,
 		sortedIcrcTokens,
 		splTokens,
+		defaultIcpTokens,
 		enabledEthereumTokens,
 		enabledBitcoinTokens,
 		enabledSolanaTokens,
@@ -48,13 +50,13 @@ export const tokens: Readable<Token[]> = derived(
 		$erc1155Tokens,
 		$icrcTokens,
 		$splTokens,
+		$defaultIcpTokens,
 		$enabledEthereumTokens,
 		$enabledBitcoinTokens,
 		$enabledSolanaTokens,
 		$enabledEvmTokens
 	]) => [
-		ICP_TOKEN,
-		TESTICP_TOKEN,
+		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
