@@ -7,6 +7,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcrc,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
@@ -99,7 +100,7 @@ export const initIcrcWalletWorker = async ({
 					ledgerCanisterId,
 					env
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcrc>);
 		},
 		stop,
 		trigger: () => {
@@ -110,7 +111,7 @@ export const initIcrcWalletWorker = async ({
 					ledgerCanisterId,
 					env
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcrc>);
 		},
 		destroy: () => {
 			if (isDestroying) {
