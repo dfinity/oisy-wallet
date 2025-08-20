@@ -155,9 +155,8 @@ export const enabledIcrcLedgerCanisterIdsNoCk: Readable<LedgerCanisterIdText[]> 
 export const allKnownIcrcTokensLedgerCanisterIds: Readable<LedgerCanisterIdText[]> = derived(
 	[icrcDefaultTokens],
 	([$icrcDefaultTokens]) => {
-		const tokens = [...IC_BUILTIN_TOKENS];
 		const icrcEnvTokens: IcTokenToggleable[] =
-			tokens?.map((token) => ({ ...token, enabled: false })) ?? [];
+			IC_BUILTIN_TOKENS.map((token) => ({ ...token, enabled: false })) ?? [];
 
 		return [
 			...$icrcDefaultTokens.map(({ ledgerCanisterId }) => ledgerCanisterId),

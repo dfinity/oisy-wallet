@@ -23,9 +23,8 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 	([$icrcTokens]) => {
 		// The list of ICRC tokens (SNSes) is defined as environment variables.
 		// These tokens are not necessarily loaded at boot time if the user has not added them to their list of custom tokens.
-		const tokens = [...IC_BUILTIN_TOKENS];
 		const icrcEnvTokens: IcTokenToggleable[] =
-			tokens?.map((token) => ({ ...token, enabled: false })) ?? [];
+			IC_BUILTIN_TOKENS.map((token) => ({ ...token, enabled: false })) ?? [];
 
 		// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
 		const knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
