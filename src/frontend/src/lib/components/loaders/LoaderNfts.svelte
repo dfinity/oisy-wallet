@@ -13,6 +13,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 	import { findNewNftIds, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
+	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 
 	interface Props {
 		children?: Snippet;
@@ -135,6 +136,6 @@
 	};
 </script>
 
-<IntervalLoader interval={20000} {onLoad}>
+<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad}>
 	{@render children?.()}
 </IntervalLoader>
