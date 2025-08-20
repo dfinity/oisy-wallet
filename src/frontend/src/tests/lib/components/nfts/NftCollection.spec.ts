@@ -36,7 +36,7 @@ describe('NftCollection', () => {
 
 		for (let i = 0; i < links.length; i++) {
 			expect(links.item(i).getAttribute('href')).toContain(
-				`${AppPath.Nfts}${mockValidErc1155Nft.collection.address}/${mockNfts[i].id}`
+				`${AppPath.Nfts}${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}/${mockNfts[i].id}`
 			);
 
 			const img = links.item(i).querySelector('.bg-contain');
