@@ -834,7 +834,10 @@
 			"open_instructions_link": "Открыть ссылку с инструкциями",
 			"select_token": "Выбрать токен",
 			"select_network_filter": "Выбрать сеть",
-			"withdrawing": ""
+			"withdrawing": "",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": ""
 		},
 		"error": {
 			"kong_not_available": "В настоящее время нет доступного обмена для обмена токенов. Пожалуйста, попробуйте еще раз позже.",

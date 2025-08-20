@@ -834,7 +834,10 @@
 			"open_instructions_link": "Ouvrir le lien des instructions",
 			"select_token": "Sélectionner le jeton",
 			"select_network_filter": "Sélectionner le réseau",
-			"withdrawing": ""
+			"withdrawing": "",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": ""
 		},
 		"error": {
 			"kong_not_available": "Il n'y a actuellement aucun échange disponible pour échanger des jetons. Veuillez réessayer plus tard.",

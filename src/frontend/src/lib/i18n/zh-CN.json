@@ -834,7 +834,10 @@
 			"open_instructions_link": "打开说明链接",
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
-			"withdrawing": "正在取款"
+			"withdrawing": "正在取款",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",

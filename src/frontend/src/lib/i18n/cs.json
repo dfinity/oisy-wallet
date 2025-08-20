@@ -834,7 +834,10 @@
 			"open_instructions_link": "Otevřít odkaz na pokyny",
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
-			"withdrawing": "Stažení..."
+			"withdrawing": "Stažení...",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": ""
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
