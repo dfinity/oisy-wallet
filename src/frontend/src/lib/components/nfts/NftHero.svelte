@@ -25,7 +25,10 @@
 		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
 			breadcrumbs = [
 				...breadcrumbs,
-				{ label: nft.collection.name, url: AppPath.Nfts + nft.collection.address }
+				{
+					label: nft.collection.name,
+					url: `${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}`
+				}
 			];
 		}
 		return breadcrumbs;

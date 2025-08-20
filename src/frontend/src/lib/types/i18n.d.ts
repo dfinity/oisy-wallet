@@ -707,6 +707,9 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
+		network_cost: string;
+		gasless: string;
+		swap_fees: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -879,6 +882,8 @@ interface I18nNfts {
 		item_traits: string;
 		collection_not_loaded: string;
 		nft_not_loaded: string;
+		collections: string;
+		all_assets: string;
 	};
 	alt: { placeholder_image: string; card: { image: string } };
 }
