@@ -22,7 +22,7 @@ import {
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
@@ -242,6 +242,7 @@ describe('all-tokens.derived', () => {
 
 			expect(tokenSymbols).toEqual([
 				ICP_TOKEN.id.description,
+				TESTICP_TOKEN.id.description,
 				BTC_MAINNET_TOKEN.id.description,
 				BTC_TESTNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
@@ -270,6 +271,7 @@ describe('all-tokens.derived', () => {
 
 			expect(tokenSymbols).toEqual([
 				ICP_TOKEN.id.description,
+				TESTICP_TOKEN.id.description,
 				BTC_MAINNET_TOKEN.id.description,
 				BTC_TESTNET_TOKEN.id.description,
 				BTC_REGTEST_TOKEN.id.description,
