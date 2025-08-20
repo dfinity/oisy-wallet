@@ -11,6 +11,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft } from '$lib/types/nft';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import NftDescription from '$lib/components/nfts/NftDescription.svelte';
 
 	const [networkId, collectionId, nftId] = $derived([
 		page.params.networkId,
@@ -47,3 +48,5 @@
 </script>
 
 <NftHero {nft} />
+
+<NftDescription {nft} />
