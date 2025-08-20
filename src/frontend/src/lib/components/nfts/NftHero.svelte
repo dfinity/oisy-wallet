@@ -5,6 +5,7 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
@@ -14,7 +15,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
