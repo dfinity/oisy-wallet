@@ -1034,13 +1034,15 @@
 			"collection_not_loaded": "",
 			"nft_not_loaded": "",
 			"collections": "",
-			"all_assets": ""
+			"all_assets": "",
+			"address_copied": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
 			"card": {
 				"image": "图片"
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {

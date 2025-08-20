@@ -884,8 +884,9 @@ interface I18nNfts {
 		nft_not_loaded: string;
 		collections: string;
 		all_assets: string;
+		address_copied: string;
 	};
-	alt: { placeholder_image: string; card: { image: string } };
+	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
 
 interface I18nFee {

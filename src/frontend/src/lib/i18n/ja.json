@@ -1034,13 +1034,15 @@
 			"collection_not_loaded": "",
 			"nft_not_loaded": "",
 			"collections": "",
-			"all_assets": ""
+			"all_assets": "",
+			"address_copied": ""
 		},
 		"alt": {
 			"placeholder_image": "まだNFTがありません",
 			"card": {
 				"image": "トークンIDが$tokenIdのNFTの画像"
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {

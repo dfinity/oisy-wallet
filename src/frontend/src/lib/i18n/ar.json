@@ -1034,13 +1034,15 @@
 			"collection_not_loaded": "",
 			"nft_not_loaded": "",
 			"collections": "",
-			"all_assets": ""
+			"all_assets": "",
+			"address_copied": ""
 		},
 		"alt": {
 			"placeholder_image": "لا توجد NFTs بعد",
 			"card": {
 				"image": "صورة NFT مع معرف التوكن: $tokenId"
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
