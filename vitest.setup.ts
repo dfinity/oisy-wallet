@@ -1,3 +1,4 @@
+import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import {
 	allowLoggingForDebugging,
@@ -94,7 +95,11 @@ vi.mock('idb-keyval', () => ({
 
 failTestsThatLogToConsole();
 
-if (process.env.ALLOW_LOGGING_FOR_DEBUGGING) {
+const ALLOW_LOGGING_FOR_DEBUGGING = parseBoolEnvVar(
+	process.env.ALLOW_LOGGING_FOR_DEBUGGING ?? import.meta.env.VITE_ALLOW_LOGGING_FOR_DEBUGGING
+);
+
+if (ALLOW_LOGGING_FOR_DEBUGGING) {
 	allowLoggingForDebugging();
 }
 
