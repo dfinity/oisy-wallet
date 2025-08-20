@@ -4,7 +4,7 @@ import * as ethEnv from '$env/networks/networks.eth.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN_ID, TESTICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
@@ -44,12 +44,10 @@ describe('AllTransactionsSkeletons', () => {
 			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
 			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
 			icTransactionsStore.reset(ICP_TOKEN_ID);
-			icTransactionsStore.reset(TESTICP_TOKEN_ID);
 
 			btcTransactionsStore.append({ tokenId: BTC_MAINNET_TOKEN_ID, transactions: [] });
 			ethTransactionsStore.add({ tokenId: ETHEREUM_TOKEN_ID, transactions: [] });
 			icTransactionsStore.append({ tokenId: ICP_TOKEN_ID, transactions: [] });
-			icTransactionsStore.append({ tokenId: TESTICP_TOKEN_ID, transactions: [] });
 		});
 
 		it('should render the skeleton when at least one store is empty', () => {
