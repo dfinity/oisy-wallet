@@ -21,8 +21,8 @@
 <p class="mt-24 text-center text-xs text-primary">
 	<span class="opacity-50">{OISY_NAME}</span>
 	<ExternalLink
-		href={releaseUrl}
 		ariaLabel={replaceOisyPlaceholders($i18n.settings.alt.github_release)}
+		href={releaseUrl}
 		iconVisible={false}>{version}</ExternalLink
 	>
 </p>

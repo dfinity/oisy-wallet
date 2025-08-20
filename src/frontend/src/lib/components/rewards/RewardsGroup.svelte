@@ -30,7 +30,7 @@
 	{/if}
 
 	{#each rewards as reward (reward.id)}
-		<div in:slide={SLIDE_DURATION} class="mt-4">
+		<div class="mt-4" in:slide={SLIDE_DURATION}>
 			<RewardCard
 				onclick={() => {
 					trackEvent({
@@ -55,8 +55,8 @@
 	{#if nonNullish(altImg) && rewards.length === 0}
 		<div class="max-h-66 overflow-hidden rounded-2xl">
 			<Img
-				src={altImg}
 				alt={altText}
+				src={altImg}
 				testId={nonNullish(testId) ? `${testId}-alt-img` : undefined}
 			/>
 		</div>

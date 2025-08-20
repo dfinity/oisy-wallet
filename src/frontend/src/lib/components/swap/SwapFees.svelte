@@ -77,15 +77,15 @@
 			{#if $isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
 				<SwapFee
 					fee={sourceTokenApproveFeeDisplay}
-					symbol={getTokenDisplaySymbol($sourceToken)}
 					feeLabel={$i18n.swap.text.approval_fee}
+					symbol={getTokenDisplaySymbol($sourceToken)}
 				/>
 			{/if}
 
 			<SwapFee
 				fee={sourceTokenTransferFeeDisplay}
-				symbol={getTokenDisplaySymbol($sourceToken)}
 				feeLabel={$i18n.swap.text.network_fee}
+				symbol={getTokenDisplaySymbol($sourceToken)}
 			/>
 		{/snippet}
 	</ModalExpandableValues>

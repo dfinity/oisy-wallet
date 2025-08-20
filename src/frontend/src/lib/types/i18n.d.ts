@@ -873,6 +873,14 @@ interface I18nNfts {
 		collection_atoz: string;
 		collection_ztoa: string;
 		collection_items_count: string;
+		collection_address: string;
+		token_standard: string;
+		quantity: string;
+		item_traits: string;
+		collection_not_loaded: string;
+		nft_not_loaded: string;
+		collections: string;
+		all_assets: string;
 	};
 	alt: { placeholder_image: string; card: { image: string } };
 }
