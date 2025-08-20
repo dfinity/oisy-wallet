@@ -39,15 +39,15 @@
 </script>
 
 <Transaction
-	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
-	{type}
-	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
-	status={transactionStatus}
-	{token}
-	{iconType}
-	to={toOwner ?? to}
 	from={fromOwner ?? from}
+	{iconType}
+	onClick={() => modalStore.openSolTransaction({ id: modalId, data: { transaction, token } })}
+	status={transactionStatus}
+	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
+	to={toOwner ?? to}
+	{token}
+	{type}
 >
 	{label}
 </Transaction>

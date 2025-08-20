@@ -18,9 +18,9 @@
 	{#snippet logo()}
 		<div class="mr-2">
 			<AvatarWithBadge
-				contact={selectedContact}
 				address={destination}
 				badge={{ type: 'addressType', address: destination }}
+				contact={selectedContact}
 			/>
 		</div>
 	{/snippet}
@@ -29,7 +29,7 @@
 		{#if isNullish(selectedContact)}
 			<span class="font-bold">{$i18n.transaction.text.to}</span>
 		{:else}
-			<SendContactName contact={selectedContact} address={destination}>
+			<SendContactName address={destination} contact={selectedContact}>
 				{$i18n.transaction.text.to} :
 			</SendContactName>
 		{/if}

@@ -17,6 +17,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { NonEmptyArray } from '$lib/types/utils';
+import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -119,9 +120,7 @@ export const saveTokens = async <
 
 		trackEvent({
 			name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,
-			metadata: {
-				error: `${err}`
-			}
+			metadata: mapIcErrorMetadata(err)
 		});
 	}
 };

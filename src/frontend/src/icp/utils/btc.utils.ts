@@ -52,9 +52,7 @@ export const getPendingTransactions = (
 	certified: true;
 } => {
 	const storeData = get(btcPendingSentTransactionsStore);
-	const pendingTransactions = storeData[address];
-
-	return pendingTransactions;
+	return storeData[address];
 };
 
 /**
@@ -70,9 +68,8 @@ export const getPendingTransactionIds = (address: string): string[] => {
 	// Use the utility function to convert txids and filter out nulls
 	return pendingTransactions.data
 		.map(convertPendingTransactionTxid)
-		.filter((txid): txid is string => txid !== null);
+		.filter((txid): txid is string => nonNullish(txid));
 };
-
 /**
  * Calculates a comprehensive BTC wallet balance structure accounting for all pending transactions.
  *
@@ -107,10 +104,10 @@ export const getPendingTransactionIds = (address: string): string[] => {
  * @returns BtcWalletBalance with all balance categories in satoshis
  */
 export const getBtcWalletBalance = ({
-	address,
-	latestBalance,
-	providerTransactions
-}: {
+																			address,
+																			latestBalance,
+																			providerTransactions
+																		}: {
 	address: string;
 	latestBalance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[];
@@ -148,50 +145,50 @@ export const getBtcWalletBalance = ({
 	const { lockedBalance, unconfirmedBalance } = isNullish(pendingTransactions?.data)
 		? { lockedBalance: ZERO, unconfirmedBalance: ZERO }
 		: pendingTransactions.data.reduce(
-				(acc, tx) => {
-					// Sum all UTXO values for this pending outgoing transaction
-					// These UTXOs are locked and cannot be spent again (prevents double-spending)
-					const txUtxoValue = tx.utxos.reduce((utxoSum, utxo) => utxoSum + BigInt(utxo.value), 0n);
+			(acc, tx) => {
+				// Sum all UTXO values for this pending outgoing transaction
+				// These UTXOs are locked and cannot be spent again (prevents double-spending)
+				const txUtxoValue = tx.utxos.reduce((utxoSum, utxo) => utxoSum + BigInt(utxo.value), 0n);
 
-					acc.lockedBalance += txUtxoValue;
+				acc.lockedBalance += txUtxoValue;
 
-					const txid = convertPendingTransactionTxid(tx);
-					if (txid) {
-						// Look up the transaction in providerTransactions to get confirmation count and type
-						const matchedTransaction = transactionLookup.get(txid);
+				const txid = convertPendingTransactionTxid(tx);
+				if (txid) {
+					// Look up the transaction in providerTransactions to get confirmation count and type
+					const matchedTransaction = transactionLookup.get(txid);
 
-						if (matchedTransaction && nonNullish(matchedTransaction.value)) {
-							const confirmations =
-								matchedTransaction.confirmations ?? UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
+					if (matchedTransaction && nonNullish(matchedTransaction.value)) {
+						const confirmations =
+							matchedTransaction.confirmations ?? UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-							// Only add to unconfirmed balance when transaction has 0/1-5 confirmations
-							// 0 confirmations: only locked (no unconfirmed impact to avoid double counting)
-							// 6+ confirmations: transaction will be removed from pending store by cleanup
-							if (
-								confirmations >= UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1 && // Start from 1 confirmation
-								confirmations < CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
-							) {
-								// Apply directional impact to unconfirmed balance
-								if (matchedTransaction.type === 'send') {
-									// Outgoing: subtract from unconfirmed balance (negative contribution)
-									acc.unconfirmedBalance -= matchedTransaction.value;
-								} else if (matchedTransaction.type === 'receive') {
-									// Incoming: add to unconfirmed balance (positive contribution)
-									acc.unconfirmedBalance += matchedTransaction.value;
-								}
+						// Only add to unconfirmed balance when transaction has 0/1-5 confirmations
+						// 0 confirmations: only locked (no unconfirmed impact to avoid double counting)
+						// 6+ confirmations: transaction will be removed from pending store by cleanup
+						if (
+							confirmations >= UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1 && // Start from 1 confirmation
+							confirmations < CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+						) {
+							// Apply directional impact to unconfirmed balance
+							if (matchedTransaction.type === 'send') {
+								// Outgoing: subtract from unconfirmed balance (negative contribution)
+								acc.unconfirmedBalance -= matchedTransaction.value;
+							} else if (matchedTransaction.type === 'receive') {
+								// Incoming: add to unconfirmed balance (positive contribution)
+								acc.unconfirmedBalance += matchedTransaction.value;
 							}
-							// If confirmations === 0: only locked, no unconfirmed impact (avoids double accounting)
-						} else {
-							// Missing transaction data from API provider - this indicates 0 confirmations
-							// Only count as locked (already added above), no unconfirmed impact
-							// This avoids double accounting while the transaction is not yet indexed by the provider
-							console.warn('Missing transaction data from API provider (0 confirmations):', txid);
 						}
+						// If confirmations === 0: only locked, no unconfirmed impact (avoids double accounting)
+					} else {
+						// Missing transaction data from API provider - this indicates 0 confirmations
+						// Only count as locked (already added above), no unconfirmed impact
+						// This avoids double accounting while the transaction is not yet indexed by the provider
+						console.warn('Missing transaction data from API provider (0 confirmations):', txid);
 					}
-					return acc;
-				},
-				{ lockedBalance: ZERO, unconfirmedBalance: ZERO }
-			);
+				}
+				return acc;
+			},
+			{ lockedBalance: ZERO, unconfirmedBalance: ZERO }
+		);
 
 	// Calculate confirmed balance: certified balance minus locked UTXOs
 	const confirmedBalance = latestBalance - lockedBalance;

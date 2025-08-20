@@ -5,9 +5,9 @@
 export const BTC_BALANCE_MIN_CONFIRMATIONS = 1;
 
 // block_index (and hence confirmations value) is undefined - transaction status "pending"
-// 0 - 5 confirmations - transaction status "unconfirmed"
+// 1 - 5 confirmations - transaction status "unconfirmed"
 // 6 and more confirmations - transaction status "confirmed"
-export const UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 0;
+export const UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 1;
 export const CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 6;
 
 export const BTC_CONVERT_FEE = 0n;
@@ -15,6 +15,12 @@ export const BTC_CONVERT_FEE = 0n;
 export const DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE = 0.00001;
 export const BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION = 10;
 export const BTC_MINIMUM_AMOUNT = 700n;
+
+// Fee tolerance percentage for Bitcoin transactions (±10%)
+// Percentage of tolerated increase in transaction fees compared to the confirmed fee.
+export const BTC_SEND_FEE_TOLERANCE_PERCENTAGE = 10n;
+export const BTC_UTXOS_FEE_UPDATE_INTERVAL = 10000;
+
 // this variable must be in sync with the constant DUST_THRESHOLD defined by the chain fusion signer
 // https://github.com/dfinity/chain-fusion-signer/blob/main/src/signer/canister/src/sign/bitcoin/tx_utils.rs
 export const BTC_DUST_THRESHOLD = 1000n;

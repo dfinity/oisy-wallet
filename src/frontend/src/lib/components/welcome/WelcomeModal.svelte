@@ -40,26 +40,26 @@
 		<div class="flex justify-center pt-4">
 			<div>
 				<ExternalLink
-					href={OISY_REWARDS_URL}
 					ariaLabel={$i18n.rewards.text.learn_more}
-					iconVisible={false}
 					asButton
+					href={OISY_REWARDS_URL}
+					iconVisible={false}
 					styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
 					testId={WELCOME_MODAL_LEARN_MORE_ANCHOR}
 				>
 					{$i18n.rewards.text.learn_more}
 				</ExternalLink>
 				<Share
+					href={OISY_WELCOME_TWITTER_URL}
 					testId={WELCOME_MODAL_SHARE_ANCHOR}
 					text={$i18n.rewards.text.share}
-					href={OISY_WELCOME_TWITTER_URL}
 				/>
 			</div>
 		</div>
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<Button onclick={modalStore.close} colorStyle="primary">
+				<Button colorStyle="primary" onclick={modalStore.close}>
 					{$i18n.rewards.text.open_wallet}
 				</Button>
 			</ButtonGroup>

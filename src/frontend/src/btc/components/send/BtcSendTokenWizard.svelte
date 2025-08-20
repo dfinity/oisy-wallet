@@ -5,12 +5,17 @@
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import { sendBtc, validateUtxosForSend } from '$btc/services/btc-send.services';
-	import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
+	import {
+		sendBtc,
+		handleBtcValidationError,
+		validateBtcSend
+	} from '$btc/services/btc-send.services';
+	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_BTC_SEND_ERROR,
-		TRACK_COUNT_BTC_SEND_SUCCESS
+		TRACK_COUNT_BTC_SEND_SUCCESS,
+		TRACK_COUNT_BTC_VALIDATION_ERROR
 	} from '$lib/constants/analytics.contants';
 	import {
 		btcAddressMainnet,
@@ -62,8 +67,9 @@
 
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
-
 	const send = async () => {
+		progress(ProgressStepsSendBtc.INITIALIZATION);
+
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 
 		if (isNullish(network)) {
@@ -105,69 +111,42 @@
 			await nullishSignOut();
 			return;
 		}
+		dispatch('icNext');
 
 		// Validate UTXOs before proceeding
 		try {
-			validateUtxosForSend({
+			await validateBtcSend({
 				utxosFee,
 				source,
 				amount,
-				feeRateSatoshisPerVByte: 2n
+				network,
+				identity: $authIdentity
 			});
 		} catch (err: unknown) {
 			// Handle BtcValidationError with specific toastsError for each type
 			if (err instanceof BtcValidationError) {
-				switch (err.type) {
-					case BtcSendValidationError.InsufficientBalance:
-						toastsError({
-							msg: { text: $i18n.send.assertion.btc_insufficient_balance }
-						});
-						break;
-					case BtcSendValidationError.InsufficientBalanceForFee:
-						toastsError({
-							msg: { text: $i18n.send.assertion.btc_insufficient_balance_for_fee }
-						});
-						break;
-					case BtcSendValidationError.InvalidUtxoData:
-						toastsError({
-							msg: { text: $i18n.send.assertion.btc_invalid_utxo_data }
-						});
-						break;
-					case BtcSendValidationError.UtxoLocked:
-						toastsError({
-							msg: { text: $i18n.send.assertion.btc_utxo_locked }
-						});
-						break;
-					case BtcSendValidationError.InvalidFeeCalculation:
-						toastsError({
-							msg: { text: $i18n.send.assertion.btc_invalid_fee_calculation }
-						});
-						break;
-					case BtcSendValidationError.MinimumBalance:
-						toastsError({
-							msg: { text: $i18n.send.assertion.minimum_btc_amount }
-						});
-						break;
-					default:
-						toastsError({
-							msg: { text: $i18n.send.error.unexpected },
-							err
-						});
-						break;
-				}
+				await handleBtcValidationError({ err });
 			} else {
+				trackEvent({
+					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+					metadata: {
+						token: $sendToken.symbol,
+						network: `${networkId?.description ?? 'unknown'}`
+					}
+				});
+
 				toastsError({
 					msg: { text: $i18n.send.error.unexpected },
 					err
 				});
 			}
+
+			// go back to the previous step so the user can correct/ try again
+			dispatch('icBack');
 			return;
 		}
 
-		dispatch('icNext');
-
 		try {
-			// TODO: add tracking
 			await sendBtc({
 				destination,
 				amount,
@@ -216,20 +195,20 @@
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
 	<BtcSendReview
+		{amount}
+		{destination}
+		{selectedContact}
+		{source}
 		on:icBack
 		on:icSend={send}
 		bind:utxosFee
-		{destination}
-		{selectedContact}
-		{amount}
-		{source}
 	/>
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<BtcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
 	<BtcSendForm
-		{source}
 		{selectedContact}
+		{source}
 		on:icNext
 		on:icClose
 		on:icBack
@@ -237,7 +216,7 @@
 		bind:destination
 		bind:amount
 	>
-		<ButtonBack onclick={back} slot="cancel" />
+		<ButtonBack slot="cancel" onclick={back} />
 	</BtcSendForm>
 {:else}
 	<slot />
