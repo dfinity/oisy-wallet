@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import TokenInputNetworkWrapper from '../tokens/TokenInputNetworkWrapper.svelte';
+	import TokenInputNetworkWrapper from '$lib/components/tokens/TokenInputNetworkWrapper.svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
