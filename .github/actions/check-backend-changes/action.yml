@@ -19,6 +19,7 @@ runs:
         # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
         # The dockerfile used in this CI run, and the scripts it COPY's.
         # There may be some files in the frontend folder that contains 'backend' in their name.
+        # The filters are split because we could have false positive caused by the default of the action considering at least one filter to be true.
         filters: |
           backend_raw:
             - '**/*backend*'
