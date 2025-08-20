@@ -51,7 +51,7 @@
 	on:icTokenButtonClick={onIcTokenButtonClick}
 >
 	{#snippet tokenListItem(token, onClick)}
-		<ModalTokensListItem {token} {onClick} showDividers={false} />
+		<ModalTokensListItem {onClick} showDividers={false} {token} />
 	{/snippet}
 	{#snippet noResults()}
 		<p class="text-primary">

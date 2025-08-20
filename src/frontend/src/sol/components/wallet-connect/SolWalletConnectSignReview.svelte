@@ -36,17 +36,17 @@
 	<!-- TODO: add address for devnet and testnet -->
 	<SendData
 		amount={amountDisplay}
-		{destination}
-		{token}
 		{balance}
-		source={$solAddressMainnet ?? ''}
+		{destination}
 		showNullishAmountLabel
+		source={$solAddressMainnet ?? ''}
+		{token}
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
 		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
 
-		<ReviewNetwork sourceNetwork={network} slot="network" />
+		<ReviewNetwork slot="network" sourceNetwork={network} />
 	</SendData>
 
 	{#snippet toolbar()}

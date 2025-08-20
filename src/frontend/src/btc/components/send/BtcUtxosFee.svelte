@@ -98,10 +98,10 @@
 </script>
 
 <FeeDisplay
-	feeAmount={utxosFee?.feeSatoshis}
 	decimals={$sendTokenDecimals}
-	symbol={$sendTokenSymbol}
 	exchangeRate={$sendTokenExchangeRate}
+	feeAmount={utxosFee?.feeSatoshis}
+	symbol={$sendTokenSymbol}
 >
 	{#snippet label()}{$i18n.fee.text.fee}{/snippet}
 </FeeDisplay>

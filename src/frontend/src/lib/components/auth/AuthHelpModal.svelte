@@ -40,7 +40,7 @@
 	const onOther = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHER });
 </script>
 
-<WizardModal {steps} bind:this={modal} bind:currentStep onClose={close}>
+<WizardModal bind:this={modal} onClose={close} {steps} bind:currentStep>
 	{#snippet title()}
 		<span class="text-xl">{titleString}</span>
 	{/snippet}

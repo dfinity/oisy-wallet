@@ -32,12 +32,12 @@
 </script>
 
 <SendForm
+	{destination}
+	disabled={invalid}
+	{invalidDestination}
+	{selectedContact}
 	on:icNext
 	on:icBack
-	{destination}
-	{selectedContact}
-	{invalidDestination}
-	disabled={invalid}
 >
 	<EthSendAmount
 		slot="amount"
@@ -55,8 +55,8 @@
 
 	<SendFeeInfo
 		slot="info"
-		feeSymbol={$feeSymbolStore}
 		decimals={$feeDecimalsStore}
+		feeSymbol={$feeSymbolStore}
 		feeTokenId={$feeTokenIdStore}
 	/>
 
