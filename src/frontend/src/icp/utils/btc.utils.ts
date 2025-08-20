@@ -1,6 +1,6 @@
 import {
 	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
-	UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+	PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
 } from '$btc/constants/btc.constants';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
@@ -159,13 +159,13 @@ export const getBtcWalletBalance = ({
 
 						if (matchedTransaction && nonNullish(matchedTransaction.value)) {
 							const confirmations =
-								matchedTransaction.confirmations ?? UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
+								matchedTransaction.confirmations ?? PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 							// Only add to unconfirmed balance when transaction has 0/1-5 confirmations
 							// 0 confirmations: only locked (no unconfirmed impact to avoid double counting)
 							// 6+ confirmations: transaction will be removed from pending store by cleanup
 							if (
-								confirmations >= UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1 && // Start from 1 confirmation
+								confirmations >= PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1 && // Start from 1 confirmation
 								confirmations < CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 							) {
 								// Apply directional impact to unconfirmed balance

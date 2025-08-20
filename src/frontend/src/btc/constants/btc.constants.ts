@@ -1,13 +1,23 @@
-// We want to show the latest balance.
-// Even if it's not totally confirmed (6 confirmations).
-// There is no difference between 0 and 1
-// because the bitcoin canister doesn't know about the mempool and unconfirmed transactions.
-export const BTC_BALANCE_MIN_CONFIRMATIONS = 1;
+/**
+ * Minimum confirmations threshold for pending Bitcoin transaction status.
+ * When block_index (and hence confirmations value) is undefined,
+ * the transaction is considered "pending" and hasn't been included in any block yet.
+ * Be aware that these transactions
+ */
+export const PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS = 0;
 
-// block_index (and hence confirmations value) is undefined - transaction status "pending"
-// 1 - 5 confirmations - transaction status "unconfirmed"
-// 6 and more confirmations - transaction status "confirmed"
+/**
+ * Minimum confirmations threshold for unconfirmed Bitcoin transaction status.
+ * Transactions with 1-5 confirmations are displayed as "unconfirmed" to users.
+ * These transactions are included in blocks but may still be subject to reorganization.
+ */
 export const UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 1;
+
+/**
+ * Minimum confirmations threshold for confirmed Bitcoin transaction status.
+ * Transactions with 6 or more confirmations are considered "confirmed" and safe.
+ * This follows the standard Bitcoin practice where 6 confirmations provide strong security.
+ */
 export const CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 6;
 
 export const BTC_CONVERT_FEE = 0n;
