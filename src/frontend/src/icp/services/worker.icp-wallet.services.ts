@@ -1,10 +1,9 @@
-import { ICP_INDEX_CANISTER_ID, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
+import type { IcToken } from '$icp/types/ic-token';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -14,11 +13,15 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 
-export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
+export const initIcpWalletWorker = async ({
+	indexCanisterId,
+	id: tokenId,
+	network: { id: networkId }
+}: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
 	let worker: Worker | null = new WalletWorker.default();
 
-	await syncWalletFromCache({ tokenId: ICP_TOKEN_ID, networkId: ICP_NETWORK_ID });
+	await syncWalletFromCache({ tokenId, networkId });
 
 	worker.onmessage = ({
 		data: dataMsg
@@ -34,19 +37,19 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 		switch (msg) {
 			case 'syncIcpWallet':
 				syncWallet({
-					tokenId: ICP_TOKEN_ID,
+					tokenId,
 					data: data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcpWalletError':
 				onLoadTransactionsError({
-					tokenId: ICP_TOKEN_ID,
+					tokenId,
 					error: data.error
 				});
 				return;
 			case 'syncIcpWalletCleanUp':
 				onTransactionsCleanUp({
-					tokenId: ICP_TOKEN_ID,
+					tokenId,
 					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
@@ -65,14 +68,18 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 		start: () => {
 			worker?.postMessage({
 				msg: 'startIcpWalletTimer',
-				data: { indexCanisterId: ICP_INDEX_CANISTER_ID }
+				data: {
+					indexCanisterId
+				}
 			} as PostMessage<PostMessageDataRequestIcp>);
 		},
 		stop,
 		trigger: () => {
 			worker?.postMessage({
 				msg: 'triggerIcpWalletTimer',
-				data: { indexCanisterId: ICP_INDEX_CANISTER_ID }
+				data: {
+					indexCanisterId
+				}
 			} as PostMessage<PostMessageDataRequestIcp>);
 		},
 		destroy: () => {

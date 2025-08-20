@@ -31,8 +31,7 @@ describe('wallet.utils', () => {
 
 			initWalletWorker({ token });
 
-			expect(initIcrcWalletWorker).toHaveBeenCalledOnce();
-			expect(initIcrcWalletWorker).toHaveBeenNthCalledWith(1, token);
+			expect(initIcrcWalletWorker).toHaveBeenCalledExactlyOnceWith(token);
 		});
 
 		it('should initialize the worker for DIP-20 tokens', () => {
@@ -43,8 +42,7 @@ describe('wallet.utils', () => {
 
 			initWalletWorker({ token });
 
-			expect(initDip20WalletWorker).toHaveBeenCalledOnce();
-			expect(initDip20WalletWorker).toHaveBeenNthCalledWith(1, token);
+			expect(initDip20WalletWorker).toHaveBeenCalledExactlyOnceWith(token);
 		});
 
 		it('should initialize the worker for ICP token', () => {
@@ -55,11 +53,12 @@ describe('wallet.utils', () => {
 
 			initWalletWorker({ token });
 
-			expect(initIcpWalletWorker).toHaveBeenCalledOnce();
+			expect(initIcpWalletWorker).toHaveBeenCalledExactlyOnceWith(token);
 
 			initWalletWorker({ token: ICP_TOKEN });
 
 			expect(initIcpWalletWorker).toHaveBeenCalledTimes(2);
+			expect(initIcpWalletWorker).toHaveBeenNthCalledWith(2, ICP_TOKEN);
 		});
 
 		it('should call initIcpWalletWorker for all other cases', () => {
