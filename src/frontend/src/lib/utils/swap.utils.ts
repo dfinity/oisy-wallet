@@ -2,12 +2,18 @@ import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
 } from '$declarations/kong_backend/kong_backend.did';
+import { dAppDescriptions } from '$env/dapp-descriptions.env';
+import type { Erc20Token } from '$eth/types/erc20';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER
 } from '$lib/constants/swap.constants';
+import { swapProvidersDetails } from '$lib/providers/swap.providers';
+import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
 import {
 	SwapProvider,
@@ -24,11 +30,6 @@ import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
-
-import type { Erc20Token } from '$eth/types/erc20';
-import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
-import { SwapError } from '$lib/services/swap-errors.services';
 import { formatToken } from './format.utils';
 import { isNullishOrEmpty } from './input.utils';
 
@@ -205,4 +206,28 @@ export const getWithdrawableToken = ({
 	}
 
 	throw new Error(`Unknown token address`);
+};
+
+export const findSwapProvider = (providerId: string) => {
+	if (isNullish(providerId)) {
+		return null;
+	}
+
+	const normalizedId = providerId.toLowerCase();
+	const icDAppProvider = dAppDescriptions.find(({ id }) => id === normalizedId);
+
+	if (icDAppProvider) {
+		return icDAppProvider;
+	}
+
+	const swapProviderDetails = swapProvidersDetails[normalizedId];
+
+	if (swapProviderDetails) {
+		return {
+			id: normalizedId,
+			...swapProviderDetails
+		};
+	}
+
+	return;
 };
