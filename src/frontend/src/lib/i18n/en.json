@@ -1032,12 +1032,12 @@
 			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
 			"collections": "Collections",
 			"all_assets": "All assets",
-            "img_consent_disabled": "You disabled images from this collection",
-            "img_consent_none": "Image disabled for security reasons",
-            "review_button": "Review",
-            "collection_name": "Collection name",
-            "media_urls": "Media URLs",
-            "display_preference": "Display preference"
+			"img_consent_disabled": "You disabled images from this collection",
+			"img_consent_none": "Image disabled for security reasons",
+			"review_button": "Review",
+			"collection_name": "Collection name",
+			"media_urls": "Media URLs",
+			"display_preference": "Display preference"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
