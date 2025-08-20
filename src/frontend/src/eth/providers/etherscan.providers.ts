@@ -5,6 +5,7 @@ import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc721Token } from '$eth/types/erc721';
 import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
+import type { EtherscanProviderTokenBalance } from '$eth/types/etherscan-token-balance';
 import type {
 	EtherscanProviderErc1155TokenTransferTransaction,
 	EtherscanProviderErc721TokenTransferTransaction,
@@ -27,7 +28,6 @@ import {
 	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { EtherscanProviderTokenBalance } from '$eth/types/etherscan-token-balance';
 
 interface TransactionsParams {
 	address: EthAddress;
@@ -351,11 +351,8 @@ export class EtherscanProvider {
 			address
 		};
 
-		return await this.provider.fetch(
-			'contract',
-			params
-		);
-	}
+		return await this.provider.fetch('contract', params);
+	};
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = [

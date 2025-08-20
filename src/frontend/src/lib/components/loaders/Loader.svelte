@@ -15,6 +15,7 @@
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
+	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
@@ -59,7 +60,6 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 
 	interface Props {
 		children: Snippet;
