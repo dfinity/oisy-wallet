@@ -108,7 +108,9 @@ describe('nft.services', () => {
 			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
 
 			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
-			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(tokenIds);
+			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(
+				tokenIds.map((tokenId) => ({ id: tokenId, balance: 1 }))
+			);
 			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
 				Promise.resolve({
 					id: tokenId,
@@ -194,7 +196,9 @@ describe('nft.services', () => {
 			const tokenIds = [...loadedTokenIds, ...notLoadedTokenIds];
 
 			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
-			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(tokenIds);
+			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(
+				tokenIds.map((tokenId) => ({ id: tokenId, balance: 1 }))
+			);
 			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
 				Promise.resolve({
 					id: tokenId,
@@ -320,7 +324,9 @@ describe('nft.services', () => {
 			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
 
 			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
-			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(tokenIds);
+			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(
+				tokenIds.map((tokenId) => ({ id: tokenId, balance: 1 }))
+			);
 			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockRejectedValue(
 				new Error('Metadata Error')
 			);
@@ -377,7 +383,9 @@ describe('nft.services', () => {
 			const tokens: Erc1155CustomToken[] = [erc1155NyanCatToken];
 			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
 
-			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(tokenIds);
+			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(
+				tokenIds.map((tokenId) => ({ id: tokenId, balance: 1 }))
+			);
 			vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
 				Promise.resolve({
 					id: tokenId,

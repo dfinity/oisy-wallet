@@ -8,7 +8,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { NftId } from '$lib/types/nft';
+import type { OwnedNft } from '$lib/types/nft';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -148,13 +148,16 @@ export class AlchemyProvider {
 	}: {
 		address: EthAddress;
 		contractAddress: Erc721ContractAddress['address'] | Erc1155ContractAddress['address'];
-	}): Promise<NftId[]> => {
+	}): Promise<OwnedNft[]> => {
 		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
 			contractAddresses: [contractAddress],
 			omitMetadata: true
 		});
 
-		return result.ownedNfts.map((nft) => parseNftId(parseInt(nft.tokenId)));
+		return result.ownedNfts.map((ownedNft) => ({
+			id: parseNftId(parseInt(ownedNft.tokenId)),
+			balance: Number(ownedNft.balance)
+		}));
 	};
 }
 

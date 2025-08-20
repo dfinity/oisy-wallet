@@ -302,10 +302,12 @@ const loadHoldersTokenIds = async ({
 		if (token.standard === 'erc1155') {
 			const alchemyProvider = alchemyProviders(token.network.id);
 
-			return await alchemyProvider.getNftIdsForOwner({
-				address: walletAddress,
-				contractAddress: token.address
-			});
+			return (
+				await alchemyProvider.getNftIdsForOwner({
+					address: walletAddress,
+					contractAddress: token.address
+				})
+			).map((ownedNft) => parseNftId(ownedNft.id));
 		}
 
 		return [];
