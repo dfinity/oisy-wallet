@@ -1,0 +1,271 @@
+<script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import TokenInputNetworkWrapper from '../tokens/TokenInputNetworkWrapper.svelte';
+	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
+	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
+	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import {
+		SUPPORTED_CROSS_SWAP_NETWORKS,
+		SWAP_SLIPPAGE_INVALID_VALUE
+	} from '$lib/constants/swap.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+
+	interface Props {
+		swapAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		slippageValue: OptionAmount;
+		isSwapAmountsLoading: boolean;
+		swapDetails?: Snippet;
+		errorType?: TokenActionErrorType;
+		customValidate?: (userAmount: bigint) => TokenActionErrorType;
+		fee?: bigint;
+	}
+
+	let {
+		swapAmount = $bindable<OptionAmount>(),
+		receiveAmount = $bindable<number | undefined>(),
+		slippageValue = $bindable<OptionAmount>(),
+		isSwapAmountsLoading,
+		swapDetails,
+		errorType = $bindable<TokenActionErrorType | undefined>(),
+		customValidate = $bindable<(userAmount: bigint) => TokenActionErrorType>(),
+		fee
+	}: Props = $props();
+
+	const {
+		sourceToken,
+		destinationToken,
+		destinationTokenBalance,
+		sourceTokenExchangeRate,
+		sourceTokenBalance,
+		destinationTokenExchangeRate,
+		switchTokens
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	let amountSetToMax = $state(false);
+	let exchangeValueUnit: DisplayUnit = $state<DisplayUnit>('usd');
+	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
+
+	let swapAmountsLoading = $derived(
+		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
+			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
+			: false
+	);
+
+	let showSwapNotOfferedError = $derived(
+		nonNullish($swapAmountsStore) &&
+			$swapAmountsStore.swaps.length === 0 &&
+			!isSwapAmountsLoading &&
+			nonNullish(swapAmount) &&
+			Number(swapAmount) > 0
+	);
+
+	let disableSwitchTokens = $derived(() => {
+		if (isNullish($destinationToken?.network.id) || isNullish($sourceToken?.network.id)) {
+			return true;
+		}
+		const condition1 = (nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
+		const condition2 = !SUPPORTED_CROSS_SWAP_NETWORKS[$destinationToken.network.id]?.includes(
+			$sourceToken.network.id
+		);
+		const condition3 =
+			isDefaultEthereumToken($destinationToken) &&
+			$destinationToken.network.id !== $sourceToken.network.id;
+		return condition1 || condition2 || condition3;
+	});
+
+	let invalid: boolean = $derived(
+		nonNullish(errorType) ||
+			isNullish(swapAmount) ||
+			Number(swapAmount) <= 0 ||
+			isNullish(receiveAmount) ||
+			isNullish(fee) ||
+			swapAmountsLoading ||
+			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
+	);
+
+	$effect(() => {
+		if (
+			nonNullish($destinationToken) &&
+			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			receiveAmount = formatTokenBigintToNumber({
+				value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			});
+		} else {
+			receiveAmount = undefined;
+		}
+	});
+
+	const dispatch = createEventDispatcher();
+
+	const onTokensSwitch = () => {
+		const tempAmount = receiveAmount;
+		swapAmountsStore.reset();
+		amountSetToMax = false;
+		swapAmount = tempAmount;
+		switchTokens();
+	};
+</script>
+
+<ContentWithToolbar>
+	<div>
+		<div class="relative">
+			<div class="mb-2">
+				<TokenInputNetworkWrapper
+					tokenNetworkId={$sourceToken?.network?.id}
+					showGradient={nonNullish($sourceToken) &&
+						nonNullish($destinationToken) &&
+						$sourceToken?.network?.id !== $destinationToken?.network.id}
+				>
+					{#snippet tokenInput()}
+						<TokenInput
+							bind:amount={swapAmount}
+							displayUnit={inputUnit}
+							exchangeRate={$sourceTokenExchangeRate}
+							bind:errorType
+							bind:amountSetToMax
+							token={$sourceToken}
+							{customValidate}
+							on:click={() => {
+								dispatch('icShowTokensList', 'source');
+							}}
+							showTokenNetwork
+						>
+							<span slot="title">{$i18n.tokens.text.source_token_title}</span>
+
+							<svelte:fragment slot="amount-info">
+								{#if nonNullish($sourceToken)}
+									<div class="text-tertiary">
+										<TokenInputAmountExchange
+											amount={swapAmount}
+											exchangeRate={$sourceTokenExchangeRate}
+											token={$sourceToken}
+											bind:displayUnit={exchangeValueUnit}
+										/>
+									</div>
+								{/if}
+							</svelte:fragment>
+
+							<svelte:fragment slot="balance">
+								{#if nonNullish($sourceToken)}
+									{#if nonNullish(fee)}
+										<MaxBalanceButton
+											bind:amountSetToMax
+											bind:amount={swapAmount}
+											error={nonNullish(errorType)}
+											balance={$sourceTokenBalance}
+											token={$sourceToken}
+											{fee}
+										/>
+									{:else}
+										<div class="w-14 sm:w-16">
+											<SkeletonText />
+										</div>
+									{/if}
+								{/if}
+							</svelte:fragment>
+						</TokenInput>
+					{/snippet}
+				</TokenInputNetworkWrapper>
+			</div>
+
+			<SwapSwitchTokensButton disabled={disableSwitchTokens()} on:icSwitchTokens={onTokensSwitch} />
+
+			<TokenInputNetworkWrapper
+				tokenNetworkId={$destinationToken?.network?.id}
+				showGradient={$sourceToken?.network?.id !== $destinationToken?.network.id}
+			>
+				{#snippet tokenInput()}
+					<TokenInput
+						token={$destinationToken}
+						amount={receiveAmount}
+						displayUnit={inputUnit}
+						exchangeRate={$destinationTokenExchangeRate}
+						loading={swapAmountsLoading}
+						disabled={true}
+						showTokenNetwork
+						on:click={() => {
+							dispatch('icShowTokensList', 'destination');
+						}}
+					>
+						<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
+
+						<svelte:fragment slot="amount-info">
+							{#if nonNullish($destinationToken)}
+								{#if showSwapNotOfferedError}
+									<div transition:slide={SLIDE_DURATION} class="text-error-primary"
+										>{$i18n.swap.text.swap_is_not_offered}</div
+									>
+								{:else}
+									<div class="flex gap-3 text-tertiary">
+										<TokenInputAmountExchange
+											amount={receiveAmount}
+											exchangeRate={$destinationTokenExchangeRate}
+											token={$destinationToken}
+											bind:displayUnit={exchangeValueUnit}
+										/>
+
+										{#if swapAmountsLoading}
+											<span class="mt-0.5 w-10">
+												<SkeletonText />
+											</span>
+										{:else}
+											<SwapValueDifference {swapAmount} {receiveAmount} />
+										{/if}
+									</div>
+								{/if}
+							{/if}
+						</svelte:fragment>
+
+						<svelte:fragment slot="balance">
+							{#if nonNullish($destinationToken)}
+								<TokenInputBalance token={$destinationToken} balance={$destinationTokenBalance} />
+							{/if}
+						</svelte:fragment>
+					</TokenInput>
+				{/snippet}
+			</TokenInputNetworkWrapper>
+		</div>
+
+		<SwapSlippage bind:slippageValue />
+
+		{@render swapDetails?.()}
+	</div>
+
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCancel onclick={() => dispatch('icClose')} />
+
+			<Button disabled={invalid} onclick={() => dispatch('icNext')}>
+				{$i18n.swap.text.review_button}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
+</ContentWithToolbar>
