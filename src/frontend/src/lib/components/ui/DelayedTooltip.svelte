@@ -32,12 +32,12 @@
 	{#snippet trigger()}
 		<span
 			class="inline-block sm:py-1"
-			role="button"
-			tabindex="0"
+			onblur={handleLeave}
+			onfocus={handleEnter}
 			onmouseenter={handleEnter}
 			onmouseleave={handleLeave}
-			onfocus={handleEnter}
-			onblur={handleLeave}
+			role="button"
+			tabindex="0"
 		>
 			{@render children?.()}
 		</span>

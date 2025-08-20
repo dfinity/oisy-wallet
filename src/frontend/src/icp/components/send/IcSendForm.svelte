@@ -32,12 +32,12 @@
 </script>
 
 <SendForm
+	{destination}
+	disabled={invalid}
+	{invalidDestination}
+	{selectedContact}
 	on:icNext
 	on:icBack
-	{destination}
-	{selectedContact}
-	{invalidDestination}
-	disabled={invalid}
 >
 	<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 

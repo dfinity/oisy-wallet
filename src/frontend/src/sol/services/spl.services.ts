@@ -60,8 +60,7 @@ export const loadCustomTokens = ({
 				err
 			});
 		},
-		identity,
-		strategy: 'query'
+		identity
 	});
 
 const loadSplCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>

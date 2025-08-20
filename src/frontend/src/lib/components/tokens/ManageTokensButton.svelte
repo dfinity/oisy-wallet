@@ -14,8 +14,8 @@
 <button
 	class="tertiary"
 	data-tid={MANAGE_TOKENS_MODAL_BUTTON}
-	onclick={() => modalStore.openManageTokens({ id: manageTokensId })}
 	{disabled}
+	onclick={() => modalStore.openManageTokens({ id: manageTokensId })}
 >
 	<IconManage />
 	{$i18n.tokens.manage.text.manage_list}

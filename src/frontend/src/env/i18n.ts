@@ -6,6 +6,7 @@ export const SUPPORTED_LANGUAGES = Object.entries(Languages);
 export const LANGUAGES = {
 	[Languages.ENGLISH]: 'English',
 	[Languages.CZECH]: 'Čeština',
+	[Languages.FRENCH]: 'Français',
 	[Languages.GERMAN]: 'Deutsch',
 	[Languages.ITALIAN]: 'Italiano',
 	[Languages.PORTUGUESE]: 'Português',

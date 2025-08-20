@@ -48,8 +48,8 @@
 	<div class="flex">
 		<ThemeSelectorButton
 			label={$i18n.settings.text.appearance_system}
-			selected={selectedCard === THEME_SYSTEM}
 			onclick={() => selectTheme(THEME_SYSTEM)}
+			selected={selectedCard === THEME_SYSTEM}
 			testId={`${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`}
 		>
 			<IconDuoTone size="20" />
@@ -58,8 +58,8 @@
 		{#each THEME_VALUES as theme (theme)}
 			<ThemeSelectorButton
 				label={$i18n.settings.text[`appearance_${theme}`]}
-				selected={selectedCard === theme}
 				onclick={() => selectTheme(theme)}
+				selected={selectedCard === theme}
 				testId={`${THEME_SELECTOR_CARD}-${theme}`}
 			>
 				{#if theme === Theme.LIGHT}
