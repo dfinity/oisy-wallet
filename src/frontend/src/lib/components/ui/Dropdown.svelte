@@ -5,6 +5,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	interface Props {
+		visible?: boolean;
 		children: Snippet;
 		title?: Snippet;
 		items: Snippet;
@@ -17,6 +18,7 @@
 	}
 
 	let {
+		visible = $bindable(false),
 		children,
 		title,
 		items,
@@ -28,7 +30,6 @@
 		testId
 	}: Props = $props();
 
-	let visible = $state(false);
 	let button: HTMLButtonElement | undefined = $state();
 
 	export const close = () => (visible = false);
