@@ -104,7 +104,7 @@
 		return condition1 || condition2 || condition3;
 	});
 
-	let invalid: boolean = $derived(
+	let invalid = $derived(
 		nonNullish(errorType) ||
 			isNullish(swapAmount) ||
 			Number(swapAmount) <= 0 ||
