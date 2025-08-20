@@ -10,15 +10,15 @@ import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 import * as addressStore from '$lib/derived/address.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import * as nftServicesModule from '$lib/services/nft.services';
+import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import { nftStore } from '$lib/stores/nft.store';
-import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('LoaderNfts', () => {
 	let etherscanProvidersSpy: MockInstance;
@@ -145,9 +145,33 @@ describe('LoaderNfts', () => {
 		});
 
 		it('should remove erc721 nfts from nft store', async () => {
-			const mockNft1 = { ...mockValidErc721Nft, id: mockNftId1, collection: {...mockValidErc721Nft.collection, address: AZUKI_ELEMENTAL_BEANS_TOKEN.address, network: AZUKI_ELEMENTAL_BEANS_TOKEN.network } };
-			const mockNft2 = { ...mockValidErc721Nft, id: mockNftId2, collection: {...mockValidErc721Nft.collection, address: AZUKI_ELEMENTAL_BEANS_TOKEN.address, network: AZUKI_ELEMENTAL_BEANS_TOKEN.network } };
-			const mockNft3 = { ...mockValidErc721Nft, id: mockNftId3, collection: {...mockValidErc721Nft.collection, address: DE_GODS_TOKEN.address, network: DE_GODS_TOKEN.network } };
+			const mockNft1 = {
+				...mockValidErc721Nft,
+				id: mockNftId1,
+				collection: {
+					...mockValidErc721Nft.collection,
+					address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+					network: AZUKI_ELEMENTAL_BEANS_TOKEN.network
+				}
+			};
+			const mockNft2 = {
+				...mockValidErc721Nft,
+				id: mockNftId2,
+				collection: {
+					...mockValidErc721Nft.collection,
+					address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+					network: AZUKI_ELEMENTAL_BEANS_TOKEN.network
+				}
+			};
+			const mockNft3 = {
+				...mockValidErc721Nft,
+				id: mockNftId3,
+				collection: {
+					...mockValidErc721Nft.collection,
+					address: DE_GODS_TOKEN.address,
+					network: DE_GODS_TOKEN.network
+				}
+			};
 
 			nftStore.addAll([mockNft1, mockNft2, mockNft3]);
 
@@ -166,12 +190,36 @@ describe('LoaderNfts', () => {
 
 				expect(get(nftStore)).toEqual([mockNft1]);
 			});
-		})
+		});
 
 		it('should remove erc1155 nfts from nft store', async () => {
-			const mockNft1 = { ...mockValidErc1155Nft, id: mockNftId1, collection: {...mockValidErc1155Nft.collection, address: NYAN_CAT_TOKEN.address, network: NYAN_CAT_TOKEN.network } };
-			const mockNft2 = { ...mockValidErc1155Nft, id: mockNftId2, collection: {...mockValidErc1155Nft.collection, address: NYAN_CAT_TOKEN.address, network: NYAN_CAT_TOKEN.network } };
-			const mockNft3 = { ...mockValidErc1155Nft, id: mockNftId3, collection: {...mockValidErc1155Nft.collection, address: BUILD_AN_APE_TOKEN.address, network: BUILD_AN_APE_TOKEN.network } };
+			const mockNft1 = {
+				...mockValidErc1155Nft,
+				id: mockNftId1,
+				collection: {
+					...mockValidErc1155Nft.collection,
+					address: NYAN_CAT_TOKEN.address,
+					network: NYAN_CAT_TOKEN.network
+				}
+			};
+			const mockNft2 = {
+				...mockValidErc1155Nft,
+				id: mockNftId2,
+				collection: {
+					...mockValidErc1155Nft.collection,
+					address: NYAN_CAT_TOKEN.address,
+					network: NYAN_CAT_TOKEN.network
+				}
+			};
+			const mockNft3 = {
+				...mockValidErc1155Nft,
+				id: mockNftId3,
+				collection: {
+					...mockValidErc1155Nft.collection,
+					address: BUILD_AN_APE_TOKEN.address,
+					network: BUILD_AN_APE_TOKEN.network
+				}
+			};
 
 			nftStore.addAll([mockNft1, mockNft2, mockNft3]);
 
@@ -189,14 +237,38 @@ describe('LoaderNfts', () => {
 				expect(mockGetNftIdsForOwner).toHaveBeenCalledTimes(2);
 
 				expect(get(nftStore)).toEqual([mockNft1]);
-			})
+			});
 		});
 	});
 
 	describe('handleUpdatedNfts', () => {
-		const mockNft1 = { ...mockValidErc1155Nft, id: mockNftId1, collection: {...mockValidErc1155Nft.collection, address: NYAN_CAT_TOKEN.address, network: NYAN_CAT_TOKEN.network } };
-		const mockNft2 = { ...mockValidErc1155Nft, id: mockNftId2, collection: {...mockValidErc1155Nft.collection, address: NYAN_CAT_TOKEN.address, network: NYAN_CAT_TOKEN.network } };
-		const mockNft3 = { ...mockValidErc1155Nft, id: mockNftId3, collection: {...mockValidErc1155Nft.collection, address: BUILD_AN_APE_TOKEN.address, network: BUILD_AN_APE_TOKEN.network } };
+		const mockNft1 = {
+			...mockValidErc1155Nft,
+			id: mockNftId1,
+			collection: {
+				...mockValidErc1155Nft.collection,
+				address: NYAN_CAT_TOKEN.address,
+				network: NYAN_CAT_TOKEN.network
+			}
+		};
+		const mockNft2 = {
+			...mockValidErc1155Nft,
+			id: mockNftId2,
+			collection: {
+				...mockValidErc1155Nft.collection,
+				address: NYAN_CAT_TOKEN.address,
+				network: NYAN_CAT_TOKEN.network
+			}
+		};
+		const mockNft3 = {
+			...mockValidErc1155Nft,
+			id: mockNftId3,
+			collection: {
+				...mockValidErc1155Nft.collection,
+				address: BUILD_AN_APE_TOKEN.address,
+				network: BUILD_AN_APE_TOKEN.network
+			}
+		};
 
 		beforeEach(() => {
 			nftStore.resetAll();
@@ -209,7 +281,10 @@ describe('LoaderNfts', () => {
 		});
 
 		it('should update erc1155 nfts from the nft store', async () => {
-			mockGetNftIdsForOwner.mockResolvedValueOnce([{ id: mockNftId1, balance: 2 }, { id: mockNftId2, balance: 1 }]);
+			mockGetNftIdsForOwner.mockResolvedValueOnce([
+				{ id: mockNftId1, balance: 2 },
+				{ id: mockNftId2, balance: 1 }
+			]);
 			mockGetNftIdsForOwner.mockResolvedValueOnce([{ id: mockNftId3, balance: 3 }]);
 
 			render(LoaderNfts);
@@ -217,8 +292,12 @@ describe('LoaderNfts', () => {
 			await waitFor(() => {
 				expect(mockGetNftIdsForOwner).toHaveBeenCalledTimes(2);
 
-				expect(get(nftStore)).toEqual([mockNft1, {...mockNft2, balance: 1}, {...mockNft3, balance: 3}]);
-			})
-		})
+				expect(get(nftStore)).toEqual([
+					mockNft1,
+					{ ...mockNft2, balance: 1 },
+					{ ...mockNft3, balance: 3 }
+				]);
+			});
+		});
 	});
 });
