@@ -834,7 +834,10 @@
 			"open_instructions_link": "Open instructions link",
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
-			"withdrawing": "Withdrawing..."
+			"withdrawing": "Withdrawing...",
+			"network_cost": "Network cost",
+			"gasless": "Gasless",
+			"swap_fees": "Swap Fees"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
