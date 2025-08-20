@@ -13,6 +13,9 @@
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft } from '$lib/types/nft';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		nft?: Nft;
@@ -68,7 +71,17 @@
 			<ListItem>
 				<span>{$i18n.nfts.text.collection_address}</span>
 				{#if nonNullish(nft)}
-					{nft.collection.address}
+					<span class="flex items-center">
+						<output>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output>
+						<AddressActions
+							copyAddress={nft.collection.address}
+							copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+								$address: nft.collection.address
+							})}
+							externalLink=""
+							externalLinkAriaLabel=""
+						/>
+					</span>
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />
