@@ -45,7 +45,7 @@
 		}
 	}, 250);
 
-	let loading: boolean = $derived( isNullish(tokens));
+	let loading: boolean = $derived(isNullish(tokens));
 
 	// Default token / tokengroup list
 	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
