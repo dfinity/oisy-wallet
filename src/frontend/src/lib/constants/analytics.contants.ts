@@ -17,6 +17,7 @@ export const TRACK_SIGN_OUT_WITH_WARNING = 'sign_out_with_warning';
 // Bitcoin
 export const TRACK_COUNT_BTC_SEND_SUCCESS = 'btc_send_success';
 export const TRACK_COUNT_BTC_SEND_ERROR = 'btc_send_error';
+export const TRACK_COUNT_BTC_VALIDATION_ERROR = 'btc_send_error';
 
 // Ethereum
 export const TRACK_COUNT_ETH_SEND_SUCCESS = 'eth_send_success';
