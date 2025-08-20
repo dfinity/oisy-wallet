@@ -1,5 +1,6 @@
 import { icrc1Transfer, transfer } from '$icp/api/icp-ledger.api';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockAccountIdentifierText,
 	mockIdentity,
@@ -30,7 +31,8 @@ describe('icp-ledger.api', () => {
 		const params = {
 			to: mockAccountIdentifierText,
 			amount,
-			identity: mockIdentity
+			identity: mockIdentity,
+			ledgerCanisterId: mockLedgerCanisterId
 		};
 
 		const mockBlock: BlockHeight = 123n;
@@ -78,7 +80,8 @@ describe('icp-ledger.api', () => {
 			to,
 			amount,
 			identity: mockIdentity,
-			createdAt
+			createdAt,
+			ledgerCanisterId: mockLedgerCanisterId
 		};
 
 		const mockIndex: IcrcBlockIndex = 123n;
