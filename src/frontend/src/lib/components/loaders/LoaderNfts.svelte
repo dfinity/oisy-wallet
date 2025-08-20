@@ -10,8 +10,10 @@
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftIdsOfToken } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { NftId, NonFungibleToken } from '$lib/types/nft';
+	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 	import { findNewNftIds } from '$lib/utils/nfts.utils';
+	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
+	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 
 	interface Props {
 		children?: Snippet;
@@ -40,6 +42,29 @@
 			token,
 			inventory,
 			infuraProvider: infuraErc721Providers(token.network.id)
+		});
+	};
+
+	const handleErc1155 = async (token: NonFungibleToken) => {
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
+		const alchemyProvider = alchemyProviders(token.network.id);
+		let inventory: OwnedNft[];
+		try {
+			inventory = await alchemyProvider.getNftIdsForOwner({
+				address: $ethAddress,
+				contractAddress: token.address
+			});
+		} catch (_: unknown) {
+			inventory = [];
+		}
+
+		handleNewNfts({
+			token,
+			inventory: inventory.map((ownedNft) => ownedNft.id),
+			infuraProvider: infuraErc1155Providers(token.network.id)
 		});
 	};
 
@@ -72,6 +97,9 @@
 		for (const token of $enabledNonFungibleTokens) {
 			if (token.standard === 'erc721') {
 				await handleErc721(token);
+			}
+			if (token.standard === 'erc1155') {
+				await handleErc1155(token);
 			}
 		}
 	};
