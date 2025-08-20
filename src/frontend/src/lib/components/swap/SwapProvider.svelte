@@ -4,6 +4,7 @@
 	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
+	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -18,9 +19,8 @@
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
-	import { UrlSchema } from '$lib/validation/url.validation';
 	import { findSwapProvider } from '$lib/utils/swap.utils';
-	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
+	import { UrlSchema } from '$lib/validation/url.validation';
 
 	interface Props {
 		slippageValue: OptionAmount;
