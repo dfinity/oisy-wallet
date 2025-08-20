@@ -959,7 +959,7 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 /// # Returns
 /// * `Ok(GetContactResult)` - The requested contact if found
 /// # Errors
-/// * `ContactNotFound` - If no contact for the proivided contact_id could be found
+/// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_contact(contact_id: u64) -> GetContactResult {

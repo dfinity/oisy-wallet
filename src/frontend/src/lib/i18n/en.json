@@ -1029,7 +1029,9 @@
 			"quantity": "Quantity",
 			"item_traits": "Item traits",
 			"collection_not_loaded": "The collection could not be displayed as it has not been loaded yet",
-			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet"
+			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
+			"collections": "Collections",
+			"all_assets": "All assets"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
