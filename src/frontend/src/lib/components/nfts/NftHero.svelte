@@ -13,6 +13,7 @@
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft } from '$lib/types/nft';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 
 	interface Props {
 		nft?: Nft;
@@ -34,12 +35,18 @@
 
 <div class="relative overflow-hidden rounded-xl" in:fade>
 	<div class="relative h-64 w-full overflow-hidden">
-		<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass="absolute blur" />
+		<div class="absolute h-full w-full">
+			<NftImageConsent {nft} showMessage={false} asHeroBanner>
+				<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass=" blur" />
+			</NftImageConsent>
+		</div>
 
 		{#if nonNullish(nft?.imageUrl)}
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
-					<Img src={nft?.imageUrl} />
+					<NftImageConsent {nft} noBg>
+						<Img src={nft?.imageUrl} />
+					</NftImageConsent>
 					<span class="absolute bottom-0 right-0 m-2.5">
 						<NetworkLogo color="white" network={nft.collection.network} size="xs" />
 					</span>

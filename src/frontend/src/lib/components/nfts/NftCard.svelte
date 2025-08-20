@@ -5,6 +5,7 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 
 	interface Props {
 		nft: Nft;
@@ -22,12 +23,13 @@
 	href={`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`}
 	onclick={disabled ? (e) => e.preventDefault() : undefined}
 >
-	<div
-		class="relative aspect-square overflow-hidden rounded-xl bg-primary-light"
-		class:opacity-50={disabled}
-	>
+	<div class="relative aspect-square overflow-hidden rounded-xl" class:opacity-50={disabled}>
 		{#if nonNullish(nft.imageUrl)}
-			<BgImg imageUrl={nft?.imageUrl} shadow="none" size="contain" testId={`${testId}-image`} />
+			<NftImageConsent {nft}>
+				<div class="h-full w-full bg-primary-light">
+					<BgImg imageUrl={nft?.imageUrl} shadow="none" size="contain" testId={`${testId}-image`} />
+				</div>
+			</NftImageConsent>
 		{:else}
 			<div class="bg-black/16 rounded-lg" data-tid={`${testId}-placeholder`}></div>
 		{/if}

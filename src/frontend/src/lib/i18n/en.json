@@ -1031,7 +1031,10 @@
 			"collection_not_loaded": "The collection could not be displayed as it has not been loaded yet",
 			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
 			"collections": "Collections",
-			"all_assets": "All assets"
+			"all_assets": "All assets",
+            "img_consent_disabled": "You disabled images from this collection",
+            "img_consent_none": "Image disabled for security reasons",
+            "review_button": "Review"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
