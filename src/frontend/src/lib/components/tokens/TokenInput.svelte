@@ -4,6 +4,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import TokenInputCurrencyFiat from '$lib/components/tokens/TokenInputCurrencyFiat.svelte';
 	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
@@ -18,7 +19,6 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import NetworkLogo from '../networks/NetworkLogo.svelte';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
