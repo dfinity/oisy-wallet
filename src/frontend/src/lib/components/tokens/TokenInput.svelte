@@ -4,6 +4,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import TokenInputCurrencyFiat from '$lib/components/tokens/TokenInputCurrencyFiat.svelte';
 	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
@@ -35,6 +36,7 @@
 	export let autofocus = false;
 	export let customValidate: (userAmount: bigint) => TokenActionErrorType = () => undefined;
 	export let customErrorValidate: (userAmount: bigint) => Error | undefined = () => undefined;
+	export let showTokenNetwork = false;
 
 	const dispatch = createEventDispatcher();
 
@@ -73,8 +75,14 @@
 	class:border-brand-subtle-20={focused}
 	class:border-secondary={!focused}
 >
-	<div class="mb-2 text-sm font-bold">
+	<div class="space-between mb-2 flex justify-between text-sm font-bold">
 		<slot name="title" />
+		{#if showTokenNetwork && nonNullish(token)}
+			<div class="flex text-xs font-normal text-tertiary">
+				<span class="mr-1 text-sm">On {token.network.name}</span>
+				<NetworkLogo network={token.network} />
+			</div>
+		{/if}
 	</div>
 
 	<TokenInputContainer
