@@ -145,7 +145,7 @@ export const validateBtcSend = async ({
 			utxo.outpoint.txid.length === 0 ||
 			utxo.outpoint.vout === undefined ||
 			!utxo.value ||
-			BigInt(utxo.value) <= 0n ||
+			BigInt(utxo.value) <= ZERO ||
 			!utxo.height ||
 			utxo.height < 0
 		) {
