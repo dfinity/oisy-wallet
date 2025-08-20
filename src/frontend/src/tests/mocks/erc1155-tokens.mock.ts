@@ -30,7 +30,7 @@ const BUILD_AN_APE_SYMBOL = 'BAPES';
 
 const BUILD_AN_APE_TOKEN_ID: TokenId = parseTokenId(BUILD_AN_APE_SYMBOL);
 
-const BUILD_AN_APE_TOKEN: RequiredErc1155Token = {
+export const BUILD_AN_APE_TOKEN: RequiredErc1155Token = {
 	id: BUILD_AN_APE_TOKEN_ID,
 	network: POLYGON_AMOY_NETWORK,
 	standard: 'erc1155',

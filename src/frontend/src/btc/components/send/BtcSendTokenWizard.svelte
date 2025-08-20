@@ -5,12 +5,17 @@
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import { sendBtc } from '$btc/services/btc-send.services';
-	import type { UtxosFee } from '$btc/types/btc-send';
+	import {
+		sendBtc,
+		handleBtcValidationError,
+		validateBtcSend
+	} from '$btc/services/btc-send.services';
+	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_BTC_SEND_ERROR,
-		TRACK_COUNT_BTC_SEND_SUCCESS
+		TRACK_COUNT_BTC_SEND_SUCCESS,
+		TRACK_COUNT_BTC_VALIDATION_ERROR
 	} from '$lib/constants/analytics.contants';
 	import {
 		btcAddressMainnet,
@@ -62,8 +67,9 @@
 
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
-
 	const send = async () => {
+		progress(ProgressStepsSendBtc.INITIALIZATION);
+
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 
 		if (isNullish(network)) {
@@ -105,11 +111,42 @@
 			await nullishSignOut();
 			return;
 		}
-
 		dispatch('icNext');
 
+		// Validate UTXOs before proceeding
 		try {
-			// TODO: add tracking
+			await validateBtcSend({
+				utxosFee,
+				source,
+				amount,
+				network,
+				identity: $authIdentity
+			});
+		} catch (err: unknown) {
+			// Handle BtcValidationError with specific toastsError for each type
+			if (err instanceof BtcValidationError) {
+				await handleBtcValidationError({ err });
+			}
+
+			trackEvent({
+				name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+				metadata: {
+					token: $sendToken.symbol,
+					network: `${networkId?.description ?? 'unknown'}`
+				}
+			});
+
+			toastsError({
+				msg: { text: $i18n.send.error.unexpected },
+				err
+			});
+
+			// go back to the previous step so the user can correct/ try again
+			dispatch('icBack');
+			return;
+		}
+
+		try {
 			await sendBtc({
 				destination,
 				amount,
