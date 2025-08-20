@@ -27,6 +27,7 @@ import {
 	type BlockTag
 } from 'ethers/providers';
 import { get } from 'svelte/store';
+import type { EtherscanProviderTokenBalance } from '$eth/types/etherscan-token-balance';
 
 interface TransactionsParams {
 	address: EthAddress;
@@ -292,6 +293,7 @@ export class EtherscanProvider {
 		);
 	};
 
+	// https://docs.etherscan.io/api-endpoints/tokens#get-address-erc721-token-inventory-by-contract-address
 	erc721TokenInventory = async ({
 		address,
 		contractAddress
@@ -318,6 +320,28 @@ export class EtherscanProvider {
 		}
 
 		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(parseInt(TokenId)));
+	};
+
+	// https://docs.etherscan.io/api-endpoints/tokens#get-address-erc721-token-holding
+	erc721TokenHolding = async (address: EthAddress): Promise<EthAddress[]> => {
+		const params = {
+			action: 'addresstokennftbalance',
+			address,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderTokenBalance[] | string = await this.provider.fetch(
+			'account',
+			params
+		);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(({ TokenAddress }: EtherscanProviderTokenBalance) => TokenAddress);
 	};
 }
 
