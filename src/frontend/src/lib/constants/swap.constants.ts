@@ -18,3 +18,6 @@ export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeee
 
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
+
+export const SWAP_MODE = 'all';
+export const SWAP_SIDE = 'SELL';

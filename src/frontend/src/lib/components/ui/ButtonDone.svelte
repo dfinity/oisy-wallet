@@ -5,11 +5,12 @@
 	interface Props {
 		onclick: () => void;
 		testId?: string;
+		variant?: 'primary' | 'secondary-light';
 	}
 
-	let { onclick, testId }: Props = $props();
+	let { onclick, testId, variant = 'primary' }: Props = $props();
 </script>
 
-<Button colorStyle="primary" paddingSmall {testId} fullWidth type="button" {onclick}>
+<Button colorStyle={variant} fullWidth {onclick} paddingSmall {testId} type="button">
 	{$i18n.core.text.done}
 </Button>

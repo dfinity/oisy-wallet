@@ -20,12 +20,12 @@
 
 <ContentWithToolbar>
 	<TokensReview
-		{sendAmount}
-		{receiveAmount}
-		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
-		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 		destinationTokenExchangeRate={$destinationTokenExchangeRate}
+		{receiveAmount}
+		{sendAmount}
+		sourceToken={$sourceToken}
+		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 	/>
 
 	<ConvertReviewNetworks />

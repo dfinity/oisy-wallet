@@ -18,7 +18,11 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let visible = $state(false);
+	interface Props {
+		visible?: boolean;
+	}
+
+	let { visible = $bindable(false) }: Props = $props();
 
 	let button = $state<HTMLButtonElement | undefined>();
 
@@ -26,12 +30,12 @@
 </script>
 
 <ButtonIcon
-	bind:button
-	onclick={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
-	testId={NAVIGATION_MENU_BUTTON}
 	colorStyle="tertiary-alt"
 	link={false}
+	onclick={() => (visible = true)}
+	testId={NAVIGATION_MENU_BUTTON}
+	bind:button
 >
 	{#snippet icon()}
 		<IconHelpCircle size="22" />
@@ -39,7 +43,7 @@
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
-<Popover bind:visible anchor={button} direction="rtl">
+<Popover anchor={button} direction="rtl" bind:visible>
 	<div
 		class="mb-1 flex max-w-80 flex-col gap-1"
 		data-tid={NAVIGATION_MENU}
@@ -56,8 +60,8 @@
 		<DocumentationLink
 			asMenuItem
 			asMenuItemCondensed
-			trackEventSource={USER_MENU_ROUTE}
 			testId={NAVIGATION_MENU_DOC_BUTTON}
+			trackEventSource={USER_MENU_ROUTE}
 		/>
 
 		<SupportLink asMenuItem asMenuItemCondensed testId={NAVIGATION_MENU_SUPPORT_BUTTON} />
@@ -65,11 +69,11 @@
 		<Hr />
 
 		<a
+			class="nav-item nav-item-condensed"
+			aria-label={$i18n.navigation.text.source_code_on_github}
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			class="nav-item nav-item-condensed"
-			aria-label={$i18n.navigation.text.source_code_on_github}
 		>
 			<IconGitHub />
 			{$i18n.navigation.text.source_code}

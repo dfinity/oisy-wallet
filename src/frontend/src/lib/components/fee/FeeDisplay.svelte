@@ -33,9 +33,9 @@
 
 <ConvertAmountDisplay
 	amount={formattedFeeAmount}
+	{displayExchangeRate}
 	{exchangeRate}
+	{label}
 	{symbol}
 	{zeroAmountLabel}
-	{displayExchangeRate}
-	{label}
 />

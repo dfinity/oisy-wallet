@@ -11,7 +11,7 @@
 	let { title, description }: Props = $props();
 </script>
 
-<div in:fade class="my-10 flex flex-col items-center justify-center px-4 text-center">
+<div class="my-10 flex flex-col items-center justify-center px-4 text-center" in:fade>
 	<IconOisyEmptyState />
 	<div class="mb-1 mt-5 font-bold">{title}</div>
 
