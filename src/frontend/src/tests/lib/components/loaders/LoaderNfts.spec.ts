@@ -10,12 +10,14 @@ import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 import * as addressStore from '$lib/derived/address.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import * as nftServicesModule from '$lib/services/nft.services';
+import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('LoaderNfts', () => {
@@ -133,6 +135,108 @@ describe('LoaderNfts', () => {
 					tokenIds: [mockNftId3],
 					walletAddress: mockEthAddress
 				});
+			});
+		});
+	});
+
+	describe('handleRemovedNfts', () => {
+		beforeEach(() => {
+			nftStore.resetAll();
+		});
+
+		it('should remove erc721 nfts from nft store', async () => {
+			const mockNft1 = {
+				...mockValidErc721Nft,
+				id: mockNftId1,
+				collection: {
+					...mockValidErc721Nft.collection,
+					address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+					network: AZUKI_ELEMENTAL_BEANS_TOKEN.network
+				}
+			};
+			const mockNft2 = {
+				...mockValidErc721Nft,
+				id: mockNftId2,
+				collection: {
+					...mockValidErc721Nft.collection,
+					address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+					network: AZUKI_ELEMENTAL_BEANS_TOKEN.network
+				}
+			};
+			const mockNft3 = {
+				...mockValidErc721Nft,
+				id: mockNftId3,
+				collection: {
+					...mockValidErc721Nft.collection,
+					address: DE_GODS_TOKEN.address,
+					network: DE_GODS_TOKEN.network
+				}
+			};
+
+			nftStore.addAll([mockNft1, mockNft2, mockNft3]);
+
+			erc721CustomTokensStore.setAll([
+				{ data: mockedEnabledAzukiToken, certified: false },
+				{ data: mockedEnabledGodsToken, certified: false }
+			]);
+
+			mockErc721TokenInventory.mockResolvedValueOnce([mockNftId1]);
+			mockErc721TokenInventory.mockResolvedValueOnce([]);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				expect(mockErc721TokenInventory).toHaveBeenCalledTimes(2);
+
+				expect(get(nftStore)).toEqual([mockNft1]);
+			});
+		});
+
+		it('should remove erc1155 nfts from nft store', async () => {
+			const mockNft1 = {
+				...mockValidErc1155Nft,
+				id: mockNftId1,
+				collection: {
+					...mockValidErc1155Nft.collection,
+					address: NYAN_CAT_TOKEN.address,
+					network: NYAN_CAT_TOKEN.network
+				}
+			};
+			const mockNft2 = {
+				...mockValidErc1155Nft,
+				id: mockNftId2,
+				collection: {
+					...mockValidErc1155Nft.collection,
+					address: NYAN_CAT_TOKEN.address,
+					network: NYAN_CAT_TOKEN.network
+				}
+			};
+			const mockNft3 = {
+				...mockValidErc1155Nft,
+				id: mockNftId3,
+				collection: {
+					...mockValidErc1155Nft.collection,
+					address: BUILD_AN_APE_TOKEN.address,
+					network: BUILD_AN_APE_TOKEN.network
+				}
+			};
+
+			nftStore.addAll([mockNft1, mockNft2, mockNft3]);
+
+			erc1155CustomTokensStore.setAll([
+				{ data: mockedEnabledNyanToken, certified: false },
+				{ data: mockedEnabledApeToken, certified: false }
+			]);
+
+			mockGetNftIdsForOwner.mockResolvedValueOnce([{ id: mockNftId1, balance: 2 }]);
+			mockGetNftIdsForOwner.mockResolvedValueOnce([]);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				expect(mockGetNftIdsForOwner).toHaveBeenCalledTimes(2);
+
+				expect(get(nftStore)).toEqual([mockNft1]);
 			});
 		});
 	});
