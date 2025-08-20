@@ -20,9 +20,9 @@
 </script>
 
 <button
-	on:click
+	class="{`${isActive ? 'w-7 bg-primary-inverted' : 'w-4 bg-disabled'} mr-1 h-1.5 transition-all duration-300 ease-linear last:mr-0`}}"
 	aria-label={replacePlaceholders($i18n.carousel.text.indicator, { $index: `${index + 1}` })}
 	data-tid={`${CAROUSEL_SLIDE_NAVIGATION}${index + 1}`}
-	class="{`${isActive ? 'w-7 bg-primary-inverted' : 'w-4 bg-disabled'} mr-1 h-1.5 transition-all duration-300 ease-linear last:mr-0`}}"
+	on:click
 	out:fade
 ></button>
