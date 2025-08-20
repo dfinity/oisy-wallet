@@ -78,13 +78,14 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
 			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
-				const token =
-					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
-					$splTokens.find(({ address }) => address.toLowerCase() === key.toLowerCase());
+				const tokens = [
+					...$erc20Tokens.filter(({ address }) => address.toLowerCase() === key.toLowerCase()),
+					...$splTokens.filter(({ address }) => address.toLowerCase() === key.toLowerCase())
+				];
 
 				return {
 					...acc,
-					...(nonNullish(token) && { [token.id]: currentPrice })
+					...tokens.reduce((inner, token) => ({ ...inner, [token.id]: currentPrice }), {})
 				};
 			}, {}),
 			...$erc20Tokens
