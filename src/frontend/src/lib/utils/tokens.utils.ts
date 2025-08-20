@@ -345,7 +345,7 @@ export const saveAllCustomTokens = async ({
 	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 	const customTokens = get(erc20CustomTokensStore) ?? [];
 	const currentUserTokens = (get(erc20UserTokensStore) ?? []).map(({ data: token }) => token);
-	const erc20UserTokens = [...currentUserTokens, ...erc20].filter(
+	const erc20UserTokens = [...erc20, ...currentUserTokens].filter(
 		(token, index, self) =>
 			index ===
 			self.findIndex(
