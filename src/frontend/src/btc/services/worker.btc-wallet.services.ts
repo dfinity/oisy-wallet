@@ -12,7 +12,7 @@ import {
 } from '$lib/stores/address.store';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { WalletWorker } from '$lib/types/listener';
-import type { PostMessage } from '$lib/types/post-message';
+import type { PostMessage, PostMessageDataRequestBtc } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdBTCMainnet,
@@ -96,14 +96,14 @@ export const initBtcWalletWorker = async ({
 			worker?.postMessage({
 				msg: 'startBtcWalletTimer',
 				data
-			});
+			} as PostMessage<PostMessageDataRequestBtc>);
 		},
 		stop,
 		trigger: () => {
 			worker?.postMessage({
 				msg: 'triggerBtcWalletTimer',
 				data
-			});
+			} as PostMessage<PostMessageDataRequestBtc>);
 		},
 		destroy: () => {
 			if (isDestroying) {
