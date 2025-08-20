@@ -84,7 +84,7 @@
 			return;
 		}
 
-		const networks: EthereumNetwork[] = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
+		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
 		for (const network of networks) {
 			// TODO make it parallel
 			await handleErc721(network)
