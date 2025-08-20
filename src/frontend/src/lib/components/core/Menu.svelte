@@ -50,7 +50,12 @@
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
-	let visible = $state(false);
+	interface Props {
+		visible?: boolean;
+	}
+
+	let { visible = $bindable(false) }: Props = $props();
+
 	let button = $state<HTMLButtonElement | undefined>();
 
 	let isVip = $state(false);
