@@ -34,8 +34,8 @@ export const failTestsThatLogToConsole = () => {
 				'Your test produced console logs, which is not allowed.\n' +
 					'If you need console output, mock and expect it in your test.\n' +
 					'This failure only happens after your test finishes so if your test had other failures, you can still see them and just ignore this.\n' +
-					'If this is only for debugging, call allowLoggingInOneTest' +
-					'ForDebugging() from $tests/utils/console.test-utils in your test.'
+					'If this is only for debugging, call allowLoggingForDebugging()' +
+					' from $tests/utils/console.test-utils in your test file.'
 			);
 		}
 		isLoggingAllowed = false;
