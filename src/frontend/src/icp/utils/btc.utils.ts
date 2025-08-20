@@ -1,10 +1,40 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
+import {
+	BTC_MAINNET_TOKEN_ID,
+	BTC_REGTEST_TOKEN_ID,
+	BTC_TESTNET_TOKEN_ID
+} from '$env/tokens/tokens.btc.env';
 import { ZERO } from '$lib/constants/app.constants';
+import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
+import type { TokenId } from '$lib/types/token';
 import { isNullish, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+/**
+ * Get the NetworkId from a BTC TokenId
+ * @param tokenId - The BTC token ID
+ * @returns The corresponding NetworkId
+ */
+export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined => {
+	if (tokenId === BTC_MAINNET_TOKEN_ID) {
+		return BTC_MAINNET_NETWORK_ID;
+	}
+	if (tokenId === BTC_TESTNET_TOKEN_ID) {
+		return BTC_TESTNET_NETWORK_ID;
+	}
+	if (tokenId === BTC_REGTEST_TOKEN_ID) {
+		return BTC_REGTEST_NETWORK_ID;
+	}
+	return undefined;
+};
 
 /**
  * Bitcoin txid to text representation requires inverting the array.
@@ -104,7 +134,7 @@ export const getPendingTransactionIds = (address: string): string[] => {
  *
  * @param address - The Bitcoin address to calculate balances for
  * @param confirmedBalance - Sum of all confirmed UTXOs (from Bitcoin node/canister)
- * @param providerTransactions - Array of transaction data with confirmation status from external API
+ * @param providerTransactions - Array of transaction data with confirmation status from external API (optional, null when certified=true)
  * @returns Structured balance object with confirmed, unconfirmed, locked, and total amounts
  */
 export const getBtcWalletBalance = ({
@@ -114,8 +144,9 @@ export const getBtcWalletBalance = ({
 }: {
 	address: string;
 	confirmedBalance: bigint;
-	providerTransactions: CertifiedData<BtcTransactionUi>[];
+	providerTransactions: CertifiedData<BtcTransactionUi>[] | null;
 }): BtcWalletBalance => {
+	// Retrieve pending outgoing transactions from local store with safe fallback
 	// If the store access fails or returns invalid data, we'll default to empty state
 	let pendingTransactions: Array<PendingTransaction> = [];
 
@@ -127,7 +158,7 @@ export const getBtcWalletBalance = ({
 			pendingTransactions = pendingData.data;
 		}
 	} catch (error) {
-		// We log the error for debugging but don't fail the entire balance calculation
+		// Log the error for debugging but don't fail the entire balance calculation
 		// This ensures the user still gets confirmed/unconfirmed balance even if pending data fails
 		console.warn('Failed to retrieve pending transactions for balance calculation:', {
 			address,
@@ -155,31 +186,34 @@ export const getBtcWalletBalance = ({
 				transaction: tx,
 				error
 			});
-			return sum;
+			return sum; // Don't add anything from this transaction
 		}
 	}, ZERO);
 
-	// Calculates the unconfirmed incoming balance from external provider transaction data
+	// Calculate unconfirmed incoming balance from external provider transaction data
 	// This part is independent of pending transactions and should work even if pending data fails
-	const unconfirmedBalance = providerTransactions.reduce((sum, tx) => {
-		try {
-			if (
-				tx.data.status === 'unconfirmed' &&
-				tx.data.type === 'receive' &&
-				nonNullish(tx.data.value)
-			) {
-				return sum + tx.data.value;
-			}
-			return sum;
-		} catch (error) {
-			// Log error but continue processing other transactions
-			console.warn('Error processing provider transaction for unconfirmed balance:', {
-				transaction: tx,
-				error
-			});
-			return sum;
-		}
-	}, ZERO);
+	// When providerTransactions is null (certified=true), unconfirmedBalance will be 0
+	const unconfirmedBalance = nonNullish(providerTransactions)
+		? providerTransactions.reduce((sum, tx) => {
+				try {
+					if (
+						tx.data.status === 'unconfirmed' &&
+						tx.data.type === 'receive' &&
+						nonNullish(tx.data.value)
+					) {
+						return sum + tx.data.value;
+					}
+					return sum;
+				} catch (error) {
+					// Log error but continue processing other transactions
+					console.warn('Error processing provider transaction for unconfirmed balance:', {
+						transaction: tx,
+						error
+					});
+					return sum;
+				}
+			}, ZERO)
+		: ZERO;
 
 	// Total balance represents the user's complete Bitcoin holdings
 	// Even if pending data fails, this will still show confirmed + unconfirmed

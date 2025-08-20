@@ -3,17 +3,7 @@ import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { getBtcSourceAddress } from '$btc/utils/btc-address.utils';
-import {
-	BTC_MAINNET_NETWORK_ID,
-	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.btc.env';
-import {
-	BTC_MAINNET_TOKEN_ID,
-	BTC_REGTEST_TOKEN_ID,
-	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens/tokens.btc.env';
-import { getBtcWalletBalance } from '$icp/utils/btc.utils';
+import { getBtcWalletBalance, mapTokenIdToNetworkId } from '$icp/utils/btc.utils';
 import { getIdbBtcTransactions } from '$lib/api/idb-transactions.api';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { syncWalletFromIdbCache } from '$lib/services/listener.services';
@@ -21,7 +11,6 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
-import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
@@ -40,19 +29,16 @@ export const syncWallet = async ({
 			newTransactions
 		}
 	} = data;
-
-	// Parse new transactions here in the listener
-	const providerTransactions: CertifiedData<BtcTransactionUi>[] = JSON.parse(
-		newTransactions,
-		jsonReviver
-	);
+	// Only parse new transactions when certified is false (when we actually receive transaction data)
+	// When certified is true, newTransactions are not provided
+	const providerTransactions: CertifiedData<BtcTransactionUi>[] | null = certified
+		? null
+		: JSON.parse(newTransactions, jsonReviver);
 
 	if (nonNullish(balance)) {
 		/*
 		 * Balance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
 		 * because the pending transactions store (btcPendingSentTransactionsStore) is not accessible from the worker context.
-		 * Web Workers have isolated execution contexts and cannot directly access Svelte stores from the main thread.
-		 *
 		 * The worker provides the confirmed balance from the Bitcoin canister, and we calculate the structured
 		 * balance (confirmed, unconfirmed, total) using newTransactions data to determine confirmation states.
 		 */
@@ -64,12 +50,14 @@ export const syncWallet = async ({
 		// Get the source address using the same logic as other components (BtcConvertTokenWizard, etc.)
 		const sourceAddress = getBtcSourceAddress(networkId);
 
-		// Wait for pending transactions to be loaded before calculating balance
-		await loadBtcPendingSentTransactions({
-			identity,
-			networkId,
-			address: sourceAddress
-		});
+		if (!certified) {
+			// Wait for pending transactions to be loaded before calculating balance
+			await loadBtcPendingSentTransactions({
+				identity,
+				networkId,
+				address: sourceAddress
+			});
+		}
 
 		// Calculate the structured balance using parsed transactions
 		// Use sourceAddress to ensure consistency with the address used for pending transactions
@@ -82,9 +70,10 @@ export const syncWallet = async ({
 		console.warn('🎯 [btc-listener.services.ts -> syncWallet] Called getBtcWalletBalance(..):', {
 			timestamp: new Date().toISOString(),
 			input: {
+				certified,
 				sourceAddress,
 				totalBalance: balance.toString(),
-				providerTransactionsCount: providerTransactions.length
+				providerTransactionsCount: providerTransactions?.length ?? 0
 			},
 			output: {
 				confirmed: btcWalletBalance.confirmed.toString(),
@@ -97,7 +86,7 @@ export const syncWallet = async ({
 		balancesStore.set({
 			id: tokenId,
 			data: {
-				data: btcWalletBalance.confirmed,
+				data: btcWalletBalance.total,
 				certified
 			}
 		});
@@ -105,10 +94,13 @@ export const syncWallet = async ({
 		balancesStore.reset(tokenId);
 	}
 
-	btcTransactionsStore.prepend({
-		tokenId,
-		transactions: providerTransactions
-	});
+	// Only store transactions when we have actual transaction data (certified === false)
+	if (nonNullish(providerTransactions)) {
+		btcTransactionsStore.prepend({
+			tokenId,
+			transactions: providerTransactions
+		});
+	}
 };
 
 export const syncWalletError = ({
@@ -144,21 +136,3 @@ export const syncWalletFromCache = (params: Omit<GetIdbTransactionsParams, 'prin
 		getIdbTransactions: getIdbBtcTransactions,
 		transactionsStore: btcTransactionsStore
 	});
-
-/**
- * Get the NetworkId from a BTC TokenId
- * @param tokenId - The BTC token ID
- * @returns The corresponding NetworkId
- */
-const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined => {
-	if (tokenId === BTC_MAINNET_TOKEN_ID) {
-		return BTC_MAINNET_NETWORK_ID;
-	}
-	if (tokenId === BTC_TESTNET_TOKEN_ID) {
-		return BTC_TESTNET_NETWORK_ID;
-	}
-	if (tokenId === BTC_REGTEST_TOKEN_ID) {
-		return BTC_REGTEST_NETWORK_ID;
-	}
-	return undefined;
-};
