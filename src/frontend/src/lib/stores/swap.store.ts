@@ -3,6 +3,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { Balance } from '$lib/types/balance';
+import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
@@ -15,8 +16,8 @@ export interface SwapError {
 }
 
 export interface SwapData {
-	sourceToken?: IcTokenToggleable;
-	destinationToken?: IcTokenToggleable;
+	sourceToken?: Token | IcTokenToggleable;
+	destinationToken?: Token | IcTokenToggleable;
 }
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
