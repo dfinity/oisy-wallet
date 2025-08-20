@@ -103,6 +103,7 @@
 		inventory: NftId[];
 	}) => {
 		const removedNfts = findRemovedNfts({ nfts: $nftStore ?? [], token, inventory });
+
 		if (removedNfts.length > 0) {
 			nftStore.removeSelectedNfts(removedNfts);
 		}
