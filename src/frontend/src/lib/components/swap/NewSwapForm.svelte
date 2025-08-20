@@ -120,7 +120,7 @@
 			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
 		) {
 			receiveAmount = formatTokenBigintToNumber({
-				value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+				value: $swapAmountsStore.selectedProvider.receiveAmount,
 				unitName: $destinationToken.decimals,
 				displayDecimals: $destinationToken.decimals
 			});
