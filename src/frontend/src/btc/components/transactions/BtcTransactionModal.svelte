@@ -116,8 +116,8 @@
 							copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
 								$hash: id
 							})}
-							explorerUrl={txExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
+							externalLink={txExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
 						/>
 					</span>
 				</ListItem>
