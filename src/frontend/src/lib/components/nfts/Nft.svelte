@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import NftDescription from '$lib/components/nfts/NftDescription.svelte';
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -11,7 +12,6 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft } from '$lib/types/nft';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import NftDescription from '$lib/components/nfts/NftDescription.svelte';
 
 	const [networkId, collectionId, nftId] = $derived([
 		page.params.networkId,
