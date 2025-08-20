@@ -157,15 +157,15 @@ export const getBtcWalletBalance = ({
 						// Look up the transaction in providerTransactions to get confirmation count and type
 						const matchedTransaction = transactionLookup.get(txid);
 
-						if (matchedTransaction && nonNullish(matchedTransaction.value)) {
+						if (nonNullish(matchedTransaction) && nonNullish(matchedTransaction.value)) {
 							const confirmations =
 								matchedTransaction.confirmations ?? PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-							// Only add to unconfirmed balance when transaction has 0/1-5 confirmations
+							// Only add to unconfirmed balance when transaction has 0-5 confirmations
 							// 0 confirmations: only locked (no unconfirmed impact to avoid double counting)
-							// 6+ confirmations: transaction will be removed from pending store by cleanup
+							// 6+ confirmations: pending transaction will be removed from store by cleanup
 							if (
-								confirmations >= PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1 && // Start from 1 confirmation
+								confirmations >= PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS &&
 								confirmations < CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 							) {
 								// Apply directional impact to unconfirmed balance
