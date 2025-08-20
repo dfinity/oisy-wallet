@@ -7,6 +7,7 @@ import type { SendBtcResponse } from '$declarations/signer/signer.did';
 import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -17,7 +18,7 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
+import { hexStringToUint8Array, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 interface BtcSendServiceParams {
@@ -140,13 +141,13 @@ export const validateBtcSend = async ({
 	}
 	for (const utxo of utxos) {
 		if (
-			!utxo.outpoint ||
-			!utxo.outpoint.txid ||
+			!nonNullish(utxo.outpoint) ||
+			!nonNullish(utxo.outpoint.txid) ||
 			utxo.outpoint.txid.length === 0 ||
 			utxo.outpoint.vout === undefined ||
-			!utxo.value ||
-			BigInt(utxo.value) <= 0n ||
-			!utxo.height ||
+			!nonNullish(utxo.value) ||
+			BigInt(utxo.value) <= ZERO ||
+			!nonNullish(utxo.height) ||
 			utxo.height < 0
 		) {
 			throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
@@ -165,8 +166,8 @@ export const validateBtcSend = async ({
 	}
 
 	// 3. Verify UTXO values and calculate totals
-	const totalUtxoValue = utxos.reduce((sum, utxo) => sum + BigInt(utxo.value), 0n);
-	if (totalUtxoValue <= 0n) {
+	const totalUtxoValue = utxos.reduce((sum, utxo) => sum + BigInt(utxo.value), ZERO);
+	if (totalUtxoValue <= ZERO) {
 		throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
 	}
 
@@ -200,7 +201,7 @@ export const validateBtcSend = async ({
 	// 6. Check for dust amounts in change output
 	// const changeAmount = totalUtxoValue - totalRequired;
 	// const DUST_THRESHOLD = 546n; // Standard Bitcoin dust threshold
-	// if (changeAmount > 0n && changeAmount < DUST_THRESHOLD) {
+	// if (changeAmount > ZERO && changeAmount < DUST_THRESHOLD) {
 	//	throw new Error(
 	//		`Transaction would create dust: change amount ${changeAmount} satoshis ` +
 	//			`is below dust threshold ${DUST_THRESHOLD} satoshis`

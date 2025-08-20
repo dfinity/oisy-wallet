@@ -1,0 +1,110 @@
+<script lang="ts">
+	import { isNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
+	import { alchemyProviders } from '$eth/providers/alchemy.providers';
+	import { etherscanProviders } from '$eth/providers/etherscan.providers';
+	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
+	import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
+	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
+	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { loadNftIdsOfToken } from '$lib/services/nft.services';
+	import { nftStore } from '$lib/stores/nft.store';
+	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
+	import { findNewNftIds } from '$lib/utils/nfts.utils';
+
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
+
+	const handleErc721 = async (token: NonFungibleToken) => {
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
+		const etherscanProvider = etherscanProviders(token.network.id);
+
+		let inventory: NftId[];
+		try {
+			inventory = await etherscanProvider.erc721TokenInventory({
+				address: $ethAddress,
+				contractAddress: token.address
+			});
+		} catch (_: unknown) {
+			inventory = [];
+		}
+
+		handleNewNfts({
+			token,
+			inventory,
+			infuraProvider: infuraErc721Providers(token.network.id)
+		});
+	};
+
+	const handleErc1155 = async (token: NonFungibleToken) => {
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
+		const alchemyProvider = alchemyProviders(token.network.id);
+		let inventory: OwnedNft[];
+		try {
+			inventory = await alchemyProvider.getNftIdsForOwner({
+				address: $ethAddress,
+				contractAddress: token.address
+			});
+		} catch (_: unknown) {
+			inventory = [];
+		}
+
+		handleNewNfts({
+			token,
+			inventory: inventory.map((ownedNft) => ownedNft.id),
+			infuraProvider: infuraErc1155Providers(token.network.id)
+		});
+	};
+
+	const handleNewNfts = ({
+		token,
+		inventory,
+		infuraProvider
+	}: {
+		token: NonFungibleToken;
+		inventory: NftId[];
+		infuraProvider: InfuraErc165Provider;
+	}) => {
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
+		const newNftIds = findNewNftIds({ nfts: $nftStore ?? [], token, inventory });
+
+		if (newNftIds.length > 0) {
+			loadNftIdsOfToken({
+				infuraProvider,
+				token,
+				tokenIds: newNftIds,
+				walletAddress: $ethAddress
+			}).catch(console.error);
+		}
+	};
+
+	const onLoad = async () => {
+		for (const token of $enabledNonFungibleTokens) {
+			if (token.standard === 'erc721') {
+				await handleErc721(token);
+			}
+			if (token.standard === 'erc1155') {
+				await handleErc1155(token);
+			}
+		}
+	};
+</script>
+
+<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad}>
+	{@render children?.()}
+</IntervalLoader>

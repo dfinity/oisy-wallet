@@ -126,20 +126,20 @@
 			// Handle BtcValidationError with specific toastsError for each type
 			if (err instanceof BtcValidationError) {
 				await handleBtcValidationError({ err });
-			} else {
-				trackEvent({
-					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-					metadata: {
-						token: $sendToken.symbol,
-						network: `${networkId?.description ?? 'unknown'}`
-					}
-				});
-
-				toastsError({
-					msg: { text: $i18n.send.error.unexpected },
-					err
-				});
 			}
+
+			trackEvent({
+				name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+				metadata: {
+					token: $sendToken.symbol,
+					network: `${networkId?.description ?? 'unknown'}`
+				}
+			});
+
+			toastsError({
+				msg: { text: $i18n.send.error.unexpected },
+				err
+			});
 
 			// go back to the previous step so the user can correct/ try again
 			dispatch('icBack');
