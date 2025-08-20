@@ -1,5 +1,5 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
@@ -82,10 +82,8 @@ export const allTokens = derived(
 		$splTokens,
 		$enabledEvmTokens
 	]) => [
-		{
-			...ICP_TOKEN,
-			enabled: true
-		},
+		{ ...ICP_TOKEN, enabled: true },
+		{ ...TESTICP_TOKEN, enabled: true },
 		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })),

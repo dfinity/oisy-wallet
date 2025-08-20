@@ -1,7 +1,7 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -54,6 +54,7 @@ export const tokens: Readable<Token[]> = derived(
 		$enabledEvmTokens
 	]) => [
 		ICP_TOKEN,
+		TESTICP_TOKEN,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
@@ -85,6 +86,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
+		TESTICP_TOKEN,
 		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens,
 		...$defaultEthereumTokens.filter((token) => token !== ETHEREUM_TOKEN)
