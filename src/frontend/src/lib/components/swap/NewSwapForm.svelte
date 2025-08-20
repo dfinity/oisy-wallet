@@ -74,7 +74,7 @@
 
 	let amountSetToMax = $state(false);
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
-	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	let swapAmountsLoading = $derived(
 		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
