@@ -18,10 +18,11 @@
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 
 	interface Props {
+		visible: boolean;
 		disabled?: boolean;
 	}
 
-	let { disabled = false }: Props = $props();
+	let { visible = $bindable(false), disabled = false }: Props = $props();
 
 	let dropdown = $state<Dropdown | undefined>();
 
@@ -55,6 +56,7 @@
 	asModalOnMobile
 	{disabled}
 	testId={NETWORKS_SWITCHER_DROPDOWN}
+	bind:visible
 >
 	<NetworkSwitcherLogo network={$selectedNetwork} />
 
