@@ -39,7 +39,7 @@
 	>
 		{#if showMessage && !isLoading}
 			<span class="text-tertiary"><IconShieldHalftone /></span>
-			<span class="max-w-[90%] text-sm text-tertiary"
+			<span class="max-w-40 text-sm text-tertiary"
 				>{isNullish(hasConsent)
 					? $i18n.nfts.text.img_consent_none
 					: $i18n.nfts.text.img_consent_disabled}</span
