@@ -39,7 +39,7 @@
 		isSwapAmountsLoading: boolean;
 		swapDetails?: Snippet;
 		errorType?: TokenActionErrorType;
-		onCustomValidate: (userAmount: bigint) => TokenActionErrorType;
+		customValidate: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
@@ -47,13 +47,13 @@
 	}
 
 	let {
-		swapAmount = $bindable<OptionAmount>(),
-		receiveAmount = $bindable<number | undefined>(),
-		slippageValue = $bindable<OptionAmount>(),
+		swapAmount = $bindable(),
+		receiveAmount = $bindable(),
+		slippageValue = $bindable(),
 		isSwapAmountsLoading,
 		swapDetails,
-		errorType = $bindable<TokenActionErrorType | undefined>(),
-		onCustomValidate = $bindable<(userAmount: bigint) => TokenActionErrorType>(),
+		errorType = $bindable(),
+		customValidate,
 		fee,
 		onShowTokensList,
 		onClose,
@@ -90,7 +90,7 @@
 			Number(swapAmount) > 0
 	);
 
-	let disableSwitchTokens = $derived(() => {
+	let isSwitchTokensButtonDisabled = $derived(() => {
 		if (isNullish($destinationToken?.network.id) || isNullish($sourceToken?.network.id)) {
 			return true;
 		}
@@ -150,7 +150,6 @@
 				>
 					{#snippet tokenInput()}
 						<TokenInput
-							customValidate={onCustomValidate}
 							displayUnit={inputUnit}
 							exchangeRate={$sourceTokenExchangeRate}
 							showTokenNetwork
@@ -158,6 +157,7 @@
 							bind:amount={swapAmount}
 							bind:errorType
 							bind:amountSetToMax
+							{customValidate}
 							on:click={() => onShowTokensList('source')}
 						>
 							<span slot="title">{$i18n.tokens.text.source_token_title}</span>
@@ -198,7 +198,10 @@
 				</TokenInputNetworkWrapper>
 			</div>
 
-			<SwapSwitchTokensButton disabled={disableSwitchTokens()} on:icSwitchTokens={onTokensSwitch} />
+			<SwapSwitchTokensButton
+				disabled={isSwitchTokensButtonDisabled()}
+				on:icSwitchTokens={onTokensSwitch}
+			/>
 
 			<TokenInputNetworkWrapper
 				showGradient={$sourceToken?.network?.id !== $destinationToken?.network.id}
