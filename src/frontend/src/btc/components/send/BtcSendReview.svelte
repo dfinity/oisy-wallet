@@ -39,12 +39,12 @@
 		invalid;
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
-	<BtcReviewNetwork networkId={$sendTokenNetworkId} slot="network" />
+<SendReview {amount} {destination} disabled={disableSend} {selectedContact} on:icBack on:icSend>
+	<BtcReviewNetwork slot="network" networkId={$sendTokenNetworkId} />
 
-	<BtcUtxosFee slot="fee" bind:utxosFee networkId={$sendTokenNetworkId} {amount} {source} />
+	<BtcUtxosFee slot="fee" {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
 
-	<div class="mt-8" slot="info">
+	<div slot="info" class="mt-8">
 		<BtcSendWarnings {utxosFee} />
 	</div>
 </SendReview>
