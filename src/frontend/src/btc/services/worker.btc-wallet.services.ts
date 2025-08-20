@@ -68,7 +68,7 @@ export const initBtcWalletWorker = async ({
 		}
 	};
 
-	const data: PostMessageDataRequestBtc = {
+	const data = {
 		// TODO: stop/start the worker on address change
 		btcAddress: get(
 			isTestnetNetwork
@@ -96,14 +96,14 @@ export const initBtcWalletWorker = async ({
 			worker?.postMessage({
 				msg: 'startBtcWalletTimer',
 				data
-			});
+			} as PostMessage<PostMessageDataRequestBtc>);
 		},
 		stop,
 		trigger: () => {
 			worker?.postMessage({
 				msg: 'triggerBtcWalletTimer',
 				data
-			});
+			} as PostMessage<PostMessageDataRequestBtc>);
 		},
 		destroy: () => {
 			if (isDestroying) {
