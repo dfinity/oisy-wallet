@@ -165,7 +165,7 @@ export const validateBtcSend = async ({
 	}
 
 	// 3. Verify UTXO values and calculate totals
-	const totalUtxoValue = utxos.reduce((sum, utxo) => sum + BigInt(utxo.value), 0n);
+	const totalUtxoValue = utxos.reduce((sum, utxo) => sum + BigInt(utxo.value), ZERO);
 	if (totalUtxoValue <= 0n) {
 		throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
 	}
