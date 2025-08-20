@@ -72,46 +72,53 @@ export const convertPendingTransactionTxid = (tx: PendingTransaction): string | 
 	return notEmptyString(txidString) ? txidString : null;
 };
 
+/**
+ * Safely retrieves pending transactions for a given Bitcoin address from the store.
+ *
+ * @param address - The Bitcoin address to get pending transactions for
+ * @returns Pending transactions data, or safe default with data: null when:
+ *   - Store hasn't been initialized yet
+ *   - Address doesn't exist in store (hasn't been loaded)
+ *   - Backend retrieval failed (setPendingTransactionsError was called)
+ */
 export const getPendingTransactions = (
 	address: string
 ): Omit<CertifiedData<Array<PendingTransaction> | null>, 'certified'> & {
 	certified: true;
 } => {
-	try {
-		const storeData = get(btcPendingSentTransactionsStore);
+	const storeData = get(btcPendingSentTransactionsStore);
 
-		// Check if store data exists and has the address
-		if (nonNullish(storeData) && address in storeData) {
-			return storeData[address];
-		}
-
-		// Return safe default when address not found in store
-		return {
-			data: null,
-			certified: true
-		};
-	} catch (error) {
-		// Log error and return safe default if store access fails
-		console.warn('Failed to retrieve pending transactions from store:', {
-			address,
-			error
-		});
-
+	// Case 1: Store not initialized - return safe default
+	if (isNullish(storeData)) {
 		return {
 			data: null,
 			certified: true
 		};
 	}
+
+	// Case 2: Address exists in store - return actual data (may be null if backend failed)
+	if (address in storeData) {
+		return storeData[address];
+	}
+
+	// Case 3: Address not in store yet, we return empty array for transactions
+	return {
+		data: [],
+		certified: true
+	};
 };
 
 /**
  * Get pending transaction IDs from the store to exclude locked UTXOs
+ * @param address - Bitcoin address to get pending transaction IDs for
+ * @returns Array of pending transaction ID strings, or null if no pending data available
+ * @throws Error when the store has not been initialized
  */
-export const getPendingTransactionIds = (address: string): string[] => {
+export const getPendingTransactionIds = (address: string): string[] | null => {
 	const pendingTransactions = getPendingTransactions(address);
 
 	if (isNullish(pendingTransactions?.data)) {
-		return [];
+		return null;
 	}
 
 	// Use the utility function to convert txids and filter out nulls
