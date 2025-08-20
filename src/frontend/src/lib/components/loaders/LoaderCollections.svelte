@@ -23,26 +23,23 @@
 
 		const contractAddresses = await loadErc721ContractAddresses(etherscanProvider);
 
-		const newTokens = contractAddresses.reduce<SaveErc721CustomToken[]>(
-			(acc, contractAddress) => {
-				const existingToken = $nonFungibleTokens.find(
-					(token) => token.address === contractAddress && token.network.id === network.id
-				);
-				if (nonNullish(existingToken)) {
-					return acc;
-				}
-
-				const newToken: SaveErc721CustomToken = {
-					address: contractAddress,
-					network,
-					enabled: true
-				};
-				acc.push(newToken);
-
+		const newTokens = contractAddresses.reduce<SaveErc721CustomToken[]>((acc, contractAddress) => {
+			const existingToken = $nonFungibleTokens.find(
+				(token) => token.address === contractAddress && token.network.id === network.id
+			);
+			if (nonNullish(existingToken)) {
 				return acc;
-			},
-			[]
-		);
+			}
+
+			const newToken: SaveErc721CustomToken = {
+				address: contractAddress,
+				network,
+				enabled: true
+			};
+			acc.push(newToken);
+
+			return acc;
+		}, []);
 
 		for (const token of newTokens) {
 			token.enabled = await isContractVerified({
@@ -66,9 +63,9 @@
 	};
 
 	const isContractVerified = async ({
-																			etherscanProvider,
-																			contractAddress
-																		}: {
+		etherscanProvider,
+		contractAddress
+	}: {
 		etherscanProvider: EtherscanProvider;
 		contractAddress: EthAddress;
 	}): Promise<boolean> => {
@@ -87,7 +84,7 @@
 		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
 		for (const network of networks) {
 			// TODO make it parallel
-			await handleErc721(network)
+			await handleErc721(network);
 		}
 	};
 </script>
