@@ -21,7 +21,7 @@ import {
 	BTC_TESTNET_TOKEN_ID
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN_ID, TESTICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import {
 	SOLANA_DEVNET_TOKEN_ID,
 	SOLANA_LOCAL_TOKEN_ID,
@@ -66,6 +66,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[ETHEREUM_TOKEN_ID]: ethPrice,
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
+			[TESTICP_TOKEN_ID]: icpPrice,
 			[SOLANA_TOKEN_ID]: solPrice,
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
 			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
