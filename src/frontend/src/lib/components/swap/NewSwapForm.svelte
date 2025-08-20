@@ -73,7 +73,7 @@
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let amountSetToMax = $state(false);
-	let exchangeValueUnit: DisplayUnit = $state<DisplayUnit>('usd');
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	let swapAmountsLoading = $derived(
