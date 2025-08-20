@@ -188,3 +188,9 @@ export interface GetWithdrawableTokenParams {
 	sourceToken: IcTokenToggleable;
 	destinationToken: IcTokenToggleable;
 }
+
+export interface SwapProvidersConfig {
+	name: string;
+	logo: string;
+	website: string;
+}

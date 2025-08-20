@@ -7,6 +7,9 @@ import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
+import { defaultIcpTokens } from '$icp/derived/tokens.derived';
+import { buildDip20Tokens } from '$icp/services/dip20-tokens.services';
+import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
@@ -61,6 +64,7 @@ export const allTokens = derived(
 		erc721Tokens,
 		// The entire list of Erc1155 tokens to display to the user.
 		erc1155Tokens,
+		defaultIcpTokens,
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
 		allIcrcTokens,
@@ -72,6 +76,7 @@ export const allTokens = derived(
 		$erc20Tokens,
 		$erc721Tokens,
 		$erc1155Tokens,
+		$defaultIcpTokens,
 		$enabledBitcoinTokens,
 		$enabledEthereumTokens,
 		$allIcrcTokens,
@@ -79,10 +84,7 @@ export const allTokens = derived(
 		$splTokens,
 		$enabledEvmTokens
 	]) => [
-		{
-			...ICP_TOKEN,
-			enabled: true
-		},
+		...$defaultIcpTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })),
