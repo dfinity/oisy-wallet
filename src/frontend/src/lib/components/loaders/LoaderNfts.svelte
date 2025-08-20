@@ -13,7 +13,7 @@
 	import { loadNftIdsOfToken } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
-	import { findNewNftIds, findRemovedNfts } from '$lib/utils/nfts.utils';
+	import { findNewNftIds, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		children?: Snippet;
@@ -63,6 +63,7 @@
 		}
 
 		handleRemovedNfts({ token, inventory: inventory.map((ownedNft) => ownedNft.id) });
+		handleUpdatedNfts({ token, inventory });
 		handleNewNfts({
 			token,
 			inventory: inventory.map((ownedNft) => ownedNft.id),
@@ -106,6 +107,20 @@
 
 		if (removedNfts.length > 0) {
 			nftStore.removeSelectedNfts(removedNfts);
+		}
+	};
+
+	const handleUpdatedNfts = ({
+		token,
+		inventory
+	}: {
+		token: NonFungibleToken;
+		inventory: OwnedNft[];
+	}) => {
+		const updatedNfts = getUpdatedNfts({ nfts: $nftStore ?? [], token, inventory });
+
+		if (updatedNfts.length > 0) {
+			nftStore.updateSelectedNfts(updatedNfts);
 		}
 	};
 
