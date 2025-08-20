@@ -36,8 +36,11 @@ runs:
       id: compute
       shell: bash
       run: |
-        if [[ "${{ steps.changes.outputs.backend_raw }}" == "true" && "${{ steps.changes.outputs.frontend }}" != "true" ]]; then
+        if [[ "$BACKEND_RAW" == "true" && "$FRONTEND" != "true" ]]; then
           echo "backend=true" >> "$GITHUB_OUTPUT"
         else
           echo "backend=false" >> "$GITHUB_OUTPUT"
         fi
+      env:
+        BACKEND_RAW: ${{ steps.changes.outputs.backend_raw }}
+        FRONTEND: ${{ steps.changes.outputs.frontend }}
