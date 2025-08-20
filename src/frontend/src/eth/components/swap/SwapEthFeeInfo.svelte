@@ -7,11 +7,11 @@
 	import { SWAP_FEE_INFO } from '$lib/constants/test-ids.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionTokenId } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 
 	interface Props {
 		decimals?: number;
