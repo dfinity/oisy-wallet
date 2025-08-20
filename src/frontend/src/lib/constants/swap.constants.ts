@@ -1,3 +1,5 @@
+import { SwapProvider, type SwapProvidersConfig } from '$lib/types/swap';
+
 export const SWAP_SLIPPAGE_PRESET_VALUES = [0.5, 1.5, 3];
 export const [_, SWAP_DEFAULT_SLIPPAGE_VALUE] = SWAP_SLIPPAGE_PRESET_VALUES;
 export const SWAP_SLIPPAGE_VALUE_DECIMALS = 4;
@@ -21,3 +23,11 @@ export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 
 export const SWAP_MODE = 'all';
 export const SWAP_SIDE = 'SELL';
+
+export const swapProvidersDetails: Record<string, SwapProvidersConfig> = {
+	[SwapProvider.VELORA]: {
+		website: 'https://app.velora.xyz/',
+		name: 'Velora',
+		logo: '/images/dapps/velora-logo.svg'
+	}
+};
