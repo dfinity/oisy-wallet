@@ -292,6 +292,7 @@ export class EtherscanProvider {
 		);
 	};
 
+	// https://docs.etherscan.io/api-endpoints/tokens#get-address-erc721-token-inventory-by-contract-address
 	erc721TokenInventory = async ({
 		address,
 		contractAddress
