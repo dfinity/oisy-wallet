@@ -25,6 +25,7 @@ import {
 	type ProviderFee,
 	type Slippage,
 	type SwapMappedResult,
+	type SwapProvidersConfig,
 	type VeloraSwapDetails
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
@@ -209,7 +210,9 @@ export const getWithdrawableToken = ({
 	throw new Error(`Unknown token address`);
 };
 
-export const findSwapProvider = (providerId: string): Partial<OisyDappDescription> | undefined => {
+export const findSwapProvider = (
+	providerId: string
+): OisyDappDescription | SwapProvidersConfig | undefined => {
 	const normalizedId = providerId.toLowerCase();
 	const icDAppProvider = dAppDescriptions.find(({ id }) => id === normalizedId);
 
