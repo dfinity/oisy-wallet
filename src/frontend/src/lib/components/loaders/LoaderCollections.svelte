@@ -56,6 +56,7 @@
 
 	const loadErc721ContractAddresses = async (etherscanProvider: EtherscanProvider) => {
 		try {
+			// TODO replace address with $ethAddress
 			return await etherscanProvider.erc721TokenHolding(
 				'0x065aef9729d4df33a4b7ff408cbd145e2a80c34c'
 			);
@@ -83,7 +84,7 @@
 			return;
 		}
 
-		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
+		const networks: EthereumNetwork[] = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
 		for (const network of networks) {
 			// TODO make it parallel
 			await handleErc721(network)
