@@ -84,8 +84,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 };
 
 export interface SwapContext {
-	sourceToken: Readable<IcTokenToggleable | undefined>;
-	destinationToken: Readable<IcTokenToggleable | undefined>;
+	sourceToken: Readable<Token | IcTokenToggleable | undefined>;
+	destinationToken: Readable<Token | IcTokenToggleable | undefined>;
 	sourceTokenBalance: Readable<Balance | undefined>;
 	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
