@@ -371,8 +371,6 @@ export const saveAllCustomTokens = async ({
 		];
 	}, []);
 
-	console.log('erc20', erc20, erc20CustomTokens);
-
 	await Promise.allSettled([
 		...(icrc.length > 0
 			? [
