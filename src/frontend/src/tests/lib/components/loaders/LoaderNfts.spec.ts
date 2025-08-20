@@ -240,4 +240,64 @@ describe('LoaderNfts', () => {
 			});
 		});
 	});
+
+	describe('handleUpdatedNfts', () => {
+		const mockNft1 = {
+			...mockValidErc1155Nft,
+			id: mockNftId1,
+			collection: {
+				...mockValidErc1155Nft.collection,
+				address: NYAN_CAT_TOKEN.address,
+				network: NYAN_CAT_TOKEN.network
+			}
+		};
+		const mockNft2 = {
+			...mockValidErc1155Nft,
+			id: mockNftId2,
+			collection: {
+				...mockValidErc1155Nft.collection,
+				address: NYAN_CAT_TOKEN.address,
+				network: NYAN_CAT_TOKEN.network
+			}
+		};
+		const mockNft3 = {
+			...mockValidErc1155Nft,
+			id: mockNftId3,
+			collection: {
+				...mockValidErc1155Nft.collection,
+				address: BUILD_AN_APE_TOKEN.address,
+				network: BUILD_AN_APE_TOKEN.network
+			}
+		};
+
+		beforeEach(() => {
+			nftStore.resetAll();
+			nftStore.addAll([mockNft1, mockNft2, mockNft3]);
+
+			erc1155CustomTokensStore.setAll([
+				{ data: mockedEnabledNyanToken, certified: false },
+				{ data: mockedEnabledApeToken, certified: false }
+			]);
+		});
+
+		it('should update erc1155 nfts from the nft store', async () => {
+			mockGetNftIdsForOwner.mockResolvedValueOnce([
+				{ id: mockNftId1, balance: 2 },
+				{ id: mockNftId2, balance: 1 }
+			]);
+			mockGetNftIdsForOwner.mockResolvedValueOnce([{ id: mockNftId3, balance: 3 }]);
+
+			render(LoaderNfts);
+
+			await waitFor(() => {
+				expect(mockGetNftIdsForOwner).toHaveBeenCalledTimes(2);
+
+				expect(get(nftStore)).toEqual([
+					mockNft1,
+					{ ...mockNft2, balance: 1 },
+					{ ...mockNft3, balance: 3 }
+				]);
+			});
+		});
+	});
 });
