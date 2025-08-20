@@ -7,8 +7,8 @@
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import {
 		sendBtc,
-		validateBtcSend,
-		handleBtcValidationError
+		handleBtcValidationError,
+		validateBtcSend
 	} from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -33,7 +33,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBTCRegtest,
 		isNetworkIdBTCTestnet,
@@ -68,6 +68,8 @@
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
 	const send = async () => {
+		progress(ProgressStepsSendBtc.INITIALIZATION);
+
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 
 		if (isNullish(network)) {
@@ -84,7 +86,7 @@
 			return;
 		}
 
-		if (isNullish(amount)) {
+		if (invalidAmount(amount) || isNullish(amount)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.amount_invalid }
 			});
@@ -98,10 +100,18 @@
 			return;
 		}
 
+		if (isNullish($sendToken)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected_undefined }
+			});
+			return;
+		}
+
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
 		}
+		dispatch('icNext');
 
 		// Validate UTXOs before proceeding
 		try {
@@ -136,10 +146,7 @@
 			return;
 		}
 
-		dispatch('icNext');
-
 		try {
-			// TODO: add tracking
 			await sendBtc({
 				destination,
 				amount,
