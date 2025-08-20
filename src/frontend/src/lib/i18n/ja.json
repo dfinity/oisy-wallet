@@ -834,7 +834,10 @@
 			"open_instructions_link": "指示リンクを開く",
 			"select_token": "トークンを選択",
 			"select_network_filter": "ネットワークを選択",
-			"withdrawing": ""
+			"withdrawing": "",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": ""
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください",
