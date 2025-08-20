@@ -15,6 +15,7 @@ import {
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
+import type { OisyDappDescription } from '$lib/types/dapp-description';
 import {
 	SwapProvider,
 	VeloraSwapTypes,
@@ -208,11 +209,7 @@ export const getWithdrawableToken = ({
 	throw new Error(`Unknown token address`);
 };
 
-export const findSwapProvider = (providerId: string) => {
-	if (isNullish(providerId)) {
-		return null;
-	}
-
+export const findSwapProvider = (providerId: string): Partial<OisyDappDescription> | undefined => {
 	const normalizedId = providerId.toLowerCase();
 	const icDAppProvider = dAppDescriptions.find(({ id }) => id === normalizedId);
 
@@ -228,6 +225,4 @@ export const findSwapProvider = (providerId: string) => {
 			...swapProviderDetails
 		};
 	}
-
-	return;
 };
