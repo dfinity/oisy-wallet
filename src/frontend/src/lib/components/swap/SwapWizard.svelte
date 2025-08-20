@@ -7,6 +7,7 @@
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
 	} from '$icp/stores/ic-token-fee.store';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
@@ -120,8 +121,8 @@
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
 				progress,
-				sourceToken: $sourceToken,
-				destinationToken: $destinationToken,
+				sourceToken: $sourceToken as IcTokenToggleable,
+				destinationToken: $destinationToken as IcTokenToggleable,
 				swapAmount,
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
@@ -174,7 +175,7 @@
 					errorType: err.code,
 					swapSucceded: err.swapSucceded,
 					url: {
-						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcTokenToggleable).ledgerCanisterId}&output=${($destinationToken as IcTokenToggleable).ledgerCanisterId}`,
 						text: 'icpswap.com'
 					}
 				});
@@ -213,13 +214,13 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<IcTokenFeeContext token={$sourceToken}>
+<IcTokenFeeContext token={$sourceToken as IcTokenToggleable}>
 	<SwapAmountsContext
 		amount={swapAmount}
-		destinationToken={$destinationToken}
+		destinationToken={$destinationToken as IcTokenToggleable}
 		isSourceTokenIcrc2={$isSourceTokenIcrc2}
 		{slippageValue}
-		sourceToken={$sourceToken}
+		sourceToken={$sourceToken as IcTokenToggleable}
 		bind:isSwapAmountsLoading
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
