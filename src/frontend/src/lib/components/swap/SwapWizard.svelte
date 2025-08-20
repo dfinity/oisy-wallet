@@ -7,6 +7,7 @@
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
 	} from '$icp/stores/ic-token-fee.store';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
@@ -33,7 +34,6 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
-	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 
 	interface Props {
 		swapAmount: OptionAmount;
