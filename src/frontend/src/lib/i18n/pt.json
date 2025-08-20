@@ -1029,7 +1029,9 @@
 			"quantity": "",
 			"item_traits": "",
 			"collection_not_loaded": "",
-			"nft_not_loaded": ""
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",

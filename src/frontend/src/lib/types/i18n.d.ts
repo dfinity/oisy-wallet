@@ -879,6 +879,8 @@ interface I18nNfts {
 		item_traits: string;
 		collection_not_loaded: string;
 		nft_not_loaded: string;
+		collections: string;
+		all_assets: string;
 	};
 	alt: { placeholder_image: string; card: { image: string } };
 }
