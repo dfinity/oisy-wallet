@@ -2,6 +2,7 @@ import { onLoadBtcStatusesError, syncBtcStatuses } from '$icp/services/ckbtc-lis
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse,
 	PostMessageSyncState
@@ -52,7 +53,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
 		},
 		stop,
 		trigger: () => {
@@ -61,7 +62,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
 		},
 		destroy: () => {
 			if (isDestroying) {
