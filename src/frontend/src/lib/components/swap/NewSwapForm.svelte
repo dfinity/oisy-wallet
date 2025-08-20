@@ -34,7 +34,7 @@
 
 	interface Props {
 		swapAmount: OptionAmount;
-		receiveAmount: number | undefined;
+		receiveAmount?: number;
 		slippageValue: OptionAmount;
 		isSwapAmountsLoading: boolean;
 		swapDetails?: Snippet;
