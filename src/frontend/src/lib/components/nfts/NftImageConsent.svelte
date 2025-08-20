@@ -3,8 +3,9 @@
 	import type { Nft } from '$lib/types/nft';
 	import Button from '$lib/components/ui/Button.svelte';
 	import IconShieldHalftone from '$lib/components/icons/IconShieldHalftone.svelte';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
 		nft?: Nft;
@@ -18,9 +19,10 @@
 
 	let hasConsent = $state();
 
-	const handleConsent = (allow: boolean) => {
-		// todo
-		hasConsent = allow;
+	const handleConsent = () => {
+		if (nonNullish(nft)) {
+			modalStore.openNftImageConsent({ id: Symbol('NftImageConsentModal'), data: nft });
+		}
 	};
 
 	const isLoading = $derived(isNullish(nft));
@@ -49,7 +51,7 @@
 					colorStyle="secondary-light"
 					onclick={(e) => {
 						e.preventDefault();
-						handleConsent(!hasConsent);
+						handleConsent();
 					}}
 					styleClass="py-1 rounded-md"
 					paddingSmall>{$i18n.nfts.text.review_button}</Button

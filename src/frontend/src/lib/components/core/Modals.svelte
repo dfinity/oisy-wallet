@@ -24,9 +24,12 @@
 		modalIcHideTokenData,
 		modalHideTokenData,
 		modalRewardDetails,
-		modalRewardDetailsData
+		modalRewardDetailsData,
+		modalNftImageConsent,
+		modalNftImageConsentData
 	} from '$lib/derived/modal.derived';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
+	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -54,5 +57,7 @@
 		<RewardsEligibilityContext>
 			<RewardModal reward={$modalRewardDetailsData} />
 		</RewardsEligibilityContext>
+	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
+		<NftImageConsentModal nft={$modalNftImageConsentData} />
 	{/if}
 {/if}

@@ -1034,7 +1034,10 @@
 			"all_assets": "All assets",
             "img_consent_disabled": "You disabled images from this collection",
             "img_consent_none": "Image disabled for security reasons",
-            "review_button": "Review"
+            "review_button": "Review",
+            "collection_name": "Collection name",
+            "media_urls": "Media URLs",
+            "display_preference": "Display preference"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
