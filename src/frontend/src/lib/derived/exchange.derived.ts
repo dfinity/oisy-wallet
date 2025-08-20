@@ -21,7 +21,7 @@ import {
 	BTC_TESTNET_TOKEN_ID
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN_ID, TESTICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import {
 	SOLANA_DEVNET_TOKEN_ID,
 	SOLANA_LOCAL_TOKEN_ID,
@@ -66,6 +66,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[ETHEREUM_TOKEN_ID]: ethPrice,
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
+			[TESTICP_TOKEN_ID]: icpPrice,
 			[SOLANA_TOKEN_ID]: solPrice,
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
 			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
@@ -78,13 +79,14 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[ARBITRUM_ETH_TOKEN_ID]: ethPrice,
 			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: ethPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
-				const token =
-					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
-					$splTokens.find(({ address }) => address.toLowerCase() === key.toLowerCase());
+				const tokens = [
+					...$erc20Tokens.filter(({ address }) => address.toLowerCase() === key.toLowerCase()),
+					...$splTokens.filter(({ address }) => address.toLowerCase() === key.toLowerCase())
+				];
 
 				return {
 					...acc,
-					...(nonNullish(token) && { [token.id]: currentPrice })
+					...tokens.reduce((inner, token) => ({ ...inner, [token.id]: currentPrice }), {})
 				};
 			}, {}),
 			...$erc20Tokens
