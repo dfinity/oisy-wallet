@@ -1,7 +1,3 @@
-import {
-	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
-	PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
-} from '$btc/constants/btc.constants';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
@@ -51,8 +47,31 @@ export const getPendingTransactions = (
 ): Omit<CertifiedData<Array<PendingTransaction> | null>, 'certified'> & {
 	certified: true;
 } => {
-	const storeData = get(btcPendingSentTransactionsStore);
-	return storeData[address];
+	try {
+		const storeData = get(btcPendingSentTransactionsStore);
+
+		// Check if store data exists and has the address
+		if (nonNullish(storeData) && address in storeData) {
+			return storeData[address];
+		}
+
+		// Return safe default when address not found in store
+		return {
+			data: null,
+			certified: true
+		};
+	} catch (error) {
+		// Log error and return safe default if store access fails
+		console.warn('Failed to retrieve pending transactions from store:', {
+			address,
+			error
+		});
+
+		return {
+			data: null,
+			certified: true
+		};
+	}
 };
 
 /**
@@ -71,140 +90,109 @@ export const getPendingTransactionIds = (address: string): string[] => {
 		.filter((txid): txid is string => nonNullish(txid));
 };
 /**
- * Calculates a comprehensive BTC wallet balance structure accounting for all pending transactions.
+ * Calculates Bitcoin wallet balance breakdown following standard Bitcoin accounting principles.
  *
- * **Data Sources:**
- * 1. totalBalance: Canonical balance from Bitcoin canister (trusted baseline)
- * 2. providerTransactions: Recent transaction data from external providers with confirmations and types
- * 3. pendingTransactions: User-initiated outgoing transactions stored locally (trusted, locked UTXOs)
+ * Bitcoin balances are calculated based on Unspent Transaction Outputs (UTXOs):
+ * - Confirmed Balance: Sum of UTXOs with sufficient block confirmations (typically 6+)
+ * - Unconfirmed Balance: Sum of incoming UTXOs with 0-5 confirmations (in mempool or recent blocks)
+ * - Locked Balance: Sum of confirmed UTXOs that are temporarily unspendable due to pending outgoing transactions
+ * - Total Balance: Combined confirmed and unconfirmed balances (represents total Bitcoin ownership)
  *
- * **Balance Calculations:**
- * - confirmed = totalBalance - lockedBalance (what user can spend right now)
- * - unconfirmed = net pending activity with 0-5 confirmations (can be ± or zero)
- * - locked = total UTXOs locked in pending outgoing transactions (always >= 0)
- * - total = confirmed + unconfirmed (user's actual total wealth)
+ * The locked balance prevents double-spending by tracking UTXOs that are inputs to unconfirmed
+ * outgoing transactions. These UTXOs remain on-chain but should not be available for new transactions
+ * until the pending transaction is either confirmed or rejected.
  *
- * **Usage Guidelines:**
- * - Use `confirmed` for transfer validation (prevents double-spending)
- * - Use `total` for primary balance display (shows true financial position)
- * - Use `unconfirmed` to show pending activity direction and amount
- * - Use `locked` for transparency about unavailable funds
- *
- * **Example Scenarios:**
- * 1. Simple outgoing: totalBalance=1.0 BTC, send 0.1 BTC (2 confirmations)
- *    → confirmed: 0.9, unconfirmed: -0.1, locked: 0.1, total: 0.8
- *
- * 2. Mixed activity: totalBalance=1.0 BTC, send 0.1 BTC + receive 0.05 BTC (both unconfirmed)
- *    → confirmed: 0.9, unconfirmed: -0.05, locked: 0.1, total: 0.85
- *
- * 3. Net incoming: totalBalance=1.0 BTC, receive 0.2 BTC (3 confirmations)
- *    → confirmed: 1.0, unconfirmed: +0.2, locked: 0.0, total: 1.2
- *
- * @param params - Parameters object containing address, totalBalance, and providerTransactions
- * @returns BtcWalletBalance with all balance categories in satoshis
+ * @param address - The Bitcoin address to calculate balances for
+ * @param confirmedBalance - Sum of all confirmed UTXOs (from Bitcoin node/canister)
+ * @param providerTransactions - Array of transaction data with confirmation status from external API
+ * @returns Structured balance object with confirmed, unconfirmed, locked, and total amounts
  */
 export const getBtcWalletBalance = ({
 	address,
-	latestBalance,
+	confirmedBalance,
 	providerTransactions
 }: {
 	address: string;
-	latestBalance: bigint;
+	confirmedBalance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[];
 }): BtcWalletBalance => {
-	console.warn('🎯 [btc.utils.ts -> getBtcWalletBalance] Received providerTransactions:', {
-		timestamp: new Date().toISOString(),
-		data: {
-			providerTransactions
+	// If the store access fails or returns invalid data, we'll default to empty state
+	let pendingTransactions: Array<PendingTransaction> = [];
+
+	try {
+		const pendingData = getPendingTransactions(address);
+
+		// Handle the various states the store data can be in
+		if (nonNullish(pendingData) && nonNullish(pendingData.data)) {
+			pendingTransactions = pendingData.data;
 		}
-	});
+	} catch (error) {
+		// We log the error for debugging but don't fail the entire balance calculation
+		// This ensures the user still gets confirmed/unconfirmed balance even if pending data fails
+		console.warn('Failed to retrieve pending transactions for balance calculation:', {
+			address,
+			error
+		});
+	}
 
-	const pendingTransactions = getPendingTransactions(address);
-	console.warn('🎯 [btc.utils.ts -> getBtcWalletBalance] Called getPendingTransactions(..):', {
-		timestamp: new Date().toISOString(),
-		input: {
-			address
-		},
-		output: {
-			...pendingTransactions,
-			data:
-				pendingTransactions?.data?.map((tx) => ({
-					...tx,
-					txid: utxoTxIdToString(tx.txid)
-				})) ?? null
+	// Calculate locked balance: UTXOs being used as inputs in pending outgoing transactions
+	// If pendingTransactions is empty (due to error or no data), locked balance will be 0
+	const lockedBalance = pendingTransactions.reduce((sum, tx) => {
+		try {
+			// Safely calculate UTXO sum with additional error handling
+			const txUtxoValue = nonNullish(tx.utxos)
+				? tx.utxos.reduce((utxoSum, utxo) => {
+						// Ensure utxo.value is valid before adding
+						const utxoValue = nonNullish(utxo?.value) ? BigInt(utxo.value) : 0n;
+						return utxoSum + utxoValue;
+					}, 0n)
+				: 0n;
+
+			return sum + txUtxoValue;
+		} catch (error) {
+			// Log error but continue processing other transactions
+			console.warn('Error processing pending transaction for locked balance:', {
+				transaction: tx,
+				error
+			});
+			return sum;
 		}
-	});
+	}, ZERO);
 
-	// Create efficient lookup map for correlation between pending and provider transactions
-	const transactionLookup = new Map<string, BtcTransactionUi>();
-	providerTransactions.forEach((tx) => {
-		transactionLookup.set(tx.data.id, tx.data);
-	});
+	// Calculates the unconfirmed incoming balance from external provider transaction data
+	// This part is independent of pending transactions and should work even if pending data fails
+	const unconfirmedBalance = providerTransactions.reduce((sum, tx) => {
+		try {
+			if (
+				tx.data.status === 'unconfirmed' &&
+				tx.data.type === 'receive' &&
+				nonNullish(tx.data.value)
+			) {
+				return sum + tx.data.value;
+			}
+			return sum;
+		} catch (error) {
+			// Log error but continue processing other transactions
+			console.warn('Error processing provider transaction for unconfirmed balance:', {
+				transaction: tx,
+				error
+			});
+			return sum;
+		}
+	}, ZERO);
 
-	// Process pending transactions to calculate locked and unconfirmed balances
-	const { lockedBalance, unconfirmedBalance } = isNullish(pendingTransactions?.data)
-		? { lockedBalance: ZERO, unconfirmedBalance: ZERO }
-		: pendingTransactions.data.reduce(
-				(acc, tx) => {
-					// Sum all UTXO values for this pending outgoing transaction
-					// These UTXOs are locked and cannot be spent again (prevents double-spending)
-					const txUtxoValue = tx.utxos.reduce((utxoSum, utxo) => utxoSum + BigInt(utxo.value), 0n);
-
-					acc.lockedBalance += txUtxoValue;
-
-					const txid = convertPendingTransactionTxid(tx);
-					if (txid) {
-						// Look up the transaction in providerTransactions to get confirmation count and type
-						const matchedTransaction = transactionLookup.get(txid);
-
-						if (nonNullish(matchedTransaction) && nonNullish(matchedTransaction.value)) {
-							const confirmations =
-								matchedTransaction.confirmations ?? PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS;
-
-							// Only add to unconfirmed balance when transaction has 0-5 confirmations
-							// 0 confirmations: only locked (no unconfirmed impact to avoid double counting)
-							// 6+ confirmations: pending transaction will be removed from store by cleanup
-							if (
-								confirmations >= PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS &&
-								confirmations < CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
-							) {
-								// Apply directional impact to unconfirmed balance
-								if (matchedTransaction.type === 'send') {
-									// Outgoing: subtract from unconfirmed balance (negative contribution)
-									acc.unconfirmedBalance -= matchedTransaction.value;
-								} else if (matchedTransaction.type === 'receive') {
-									// Incoming: add to unconfirmed balance (positive contribution)
-									acc.unconfirmedBalance += matchedTransaction.value;
-								}
-							}
-							// If confirmations === 0: only locked, no unconfirmed impact (avoids double accounting)
-						} else {
-							// Missing transaction data from API provider - this indicates 0 confirmations
-							// Only count as locked (already added above), no unconfirmed impact
-							// This avoids double accounting while the transaction is not yet indexed by the provider
-							console.warn('Missing transaction data from API provider (0 confirmations):', txid);
-						}
-					}
-					return acc;
-				},
-				{ lockedBalance: ZERO, unconfirmedBalance: ZERO }
-			);
-
-	// Calculate confirmed balance: certified balance minus locked UTXOs
-	const confirmedBalance = latestBalance - lockedBalance;
-
-	//  User's actual actual total wealth after all pending activity.This gives users the most accurate picture of their
-	//  real BTC holdings.
-	const actualTotalBalance = confirmedBalance + unconfirmedBalance;
+	// Total balance represents the user's complete Bitcoin holdings
+	// Even if pending data fails, this will still show confirmed + unconfirmed
+	const totalBalance = confirmedBalance + unconfirmedBalance;
 
 	return {
-		// For transfer validation - ensures users can only spend available funds
+		// Confirmed balance: UTXOs with sufficient confirmations, safe for spending
 		confirmed: confirmedBalance > ZERO ? confirmedBalance : ZERO,
-		// For showing net pending activity direction and amount
-		unconfirmed: unconfirmedBalance,
-		// For transparency about funds locked in outgoing transactions
-		locked: lockedBalance,
-		// For primary balance display - shows user's true financial position
-		total: actualTotalBalance > ZERO ? actualTotalBalance : ZERO
+		// Unconfirmed balance: incoming transactions waiting for confirmations
+		unconfirmed: unconfirmedBalance > ZERO ? unconfirmedBalance : ZERO,
+		// Locked balance: confirmed UTXOs temporarily unavailable (0 if pending data unavailable)
+		locked: lockedBalance > ZERO ? lockedBalance : ZERO,
+		// Total balance: complete Bitcoin ownership (confirmed + unconfirmed)
+		total: totalBalance > ZERO ? totalBalance : ZERO
 	};
 };

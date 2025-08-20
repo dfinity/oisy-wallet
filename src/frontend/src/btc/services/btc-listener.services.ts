@@ -79,7 +79,7 @@ export const syncWallet = async ({
 		// Use sourceAddress to ensure consistency with the address used for pending transactions
 		const btcWalletBalance = getBtcWalletBalance({
 			address: sourceAddress,
-			latestBalance: balance,
+			confirmedBalance: balance,
 			providerTransactions
 		});
 
@@ -101,7 +101,7 @@ export const syncWallet = async ({
 		balancesStore.set({
 			id: tokenId,
 			data: {
-				data: btcWalletBalance.total,
+				data: btcWalletBalance.confirmed,
 				certified
 			}
 		});

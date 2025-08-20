@@ -65,7 +65,9 @@ export const mapBtcTransaction = ({
 
 	// Step 4: Compute the number of confirmations
 	// +1 is needed to account for the block where the transaction was first included
-	const confirmations = nonNullish(block_index) ? latestBitcoinBlockHeight - block_index + 1 : 0;
+	const confirmations = nonNullish(block_index)
+		? latestBitcoinBlockHeight - block_index + 1
+		: undefined;
 
 	// Step 5: Derive transaction status based on confirmations thresholds
 	const status = isNullish(confirmations)
