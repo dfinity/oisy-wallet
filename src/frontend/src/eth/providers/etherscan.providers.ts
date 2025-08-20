@@ -343,6 +343,19 @@ export class EtherscanProvider {
 
 		return result.map(({ TokenAddress }: EtherscanProviderTokenBalance) => TokenAddress);
 	};
+
+	// https://docs.etherscan.io/etherscan-v2/api-endpoints/contracts#get-contract-abi-for-verified-contract-source-codes
+	contractAbi = async (address: EthAddress): Promise<string> => {
+		const params = {
+			action: 'getabi',
+			address
+		};
+
+		return await this.provider.fetch(
+			'contract',
+			params
+		);
+	}
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = [
