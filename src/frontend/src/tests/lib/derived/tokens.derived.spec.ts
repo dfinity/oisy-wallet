@@ -24,7 +24,7 @@ import {
 	ARBITRUM_SEPOLIA_ETH_TOKEN
 } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -189,6 +189,7 @@ describe('tokens.derived', () => {
 
 			expect(get(tokens)).toEqual([
 				ICP_TOKEN,
+				TESTICP_TOKEN,
 				BTC_MAINNET_TOKEN,
 				BTC_TESTNET_TOKEN,
 				ETHEREUM_TOKEN,
@@ -212,6 +213,7 @@ describe('tokens.derived', () => {
 
 			expect(get(tokens)).toEqual([
 				ICP_TOKEN,
+				TESTICP_TOKEN,
 				BTC_MAINNET_TOKEN,
 				BTC_TESTNET_TOKEN,
 				BTC_REGTEST_TOKEN,
