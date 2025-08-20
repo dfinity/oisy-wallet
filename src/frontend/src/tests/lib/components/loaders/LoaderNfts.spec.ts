@@ -10,15 +10,15 @@ import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 import * as addressStore from '$lib/derived/address.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import * as nftServicesModule from '$lib/services/nft.services';
+import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import { nftStore } from '$lib/stores/nft.store';
-import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('LoaderNfts', () => {
 	let etherscanProvidersSpy: MockInstance;

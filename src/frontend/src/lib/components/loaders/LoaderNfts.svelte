@@ -96,9 +96,9 @@
 	};
 
 	const handleRemovedNfts = ({
-															 token,
-															 inventory
-														 }: {
+		token,
+		inventory
+	}: {
 		token: NonFungibleToken;
 		inventory: NftId[];
 	}) => {
