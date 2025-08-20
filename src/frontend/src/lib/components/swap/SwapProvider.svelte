@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
-	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -20,6 +19,8 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 	import { UrlSchema } from '$lib/validation/url.validation';
+	import { findSwapProvider } from '$lib/utils/swap.utils';
+	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 
 	interface Props {
 		slippageValue: OptionAmount;
@@ -35,9 +36,7 @@
 	let selectedProvider = $derived($swapAmountsStore?.selectedProvider);
 	let isBestRate = $derived(selectedProvider?.provider === $swapAmountsStore?.swaps[0]?.provider);
 	let swapDApp = $derived(
-		dAppDescriptions.find(
-			({ id }) => id === $swapAmountsStore?.selectedProvider?.provider.toLowerCase()
-		)
+		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);
 
 	$effect(() => {
@@ -110,6 +109,8 @@
 				<SwapDetailsKong provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.ICP_SWAP}
 				<SwapDetailsIcp provider={selectedProvider} {slippageValue} />
+			{:else if selectedProvider.provider === SwapProvider.VELORA}
+				<SwapDetailsVelora provider={selectedProvider} />
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}
