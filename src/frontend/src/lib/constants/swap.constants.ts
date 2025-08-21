@@ -1,3 +1,11 @@
+import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
+import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
+import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import type { NetworkId } from '$lib/types/network';
 import { SwapProvider, type SwapProvidersConfig } from '$lib/types/swap';
 
 export const SWAP_SLIPPAGE_PRESET_VALUES = [0.5, 1.5, 3];
@@ -30,4 +38,13 @@ export const swapProvidersDetails: Record<string, SwapProvidersConfig> = {
 		name: 'Velora',
 		logo: '/images/dapps/velora-logo.svg'
 	}
+};
+
+export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
+	[ICP_NETWORK_ID]: [ICP_NETWORK_ID],
+	[ETHEREUM_NETWORK_ID]: [ETHEREUM_NETWORK_ID, ...SUPPORTED_EVM_MAINNET_NETWORK_IDS],
+	[ARBITRUM_MAINNET_NETWORK_ID]: [ARBITRUM_MAINNET_NETWORK_ID],
+	[BSC_MAINNET_NETWORK_ID]: [BSC_MAINNET_NETWORK_ID],
+	[POLYGON_MAINNET_NETWORK_ID]: [POLYGON_MAINNET_NETWORK_ID],
+	[BASE_NETWORK_ID]: [ETHEREUM_NETWORK_ID, ...SUPPORTED_EVM_MAINNET_NETWORK_IDS]
 };
