@@ -20,6 +20,8 @@
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
+
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
 	$: invalid =

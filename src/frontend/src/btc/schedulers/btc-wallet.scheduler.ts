@@ -81,9 +81,9 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		try {
 			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
-			const newTransactions = fetchedTransactions.filter(({ hash }) =>
-				isNullish(this.store.transactions[`${hash}`])
-			);
+			const newTransactions = fetchedTransactions; //.filter(({ hash }) =>
+			//isNullish(this.store.transactions[`${hash}`])
+			//);
 
 			const latestBitcoinBlockHeight = await btcLatestBlockHeight();
 
