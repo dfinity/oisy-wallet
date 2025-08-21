@@ -17,22 +17,30 @@
 </script>
 
 <a
-	class="flex w-full flex-col gap-2 p-1 text-left no-underline hover:text-inherit"
+	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
 	class:cursor-not-allowed={disabled}
+	class:hover:-translate-y-1={!disabled}
+	class:hover:bg-primary={!disabled}
 	data-tid={testId}
 	href={`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`}
 	onclick={disabled ? (e) => e.preventDefault() : undefined}
 >
-	<div class="relative aspect-square overflow-hidden rounded-xl" class:opacity-50={disabled}>
-		{#if nonNullish(nft.imageUrl)}
-			<NftImageConsent {nft}>
-				<div class="h-full w-full bg-primary-light">
-					<BgImg imageUrl={nft?.imageUrl} shadow="none" size="contain" testId={`${testId}-image`} />
-				</div>
-			</NftImageConsent>
-		{:else}
-			<div class="bg-black/16 rounded-lg" data-tid={`${testId}-placeholder`}></div>
-		{/if}
+	<div
+		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
+		class:opacity-50={disabled}
+	>
+		<NftImageConsent {nft}>
+			<div class="h-full w-full">
+				<BgImg
+					imageUrl={nft?.imageUrl}
+					shadow="inset"
+					size="cover"
+					testId={`${testId}-image`}
+					styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+				/>
+			</div>
+		</NftImageConsent>
+
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
 			{#if nonNullish(nft.balance)}
@@ -48,7 +56,7 @@
 		</div>
 	</div>
 
-	<div class="flex w-full flex-col gap-1">
+	<div class="flex w-full flex-col gap-1 px-2 pb-2">
 		<span
 			class="truncate text-sm font-bold"
 			class:text-disabled={disabled}
