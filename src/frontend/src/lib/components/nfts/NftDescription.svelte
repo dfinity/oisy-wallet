@@ -18,7 +18,7 @@
 				{#if nonNullish(nft.name)}
 					<h5 class="mb-3">{nft.name}</h5>
 				{/if}
-				{#if nonNullish(nft.name)}
+				{#if nonNullish(nft.description)}
 					<p class="text-sm">{nft.description}</p>
 				{/if}
 			</div>
