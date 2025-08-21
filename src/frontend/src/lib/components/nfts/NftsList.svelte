@@ -17,7 +17,7 @@
 			<EmptyNftsList />
 		{:else}
 			<h5 class="mt-5">{$i18n.nfts.text.collections}</h5>
-			<div class="grid grid-cols-3 gap-2 gap-y-4 pt-4">
+			<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">
 				{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
 					{#if collection.nfts.length > 0}
 						<NftCollectionCard {collection} />
@@ -29,7 +29,7 @@
 		<EmptyNftsList />
 	{:else}
 		<h5 class="mt-5">{$i18n.nfts.text.all_assets}</h5>
-		<div class="grid grid-cols-3 gap-2 gap-y-4 pt-4">
+		<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">
 			{#each nfts as nft, index (`${String(nft.id)}-${index}`)}
 				<NftCard {nft} />
 			{/each}

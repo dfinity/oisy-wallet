@@ -7,7 +7,6 @@ describe('NftCard', () => {
 	const testId = 'nft-card';
 
 	const imageSelector = `div[data-tid="${testId}-image"]`;
-	const imagePlaceholderSelector = `div[data-tid="${testId}-placeholder"]`;
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
 	const balanceSelector = `span[data-tid="${testId}-balance"]`;
 
@@ -40,15 +39,14 @@ describe('NftCard', () => {
 	it('should render image placeholder if no image is defined', () => {
 		const { container, getByText } = render(NftCard, {
 			props: {
-				nft: { ...mockValidErc721Nft, imageUrl: null },
+				nft: { ...mockValidErc721Nft, imageUrl: undefined },
 				testId
 			}
 		});
 
-		const imagePlaceholder: HTMLDivElement | null =
-			container.querySelector(imagePlaceholderSelector);
+		const image: HTMLDivElement | null = container.querySelector(imageSelector);
 
-		expect(imagePlaceholder).toBeInTheDocument();
+		expect(image?.getAttribute('class')?.includes('animate-pulse')).toBeTruthy();
 
 		const networkLogo: HTMLDivElement | null = container.querySelector(networkLogoSelector);
 
