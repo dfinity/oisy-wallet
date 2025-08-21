@@ -24,7 +24,7 @@
 
 	interface Props {
 		swapAmount: OptionAmount;
-		receiveAmount: number | undefined;
+		receiveAmount?: number;
 		slippageValue: OptionAmount;
 		nativeEthereumToken: Token;
 		isSwapAmountsLoading: boolean;
