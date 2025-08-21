@@ -92,7 +92,7 @@
 		swapFailedProgressSteps = [];
 	};
 
-	let sourceTokenFee = $derived<bigint | undefined>(
+	let sourceTokenFee = $derived(
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore)
 			? $icTokenFeeStore[$sourceToken.symbol]
 			: undefined
