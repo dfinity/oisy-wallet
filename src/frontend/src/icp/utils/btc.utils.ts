@@ -15,7 +15,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
-import { isNullish, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -35,15 +35,6 @@ export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =
 	}
 	return undefined;
 };
-
-/**
- * Bitcoin txid to text representation requires inverting the array.
- *
- * @param txid Uint8Array | number[]
- * @returns string A human-readable transaction id.
- */
-export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
-	uint8ArrayToHexString(Uint8Array.from(txid).toReversed());
 
 /**
  * Converts a PendingTransaction txid to a hex string format

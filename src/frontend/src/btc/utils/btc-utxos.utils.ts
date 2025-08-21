@@ -11,16 +11,10 @@ export interface UtxoSelectionResult {
 }
 
 /**
- * Converts a UTXO transaction ID (Uint8Array) to a hex string
- */
-export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
-	uint8ArrayToHexString(txid);
-
-/**
  * Extracts transaction IDs from an array of UTXOs
  */
 export const extractUtxoTxIds = (utxos: Utxo[]): string[] =>
-	utxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
+	utxos.map(({ outpoint: { txid } }) => uint8ArrayToHexString(txid));
 
 /**
  * Estimates transaction size in bytes based on number of inputs and outputs
@@ -130,7 +124,7 @@ export const filterLockedUtxos = ({
 	pendingTxIds: string[];
 }): Utxo[] =>
 	utxos.filter((utxo) => {
-		const txIdHex = utxoTxIdToString(utxo.outpoint.txid);
+		const txIdHex = uint8ArrayToHexString(utxo.outpoint.txid);
 		return !pendingTxIds.includes(txIdHex);
 	});
 
