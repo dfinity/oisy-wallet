@@ -1,4 +1,4 @@
-import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
@@ -33,7 +33,7 @@ export const prepareBtcSend = async ({
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
-	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
+	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
@@ -127,20 +127,20 @@ export const getFeeRateFromPercentiles = async ({
 	// Use median fee percentile
 	const medianIndex = Math.floor(fee_percentiles.length / 2);
 
-	// Convert from millisats to sats (divide by 1000)
-	const feeRateSatsPerVByte = fee_percentiles[medianIndex];
+	// Use median fee percentile
+	const medianFeeMillisatsPerVByte = fee_percentiles[medianIndex];
 
 	// Apply minimum and maximum limits
 	const MIN_FEE_RATE = 1_000n; // 1 sat/vbyte minimum
 	const MAX_FEE_RATE = 100_000n; // 100 sat/vbyte maximum
 
-	if (feeRateSatsPerVByte < MIN_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte < MIN_FEE_RATE) {
 		return MIN_FEE_RATE;
 	}
 
-	if (feeRateSatsPerVByte > MAX_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte > MAX_FEE_RATE) {
 		return MAX_FEE_RATE;
 	}
 
-	return feeRateSatsPerVByte;
+	return medianFeeMillisatsPerVByte;
 };
