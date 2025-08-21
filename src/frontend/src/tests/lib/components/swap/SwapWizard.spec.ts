@@ -15,6 +15,11 @@ vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
 }));
 
+vi.mock('ethers', () => ({
+	Signature: { from: () => ({ compactSerialized: '0x' }) },
+	TypedDataEncoder: { hash: () => '0x' }
+}));
+
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
 const mockDestToken = { ...mockValidIcCkToken, enabled: true } as IcToken;
 

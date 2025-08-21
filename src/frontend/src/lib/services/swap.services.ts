@@ -659,7 +659,7 @@ export const fetchVeloraDeltaSwap = async ({
 	});
 
 	const sdk = constructSimpleSDK({
-		chainId: Number(sourceNetwork?.chainId),
+		chainId: Number(sourceNetwork.chainId),
 		fetch: window.fetch
 	});
 
@@ -694,11 +694,11 @@ export const fetchVeloraDeltaSwap = async ({
 	const signableOrderData = await sdk.delta.buildDeltaOrder({
 		deltaPrice: swapDetails as DeltaPrice | BridgePrice,
 		owner: userAddress,
-		srcToken: sourceToken?.address,
-		destToken: destinationToken?.address,
+		srcToken: sourceToken.address,
+		destToken: destinationToken.address,
 		srcAmount: `${parsedSwapAmount}`,
 		destAmount: `${slippageMinimum}`,
-		destChainId: Number(destinationNetwork?.chainId)
+		destChainId: Number(destinationNetwork.chainId)
 	});
 
 	const hash = getSignParamsEIP712(signableOrderData);
@@ -725,7 +725,7 @@ export const fetchVeloraDeltaSwap = async ({
 	await waitAndTriggerWallet();
 };
 
-export const checkDeltaOrderStatus = async ({
+const checkDeltaOrderStatus = async ({
 	sdk,
 	auctionId,
 	timeoutMs = SWAP_DELTA_TIMEOUT_MS,
