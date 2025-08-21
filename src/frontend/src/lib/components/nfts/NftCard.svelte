@@ -32,8 +32,8 @@
 			imageUrl={nft?.imageUrl}
 			shadow="inset"
 			size="cover"
-			testId={`${testId}-image`}
 			styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+			testId={`${testId}-image`}
 		/>
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">

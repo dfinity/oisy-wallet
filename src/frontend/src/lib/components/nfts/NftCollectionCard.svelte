@@ -18,10 +18,10 @@
 
 <a
 	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300"
-	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 	class:cursor-not-allowed={disabled}
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}
+	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 >
 	<div
 		class="relative grid aspect-square gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5"
@@ -42,8 +42,8 @@
 						imageUrl={nft?.imageUrl}
 						shadow="inset"
 						size="cover"
-						testId={`${testId}-image-${index}`}
 						styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+						testId={`${testId}-image-${index}`}
 					/>
 				</div>
 			{/if}
