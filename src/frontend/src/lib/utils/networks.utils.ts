@@ -5,6 +5,7 @@ import type { UserNetworks } from '$lib/types/user-networks';
 import {
 	isNetworkIdArbitrum,
 	isNetworkIdBase,
+	isNetworkIdBsc,
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdPolygon,
@@ -51,7 +52,8 @@ export const getContractExplorerUrl = ({
 				isNetworkIdEvm(network.id) ||
 				isNetworkIdSepolia(network.id) ||
 				isNetworkIdArbitrum(network.id) ||
-				isNetworkIdPolygon(network.id)
+				isNetworkIdPolygon(network.id) ||
+				isNetworkIdBsc(network.id)
 			) {
 				return `${baseUrl}/address/${contractAddress}`;
 			}

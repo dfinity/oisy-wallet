@@ -1,4 +1,21 @@
 import {
+	ARBITRUM_MAINNET_NETWORK,
+	ARBITRUM_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import {
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	BSC_MAINNET_NETWORK,
+	BSC_TESTNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.bsc.env';
+import {
+	POLYGON_AMOY_NETWORK,
+	POLYGON_MAINNET_NETWORK
+} from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK
@@ -6,7 +23,7 @@ import {
 import * as appContants from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { defineEnabledNetworks } from '$lib/utils/networks.utils';
+import { defineEnabledNetworks, getContractExplorerUrl } from '$lib/utils/networks.utils';
 
 describe('networks.utils', () => {
 	describe('defineEnabledNetworks', () => {
@@ -181,6 +198,55 @@ describe('networks.utils', () => {
 					expect(defineEnabledNetworks(params)).toEqual([...mainnetNetworks, ...testnetNetworks]);
 				});
 			});
+		});
+	});
+
+	// ---- EVM-like networks should use /address/:contract
+	describe('getContractExplorerUrl — EVM networks', () => {
+		const ADDR = '0xA11CE0000000000000000000000000000000000';
+
+		const evmCases = [
+			['Ethereum mainnet', ETHEREUM_NETWORK],
+			['Sepolia', SEPOLIA_NETWORK],
+			['Base mainnet', BASE_NETWORK],
+			['Base Sepolia', BASE_SEPOLIA_NETWORK],
+			['Arbitrum mainnet', ARBITRUM_MAINNET_NETWORK],
+			['Arbitrum Sepolia', ARBITRUM_SEPOLIA_NETWORK],
+			['Polygon mainnet', POLYGON_MAINNET_NETWORK],
+			['Polygon Amoy', POLYGON_AMOY_NETWORK],
+			['BSC mainnet', BSC_MAINNET_NETWORK],
+			['BSC testnet', BSC_TESTNET_NETWORK]
+		] as const;
+
+		it.each(evmCases)('%s uses /address/', (_label, network) => {
+			const base = (network as any).explorerUrl as string;
+			const url = getContractExplorerUrl({ network, contractAddress: ADDR });
+			expect(url).toBe(`${base}/address/${ADDR}`);
+		});
+	});
+
+	// ---- Solana networks should use /account/:contract
+	describe('getContractExplorerUrl — Solana networks', () => {
+		const ADDR = 'So11111111111111111111111111111111111111112';
+
+		const solCases = [
+			['Solana mainnet', SOLANA_MAINNET_NETWORK],
+			['Solana devnet', SOLANA_DEVNET_NETWORK]
+		] as const;
+
+		it.each(solCases)('%s uses /account/', (_label, network) => {
+			const base = (network as any).explorerUrl as string;
+			const url = getContractExplorerUrl({ network, contractAddress: ADDR });
+			expect(url).toBe(`${base}/account/${ADDR}`);
+		});
+	});
+
+	// ---- No explorer URL -> undefined
+	describe('getContractExplorerUrl — no explorer URL', () => {
+		it('returns undefined if network.explorerUrl is nullish', () => {
+			const network = { id: 'custom-chain', explorerUrl: undefined } as any;
+			const url = getContractExplorerUrl({ network, contractAddress: '0xdead' });
+			expect(url).toBeUndefined();
 		});
 	});
 });
