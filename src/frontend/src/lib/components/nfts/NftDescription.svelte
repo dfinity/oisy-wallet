@@ -11,7 +11,7 @@
 	const { nft }: Props = $props();
 </script>
 
-{#if (nonNullish(nft) && nonNullish(nft.description)) || isNullish(nft)}
+{#if nonNullish(nft?.description)) || isNullish(nft)}
 	<div class="mt-5 flex rounded-lg bg-primary p-5">
 		{#if nonNullish(nft)}
 			<div class="grow-1 flex flex-col">
