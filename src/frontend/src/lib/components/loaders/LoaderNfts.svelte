@@ -6,6 +6,8 @@
 	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -14,8 +16,6 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 	import { findNewNftIds, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
-	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 
 	interface Props {
 		children?: Snippet;
