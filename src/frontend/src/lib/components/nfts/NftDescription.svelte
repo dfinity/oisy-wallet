@@ -14,7 +14,7 @@
 {#if (nonNullish(nft) && nonNullish(nft.description)) || isNullish(nft)}
 	<div class="mt-5 flex rounded-lg bg-primary p-5">
 		{#if nonNullish(nft)}
-			<div class="flex flex-col">
+			<div class="grow-1 flex flex-col">
 				{#if nonNullish(nft.name)}
 					<h5 class="mb-3">{nft.name}</h5>
 				{/if}
