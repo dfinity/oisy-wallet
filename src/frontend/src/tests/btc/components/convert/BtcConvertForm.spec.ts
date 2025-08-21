@@ -55,7 +55,6 @@ describe('BtcConvertForm', () => {
 			.mockImplementation(() => readable(status));
 
 	const buttonTestId = 'convert-form-button-next';
-	const btcSendWarningsTestId = 'btc-convert-form-send-warnings';
 
 	beforeEach(() => {
 		mockPage.reset();
