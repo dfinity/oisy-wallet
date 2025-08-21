@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import type { Nft } from '$lib/types/nft';
-	import Img from '$lib/components/ui/Img.svelte';
 
 	interface Props {
 		nft?: Nft;
