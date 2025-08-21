@@ -29,6 +29,11 @@ export const syncWallet = async ({
 			newTransactions
 		}
 	} = data;
+
+	if (certified) {
+		return;
+	}
+
 	// Only parse new transactions when certified is false (when we actually receive transaction data)
 	// When certified is true, newTransactions are not provided
 	const providerTransactions: CertifiedData<BtcTransactionUi>[] | null = certified
