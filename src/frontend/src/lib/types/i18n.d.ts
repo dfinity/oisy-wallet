@@ -707,6 +707,10 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
+		network_cost: string;
+		gasless: string;
+		swap_fees: string;
+		cross_chain_networks_info: string;
 	};
 	error: {
 		kong_not_available: string;

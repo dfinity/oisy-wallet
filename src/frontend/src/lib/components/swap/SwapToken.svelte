@@ -23,7 +23,7 @@
 
 {#if nonNullish(token)}
 	<div class="flex items-center">
-		<TokenLogo data={token} logoSize="md" />
+		<TokenLogo badge={{ type: 'network' }} data={token} logoSize="md" />
 
 		<div class="ml-2 flex flex-col">
 			<span class="text-2xl font-bold">

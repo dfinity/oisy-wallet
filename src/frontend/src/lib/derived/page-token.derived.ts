@@ -1,5 +1,5 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
@@ -49,6 +49,10 @@ export const pageToken: Readable<OptionToken> = derived(
 
 		if ($routeToken === ICP_TOKEN.name) {
 			return ICP_TOKEN;
+		}
+
+		if ($routeToken === TESTICP_TOKEN.name) {
+			return TESTICP_TOKEN;
 		}
 
 		return [
