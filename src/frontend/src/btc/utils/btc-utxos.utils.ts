@@ -1,3 +1,4 @@
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 import { uint8ArrayToHexString } from '@dfinity/utils';
@@ -14,7 +15,7 @@ export interface UtxoSelectionResult {
  * Extracts transaction IDs from an array of UTXOs
  */
 export const extractUtxoTxIds = (utxos: Utxo[]): string[] =>
-	utxos.map(({ outpoint: { txid } }) => uint8ArrayToHexString(txid));
+	utxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
 
 /**
  * Estimates transaction size in bytes based on number of inputs and outputs
