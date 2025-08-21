@@ -29,6 +29,13 @@
 		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
+		<BgImg
+			imageUrl={nft?.imageUrl}
+			shadow="inset"
+			size="cover"
+			styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+			testId={`${testId}-image`}
+		/>
 		<NftImageConsent {nft}>
 			<div class="h-full w-full">
 				<BgImg
