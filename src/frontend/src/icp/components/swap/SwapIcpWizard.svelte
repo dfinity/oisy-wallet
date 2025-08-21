@@ -39,8 +39,8 @@
 		swapAmount: OptionAmount;
 		receiveAmount?: number;
 		slippageValue: OptionAmount;
-		swapProgressStep: string;
-		swapFailedProgressSteps?: string[];
+		swapProgressStep: ProgressStepsSwap;
+		swapFailedProgressSteps?: ProgressStepsSwap[];
 		currentStep?: WizardStep;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
