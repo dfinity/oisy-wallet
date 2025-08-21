@@ -43,7 +43,7 @@ export const getContractExplorerUrl = ({
 	contractAddress: string;
 }): string | undefined => {
 	if (nonNullish((network as SolanaNetwork | EthereumNetwork)?.explorerUrl)) {
-		let baseUrl = (network as SolanaNetwork | EthereumNetwork)?.explorerUrl;
+		const baseUrl = (network as SolanaNetwork | EthereumNetwork)?.explorerUrl;
 		if (nonNullish(baseUrl)) {
 			if (
 				isNetworkIdEthereum(network.id) ||
