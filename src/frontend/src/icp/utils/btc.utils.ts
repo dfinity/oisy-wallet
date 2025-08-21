@@ -15,8 +15,17 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
-import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+/**
+ * Bitcoin txid to text representation requires inverting the array.
+ *
+ * @param txid Uint8Array | number[]
+ * @returns string A human-readable transaction id.
+ */
+export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
+	uint8ArrayToHexString(Uint8Array.from(txid).toReversed());
 
 /**
  * Get the NetworkId from a BTC TokenId
@@ -34,33 +43,6 @@ export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =
 		return BTC_REGTEST_NETWORK_ID;
 	}
 	return undefined;
-};
-
-/**
- * Converts a PendingTransaction txid to a hex string format
- * @param tx - The pending transaction containing the txid
- * @returns The txid as a hex string, or null if conversion fails
- */
-export const convertPendingTransactionTxid = (tx: PendingTransaction): string | null => {
-	let txidString: string;
-
-	// Handle Uint8Array case (txid: Uint8Array )
-	if (tx.txid instanceof Uint8Array) {
-		txidString = Array.from(tx.txid)
-			.map((b: number) => b.toString(16).padStart(2, '0'))
-			.join('');
-	}
-	// Handle number array case (txid: number[])
-	else if (Array.isArray(tx.txid)) {
-		txidString = tx.txid.map((b: number) => b.toString(16).padStart(2, '0')).join('');
-	}
-	// Fallback, convert to string representation
-	else {
-		txidString = String(tx.txid);
-	}
-
-	// Return the txid string only if it's not empty
-	return notEmptyString(txidString) ? txidString : null;
 };
 
 /**
@@ -112,9 +94,9 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
 		return null;
 	}
 
-	// Use the utility function to convert txids and filter out nulls
+	// Extract txid from each PendingTransaction and use utxoTxIdToString to convert it
 	return pendingTransactions.data
-		.map(convertPendingTransactionTxid)
+		.map((tx) => utxoTxIdToString(tx.txid))
 		.filter((txid): txid is string => nonNullish(txid));
 };
 /**
