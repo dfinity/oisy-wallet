@@ -6,7 +6,6 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReplacer } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -29,8 +28,6 @@ describe('btc-listener', () => {
 	}: {
 		balance?: bigint | null;
 		transactions?: BtcTransactionUi[];
-		address?: string;
-		network?: BitcoinNetwork;
 	}): BtcPostMessageDataResponseWallet => ({
 		wallet: {
 			balance: {

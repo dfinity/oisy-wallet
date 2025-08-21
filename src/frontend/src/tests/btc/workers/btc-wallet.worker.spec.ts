@@ -1,4 +1,5 @@
 import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
+import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as blockchainRest from '$lib/rest/blockchain.rest';
@@ -6,10 +7,12 @@ import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
+import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { BitcoinCanister, type BitcoinNetwork } from '@dfinity/ckbtc';
+import { jsonReplacer } from '@dfinity/utils';
 import { waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -25,6 +28,8 @@ describe('btc-wallet.worker', () => {
 
 	const mockBalance = 100n;
 
+	const latestBitcoinBlockHeight = 100;
+
 	const mockPostMessageStatusInProgress = {
 		msg: 'syncBtcWalletStatus',
 		data: {
@@ -38,6 +43,40 @@ describe('btc-wallet.worker', () => {
 			state: 'idle'
 		}
 	};
+
+	const mockPostMessage = ({
+		certified,
+		withTransactions
+	}: {
+		certified: boolean;
+		withTransactions: boolean;
+	}) => ({
+		msg: 'syncBtcWallet',
+		data: {
+			wallet: {
+				balance: {
+					certified,
+					data: mockBalance
+				},
+				newTransactions: JSON.stringify(
+					withTransactions
+						? [
+								{
+									data: mapBtcTransaction({
+										transaction: mockBtcTransaction,
+										latestBitcoinBlockHeight,
+										btcAddress: mockBtcAddress
+									}),
+									// TODO: use "certified" instead of hardcoded value when we have a way of certifying BTC txs
+									certified: false
+								}
+							]
+						: [],
+					jsonReplacer
+				)
+			}
+		}
+	});
 
 	const postMessageMock = vi.fn();
 
@@ -85,6 +124,15 @@ describe('btc-wallet.worker', () => {
 	}): TestUtil => {
 		const scheduler: BtcWalletScheduler = new BtcWalletScheduler();
 
+		const mockPostMessageUncertified = mockPostMessage({
+			certified: false,
+			withTransactions: true
+		});
+		const mockPostMessageCertified = mockPostMessage({
+			certified: true,
+			withTransactions: false
+		});
+
 		return {
 			setup: () => {},
 
@@ -104,27 +152,23 @@ describe('btc-wallet.worker', () => {
 
 					await awaitJobExecution();
 
-					// Verify that status messages are being sent
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
-
-					const initialCallCount = postMessageMock.mock.calls.length;
-
-					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
-
-					// Check that more calls were made after the timer advance
-					expect(postMessageMock.mock.calls.length).toBeGreaterThan(initialCallCount);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
-
-					const secondCallCount = postMessageMock.mock.calls.length;
+					expect(postMessageMock).toHaveBeenCalledTimes(4);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					// Check that more calls were made after the second timer advance
-					expect(postMessageMock.mock.calls.length).toBeGreaterThan(secondCallCount);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+					expect(postMessageMock).toHaveBeenCalledTimes(8);
+					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
 				});
 
 				it('should start the scheduler with an interval', async () => {
@@ -180,7 +224,10 @@ describe('btc-wallet.worker', () => {
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					// Verify that the error message was sent
+					// idle and in_progress 3 times
+					// error
+					expect(postMessageMock).toHaveBeenCalledTimes(7);
+
 					expect(postMessageMock).toHaveBeenCalledWith({
 						msg: 'syncBtcWalletError',
 						data: {

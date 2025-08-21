@@ -130,20 +130,20 @@ export const getFeeRateFromPercentiles = async ({
 	// Use median fee percentile
 	const medianIndex = Math.floor(fee_percentiles.length / 2);
 
-	// Convert from millisats to sats (divide by 1000)
-	const feeRateSatsPerVByte = fee_percentiles[medianIndex];
+	// Use median fee percentile
+	const medianFeeMillisatsPerVByte = fee_percentiles[medianIndex];
 
 	// Apply minimum and maximum limits
 	const MIN_FEE_RATE = 1_000n; // 1 sat/vbyte minimum
 	const MAX_FEE_RATE = 100_000n; // 100 sat/vbyte maximum
 
-	if (feeRateSatsPerVByte < MIN_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte < MIN_FEE_RATE) {
 		return MIN_FEE_RATE;
 	}
 
-	if (feeRateSatsPerVByte > MAX_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte > MAX_FEE_RATE) {
 		return MAX_FEE_RATE;
 	}
 
-	return feeRateSatsPerVByte;
+	return medianFeeMillisatsPerVByte;
 };
