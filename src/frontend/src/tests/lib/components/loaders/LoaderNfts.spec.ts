@@ -7,17 +7,19 @@ import * as infuraErc721ProvidersModule from '$eth/providers/infura-erc721.provi
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
-import * as addressStore from '$lib/derived/address.derived';
-import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import * as nftServicesModule from '$lib/services/nft.services';
+import { ethAddressStore } from '$lib/stores/address.store';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
-import { get, readable } from 'svelte/store';
+import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('LoaderNfts', () => {
@@ -52,12 +54,12 @@ describe('LoaderNfts', () => {
 		erc721CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.resetAll();
 
-		vi.spyOn(testnetsEnabled, 'subscribe').mockImplementation((fn) => {
-			fn(true);
-			return () => {};
-		});
+		mockAuthStore();
 
-		vi.spyOn(addressStore, 'ethAddress', 'get').mockImplementation(() => readable(mockEthAddress));
+		setupTestnetsStore('enabled');
+		setupUserNetworksStore('allEnabled');
+
+		ethAddressStore.set({ data: mockEthAddress, certified: false });
 	});
 
 	describe('handleNewNfts', () => {
@@ -75,7 +77,7 @@ describe('LoaderNfts', () => {
 			loadNftIdsOfTokenSpy = vi.spyOn(nftServicesModule, 'loadNftIdsOfToken');
 		});
 
-		it('should add new erc721 nfts of loaded nft ids', async () => {
+		it('should add new ERC721 nfts of loaded nft ids', async () => {
 			erc721CustomTokensStore.setAll([
 				{ data: mockedEnabledAzukiToken, certified: false },
 				{ data: mockedEnabledGodsToken, certified: false }
@@ -105,7 +107,7 @@ describe('LoaderNfts', () => {
 			});
 		});
 
-		it('should add new erc1155 nfts of loaded nft ids', async () => {
+		it('should add new ERC1155 nfts of loaded nft ids', async () => {
 			erc1155CustomTokensStore.setAll([
 				{ data: mockedEnabledNyanToken, certified: false },
 				{ data: mockedEnabledApeToken, certified: false }
@@ -144,7 +146,7 @@ describe('LoaderNfts', () => {
 			nftStore.resetAll();
 		});
 
-		it('should remove erc721 nfts from nft store', async () => {
+		it('should remove ERC721 nfts from nft store', async () => {
 			const mockNft1 = {
 				...mockValidErc721Nft,
 				id: mockNftId1,
@@ -192,7 +194,7 @@ describe('LoaderNfts', () => {
 			});
 		});
 
-		it('should remove erc1155 nfts from nft store', async () => {
+		it('should remove ERC1155 nfts from nft store', async () => {
 			const mockNft1 = {
 				...mockValidErc1155Nft,
 				id: mockNftId1,
@@ -274,13 +276,15 @@ describe('LoaderNfts', () => {
 			nftStore.resetAll();
 			nftStore.addAll([mockNft1, mockNft2, mockNft3]);
 
+			erc721CustomTokensStore.resetAll();
+
 			erc1155CustomTokensStore.setAll([
 				{ data: mockedEnabledNyanToken, certified: false },
 				{ data: mockedEnabledApeToken, certified: false }
 			]);
 		});
 
-		it('should update erc1155 nfts from the nft store', async () => {
+		it('should update ERC1155 nfts from the nft store', async () => {
 			mockGetNftIdsForOwner.mockResolvedValueOnce([
 				{ id: mockNftId1, balance: 2 },
 				{ id: mockNftId2, balance: 1 }
