@@ -35,6 +35,14 @@ export const syncWallet = async ({
 		? null
 		: JSON.parse(newTransactions, jsonReviver);
 
+	// Only store transactions when we have actual transaction data (certified === false)
+	if (nonNullish(providerTransactions)) {
+		btcTransactionsStore.prepend({
+			tokenId,
+			transactions: providerTransactions
+		});
+	}
+
 	if (nonNullish(balance)) {
 		/*
 		 * Balance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
@@ -57,12 +65,16 @@ export const syncWallet = async ({
 			address: sourceAddress
 		});
 
+		// Get transactions directly from the store instead of using parsed worker data
+		const storeData = get(btcTransactionsStore);
+		const storeTransactions = nonNullish(storeData) ? (storeData[tokenId] ?? null) : null;
+
 		// Calculate the structured balance using parsed transactions
 		// Use sourceAddress to ensure consistency with the address used for pending transactions
 		const btcWalletBalance = getBtcWalletBalance({
 			address: sourceAddress,
 			confirmedBalance: balance,
-			providerTransactions,
+			providerTransactions: storeTransactions,
 			certified
 		});
 
@@ -75,14 +87,6 @@ export const syncWallet = async ({
 		});
 	} else {
 		balancesStore.reset(tokenId);
-	}
-
-	// Only store transactions when we have actual transaction data (certified === false)
-	if (nonNullish(providerTransactions)) {
-		btcTransactionsStore.prepend({
-			tokenId,
-			transactions: providerTransactions
-		});
 	}
 };
 
