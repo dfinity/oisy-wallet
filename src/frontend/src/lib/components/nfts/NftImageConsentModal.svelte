@@ -82,7 +82,7 @@
 			</div>
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.nfts.text.media_urls}</span>
-				<span class="flex-col">
+				<span class="flex-col justify-items-end">
 					{#each getNftCollectionUi( { $nftStore, $nonFungibleTokens } ).find((coll) => coll.collection.id === nft.collection.id && coll.collection.address === nft.collection.address)?.nfts ?? [] as nft}
 						<span class="flex">
 							#{nft.id} &nbsp;
