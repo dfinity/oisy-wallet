@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import NewSwapForm from '$lib/components/swap/NewSwapForm.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -9,7 +10,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
-	import NewSwapForm from '$lib/components/swap/NewSwapForm.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -38,9 +38,7 @@
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
-	let totalFee = $derived(
-		(sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
-	);
+	let totalFee = $derived((sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n));
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
