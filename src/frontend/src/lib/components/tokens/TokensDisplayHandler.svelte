@@ -7,11 +7,11 @@
 	import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
 
 	interface Props {
-		// We start it as undefined to avoid showing an empty list before the first update.
-		tokens?: TokenUiOrGroupUi[];
+		tokens: TokenUiOrGroupUi[] | undefined;
 		children: Snippet;
 	}
 
+	// We start `tokens` as undefined to avoid showing an empty list before the first update.
 	let { tokens = $bindable(), children }: Props = $props();
 
 	let groupedTokens: TokenUiOrGroupUi[] = $derived(
