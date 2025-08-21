@@ -1,6 +1,8 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { approve as approveToken } from '$eth/services/send.services';
+import { swap } from '$eth/services/swap.services';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -70,7 +72,8 @@ import {
 	constructSimpleSDK,
 	type BridgePrice,
 	type DeltaAuction,
-	type DeltaPrice
+	type DeltaPrice,
+	type OptimalRate
 } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 import { trackEvent } from './analytics.services';
@@ -760,4 +763,75 @@ const isExecutedDeltaAuction = ({
 	}
 
 	return true;
+};
+
+export const fetchVeloraMarketSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	sourceNetwork,
+	slippageValue,
+	userAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapVeloraParams): Promise<void> => {
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
+
+	const sdk = constructSimpleSDK({
+		chainId: Number(sourceNetwork.chainId),
+		fetch: window.fetch
+	});
+
+	const TokenTransferProxy = await sdk.swap.getSpender();
+
+	if (!isDefaultEthereumToken(sourceToken)) {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: TokenTransferProxy,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			maxPriorityFeePerGas,
+			shouldSwapWithApproval: true,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
+	}
+
+	progress(ProgressStepsSwap.SWAP);
+
+	const txParams = await sdk.swap.buildTx({
+		srcToken: geSwapEthTokenAddress(sourceToken),
+		destToken: geSwapEthTokenAddress(destinationToken),
+		srcAmount: swapDetails.srcAmount,
+		slippage: Number(slippageValue) * 100,
+		priceRoute: swapDetails as OptimalRate,
+		userAddress
+	});
+
+	await swap({
+		from: userAddress,
+		to: txParams.to,
+		transaction: txParams,
+		identity,
+		token: sourceToken,
+		sourceNetwork,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
+		progress
+	});
+
+	progress(ProgressStepsSwap.UPDATE_UI);
+
+	await waitAndTriggerWallet();
 };
