@@ -223,6 +223,7 @@ describe('networks.utils', () => {
 		it.each(evmCases)('$label uses /address/', ({ network }) => {
 			const base = (network as EthereumNetwork).explorerUrl;
 			const url = getContractExplorerUrl({ network, contractAddress: ADDR });
+
 			expect(url).toBe(`${base}/address/${ADDR}`);
 		});
 	});
@@ -239,6 +240,7 @@ describe('networks.utils', () => {
 		it.each(solCases)('$label uses /account/', ({ network }) => {
 			const base = (network as SolanaNetwork)?.explorerUrl;
 			const url = getContractExplorerUrl({ network, contractAddress: ADDR });
+
 			expect(url).toBe(`${base}/account/${ADDR}`);
 		});
 	});
@@ -248,6 +250,7 @@ describe('networks.utils', () => {
 		it('returns undefined if network.explorerUrl is nullish', () => {
 			const network: Network = { id: 'custom-chain', explorerUrl: undefined } as unknown as Network;
 			const url = getContractExplorerUrl({ network, contractAddress: '0xdead' });
+
 			expect(url).toBeUndefined();
 		});
 	});
