@@ -74,11 +74,11 @@
 
 		{#if !renderQRCodeReader}
 			<Button
-				type="button"
-				styleClass="inset-center"
 				colorStyle="primary"
+				onclick={() => (renderQRCodeReader = true)}
 				paddingSmall
-				onclick={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</Button
+				styleClass="inset-center"
+				type="button">{$i18n.wallet_connect.text.scan_qr}</Button
 			>
 		{/if}
 	</div>

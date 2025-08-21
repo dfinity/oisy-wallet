@@ -14,18 +14,17 @@ runs:
       uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
       id: changes
       with:
-        # Scripts, GitHub actions that contain 'backend' in their path.
+        # Scripts, GitHub actions, or any path that contain 'backend' in their path.
         # The backend source code.
         # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
         # The dockerfile used in this CI run, and the scripts it COPY's.
-        # There may be some files in the frontend folder that contains 'backend' in their name.
         filters: |
           backend:
             - '**/*backend*'
+            - '**/*backend*/**'
             - 'src/backend/**'
             - 'src/shared/**'
             - '**/Cargo*'
             - '**/*rust*'
             - 'Dockerfile'
             - 'docker/**'
-            - '!src/frontend/**'

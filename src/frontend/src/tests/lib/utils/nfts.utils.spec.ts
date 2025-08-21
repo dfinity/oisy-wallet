@@ -3,7 +3,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
-import type { Nft, NftId, NftsByNetwork } from '$lib/types/nft';
+import type { Nft, NftId, NftsByNetwork, OwnedNft } from '$lib/types/nft';
 import {
 	filterSortByCollection,
 	findNewNftIds,
@@ -12,13 +12,14 @@ import {
 	getEnabledNfts,
 	getNftCollectionUi,
 	getNftsByNetworks,
+	getUpdatedNfts,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
 } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('nfts.utils', () => {
 	const erc721Tokens: Erc721CustomToken[] = [
@@ -346,6 +347,100 @@ describe('nfts.utils', () => {
 			});
 
 			expect(result).toEqual([]);
+		});
+	});
+
+	describe('getUpdatedNfts', () => {
+		const mockErc1155Nft1 = {
+			...mockValidErc1155Nft,
+			id: parseNftId(983524),
+			balance: 2,
+			collection: {
+				...mockValidErc1155Nft.collection,
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				network: POLYGON_AMOY_NETWORK
+			}
+		};
+		const mockErc1155Nft2 = {
+			...mockValidErc1155Nft,
+			id: parseNftId(37534),
+			balance: 3,
+			collection: {
+				...mockValidErc1155Nft.collection,
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				network: POLYGON_AMOY_NETWORK
+			}
+		};
+		const mockErc1155Nft3 = {
+			...mockValidErc1155Nft,
+			id: parseNftId(823746),
+			balance: 3,
+			collection: {
+				...mockValidErc1155Nft.collection,
+				address: DE_GODS_TOKEN.address,
+				network: POLYGON_AMOY_NETWORK
+			}
+		};
+
+		it('should return nfts with updated balances', () => {
+			const loadedNfts = [mockErc1155Nft1, mockErc1155Nft2];
+			const inventory: OwnedNft[] = [
+				{ id: mockErc1155Nft1.id, balance: 5 },
+				{ id: mockErc1155Nft2.id, balance: mockErc1155Nft2.balance }
+			];
+
+			const result = getUpdatedNfts({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([{ ...mockErc1155Nft1, balance: 5 }]);
+		});
+
+		it('should return empty array if no balances have changed', () => {
+			const loadedNfts = [mockErc1155Nft1, mockErc1155Nft2];
+			const inventory: OwnedNft[] = [
+				{ id: mockErc1155Nft1.id, balance: mockErc1155Nft1.balance },
+				{ id: mockErc1155Nft2.id, balance: mockErc1155Nft2.balance }
+			];
+
+			const result = getUpdatedNfts({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should return empty array if no nfts are loaded yet', () => {
+			const loadedNfts: Nft[] = [];
+			const inventory: OwnedNft[] = [
+				{ id: mockErc1155Nft1.id, balance: mockErc1155Nft1.balance },
+				{ id: mockErc1155Nft2.id, balance: mockErc1155Nft2.balance }
+			];
+
+			const result = getUpdatedNfts({
+				nfts: loadedNfts,
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
+				inventory
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('should handle different tokens and networks correctly', () => {
+			const loadedNfts = [mockErc1155Nft1, mockErc1155Nft2, mockErc1155Nft3];
+			const inventory: OwnedNft[] = [
+				{ id: mockErc1155Nft1.id, balance: 5 },
+				{ id: mockErc1155Nft2.id, balance: 5 },
+				{ id: mockErc1155Nft3.id, balance: 5 }
+			];
+
+			const result = getUpdatedNfts({ nfts: loadedNfts, token: DE_GODS_TOKEN, inventory });
+
+			expect(result).toEqual([{ ...mockErc1155Nft3, balance: 5 }]);
 		});
 	});
 

@@ -834,7 +834,11 @@
 			"open_instructions_link": "Otevřít odkaz na pokyny",
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
-			"withdrawing": "Stažení..."
+			"withdrawing": "Stažení...",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
@@ -1029,7 +1033,9 @@
 			"quantity": "",
 			"item_traits": "",
 			"collection_not_loaded": "",
-			"nft_not_loaded": ""
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": ""
 		},
 		"alt": {
 			"placeholder_image": "",

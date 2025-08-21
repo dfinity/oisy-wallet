@@ -834,7 +834,11 @@
 			"open_instructions_link": "Open instructions link",
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
-			"withdrawing": "Withdrawing..."
+			"withdrawing": "Withdrawing...",
+			"network_cost": "Network cost",
+			"gasless": "Gasless",
+			"swap_fees": "Swap Fees",
+			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -1029,7 +1033,9 @@
 			"quantity": "Quantity",
 			"item_traits": "Item traits",
 			"collection_not_loaded": "The collection could not be displayed as it has not been loaded yet",
-			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet"
+			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
+			"collections": "Collections",
+			"all_assets": "All assets"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",

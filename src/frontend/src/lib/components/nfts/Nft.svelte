@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import NftDescription from '$lib/components/nfts/NftDescription.svelte';
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -47,3 +48,5 @@
 </script>
 
 <NftHero {nft} />
+
+<NftDescription {nft} />
