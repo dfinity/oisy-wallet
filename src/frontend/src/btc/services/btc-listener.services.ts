@@ -50,14 +50,12 @@ export const syncWallet = async ({
 		// Get the source address using the same logic as other components (BtcConvertTokenWizard, etc.)
 		const sourceAddress = getBtcSourceAddress(networkId);
 
-		if (!certified) {
-			// Wait for pending transactions to be loaded before calculating balance
-			await loadBtcPendingSentTransactions({
-				identity,
-				networkId,
-				address: sourceAddress
-			});
-		}
+		// Wait for pending transactions to be loaded before calculating balance
+		await loadBtcPendingSentTransactions({
+			identity,
+			networkId,
+			address: sourceAddress
+		});
 
 		// Calculate the structured balance using parsed transactions
 		// Use sourceAddress to ensure consistency with the address used for pending transactions
