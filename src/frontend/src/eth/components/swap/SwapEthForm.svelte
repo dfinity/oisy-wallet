@@ -1,26 +1,26 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { ZERO } from '$lib/constants/app.constants';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import { type OptionAmount } from '$lib/types/send';
-	import type { TokenActionErrorType } from '$lib/types/token-action';
-	import { formatToken } from '$lib/utils/format.utils';
+	import SwapEthFeeInfo from './SwapEthFeeInfo.svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
-	import { balancesStore } from '$lib/stores/balances.store';
-	import type { Token } from '$lib/types/token';
-	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import { Html } from '@dfinity/gix-components';
-	import SwapEthFeeInfo from './SwapEthFeeInfo.svelte';
 	import NewSwapForm from '$lib/components/swap/NewSwapForm.svelte';
+	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
