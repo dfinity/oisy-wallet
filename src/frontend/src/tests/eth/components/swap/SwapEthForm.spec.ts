@@ -150,7 +150,7 @@ describe('SwapFormEth', () => {
 
 		const exchangeValues = container.querySelectorAll('[data-tid="swap-amount-exchange-value"]');
 
-		expect(exchangeValues.length).toBe(2);
+		expect(exchangeValues).toHaveLength(2);
 	});
 
 	it('should render action buttons', () => {
