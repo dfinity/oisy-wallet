@@ -14,6 +14,8 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 	import { findNewNftIds, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 
 	interface Props {
 		children?: Snippet;
@@ -126,10 +128,10 @@
 
 	const onLoad = async () => {
 		for (const token of $enabledNonFungibleTokens) {
-			if (token.standard === 'erc721') {
+			if (isTokenErc721(token)) {
 				await handleErc721(token);
 			}
-			if (token.standard === 'erc1155') {
+			if (isTokenErc1155(token)) {
 				await handleErc1155(token);
 			}
 		}
