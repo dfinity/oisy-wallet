@@ -8,12 +8,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import { getNftCollectionUi } from '$lib/utils/nfts.utils';
-	import { nftStore } from '$lib/stores/nft.store';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
-	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { nftStore } from '$lib/stores/nft.store';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	interface Props {
 		nft: Nft;
@@ -57,11 +57,11 @@
 				<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
 				<span>
 					<output>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output>
-					<TransactionAddressActions
+					<AddressActions
 						copyAddress={nft.collection.address}
 						copyAddressText="Copied"
-						explorerUrl=""
-						explorerUrlAriaLabel=""
+						externalLink=""
+						externalLinkAriaLabel=""
 					/>
 				</span>
 			</div>
@@ -79,7 +79,7 @@
 							<output class="text-tertiary"
 								>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 							>
-							<TransactionAddressActions
+							<externalLink
 								copyAddress={nft.imageUrl}
 								copyAddressText="Copied"
 								explorerUrl={nft.imageUrl}

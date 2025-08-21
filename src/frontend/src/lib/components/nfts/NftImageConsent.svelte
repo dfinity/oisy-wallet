@@ -33,7 +33,7 @@
 {:else}
 	<div
 		class="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 text-center"
-		class:bg-brand-subtle-10={!noBg}
+		class:bg-secondary-alt={!noBg}
 		class:rounded-xl={!asHeroBanner}
 		class:rounded-t-xl={asHeroBanner}
 		class:animate-pulse={isLoading}
@@ -47,16 +47,20 @@
 					: $i18n.nfts.text.img_consent_disabled}</span
 			>
 			<span
-				><Button
+				class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100 lg:max-h-0 lg:opacity-0"
+			>
+				<Button
 					colorStyle="secondary-light"
 					onclick={(e) => {
 						e.preventDefault();
 						handleConsent();
 					}}
 					styleClass="py-1 rounded-md"
-					paddingSmall>{$i18n.nfts.text.review_button}</Button
-				></span
-			>
+					paddingSmall
+				>
+					{$i18n.nfts.text.review_button}
+				</Button>
+			</span>
 		{/if}
 	</div>
 {/if}
