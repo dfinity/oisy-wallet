@@ -238,6 +238,7 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+export const SWAP_FEE_INFO = 'swap-fee-info';
 
 // Avatar
 export const AVATAR_IMAGE = 'avatar-image';

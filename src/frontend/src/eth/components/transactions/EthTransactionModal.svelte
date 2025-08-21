@@ -15,8 +15,8 @@
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -111,9 +111,9 @@
 			{#snippet logo()}
 				{#if nonNullish(token)}
 					{#if isTokenNonFungible(token) && nonNullish(nft)}
-						<NftLogo {nft} badge={{ type: 'network' }} />
+						<NftLogo badge={{ type: 'network' }} {nft} />
 					{:else}
-						<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+						<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 					{/if}
 				{/if}
 			{/snippet}
@@ -139,12 +139,12 @@
 
 		{#if nonNullish(to) && nonNullish(from)}
 			<TransactionContactCard
-				type={type === 'receive' ? 'receive' : 'send'}
-				{to}
 				{from}
-				{toExplorerUrl}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
+				{to}
+				{toExplorerUrl}
+				type={type === 'receive' ? 'receive' : 'send'}
 			/>
 		{/if}
 
@@ -155,13 +155,13 @@
 					<span>
 						<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
 
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={hash}
 							copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
 								$hash: hash
 							})}
-							{explorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
+							externalLink={explorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
 						/>
 					</span>
 				</ListItem>
@@ -198,11 +198,11 @@
 					<span class="flex max-w-[50%] flex-row break-all">
 						<output>{fromDisplay}</output>
 
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={fromDisplay}
 							copyAddressText={$i18n.transaction.text.from_copied}
-							explorerUrl={fromExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+							externalLink={fromExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
 						/>
 					</span>
 				</ListItem>
@@ -215,11 +215,11 @@
 					<span class="flex max-w-[50%] flex-row break-all">
 						<output>{toDisplay}</output>
 
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={toDisplay}
 							copyAddressText={$i18n.transaction.text.to_copied}
-							explorerUrl={toExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+							externalLink={toExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						/>
 					</span>
 				</ListItem>

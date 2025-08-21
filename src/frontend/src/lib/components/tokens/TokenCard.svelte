@@ -45,21 +45,21 @@
 
 <div class="flex w-full flex-col">
 	<LogoButton
+		condensed={asNetwork}
 		dividers={false}
+		{hover}
+		onClick={() => dispatch('click')}
 		rounded={false}
 		{testId}
-		onClick={() => dispatch('click')}
-		condensed={asNetwork}
-		{hover}
 	>
 		{#snippet logo()}
 			<span class="flex" class:mr-2={!asNetwork}>
 				<TokenLogo
-					{data}
 					badge={nonNullish(data.tokenCount)
 						? { type: 'tokenCount', count: data.tokenCount }
 						: { type: 'network' }}
 					color="white"
+					{data}
 					logoSize={asNetwork ? 'xs' : 'lg'}
 				/>
 			</span>
@@ -86,12 +86,12 @@
 
 		{#snippet titleEnd()}
 			{#if isNullish(onToggle)}
-				<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
+				<span class="block min-w-12 text-nowrap" class:text-sm={asNetwork}>
 					<TokenBalance {data} hideBalance={$isPrivacyMode}>
 						{#snippet privacyBalance()}
 							<IconDots
-								variant={asNetwork ? 'sm' : 'md'}
 								styleClass={asNetwork ? 'my-4.25' : 'pb-4'}
+								variant={asNetwork ? 'sm' : 'md'}
 							/>
 						{/snippet}
 					</TokenBalance>
@@ -114,9 +114,9 @@
 		{/snippet}
 
 		{#snippet descriptionEnd()}
-			<span class:text-sm={asNetwork} class="block min-w-12 text-nowrap">
+			<span class="block min-w-12 text-nowrap" class:text-sm={asNetwork}>
 				{#if nonNullish(onToggle) && nonNullish(token)}
-					<EnableTokenToggle {token} {onToggle} />
+					<EnableTokenToggle {onToggle} {token} />
 				{:else if !$isPrivacyMode}
 					<ExchangeTokenValue {data} />
 				{/if}

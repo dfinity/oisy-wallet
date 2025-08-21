@@ -7,31 +7,31 @@
 		copyAddress?: string;
 		copyAddressText?: string;
 		copyAddressTestId?: string;
-		explorerUrl?: string;
-		explorerUrlAriaLabel?: string;
-		explorerUrlTestId?: string;
+		externalLink?: string;
+		externalLinkAriaLabel?: string;
+		externalLinkTestId?: string;
 	}
 
 	const {
 		copyAddress,
 		copyAddressText,
 		copyAddressTestId,
-		explorerUrl,
-		explorerUrlAriaLabel,
-		explorerUrlTestId
+		externalLink,
+		externalLinkAriaLabel,
+		externalLinkTestId
 	}: Props = $props();
 </script>
 
 <span class="float-right flex pl-1.5 align-top">
 	{#if nonNullish(copyAddress) && nonNullish(copyAddressText)}
-		<Copy value={copyAddress} text={copyAddressText} inline testId={copyAddressTestId} />
+		<Copy inline testId={copyAddressTestId} text={copyAddressText} value={copyAddress} />
 	{/if}
-	{#if nonNullish(explorerUrl) && nonNullish(explorerUrlAriaLabel)}
+	{#if nonNullish(externalLink) && nonNullish(externalLinkAriaLabel)}
 		<ExternalLink
+			ariaLabel={externalLinkAriaLabel}
+			href={externalLink}
 			iconSize="18"
-			href={explorerUrl}
-			ariaLabel={explorerUrlAriaLabel}
-			testId={explorerUrlTestId}
+			testId={externalLinkTestId}
 		/>
 	{/if}
 </span>

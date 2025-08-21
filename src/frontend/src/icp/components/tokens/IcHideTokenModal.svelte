@@ -80,4 +80,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />
+<HideTokenModal {assertHide} {fromRoute} {hideToken} {updateUi} />

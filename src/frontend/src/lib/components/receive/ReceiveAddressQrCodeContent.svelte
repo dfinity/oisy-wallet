@@ -24,13 +24,13 @@
 <ReceiveQrCode address={address ?? ''} {addressToken} />
 
 <ReceiveAddress
-	labelRef="address"
 	address={address ?? ''}
-	{testId}
-	{network}
-	{qrCodeAction}
 	{copyAriaLabel}
 	{copyButtonTestId}
+	labelRef="address"
+	{network}
+	{qrCodeAction}
+	{testId}
 >
 	{#snippet title()}
 		{addressLabel ?? $i18n.wallet.text.address}
