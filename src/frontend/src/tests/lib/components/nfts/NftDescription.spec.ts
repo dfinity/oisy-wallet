@@ -50,6 +50,6 @@ describe('NftDescription', () => {
 
 		const skeletons = getAllByTestId(TOKEN_SKELETON_TEXT);
 
-		expect(skeletons.length).toEqual(3);
+		expect(skeletons).toHaveLength(3);
 	});
 });
