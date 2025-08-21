@@ -55,7 +55,6 @@
 				msg: { text: $i18n.send.error.unexpected_utxos_fee },
 				err
 			});
-
 			dispatch('icBack');
 		}
 	};

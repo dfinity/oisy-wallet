@@ -21,8 +21,6 @@
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
-
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
 	$: invalid =
@@ -33,13 +31,7 @@
 
 	let disableSend: boolean;
 	// We want to disable send if pending transactions or UTXOs fee isn't available yet, there was an error or there are pending transactions.
-	$: disableSend =
-		isNullish(utxosFee) ||
-		utxosFee?.error === BtcPrepareSendError.InsufficientBalance ||
-		utxosFee?.error === BtcPrepareSendError.InsufficientBalanceForFee ||
-		utxosFee?.utxos.length === 0 ||
-		nonNullish(utxosFee?.error) ||
-		invalid;
+	$: disableSend = isNullish(utxosFee) || nonNullish(utxosFee?.error) || invalid;
 </script>
 
 <SendReview {amount} {destination} disabled={disableSend} {selectedContact} on:icBack on:icSend>
