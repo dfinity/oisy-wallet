@@ -36,7 +36,7 @@
 	const { sourceToken, destinationToken, sourceTokenBalance, isSourceTokenIcrc2 } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	let errorType: TokenActionErrorType = $state<TokenActionErrorType | undefined>(undefined);
+	let errorType = $state<TokenActionErrorType | undefined>();
 
 	let totalFee = $derived(
 		(sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
