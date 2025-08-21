@@ -114,19 +114,18 @@
 			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
 	);
 
+	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
+
 	$effect(() => {
-		if (
+		receiveAmount =
 			nonNullish($destinationToken) &&
 			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
-		) {
-			receiveAmount = formatTokenBigintToNumber({
-				value: $swapAmountsStore.selectedProvider.receiveAmount,
-				unitName: $destinationToken.decimals,
-				displayDecimals: $destinationToken.decimals
-			});
-		} else {
-			receiveAmount = undefined;
-		}
+				? formatTokenBigintToNumber({
+						value: $swapAmountsStore.selectedProvider.receiveAmount,
+						unitName: $destinationToken.decimals,
+						displayDecimals: $destinationToken.decimals
+					})
+				: undefined;
 	});
 
 	const onTokensSwitch = () => {
@@ -145,7 +144,7 @@
 				<TokenInputNetworkWrapper
 					showGradient={nonNullish($sourceToken) &&
 						nonNullish($destinationToken) &&
-						$sourceToken?.network?.id !== $destinationToken?.network.id}
+						isCrossChainNetworks}
 					tokenNetworkId={$sourceToken?.network?.id}
 				>
 					{#snippet tokenInput()}
@@ -204,7 +203,7 @@
 			/>
 
 			<TokenInputNetworkWrapper
-				showGradient={$sourceToken?.network?.id !== $destinationToken?.network.id}
+				showGradient={isCrossChainNetworks}
 				tokenNetworkId={$destinationToken?.network?.id}
 			>
 				{#snippet tokenInput()}
