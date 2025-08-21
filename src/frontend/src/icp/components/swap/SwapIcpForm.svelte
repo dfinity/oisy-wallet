@@ -1,15 +1,10 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
-	import {
-		SWAP_AMOUNTS_CONTEXT_KEY,
-		type SwapAmountsContext
-	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
