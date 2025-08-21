@@ -99,16 +99,16 @@
 </script>
 
 <NewSwapForm
-	bind:swapAmount
-	bind:receiveAmount
-	bind:slippageValue
-	{onShowTokensList}
-	{onClose}
-	{onNext}
-	onCustomValidate={customValidate}
 	{errorType}
 	fee={$maxGasFee}
 	{isSwapAmountsLoading}
+	{onClose}
+	onCustomValidate={customValidate}
+	{onNext}
+	{onShowTokensList}
+	bind:swapAmount
+	bind:receiveAmount
+	bind:slippageValue
 >
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken) && nonNullish($feeTokenIdStore)}
@@ -126,7 +126,7 @@
 			{/if}
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider on:icShowProviderList {slippageValue} />
+				<SwapProvider {slippageValue} on:icShowProviderList />
 				<EthFeeDisplay>
 					{#snippet label()}
 						<Html text={$i18n.fee.text.total_fee} />
@@ -134,8 +134,8 @@
 				</EthFeeDisplay>
 
 				<SwapEthFeeInfo
-					feeSymbol={$feeSymbolStore}
 					decimals={$feeDecimalsStore}
+					feeSymbol={$feeSymbolStore}
 					feeTokenId={$feeTokenIdStore}
 				/>
 			</div>
