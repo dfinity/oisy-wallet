@@ -88,15 +88,15 @@ export const getPendingTransactions = (
 } => {
 	const storeData = get(btcPendingSentTransactionsStore);
 
-	// Case 1: Store not initialized - return safe default
-	if (isNullish(storeData)) {
+	// Case 1: Store not initialized, return safe default
+	if (isNullish(storeData) || Object.keys(storeData).length === 0) {
 		return {
 			data: null,
 			certified: true
 		};
 	}
 
-	// Case 2: Address exists in store - return actual data (may be null if backend failed)
+	// Case 2: Address exists in store ,return actual data (may be null if backend failed)
 	if (address in storeData) {
 		return storeData[address];
 	}
