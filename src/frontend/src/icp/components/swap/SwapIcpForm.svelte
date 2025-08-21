@@ -55,9 +55,6 @@
 </script>
 
 <NewSwapForm
-	bind:swapAmount
-	bind:receiveAmount
-	bind:slippageValue
 	{errorType}
 	fee={totalFee}
 	{isSwapAmountsLoading}
@@ -65,13 +62,16 @@
 	onCustomValidate={customValidate}
 	{onNext}
 	{onShowTokensList}
+	bind:swapAmount
+	bind:receiveAmount
+	bind:slippageValue
 >
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider on:icShowProviderList showSelectButton {slippageValue} />
+				<SwapProvider showSelectButton {slippageValue} on:icShowProviderList />
 				<SwapFees />
 			</div>
 		{/if}
