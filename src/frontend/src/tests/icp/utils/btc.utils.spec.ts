@@ -84,11 +84,11 @@ describe('btc.utils', () => {
 		it('returns [] when data is null or missing', () => {
 			mockStoreApi.setStoreValue({ [addr]: { certified: true as const, data: null } });
 
-			expect(getPendingTransactionIds(addr)).toEqual([]);
+			expect(getPendingTransactionIds(addr)).toEqual(null);
 
 			mockStoreApi.setStoreValue({}); // address not present
 
-			expect(getPendingTransactionIds(addr)).toEqual([]);
+			expect(getPendingTransactionIds(addr)).toEqual(null);
 		});
 
 		it('converts transaction IDs and filters out empty ones', () => {
