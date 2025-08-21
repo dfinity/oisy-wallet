@@ -837,7 +837,8 @@
 			"withdrawing": "",
 			"network_cost": "",
 			"gasless": "",
-			"swap_fees": ""
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
