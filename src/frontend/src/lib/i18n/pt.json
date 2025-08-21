@@ -1036,7 +1036,8 @@
 			"nft_not_loaded": "",
 			"collections": "",
 			"all_assets": "",
-			"address_copied": ""
+			"address_copied": "",
+			"open_explorer": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",

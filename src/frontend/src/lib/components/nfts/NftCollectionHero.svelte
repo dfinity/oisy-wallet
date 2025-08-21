@@ -13,7 +13,6 @@
 	import type { Nft, NftCollection } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 
 	interface Props {

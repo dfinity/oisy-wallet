@@ -1037,7 +1037,7 @@
 			"collections": "Collections",
 			"all_assets": "All assets",
 			"address_copied": "Address $address copied",
-            "open_explorer": "Open this contract in blockchain explorer"
+			"open_explorer": "Open this contract in blockchain explorer"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
