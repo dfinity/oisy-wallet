@@ -120,47 +120,27 @@ export const getBtcWalletBalance = ({
 	providerTransactions: CertifiedData<BtcTransactionUi>[] | null;
 }): BtcWalletBalance => {
 	// Retrieve pending outgoing transactions from local store with safe fallback
-	// If the store access fails or returns invalid data, we'll default to empty state
+	const pendingData = getPendingTransactions(address);
 	let pendingTransactions: Array<PendingTransaction> = [];
 
-	try {
-		const pendingData = getPendingTransactions(address);
-
-		// Handle the various states the store data can be in
-		if (nonNullish(pendingData) && nonNullish(pendingData.data)) {
-			pendingTransactions = pendingData.data;
-		}
-	} catch (error) {
-		// Log the error for debugging but don't fail the entire balance calculation
-		// This ensures the user still gets confirmed/unconfirmed balance even if pending data fails
-		console.warn('Failed to retrieve pending transactions for balance calculation:', {
-			address,
-			error
-		});
+	// Handle the various states the store data can be in
+	if (nonNullish(pendingData?.data)) {
+		pendingTransactions = pendingData.data;
 	}
 
 	// Calculate locked balance: UTXOs being used as inputs in pending outgoing transactions
 	// If pendingTransactions is empty (due to error or no data), locked balance will be 0
 	const lockedBalance = pendingTransactions.reduce((sum, tx) => {
-		try {
-			// Safely calculate UTXO sum with additional error handling
-			const txUtxoValue = nonNullish(tx.utxos)
-				? tx.utxos.reduce((utxoSum, utxo) => {
-						// Ensure utxo.value is valid before adding
-						const utxoValue = nonNullish(utxo?.value) ? BigInt(utxo.value) : 0n;
-						return utxoSum + utxoValue;
-					}, 0n)
-				: 0n;
+		// Safely calculate UTXO sum with additional error handling
+		const txUtxoValue = nonNullish(tx.utxos)
+			? tx.utxos.reduce((utxoSum, utxo) => {
+					// Ensure utxo.value is valid before adding
+					const utxoValue = nonNullish(utxo?.value) ? BigInt(utxo.value) : ZERO;
+					return utxoSum + utxoValue;
+				}, ZERO)
+			: ZERO;
 
-			return sum + txUtxoValue;
-		} catch (error) {
-			// Log error but continue processing other transactions
-			console.warn('Error processing pending transaction for locked balance:', {
-				transaction: tx,
-				error
-			});
-			return sum; // Don't add anything from this transaction
-		}
+		return sum + txUtxoValue;
 	}, ZERO);
 
 	// Calculate unconfirmed incoming balance from external provider transaction data
@@ -168,23 +148,14 @@ export const getBtcWalletBalance = ({
 	// When providerTransactions is null (certified=true), unconfirmedBalance will be 0
 	const unconfirmedBalance = nonNullish(providerTransactions)
 		? providerTransactions.reduce((sum, tx) => {
-				try {
-					if (
-						tx.data.status === 'unconfirmed' &&
-						tx.data.type === 'receive' &&
-						nonNullish(tx.data.value)
-					) {
-						return sum + tx.data.value;
-					}
-					return sum;
-				} catch (error) {
-					// Log error but continue processing other transactions
-					console.warn('Error processing provider transaction for unconfirmed balance:', {
-						transaction: tx,
-						error
-					});
-					return sum;
+				if (
+					tx.data.status === 'unconfirmed' &&
+					tx.data.type === 'receive' &&
+					nonNullish(tx.data.value)
+				) {
+					return sum + tx.data.value;
 				}
+				return sum;
 			}, ZERO)
 		: ZERO;
 
