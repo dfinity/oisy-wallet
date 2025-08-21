@@ -20,10 +20,12 @@ import {
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK
 } from '$env/networks/networks.sol.env';
+import type { EthereumNetwork } from '$eth/types/network';
 import * as appContants from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { defineEnabledNetworks, getContractExplorerUrl } from '$lib/utils/networks.utils';
+import type { SolanaNetwork } from '$sol/types/network';
 
 describe('networks.utils', () => {
 	describe('defineEnabledNetworks', () => {
@@ -205,21 +207,21 @@ describe('networks.utils', () => {
 	describe('getContractExplorerUrl — EVM networks', () => {
 		const ADDR = '0xA11CE0000000000000000000000000000000000';
 
-		const evmCases = [
-			['Ethereum mainnet', ETHEREUM_NETWORK],
-			['Sepolia', SEPOLIA_NETWORK],
-			['Base mainnet', BASE_NETWORK],
-			['Base Sepolia', BASE_SEPOLIA_NETWORK],
-			['Arbitrum mainnet', ARBITRUM_MAINNET_NETWORK],
-			['Arbitrum Sepolia', ARBITRUM_SEPOLIA_NETWORK],
-			['Polygon mainnet', POLYGON_MAINNET_NETWORK],
-			['Polygon Amoy', POLYGON_AMOY_NETWORK],
-			['BSC mainnet', BSC_MAINNET_NETWORK],
-			['BSC testnet', BSC_TESTNET_NETWORK]
-		] as const;
+		const evmCases: { label: string; network: Network }[] = [
+			{ label: 'Ethereum mainnet', network: ETHEREUM_NETWORK },
+			{ label: 'Sepolia', network: SEPOLIA_NETWORK },
+			{ label: 'Base mainnet', network: BASE_NETWORK },
+			{ label: 'Base Sepolia', network: BASE_SEPOLIA_NETWORK },
+			{ label: 'Arbitrum mainnet', network: ARBITRUM_MAINNET_NETWORK },
+			{ label: 'Arbitrum Sepolia', network: ARBITRUM_SEPOLIA_NETWORK },
+			{ label: 'Polygon mainnet', network: POLYGON_MAINNET_NETWORK },
+			{ label: 'Polygon Amoy', network: POLYGON_AMOY_NETWORK },
+			{ label: 'BSC mainnet', network: BSC_MAINNET_NETWORK },
+			{ label: 'BSC testnet', network: BSC_TESTNET_NETWORK }
+		];
 
-		it.each(evmCases)('%s uses /address/', (_label, network) => {
-			const base = (network as any).explorerUrl as string;
+		it.each(evmCases)('$label uses /address/', ({ network }) => {
+			const base = (network as EthereumNetwork).explorerUrl;
 			const url = getContractExplorerUrl({ network, contractAddress: ADDR });
 			expect(url).toBe(`${base}/address/${ADDR}`);
 		});
@@ -229,13 +231,13 @@ describe('networks.utils', () => {
 	describe('getContractExplorerUrl — Solana networks', () => {
 		const ADDR = 'So11111111111111111111111111111111111111112';
 
-		const solCases = [
-			['Solana mainnet', SOLANA_MAINNET_NETWORK],
-			['Solana devnet', SOLANA_DEVNET_NETWORK]
-		] as const;
+		const solCases: { label: string; network: Network }[] = [
+			{ label: 'Solana mainnet', network: SOLANA_MAINNET_NETWORK },
+			{ label: 'Solana devnet', network: SOLANA_DEVNET_NETWORK }
+		];
 
-		it.each(solCases)('%s uses /account/', (_label, network) => {
-			const base = (network as any).explorerUrl as string;
+		it.each(solCases)('$label uses /account/', ({ network }) => {
+			const base = (network as SolanaNetwork)?.explorerUrl;
 			const url = getContractExplorerUrl({ network, contractAddress: ADDR });
 			expect(url).toBe(`${base}/account/${ADDR}`);
 		});
@@ -244,7 +246,7 @@ describe('networks.utils', () => {
 	// ---- No explorer URL -> undefined
 	describe('getContractExplorerUrl — no explorer URL', () => {
 		it('returns undefined if network.explorerUrl is nullish', () => {
-			const network = { id: 'custom-chain', explorerUrl: undefined } as any;
+			const network: Network = { id: 'custom-chain', explorerUrl: undefined } as unknown as Network;
 			const url = getContractExplorerUrl({ network, contractAddress: '0xdead' });
 			expect(url).toBeUndefined();
 		});
