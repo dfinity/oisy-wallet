@@ -149,6 +149,7 @@
 				>
 					{#snippet tokenInput()}
 						<TokenInput
+							customValidate={onCustomValidate}
 							displayUnit={inputUnit}
 							exchangeRate={$sourceTokenExchangeRate}
 							showTokenNetwork
@@ -156,7 +157,6 @@
 							bind:amount={swapAmount}
 							bind:errorType
 							bind:amountSetToMax
-							customValidate={onCustomValidate}
 							on:click={() => onShowTokensList('source')}
 						>
 							<span slot="title">{$i18n.tokens.text.source_token_title}</span>
