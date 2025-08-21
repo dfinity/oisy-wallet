@@ -14,12 +14,22 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		nft: Nft;
 	}
 
 	const { nft }: Props = $props();
+
+	const shortCollectionName = $derived(
+		nonNullish(nft.collection.name)
+			? shortenWithMiddleEllipsis({
+					text: nft.collection.name,
+					splitLength: 12
+				})
+			: undefined
+	);
 </script>
 
 <Modal on:nnsClose={() => modalStore.close()}>
@@ -28,7 +38,7 @@
 			<span class="flex text-warning-primary">
 				<IconImageDownload />
 			</span>
-			<h3>Review media sources for "{nft.collection.name}"</h3>
+			<h3>Review media sources for <br />"{shortCollectionName}"</h3>
 		</div>
 
 		<p class="mb-5">
@@ -45,7 +55,7 @@
 		<div class="flex flex-col gap-2 text-sm">
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.nfts.text.collection_name}</span><span
-					>{nft.collection.name}</span
+					>{shortCollectionName}</span
 				>
 			</div>
 			<div class="flex w-full justify-between">
@@ -79,11 +89,11 @@
 							<output class="text-tertiary"
 								>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 							>
-							<externalLink
+							<AddressActions
 								copyAddress={nft.imageUrl}
 								copyAddressText="Copied"
-								explorerUrl={nft.imageUrl}
-								explorerUrlAriaLabel="Open in new tab"
+								externalLink={nft.imageUrl}
+								externalLinkAriaLabel="Open in new tab"
 							/>
 						</span>
 					{/each}
