@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
+	import NewSwapForm from '$lib/components/swap/NewSwapForm.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -14,7 +15,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
-	import NewSwapForm from '$lib/components/swap/NewSwapForm.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -60,9 +60,6 @@
 </script>
 
 <NewSwapForm
-	bind:swapAmount
-	bind:receiveAmount
-	bind:slippageValue
 	{errorType}
 	fee={totalFee}
 	{isSwapAmountsLoading}
@@ -70,13 +67,16 @@
 	onCustomValidate={customValidate}
 	{onNext}
 	{onShowTokensList}
+	bind:swapAmount
+	bind:receiveAmount
+	bind:slippageValue
 >
 	{#snippet swapDetails()}
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider on:icShowProviderList showSelectButton {slippageValue} />
+				<SwapProvider showSelectButton {slippageValue} on:icShowProviderList />
 				<SwapFees />
 			</div>
 		{/if}
