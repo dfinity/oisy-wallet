@@ -11,16 +11,16 @@
 		nft?: Nft;
 		children: Snippet;
 		showMessage?: boolean;
-		noBg?: boolean;
-		asHeroBanner?: boolean;
+		type: 'hero-banner' | 'card' | 'nft-display';
 	}
 
-	const { nft, children, showMessage = true, noBg = false, asHeroBanner = false }: Props = $props();
+	const { nft, children, showMessage = true, type }: Props = $props();
 
 	let hasConsent = $state();
 
 	const handleConsent = () => {
 		if (nonNullish(nft)) {
+			//hasConsent = true;
 			modalStore.openNftImageConsent({ id: Symbol('NftImageConsentModal'), data: nft });
 		}
 	};
@@ -32,10 +32,9 @@
 	{@render children()}
 {:else}
 	<div
-		class="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 text-center"
-		class:bg-secondary-alt={!noBg}
-		class:rounded-xl={!asHeroBanner}
-		class:rounded-t-xl={asHeroBanner}
+		class="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 bg-secondary-alt text-center"
+		class:rounded-xl={type !== 'hero-banner'}
+		class:rounded-t-xl={type === 'hero-banner'}
 		class:animate-pulse={isLoading}
 		class:bg-disabled-alt={isLoading}
 	>
@@ -47,7 +46,9 @@
 					: $i18n.nfts.text.img_consent_disabled}</span
 			>
 			<span
-				class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100 lg:max-h-0 lg:opacity-0"
+				class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100"
+				class:lg:opacity-0={type === 'card'}
+				class:lg:max-h-0={type === 'card'}
 			>
 				<Button
 					colorStyle="secondary-light"

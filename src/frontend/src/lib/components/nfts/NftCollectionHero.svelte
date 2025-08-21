@@ -24,7 +24,7 @@
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="flex h-64 w-full">
-		<NftImageConsent nft={nfts?.[0]} asHeroBanner>
+		<NftImageConsent nft={nfts?.[0]} type="hero-banner">
 			<BgImg imageUrl={nfts?.[0]?.imageUrl} size="cover" />
 		</NftImageConsent>
 	</div>

@@ -29,14 +29,7 @@
 		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<BgImg
-			imageUrl={nft?.imageUrl}
-			shadow="inset"
-			size="cover"
-			styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
-			testId={`${testId}-image`}
-		/>
-		<NftImageConsent {nft}>
+		<NftImageConsent {nft} type="card">
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
@@ -47,7 +40,6 @@
 				/>
 			</div>
 		</NftImageConsent>
-
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
 			{#if nonNullish(nft.balance)}
