@@ -39,7 +39,7 @@
 		isSwapAmountsLoading: boolean;
 		swapDetails?: Snippet;
 		errorType?: TokenActionErrorType;
-		customValidate: (userAmount: bigint) => TokenActionErrorType;
+		onCustomValidate: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
@@ -53,7 +53,7 @@
 		isSwapAmountsLoading,
 		swapDetails,
 		errorType = $bindable(),
-		customValidate,
+		onCustomValidate,
 		fee,
 		onShowTokensList,
 		onClose,
@@ -157,7 +157,7 @@
 							bind:amount={swapAmount}
 							bind:errorType
 							bind:amountSetToMax
-							{customValidate}
+							customValidate={onCustomValidate}
 							on:click={() => onShowTokensList('source')}
 						>
 							<span slot="title">{$i18n.tokens.text.source_token_title}</span>
