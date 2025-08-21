@@ -2,8 +2,7 @@ import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CK_TOKENS_LEDGER_CANISTER_IDS
 } from '$env/networks/networks.icrc.env';
-import { buildDip20Tokens } from '$icp/services/dip20-tokens.services';
-import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
+import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -15,7 +14,6 @@ import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import type { CanisterIdText } from '$lib/types/canister';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
-import { parseTokenId } from '$lib/validation/token.validation';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -157,9 +155,8 @@ export const enabledIcrcLedgerCanisterIdsNoCk: Readable<LedgerCanisterIdText[]> 
 export const allKnownIcrcTokensLedgerCanisterIds: Readable<LedgerCanisterIdText[]> = derived(
 	[icrcDefaultTokens],
 	([$icrcDefaultTokens]) => {
-		const tokens = [...buildIcrcCustomTokens(), ...buildDip20Tokens()];
 		const icrcEnvTokens: IcTokenToggleable[] =
-			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
+			IC_BUILTIN_TOKENS.map((token) => ({ ...token, enabled: false })) ?? [];
 
 		return [
 			...$icrcDefaultTokens.map(({ ledgerCanisterId }) => ledgerCanisterId),
