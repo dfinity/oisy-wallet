@@ -23,18 +23,14 @@ import { get } from 'svelte/store';
  * @param tokenId - The BTC token ID
  * @returns The corresponding NetworkId
  */
-export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined => {
-	if (tokenId === BTC_MAINNET_TOKEN_ID) {
-		return BTC_MAINNET_NETWORK_ID;
-	}
-	if (tokenId === BTC_TESTNET_TOKEN_ID) {
-		return BTC_TESTNET_NETWORK_ID;
-	}
-	if (tokenId === BTC_REGTEST_TOKEN_ID) {
-		return BTC_REGTEST_NETWORK_ID;
-	}
-	return undefined;
-};
+export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =>
+	tokenId === BTC_MAINNET_TOKEN_ID
+		? BTC_MAINNET_NETWORK_ID
+		: tokenId === BTC_TESTNET_TOKEN_ID
+			? BTC_TESTNET_NETWORK_ID
+			: tokenId === BTC_REGTEST_TOKEN_ID
+				? BTC_REGTEST_NETWORK_ID
+				: undefined;
 
 /**
  * Bitcoin txid to text representation requires inverting the array.
