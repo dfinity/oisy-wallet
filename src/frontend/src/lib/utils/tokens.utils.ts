@@ -5,6 +5,7 @@ import {
 	saveErc721CustomTokens
 } from '$eth/services/manage-tokens.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20CustomToken, SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -343,7 +344,15 @@ export const saveAllCustomTokens = async ({
 
 	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 	const customTokens = get(erc20CustomTokensStore) ?? [];
-	const erc20CustomTokens = erc20.reduce<SaveErc20CustomToken[]>((acc, token) => {
+	const currentUserTokens = (get(erc20UserTokensStore) ?? []).map(({ data: token }) => token);
+	const erc20UserTokens = [...erc20, ...currentUserTokens].filter(
+		(token, index, self) =>
+			index ===
+			self.findIndex(
+				(t) => t.address === token.address && t.network.chainId === token.network.chainId
+			)
+	);
+	const erc20CustomTokens = erc20UserTokens.reduce<SaveErc20CustomToken[]>((acc, token) => {
 		const customToken = customTokens.find(
 			({
 				data: {
