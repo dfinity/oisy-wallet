@@ -4,7 +4,6 @@
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -46,7 +45,7 @@
 		}
 	}, 250);
 
-	let loading: boolean = $derived($erc20UserTokensNotInitialized || isNullish(tokens));
+	let loading: boolean = $derived(isNullish(tokens));
 
 	// Default token / tokengroup list
 	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
@@ -71,7 +70,7 @@
 			)
 		});
 
-		// we need to reset modified tokens, since the filter has changed the selected token(s) may not be visible anymore
+		// we need to reset modified tokens, since the filter has changed, the selected token(s) may not be visible anymore
 		modifiedTokens = {};
 	};
 
