@@ -62,23 +62,8 @@ export const syncWallet = async ({
 		const btcWalletBalance = getBtcWalletBalance({
 			address: sourceAddress,
 			confirmedBalance: balance,
-			providerTransactions
-		});
-
-		console.warn('🎯 [btc-listener.services.ts -> syncWallet] Called getBtcWalletBalance(..):', {
-			timestamp: new Date().toISOString(),
-			input: {
-				certified,
-				sourceAddress,
-				totalBalance: balance.toString(),
-				providerTransactionsCount: providerTransactions?.length ?? 0
-			},
-			output: {
-				confirmed: btcWalletBalance.confirmed.toString(),
-				unconfirmed: btcWalletBalance.unconfirmed.toString(),
-				locked: btcWalletBalance.locked.toString(),
-				total: btcWalletBalance.total.toString()
-			}
+			providerTransactions,
+			certified
 		});
 
 		balancesStore.set({

@@ -142,16 +142,19 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
  * @param address - The Bitcoin address to calculate balances for
  * @param confirmedBalance - Sum of all confirmed UTXOs (from Bitcoin node/canister)
  * @param providerTransactions - Array of transaction data with confirmation status from external API (optional, null when certified=true)
+ * @param certified
  * @returns Structured balance object with confirmed, unconfirmed, locked, and total amounts
  */
 export const getBtcWalletBalance = ({
 	address,
 	confirmedBalance,
-	providerTransactions
+	providerTransactions,
+	certified
 }: {
 	address: string;
 	confirmedBalance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[] | null;
+	certified: boolean;
 }): BtcWalletBalance => {
 	// Retrieve pending outgoing transactions from local store with safe fallback
 	// If the store access fails or returns invalid data, we'll default to empty state
@@ -193,7 +196,7 @@ export const getBtcWalletBalance = ({
 				transaction: tx,
 				error
 			});
-			return sum; // Don't add anything from this transaction
+			return sum;
 		}
 	}, ZERO);
 
@@ -226,7 +229,7 @@ export const getBtcWalletBalance = ({
 	// Even if pending data fails, this will still show confirmed + unconfirmed
 	const totalBalance = confirmedBalance + unconfirmedBalance;
 
-	return {
+	const btcWalletBalance = {
 		// Confirmed balance: UTXOs with sufficient confirmations, safe for spending
 		confirmed: confirmedBalance > ZERO ? confirmedBalance : ZERO,
 		// Unconfirmed balance: incoming transactions waiting for confirmations
@@ -236,4 +239,23 @@ export const getBtcWalletBalance = ({
 		// Total balance: complete Bitcoin ownership (confirmed + unconfirmed)
 		total: totalBalance > ZERO ? totalBalance : ZERO
 	};
+	console.warn('🎯 [btc-listener.services.ts -> syncWallet] Called getBtcWalletBalance(..):', {
+		timestamp: new Date().toISOString(),
+		input: {
+			certified,
+			address,
+			confirmedBalance: confirmedBalance.toString(),
+			providerTransactionsCount: providerTransactions?.length ?? 0,
+			pendingTransactionsCount: pendingTransactions.length ?? 0,
+			providerTransactions,
+			pendingTransactions
+		},
+		output: {
+			confirmed: btcWalletBalance.confirmed.toString(),
+			unconfirmed: btcWalletBalance.unconfirmed.toString(),
+			locked: btcWalletBalance.locked.toString(),
+			total: btcWalletBalance.total.toString()
+		}
+	});
+	return btcWalletBalance;
 };
