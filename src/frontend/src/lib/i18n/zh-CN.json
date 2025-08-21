@@ -837,7 +837,8 @@
 			"withdrawing": "正在取款",
 			"network_cost": "",
 			"gasless": "",
-			"swap_fees": ""
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
