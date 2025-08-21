@@ -2,7 +2,6 @@ import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
-import * as ethUtils from '$eth/utils/eth.utils';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';

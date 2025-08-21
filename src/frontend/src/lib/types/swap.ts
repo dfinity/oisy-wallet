@@ -1,6 +1,7 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
+import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -16,7 +17,6 @@ import type {
 import type { EthAddress } from './address';
 import type { Amount, OptionAmount } from './send';
 import type { RequiredTransactionFeeData } from './transaction';
-import type { ProgressStep } from '$eth/types/send';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
