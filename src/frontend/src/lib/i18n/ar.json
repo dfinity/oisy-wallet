@@ -834,7 +834,10 @@
 			"open_instructions_link": "افتح رابط التعليمات",
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
-			"withdrawing": ""
+			"withdrawing": "",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": ""
 		},
 		"error": {
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",
