@@ -38,7 +38,7 @@
 
 	let errorType: TokenActionErrorType = $state<TokenActionErrorType | undefined>(undefined);
 
-	let totalFee: bigint | undefined = $derived(
+	let totalFee = $derived(
 		(sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
 	);
 
