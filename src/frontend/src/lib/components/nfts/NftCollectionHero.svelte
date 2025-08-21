@@ -14,6 +14,8 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+
 	interface Props {
 		collection?: NftCollection;
 		nfts: Nft[];
@@ -54,8 +56,11 @@
 							copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
 								$address: collection.address
 							})}
-							externalLink=""
-							externalLinkAriaLabel=""
+							externalLink={getContractExplorerUrl({
+								network: collection.network,
+								contractAddress: collection.address
+							})}
+							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
 						/>
 					</span>
 				{:else}

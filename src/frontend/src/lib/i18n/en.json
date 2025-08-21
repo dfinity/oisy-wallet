@@ -1036,7 +1036,8 @@
 			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
 			"collections": "Collections",
 			"all_assets": "All assets",
-			"address_copied": "Address $address copied"
+			"address_copied": "Address $address copied",
+            "open_explorer": "Open this contract in blockchain explorer"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
