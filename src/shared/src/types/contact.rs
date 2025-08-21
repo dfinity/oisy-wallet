@@ -5,14 +5,14 @@ use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
 
-/// Maximum image size in bytes (100 KB)
-pub const MAX_IMAGE_SIZE_BYTES: usize = 100 * 1024;
-
 /// Maximum number of images per principal (100)
 pub const MAX_IMAGES_PER_PRINCIPAL: usize = 100;
 
 /// Memory usage threshold (80%) above which new images cannot be added
 pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
+
+// Re-export image size limit used by validation so tests and external modules can reference it
+pub use crate::impls::MAX_IMAGE_SIZE_BYTES;
 
 pub type ImageId = u64;
 
@@ -59,6 +59,7 @@ pub struct Contact {
 }
 
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
+#[serde(remote = "Self")]
 pub struct ContactImage {
     pub data: ByteBuf,
     pub mime_type: ImageMimeType,
