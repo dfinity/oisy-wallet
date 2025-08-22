@@ -127,9 +127,7 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
 		conversions: pendingTransactions.data.map((tx, index) => ({
 			txIndex: index,
 			rawTxid: tx.txid,
-			method1_pendingTransactionTxidToString: pendingTransactionTxidToString(tx),
-			method2_utxoTxIdToString: utxoTxIdToString(tx.txid),
-			method3_uint8ArrayToHexString: uint8ArrayToHexString(tx.txid)
+			txid: pendingTransactionTxidToString(tx)
 		}))
 	});
 

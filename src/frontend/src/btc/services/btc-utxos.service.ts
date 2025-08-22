@@ -4,7 +4,7 @@ import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
-import { getPendingTransactionIds } from '$icp/utils/btc.utils';
+import { getPendingTransactionUtxoTxIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddress } from '$lib/types/address';
@@ -36,7 +36,7 @@ export const prepareBtcSend = async ({
 	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 	// Get pending transactions to exclude locked UTXOs
-	const pendingTxIds = getPendingTransactionIds(source);
+	const pendingTxIds = getPendingTransactionUtxoTxIds(source);
 	if (isNullish(pendingTxIds)) {
 		throw new Error('Pending transactions have not been iitialied');
 	}
