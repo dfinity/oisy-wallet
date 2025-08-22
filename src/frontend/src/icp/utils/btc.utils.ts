@@ -1,20 +1,6 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
-import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
-import {
-	BTC_MAINNET_NETWORK_ID,
-	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.btc.env';
-import {
-	BTC_MAINNET_TOKEN_ID,
-	BTC_REGTEST_TOKEN_ID,
-	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens/tokens.btc.env';
-import { ZERO } from '$lib/constants/app.constants';
-import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
-import type { TokenId } from '$lib/types/token';
 import {
 	hexStringToUint8Array,
 	isNullish,
@@ -23,6 +9,20 @@ import {
 	uint8ArrayToHexString
 } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import {
+	BTC_MAINNET_TOKEN_ID,
+	BTC_REGTEST_TOKEN_ID,
+	BTC_TESTNET_TOKEN_ID
+} from '$env/tokens/tokens.btc.env';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
+import { ZERO } from '$lib/constants/app.constants';
+import type { TokenId } from '$lib/types/token';
+import type { NetworkId } from '$lib/types/network';
+import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 
 /**
  * Bitcoin txid to text representation requires inverting the array.
@@ -154,62 +154,39 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
  * @param address - The Bitcoin address to calculate balances for
  * @param confirmedBalance - Sum of all confirmed UTXOs (from Bitcoin node/canister)
  * @param providerTransactions - Array of transaction data with confirmation status from external API (optional, null when certified=true)
- * @param certified
  * @returns Structured balance object with confirmed, unconfirmed, locked, and total amounts
  */
 export const getBtcWalletBalance = ({
 	address,
 	confirmedBalance,
-	providerTransactions,
-	certified
+	providerTransactions
 }: {
 	address: string;
 	confirmedBalance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[] | null;
-	certified: boolean;
 }): BtcWalletBalance => {
 	// Retrieve pending outgoing transactions from local store with safe fallback
-	// If the store access fails or returns invalid data, we'll default to empty state
+	const pendingData = getPendingTransactions(address);
 	let pendingTransactions: Array<PendingTransaction> = [];
 
-	try {
-		const pendingData = getPendingTransactions(address);
-
-		// Handle the various states the store data can be in
-		if (nonNullish(pendingData) && nonNullish(pendingData.data)) {
-			pendingTransactions = pendingData.data;
-		}
-	} catch (error) {
-		// Log the error for debugging but don't fail the entire balance calculation
-		// This ensures the user still gets confirmed/unconfirmed balance even if pending data fails
-		console.warn('Failed to retrieve pending transactions for balance calculation:', {
-			address,
-			error
-		});
+	// Handle the various states the store data can be in
+	if (nonNullish(pendingData?.data)) {
+		pendingTransactions = pendingData.data;
 	}
 
 	// Calculate locked balance: UTXOs being used as inputs in pending outgoing transactions
 	// If pendingTransactions is empty (due to error or no data), locked balance will be 0
 	const lockedBalance = pendingTransactions.reduce((sum, tx) => {
-		try {
-			// Safely calculate UTXO sum with additional error handling
-			const txUtxoValue = nonNullish(tx.utxos)
-				? tx.utxos.reduce((utxoSum, utxo) => {
-						// Ensure utxo.value is valid before adding
-						const utxoValue = nonNullish(utxo?.value) ? BigInt(utxo.value) : 0n;
-						return utxoSum + utxoValue;
-					}, 0n)
-				: 0n;
+		// Safely calculate UTXO sum with additional error handling
+		const txUtxoValue = nonNullish(tx.utxos)
+			? tx.utxos.reduce((utxoSum, utxo) => {
+					// Ensure utxo.value is valid before adding
+					const utxoValue = nonNullish(utxo?.value) ? BigInt(utxo.value) : ZERO;
+					return utxoSum + utxoValue;
+				}, ZERO)
+			: ZERO;
 
-			return sum + txUtxoValue;
-		} catch (error) {
-			// Log error but continue processing other transactions
-			console.warn('Error processing pending transaction for locked balance:', {
-				transaction: tx,
-				error
-			});
-			return sum;
-		}
+		return sum + txUtxoValue;
 	}, ZERO);
 
 	// Calculate unconfirmed incoming balance from external provider transaction data
@@ -217,23 +194,14 @@ export const getBtcWalletBalance = ({
 	// When providerTransactions is null (certified=true), unconfirmedBalance will be 0
 	const unconfirmedBalance = nonNullish(providerTransactions)
 		? providerTransactions.reduce((sum, tx) => {
-				try {
-					if (
-						tx.data.status === 'unconfirmed' &&
-						tx.data.type === 'receive' &&
-						nonNullish(tx.data.value)
-					) {
-						return sum + tx.data.value;
-					}
-					return sum;
-				} catch (error) {
-					// Log error but continue processing other transactions
-					console.warn('Error processing provider transaction for unconfirmed balance:', {
-						transaction: tx,
-						error
-					});
-					return sum;
+				if (
+					tx.data.status === 'unconfirmed' &&
+					tx.data.type === 'receive' &&
+					nonNullish(tx.data.value)
+				) {
+					return sum + tx.data.value;
 				}
+				return sum;
 			}, ZERO)
 		: ZERO;
 
@@ -241,7 +209,7 @@ export const getBtcWalletBalance = ({
 	// Even if pending data fails, this will still show confirmed + unconfirmed
 	const totalBalance = confirmedBalance + unconfirmedBalance;
 
-	const btcWalletBalance = {
+	return {
 		// Confirmed balance: UTXOs with sufficient confirmations, safe for spending
 		confirmed: confirmedBalance > ZERO ? confirmedBalance : ZERO,
 		// Unconfirmed balance: incoming transactions waiting for confirmations
@@ -251,34 +219,4 @@ export const getBtcWalletBalance = ({
 		// Total balance: complete Bitcoin ownership (confirmed + unconfirmed)
 		total: totalBalance > ZERO ? totalBalance : ZERO
 	};
-	console.warn('🎯 [btc-listener.services.ts -> syncWallet] Called getBtcWalletBalance(..):', {
-		timestamp: new Date().toISOString(),
-		input: {
-			certified,
-			address,
-			confirmedBalance: confirmedBalance.toString(),
-			providerTransactionsCount: providerTransactions?.length ?? 0,
-			pendingTransactionsCount: pendingTransactions.length ?? 0,
-			providerTransactions,
-			pendingTransactions: pendingTransactions.map((tx) => ({
-				...tx,
-				txid: utxoTxIdToString(tx.txid),
-				utxos: tx.utxos?.map((utxo) => ({
-					...utxo,
-					outpoint: {
-						...utxo.outpoint,
-						txid: utxoTxIdToString(utxo.outpoint.txid)
-					}
-				}))
-			}))
-		},
-		output: {
-			confirmed: btcWalletBalance.confirmed.toString(),
-			unconfirmed: btcWalletBalance.unconfirmed.toString(),
-			locked: btcWalletBalance.locked.toString(),
-			total: btcWalletBalance.total.toString()
-		}
-	});
-
-	return btcWalletBalance;
 };

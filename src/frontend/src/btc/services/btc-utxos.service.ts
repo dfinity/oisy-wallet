@@ -31,10 +31,9 @@ export const prepareBtcSend = async ({
 	amount,
 	source
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
-	try {
-		const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
+	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
-		const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
+	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 		// Get pending transactions to exclude locked UTXOs
 		const pendingTxIds = getPendingTransactionIds(source);
@@ -45,77 +44,69 @@ export const prepareBtcSend = async ({
 		// Convert amount to satoshis
 		const amountSatoshis = convertNumberToSatoshis({ amount });
 
-		// Step 1: Get current fee percentiles from backend
-		const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
-			identity,
-			network
-		});
+	// Step 1: Get current fee percentiles from backend
+	const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
+		identity,
+		network
+	});
 
-		// Step 2: Fetch all available UTXOs using query call (fast and no cycle cost)
-		const response = await getUtxosQuery({
-			identity,
-			bitcoinCanisterId,
-			address: source,
-			network,
-			minConfirmations: requiredMinConfirmations
-		});
+	// Step 2: Fetch all available UTXOs using query call (fast and no cycle cost)
+	const response = await getUtxosQuery({
+		identity,
+		bitcoinCanisterId,
+		address: source,
+		network,
+		minConfirmations: requiredMinConfirmations
+	});
 
-		const allUtxos = response.utxos;
+	const allUtxos = response.utxos;
 
-		if (allUtxos.length === 0) {
-			return {
-				feeSatoshis: ZERO,
-				utxos: [],
-				error: BtcPrepareSendError.InsufficientBalance
-			};
-		}
-
-		// Step 3: Filter UTXOs based on confirmations and exclude locked ones
-		const filteredUtxos = filterAvailableUtxos({
-			utxos: allUtxos,
-			options: {
-				minConfirmations: requiredMinConfirmations,
-				pendingTxIds
-			}
-		});
-
-		if (filteredUtxos.length === 0) {
-			return {
-				feeSatoshis: ZERO,
-				utxos: [],
-				error: BtcPrepareSendError.InsufficientBalance
-			};
-		}
-
-		// Step 4: Select UTXOs with fee consideration
-		const selection = calculateUtxoSelection({
-			availableUtxos: filteredUtxos,
-			amountSatoshis,
-			feeRateMiliSatoshisPerVByte
-		});
-
-		// Check if there were insufficient funds during UTXO selection
-		if (!selection.sufficientFunds) {
-			return {
-				feeSatoshis: selection.feeSatoshis,
-				utxos: filteredUtxos,
-				error: BtcPrepareSendError.InsufficientBalanceForFee
-			};
-		}
-
-		// Fee is already calculated in the selection process
-		return {
-			feeSatoshis: selection.feeSatoshis,
-			utxos: selection.selectedUtxos
-		};
-	} catch (error) {
-		console.error('Error during BTC UTXO selection:', error);
+	if (allUtxos.length === 0) {
 		return {
 			feeSatoshis: ZERO,
 			utxos: [],
+			error: BtcPrepareSendError.InsufficientBalance
+		};
+	}
+
+	// Step 3: Filter UTXOs based on confirmations and exclude locked ones
+	const filteredUtxos = filterAvailableUtxos({
+		utxos: allUtxos,
+		options: {
+			minConfirmations: requiredMinConfirmations,
+			pendingTxIds
+		}
+	});
+
+	if (filteredUtxos.length === 0) {
+		return {
+			feeSatoshis: ZERO,
+			utxos: [],
+			error: BtcPrepareSendError.InsufficientBalance
+		};
+	}
+
+	// Step 4: Select UTXOs with fee consideration
+	const selection = calculateUtxoSelection({
+		availableUtxos: filteredUtxos,
+		amountSatoshis,
+		feeRateMiliSatoshisPerVByte
+	});
+
+	// Check if there were insufficient funds during UTXO selection
+	if (!selection.sufficientFunds) {
+		return {
+			feeSatoshis: selection.feeSatoshis,
+			utxos: filteredUtxos,
 			error: BtcPrepareSendError.InsufficientBalanceForFee
 		};
 	}
+
+	// Fee is already calculated in the selection process
+	return {
+		feeSatoshis: selection.feeSatoshis,
+		utxos: selection.selectedUtxos
+	};
 };
 
 export const getFeeRateFromPercentiles = async ({
