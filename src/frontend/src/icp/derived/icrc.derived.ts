@@ -18,7 +18,7 @@ import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * The list of Icrc default tokens - i.e. the statically configured Icrc tokens of Oisy + their metadata, unique IDs, etc. fetched at runtime.
+ * The list of ICRC default tokens - i.e. the statically configured ICRC tokens of Oisy + their metadata, unique IDs, etc. fetched at runtime.
  */
 const icrcDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcDefaultTokensStore, testnetsEnabled],
