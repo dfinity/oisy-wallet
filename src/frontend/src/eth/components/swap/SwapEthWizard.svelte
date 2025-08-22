@@ -180,7 +180,9 @@
 			} else {
 				await fetchVeloraMarketSwap(params);
 			}
+
 			progress(ProgressStepsSwap.DONE);
+			
 			trackEvent({
 				name: TRACK_COUNT_SWAP_SUCCESS,
 				metadata: {
@@ -189,6 +191,7 @@
 					dApp: $swapAmountsStore.selectedProvider.provider
 				}
 			});
+			
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
