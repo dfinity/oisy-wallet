@@ -33,6 +33,7 @@
 	const dispatch = createEventDispatcher();
 
 	let schedulerTimer: NodeJS.Timeout | undefined;
+	let isActive = true; // Simple reactive variable
 
 	const updatePrepareBtcSend = async () => {
 		try {
@@ -64,11 +65,15 @@
 		// Stop existing scheduler if it exists
 		stopScheduler();
 
+		isActive = true; // Set to active when starting
+
 		// Start the recurring scheduler
 		const scheduleNext = () => {
 			schedulerTimer = setTimeout(async () => {
-				await updatePrepareBtcSend();
-				scheduleNext();
+				if (isActive) {
+					await updatePrepareBtcSend();
+					scheduleNext(); // Only reschedule if still active
+				}
 			}, BTC_UTXOS_FEE_UPDATE_INTERVAL);
 		};
 
@@ -76,10 +81,11 @@
 	};
 
 	const stopScheduler = () => {
+		isActive = false;
+
 		if (schedulerTimer) {
-			// Clear existing timer
 			clearTimeout(schedulerTimer);
-			//schedulerTimer = undefined;
+			schedulerTimer = undefined;
 		}
 	};
 
