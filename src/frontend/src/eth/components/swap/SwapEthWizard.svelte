@@ -223,8 +223,8 @@
 		amount={swapAmount}
 		{nativeEthereumToken}
 		observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
-		sendToken={$sourceToken as Token}
-		sendTokenId={($sourceToken as Token).id}
+		sendToken={$sourceToken}
+		sendTokenId={$sourceToken.id}
 		sourceNetwork={$sourceToken.network as EthereumNetwork}
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
