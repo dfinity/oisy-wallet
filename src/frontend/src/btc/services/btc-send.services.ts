@@ -161,7 +161,7 @@ export const validateBtcSend = async ({
 
 	// 2. Check if UTXOs are still unspent (not locked by pending transactions)
 	// It is very important that the pending transactions are updated before validating the UTXOs
-	loadBtcPendingSentTransactions({
+	await loadBtcPendingSentTransactions({
 		identity,
 		networkId: mapBitcoinNetworkToNetworkId(network), // we want to avoid having to pass redundant data to the function
 		address: source
