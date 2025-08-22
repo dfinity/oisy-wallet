@@ -18,7 +18,7 @@ import {
 	SOLANA_MAINNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
-import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
+import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { SolanaNetwork } from '$sol/types/network';
@@ -100,7 +100,7 @@ export const showTokenFilteredBySelectedNetwork = ({
 	$selectedNetwork: Network | undefined;
 	$pseudoNetworkChainFusion: boolean;
 }): boolean =>
-	($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && token.network.env !== 'testnet') ||
+	($pseudoNetworkChainFusion && !isTokenIcTestnet(token) && token.network.env !== 'testnet') ||
 	$selectedNetwork?.id === token.network.id;
 
 export const showTokenFilteredBySelectedNetworks = ({
@@ -112,7 +112,7 @@ export const showTokenFilteredBySelectedNetworks = ({
 	$selectedNetworks: NetworkId[] | undefined;
 	$pseudoNetworkChainFusion: boolean;
 }): boolean =>
-	($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && token.network.env !== 'testnet') ||
+	($pseudoNetworkChainFusion && !isTokenIcTestnet(token) && token.network.env !== 'testnet') ||
 	(nonNullish($selectedNetworks) && $selectedNetworks?.includes(token.network.id));
 
 /**

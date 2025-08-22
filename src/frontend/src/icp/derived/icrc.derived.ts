@@ -9,7 +9,7 @@ import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
+import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -18,13 +18,13 @@ import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * The list of Icrc default tokens - i.e. the statically configured Icrc tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
+ * The list of ICRC default tokens - i.e. the statically configured ICRC tokens of Oisy + their metadata, unique IDs, etc. fetched at runtime.
  */
 const icrcDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcDefaultTokensStore, testnetsEnabled],
 	([$icrcTokensStore, $testnetsEnabled]) =>
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
-			(token) => $testnetsEnabled || !isTokenIcrcTestnet(token)
+			(token) => $testnetsEnabled || !isTokenIcTestnet(token)
 		)
 );
 
@@ -51,13 +51,13 @@ const icrcDefaultTokensCanisterIds: Readable<CanisterIdText[]> = derived(
 
 /**
  * The list of Icrc tokens the user has added, enabled or disabled. Can contains default tokens for example if user has disabled a default tokens.
- * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "custom token" in the backend.
+ * i.e. default tokens are configured on the client side. If the user disables or enables a default token, this token is added as a "custom token" in the backend.
  */
 const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokensStore, testnetsEnabled],
 	([$icrcCustomTokensStore, $testnetsEnabled]) =>
 		($icrcCustomTokensStore?.map(({ data: token }) => token) ?? []).filter(
-			(token) => $testnetsEnabled || !isTokenIcrcTestnet(token)
+			(token) => $testnetsEnabled || !isTokenIcTestnet(token)
 		)
 );
 
