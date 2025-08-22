@@ -1036,18 +1036,21 @@
 			"nft_not_loaded": "Das NFT konnte nicht angezeigt werden weil es noch nicht geladen wurde",
 			"collections": "Kollektionen",
 			"all_assets": "Alle Assets",
-			"img_consent_disabled": "",
+            "address_copied": "Adresse $address kopiert",
+            "open_explorer": "Öffne diesen Contract im Blockchain Explorer",
+            "img_consent_disabled": "",
 			"img_consent_none": "",
 			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
 			"display_preference": ""
-		},
+			},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
 			"card": {
 				"image": "NFT Bild mit token ID: $tokenId"
-			}
+			},
+			"copy_address": "Diese Adresse in die Zwischenablage kopieren"
 		}
 	},
 	"fee": {
