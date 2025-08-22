@@ -135,6 +135,7 @@
 			});
 			return;
 		}
+
 		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $feeStore;
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
 		if (
