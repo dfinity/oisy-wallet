@@ -141,10 +141,10 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
  * @returns Structured balance object with confirmed, unconfirmed, locked, and total amounts
  */
 export const getBtcWalletBalance = ({
-																			address,
-																			confirmedBalance,
-																			providerTransactions
-																		}: {
+	address,
+	confirmedBalance,
+	providerTransactions
+}: {
 	address: string;
 	confirmedBalance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[] | null;
@@ -164,10 +164,10 @@ export const getBtcWalletBalance = ({
 		// Safely calculate UTXO sum with additional error handling
 		const txUtxoValue = nonNullish(tx.utxos)
 			? tx.utxos.reduce((utxoSum, utxo) => {
-				// Ensure utxo.value is valid before adding
-				const utxoValue = nonNullish(utxo?.value) ? BigInt(utxo.value) : ZERO;
-				return utxoSum + utxoValue;
-			}, ZERO)
+					// Ensure utxo.value is valid before adding
+					const utxoValue = nonNullish(utxo?.value) ? BigInt(utxo.value) : ZERO;
+					return utxoSum + utxoValue;
+				}, ZERO)
 			: ZERO;
 
 		return sum + txUtxoValue;
@@ -178,15 +178,15 @@ export const getBtcWalletBalance = ({
 	// When providerTransactions is null (certified=true), unconfirmedBalance will be 0
 	const unconfirmedBalance = nonNullish(providerTransactions)
 		? providerTransactions.reduce((sum, tx) => {
-			if (
-				tx.data.status === 'unconfirmed' &&
-				tx.data.type === 'receive' &&
-				nonNullish(tx.data.value)
-			) {
-				return sum + tx.data.value;
-			}
-			return sum;
-		}, ZERO)
+				if (
+					tx.data.status === 'unconfirmed' &&
+					tx.data.type === 'receive' &&
+					nonNullish(tx.data.value)
+				) {
+					return sum + tx.data.value;
+				}
+				return sum;
+			}, ZERO)
 		: ZERO;
 
 	// Total balance represents the user's complete Bitcoin holdings
