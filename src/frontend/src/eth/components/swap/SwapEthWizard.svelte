@@ -161,6 +161,7 @@
 
 		try {
 			failedSwapError.set(undefined);
+
 			const params = {
 				identity: $authIdentity,
 				progress: (step: ProgressStep) => (swapProgressStep = step),
