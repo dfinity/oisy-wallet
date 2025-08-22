@@ -55,6 +55,7 @@
 				msg: { text: $i18n.send.error.unexpected_utxos_fee },
 				err
 			});
+
 			dispatch('icBack');
 		}
 	};
@@ -75,13 +76,10 @@
 	};
 
 	const stopScheduler = () => {
-		//if (schedulerTimer) {
-		// Clear existing timer
-		try {
+		if (schedulerTimer) {
+			// Clear existing timer
 			clearTimeout(schedulerTimer);
-			schedulerTimer = undefined;
-		} catch (err) {
-			console.error('Error stopping scheduler', err);
+			//schedulerTimer = undefined;
 		}
 	};
 
