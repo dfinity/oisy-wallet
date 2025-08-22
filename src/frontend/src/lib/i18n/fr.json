@@ -102,8 +102,8 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% décentralisé",
-			"logout": "Déconnexion",
-			"lock": "",
+			"logout": "Se déconnecter",
+			"lock": "Verrouiller",
 			"authenticate": "Ouvrir ou Créer",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP, et plus encore",
 			"instant_and_private": "Accès instantané et privé partout",
