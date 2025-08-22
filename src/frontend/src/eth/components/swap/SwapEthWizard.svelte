@@ -89,7 +89,7 @@
 	const feeStore = initEthFeeStore();
 
 	let nativeEthereumToken = $derived(
-		nonNullish(evmNativeEthereumToken) ? evmNativeEthereumToken : $ethereumToken
+		evmNativeEthereumToken ?? $ethereumToken
 	);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
