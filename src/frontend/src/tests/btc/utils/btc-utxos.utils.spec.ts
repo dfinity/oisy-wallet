@@ -125,7 +125,7 @@ describe('btc-utxos.utils', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: utxos,
 				amountSatoshis: 250_000n,
-				feeRateSatoshisPerVByte: 10n
+				feeRateMiliSatoshisPerVByte: 10000n
 			});
 
 			expect(result.selectedUtxos.length).toBeGreaterThan(0);
@@ -139,7 +139,7 @@ describe('btc-utxos.utils', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: utxos,
 				amountSatoshis: 100_000n,
-				feeRateSatoshisPerVByte: 1n
+				feeRateMiliSatoshisPerVByte: 1000n
 			});
 
 			// Should select the largest UTXO first (300_000)
@@ -152,7 +152,7 @@ describe('btc-utxos.utils', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: [createMockUtxo({ value: 500_000 })],
 				amountSatoshis: 100_000n,
-				feeRateSatoshisPerVByte: 1n
+				feeRateMiliSatoshisPerVByte: 1000n
 			});
 
 			// With 1 sat/vbyte and estimated tx size of 140 bytes, fee = 140 sats
@@ -166,7 +166,7 @@ describe('btc-utxos.utils', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: [],
 				amountSatoshis: 100_000n,
-				feeRateSatoshisPerVByte: 10n
+				feeRateMiliSatoshisPerVByte: 10000n
 			});
 
 			expect(result.selectedUtxos).toHaveLength(0);
@@ -182,7 +182,7 @@ describe('btc-utxos.utils', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: smallUtxos,
 				amountSatoshis: 900n,
-				feeRateSatoshisPerVByte: 100n // High fee rate will make it insufficient
+				feeRateMiliSatoshisPerVByte: 100000n // High fee rate will make it insufficient
 			});
 
 			expect(result.sufficientFunds).toBeFalsy();
@@ -196,7 +196,7 @@ describe('btc-utxos.utils', () => {
 			const result = calculateUtxoSelection({
 				availableUtxos: [createMockUtxo({ value: 100_000 })],
 				amountSatoshis: 50_000n,
-				feeRateSatoshisPerVByte: ZERO
+				feeRateMiliSatoshisPerVByte: ZERO
 			});
 
 			expect(result.changeAmount).toBe(50_000n); // No fees

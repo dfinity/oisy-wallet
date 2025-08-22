@@ -127,7 +127,7 @@ describe('btc-send.services', () => {
 			vi.spyOn(btcUtils, 'getPendingTransactionIds').mockReturnValue([]);
 			vi.spyOn(btcUtxosUtils, 'extractUtxoTxIds').mockReturnValue(['txid1', 'txid2']);
 			vi.spyOn(btcUtxosUtils, 'estimateTransactionSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4n);
+			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
 		});
 
 		it('should pass validation for valid UTXOs and parameters', async () => {
@@ -278,7 +278,7 @@ describe('btc-send.services', () => {
 			it('should throw InvalidFeeCalculation error when fee is too low', async () => {
 				// Mock estimated transaction size and fee rate to make expected fee higher than provided fee
 				vi.spyOn(btcUtxosUtils, 'estimateTransactionSize').mockReturnValue(1000);
-				vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(10n);
+				vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(10000n);
 
 				const params = {
 					...defaultValidateParams,
@@ -321,7 +321,7 @@ describe('btc-send.services', () => {
 		it('should throw InsufficientBalanceForFee error when UTXOs have insufficient funds', async () => {
 			// Use smaller fee and transaction size for consistent calculation
 			vi.spyOn(btcUtxosUtils, 'estimateTransactionSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1n);
+			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(1000n);
 
 			const params = {
 				...defaultValidateParams,
@@ -343,7 +343,7 @@ describe('btc-send.services', () => {
 		it('should accept fee within tolerance range', async () => {
 			// Mock transaction size for predictable fee calculation
 			vi.spyOn(btcUtxosUtils, 'estimateTransactionSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4n);
+			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
 
 			const expectedFee = BigInt(250) * 4n; // 1000 satoshis
 			const toleranceRange = expectedFee / 10n; // 100 satoshis
@@ -377,7 +377,7 @@ describe('btc-send.services', () => {
 
 			// Mock the transaction size estimation for 2 inputs
 			vi.spyOn(btcUtxosUtils, 'estimateTransactionSize').mockReturnValue(370);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(3n);
+			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(3000n);
 
 			const params = {
 				...defaultValidateParams,
@@ -404,7 +404,7 @@ describe('btc-send.services', () => {
 
 		it('should validate exact fee tolerance boundaries', async () => {
 			vi.spyOn(btcUtxosUtils, 'estimateTransactionSize').mockReturnValue(250);
-			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4n);
+			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
 
 			const expectedFee = 250n * 4n; // 1000 satoshis
 			const toleranceRange = expectedFee / 10n; // 100 satoshis

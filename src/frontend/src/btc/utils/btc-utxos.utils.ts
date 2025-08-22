@@ -54,11 +54,11 @@ export const estimateTransactionSize = ({
 export const calculateUtxoSelection = ({
 	availableUtxos,
 	amountSatoshis,
-	feeRateSatoshisPerVByte
+	feeRateMiliSatoshisPerVByte
 }: {
 	availableUtxos: Utxo[];
 	amountSatoshis: bigint;
-	feeRateSatoshisPerVByte: bigint;
+	feeRateMiliSatoshisPerVByte: bigint;
 }): UtxoSelectionResult => {
 	if (availableUtxos.length === 0) {
 		return {
@@ -92,7 +92,7 @@ export const calculateUtxoSelection = ({
 			numInputs: selectedUtxos.length,
 			numOutputs: 2
 		});
-		estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
+		estimatedFee = (BigInt(txSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 		const totalRequired = amountSatoshis + estimatedFee;
 
 		// Check if we have enough to cover amount and fee
