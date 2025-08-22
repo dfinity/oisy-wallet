@@ -1,6 +1,6 @@
 import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
-import { createAuthClient } from '$lib/utils/auth.utils';
+import { safeCreateAuthClient } from '$lib/utils/auth.utils';
 import { IdbStorage, KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
 import { DelegationChain, isDelegationValid } from '@dfinity/identity';
 
@@ -50,12 +50,12 @@ const onIdleSignOut = async () => {
 };
 
 /**
- * If user is not authenticated - i.e. no identity or anonymous and there is no valid delegation chain, then identity is not valid
+ * If the user is not authenticated - i.e. no identity or anonymous and there is no valid delegation chain, then identity is not valid
  *
  * @returns true if authenticated
  */
 const checkAuthentication = async (): Promise<boolean> => {
-	const authClient: AuthClient = await createAuthClient();
+	const authClient: AuthClient = await safeCreateAuthClient();
 	return authClient.isAuthenticated();
 };
 

@@ -7,7 +7,11 @@ import {
 } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
-import { createAuthClient, getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
+import {
+	createAuthClient,
+	getOptionalDerivationOrigin,
+	safeCreateAuthClient
+} from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
@@ -40,7 +44,7 @@ const initAuthStore = (): AuthStore => {
 		subscribe,
 
 		sync: async () => {
-			authClient = authClient ?? (await createAuthClient());
+			authClient = authClient ?? (await safeCreateAuthClient());
 			const isAuthenticated: boolean = await authClient.isAuthenticated();
 
 			set({
@@ -51,7 +55,7 @@ const initAuthStore = (): AuthStore => {
 		signIn: ({ domain }: AuthSignInParams) =>
 			// eslint-disable-next-line no-async-promise-executor
 			new Promise<void>(async (resolve, reject) => {
-				authClient = authClient ?? (await createAuthClient());
+				authClient = authClient ?? (await safeCreateAuthClient());
 
 				const identityProvider = nonNullish(INTERNET_IDENTITY_CANISTER_ID)
 					? /apple/i.test(navigator?.vendor)
