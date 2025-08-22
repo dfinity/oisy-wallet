@@ -40,7 +40,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
-	import type { TokenId, Token } from '$lib/types/token';
+	import type { TokenId } from '$lib/types/token';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -217,7 +217,7 @@
 	};
 </script>
 
-{#if nonNullish($sourceToken) && nonNullish($sourceToken.network)}
+{#if nonNullish($sourceToken)}
 	<EthFeeContext
 		bind:this={feeContext}
 		amount={swapAmount}
