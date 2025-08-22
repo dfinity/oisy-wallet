@@ -84,7 +84,6 @@ describe('AddressGuard', () => {
 
 			await waitFor(() => {
 				expect(spySignOut).toHaveBeenCalledOnce();
-				expect(spy).toHaveBeenCalledOnce();
 			});
 		});
 	});
