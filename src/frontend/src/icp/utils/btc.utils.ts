@@ -15,7 +15,13 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
-import { isNullish, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
+import {
+	hexStringToUint8Array,
+	isNullish,
+	nonNullish,
+	notEmptyString,
+	uint8ArrayToHexString
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -27,23 +33,25 @@ import { get } from 'svelte/store';
 export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
 	uint8ArrayToHexString(Uint8Array.from(txid).toReversed());
 
-export const pendingTransactionTxidToString = (tx: PendingTransaction): string | null => {
-	let txidString: string;
+/**
+ * Convert a Bitcoin transaction ID hex string to Uint8Array with proper byte reversal.
+ * Bitcoin transaction IDs are displayed in reverse byte order compared to their binary representation.
+ *
+ * @param txidHex - Bitcoin transaction ID as hex string (human-readable format)
+ * @returns Uint8Array - Transaction ID in binary format (bytes reversed)
+ */
+export const txidStringToUint8Array = (txidHex: string): Uint8Array =>
+	Uint8Array.from(hexStringToUint8Array(txidHex)).reverse();
 
-	// Handle Uint8Array case (txid: Uint8Array )
-	if (tx.txid instanceof Uint8Array) {
-		txidString = Array.from(tx.txid)
-			.map((b: number) => b.toString(16).padStart(2, '0'))
-			.join('');
-	}
-	// Handle number array case (txid: number[])
-	else if (Array.isArray(tx.txid)) {
-		txidString = tx.txid.map((b: number) => b.toString(16).padStart(2, '0')).join('');
-	}
-	// Fallback, convert to string representation
-	else {
-		txidString = String(tx.txid);
-	}
+/**
+ * Convert a pending transaction's txid to human-readable hex string format.
+ * Uses the same byte reversal logic as utxoTxIdToString for consistency.
+ *
+ * @param tx - PendingTransaction containing the txid
+ * @returns string | null - Human-readable transaction ID or null if empty
+ */
+export const pendingTransactionTxidToString = (tx: PendingTransaction): string | null => {
+	const txidString = utxoTxIdToString(tx.txid);
 
 	// Return the txid string only if it's not empty
 	return notEmptyString(txidString) ? txidString : null;

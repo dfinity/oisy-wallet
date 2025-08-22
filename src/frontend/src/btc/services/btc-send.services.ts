@@ -4,7 +4,11 @@ import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
-import { getPendingTransactionIds } from '$icp/utils/btc.utils';
+import {
+	getPendingTransactionIds,
+	txidStringToUint8Array,
+	utxoTxIdToString
+} from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -18,7 +22,7 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { hexStringToUint8Array, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 interface BtcSendServiceParams {
@@ -227,11 +231,31 @@ export const sendBtc = async ({
 
 	onProgress?.();
 
+	console.warn(
+		'🔍 [backend.canister.ts -> btcAddPendingTransaction] Adding pending BTC transaction:',
+		{
+			timestamp: new Date().toISOString(),
+			input: {
+				identity,
+				network: mapToSignerBitcoinNetwork({ network }),
+				address: source,
+				txId: txid,
+				utxos: utxosFee.utxos?.map((utxo) => ({
+					...utxo,
+					outpoint: {
+						...utxo.outpoint,
+						txid: utxoTxIdToString(utxo.outpoint.txid)
+					}
+				}))
+			}
+		}
+	);
+
 	await addPendingBtcTransaction({
 		identity,
 		network: mapToSignerBitcoinNetwork({ network }),
 		address: source,
-		txId: hexStringToUint8Array(txid),
+		txId: txidStringToUint8Array(txid),
 		utxos: utxosFee.utxos
 	});
 

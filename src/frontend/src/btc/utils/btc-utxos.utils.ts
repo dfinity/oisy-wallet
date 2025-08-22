@@ -1,7 +1,6 @@
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
-import { uint8ArrayToHexString } from '@dfinity/utils';
 
 export interface UtxoSelectionResult {
 	selectedUtxos: Utxo[];
@@ -125,7 +124,7 @@ export const filterLockedUtxos = ({
 	pendingTxIds: string[];
 }): Utxo[] =>
 	utxos.filter((utxo) => {
-		const txIdHex = uint8ArrayToHexString(utxo.outpoint.txid);
+		const txIdHex = utxoTxIdToString(utxo.outpoint.txid);
 		return !pendingTxIds.includes(txIdHex);
 	});
 
