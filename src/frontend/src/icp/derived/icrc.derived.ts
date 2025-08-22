@@ -66,12 +66,13 @@ const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 	([$icrcDefaultTokens, $icrcCustomTokens]) =>
 		$icrcDefaultTokens.map(({ ledgerCanisterId, ...rest }) => {
 			const customToken = $icrcCustomTokens.find(
-				({ ledgerCanisterId: customLedgerCanisterId }) => customLedgerCanisterId === ledgerCanisterId
+				({ ledgerCanisterId: customLedgerCanisterId }) =>
+					customLedgerCanisterId === ledgerCanisterId
 			);
 
 			return mapDefaultTokenToToggleable<IcToken>({
 				defaultToken: { ledgerCanisterId, ...rest },
-	customToken
+				customToken
 			});
 		})
 );
