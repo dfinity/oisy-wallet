@@ -6,6 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
+	import NftCardSkeleton from '$lib/components/nfts/NftCardSkeleton.svelte';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
@@ -18,11 +19,17 @@
 		{:else}
 			<h5 class="mt-5">{$i18n.nfts.text.collections}</h5>
 			<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">
-				{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
-					{#if collection.nfts.length > 0}
-						<NftCollectionCard {collection} />
-					{/if}
-				{/each}
+				{#if nftCollections.filter((c) => c.nfts.length > 0).length > 0}
+					{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
+						{#if collection.nfts.length > 0}
+							<NftCollectionCard {collection} />
+						{/if}
+					{/each}
+				{:else}
+					<NftCardSkeleton />
+					<NftCardSkeleton />
+					<NftCardSkeleton />
+				{/if}
 			</div>
 		{/if}
 	{:else if nftCollections.length === 0}

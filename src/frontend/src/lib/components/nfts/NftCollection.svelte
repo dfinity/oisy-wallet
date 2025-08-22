@@ -11,6 +11,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
+	import NftCardSkeleton from '$lib/components/nfts/NftCardSkeleton.svelte';
 
 	const [collectionId, networkId] = $derived([page.params.collectionId, page.params.networkId]);
 
@@ -44,7 +45,13 @@
 <NftCollectionHero {collection} nfts={collectionNfts} />
 
 <div class="mt-4 grid grid-cols-3 gap-3 gap-y-4 py-4">
-	{#each collectionNfts as nft, index (nft.id + index)}
-		<NftCard {nft} />
-	{/each}
+	{#if collectionNfts.length > 0}
+		{#each collectionNfts as nft, index (nft.id + index)}
+			<NftCard {nft} />
+		{/each}
+	{:else}
+		<NftCardSkeleton />
+		<NftCardSkeleton />
+		<NftCardSkeleton />
+	{/if}
 </div>
