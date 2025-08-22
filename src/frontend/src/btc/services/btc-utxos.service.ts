@@ -1,4 +1,4 @@
-import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
@@ -33,7 +33,7 @@ export const prepareBtcSend = async ({
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
-	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
+	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);

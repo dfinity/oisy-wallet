@@ -54,7 +54,7 @@ describe('NftsList', () => {
 				`${AppPath.Nfts}${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
 			);
 
-			const img = links.item(i).querySelector('.bg-contain');
+			const img = links.item(i).querySelector('.bg-cover');
 
 			assertNonNullish(img);
 
