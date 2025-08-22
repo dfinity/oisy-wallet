@@ -44,7 +44,7 @@ const initAuthStore = (): AuthStore => {
 		subscribe,
 
 		sync: async () => {
-			authClient = authClient ?? (await safeCreateAuthClient());
+			authClient = authClient ?? (await createAuthClient());
 			const isAuthenticated: boolean = await authClient.isAuthenticated();
 
 			set({
