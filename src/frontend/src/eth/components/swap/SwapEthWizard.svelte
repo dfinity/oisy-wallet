@@ -85,7 +85,7 @@
 			: undefined
 	);
 
-	let evmNativeEthereumToken: Token | undefined = $derived($evmNativeToken ?? fallbackEvmToken);
+	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 	const feeStore = initEthFeeStore();
 
 	let nativeEthereumToken: Token | undefined = $derived(
