@@ -35,10 +35,10 @@ export const prepareBtcSend = async ({
 
 	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-	// Get pending transactions to exclude locked UTXOs
-	const pendingTxIds = getPendingTransactionUtxoTxIds(source);
-	if (isNullish(pendingTxIds)) {
-		throw new Error('Pending transactions have not been iitialied');
+	// Get pending UTXO transaction IDs to exclude locked UTXOs
+	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
+	if (isNullish(pendingUtxoTxIds)) {
+		throw new Error('Pending transactions have not been initialized');
 	}
 
 	// Convert amount to satoshis
@@ -74,7 +74,7 @@ export const prepareBtcSend = async ({
 		utxos: allUtxos,
 		options: {
 			minConfirmations: requiredMinConfirmations,
-			pendingTxIds
+			pendingTxIds: pendingUtxoTxIds
 		}
 	});
 
