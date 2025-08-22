@@ -159,11 +159,13 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
 export const getBtcWalletBalance = ({
 	address,
 	confirmedBalance,
-	providerTransactions
+	providerTransactions,
+	certified
 }: {
 	address: string;
 	confirmedBalance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[] | null;
+	certified: boolean;
 }): BtcWalletBalance => {
 	// Retrieve pending outgoing transactions from local store with safe fallback
 	const pendingData = getPendingTransactions(address);
@@ -209,7 +211,7 @@ export const getBtcWalletBalance = ({
 	// Even if pending data fails, this will still show confirmed + unconfirmed
 	const totalBalance = confirmedBalance + unconfirmedBalance;
 
-	return {
+	const btcWalletBalance = {
 		// Confirmed balance: UTXOs with sufficient confirmations, safe for spending
 		confirmed: confirmedBalance > ZERO ? confirmedBalance : ZERO,
 		// Unconfirmed balance: incoming transactions waiting for confirmations
@@ -219,4 +221,35 @@ export const getBtcWalletBalance = ({
 		// Total balance: complete Bitcoin ownership (confirmed + unconfirmed)
 		total: totalBalance > ZERO ? totalBalance : ZERO
 	};
+
+	console.warn('🎯 [btc-listener.services.ts -> syncWallet] Called getBtcWalletBalance(..):', {
+		timestamp: new Date().toISOString(),
+		input: {
+			certified,
+			address,
+			confirmedBalance: confirmedBalance.toString(),
+			providerTransactionsCount: providerTransactions?.length ?? 0,
+			pendingTransactionsCount: pendingTransactions.length ?? 0,
+			providerTransactions,
+			pendingTransactions: pendingTransactions.map((tx) => ({
+				...tx,
+				txid: utxoTxIdToString(tx.txid),
+				utxos: tx.utxos?.map((utxo) => ({
+					...utxo,
+					outpoint: {
+						...utxo.outpoint,
+						txid: utxoTxIdToString(utxo.outpoint.txid)
+					}
+				}))
+			}))
+		},
+		output: {
+			confirmed: btcWalletBalance.confirmed.toString(),
+			unconfirmed: btcWalletBalance.unconfirmed.toString(),
+			locked: btcWalletBalance.locked.toString(),
+			total: btcWalletBalance.total.toString()
+		}
+	});
+
+	return btcWalletBalance;
 };
