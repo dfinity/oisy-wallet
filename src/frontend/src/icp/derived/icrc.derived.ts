@@ -3,7 +3,7 @@ import {
 	ICRC_CK_TOKENS_LEDGER_CANISTER_IDS
 } from '$env/networks/networks.icrc.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
-import { SUPPORTED_ICP_LEDGER_CANISTER_IDS, SUPPORTED_ICP_TOKENS } from '$env/tokens/tokens.icp.env';
+import { SUPPORTED_ICP_LEDGER_CANISTER_IDS } from '$env/tokens/tokens.icp.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -94,7 +94,9 @@ const icrcCustomTokensToggleable: Readable<IcrcCustomToken[]> = derived(
 	([$icrcCustomTokens, $icrcDefaultTokensCanisterIds]) =>
 		$icrcCustomTokens.filter(
 			({ ledgerCanisterId }) =>
-				![...SUPPORTED_ICP_LEDGER_CANISTER_IDS, ...$icrcDefaultTokensCanisterIds].includes(ledgerCanisterId)
+				![...SUPPORTED_ICP_LEDGER_CANISTER_IDS, ...$icrcDefaultTokensCanisterIds].includes(
+					ledgerCanisterId
+				)
 		)
 );
 
