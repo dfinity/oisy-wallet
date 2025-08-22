@@ -17,7 +17,20 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import { evmNativeToken } from '$evm/derived/token.derived';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
+	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
+	import SwapReview from '$lib/components/swap/SwapReview.svelte';
+	import {
+		TRACK_COUNT_SWAP_ERROR,
+		TRACK_COUNT_SWAP_SUCCESS
+	} from '$lib/constants/analytics.contants';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext as SwapAmountsContextType
@@ -26,21 +39,8 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId, Token } from '$lib/types/token';
-	import { exchanges } from '$lib/derived/exchange.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { fetchVeloraDeltaSwap, fetchVeloraMarketSwap } from '$lib/services/swap.services';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import {
-		TRACK_COUNT_SWAP_ERROR,
-		TRACK_COUNT_SWAP_SUCCESS
-	} from '$lib/constants/analytics.contants';
-	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import SwapReview from '$lib/components/swap/SwapReview.svelte';
-	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -206,34 +206,34 @@
 
 <EthFeeContext
 	bind:this={feeContext}
+	amount={swapAmount}
+	{nativeEthereumToken}
+	observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
 	sendToken={$sourceToken as Token}
 	sendTokenId={($sourceToken as Token).id}
-	amount={swapAmount}
-	observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
 	sourceNetwork={$sourceToken?.network as EthereumNetwork}
-	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSwap.SWAP}
 		<SwapEthForm
+			{isSwapAmountsLoading}
+			{nativeEthereumToken}
 			{onClose}
 			{onNext}
 			{onShowTokensList}
 			bind:swapAmount
 			bind:receiveAmount
 			bind:slippageValue
-			{nativeEthereumToken}
-			{isSwapAmountsLoading}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 		<SwapReview
+			{receiveAmount}
+			{slippageValue}
+			{swapAmount}
 			on:icSwap={swap}
 			on:icBack
 			on:icStopTrigger
-			{slippageValue}
-			{swapAmount}
-			{receiveAmount}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<SwapProgress bind:swapProgressStep sendWithApproval={true} />
+		<SwapProgress sendWithApproval={true} bind:swapProgressStep />
 	{/if}
 </EthFeeContext>
