@@ -78,7 +78,7 @@ describe('btc-utxos.service', () => {
 				bitcoinCanisterId: 'ghsi2-tqaaa-aaaan-aaaca-cai',
 				address: mockBtcAddress,
 				network: mockNetwork,
-				minConfirmations: 1
+				minConfirmations: 6
 			});
 		});
 
