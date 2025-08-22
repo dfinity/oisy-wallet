@@ -75,10 +75,13 @@
 	};
 
 	const stopScheduler = () => {
-		if (schedulerTimer) {
-			// Clear existing timer
+		//if (schedulerTimer) {
+		// Clear existing timer
+		try {
 			clearTimeout(schedulerTimer);
 			schedulerTimer = undefined;
+		} catch (err) {
+			console.error('Error stopping scheduler', err);
 		}
 	};
 
