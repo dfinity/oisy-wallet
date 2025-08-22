@@ -1037,7 +1037,7 @@
 			"collections": "Collections",
 			"all_assets": "All assets",
 			"address_copied": "Address $address copied",
-			"open_explorer": "Open this contract in blockchain explorer"
+			"open_explorer": "Open this contract in blockchain explorer",
 			"img_consent_disabled": "You disabled images from this collection",
 			"img_consent_none": "Image disabled for security reasons",
 			"review_button": "Review",
