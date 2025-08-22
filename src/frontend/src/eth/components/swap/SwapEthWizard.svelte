@@ -239,7 +239,7 @@
 				bind:slippageValue
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview {receiveAmount} {slippageValue} {swapAmount} onSwap={swap} {onBack} {onClose} />
+			<SwapReview {onBack} {onClose} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount} />
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress sendWithApproval={true} bind:swapProgressStep />
 		{/if}
