@@ -3,6 +3,7 @@ import {
 	ICRC_CK_TOKENS_LEDGER_CANISTER_IDS
 } from '$env/networks/networks.icrc.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
+import { SUPPORTED_ICP_TOKENS } from '$env/tokens/tokens.icp.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -16,7 +17,6 @@ import type { CanisterIdText } from '$lib/types/canister';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-import { SUPPORTED_ICP_TOKENS } from '$env/tokens/tokens.icp.env';
 
 /**
  * The list of ICRC default tokens - i.e. the statically configured ICRC tokens of OISY + their metadata, unique IDs, etc. fetched at runtime.
@@ -93,7 +93,8 @@ const icrcCustomTokensToggleable: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokens, icrcDefaultTokensCanisterIds],
 	([$icrcCustomTokens, $icrcDefaultTokensCanisterIds]) =>
 		$icrcCustomTokens.filter(
-			({ ledgerCanisterId }) => ![...SUPPORTED_ICP_TOKENS, ...$icrcDefaultTokensCanisterIds].includes(ledgerCanisterId)
+			({ ledgerCanisterId }) =>
+				![...SUPPORTED_ICP_TOKENS, ...$icrcDefaultTokensCanisterIds].includes(ledgerCanisterId)
 		)
 );
 
