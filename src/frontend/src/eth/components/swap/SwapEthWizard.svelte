@@ -30,17 +30,17 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
+	import { fetchVeloraDeltaSwap, fetchVeloraMarketSwap } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext as SwapAmountsContextType
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId, Token } from '$lib/types/token';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import { fetchVeloraDeltaSwap, fetchVeloraMarketSwap } from '$lib/services/swap.services';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -77,7 +77,7 @@
 	/**
 	 * Fee context store
 	 */
-	let fallbackEvmToken: Token | undefined = $derived(
+	let fallbackEvmToken = $derived(
 		nonNullish($sourceToken)
 			? $enabledEvmTokens.find(
 					({ network: { id: networkId } }) => $sourceToken.network.id === networkId
@@ -85,11 +85,11 @@
 			: undefined
 	);
 
-	let evmNativeEthereumToken: Token | undefined = $derived($evmNativeToken ?? fallbackEvmToken);
+	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken: Token | undefined = $derived(
-		nonNullish(evmNativeEthereumToken) ? evmNativeEthereumToken : $ethereumToken
+	let nativeEthereumToken = $derived(
+		evmNativeEthereumToken ?? $ethereumToken
 	);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
@@ -108,7 +108,7 @@
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
-	let feeContext: EthFeeContext | undefined;
+	let feeContext = $state<EthFeeContext | undefined>()
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
@@ -128,14 +128,18 @@
 			await nullishSignOut();
 			return;
 		}
+
 		if (isNullish($feeStore)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.gas_fees_not_defined }
 			});
 			return;
 		}
+
 		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $feeStore;
+
 		swapProgressStep = ProgressStepsSwap.INITIALIZATION;
+
 		if (
 			isNullish($sourceToken) ||
 			isNullish($destinationToken) ||
@@ -158,6 +162,7 @@
 
 		try {
 			failedSwapError.set(undefined);
+
 			const params = {
 				identity: $authIdentity,
 				progress: (step: ProgressStep) => (swapProgressStep = step),
@@ -174,12 +179,15 @@
 				maxPriorityFeePerGas,
 				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
 			};
+
 			if ($swapAmountsStore.swaps[0].type === VeloraSwapTypes.DELTA) {
 				await fetchVeloraDeltaSwap(params);
 			} else {
 				await fetchVeloraMarketSwap(params);
 			}
+
 			progress(ProgressStepsSwap.DONE);
+			
 			trackEvent({
 				name: TRACK_COUNT_SWAP_SUCCESS,
 				metadata: {
@@ -188,6 +196,7 @@
 					dApp: $swapAmountsStore.selectedProvider.provider
 				}
 			});
+			
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
