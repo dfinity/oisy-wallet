@@ -237,11 +237,11 @@
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
 				{receiveAmount}
-				{slippageValue}
 				{swapAmount}
-				on:icSwap={swap}
-				on:icBack
-				on:icClose
+				{slippageValue}
+				onSwap={swap}
+				onBack={back}
+				onClose={close}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
