@@ -1,5 +1,4 @@
 import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
-import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
@@ -25,6 +24,7 @@ import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 
 interface BtcSendServiceParams {
 	identity: Identity;
@@ -177,7 +177,7 @@ export const validateBtcSend = async ({
 	if (utxoTxIds.length > 0) {
 		const providedUtxoTxIds = extractUtxoTxIds(utxos);
 		for (const utxoTxId of providedUtxoTxIds) {
-			if (utxoTxIds.includes(utxoTxId)) {
+			if (pendingTxIds.includes(utxoTxId)) {
 				throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 			}
 		}
@@ -198,7 +198,6 @@ export const validateBtcSend = async ({
 		numInputs: utxos.length,
 		numOutputs: 2
 	});
-
 	const expectedMinFee = (BigInt(estimatedTxSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 
 	// Allow some tolerance for fee calculation differences (±10%)
@@ -215,6 +214,17 @@ export const validateBtcSend = async ({
 	if (totalUtxoValue < totalRequired) {
 		throw new BtcValidationError(BtcSendValidationError.InsufficientBalanceForFee);
 	}
+
+	// TODO we must solve the dust issue first in prepareBtcSend before implementing this validation:
+	// 6. Check for dust amounts in change output
+	// const changeAmount = totalUtxoValue - totalRequired;
+	// const DUST_THRESHOLD = 546n; // Standard Bitcoin dust threshold
+	// if (changeAmount > ZERO && changeAmount < DUST_THRESHOLD) {
+	//	throw new Error(
+	//		`Transaction would create dust: change amount ${changeAmount} satoshis ` +
+	//			`is below dust threshold ${DUST_THRESHOLD} satoshis`
+	//	);
+	// }
 };
 
 export const sendBtc = async ({

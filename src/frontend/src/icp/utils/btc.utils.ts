@@ -75,36 +75,26 @@ export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =
  * Safely retrieves pending transactions for a given Bitcoin address from the store.
  *
  * @param address - The Bitcoin address to get pending transactions for
- * @returns Pending transactions data, or safe default with data: null when:
+ * @returns Array of pending transactions, or null when:
  *   - Store hasn't been initialized yet
  *   - Address doesn't exist in store (hasn't been loaded)
  *   - Backend retrieval failed (setPendingTransactionsError was called)
  */
-export const getPendingTransactions = (
-	address: string
-): Omit<CertifiedData<Array<PendingTransaction> | null>, 'certified'> & {
-	certified: true;
-} => {
+export const getPendingTransactions = (address: string): Array<PendingTransaction> | null => {
 	const storeData = get(btcPendingSentTransactionsStore);
 
-	// Case 1: Store not initialized, return safe default
+	// Case 1: Store not initialized, return null
 	if (isNullish(storeData) || Object.keys(storeData).length === 0) {
-		return {
-			data: null,
-			certified: true
-		};
+		return null;
 	}
 
-	// Case 2: Address exists in store ,return actual data (may be null if backend failed)
+	// Case 2: Address exists in store, return actual data (may be null if backend failed)
 	if (address in storeData) {
-		return storeData[address];
+		return storeData[address].data;
 	}
 
-	// Case 3: Address not in store yet, we return empty array for transactions
-	return {
-		data: [],
-		certified: true
-	};
+	// Case 3: Address not in store yet, return empty array for transactions
+	return [];
 };
 
 /**
@@ -116,23 +106,23 @@ export const getPendingTransactions = (
 export const getPendingTransactionIds = (address: string): string[] | null => {
 	const pendingTransactions = getPendingTransactions(address);
 
-	if (isNullish(pendingTransactions?.data)) {
+	if (isNullish(pendingTransactions)) {
 		return null;
 	}
 
 	// Debug: Compare different TXID conversion methods
 	console.warn('🎯 [btc.utils.ts -> getPendingTransactionIds] TXID Conversion Comparison:', {
 		address,
-		pendingTransactionsCount: pendingTransactions.data.length,
-		conversions: pendingTransactions.data.map((tx, index) => ({
+		pendingTransactionsCount: pendingTransactions.length,
+		conversions: pendingTransactions.map((tx, index) => ({
 			txIndex: index,
 			rawTxid: tx.txid,
 			txid: pendingTransactionTxidToString(tx)
 		}))
 	});
 
-	// Use the utility function to convert txids and filter out nulls
-	return pendingTransactions.data
+	// Use the utility function to convert transaction IDs and filter out nulls
+	return pendingTransactions
 		.map(pendingTransactionTxidToString)
 		.filter((txid): txid is string => nonNullish(txid));
 };
@@ -147,14 +137,14 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
 export const getPendingTransactionUtxoTxIds = (address: string): string[] | null => {
 	const pendingTransactions = getPendingTransactions(address);
 
-	if (isNullish(pendingTransactions?.data)) {
+	if (isNullish(pendingTransactions)) {
 		return null;
 	}
 
 	// Extract all UTXO transaction IDs from all pending transactions
 	const utxoTxIds: string[] = [];
 
-	for (const tx of pendingTransactions.data) {
+	for (const tx of pendingTransactions) {
 		if (nonNullish(tx.utxos)) {
 			for (const utxo of tx.utxos) {
 				if (nonNullish(utxo?.outpoint?.txid)) {
@@ -201,13 +191,7 @@ export const getBtcWalletBalance = ({
 	certified: boolean;
 }): BtcWalletBalance => {
 	// Retrieve pending outgoing transactions from local store with safe fallback
-	const pendingData = getPendingTransactions(address);
-	let pendingTransactions: Array<PendingTransaction> = [];
-
-	// Handle the various states the store data can be in
-	if (nonNullish(pendingData?.data)) {
-		pendingTransactions = pendingData.data;
-	}
+	const pendingTransactions = getPendingTransactions(address) ?? [];
 
 	// Calculate locked balance: UTXOs being used as inputs in pending outgoing transactions
 	// If pendingTransactions is empty (due to error or no data), locked balance will be 0
