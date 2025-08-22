@@ -15,7 +15,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
-import { isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -27,23 +27,41 @@ import { get } from 'svelte/store';
 export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
 	uint8ArrayToHexString(Uint8Array.from(txid).toReversed());
 
+export const pendingTransactionTxidToString = (tx: PendingTransaction): string | null => {
+	let txidString: string;
+
+	// Handle Uint8Array case (txid: Uint8Array )
+	if (tx.txid instanceof Uint8Array) {
+		txidString = Array.from(tx.txid)
+			.map((b: number) => b.toString(16).padStart(2, '0'))
+			.join('');
+	}
+	// Handle number array case (txid: number[])
+	else if (Array.isArray(tx.txid)) {
+		txidString = tx.txid.map((b: number) => b.toString(16).padStart(2, '0')).join('');
+	}
+	// Fallback, convert to string representation
+	else {
+		txidString = String(tx.txid);
+	}
+
+	// Return the txid string only if it's not empty
+	return notEmptyString(txidString) ? txidString : null;
+};
+
 /**
  * Get the NetworkId from a BTC TokenId
  * @param tokenId - The BTC token ID
  * @returns The corresponding NetworkId
  */
-export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined => {
-	if (tokenId === BTC_MAINNET_TOKEN_ID) {
-		return BTC_MAINNET_NETWORK_ID;
-	}
-	if (tokenId === BTC_TESTNET_TOKEN_ID) {
-		return BTC_TESTNET_NETWORK_ID;
-	}
-	if (tokenId === BTC_REGTEST_TOKEN_ID) {
-		return BTC_REGTEST_NETWORK_ID;
-	}
-	return undefined;
-};
+export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =>
+	tokenId === BTC_MAINNET_TOKEN_ID
+		? BTC_MAINNET_NETWORK_ID
+		: tokenId === BTC_TESTNET_TOKEN_ID
+			? BTC_TESTNET_NETWORK_ID
+			: tokenId === BTC_REGTEST_TOKEN_ID
+				? BTC_REGTEST_NETWORK_ID
+				: undefined;
 
 /**
  * Safely retrieves pending transactions for a given Bitcoin address from the store.
@@ -94,9 +112,22 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
 		return null;
 	}
 
-	// Extract txid from each PendingTransaction and use utxoTxIdToString to convert it
+	// Debug: Compare different TXID conversion methods
+	console.warn('🔍 [btc.utils.ts -> getPendingTransactionIds] TXID Conversion Comparison:', {
+		address,
+		pendingTransactionsCount: pendingTransactions.data.length,
+		conversions: pendingTransactions.data.map((tx, index) => ({
+			txIndex: index,
+			rawTxid: tx.txid,
+			method1_pendingTransactionTxidToString: pendingTransactionTxidToString(tx),
+			method2_utxoTxIdToString: utxoTxIdToString(tx.txid),
+			method3_uint8ArrayToHexString: uint8ArrayToHexString(tx.txid)
+		}))
+	});
+
+	// Use the utility function to convert txids and filter out nulls
 	return pendingTransactions.data
-		.map((tx) => utxoTxIdToString(tx.txid))
+		.map(pendingTransactionTxidToString)
 		.filter((txid): txid is string => nonNullish(txid));
 };
 /**
