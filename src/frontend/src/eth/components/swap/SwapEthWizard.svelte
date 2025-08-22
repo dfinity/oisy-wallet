@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -72,7 +72,6 @@
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
-	const dispatch = createEventDispatcher();
 
 	/**
 	 * Fee context store
@@ -88,9 +87,7 @@
 	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken = $derived(
-		evmNativeEthereumToken ?? $ethereumToken
-	);
+	let nativeEthereumToken = $derived(evmNativeEthereumToken ?? $ethereumToken);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
@@ -108,7 +105,7 @@
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
-	let feeContext = $state<EthFeeContext | undefined>()
+	let feeContext = $state<EthFeeContext | undefined>();
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
@@ -187,7 +184,7 @@
 			}
 
 			progress(ProgressStepsSwap.DONE);
-			
+
 			trackEvent({
 				name: TRACK_COUNT_SWAP_SUCCESS,
 				metadata: {
@@ -196,7 +193,7 @@
 					dApp: $swapAmountsStore.selectedProvider.provider
 				}
 			});
-			
+
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
@@ -207,7 +204,7 @@
 					dApp: $swapAmountsStore.selectedProvider.provider
 				}
 			});
-			dispatch('icStartTrigger');
+
 			onBack();
 		}
 	};
