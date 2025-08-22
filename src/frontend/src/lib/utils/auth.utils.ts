@@ -1,17 +1,13 @@
+import { idbStorage } from '$lib/api/idb-auth.api';
 import { AUTH_ALTERNATIVE_ORIGINS, AUTH_DERIVATION_ORIGIN } from '$lib/constants/app.constants';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import type { Identity } from '@dfinity/agent';
-import {
-	AuthClient,
-	IdbStorage,
-	KEY_STORAGE_DELEGATION,
-	type AuthClientStorage
-} from '@dfinity/auth-client';
+import { AuthClient, KEY_STORAGE_DELEGATION } from '@dfinity/auth-client';
 import { notEmptyString } from '@dfinity/utils';
 
-export const createAuthClient = (storage?: AuthClientStorage): Promise<AuthClient> =>
+export const createAuthClient = (): Promise<AuthClient> =>
 	AuthClient.create({
-		storage,
+		storage: idbStorage,
 		idleOptions: {
 			disableIdle: true,
 			disableDefaultIdleCallback: true
@@ -25,9 +21,8 @@ export const createAuthClient = (storage?: AuthClientStorage): Promise<AuthClien
  * To ensure each session starts clean and safe, we clear the stored keys before creating a new AuthClient.
  */
 export const safeCreateAuthClient = async (): Promise<AuthClient> => {
-	const idbStorage: IdbStorage = new IdbStorage();
 	await idbStorage.remove(KEY_STORAGE_DELEGATION);
-	return await createAuthClient(idbStorage);
+	return await createAuthClient();
 };
 
 /**
@@ -35,7 +30,7 @@ export const safeCreateAuthClient = async (): Promise<AuthClient> => {
  * This is notably useful for Web Workers who do not have access to the window.
  */
 export const loadIdentity = async (): Promise<Identity | undefined> => {
-	const authClient = await safeCreateAuthClient();
+	const authClient = await createAuthClient();
 	const authenticated = await authClient.isAuthenticated();
 
 	// Not authenticated therefore we provide no identity as a result

@@ -1,7 +1,8 @@
+import { idbStorage } from '$lib/api/idb-auth.api';
 import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
-import { safeCreateAuthClient } from '$lib/utils/auth.utils';
-import { IdbStorage, KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
+import { createAuthClient } from '$lib/utils/auth.utils';
+import { KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
 import { DelegationChain, isDelegationValid } from '@dfinity/identity';
 
 export const onAuthMessage = async ({
@@ -55,7 +56,7 @@ const onIdleSignOut = async () => {
  * @returns true if authenticated
  */
 const checkAuthentication = async (): Promise<boolean> => {
-	const authClient: AuthClient = await safeCreateAuthClient();
+	const authClient: AuthClient = await createAuthClient();
 	return authClient.isAuthenticated();
 };
 
@@ -68,7 +69,6 @@ const checkDelegationChain = async (): Promise<{
 	valid: boolean;
 	delegation: DelegationChain | null;
 }> => {
-	const idbStorage: IdbStorage = new IdbStorage();
 	const delegationChain: string | null = await idbStorage.get(KEY_STORAGE_DELEGATION);
 
 	const delegation = delegationChain !== null ? DelegationChain.fromJSON(delegationChain) : null;
