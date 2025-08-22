@@ -7,6 +7,7 @@ import {
 } from '$env/networks/networks.icp.env';
 import icpLight from '$icp/assets/icp-light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import type { RequiredToken, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -61,4 +62,6 @@ export const TESTICP_TOKEN: IcToken = {
 	explorerUrl: ICP_EXPLORER_URL
 };
 
-export const ICP_LEDGER_CANISTER_TESTNET_IDS = [TESTICP_TOKEN.ledgerCanisterId];
+export const ICP_LEDGER_CANISTER_TESTNET_IDS: LedgerCanisterIdText[] = [
+	TESTICP_TOKEN.ledgerCanisterId
+];
