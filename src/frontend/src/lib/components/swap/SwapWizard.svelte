@@ -154,20 +154,6 @@
 
 			setTimeout(() => close(), 2500);
 		} catch (err: unknown) {
-			const errorDetail = errorDetailToString(err);
-			// TODO: Add unit tests to cover failed swap error scenarios
-			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
-				failedSwapError.set({
-					message: replacePlaceholders(
-						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
-						{
-							$maxSlippage: slippageValue.toString()
-						}
-					),
-					variant: 'info'
-				});
-			}
-
 			if (isSwapError(err)) {
 				failedSwapError.set({
 					message: err.message,
@@ -184,6 +170,20 @@
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected },
 					err
+				});
+			}
+
+			const errorDetail = errorDetailToString(err);
+			// TODO: Add unit tests to cover failed swap error scenarios
+			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: slippageValue.toString()
+						}
+					),
+					variant: 'info'
 				});
 			}
 
