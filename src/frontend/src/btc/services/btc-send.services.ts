@@ -5,7 +5,7 @@ import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
 import {
-	getPendingTransactionIds,
+	getPendingTransactionUtxoTxIds,
 	txidStringToUint8Array,
 	utxoTxIdToString
 } from '$icp/utils/btc.utils';
@@ -159,17 +159,17 @@ export const validateBtcSend = async ({
 	}
 
 	// 2. Check if UTXOs are still unspent (not locked by pending transactions)
-	const pendingTxIds = getPendingTransactionIds(source);
+	const utxoTxIds = getPendingTransactionUtxoTxIds(source);
 
-	if (isNullish(pendingTxIds)) {
+	if (isNullish(utxoTxIds)) {
 		// when no pending transactions have been initiated, we cannot validate UTXO's and therefore, validation must fail
 		throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 	}
 
-	if (pendingTxIds.length > 0) {
+	if (utxoTxIds.length > 0) {
 		const providedUtxoTxIds = extractUtxoTxIds(utxos);
 		for (const utxoTxId of providedUtxoTxIds) {
-			if (pendingTxIds.includes(utxoTxId)) {
+			if (utxoTxIds.includes(utxoTxId)) {
 				throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 			}
 		}
@@ -190,6 +190,7 @@ export const validateBtcSend = async ({
 		numInputs: utxos.length,
 		numOutputs: 2
 	});
+
 	const expectedMinFee = (BigInt(estimatedTxSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 
 	// Allow some tolerance for fee calculation differences (±10%)
@@ -206,17 +207,6 @@ export const validateBtcSend = async ({
 	if (totalUtxoValue < totalRequired) {
 		throw new BtcValidationError(BtcSendValidationError.InsufficientBalanceForFee);
 	}
-
-	// TODO we must solve the dust issue first in prepareBtcSend before implementing this validation:
-	// 6. Check for dust amounts in change output
-	// const changeAmount = totalUtxoValue - totalRequired;
-	// const DUST_THRESHOLD = 546n; // Standard Bitcoin dust threshold
-	// if (changeAmount > ZERO && changeAmount < DUST_THRESHOLD) {
-	//	throw new Error(
-	//		`Transaction would create dust: change amount ${changeAmount} satoshis ` +
-	//			`is below dust threshold ${DUST_THRESHOLD} satoshis`
-	//	);
-	// }
 };
 
 export const sendBtc = async ({

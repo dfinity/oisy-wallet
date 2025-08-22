@@ -138,6 +138,41 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
 		.map(pendingTransactionTxidToString)
 		.filter((txid): txid is string => nonNullish(txid));
 };
+
+/**
+ * Get all UTXO transaction IDs from all pending transactions for a given address.
+ * These are the transaction IDs that UTXOs reference (inputs being spent), not the pending transaction IDs themselves.
+ *
+ * @param address - Bitcoin address to get pending UTXO transaction IDs for
+ * @returns Array of UTXO transaction ID strings, or null if no pending data available
+ */
+export const getPendingTransactionUtxoTxIds = (address: string): string[] | null => {
+	const pendingTransactions = getPendingTransactions(address);
+
+	if (isNullish(pendingTransactions?.data)) {
+		return null;
+	}
+
+	// Extract all UTXO transaction IDs from all pending transactions
+	const utxoTxIds: string[] = [];
+
+	for (const tx of pendingTransactions.data) {
+		if (nonNullish(tx.utxos)) {
+			for (const utxo of tx.utxos) {
+				if (nonNullish(utxo?.outpoint?.txid)) {
+					const utxoTxId = utxoTxIdToString(utxo.outpoint.txid);
+					if (notEmptyString(utxoTxId)) {
+						utxoTxIds.push(utxoTxId);
+					}
+				}
+			}
+		}
+	}
+
+	// Remove duplicates and return
+	return Array.from(new Set(utxoTxIds));
+};
+
 /**
  * Calculates Bitcoin wallet balance breakdown following standard Bitcoin accounting principles.
  *
