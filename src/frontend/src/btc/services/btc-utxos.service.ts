@@ -74,7 +74,7 @@ export const prepareBtcSend = async ({
 		utxos: allUtxos,
 		options: {
 			minConfirmations: requiredMinConfirmations,
-			pendingTxIds: pendingUtxoTxIds
+			pendingUtxoTxIds
 		}
 	});
 

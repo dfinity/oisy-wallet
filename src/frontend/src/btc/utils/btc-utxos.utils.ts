@@ -118,14 +118,14 @@ export const calculateUtxoSelection = ({
  */
 export const filterLockedUtxos = ({
 	utxos,
-	pendingTxIds
+	pendingUtxoTxIds
 }: {
 	utxos: Utxo[];
-	pendingTxIds: string[];
+	pendingUtxoTxIds: string[];
 }): Utxo[] =>
 	utxos.filter((utxo) => {
 		const txIdHex = utxoTxIdToString(utxo.outpoint.txid);
-		return !pendingTxIds.includes(txIdHex);
+		return !pendingUtxoTxIds.includes(txIdHex);
 	});
 
 /**
@@ -138,10 +138,10 @@ export const filterAvailableUtxos = ({
 	utxos: Utxo[];
 	options: {
 		minConfirmations: number;
-		pendingTxIds: string[];
+		pendingUtxoTxIds: string[];
 	};
 }): Utxo[] => {
-	const { minConfirmations, pendingTxIds } = options;
+	const { minConfirmations, pendingUtxoTxIds } = options;
 
 	// First filter by confirmations to ensure transaction security
 	// Note: UTXOs are pre-filtered by the Bitcoin canister endpoint
@@ -158,6 +158,6 @@ export const filterAvailableUtxos = ({
 	// Then filter out locked UTXOs
 	return filterLockedUtxos({
 		utxos: confirmedUtxos,
-		pendingTxIds
+		pendingUtxoTxIds
 	});
 };
