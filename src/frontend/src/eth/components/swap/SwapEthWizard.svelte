@@ -174,6 +174,7 @@
 				maxPriorityFeePerGas,
 				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
 			};
+
 			if ($swapAmountsStore.swaps[0].type === VeloraSwapTypes.DELTA) {
 				await fetchVeloraDeltaSwap(params);
 			} else {
