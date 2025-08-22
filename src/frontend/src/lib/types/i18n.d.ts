@@ -887,6 +887,12 @@ interface I18nNfts {
 		all_assets: string;
 		address_copied: string;
 		open_explorer: string;
+		img_consent_disabled: string;
+		img_consent_none: string;
+		review_button: string;
+		collection_name: string;
+		media_urls: string;
+		display_preference: string;
 	};
 	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
