@@ -45,7 +45,7 @@ const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 	[erc20DefaultTokens, erc20UserTokens],
 	([$erc20DefaultTokens, $erc20UserTokens]) =>
 		$erc20DefaultTokens.map(({ address, network, ...rest }) => {
-			const userToken = $erc20UserTokens.find(
+			const customToken = $erc20UserTokens.find(
 				({ address: contractAddress, network: contractNetwork }) =>
 					contractAddress === address && network.chainId === contractNetwork.chainId
 			);
@@ -56,7 +56,7 @@ const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 					network,
 					...rest
 				},
-				userToken
+				customToken
 			});
 		})
 );
