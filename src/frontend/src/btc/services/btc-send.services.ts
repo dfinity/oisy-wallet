@@ -172,7 +172,7 @@ export const validateBtcSend = async ({
 	}
 
 	// 4. Validate fee calculation matches expected transaction structure ( recipient + change)
-	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
+	const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
 		network,
 		identity
 	});
@@ -180,7 +180,7 @@ export const validateBtcSend = async ({
 		numInputs: utxos.length,
 		numOutputs: 2
 	});
-	const expectedMinFee = BigInt(estimatedTxSize) * feeRateSatoshisPerVByte;
+	const expectedMinFee = (BigInt(estimatedTxSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 
 	// Allow some tolerance for fee calculation differences (±10%)
 	const feeToleranceRange = expectedMinFee / BTC_SEND_FEE_TOLERANCE_PERCENTAGE;
