@@ -42,7 +42,7 @@ export const prepareBtcSend = async ({
 	const amountSatoshis = convertNumberToSatoshis({ amount });
 
 	// Step 1: Get current fee percentiles from backend
-	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
+	const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
 		identity,
 		network
 	});
@@ -87,7 +87,7 @@ export const prepareBtcSend = async ({
 	const selection = calculateUtxoSelection({
 		availableUtxos: filteredUtxos,
 		amountSatoshis,
-		feeRateSatoshisPerVByte
+		feeRateMiliSatoshisPerVByte
 	});
 
 	// Check if there were insufficient funds during UTXO selection
@@ -126,22 +126,21 @@ export const getFeeRateFromPercentiles = async ({
 
 	// Use median fee percentile
 	const medianIndex = Math.floor(fee_percentiles.length / 2);
+
+	// Use median fee percentile
 	const medianFeeMillisatsPerVByte = fee_percentiles[medianIndex];
 
-	// Convert from millisats to sats (divide by 1000)
-	const feeRateSatsPerVByte = medianFeeMillisatsPerVByte / 1000n;
-
 	// Apply minimum and maximum limits
-	const MIN_FEE_RATE = 1n; // 1 sat/vbyte minimum
-	const MAX_FEE_RATE = 100n; // 100 sat/vbyte maximum
+	const MIN_FEE_RATE = 1_000n; // 1 sat/vbyte minimum
+	const MAX_FEE_RATE = 100_000n; // 100 sat/vbyte maximum
 
-	if (feeRateSatsPerVByte < MIN_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte < MIN_FEE_RATE) {
 		return MIN_FEE_RATE;
 	}
 
-	if (feeRateSatsPerVByte > MAX_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte > MAX_FEE_RATE) {
 		return MAX_FEE_RATE;
 	}
 
-	return feeRateSatsPerVByte;
+	return medianFeeMillisatsPerVByte;
 };
