@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
@@ -22,10 +22,21 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let swapAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let slippageValue: OptionAmount;
+	interface Props {
+		swapAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		slippageValue: OptionAmount;
+		swapFees: Snippet;
+	}
+
+	let {
+		swapAmount = $bindable(),
+		receiveAmount = $bindable(),
+		slippageValue = $bindable(),
+		swapFees
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -47,10 +58,10 @@
 		dispatch('icClose');
 	};
 
-	let isManualWithdrawSuccess: boolean;
-	$: isManualWithdrawSuccess =
+	let isManualWithdrawSuccess = $derived(
 		$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS &&
-		$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success;
+			$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success
+	);
 </script>
 
 <ContentWithToolbar>
@@ -87,8 +98,20 @@
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
-		<SwapFees />
+
+		{@render swapFees()}
 	</div>
+
+	{#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken?.network.id !== $destinationToken?.network.id}
+		<MessageBox styleClass="sm:text-sm">
+			<Html
+				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
+					$sourceNetwork: $sourceToken.network.name,
+					$destinationNetwork: $destinationToken.network.name
+				})}
+			/>
+		</MessageBox>
+	{/if}
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
