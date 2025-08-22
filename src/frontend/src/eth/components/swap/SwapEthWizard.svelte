@@ -217,7 +217,7 @@
 	};
 </script>
 
-{#if nonNullish($sourceToken) && nonNullish($sourceToken.network)}
+{#if nonNullish($sourceToken)}
 	<EthFeeContext
 		bind:this={feeContext}
 		amount={swapAmount}
