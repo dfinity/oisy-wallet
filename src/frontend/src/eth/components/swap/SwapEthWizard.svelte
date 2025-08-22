@@ -88,7 +88,7 @@
 	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken: Token | undefined = $derived(
+	let nativeEthereumToken = $derived(
 		nonNullish(evmNativeEthereumToken) ? evmNativeEthereumToken : $ethereumToken
 	);
 
