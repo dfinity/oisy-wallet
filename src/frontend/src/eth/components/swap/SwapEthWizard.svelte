@@ -77,7 +77,7 @@
 	/**
 	 * Fee context store
 	 */
-	let fallbackEvmToken: Token | undefined = $derived(
+	let fallbackEvmToken = $derived(
 		nonNullish($sourceToken)
 			? $enabledEvmTokens.find(
 					({ network: { id: networkId } }) => $sourceToken.network.id === networkId
