@@ -108,7 +108,7 @@
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
-	let feeContext: EthFeeContext | undefined;
+	let feeContext = $state<EthFeeContext | undefined>()
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
