@@ -205,6 +205,13 @@
 				}
 			});
 
+			failedSwapError.set(undefined);
+
+			toastsError({
+				msg: { text: $i18n.swap.error.unexpected },
+				err
+			});
+
 			onBack();
 		}
 	};

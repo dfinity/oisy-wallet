@@ -11,6 +11,10 @@ import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
+vi.mock('$lib/utils/parse.utils', () => ({
+	parseToken: vi.fn()
+}));
+
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
 }));
@@ -31,40 +35,42 @@ const BASE_PROPS = {
 };
 
 describe('SwapEthWizard', () => {
-	let mockContext: Map<symbol, unknown>;
+	const mockContext = new Map([]);
 
-	const createContext = (): Map<symbol, unknown> => {
-		const swapContext = {
-			sourceToken: readable(mockToken),
-			destinationToken: readable(mockDestToken),
-			failedSwapError: writable(undefined),
-			sourceTokenExchangeRate: readable(10)
-		};
+	mockContext.set(SWAP_CONTEXT_KEY, {
+		sourceToken: readable(mockToken),
+		destinationToken: readable(mockDestToken),
+		failedSwapError: writable(undefined),
+		sourceTokenExchangeRate: readable(10),
+		sourceTokenBalance: readable(undefined),
+		destinationTokenBalance: readable(undefined),
+		destinationTokenExchangeRate: readable(20),
+		isSourceTokenIcrc2: readable(false),
+		setSourceToken: () => {},
+		setDestinationToken: () => {},
+		switchTokens: () => {}
+	});
 
-		const swapAmountsStore = initSwapAmountsStore();
-		swapAmountsStore.setSwaps({
-			swaps: mockSwapProviders,
-			amountForSwap: 1,
-			selectedProvider: mockSwapProviders[0]
-		});
+	const swapAmountsStore = initSwapAmountsStore();
+	swapAmountsStore.setSwaps({
+		swaps: mockSwapProviders,
+		amountForSwap: 1,
+		selectedProvider: mockSwapProviders[0]
+	});
 
-		return new Map<symbol, unknown>([
-			[SWAP_CONTEXT_KEY, swapContext],
-			[SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore }],
-			[
-				ETH_FEE_CONTEXT_KEY,
-				initEthFeeContext({
-					feeStore: initEthFeeStore(),
-					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
-					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
-					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
-				})
-			]
-		]);
-	};
+	mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+
+	mockContext.set(
+		ETH_FEE_CONTEXT_KEY,
+		initEthFeeContext({
+			feeStore: initEthFeeStore(),
+			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+		})
+	);
 
 	beforeEach(() => {
-		mockContext = createContext();
 		mockAuthStore();
 	});
 
