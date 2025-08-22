@@ -1,4 +1,4 @@
-import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
@@ -33,7 +33,7 @@ export const prepareBtcSend = async ({
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
-	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
+	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
@@ -42,7 +42,7 @@ export const prepareBtcSend = async ({
 	const amountSatoshis = convertNumberToSatoshis({ amount });
 
 	// Step 1: Get current fee percentiles from backend
-	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
+	const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
 		identity,
 		network
 	});
@@ -87,7 +87,7 @@ export const prepareBtcSend = async ({
 	const selection = calculateUtxoSelection({
 		availableUtxos: filteredUtxos,
 		amountSatoshis,
-		feeRateSatoshisPerVByte
+		feeRateMiliSatoshisPerVByte
 	});
 
 	// Check if there were insufficient funds during UTXO selection
@@ -126,22 +126,21 @@ export const getFeeRateFromPercentiles = async ({
 
 	// Use median fee percentile
 	const medianIndex = Math.floor(fee_percentiles.length / 2);
+
+	// Use median fee percentile
 	const medianFeeMillisatsPerVByte = fee_percentiles[medianIndex];
 
-	// Convert from millisats to sats (divide by 1000)
-	const feeRateSatsPerVByte = medianFeeMillisatsPerVByte / 1000n;
-
 	// Apply minimum and maximum limits
-	const MIN_FEE_RATE = 1n; // 1 sat/vbyte minimum
-	const MAX_FEE_RATE = 100n; // 100 sat/vbyte maximum
+	const MIN_FEE_RATE = 1_000n; // 1 sat/vbyte minimum
+	const MAX_FEE_RATE = 100_000n; // 100 sat/vbyte maximum
 
-	if (feeRateSatsPerVByte < MIN_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte < MIN_FEE_RATE) {
 		return MIN_FEE_RATE;
 	}
 
-	if (feeRateSatsPerVByte > MAX_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte > MAX_FEE_RATE) {
 		return MAX_FEE_RATE;
 	}
 
-	return feeRateSatsPerVByte;
+	return medianFeeMillisatsPerVByte;
 };

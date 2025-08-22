@@ -837,7 +837,8 @@
 			"withdrawing": "",
 			"network_cost": "",
 			"gasless": "",
-			"swap_fees": ""
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください",
@@ -1034,13 +1035,16 @@
 			"collection_not_loaded": "",
 			"nft_not_loaded": "",
 			"collections": "",
-			"all_assets": ""
+			"all_assets": "",
+			"address_copied": "",
+			"open_explorer": ""
 		},
 		"alt": {
 			"placeholder_image": "まだNFTがありません",
 			"card": {
 				"image": "トークンIDが$tokenIdのNFTの画像"
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
