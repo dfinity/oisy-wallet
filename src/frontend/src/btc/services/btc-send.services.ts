@@ -1,4 +1,5 @@
 import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
+import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
@@ -24,7 +25,6 @@ import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 
 interface BtcSendServiceParams {
 	identity: Identity;
@@ -177,7 +177,7 @@ export const validateBtcSend = async ({
 	if (utxoTxIds.length > 0) {
 		const providedUtxoTxIds = extractUtxoTxIds(utxos);
 		for (const utxoTxId of providedUtxoTxIds) {
-			if (pendingTxIds.includes(utxoTxId)) {
+			if (utxoTxIds.includes(utxoTxId)) {
 				throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 			}
 		}

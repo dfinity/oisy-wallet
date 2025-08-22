@@ -35,9 +35,9 @@ export const prepareBtcSend = async ({
 
 	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-	// Get pending transactions to exclude locked UTXOs
-	const pendingTxIds = getPendingTransactionIds(source);
-	if (isNullish(pendingTxIds)) {
+	// Get pending UTXO transaction IDs to exclude locked UTXOs
+	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
+	if (isNullish(pendingUtxoTxIds)) {
 		throw new Error('Pending transactions have not been initialized');
 	}
 
