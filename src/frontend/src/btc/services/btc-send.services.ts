@@ -1,4 +1,5 @@
 import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
+import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
@@ -18,7 +19,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { invalidAmount } from '$lib/utils/input.utils';
-import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
@@ -159,6 +160,13 @@ export const validateBtcSend = async ({
 	}
 
 	// 2. Check if UTXOs are still unspent (not locked by pending transactions)
+	// It is very important that the pending transactions are updated before validating the UTXOs
+	loadBtcPendingSentTransactions({
+		identity,
+		networkId: mapBitcoinNetworkToNetworkId(network), // we want to avoid having to pass redundant data to the function
+		address: source
+	});
+
 	const utxoTxIds = getPendingTransactionUtxoTxIds(source);
 
 	if (isNullish(utxoTxIds)) {
