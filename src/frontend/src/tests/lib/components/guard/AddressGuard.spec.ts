@@ -76,7 +76,7 @@ describe('AddressGuard', () => {
 				throw new CanisterInternalError('Test');
 			});
 
-			const spySignOut = vi.spyOn(authServices, 'errorSignOut');
+			const spySignOut = vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
 
 			const spy = vi.spyOn(window.location, 'reload');
 

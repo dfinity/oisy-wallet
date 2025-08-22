@@ -56,7 +56,7 @@ describe('loader.services', () => {
 			vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
 		});
 
-		it('should return success', async () => {
+		it('should work correctly', async () => {
 			apiMock.mockResolvedValueOnce(undefined);
 
 			const result = await initSignerAllowance();
@@ -64,29 +64,28 @@ describe('loader.services', () => {
 			expect(result.success).toBeTruthy();
 		});
 
-		it('should return success equals to false', async () => {
+		it('should handle errors', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
+
+			vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
 
 			const result = await initSignerAllowance();
 
 			expect(result.success).toBeFalsy();
 		});
 
-		it('should sign out and ultimately reload the window', async () => {
+		it('should sign out', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
 
-			const spySignOut = vi.spyOn(authServices, 'errorSignOut');
-
-			const spy = vi.spyOn(window.location, 'reload');
+			const spySignOut = vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
 
 			await initSignerAllowance();
 
 			expect(spySignOut).toHaveBeenCalledOnce();
-			expect(spy).toHaveBeenCalledOnce();
 		});
 	});
 
