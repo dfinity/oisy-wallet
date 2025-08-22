@@ -128,6 +128,7 @@
 			await nullishSignOut();
 			return;
 		}
+
 		if (isNullish($feeStore)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.gas_fees_not_defined }
