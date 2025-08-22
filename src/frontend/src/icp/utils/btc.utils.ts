@@ -260,7 +260,17 @@ export const getBtcWalletBalance = ({
 			providerTransactionsCount: providerTransactions?.length ?? 0,
 			pendingTransactionsCount: pendingTransactions.length ?? 0,
 			providerTransactions,
-			pendingTransactions
+			pendingTransactions: pendingTransactions.map((tx) => ({
+				...tx,
+				txid: utxoTxIdToString(tx.txid),
+				utxos: tx.utxos?.map((utxo) => ({
+					...utxo,
+					outpoint: {
+						...utxo.outpoint,
+						txid: utxoTxIdToString(utxo.outpoint.txid)
+					}
+				}))
+			}))
 		},
 		output: {
 			confirmed: btcWalletBalance.confirmed.toString(),
@@ -269,5 +279,6 @@ export const getBtcWalletBalance = ({
 			total: btcWalletBalance.total.toString()
 		}
 	});
+
 	return btcWalletBalance;
 };
