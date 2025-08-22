@@ -60,3 +60,5 @@ export const TESTICP_TOKEN: IcToken = {
 	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai',
 	explorerUrl: ICP_EXPLORER_URL
 };
+
+export const ICP_LEDGER_CANISTER_TESTNET_IDS = [TESTICP_TOKEN.ledgerCanisterId];
