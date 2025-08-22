@@ -2,6 +2,7 @@ import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import * as ethUtils from '$eth/utils/eth.utils';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
@@ -13,6 +14,7 @@ import {
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
 	fetchVeloraDeltaSwap,
+	fetchVeloraMarketSwap,
 	loadKongSwapTokens,
 	performManualWithdraw,
 	withdrawICPSwapAfterFailedSwap,
@@ -550,6 +552,135 @@ describe('fetchVeloraDeltaSwap', () => {
 		});
 
 		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+	});
+});
+
+describe('fetchVeloraMarketSwap', () => {
+	const mockSourceToken = {
+		...mockValidErc20Token,
+		address: mockEthAddress,
+		decimals: 18
+	};
+
+	const mockDestinationToken = {
+		...mockValidErc20Token,
+		address: '0xDestinationToken',
+		decimals: 6
+	};
+
+	const mockSwapAmount = '1000000000000000000';
+	const mockSlippageValue = '0.5';
+	const mockSourceNetwork = ETHEREUM_NETWORK;
+	const mockUserAddress = mockEthAddress;
+	const mockGas = '21000';
+	const mockMaxFeePerGas = '20000000000';
+	const mockMaxPriorityFeePerGas = '2000000000';
+
+	const mockSwapDetails = {
+		srcToken: mockEthAddress,
+		destToken: '0xDestinationToken',
+		srcAmount: '1000000000000000000',
+		destAmount: '900000000',
+		destAmountBeforeFee: '920000000',
+		gasCost: '50000',
+		gasCostBeforeFee: '48000',
+		gasCostUSD: '15.5',
+		gasCostUSDBeforeFee: '14.8',
+		srcUSD: '1000.0',
+		destUSD: '895.5',
+		destUSDBeforeFee: '915.2',
+		partner: 'PartnerName',
+		partnerFee: 0.25,
+		hmac: 'abcd1234'
+	};
+
+	const mockProgress = vi.fn();
+
+	let mockSdk: {
+		swap: {
+			getSpender: ReturnType<typeof vi.fn>;
+			buildTx: ReturnType<typeof vi.fn>;
+		};
+	};
+	let mockSwap: {
+		getSpender: ReturnType<typeof vi.fn>;
+		buildTx: ReturnType<typeof vi.fn>;
+	};
+	let mockSwapGetSpender: ReturnType<typeof vi.fn>;
+	let mockSwapBuildTx: ReturnType<typeof vi.fn>;
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		mockSwapGetSpender = vi.fn();
+		mockSwapBuildTx = vi.fn();
+
+		mockSwap = {
+			getSpender: mockSwapGetSpender,
+			buildTx: mockSwapBuildTx
+		};
+
+		mockSdk = {
+			swap: mockSwap
+		};
+
+		vi.mocked(constructSimpleSDK).mockReturnValue(
+			mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
+		);
+		mockSwapGetSpender.mockResolvedValue('0xTokenTransferProxy');
+		mockSwapBuildTx.mockResolvedValue({
+			to: '0xSwapContract',
+			data: '0xswapdata'
+		});
+	});
+
+	it('should execute market swap successfully with non-default token', async () => {
+		await fetchVeloraMarketSwap({
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken: mockSourceToken,
+			destinationToken: mockDestinationToken,
+			swapAmount: mockSwapAmount,
+			sourceNetwork: mockSourceNetwork,
+			slippageValue: mockSlippageValue,
+			userAddress: mockUserAddress,
+			gas: BigInt(mockGas),
+			maxFeePerGas: BigInt(mockMaxFeePerGas),
+			maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+			swapDetails: mockSwapDetails as VeloraSwapDetails,
+			receiveAmount: BigInt(1000),
+			destinationNetwork: SEPOLIA_NETWORK
+		});
+
+		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
+		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(mockSwapGetSpender).toHaveBeenCalled();
+	});
+
+	it('should execute market swap successfully with default Ethereum token', async () => {
+		vi.mocked(ethUtils.isDefaultEthereumToken).mockReturnValue(true);
+
+		await fetchVeloraMarketSwap({
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken: mockSourceToken,
+			destinationToken: mockDestinationToken,
+			swapAmount: mockSwapAmount,
+			sourceNetwork: mockSourceNetwork,
+			slippageValue: mockSlippageValue,
+			userAddress: mockUserAddress,
+			gas: BigInt(mockGas),
+			maxFeePerGas: BigInt(mockMaxFeePerGas),
+			maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+			swapDetails: mockSwapDetails as VeloraSwapDetails,
+			receiveAmount: BigInt(1000),
+			destinationNetwork: SEPOLIA_NETWORK
+		});
+
+		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
+		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(mockSwapGetSpender).toHaveBeenCalled();
+		expect(mockSwapBuildTx).toHaveBeenCalled();
 	});
 });
 
