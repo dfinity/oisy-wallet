@@ -121,7 +121,7 @@ export const getPendingTransactionIds = (address: string): string[] | null => {
 	}
 
 	// Debug: Compare different TXID conversion methods
-	console.warn('🔍 [btc.utils.ts -> getPendingTransactionIds] TXID Conversion Comparison:', {
+	console.warn('🎯 [btc.utils.ts -> getPendingTransactionIds] TXID Conversion Comparison:', {
 		address,
 		pendingTransactionsCount: pendingTransactions.data.length,
 		conversions: pendingTransactions.data.map((tx, index) => ({

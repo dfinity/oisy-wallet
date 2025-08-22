@@ -232,7 +232,7 @@ export const sendBtc = async ({
 	onProgress?.();
 
 	console.warn(
-		'🔍 [backend.canister.ts -> btcAddPendingTransaction] Adding pending BTC transaction:',
+		'🎯 [backend.canister.ts -> btcAddPendingTransaction] Adding pending BTC transaction:',
 		{
 			timestamp: new Date().toISOString(),
 			input: {
