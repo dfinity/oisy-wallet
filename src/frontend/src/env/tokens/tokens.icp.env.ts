@@ -9,6 +9,7 @@ import icpLight from '$icp/assets/icp-light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic-token';
 import type { RequiredToken, TokenId } from '$lib/types/token';
+import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 /**
@@ -45,11 +46,12 @@ export const TESTICP_SYMBOL = 'TESTICP';
 
 export const TESTICP_TOKEN_ID: TokenId = parseTokenId(TESTICP_SYMBOL);
 
-export const TESTICP_TOKEN: IcToken = {
+export const TESTICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated'>> = {
 	id: TESTICP_TOKEN_ID,
 	network: ICP_PSEUDO_TESTNET_NETWORK,
 	standard: 'icp',
 	category: 'default',
+	exchangeCoinId: 'internet-computer',
 	position: 0,
 	name: 'Test ICP',
 	symbol: TESTICP_SYMBOL,
@@ -60,3 +62,10 @@ export const TESTICP_TOKEN: IcToken = {
 	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai',
 	explorerUrl: ICP_EXPLORER_URL
 };
+
+export const SUPPORTED_ICP_TOKENS: RequiredToken<Omit<IcToken, 'deprecated'>>[] =
+	defineSupportedTokens({
+		mainnetFlag: true,
+		mainnetTokens: [ICP_TOKEN],
+		testnetTokens: [TESTICP_TOKEN]
+	});
