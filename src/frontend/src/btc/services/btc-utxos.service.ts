@@ -35,14 +35,14 @@ export const prepareBtcSend = async ({
 
 	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-		// Get pending transactions to exclude locked UTXOs
-		const pendingTxIds = getPendingTransactionIds(source);
-		if (isNullish(pendingTxIds)) {
-			throw new Error('Pending transactions have not been iitialied');
-		}
+	// Get pending transactions to exclude locked UTXOs
+	const pendingTxIds = getPendingTransactionIds(source);
+	if (isNullish(pendingTxIds)) {
+		throw new Error('Pending transactions have not been iitialied');
+	}
 
-		// Convert amount to satoshis
-		const amountSatoshis = convertNumberToSatoshis({ amount });
+	// Convert amount to satoshis
+	const amountSatoshis = convertNumberToSatoshis({ amount });
 
 	// Step 1: Get current fee percentiles from backend
 	const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
