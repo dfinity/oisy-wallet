@@ -88,9 +88,7 @@
 	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken = $derived(
-		evmNativeEthereumToken ?? $ethereumToken
-	);
+	let nativeEthereumToken = $derived(evmNativeEthereumToken ?? $ethereumToken);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
@@ -108,7 +106,7 @@
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
-	let feeContext = $state<EthFeeContext | undefined>()
+	let feeContext = $state<EthFeeContext | undefined>();
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
@@ -187,7 +185,7 @@
 			}
 
 			progress(ProgressStepsSwap.DONE);
-			
+
 			trackEvent({
 				name: TRACK_COUNT_SWAP_SUCCESS,
 				metadata: {
@@ -196,7 +194,7 @@
 					dApp: $swapAmountsStore.selectedProvider.provider
 				}
 			});
-			
+
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
