@@ -44,7 +44,7 @@ export const sendIc = async ({
 
 	sendCompleted();
 
-	progress(ProgressStepsSendIc.RELOAD);
+	progress?.(ProgressStepsSendIc.RELOAD);
 
 	await waitAndTriggerWallet();
 };
