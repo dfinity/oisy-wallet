@@ -236,8 +236,8 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
-				onBack={back}
-				onClose={close}
+				onBack={() => dispatch('icBack')}
+				onClose={() => dispatch('icClose')}
 				onSwap={swap}
 				{receiveAmount}
 				{slippageValue}

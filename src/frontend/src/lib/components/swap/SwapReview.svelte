@@ -27,17 +27,17 @@
 		swapAmount: OptionAmount;
 		receiveAmount: number | undefined;
 		slippageValue: OptionAmount;
-		onBack?: () => void;
+		onBack: () => void;
 		onClose?: () => void;
-		onSwap?: () => void;
+		onSwap: () => Promise<void>;
 	}
 	let {
 		swapAmount = $bindable(),
 		receiveAmount = $bindable(),
 		slippageValue = $bindable(),
-		onBack = $bindable(() => {}),
-		onClose = $bindable(() => {}),
-		onSwap = $bindable(() => {})
+		onBack,
+		onClose,
+		onSwap
 	}: Props = $props();
 
 	const {
@@ -55,11 +55,7 @@
 
 	const handleClose = () => {
 		failedSwapError.set(undefined);
-		onClose();
-	};
-
-	const handleSwap = () => {
-		onSwap();
+		onClose?.();
 	};
 
 	let isManualWithdrawSuccess = $derived(
@@ -155,7 +151,7 @@
 			{:else}
 				<ButtonBack onclick={handleBack} />
 
-				<Button onclick={handleSwap}>
+				<Button onclick={onSwap}>
 					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
 						? $i18n.transaction.type.withdraw
 						: $i18n.swap.text.swap_button}

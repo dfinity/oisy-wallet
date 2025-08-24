@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
+	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -215,6 +215,8 @@
 			onBack();
 		}
 	};
+
+	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish($sourceToken)}
@@ -239,7 +241,14 @@
 				bind:slippageValue
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview {onBack} {onClose} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount} />
+			<SwapReview
+				onBack={() => dispatch('icBack')}
+				onClose={() => dispatch('icClose')}
+				onSwap={swap}
+				{receiveAmount}
+				{slippageValue}
+				{swapAmount}
+			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress sendWithApproval={true} bind:swapProgressStep />
 		{/if}
