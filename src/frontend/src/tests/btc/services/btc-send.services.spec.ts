@@ -1,3 +1,4 @@
+import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
 import { sendBtc, validateBtcSend, type SendBtcParams } from '$btc/services/btc-send.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
@@ -10,7 +11,7 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { Utxo } from '@dfinity/ckbtc';
-import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
+import { toNullable } from '@dfinity/utils';
 
 // Mock environment variables (same as btc-utxos.service.spec.ts)
 vi.mock('$env/networks/networks.icrc.env', () => ({
@@ -41,6 +42,9 @@ describe('btc-send.services', () => {
 				.spyOn(backendAPI, 'addPendingBtcTransaction')
 				.mockResolvedValue(true);
 			const sendBtcApiSpy = vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
+			const txidStringToUint8ArraySpy = vi
+				.spyOn(btcUtils, 'txidStringToUint8Array')
+				.mockReturnValue(new Uint8Array());
 			const onProgressSpy = vi.spyOn(defaultParams, 'onProgress');
 
 			await sendBtc(defaultParams);
@@ -63,12 +67,14 @@ describe('btc-send.services', () => {
 
 			expect(onProgressSpy).toHaveBeenCalled();
 
+			expect(txidStringToUint8ArraySpy).toHaveBeenCalledWith(txid);
+
 			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
 			expect(addPendingBtcTransactionSpy).toHaveBeenCalledWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
 				address: defaultParams.source,
-				txId: hexStringToUint8Array(txid),
+				txId: new Uint8Array(),
 				utxos: defaultParams.utxosFee.utxos
 			});
 		});
@@ -124,7 +130,11 @@ describe('btc-send.services', () => {
 			vi.clearAllMocks();
 
 			// Then set up default mocks
-			vi.spyOn(btcUtils, 'getPendingTransactionIds').mockReturnValue([]);
+			vi.spyOn(
+				btcPendingSentTransactionsServices,
+				'loadBtcPendingSentTransactions'
+			).mockResolvedValue({ success: true });
+			vi.spyOn(btcUtils, 'getPendingTransactionUtxoTxIds').mockReturnValue([]);
 			vi.spyOn(btcUtxosUtils, 'extractUtxoTxIds').mockReturnValue(['txid1', 'txid2']);
 			vi.spyOn(btcUtxosUtils, 'estimateTransactionSize').mockReturnValue(250);
 			vi.spyOn(btcUtxosService, 'getFeeRateFromPercentiles').mockResolvedValue(4000n);
@@ -262,7 +272,7 @@ describe('btc-send.services', () => {
 		});
 
 		it('should throw UtxoLocked error when UTXO is in pending transactions', async () => {
-			vi.spyOn(btcUtils, 'getPendingTransactionIds').mockReturnValue(['txid1']);
+			vi.spyOn(btcUtils, 'getPendingTransactionUtxoTxIds').mockReturnValue(['txid1']);
 			vi.spyOn(btcUtxosUtils, 'extractUtxoTxIds').mockReturnValue(['txid1']);
 
 			await expect(validateBtcSend(defaultValidateParams)).rejects.toThrow(BtcValidationError);
