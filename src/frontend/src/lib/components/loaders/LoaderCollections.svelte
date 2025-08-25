@@ -2,6 +2,8 @@
 	import type { Identity } from '@dfinity/agent';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { get } from 'svelte/store';
+	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 	import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
 	import { NFTS_ENABLED } from '$env/nft.env';
@@ -11,16 +13,14 @@
 	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
-	import { listCustomTokens } from '$lib/api/backend.api';
-	import { get } from 'svelte/store';
-	import { i18n } from '$lib/stores/i18n.store';
-	import type { CustomToken } from '$declarations/backend/backend.did';
 
 	interface Props {
 		children?: Snippet;
@@ -35,7 +35,7 @@
 		identity
 	}: {
 		contracts: OwnedContract[];
-		customTokens: CustomToken[],
+		customTokens: CustomToken[];
 		network: EthereumNetwork;
 		identity: Identity;
 	}) => {
@@ -45,8 +45,8 @@
 					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
-				return tokenAddress === contract.address && tokenChainId === network.chainId
-			})
+				return tokenAddress === contract.address && tokenChainId === network.chainId;
+			});
 			if (nonNullish(existingToken)) {
 				return acc;
 			}
@@ -71,7 +71,7 @@
 
 	const handleErc1155 = async ({
 		contracts,
-																 customTokens,
+		customTokens,
 		network,
 		identity
 	}: {
@@ -86,8 +86,8 @@
 					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
-				return tokenAddress === contract.address && tokenChainId === network.chainId
-			})
+				return tokenAddress === contract.address && tokenChainId === network.chainId;
+			});
 			if (nonNullish(existingToken)) {
 				return acc;
 			}
@@ -149,8 +149,18 @@
 				(contract) => contract.standard.toLowerCase() === 'erc1155'
 			);
 
-			await handleErc721({ contracts: erc721Contracts, customTokens: customErc721Tokens, network, identity: $authIdentity });
-			await handleErc1155({ contracts: erc1155Contracts, customTokens: customErc1155Tokens, network, identity: $authIdentity });
+			await handleErc721({
+				contracts: erc721Contracts,
+				customTokens: customErc721Tokens,
+				network,
+				identity: $authIdentity
+			});
+			await handleErc1155({
+				contracts: erc1155Contracts,
+				customTokens: customErc1155Tokens,
+				network,
+				identity: $authIdentity
+			});
 		}
 	};
 </script>

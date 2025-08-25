@@ -5,6 +5,7 @@ import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
+import { listCustomTokens } from '$lib/api/backend.api';
 import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -12,7 +13,6 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
-import { listCustomTokens } from '$lib/api/backend.api';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
