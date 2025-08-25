@@ -10,11 +10,11 @@
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
+	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -74,11 +74,11 @@
 	};
 
 	const handleErc1155 = async ({
-																 contracts,
-																 customTokens,
-																 network,
-																 identity
-															 }: {
+		contracts,
+		customTokens,
+		network,
+		identity
+	}: {
 		contracts: OwnedContract[];
 		customTokens: CustomToken[];
 		network: EthereumNetwork;

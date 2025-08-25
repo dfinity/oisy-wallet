@@ -3,10 +3,10 @@ import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.
 import * as nftEnv from '$env/nft.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
+import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import { listCustomTokens } from '$lib/api/backend.api';
 import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
-import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
