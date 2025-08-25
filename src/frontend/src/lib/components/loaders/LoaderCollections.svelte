@@ -4,6 +4,7 @@
 	import type { Snippet } from 'svelte';
 	import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 	import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -17,7 +18,6 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { OwnedContract } from '$lib/types/nft';
-	import { NFTS_ENABLED } from '$env/nft.env';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
 	interface Props {
@@ -53,7 +53,10 @@
 			return acc;
 		}, []);
 
-		await saveErc721CustomTokens({ tokens: tokens as NonEmptyArray<SaveErc721CustomToken>, identity });
+		await saveErc721CustomTokens({
+			tokens: tokens as NonEmptyArray<SaveErc721CustomToken>,
+			identity
+		});
 	};
 
 	const handleErc1155 = async ({
@@ -83,7 +86,10 @@
 			return acc;
 		}, []);
 
-		await saveErc1155CustomTokens({ tokens: tokens as NonEmptyArray<SaveErc1155CustomToken>, identity });
+		await saveErc1155CustomTokens({
+			tokens: tokens as NonEmptyArray<SaveErc1155CustomToken>,
+			identity
+		});
 	};
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
