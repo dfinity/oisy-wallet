@@ -1,10 +1,11 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
+	import { Html, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
+	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -215,6 +216,8 @@
 			onBack();
 		}
 	};
+
+	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish($sourceToken)}
@@ -240,13 +243,20 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
+				onBack={() => dispatch('icBack')}
+				onSwap={swap}
 				{receiveAmount}
 				{slippageValue}
 				{swapAmount}
-				on:icSwap={swap}
-				on:icBack
-				on:icStopTrigger
-			/>
+			>
+				{#snippet swapFees()}
+					<EthFeeDisplay>
+						{#snippet label()}
+							<Html text={$i18n.fee.text.total_fee} />
+						{/snippet}
+					</EthFeeDisplay>
+				{/snippet}
+			</SwapReview>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress sendWithApproval={true} bind:swapProgressStep />
 		{/if}

@@ -45,7 +45,7 @@ const splDefaultTokensToggleable: Readable<SplTokenToggleable[]> = derived(
 	[splDefaultTokens, splCustomTokens],
 	([$splDefaultTokens, $splCustomTokens]) =>
 		$splDefaultTokens.map(({ address, network, ...rest }) => {
-			const userToken = $splCustomTokens.find(
+			const customToken = $splCustomTokens.find(
 				({ address: contractAddress, network: contractNetwork }) =>
 					contractAddress === address &&
 					(network as SolanaNetwork).chainId === (contractNetwork as SolanaNetwork).chainId
@@ -57,7 +57,7 @@ const splDefaultTokensToggleable: Readable<SplTokenToggleable[]> = derived(
 					network,
 					...rest
 				},
-				userToken
+				customToken
 			});
 		})
 );

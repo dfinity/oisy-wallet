@@ -1,15 +1,16 @@
 import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
-import { getPendingTransactionIds } from '$icp/utils/btc.utils';
+import { getPendingTransactionUtxoTxIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
-import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { isNullish } from '@dfinity/utils';
@@ -35,9 +36,15 @@ export const prepareBtcSend = async ({
 
 	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-	// Get pending transactions to exclude locked UTXOs
-	const pendingTxIds = getPendingTransactionIds(source);
-	if (isNullish(pendingTxIds)) {
+	// Get pending UTXO transaction IDs to exclude locked UTXOs
+	// It is very important that the pending transactions are updated before validating the UTXOs
+	await loadBtcPendingSentTransactions({
+		identity,
+		networkId: mapBitcoinNetworkToNetworkId(network), // we want to avoid having to pass redundant data to the function
+		address: source
+	});
+	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
+	if (isNullish(pendingUtxoTxIds)) {
 		throw new Error('Pending transactions have not been initialized');
 	}
 
@@ -74,7 +81,7 @@ export const prepareBtcSend = async ({
 		utxos: allUtxos,
 		options: {
 			minConfirmations: requiredMinConfirmations,
-			pendingTxIds
+			pendingUtxoTxIds
 		}
 	});
 
