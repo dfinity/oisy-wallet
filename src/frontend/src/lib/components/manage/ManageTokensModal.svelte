@@ -3,6 +3,7 @@
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
@@ -52,7 +53,6 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-	import { NFTS_ENABLED } from '$env/nft.env';
 
 	let {
 		initialSearch,
