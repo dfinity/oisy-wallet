@@ -168,7 +168,7 @@ export class AlchemyProvider {
 
 		return result.contracts.map((ownedContract) => ({
 			address: ownedContract.address,
-			name: ownedContract.name,
+			name: ownedContract.name ?? '',
 			isSpam: ownedContract.isSpam,
 			standard: ownedContract.tokenType === 'ERC721' ? 'erc721' : ownedContract.tokenType === 'ERC1155' ? 'erc1155' : undefined,
 		}));
