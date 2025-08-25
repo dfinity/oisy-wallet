@@ -18,7 +18,7 @@
 </header>
 
 <main
-	class="mx-0 mt-10 flex flex-col items-start justify-center px-8 pb-10 lg:mx-auto lg:w-md lg:px-0 1.5lg:mt-28"
+	class="mx-0 mt-10 flex flex-col items-start justify-center px-8 pb-10 lg:mx-auto lg:w-sm lg:px-0 2xl:w-md 1.5lg:mt-28"
 >
 	{@render children()}
 </main>
