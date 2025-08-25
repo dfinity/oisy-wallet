@@ -150,7 +150,7 @@ describe('fetchSwapAmounts', () => {
 			tokens: mockTokens,
 			slippage,
 			isSourceTokenIcrc2: true,
-			userAddress: mockEthAddress
+			userEthAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(2);
@@ -180,7 +180,7 @@ describe('fetchSwapAmounts', () => {
 			tokens: mockTokens,
 			slippage,
 			isSourceTokenIcrc2: true,
-			userAddress: mockEthAddress
+			userEthAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(1);
@@ -205,7 +205,7 @@ describe('fetchSwapAmounts', () => {
 			tokens: mockTokens,
 			slippage,
 			isSourceTokenIcrc2: true,
-			userAddress: mockEthAddress
+			userEthAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(1);
@@ -227,7 +227,7 @@ describe('fetchSwapAmounts', () => {
 			tokens: mockTokens,
 			slippage,
 			isSourceTokenIcrc2: true,
-			userAddress: mockEthAddress
+			userEthAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(2);
@@ -250,7 +250,7 @@ describe('fetchSwapAmounts', () => {
 			tokens: mockTokens,
 			slippage,
 			isSourceTokenIcrc2: false,
-			userAddress: mockEthAddress
+			userEthAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(1);
@@ -284,7 +284,7 @@ describe('fetchSwapAmounts', () => {
 			tokens: [evmToken, mockValidErc20Token],
 			slippage: 0.5,
 			isSourceTokenIcrc2: true,
-			userAddress: '0xUser'
+			userEthAddress: '0xUser'
 		});
 
 		expect(mockGetQuote).toHaveBeenCalled();
@@ -307,7 +307,7 @@ describe('fetchSwapAmountsEVM', () => {
 	} as unknown as Erc20Token;
 
 	const amount = BigInt('1000000000000000000');
-	const userAddress = '0xUser';
+	const userEthAddress = '0xUser';
 
 	const mockGetQuote = vi.fn();
 
@@ -330,7 +330,7 @@ describe('fetchSwapAmountsEVM', () => {
 			sourceToken,
 			destinationToken,
 			amount,
-			userAddress
+			userEthAddress
 		});
 
 		expect(mapVeloraSwapResult).not.toHaveBeenCalled();
@@ -345,7 +345,7 @@ describe('fetchSwapAmountsEVM', () => {
 			sourceToken,
 			destinationToken,
 			amount,
-			userAddress
+			userEthAddress
 		});
 
 		expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
@@ -362,7 +362,7 @@ describe('fetchSwapAmountsEVM', () => {
 			sourceToken,
 			destinationToken,
 			amount,
-			userAddress
+			userEthAddress
 		});
 
 		expect(mapVeloraMarketSwapResult).toHaveBeenCalledOnce();

@@ -67,7 +67,7 @@
 				tokens: $tokens,
 				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
 				isSourceTokenIcrc2,
-				userAddress: $ethAddress
+				userEthAddress: $ethAddress
 			});
 
 			if (swapAmounts.length === 0) {

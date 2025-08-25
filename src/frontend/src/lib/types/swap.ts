@@ -60,7 +60,7 @@ export interface FetchSwapAmountsParams {
 	tokens: Token[];
 	slippage: string | number;
 	isSourceTokenIcrc2: boolean;
-	userAddress: OptionEthAddress;
+	userEthAddress: OptionEthAddress;
 }
 
 export type Slippage = string | number;
@@ -190,7 +190,7 @@ export interface VeloraQuoteParams {
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token;
 	amount: bigint;
-	userAddress: OptionEthAddress;
+	userEthAddress: OptionEthAddress;
 }
 
 export interface GetWithdrawableTokenParams {

@@ -181,7 +181,7 @@ export const fetchSwapAmounts = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2,
-	userAddress
+	userEthAddress
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -202,7 +202,7 @@ export const fetchSwapAmounts = async ({
 				sourceToken: sourceToken as Erc20Token,
 				destinationToken: destinationToken as Erc20Token,
 				amount: sourceAmount,
-				userAddress
+				userEthAddress
 			});
 };
 
@@ -214,7 +214,7 @@ const fetchSwapAmountsICP = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2
-}: Omit<FetchSwapAmountsParams, 'userAddress'> & { amount: bigint }): Promise<
+}: Omit<FetchSwapAmountsParams, 'userEthAddress'> & { amount: bigint }): Promise<
 	SwapMappedResult[]
 > => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
@@ -568,16 +568,16 @@ export const fetchSwapAmountsEVM = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userAddress
+	userEthAddress
 }: VeloraQuoteParams): Promise<SwapMappedResult[]> => {
-	if (isNullish(userAddress)) {
+	if (isNullish(userEthAddress)) {
 		return [];
 	}
 	const swapAmountsResults = await fetchVeloraSwapAmount({
 		sourceToken,
 		destinationToken,
 		amount,
-		userAddress
+		userEthAddress
 	});
 
 	if (isNullish(swapAmountsResults)) {
@@ -591,8 +591,8 @@ const fetchVeloraSwapAmount = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userAddress
-}: VeloraQuoteParams & { userAddress: EthAddress }): Promise<SwapMappedResult | null> => {
+	userEthAddress
+}: VeloraQuoteParams & { userEthAddress: EthAddress }): Promise<SwapMappedResult | null> => {
 	const {
 		network: { chainId: destChainId }
 	} = destinationToken;
@@ -614,7 +614,7 @@ const fetchVeloraSwapAmount = async ({
 		destDecimals: destinationToken.decimals,
 		mode: SWAP_MODE,
 		side: SWAP_SIDE,
-		userAddress
+		userAddress: userEthAddress
 	};
 
 	const data = await sdk.quote.getQuote(
