@@ -154,14 +154,7 @@
 				utxosFee,
 				network,
 				source,
-				identity: $authIdentity,
-				onProgress: () => {
-					if (sendProgressStep === ProgressStepsSendBtc.INITIALIZATION) {
-						progress(ProgressStepsSendBtc.SEND);
-					} else if (sendProgressStep === ProgressStepsSendBtc.SEND) {
-						progress(ProgressStepsSendBtc.DONE);
-					}
-				}
+				identity: $authIdentity
 			});
 
 			trackEvent({
@@ -172,7 +165,7 @@
 				}
 			});
 
-			sendProgressStep = ProgressStepsSendBtc.DONE;
+			progress(ProgressStepsSendBtc.DONE);
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
