@@ -10,6 +10,7 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -239,7 +240,11 @@
 			{receiveAmount}
 			{slippageValue}
 			{swapAmount}
-		/>
+		>
+			{#snippet swapFees()}
+				<SwapFees />
+			{/snippet}
+		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 		<SwapProgress bind:swapProgressStep />
 	{/if}
