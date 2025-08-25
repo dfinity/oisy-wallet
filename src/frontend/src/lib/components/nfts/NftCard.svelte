@@ -2,50 +2,62 @@
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		nft: Nft;
 		testId?: string;
+		disabled?: boolean;
 	}
 
-	let { nft, testId }: Props = $props();
+	let { nft, testId, disabled }: Props = $props();
 </script>
 
-<div data-tid={testId}>
-	<div class="relative overflow-hidden rounded-lg">
-		{#if nonNullish(nft.imageUrl)}
-			<Img
-				src={nft.imageUrl}
-				alt={replacePlaceholders($i18n.nfts.alt.card.image, {
-					$tokenId: nft.id.toString()
-				})}
-				styleClass="h-48 object-contain bg-black"
-				testId={`${testId}-image`}
-			/>
-		{:else}
-			<div class="bg-black/16 h-48 rounded-lg" data-tid={`${testId}-placeholder`}></div>
-		{/if}
+<a
+	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
+	class:cursor-not-allowed={disabled}
+	class:hover:-translate-y-1={!disabled}
+	class:hover:bg-primary={!disabled}
+	data-tid={testId}
+	href={`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`}
+	onclick={disabled ? (e) => e.preventDefault() : undefined}
+>
+	<div
+		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
+		class:opacity-50={disabled}
+	>
+		<BgImg
+			imageUrl={nft?.imageUrl}
+			shadow="inset"
+			size="cover"
+			styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+			testId={`${testId}-image`}
+		/>
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
 			{#if nonNullish(nft.balance)}
-				<Badge variant="outline" testId={`${testId}-balance`}>{nft.balance}x</Badge>
+				<Badge testId={`${testId}-balance`} variant="outline">{nft.balance}x</Badge>
 			{/if}
 
 			<NetworkLogo
+				color="white"
 				network={nft.collection.network}
 				size="xs"
-				color="white"
 				testId={`${testId}-network`}
 			/>
 		</div>
 	</div>
 
-	<div class="px-2 pt-2">
-		<h3 class="truncate text-xs font-semibold text-tertiary">{nft.collection.name}</h3>
-		<span class="text-xs text-tertiary">{`#${nft.id}`}</span>
+	<div class="flex w-full flex-col gap-1 px-2 pb-2">
+		<span
+			class="truncate text-sm font-bold"
+			class:text-disabled={disabled}
+			class:text-primary={!disabled}>{nft.name}</span
+		>
+		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
+			>#{nft.id}</span
+		>
 	</div>
-</div>
+</a>

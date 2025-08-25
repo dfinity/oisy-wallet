@@ -31,3 +31,14 @@ export const NftSchema = z.object({
 	...NftMetadataSchema.shape,
 	collection: NftCollectionSchema
 });
+
+export const OwnedNftSchema = z.object({
+	id: NftIdSchema,
+	balance: z.number()
+});
+
+export const OwnedContractSchema = z.object({
+	address: z.string(),
+	isSpam: z.boolean(),
+	standard: z.custom<TokenStandard>()
+});

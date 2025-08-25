@@ -28,17 +28,17 @@
 </script>
 
 <button
-	class="dropdown-button"
 	bind:this={button}
-	onclick={onClick}
-	aria-label={ariaLabel}
-	data-tid={testId}
-	{disabled}
+	class="dropdown-button"
+	class:border
+	class:border-tertiary={border}
 	class:disabled
 	class:opened
 	class:w-full={fullWidth}
-	class:border
-	class:border-tertiary={border}
+	aria-label={ariaLabel}
+	data-tid={testId}
+	{disabled}
+	onclick={onClick}
 >
 	{@render children?.()}
 	<div class="transform transition-transform duration-300 ease-in-out" class:-scale-y-100={opened}>

@@ -1,22 +1,23 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	const dispatch = createEventDispatcher();
+	interface Props {
+		approve?: boolean;
+		onApprove: () => void;
+		onReject: () => void;
+	}
 
-	export let approve = true;
+	let { approve = true, onApprove, onReject }: Props = $props();
 </script>
 
 <ButtonGroup>
-	<Button colorStyle="error" onclick={() => dispatch('icReject')} disabled={$isBusy}
-		>{$i18n.core.text.reject}</Button
-	>
+	<Button colorStyle="error" disabled={$isBusy} onclick={onReject}>{$i18n.core.text.reject}</Button>
 
 	{#if approve}
-		<Button colorStyle="success" disabled={$isBusy} onclick={() => dispatch('icApprove')}>
+		<Button colorStyle="success" disabled={$isBusy} onclick={onApprove}>
 			{$i18n.core.text.approve}
 		</Button>
 	{/if}

@@ -25,13 +25,13 @@
 	})();
 </script>
 
-<ConvertETH nativeTokenId={$ethereumTokenId} ariaLabel={$i18n.convert.text.convert_to_cketh}>
-	<IconCkConvert size="24" slot="icon" />
+<ConvertETH ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$ethereumTokenId}>
+	<IconCkConvert slot="icon" size="24" />
 	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckEthToken)}
 	<FeeStoreContext token={$ethereumToken}>
-		<ConvertModal sourceToken={$ethereumToken} destinationToken={ckEthToken} />
+		<ConvertModal destinationToken={ckEthToken} sourceToken={$ethereumToken} />
 	</FeeStoreContext>
 {/if}

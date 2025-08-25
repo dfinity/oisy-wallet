@@ -16,4 +16,4 @@
 	export const getIsValid = () => isValid;
 </script>
 
-<InputContactName bind:contact bind:isValid {disabled} />
+<InputContactName {disabled} bind:contact bind:isValid />

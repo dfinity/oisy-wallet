@@ -5,9 +5,9 @@
 	export let contractAddress = '';
 </script>
 
-<label for="destination" class="font-bold">{$i18n.tokens.text.contract_address}:</label>
+<label class="font-bold" for="destination">{$i18n.tokens.text.contract_address}:</label>
 <InputText
 	name="contractAddress"
-	bind:value={contractAddress}
 	placeholder={$i18n.tokens.placeholder.enter_contract_address}
+	bind:value={contractAddress}
 />

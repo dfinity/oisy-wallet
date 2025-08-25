@@ -214,16 +214,16 @@
 
 <EthFeeContext
 	bind:this={feeContext}
-	sendToken={$sendToken}
-	sendTokenId={$sendTokenId}
 	{amount}
 	{destination}
-	observe={currentStep?.name !== WizardStepsSend.SENDING}
-	{sourceNetwork}
 	{nativeEthereumToken}
+	observe={currentStep?.name !== WizardStepsSend.SENDING}
+	sendToken={$sendToken}
+	sendTokenId={$sendTokenId}
+	{sourceNetwork}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<EthSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} />
+		<EthSendReview {amount} {destination} {selectedContact} on:icBack on:icSend={send} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
 			progressStep={sendProgressStep}
@@ -231,16 +231,16 @@
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<EthSendForm
+			{nativeEthereumToken}
+			{selectedContact}
 			on:icNext
 			on:icClose={close}
 			on:icBack
 			on:icTokensList
-			{selectedContact}
 			bind:destination
 			bind:amount
-			{nativeEthereumToken}
 		>
-			<ButtonBack onclick={back} slot="cancel" />
+			<ButtonBack slot="cancel" onclick={back} />
 		</EthSendForm>
 	{:else}
 		<slot />

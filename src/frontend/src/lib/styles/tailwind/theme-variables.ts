@@ -13,6 +13,7 @@ export const themeVariables = {
 		page: 'var(--color-background-page)',
 		surface: 'var(--color-background-surface)',
 		primary: 'var(--color-background-primary)',
+		'primary-light': 'var(--color-background-primary-light)',
 		'primary-alt': 'var(--color-background-primary-alt)',
 		'primary-inverted': 'var(--color-background-primary-inverted)',
 		'primary-inverted-alt': 'var(--color-background-primary-inverted-alt)',

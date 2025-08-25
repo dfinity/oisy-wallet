@@ -69,16 +69,16 @@
 <div
 	style={`--input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px; ${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
 >
-	<Input {disabled} inputType="text" bind:value innerEnd={qrButton} {...props}></Input>
+	<Input {disabled} innerEnd={qrButton} inputType="text" bind:value {...props}></Input>
 
 	<div class="text-md pt-2">
 		{#if error}
-			<p transition:slide={SLIDE_DURATION} class="text-error-primary">
+			<p class="text-error-primary" transition:slide={SLIDE_DURATION}>
 				{error}
 			</p>
 		{/if}
 		{#if isValid}
-			<p transition:slide={SLIDE_DURATION} class="text-success-primary">
+			<p class="text-success-primary" transition:slide={SLIDE_DURATION}>
 				{$i18n.address.form.valid_for_networks}
 				{#each networks as network, i (network.id)}
 					{#if i > 0}

@@ -276,12 +276,12 @@
 </script>
 
 <WizardModal
-	{steps}
-	bind:currentStep
 	bind:this={modal}
 	disablePointerEvents={loading}
-	testId={ADDRESS_BOOK_MODAL}
 	onClose={close}
+	{steps}
+	testId={ADDRESS_BOOK_MODAL}
+	bind:currentStep
 >
 	{#snippet title()}
 		{#if currentStepName === AddressBookSteps.SHOW_ADDRESS && nonNullish(currentContact?.name)}
@@ -289,8 +289,8 @@
 				<Avatar
 					name={currentContact.name}
 					image={currentContact.image}
-					variant="xs"
 					styleClass="rounded-full flex items-center justify-center"
+					variant="xs"
 				/>
 				<div class="text-center text-lg font-semibold text-primary">
 					{currentContact.name}
@@ -308,10 +308,6 @@
 	{#if currentStepName === AddressBookSteps.ADDRESS_BOOK}
 		<AddressBookStep
 			{contacts}
-			onShowContact={(contact) => {
-				currentContactId = contact.id;
-				gotoStep(AddressBookSteps.SHOW_CONTACT);
-			}}
 			onAddContact={() => {
 				currentContactId = undefined;
 				currentAddressIndex = undefined;
@@ -324,20 +320,24 @@
 				previousStepName = AddressBookSteps.ADDRESS_BOOK;
 				gotoStep(AddressBookSteps.SHOW_ADDRESS);
 			}}
+			onShowContact={(contact) => {
+				currentContactId = contact.id;
+				gotoStep(AddressBookSteps.SHOW_CONTACT);
+			}}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_CONTACT && nonNullish(currentContact)}
 		<ShowContactStep
-			onClose={() => {
-				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
-			}}
 			contact={currentContact}
-			onEdit={(contact) => {
-				currentContactId = contact.id;
-				gotoStep(AddressBookSteps.EDIT_CONTACT);
-			}}
 			onAddAddress={() => {
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
+			}}
+			onClose={() => {
+				navigateToEntrypointOrCallback(() => gotoStep(AddressBookSteps.ADDRESS_BOOK));
+			}}
+			onEdit={(contact) => {
+				currentContactId = contact.id;
+				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
 			onShowAddress={(addressIndex) => {
 				currentAddressIndex = addressIndex;
@@ -350,55 +350,56 @@
 		<Responsive down="sm">
 			<EditContactStep
 				contact={currentContact}
-				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
-				onEdit={(contact) => {
-					currentContact = contact;
-					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
-				}}
-				onAvatarEdit={handleAddAvatar}
-				onEditAddress={(index) => {
-					currentAddressIndex = index;
-					gotoStep(AddressBookSteps.EDIT_ADDRESS);
-				}}
 				onAddAddress={() => {
 					currentAddressIndex = undefined;
 					previousStepName = AddressBookSteps.SHOW_CONTACT;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
+				onAvatarEdit={handleAddAvatar}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
+				onDeleteAddress={(index) => {
+					currentAddressIndex = index;
+				}}
 				onDeleteContact={() => {
 					isDeletingContact = true;
 				}}
-				onDeleteAddress={(index) => {
+				onEdit={(contact) => {
+					currentContact = contact;
+					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				}}
+				onEditAddress={(index) => {
 					currentAddressIndex = index;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
 			/>
 		</Responsive>
 		<Responsive up="md">
 			<EditContactStep
 				contact={currentContact}
-				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
-				onEdit={(contact) => {
-					currentContact = contact;
-					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
-				}}
-				onAvatarEdit={handleAddAvatar}
-				onEditAddress={(index) => {
-					currentAddressIndex = index;
-					gotoStep(AddressBookSteps.EDIT_ADDRESS);
-				}}
 				onAddAddress={() => {
 					currentAddressIndex = undefined;
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 				}}
-				onDeleteContact={confirmDeleteContact}
+				onAvatarEdit={handleAddAvatar}
+				onClose={() => gotoStep(AddressBookSteps.SHOW_CONTACT)}
 				onDeleteAddress={confirmDeleteAddress}
+				onDeleteContact={confirmDeleteContact}
+				onEdit={(contact) => {
+					currentContact = contact;
+					gotoStep(AddressBookSteps.EDIT_CONTACT_NAME);
+				}}
+				onEditAddress={(index) => {
+					currentAddressIndex = index;
+					gotoStep(AddressBookSteps.EDIT_ADDRESS);
+				}}
 			/>
 		</Responsive>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT_NAME}
 		<EditContactNameStep
 			bind:this={editContactNameStep}
-			bind:title={editContactNameTitle}
 			contact={currentContact}
+			disabled={loading}
+			isNewContact={isNullish(currentContact)}
 			onAddContact={async (contact: Pick<ContactUi, 'name'>) => {
 				const createdContact = await callCreateContact({ name: contact.name });
 				if (modalData?.entrypoint) {
@@ -415,27 +416,26 @@
 					}
 				}
 			}}
+			onClose={() => {
+				navigateToEntrypointOrCallback(handleClose);
+			}}
 			onSaveContact={async (contact: ContactUi) => {
 				await callUpdateContact({ contact });
 				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
-			isNewContact={isNullish(currentContact)}
-			onClose={() => {
-				navigateToEntrypointOrCallback(handleClose);
-			}}
-			disabled={loading}
+			bind:title={editContactNameTitle}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.EDIT_ADDRESS && nonNullish(currentContact)}
 		<EditAddressStep
-			contact={currentContact}
 			address={nonNullish(currentAddressIndex)
 				? currentContact?.addresses[currentAddressIndex]
 				: nonNullish(qrCodeAddress)
 					? { address: qrCodeAddress }
 					: undefined}
-			onSaveAddress={handleSaveAddress}
-			onAddAddress={handleAddAddress}
+			contact={currentContact}
+			disabled={loading}
 			isNewAddress={isNullish(currentAddressIndex)}
+			onAddAddress={handleAddAddress}
 			onClose={() => {
 				currentAddressIndex = undefined;
 				handleClose();
@@ -443,18 +443,18 @@
 			onQRCodeScan={() =>
 				nonNullish(modal) &&
 				goToWizardStep({ modal, steps, stepName: AddressBookSteps.QR_CODE_SCAN })}
-			disabled={loading}
+			onSaveAddress={handleSaveAddress}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.DELETE_ADDRESS && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
 		<DeleteAddressConfirmContent
+			address={currentContact.addresses[currentAddressIndex]}
+			contact={currentContact}
+			disabled={loading}
 			onCancel={() => {
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
 			onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
-			address={currentContact.addresses[currentAddressIndex]}
-			contact={currentContact}
-			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SHOW_ADDRESS}
 		{#if nonNullish(currentAddressIndex) && nonNullish(currentContact?.addresses?.[currentAddressIndex])}
@@ -468,15 +468,16 @@
 		{/if}
 	{:else if currentStep?.name === AddressBookSteps.DELETE_CONTACT && nonNullish(currentContact)}
 		<DeleteContactConfirmContent
+			contact={currentContact}
+			disabled={loading}
 			onCancel={() => {
 				gotoStep(AddressBookSteps.EDIT_CONTACT);
 			}}
 			onDelete={handleDeleteContact}
-			contact={currentContact}
-			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.SAVE_ADDRESS}
 		<SaveAddressStep
+			onClose={close}
 			onCreateContact={() => {
 				currentContact = undefined;
 				gotoStep(AddressBookSteps.CREATE_CONTACT);
@@ -486,10 +487,11 @@
 				currentAddressIndex = undefined;
 				gotoStep(AddressBookSteps.EDIT_ADDRESS);
 			}}
-			onClose={close}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.CREATE_CONTACT}
 		<CreateContactStep
+			disabled={loading}
+			onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
 			onSave={async (contact: ContactUi) => {
 				loading = true;
 				currentContact = contact;
@@ -498,8 +500,6 @@
 				await callUpdateContact({ contact: { ...createdContact, ...contact } });
 				close();
 			}}
-			onBack={() => gotoStep(AddressBookSteps.SAVE_ADDRESS)}
-			disabled={loading}
 		/>
 	{:else if currentStep?.name === AddressBookSteps.QR_CODE_SCAN}
 		<AddressBookQrCodeStep
@@ -515,14 +515,16 @@
 
 {#if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && nonNullish(currentAddressIndex)}
 	<DeleteAddressConfirmBottomSheet
-		onCancel={() => (currentAddressIndex = undefined)}
-		onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 		address={currentContact.addresses[currentAddressIndex]}
 		contact={currentContact}
 		disabled={loading}
+		onCancel={() => (currentAddressIndex = undefined)}
+		onDelete={() => nonNullish(currentAddressIndex) && handleDeleteAddress(currentAddressIndex)}
 	/>
 {:else if currentStep?.name === AddressBookSteps.EDIT_CONTACT && nonNullish(currentContact) && isDeletingContact}
 	<DeleteContactConfirmBottomSheet
+		contact={currentContact}
+		disabled={loading}
 		onCancel={() => {
 			isDeletingContact = false;
 		}}
@@ -532,7 +534,5 @@
 				handleDeleteContact(currentContact.id);
 			}
 		}}
-		contact={currentContact}
-		disabled={loading}
 	/>
 {/if}

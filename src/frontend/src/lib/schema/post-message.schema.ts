@@ -87,6 +87,10 @@ export const PostMessageDataRequestDip20Schema = z.object({
 	canisterId: CanisterIdTextSchema
 });
 
+export const PostMessageDataRequestIcpSchema = z.object({
+	indexCanisterId: CanisterIdTextSchema
+});
+
 export const PostMessageDataRequestIcCkSchema = IcCkMetadataSchema.pick({
 	minterCanisterId: true
 }).partial();

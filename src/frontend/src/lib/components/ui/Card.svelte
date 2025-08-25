@@ -33,8 +33,8 @@
 	<div class="flex flex-1 flex-col justify-center">
 		<div class="flex gap-1 font-bold leading-5" class:items-center={isNullish(description)}>
 			<span
-				class="clamp-4 inline-flex items-center text-left"
-				style={nonNullish(amount) ? 'max-width: 60%' : undefined}>{@render children?.()}</span
+				style={nonNullish(amount) ? 'max-width: 60%' : undefined}
+				class="clamp-4 inline-flex items-center text-left">{@render children?.()}</span
 			>
 
 			{#if nonNullish(amount)}

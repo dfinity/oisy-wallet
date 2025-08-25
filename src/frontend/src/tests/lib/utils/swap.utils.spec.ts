@@ -16,10 +16,11 @@ import {
 	VELORA_SWAP_PROVIDER
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
-import { SwapErrorCodes, VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
+import { SwapErrorCodes, SwapProvider, VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
+	findSwapProvider,
 	formatReceiveOutMinimum,
 	geSwapEthTokenAddress,
 	getKongIcTokenIdentifier,
@@ -515,6 +516,54 @@ describe('swap utils', () => {
 					destinationToken
 				})
 			).toThrow('Unknown token address');
+		});
+	});
+
+	describe('findSwapProviderDetails', () => {
+		it('returns Velora provider details when given SwapProvider.VELORA', () => {
+			const result = findSwapProvider(SwapProvider.VELORA);
+
+			expect(result).include({
+				id: 'velora',
+				website: 'https://app.velora.xyz/',
+				logo: '/images/dapps/velora-logo.svg'
+			});
+		});
+
+		it('returns Velora provider details when given the string VELORA', () => {
+			const result = findSwapProvider('VELORA');
+
+			expect(result).include({
+				id: 'velora',
+				website: 'https://app.velora.xyz/',
+				logo: '/images/dapps/velora-logo.svg'
+			});
+		});
+
+		it('returns Kongswap provider details when given kongswap', () => {
+			const result = findSwapProvider(SwapProvider.KONG_SWAP);
+
+			expect(result).include({
+				id: 'kongswap',
+				logo: '/images/dapps/kong-swap-logo.svg',
+				website: 'https://www.kongswap.io/'
+			});
+		});
+
+		it('returns ICPSWAP provider details when given icpSwap', () => {
+			const result = findSwapProvider(SwapProvider.ICP_SWAP);
+
+			expect(result).include({
+				id: 'icpswap',
+				website: 'https://icpswap.com',
+				logo: '/images/dapps/icp-swap-logo.svg'
+			});
+		});
+
+		it('should return undefined if dapp is not found', () => {
+			const result = findSwapProvider('test');
+
+			expect(result).toBeUndefined();
 		});
 	});
 });

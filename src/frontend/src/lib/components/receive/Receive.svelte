@@ -10,7 +10,7 @@
 
 <svelte:window on:oisyReceive={() => modalStore.openReceive(modalId)} />
 
-<ReceiveButtonWithModal open={modalStore.openReceive} isOpen={$modalReceive} {modalId}>
+<ReceiveButtonWithModal isOpen={$modalReceive} {modalId} open={modalStore.openReceive}>
 	{#snippet modal()}
 		<ReceiveAddressModal infoCmp={ReceiveAddresses} on:nnsClose={modalStore.close} />
 	{/snippet}

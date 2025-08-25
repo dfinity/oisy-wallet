@@ -10,7 +10,7 @@
 <Toggle
 	ariaLabel={checked ? $i18n.settings.text.disable_network : $i18n.settings.text.enable_network}
 	{checked}
-	on:nnsToggle
 	{disabled}
 	{testId}
+	on:nnsToggle
 />

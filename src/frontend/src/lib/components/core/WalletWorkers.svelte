@@ -1,14 +1,20 @@
-<script lang="ts">
+<script lang="ts" module>
+	import type { Token } from '$lib/types/token';
+
+	type T = Token;
+</script>
+
+<script generics="T extends Token = Token" lang="ts">
 	import { debounce } from '@dfinity/utils';
 	import { onDestroy, type Snippet } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { InitWalletWorkerFn, WalletWorker } from '$lib/types/listener';
-	import type { Token, TokenId } from '$lib/types/token';
+	import type { TokenId } from '$lib/types/token';
 	import { cleanWorkers, loadWorker } from '$lib/utils/wallet.utils';
 
 	interface Props {
-		tokens: Token[];
-		initWalletWorker: InitWalletWorkerFn;
+		tokens: T[];
+		initWalletWorker: InitWalletWorkerFn<T>;
 		children?: Snippet;
 	}
 

@@ -7,7 +7,8 @@ import type {
 	NftCollectionUi,
 	NftId,
 	NftsByNetwork,
-	NonFungibleToken
+	NonFungibleToken,
+	OwnedNft
 } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
@@ -61,6 +62,58 @@ export const findNft = ({
 		({ id, collection: { address, network } }) =>
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
+
+export const findNewNftIds = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: NftId[];
+}): NftId[] => inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId })));
+
+export const findRemovedNfts = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: NftId[];
+}): Nft[] =>
+	nfts.filter(
+		(nft) =>
+			nft.collection.network === token.network &&
+			nft.collection.address === token.address &&
+			isNullish(inventory.find((nftId) => nftId === nft.id))
+	);
+
+export const getUpdatedNfts = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: OwnedNft[];
+}): Nft[] =>
+	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
+		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
+			return acc;
+		}
+
+		const ownedNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
+
+		if (nonNullish(ownedNft) && nft.balance !== ownedNft.balance) {
+			acc.push({
+				...nft,
+				balance: ownedNft.balance
+			});
+		}
+
+		return acc;
+	}, []);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';

@@ -27,7 +27,7 @@
 		invalidAmount(amount);
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={invalid}>
+<SendReview {amount} {destination} disabled={invalid} {selectedContact} on:icBack on:icSend>
 	<IcTokenFee slot="fee" />
 
 	<IcReviewNetwork slot="network" />

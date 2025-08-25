@@ -14,9 +14,9 @@
 </script>
 
 <ButtonHero
-	{onclick}
-	disabled={$isBusy || isNullishOrEmpty(ONRAMPER_API_KEY)}
 	ariaLabel={$i18n.send.text.send}
+	disabled={$isBusy || isNullishOrEmpty(ONRAMPER_API_KEY)}
+	{onclick}
 >
 	{#snippet icon()}
 		<IconlyBuy size="24" />

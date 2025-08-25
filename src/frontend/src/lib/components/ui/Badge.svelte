@@ -31,10 +31,10 @@
 </script>
 
 <span
-	data-tid={testId}
 	class="inline-flex h-fit items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold {variantClassNames[
 		variant
 	]} {styleClass ?? ''} {width}"
+	data-tid={testId}
 >
 	<span class="inline-block min-w-0 truncate">
 		{@render children?.()}

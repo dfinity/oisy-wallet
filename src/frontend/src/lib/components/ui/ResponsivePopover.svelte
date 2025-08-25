@@ -15,14 +15,14 @@
 </script>
 
 <Responsive up="sm">
-	<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
 		{@render content()}
 	</Popover>
 </Responsive>
 <Responsive down="sm">
 	<BottomSheet {content} bind:visible>
 		{#snippet footer()}
-			<ButtonDone variant="secondary-light" onclick={() => (visible = false)} />
+			<ButtonDone onclick={() => (visible = false)} variant="secondary-light" />
 		{/snippet}
 	</BottomSheet>
 </Responsive>

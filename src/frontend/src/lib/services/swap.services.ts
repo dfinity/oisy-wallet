@@ -1,4 +1,8 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import { approve as approveToken } from '$eth/services/send.services';
+import { swap } from '$eth/services/swap.services';
+import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -16,12 +20,19 @@ import {
 	withdraw
 } from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
+import { signPrehash } from '$lib/api/signer.api';
 import {
 	KONG_BACKEND_CANISTER_ID,
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
-import { ICP_SWAP_POOL_FEE, SWAP_MODE, SWAP_SIDE } from '$lib/constants/swap.constants';
+import {
+	ICP_SWAP_POOL_FEE,
+	SWAP_DELTA_INTERVAL_MS,
+	SWAP_DELTA_TIMEOUT_MS,
+	SWAP_MODE,
+	SWAP_SIDE
+} from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { i18n } from '$lib/stores/i18n.store';
@@ -32,6 +43,7 @@ import {
 import {
 	SwapErrorCodes,
 	SwapProvider,
+	type CheckDeltaOrderStatusParams,
 	type FetchSwapAmountsParams,
 	type GetQuoteParams,
 	type ICPSwapResult,
@@ -40,6 +52,7 @@ import {
 	type IcpSwapWithdrawResponse,
 	type SwapMappedResult,
 	type SwapParams,
+	type SwapVeloraParams,
 	type VeloraQuoteParams
 } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
@@ -55,7 +68,13 @@ import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { constructSimpleSDK } from '@velora-dex/sdk';
+import {
+	constructSimpleSDK,
+	type BridgePrice,
+	type DeltaAuction,
+	type DeltaPrice,
+	type OptimalRate
+} from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 import { trackEvent } from './analytics.services';
 import { throwSwapError } from './swap-errors.services';
@@ -92,7 +111,10 @@ export const fetchKongSwap = async ({
 					...transferParams,
 					ledgerCanisterId
 				})
-			: await sendIcp(transferParams)
+			: await sendIcp({
+					...transferParams,
+					ledgerCanisterId
+				})
 		: undefined;
 
 	isSourceTokenIcrc2 &&
@@ -616,4 +638,200 @@ export const withdrawUserUnusedBalance = async ({
 			fee: token.fee
 		});
 	}
+};
+
+export const fetchVeloraDeltaSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	sourceNetwork,
+	receiveAmount,
+	slippageValue,
+	destinationNetwork,
+	userAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapVeloraParams): Promise<void> => {
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
+
+	const sdk = constructSimpleSDK({
+		chainId: Number(sourceNetwork.chainId),
+		fetch: window.fetch
+	});
+
+	const deltaContract = await sdk.delta.getDeltaContract();
+
+	const slippageMinimum = calculateSlippage({
+		quoteAmount: receiveAmount,
+		slippagePercentage: Number(slippageValue)
+	});
+
+	if (isNullish(deltaContract)) {
+		return;
+	}
+
+	await approveToken({
+		token: sourceToken,
+		from: userAddress,
+		to: deltaContract,
+		amount: parsedSwapAmount,
+		sourceNetwork,
+		identity,
+		gas,
+		maxFeePerGas,
+		shouldSwapWithApproval: true,
+		maxPriorityFeePerGas,
+		progress,
+		progressSteps: ProgressStepsSwap
+	});
+
+	progress(ProgressStepsSwap.SWAP);
+
+	const signableOrderData = await sdk.delta.buildDeltaOrder({
+		deltaPrice: swapDetails as DeltaPrice | BridgePrice,
+		owner: userAddress,
+		srcToken: sourceToken.address,
+		destToken: destinationToken.address,
+		srcAmount: `${parsedSwapAmount}`,
+		destAmount: `${slippageMinimum}`,
+		destChainId: Number(destinationNetwork.chainId)
+	});
+
+	const hash = getSignParamsEIP712(signableOrderData);
+
+	const signature = await signPrehash({
+		hash,
+		identity
+	});
+
+	const compactSignature = getCompactSignature(signature);
+
+	const deltaAuction = await sdk.delta.postDeltaOrder({
+		order: signableOrderData.data,
+		signature: compactSignature
+	});
+
+	await checkDeltaOrderStatus({
+		sdk,
+		auctionId: deltaAuction.id
+	});
+
+	progress(ProgressStepsSwap.UPDATE_UI);
+
+	await waitAndTriggerWallet();
+};
+
+const checkDeltaOrderStatus = async ({
+	sdk,
+	auctionId,
+	timeoutMs = SWAP_DELTA_TIMEOUT_MS,
+	intervalMs = SWAP_DELTA_INTERVAL_MS
+}: CheckDeltaOrderStatusParams): Promise<void> => {
+	const deadline = Date.now() + timeoutMs;
+
+	while (Date.now() < deadline) {
+		const auction = await sdk.delta.getDeltaOrderById(auctionId);
+
+		if (isExecutedDeltaAuction({ auction })) {
+			return;
+		}
+
+		await new Promise((r) => setTimeout(r, intervalMs));
+	}
+};
+
+const isExecutedDeltaAuction = ({
+	auction,
+	waitForCrosschain = true
+}: {
+	auction: Omit<DeltaAuction, 'signature'>;
+	waitForCrosschain?: boolean;
+}): boolean => {
+	if (auction.status !== 'EXECUTED') {
+		return false;
+	}
+
+	if (waitForCrosschain && auction.order.bridge.destinationChainId !== 0) {
+		return auction.bridgeStatus === 'filled';
+	}
+
+	return true;
+};
+
+export const fetchVeloraMarketSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	sourceNetwork,
+	slippageValue,
+	userAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	swapDetails
+}: SwapVeloraParams): Promise<void> => {
+	const parsedSwapAmount = parseToken({
+		value: `${swapAmount}`,
+		unitName: sourceToken.decimals
+	});
+
+	const sdk = constructSimpleSDK({
+		chainId: Number(sourceNetwork.chainId),
+		fetch: window.fetch
+	});
+
+	const TokenTransferProxy = await sdk.swap.getSpender();
+
+	if (!isDefaultEthereumToken(sourceToken)) {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: TokenTransferProxy,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			maxPriorityFeePerGas,
+			shouldSwapWithApproval: true,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
+	}
+
+	progress(ProgressStepsSwap.SWAP);
+
+	const txParams = await sdk.swap.buildTx({
+		srcToken: geSwapEthTokenAddress(sourceToken),
+		destToken: geSwapEthTokenAddress(destinationToken),
+		srcAmount: swapDetails.srcAmount,
+		slippage: Number(slippageValue) * 100,
+		priceRoute: swapDetails as OptimalRate,
+		userAddress
+	});
+
+	await swap({
+		from: userAddress,
+		to: txParams.to,
+		transaction: txParams,
+		identity,
+		token: sourceToken,
+		sourceNetwork,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
+		progress
+	});
+
+	progress(ProgressStepsSwap.UPDATE_UI);
+
+	await waitAndTriggerWallet();
 };
