@@ -23,6 +23,7 @@ import {
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 import type { TokenStandard } from '$lib/types/token';
+import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -163,7 +164,7 @@ export class AlchemyProvider {
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
 	getTokensForOwner = async (address: EthAddress): Promise<OwnedContract[]> => {
-		const result: AlchemyProviderContracts = await this.provider.nft.getContractsForOwner(address);
+		const result: AlchemyProviderContract = await this.provider.nft.getContractsForOwner(address);
 
 		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
 			const tokenStandard =
