@@ -5,6 +5,7 @@
 	import { writable } from 'svelte/store';
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -41,7 +42,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
-	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
