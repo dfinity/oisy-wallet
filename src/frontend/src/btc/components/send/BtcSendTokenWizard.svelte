@@ -143,6 +143,7 @@
 		}
 
 		try {
+			progress(ProgressStepsSendBtc.SEND);
 			await sendBtc({
 				destination,
 				amount,
