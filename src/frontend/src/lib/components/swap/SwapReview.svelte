@@ -103,17 +103,6 @@
 		{@render swapFees()}
 	</div>
 
-	{#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
-		<MessageBox styleClass="sm:text-sm">
-			<Html
-				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
-					$sourceNetwork: $sourceToken.network.name,
-					$destinationNetwork: $destinationToken.network.name
-				})}
-			/>
-		</MessageBox>
-	{/if}
-
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
 			<MessageBox level={$failedSwapError.variant}>
