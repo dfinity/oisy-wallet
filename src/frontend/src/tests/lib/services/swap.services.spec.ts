@@ -306,7 +306,7 @@ describe('fetchSwapAmountsEVM', () => {
 		address: '0xDestAddress'
 	} as unknown as Erc20Token;
 
-	const amount = '1000000000000000000';
+	const amount = BigInt('1000000000000000000');
 	const userAddress = '0xUser';
 
 	const mockGetQuote = vi.fn();

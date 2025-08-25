@@ -201,7 +201,7 @@ export const fetchSwapAmounts = async ({
 		: await fetchSwapAmountsEVM({
 				sourceToken: sourceToken as Erc20Token,
 				destinationToken: destinationToken as Erc20Token,
-				amount: `${sourceAmount}`,
+				amount: sourceAmount,
 				userAddress
 			});
 };
@@ -607,7 +607,7 @@ const fetchVeloraSwapAmount = async ({
 	});
 
 	const baseParams: GetQuoteParams = {
-		amount,
+		amount: `${amount}`,
 		srcToken: geSwapEthTokenAddress(sourceToken),
 		destToken: geSwapEthTokenAddress(destinationToken),
 		srcDecimals: sourceToken.decimals,
