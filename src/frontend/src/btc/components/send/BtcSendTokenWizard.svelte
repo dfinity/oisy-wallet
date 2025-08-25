@@ -137,11 +137,6 @@
 				}
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
-
 			// go back to the previous step so the user can correct/ try again
 			dispatch('icBack');
 			return;
