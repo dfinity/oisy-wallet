@@ -18,7 +18,7 @@ class MockIntersectionObserver {
 	unobserve() {}
 	disconnect() {}
 }
-vi.stubGlobal('IntersectionObserver', MockIntersectionObserver as any);
+vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 
 // Helper to trigger all IO callbacks
 const triggerIntersect = (targets: Element[]) => {
