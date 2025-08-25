@@ -8,14 +8,15 @@
 		title: string;
 		text: string;
 		stringReplacements: I18nSubstitutions;
+		sidebarHeading?: string; // default heading will be h3 (### in markdown)
 	}
 
-	const { title, text, stringReplacements }: Props = $props();
+	const { title, text, stringReplacements, sidebarHeading = '###' }: Props = $props();
 
 	const blocks: MarkdownBlockType[] = $derived.by(() =>
 		text.split('\n').map((line: string) => {
-			if (line.startsWith('###')) {
-				const title = line.replace(/^###\s*/, '').trim();
+			if (line.startsWith(sidebarHeading)) {
+				const title = line.slice(sidebarHeading.length).trim();
 				const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 				return { type: 'header', text: title, id };
 			}
@@ -28,7 +29,7 @@
 
 {#each blocks as block}
 	{#if block.type === 'header'}
-		<h3 id={block.id}>{block.text.replace(/\\+/g, '')}</h3>
+		<h3 id={block.id}>{block.text}</h3>
 	{:else}
 		<Markdown text={replacePlaceholders(block.text, stringReplacements)} />
 	{/if}
