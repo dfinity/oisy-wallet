@@ -105,7 +105,7 @@
 				network,
 				enabled: !contract.isSpam
 			};
-			acc.push(newToken);
+			acc = [...acc, newToken];
 
 			return acc;
 		}, []);
