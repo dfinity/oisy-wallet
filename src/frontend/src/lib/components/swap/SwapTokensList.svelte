@@ -59,7 +59,7 @@
 	loading={false}
 	on:icSelectNetworkFilter
 	on:icTokenButtonClick={onIcTokenButtonClick}
-	networkSelectorViewOnly={VELORA_SWAP_ENABLED ? false : true}
+	networkSelectorViewOnly={VELORA_SWAP_ENABLED}
 >
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {token} {onClick} />
