@@ -142,7 +142,7 @@ export const validateBtcSend = async ({
 	const { utxos, feeSatoshis } = utxosFee;
 	const amountSatoshis = convertNumberToSatoshis({ amount });
 
-	if (utxos.length === 0) {
+	if (utxos.length !== 0) {
 		throw new BtcValidationError(BtcSendValidationError.InsufficientBalance);
 	}
 	for (const utxo of utxos) {
