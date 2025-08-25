@@ -123,10 +123,7 @@ vi.mock('$lib/utils/swap.utils', async (importOriginal) => {
 });
 
 describe('fetchSwapAmounts', () => {
-	const mockTokens = [
-		{ ledgerCanisterId: 'token0-id', standard: 'icrc', decimals: 18 } as IcToken,
-		{ ledgerCanisterId: 'token1-id', standard: 'icrc', decimals: 18 } as IcToken
-	];
+	const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
 
 	const [sourceToken] = mockTokens;
 	const [_, destinationToken] = mockTokens;
@@ -152,7 +149,8 @@ describe('fetchSwapAmounts', () => {
 			amount,
 			tokens: mockTokens,
 			slippage,
-			isSourceTokenIcrc2: true
+			isSourceTokenIcrc2: true,
+			userAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(2);
@@ -181,7 +179,8 @@ describe('fetchSwapAmounts', () => {
 			amount,
 			tokens: mockTokens,
 			slippage,
-			isSourceTokenIcrc2: true
+			isSourceTokenIcrc2: true,
+			userAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(1);
@@ -205,7 +204,8 @@ describe('fetchSwapAmounts', () => {
 			amount,
 			tokens: mockTokens,
 			slippage,
-			isSourceTokenIcrc2: true
+			isSourceTokenIcrc2: true,
+			userAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(1);
@@ -226,7 +226,8 @@ describe('fetchSwapAmounts', () => {
 			amount,
 			tokens: mockTokens,
 			slippage,
-			isSourceTokenIcrc2: true
+			isSourceTokenIcrc2: true,
+			userAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(2);
@@ -248,11 +249,45 @@ describe('fetchSwapAmounts', () => {
 			amount,
 			tokens: mockTokens,
 			slippage,
-			isSourceTokenIcrc2: false
+			isSourceTokenIcrc2: false,
+			userAddress: mockEthAddress
 		});
 
 		expect(result).toHaveLength(1);
 		expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
+	});
+
+	it('should call fetchSwapAmountsEVM when network.id !== ICP_NETWORK_ID', async () => {
+		const mockGetQuote = vi.fn();
+
+		vi.mocked(constructSimpleSDK).mockReturnValue({
+			quote: { getQuote: mockGetQuote }
+		} as unknown as ReturnType<typeof constructSimpleSDK>);
+
+		mockGetQuote.mockResolvedValue({});
+
+		const evmToken = {
+			...mockValidErc20Token,
+			network: {
+				id: Symbol('evm-network-id'),
+				env: 'mainnet',
+				name: 'EVM Network',
+				chainId: 1n
+			}
+		} as Erc20Token;
+
+		await fetchSwapAmounts({
+			identity: mockIdentity,
+			sourceToken: evmToken,
+			destinationToken: mockValidErc20Token,
+			amount: 1000,
+			tokens: [evmToken, mockValidErc20Token],
+			slippage: 0.5,
+			isSourceTokenIcrc2: true,
+			userAddress: '0xUser'
+		});
+
+		expect(mockGetQuote).toHaveBeenCalled();
 	});
 });
 

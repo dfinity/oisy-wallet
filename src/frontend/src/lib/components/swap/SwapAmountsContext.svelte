@@ -12,11 +12,13 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import type { Erc20Token } from '$eth/types/erc20';
 
 	interface Props {
 		amount: OptionAmount;
-		sourceToken: IcToken | undefined;
-		destinationToken: IcToken | undefined;
+		sourceToken: IcToken | Erc20Token | undefined;
+		destinationToken: IcToken | Erc20Token | undefined;
 		slippageValue: OptionAmount;
 		children?: Snippet;
 		isSourceTokenIcrc2: boolean;
@@ -64,7 +66,8 @@
 				amount,
 				tokens: $tokens,
 				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
-				isSourceTokenIcrc2
+				isSourceTokenIcrc2,
+				userAddress: $ethAddress
 			});
 
 			if (swapAmounts.length === 0) {
