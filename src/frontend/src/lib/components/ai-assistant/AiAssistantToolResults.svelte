@@ -13,7 +13,7 @@
 <div class="mb-5">
 	{#each results as { result, type }, index (index)}
 		{#if type === 'show_contacts' && nonNullish(result)}
-			<AiAssistantShowContactsTool contacts={result} />
+			<AiAssistantShowContactsTool contacts={result.contacts} />
 		{/if}
 	{/each}
 </div>
