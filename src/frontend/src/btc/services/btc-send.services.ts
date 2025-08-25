@@ -167,7 +167,7 @@ export const validateBtcSend = async ({
 
 	if (isNullish(pendingUtxoTxIds)) {
 		// when no pending transactions have been initiated, we cannot validate UTXO's and therefore, validation must fail
-		throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
+		throw new BtcValidationError(BtcSendValidationError.PendingTransactionsNotAvailable);
 	}
 
 	if (pendingUtxoTxIds.length > 0) {

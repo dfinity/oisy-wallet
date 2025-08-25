@@ -22,6 +22,7 @@ export enum BtcSendValidationError {
 	InsufficientBalanceForFee = 'InsufficientBalanceForFee',
 	InvalidUtxoData = 'InvalidUtxoData',
 	UtxoLocked = 'UtxoLocked',
+	PendingTransactionsNotAvailable = 'pending_transactions_not_available',
 	InvalidFeeCalculation = 'InvalidFeeCalculation',
 	MinimumBalance = 'MinimumBalance',
 	AuthenticationRequired = 'AuthenticationRequired',

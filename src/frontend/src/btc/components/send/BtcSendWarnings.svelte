@@ -58,6 +58,12 @@
 			<span>{$i18n.send.assertion.minimum_btc_amount}</span>
 		</MessageBox>
 	</div>
+{:else if utxosFee?.error === BtcSendValidationError.PendingTransactionsNotAvailable}
+	<div class="w-full" in:fade>
+		<MessageBox level="warning">
+			<span>{$i18n.send.assertion.pending_transactions_not_available}</span>
+		</MessageBox>
+	</div>
 {:else if utxosFee?.error === BtcSendValidationError.InvalidUtxoData}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
