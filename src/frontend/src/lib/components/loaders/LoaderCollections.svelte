@@ -52,11 +52,7 @@
 			return acc;
 		}, []);
 
-		if (tokens.length > 0) {
-			return
-		}
-
-		await saveErc721CustomTokens({ tokens, identity });
+		await saveErc721CustomTokens({ tokens: tokens as [SaveErc721CustomToken, ...SaveErc721CustomToken[]], identity });
 	};
 
 	const handleErc1155 = async ({
