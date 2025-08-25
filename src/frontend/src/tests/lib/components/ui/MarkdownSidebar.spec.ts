@@ -1,4 +1,6 @@
 import MarkdownSidebar from '$lib/components/ui/MarkdownSidebar.svelte';
+import type { MarkdownBlockType } from '$lib/types/markdown';
+import { nonNullish } from '@dfinity/utils';
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 
 // ---- Mock IntersectionObserver ----
@@ -27,12 +29,14 @@ const triggerIntersect = (targets: Element[]) => {
 };
 
 // ---- Helpers to attach real <h3 id="..."> into the document ----
-const insertHeadingsIntoDOM = (idsAndText: Array<{ id: string; text: string }>) => {
-	idsAndText.forEach(({ id, text }) => {
-		const h = document.createElement('h3');
-		h.id = id;
-		h.textContent = text;
-		document.body.appendChild(h);
+const insertHeadingsIntoDOM = (blocks: MarkdownBlockType[]) => {
+	blocks.forEach(({ id, text }) => {
+		if (nonNullish(id)) {
+			const h = document.createElement('h3');
+			h.id = id;
+			h.textContent = text;
+			document.body.appendChild(h);
+		}
 	});
 };
 
@@ -49,17 +53,17 @@ afterEach(() => {
 
 describe('MarkdownSidebar', () => {
 	it('renders links for headings with correct hrefs and highlights the first by default', async () => {
-		const headings = [
+		const headings: MarkdownBlockType[] = [
 			{ type: 'header', text: 'Acceptance of Terms', id: 'heading-1' },
 			{ type: 'header', text: 'Description of our Services', id: 'heading-2' },
 			{ type: 'header', text: 'Account Access and Security', id: 'heading-3' }
-		] as const;
+		];
 
 		// Put real <h3> elements in the DOM so the component can observe them
-		insertHeadingsIntoDOM(headings.map(({ id, text }) => ({ id, text })));
+		insertHeadingsIntoDOM(headings);
 
 		const { getByRole } = render(MarkdownSidebar, {
-			props: { headings: headings as any }
+			props: { headings: headings }
 		});
 
 		// Links rendered with correct text and hrefs
