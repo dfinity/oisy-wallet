@@ -17,7 +17,7 @@
 
 	interface Props {
 		amount: OptionAmount;
-		sourceToken: IcToken | Erc20Token | undefined;
+		sourceToken?: IcToken | Erc20Token;
 		destinationToken: IcToken | Erc20Token | undefined;
 		slippageValue: OptionAmount;
 		children?: Snippet;
