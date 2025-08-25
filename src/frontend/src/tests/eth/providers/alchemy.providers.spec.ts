@@ -2,6 +2,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
+import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { OwnedContract, OwnedNft } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -10,7 +11,6 @@ import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Alchemy } from 'alchemy-sdk';
-import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();

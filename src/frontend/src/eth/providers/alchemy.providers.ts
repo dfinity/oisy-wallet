@@ -1,6 +1,7 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
+import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc721ContractAddress } from '$eth/types/erc721';
@@ -9,6 +10,7 @@ import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { OwnedContract, OwnedNft } from '$lib/types/nft';
+import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -22,8 +24,6 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
-import type { TokenStandard } from '$lib/types/token';
-import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
