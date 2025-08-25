@@ -79,6 +79,77 @@ describe('alchemy.providers', () => {
 		});
 	});
 
+	describe('getTokensForOwner', () => {
+		const mockApiResponse: AlchemyProviderContracts = {
+			contracts: [
+				{
+					isSpam: false,
+					address: mockEthAddress,
+					tokenType: 'ERC721'
+				},
+				{
+					isSpam: false,
+					address: mockEthAddress2,
+					tokenType: 'ERC721'
+				}
+			]
+		};
+
+		const expectedContracts: OwnedContract[] = [
+			{ address: mockEthAddress, isSpam: false, standard: 'erc721' },
+			{ address: mockEthAddress2, isSpam: false, standard: 'erc721' }
+		];
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should fetch and map contracts correctly', async () => {
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getContractsForOwner: vi.fn().mockResolvedValue(mockApiResponse)
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			const contracts = await provider.getTokensForOwner(mockEthAddress);
+
+			expect(Alchemy.prototype.nft.getContractsForOwner).toHaveBeenCalledOnce();
+
+			expect(contracts).toStrictEqual(expectedContracts);
+		});
+
+		it('should handle incorrect token types correctly', async () => {
+			const updatedMockApiResponse = {
+				...mockApiResponse,
+				...[
+					{
+						isSpam: false,
+						address: mockEthAddress,
+						tokenType: 'NO_SUPPORTED_NFT_STANDARD'
+					}
+				]
+			};
+
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getContractsForOwner: vi.fn().mockResolvedValue(updatedMockApiResponse)
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			const contracts = await provider.getTokensForOwner(mockEthAddress);
+
+			expect(Alchemy.prototype.nft.getContractsForOwner).toHaveBeenCalledOnce();
+
+			expect(contracts).toStrictEqual(expectedContracts);
+		});
+	});
+
 	describe('alchemyProviders', () => {
 		networks.forEach(({ id, name }) => {
 			it(`should return the correct provider for ${name} network`, () => {
