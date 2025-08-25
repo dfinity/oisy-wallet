@@ -18,7 +18,7 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { hexStringToUint8Array, nonNullish, toNullable } from '@dfinity/utils';
+import { hexStringToUint8Array, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 interface BtcSendServiceParams {
@@ -156,6 +156,12 @@ export const validateBtcSend = async ({
 
 	// 2. Check if UTXOs are still unspent (not locked by pending transactions)
 	const pendingTxIds = getPendingTransactionIds(source);
+
+	if (isNullish(pendingTxIds)) {
+		// when no pending transactions have been initiated, we cannot validate UTXO's and therefore, validation must fail
+		throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
+	}
+
 	if (pendingTxIds.length > 0) {
 		const providedUtxoTxIds = extractUtxoTxIds(utxos);
 		for (const utxoTxId of providedUtxoTxIds) {

@@ -37,6 +37,9 @@ export const prepareBtcSend = async ({
 
 	// Get pending transactions to exclude locked UTXOs
 	const pendingTxIds = getPendingTransactionIds(source);
+	if (isNullish(pendingTxIds)) {
+		throw new Error('Pending transactions have not been initialized');
+	}
 
 	// Convert amount to satoshis
 	const amountSatoshis = convertNumberToSatoshis({ amount });

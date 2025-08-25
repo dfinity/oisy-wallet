@@ -71,6 +71,10 @@ export const SUPPORTED_ICP_TOKENS: RequiredToken<Omit<IcToken, 'deprecated'>>[] 
 		testnetTokens: [TESTICP_TOKEN]
 	});
 
+export const SUPPORTED_ICP_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = SUPPORTED_ICP_TOKENS.map(
+	({ ledgerCanisterId }) => ledgerCanisterId
+);
+
 export const ICP_LEDGER_CANISTER_TESTNET_IDS: LedgerCanisterIdText[] = [
 	TESTICP_TOKEN.ledgerCanisterId
 ];

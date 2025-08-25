@@ -24,6 +24,7 @@
 		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet,
+		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet
@@ -58,13 +59,10 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { readable } from 'svelte/store';
 
 	interface Props {
 		children: Snippet;
 	}
-
-	const ethAddress = readable('0xffce06ddc814537ff78076df32bf4bce108ec66f');
 
 	let { children }: Props = $props();
 
