@@ -27,11 +27,11 @@
 	let { children }: Props = $props();
 
 	const handleErc721 = async ({
-																contracts,
-																customTokens,
-																network,
-																identity
-															}: {
+		contracts,
+		customTokens,
+		network,
+		identity
+	}: {
 		contracts: OwnedContract[];
 		customTokens: CustomToken[];
 		network: EthereumNetwork;
