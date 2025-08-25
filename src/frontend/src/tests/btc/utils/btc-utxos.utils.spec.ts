@@ -4,9 +4,9 @@ import {
 	extractUtxoTxIds,
 	filterAvailableUtxos,
 	filterLockedUtxos,
-	utxoTxIdToString,
 	type UtxoSelectionResult
 } from '$btc/utils/btc-utxos.utils';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
 
@@ -31,18 +31,18 @@ describe('btc-utxos.utils', () => {
 	});
 
 	describe('utxoTxIdToString', () => {
-		it('should convert Uint8Array to hex string', () => {
+		it('should convert Uint8Array to hex string with byte reversal', () => {
 			const txid = new Uint8Array([1, 2, 3, 4]);
 			const result = utxoTxIdToString(txid);
 
-			expect(result).toBe('01020304');
+			expect(result).toBe('04030201');
 		});
 
-		it('should convert number array to hex string', () => {
+		it('should convert number array to hex string with byte reversal', () => {
 			const txid = [1, 2, 3, 4];
 			const result = utxoTxIdToString(txid);
 
-			expect(result).toBe('01020304');
+			expect(result).toBe('04030201');
 		});
 
 		it('should handle empty array', () => {
@@ -62,7 +62,7 @@ describe('btc-utxos.utils', () => {
 
 			const result = extractUtxoTxIds(utxos);
 
-			expect(result).toEqual(['01020304', '05060708']);
+			expect(result).toEqual(['04030201', '08070605']);
 		});
 
 		it('should return empty array for empty input', () => {
@@ -222,11 +222,11 @@ describe('btc-utxos.utils', () => {
 		];
 
 		it('should filter out locked UTXOs', () => {
-			const pendingTxIds = ['01020304', '090a0b0c']; // Hex of [1,2,3,4] and [9,10,11,12]
+			const pendingUtxoTxIds = ['04030201', '0c0b0a09']; // Hex of [1,2,3,4] and [9,10,11,12] reversed
 
 			const result = filterLockedUtxos({
 				utxos,
-				pendingTxIds
+				pendingUtxoTxIds
 			});
 
 			expect(result).toHaveLength(1);
@@ -236,7 +236,7 @@ describe('btc-utxos.utils', () => {
 		it('should return all UTXOs when no pending transactions', () => {
 			const result = filterLockedUtxos({
 				utxos,
-				pendingTxIds: []
+				pendingUtxoTxIds: []
 			});
 
 			expect(result).toHaveLength(3);
@@ -245,7 +245,7 @@ describe('btc-utxos.utils', () => {
 		it('should handle empty UTXO array', () => {
 			const result = filterLockedUtxos({
 				utxos: [],
-				pendingTxIds: ['01020304']
+				pendingUtxoTxIds: ['04030201']
 			});
 
 			expect(result).toEqual([]);
@@ -274,7 +274,7 @@ describe('btc-utxos.utils', () => {
 				utxos,
 				options: {
 					minConfirmations: 6,
-					pendingTxIds: []
+					pendingUtxoTxIds: []
 				}
 			});
 
@@ -287,7 +287,7 @@ describe('btc-utxos.utils', () => {
 				utxos,
 				options: {
 					minConfirmations: 1,
-					pendingTxIds: []
+					pendingUtxoTxIds: []
 				}
 			});
 
@@ -297,13 +297,13 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should filter out locked UTXOs', () => {
-			const pendingTxIds = ['05060708']; // Hex of [5, 6, 7, 8]
+			const pendingUtxoTxIds = ['08070605']; // Hex of [5, 6, 7, 8] reversed
 
 			const result = filterAvailableUtxos({
 				utxos,
 				options: {
 					minConfirmations: 6,
-					pendingTxIds
+					pendingUtxoTxIds
 				}
 			});
 
@@ -312,13 +312,13 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should apply both confirmation and lock filters', () => {
-			const pendingTxIds = ['090a0b0c']; // Hex of [9, 10, 11, 12]
+			const pendingUtxoTxIds = ['0c0b0a09']; // Hex of [9, 10, 11, 12] reversed
 
 			const result = filterAvailableUtxos({
 				utxos,
 				options: {
 					minConfirmations: 10,
-					pendingTxIds
+					pendingUtxoTxIds
 				}
 			});
 
@@ -332,7 +332,7 @@ describe('btc-utxos.utils', () => {
 				utxos: [],
 				options: {
 					minConfirmations: 1,
-					pendingTxIds: []
+					pendingUtxoTxIds: []
 				}
 			});
 
