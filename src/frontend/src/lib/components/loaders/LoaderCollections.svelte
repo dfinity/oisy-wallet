@@ -17,6 +17,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { OwnedContract } from '$lib/types/nft';
+	import { NFTS_ENABLED } from '$env/nft.env';
 
 	interface Props {
 		children?: Snippet;
@@ -99,7 +100,7 @@
 	};
 
 	const onLoad = async () => {
-		if (isNullish($authIdentity)) {
+		if (!NFTS_ENABLED || isNullish($authIdentity)) {
 			return;
 		}
 
