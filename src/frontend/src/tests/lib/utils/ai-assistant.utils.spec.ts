@@ -50,7 +50,7 @@ describe('ai-assistant.utils', () => {
 					aiAssistantContacts: [aiAssistantContact],
 					extendedAddressContacts: storeData
 				})
-			).toEqual([...contactsData]);
+			).toEqual(Object.values(storeData));
 		});
 	});
 });
