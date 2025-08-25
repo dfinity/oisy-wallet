@@ -40,10 +40,10 @@
 		identity: Identity;
 	}) => {
 		const tokens = contracts.reduce<SaveErc721CustomToken[]>((acc, contract) => {
-			const existingToken = customTokens.find(({ token }) => {
+			const existingToken = customTokens.find((customToken): customToken is CustomToken => {
 				const {
 					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
-				} = token;
+				} = customToken;
 
 				return tokenAddress === contract.address && tokenChainId === network.chainId;
 			});
