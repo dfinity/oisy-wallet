@@ -243,7 +243,6 @@
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
 				onBack={() => dispatch('icBack')}
-				onStopTrigger={() => dispatch('icStopTrigger')}
 				onSwap={swap}
 				{receiveAmount}
 				{slippageValue}
