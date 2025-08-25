@@ -102,7 +102,7 @@ describe('BtcSendReview', () => {
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 
-	it('should disable the next button if utxos are not available', () => {
+	it('should disable the next button if utxosFee has an error', () => {
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcSendReview, {
@@ -110,7 +110,7 @@ describe('BtcSendReview', () => {
 				...props,
 				utxosFee: {
 					...mockUtxosFee,
-					utxos: []
+					error: BtcPrepareSendError.InsufficientBalance
 				}
 			},
 			context: mockContext()

@@ -22,7 +22,6 @@
 		</MessageBox>
 	</div>
 {/if}
-
 {#if utxosFee?.error === BtcPrepareSendError.InsufficientBalance}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">
