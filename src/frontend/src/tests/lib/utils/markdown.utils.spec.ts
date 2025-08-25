@@ -18,6 +18,7 @@ Some paragraph text
 	it('trims spaces after heading designator', () => {
 		const markdown = '###    Spaced Heading';
 		const result = getMarkdownBlocks({ markdown, headingDesignator: '###' });
+
 		expect(result[0]).toEqual({
 			type: 'header',
 			text: 'Spaced Heading',
@@ -28,12 +29,14 @@ Some paragraph text
 	it('handles non-heading lines correctly', () => {
 		const markdown = 'Just some text';
 		const result = getMarkdownBlocks({ markdown, headingDesignator: '###' });
+
 		expect(result).toEqual([{ type: 'default', text: 'Just some text' }]);
 	});
 
 	it('generates slugified IDs with dashes', () => {
 		const markdown = '### Heading With !@#$ Symbols';
 		const result = getMarkdownBlocks({ markdown, headingDesignator: '###' });
+
 		expect(result[0].id).toBe('heading-with-symbols');
 	});
 
@@ -55,6 +58,7 @@ Some text`;
 
 	it('returns empty array for empty string', () => {
 		const result = getMarkdownBlocks({ markdown: '', headingDesignator: '###' });
+
 		expect(result).toEqual([{ type: 'default', text: '' }]);
 	});
 });
