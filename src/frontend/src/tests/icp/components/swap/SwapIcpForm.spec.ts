@@ -16,8 +16,8 @@ describe('SwapIcpForm', () => {
 
 	beforeEach(() => {
 		const originalSwapContext = initSwapContext({
-			sourceToken: mockValidIcToken as IcTokenToggleable ,
-			destinationToken: mockValidIcCkToken as IcTokenToggleable 
+			sourceToken: mockValidIcToken as IcTokenToggleable,
+			destinationToken: mockValidIcCkToken as IcTokenToggleable
 		});
 
 		const mockSwapContext = {

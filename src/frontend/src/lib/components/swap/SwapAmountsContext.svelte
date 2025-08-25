@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import type { Erc20Token } from '$eth/types/erc20';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -12,8 +14,6 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import type { Erc20Token } from '$eth/types/erc20';
 
 	interface Props {
 		amount: OptionAmount;
