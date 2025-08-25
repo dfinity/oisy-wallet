@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
-	import SwapFees from '$lib/components/swap/SwapFees.svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
@@ -31,6 +30,7 @@
 		onBack: () => void;
 		onClose?: () => void;
 		onSwap: () => Promise<void>;
+		swapFees: Snippet;
 	}
 	let {
 		swapAmount = $bindable(),
@@ -38,7 +38,8 @@
 		slippageValue = $bindable(),
 		onBack,
 		onClose,
-		onSwap
+		onSwap,
+		swapFees
 	}: Props = $props();
 
 	const {
@@ -99,7 +100,7 @@
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
-		<SwapFees />
+		{@render swapFees()}
 	</div>
 
 	{#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
