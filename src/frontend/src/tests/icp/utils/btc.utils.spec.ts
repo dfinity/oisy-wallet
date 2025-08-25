@@ -67,28 +67,58 @@ describe('btc.utils', () => {
 	});
 
 	describe('getPendingTransactions', () => {
-		it('returns store entry for address', () => {
+		it('returns transaction array for address', () => {
+			const transactions = [{ txid: [1, 2, 3] }];
 			const storeValue: StoreValue = {
-				[addr]: { certified: true as const, data: [{ txid: [1, 2, 3] }] }
+				[addr]: { certified: true as const, data: transactions }
 			};
 			mockStoreApi.setStoreValue(storeValue);
 
 			const result = getPendingTransactions(addr);
 
-			expect(result).toEqual(storeValue[addr]);
-			expect(result.certified).toBeTruthy();
+			expect(result).toEqual(transactions);
+		});
+
+		it('returns null when data is null', () => {
+			const storeValue: StoreValue = {
+				[addr]: { certified: true as const, data: null }
+			};
+			mockStoreApi.setStoreValue(storeValue);
+
+			const result = getPendingTransactions(addr);
+
+			expect(result).toBeNull();
+		});
+
+		it('returns null when store is empty', () => {
+			mockStoreApi.setStoreValue({});
+
+			const result = getPendingTransactions(addr);
+
+			expect(result).toBeNull();
+		});
+
+		it('returns empty array when address not in populated store', () => {
+			const storeValue: StoreValue = {
+				'other-addr': { certified: true as const, data: [{ txid: [1] }] }
+			};
+			mockStoreApi.setStoreValue(storeValue);
+
+			const result = getPendingTransactions(addr);
+
+			expect(result).toEqual([]);
 		});
 	});
 
 	describe('getPendingTransactionIds', () => {
-		it('returns [] when data is null or missing', () => {
+		it('returns null when data is null or missing', () => {
 			mockStoreApi.setStoreValue({ [addr]: { certified: true as const, data: null } });
 
-			expect(getPendingTransactionIds(addr)).toEqual([]);
+			expect(getPendingTransactionIds(addr)).toEqual(null);
 
 			mockStoreApi.setStoreValue({}); // address not present
 
-			expect(getPendingTransactionIds(addr)).toEqual([]);
+			expect(getPendingTransactionIds(addr)).toEqual(null);
 		});
 
 		it('converts transaction IDs and filters out empty ones', () => {

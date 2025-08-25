@@ -710,6 +710,7 @@ interface I18nSwap {
 		network_cost: string;
 		gasless: string;
 		swap_fees: string;
+		cross_chain_networks_info: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -884,8 +885,10 @@ interface I18nNfts {
 		nft_not_loaded: string;
 		collections: string;
 		all_assets: string;
+		address_copied: string;
+		open_explorer: string;
 	};
-	alt: { placeholder_image: string; card: { image: string } };
+	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
 
 interface I18nFee {
