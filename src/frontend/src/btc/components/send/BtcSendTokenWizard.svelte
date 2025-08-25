@@ -154,9 +154,6 @@
 				identity: $authIdentity
 			});
 
-			// Trigger BTC statuses update after successful send
-			window.dispatchEvent(new CustomEvent('oisyTriggerWallet'));
-
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_SUCCESS,
 				metadata: {
