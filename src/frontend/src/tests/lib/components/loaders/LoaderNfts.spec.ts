@@ -244,6 +244,8 @@ describe('LoaderNfts', () => {
 	});
 
 	describe('handleUpdatedNfts', () => {
+		let loadNftIdsOfTokenSpy: MockInstance;
+
 		const mockNft1 = {
 			...mockValidErc1155Nft,
 			id: mockNftId1,
@@ -282,6 +284,8 @@ describe('LoaderNfts', () => {
 				{ data: mockedEnabledNyanToken, certified: false },
 				{ data: mockedEnabledApeToken, certified: false }
 			]);
+
+			loadNftIdsOfTokenSpy = vi.spyOn(nftServicesModule, 'loadNftIdsOfToken');
 		});
 
 		it('should update ERC1155 nfts from the nft store', async () => {
