@@ -491,7 +491,7 @@ service : (Arg) -> {
 	// # Returns
 	// * `Ok(GetContactResult)` - The requested contact if found
 	// # Errors
-	// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
+	// * `ContactNotFound` - If no contact for the proivided contact_id could be found
 	get_contact : (nat64) -> (GetContactResult) query;
 	// Returns all contacts for the caller
 	//
