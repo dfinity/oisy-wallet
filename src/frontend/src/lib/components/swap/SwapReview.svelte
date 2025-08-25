@@ -21,7 +21,6 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
