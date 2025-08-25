@@ -3,26 +3,18 @@
 	import { type I18nSubstitutions, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import MarkdownSidebar from '$lib/components/ui/MarkdownSidebar.svelte';
 	import type { MarkdownBlockType } from '$lib/types/markdown';
+	import { getMarkdownBlocks } from '$lib/utils/markdown.utils';
 
 	interface Props {
 		title: string;
 		text: string;
 		stringReplacements: I18nSubstitutions;
-		sidebarHeading?: string; // default heading will be h3 (### in markdown)
+		headingDesignator?: string; // default heading will be h3 (### in markdown)
 	}
 
-	const { title, text, stringReplacements, sidebarHeading = '###' }: Props = $props();
+	const { title, text, stringReplacements, headingDesignator = '###' }: Props = $props();
 
-	const blocks: MarkdownBlockType[] = $derived.by(() =>
-		text.split('\n').map((line: string) => {
-			if (line.startsWith(sidebarHeading)) {
-				const title = line.slice(sidebarHeading.length).trim();
-				const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-				return { type: 'header', text: title, id };
-			}
-			return { type: 'default', text: line };
-		})
-	);
+	const blocks: MarkdownBlockType[] = $derived(getMarkdownBlocks({ md: text, headingDesignator }));
 </script>
 
 <h1 class="mb-4">{title}</h1>
