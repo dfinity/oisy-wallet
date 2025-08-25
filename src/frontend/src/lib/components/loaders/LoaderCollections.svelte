@@ -83,9 +83,7 @@
 			return acc;
 		}, []);
 
-		if (tokens.length > 0) {
-			await saveErc1155CustomTokens({ tokens, identity });
-		}
+		await saveErc1155CustomTokens({ tokens: tokens as NonEmptyArray<SaveErc1155CustomToken>, identity });
 	};
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
