@@ -11,9 +11,9 @@ import { ethAddressStore } from '$lib/stores/address.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
-import { toNullable } from '@dfinity/utils';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -109,13 +109,20 @@ describe('LoaderCollections', () => {
 		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
 
 		const existingErc721CustomTokens = networks.map((network) => ({
-			token: { Erc721: {token_address: mockEthAddress, chain_id: network.chainId}}, version: toNullable(1n), enabled: true
-		}))
+			token: { Erc721: { token_address: mockEthAddress, chain_id: network.chainId } },
+			version: toNullable(1n),
+			enabled: true
+		}));
 		const existingErc1155CustomTokens = networks.map((network) => ({
-			token: { Erc1155: {token_address: mockEthAddress, chain_id: network.chainId}}, version: toNullable(1n), enabled: true
-		}))
+			token: { Erc1155: { token_address: mockEthAddress, chain_id: network.chainId } },
+			version: toNullable(1n),
+			enabled: true
+		}));
 
-		vi.mocked(listCustomTokens).mockResolvedValue([...existingErc721CustomTokens, ...existingErc1155CustomTokens]);
+		vi.mocked(listCustomTokens).mockResolvedValue([
+			...existingErc721CustomTokens,
+			...existingErc1155CustomTokens
+		]);
 
 		mockGetTokensForOwner.mockResolvedValue([
 			{ address: mockEthAddress, isSpam: false, standard: 'erc721' },
@@ -130,5 +137,5 @@ describe('LoaderCollections', () => {
 			expect(erc721CustomTokensSpy).not.toHaveBeenCalled();
 			expect(erc1155CustomTokensSpy).not.toHaveBeenCalled();
 		});
-	})
+	});
 });
