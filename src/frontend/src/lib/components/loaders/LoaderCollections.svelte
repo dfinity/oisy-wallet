@@ -40,7 +40,7 @@
 		identity: Identity;
 	}) => {
 		const tokens = contracts.reduce<SaveErc721CustomToken[]>((acc, contract) => {
-			const existingToken = customTokens.find(({token}) => {
+			const existingToken = customTokens.find(({ token }) => {
 				if (!('Erc721' in token)) {
 					return false;
 				}
