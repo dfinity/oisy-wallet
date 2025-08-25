@@ -37,17 +37,15 @@
 	});
 </script>
 
-<div class="fixed right-12 top-10 hidden rounded-2xl bg-primary py-2 xl:block 1.5lg:top-28">
-	<List condensed styleClass="pr-3">
-		{#each headings as { id, text }, index (id)}
-			<ListItem>
-				<a href={`#${id}`} class="w-full no-underline">
-					<span
-						class:text-primary={nonNullish(activeId) ? activeId === id : index === 0}
-						class="text-xs">{text}</span
-					>
-				</a>
-			</ListItem>
-		{/each}
-	</List>
-</div>
+<List condensed styleClass="pr-3">
+	{#each headings as { id, text }, index (id)}
+		<ListItem>
+			<a href={`#${id}`} class="w-full no-underline">
+				<span
+					class:text-primary={nonNullish(activeId) ? activeId === id : index === 0}
+					class="text-xs">{text}</span
+				>
+			</a>
+		</ListItem>
+	{/each}
+</List>
