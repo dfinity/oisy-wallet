@@ -1,17 +1,17 @@
-import { mockAuthStore } from '$tests/mocks/auth.mock';
-import type { MockInstance } from 'vitest';
-import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
-import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { render, waitFor } from '@testing-library/svelte';
-import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
-import * as nftEnv from '$env/nft.env';
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
+import * as nftEnv from '$env/nft.env';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
+import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
+import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
+import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 import { ethAddressStore } from '$lib/stores/address.store';
-import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services'
-import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services'
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { render, waitFor } from '@testing-library/svelte';
+import type { MockInstance } from 'vitest';
 
 describe('LoaderCollections', () => {
 	let alchemyProvidersSpy: MockInstance;
@@ -39,15 +39,15 @@ describe('LoaderCollections', () => {
 		mockAuthStore();
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
-	})
+	});
 
 	it('should add new collections', async () => {
 		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
 
 		mockGetTokensForOwner.mockResolvedValue([
-			{address: mockEthAddress, isSpam: false, standard: 'erc721'},
-			{address: mockEthAddress, isSpam: false, standard: 'erc1155'}
-		])
+			{ address: mockEthAddress, isSpam: false, standard: 'erc721' },
+			{ address: mockEthAddress, isSpam: false, standard: 'erc1155' }
+		]);
 
 		render(LoaderCollections);
 
@@ -55,21 +55,35 @@ describe('LoaderCollections', () => {
 			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
 
 			for (const network of networks) {
-				expect(erc721CustomTokensSpy).toHaveBeenCalledWith({tokens: [{
-					address: mockEthAddress, network, enabled: true
-					}], identity: mockIdentity})
+				expect(erc721CustomTokensSpy).toHaveBeenCalledWith({
+					tokens: [
+						{
+							address: mockEthAddress,
+							network,
+							enabled: true
+						}
+					],
+					identity: mockIdentity
+				});
 
-				expect(erc1155CustomTokensSpy).toHaveBeenCalledWith({tokens: [{
-						address: mockEthAddress, network, enabled: true
-					}], identity: mockIdentity})
+				expect(erc1155CustomTokensSpy).toHaveBeenCalledWith({
+					tokens: [
+						{
+							address: mockEthAddress,
+							network,
+							enabled: true
+						}
+					],
+					identity: mockIdentity
+				});
 			}
-		})
+		});
 	});
 
 	it('should not add existing collections', async () => {
 		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
 
-		mockGetTokensForOwner.mockResolvedValue([])
+		mockGetTokensForOwner.mockResolvedValue([]);
 
 		render(LoaderCollections);
 
@@ -78,6 +92,6 @@ describe('LoaderCollections', () => {
 
 			expect(erc721CustomTokensSpy).not.toHaveBeenCalled();
 			expect(erc1155CustomTokensSpy).not.toHaveBeenCalled();
-		})
+		});
 	});
-})
+});
