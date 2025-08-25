@@ -1,5 +1,5 @@
 import type { AiAssistantContactUi, AiAssistantContactUiMap } from '$lib/types/ai-assistant';
-import type { ContactUi, ExtendedAddressContactUiMap } from '$lib/types/contact';
+import type { ExtendedAddressContactUi, ExtendedAddressContactUiMap } from '$lib/types/contact';
 
 export const parseToAiAssistantContacts = (
 	extendedAddressContacts: ExtendedAddressContactUiMap
@@ -23,17 +23,15 @@ export const parseFromAiAssistantContacts = ({
 }: {
 	aiAssistantContacts: AiAssistantContactUi[];
 	extendedAddressContacts: ExtendedAddressContactUiMap;
-}): ContactUi[] =>
-	aiAssistantContacts.reduce<ContactUi[]>(
+}): ExtendedAddressContactUi[] =>
+	aiAssistantContacts.reduce<ExtendedAddressContactUi[]>(
 		(acc, { id, addresses }) => [
 			...acc,
 			{
 				...extendedAddressContacts[`${id}`],
-				addresses: extendedAddressContacts[`${id}`].addresses
-					.filter(({ id: addressId }) =>
-						addresses.some((filteredAddress) => filteredAddress.id === addressId)
-					)
-					.map(({ id: _, ...rest }) => ({ ...rest }))
+				addresses: extendedAddressContacts[`${id}`].addresses.filter(({ id: addressId }) =>
+					addresses.some((filteredAddress) => filteredAddress.id === addressId)
+				)
 			}
 		],
 		[]
