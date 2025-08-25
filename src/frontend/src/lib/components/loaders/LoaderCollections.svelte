@@ -18,6 +18,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { OwnedContract } from '$lib/types/nft';
 	import { NFTS_ENABLED } from '$env/nft.env';
+	import type { NonEmptyArray } from '$lib/types/utils';
 
 	interface Props {
 		children?: Snippet;
@@ -52,7 +53,7 @@
 			return acc;
 		}, []);
 
-		await saveErc721CustomTokens({ tokens: tokens as [SaveErc721CustomToken, ...SaveErc721CustomToken[]], identity });
+		await saveErc721CustomTokens({ tokens: tokens as NonEmptyArray<SaveErc721CustomToken>, identity });
 	};
 
 	const handleErc1155 = async ({
