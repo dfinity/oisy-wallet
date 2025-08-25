@@ -24,6 +24,7 @@ import {
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { TokenStandard } from '$lib/types/token';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -177,7 +178,7 @@ export class AlchemyProvider {
 				address: ownedContract.address,
 				name: ownedContract.name ?? '',
 				isSpam: ownedContract.isSpam,
-				standard: tokenStandard,
+				standard: tokenStandard as TokenStandard,
 			}
 			acc.push(newContract)
 
