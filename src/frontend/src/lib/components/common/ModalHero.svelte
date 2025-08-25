@@ -8,10 +8,11 @@
 		title?: Snippet;
 		subtitle?: Snippet;
 		description?: Snippet;
+		content?: Snippet;
 		variant?: ModalHeroVariant;
 	}
 
-	const { logo, title, subtitle, description, variant = 'default' }: Props = $props();
+	const { logo, title, subtitle, description, content, variant = 'default' }: Props = $props();
 </script>
 
 <div
@@ -42,6 +43,12 @@
 	{#if nonNullish(description)}
 		<div class="text-sm text-tertiary">
 			{@render description()}
+		</div>
+	{/if}
+
+	{#if nonNullish(content)}
+		<div class="mt-4 w-full">
+			{@render content()}
 		</div>
 	{/if}
 </div>

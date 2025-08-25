@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
@@ -23,11 +23,22 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
 
-	export let swapAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let slippageValue: OptionAmount;
-
-	const dispatch = createEventDispatcher();
+	interface Props {
+		swapAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		slippageValue: OptionAmount;
+		onBack: () => void;
+		onClose?: () => void;
+		onSwap: () => Promise<void>;
+	}
+	let {
+		swapAmount = $bindable(),
+		receiveAmount = $bindable(),
+		slippageValue = $bindable(),
+		onBack,
+		onClose,
+		onSwap
+	}: Props = $props();
 
 	const {
 		sourceToken,
@@ -37,20 +48,20 @@
 		failedSwapError
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const onClick = () => {
+	const handleBack = () => {
 		failedSwapError.set(undefined);
-		dispatch('icBack');
+		onBack();
 	};
 
-	const onClose = () => {
+	const handleClose = () => {
 		failedSwapError.set(undefined);
-		dispatch('icClose');
+		onClose?.();
 	};
 
-	let isManualWithdrawSuccess: boolean;
-	$: isManualWithdrawSuccess =
+	let isManualWithdrawSuccess = $derived(
 		$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS &&
-		$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success;
+			$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success
+	);
 </script>
 
 <ContentWithToolbar>
@@ -136,11 +147,11 @@
 	{#snippet toolbar()}
 		<ButtonGroup>
 			{#if isManualWithdrawSuccess}
-				<Button onclick={onClose}>{$i18n.core.text.close}</Button>
+				<Button onclick={handleClose}>{$i18n.core.text.close}</Button>
 			{:else}
-				<ButtonBack onclick={onClick} />
+				<ButtonBack onclick={handleBack} />
 
-				<Button onclick={() => dispatch('icSwap')}>
+				<Button onclick={onSwap}>
 					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
 						? $i18n.transaction.type.withdraw
 						: $i18n.swap.text.swap_button}
