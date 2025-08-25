@@ -23,6 +23,7 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
+import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -166,12 +167,22 @@ export class AlchemyProvider {
 	getTokensForOwner = async (address: EthAddress): Promise<OwnedContract[]> => {
 		const result: AlchemyProviderContracts = await this.provider.nft.getContractsForOwner(address);
 
-		return result.contracts.map((ownedContract) => ({
-			address: ownedContract.address,
-			name: ownedContract.name ?? '',
-			isSpam: ownedContract.isSpam,
-			standard: ownedContract.tokenType === 'ERC721' ? 'erc721' : ownedContract.tokenType === 'ERC1155' ? 'erc1155' : undefined,
-		}));
+		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
+			const tokenStandard = ownedContract.tokenType === 'ERC721' ? 'erc721' : ownedContract.tokenType === 'ERC1155' ? 'erc1155' : undefined;
+			if (isNullish(tokenStandard)) {
+				return acc;
+			}
+
+			const newContract = {
+				address: ownedContract.address,
+				name: ownedContract.name ?? '',
+				isSpam: ownedContract.isSpam,
+				standard: tokenStandard,
+			}
+			acc.push(newContract)
+
+			return acc;
+		}, [])
 	};
 }
 
