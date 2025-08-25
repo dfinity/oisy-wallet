@@ -91,6 +91,15 @@ const mapper: Record<symbol, BitcoinNetwork> = {
 export const mapNetworkIdToBitcoinNetwork = (networkId: NetworkId): BitcoinNetwork | undefined =>
 	mapper[networkId];
 
+export const mapBitcoinNetworkToNetworkId = (network: BitcoinNetwork): NetworkId | undefined => {
+	const reverseMapper: Record<BitcoinNetwork, NetworkId> = {
+		mainnet: BTC_MAINNET_NETWORK_ID,
+		testnet: BTC_TESTNET_NETWORK_ID,
+		regtest: BTC_REGTEST_NETWORK_ID
+	};
+	return reverseMapper[network];
+};
+
 export const showTokenFilteredBySelectedNetwork = ({
 	token,
 	$selectedNetwork,
