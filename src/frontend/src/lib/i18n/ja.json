@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "",
 			"btc_invalid_utxo_data": "",
 			"btc_utxo_locked": "",
-			"btc_invalid_fee_calculation": ""
+			"btc_invalid_fee_calculation": "",
+			"pending_transactions_not_available": ""
 		},
 		"error": {
 			"unexpected": "トランザクションの送信中に問題が発生しました",
