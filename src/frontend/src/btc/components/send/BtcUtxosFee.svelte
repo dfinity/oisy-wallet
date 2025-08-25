@@ -84,6 +84,7 @@
 		isActive = false;
 
 		if (schedulerTimer) {
+			// Clear existing timer
 			clearTimeout(schedulerTimer);
 			schedulerTimer = undefined;
 		}

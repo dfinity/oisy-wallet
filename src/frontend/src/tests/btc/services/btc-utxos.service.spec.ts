@@ -1,9 +1,25 @@
 // Hoisted holder for values used/assigned inside the vi.mock factory
 interface TxEntry {
 	txid: unknown;
+	utxos?: Array<{ value: bigint; outpoint: { txid: unknown; vout: number } }>;
 }
 type StoreValue = Record<string, { certified: true; data: Array<TxEntry> | null }>;
-const mockStoreApi = vi.hoisted(() => ({ setStoreValue: (_v: StoreValue) => {} }));
+
+interface SetPendingTransactionsParams {
+	address: string;
+	pendingTransactions: Array<TxEntry>;
+}
+
+interface SetPendingTransactionsErrorParams {
+	address: string;
+}
+
+const mockStoreApi = vi.hoisted(() => ({
+	setStoreValue: (_v: StoreValue) => {},
+	setPendingTransactions: (_params: SetPendingTransactionsParams) => {},
+	setPendingTransactionsError: (_params: SetPendingTransactionsErrorParams) => {},
+	reset: () => {}
+}));
 
 // Mock the btcPendingSentTransactionsStore BEFORE importing the module under test
 vi.mock('$btc/stores/btc-pending-sent-transactions.store', async () => {
@@ -11,10 +27,37 @@ vi.mock('$btc/stores/btc-pending-sent-transactions.store', async () => {
 	const store = writable<StoreValue>({});
 	// Assign through the hoisted holder instead of touching top-level variables
 	mockStoreApi.setStoreValue = (v: StoreValue) => store.set(v);
+	mockStoreApi.setPendingTransactions = ({
+		address,
+		pendingTransactions
+	}: SetPendingTransactionsParams) => {
+		store.update((current) => ({
+			...current,
+			[address]: { certified: true, data: pendingTransactions }
+		}));
+	};
+	mockStoreApi.setPendingTransactionsError = ({ address }: SetPendingTransactionsErrorParams) => {
+		store.update((current) => ({
+			...current,
+			[address]: { certified: true, data: null }
+		}));
+	};
+	mockStoreApi.reset = () => store.set({});
+
 	return {
-		btcPendingSentTransactionsStore: store
+		btcPendingSentTransactionsStore: {
+			...store,
+			setPendingTransactions: mockStoreApi.setPendingTransactions,
+			setPendingTransactionsError: mockStoreApi.setPendingTransactionsError,
+			reset: mockStoreApi.reset
+		}
 	};
 });
+
+// Mock the loadBtcPendingSentTransactions function
+vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
+	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue({ success: true })
+}));
 
 import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utxos.service';
 import { BtcPrepareSendError } from '$btc/types/btc-send';
@@ -176,9 +219,18 @@ describe('btc-utxos.service', () => {
 		});
 
 		it('should successfully prepare transaction with existing pending transactions', async () => {
-			// Initialize store with some pending transactions (different from UTXOs to avoid conflicts)
+			// Initialize store with some pending transactions that have UTXOs
 			const mockPendingTransaction = {
-				txid: new Uint8Array([99, 100, 101, 102]) // Different from mockUtxo txid
+				txid: new Uint8Array([99, 100, 101, 102]), // This is the pending transaction ID
+				utxos: [
+					{
+						value: 300000n,
+						outpoint: {
+							txid: new Uint8Array([200, 201, 202, 203]), // This is the UTXO transaction ID that will be checked
+							vout: 0
+						}
+					}
+				]
 			};
 
 			mockStoreApi.setStoreValue({

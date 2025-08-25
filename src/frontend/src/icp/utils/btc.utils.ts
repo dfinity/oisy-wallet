@@ -25,6 +25,20 @@ import {
 import { get } from 'svelte/store';
 
 /**
+ * Get the NetworkId from a BTC TokenId
+ * @param tokenId - The BTC token ID
+ * @returns The corresponding NetworkId
+ */
+export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =>
+	tokenId === BTC_MAINNET_TOKEN_ID
+		? BTC_MAINNET_NETWORK_ID
+		: tokenId === BTC_TESTNET_TOKEN_ID
+			? BTC_TESTNET_NETWORK_ID
+			: tokenId === BTC_REGTEST_TOKEN_ID
+				? BTC_REGTEST_NETWORK_ID
+				: undefined;
+
+/**
  * Bitcoin txid to text representation requires inverting the array.
  *
  * @param txid Uint8Array | number[]
@@ -56,20 +70,6 @@ export const pendingTransactionTxidToString = (tx: PendingTransaction): string |
 	// Return the txid string only if it's not empty
 	return notEmptyString(txidString) ? txidString : null;
 };
-
-/**
- * Get the NetworkId from a BTC TokenId
- * @param tokenId - The BTC token ID
- * @returns The corresponding NetworkId
- */
-export const mapTokenIdToNetworkId = (tokenId: TokenId): NetworkId | undefined =>
-	tokenId === BTC_MAINNET_TOKEN_ID
-		? BTC_MAINNET_NETWORK_ID
-		: tokenId === BTC_TESTNET_TOKEN_ID
-			? BTC_TESTNET_NETWORK_ID
-			: tokenId === BTC_REGTEST_TOKEN_ID
-				? BTC_REGTEST_NETWORK_ID
-				: undefined;
 
 /**
  * Safely retrieves pending transactions for a given Bitcoin address from the store.
