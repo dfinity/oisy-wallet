@@ -13,7 +13,7 @@ export type ProgressStep = ProgressStepsSend | ProgressStepsSwap;
 type ProgressStepsEnum = typeof ProgressStepsSend | typeof ProgressStepsSwap;
 
 interface WithProgress {
-	progress: (step: ProgressStep) => void;
+	progress?: (step: ProgressStep) => void;
 	progressSteps?: ProgressStepsEnum;
 }
 
