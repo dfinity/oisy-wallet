@@ -33,5 +33,5 @@ export enum BtcSendValidationError {
 export interface UtxosFee {
 	feeSatoshis: bigint;
 	utxos: Utxo[];
-	error?: BtcPrepareSendError;
+	error?: BtcPrepareSendError | BtcSendValidationError;
 }
