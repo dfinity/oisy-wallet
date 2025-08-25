@@ -46,7 +46,7 @@ describe('SwapWizard', () => {
 		expect(container).toBeTruthy();
 	});
 
-	it('should render ICP wizard when sourceToken is null', async () => {
+	it('should render ICP wizard when sourceToken is null', () => {
 		vi.mocked(isNullish).mockReturnValue(true);
 
 		const { container } = render(NewSwapWizard, {
@@ -57,7 +57,7 @@ describe('SwapWizard', () => {
 		expect(container).toBeTruthy();
 	});
 
-	it('should render ETH wizard when sourceToken is not ICP network', async () => {
+	it('should render ETH wizard when sourceToken is not ICP network', () => {
 		vi.mocked(isNullish).mockReturnValue(false);
 		vi.mocked(isNetworkIdICP).mockReturnValue(false);
 
