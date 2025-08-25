@@ -187,8 +187,8 @@ export interface GetQuoteParams extends QuoteParams<'all'> {
 }
 
 export interface VeloraQuoteParams {
-	sourceToken: Token;
-	destinationToken: Token;
+	sourceToken: Erc20Token;
+	destinationToken: Erc20Token;
 	amount: bigint;
 	userEthAddress: OptionEthAddress;
 }
