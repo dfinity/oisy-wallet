@@ -47,7 +47,7 @@ afterEach(() => {
 	document.body.querySelectorAll('h3').forEach((h) => h.remove());
 });
 
-describe('Sidebar (TOC) component', () => {
+describe('MarkdownSidebar', () => {
 	it('renders links for headings with correct hrefs and highlights the first by default', async () => {
 		const headings = [
 			{ type: 'header', text: 'Acceptance of Terms', id: 'heading-1' },
