@@ -13,6 +13,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
+import { toNullable } from '@dfinity/utils';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -39,8 +40,6 @@ describe('LoaderCollections', () => {
 		erc1155CustomTokensSpy = vi.spyOn(erc1155CustomTokens, 'saveCustomTokens');
 		erc1155CustomTokensSpy.mockResolvedValue(undefined);
 
-		vi.mocked(listCustomTokens).mockResolvedValue([]);
-
 		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 
 		mockAuthStore();
@@ -50,6 +49,8 @@ describe('LoaderCollections', () => {
 
 	it('should add new collections', async () => {
 		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
+
+		vi.mocked(listCustomTokens).mockResolvedValue([]);
 
 		mockGetTokensForOwner.mockResolvedValue([
 			{ address: mockEthAddress, isSpam: false, standard: 'erc721' },
@@ -87,8 +88,10 @@ describe('LoaderCollections', () => {
 		});
 	});
 
-	it('should not add existing collections', async () => {
+	it('should not add collections if there are no new collections', async () => {
 		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
+
+		vi.mocked(listCustomTokens).mockResolvedValue([]);
 
 		mockGetTokensForOwner.mockResolvedValue([]);
 
@@ -101,4 +104,31 @@ describe('LoaderCollections', () => {
 			expect(erc1155CustomTokensSpy).not.toHaveBeenCalled();
 		});
 	});
+
+	it('should not add existing collections', async () => {
+		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
+
+		const existingErc721CustomTokens = networks.map((network) => ({
+			token: { Erc721: {token_address: mockEthAddress, chain_id: network.chainId}}, version: toNullable(1n), enabled: true
+		}))
+		const existingErc1155CustomTokens = networks.map((network) => ({
+			token: { Erc1155: {token_address: mockEthAddress, chain_id: network.chainId}}, version: toNullable(1n), enabled: true
+		}))
+
+		vi.mocked(listCustomTokens).mockResolvedValue([...existingErc721CustomTokens, ...existingErc1155CustomTokens]);
+
+		mockGetTokensForOwner.mockResolvedValue([
+			{ address: mockEthAddress, isSpam: false, standard: 'erc721' },
+			{ address: mockEthAddress, isSpam: false, standard: 'erc1155' }
+		]);
+
+		render(LoaderCollections);
+
+		await waitFor(() => {
+			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
+
+			expect(erc721CustomTokensSpy).not.toHaveBeenCalled();
+			expect(erc1155CustomTokensSpy).not.toHaveBeenCalled();
+		});
+	})
 });
