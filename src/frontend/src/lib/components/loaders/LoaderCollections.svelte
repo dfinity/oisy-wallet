@@ -40,10 +40,14 @@
 		identity: Identity;
 	}) => {
 		const tokens = contracts.reduce<SaveErc721CustomToken[]>((acc, contract) => {
-			const existingToken = customTokens.find((customToken): customToken is CustomToken => {
+			const existingToken = customTokens.find(({token}) => {
+				if (!('Erc721' in token)) {
+					return false;
+				}
+
 				const {
 					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
-				} = customToken;
+				} = token;
 
 				return tokenAddress === contract.address && tokenChainId === network.chainId;
 			});
@@ -82,6 +86,10 @@
 	}) => {
 		const tokens = contracts.reduce<SaveErc1155CustomToken[]>((acc, contract) => {
 			const existingToken = customTokens.find(({ token }) => {
+				if (!('Erc1155' in token)) {
+					return false;
+				}
+
 				const {
 					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
