@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		allCrossChainSwapTokens,
 		allKongSwapCompatibleIcrcTokens
