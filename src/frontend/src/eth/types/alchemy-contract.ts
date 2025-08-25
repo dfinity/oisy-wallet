@@ -3,7 +3,7 @@ interface Contract {
 	address: string;
 	name?: string;
 	isSpam: boolean;
-	tokenType: string
+	tokenType: string;
 }
 
 export interface AlchemyProviderContracts {
