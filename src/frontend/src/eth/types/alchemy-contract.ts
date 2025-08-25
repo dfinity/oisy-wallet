@@ -7,5 +7,5 @@ interface Contract {
 }
 
 export interface AlchemyProviderContracts {
-	contracts: Contract;
+	contracts: Contract[];
 }
