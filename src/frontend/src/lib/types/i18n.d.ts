@@ -1236,6 +1236,10 @@ interface I18nLicense_agreement {
 	alt: { license_agreement: string };
 }
 
+interface I18nTermsOfUse {
+	text: { title: string; body: string };
+}
+
 interface I18nActivity {
 	text: { title: string };
 	info: { btc_transactions: string };
@@ -1328,6 +1332,7 @@ interface I18n {
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
+	termsOfUse: I18nTermsOfUse;
 	activity: I18nActivity;
 	earning: I18nEarning;
 	welcome: I18nWelcome;
