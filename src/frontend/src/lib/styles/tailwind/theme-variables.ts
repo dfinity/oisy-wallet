@@ -13,6 +13,7 @@ export const themeVariables = {
 		page: 'var(--color-background-page)',
 		surface: 'var(--color-background-surface)',
 		primary: 'var(--color-background-primary)',
+		'primary-light': 'var(--color-background-primary-light)',
 		'primary-alt': 'var(--color-background-primary-alt)',
 		'primary-inverted': 'var(--color-background-primary-inverted)',
 		'primary-inverted-alt': 'var(--color-background-primary-inverted-alt)',
@@ -73,6 +74,9 @@ export const themeVariables = {
 			'7': 'var(--color-background-contact-7)',
 			'8': 'var(--color-background-contact-8)',
 			'9': 'var(--color-background-contact-9)'
+		},
+		overlay: {
+			'page-30': 'color-mix(in srgb, var(--color-background-page) 30%, transparent)'
 		}
 	},
 	border: {
@@ -176,6 +180,8 @@ export const themeVariables = {
 		'trump-0': '#232BCC',
 		'trump-100': '#000797',
 		'gold-0': '#CCA055',
-		'gold-100': '#EBD27F'
+		'gold-100': '#EBD27F',
+		'arbitrum-0': '#11AAFF',
+		'arbitrum-100': '#203147'
 	}
 };

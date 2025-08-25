@@ -246,6 +246,66 @@ mod custom_token {
         );
     }
 
+    mod erc20 {
+        //! Tests for the erc20 module.
+        use super::*;
+        use crate::validate::{test_validate_on_deserialize, TestVector, Validate};
+
+        test_validate_on_deserialize!(
+            ErcToken,
+            vec![
+                TestVector {
+                    input: ErcToken {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 1
+                    },
+                    valid: true,
+                    description: "Valid Erc20Token",
+                },
+                TestVector {
+                    input: ErcToken {
+                        token_address: ErcTokenId(
+                            "0x12345678901234567890123456789012345678".to_string()
+                        ),
+                        chain_id: 1,
+                    },
+                    valid: false,
+                    description: "Erc20Token with a token address that is too short",
+                },
+                TestVector {
+                    input: ErcToken {
+                        token_address: ErcTokenId("1".repeat(99)),
+                        chain_id: 1,
+                    },
+                    valid: false,
+                    description: "Erc20Token with a token address that is too long",
+                },
+                TestVector {
+                    input: ErcToken {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 2 ^ 64 - 1,
+                    },
+                    valid: true,
+                    description: "Maximum chain ID",
+                },
+                TestVector {
+                    input: ErcToken {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 0,
+                    },
+                    valid: true,
+                    description: "Minimum chain ID",
+                },
+            ]
+        );
+    }
+
     mod icrc {
         //! Tests for the icrc module.
         use candid::Principal;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Spinner } from '@dfinity/gix-components';
+	import { Spinner, stopPropagation } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { busy } from '$lib/stores/busy.store';
@@ -23,14 +23,14 @@
 
 {#if nonNullish($busy)}
 	<div
-		in:fade
-		out:fade={{ duration: 200 }}
-		on:click={close}
-		on:keydown={keyboardClose}
-		class:close={$busy.close}
 		class="busy"
+		class:close={$busy.close}
+		onclick={close}
+		onkeydown={keyboardClose}
 		role="button"
 		tabindex="-1"
+		in:fade
+		out:fade={{ duration: 200 }}
 	>
 		<div class="content">
 			{#if $busy.spinner}
@@ -44,7 +44,7 @@
 			{/if}
 
 			{#if $busy.close}
-				<button on:click|stopPropagation={close} aria-label="Close" class="text-off-white"
+				<button class="text-off-white" aria-label="Close" onclick={stopPropagation(close)}
 					>Cancel</button
 				>
 			{/if}

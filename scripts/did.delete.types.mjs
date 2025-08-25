@@ -21,7 +21,9 @@ const promises = Object.keys(canisters)
 				'kong_backend',
 				'icp_swap_pool',
 				'icp_swap_factory',
-				'xtc_ledger'
+				'xtc_ledger',
+				'sol_rpc',
+				'llm'
 			].includes(canister)
 	)
 	.map(deleteFolder);

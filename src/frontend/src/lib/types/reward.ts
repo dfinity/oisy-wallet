@@ -1,7 +1,8 @@
 import type { ClaimedVipReward, ClaimVipRewardResponse } from '$declarations/rewards/rewards.did';
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+import type { RewardType } from '$lib/enums/reward-type';
 import type { Principal } from '@dfinity/principal';
 
 export interface RewardsResponse {
@@ -19,10 +20,9 @@ export interface RewardResponseInfo {
 }
 
 export interface RewardResult {
-	receivedReward: boolean;
-	receivedJackpot: boolean;
-	receivedReferral: boolean;
 	reward?: RewardResponseInfo;
+	lastTimestamp?: bigint;
+	rewardType?: RewardType;
 }
 
 export interface RewardClaimApiResponse {
@@ -37,8 +37,8 @@ export interface RewardClaimResponse<T = unknown> {
 }
 
 export interface RewardStateData {
-	reward: RewardDescription;
-	jackpot?: boolean;
+	reward: RewardCampaignDescription;
+	rewardType?: RewardType;
 }
 
 export interface UserRoleResult {
@@ -75,4 +75,8 @@ export interface MinTransactionsCriterion extends CampaignCriterion {
 
 export interface MinTotalAssetsUsdCriterion extends CampaignCriterion {
 	usd: number;
+}
+
+export interface HangoverCriterion extends CampaignCriterion {
+	days: bigint;
 }

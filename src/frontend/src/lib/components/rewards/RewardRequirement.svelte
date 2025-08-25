@@ -5,6 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type {
 		CampaignCriterion,
+		HangoverCriterion,
 		MinLoginsCriterion,
 		MinTotalAssetsUsdCriterion,
 		MinTransactionsCriterion
@@ -42,6 +43,13 @@
 				$usd: minTotalAssetsUsdCriterion.usd.toString()
 			});
 		}
+		if (RewardCriterionType.HANGOVER === criterion.type) {
+			const hangoverCriterion = criterion as HangoverCriterion;
+
+			return replacePlaceholders($i18n.rewards.requirements.hangover, {
+				$days: hangoverCriterion.days.toString()
+			});
+		}
 	};
 
 	const criterionText = $derived(getCriterionText(criterion));
@@ -50,15 +58,15 @@
 {#if nonNullish(criterionText)}
 	<span
 		class="flex w-full flex-row"
-		class:transition={!criterion.satisfied}
 		class:duration-500={!criterion.satisfied}
 		class:ease-in-out={!criterion.satisfied}
+		class:transition={!criterion.satisfied}
 	>
 		<span
-			data-tid={testId}
 			class="-mt-0.5 mr-2"
-			class:text-success-primary={criterion.satisfied}
 			class:text-disabled={!criterion.satisfied}
+			class:text-success-primary={criterion.satisfied}
+			data-tid={testId}
 		>
 			<IconCheckCircleFill size={32} />
 		</span>

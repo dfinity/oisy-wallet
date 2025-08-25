@@ -65,7 +65,7 @@
 </script>
 
 {#if $modalManageTokens}
-	<ManageTokensModal onClose={handleClose} initialSearch={token?.name}>
+	<ManageTokensModal initialSearch={token?.name} onClose={handleClose}>
 		{#snippet infoElement()}
 			<MessageBox level="info">
 				{$i18n.transactions.text.token_needs_enabling}

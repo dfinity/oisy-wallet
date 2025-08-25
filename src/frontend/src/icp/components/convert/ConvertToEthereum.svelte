@@ -15,15 +15,15 @@
 </script>
 
 <ConvertETH
-	nativeTokenId={$ckEthereumNativeTokenId}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {
 		$token: $ckEthereumTwinToken.symbol
 	})}
+	nativeTokenId={$ckEthereumNativeTokenId}
 >
-	<IconCkConvert size="28" slot="icon" />
+	<IconCkConvert slot="icon" size="24" />
 	<span>{$ckEthereumTwinToken.symbol}</span>
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenEth && nonNullish(icCkToken) && nonNullish(icCkToken.twinToken)}
-	<ConvertModal sourceToken={icCkToken} destinationToken={icCkToken.twinToken} />
+	<ConvertModal destinationToken={icCkToken.twinToken} sourceToken={icCkToken} />
 {/if}

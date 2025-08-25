@@ -9,7 +9,6 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('CreateContactStep', () => {
 	it('should render the create contact step with forms and buttons', () => {
@@ -95,7 +94,7 @@ describe('CreateContactStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that onSave was called with the correct contact
-		expect(onSave).toHaveBeenCalledTimes(1);
+		expect(onSave).toHaveBeenCalledOnce();
 		expect(onSave).toHaveBeenCalledWith({
 			name: 'Test Contact',
 			addresses: [{ address: mockSolAddress, addressType: 'Sol', label: 'Test alias' }]
@@ -115,6 +114,6 @@ describe('CreateContactStep', () => {
 		await fireEvent.click(cancelButton);
 
 		// Check that close was called
-		expect(onBack).toHaveBeenCalledTimes(1);
+		expect(onBack).toHaveBeenCalledOnce();
 	});
 });

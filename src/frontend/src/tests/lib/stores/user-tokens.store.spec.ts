@@ -1,3 +1,5 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
@@ -14,6 +16,12 @@ import type { CertifiedData } from '$lib/types/store';
 import type { Token } from '$lib/types/token';
 import type { UserToken } from '$lib/types/user-token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import {
+	AZUKI_ELEMENTAL_BEANS_TOKEN,
+	DE_GODS_TOKEN,
+	mockValidErc721Token
+} from '$tests/mocks/erc721-tokens.mock';
 import { get } from 'svelte/store';
 
 describe('user-token.store', () => {
@@ -111,6 +119,18 @@ describe('user-token.store', () => {
 				expect(get(mockStore)).toEqual(expectedResults);
 			});
 
+			it('should use the token address as identifier for ERC721 tokens', () => {
+				mockStore.setAll([{ data: { ...AZUKI_ELEMENTAL_BEANS_TOKEN, enabled }, certified }]);
+				const erc721Token2 = { ...DE_GODS_TOKEN, address: AZUKI_ELEMENTAL_BEANS_TOKEN.address };
+				mockStore.setAll([{ data: { ...erc721Token2, enabled }, certified }]);
+
+				const expectedResults = [
+					{ data: { ...erc721Token2, enabled, id: AZUKI_ELEMENTAL_BEANS_TOKEN.id }, certified }
+				];
+
+				expect(get(mockStore)).toEqual(expectedResults);
+			});
+
 			it('should use the token address as identifier for SPL tokens', () => {
 				mockStore.setAll([{ data: { ...BONK_TOKEN, enabled }, certified }]);
 				const erc20Token2 = { ...TRUMP_TOKEN, address: BONK_TOKEN.address };
@@ -118,6 +138,80 @@ describe('user-token.store', () => {
 
 				const expectedResults = [
 					{ data: { ...erc20Token2, enabled, id: BONK_TOKEN.id }, certified }
+				];
+
+				expect(get(mockStore)).toEqual(expectedResults);
+			});
+
+			it('should not save ERC20 tokens with same address and same networks as different tokens', () => {
+				mockStore.setAll([
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified }
+				]);
+				mockStore.setAll([
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified }
+				]);
+
+				const expectedResults = [
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified }
+				];
+
+				expect(get(mockStore)).toEqual(expectedResults);
+			});
+
+			it('should not save ERC721 tokens with same address and same networks as different tokens', () => {
+				mockStore.setAll([
+					{ data: { ...mockValidErc721Token, network: BASE_NETWORK, enabled }, certified }
+				]);
+				mockStore.setAll([
+					{ data: { ...mockValidErc721Token, network: BASE_NETWORK, enabled }, certified }
+				]);
+
+				const expectedResults = [
+					{ data: { ...mockValidErc721Token, network: BASE_NETWORK, enabled }, certified }
+				];
+
+				expect(get(mockStore)).toEqual(expectedResults);
+			});
+
+			it('should save ERC20 tokens with same address but different networks as different tokens', () => {
+				mockStore.setAll([
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified }
+				]);
+				mockStore.setAll([
+					{
+						data: { ...mockValidErc20Token, network: ARBITRUM_MAINNET_NETWORK, enabled },
+						certified
+					}
+				]);
+
+				const expectedResults = [
+					{ data: { ...mockValidErc20Token, network: BASE_NETWORK, enabled }, certified },
+					{
+						data: { ...mockValidErc20Token, network: ARBITRUM_MAINNET_NETWORK, enabled },
+						certified
+					}
+				];
+
+				expect(get(mockStore)).toEqual(expectedResults);
+			});
+
+			it('should save ERC721 tokens with same address but different networks as different tokens', () => {
+				mockStore.setAll([
+					{ data: { ...mockValidErc721Token, network: BASE_NETWORK, enabled }, certified }
+				]);
+				mockStore.setAll([
+					{
+						data: { ...mockValidErc721Token, network: ARBITRUM_MAINNET_NETWORK, enabled },
+						certified
+					}
+				]);
+
+				const expectedResults = [
+					{ data: { ...mockValidErc721Token, network: BASE_NETWORK, enabled }, certified },
+					{
+						data: { ...mockValidErc721Token, network: ARBITRUM_MAINNET_NETWORK, enabled },
+						certified
+					}
 				];
 
 				expect(get(mockStore)).toEqual(expectedResults);

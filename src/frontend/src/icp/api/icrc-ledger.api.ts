@@ -25,8 +25,6 @@ import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
  * @param {QueryParams} params.rest - Additional query parameters.
  * @returns {Promise<IcrcTokenMetadataResponse>} The metadata response for the ICRC token.
- *
- * @todo Add missing test for this function.
  */
 export const metadata = async ({
 	certified = true,
@@ -106,8 +104,6 @@ export const balance = async ({
  * @param {bigint} [params.createdAt] - Optional timestamp for when the transfer was created.
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
  * @returns {Promise<IcrcBlockIndex>} The block index of the transfer.
- *
- * @todo Add missing test for this function.
  */
 export const transfer = async ({
 	identity,
@@ -144,8 +140,6 @@ export const transfer = async ({
  * @param {bigint} params.expiresAt - The expiration timestamp for the approval.
  * @param {bigint} [params.createdAt] - Optional timestamp for when the approval was created.
  * @returns {Promise<IcrcBlockIndex>} The block index of the approval.
- *
- * @todo Add missing test for this function.
  */
 export const approve = async ({
 	identity,

@@ -21,7 +21,7 @@
 
 	const modalId = Symbol();
 
-	let minterInfoLoaded = false;
+	let minterInfoLoaded = $state(false);
 
 	const openReceive = async (modalId: symbol) => {
 		// If the minter info has not been loaded yet, we attach the web worker to load that information.
@@ -45,8 +45,10 @@
 
 <svelte:window on:oisyReceiveCkBTC={async () => await openModal(modalId)} />
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalCkBTCReceive} {modalId}>
-	<ReceiveAddressModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} slot="modal" />
+<ReceiveButtonWithModal isOpen={$modalCkBTCReceive} {modalId} open={openModal}>
+	{#snippet modal()}
+		<ReceiveAddressModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} />
+	{/snippet}
 </ReceiveButtonWithModal>
 
 {#if !minterInfoLoaded}

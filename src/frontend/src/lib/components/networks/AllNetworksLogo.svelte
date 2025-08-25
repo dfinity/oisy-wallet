@@ -6,31 +6,35 @@
 	import type { LogoSize } from '$lib/types/components';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let size: LogoSize = 'xxs';
-	export let color: 'off-white' | 'white' = 'off-white';
-	export let testId: string | undefined = undefined;
+	interface Props {
+		size?: LogoSize;
+		color?: 'off-white' | 'white';
+		testId?: string;
+	}
+
+	let { size = 'xxs', color = 'off-white', testId }: Props = $props();
 </script>
 
 <div class="dark-hidden block">
 	<Logo
-		src={allNetworksIconLight}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
 			$name: $i18n.networks.chain_fusion
 		})}
-		{size}
 		{color}
+		{size}
+		src={allNetworksIconLight}
 		testId={`${testId}-light`}
 	/>
 </div>
 
 <div class="dark-block hidden">
 	<Logo
-		src={allNetworksIconDark}
 		alt={replacePlaceholders($i18n.core.alt.logo, {
 			$name: $i18n.networks.chain_fusion
 		})}
-		{size}
 		{color}
+		{size}
+		src={allNetworksIconDark}
 		testId={`${testId}-dark`}
 	/>
 </div>

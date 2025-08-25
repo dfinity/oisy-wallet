@@ -16,7 +16,7 @@ describe('ConvertAmountSource', () => {
 	const insufficientFunds = false;
 	const insufficientFundsForFee = false;
 	// balance - total fee
-	const maxButtonValue = 0.0499;
+	const maxButtonValue = '0.0499';
 	const maxButtonText = `Max: ${maxButtonValue} BTC`;
 
 	const props = {
@@ -104,7 +104,7 @@ describe('ConvertAmountSource', () => {
 		// wait for debounced setMax to be completed
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		expect(testProps.sendAmount).toBe(0.04991);
+		expect(testProps.sendAmount).toBe('0.04991');
 	});
 
 	it('should not update sendAmount value if max button was not clicked and total fee got updated', async () => {

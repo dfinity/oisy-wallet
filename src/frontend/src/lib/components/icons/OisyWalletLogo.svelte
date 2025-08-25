@@ -7,15 +7,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let ariaLabel: string;
-	$: ariaLabel = replacePlaceholders($i18n.core.alt.logo, { $name: OISY_NAME });
+	let ariaLabel = $derived(replacePlaceholders($i18n.core.alt.logo, { $name: OISY_NAME }));
 </script>
 
 <div class="mr-3">
 	<IconAstronautHelmet />
 </div>
 
-<picture aria-label={ariaLabel} class="invert-on-dark-theme hidden w-24 xs:block">
-	<source srcset={oisyLogoSmall} media="(max-width: 639px)" />
-	<Img src={oisyLogoLarge} alt={ariaLabel} />
+<picture class="invert-on-dark-theme hidden w-24 xs:block" aria-label={ariaLabel}>
+	<source media="(max-width: 639px)" srcset={oisyLogoSmall} />
+	<Img alt={ariaLabel} src={oisyLogoLarge} />
 </picture>

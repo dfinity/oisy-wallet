@@ -9,10 +9,29 @@ import {
 } from '$lib/constants/test-ids.constants';
 import type { ContactUi } from '$lib/types/contact';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
+
+vi.mock('browser-image-compression', () => {
+	const mockCompression = vi
+		.fn()
+		.mockResolvedValue(new File(['x'], 'avatar.png', { type: 'image/png' }));
+
+	const getDataUrlFromFile = vi.fn().mockResolvedValue('data:image/png;base64,MOCK');
+
+	return {
+		__esModule: true,
+		default: Object.assign(mockCompression, {
+			getDataUrlFromFile
+		})
+	};
+});
+
+vi.mock('$env/avatar.env', () => ({
+	AVATAR_ENABLED: true
+}));
 
 describe('EditContactStep', () => {
 	const mockContact: ContactUi = {
@@ -35,6 +54,7 @@ describe('EditContactStep', () => {
 
 	const mockClose = vi.fn();
 	const mockEdit = vi.fn();
+	const onAvatarEdit = vi.fn();
 	const mockEditAddress = vi.fn();
 	const mockAddAddress = vi.fn();
 	const mockDeleteContact = vi.fn();
@@ -53,14 +73,12 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit
 			}
 		});
 
-		// Check that the contact name is displayed
 		expect(getByText(mockContact.name)).toBeInTheDocument();
-
-		// Check that addresses are displayed
 		expect(getByText(en.address.types.Eth)).toBeInTheDocument();
 		expect(getByText('My ETH Address')).toBeInTheDocument();
 		expect(getByText(en.address.types.Btc)).toBeInTheDocument();
@@ -76,14 +94,15 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit
 			}
 		});
 
 		const editButton = getByTestId(CONTACT_HEADER_EDITING_EDIT_BUTTON);
 		await fireEvent.click(editButton);
 
-		expect(mockEdit).toHaveBeenCalledTimes(1);
+		expect(mockEdit).toHaveBeenCalledOnce();
 		expect(mockEdit).toHaveBeenCalledWith(mockContact);
 	});
 
@@ -96,14 +115,15 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit
 			}
 		});
 
 		const addAddressButton = getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON);
 		await fireEvent.click(addAddressButton);
 
-		expect(mockAddAddress).toHaveBeenCalledTimes(1);
+		expect(mockAddAddress).toHaveBeenCalledOnce();
 	});
 
 	it('should call deleteContact function when delete contact button is clicked', async () => {
@@ -115,14 +135,15 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit
 			}
 		});
 
 		const deleteContactButton = getByTestId(CONTACT_EDIT_DELETE_CONTACT_BUTTON);
 		await fireEvent.click(deleteContactButton);
 
-		expect(mockDeleteContact).toHaveBeenCalledTimes(1);
+		expect(mockDeleteContact).toHaveBeenCalledOnce();
 		expect(mockDeleteContact).toHaveBeenCalledWith(mockContact.id);
 	});
 
@@ -135,14 +156,15 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit
 			}
 		});
 
 		const closeButton = getByTestId(CONTACT_SHOW_CLOSE_BUTTON);
 		await fireEvent.click(closeButton);
 
-		expect(mockClose).toHaveBeenCalledTimes(1);
+		expect(mockClose).toHaveBeenCalledOnce();
 	});
 
 	it('should call editAddress function when edit address button is clicked', async () => {
@@ -154,7 +176,8 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit
 			}
 		});
 
@@ -163,7 +186,7 @@ describe('EditContactStep', () => {
 		// Click the first edit address button
 		await fireEvent.click(editAddressButtons[0]);
 
-		expect(mockEditAddress).toHaveBeenCalledTimes(1);
+		expect(mockEditAddress).toHaveBeenCalledOnce();
 		expect(mockEditAddress).toHaveBeenCalledWith(0);
 	});
 
@@ -176,7 +199,8 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: mockAddAddress,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit
 			}
 		});
 
@@ -185,7 +209,7 @@ describe('EditContactStep', () => {
 		// Click the first delete address button
 		await fireEvent.click(deleteAddressButtons[0]);
 
-		expect(mockDeleteAddress).toHaveBeenCalledTimes(1);
+		expect(mockDeleteAddress).toHaveBeenCalledOnce();
 		expect(mockDeleteAddress).toHaveBeenCalledWith(0);
 	});
 
@@ -198,12 +222,47 @@ describe('EditContactStep', () => {
 				onEditAddress: mockEditAddress,
 				onAddAddress: null as unknown as () => void,
 				onDeleteContact: mockDeleteContact,
-				onDeleteAddress: mockDeleteAddress
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit
 			}
 		});
 
 		const addAddressButton = getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON);
 
 		expect(addAddressButton).toBeDisabled();
+	});
+
+	it('calls onAvatarEdit with a ContactImage when a file is selected', async () => {
+		const { container } = render(EditContactStep, {
+			props: {
+				contact: mockContact,
+				onClose: mockClose,
+				onEdit: mockEdit,
+				onEditAddress: mockEditAddress,
+				onAddAddress: mockAddAddress,
+				onDeleteContact: mockDeleteContact,
+				onDeleteAddress: mockDeleteAddress,
+				onAvatarEdit
+			}
+		});
+
+		const input = container.querySelector('input[type="file"]');
+
+		expect(input).toBeInTheDocument();
+
+		const file = new File(['x'], 'avatar.png', { type: 'image/png' });
+
+		if (nonNullish(input)) {
+			await fireEvent.change(input, { target: { files: [file] } });
+		}
+
+		expect(onAvatarEdit).toHaveBeenCalledOnce();
+		expect(onAvatarEdit).toHaveBeenNthCalledWith(
+			1,
+			expect.objectContaining({
+				data: expect.any(Uint8Array),
+				mime_type: { 'image/png': null }
+			})
+		);
 	});
 });

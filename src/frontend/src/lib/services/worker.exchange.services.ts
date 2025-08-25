@@ -18,14 +18,14 @@ let errorMessages: { msg: string; timestamp: number }[] = [];
 
 export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 	const ExchangeWorker = await import('$lib/workers/workers?worker');
-	const exchangeWorker: Worker = new ExchangeWorker.default();
+	let exchangeWorker: Worker | null = new ExchangeWorker.default();
 
 	exchangeWorker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<PostMessageDataResponseExchange | PostMessageDataResponseExchangeError>
 	>) => {
-		const { msg, data: value } = data;
+		const { msg, data } = dataMsg;
 
 		// If Coingecko throws an error, for instance, if too many requests are queried within the same minute, it is possible that the window may receive the same error twice because we start and stop the worker based on certain store changes.
 		// To prevent the same issue from being displayed multiple times, which would not be user-friendly, the following function keeps track of errors and only displays those that have occurred with a time span of one minute or more.
@@ -73,13 +73,13 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 
 		switch (msg) {
 			case 'syncExchange':
-				syncExchange(value as PostMessageDataResponseExchange | undefined);
+				syncExchange(data as PostMessageDataResponseExchange | undefined);
 				return;
 			case 'syncExchangeError':
 				// TODO: error appears to often currently and is super annoying. So until we figure out a way to solve this, hide the error to the console.
 				console.error(
 					'An error occurred while attempting to retrieve the USD exchange rates.',
-					(value as PostMessageDataResponseExchangeError | undefined)?.err
+					(data as PostMessageDataResponseExchangeError | undefined)?.err
 				);
 				// toastError(value as PostMessageDataResponseExchangeError | undefined);
 				return;
@@ -87,20 +87,29 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 	};
 
 	const stopTimer = () =>
-		exchangeWorker.postMessage({
+		exchangeWorker?.postMessage({
 			msg: 'stopExchangeTimer'
 		});
 
+	let isDestroying = false;
+
 	return {
 		startExchangeTimer: (data: PostMessageDataRequestExchangeTimer) => {
-			exchangeWorker.postMessage({
+			exchangeWorker?.postMessage({
 				msg: 'startExchangeTimer',
 				data
 			});
 		},
 		stopExchangeTimer: stopTimer,
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stopTimer();
+			exchangeWorker?.terminate();
+			exchangeWorker = null;
+			isDestroying = false;
 			errorMessages = [];
 		}
 	};

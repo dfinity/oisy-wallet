@@ -7,8 +7,13 @@ use serde::{de, Deserializer};
 use crate::{
     types::{
         backend_config::{Config, InitArg},
-        contact::{Contact, ContactAddressData, CreateContactRequest, UpdateContactRequest},
-        custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
+        contact::{
+            Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
+        },
+        custom_token::{
+            CustomToken, CustomTokenId, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId,
+            Token,
+        },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
             NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
@@ -79,6 +84,21 @@ impl From<&Token> for CustomTokenId {
             Token::SplDevnet(SplToken { token_address, .. }) => {
                 CustomTokenId::SolDevnet(token_address.clone())
             }
+            Token::Erc20(ErcToken {
+                token_address,
+                chain_id,
+                ..
+            })
+            | Token::Erc721(ErcToken {
+                token_address,
+                chain_id,
+                ..
+            })
+            | Token::Erc1155(ErcToken {
+                token_address,
+                chain_id,
+                ..
+            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
         }
     }
 }
@@ -408,14 +428,32 @@ impl Validate for SplTokenId {
     }
 }
 
+impl ErcTokenId {
+    pub const MAX_LENGTH: usize = 42;
+    pub const MIN_LENGTH: usize = 42;
+}
+
+impl Validate for ErcTokenId {
+    /// Verifies that an Ethereum/EVM address is valid.
+    fn validate(&self) -> Result<(), candid::Error> {
+        if self.0.len() != 42 {
+            return Err(candid::Error::msg(
+                "Invalid Ethereum/EVM contract address length",
+            ));
+        }
+        Ok(())
+    }
+}
+
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
-            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle we could */
+            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle, we could */
             // check the exact type of principal.
             CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
                 token_address.validate()
             }
+            CustomTokenId::Ethereum(token_address, _) => token_address.validate(),
         }
     }
 }
@@ -431,6 +469,7 @@ impl Validate for Token {
         match self {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
+            Token::Erc20(token) | Token::Erc721(token) | Token::Erc1155(token) => token.validate(),
         }
     }
 }
@@ -447,6 +486,12 @@ impl Validate for SplToken {
                 )));
             }
         }
+        self.token_address.validate()
+    }
+}
+
+impl Validate for ErcToken {
+    fn validate(&self) -> Result<(), candid::Error> {
         self.token_address.validate()
     }
 }
@@ -518,6 +563,17 @@ impl Validate for ContactAddressData {
     }
 }
 
+impl Validate for ContactImage {
+    fn validate(&self) -> Result<(), Error> {
+        // For now, we don't have specific validation rules for ContactImage
+        // In the future, we might want to validate:
+        // - Image size limits
+        // - MIME type consistency with the actual data
+        // - Image dimensions
+        Ok(())
+    }
+}
+
 impl Validate for CreateContactRequest {
     fn validate(&self) -> Result<(), Error> {
         // Validate that string length is not greater than the max allowed
@@ -574,4 +630,6 @@ validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
+validate_on_deserialize!(ErcToken);
+validate_on_deserialize!(ErcTokenId);
 validate_on_deserialize!(UserToken);

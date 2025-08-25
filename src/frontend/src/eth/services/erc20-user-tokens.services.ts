@@ -21,7 +21,7 @@ export const saveUserTokens = async ({
 	identity,
 	tokens
 }: SaveTokensParams<SaveUserToken>) => {
-	progress(ProgressStepsAddToken.SAVE);
+	progress?.(ProgressStepsAddToken.SAVE);
 
 	await setManyUserTokens({
 		identity,
@@ -29,7 +29,7 @@ export const saveUserTokens = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	progress(ProgressStepsAddToken.UPDATE_UI);
+	progress?.(ProgressStepsAddToken.UPDATE_UI);
 
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled, id }) => !enabled && nonNullish(id));

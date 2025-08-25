@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Tokens from '$lib/components/tokens/Tokens.svelte';
+	import Assets from '$lib/components/tokens/Assets.svelte';
 </script>
 
-<Tokens />
+<Assets />

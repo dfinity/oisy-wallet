@@ -3,8 +3,7 @@ import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import {
 	SOLANA_DEVNET_NETWORK_SYMBOL,
 	SOLANA_LOCAL_NETWORK_SYMBOL,
-	SOLANA_MAINNET_NETWORK_SYMBOL,
-	SOLANA_TESTNET_NETWORK_SYMBOL
+	SOLANA_MAINNET_NETWORK_SYMBOL
 } from '$env/networks/networks.sol.env';
 import { BTC_MAINNET_SYMBOL, BTC_TESTNET_SYMBOL } from '$env/tokens/tokens.btc.env';
 import type { BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
@@ -16,7 +15,7 @@ import type {
 } from '$lib/types/idb-addresses';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
-import { createStore, del, get, set, update, type UseStore } from 'idb-keyval';
+import { clear, createStore, del, get, set, update, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
 const idbAddressesStore = (key: string): UseStore =>
@@ -28,7 +27,6 @@ const idbBtcAddressesStoreTestnet = idbAddressesStore(BTC_TESTNET_SYMBOL.toLower
 const idbEthAddressesStore = idbAddressesStore(ETHEREUM_NETWORK_SYMBOL.toLowerCase());
 
 const idbSolAddressesStoreMainnet = idbAddressesStore(SOLANA_MAINNET_NETWORK_SYMBOL.toLowerCase());
-const idbSolAddressesStoreTestnet = idbAddressesStore(SOLANA_TESTNET_NETWORK_SYMBOL.toLowerCase());
 const idbSolAddressesStoreDevnet = idbAddressesStore(SOLANA_DEVNET_NETWORK_SYMBOL.toLowerCase());
 const idbSolAddressesStoreLocal = idbAddressesStore(SOLANA_LOCAL_NETWORK_SYMBOL.toLowerCase());
 
@@ -55,12 +53,6 @@ export const setIdbSolAddressMainnet = ({
 	principal
 }: SetIdbAddressParams<SolAddress>): Promise<void> =>
 	set(principal.toText(), address, idbSolAddressesStoreMainnet);
-
-export const setIdbSolAddressTestnet = ({
-	address,
-	principal
-}: SetIdbAddressParams<SolAddress>): Promise<void> =>
-	set(principal.toText(), address, idbSolAddressesStoreTestnet);
 
 export const setIdbSolAddressDevnet = ({
 	address,
@@ -122,3 +114,9 @@ export const deleteIdbEthAddress = (principal: Principal): Promise<void> =>
 
 export const deleteIdbSolAddressMainnet = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbSolAddressesStoreMainnet);
+
+export const clearIdbBtcAddressMainnet = (): Promise<void> => clear(idbBtcAddressesStoreMainnet);
+
+export const clearIdbEthAddress = (): Promise<void> => clear(idbEthAddressesStore);
+
+export const clearIdbSolAddressMainnet = (): Promise<void> => clear(idbSolAddressesStoreMainnet);

@@ -7,6 +7,7 @@ import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.u
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
 import { getAllIcTransactions, getIcExtendedTransactions } from '$icp/utils/ic-transactions.utils';
 import type { Token } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
 import {
 	MOCK_CKBTC_TOKEN,
 	MOCK_CKETH_TOKEN,
@@ -18,8 +19,6 @@ import {
 	setupIcTransactionsStore
 } from '$tests/mocks/ic-transactions.mock';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
-import type { BRAND } from 'zod';
 
 describe('getIcExtendedTransactions', () => {
 	it('should return no transactions if the stores are empty', () => {
@@ -34,7 +33,7 @@ describe('getIcExtendedTransactions', () => {
 
 	it('should return 3 transactions', () => {
 		setupIcTransactionsStore({
-			tokenId: MOCK_CKETH_TOKEN.id as unknown as symbol & BRAND<'TokenId'>
+			tokenId: MOCK_CKETH_TOKEN.id ?? parseTokenId('')
 		});
 
 		const result = getIcExtendedTransactions({
@@ -46,7 +45,7 @@ describe('getIcExtendedTransactions', () => {
 		expect(result).toHaveLength(3);
 
 		cleanupIcTransactionsStore({
-			tokenId: MOCK_CKETH_TOKEN.id as unknown as symbol & BRAND<'TokenId'>
+			tokenId: MOCK_CKETH_TOKEN.id ?? parseTokenId('')
 		});
 	});
 });

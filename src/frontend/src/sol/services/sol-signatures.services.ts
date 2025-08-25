@@ -78,6 +78,7 @@ export const getSolSignatures = async ({
  * Fetches transactions without an error for a given wallet address.
  */
 export const getSolTransactions = async ({
+	identity,
 	address,
 	network,
 	tokenAddress,
@@ -117,6 +118,7 @@ export const getSolTransactions = async ({
 		async (accPromise, signature) => {
 			const acc = await accPromise;
 			const parsedTransactions = await fetchSolTransactionsForSignature({
+				identity,
 				signature,
 				network,
 				address,

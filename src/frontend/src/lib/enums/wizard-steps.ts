@@ -24,7 +24,10 @@ export enum WizardStepsConvert {
 export enum WizardStepsSwap {
 	SWAP = 'Swap',
 	REVIEW = 'Review',
-	SWAPPING = 'Swapping'
+	SWAPPING = 'Swapping',
+	TOKENS_LIST = 'Tokens List',
+	FILTER_NETWORKS = 'Filter Networks',
+	SELECT_PROVIDER = 'Select swap provider'
 }
 
 export enum WizardStepsAuthHelp {
@@ -45,5 +48,29 @@ export enum WizardStepsReceive {
 
 export enum TokenModalSteps {
 	CONTENT = 'content',
-	DELETE_CONFIRMATION = 'delete_confirnation'
+	DELETE_CONFIRMATION = 'delete_confirmation',
+	EDIT = 'edit',
+	EDIT_PROGRESS = 'edit_progress'
+}
+
+export enum WizardStepsWalletConnect {
+	CONNECT = 'Connect',
+	REVIEW = 'Review'
+}
+
+export enum WizardStepsHideToken {
+	HIDE = 'Hide',
+	HIDING = 'Hiding'
+}
+
+export enum WizardStepsReceiveAddress {
+	RECEIVE = 'Receive',
+	QR_CODE = 'QR code'
+}
+
+export enum WizardStepsManageTokens {
+	MANAGE = 'Manage',
+	IMPORT = 'Import',
+	REVIEW = 'Review',
+	SAVING = 'Saving'
 }

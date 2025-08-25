@@ -1,5 +1,5 @@
 import type { TokenMetadata } from '$lib/types/token';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 export type QrStatus = 'success' | 'cancelled' | 'token_incompatible';
 
@@ -21,19 +21,13 @@ const DecodedUrnBaseSchema = z.object({
 });
 
 const NumericParamsSchema = URN_NUMERIC_PARAMS.reduce(
-	(acc, param) => {
-		acc[param] = z.number().optional();
-		return acc;
-	},
-	{} as Record<(typeof URN_NUMERIC_PARAMS)[number], z.ZodNumber | z.ZodOptional<z.ZodNumber>>
+	(acc, param) => ({ ...acc, [param]: z.number().optional() }),
+	{} as Record<(typeof URN_NUMERIC_PARAMS)[number], z.ZodOptional<z.ZodNumber>>
 );
 
 const StringParamsSchema = URN_STRING_PARAMS.reduce(
-	(acc, param) => {
-		acc[param] = z.string().optional();
-		return acc;
-	},
-	{} as Record<(typeof URN_STRING_PARAMS)[number], z.ZodString | z.ZodOptional<z.ZodString>>
+	(acc, param) => ({ ...acc, [param]: z.string().optional() }),
+	{} as Record<(typeof URN_STRING_PARAMS)[number], z.ZodOptional<z.ZodString>>
 );
 
 export const DecodedUrnSchema = DecodedUrnBaseSchema.extend({

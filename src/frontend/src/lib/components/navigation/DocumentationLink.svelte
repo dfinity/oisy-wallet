@@ -11,6 +11,7 @@
 		asMenuItemCondensed?: boolean;
 		shortTextOnMobile?: boolean;
 		trackEventSource?: string;
+		testId?: string;
 	}
 
 	// We display an alternative "Docs" text instead of "Documentation" to avoid design breaks on small screens
@@ -18,17 +19,19 @@
 		asMenuItem = false,
 		asMenuItemCondensed = false,
 		shortTextOnMobile = false,
-		trackEventSource
+		trackEventSource,
+		testId
 	}: Props = $props();
 </script>
 
 <ExternalLink
+	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.documentation)}
 	{asMenuItem}
 	{asMenuItemCondensed}
 	href={OISY_DOCS_URL}
-	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.documentation)}
 	iconVisible={false}
 	styleClass={asMenuItem ? '' : 'font-bold'}
+	{testId}
 	trackEvent={{
 		name: TRACK_COUNT_OPEN_DOCUMENTATION,
 		metadata: { source: trackEventSource ?? '' }

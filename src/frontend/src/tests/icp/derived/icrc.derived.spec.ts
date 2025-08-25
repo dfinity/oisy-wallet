@@ -1,10 +1,19 @@
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/networks/networks.icrc.env';
-import { enabledIcrcLedgerCanisterIdsNoCk, enabledIcrcTokens } from '$icp/derived/icrc.derived';
+import * as tokensIcEnv from '$env/tokens/tokens.ic.env';
+import {
+	allKnownIcrcTokensLedgerCanisterIds,
+	enabledIcrcLedgerCanisterIdsNoCk,
+	enabledIcrcTokens
+} from '$icp/derived/icrc.derived';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockValidDip20Token,
+	mockValidIcToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { get } from 'svelte/store';
 
 describe('icrc.derived', () => {
@@ -162,6 +171,26 @@ describe('icrc.derived', () => {
 			expect(tokens).toStrictEqual([
 				mockIcrcDefaultToken2.ledgerCanisterId,
 				mockIcrcCustomToken1.ledgerCanisterId
+			]);
+		});
+	});
+
+	describe('allKnownIcrcTokensLedgerCanisterIds', () => {
+		vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [
+			mockValidIcrcToken,
+			mockValidDip20Token
+		]);
+		icrcDefaultTokensStore.setAll([
+			{ data: mockIcrcDefaultToken1, certified: false },
+			{ data: mockIcrcDefaultToken2, certified: false }
+		]);
+
+		it('should return correct array of ledger ids', () => {
+			expect(get(allKnownIcrcTokensLedgerCanisterIds)).toEqual([
+				mockIcrcDefaultToken1.ledgerCanisterId,
+				mockIcrcDefaultToken2.ledgerCanisterId,
+				mockValidIcrcToken.ledgerCanisterId,
+				mockValidDip20Token.ledgerCanisterId
 			]);
 		});
 	});

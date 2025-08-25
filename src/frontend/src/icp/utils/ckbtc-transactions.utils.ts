@@ -175,11 +175,11 @@ const burnStatus = (
 				status: 'pending'
 			};
 		}
-
-		if (!('Confirmed' in retrieveBtcStatus)) {
-			console.error('Unknown retrieveBtcStatusV2:', retrieveBtcStatus);
-		}
 	}
+
+	// Force compiler error on unhandled cases based on leftover types
+	const _: { Confirmed: { txid: Uint8Array | number[] } } | { Unknown: null } | undefined | never =
+		retrieveBtcStatus;
 
 	return {
 		typeLabel: 'transaction.label.twin_token_sent',

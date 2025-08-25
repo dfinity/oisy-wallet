@@ -3,6 +3,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { Balance } from '$lib/types/balance';
+import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
@@ -10,11 +11,13 @@ export interface SwapError {
 	variant: 'error' | 'warning' | 'info';
 	message: string;
 	url?: { url: string; text: string };
+	errorType?: string;
+	swapSucceded?: boolean;
 }
 
 export interface SwapData {
-	sourceToken?: IcTokenToggleable;
-	destinationToken?: IcTokenToggleable;
+	sourceToken?: Token | IcTokenToggleable;
+	destinationToken?: Token | IcTokenToggleable;
 }
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
@@ -81,8 +84,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 };
 
 export interface SwapContext {
-	sourceToken: Readable<IcTokenToggleable | undefined>;
-	destinationToken: Readable<IcTokenToggleable | undefined>;
+	sourceToken: Readable<Token | IcTokenToggleable | undefined>;
+	destinationToken: Readable<Token | IcTokenToggleable | undefined>;
 	sourceTokenBalance: Readable<Balance | undefined>;
 	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;

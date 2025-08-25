@@ -264,7 +264,7 @@ describe('error.utils', () => {
 		});
 
 		it('should return a parsed object removing the unnecessary keys', () => {
-			const errorMsg = `Call failed: \n message: fail\n 'Error code': abc123\n token: secret\n "Request ID": "abc123"\n "Reject message": "This is a reject message"\n code: 500`;
+			const errorMsg = `Call failed: \n message: fail\n 'Error code': abc123\n token: secret\n "Request ID": "abc123"\n "Reject message": "This is a reject message"\n code: 500\nConsider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation: https://internetcomputer.org/docs/current/references/ic-interface-spec/#error-handling`;
 			const expected = {
 				message: 'fail',
 				'Error code': 'abc123',

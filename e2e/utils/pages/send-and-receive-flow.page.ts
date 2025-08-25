@@ -1,8 +1,11 @@
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	AMOUNT_DATA,
 	DESTINATION_INPUT,
 	IN_PROGRESS_MODAL,
 	MAX_BUTTON,
+	NAVIGATION_ITEM_ACTIVITY,
+	NAVIGATION_ITEM_TOKENS,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_DONE_BUTTON,
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
@@ -13,15 +16,7 @@ import {
 	SEND_TOKENS_MODAL,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
 	TOKEN_CARD,
-	TOKEN_INPUT_CURRENCY_TOKEN,
-	ADDRESS_BOOK_MODAL_BUTTON,
-	CONTACT_CARD,
-	CONTACT_CARD_BUTTON,
-	ADDRESS_LIST_ITEM_BUTTON,
-	ADDRESS_BOOK_MODAL_BUTTON,
-	CONTACT_CARD,
-	CONTACT_CARD_BUTTON,
-	ADDRESS_LIST_ITEM_BUTTON
+	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { LedgerTransferCommand } from '../commands/ledger-transfer.command';
@@ -93,124 +88,37 @@ export class FlowPage extends HomepageLoggedIn {
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
 		});
 	}
-	
-	async sendTokensToContact(contactName: string, amount: string = '1'): Promise<void> {
-		// Open the send tokens modal
-		await this.clickByTestId({ testId: SEND_TOKENS_MODAL_OPEN_BUTTON });
-		await this.waitForModal({
-			modalOpenButtonTestId: SEND_TOKENS_MODAL_OPEN_BUTTON,
-			modalTestId: SEND_TOKENS_MODAL
-		});
-		
-		// Click on the address book button to select a contact
-		await this.clickByTestId({ testId: ADDRESS_BOOK_MODAL_BUTTON });
-		
-		// Wait for the address book modal to appear
-		await this.waitForByTestId({ testId: CONTACT_CARD });
-		
-		// Find and select the contact with the given name
-		const contactCards = await this.page.locator(`[data-tid="${CONTACT_CARD}"]`).all();
-		
-		for (const card of contactCards) {
-			const text = await card.textContent();
-			if (text && text.includes(contactName)) {
-				// Click on the contact card button
-				await card.locator(`[data-tid="${CONTACT_CARD_BUTTON}"]`).click();
-				break;
-			}
-		}
-		
-		// Select the address from the contact
-		await this.clickByTestId({ testId: ADDRESS_LIST_ITEM_BUTTON });
-		
-		// Continue with the send flow
-		await this.clickByTestId({ testId: SEND_FORM_DESTINATION_NEXT_BUTTON });
-		
-		// Set the amount
-		await this.setInputValueByTestId({
-			testId: TOKEN_INPUT_CURRENCY_TOKEN,
-			value: amount
-		});
-		
-		// Continue to review
-		await this.clickByTestId({ testId: SEND_FORM_NEXT_BUTTON });
-		
-		// Send the tokens
-		await this.clickByTestId({ testId: REVIEW_FORM_SEND_BUTTON });
-		
-		// Wait for the transaction to complete
-		const progressModalExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
-		expect(progressModalExists).toBeTruthy();
-		
-		await this.waitForByTestId({
-			testId: IN_PROGRESS_MODAL,
-			options: { state: 'detached' }
-		});
-		
-		const progressModalDoesNotExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
-		expect(progressModalDoesNotExists).toBeFalsy();
-		
+
+	async navigateToActivity(): Promise<void> {
+		await this.navigateTo({ testId: NAVIGATION_ITEM_ACTIVITY, expectedPath: AppPath.Activity });
+
+		await new Promise((resolve) => setTimeout(resolve, 5000));
+
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
 		});
 	}
-	
-	async sendTokensToContact(contactName: string, amount: string = '1'): Promise<void> {
-		// Open the send tokens modal
-		await this.clickByTestId({ testId: SEND_TOKENS_MODAL_OPEN_BUTTON });
-		await this.waitForModal({
-			modalOpenButtonTestId: SEND_TOKENS_MODAL_OPEN_BUTTON,
-			modalTestId: SEND_TOKENS_MODAL
+
+	async navigateToAssets(): Promise<void> {
+		await this.navigateTo({ testId: NAVIGATION_ITEM_TOKENS, expectedPath: AppPath.Tokens });
+
+		await this.waitForContentReady();
+	}
+
+	async navigateToTransactionsPage({
+		tokenSymbol,
+		networkSymbol
+	}: {
+		tokenSymbol: string;
+		networkSymbol: string;
+	}): Promise<void> {
+		await this.navigateTo({
+			testId: this.getTokenCardTestId({ tokenSymbol, networkSymbol }),
+			expectedPath: AppPath.Transactions
 		});
-		
-		// Click on the address book button to select a contact
-		await this.clickByTestId({ testId: ADDRESS_BOOK_MODAL_BUTTON });
-		
-		// Wait for the address book modal to appear
-		await this.waitForByTestId({ testId: CONTACT_CARD });
-		
-		// Find and select the contact with the given name
-		const contactCards = await this.page.locator(`[data-tid="${CONTACT_CARD}"]`).all();
-		
-		for (const card of contactCards) {
-			const text = await card.textContent();
-			if (text && text.includes(contactName)) {
-				// Click on the contact card button
-				await card.locator(`[data-tid="${CONTACT_CARD_BUTTON}"]`).click();
-				break;
-			}
-		}
-		
-		// Select the address from the contact
-		await this.clickByTestId({ testId: ADDRESS_LIST_ITEM_BUTTON });
-		
-		// Continue with the send flow
-		await this.clickByTestId({ testId: SEND_FORM_DESTINATION_NEXT_BUTTON });
-		
-		// Set the amount
-		await this.setInputValueByTestId({
-			testId: TOKEN_INPUT_CURRENCY_TOKEN,
-			value: amount
-		});
-		
-		// Continue to review
-		await this.clickByTestId({ testId: SEND_FORM_NEXT_BUTTON });
-		
-		// Send the tokens
-		await this.clickByTestId({ testId: REVIEW_FORM_SEND_BUTTON });
-		
-		// Wait for the transaction to complete
-		const progressModalExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
-		expect(progressModalExists).toBeTruthy();
-		
-		await this.waitForByTestId({
-			testId: IN_PROGRESS_MODAL,
-			options: { state: 'detached' }
-		});
-		
-		const progressModalDoesNotExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
-		expect(progressModalDoesNotExists).toBeFalsy();
-		
+
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
 		});

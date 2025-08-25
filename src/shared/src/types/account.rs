@@ -13,7 +13,7 @@ use serde::Serialize;
 use super::token_id::TokenId;
 use crate::types::network::marker_trait::{
     BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, EthereumMainnet, EthereumSepolia,
-    InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet, SolanaTestnet,
+    InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet,
 };
 
 pub mod conversion;
@@ -59,11 +59,9 @@ pub struct IcrcSubaccountId(pub [u8; 32]);
 pub struct SolPrincipal(pub String);
 impl AccountId<SolanaMainnet> for SolPrincipal {}
 impl AccountId<SolanaDevnet> for SolPrincipal {}
-impl AccountId<SolanaTestnet> for SolPrincipal {}
 impl AccountId<SolanaLocal> for SolPrincipal {}
 impl TokenId<SolanaMainnet> for SolPrincipal {}
 impl TokenId<SolanaDevnet> for SolPrincipal {}
-impl TokenId<SolanaTestnet> for SolPrincipal {}
 impl TokenId<SolanaLocal> for SolPrincipal {}
 
 /// A bitcoin address

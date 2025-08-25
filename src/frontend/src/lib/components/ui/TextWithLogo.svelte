@@ -1,17 +1,23 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 
-	export let name: string;
-	export let logo: 'start' | 'end' = 'end';
-	export let description: string | undefined = undefined;
+	interface Props {
+		name: string;
+		logo?: 'start' | 'end';
+		description?: string;
+		icon: Snippet;
+	}
+
+	let { name, logo = 'end', description, icon }: Props = $props();
 </script>
 
 <span
 	class="flex"
-	class:items-center={!description}
-	class:gap-2={logo === 'start'}
-	class:gap-1={logo === 'end'}
 	class:flex-row-reverse={logo === 'start'}
+	class:gap-1={logo === 'end'}
+	class:gap-2={logo === 'start'}
+	class:items-center={!description}
 >
 	<span class="flex flex-col gap-0.5">
 		<span class="leading-5">{name}</span>
@@ -19,5 +25,5 @@
 			<span class="text-left text-xs leading-none text-tertiary">{description}</span>
 		{/if}
 	</span>
-	<slot name="icon" />
+	{@render icon()}
 </span>

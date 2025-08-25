@@ -1,6 +1,7 @@
 import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
+	BtcGetFeePercentilesResponse,
 	Contact,
 	CreateChallengeResponse,
 	CustomToken,
@@ -18,6 +19,7 @@ import type {
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	CreateContactParams,
@@ -81,6 +83,15 @@ export const removeUserToken = async ({
 	const { removeUserToken } = await backendCanister({ identity });
 
 	return removeUserToken(restParams);
+};
+
+export const removeCustomToken = async ({
+	identity,
+	...restParams
+}: CanisterApiFunctionParams<{ token: CustomToken }>): Promise<void> => {
+	const { removeCustomToken } = await backendCanister({ identity });
+
+	return removeCustomToken(restParams);
 };
 
 export const setManyUserTokens = async ({
@@ -154,6 +165,15 @@ export const selectUserUtxosFee = async ({
 	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
 
 	return btcSelectUserUtxosFee(params);
+};
+
+export const getCurrentBtcFeePercentiles = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetFeePercentilesParams>): Promise<BtcGetFeePercentilesResponse> => {
+	const { btcGetCurrentFeePercentiles } = await backendCanister({ identity });
+
+	return btcGetCurrentFeePercentiles(params);
 };
 
 export const createPowChallenge = async ({

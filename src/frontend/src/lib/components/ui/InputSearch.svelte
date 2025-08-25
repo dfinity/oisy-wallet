@@ -23,19 +23,19 @@
 
 <InputTextWithAction
 	name="filter"
-	required={false}
-	bind:value={filter}
-	{placeholder}
 	{autofocus}
+	{placeholder}
+	required={false}
 	{testId}
+	bind:value={filter}
 >
-	<svelte:fragment slot="inner-end">
+	{#snippet innerEnd()}
 		{#if showResetButton}
-			<button onclick={() => (filter = '')} aria-label={$i18n.core.text.clear_filter}>
+			<button aria-label={$i18n.core.text.clear_filter} onclick={() => (filter = '')}>
 				<IconClose />
 			</button>
 		{:else}
 			<IconSearch />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </InputTextWithAction>

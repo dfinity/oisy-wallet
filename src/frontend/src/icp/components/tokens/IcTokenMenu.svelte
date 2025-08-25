@@ -5,25 +5,25 @@
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { TOKEN_MENU_IC } from '$lib/constants/test-ids.constants';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/stores/token.store';
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = ($token as OptionIcCkToken)?.explorerUrl;
+	let explorerUrl = $derived(($pageToken as OptionIcCkToken)?.explorerUrl);
 
-	let transactionsExplorerUrl: string | undefined;
-	$: transactionsExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined;
+	let transactionsExplorerUrl = $derived(
+		nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined
+	);
 </script>
 
 <TokenMenu testId={TOKEN_MENU_IC}>
 	{#if nonNullish(transactionsExplorerUrl)}
 		<div in:fade>
 			<ExternalLink
+				ariaLabel={$i18n.tokens.alt.open_dashboard}
 				asMenuItem
 				asMenuItemCondensed
 				fullWidth
 				href={transactionsExplorerUrl}
-				ariaLabel={$i18n.tokens.alt.open_dashboard}
 				iconVisible={false}
 			>
 				{$i18n.navigation.text.view_on_explorer}

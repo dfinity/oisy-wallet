@@ -152,7 +152,12 @@ export const parseIcErrorMessage = (err: unknown): Record<string, string> | unde
 		);
 
 		// Remove the "Request ID" key if it exists, since it is unique per request, so not useful for general error handling
-		const { ['Request ID']: _, ...rest } = errObj;
+		const {
+			['Request ID']: _,
+			['Consider gracefully handling failures from this canister or altering the canister to handle exceptions. See documentation']:
+				__,
+			...rest
+		} = errObj;
 
 		return rest;
 	} catch (_: unknown) {

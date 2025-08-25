@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { erc20DefaultTokens } from '$eth/derived/erc20.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils.js';
@@ -11,6 +12,12 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+
+	interface Props {
+		fromRoute?: NavigationTarget;
+	}
+
+	let { fromRoute }: Props = $props();
 
 	let isErc20 = $derived(nonNullish($pageToken) && isTokenErc20($pageToken));
 
@@ -26,7 +33,7 @@
 	);
 </script>
 
-<TokenModal token={$pageToken} isDeletable={!undeletableToken}>
+<TokenModal {fromRoute} isDeletable={!undeletableToken} token={$pageToken}>
 	{#if nonNullish(contractAddress)}
 		<ModalListItem>
 			{#snippet label()}
@@ -36,14 +43,14 @@
 			{#snippet content()}
 				<output>{shortenWithMiddleEllipsis({ text: contractAddress })}</output>
 
-				<Copy value={contractAddress} text={$i18n.tokens.details.contract_address_copied} inline />
+				<Copy inline text={$i18n.tokens.details.contract_address_copied} value={contractAddress} />
 
 				<ExternalLink
-					iconSize="18"
-					href={`${getExplorerUrl({ token: $pageToken })}/address/${contractAddress}`}
 					ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
-					inline
 					color="blue"
+					href={`${getExplorerUrl({ token: $pageToken })}/address/${contractAddress}`}
+					iconSize="18"
+					inline
 				/>
 			{/snippet}
 		</ModalListItem>

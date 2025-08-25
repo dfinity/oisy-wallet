@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -31,7 +31,11 @@
 
 	$: insufficientFunds = nonNullish(insufficientFundsError);
 
-	const { feeStore: storeFeeData, minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const {
+		feeStore: storeFeeData,
+		minGasFee,
+		maxGasFee
+	} = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -85,14 +89,14 @@
 
 <div class="mb-4">
 	<TokenInput
+		autofocus={nonNullish($sendToken)}
+		customErrorValidate={customValidate}
+		displayUnit={inputUnit}
+		exchangeRate={$sendTokenExchangeRate}
 		token={$sendToken}
 		bind:amount
-		displayUnit={inputUnit}
 		bind:amountSetToMax
-		exchangeRate={$sendTokenExchangeRate}
 		bind:error={insufficientFundsError}
-		customErrorValidate={customValidate}
-		autofocus={nonNullish($sendToken)}
 		on:click={() => {
 			dispatch('icTokensList');
 		}}
@@ -115,12 +119,12 @@
 		<svelte:fragment slot="balance">
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
+					balance={$sendBalance}
+					error={nonNullish(insufficientFundsError)}
+					fee={$maxGasFee}
+					token={$sendToken}
 					bind:amount
 					bind:amountSetToMax
-					error={nonNullish(insufficientFundsError)}
-					balance={$sendBalance}
-					token={$sendToken}
-					fee={$maxGasFee}
 				/>
 			{/if}
 		</svelte:fragment>

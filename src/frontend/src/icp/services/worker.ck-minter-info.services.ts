@@ -13,6 +13,7 @@ import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/ty
 import type { IcCkMetadata } from '$icp/types/ic-token';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse,
 	PostMessageSyncState
@@ -52,55 +53,69 @@ const initCkMinterInfoWorker = async ({
 		onSyncStatus: (state: SyncState) => void;
 	}): Promise<IcCkWorkerInitResult> => {
 	const CkMinterInfoWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new CkMinterInfoWorker.default();
+	let worker: Worker | null = new CkMinterInfoWorker.default();
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<PostMessageJsonDataResponse | PostMessageDataResponseError | PostMessageSyncState>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncCkMinterInfo':
 				onSyncSuccess({
 					tokenId,
-					data: data.data as PostMessageJsonDataResponse
+					data: data as PostMessageJsonDataResponse
 				});
 				return;
 			case 'syncCkMinterInfoError':
 				onSyncError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: data.error
 				});
 				return;
 			case 'syncCkMinterInfoStatus':
-				onSyncStatus((data.data as PostMessageSyncState).state);
+				onSyncStatus((data as PostMessageSyncState).state);
 				return;
 		}
 	};
 
+	const stop = () => {
+		worker?.postMessage({
+			msg: `stop${postMessageKey}MinterInfoTimer`
+		});
+	};
+
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: `start${postMessageKey}MinterInfoTimer`,
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: `stop${postMessageKey}MinterInfoTimer`
-			});
-		},
+		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: `trigger${postMessageKey}MinterInfoTimer`,
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
+		},
+		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
+			stop();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

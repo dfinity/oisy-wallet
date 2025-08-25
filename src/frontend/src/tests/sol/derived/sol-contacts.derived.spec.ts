@@ -1,5 +1,6 @@
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
+import { getNetworkContactKey } from '$lib/utils/contact.utils';
 import { solNetworkContacts } from '$sol/derived/sol-contacts.derived';
 import { getMockContactsUi, mockContactUiSolAddressUi } from '$tests/mocks/contacts.mock';
 import { get } from 'svelte/store';
@@ -7,7 +8,7 @@ import { get } from 'svelte/store';
 describe('sol-contacts.derived', () => {
 	describe('solNetworkContacts', () => {
 		const contactWithSolAddress = getMockContactsUi({
-			n: 3,
+			n: 2,
 			name: 'Multiple Addresses Contact',
 			addresses: [mockContactUiSolAddressUi]
 		}) as unknown as ContactUi[];
@@ -20,7 +21,20 @@ describe('sol-contacts.derived', () => {
 			contactsStore.set([...contactWithSolAddress]);
 
 			expect(get(solNetworkContacts)).toStrictEqual({
-				[mockContactUiSolAddressUi.address]: contactWithSolAddress[0]
+				[getNetworkContactKey({
+					contact: contactWithSolAddress[0],
+					address: mockContactUiSolAddressUi.address
+				})]: {
+					contact: contactWithSolAddress[0],
+					address: mockContactUiSolAddressUi.address
+				},
+				[getNetworkContactKey({
+					contact: contactWithSolAddress[1],
+					address: mockContactUiSolAddressUi.address
+				})]: {
+					contact: contactWithSolAddress[1],
+					address: mockContactUiSolAddressUi.address
+				}
 			});
 		});
 

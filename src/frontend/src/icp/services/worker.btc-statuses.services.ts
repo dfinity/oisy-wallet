@@ -2,6 +2,7 @@ import { onLoadBtcStatusesError, syncBtcStatuses } from '$icp/services/ckbtc-lis
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse,
 	PostMessageSyncState
@@ -12,52 +13,66 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 	token: { id: tokenId }
 }: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
 	const BtcStatusesWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new BtcStatusesWorker.default();
+	let worker: Worker | null = new BtcStatusesWorker.default();
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseError>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncBtcStatuses':
 				syncBtcStatuses({
 					tokenId,
-					data: data.data as PostMessageJsonDataResponse
+					data: data as PostMessageJsonDataResponse
 				});
 				return;
 			case 'syncBtcStatusesError':
 				onLoadBtcStatusesError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: data.error
 				});
 				return;
 		}
 	};
 
+	const stop = () => {
+		worker?.postMessage({
+			msg: 'stopBtcStatusesTimer'
+		});
+	};
+
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startBtcStatusesTimer',
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopBtcStatusesTimer'
-			});
-		},
+		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'triggerBtcStatusesTimer',
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
+		},
+		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
+			stop();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

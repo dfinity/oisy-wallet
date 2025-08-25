@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
@@ -22,10 +22,11 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
-		reward: RewardDescription;
+		reward: RewardCampaignDescription;
 	}
 
 	let { reward }: Props = $props();
@@ -42,8 +43,10 @@
 	let amountOfRewards = $state(0);
 </script>
 
-<Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
-	<span class="text-center text-xl" slot="title">{reward.title}</span>
+<Modal testId={REWARDS_MODAL} on:nnsClose={modalStore.close}>
+	<span slot="title" class="text-center text-xl">
+		{resolveText({ i18n: $i18n, path: reward.title })}
+	</span>
 
 	<ContentWithToolbar>
 		<RewardBanner {reward} />
@@ -54,19 +57,19 @@
 		{/if}
 
 		<div class="flex w-full justify-between text-lg font-semibold">
-			<span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
+			<span class="inline-flex">{resolveText({ i18n: $i18n, path: reward.participateTitle })}</span>
 			<span>
 				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
 			</span>
 		</div>
-		<p class="my-3"><Html text={reward.description} /></p>
+		<p class="my-3"><Html text={resolveText({ i18n: $i18n, path: reward.description })} /></p>
 
 		{#if !hasEnded}
 			<ExternalLink
-				href={reward.learnMoreHref}
 				ariaLabel={$i18n.rewards.text.learn_more}
-				iconVisible={false}
 				asButton
+				href={reward.learnMoreHref}
+				iconVisible={false}
 				styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
 				trackEvent={{
 					name: TRACK_REWARD_CAMPAIGN_LEARN_MORE,
@@ -77,9 +80,9 @@
 			</ExternalLink>
 
 			<Share
-				text={$i18n.rewards.text.share}
-				href={reward.campaignHref}
+				href={resolveText({ i18n: $i18n, path: reward.campaignHref })}
 				styleClass="my-2"
+				text={$i18n.rewards.text.share}
 				trackEvent={{
 					name: TRACK_REWARD_CAMPAIGN_SHARE,
 					metadata: { campaignId: `${reward.id}`, state: getCampaignState(reward) }
@@ -89,12 +92,12 @@
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
 
-				<RewardsRequirements {isEligible} {criteria} />
+				<RewardsRequirements {criteria} {isEligible} />
 			{/if}
 		{/if}
 
 		{#snippet toolbar()}
-			<Button paddingSmall type="button" fullWidth onclick={modalStore.close}>
+			<Button fullWidth onclick={modalStore.close} paddingSmall type="button">
 				{$i18n.rewards.text.modal_button_text}
 			</Button>
 		{/snippet}

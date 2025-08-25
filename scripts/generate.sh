@@ -55,6 +55,10 @@ DFX_NETWORK=ic ./scripts/build.icp_swap_pool.sh
 DFX_NETWORK=ic ./scripts/build.icp_swap_factory.sh
 # .. downloads candid for the xtc_ledger
 DFX_NETWORK=ic ./scripts/build.xtc_ledger.sh
+# .. downloads candid for the sol_rpc
+DFX_NETWORK=ic ./scripts/build.sol_rpc.sh
+# .. downloads candid for the llm
+DFX_NETWORK=ic ./scripts/build.llm.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings

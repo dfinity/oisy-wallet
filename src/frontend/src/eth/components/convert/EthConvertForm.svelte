@@ -3,7 +3,7 @@
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -23,7 +23,7 @@
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	const { minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { minGasFee, maxGasFee } = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	const { insufficientFunds, insufficientFundsForFee } =
 		getContext<TokenActionValidationErrorsContext>(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
@@ -37,13 +37,13 @@
 </script>
 
 <ConvertForm
+	disabled={invalid}
+	minFee={$minGasFee}
+	testId={ETH_CONVERT_FORM_TEST_ID}
+	totalFee={$maxGasFee}
 	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
-	totalFee={$maxGasFee}
-	minFee={$minGasFee}
-	disabled={invalid}
-	testId={ETH_CONVERT_FORM_TEST_ID}
 >
 	<svelte:fragment slot="message">
 		{#if isTokenErc20($sourceToken) && $insufficientFundsForFee}
@@ -56,7 +56,9 @@
 	</svelte:fragment>
 
 	<EthFeeDisplay slot="fee">
-		<Html slot="label" text={$i18n.fee.text.convert_fee} />
+		{#snippet label()}
+			<Html text={$i18n.fee.text.convert_fee} />
+		{/snippet}
 	</EthFeeDisplay>
 
 	<slot name="cancel" slot="cancel" />

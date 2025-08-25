@@ -1,9 +1,5 @@
 import { PrincipalTextSchema } from '@dfinity/zod-schemas';
-import * as z from 'zod';
-
-const NumberAsStringSchema = z.string().refine((val) => !isNaN(Number(val)), {
-	message: 'Invalid number string'
-});
+import * as z from 'zod/v4';
 
 const DateTimeSchema = z
 	.string()
@@ -11,14 +7,15 @@ const DateTimeSchema = z
 
 const KongSwapTokenMetricsSchema = z.object({
 	token_id: z.number(),
-	total_supply: NumberAsStringSchema.nullable(),
-	market_cap: NumberAsStringSchema.nullable(),
-	price: NumberAsStringSchema,
+	total_supply: z.number().nullable(),
+	market_cap: z.number().nullable(),
+	price: z.number().nullable(),
 	updated_at: DateTimeSchema,
-	volume_24h: NumberAsStringSchema,
-	tvl: NumberAsStringSchema,
-	price_change_24h: NumberAsStringSchema.nullable(),
-	previous_price: NumberAsStringSchema.nullable()
+	volume_24h: z.number().nullable(),
+	tvl: z.number().nullable(),
+	price_change_24h: z.number().nullable(),
+	previous_price: z.number().nullable(),
+	is_verified: z.boolean()
 });
 
 const KongSwapTokenBaseSchema = z.object({

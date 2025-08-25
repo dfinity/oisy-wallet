@@ -16,6 +16,10 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
+
 describe('AllTransactions', () => {
 	const customIcrcToken: IcrcCustomToken = {
 		...mockValidIcToken,
@@ -96,5 +100,49 @@ describe('AllTransactions', () => {
 		const { getByText } = render(AllTransactions);
 
 		expect(getByText(en.transactions.text.transaction_history)).toBeInTheDocument();
+	});
+
+	describe('Privacy Mode', () => {
+		it('renders title with eye-off icon when privacy mode is enabled', async () => {
+			const settingsModule = await import('$lib/stores/settings.store');
+			settingsModule.privacyModeStore.subscribe = (fn) => {
+				fn({ enabled: true });
+				return () => {};
+			};
+
+			const { container } = render(AllTransactions);
+
+			const titleContainer = container.querySelector('span.flex.items-center.gap-2');
+
+			expect(titleContainer).toBeInTheDocument();
+
+			const title = titleContainer?.querySelector('h1');
+
+			expect(title).toBeInTheDocument();
+			expect(title?.textContent).toBe(en.activity.text.title);
+
+			const eyeOffIcon = titleContainer?.querySelector('span.text-tertiary');
+
+			expect(eyeOffIcon).toBeInTheDocument();
+		});
+
+		it('renders simple title when privacy mode is disabled', async () => {
+			const settingsModule = await import('$lib/stores/settings.store');
+			settingsModule.privacyModeStore.subscribe = (fn) => {
+				fn({ enabled: false });
+				return () => {};
+			};
+
+			const { container } = render(AllTransactions);
+
+			const titleContainer = container.querySelector('span.flex.items-center.gap-2');
+
+			expect(titleContainer).not.toBeInTheDocument();
+
+			const title = container.querySelector('h1');
+
+			expect(title).toBeInTheDocument();
+			expect(title?.textContent).toBe(en.activity.text.title);
+		});
 	});
 });

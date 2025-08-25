@@ -12,7 +12,7 @@ import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -528,7 +528,7 @@ describe('signer.canister', () => {
 		});
 	});
 
-	describe('btc_caller_send', () => {
+	describe('sendBtc', () => {
 		it('sends BTC correctly', async () => {
 			const response = { Ok: { txid: '1' } };
 			service.btc_caller_send.mockResolvedValue(response);

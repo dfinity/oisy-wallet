@@ -14,8 +14,8 @@
 </script>
 
 <DateBadge
-	variant={hasEnded ? 'disabled' : 'warning'}
 	{date}
-	{testId}
 	prefix={hasEnded ? $i18n.rewards.text.ended_date : $i18n.rewards.text.active_date}
+	{testId}
+	variant={hasEnded ? 'disabled' : 'warning'}
 ></DateBadge>

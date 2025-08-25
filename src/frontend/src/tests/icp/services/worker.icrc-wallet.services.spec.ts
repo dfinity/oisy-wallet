@@ -1,4 +1,4 @@
-import { syncWallet } from '$icp/services/ic-listener.services';
+import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
@@ -8,7 +8,8 @@ import type { WalletWorker } from '$lib/types/listener';
 import { mockIndexCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 
 vi.mock('$icp/services/ic-listener.services', () => ({
-	syncWallet: vi.fn()
+	syncWallet: vi.fn(),
+	syncWalletFromCache: vi.fn()
 }));
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
@@ -21,6 +22,7 @@ const postMessageSpy = vi.fn();
 class MockWorker {
 	postMessage = postMessageSpy;
 	onmessage: ((event: MessageEvent) => void) | null = null;
+	terminate: () => void = vi.fn();
 }
 
 vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
@@ -91,6 +93,24 @@ describe('worker.icrc-wallet.services', () => {
 				});
 			});
 
+			it('should destroy the worker', () => {
+				worker.destroy();
+
+				expect(postMessageSpy).toHaveBeenCalledOnce();
+				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+					msg: 'stopIcrcWalletTimer'
+				});
+
+				expect(workerInstance.terminate).toHaveBeenCalledOnce();
+			});
+
+			it('should sync one time from cache', () => {
+				expect(syncWalletFromCache).toHaveBeenCalledExactlyOnceWith({
+					tokenId: mockToken.id,
+					networkId: mockToken.network.id
+				});
+			});
+
 			describe('onmessage', () => {
 				it('should handle syncIcrcWallet message', () => {
 					const payload = {
@@ -141,11 +161,8 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(postMessageSpy).toHaveBeenCalledTimes(2);
+					expect(postMessageSpy).toHaveBeenCalledOnce();
 					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-						msg: 'stopIcrcWalletTimer'
-					});
-					expect(postMessageSpy).toHaveBeenNthCalledWith(2, {
 						msg: 'startIcrcWalletTimer',
 						data: {
 							ledgerCanisterId,
@@ -164,23 +181,13 @@ describe('worker.icrc-wallet.services', () => {
 						workerInstance.onmessage?.({ data: payload } as MessageEvent);
 					});
 
-					expect(postMessageSpy).toHaveBeenCalledTimes(10 + 1);
-
+					expect(postMessageSpy).toHaveBeenCalledOnce();
 					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-						msg: 'stopIcrcWalletTimer'
-					});
-					expect(postMessageSpy).toHaveBeenNthCalledWith(2, {
 						msg: 'startIcrcWalletTimer',
 						data: {
 							ledgerCanisterId,
 							env
 						}
-					});
-
-					Array.from({ length: 8 }).forEach((_, index) => {
-						expect(postMessageSpy).toHaveBeenNthCalledWith(index + 3, {
-							msg: 'stopIcrcWalletTimer'
-						});
 					});
 				});
 			});

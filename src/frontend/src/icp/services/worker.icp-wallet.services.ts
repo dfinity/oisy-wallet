@@ -1,23 +1,30 @@
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { syncWallet } from '$icp/services/ic-listener.services';
+import { syncWallet, syncWalletFromCache } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
+import type { IcToken } from '$icp/types/ic-token';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcp,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 
-export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
+export const initIcpWalletWorker = async ({
+	indexCanisterId,
+	id: tokenId,
+	network: { id: networkId }
+}: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new WalletWorker.default();
+	let worker: Worker | null = new WalletWorker.default();
+
+	await syncWalletFromCache({ tokenId, networkId });
 
 	worker.onmessage = ({
-		data
+		data: dataMsg
 	}: MessageEvent<
 		PostMessage<
 			| PostMessageDataResponseWallet
@@ -25,45 +32,65 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			| PostMessageDataResponseWalletCleanUp
 		>
 	>) => {
-		const { msg } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'syncIcpWallet':
 				syncWallet({
-					tokenId: ICP_TOKEN_ID,
-					data: data.data as PostMessageDataResponseWallet
+					tokenId,
+					data: data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcpWalletError':
 				onLoadTransactionsError({
-					tokenId: ICP_TOKEN_ID,
-					error: (data.data as PostMessageDataResponseError).error
+					tokenId,
+					error: data.error
 				});
 				return;
 			case 'syncIcpWalletCleanUp':
 				onTransactionsCleanUp({
-					tokenId: ICP_TOKEN_ID,
-					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
+					tokenId,
+					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
 		}
 	};
 
+	const stop = () => {
+		worker?.postMessage({
+			msg: 'stopIcpWalletTimer'
+		});
+	};
+
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
-				msg: 'startIcpWalletTimer'
-			});
+			worker?.postMessage({
+				msg: 'startIcpWalletTimer',
+				data: {
+					indexCanisterId
+				}
+			} as PostMessage<PostMessageDataRequestIcp>);
 		},
-		stop: () => {
-			worker.postMessage({
-				msg: 'stopIcpWalletTimer'
-			});
-		},
+		stop,
 		trigger: () => {
-			worker.postMessage({
-				msg: 'triggerIcpWalletTimer'
-			});
+			worker?.postMessage({
+				msg: 'triggerIcpWalletTimer',
+				data: {
+					indexCanisterId
+				}
+			} as PostMessage<PostMessageDataRequestIcp>);
+		},
+		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
+			stop();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

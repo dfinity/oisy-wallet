@@ -13,6 +13,7 @@ src/frontend/src/env/tokens/tokens-erc20/
 src/frontend/static/icons/sns/*
 src/frontend/src/**/*.svelte
 src/frontend/src/tests/**/*.spec.ts
+src/frontend/src/tests/**/*.mock.ts
 .github/actions/*.yml
 .github/workflows/*.yml
 vitest.config.ts

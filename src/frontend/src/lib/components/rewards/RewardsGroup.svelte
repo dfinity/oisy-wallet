@@ -2,7 +2,7 @@
 	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { TRACK_REWARD_CAMPAIGN_OPEN } from '$lib/constants/analytics.contants';
@@ -13,7 +13,7 @@
 
 	interface Props {
 		title?: string;
-		rewards: RewardDescription[];
+		rewards: RewardCampaignDescription[];
 		altText?: string;
 		altImg?: string;
 		testId?: string;
@@ -30,7 +30,7 @@
 	{/if}
 
 	{#each rewards as reward (reward.id)}
-		<div in:slide={SLIDE_DURATION} class="mt-4">
+		<div class="mt-4" in:slide={SLIDE_DURATION}>
 			<RewardCard
 				onclick={() => {
 					trackEvent({
@@ -55,8 +55,8 @@
 	{#if nonNullish(altImg) && rewards.length === 0}
 		<div class="max-h-66 overflow-hidden rounded-2xl">
 			<Img
-				src={altImg}
 				alt={altText}
+				src={altImg}
 				testId={nonNullish(testId) ? `${testId}-alt-img` : undefined}
 			/>
 		</div>

@@ -68,44 +68,44 @@
 </script>
 
 <FeeDisplay
-	feeAmount={icTokenFee}
 	decimals={sourceToken.decimals}
 	exchangeRate={sourceTokenExchangeRate}
+	feeAmount={icTokenFee}
 	symbol={sourceToken.symbol}
 	zeroAmountLabel={$i18n.fee.text.zero_fee}
 >
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+	{#snippet label()}{$i18n.fee.text.fee}{/snippet}
 </FeeDisplay>
 
 {#if nonNullish(bitcoinEstimatedFee)}
 	<FeeDisplay
-		feeAmount={bitcoinEstimatedFee}
 		decimals={BTC_DECIMALS}
 		exchangeRate={bitcoinFeeExchangeRate}
+		feeAmount={bitcoinEstimatedFee}
 		symbol={BTC_MAINNET_SYMBOL}
 	>
-		<svelte:fragment slot="label">{$i18n.fee.text.estimated_btc}</svelte:fragment>
+		{#snippet label()}{$i18n.fee.text.estimated_btc}{/snippet}
 	</FeeDisplay>
 {/if}
 
 {#if nonNullish(kytFee)}
 	<FeeDisplay
-		feeAmount={kytFee}
 		decimals={sourceToken.decimals}
 		exchangeRate={sourceTokenExchangeRate}
+		feeAmount={kytFee}
 		symbol={sourceToken.symbol}
 	>
-		<svelte:fragment slot="label">{$i18n.fee.text.estimated_inter_network}</svelte:fragment>
+		{#snippet label()}{$i18n.fee.text.estimated_inter_network}{/snippet}
 	</FeeDisplay>
 {/if}
 
 {#if nonNullish(ethereumEstimateFee)}
 	<FeeDisplay
-		feeAmount={ethereumEstimateFee}
 		decimals={ethereumFeeToken.decimals}
 		exchangeRate={ethereumFeeExchangeRate}
+		feeAmount={ethereumEstimateFee}
 		symbol={ethereumFeeToken.symbol}
 	>
-		<svelte:fragment slot="label">{$i18n.fee.text.estimated_eth}</svelte:fragment>
+		{#snippet label()}{$i18n.fee.text.estimated_eth}{/snippet}
 	</FeeDisplay>
 {/if}

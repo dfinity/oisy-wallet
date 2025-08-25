@@ -9,7 +9,6 @@ import {
 } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('ContactCard', () => {
 	// Create mock contacts using getMockContacts

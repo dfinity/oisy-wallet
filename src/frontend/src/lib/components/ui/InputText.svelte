@@ -1,26 +1,43 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 
-	export let value = '';
-	export let name: string;
-	export let placeholder: string;
-	export let showResetButton = false;
-	export let required = true;
-	export let testId: string | undefined = undefined;
-	export let autofocus = false;
-	export let disabled: boolean | undefined = undefined;
+	interface Props {
+		value: string;
+		name: string;
+		placeholder: string;
+		showResetButton?: boolean;
+		required?: boolean;
+		testId?: string;
+		autofocus?: boolean;
+		disabled?: boolean;
+		innerEnd?: Snippet;
+	}
+
+	let {
+		value = $bindable(''),
+		name,
+		placeholder,
+		showResetButton = false,
+		required = true,
+		testId,
+		autofocus = false,
+		disabled,
+		innerEnd
+	}: Props = $props();
 </script>
 
 <Input
 	{name}
-	inputType="text"
-	{required}
-	bind:value
-	{placeholder}
-	{showResetButton}
-	spellcheck={false}
 	autocomplete="off"
 	{autofocus}
-	{testId}
 	{disabled}
+	{innerEnd}
+	inputType="text"
+	{placeholder}
+	{required}
+	{showResetButton}
+	spellcheck={false}
+	{testId}
+	bind:value
 />

@@ -2,12 +2,12 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 import {
-	FEE_CONTEXT_KEY,
-	initFeeContext,
-	initFeeStore,
-	type FeeContext,
-	type FeeStore
-} from '$eth/stores/fee.store';
+	ETH_FEE_CONTEXT_KEY,
+	initEthFeeContext,
+	initEthFeeStore,
+	type EthFeeContext,
+	type EthFeeStore
+} from '$eth/stores/eth-fee.store';
 import {
 	CONVERT_CONTEXT_KEY,
 	initConvertContext,
@@ -23,12 +23,12 @@ import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 describe('EthConvertForm', () => {
-	let store: FeeStore;
-	const mockContext = ({ feeStore }: { feeStore: FeeStore }) =>
-		new Map<symbol, ConvertContext | FeeContext | TokenActionValidationErrorsContext>([
+	let store: EthFeeStore;
+	const mockContext = ({ feeStore }: { feeStore: EthFeeStore }) =>
+		new Map<symbol, ConvertContext | EthFeeContext | TokenActionValidationErrorsContext>([
 			[
-				FEE_CONTEXT_KEY,
-				initFeeContext({
+				ETH_FEE_CONTEXT_KEY,
+				initEthFeeContext({
 					feeStore,
 					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
 					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
@@ -63,7 +63,7 @@ describe('EthConvertForm', () => {
 	beforeEach(() => {
 		mockPage.reset();
 		vi.resetAllMocks();
-		store = initFeeStore();
+		store = initEthFeeStore();
 	});
 
 	it('should keep the next button clickable if all requirements are met', () => {

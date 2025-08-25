@@ -2,6 +2,7 @@ import type { EligibilityReport, RewardInfo, UserData } from '$declarations/rewa
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
 import * as rewardApi from '$lib/api/reward.api';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
+import { RewardType } from '$lib/enums/reward-type';
 import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
@@ -46,13 +47,11 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 
-			const { receivedReward, receivedJackpot, receivedReferral, reward } =
-				await loadRewardResult(mockIdentity);
+			const { reward, lastTimestamp, rewardType } = await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBeFalsy();
-			expect(receivedJackpot).toBeFalsy();
-			expect(receivedReferral).toBeFalsy();
+			expect(rewardType).toBeUndefined();
 			expect(reward).toBeUndefined();
+			expect(lastTimestamp).toBeUndefined();
 		});
 
 		it('should return falsy reward result and set entry in the session storage', async () => {
@@ -68,17 +67,14 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral } =
-				await loadRewardResult(mockIdentity);
+			const { rewardType } = await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBeFalsy();
-			expect(receivedJackpot).toBeFalsy();
-			expect(receivedReferral).toBeFalsy();
+			expect(rewardType).toBeUndefined();
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
 
-		it('should return isReward as true and set entry in the session storage', async () => {
+		it('should return reward with type airdrop and set entry in the session storage', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				superpowers: [],
@@ -91,19 +87,16 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral, reward } =
-				await loadRewardResult(mockIdentity);
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBeTruthy();
-			expect(receivedJackpot).toBeFalsy();
-			expect(receivedReferral).toBeFalsy();
 			expect(reward).toEqual(mappedMockedReward);
+			expect(rewardType).toBe(RewardType.AIRDROP);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
 
-		it('should return isJackpot as true and set entry in the session storage', async () => {
-			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
+		it('should return reward with type referral and set entry in the session storage', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRAL] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				superpowers: [],
@@ -116,19 +109,16 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral, reward } =
-				await loadRewardResult(mockIdentity);
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBeTruthy();
-			expect(receivedJackpot).toBeTruthy();
-			expect(receivedReferral).toBeFalsy();
-			expect(reward).toEqual({ ...mappedMockedReward, name: 'jackpot' });
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.REFERRAL });
+			expect(rewardType).toBe(RewardType.REFERRAL);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
 
-		it('should return isJackpot as true if one of several received rewards is a jackpot and set entry in the session storage', async () => {
-			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
+		it('should return reward with type referral if one of several received rewards is a referral and set entry in the session storage', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRAL] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				superpowers: [],
@@ -141,19 +131,16 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral, reward } =
-				await loadRewardResult(mockIdentity);
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBeTruthy();
-			expect(receivedJackpot).toBeTruthy();
-			expect(receivedReferral).toBeFalsy();
-			expect(reward).toEqual({ ...mappedMockedReward, name: 'jackpot' });
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.REFERRAL });
+			expect(rewardType).toBe(RewardType.REFERRAL);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
 
-		it('should return isReferral as true and set entry in the session storage', async () => {
-			const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
+		it('should return reward with type referrer and set entry in the session storage', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRER] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				superpowers: [],
@@ -166,24 +153,28 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral, reward } =
-				await loadRewardResult(mockIdentity);
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBeTruthy();
-			expect(receivedJackpot).toBeFalsy();
-			expect(receivedReferral).toBeTruthy();
-			expect(reward).toEqual({ ...mappedMockedReward, name: 'referral' });
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.REFERRER });
+			expect(rewardType).toBe(RewardType.REFERRER);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
 
-		it('should return isReferral as true if one of several received rewards is a referral and set entry in the session storage', async () => {
-			const customMockedReward: RewardInfo = { ...mockedReward, name: ['referral'] };
+		it('should return reward with type referrer if one of several received rewards is a referrer and set entry in the session storage', async () => {
+			const customMockedReferrerReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRER]
+			};
+			const customMockedReferralReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRAL]
+			};
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				superpowers: [],
 				airdrops: [],
-				usage_awards: [[mockedReward, customMockedReward]],
+				usage_awards: [[mockedReward, customMockedReferrerReward, customMockedReferralReward]],
 				last_snapshot_timestamp: [lastTimestamp],
 				sprinkles: []
 			};
@@ -191,15 +182,196 @@ describe('rewards.utils', () => {
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
 
-			const { receivedReward, receivedJackpot, receivedReferral, reward } =
-				await loadRewardResult(mockIdentity);
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
 
-			expect(receivedReward).toBeTruthy();
-			expect(receivedJackpot).toBeFalsy();
-			expect(receivedReferral).toBeTruthy();
-			expect(reward).toEqual({ ...mappedMockedReward, name: 'referral' });
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.REFERRER });
+			expect(rewardType).toBe(RewardType.REFERRER);
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return reward with type referee and set entry in the session storage', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFEREE] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
+
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.REFEREE });
+			expect(rewardType).toBe(RewardType.REFEREE);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return reward with type referee if one of several received rewards is a referee and set entry in the session storage', async () => {
+			const customMockedRefereeReward: RewardInfo = { ...mockedReward, name: [RewardType.REFEREE] };
+			const customMockedReferralReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRAL]
+			};
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward, customMockedRefereeReward, customMockedReferralReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
+
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.REFEREE });
+			expect(rewardType).toBe(RewardType.REFEREE);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return reward with type jackpot and set entry in the session storage', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.JACKPOT] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
+
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.JACKPOT });
+			expect(rewardType).toBe(RewardType.JACKPOT);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return reward with type jackpot if one of several received rewards is a jackpot and set entry in the session storage', async () => {
+			const customMockedJackpotReward: RewardInfo = { ...mockedReward, name: [RewardType.JACKPOT] };
+			const customMockedReferralReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.REFERRAL]
+			};
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward, customMockedJackpotReward, customMockedReferralReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
+
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.JACKPOT });
+			expect(rewardType).toBe(RewardType.JACKPOT);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return reward with type leaderboard and set entry in the session storage', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.LEADERBOARD] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
+
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.LEADERBOARD });
+			expect(rewardType).toBe(RewardType.LEADERBOARD);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return reward with type leaderboard if one of several received rewards is a leaderboard and set entry in the session storage', async () => {
+			const customMockedLeaderboardReward: RewardInfo = {
+				...mockedReward,
+				name: [RewardType.LEADERBOARD]
+			};
+			const customMockedJackpotReward: RewardInfo = { ...mockedReward, name: [RewardType.JACKPOT] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward, customMockedLeaderboardReward, customMockedJackpotReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { reward, rewardType } = await loadRewardResult(mockIdentity);
+
+			expect(reward).toEqual({ ...mappedMockedReward, name: RewardType.LEADERBOARD });
+			expect(rewardType).toBe(RewardType.LEADERBOARD);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return timestamp on initial loading with new reward of type airdrop', async () => {
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { reward, lastTimestamp: timestamp, rewardType } = await loadRewardResult(mockIdentity);
+
+			expect(reward).toEqual(mappedMockedReward);
+			expect(timestamp).toBe(lastTimestamp);
+			expect(rewardType).toBe(RewardType.AIRDROP);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
+		});
+
+		it('should return timestamp on first login', async () => {
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [0n],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBeNull();
+
+			const { lastTimestamp } = await loadRewardResult(mockIdentity);
+
+			expect(lastTimestamp).toBe(0n);
 		});
 	});
 

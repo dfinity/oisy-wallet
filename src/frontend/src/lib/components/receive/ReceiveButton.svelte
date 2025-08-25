@@ -6,20 +6,20 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		onclick: () => void;
+		onClick: () => void;
 	}
 
-	let { onclick }: Props = $props();
+	let { onClick }: Props = $props();
 </script>
 
 <ButtonHero
-	{onclick}
-	disabled={$isBusy}
 	ariaLabel={$i18n.receive.text.receive}
+	disabled={$isBusy}
+	onclick={onClick}
 	testId={RECEIVE_TOKENS_MODAL_OPEN_BUTTON}
 >
 	{#snippet icon()}
-		<IconQr size="28" />
+		<IconQr size="24" />
 	{/snippet}
 	{#snippet label()}
 		{$i18n.receive.text.receive}

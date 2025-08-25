@@ -31,11 +31,19 @@ export const loadAddresses = async (networkIds: NetworkId[]): Promise<ResultSucc
 	return { success: results.every(({ success }) => success) };
 };
 
-export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
+export const loadIdbAddresses = async (
+	networkIds: NetworkId[]
+): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
 	const results = await Promise.all([
-		loadIdbBtcAddressMainnet(),
-		loadIdbEthAddress(),
-		loadIdbSolAddressMainnet()
+		...(networkIds.includes(BTC_MAINNET_NETWORK_ID)
+			? [loadIdbBtcAddressMainnet()]
+			: ([] as ResultSuccess<LoadIdbAddressError>[])),
+		...(networkIds.includes(ETHEREUM_NETWORK_ID)
+			? [loadIdbEthAddress()]
+			: ([] as ResultSuccess<LoadIdbAddressError>[])),
+		...(networkIds.includes(SOLANA_MAINNET_NETWORK_ID)
+			? [loadIdbSolAddressMainnet()]
+			: ([] as ResultSuccess<LoadIdbAddressError>[]))
 	]);
 
 	const { success, err } = reduceResults<LoadIdbAddressError>(results);

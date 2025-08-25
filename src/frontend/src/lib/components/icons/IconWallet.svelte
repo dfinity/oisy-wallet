@@ -1,20 +1,24 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
-	export let size = '24';
+	interface Props {
+		size?: string;
+	}
+
+	let { size = '24' }: Props = $props();
 </script>
 
 <svg
-	width={size}
+	fill="currentColor"
 	height={size}
 	viewBox="0 0 24 24"
-	fill="currentColor"
+	width={size}
 	xmlns="http://www.w3.org/2000/svg"
 >
 	<path
-		opacity="0.4"
-		fill-rule="evenodd"
 		clip-rule="evenodd"
 		d="M5 6C3.34315 6 2 7.34315 2 9V18C2 19.6569 3.34315 21 5 21H19C20.6569 21 22 19.6569 22 18V9C22 7.34315 20.6569 6 19 6H5ZM17.0508 14C18.1554 14 19.0508 13.1046 19.0508 12C19.0508 10.8954 18.1554 10 17.0508 10C15.9462 10 15.0508 10.8954 15.0508 12C15.0508 13.1046 15.9462 14 17.0508 14Z"
+		fill-rule="evenodd"
+		opacity="0.4"
 	/>
 	<path
 		d="M1.8259 6.9778C1.67694 5.40401 2.77479 3.98467 4.3355 3.7333L16.3561 1.79717C17.9919 1.5337 19.5316 2.64617 19.795 4.28194L19.8465 4.60166H8.54882C7.99654 4.60166 7.54882 5.04938 7.54882 5.60166C7.54882 5.74324 7.57824 5.87795 7.6313 6H5C3.39205 6 2.07957 7.26502 2.00348 8.85412L1.8259 6.9778Z"

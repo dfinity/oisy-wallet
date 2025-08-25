@@ -9,6 +9,7 @@
 		condensed?: boolean;
 		noPadding?: boolean;
 		children?: Snippet;
+		testId?: string;
 	}
 
 	const {
@@ -17,7 +18,8 @@
 		styleClass = '',
 		condensed = true,
 		noPadding = false,
-		children
+		children,
+		testId
 	}: Props = $props();
 
 	export interface ListContext {
@@ -30,7 +32,7 @@
 </script>
 
 {#if element === 'ul'}
-	<ul class={`list-disc ${styleClass}`}>{@render children?.()}</ul>
+	<ul class={`list-disc ${styleClass}`} data-tid={testId}>{@render children?.()}</ul>
 {:else if element === 'ol'}
-	<ol class={styleClass}>{@render children?.()}</ol>
+	<ol class={styleClass} data-tid={testId}>{@render children?.()}</ol>
 {/if}

@@ -32,13 +32,13 @@
 <div class="mr-2 mt-1 flex flex-row">
 	{#each previewList as network (network.id)}
 		<div class="-ml-1 flex">
-			<NetworkLogo size="xxs" {network} />
+			<NetworkLogo {network} size="xxs" />
 		</div>
 	{/each}
 	{#if enabledList.length > numberOfIcons}
 		<div
-			class="-ml-1 flex items-center justify-center overflow-hidden rounded-full bg-primary text-center text-xs ring-1 ring-primary transition-opacity duration-150"
 			style={`width: ${logoSizes.xxs}; height: ${logoSizes.xxs}`}
+			class="-ml-1 flex items-center justify-center overflow-hidden rounded-full bg-primary text-center text-xs ring-1 ring-primary transition-opacity duration-150"
 		>
 			+{enabledList.length - numberOfIcons}
 		</div>

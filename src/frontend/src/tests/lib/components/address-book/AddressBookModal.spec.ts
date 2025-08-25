@@ -5,6 +5,7 @@ import {
 	ADDRESS_BOOK_CONTACT_NAME_INPUT,
 	ADDRESS_BOOK_MODAL,
 	ADDRESS_BOOK_SAVE_BUTTON,
+	BUTTON_MODAL_CLOSE,
 	CONTACT_CARD,
 	CONTACT_CARD_BUTTON,
 	CONTACT_HEADER_EDIT_BUTTON,
@@ -12,14 +13,15 @@ import {
 	CONTACT_SHOW_CLOSE_BUTTON,
 	MODAL_TITLE
 } from '$lib/constants/test-ids.constants';
+import { AddressBookSteps } from '$lib/enums/progress-steps';
 import { loadContacts } from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
+import { modalStore } from '$lib/stores/modal.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockManageContactsService } from '$tests/mocks/manage-contacts.service.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('AddressBookModal', () => {
 	let cleanup: { restore: () => void };
@@ -331,5 +333,22 @@ describe('AddressBookModal', () => {
 			// The existing contact should be displayed
 			expect(getByText('Pre-existing Contact', { exact: false })).toBeInTheDocument();
 		});
+	});
+
+	it('should execute the onComplete callback function when the modal is closed during save address entrypoint', async () => {
+		const { getByTestId } = render(AddressBookModal);
+
+		const onComplete = vi.fn();
+
+		modalStore.openAddressBook({
+			id: Symbol(),
+			data: { entrypoint: { type: AddressBookSteps.SAVE_ADDRESS, address: '0x123', onComplete } }
+		});
+
+		expect(getByTestId(BUTTON_MODAL_CLOSE)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(BUTTON_MODAL_CLOSE));
+
+		expect(onComplete).toHaveBeenCalledOnce();
 	});
 });

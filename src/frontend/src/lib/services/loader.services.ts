@@ -1,3 +1,4 @@
+import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
@@ -96,7 +97,14 @@ export const initLoader = async ({
 		return;
 	}
 
-	const { success: addressIdbSuccess, err } = await loadIdbAddresses();
+	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
+	const enabledNetworkIds: NetworkId[] = [
+		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
+		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
+	];
+
+	const { success: addressIdbSuccess, err } = await loadIdbAddresses(enabledNetworkIds);
 
 	if (addressIdbSuccess) {
 		loading.set(false);
@@ -111,21 +119,19 @@ export const initLoader = async ({
 	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 	setProgressModal(true);
 
-	const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
+	if (FRONTEND_DERIVATION_ENABLED) {
+		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
+		initSignerAllowance();
+	} else {
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-	if (!initSignerAllowanceSuccess) {
-		// Sign-out is handled within the service.
-		return;
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
+		}
 	}
 
 	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
-
-	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
-	const enabledNetworkIds: NetworkId[] = [
-		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
-		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
-		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
-	];
 
 	// We don't need to load the addresses of the disabled networks.
 	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>

@@ -1,13 +1,17 @@
 <!-- source: ICONLY PRO - The license is bought and owned by the DFINITY Foundation - Please read the documentation in the README file, or see terms and conditions here https://iconly.pro/pages/terms -->
 <script lang="ts">
-	export let size = '24';
+	interface Props {
+		size?: string;
+	}
+
+	let { size = '24' }: Props = $props();
 </script>
 
 <svg
-	width={size}
+	fill="currentColor"
 	height={size}
 	viewBox="0 0 24 24"
-	fill="currentColor"
+	width={size}
 	xmlns="http://www.w3.org/2000/svg"
 >
 	<path

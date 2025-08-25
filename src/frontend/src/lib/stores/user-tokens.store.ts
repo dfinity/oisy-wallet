@@ -1,5 +1,5 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
-import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc } from '$eth/utils/erc.utils';
 import type { CertifiedData } from '$lib/types/store';
 import type { Token, TokenId } from '$lib/types/token';
 import type { UserToken } from '$lib/types/user-token';
@@ -23,7 +23,11 @@ export const initCertifiedUserTokensStore = <T extends Token>(): CertifiedUserTo
 	const getIdentifier = <T extends Token>(
 		token: T
 	): TokenId | Erc20ContractAddress['address'] | SplTokenAddress =>
-		isTokenSpl(token) ? token.address : isTokenErc20(token) ? token.address : token.id;
+		isTokenSpl(token)
+			? token.address
+			: isTokenErc(token)
+				? `${token.address}#${token.network.chainId}`
+				: token.id;
 
 	return {
 		setAll: (tokens: CertifiedData<UserToken<T>>[]) =>

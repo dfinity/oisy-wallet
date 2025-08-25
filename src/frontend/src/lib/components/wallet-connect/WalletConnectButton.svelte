@@ -7,12 +7,12 @@
 </script>
 
 <button
-	aria-label={ariaLabel}
-	on:click
-	in:fade
 	class="tertiary-alt h-10"
 	class:icon={!$$slots.default}
+	aria-label={ariaLabel}
 	disabled={$ethAddressNotLoaded}
+	on:click
+	in:fade
 >
 	<IconWalletConnect size="24" />
 	<slot />

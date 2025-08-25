@@ -1,7 +1,6 @@
 import Input from '$lib/components/ui/Input.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('Input', () => {
 	const defaultProps = {

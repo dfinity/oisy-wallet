@@ -3,8 +3,9 @@ import SendInputDestination from '$lib/components/send/SendInputDestination.svel
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { ContactUi } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
+import { getNetworkContactKey } from '$lib/utils/contact.utils';
 import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contacts.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
@@ -85,7 +86,13 @@ describe('SendInputDestination', () => {
 				invalidDestination: false,
 				knownDestinations: {},
 				networkContacts: {
-					[props.destination]: contact
+					[getNetworkContactKey({
+						contact,
+						address: props.destination
+					})]: {
+						contact,
+						address: props.destination
+					}
 				}
 			},
 			context: mockContext(ETHEREUM_TOKEN)

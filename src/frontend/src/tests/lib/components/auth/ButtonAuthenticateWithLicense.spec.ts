@@ -5,7 +5,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('ButtonAuthenticateWithLicense', () => {
 	const signInButtonSelector = `button[data-tid="login-button"]`;

@@ -5,7 +5,7 @@ import { isEthAddress } from '$lib/utils/account.utils';
 import { isBtcAddress } from '$lib/utils/address.utils';
 import { isSolAddress } from '$sol/utils/sol-address.utils';
 import { nonNullish } from '@dfinity/utils';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const AddressSchema = z.string().nonempty();
 

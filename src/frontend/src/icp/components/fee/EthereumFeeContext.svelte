@@ -75,7 +75,7 @@
 		store.setFee(null);
 	};
 
-	$: maxTransactionFee, updateContext();
+	$: (maxTransactionFee, updateContext());
 
 	const loadFee = async () => {
 		clearTimer();
@@ -97,7 +97,7 @@
 		timer = setInterval(load, 30000);
 	};
 
-	$: networkId, (async () => await loadFee())();
+	$: (networkId, (async () => await loadFee())());
 
 	let timer: NodeJS.Timeout | undefined;
 

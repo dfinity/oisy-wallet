@@ -16,7 +16,13 @@
 	}
 	let { contact = $bindable(), disabled = false, isValid = $bindable() }: Props = $props();
 
-	const trimmedName = $derived((contact.name ?? '').trim());
+	let name = $state(contact.name ?? '');
+
+	$effect(() => {
+		contact.name = name;
+	});
+
+	const trimmedName = $derived(name.trim());
 	const isNameTooLong = $derived(trimmedName.length > CONTACT_MAX_NAME_LENGTH);
 
 	$effect(() => {
@@ -24,22 +30,22 @@
 	});
 </script>
 
-<div class="w-full" style="--input-font-size: var(--text-base)">
+<div style="--input-font-size: var(--text-base)" class="w-full">
 	<div
 		class="w-full rounded-lg bg-brand-subtle-10 p-4 pb-6 pt-4 text-sm md:p-6 md:text-base md:font-bold"
 	>
 		{$i18n.contact.fields.name}
 		<InputText
 			name="name"
-			placeholder=""
-			bind:value={contact.name}
-			showResetButton={!disabled}
-			testId={ADDRESS_BOOK_CONTACT_NAME_INPUT}
 			autofocus={true}
 			{disabled}
+			placeholder=""
+			showResetButton={!disabled}
+			testId={ADDRESS_BOOK_CONTACT_NAME_INPUT}
+			bind:value={name}
 		/>
 		{#if isNameTooLong}
-			<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
+			<p class="pt-2 text-error-primary" transition:slide={SLIDE_DURATION}>
 				{replacePlaceholders($i18n.contact.error.name_too_long, {
 					$maxCharacters: `${CONTACT_MAX_NAME_LENGTH}`
 				})}</p

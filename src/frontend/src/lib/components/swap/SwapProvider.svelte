@@ -2,9 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
-	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
+	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -18,6 +18,8 @@
 	import type { OptionString } from '$lib/types/string';
 	import { SwapProvider } from '$lib/types/swap';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { findSwapProvider } from '$lib/utils/swap.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 
 	interface Props {
@@ -34,9 +36,7 @@
 	let selectedProvider = $derived($swapAmountsStore?.selectedProvider);
 	let isBestRate = $derived(selectedProvider?.provider === $swapAmountsStore?.swaps[0]?.provider);
 	let swapDApp = $derived(
-		dAppDescriptions.find(
-			({ id }) => id === $swapAmountsStore?.selectedProvider?.provider.toLowerCase()
-		)
+		nonNullish(selectedProvider?.provider) ? findSwapProvider(selectedProvider.provider) : null
 	);
 
 	$effect(() => {
@@ -77,12 +77,16 @@
 						<div class="flex gap-2">
 							<div class="mt-1">
 								<Logo
+									alt={replacePlaceholders($i18n.dapps.alt.logo, {
+										$dAppName: resolveText({ i18n: $i18n, path: swapDApp.name })
+									})}
 									src={swapDApp.logo}
-									alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: swapDApp.name })}
 								/>
 							</div>
 							<div class="mr-auto">
-								<div class="text-lg font-bold">{swapDApp.name}</div>
+								<div class="text-lg font-bold"
+									>{resolveText({ i18n: $i18n, path: swapDApp.name })}</div
+								>
 							</div>
 						</div>
 					</div>
@@ -105,6 +109,8 @@
 				<SwapDetailsKong provider={selectedProvider} />
 			{:else if selectedProvider.provider === SwapProvider.ICP_SWAP}
 				<SwapDetailsIcp provider={selectedProvider} {slippageValue} />
+			{:else if selectedProvider.provider === SwapProvider.VELORA}
+				<SwapDetailsVelora provider={selectedProvider} />
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}

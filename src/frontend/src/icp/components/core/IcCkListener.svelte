@@ -21,14 +21,14 @@
 			}))
 	);
 
-	onDestroy(() => worker?.stop());
+	onDestroy(() => worker?.destroy());
 
 	const syncTimer = () => {
 		worker?.stop();
 		worker?.start();
 	};
 
-	$: worker, syncTimer();
+	$: (worker, syncTimer());
 
 	const triggerTimer = () => worker?.trigger();
 </script>

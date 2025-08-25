@@ -12,7 +12,7 @@ import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse as AlchemyTransactionResponse } from 'alchemy-sdk';
 import type { FeeData } from 'ethers/providers';
 import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
-import type * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
@@ -39,6 +39,7 @@ export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
 		timestamp?: number;
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
+		tokenId?: number;
 	};
 
 export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
@@ -65,6 +66,8 @@ export interface TransactionUiCommon {
 	fromExplorerUrl?: string;
 	blockNumber?: number;
 }
+
+export type AnyTransaction = BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi;
 
 export type AnyTransactionUi =
 	| BtcTransactionUi

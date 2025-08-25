@@ -23,14 +23,13 @@
 
 	export let ledgerCanisterId: string | undefined;
 	export let indexCanisterId: string | undefined;
+	export let metadata: ValidateTokenData | undefined;
 
 	let invalid = true;
-	$: invalid = isNullish(token);
+	$: invalid = isNullish(metadata);
 
 	const dispatch = createEventDispatcher();
 	const back = () => dispatch('icBack');
-
-	let token: ValidateTokenData | undefined;
 
 	onMount(async () => {
 		const { result, data } = await loadAndAssertAddCustomToken({
@@ -45,34 +44,34 @@
 			return;
 		}
 
-		token = data;
+		metadata = data;
 	});
 </script>
 
 <ContentWithToolbar>
 	<div class="mb-4 rounded-lg bg-brand-subtle-20 p-4">
-		{#if isNullish(token)}
+		{#if isNullish(metadata)}
 			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
 		{:else}
 			<div in:blur>
 				<Card noMargin>
-					{token.token.name}
+					{metadata.token.name}
 
 					{#snippet icon()}
-						{#if nonNullish(token)}
+						{#if nonNullish(metadata)}
 							<Logo
-								src={token.token.icon}
-								alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
-								size="lg"
+								alt={replacePlaceholders($i18n.core.alt.logo, { $name: metadata.token.name })}
 								color="white"
+								size="lg"
+								src={metadata.token.icon}
 							/>
 						{/if}
 					{/snippet}
 
 					{#snippet description()}
-						{#if nonNullish(token)}
+						{#if nonNullish(metadata)}
 							<span class="break-all">
-								{token.token.symbol}
+								{metadata.token.symbol}
 							</span>
 						{/if}
 					{/snippet}
@@ -81,14 +80,14 @@
 		{/if}
 	</div>
 
-	{#if nonNullish(token)}
+	{#if nonNullish(metadata)}
 		{@const {
 			network: safeNetwork,
 			ledgerCanisterId: safeLedgerCanisterId,
 			indexCanisterId: safeIndexCanisterId
-		} = token.token}
+		} = metadata.token}
 		<div in:fade>
-			<Value ref="network" element="div">
+			<Value element="div" ref="network">
 				{#snippet label()}
 					{$i18n.tokens.manage.text.network}
 				{/snippet}
@@ -97,7 +96,7 @@
 				{/snippet}
 			</Value>
 
-			<Value ref="ledgerId" element="div">
+			<Value element="div" ref="ledgerId">
 				{#snippet label()}{$i18n.tokens.import.text.ledger_canister_id}{/snippet}
 				{#snippet content()}
 					{safeLedgerCanisterId}
@@ -105,7 +104,7 @@
 			</Value>
 
 			{#if nonNullish(indexCanisterId)}
-				<Value ref="indexId" element="div">
+				<Value element="div" ref="indexId">
 					{#snippet label()}
 						{$i18n.tokens.import.text.index_canister_id}
 					{/snippet}
@@ -121,7 +120,7 @@
 
 	{#snippet toolbar()}
 		<div in:fade>
-			{#if nonNullish(token)}
+			{#if nonNullish(metadata)}
 				<ButtonGroup>
 					<ButtonBack onclick={back} />
 					<Button disabled={invalid} onclick={() => dispatch('icSave')}>

@@ -17,7 +17,7 @@ describe('BtcTokenModal', () => {
 
 		const { container } = render(BtcTokenModal);
 
-		modalStore.openBtcToken(BTC_MAINNET_TOKEN.id);
+		modalStore.openBtcToken({ id: BTC_MAINNET_TOKEN.id, data: undefined });
 
 		expect(container).toHaveTextContent(BTC_MAINNET_TOKEN.network.name);
 		expect(container).toHaveTextContent(BTC_MAINNET_TOKEN.name);

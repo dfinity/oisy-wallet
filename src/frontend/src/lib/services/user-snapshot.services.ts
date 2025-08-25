@@ -15,7 +15,7 @@ import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
-import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
+import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
 import {
 	NANO_SECONDS_IN_MILLISECOND,
@@ -136,11 +136,11 @@ const getLastTransactionsByToken = ({
 			return [];
 		}
 
-		return (get(ethTransactionsStore)?.[tokenId] ?? []).map((transaction) =>
+		return (get(ethTransactionsStore)?.[tokenId] ?? []).map(({ data: transaction }) =>
 			mapEthTransactionUi({
 				transaction,
 				ckMinterInfoAddresses,
-				$ethAddress: account
+				ethAddress: account
 			})
 		);
 	}
@@ -190,7 +190,7 @@ const toAnySnapshot = ({
 		return;
 	}
 
-	const isTestnet = networkEnv === 'testnet' || isTokenIcrcTestnet(token);
+	const isTestnet = networkEnv === 'testnet' || isTokenIcTestnet(token);
 
 	// This does not happen, but we need it to make it type-safe
 	assertNonNullish(networkId.description);

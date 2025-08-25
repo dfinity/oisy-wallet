@@ -2,6 +2,7 @@ import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
 	_SERVICE as BackendService,
+	BtcGetFeePercentilesResponse,
 	Contact,
 	CreateChallengeResponse,
 	CustomToken,
@@ -27,6 +28,7 @@ import type {
 	AddUserHiddenDappIdParams,
 	AllowSigningParams,
 	BtcAddPendingTransactionParams,
+	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse,
@@ -96,6 +98,12 @@ export class BackendCanister extends Canister<BackendService> {
 		const { remove_user_token } = this.caller({ certified: true });
 
 		return remove_user_token(params);
+	};
+
+	removeCustomToken = ({ token }: { token: CustomToken }): Promise<void> => {
+		const { remove_custom_token } = this.caller({ certified: true });
+
+		return remove_custom_token(token);
 	};
 
 	createUserProfile = (): Promise<UserProfile> => {
@@ -184,6 +192,24 @@ export class BackendCanister extends Canister<BackendService> {
 			return Ok;
 		}
 
+		throw mapBtcSelectUserUtxosFeeError(response.Err);
+	};
+
+	btcGetCurrentFeePercentiles = async ({
+		network
+	}: BtcGetFeePercentilesParams): Promise<BtcGetFeePercentilesResponse> => {
+		const { btc_get_current_fee_percentiles } = this.caller({ certified: true });
+
+		const response = await btc_get_current_fee_percentiles({
+			network
+		});
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		// Reuse the same error mapping as other BTC methods since they share the same error type
 		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
@@ -283,7 +309,7 @@ export class BackendCanister extends Canister<BackendService> {
 
 	createContact = async (name: string): Promise<Contact> => {
 		const { create_contact } = this.caller({ certified: true });
-		const response = await create_contact({ name });
+		const response = await create_contact({ name, image: [] });
 
 		if ('Ok' in response) {
 			return response.Ok;

@@ -80,6 +80,9 @@ describe('btc-wallet.worker', () => {
 
 	const postMessageMock = vi.fn();
 
+	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	const awaitJobExecution = () => vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 	beforeAll(() => {
 		originalPostmessage = window.postMessage;
 		window.postMessage = postMessageMock;
@@ -147,6 +150,8 @@ describe('btc-wallet.worker', () => {
 				it('should trigger postMessage with correct data', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					expect(postMessageMock).toHaveBeenCalledTimes(4);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
@@ -175,8 +180,8 @@ describe('btc-wallet.worker', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
-					expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(1);
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
+					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
 				});
 
 				it('should stop the scheduler', () => {
@@ -188,8 +193,8 @@ describe('btc-wallet.worker', () => {
 				it('should trigger syncWallet periodically', async () => {
 					await scheduler.start(startData);
 
-					expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
-					expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(1);
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
+					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
@@ -204,6 +209,8 @@ describe('btc-wallet.worker', () => {
 
 				it('should postMessage with status of the worker', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
