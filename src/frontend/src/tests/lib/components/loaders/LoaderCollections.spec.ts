@@ -12,6 +12,11 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
+import { listCustomTokens } from '$lib/api/backend.api';
+
+vi.mock('$lib/api/backend.api', () => ({
+	listCustomTokens: vi.fn()
+}));
 
 describe('LoaderCollections', () => {
 	let alchemyProvidersSpy: MockInstance;
@@ -33,6 +38,8 @@ describe('LoaderCollections', () => {
 
 		erc1155CustomTokensSpy = vi.spyOn(erc1155CustomTokens, 'saveCustomTokens');
 		erc1155CustomTokensSpy.mockResolvedValue(undefined);
+
+		vi.mocked(listCustomTokens).mockResolvedValue([]);
 
 		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 
