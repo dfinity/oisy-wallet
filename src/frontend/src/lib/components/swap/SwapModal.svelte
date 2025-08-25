@@ -25,8 +25,8 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext, initSwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
-	import { closeModal } from '$lib/utils/modal.utils';
 	import type { Token } from '$lib/types/token';
+	import { closeModal } from '$lib/utils/modal.utils';
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
