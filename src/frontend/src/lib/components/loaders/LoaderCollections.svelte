@@ -3,14 +3,20 @@
 	import type { Snippet } from 'svelte';
 	import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 	import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
-	import { type EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
-	import type { EthAddress } from '$lib/types/address';
+	import { alchemyProviders } from '$eth/providers/alchemy.providers';
+	import type { OwnedContract } from '$lib/types/nft';
+	import { erc721Tokens } from '$eth/derived/erc721.derived';
+	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
+	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
+	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
+	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
+	import type { Identity } from '@dfinity/agent';
+	import { ethAddress } from '$lib/derived/address.derived';
 
 	interface Props {
 		children?: Snippet;
@@ -18,63 +24,69 @@
 
 	let { children }: Props = $props();
 
-	const handleErc721 = async (network: EthereumNetwork) => {
-		const etherscanProvider = etherscanProviders(network.id);
+	const handleErc721 = async ({contracts, network, identity}: { contracts: OwnedContract[], network: EthereumNetwork, identity: Identity }) => {
+		const tokens = contracts.reduce<SaveErc721CustomToken[]>(
+			(acc, contract) => {
+				const existingToken = $erc721Tokens.find(
+					(token) => token.address === contract.address && token.network.id === network.id
+				);
+				if (nonNullish(existingToken)) {
+					return acc;
+				}
 
-		const contractAddresses = await loadErc721ContractAddresses(etherscanProvider);
+				const newToken: SaveErc721CustomToken = {
+					address: contract.address,
+					network,
+					enabled: !contract.isSpam
+				};
+				acc.push(newToken);
 
-		const newTokens = contractAddresses.reduce<SaveErc721CustomToken[]>((acc, contractAddress) => {
-			const existingToken = $nonFungibleTokens.find(
-				(token) => token.address === contractAddress && token.network.id === network.id
-			);
-			if (nonNullish(existingToken)) {
 				return acc;
-			}
+			},
+			[]
+		);
 
-			const newToken: SaveErc721CustomToken = {
-				address: contractAddress,
-				network,
-				enabled: true
-			};
-			acc.push(newToken);
+		await saveErc721CustomTokens({tokens, identity})
+	}
 
-			return acc;
-		}, []);
+	const handleErc1155 = async ({contracts, network, identity}: { contracts: OwnedContract[], network: EthereumNetwork, identity: Identity}) => {
+		const tokens = contracts.reduce<SaveErc1155CustomToken[]>(
+			(acc, contract) => {
+				const existingToken = $erc1155Tokens.find(
+					(token) => token.address === contract.address && token.network.id === network.id
+				);
+				if (nonNullish(existingToken)) {
+					return acc;
+				}
 
-		for (const token of newTokens) {
-			token.enabled = await isContractVerified({
-				etherscanProvider,
-				contractAddress: token.address
-			});
+				const newToken: SaveErc1155CustomToken = {
+					address: contract.address,
+					network,
+					enabled: !contract.isSpam
+				};
+				acc.push(newToken);
+
+				return acc;
+			},
+			[]
+		);
+
+		await saveErc1155CustomTokens({tokens, identity})
+	}
+
+	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
+		if (isNullish($ethAddress)) {
+			return []
 		}
 
-		// await saveErc721CustomTokens({identity: $authIdentity, tokens: newTokens})
-	};
+		const alchemyProvider = alchemyProviders(network.id);
 
-	const loadErc721ContractAddresses = async (etherscanProvider: EtherscanProvider) => {
 		try {
-			// TODO replace address with $ethAddress
-			return await etherscanProvider.erc721TokenHolding(
-				'0x065aef9729d4df33a4b7ff408cbd145e2a80c34c'
-			);
+			return await alchemyProvider.getTokensForOwner($ethAddress)
 		} catch (_: unknown) {
-			return [];
+			return []
 		}
-	};
-
-	const isContractVerified = async ({
-		etherscanProvider,
-		contractAddress
-	}: {
-		etherscanProvider: EtherscanProvider;
-		contractAddress: EthAddress;
-	}): Promise<boolean> => {
-		try {
-			return nonNullish(await etherscanProvider.contractAbi(contractAddress));
-		} catch (_: unknown) {
-			return false;
-		}
-	};
+	}
 
 	const onLoad = async () => {
 		if (isNullish($authIdentity)) {
@@ -83,8 +95,13 @@
 
 		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
 		for (const network of networks) {
-			// TODO make it parallel
-			await handleErc721(network);
+			const contracts: OwnedContract[] = await loadContracts(network)
+
+			const erc721Contracts = contracts.filter((contract) => contract.standard.toLowerCase() === 'erc721')
+			const erc1155Contracts = contracts.filter((contract) => contract.standard.toLowerCase() === 'erc1155')
+
+			await handleErc721({contracts: erc721Contracts, network, identity: $authIdentity})
+			await handleErc1155({contracts: erc1155Contracts, network, identity: $authIdentity})
 		}
 	};
 </script>

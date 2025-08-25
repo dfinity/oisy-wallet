@@ -8,7 +8,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { OwnedNft } from '$lib/types/nft';
+import type { OwnedContract, OwnedNft } from '$lib/types/nft';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -22,6 +22,7 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
+import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -142,6 +143,7 @@ export class AlchemyProvider {
 		};
 	};
 
+	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftIdsForOwner = async ({
 		address,
 		contractAddress
@@ -159,6 +161,18 @@ export class AlchemyProvider {
 			balance: Number(ownedNft.balance)
 		}));
 	};
+
+	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
+	getTokensForOwner = async (address: EthAddress): Promise<OwnedContract[]> => {
+		const result: AlchemyProviderContracts = await this.provider.nft.getContractsForOwner(address);
+
+		return result.contracts.map((ownedContract) => ({
+			address: ownedContract.address,
+			name: ownedContract.name,
+			isSpam: ownedContract.isSpam,
+			standard: ownedContract.tokenType
+		}))
+	}
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = [

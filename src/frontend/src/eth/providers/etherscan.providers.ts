@@ -321,38 +321,6 @@ export class EtherscanProvider {
 
 		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(parseInt(TokenId)));
 	};
-
-	// https://docs.etherscan.io/api-endpoints/tokens#get-address-erc721-token-holding
-	erc721TokenHolding = async (address: EthAddress): Promise<EthAddress[]> => {
-		const params = {
-			action: 'addresstokennftbalance',
-			address,
-			startblock: 0,
-			endblock: 99999999,
-			sort: 'desc'
-		};
-
-		const result: EtherscanProviderTokenBalance[] | string = await this.provider.fetch(
-			'account',
-			params
-		);
-
-		if (typeof result === 'string') {
-			throw new Error(result);
-		}
-
-		return result.map(({ TokenAddress }: EtherscanProviderTokenBalance) => TokenAddress);
-	};
-
-	// https://docs.etherscan.io/etherscan-v2/api-endpoints/contracts#get-contract-abi-for-verified-contract-source-codes
-	contractAbi = async (address: EthAddress): Promise<string> => {
-		const params = {
-			action: 'getabi',
-			address
-		};
-
-		return await this.provider.fetch('contract', params);
-	};
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = [
