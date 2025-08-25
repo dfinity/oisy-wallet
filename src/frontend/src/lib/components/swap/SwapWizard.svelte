@@ -9,6 +9,7 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
+	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -236,13 +237,17 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
+				onBack={() => dispatch('icBack')}
+				onClose={() => dispatch('icClose')}
+				onSwap={swap}
 				{receiveAmount}
 				{slippageValue}
 				{swapAmount}
-				on:icSwap={swap}
-				on:icBack
-				on:icClose
-			/>
+			>
+				{#snippet swapFees()}
+					<SwapFees />
+				{/snippet}
+			</SwapReview>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===

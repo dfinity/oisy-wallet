@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapIcpForm from './SwapIcpForm.svelte';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import {
@@ -10,6 +10,7 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -75,6 +76,8 @@
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContextType>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
+
+	const dispatch = createEventDispatcher();
 
 	const setFailedProgressStep = (step: ProgressStepsSwap) => {
 		if (!swapFailedProgressSteps.includes(step)) {
@@ -231,7 +234,17 @@
 			bind:slippageValue
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-		<SwapReview {receiveAmount} {slippageValue} {swapAmount} on:icSwap={swap} on:icBack />
+		<SwapReview
+			onBack={() => dispatch('icBack')}
+			onSwap={swap}
+			{receiveAmount}
+			{slippageValue}
+			{swapAmount}
+		>
+			{#snippet swapFees()}
+				<SwapFees />
+			{/snippet}
+		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 		<SwapProgress bind:swapProgressStep />
 	{/if}
