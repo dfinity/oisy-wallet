@@ -1,5 +1,4 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
-import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { approve as approveToken } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -60,6 +59,7 @@ import {
 	type VeloraQuoteParams
 } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
@@ -188,7 +188,7 @@ export const fetchSwapAmounts = async ({
 		unitName: sourceToken.decimals
 	});
 
-	return sourceToken.network.id === ICP_NETWORK_ID
+	return isNetworkIdICP(sourceToken.network.id)
 		? await fetchSwapAmountsICP({
 				identity,
 				sourceToken,
