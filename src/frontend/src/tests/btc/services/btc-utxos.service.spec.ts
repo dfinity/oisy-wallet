@@ -1,3 +1,64 @@
+// Hoisted holder for values used/assigned inside the vi.mock factory
+interface TxEntry {
+	txid: unknown;
+	utxos?: Array<{ value: bigint; outpoint: { txid: unknown; vout: number } }>;
+}
+type StoreValue = Record<string, { certified: true; data: Array<TxEntry> | null }>;
+
+interface SetPendingTransactionsParams {
+	address: string;
+	pendingTransactions: Array<TxEntry>;
+}
+
+interface SetPendingTransactionsErrorParams {
+	address: string;
+}
+
+const mockStoreApi = vi.hoisted(() => ({
+	setStoreValue: (_v: StoreValue) => {},
+	setPendingTransactions: (_params: SetPendingTransactionsParams) => {},
+	setPendingTransactionsError: (_params: SetPendingTransactionsErrorParams) => {},
+	reset: () => {}
+}));
+
+// Mock the btcPendingSentTransactionsStore BEFORE importing the module under test
+vi.mock('$btc/stores/btc-pending-sent-transactions.store', async () => {
+	const { writable } = await import('svelte/store');
+	const store = writable<StoreValue>({});
+	// Assign through the hoisted holder instead of touching top-level variables
+	mockStoreApi.setStoreValue = (v: StoreValue) => store.set(v);
+	mockStoreApi.setPendingTransactions = ({
+		address,
+		pendingTransactions
+	}: SetPendingTransactionsParams) => {
+		store.update((current) => ({
+			...current,
+			[address]: { certified: true, data: pendingTransactions }
+		}));
+	};
+	mockStoreApi.setPendingTransactionsError = ({ address }: SetPendingTransactionsErrorParams) => {
+		store.update((current) => ({
+			...current,
+			[address]: { certified: true, data: null }
+		}));
+	};
+	mockStoreApi.reset = () => store.set({});
+
+	return {
+		btcPendingSentTransactionsStore: {
+			...store,
+			setPendingTransactions: mockStoreApi.setPendingTransactions,
+			setPendingTransactionsError: mockStoreApi.setPendingTransactionsError,
+			reset: mockStoreApi.reset
+		}
+	};
+});
+
+// Mock the loadBtcPendingSentTransactions function
+vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
+	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue({ success: true })
+}));
+
 import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utxos.service';
 import { BtcPrepareSendError } from '$btc/types/btc-send';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
@@ -51,6 +112,10 @@ describe('btc-utxos.service', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Initialize the pending transactions store with empty data for the test address
+		mockStoreApi.setStoreValue({
+			[mockBtcAddress]: { certified: true as const, data: [] }
+		});
 	});
 
 	describe('prepareBtcSend', () => {
@@ -96,6 +161,101 @@ describe('btc-utxos.service', () => {
 				utxos: [],
 				error: BtcPrepareSendError.InsufficientBalance
 			});
+		});
+
+		it('should throw error when pending transactions store is not initialized', async () => {
+			// Set store to empty state (no address data)
+			mockStoreApi.setStoreValue({});
+
+			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
+			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
+
+			await expect(prepareBtcSend(defaultParams)).rejects.toThrow(
+				'Pending transactions have not been initialized'
+			);
+
+			// Verify that no API calls were made since the error is thrown early
+			expect(backendApi.getCurrentBtcFeePercentiles).not.toHaveBeenCalled();
+			expect(bitcoinApi.getUtxosQuery).not.toHaveBeenCalled();
+		});
+
+		it('should throw error when pending transactions data is null for address', async () => {
+			// Set store with null data for the address (simulating failed backend call)
+			mockStoreApi.setStoreValue({
+				[mockBtcAddress]: { certified: true as const, data: null }
+			});
+
+			await expect(prepareBtcSend(defaultParams)).rejects.toThrow(
+				'Pending transactions have not been initialized'
+			);
+
+			// Verify that no API calls were made since the error is thrown early
+			expect(backendApi.getCurrentBtcFeePercentiles).not.toHaveBeenCalled();
+			expect(bitcoinApi.getUtxosQuery).not.toHaveBeenCalled();
+		});
+
+		it('should successfully prepare transaction when pending transactions store is properly initialized', async () => {
+			// Ensure store is properly initialized with empty pending transactions
+			mockStoreApi.setStoreValue({
+				[mockBtcAddress]: { certified: true as const, data: [] }
+			});
+
+			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
+			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
+
+			const result = await prepareBtcSend(defaultParams);
+
+			expect(result).toEqual({
+				feeSatoshis: expect.any(BigInt),
+				utxos: expect.any(Array),
+				error: undefined
+			});
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
+			expect(result.utxos.length).toBeGreaterThan(ZERO);
+
+			// Verify that all API calls were made successfully
+			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalled();
+			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalled();
+		});
+
+		it('should successfully prepare transaction with existing pending transactions', async () => {
+			// Initialize store with some pending transactions that have UTXOs
+			const mockPendingTransaction = {
+				txid: new Uint8Array([99, 100, 101, 102]), // This is the pending transaction ID
+				utxos: [
+					{
+						value: 300000n,
+						outpoint: {
+							txid: new Uint8Array([200, 201, 202, 203]), // This is the UTXO transaction ID that will be checked
+							vout: 0
+						}
+					}
+				]
+			};
+
+			mockStoreApi.setStoreValue({
+				[mockBtcAddress]: {
+					certified: true as const,
+					data: [mockPendingTransaction]
+				}
+			});
+
+			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
+			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
+
+			const result = await prepareBtcSend(defaultParams);
+
+			expect(result).toEqual({
+				feeSatoshis: expect.any(BigInt),
+				utxos: expect.any(Array),
+				error: undefined
+			});
+			expect(result.feeSatoshis).toBeGreaterThan(ZERO);
+			expect(result.utxos.length).toBeGreaterThan(ZERO);
+
+			// Verify that all API calls were made successfully
+			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalled();
+			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalled();
 		});
 
 		it('should handle testnet network correctly', async () => {
