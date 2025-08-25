@@ -64,15 +64,16 @@ const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
 
 const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 	[icrcDefaultTokens, icrcCustomTokens],
-	([$icrcDefaultTokens, $icrcUserTokens]) =>
+	([$icrcDefaultTokens, $icrcCustomTokens]) =>
 		$icrcDefaultTokens.map(({ ledgerCanisterId, ...rest }) => {
-			const userToken = $icrcUserTokens.find(
-				({ ledgerCanisterId: userLedgerCanisterId }) => userLedgerCanisterId === ledgerCanisterId
+			const customToken = $icrcCustomTokens.find(
+				({ ledgerCanisterId: customLedgerCanisterId }) =>
+					customLedgerCanisterId === ledgerCanisterId
 			);
 
 			return mapDefaultTokenToToggleable<IcToken>({
 				defaultToken: { ledgerCanisterId, ...rest },
-				userToken
+				customToken
 			});
 		})
 );
