@@ -2,11 +2,11 @@ import { getMarkdownBlocks } from '$lib/utils/markdown.utils';
 
 describe('getMarkdownBlocks', () => {
 	it('splits markdown into blocks with headers and defaults', () => {
-		const md = `### First Heading
+		const markdown = `### First Heading
 Some paragraph text
 ### Second Heading`;
 
-		const result = getMarkdownBlocks({ md, headingDesignator: '###' });
+		const result = getMarkdownBlocks({ markdown, headingDesignator: '###' });
 
 		expect(result).toEqual([
 			{ type: 'header', text: 'First Heading', id: 'first-heading' },
@@ -16,8 +16,8 @@ Some paragraph text
 	});
 
 	it('trims spaces after heading designator', () => {
-		const md = '###    Spaced Heading';
-		const result = getMarkdownBlocks({ md, headingDesignator: '###' });
+		const markdown = '###    Spaced Heading';
+		const result = getMarkdownBlocks({ markdown, headingDesignator: '###' });
 		expect(result[0]).toEqual({
 			type: 'header',
 			text: 'Spaced Heading',
@@ -26,21 +26,21 @@ Some paragraph text
 	});
 
 	it('handles non-heading lines correctly', () => {
-		const md = 'Just some text';
-		const result = getMarkdownBlocks({ md, headingDesignator: '###' });
+		const markdown = 'Just some text';
+		const result = getMarkdownBlocks({ markdown, headingDesignator: '###' });
 		expect(result).toEqual([{ type: 'default', text: 'Just some text' }]);
 	});
 
 	it('generates slugified IDs with dashes', () => {
-		const md = '### Heading With !@#$ Symbols';
-		const result = getMarkdownBlocks({ md, headingDesignator: '###' });
+		const markdown = '### Heading With !@#$ Symbols';
+		const result = getMarkdownBlocks({ markdown, headingDesignator: '###' });
 		expect(result[0].id).toBe('heading-with-symbols');
 	});
 
 	it('supports custom heading designators', () => {
-		const md = `## Custom H2
+		const markdown = `## Custom H2
 Some text`;
-		const result = getMarkdownBlocks({ md, headingDesignator: '##' });
+		const result = getMarkdownBlocks({ markdown, headingDesignator: '##' });
 
 		expect(result[0]).toEqual({
 			type: 'header',
@@ -54,7 +54,7 @@ Some text`;
 	});
 
 	it('returns empty array for empty string', () => {
-		const result = getMarkdownBlocks({ md: '', headingDesignator: '###' });
+		const result = getMarkdownBlocks({ markdown: '', headingDesignator: '###' });
 		expect(result).toEqual([{ type: 'default', text: '' }]);
 	});
 });
