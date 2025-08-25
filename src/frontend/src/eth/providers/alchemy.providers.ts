@@ -170,7 +170,7 @@ export class AlchemyProvider {
 			address: ownedContract.address,
 			name: ownedContract.name,
 			isSpam: ownedContract.isSpam,
-			standard: ownedContract.tokenType
+			standard: ownedContract.tokenType === 'ERC721' ? 'erc721' : ownedContract.tokenType === 'ERC1155' ? 'erc1155' : undefined,
 		}));
 	};
 }
