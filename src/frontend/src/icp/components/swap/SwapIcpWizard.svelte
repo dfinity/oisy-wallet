@@ -34,6 +34,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
+	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -239,7 +240,11 @@
 			{receiveAmount}
 			{slippageValue}
 			{swapAmount}
-		/>
+		>
+			{#snippet swapFees()}
+				<SwapFees />
+			{/snippet}
+		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 		<SwapProgress bind:swapProgressStep />
 	{/if}

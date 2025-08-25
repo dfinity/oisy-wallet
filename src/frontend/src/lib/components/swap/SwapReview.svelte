@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
@@ -22,6 +22,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes } from '$lib/types/swap';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -30,6 +31,7 @@
 		onBack: () => void;
 		onClose?: () => void;
 		onSwap: () => Promise<void>;
+		swapFees: Snippet;
 	}
 	let {
 		swapAmount = $bindable(),
@@ -37,7 +39,8 @@
 		slippageValue = $bindable(),
 		onBack,
 		onClose,
-		onSwap
+		onSwap,
+		swapFees
 	}: Props = $props();
 
 	const {
@@ -98,8 +101,19 @@
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
-		<SwapFees />
+		{@render swapFees()}
 	</div>
+
+	{#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
+		<MessageBox styleClass="sm:text-sm">
+			<Html
+				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
+					$sourceNetwork: $sourceToken.network.name,
+					$destinationNetwork: $destinationToken.network.name
+				})}
+			/>
+		</MessageBox>
+	{/if}
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">

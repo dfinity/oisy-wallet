@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
+	import { Html, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -41,6 +41,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -247,7 +248,15 @@
 				{receiveAmount}
 				{slippageValue}
 				{swapAmount}
-			/>
+			>
+				{#snippet swapFees()}
+					<EthFeeDisplay>
+						{#snippet label()}
+							<Html text={$i18n.fee.text.total_fee} />
+						{/snippet}
+					</EthFeeDisplay>
+				{/snippet}
+			</SwapReview>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress sendWithApproval={true} bind:swapProgressStep />
 		{/if}
