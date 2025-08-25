@@ -1,9 +1,11 @@
 import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
+import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
+import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -13,11 +15,11 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { invalidAmount } from '$lib/utils/input.utils';
-import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { hexStringToUint8Array, nonNullish, toNullable } from '@dfinity/utils';
+import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 interface BtcSendServiceParams {
@@ -161,17 +163,17 @@ export const validateBtcSend = async ({
 		address: source
 	});
 
-	const utxoTxIds = getPendingTransactionUtxoTxIds(source);
+	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
 
-	if (isNullish(utxoTxIds)) {
+	if (isNullish(pendingUtxoTxIds)) {
 		// when no pending transactions have been initiated, we cannot validate UTXO's and therefore, validation must fail
 		throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 	}
 
-	if (utxoTxIds.length > 0) {
+	if (pendingUtxoTxIds.length > 0) {
 		const providedUtxoTxIds = extractUtxoTxIds(utxos);
 		for (const utxoTxId of providedUtxoTxIds) {
-			if (utxoTxIds.includes(utxoTxId)) {
+			if (pendingUtxoTxIds.includes(utxoTxId)) {
 				throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 			}
 		}
@@ -237,7 +239,7 @@ export const sendBtc = async ({
 		identity,
 		network: mapToSignerBitcoinNetwork({ network }),
 		address: source,
-		txId: hexStringToUint8Array(txid),
+		txId: txidStringToUint8Array(txid),
 		utxos: utxosFee.utxos
 	});
 
