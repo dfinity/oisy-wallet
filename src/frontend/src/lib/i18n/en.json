@@ -729,7 +729,7 @@
 			"btc_invalid_utxo_data": "Invalid Bitcoin transaction data",
 			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
 			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed",
-			"pending_transactions_not_available": "The pending transaction are currently not available. Please try again later."
+			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",

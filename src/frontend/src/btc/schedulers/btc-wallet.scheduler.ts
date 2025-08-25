@@ -82,8 +82,9 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
 			const newTransactions = fetchedTransactions.filter(
+				// ({ hash, block_height }) => isNullish(this.store.transactions[`${hash}`])
+				// as long as the transaction is unconfirmed, we need to update the transaction data
 				({ hash, block_height }) =>
-					// as long as the transaction is unconfirmed, we need to update the transaction data
 					isNullish(this.store.transactions[`${hash}`]) || isNullish(block_height)
 			);
 

@@ -729,7 +729,7 @@
 			"btc_invalid_utxo_data": "",
 			"btc_utxo_locked": "",
 			"btc_invalid_fee_calculation": "",
-			"pending_transactions_not_available": ""
+			"pending_transactions_not_available": "Служба ожидающих транзакций в настоящее время недоступна. Пожалуйста, попробуйте позже."
 		},
 		"error": {
 			"unexpected": "Что-то пошло не так при отправке транзакции.",

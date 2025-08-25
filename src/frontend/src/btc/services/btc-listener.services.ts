@@ -30,6 +30,7 @@ export const syncWallet = async ({
 		}
 	} = data;
 
+	// Skip the certified event since it does not contain the required provider transactions
 	if (certified) {
 		return;
 	}
