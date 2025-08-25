@@ -129,6 +129,11 @@ export const validateBtcSend = async ({
 	network: BitcoinNetwork;
 	identity: Identity;
 }): Promise<void> => {
+	if (nonNullish(utxosFee.error)) {
+		// If the send button was not properly disabled during an error, we return the same error again
+		throw utxosFee.error;
+	}
+
 	// 1. Validate general input parameters first before accessing any properties
 	if (invalidAmount(amount)) {
 		throw new BtcValidationError(BtcSendValidationError.InvalidAmount);
