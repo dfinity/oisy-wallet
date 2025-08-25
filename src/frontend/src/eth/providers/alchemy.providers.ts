@@ -10,6 +10,7 @@ import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { OwnedContract, OwnedNft } from '$lib/types/nft';
+import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -23,8 +24,6 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
-import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { TokenStandard } from '$lib/types/token';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -169,7 +168,12 @@ export class AlchemyProvider {
 		const result: AlchemyProviderContracts = await this.provider.nft.getContractsForOwner(address);
 
 		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
-			const tokenStandard = ownedContract.tokenType === 'ERC721' ? 'erc721' : ownedContract.tokenType === 'ERC1155' ? 'erc1155' : undefined;
+			const tokenStandard =
+				ownedContract.tokenType === 'ERC721'
+					? 'erc721'
+					: ownedContract.tokenType === 'ERC1155'
+						? 'erc1155'
+						: undefined;
 			if (isNullish(tokenStandard)) {
 				return acc;
 			}
@@ -178,12 +182,12 @@ export class AlchemyProvider {
 				address: ownedContract.address,
 				name: ownedContract.name ?? '',
 				isSpam: ownedContract.isSpam,
-				standard: tokenStandard as TokenStandard,
-			}
-			acc.push(newContract)
+				standard: tokenStandard as TokenStandard
+			};
+			acc.push(newContract);
 
 			return acc;
-		}, [])
+		}, []);
 	};
 }
 
