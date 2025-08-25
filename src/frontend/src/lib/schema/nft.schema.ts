@@ -40,5 +40,5 @@ export const OwnedNftSchema = z.object({
 export const OwnedContractSchema = z.object({
 	address: z.string(),
 	isSpam: z.boolean(),
-	standard: z.custom<TokenStandard>(),
-})
+	standard: z.custom<TokenStandard>()
+});

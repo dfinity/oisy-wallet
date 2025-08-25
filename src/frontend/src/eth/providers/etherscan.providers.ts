@@ -5,7 +5,6 @@ import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc721Token } from '$eth/types/erc721';
 import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
-import type { EtherscanProviderTokenBalance } from '$eth/types/etherscan-token-balance';
 import type {
 	EtherscanProviderErc1155TokenTransferTransaction,
 	EtherscanProviderErc721TokenTransferTransaction,
