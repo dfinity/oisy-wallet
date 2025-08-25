@@ -38,6 +38,20 @@
 			>
 		</MessageBox>
 	</div>
+{:else if utxosFee?.error === BtcPrepareSendError.UtxoLocked}
+	<div class="w-full" in:fade>
+		<MessageBox level="warning">
+			<span data-tid="btc-send-form-utxos-locked">{$i18n.send.assertion.btc_utxo_locked}</span>
+		</MessageBox>
+	</div>
+{:else if utxosFee?.error === BtcPrepareSendError.PendingTransactionsNotAvailable}
+	<div class="w-full" in:fade>
+		<MessageBox level="warning">
+			<span data-tid="btc-send-form-pending-transactions-not-available"
+				>{$i18n.send.assertion.pending_transactions_not_available}</span
+			>
+		</MessageBox>
+	</div>
 {:else if utxosFee?.error === BtcPrepareSendError.MinimumBalance}
 	<div class="w-full" in:fade>
 		<MessageBox level="warning">

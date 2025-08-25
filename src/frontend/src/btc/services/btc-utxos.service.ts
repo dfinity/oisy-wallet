@@ -48,7 +48,7 @@ export const prepareBtcSend = async ({
 		return {
 			feeSatoshis: ZERO,
 			utxos: [],
-			error: BtcPrepareSendError.InsufficientBalance
+			error: BtcPrepareSendError.PendingTransactionsNotAvailable
 		};
 	}
 
@@ -93,7 +93,7 @@ export const prepareBtcSend = async ({
 		return {
 			feeSatoshis: ZERO,
 			utxos: [],
-			error: BtcPrepareSendError.InsufficientBalance
+			error: BtcPrepareSendError.UtxoLocked
 		};
 	}
 
