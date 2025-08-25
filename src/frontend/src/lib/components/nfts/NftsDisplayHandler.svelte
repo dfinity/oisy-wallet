@@ -26,7 +26,10 @@
 			sort: $nftListStore.sort
 		});
 		nftCollections = filterSortByCollection({
-			items: getNftCollectionUi({ $nftStore, $nonFungibleTokens: $enabledNonFungibleNetworkTokens }),
+			items: getNftCollectionUi({
+				$nftStore,
+				$nonFungibleTokens: $enabledNonFungibleNetworkTokens
+			}),
 			filter: $tokenListStore.filter,
 			sort: $nftListStore.sort
 		});
