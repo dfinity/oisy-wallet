@@ -4,7 +4,6 @@ import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
-import { getPendingTransactionIds } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
