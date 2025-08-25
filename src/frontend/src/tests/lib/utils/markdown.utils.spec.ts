@@ -50,6 +50,7 @@ Some text`;
 			text: 'Custom H2',
 			id: 'custom-h2'
 		});
+
 		expect(result[1]).toEqual({
 			type: 'default',
 			text: 'Some text'
