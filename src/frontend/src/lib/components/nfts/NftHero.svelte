@@ -5,6 +5,7 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
@@ -13,6 +14,9 @@
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft } from '$lib/types/nft';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 
 	interface Props {
 		nft?: Nft;
@@ -68,7 +72,20 @@
 			<ListItem>
 				<span>{$i18n.nfts.text.collection_address}</span>
 				{#if nonNullish(nft)}
-					{nft.collection.address}
+					<span class="flex items-center">
+						<output>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output>
+						<AddressActions
+							copyAddress={nft.collection.address}
+							copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+								$address: nft.collection.address
+							})}
+							externalLink={getContractExplorerUrl({
+								network: nft.collection.network,
+								contractAddress: nft.collection.address
+							})}
+							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
+						/>
+					</span>
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />

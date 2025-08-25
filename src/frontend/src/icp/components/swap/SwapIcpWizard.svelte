@@ -2,15 +2,15 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
+	import SwapIcpForm from './SwapIcpForm.svelte';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
 	} from '$icp/stores/ic-token-fee.store';
+	import type { IcToken } from '$icp/types/ic-token';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
-	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
-	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -31,26 +31,36 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
+	import { SwapErrorCodes } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
-		receiveAmount: number | undefined;
+		receiveAmount?: number;
 		slippageValue: OptionAmount;
-		swapProgressStep: string;
-		swapFailedProgressSteps?: string[];
-		currentStep: WizardStep | undefined;
+		swapProgressStep: ProgressStepsSwap;
+		swapFailedProgressSteps?: ProgressStepsSwap[];
+		currentStep?: WizardStep;
+		isSwapAmountsLoading: boolean;
+		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onClose: () => void;
+		onNext: () => void;
+		onBack: () => void;
 	}
 	let {
-		swapAmount = $bindable<OptionAmount>(),
-		receiveAmount = $bindable<number | undefined>(),
-		slippageValue = $bindable<OptionAmount>(),
-		swapProgressStep = $bindable<string>(),
-		swapFailedProgressSteps = $bindable<string[]>(),
-		currentStep
+		swapAmount = $bindable(),
+		receiveAmount = $bindable(),
+		slippageValue = $bindable(),
+		swapProgressStep = $bindable(),
+		swapFailedProgressSteps = $bindable([]),
+		currentStep,
+		isSwapAmountsLoading,
+		onShowTokensList,
+		onClose,
+		onNext,
+		onBack
 	}: Props = $props();
 
 	const {
@@ -67,7 +77,7 @@
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 
-	let isSwapAmountsLoading = $state(false);
+	const dispatch = createEventDispatcher();
 
 	const setFailedProgressStep = (step: ProgressStepsSwap) => {
 		if (!swapFailedProgressSteps.includes(step)) {
@@ -85,9 +95,7 @@
 		swapFailedProgressSteps = [];
 	};
 
-	const dispatch = createEventDispatcher();
-
-	let sourceTokenFee = $derived<bigint | undefined>(
+	let sourceTokenFee = $derived(
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore)
 			? $icTokenFeeStore[$sourceToken.symbol]
 			: undefined
@@ -114,7 +122,7 @@
 			return;
 		}
 
-		dispatch('icNext');
+		onNext();
 
 		try {
 			clearFailedProgressStep();
@@ -153,7 +161,7 @@
 				}
 			});
 
-			setTimeout(() => close(), 2500);
+			setTimeout(() => onClose(), 2500);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
 			// TODO: Add unit tests to cover failed swap error scenarios
@@ -176,7 +184,7 @@
 					errorType: err.code,
 					swapSucceded: err.swapSucceded,
 					url: {
-						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcTokenToggleable).ledgerCanisterId}&output=${($destinationToken as IcTokenToggleable).ledgerCanisterId}`,
+						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcToken).ledgerCanisterId}&output=${($destinationToken as IcToken).ledgerCanisterId}`,
 						text: 'icpswap.com'
 					}
 				});
@@ -207,54 +215,37 @@
 				});
 			}
 
-			setTimeout(() => back(), 2000);
+			setTimeout(() => onBack(), 2000);
 		}
 	};
-
-	const close = () => dispatch('icClose');
-	const back = () => dispatch('icBack');
 </script>
 
-<IcTokenFeeContext token={$sourceToken as IcTokenToggleable}>
-	<SwapAmountsContext
-		amount={swapAmount}
-		destinationToken={$destinationToken as IcTokenToggleable}
-		isSourceTokenIcrc2={$isSourceTokenIcrc2}
-		{slippageValue}
-		sourceToken={$sourceToken as IcTokenToggleable}
-		bind:isSwapAmountsLoading
-	>
-		{#if currentStep?.name === WizardStepsSwap.SWAP}
-			<SwapForm
-				{isSwapAmountsLoading}
-				on:icClose
-				on:icNext
-				on:icShowTokensList
-				on:icShowProviderList
-				bind:swapAmount
-				bind:receiveAmount
-				bind:slippageValue
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview
-				onBack={() => dispatch('icBack')}
-				onClose={() => dispatch('icClose')}
-				onSwap={swap}
-				{receiveAmount}
-				{slippageValue}
-				{swapAmount}
-			>
-				{#snippet swapFees()}
-					<SwapFees />
-				{/snippet}
-			</SwapReview>
-		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress
-				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
-					SwapProvider.ICP_SWAP}
-				bind:swapProgressStep
-				bind:failedSteps={swapFailedProgressSteps}
-			/>
-		{/if}
-	</SwapAmountsContext>
+<IcTokenFeeContext token={$sourceToken as IcToken}>
+	{#if currentStep?.name === WizardStepsSwap.SWAP}
+		<SwapIcpForm
+			{isSwapAmountsLoading}
+			{onClose}
+			{onNext}
+			{onShowTokensList}
+			{sourceTokenFee}
+			on:icShowProviderList
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+		/>
+	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
+		<SwapReview
+			onBack={() => dispatch('icBack')}
+			onSwap={swap}
+			{receiveAmount}
+			{slippageValue}
+			{swapAmount}
+		>
+			{#snippet swapFees()}
+				<SwapFees />
+			{/snippet}
+		</SwapReview>
+	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
+		<SwapProgress bind:swapProgressStep />
+	{/if}
 </IcTokenFeeContext>
