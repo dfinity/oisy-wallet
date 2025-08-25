@@ -30,11 +30,6 @@ export const syncWallet = async ({
 		}
 	} = data;
 
-	// Skip the certified event since it does not contain the required provider transactions
-	if (certified) {
-		return;
-	}
-
 	// Only parse new transactions when certified is false (when we actually receive transaction data)
 	// When certified is true, newTransactions are not provided
 	const providerTransactions: CertifiedData<BtcTransactionUi>[] | null = certified
@@ -48,7 +43,10 @@ export const syncWallet = async ({
 			transactions: providerTransactions
 		});
 	}
-
+	// Skip the certified event since it does not contain the required provider transactions
+	if (certified) {
+		return;
+	}
 	if (nonNullish(balance)) {
 		/*
 		 * Balance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
