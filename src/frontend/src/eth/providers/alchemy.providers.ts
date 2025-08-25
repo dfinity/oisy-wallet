@@ -180,7 +180,6 @@ export class AlchemyProvider {
 
 			const newContract = {
 				address: ownedContract.address,
-				name: ownedContract.name ?? '',
 				isSpam: ownedContract.isSpam,
 				standard: tokenStandard as TokenStandard
 			};
