@@ -52,6 +52,7 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import { NFTS_ENABLED } from '$env/nft.env';
 
 	let {
 		initialSearch,
@@ -139,26 +140,28 @@
 			enabled: true
 		};
 
-		const isErc721 = await isInterfaceErc721({
-			address: ethContractAddress,
-			networkId: network.id
-		});
+		if (NFTS_ENABLED) {
+			const isErc721 = await isInterfaceErc721({
+				address: ethContractAddress,
+				networkId: network.id
+			});
 
-		if (isErc721) {
-			await saveErc721([newToken]);
+			if (isErc721) {
+				await saveErc721([newToken]);
 
-			return;
-		}
+				return;
+			}
 
-		const isErc1155 = await isInterfaceErc1155({
-			address: ethContractAddress,
-			networkId: network.id
-		});
+			const isErc1155 = await isInterfaceErc1155({
+				address: ethContractAddress,
+				networkId: network.id
+			});
 
-		if (isErc1155) {
-			await saveErc1155([newToken]);
+			if (isErc1155) {
+				await saveErc1155([newToken]);
 
-			return;
+				return;
+			}
 		}
 
 		if (ethMetadata.decimals > 0) {
