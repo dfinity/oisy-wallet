@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
@@ -27,6 +26,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import type { Token } from '$lib/types/token';
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
@@ -69,7 +69,7 @@
 		setFilterQuery('');
 	};
 
-	const selectToken = ({ detail: token }: CustomEvent<IcTokenToggleable>) => {
+	const selectToken = ({ detail: token }: CustomEvent<Token>) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
 		} else if (selectTokenType === 'destination') {
