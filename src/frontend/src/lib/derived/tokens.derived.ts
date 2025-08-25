@@ -101,6 +101,14 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);
 
 /**
+ * All user-enabled unique tokens symbols.
+ */
+export const enabledUniqueTokensSymbols: Readable<Token['symbol'][]> = derived(
+	[enabledTokens],
+	([$enabledTokens]) => Array.from(new Set($enabledTokens.map(({ symbol }) => symbol)))
+);
+
+/**
  * All user-enabled fungible tokens.
  */
 export const enabledFungibleTokens: Readable<Token[]> = derived(
