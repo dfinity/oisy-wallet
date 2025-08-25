@@ -236,12 +236,12 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
+				onBack={() => dispatch('icBack')}
+				onClose={() => dispatch('icClose')}
+				onSwap={swap}
 				{receiveAmount}
 				{slippageValue}
 				{swapAmount}
-				on:icSwap={swap}
-				on:icBack
-				on:icClose
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
