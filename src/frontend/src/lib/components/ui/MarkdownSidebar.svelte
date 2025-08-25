@@ -12,10 +12,12 @@
 	const { headings }: Props = $props();
 
 	let activeId: string | undefined = $state();
+	let observer: IntersectionObserver | undefined;
+	const observed = new Set<Element>();
 
 	onMount(() => {
 		// Scroll spy to highlight active item
-		const observer = new IntersectionObserver(
+		observer = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
@@ -29,11 +31,19 @@
 		headings.forEach(({ id }) => {
 			if (nonNullish(id)) {
 				const el = document.getElementById(id);
-				if (nonNullish(el)) {
+				if (nonNullish(el) && nonNullish(observer)) {
 					observer.observe(el);
+					observed.add(el);
 				}
 			}
 		});
+
+		// cleanup observers
+		return () => {
+			observed.forEach((el) => observer?.unobserve(el));
+			observer?.disconnect();
+			observed.clear();
+		};
 	});
 </script>
 
