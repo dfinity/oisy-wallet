@@ -2,6 +2,7 @@
 	import { Markdown } from '@dfinity/gix-components';
 	import { type I18nSubstitutions, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import MarkdownSidebar from '$lib/components/ui/MarkdownSidebar.svelte';
+	import type { MarkdownBlockType } from '$lib/types/markdown';
 
 	interface Props {
 		title: string;
@@ -11,7 +12,7 @@
 
 	const { title, text, stringReplacements }: Props = $props();
 
-	const blocks = $derived.by(() =>
+	const blocks: MarkdownBlockType[] = $derived.by(() =>
 		text.split('\n').map((line: string) => {
 			if (line.startsWith('###')) {
 				const title = line.replace(/^###\s*/, '').trim();
@@ -33,4 +34,4 @@
 	{/if}
 {/each}
 
-<MarkdownSidebar {text} />
+<MarkdownSidebar headings={blocks.filter((block) => block.type === 'header')} />
