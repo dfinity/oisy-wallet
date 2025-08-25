@@ -26,6 +26,8 @@ describe('LoaderNfts', () => {
 	let etherscanProvidersSpy: MockInstance;
 	let alchemyProvidersSpy: MockInstance;
 
+	let loadNftIdsOfTokenSpy: MockInstance;
+
 	const mockErc721TokenInventory = vi.fn();
 	const mockGetNftIdsForOwner = vi.fn();
 
@@ -60,12 +62,13 @@ describe('LoaderNfts', () => {
 		setupUserNetworksStore('allEnabled');
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
+
+		loadNftIdsOfTokenSpy = vi.spyOn(nftServicesModule, 'loadNftIdsOfToken');
 	});
 
 	describe('handleNewNfts', () => {
 		let infuraErc721ProvidersSpy: MockInstance;
 		let infuraErc1155ProvidersSpy: MockInstance;
-		let loadNftIdsOfTokenSpy: MockInstance;
 
 		beforeEach(() => {
 			infuraErc721ProvidersSpy = vi.spyOn(infuraErc721ProvidersModule, 'infuraErc721Providers');
@@ -73,8 +76,6 @@ describe('LoaderNfts', () => {
 
 			infuraErc1155ProvidersSpy = vi.spyOn(infuraErc1155ProvidersModule, 'infuraErc1155Providers');
 			infuraErc1155ProvidersSpy.mockReturnValue({});
-
-			loadNftIdsOfTokenSpy = vi.spyOn(nftServicesModule, 'loadNftIdsOfToken');
 		});
 
 		it('should add new ERC721 nfts of loaded nft ids', async () => {
