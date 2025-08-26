@@ -323,7 +323,7 @@ type TokenAccountId = variant {
 	Sol : text;
 	Icrcv2 : Icrcv2AccountId
 };
-type TokenState = variant { Spam; Default; Hidden };
+type TokenState = variant { Spam; Hidden };
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;

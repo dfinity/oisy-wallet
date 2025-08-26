@@ -344,7 +344,7 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
-export type TokenState = { Spam: null } | { Default: null } | { Hidden: null };
+export type TokenState = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {
