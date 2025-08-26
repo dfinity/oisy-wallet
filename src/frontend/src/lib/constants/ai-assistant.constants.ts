@@ -71,3 +71,5 @@ export const AI_ASSISTANT_TOOLS = [
 ] as tool[];
 
 export const MAX_DISPLAYED_ADDRESSES_NUMBER = 4;
+
+export const MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH = 100;
