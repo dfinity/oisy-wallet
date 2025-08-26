@@ -1232,6 +1232,7 @@ interface I18nLicense_agreement {
 		assignment: string;
 		no_waiver: string;
 		english_version: string;
+		body: string;
 	};
 	alt: { license_agreement: string };
 }
