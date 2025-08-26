@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Markdown } from '@dfinity/gix-components';
-	import { type I18nSubstitutions, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import MarkdownSidebar from '$lib/components/ui/MarkdownSidebar.svelte';
 	import type { MarkdownBlockType } from '$lib/types/markdown';
+	import { type I18nSubstitutions, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getMarkdownBlocks } from '$lib/utils/markdown.utils';
 
 	interface Props {
@@ -21,7 +21,7 @@
 
 <h1 class="mb-4">{title}</h1>
 
-{#each blocks as block}
+{#each blocks as block, index (block.text + index)}
 	{#if block.type === 'header'}
 		<h3 id={block.id}>{block.text}</h3>
 	{:else}
