@@ -224,7 +224,8 @@ describe('custom-tokens.services', () => {
 						}
 					},
 					version: toNullable(2n),
-					enabled: true
+					enabled: true,
+					state: toNullable()
 				}
 			]);
 
