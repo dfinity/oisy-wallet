@@ -5,15 +5,16 @@
 
 	interface Props {
 		results: ToolResult[];
+		onSendMessage: (params: { messageText: string; context?: string }) => Promise<void>;
 	}
 
-	let { results }: Props = $props();
+	let { results, onSendMessage }: Props = $props();
 </script>
 
 <div class="mb-5">
 	{#each results as { result, type }, index (index)}
-		{#if type === 'show_contacts' && nonNullish(result)}
-			<AiAssistantShowContactsTool contacts={result.contacts} />
+		{#if type === 'show_contacts' && nonNullish(result) && 'contacts' in result}
+			<AiAssistantShowContactsTool {...result} {onSendMessage} />
 		{/if}
 	{/each}
 </div>
