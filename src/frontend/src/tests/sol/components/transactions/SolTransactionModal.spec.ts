@@ -2,11 +2,11 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { capitalizeFirstLetter } from '$lib/utils/string.utils';
 import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { capitalizeFirstLetter } from '$tests/utils/string-utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
