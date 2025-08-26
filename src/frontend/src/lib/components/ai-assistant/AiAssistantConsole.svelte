@@ -32,7 +32,13 @@
 		)
 	);
 
-	const sendMessage = async ({ messageText }: { messageText: string }) => {
+	const sendMessage = async ({
+		messageText,
+		context
+	}: {
+		messageText: string;
+		context?: string;
+	}) => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
@@ -40,7 +46,7 @@
 
 		aiAssistantStore.appendMessage({
 			role: 'user',
-			data: { text: messageText }
+			data: { text: messageText, context }
 		});
 
 		try {
@@ -137,7 +143,7 @@
 			</div>
 		{:else}
 			<div in:fade>
-				<AiAssistantMessages {loading} messages={messagesToDisplay} />
+				<AiAssistantMessages {loading} messages={messagesToDisplay} onSendMessage={sendMessage} />
 			</div>
 		{/if}
 	</div>
