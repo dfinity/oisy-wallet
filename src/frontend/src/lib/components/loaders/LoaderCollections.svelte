@@ -61,7 +61,7 @@
 				enabled: !contract.isSpam
 			};
 
-			return [...acc, newToken]
+			return [...acc, newToken];
 		}, []);
 
 		if (tokens.length > 0) {
