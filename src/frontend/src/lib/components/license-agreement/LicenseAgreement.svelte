@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import MarkdownWithSidebar from '$lib/components/ui/MarkdownWithSidebar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 
 	let agreementList = $derived([
 		$i18n.license_agreement.text.paragraph_1,
