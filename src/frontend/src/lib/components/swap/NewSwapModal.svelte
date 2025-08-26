@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Token } from '$lib/types/token';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import ModalNetworksFilter from '../tokens/ModalNetworksFilter.svelte';
 	import NewSwapWizard from './NewSwapWizard.svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
+	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import {
 		SUPPORTED_CROSS_SWAP_NETWORKS,
@@ -39,6 +38,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext, initSwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
+	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -229,15 +229,15 @@
 	{:else}
 		<NewSwapWizard
 			{currentStep}
+			onBack={modal.back}
+			onClose={close}
+			onNext={modal.next}
+			onShowTokensList={showTokensList}
 			bind:swapAmount
 			bind:receiveAmount
 			bind:slippageValue
 			bind:swapProgressStep
 			bind:swapFailedProgressSteps
-			onBack={modal.back}
-			onNext={modal.next}
-			onClose={close}
-			onShowTokensList={showTokensList}
 			on:icShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
 		/>
 	{/if}
