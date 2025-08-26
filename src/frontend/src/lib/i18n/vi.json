@@ -1555,6 +1555,7 @@
 			"action_button_contacts_title": "Hiển thị danh bạ",
 			"action_button_contacts_subtitle": "Hiển thị danh bạ đã lưu của bạn",
 			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
+			"select_contact_message": "",
 			"send_message": "Gửi tin nhắn",
 			"send_message_input_placeholder": "Bạn muốn làm gì?",
 			"no_contacts_found_message": "Xin lỗi, tôi không thể tìm thấy bất kỳ liên hệ phù hợp nào trong danh bạ của bạn.",

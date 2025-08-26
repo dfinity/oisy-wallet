@@ -1555,6 +1555,7 @@
 			"action_button_contacts_title": "عرض جهات الاتصال",
 			"action_button_contacts_subtitle": "عرض جهات الاتصال المحفوظة لديك",
 			"action_button_contacts_prompt": "أرني جهات اتصالي.",
+			"select_contact_message": "",
 			"send_message": "إرسال رسالة",
 			"send_message_input_placeholder": "ماذا تريد أن تفعل؟",
 			"no_contacts_found_message": "",
