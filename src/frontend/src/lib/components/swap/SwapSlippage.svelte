@@ -6,7 +6,6 @@
 	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
-		SWAP_SLIPPAGE_INVALID_VALUE,
 		SWAP_SLIPPAGE_PRESET_VALUES,
 		SWAP_SLIPPAGE_VALUE_DECIMALS,
 		SWAP_SLIPPAGE_WARNING_VALUE
