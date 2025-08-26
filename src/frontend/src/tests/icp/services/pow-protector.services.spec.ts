@@ -1,5 +1,5 @@
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 
 // Mock the allowance function
 vi.mock('$icp/api/icrc-ledger.api', () => ({

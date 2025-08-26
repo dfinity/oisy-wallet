@@ -147,7 +147,7 @@ describe('pow-protector.worker', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyHasRequiredCycles).toHaveBeenCalledTimes(1);
+					expect(spyHasRequiredCycles).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
 
