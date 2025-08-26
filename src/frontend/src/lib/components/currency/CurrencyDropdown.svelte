@@ -18,7 +18,7 @@
 	import { currencyStore } from '$lib/stores/currency.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { getCurrencyName, getCurrencySymbol } from '$lib/utils/currency.utils';
-	import {capitalizeFirstLetter} from "$lib/utils/string.utils";
+	import { capitalizeFirstLetter } from '$lib/utils/string.utils';
 
 	let dropdown = $state<Dropdown>();
 

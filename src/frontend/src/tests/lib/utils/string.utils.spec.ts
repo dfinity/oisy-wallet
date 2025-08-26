@@ -44,7 +44,7 @@ describe('string.utils', () => {
 			});
 
 			// Depending on engine/Unicode version, this will be "SSildschirm" (common in JS)
-			expect(result === 'SSildschirm' || result === 'ẞildschirm').toBe(true);
+			expect(result === 'SSildschirm' || result === 'ẞildschirm').toBeTruthy();
 		});
 
 		it('should handle empty strings', () => {
