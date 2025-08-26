@@ -133,11 +133,15 @@ jobs:
           # chore(frontend)!: drop support for Node 6
           if [[ "$TITLE" =~ ^([a-z]+)(\([-a-zA-Z0-9,]+\))\!\: ]]; then
             echo "BREAKING_TITLE=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "BREAKING_TITLE=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
           # The PR body needs a line declaring the breaking change, e.g.:
           # BREAKING CHANGE: use JavaScript features not available in Node 6.
           if grep -qE '^BREAKING CHANGE: ' <<<"$DESCRIPTION"; then
             echo "BREAKING_DESCRIPTION=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo "BREAKING_DESCRIPTION=false" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
       - name: Need to check for breaking changes
         id: check-for-breaking-changes
