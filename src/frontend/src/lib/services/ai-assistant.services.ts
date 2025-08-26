@@ -3,9 +3,9 @@ import { llmChat } from '$lib/api/llm.api';
 import {
 	AI_ASSISTANT_FILTER_CONTACTS_PROMPT,
 	AI_ASSISTANT_LLM_MODEL,
-	AI_ASSISTANT_SYSTEM_PROMPT,
 	AI_ASSISTANT_TOOLS
 } from '$lib/constants/ai-assistant.constants';
+import { aiAssistantSystemMessage } from '$lib/derived/ai-assistant.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import type {
 	ChatMessageContent,
@@ -92,11 +92,7 @@ export const askLlmToFilterContacts = async ({
 		request: {
 			model: AI_ASSISTANT_LLM_MODEL,
 			messages: [
-				{
-					system: {
-						content: AI_ASSISTANT_SYSTEM_PROMPT
-					}
-				},
+				get(aiAssistantSystemMessage),
 				{
 					user: {
 						content: `
