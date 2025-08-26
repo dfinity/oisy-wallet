@@ -13,7 +13,7 @@ describe('custom-token.utils', () => {
 		const partialExpected = {
 			enabled: true,
 			version: [1n],
-			state: toNullable()
+			section: toNullable()
 		};
 
 		it('should convert to CustomToken with nullish version', () => {

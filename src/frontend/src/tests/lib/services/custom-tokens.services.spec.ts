@@ -30,7 +30,7 @@ describe('custom-tokens.services', () => {
 				},
 				version: toNullable(2n),
 				enabled: true,
-				state: toNullable()
+				section: toNullable()
 			},
 			{
 				token: {
@@ -41,7 +41,7 @@ describe('custom-tokens.services', () => {
 				},
 				version: toNullable(1n),
 				enabled: false,
-				state: toNullable()
+				section: toNullable()
 			},
 			{
 				token: {
@@ -53,7 +53,7 @@ describe('custom-tokens.services', () => {
 				},
 				version: toNullable(),
 				enabled: true,
-				state: toNullable()
+				section: toNullable()
 			}
 		];
 
@@ -225,7 +225,7 @@ describe('custom-tokens.services', () => {
 					},
 					version: toNullable(2n),
 					enabled: true,
-					state: toNullable()
+					section: toNullable()
 				}
 			]);
 

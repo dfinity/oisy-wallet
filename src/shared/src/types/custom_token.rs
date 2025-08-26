@@ -66,11 +66,11 @@ pub struct CustomToken {
     pub token: Token,
     pub enabled: bool,
     pub version: Option<Version>,
-    pub state: Option<TokenState>,
+    pub section: Option<TokenSection>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum TokenState {
+pub enum TokenSection {
     Hidden = 0,
     Spam = 1,
 }

@@ -95,7 +95,7 @@ describe('custom-token.services', () => {
 								ledger_id: Principal.fromText(mockSendToken.ledgerCanisterId)
 							}
 						},
-						state: toNullable()
+						section: toNullable()
 					}
 				});
 
@@ -146,7 +146,7 @@ describe('custom-token.services', () => {
 							},
 							version: [1n],
 							enabled: true,
-							state: toNullable()
+							section: toNullable()
 						}
 					]);
 
@@ -246,7 +246,7 @@ describe('custom-token.services', () => {
 							},
 							version: [1n],
 							enabled: true,
-							state: toNullable()
+							section: toNullable()
 						}
 					]);
 
@@ -301,7 +301,7 @@ describe('custom-token.services', () => {
 									)
 								}
 							},
-							state: toNullable()
+							section: toNullable()
 						}
 					});
 				});
