@@ -5,6 +5,9 @@
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import { OISY_REPO_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
@@ -12,9 +15,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
-	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
-	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 
 	let isHomePage = $derived(isRouteTokens(page));
 </script>
