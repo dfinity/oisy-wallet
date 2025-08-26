@@ -6,7 +6,6 @@
 	import ModalNetworksFilter from '../tokens/ModalNetworksFilter.svelte';
 	import NewSwapWizard from './NewSwapWizard.svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
