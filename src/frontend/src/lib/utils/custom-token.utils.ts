@@ -89,7 +89,8 @@ export const toCustomToken = ({
 	return {
 		enabled,
 		version: toNullable(version),
-		token: toCustomTokenMap()
+		token: toCustomTokenMap(),
+		state: toNullable()
 	};
 };
 
