@@ -197,8 +197,8 @@ export interface DefiniteCanisterSettingsArgs {
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export interface ErcToken {
 	token_address: string;
-	allow_img_source: [] | [boolean];
 	chain_id: bigint;
+	allow_media_source: [] | [boolean];
 }
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
