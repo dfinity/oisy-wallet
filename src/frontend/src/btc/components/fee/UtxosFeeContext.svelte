@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, onMount, onDestroy } from 'svelte';
 	import {
 		BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
-		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
+		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE,
+		BTC_UTXOS_FEE_UPDATE_INTERVAL
 	} from '$btc/constants/btc.constants';
 	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
@@ -20,6 +21,9 @@
 	export let amountError = false;
 
 	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
+
+	let schedulerTimer: NodeJS.Timeout | undefined;
+	let isActive = true;
 
 	const loadEstimatedFee = async () => {
 		if (isNullish($authIdentity)) {
@@ -82,7 +86,52 @@
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	$: (amount, networkId, amountError, source, debounceEstimateFee());
+	const startScheduler = () => {
+		// Stop existing scheduler if it exists
+		stopScheduler();
+		isActive = true;
+
+		// Start the recurring scheduler
+		const scheduleNext = () => {
+			schedulerTimer = setTimeout(() => {
+				// only execute next update if still active
+				if (isActive) {
+					debounceEstimateFee();
+					scheduleNext();
+				}
+			}, BTC_UTXOS_FEE_UPDATE_INTERVAL);
+		};
+
+		scheduleNext();
+	};
+
+	const stopScheduler = () => {
+		isActive = false;
+
+		if (schedulerTimer) {
+			// Clear existing timer
+			clearTimeout(schedulerTimer);
+			schedulerTimer = undefined;
+		}
+	};
+
+	onMount(() => {
+		// Start the scheduler after initial load
+		startScheduler();
+	});
+
+	onDestroy(() => {
+		stopScheduler();
+	});
+
+	// Trigger debounced fee estimation when parameters change
+	$: {
+		amount;
+		networkId;
+		amountError;
+		source;
+		debounceEstimateFee();
+	}
 </script>
 
 <slot />

@@ -7,12 +7,18 @@
 	import BtcConvertReview from '$btc/components/convert/BtcConvertReview.svelte';
 	import UtxosFeeContext from '$btc/components/fee/UtxosFeeContext.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
-	import { sendBtc } from '$btc/services/btc-send.services';
+	import {
+		handleBtcValidationError,
+		sendBtc,
+		validateBtcSend
+	} from '$btc/services/btc-send.services';
 	import { UTXOS_FEE_CONTEXT_KEY } from '$btc/stores/utxos-fee.store';
+	import { BtcValidationError } from '$btc/types/btc-send';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
+		TRACK_COUNT_BTC_VALIDATION_ERROR,
 		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR,
 		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_SUCCESS
 	} from '$lib/constants/analytics.contants';
@@ -102,7 +108,39 @@
 
 		dispatch('icNext');
 
+		// Validate UTXOs before proceeding
+		const { utxosFee } = $utxosFeeStore;
+		progress(ProgressStepsConvert.INITIALIZATION);
 		try {
+			await validateBtcSend({
+				utxosFee,
+				source: sourceAddress,
+				amount: sendAmount,
+				network,
+				identity: $authIdentity
+			});
+		} catch (err: unknown) {
+			// Handle BtcValidationError with specific toastsError for each type
+			if (err instanceof BtcValidationError) {
+				await handleBtcValidationError({ err });
+				utxosFee.error = err.type;
+			}
+
+			trackEvent({
+				name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+				metadata: {
+					token: utxosFee.symbol,
+					network: `${networkId?.description ?? 'unknown'}`
+				}
+			});
+
+			// go back to the previous step so the user can correct/ try again
+			dispatch('icBack');
+			return;
+		}
+
+		try {
+			progress(ProgressStepsConvert.CONVERT);
 			await sendBtc({
 				destination: destinationAddress,
 				amount: sendAmount,
@@ -111,11 +149,7 @@
 				source: sourceAddress,
 				identity: $authIdentity,
 				onProgress: () => {
-					if (convertProgressStep === ProgressStepsConvert.INITIALIZATION) {
-						progress(ProgressStepsConvert.CONVERT);
-					} else if (convertProgressStep === ProgressStepsConvert.CONVERT) {
-						progress(ProgressStepsConvert.UPDATE_UI);
-					}
+					progress(ProgressStepsConvert.UPDATE_UI);
 				}
 			});
 
