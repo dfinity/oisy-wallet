@@ -11,6 +11,8 @@ import {
 } from '$eth/providers/infura-erc721.providers';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
+import { TRACK_ETH_LOADING_NFT_IDS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
@@ -311,11 +313,22 @@ const loadHoldersTokenIds = async ({
 					address: walletAddress,
 					contractAddress: token.address
 				})
-			).map((ownedNft) => parseNftId(ownedNft.id));
+			).map(({ id }) => id);
 		}
 
 		return [];
-	} catch (_: unknown) {
+	} catch (err: unknown) {
+		trackEvent({
+			name: TRACK_ETH_LOADING_NFT_IDS_ERROR,
+			metadata: {
+				tokenId: `${token.id.description}`,
+				networkId: `${token.network.id.description}`,
+				standard: token.standard,
+				error: `${err}`
+			},
+			warning: `Failed to load NFT IDs: ${err}`
+		});
+
 		return [];
 	}
 };
