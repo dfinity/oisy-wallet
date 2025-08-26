@@ -14,7 +14,9 @@
 
 	const { title, text, stringReplacements, headingDesignator = '###' }: Props = $props();
 
-	const blocks: MarkdownBlockType[] = $derived(getMarkdownBlocks({ md: text, headingDesignator }));
+	const blocks: MarkdownBlockType[] = $derived(
+		getMarkdownBlocks({ markdown: text, headingDesignator })
+	);
 </script>
 
 <h1 class="mb-4">{title}</h1>
