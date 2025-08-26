@@ -94,7 +94,8 @@ describe('custom-token.services', () => {
 								index_id: isNullish(indexCanisterId) ? [] : [Principal.fromText(indexCanisterId)],
 								ledger_id: Principal.fromText(mockSendToken.ledgerCanisterId)
 							}
-						}
+						},
+						state: []
 					}
 				});
 
@@ -299,7 +300,8 @@ describe('custom-token.services', () => {
 										isNullish(indexCanisterId) ? undefined : Principal.fromText(indexCanisterId)
 									)
 								}
-							}
+							},
+							state: []
 						}
 					});
 				});
