@@ -171,8 +171,6 @@ mod bitcoin {
     );
 }
 
-// removed empty custom_token module with unused imports
-
 mod contact_image {
     //! Tests for ContactImage validation
     use candid::{Decode, Encode};
