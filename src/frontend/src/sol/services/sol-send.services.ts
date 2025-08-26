@@ -293,14 +293,14 @@ export const sendSol = async ({
 	source
 }: {
 	identity: OptionIdentity;
-	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
 	amount: bigint;
 	prioritizationFee: bigint;
 	destination: SolAddress;
 	source: SolAddress;
+	progress?: (step: ProgressStepsSendSol) => void;
 }): Promise<Signature> => {
-	progress(ProgressStepsSendSol.INITIALIZATION);
+	progress?.(ProgressStepsSendSol.INITIALIZATION);
 
 	const {
 		network: { id: networkId }
@@ -347,20 +347,20 @@ export const sendSol = async ({
 		transactionMessage
 	);
 
-	progress(ProgressStepsSendSol.SIGN);
+	progress?.(ProgressStepsSendSol.SIGN);
 
 	const { signedTransaction, signature } = await signTransaction(
 		prioritizationFee > ZERO ? transactionMessageWithComputeUnitPrice : transactionMessage
 	);
 
-	progress(ProgressStepsSendSol.SEND);
+	progress?.(ProgressStepsSendSol.SEND);
 
 	await sendSignedTransaction({
 		rpc,
 		signedTransaction
 	});
 
-	progress(ProgressStepsSendSol.CONFIRM);
+	progress?.(ProgressStepsSendSol.CONFIRM);
 
 	await confirmSignedTransaction({
 		rpc,
@@ -368,7 +368,7 @@ export const sendSol = async ({
 		signedTransaction
 	});
 
-	progress(ProgressStepsSendSol.DONE);
+	progress?.(ProgressStepsSendSol.DONE);
 
 	return signature;
 };
