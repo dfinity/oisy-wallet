@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
-	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
+	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
+	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -27,12 +27,12 @@
 
 <main
 	class="mx-0 mt-10 flex flex-col justify-center px-8 pb-10 lg:mx-auto lg:px-0 1.5lg:mt-28"
+	class:2xl:w-md={NEW_AGREEMENTS_ENABLED}
+	class:agreements-v2={NEW_AGREEMENTS_ENABLED}
 	class:items-center={!NEW_AGREEMENTS_ENABLED}
 	class:items-start={NEW_AGREEMENTS_ENABLED}
-	class:lg:w-md={!NEW_AGREEMENTS_ENABLED}
-	class:2xl:w-md={NEW_AGREEMENTS_ENABLED}
 	class:l:w-sm={NEW_AGREEMENTS_ENABLED}
-	class:agreements-v2={NEW_AGREEMENTS_ENABLED}
+	class:lg:w-md={!NEW_AGREEMENTS_ENABLED}
 >
 	{@render children()}
 </main>
