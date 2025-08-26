@@ -303,7 +303,6 @@ const loadHoldersTokenIds = async ({
 			});
 		}
 
-    
 		if (isTokenErc1155(token)) {
 			const { getNftIdsForOwner } = alchemyProviders(token.network.id);
 
