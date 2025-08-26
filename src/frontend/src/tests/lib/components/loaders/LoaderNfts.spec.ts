@@ -64,7 +64,7 @@ describe('LoaderNfts', () => {
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 
 		loadNftIdsOfTokenSpy = vi.spyOn(nftServicesModule, 'loadNftIdsOfToken');
-		loadNftIdsOfTokenSpy.mockImplementation(() => Promise.resolve())
+		loadNftIdsOfTokenSpy.mockResolvedValue(undefined);
 	});
 
 	describe('handleNewNfts', () => {
@@ -147,7 +147,7 @@ describe('LoaderNfts', () => {
 		beforeEach(() => {
 			nftStore.resetAll();
 
-			erc721CustomTokensStore.resetAll()
+			erc721CustomTokensStore.resetAll();
 			erc1155CustomTokensStore.resetAll();
 		});
 
