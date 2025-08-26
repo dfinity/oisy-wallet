@@ -126,7 +126,6 @@
 		} catch (err: unknown) {
 			// Handle BtcValidationError with specific toastsError for each type
 			if (err instanceof BtcValidationError) {
-				await handleBtcValidationError({ err });
 				utxosFee.error = err.type;
 			}
 
