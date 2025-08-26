@@ -4,10 +4,11 @@ use candid::Principal;
 use shared::types::{
     custom_token::{
         ChainId, CustomToken, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId, Token,
+        TokenState,
     },
     TokenVersion,
 };
-use shared::types::custom_token::TokenState;
+
 use crate::utils::{
     assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
     mock::CALLER,
@@ -68,9 +69,9 @@ static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc721 {
         token: ErcToken {
             token_address: ERC721_TOKEN_ID.clone(),
-            chain_id: ERC721_CHAIN_ID.clone()
+            chain_id: ERC721_CHAIN_ID.clone(),
         },
-        state: TokenState::Default
+        state: TokenState::Default,
     },
     enabled: true,
     version: None,
