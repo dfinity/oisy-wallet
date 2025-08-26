@@ -188,13 +188,13 @@
 	<BitcoinFeeContext amount={sendAmount} {networkId} token={$sourceToken}>
 		{#if currentStep?.name === WizardStepsConvert.CONVERT}
 			<IcConvertForm
+				destination={isDestinationCustom ? customDestination : defaultDestination}
+				{isDestinationCustom}
 				on:icNext
 				on:icClose
 				on:icDestination
 				bind:sendAmount
 				bind:receiveAmount
-				destination={isDestinationCustom ? customDestination : defaultDestination}
-				{isDestinationCustom}
 			>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
@@ -206,12 +206,12 @@
 			</IcConvertForm>
 		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 			<IcConvertReview
-				on:icConvert={convert}
-				on:icBack
-				{sendAmount}
-				{receiveAmount}
 				destination={isDestinationCustom ? customDestination : defaultDestination}
 				{isDestinationCustom}
+				{receiveAmount}
+				{sendAmount}
+				on:icConvert={convert}
+				on:icBack
 			>
 				<ButtonBack slot="cancel" onclick={back} />
 			</IcConvertReview>
@@ -231,10 +231,10 @@
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQrCodeScan
 				expectedToken={$destinationToken}
-				bind:destination={customDestination}
-				bind:amount={sendAmount}
 				onDecodeQrCode={decodeQrCode}
 				{onIcQrCodeBack}
+				bind:destination={customDestination}
+				bind:amount={sendAmount}
 			/>
 		{:else}
 			<slot />

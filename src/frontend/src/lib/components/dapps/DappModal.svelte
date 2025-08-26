@@ -53,11 +53,11 @@
 			{#if nonNullish(screenshots) && screenshots.length > 0}
 				<div class="overflow-hidden rounded-3xl">
 					<ImgBanner
-						styleClass="max-h-64"
-						src={screenshots[0]}
 						alt={replacePlaceholders($i18n.dapps.alt.website, {
 							$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 						})}
+						src={screenshots[0]}
+						styleClass="max-h-64"
 					/>
 				</div>
 			{/if}
@@ -67,21 +67,21 @@
 					class="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 border-b border-tertiary pb-2 sm:gap-4 sm:pb-4"
 				>
 					<Logo
-						size="md"
-						src={logo}
 						alt={replacePlaceholders($i18n.dapps.alt.logo, {
 							$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 						})}
+						size="md"
+						src={logo}
 					/>
 					<div class="mr-auto">
 						<div class="text-lg font-bold">{resolveText({ i18n: $i18n, path: dAppName })}</div>
 						{#if nonNullish(websiteURL)}
 							<ExternalLink
-								iconVisible={false}
 								ariaLabel={replacePlaceholders($i18n.dapps.text.open_dapp, {
 									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
 								href={websiteURL.toString()}
+								iconVisible={false}
 								styleClass="text-sm text-tertiary">{websiteURL.hostname}</ExternalLink
 							>
 						{/if}
@@ -89,40 +89,40 @@
 					<div class="flex space-x-3">
 						{#if nonNullish(telegram)}
 							<ExternalLinkIcon
-								href={telegram}
 								ariaLabel={replacePlaceholders($i18n.dapps.alt.open_telegram, {
 									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
+								href={telegram}
 							>
 								<IconTelegram size="22" />
 							</ExternalLinkIcon>
 						{/if}
 						{#if nonNullish(openChat)}
 							<ExternalLinkIcon
-								href={openChat}
 								ariaLabel={replacePlaceholders($i18n.dapps.alt.open_open_chat, {
 									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
+								href={openChat}
 							>
 								<IconOpenChat size="22" />
 							</ExternalLinkIcon>
 						{/if}
 						{#if nonNullish(twitter)}
 							<ExternalLinkIcon
-								href={twitter}
 								ariaLabel={replacePlaceholders($i18n.dapps.alt.open_twitter, {
 									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
+								href={twitter}
 							>
 								<IconTwitter size="22" />
 							</ExternalLinkIcon>
 						{/if}
 						{#if nonNullish(github)}
 							<ExternalLinkIcon
-								href={github}
 								ariaLabel={replacePlaceholders($i18n.dapps.alt.source_code_on_github, {
 									$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 								})}
+								href={github}
 							>
 								<IconGitHub size="22" />
 							</ExternalLinkIcon>
@@ -145,9 +145,9 @@
 					})}
 					asButton
 					fullWidth
-					styleClass="primary padding-sm flex-1"
 					href={websiteURL.toString()}
 					iconAsLast
+					styleClass="primary padding-sm flex-1"
 					trackEvent={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
 					>{callToAction
 						? resolveText({ i18n: $i18n, path: callToAction })

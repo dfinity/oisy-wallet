@@ -19,10 +19,10 @@
 	{#if dAppDescription.screenshots.length > 0}
 		<div class="max-h-64 bg-brand-subtle-30">
 			<ImgBanner
-				src={dAppDescription.screenshots[0]}
 				alt={replacePlaceholders($i18n.dapps.alt.website, {
 					$dAppName: resolveText({ i18n: $i18n, path: dAppDescription.name })
 				})}
+				src={dAppDescription.screenshots[0]}
 			/>
 		</div>
 	{/if}
@@ -30,10 +30,10 @@
 		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 rounded-full">
 				<Img
-					src={dAppDescription.logo}
 					alt={replacePlaceholders($i18n.dapps.alt.logo, {
 						$dAppName: resolveText({ i18n: $i18n, path: dAppDescription.name })
 					})}
+					src={dAppDescription.logo}
 				/>
 			</div>
 			<div class="flex-1">
@@ -43,7 +43,7 @@
 				>
 			</div>
 
-			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="primary" {onclick}>
+			<Button colorStyle="primary" {onclick} paddingSmall styleClass="grow-0 text-sm">
 				{$i18n.core.text.view}
 			</Button>
 		</div>

@@ -5,6 +5,7 @@ import type {
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
 	PostMessageDataRequestIcCkSchema,
+	PostMessageDataRequestIcpSchema,
 	PostMessageDataRequestIcrcSchema,
 	PostMessageDataRequestIcrcStrictSchema,
 	PostMessageDataRequestSchema,
@@ -42,6 +43,8 @@ export type PostMessageDataRequestIcrcStrict = z.infer<
 >;
 
 export type PostMessageDataRequestDip20 = z.infer<typeof PostMessageDataRequestDip20Schema>;
+
+export type PostMessageDataRequestIcp = z.infer<typeof PostMessageDataRequestIcpSchema>;
 
 export type PostMessageDataRequestIcCk = z.infer<typeof PostMessageDataRequestIcCkSchema>;
 

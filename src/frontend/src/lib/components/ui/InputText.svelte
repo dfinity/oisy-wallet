@@ -29,15 +29,15 @@
 
 <Input
 	{name}
-	inputType="text"
-	{required}
-	bind:value
-	{placeholder}
-	{showResetButton}
-	spellcheck={false}
 	autocomplete="off"
 	{autofocus}
-	{testId}
 	{disabled}
 	{innerEnd}
+	inputType="text"
+	{placeholder}
+	{required}
+	{showResetButton}
+	spellcheck={false}
+	{testId}
+	bind:value
 />

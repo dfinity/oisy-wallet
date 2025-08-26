@@ -9,7 +9,7 @@
 	export let receiveAmount: number | undefined;
 </script>
 
-<ConvertReview on:icConvert on:icBack {sendAmount} {receiveAmount}>
+<ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
 	<BtcConvertFees slot="fee" />
 
 	<div slot="info-message" class="mt-4">

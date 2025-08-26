@@ -11,4 +11,4 @@
 	let { rewardState = $bindable(), endedCampaignsAmount = 1 }: Props = $props();
 </script>
 
-<RewardsFilter bind:rewardState={$rewardState} {endedCampaignsAmount} />
+<RewardsFilter {endedCampaignsAmount} bind:rewardState={$rewardState} />

@@ -18,7 +18,7 @@
 		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : '';
 </script>
 
-<Modal on:nnsClose={modalStore.close} testId={SETTINGS_NETWORKS_MODAL}>
+<Modal testId={SETTINGS_NETWORKS_MODAL} on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{modalTitle}</svelte:fragment>
 
 	<!-- we add an if here because theres plans to have multiple settings open as a modal -->

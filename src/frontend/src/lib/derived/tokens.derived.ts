@@ -1,7 +1,7 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -12,6 +12,7 @@ import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
+import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
@@ -37,6 +38,7 @@ export const tokens: Readable<Token[]> = derived(
 		erc1155Tokens,
 		sortedIcrcTokens,
 		splTokens,
+		defaultIcpTokens,
 		enabledEthereumTokens,
 		enabledBitcoinTokens,
 		enabledSolanaTokens,
@@ -48,12 +50,13 @@ export const tokens: Readable<Token[]> = derived(
 		$erc1155Tokens,
 		$icrcTokens,
 		$splTokens,
+		$defaultIcpTokens,
 		$enabledEthereumTokens,
 		$enabledBitcoinTokens,
 		$enabledSolanaTokens,
 		$enabledEvmTokens
 	]) => [
-		ICP_TOKEN,
+		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
@@ -85,6 +88,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
+		TESTICP_TOKEN,
 		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens,
 		...$defaultEthereumTokens.filter((token) => token !== ETHEREUM_TOKEN)
@@ -95,6 +99,14 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
  * All user-enabled tokens.
  */
 export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);
+
+/**
+ * All user-enabled unique tokens symbols.
+ */
+export const enabledUniqueTokensSymbols: Readable<Token['symbol'][]> = derived(
+	[enabledTokens],
+	([$enabledTokens]) => Array.from(new Set($enabledTokens.map(({ symbol }) => symbol)))
+);
 
 /**
  * All user-enabled fungible tokens.

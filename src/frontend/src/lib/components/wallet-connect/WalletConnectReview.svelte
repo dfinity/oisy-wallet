@@ -2,8 +2,7 @@
 	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import type { ProposalTypes } from '@walletconnect/types';
-	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
@@ -18,20 +17,23 @@
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let proposal: Option<WalletKitTypes.SessionProposal>;
+	interface Props {
+		proposal: Option<WalletKitTypes.SessionProposal>;
+		onApprove: () => void;
+		onReject: () => void;
+		onCancel: () => void;
+	}
 
-	let params: ProposalTypes.Struct | undefined;
-	$: params = proposal?.params;
+	let { proposal, onApprove, onReject, onCancel }: Props = $props();
 
-	let approve = true;
-	$: approve = acceptedContext(proposal?.verifyContext);
+	let params = $derived(proposal?.params);
 
-	const dispatch = createEventDispatcher();
+	let approve = $derived(acceptedContext(proposal?.verifyContext));
 
 	// Display a cancel button after a while if the WalletConnect initialization never resolves
 
-	let timer: NodeJS.Timeout | undefined;
-	let displayCancel = false;
+	let timer = $state<NodeJS.Timeout | undefined>();
+	let displayCancel = $state(false);
 
 	onMount(() => (timer = setTimeout(() => (displayCancel = true), 2000)));
 
@@ -85,7 +87,7 @@
 
 		{#snippet toolbar()}
 			<div in:fade>
-				<WalletConnectActions {approve} on:icApprove on:icReject />
+				<WalletConnectActions {approve} {onApprove} {onReject} />
 			</div>
 		{/snippet}
 	</ContentWithToolbar>
@@ -104,10 +106,7 @@
 			{#if displayCancel}
 				<div in:fade>
 					<ButtonGroup>
-						<ButtonCancel
-							onclick={() => dispatch('icCancel')}
-							disabled={$isBusy || $ethAddressNotCertified}
-						/>
+						<ButtonCancel disabled={$isBusy || $ethAddressNotCertified} onclick={onCancel} />
 					</ButtonGroup>
 				</div>
 			{/if}

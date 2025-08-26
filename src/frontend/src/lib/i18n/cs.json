@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Desetinná místa",
 			"amount": "Částka",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Cíl",
 			"reject": "Odmítnout",
@@ -721,8 +722,13 @@
 			"minter_info_not_loaded": "Zkuste to znovu za několik sekund, parametr konfigurace ckETH ještě není načten.",
 			"minter_info_not_certified": "Zkuste to znovu za několik sekund, parametr konfigurace ckETH nebyl certifikován.",
 			"cketh_max_transaction_fee_missing": "Chybí maximální poplatek za transakci pro ckETH.",
-			"utxos_fee_missing": "Chybí poplatek UTXO.",
-			"minimum_btc_amount": "Minimální částka je $amount BTC."
+			"utxos_fee_missing": "Chybí poplatek za UTXO.",
+			"minimum_btc_amount": "Částka je příliš malá. Zadejte prosím alespoň $amount BTC.",
+			"btc_insufficient_balance": "Pro transakci nejsou k dispozici žádné Bitcoin UTXO",
+			"btc_insufficient_balance_for_fee": "Nedostatečný zůstatek Bitcoinu na pokrytí transakčních poplatků",
+			"btc_invalid_utxo_data": "Neplatná data Bitcoin transakce",
+			"btc_utxo_locked": "Bitcoin prostředky jsou uzamčeny čekajícími transakcemi",
+			"btc_invalid_fee_calculation": "Ověření poplatku za Bitcoin transakci se nezdařilo"
 		},
 		"error": {
 			"unexpected": "Při odesílání transakce se něco pokazilo.",
@@ -828,7 +834,11 @@
 			"open_instructions_link": "Otevřít odkaz na pokyny",
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
-			"withdrawing": "Stažení..."
+			"withdrawing": "Stažení...",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
@@ -1006,13 +1016,35 @@
 		"text": {
 			"title": "",
 			"title_empty": "",
-			"description_empty": ""
+			"description_empty": "",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": "",
+			"collection_not_loaded": "",
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": "",
+			"address_copied": "",
+			"open_explorer": ""
 		},
 		"alt": {
 			"placeholder_image": "",
 			"card": {
 				"image": ""
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
@@ -1523,8 +1555,14 @@
 			"action_button_contacts_title": "Zobrazit kontakty",
 			"action_button_contacts_subtitle": "Zobrazte své uložené kontakty",
 			"action_button_contacts_prompt": "Ukaž mi moje kontakty.",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "Poslat zprávu",
 			"send_message_input_placeholder": "Co chcete dělat?",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": "Přemýšlím..."
 		},

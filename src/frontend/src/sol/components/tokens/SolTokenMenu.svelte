@@ -44,11 +44,11 @@
 	{#if nonNullish(explorerAddressUrl)}
 		<div in:fade>
 			<ExternalLink
+				ariaLabel={$i18n.tokens.alt.open_dashboard}
 				asMenuItem
 				asMenuItemCondensed
 				fullWidth
 				href={explorerAddressUrl}
-				ariaLabel={$i18n.tokens.alt.open_dashboard}
 				iconVisible={false}
 				testId={TOKEN_MENU_SOL_EXPLORER_LINK}
 			>

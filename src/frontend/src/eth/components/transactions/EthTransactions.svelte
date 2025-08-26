@@ -55,7 +55,7 @@
 	<EthTransactionsSkeletons>
 		{#each sortedTransactionsUi as transaction (transaction.hash)}
 			<div transition:slide={SLIDE_DURATION}>
-				<EthTransaction {transaction} token={$tokenWithFallback} />
+				<EthTransaction token={$tokenWithFallback} {transaction} />
 			</div>
 		{/each}
 
@@ -66,7 +66,7 @@
 </LoaderEthTransactions>
 
 {#if $modalEthTransaction && nonNullish(selectedTransaction)}
-	<EthTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<EthTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalEthToken}
 	<EthTokenModal fromRoute={$modalEthTokenData} />
 {/if}

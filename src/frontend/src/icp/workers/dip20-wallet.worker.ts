@@ -9,11 +9,7 @@ import {
 	mapTransactionDip20ToSelf
 } from '$icp/utils/dip20-transactions.utils';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
-import type {
-	PostMessage,
-	PostMessageDataRequest,
-	PostMessageDataRequestDip20
-} from '$lib/types/post-message';
+import type { PostMessage, PostMessageDataRequestDip20 } from '$lib/types/post-message';
 import { isNullish } from '@dfinity/utils';
 
 // TODO: add query for transactions - for now we mock with empty transactions
@@ -66,13 +62,13 @@ const mapTransaction = ({
 	transaction: Pick<Dip20TransactionWithId, 'id'> & {
 		transaction: Event & IcTransactionAddOnsInfo;
 	};
-	jobData: SchedulerJobData<PostMessageDataRequest>;
+	jobData: SchedulerJobData<PostMessageDataRequestDip20>;
 }): IcTransactionUi => mapDip20Transaction({ transaction, identity });
 
 const initDip20WalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTransactionsScheduler<
 	Event,
 	Dip20TransactionWithId,
-	PostMessageDataRequest
+	PostMessageDataRequestDip20
 > =>
 	new IcWalletBalanceAndTransactionsScheduler(
 		getBalanceAndTransactions,
@@ -87,11 +83,11 @@ export const initDip20WalletScheduler = (
 ): IcWalletScheduler<PostMessageDataRequestDip20> =>
 	initDip20WalletBalanceAndTransactionsScheduler();
 
-let scheduler: IcWalletScheduler<PostMessageDataRequest> | undefined;
+let scheduler: IcWalletScheduler<PostMessageDataRequestDip20> | undefined;
 
 export const onDip20WalletMessage = async ({
 	data: dataMsg
-}: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
+}: MessageEvent<PostMessage<PostMessageDataRequestDip20>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {

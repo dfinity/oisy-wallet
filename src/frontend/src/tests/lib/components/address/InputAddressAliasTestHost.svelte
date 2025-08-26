@@ -17,4 +17,4 @@
 	export const getAddress = () => address;
 </script>
 
-<InputAddressAlias bind:address bind:isValid {disableAddressField} />
+<InputAddressAlias {disableAddressField} bind:address bind:isValid />

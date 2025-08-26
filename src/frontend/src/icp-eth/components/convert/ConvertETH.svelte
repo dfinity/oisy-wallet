@@ -83,9 +83,9 @@
 
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
-		onclick={async () => await openConvert()}
-		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
 		{ariaLabel}
+		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
+		onclick={async () => await openConvert()}
 	>
 		{#snippet icon()}
 			<slot name="icon" />

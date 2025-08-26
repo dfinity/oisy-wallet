@@ -17,14 +17,14 @@
 </script>
 
 <SendInputDestination
-	bind:destination
-	bind:invalidDestination
+	inputPlaceholder={$i18n.send.placeholder.enter_recipient_address}
 	{knownDestinations}
 	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
-	inputPlaceholder={$i18n.send.placeholder.enter_recipient_address}
-	on:icQRCodeScan
 	onQRButtonClick={() => dispatch('icQRCodeScan')}
+	bind:destination
+	bind:invalidDestination
+	on:icQRCodeScan
 />
 
 <!-- TODO: PRODSEC: add some sort of warning/info when the destination input is not an ATA address, either here or in the confirmation review step -->

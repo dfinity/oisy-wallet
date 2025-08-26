@@ -27,10 +27,11 @@
 
 <a
 	class="transition-bg duration-250 flex flex-col items-center rounded-2xl p-3 text-center text-primary no-underline shadow"
-	class:hover:bg-brand-subtle-30={!disabled}
-	class:hover:text-primary={!disabled}
 	class:bg-brand-subtle-20={!disabled}
 	class:bg-disabled-alt={disabled}
+	class:hover:bg-brand-subtle-30={!disabled}
+	class:hover:text-primary={!disabled}
+	data-tid={testId}
 	href={nonNullish(appPath) && !disabled
 		? networkUrl({
 				path: appPath,
@@ -39,7 +40,6 @@
 				fromRoute
 			})
 		: undefined}
-	data-tid={testId}
 >
 	<span class="py-2">
 		{@render icon()}

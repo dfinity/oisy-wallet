@@ -20,6 +20,7 @@
 	let type: EthTransactionType;
 	let to: string | undefined;
 	let from: string | undefined;
+	let tokenId: number | undefined;
 
 	let pending: boolean;
 	$: pending = isTransactionPending(transaction);
@@ -27,7 +28,7 @@
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
-	$: ({ value, timestamp, displayTimestamp, type, to, from } = transaction);
+	$: ({ value, timestamp, displayTimestamp, type, to, from, tokenId } = transaction);
 
 	let ckTokenSymbol: string;
 	$: ckTokenSymbol = isSupportedEthToken(token)
@@ -71,15 +72,16 @@
 </script>
 
 <Transaction
-	onClick={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}
 	{amount}
-	{type}
-	timestamp={transactionDate}
-	{status}
-	{token}
-	{iconType}
-	{to}
 	{from}
+	{iconType}
+	onClick={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}
+	{status}
+	timestamp={transactionDate}
+	{to}
+	{token}
+	{tokenId}
+	{type}
 >
 	{label}
 </Transaction>

@@ -1,11 +1,10 @@
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS } from '$env/networks/networks.icrc.env';
+import * as tokensIcEnv from '$env/tokens/tokens.ic.env';
 import {
 	allKnownIcrcTokensLedgerCanisterIds,
 	enabledIcrcLedgerCanisterIdsNoCk,
 	enabledIcrcTokens
 } from '$icp/derived/icrc.derived';
-import * as dip20TokensServices from '$icp/services/dip20-tokens.services';
-import * as icrcCustomTokensServices from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
@@ -177,10 +176,10 @@ describe('icrc.derived', () => {
 	});
 
 	describe('allKnownIcrcTokensLedgerCanisterIds', () => {
-		vi.spyOn(icrcCustomTokensServices, 'buildIcrcCustomTokens').mockReturnValue([
-			mockValidIcrcToken
+		vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [
+			mockValidIcrcToken,
+			mockValidDip20Token
 		]);
-		vi.spyOn(dip20TokensServices, 'buildDip20Tokens').mockReturnValue([mockValidDip20Token]);
 		icrcDefaultTokensStore.setAll([
 			{ data: mockIcrcDefaultToken1, certified: false },
 			{ data: mockIcrcDefaultToken2, certified: false }

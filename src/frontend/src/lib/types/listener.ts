@@ -9,7 +9,9 @@ export interface WalletWorker {
 	destroy: () => void;
 }
 
-export type InitWalletWorkerFn = (params: { token: Token }) => Promise<WalletWorker>;
+export type InitWalletWorkerFn<T extends Token = Token> = (params: {
+	token: T;
+}) => Promise<WalletWorker>;
 
 export interface TokenToListener {
 	token: Token;

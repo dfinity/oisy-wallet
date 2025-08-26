@@ -5,10 +5,10 @@
 </script>
 
 <a
+	class="inline-flex items-center gap-2 pb-3 pt-6 text-center text-xs font-bold no-underline md:text-base"
 	href={ERC20_ICP_REPO_URL}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="inline-flex items-center gap-2 pb-3 pt-6 text-center text-xs font-bold no-underline md:text-base"
 >
 	<IconInfo />
 	<span class="pl-1">{$i18n.hero.text.learn_more_about_erc20_icp}</span>

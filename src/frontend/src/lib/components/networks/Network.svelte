@@ -26,12 +26,12 @@
 </script>
 
 <NetworkButton
-	{selectedNetworkId}
-	{usdBalance}
 	{delayOnNetworkSelect}
-	{network}
-	{labelsSize}
 	isTestnet={network.env === 'testnet'}
-	testId={`${testIdPrefix}-${network.id.description}`}
+	{labelsSize}
+	{network}
 	{onSelected}
+	{selectedNetworkId}
+	testId={`${testIdPrefix}-${network.id.description}`}
+	{usdBalance}
 />

@@ -11,10 +11,10 @@
 </script>
 
 <button
-	{onclick}
 	class="login-button flex w-full items-center justify-center gap-4 rounded-2xl bg-brand-primary py-3 text-lg font-bold leading-6 text-primary-inverted sm:px-12"
 	class:sm:w-80={!fullWidth}
 	data-tid="login-button"
+	{onclick}
 >
 	{$i18n.auth.text.authenticate}
 	<IconAstronautArrow />

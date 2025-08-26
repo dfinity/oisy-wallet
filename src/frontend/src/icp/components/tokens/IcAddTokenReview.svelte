@@ -60,10 +60,10 @@
 					{#snippet icon()}
 						{#if nonNullish(metadata)}
 							<Logo
-								src={metadata.token.icon}
 								alt={replacePlaceholders($i18n.core.alt.logo, { $name: metadata.token.name })}
-								size="lg"
 								color="white"
+								size="lg"
+								src={metadata.token.icon}
 							/>
 						{/if}
 					{/snippet}
@@ -87,7 +87,7 @@
 			indexCanisterId: safeIndexCanisterId
 		} = metadata.token}
 		<div in:fade>
-			<Value ref="network" element="div">
+			<Value element="div" ref="network">
 				{#snippet label()}
 					{$i18n.tokens.manage.text.network}
 				{/snippet}
@@ -96,7 +96,7 @@
 				{/snippet}
 			</Value>
 
-			<Value ref="ledgerId" element="div">
+			<Value element="div" ref="ledgerId">
 				{#snippet label()}{$i18n.tokens.import.text.ledger_canister_id}{/snippet}
 				{#snippet content()}
 					{safeLedgerCanisterId}
@@ -104,7 +104,7 @@
 			</Value>
 
 			{#if nonNullish(indexCanisterId)}
-				<Value ref="indexId" element="div">
+				<Value element="div" ref="indexId">
 					{#snippet label()}
 						{$i18n.tokens.import.text.index_canister_id}
 					{/snippet}

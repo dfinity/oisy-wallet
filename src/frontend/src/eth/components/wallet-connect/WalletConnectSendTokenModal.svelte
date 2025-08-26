@@ -162,7 +162,7 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} onClose={reject}>
+<WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{@const { data } = firstTransaction}
 
 	{#snippet title()}
@@ -174,12 +174,12 @@
 	<EthFeeContext
 		amount={amount.toString()}
 		{data}
+		{destination}
+		nativeEthereumToken={$ethereumToken}
+		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
-		{destination}
-		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		{sourceNetwork}
-		nativeEthereumToken={$ethereumToken}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
 			{#if currentStep?.name === WizardStepsSend.SENDING}
@@ -190,13 +190,13 @@
 			{:else}
 				<WalletConnectSendReview
 					{amount}
-					{destination}
 					{data}
+					{destination}
 					{erc20Approve}
+					onApprove={send}
+					onReject={reject}
 					{sourceNetwork}
 					{targetNetwork}
-					on:icApprove={send}
-					on:icReject={reject}
 				/>
 			{/if}
 		</CkEthLoader>

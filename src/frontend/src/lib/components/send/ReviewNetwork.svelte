@@ -52,10 +52,10 @@
 				<span class="flex gap-1">
 					<SendBtcNetwork networkId={destinationNetworkId} />
 					<Logo
-						src={bitcoin}
 						alt={replacePlaceholders($i18n.core.alt.logo, {
 							$name: $i18n.receive.bitcoin.text.bitcoin
 						})}
+						src={bitcoin}
 					/>
 				</span>
 			{:else if isNetworkEthereum}

@@ -41,7 +41,7 @@
 <TransactionsSkeletons loading={$btcTransactionsNotInitialized}>
 	{#each $sortedBtcTransactions as transaction (transaction.data.id)}
 		<div transition:slide={SLIDE_DURATION}>
-			<BtcTransaction transaction={transaction.data} {token} />
+			<BtcTransaction {token} transaction={transaction.data} />
 		</div>
 	{/each}
 
@@ -51,7 +51,7 @@
 </TransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedTransaction)}
-	<BtcTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<BtcTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalBtcToken}
 	<BtcTokenModal fromRoute={$modalBtcTokenData} />
 {/if}

@@ -61,25 +61,25 @@
 </script>
 
 <ButtonIcon
-	bind:button
-	onclick={() => (visible = true)}
-	colorStyle="tertiary-alt"
-	styleClass="w-auto h-auto p-0"
-	transparent
-	link={false}
 	ariaLabel={$i18n.address_book.edit_avatar.replace_image}
+	colorStyle="tertiary-alt"
+	link={false}
+	onclick={() => (visible = true)}
+	styleClass="w-auto h-auto p-0"
 	testId={CONTACT_POPOVER_TRIGGER}
+	transparent
+	bind:button
 >
 	{#snippet icon()}
 		<IconPencil />
 	{/snippet}
 </ButtonIcon>
 
-<Popover bind:visible anchor={button} invisibleBackdrop>
+<Popover anchor={button} invisibleBackdrop bind:visible>
 	<div
 		class="avatar-edit-popover min-w-60 max-w-[60%] text-left"
-		role="menu"
 		data-tid={CONTACT_POPOVER_MENU}
+		role="menu"
 	>
 		<h3 class="popover-title pb-2 pt-1 text-base">{$i18n.address_book.edit_avatar.menu_title}</h3>
 		<ul class="flex flex-col">
@@ -87,12 +87,12 @@
 				<li class="logo-button-list-item">
 					<LogoButton
 						hover
-						styleClass="w-full"
-						testId={testId ?? CONTACT_POPOVER_MENU_ITEM}
 						onClick={() => {
 							action();
 							visible = false;
 						}}
+						styleClass="w-full"
+						testId={testId ?? CONTACT_POPOVER_MENU_ITEM}
 					>
 						{#snippet logo()}
 							<ItemLogo />

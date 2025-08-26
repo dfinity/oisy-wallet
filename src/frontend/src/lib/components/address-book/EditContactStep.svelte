@@ -92,22 +92,22 @@
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col gap-1 h-full">
-	<LogoButton hover={false} condensed={true}>
+	<LogoButton condensed={true} hover={false}>
 		{#snippet logo()}
 			<div class="relative flex">
 				<Avatar
 					name={contact.name}
 					image={contact.image}
-					variant="xs"
-					styleClass="md:text-[19.2px]"
 					{loading}
+					styleClass="md:text-[19.2px]"
+					variant="xs"
 				/>
 				{#if AVATAR_ENABLED}
 					<span
 						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 						data-tid={`${AVATAR_BADGE}-${contact.name}`}
 					>
-						<EditAvatar {imageUrl} onReplaceImage={replaceImage} onRemoveImage={removeImage} />
+						<EditAvatar {imageUrl} onRemoveImage={removeImage} onReplaceImage={replaceImage} />
 					</span>
 				{/if}
 			</div>
@@ -119,13 +119,13 @@
 
 		{#snippet action()}
 			<ButtonIcon
-				styleClass="-m-1 md:m-0"
-				colorStyle="tertiary-alt"
-				transparent
-				link={false}
 				ariaLabel={$i18n.core.text.edit}
+				colorStyle="tertiary-alt"
+				link={false}
 				onclick={() => onEdit(contact)}
+				styleClass="-m-1 md:m-0"
 				testId={CONTACT_HEADER_EDITING_EDIT_BUTTON}
+				transparent
 			>
 				{#snippet icon()}
 					<IconPencil />
@@ -151,11 +151,11 @@
 		<Button
 			alignLeft
 			ariaLabel={$i18n.address_book.edit_contact.add_address}
-			transparent
 			colorStyle="secondary-light"
 			disabled={isNullish(onAddAddress)}
 			onclick={() => onAddAddress?.()}
 			testId={CONTACT_EDIT_ADD_ADDRESS_BUTTON}
+			transparent
 		>
 			<IconPlus />
 			{$i18n.address_book.edit_contact.add_address}
@@ -168,10 +168,10 @@
 		<Button
 			alignLeft
 			ariaLabel={$i18n.address_book.edit_contact.delete_contact}
-			transparent
 			colorStyle="error"
 			onclick={() => onDeleteContact?.(contact.id)}
 			testId={CONTACT_EDIT_DELETE_CONTACT_BUTTON}
+			transparent
 		>
 			<IconTrash />
 			{$i18n.address_book.edit_contact.delete_contact}
@@ -188,5 +188,5 @@
 </ContentWithToolbar>
 
 {#if AVATAR_ENABLED}
-	<HiddenFileInput bind:this={fileInput} testId={AVATAR_UPLOAD_IMAGE} onChange={handleFileChange} />
+	<HiddenFileInput bind:this={fileInput} onChange={handleFileChange} testId={AVATAR_UPLOAD_IMAGE} />
 {/if}

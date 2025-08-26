@@ -37,13 +37,13 @@
 </script>
 
 <ConvertForm
+	disabled={invalid}
+	minFee={$minGasFee}
+	testId={ETH_CONVERT_FORM_TEST_ID}
+	totalFee={$maxGasFee}
 	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
-	totalFee={$maxGasFee}
-	minFee={$minGasFee}
-	disabled={invalid}
-	testId={ETH_CONVERT_FORM_TEST_ID}
 >
 	<svelte:fragment slot="message">
 		{#if isTokenErc20($sourceToken) && $insufficientFundsForFee}

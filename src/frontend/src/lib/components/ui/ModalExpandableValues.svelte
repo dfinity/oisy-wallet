@@ -11,7 +11,7 @@
 	let { listHeader, listItems }: Props = $props();
 </script>
 
-<div in:fade class="modal-expandable-values">
+<div class="modal-expandable-values" in:fade>
 	<Collapsible>
 		{#snippet header()}
 			<!-- The width of the item below should be 100% - collapsible expand button width (1.5rem) -->

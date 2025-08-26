@@ -32,11 +32,11 @@
 </script>
 
 {#if nonNullish(usdValue)}
-	<div in:fade data-tid={CONVERT_AMOUNT_EXCHANGE_VALUE}>
+	<div data-tid={CONVERT_AMOUNT_EXCHANGE_VALUE} in:fade>
 		{usdValue === 0 ? '' : displayValue?.includes('<') ? '' : '~'}{displayValue}
 	</div>
 {:else if isNullish(amount)}
-	<div in:fade class="w-10 sm:w-8" data-tid={CONVERT_AMOUNT_EXCHANGE_SKELETON}>
+	<div class="w-10 sm:w-8" data-tid={CONVERT_AMOUNT_EXCHANGE_SKELETON} in:fade>
 		<SkeletonText />
 	</div>
 {/if}
