@@ -506,6 +506,7 @@
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
 			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Chyba při načítání informací o peněžence BTC.",
 			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL."
 		}
