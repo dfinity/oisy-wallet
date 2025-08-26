@@ -8,7 +8,6 @@
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
-	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import {
 		SUPPORTED_CROSS_SWAP_NETWORKS,
