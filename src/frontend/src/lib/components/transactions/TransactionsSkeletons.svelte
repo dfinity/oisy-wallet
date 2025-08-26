@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import type { Snippet } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 
 	interface Props {
