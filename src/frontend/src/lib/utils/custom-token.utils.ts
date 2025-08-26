@@ -19,6 +19,7 @@ import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
+import { TokenState } from '$lib/enums/token-states';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,
@@ -65,7 +66,7 @@ export const toCustomToken = ({
 		}
 
 		if (networkKey === 'Erc721') {
-			return { Erc721: toErcCustomToken(rest) };
+			return { Erc721: {token: toErcCustomToken(rest), state: TokenState.Default } };
 		}
 
 		if (networkKey === 'Erc1155') {
