@@ -5,6 +5,7 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 
 	interface Props {
 		nft: Nft;
@@ -28,13 +29,17 @@
 		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<BgImg
-			imageUrl={nft?.imageUrl}
-			shadow="inset"
-			size="cover"
-			styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
-			testId={`${testId}-image`}
-		/>
+		<NftImageConsent {nft} type="card">
+			<div class="h-full w-full">
+				<BgImg
+					imageUrl={nft?.imageUrl}
+					shadow="inset"
+					size="cover"
+					testId={`${testId}-image`}
+					styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+				/>
+			</div>
+		</NftImageConsent>
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
 			{#if nonNullish(nft.balance)}

@@ -11,6 +11,7 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
@@ -27,7 +28,9 @@
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="flex h-64 w-full">
-		<BgImg imageUrl={nfts?.[0]?.imageUrl} size="cover" />
+		<NftImageConsent nft={nfts?.[0]} type="hero-banner">
+			<BgImg imageUrl={nfts?.[0]?.imageUrl} size="cover" />
+		</NftImageConsent>
 	</div>
 
 	<div class="bg-primary p-4">
