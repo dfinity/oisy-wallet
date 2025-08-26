@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { capitalizeFirstLetter } from '../../../tests/utils/string-utils';
 	import { SUPPORTED_CURRENCIES } from '$env/currency.env';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
