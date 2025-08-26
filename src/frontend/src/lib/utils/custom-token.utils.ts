@@ -7,6 +7,7 @@ import type {
 } from '$declarations/backend/backend.did';
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumChainId } from '$eth/types/network';
+import { TokenState } from '$lib/enums/token-states';
 import type {
 	ErcSaveCustomToken,
 	IcrcSaveCustomToken,
@@ -19,7 +20,6 @@ import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
-import { TokenState } from '$lib/enums/token-states';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,
@@ -66,7 +66,7 @@ export const toCustomToken = ({
 		}
 
 		if (networkKey === 'Erc721') {
-			return { Erc721: {token: toErcCustomToken(rest), state: TokenState.Default } };
+			return { Erc721: { token: toErcCustomToken(rest), state: TokenState.Default } };
 		}
 
 		if (networkKey === 'Erc1155') {
