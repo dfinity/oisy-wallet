@@ -1555,6 +1555,7 @@
 			"action_button_contacts_title": "Mostrar contatos",
 			"action_button_contacts_subtitle": "Mostrar os seus contatos salvos",
 			"action_button_contacts_prompt": "Mostrar meus contatos.",
+			"select_contact_message": "",
 			"send_message": "Enviar mensagem",
 			"send_message_input_placeholder": "O que você quer fazer?",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",

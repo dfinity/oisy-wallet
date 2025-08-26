@@ -1555,6 +1555,7 @@
 			"action_button_contacts_title": "Show contacts",
 			"action_button_contacts_subtitle": "Display your saved contacts",
 			"action_button_contacts_prompt": "Show me my contacts.",
+			"select_contact_message": "Select a contact to initiate the sending process:",
 			"send_message": "Send message",
 			"send_message_input_placeholder": "What do you want to do?",
 			"no_contacts_found_message": "Sorry, I couldn't find any suitable contacts in your address book.",

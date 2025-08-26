@@ -1555,6 +1555,7 @@
 			"action_button_contacts_title": "Pokaż kontakty",
 			"action_button_contacts_subtitle": "Wyświetl zapisane kontakty",
 			"action_button_contacts_prompt": "Pokaż mi moje kontakty.",
+			"select_contact_message": "",
 			"send_message": "Wyślij wiadomość",
 			"send_message_input_placeholder": "Co chcesz zrobić?",
 			"no_contacts_found_message": "Przepraszamy, nie udało mi się znaleźć odpowiednich kontaktów w Twojej książce adresowej.",
