@@ -109,12 +109,24 @@ describe('LoaderCollections', () => {
 		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
 
 		const existingErc721CustomTokens = networks.map((network) => ({
-			token: { Erc721: { token_address: mockEthAddress, chain_id: network.chainId } },
+			token: {
+				Erc721: {
+					token_address: mockEthAddress,
+					chain_id: network.chainId,
+					allow_media_source: toNullable(false)
+				}
+			},
 			version: toNullable(1n),
 			enabled: true
 		}));
 		const existingErc1155CustomTokens = networks.map((network) => ({
-			token: { Erc1155: { token_address: mockEthAddress, chain_id: network.chainId } },
+			token: {
+				Erc1155: {
+					token_address: mockEthAddress,
+					chain_id: network.chainId,
+					allow_media_source: toNullable(true)
+				}
+			},
 			version: toNullable(1n),
 			enabled: true
 		}));
