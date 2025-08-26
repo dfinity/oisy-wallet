@@ -13,13 +13,13 @@ class IOStub {
 let originalIO: typeof IntersectionObserver | undefined;
 
 describe('MarkdownWithSidebar', () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
 	beforeAll(() => {
 		originalIO = globalThis.IntersectionObserver;
 		globalThis.IntersectionObserver = IOStub as unknown as typeof IntersectionObserver;
+	});
+
+	beforeEach(() => {
+		vi.restoreAllMocks();
 	});
 
 	afterAll(() => {
