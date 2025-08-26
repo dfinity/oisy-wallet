@@ -82,7 +82,9 @@ export const getAiAssistantSystemPrompt = ({
 	AVAILABLE CONTACTS:
 	${availableContacts}`;
 
-export const AI_ASSISTANT_FILTER_CONTACTS_PROMPT = `You are a strict semantic filter engine.
+export const getAiAssistantFilterContactsPrompt = (
+	filterParams: string
+) => `You are a strict semantic filter engine.
 Given a list of contacts and a user query, return ONLY contacts that semantically match.
 - Use concept reasoning: e.g., "fruit" → pineapple.
 - Filter addresses by "addressType" if provided, only return matching addresses.
@@ -103,38 +105,99 @@ Return ONLY this JSON schema:
   "message"?: string
 }
 
+Arguments: "${filterParams}".
+
 Do NOT include json or any Markdown.
 Do NOT include extra text.`;
 
-export const AI_ASSISTANT_TOOLS = [
-	{
-		function: {
-			name: 'show_contacts',
-			description: toNullable(`Retrieve contacts from the user's address book.
-					Return ONLY a valid JSON object matching the exact schema below.
-					Do not include any extra commentary, markdown, or text outside the JSON.
-					Ensure the JSON is syntactically complete — all brackets and quotes must be closed.`),
-			parameters: toNullable({
-				type: 'object',
-				properties: toNullable([
-					{
-						type: 'string',
-						name: 'searchQuery',
-						enum: toNullable(),
-						description: toNullable('Optional search term. Can be vague (e.g., "fruit", "crypto").')
-					},
-					{
-						type: 'array',
-						name: 'addressType',
-						enum: toNullable(['Btc', 'Eth', 'Sol', 'Icrcv2']),
-						description: toNullable("Optional filter for address types. Example: ['Btc', 'Eth'].")
-					}
-				]),
-				required: toNullable()
-			})
+export const getAiAssistantToolsDescription = (enabledTokensSymbols: string[]) =>
+	[
+		{
+			function: {
+				name: 'show_contacts',
+				description: toNullable(
+					"Retrieve contacts from the user's address book. " +
+						'Return ONLY a valid JSON object matching the exact schema below. ' +
+						'Do not include any extra commentary, markdown, or text outside the JSON. ' +
+						'Ensure the JSON is syntactically complete — all brackets and quotes must be closed.'
+				),
+				parameters: toNullable({
+					type: 'object',
+					properties: toNullable([
+						{
+							type: 'string',
+							name: 'searchQuery',
+							enum: toNullable(),
+							description: toNullable(
+								'Optional search term. Can be vague (e.g., "fruit", "crypto").'
+							)
+						},
+						{
+							type: 'array',
+							name: 'addressType',
+							enum: toNullable(['Btc', 'Eth', 'Sol', 'Icrcv2']),
+							description: toNullable("Optional filter for address types. Example: ['Btc', 'Eth'].")
+						}
+					]),
+					required: toNullable()
+				})
+			}
+		},
+		{
+			function: {
+				name: 'review_send_tokens',
+				description:
+					toNullable(`Display an overview of the pending token transfer for user confirmation. 
+				When filling parameters:
+				- Assign the numeric amount to "amountNumber" (type: number). Use numerals without quotes (e.g., 10, 0.5).
+				- Assign the token symbol (string) to "tokenSymbol".
+				- Never assign the token symbol to "amountNumber".
+				Correct example: {"addressId":"abc","amountNumber":"10","tokenSymbol":"ICP"}
+				Incorrect (never do): {"addressId":"abc","amountNumber":"ICP"}
+				Do NOT send tokens yourself; sending will only happen via the UI button.
+				There should always be 3 arguments returned: "tokenSymbol", "amountNumber" and either "addressId" or "address".
+				If one of those 3 arguments is not available, ask the user to provide it.`),
+				parameters: toNullable({
+					type: 'object',
+					properties: toNullable([
+						{
+							type: 'string',
+							name: 'addressId',
+							enum: toNullable(),
+							description: toNullable(
+								'Unique ID of the address in the user’s contacts. Returned from show_contacts.'
+							)
+						},
+						{
+							type: 'string',
+							name: 'address',
+							enum: toNullable(),
+							description: toNullable(
+								'Blockchain address to send tokens to if not using a contact.'
+							)
+						},
+						{
+							type: 'string',
+							name: 'amountNumber',
+							enum: toNullable(),
+							description: toNullable(
+								'Numeric amount to send. Example: "10" for 10 ICP, "0.5" for 0.5 BTC.'
+							)
+						},
+						{
+							type: 'string',
+							name: 'tokenSymbol',
+							enum: toNullable(enabledTokensSymbols),
+							description: toNullable(
+								"Token symbol or identifier to send. Example: 'ICP', 'BTC', 'ckUSDC'. Must be one of the AVAILABLE TOKENS."
+							)
+						}
+					]),
+					required: toNullable(['amountNumber', 'tokenSymbol'])
+				})
+			}
 		}
-	}
-] as tool[];
+	] as tool[];
 
 export const MAX_DISPLAYED_ADDRESSES_NUMBER = 4;
 
