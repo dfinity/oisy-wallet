@@ -178,9 +178,9 @@ export interface CredentialSpec {
 export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
+	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
-	state: [] | [TokenState];
 }
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
@@ -344,7 +344,7 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
-export type TokenState = { Spam: null } | { Hidden: null };
+export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {
