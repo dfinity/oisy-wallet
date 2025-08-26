@@ -89,6 +89,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			// Keep transactions that are either unconfirmed (no block_height) or have fewer than the required number of confirmations.
 			// This ensures proper recalculation of confirmation status until final confirmation is reached.
 			const newTransactions = fetchedTransactions.filter((transaction) => {
+				// Include transactions that are NOT already in the store
+				if (isNullish(this.store.transactions[`${transaction.hash}`])) {
+					return true;
+				}
+
 				// If block_height is null (unconfirmed/pending), include the transaction
 				if (transaction.block_height === null) {
 					return true;
