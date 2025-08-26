@@ -1,8 +1,14 @@
 import MarkdownSidebar from '$lib/components/ui/MarkdownSidebar.svelte';
+import type { MarkdownBlockType } from '$lib/types/markdown';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 
 // ---- Mock IntersectionObserver ----
-type IOEntry = { target: Element; isIntersecting: boolean; intersectionRatio?: number };
+interface IOEntry {
+	target: Element;
+	isIntersecting: boolean;
+	intersectionRatio?: number;
+}
 let observedElements: Element[] = [];
 let ioCallbacks: ((entries: IOEntry[]) => void)[] = [];
 
@@ -18,7 +24,7 @@ class MockIntersectionObserver {
 	unobserve() {}
 	disconnect() {}
 }
-vi.stubGlobal('IntersectionObserver', MockIntersectionObserver as any);
+vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 
 // Helper to trigger all IO callbacks
 const triggerIntersect = (targets: Element[]) => {
@@ -27,39 +33,41 @@ const triggerIntersect = (targets: Element[]) => {
 };
 
 // ---- Helpers to attach real <h3 id="..."> into the document ----
-const insertHeadingsIntoDOM = (idsAndText: Array<{ id: string; text: string }>) => {
-	idsAndText.forEach(({ id, text }) => {
-		const h = document.createElement('h3');
-		h.id = id;
-		h.textContent = text;
-		document.body.appendChild(h);
+const insertHeadingsIntoDOM = (blocks: MarkdownBlockType[]) => {
+	blocks.forEach(({ id, text }) => {
+		if (nonNullish(id)) {
+			const h = document.createElement('h3');
+			h.id = id;
+			h.textContent = text;
+			document.body.appendChild(h);
+		}
 	});
 };
 
-beforeEach(() => {
-	observedElements = [];
-	ioCallbacks = [];
-});
-
-afterEach(() => {
-	cleanup();
-	// Clean any headings we appended
-	document.body.querySelectorAll('h3').forEach((h) => h.remove());
-});
-
 describe('MarkdownSidebar', () => {
+	beforeEach(() => {
+		observedElements = [];
+		ioCallbacks = [];
+	});
+
+	afterEach(() => {
+		cleanup();
+		// Clean any headings we appended
+		document.body.querySelectorAll('h3').forEach((h) => h.remove());
+	});
+
 	it('renders links for headings with correct hrefs and highlights the first by default', async () => {
-		const headings = [
+		const headings: MarkdownBlockType[] = [
 			{ type: 'header', text: 'Acceptance of Terms', id: 'heading-1' },
 			{ type: 'header', text: 'Description of our Services', id: 'heading-2' },
 			{ type: 'header', text: 'Account Access and Security', id: 'heading-3' }
-		] as const;
+		];
 
 		// Put real <h3> elements in the DOM so the component can observe them
-		insertHeadingsIntoDOM(headings.map(({ id, text }) => ({ id, text })));
+		insertHeadingsIntoDOM(headings);
 
-		const { container, getByRole } = render(MarkdownSidebar, {
-			props: { headings: headings as any }
+		const { getByRole } = render(MarkdownSidebar, {
+			props: { headings }
 		});
 
 		// Links rendered with correct text and hrefs
@@ -78,18 +86,25 @@ describe('MarkdownSidebar', () => {
 
 		// First item should be highlighted initially (activeId is undefined => index === 0)
 		const span1 = link1.querySelector('span');
+
 		expect(span1).toHaveClass('text-primary');
 
 		const span2 = link2.querySelector('span');
+
 		expect(span2).not.toHaveClass('text-primary');
 
 		const span3 = link3.querySelector('span');
+
 		expect(span3).not.toHaveClass('text-primary');
 
 		// Component should start observing the actual <h3> nodes
-		const h1 = document.getElementById('heading-1')!;
-		const h2 = document.getElementById('heading-2')!;
-		const h3 = document.getElementById('heading-3')!;
+		const h1 = document.getElementById('heading-1');
+		assertNonNullish(h1);
+		const h2 = document.getElementById('heading-2');
+		assertNonNullish(h2);
+		const h3 = document.getElementById('heading-3');
+		assertNonNullish(h3);
+
 		expect(observedElements).toEqual(expect.arrayContaining([h1, h2, h3]));
 
 		// Simulate that heading-2 becomes the visible one
@@ -109,8 +124,5 @@ describe('MarkdownSidebar', () => {
 			expect(span1).not.toHaveClass('text-primary');
 			expect(span2).not.toHaveClass('text-primary');
 		});
-
-		// keep container referenced to avoid TS remove-unused warnings
-		expect(container).toBeTruthy();
 	});
 });

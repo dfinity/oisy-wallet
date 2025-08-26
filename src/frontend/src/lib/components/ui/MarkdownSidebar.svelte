@@ -12,10 +12,12 @@
 	const { headings }: Props = $props();
 
 	let activeId: string | undefined = $state();
+	let observer: IntersectionObserver | undefined;
+	let observed: Element[] = [];
 
 	onMount(() => {
 		// Scroll spy to highlight active item
-		const observer = new IntersectionObserver(
+		observer = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
@@ -29,21 +31,29 @@
 		headings.forEach(({ id }) => {
 			if (nonNullish(id)) {
 				const el = document.getElementById(id);
-				if (nonNullish(el)) {
+				if (nonNullish(el) && nonNullish(observer)) {
 					observer.observe(el);
+					observed = [...observed, el];
 				}
 			}
 		});
+
+		// cleanup observers
+		return () => {
+			observed.forEach((el) => observer?.unobserve(el));
+			observer?.disconnect();
+			observed = [];
+		};
 	});
 </script>
 
 <List condensed styleClass="pr-3">
 	{#each headings as { id, text }, index (id)}
 		<ListItem>
-			<a href={`#${id}`} class="w-full no-underline">
+			<a class="w-full no-underline" href={`#${id}`}>
 				<span
-					class:text-primary={nonNullish(activeId) ? activeId === id : index === 0}
-					class="text-xs">{text}</span
+					class="text-xs"
+					class:text-primary={nonNullish(activeId) ? activeId === id : index === 0}>{text}</span
 				>
 			</a>
 		</ListItem>
