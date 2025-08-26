@@ -70,7 +70,7 @@ const loadNftsOfToken = async ({
 	loadedNfts,
 	walletAddress
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	token: NonFungibleToken;
 	loadedNfts: Nft[];
 	walletAddress: EthAddress;
@@ -92,7 +92,7 @@ export const loadNftIdsOfToken = async ({
 	tokenIds,
 	walletAddress
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	token: NonFungibleToken;
 	tokenIds: NftId[];
 	walletAddress: EthAddress;
@@ -120,7 +120,7 @@ const loadNftsOfBatch = async ({
 	token,
 	tokenIds
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	walletAddress: EthAddress;
 	token: NonFungibleToken;
 	tokenIds: NftId[];
@@ -139,7 +139,7 @@ const loadNftsMetadata = async ({
 	token,
 	tokenIds
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	token: NonFungibleToken;
 	tokenIds: NftId[];
 }): Promise<NftMetadata[]> => {
@@ -167,7 +167,7 @@ const loadNftMetadata = async ({
 	token,
 	tokenId
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	token: NonFungibleToken;
 	tokenId: NftId;
 }): Promise<NftMetadata> => {
@@ -177,15 +177,16 @@ const loadNftMetadata = async ({
 
 	try {
 		if (isTokenErc721(token)) {
-			const infuraErc721Provider = infuraProvider as InfuraErc721Provider;
-			return await infuraErc721Provider.getNftMetadata({
+			const { getNftMetadata } = infuraProvider;
+			return await getNftMetadata({
 				contractAddress: token.address,
 				tokenId
 			});
 		}
+
 		if (isTokenErc1155(token)) {
-			const infuraErc1155Provider = infuraProvider as InfuraErc1155Provider;
-			return await infuraErc1155Provider.getNftMetadata({
+			const { getNftMetadata } = infuraProvider;
+			return await getNftMetadata({
 				contractAddress: token.address,
 				tokenId
 			});
@@ -296,18 +297,19 @@ const loadHoldersTokenIds = async ({
 }): Promise<NftId[]> => {
 	try {
 		if (isTokenErc721(token)) {
-			const etherscanProvider = etherscanProviders(token.network.id);
+			const { erc721TokenInventory } = etherscanProviders(token.network.id);
 
-			return await etherscanProvider.erc721TokenInventory({
+			return await erc721TokenInventory({
 				address: walletAddress,
 				contractAddress: token.address
 			});
 		}
+
 		if (isTokenErc1155(token)) {
-			const alchemyProvider = alchemyProviders(token.network.id);
+			const { getNftIdsForOwner } = alchemyProviders(token.network.id);
 
 			return (
-				await alchemyProvider.getNftIdsForOwner({
+				await getNftIdsForOwner({
 					address: walletAddress,
 					contractAddress: token.address
 				})
