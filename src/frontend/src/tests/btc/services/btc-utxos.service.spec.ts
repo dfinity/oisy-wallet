@@ -163,33 +163,41 @@ describe('btc-utxos.service', () => {
 			});
 		});
 
-		it('should throw error when pending transactions store is not initialized', async () => {
+		it('should return error when pending transactions store is not initialized', async () => {
 			// Set store to empty state (no address data)
 			mockStoreApi.setStoreValue({});
 
 			vi.spyOn(backendApi, 'getCurrentBtcFeePercentiles').mockResolvedValue(mockFeePercentiles);
 			vi.spyOn(bitcoinApi, 'getUtxosQuery').mockResolvedValue(mockUtxosResponse);
 
-			await expect(prepareBtcSend(defaultParams)).rejects.toThrow(
-				'Pending transactions have not been initialized'
-			);
+			const result = await prepareBtcSend(defaultParams);
 
-			// Verify that no API calls were made since the error is thrown early
+			expect(result).toEqual({
+				feeSatoshis: ZERO,
+				utxos: [],
+				error: BtcPrepareSendError.PendingTransactionsNotAvailable
+			});
+
+			// Verify that no API calls were made since the error is returned early
 			expect(backendApi.getCurrentBtcFeePercentiles).not.toHaveBeenCalled();
 			expect(bitcoinApi.getUtxosQuery).not.toHaveBeenCalled();
 		});
 
-		it('should throw error when pending transactions data is null for address', async () => {
+		it('should return error when pending transactions data is null for address', async () => {
 			// Set store with null data for the address (simulating failed backend call)
 			mockStoreApi.setStoreValue({
 				[mockBtcAddress]: { certified: true as const, data: null }
 			});
 
-			await expect(prepareBtcSend(defaultParams)).rejects.toThrow(
-				'Pending transactions have not been initialized'
-			);
+			const result = await prepareBtcSend(defaultParams);
 
-			// Verify that no API calls were made since the error is thrown early
+			expect(result).toEqual({
+				feeSatoshis: ZERO,
+				utxos: [],
+				error: BtcPrepareSendError.PendingTransactionsNotAvailable
+			});
+
+			// Verify that no API calls were made since the error is returned early
 			expect(backendApi.getCurrentBtcFeePercentiles).not.toHaveBeenCalled();
 			expect(bitcoinApi.getUtxosQuery).not.toHaveBeenCalled();
 		});
