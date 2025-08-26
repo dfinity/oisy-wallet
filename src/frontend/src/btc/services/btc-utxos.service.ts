@@ -45,11 +45,7 @@ export const prepareBtcSend = async ({
 	});
 	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
 	if (isNullish(pendingUtxoTxIds)) {
-		return {
-			feeSatoshis: ZERO,
-			utxos: [],
-			error: BtcPrepareSendError.PendingTransactionsNotAvailable
-		};
+		throw new Error('Pending transactions have not been initialized');
 	}
 
 	// Convert amount to satoshis
@@ -93,7 +89,7 @@ export const prepareBtcSend = async ({
 		return {
 			feeSatoshis: ZERO,
 			utxos: [],
-			error: BtcPrepareSendError.UtxoLocked
+			error: BtcPrepareSendError.InsufficientBalance
 		};
 	}
 

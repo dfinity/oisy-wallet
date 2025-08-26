@@ -9,29 +9,6 @@ import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import { jsonReplacer } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-// Mock the required dependencies
-vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
-	loadBtcPendingSentTransactions: vi.fn().mockResolvedValue(undefined)
-}));
-
-vi.mock('$btc/utils/btc-address.utils', () => ({
-	getBtcSourceAddress: vi.fn().mockReturnValue('test-btc-address')
-}));
-
-vi.mock('$icp/utils/btc.utils', () => ({
-	getBtcWalletBalance: vi.fn().mockReturnValue({ total: 1000n }),
-	mapTokenIdToNetworkId: vi.fn().mockReturnValue('test-network-id')
-}));
-
-vi.mock('$lib/derived/auth.derived', () => ({
-	authIdentity: {
-		subscribe: vi.fn((callback) => {
-			callback({ mockIdentity: true });
-			return { unsubscribe: vi.fn() };
-		})
-	}
-}));
-
 describe('btc-listener', () => {
 	const tokenId: TokenId = parseTokenId('testTokenId');
 
@@ -47,16 +24,14 @@ describe('btc-listener', () => {
 
 	const mockPostMessage = ({
 		balance = mockBalance,
-		transactions = mockTransactions,
-		certified = false
+		transactions = mockTransactions
 	}: {
 		balance?: bigint | null;
 		transactions?: BtcTransactionUi[];
-		certified?: boolean;
 	}): BtcPostMessageDataResponseWallet => ({
 		wallet: {
 			balance: {
-				certified,
+				certified: true,
 				data: balance
 			},
 			newTransactions: JSON.stringify(mockCertifiedTransactions(transactions), jsonReplacer)
@@ -71,47 +46,43 @@ describe('btc-listener', () => {
 	});
 
 	describe('syncWallet', () => {
-		it('should set the balance in balancesStore', async () => {
-			await syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+		it('should set the balance in balancesStore', () => {
+			syncWallet({ data: mockPostMessage({}), tokenId });
 
 			const balance = get(balancesStore);
 
 			expect(balance?.[tokenId]).toEqual({
 				data: mockBalance,
-				certified: false
+				certified: true
 			});
 		});
 
-		it('should set the transactions in btcTransactionsStore', async () => {
-			await syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+		it('should set the transactions in btcTransactionsStore', () => {
+			syncWallet({ data: mockPostMessage({}), tokenId });
 
 			const transactions = get(btcTransactionsStore);
 
 			expect(transactions?.[tokenId]).toEqual(mockCertifiedTransactions(mockTransactions));
 		});
 
-		it('should prepend the transactions in btcTransactionsStore', async () => {
-			await syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+		it('should prepend the transactions in btcTransactionsStore', () => {
+			syncWallet({ data: mockPostMessage({}), tokenId });
 
 			const transactionsToPrepend = [...mockTransactions, ...mockTransactions];
 
 			const mockMorePostMessage: BtcPostMessageDataResponseWallet = mockPostMessage({
-				transactions: transactionsToPrepend,
-				certified: false
+				transactions: transactionsToPrepend
 			});
 
-			await syncWallet({ data: mockMorePostMessage, tokenId });
+			syncWallet({ data: mockMorePostMessage, tokenId });
 
 			const transactions = get(btcTransactionsStore);
 
 			expect(transactions?.[tokenId]).toEqual(mockCertifiedTransactions(transactionsToPrepend));
 		});
 
-		it('should reset balanceStore if balance is empty', async () => {
-			await syncWallet({
-				data: mockPostMessage({ balance: null, certified: false }),
-				tokenId
-			});
+		it('should reset balanceStore if balance is empty', () => {
+			syncWallet({ data: mockPostMessage({ balance: null }), tokenId });
 
 			const balance = get(balancesStore);
 
@@ -120,17 +91,15 @@ describe('btc-listener', () => {
 	});
 
 	describe('syncWalletError', () => {
-		it('should reset balanceStore and btcTransactionsStore on error', async () => {
-			await syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+		it('should reset balanceStore and btcTransactionsStore on error', () => {
+			syncWallet({ data: mockPostMessage({}), tokenId });
 
 			syncWalletError({ error: 'test', tokenId, hideToast: true });
 
 			const balance = get(balancesStore);
 			const transactions = get(btcTransactionsStore);
 
-			// The console.warn call count depends on how many times getPendingTransactionsBalance is called
-			// and how many console.warn statements are in that function
-			expect(console.warn).toHaveBeenCalled();
+			expect(console.warn).toHaveBeenCalledOnce();
 			expect(balance?.[tokenId]).toBeNull();
 			expect(transactions?.[tokenId]).toBeNull();
 		});

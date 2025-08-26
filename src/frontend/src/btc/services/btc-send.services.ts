@@ -129,11 +129,6 @@ export const validateBtcSend = async ({
 	network: BitcoinNetwork;
 	identity: Identity;
 }): Promise<void> => {
-	if (nonNullish(utxosFee.error)) {
-		// If the send button was not properly disabled during an error, we return the same error again
-		throw utxosFee.error;
-	}
-
 	// 1. Validate general input parameters first before accessing any properties
 	if (invalidAmount(amount)) {
 		throw new BtcValidationError(BtcSendValidationError.InvalidAmount);
@@ -172,7 +167,7 @@ export const validateBtcSend = async ({
 
 	if (isNullish(pendingUtxoTxIds)) {
 		// when no pending transactions have been initiated, we cannot validate UTXO's and therefore, validation must fail
-		throw new BtcValidationError(BtcSendValidationError.PendingTransactionsNotAvailable);
+		throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 	}
 
 	if (pendingUtxoTxIds.length > 0) {
@@ -238,6 +233,8 @@ export const sendBtc = async ({
 }: SendBtcParams): Promise<void> => {
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
 
+	onProgress?.();
+
 	await addPendingBtcTransaction({
 		identity,
 		network: mapToSignerBitcoinNetwork({ network }),
@@ -245,8 +242,6 @@ export const sendBtc = async ({
 		txId: txidStringToUint8Array(txid),
 		utxos: utxosFee.utxos
 	});
-
-	onProgress?.();
 
 	await waitAndTriggerWallet();
 };
