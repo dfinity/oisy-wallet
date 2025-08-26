@@ -7,6 +7,9 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
+import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
@@ -178,14 +181,13 @@ const loadErcTransactions = async ({
 	}
 
 	try {
-		const transactions =
-			token.standard === 'erc20'
-				? await loadErc20Transactions({ networkId, token, address })
-				: token.standard === 'erc721'
-					? await loadErc721Transactions({ networkId, token, address })
-					: token.standard === 'erc1155'
-						? await loadErc1155Transactions({ networkId, token, address })
-						: [];
+		const transactions = isTokenErc20(token)
+			? await loadErc20Transactions({ networkId, token, address })
+			: isTokenErc721(token)
+				? await loadErc721Transactions({ networkId, token, address })
+				: isTokenErc1155(token)
+					? await loadErc1155Transactions({ networkId, token, address })
+					: [];
 
 		const certifiedTransactions = transactions.map((transaction) => ({
 			data: transaction,
