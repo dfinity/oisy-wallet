@@ -21,7 +21,7 @@
 
 <h1 class="mb-4">{title}</h1>
 
-{#each blocks as block}
+{#each blocks as block, index (block.text + index)}
 	{#if block.type === 'header'}
 		<h3 id={block.id}>{block.text}</h3>
 	{:else}

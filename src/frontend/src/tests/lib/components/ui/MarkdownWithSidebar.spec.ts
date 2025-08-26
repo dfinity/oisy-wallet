@@ -13,6 +13,10 @@ class IOStub {
 let originalIO: typeof IntersectionObserver | undefined;
 
 describe('MarkdownWithSidebar', () => {
+	beforeEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	beforeAll(() => {
 		originalIO = globalThis.IntersectionObserver;
 		globalThis.IntersectionObserver = IOStub as unknown as typeof IntersectionObserver;
@@ -20,10 +24,6 @@ describe('MarkdownWithSidebar', () => {
 
 	afterAll(() => {
 		globalThis.IntersectionObserver = originalIO as typeof IntersectionObserver;
-	});
-
-	beforeEach(() => {
-		vi.restoreAllMocks();
 	});
 
 	it('renders the title <h1> from the title prop', () => {
