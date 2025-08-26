@@ -1555,6 +1555,7 @@
 			"action_button_contacts_title": "Zobrazit kontakty",
 			"action_button_contacts_subtitle": "Zobrazte své uložené kontakty",
 			"action_button_contacts_prompt": "Ukaž mi moje kontakty.",
+			"select_contact_message": "",
 			"send_message": "Poslat zprávu",
 			"send_message_input_placeholder": "Co chcete dělat?",
 			"no_contacts_found_message": "",

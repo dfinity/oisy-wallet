@@ -16,11 +16,12 @@ Personality: Confident about revolutionary security model, user-focused on seaml
 honest about alpha status. Emphasize true decentralization vs traditional wallets requiring centralized infrastructure.
 Answer style: Concise.`;
 
-export const AI_ASSISTANT_FILTER_CONTACTS_PROMPT = `
-You are a strict semantic filter engine.
+export const AI_ASSISTANT_FILTER_CONTACTS_PROMPT = `You are a strict semantic filter engine.
 Given a list of contacts and a user query, return ONLY contacts that semantically match.
 - Use concept reasoning: e.g., "fruit" → pineapple.
-- If the query is ambiguous or no match is found, return an empty list, not all contacts.
+- Filter addresses by "addressType" if provided, only return matching addresses.
+- If no matching contacts are found, return an empty contacts array and include a "message" field using this exact format: "It looks like you don’t have any saved contacts with a {networkName} address. You can either provide a {networkName} address directly or choose a different token." Replace {networkName} with the friendly blockchain name derived from the token (e.g., SOL → Sol, ICP → ICP).
+
 
 Return ONLY this JSON schema:
 {
@@ -32,7 +33,8 @@ Return ONLY this JSON schema:
         { "id": string, "label"?: string, "addressType": "Btc" | "Eth" | "Sol" | "Icrcv2" }
       ]
     }
-  ]
+  ],
+  "message"?: string
 }
 
 Do NOT include json or any Markdown.
@@ -42,9 +44,10 @@ export const AI_ASSISTANT_TOOLS = [
 	{
 		function: {
 			name: 'show_contacts',
-			description: toNullable(
-				"Retrieve contacts from the user's address book. If filters are provided, semantic filtering will be applied in a second step."
-			),
+			description: toNullable(`Retrieve contacts from the user's address book.
+					Return ONLY a valid JSON object matching the exact schema below.
+					Do not include any extra commentary, markdown, or text outside the JSON.
+					Ensure the JSON is syntactically complete — all brackets and quotes must be closed.`),
 			parameters: toNullable({
 				type: 'object',
 				properties: toNullable([
@@ -68,3 +71,5 @@ export const AI_ASSISTANT_TOOLS = [
 ] as tool[];
 
 export const MAX_DISPLAYED_ADDRESSES_NUMBER = 4;
+
+export const MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH = 100;
