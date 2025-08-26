@@ -13,7 +13,7 @@ import type {
 	IcTokenWithoutIdExtended,
 	IcrcCustomToken
 } from '$icp/types/icrc-custom-token';
-import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
+import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -64,7 +64,7 @@ const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string>
  *          - `ICP_PSEUDO_TESTNET_NETWORK` for known "testnet" tokens
  */
 const mapIcNetwork = (ledgerCanisterId: LedgerCanisterIdText) =>
-	isTokenIcrcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
+	isTokenIcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
 
 export const mapIcrcToken = ({
 	metadata,
