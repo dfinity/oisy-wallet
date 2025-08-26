@@ -6,6 +6,7 @@ import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.stor
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
+import { TokenState } from '$lib/enums/token-state';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -15,7 +16,6 @@ import type { NetworkId } from '$lib/types/network';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { TokenState } from '$lib/enums/token-state';
 
 export const isInterfaceErc1155 = async ({
 	networkId,
@@ -108,7 +108,9 @@ const loadCustomTokensWithMetadata = async (
 						category: 'custom' as const,
 						enabled,
 						version,
-						...(nonNullish(state) && { state: 'Spam' in state ? TokenState.SPAM : TokenState.HIDDEN })
+						...(nonNullish(state) && {
+							state: 'Spam' in state ? TokenState.SPAM : TokenState.HIDDEN
+						})
 					},
 					...metadata
 				};
