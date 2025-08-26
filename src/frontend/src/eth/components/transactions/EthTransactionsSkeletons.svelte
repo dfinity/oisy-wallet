@@ -4,8 +4,7 @@
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 
 	let loading: boolean;
-	$: loading =
-		($tokenNotInitialized) || $ethTransactionsNotInitialized;
+	$: loading = $tokenNotInitialized || $ethTransactionsNotInitialized;
 </script>
 
 <TransactionsSkeletons {loading}>
