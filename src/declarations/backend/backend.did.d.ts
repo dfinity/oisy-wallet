@@ -334,7 +334,7 @@ export interface TestnetsSettings {
 export type Token =
 	| { Erc20: ErcToken }
 	| { Icrc: IcrcToken }
-	| { Erc721: ErcToken }
+	| { Erc721: { token: ErcToken; state: TokenState } }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken }
 	| { Erc1155: ErcToken };
@@ -343,6 +343,7 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
+export type TokenState = { Spam: null } | { Default: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {

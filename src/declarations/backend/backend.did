@@ -311,7 +311,7 @@ type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
 	Erc20 : ErcToken;
 	Icrc : IcrcToken;
-	Erc721 : ErcToken;
+	Erc721 : record { token : ErcToken; state : TokenState };
 	SplDevnet : SplToken;
 	SplMainnet : SplToken;
 	Erc1155 : ErcToken
@@ -322,6 +322,7 @@ type TokenAccountId = variant {
 	Sol : text;
 	Icrcv2 : Icrcv2AccountId
 };
+type TokenState = variant { Spam; Default; Hidden };
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;
