@@ -175,7 +175,8 @@ type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
 	token : Token;
 	version : opt nat64;
-	enabled : bool
+	enabled : bool;
+	state : opt TokenState
 };
 type DappCarouselSettings = record { hidden_dapp_ids : vec text };
 type DappSettings = record { dapp_carousel : DappCarouselSettings };
@@ -322,6 +323,7 @@ type TokenAccountId = variant {
 	Sol : text;
 	Icrcv2 : Icrcv2AccountId
 };
+type TokenState = variant { Spam; Hidden };
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;

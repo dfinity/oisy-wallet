@@ -383,10 +383,12 @@ export const idlFactory = ({ IDL }) => {
 		SplMainnet: SplToken,
 		Erc1155: ErcToken
 	});
+	const TokenState = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });
 	const CustomToken = IDL.Record({
 		token: Token,
 		version: IDL.Opt(IDL.Nat64),
-		enabled: IDL.Bool
+		enabled: IDL.Bool,
+		state: IDL.Opt(TokenState)
 	});
 	const UserToken = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
