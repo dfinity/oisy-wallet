@@ -6,10 +6,6 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { networks } from '$lib/derived/networks.derived';
 	import {
-		MODAL_NETWORKS_LIST_CONTEXT_KEY,
-		type ModalNetworksListContext
-	} from '$lib/stores/modal-networks-list.store';
-	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
