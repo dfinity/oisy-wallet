@@ -47,7 +47,7 @@ export const TESTICP_SYMBOL = 'TESTICP';
 
 export const TESTICP_TOKEN_ID: TokenId = parseTokenId(TESTICP_SYMBOL);
 
-export const TESTICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated'>> = {
+export const TESTICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'explorerUrl'>> = {
 	id: TESTICP_TOKEN_ID,
 	network: ICP_PSEUDO_TESTNET_NETWORK,
 	standard: 'icp',
@@ -60,11 +60,10 @@ export const TESTICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated'>> = {
 	icon: icpLight,
 	fee: 10_000n,
 	ledgerCanisterId: 'xafvr-biaaa-aaaai-aql5q-cai',
-	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai',
-	explorerUrl: ICP_EXPLORER_URL
+	indexCanisterId: 'qcuy6-bqaaa-aaaai-aqmqq-cai'
 };
 
-export const SUPPORTED_ICP_TOKENS: RequiredToken<Omit<IcToken, 'deprecated'>>[] =
+export const SUPPORTED_ICP_TOKENS: RequiredToken<Omit<IcToken, 'deprecated' | 'explorerUrl'>>[] =
 	defineSupportedTokens({
 		mainnetFlag: true,
 		mainnetTokens: [ICP_TOKEN],
