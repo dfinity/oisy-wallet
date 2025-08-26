@@ -1555,6 +1555,7 @@
 			"action_button_contacts_title": "Afficher les contacts",
 			"action_button_contacts_subtitle": "Afficher vos contacts enregistrés",
 			"action_button_contacts_prompt": "Montrez-moi mes contacts.",
+			"select_contact_message": "",
 			"send_message": "Envoyer un message",
 			"send_message_input_placeholder": "Que voulez-vous faire ?",
 			"no_contacts_found_message": "",
