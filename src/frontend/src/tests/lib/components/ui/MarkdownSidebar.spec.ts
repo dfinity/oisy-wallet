@@ -4,7 +4,11 @@ import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 
 // ---- Mock IntersectionObserver ----
-type IOEntry = { target: Element; isIntersecting: boolean; intersectionRatio?: number };
+interface IOEntry {
+	target: Element;
+	isIntersecting: boolean;
+	intersectionRatio?: number;
+}
 let observedElements: Element[] = [];
 let ioCallbacks: ((entries: IOEntry[]) => void)[] = [];
 
@@ -63,7 +67,7 @@ describe('MarkdownSidebar', () => {
 		insertHeadingsIntoDOM(headings);
 
 		const { getByRole } = render(MarkdownSidebar, {
-			props: { headings: headings }
+			props: { headings }
 		});
 
 		// Links rendered with correct text and hrefs
@@ -82,12 +86,15 @@ describe('MarkdownSidebar', () => {
 
 		// First item should be highlighted initially (activeId is undefined => index === 0)
 		const span1 = link1.querySelector('span');
+
 		expect(span1).toHaveClass('text-primary');
 
 		const span2 = link2.querySelector('span');
+
 		expect(span2).not.toHaveClass('text-primary');
 
 		const span3 = link3.querySelector('span');
+
 		expect(span3).not.toHaveClass('text-primary');
 
 		// Component should start observing the actual <h3> nodes
