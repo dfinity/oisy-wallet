@@ -19,6 +19,7 @@ import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+import { TokenState } from '$lib/enums/token-state';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -38,7 +39,8 @@ describe('erc1155.services', () => {
 					chain_id: ETHEREUM_NETWORK.chainId,
 					token_address: mockEthAddress
 				}
-			}
+			},
+			state: toNullable(TokenState.Default)
 		},
 		{
 			version: toNullable(2n),
@@ -48,7 +50,8 @@ describe('erc1155.services', () => {
 					chain_id: BASE_NETWORK.chainId,
 					token_address: mockEthAddress2.toUpperCase()
 				}
-			}
+			},
+			state: toNullable(TokenState.Default)
 		},
 		{
 			version: toNullable(),
@@ -58,7 +61,8 @@ describe('erc1155.services', () => {
 					chain_id: POLYGON_AMOY_NETWORK.chainId,
 					token_address: mockEthAddress3
 				}
-			}
+			},
+			state: toNullable(TokenState.Default)
 		}
 	];
 

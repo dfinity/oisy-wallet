@@ -144,7 +144,8 @@ describe('custom-token.services', () => {
 								}
 							},
 							version: [1n],
-							enabled: true
+							enabled: true,
+							state: toNullable()
 						}
 					]);
 
@@ -243,7 +244,8 @@ describe('custom-token.services', () => {
 								}
 							},
 							version: [1n],
-							enabled: true
+							enabled: true,
+							state: toNullable()
 						}
 					]);
 

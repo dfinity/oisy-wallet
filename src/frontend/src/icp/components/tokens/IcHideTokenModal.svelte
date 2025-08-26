@@ -64,6 +64,7 @@
 			token: {
 				enabled: false,
 				version: toNullable(version),
+				state: toNullable(),
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),
