@@ -1478,6 +1478,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Ao clicar neste botão, você concorda com o",
 			"accept_terms_link": "Contrato de Licença",
 			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
@@ -1500,6 +1501,22 @@
 		},
 		"alt": {
 			"license_agreement": "O Contrato de Licença $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {

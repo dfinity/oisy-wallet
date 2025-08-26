@@ -1478,6 +1478,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Нажимая эту кнопку, вы соглашаетесь с",
 			"accept_terms_link": "Лицензионное Соглашение",
 			"title": "Лицензионное Соглашение $oisy_name («Лицензионное Соглашение»)",
@@ -1500,6 +1501,22 @@
 		},
 		"alt": {
 			"license_agreement": "Лицензионное Соглашение $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {

@@ -1478,7 +1478,7 @@
 	},
 	"license_agreement": {
 		"text": {
-            "license_agreement": "License Agreement",
+			"license_agreement": "License Agreement",
 			"accept_terms": "By clicking this button, you agree to the",
 			"accept_terms_link": "License Agreement",
 			"title": "$oisy_name License Agreement (“License Agreement”)",
@@ -1503,22 +1503,22 @@
 			"license_agreement": "The $oisy_name License Agreement"
 		}
 	},
-  "terms_of_use": {
-    "text": {
-      "terms_of_use": "Terms of Use"
-    },
-    "alt": {
-      "terms_of_use": "Terms of Use"
-    }
-  },
-  "privacy_policy": {
-    "text": {
-      "privacy_policy": "Privacy Policy"
-    },
-    "alt": {
-      "privacy_policy": "Privacy Policy"
-    }
-  },
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "Terms of Use"
+		},
+		"alt": {
+			"terms_of_use": "Terms of Use"
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "Privacy Policy"
+		},
+		"alt": {
+			"privacy_policy": "Privacy Policy"
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "Recent Activity"

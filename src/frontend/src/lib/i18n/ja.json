@@ -1478,6 +1478,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "このボタンをクリックすると、以下に同意したことになります。",
 			"accept_terms_link": "ライセンス契約",
 			"title": "$oisy_nameライセンス契約（以下「本ライセンス契約」）",
@@ -1500,6 +1501,22 @@
 		},
 		"alt": {
 			"license_agreement": "$oisy_nameライセンス契約"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
