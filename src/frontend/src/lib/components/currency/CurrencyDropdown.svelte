@@ -91,7 +91,7 @@
 								{/if}
 							</span>
 							<div class="flex w-full flex-row justify-between gap-5">
-								{capitalizeFirstLetter(name)}
+								<span class='first-letter:uppercase'>{name}</span>
 								<span class="text-right text-tertiary">{symbol}</span>
 							</div>
 						</Button>
