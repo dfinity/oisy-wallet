@@ -74,7 +74,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_spam} checked={true} disabled />
+						<Toggle ariaLabel={$i18n.nfts.text.show_spam} checked={false} disabled />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
@@ -87,7 +87,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_hidden}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_hidden} checked={true} disabled />
+						<Toggle ariaLabel={$i18n.nfts.text.show_hidden} checked={false} disabled />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
