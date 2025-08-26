@@ -9,7 +9,6 @@ import { loadCustomTokens, loadErc721Tokens } from '$eth/services/erc721.service
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721Metadata } from '$eth/types/erc721';
 import { listCustomTokens } from '$lib/api/backend.api';
-import { TokenState } from '$lib/enums/token-state';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -40,7 +39,7 @@ describe('erc721.services', () => {
 					token_address: mockEthAddress
 				}
 			},
-			state: toNullable(TokenState.Default)
+			state: toNullable()
 		},
 		{
 			version: toNullable(2n),
@@ -51,7 +50,7 @@ describe('erc721.services', () => {
 					token_address: mockEthAddress2.toUpperCase()
 				}
 			},
-			state: toNullable(TokenState.Default)
+			state: toNullable()
 		},
 		{
 			version: toNullable(),
@@ -62,7 +61,7 @@ describe('erc721.services', () => {
 					token_address: mockEthAddress3
 				}
 			},
-			state: toNullable(TokenState.Default)
+			state: toNullable()
 		}
 	];
 

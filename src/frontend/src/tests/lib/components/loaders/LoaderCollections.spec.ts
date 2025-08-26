@@ -7,7 +7,6 @@ import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.servic
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import { listCustomTokens } from '$lib/api/backend.api';
 import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
-import { TokenState } from '$lib/enums/token-state';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -113,13 +112,13 @@ describe('LoaderCollections', () => {
 			token: { Erc721: { token_address: mockEthAddress, chain_id: network.chainId } },
 			version: toNullable(1n),
 			enabled: true,
-			state: toNullable(TokenState.Default)
+			state: toNullable()
 		}));
 		const existingErc1155CustomTokens = networks.map((network) => ({
 			token: { Erc1155: { token_address: mockEthAddress, chain_id: network.chainId } },
 			version: toNullable(1n),
 			enabled: true,
-			state: toNullable(TokenState.Default)
+			state: toNullable()
 		}));
 
 		vi.mocked(listCustomTokens).mockResolvedValue([
