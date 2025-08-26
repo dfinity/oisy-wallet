@@ -50,10 +50,10 @@
 <List condensed styleClass="pr-3">
 	{#each headings as { id, text }, index (id)}
 		<ListItem>
-			<a href={`#${id}`} class="w-full no-underline">
+			<a class="w-full no-underline" href={`#${id}`}>
 				<span
-					class:text-primary={nonNullish(activeId) ? activeId === id : index === 0}
-					class="text-xs">{text}</span
+					class="text-xs"
+					class:text-primary={nonNullish(activeId) ? activeId === id : index === 0}>{text}</span
 				>
 			</a>
 		</ListItem>
