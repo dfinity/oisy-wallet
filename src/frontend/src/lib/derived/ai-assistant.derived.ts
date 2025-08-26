@@ -1,5 +1,8 @@
 import type { chat_message_v1 } from '$declarations/llm/llm.did';
-import { AI_ASSISTANT_SYSTEM_PROMPT } from '$lib/constants/ai-assistant.constants';
+import {
+	AI_ASSISTANT_SYSTEM_PROMPT,
+	MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH
+} from '$lib/constants/ai-assistant.constants';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import type { ChatMessage } from '$lib/types/ai-assistant';
 import { notEmptyString, toNullable } from '@dfinity/utils';
@@ -20,8 +23,10 @@ export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 	([$aiAssistantStore]) => {
 		let includesSystemMessage = false;
 
-		// Get last 10 messages from chat history
-		const recentHistory = ($aiAssistantStore?.chatHistory ?? []).slice(-10);
+		// Get last 100 messages from chat history
+		const recentHistory = ($aiAssistantStore?.chatHistory ?? []).slice(
+			-MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH
+		);
 
 		// Parse chat messages into LLM-compatible messages
 		const messages = recentHistory.reduce<chat_message_v1[]>(
