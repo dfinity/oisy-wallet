@@ -9,6 +9,8 @@ import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
+import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
@@ -36,7 +38,7 @@ export const loadNfts = async ({
 		tokens.map((token) => {
 			const loadedNfts = getLoadedNfts({ token, loadedNftsByNetwork });
 
-			if (token.standard === 'erc721') {
+			if (isTokenErc721(token)) {
 				const infuraErc721Provider = infuraErc721Providers(token.network.id);
 
 				return loadNftsOfToken({
@@ -46,7 +48,7 @@ export const loadNfts = async ({
 					walletAddress
 				});
 			}
-			if (token.standard === 'erc1155') {
+			if (isTokenErc1155(token)) {
 				const infuraErc1155Provider = infuraErc1155Providers(token.network.id);
 
 				return loadNftsOfToken({
@@ -172,14 +174,15 @@ const loadNftMetadata = async ({
 	await randomWait({ min: 0, max: 2000 });
 
 	try {
-		if (token.standard === 'erc721') {
+		if (isTokenErc721(token)) {
 			const { getNftMetadata } = infuraProvider;
 			return await getNftMetadata({
 				contractAddress: token.address,
 				tokenId
 			});
 		}
-		if (token.standard === 'erc1155') {
+
+		if (isTokenErc1155(token)) {
 			const { getNftMetadata } = infuraProvider;
 			return await getNftMetadata({
 				contractAddress: token.address,
@@ -233,7 +236,7 @@ const getNft = async ({
 	nftMetadata: NftMetadata;
 }): Promise<Nft> => {
 	let balance;
-	if (token.standard === 'erc1155') {
+	if (isTokenErc1155(token)) {
 		const infuraErc1155Provider = infuraProvider as InfuraErc1155Provider;
 		balance = await loadBalance({
 			infuraProvider: infuraErc1155Provider,
@@ -291,7 +294,7 @@ const loadHoldersTokenIds = async ({
 	token: NonFungibleToken;
 }): Promise<NftId[]> => {
 	try {
-		if (token.standard === 'erc721') {
+		if (isTokenErc721(token)) {
 			const { erc721TokenInventory } = etherscanProviders(token.network.id);
 
 			return await erc721TokenInventory({
@@ -299,7 +302,9 @@ const loadHoldersTokenIds = async ({
 				contractAddress: token.address
 			});
 		}
-		if (token.standard === 'erc1155') {
+
+    
+		if (isTokenErc1155(token)) {
 			const { getNftIdsForOwner } = alchemyProviders(token.network.id);
 
 			return (
