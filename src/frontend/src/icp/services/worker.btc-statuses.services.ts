@@ -2,6 +2,7 @@ import { onLoadBtcStatusesError, syncBtcStatuses } from '$icp/services/ckbtc-lis
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse,
 	PostMessageSyncState
@@ -12,7 +13,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 	token: { id: tokenId }
 }: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
 	const BtcStatusesWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new BtcStatusesWorker.default();
+	let worker: Worker | null = new BtcStatusesWorker.default();
 
 	worker.onmessage = ({
 		data: dataMsg
@@ -38,32 +39,40 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 	};
 
 	const stop = () => {
-		worker.postMessage({
+		worker?.postMessage({
 			msg: 'stopBtcStatusesTimer'
 		});
 	};
 
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startBtcStatusesTimer',
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
 		},
 		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'triggerBtcStatusesTimer',
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
 		},
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stop();
-			worker.terminate();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

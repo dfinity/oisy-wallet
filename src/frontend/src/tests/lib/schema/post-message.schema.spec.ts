@@ -5,6 +5,7 @@ import {
 	IC_CKBTC_MINTER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import { Currency } from '$lib/enums/currency';
 import {
 	JsonTransactionsTextSchema,
 	POST_MESSAGE_REQUESTS,
@@ -89,6 +90,7 @@ describe('post-message.schema', () => {
 
 		it('should validate with correct structure for erc20Addresses and icrcCanisterIds', () => {
 			const validData = {
+				currentCurrency: Currency.USD,
 				erc20Addresses: [mockValidErc20Address],
 				icrcCanisterIds: [mockValidIndexCanisterId],
 				splAddresses: [mockValidSplAddress]
@@ -99,6 +101,7 @@ describe('post-message.schema', () => {
 
 		it('should an invalid erc20Addresses given the lack of zod parser for erc20', () => {
 			const validData = {
+				currentCurrency: Currency.USD,
 				erc20Addresses: ['invalid_address', mockValidErc20Address],
 				icrcCanisterIds: [mockValidIndexCanisterId],
 				splAddresses: [mockValidSplAddress]
@@ -405,6 +408,10 @@ describe('post-message.schema', () => {
 
 		it('should validate with all valid price fields', () => {
 			const validData = {
+				currentExchangeRate: {
+					exchangeRateToUsd: 1.5,
+					currency: Currency.EUR
+				},
 				currentEthPrice: mockValidPrice,
 				currentBtcPrice: mockValidPrice,
 				currentErc20Prices: mockValidPrice,

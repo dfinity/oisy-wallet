@@ -111,6 +111,7 @@ A list of useful faucets:
     - ChainLink: [all faucets](https://faucets.chain.link/)
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
 - SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com/)
+- TESTICP: [TESTICP Faucet](https://nqoci-rqaaa-aaaap-qp53q-cai.icp0.io/)
 
 ## Testing
 
@@ -315,7 +316,6 @@ Location: `src/frontend/src/env/networks/networks-evm/`
 - Create a new file: `networks.<network>.env.ts`
 - Copy contents from an existing EVM network file (e.g., `networks.bsc.env.ts`)
 - Update the following fields:
-
   - `SYMBOL` – short identifier (e.g., `'BSC'`, `'ARB'`)
   - `NAME` – name of the network
   - `CHAIN ID` - chainId of the network
@@ -390,7 +390,6 @@ Location: `src/frontend/src/env/tokens/tokens-evm/`
   ```
 
 - Update the following fields:
-
   - **Decimals** – token precision (e.g., `18`)
   - **Symbol** – short token symbol (e.g., `'POL'`, `'ARB'`)
   - **Network** – reference the network object created in the previous step
@@ -549,7 +548,6 @@ To do this, the following steps are required:
 
 - Create a folder in `src/frontend/src/env/tokens/tokens-evm/tokens-<network>/` named `tokens-erc20`
 - For each token:
-
   - Create a file named: `tokens.<token>.env.ts`
   - Copy content from a similar token file in another EVM network.
   - Update the following fields:
@@ -590,7 +588,7 @@ if (
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'binancecoin',
-		vs_currencies: 'usd'
+		vs_currencies: Currency.USD
 	});
 ```
 

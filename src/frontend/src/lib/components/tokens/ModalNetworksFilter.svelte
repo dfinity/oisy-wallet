@@ -6,20 +6,34 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { networks } from '$lib/derived/networks.derived';
 	import {
+		MODAL_NETWORKS_LIST_CONTEXT_KEY,
+		type ModalNetworksListContext
+	} from '$lib/stores/modal-networks-list.store';
+	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import type { NetworkId } from '$lib/types/network';
+	import type { OptionNetworkId } from '$lib/types/network';
+
+	interface Props {
+		allNetworksEnabled?: boolean;
+	}
+
+	let { allNetworksEnabled }: Props = $props();
 
 	const { setFilterNetwork, filterNetwork } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
+
+	const { filteredNetworks } = getContext<ModalNetworksListContext>(
+		MODAL_NETWORKS_LIST_CONTEXT_KEY
 	);
 
 	const dispatch = createEventDispatcher();
 
 	const back = () => dispatch('icNetworkFilter');
 
-	const onNetworkSelect = ({ detail: networkId }: CustomEvent<NetworkId>) => {
+	const onNetworkSelect = (networkId: OptionNetworkId) => {
 		const network = $networks.find(({ id }) => id === networkId);
 
 		setFilterNetwork(network);
@@ -30,10 +44,12 @@
 
 <ContentWithToolbar>
 	<NetworkSwitcherList
-		on:icSelected={onNetworkSelect}
-		selectedNetworkId={$filterNetwork?.id}
+		{allNetworksEnabled}
 		delayOnNetworkSelect={false}
 		labelsSize="lg"
+		onSelected={onNetworkSelect}
+		selectedNetworkId={$filterNetwork?.id}
+		supportedNetworks={$filteredNetworks}
 	/>
 
 	{#snippet toolbar()}

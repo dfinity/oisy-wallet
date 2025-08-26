@@ -26,9 +26,9 @@
 	{#if qrCodeAction.enabled}
 		<ButtonIcon
 			ariaLabel={qrCodeAction.ariaLabel}
+			link={false}
 			onclick={() => dispatch('click')}
 			testId={qrCodeAction?.testId}
-			link={false}
 		>
 			{#snippet icon()}
 				<IconQRCodeScanner size="24" />

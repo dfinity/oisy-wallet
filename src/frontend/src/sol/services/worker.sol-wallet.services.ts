@@ -25,7 +25,7 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	} = token;
 
 	const WalletWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new WalletWorker.default();
+	let worker: Worker | null = new WalletWorker.default();
 
 	const isDevnetNetwork = isNetworkIdSOLDevnet(networkId);
 	const isLocalNetwork = isNetworkIdSOLLocal(networkId);
@@ -82,28 +82,36 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	};
 
 	const stop = () => {
-		worker.postMessage({
+		worker?.postMessage({
 			msg: 'stopSolWalletTimer'
 		});
 	};
 
+	let isDestroying = false;
+
 	return {
 		start: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'startSolWalletTimer',
 				data
-			});
+			} as PostMessage<PostMessageDataRequestSol>);
 		},
 		stop,
 		trigger: () => {
-			worker.postMessage({
+			worker?.postMessage({
 				msg: 'triggerSolWalletTimer',
 				data
-			});
+			} as PostMessage<PostMessageDataRequestSol>);
 		},
 		destroy: () => {
+			if (isDestroying) {
+				return;
+			}
+			isDestroying = true;
 			stop();
-			worker.terminate();
+			worker?.terminate();
+			worker = null;
+			isDestroying = false;
 		}
 	};
 };

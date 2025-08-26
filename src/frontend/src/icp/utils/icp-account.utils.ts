@@ -72,13 +72,10 @@ export const tryToParseIcrcAccountStringToAccountIdentifierText = (
 			? SubAccount.fromBytes(new Uint8Array(icrcSubaccount))
 			: undefined;
 
-		// TODO: remove this check after we use the latest ic-js packages (where this error is thrown internally)
-		if (!(subAccount instanceof Error)) {
-			return AccountIdentifier.fromPrincipal({
-				principal,
-				subAccount
-			}).toHex();
-		}
+		return AccountIdentifier.fromPrincipal({
+			principal,
+			subAccount
+		}).toHex();
 	} catch (_: unknown) {
 		// if parsing failed, we just return undefined and let consumers handle it
 		return;

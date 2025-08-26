@@ -142,9 +142,11 @@ export interface ContactAddressData {
 export type ContactError =
 	| { InvalidContactData: null }
 	| { CanisterMemoryNearCapacity: null }
+	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
 	| { ImageTooLarge: null }
 	| { RandomnessError: null }
+	| { ImageExceedsMaxSize: null }
 	| { CanisterStatusError: null }
 	| { TooManyContactsWithImages: null };
 export interface ContactImage {
@@ -193,13 +195,7 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
-export interface Erc20Token {
-	decimals: [] | [number];
-	token_address: string;
-	chain_id: bigint;
-	symbol: [] | [string];
-}
-export interface Erc721Token {
+export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
 }
@@ -336,11 +332,12 @@ export interface TestnetsSettings {
 	show_testnets: boolean;
 }
 export type Token =
-	| { Erc20: Erc20Token }
+	| { Erc20: ErcToken }
 	| { Icrc: IcrcToken }
-	| { Erc721: Erc721Token }
+	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
-	| { SplMainnet: SplToken };
+	| { SplMainnet: SplToken }
+	| { Erc1155: ErcToken };
 export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }

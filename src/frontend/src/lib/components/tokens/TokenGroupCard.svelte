@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -81,19 +80,17 @@
 </script>
 
 <div class="flex flex-col" class:bg-primary={isExpanded}>
-	<MultipleListeners tokens={tokenGroup.tokens}>
-		<div class="transition duration-300 hover:bg-primary">
-			<TokenCard
-				data={{
-					...headerData,
-					tokenCount: filteredTokens.length,
-					networks: filteredTokens.map((t) => t.network)
-				}}
-				testIdPrefix={TOKEN_GROUP}
-				on:click={() => toggleIsExpanded(!isExpanded)}
-			/>
-		</div>
-	</MultipleListeners>
+	<div class="transition duration-300 hover:bg-primary">
+		<TokenCard
+			data={{
+				...headerData,
+				tokenCount: filteredTokens.length,
+				networks: filteredTokens.map((t) => t.network)
+			}}
+			testIdPrefix={TOKEN_GROUP}
+			on:click={() => toggleIsExpanded(!isExpanded)}
+		/>
+	</div>
 
 	{#if isExpanded}
 		<div class="ml-0 flex flex-col gap-1.5 p-2 md:ml-16" transition:slide={SLIDE_PARAMS}>
@@ -102,15 +99,15 @@
 					class="duration-250 flex overflow-hidden rounded-lg bg-secondary transition hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
-					<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} asNetwork />
+					<TokenCard asNetwork data={token} on:click={() => goto(transactionsUrl({ token }))} />
 				</div>
 			{/each}
 
 			{#if notDisplayedCount > 0 || !hideZeros}
 				<Button
-					styleClass="font-normal text-sm justify-start py-2"
 					link
 					onclick={() => toggleHideZeros(!hideZeros)}
+					styleClass="font-normal text-sm justify-start py-2"
 				>
 					{hideZeros
 						? replacePlaceholders($i18n.tokens.text.show_more_networks, {

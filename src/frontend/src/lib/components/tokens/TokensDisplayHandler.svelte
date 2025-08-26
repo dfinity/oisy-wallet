@@ -1,27 +1,38 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import type { Snippet } from 'svelte';
+	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
 
-	// We start it as undefined to avoid showing an empty list before the first update.
-	export let tokens: TokenUiOrGroupUi[] | undefined = undefined;
+	interface Props {
+		tokens: TokenUiOrGroupUi[] | undefined;
+		children: Snippet;
+	}
 
-	let groupedTokens: TokenUiOrGroupUi[];
-	$: groupedTokens = groupTokensByTwin($combinedDerivedSortedNetworkTokensUi);
+	// We start `tokens` as undefined to avoid showing an empty list before the first update.
+	let { tokens = $bindable(), children }: Props = $props();
 
-	let sortedTokensOrGroups: TokenUiOrGroupUi[];
-	$: sortedTokensOrGroups = filterTokenGroups({
-		groupedTokens,
-		showZeroBalances: $showZeroBalances
-	});
+	let groupedTokens: TokenUiOrGroupUi[] = $derived(
+		groupTokensByTwin($combinedDerivedSortedFungibleNetworkTokensUi)
+	);
+
+	let sortedTokensOrGroups: TokenUiOrGroupUi[] = $derived(
+		filterTokenGroups({
+			groupedTokens,
+			showZeroBalances: $showZeroBalances
+		})
+	);
 
 	const updateTokensToDisplay = () => (tokens = [...sortedTokensOrGroups]);
 
 	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 500);
 
-	$: sortedTokensOrGroups, debounceUpdateTokensToDisplay();
+	$effect(() => {
+		[sortedTokensOrGroups];
+		debounceUpdateTokensToDisplay();
+	});
 </script>
 
-<slot />
+{@render children()}

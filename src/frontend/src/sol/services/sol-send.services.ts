@@ -13,15 +13,15 @@ import {
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
-import type { SplTokenAddress } from '$sol/types/spl';
+import type { SplToken } from '$sol/types/spl';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
-import { getTransferInstruction } from '@solana-program/token';
+import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
 import {
 	appendTransactionMessageInstructions,
 	assertTransactionIsFullySigned,
@@ -132,16 +132,21 @@ const createSplTokenTransactionMessage = async ({
 	destination,
 	amount,
 	network,
-	tokenAddress,
-	tokenOwnerAddress
+	token
 }: {
 	signer: TransactionSigner;
 	destination: SolAddress;
 	amount: bigint;
 	network: SolanaNetworkType;
-	tokenAddress: SplTokenAddress;
-	tokenOwnerAddress: SolAddress;
+	token: SplToken;
 }): Promise<SolTransactionMessage> => {
+	const {
+		address: tokenAddress,
+		owner: tokenOwnerAddress,
+		mintAuthority: tokenMintAuthority,
+		decimals: tokenDecimals
+	} = token;
+
 	const rpc = solanaHttpRpc(network);
 
 	const source = signer.address;
@@ -186,24 +191,35 @@ const createSplTokenTransactionMessage = async ({
 	const ataInstruction = await createAtaInstruction({
 		signer,
 		destination,
-		tokenAddress
+		tokenAddress,
+		tokenOwnerAddress
 	});
 
-	const transferInstruction = getTransferInstruction(
-		{
-			source: solAddress(sourceTokenAccountAddress),
-			destination: solAddress(
-				destinationIsAtaAddress
-					? destination
-					: mustCreateDestinationTokenAccount
-						? calculatedDestinationTokenAccountAddress
-						: destinationTokenAccountAddress
-			),
-			authority: signer,
-			amount
-		},
-		{ programAddress: solAddress(tokenOwnerAddress) }
-	);
+	const transferParams = {
+		source: solAddress(sourceTokenAccountAddress),
+		destination: solAddress(
+			destinationIsAtaAddress
+				? destination
+				: mustCreateDestinationTokenAccount
+					? calculatedDestinationTokenAccountAddress
+					: destinationTokenAccountAddress
+		),
+		authority: signer,
+		amount
+	};
+
+	const config = { programAddress: solAddress(tokenOwnerAddress) };
+
+	const transferInstruction = nonNullish(tokenMintAuthority)
+		? getTransferCheckedInstruction(
+				{
+					...transferParams,
+					mint: solAddress(tokenAddress),
+					decimals: tokenDecimals
+				},
+				config
+			)
+		: getTransferInstruction(transferParams, { programAddress: solAddress(tokenOwnerAddress) });
 
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(
@@ -277,14 +293,14 @@ export const sendSol = async ({
 	source
 }: {
 	identity: OptionIdentity;
-	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
 	amount: bigint;
 	prioritizationFee: bigint;
 	destination: SolAddress;
 	source: SolAddress;
+	progress?: (step: ProgressStepsSendSol) => void;
 }): Promise<Signature> => {
-	progress(ProgressStepsSendSol.INITIALIZATION);
+	progress?.(ProgressStepsSendSol.INITIALIZATION);
 
 	const {
 		network: { id: networkId }
@@ -307,8 +323,7 @@ export const sendSol = async ({
 				destination,
 				amount,
 				network: solNetwork,
-				tokenAddress: token.address,
-				tokenOwnerAddress: token.owner
+				token
 			})
 		: await createSolTransactionMessage({
 				signer,
@@ -332,20 +347,20 @@ export const sendSol = async ({
 		transactionMessage
 	);
 
-	progress(ProgressStepsSendSol.SIGN);
+	progress?.(ProgressStepsSendSol.SIGN);
 
 	const { signedTransaction, signature } = await signTransaction(
 		prioritizationFee > ZERO ? transactionMessageWithComputeUnitPrice : transactionMessage
 	);
 
-	progress(ProgressStepsSendSol.SEND);
+	progress?.(ProgressStepsSendSol.SEND);
 
 	await sendSignedTransaction({
 		rpc,
 		signedTransaction
 	});
 
-	progress(ProgressStepsSendSol.CONFIRM);
+	progress?.(ProgressStepsSendSol.CONFIRM);
 
 	await confirmSignedTransaction({
 		rpc,
@@ -353,7 +368,7 @@ export const sendSol = async ({
 		signedTransaction
 	});
 
-	progress(ProgressStepsSendSol.DONE);
+	progress?.(ProgressStepsSendSol.DONE);
 
 	return signature;
 };

@@ -10,6 +10,7 @@
 		loading?: boolean;
 		loadingAsSkeleton?: boolean;
 		fullWidth?: boolean;
+		contentFullWidth?: boolean;
 		alignLeft?: boolean;
 		link?: boolean;
 		inlineLink?: boolean;
@@ -17,6 +18,7 @@
 		testId?: string;
 		ariaLabel?: string;
 		styleClass?: string;
+		innerStyleClass?: string;
 		transparent?: boolean;
 		onclick?: MouseEventHandler<HTMLButtonElement>;
 		ondblclick?: MouseEventHandler<HTMLButtonElement>;
@@ -30,6 +32,7 @@
 		loading = false,
 		loadingAsSkeleton = true,
 		fullWidth = false,
+		contentFullWidth = false,
 		alignLeft = false,
 		link = false,
 		inlineLink = false,
@@ -37,6 +40,7 @@
 		testId,
 		ariaLabel,
 		styleClass = '',
+		innerStyleClass = '',
 		transparent,
 		onclick,
 		ondblclick,
@@ -46,34 +50,35 @@
 
 <button
 	class={`${colorStyle} flex text-center ${styleClass}`}
-	class:flex-1={!inlineLink}
-	class:font-normal={inlineLink}
-	class:text-tertiary={inlineLink}
-	class:underline={inlineLink}
-	class:hover:text-brand-primary={inlineLink}
-	class:padding-sm={paddingSmall}
-	class:w-full={fullWidth}
-	class:link
-	{type}
-	class:justify-start={alignLeft}
-	disabled={disabled ?? loading}
-	class:loading
-	class:transition={loading}
+	class:animate-pulse={loading}
 	class:duration-500={loading}
 	class:ease-in-out={loading}
-	class:animate-pulse={loading}
+	class:flex-1={!inlineLink}
+	class:font-normal={inlineLink}
+	class:hover:text-brand-primary={inlineLink}
+	class:justify-start={alignLeft}
+	class:link
+	class:loading
+	class:padding-sm={paddingSmall}
+	class:text-tertiary={inlineLink}
+	class:transition={loading}
 	class:transparent
+	class:underline={inlineLink}
+	class:w-full={fullWidth}
+	aria-label={ariaLabel}
+	data-tid={testId}
+	disabled={disabled ?? loading}
 	{onclick}
 	{ondblclick}
-	data-tid={testId}
-	aria-label={ariaLabel}
+	{type}
 >
 	<span
-		class="flex min-w-0 gap-2"
-		class:transition={loading}
+		class={`flex min-w-0 gap-2 ${innerStyleClass}`}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
 		class:invisible={loading && loadingAsSkeleton}
+		class:transition={loading}
+		class:w-full={contentFullWidth}
 		aria-hidden={loading && loadingAsSkeleton}
 	>
 		{@render children()}

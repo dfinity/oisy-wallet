@@ -4,6 +4,7 @@ import {
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
 import { ONEINCH_TOKEN } from '$env/tokens/tokens-erc20/tokens.1inch.env';
+import { ARB_TOKEN } from '$env/tokens/tokens-erc20/tokens.arb.env';
 import { DAI_TOKEN } from '$env/tokens/tokens-erc20/tokens.dai.env';
 import { DMAIL_TOKEN } from '$env/tokens/tokens-erc20/tokens.dmail.env';
 import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
@@ -15,6 +16,7 @@ import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { RNDR_TOKEN } from '$env/tokens/tokens-erc20/tokens.rndr.env';
 import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
+import { SPX_TOKEN } from '$env/tokens/tokens-erc20/tokens.spx.env';
 import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
@@ -57,12 +59,14 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 
 export const ADDITIONAL_ERC20_TOKENS: RequiredAdditionalErc20Token[] = [
 	ONEINCH_TOKEN,
+	ARB_TOKEN,
 	DAI_TOKEN,
 	DMAIL_TOKEN,
 	FLOKI_TOKEN,
 	JASMY_TOKEN,
 	MATIC_TOKEN,
 	RNDR_TOKEN,
+	SPX_TOKEN,
 	WEETH_TOKEN,
 	WETH_TOKEN
 ];

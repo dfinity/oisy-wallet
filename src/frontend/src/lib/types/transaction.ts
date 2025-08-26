@@ -39,6 +39,7 @@ export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
 		timestamp?: number;
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
+		tokenId?: number;
 	};
 
 export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
@@ -65,6 +66,8 @@ export interface TransactionUiCommon {
 	fromExplorerUrl?: string;
 	blockNumber?: number;
 }
+
+export type AnyTransaction = BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi;
 
 export type AnyTransactionUi =
 	| BtcTransactionUi

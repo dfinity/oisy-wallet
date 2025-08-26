@@ -73,10 +73,10 @@
 		nonNullish(token) && isTokenIcrc(token) ? (token.indexCanisterId ?? '') : ''
 	);
 
-	let modal: WizardModal | undefined = $state();
+	let modal: WizardModal<TokenModalSteps> | undefined = $state();
 	const close = () => modalStore.close();
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<TokenModalSteps> = [
 		{
 			name: TokenModalSteps.CONTENT,
 			title: $i18n.tokens.details.title
@@ -94,8 +94,8 @@
 			title: $i18n.tokens.import.text.updating
 		}
 	];
-	let currentStep: WizardStep | undefined = $state();
-	let currentStepName = $derived(currentStep?.name as TokenModalSteps | undefined);
+	let currentStep: WizardStep<TokenModalSteps> | undefined = $state();
+	let currentStepName = $derived(currentStep?.name);
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
@@ -319,13 +319,13 @@
 </script>
 
 <WizardModal
-	{steps}
-	bind:currentStep
 	bind:this={modal}
 	disablePointerEvents={loading || currentStepName === TokenModalSteps.EDIT_PROGRESS}
-	on:nnsClose={close}
+	onClose={close}
+	{steps}
+	bind:currentStep
 >
-	<svelte:fragment slot="title">{currentStep?.title}</svelte:fragment>
+	{#snippet title()}{currentStep?.title}{/snippet}
 
 	{#if currentStepName === TokenModalSteps.CONTENT}
 		<Responsive up="md">
@@ -352,23 +352,23 @@
 		</Responsive>
 	{:else if currentStepName === TokenModalSteps.DELETE_CONFIRMATION}
 		<TokenModalDeleteConfirmation
-			{token}
 			{loading}
 			onCancel={() => gotoStep(TokenModalSteps.CONTENT)}
 			onConfirm={() => onTokenDelete(token)}
+			{token}
 		/>
 	{:else if currentStepName === TokenModalSteps.EDIT && nonNullish(token) && isTokenIcrc(token)}
 		<ContentWithToolbar>
 			<AddTokenByNetworkDropdown
-				networkName={token.network.name}
 				availableNetworks={[token.network]}
 				disabled
+				networkName={token.network.name}
 			/>
 
 			<IcAddTokenForm
+				editMode
 				ledgerCanisterId={token.ledgerCanisterId}
 				bind:indexCanisterId={icrcTokenIndexCanisterId}
-				editMode
 			/>
 
 			{#snippet toolbar()}
@@ -392,8 +392,8 @@
 
 {#if currentStepName === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}
 	<BottomSheetConfirmationPopup
-		onCancel={() => (showBottomSheetDeleteConfirmation = false)}
 		disabled={loading}
+		onCancel={() => (showBottomSheetDeleteConfirmation = false)}
 	>
 		{#snippet title()}
 			{$i18n.tokens.text.delete_token}
@@ -401,10 +401,10 @@
 
 		{#snippet content()}
 			<TokenModalDeleteConfirmation
-				{token}
 				{loading}
 				onCancel={() => (showBottomSheetDeleteConfirmation = false)}
 				onConfirm={() => onTokenDelete(token)}
+				{token}
 			/>
 		{/snippet}
 	</BottomSheetConfirmationPopup>

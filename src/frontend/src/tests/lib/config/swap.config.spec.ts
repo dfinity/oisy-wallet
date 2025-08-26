@@ -23,6 +23,18 @@ describe('swap.config', () => {
 				{
 					name: WizardStepsSwap.SWAPPING,
 					title: en.swap.text.executing_transaction
+				},
+				{
+					name: WizardStepsSwap.TOKENS_LIST,
+					title: en.send.text.select_token
+				},
+				{
+					name: WizardStepsSwap.FILTER_NETWORKS,
+					title: en.send.text.select_network_filter
+				},
+				{
+					name: WizardStepsSwap.SELECT_PROVIDER,
+					title: en.swap.text.select_swap_provider
 				}
 			]);
 		});

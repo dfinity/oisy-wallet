@@ -8,6 +8,7 @@ import { emit } from '$lib/utils/events.utils';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import { cleanWorkers, loadWorker } from '$lib/utils/wallet.utils';
 import { render } from '@testing-library/svelte';
+import { SvelteMap } from 'svelte/reactivity';
 
 describe('WalletWorkers', () => {
 	const tokenA = ETHEREUM_TOKEN;
@@ -50,7 +51,7 @@ describe('WalletWorkers', () => {
 
 		expect(initWalletWorker).not.toHaveBeenCalled();
 
-		const workers: Map<TokenId, WalletWorker> = new Map<TokenId, WalletWorker>();
+		const workers: SvelteMap<TokenId, WalletWorker> = new SvelteMap<TokenId, WalletWorker>();
 
 		expect(cleanWorkers).toHaveBeenCalledExactlyOnceWith({ workers, tokens: [] });
 		expect(loadWorker).not.toHaveBeenCalled();
@@ -67,7 +68,7 @@ describe('WalletWorkers', () => {
 			expect(initWalletWorker).toHaveBeenNthCalledWith(index + 1, { token });
 		});
 
-		const workers: Map<TokenId, WalletWorker> = new Map<TokenId, WalletWorker>([
+		const workers: SvelteMap<TokenId, WalletWorker> = new SvelteMap<TokenId, WalletWorker>([
 			[tokenA.id, mockWorker],
 			[tokenB.id, mockWorker],
 			[tokenC.id, mockWorker]
@@ -93,6 +94,8 @@ describe('WalletWorkers', () => {
 		expect(trigger).not.toHaveBeenCalled();
 
 		emit({ message: 'oisyTriggerWallet' });
+
+		await waitTimer();
 
 		expect(trigger).toHaveBeenCalledTimes(tokens.length);
 	});

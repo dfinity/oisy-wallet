@@ -23,6 +23,7 @@ import * as accountUtils from '$lib/utils/account.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
 import {
+	mockLedgerCanisterId,
 	mockValidDip20Token,
 	mockValidIcCkToken,
 	mockValidIcToken,
@@ -177,7 +178,8 @@ describe('ic-send.services', () => {
 					expect(icrc1TransferIcp).toHaveBeenNthCalledWith(1, {
 						identity: mockIdentity,
 						to: decodeIcrcAccount(mockPrincipalText2),
-						amount: mockAmount
+						amount: mockAmount,
+						ledgerCanisterId: mockLedgerCanisterId
 					});
 
 					expect(transferIcp).not.toHaveBeenCalled();
@@ -193,7 +195,8 @@ describe('ic-send.services', () => {
 					expect(transferIcp).toHaveBeenNthCalledWith(1, {
 						identity: mockIdentity,
 						to: mockPrincipalText2,
-						amount: mockAmount
+						amount: mockAmount,
+						ledgerCanisterId: mockLedgerCanisterId
 					});
 
 					expect(icrc1TransferIcp).not.toHaveBeenCalled();
@@ -602,6 +605,7 @@ describe('ic-send.services', () => {
 			to: mockPrincipalText2,
 			amount: mockAmount,
 			identity: mockIdentity,
+			ledgerCanisterId: mockLedgerCanisterId,
 			progress: mockProgress
 		};
 
@@ -619,7 +623,8 @@ describe('ic-send.services', () => {
 			expect(icrc1TransferIcp).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				to: decodeIcrcAccount(mockPrincipalText2),
-				amount: mockAmount
+				amount: mockAmount,
+				ledgerCanisterId: mockLedgerCanisterId
 			});
 
 			expect(transferIcp).not.toHaveBeenCalled();
@@ -635,7 +640,8 @@ describe('ic-send.services', () => {
 			expect(transferIcp).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				to: mockPrincipalText2,
-				amount: mockAmount
+				amount: mockAmount,
+				ledgerCanisterId: mockLedgerCanisterId
 			});
 
 			expect(icrc1TransferIcp).not.toHaveBeenCalled();

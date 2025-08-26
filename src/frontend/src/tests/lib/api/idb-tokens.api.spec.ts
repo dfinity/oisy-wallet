@@ -3,6 +3,10 @@ import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { toUserToken } from '$icp-eth/services/user-token.services';
 import {
+	clearIdbEthTokens,
+	clearIdbEthTokensDeprecated,
+	clearIdbIcTokens,
+	clearIdbSolTokens,
 	deleteIdbEthToken,
 	deleteIdbEthTokenDeprecated,
 	deleteIdbEthTokens,
@@ -29,17 +33,6 @@ import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
-import { expect, vi } from 'vitest';
-
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
 
 vi.mock('$app/environment', () => ({
 	browser: true
@@ -453,6 +446,38 @@ describe('idb-tokens.api', () => {
 			});
 
 			expect(signOutSpy).toHaveBeenCalled();
+		});
+	});
+
+	describe('clearIdbIcTokens', () => {
+		it('should clear IC tokens', async () => {
+			await clearIdbIcTokens();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbEthTokensDeprecated', () => {
+		it('should clear deprecated ETH tokens', async () => {
+			await clearIdbEthTokensDeprecated();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbEthTokens', () => {
+		it('should clear ETH tokens', async () => {
+			await clearIdbEthTokens();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbSolTokens', () => {
+		it('should clear SOL tokens', async () => {
+			await clearIdbSolTokens();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
 		});
 	});
 });

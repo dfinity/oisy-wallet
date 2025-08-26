@@ -32,10 +32,11 @@ export const selectColorForName = <T>({
 };
 
 export const mapToFrontendContact = (contact: Contact): ContactUi => {
-	const { update_timestamp_ns, ...rest } = contact;
+	const { update_timestamp_ns, image, ...rest } = contact;
 	return {
 		...rest,
 		updateTimestampNs: update_timestamp_ns,
+		image: fromNullable(image),
 		addresses: contact.addresses.map((address) => ({
 			address: getTokenAccountIdAddressString(address.token_account_id),
 			label: fromNullable(address.label),
@@ -45,10 +46,12 @@ export const mapToFrontendContact = (contact: Contact): ContactUi => {
 };
 
 export const mapToBackendContact = (contact: ContactUi): Contact => {
-	const { updateTimestampNs, ...rest } = contact;
+	const { updateTimestampNs, image, ...rest } = contact;
 	return {
 		...rest,
 		update_timestamp_ns: updateTimestampNs,
+		// null is an acceptable value — it means the user forcibly removed their avatar
+		image: image !== undefined ? toNullable(image) : [],
 		addresses: contact.addresses.map((address) => ({
 			token_account_id: TokenAccountIdSchema.parse(address.address),
 			label: toNullable(address.label)

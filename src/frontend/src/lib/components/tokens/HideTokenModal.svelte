@@ -12,7 +12,7 @@
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { tokenToggleable } from '$lib/derived/token.derived';
+	import { pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
 	import { WizardStepsHideToken } from '$lib/enums/wizard-steps';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -34,7 +34,7 @@
 			return;
 		}
 
-		if (!$tokenToggleable) {
+		if (!$pageTokenToggleable) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.not_toggleable }
 			});
@@ -105,8 +105,8 @@
 
 	let hideProgressStep: string = ProgressStepsHideToken.INITIALIZATION;
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsHideToken> | undefined;
+	let modal: WizardModal<WizardStepsHideToken>;
 
 	const close = () => {
 		modalStore.close();
@@ -120,13 +120,13 @@
 </script>
 
 <WizardModal
+	bind:this={modal}
+	disablePointerEvents={currentStep?.name === 'Hiding'}
+	onClose={close}
 	{steps}
 	bind:currentStep
-	bind:this={modal}
-	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === 'Hiding'}
 >
-	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 	{#if currentStep?.name === 'Hiding'}
 		<InProgressWizard

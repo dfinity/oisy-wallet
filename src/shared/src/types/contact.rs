@@ -5,6 +5,17 @@ use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
 
+/// Maximum image size in bytes (100 KB)
+pub const MAX_IMAGE_SIZE_BYTES: usize = 100 * 1024;
+
+/// Maximum number of images per principal (100)
+pub const MAX_IMAGES_PER_PRINCIPAL: usize = 100;
+
+/// Memory usage threshold (80%) above which new images cannot be added
+pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
+
+pub type ImageId = u64;
+
 /// Represents the MIME type of image.
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum ImageMimeType {
@@ -36,10 +47,6 @@ impl ImageMimeType {
         &["image/jpeg", "image/png", "image/gif", "image/webp"]
     }
 }
-
-/// Memory usage threshold (80%) above which new images cannot be added
-pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
-pub type ImageId = u64;
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[serde(remote = "Self")]
@@ -96,4 +103,61 @@ pub enum ContactError {
     TooManyContactsWithImages,
     CanisterMemoryNearCapacity,
     CanisterStatusError,
+    InvalidImageFormat,
+    ImageExceedsMaxSize,
+}
+
+// Helper struct for serialization
+#[derive(serde::Serialize)]
+pub struct ContactImageTemp<'a> {
+    pub mime_type: &'a ImageMimeType,
+    pub data: &'a serde_bytes::ByteBuf,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, serde::Serialize)]
+pub struct ImageStatistics {
+    pub total_contacts: usize,
+    pub contacts_with_images: usize,
+    pub total_image_size: usize,
+}
+
+/// Counts the number of contacts with images for a specific principal
+#[must_use]
+pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
+    stored_contacts
+        .contacts
+        .values()
+        .filter(|contact| contact.image.is_some())
+        .count()
+}
+
+/// Calculates the total size of all images in the contact store
+#[must_use]
+pub fn calculate_total_image_size(stored_contacts: &StoredContacts) -> usize {
+    stored_contacts
+        .contacts
+        .values()
+        .filter_map(|contact| contact.image.as_ref())
+        .map(|image| image.data.len())
+        .sum()
+}
+
+/// Validates that adding a new image won't exceed the per-principal image limit
+///
+/// # Errors
+/// Returns an error if the image limit is exceeded or other constraints are violated.
+pub fn validate_principal_memory_limit(
+    stored_contacts: &StoredContacts,
+    is_adding_new_image: bool,
+) -> Result<(), ContactError> {
+    if !is_adding_new_image {
+        return Ok(());
+    }
+
+    let current_image_count = count_contacts_with_images(stored_contacts);
+    if current_image_count >= MAX_IMAGES_PER_PRINCIPAL {
+        return Err(ContactError::TooManyContactsWithImages);
+    }
+
+    Ok(())
 }

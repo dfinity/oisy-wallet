@@ -56,7 +56,7 @@
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<QrCodeScanner {onScan} onBack={onIcQrCodeBack} />
+	<QrCodeScanner onBack={onIcQrCodeBack} {onScan} />
 
 	{#snippet toolbar()}
 		<ButtonGroup>

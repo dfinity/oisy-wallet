@@ -3,8 +3,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	let agreementList: string[];
-	$: agreementList = [
+	let agreementList = $derived([
 		$i18n.license_agreement.text.paragraph_1,
 		$i18n.license_agreement.text.paragraph_2,
 		$i18n.license_agreement.text.paragraph_3,
@@ -21,7 +20,7 @@
 		$i18n.license_agreement.text.assignment,
 		$i18n.license_agreement.text.no_waiver,
 		$i18n.license_agreement.text.english_version
-	];
+	]);
 </script>
 
 <h1 class="text-5xl">{replaceOisyPlaceholders($i18n.license_agreement.text.title)}</h1>

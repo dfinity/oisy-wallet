@@ -13,15 +13,15 @@
 
 	export let usesIdentityHelp = false;
 
-	let modal: WizardModal;
+	let modal: WizardModal<WizardStepsAuthHelp>;
 
-	let steps: WizardSteps;
+	let steps: WizardSteps<WizardStepsAuthHelp>;
 	$: steps = authHelpWizardSteps({ i18n: $i18n });
 
-	let currentStep: WizardStep | undefined;
+	let currentStep: WizardStep<WizardStepsAuthHelp> | undefined;
 
-	let title: string;
-	$: title = currentStep?.title ?? $i18n.auth.help.text.title;
+	let titleString: string;
+	$: titleString = currentStep?.title ?? $i18n.auth.help.text.title;
 
 	onMount(() => {
 		if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {
@@ -40,10 +40,10 @@
 	const onOther = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHER });
 </script>
 
-<WizardModal {steps} bind:this={modal} bind:currentStep on:nnsClose={close}>
-	<svelte:fragment slot="title">
-		<span class="text-xl">{title}</span>
-	</svelte:fragment>
+<WizardModal bind:this={modal} onClose={close} {steps} bind:currentStep>
+	{#snippet title()}
+		<span class="text-xl">{titleString}</span>
+	{/snippet}
 
 	{#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}
 		<AuthHelpForm {onLostIdentity} {onOther} />

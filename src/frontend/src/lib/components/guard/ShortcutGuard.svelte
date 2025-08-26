@@ -5,7 +5,7 @@
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { children }: Props = $props();
@@ -26,6 +26,6 @@
 	};
 </script>
 
-{@render children?.()}
+{@render children()}
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />

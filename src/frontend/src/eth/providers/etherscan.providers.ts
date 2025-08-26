@@ -1,18 +1,25 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
+import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc721Token } from '$eth/types/erc721';
+import type { EtherscanProviderTokenId } from '$eth/types/etherscan-token';
 import type {
+	EtherscanProviderErc1155TokenTransferTransaction,
+	EtherscanProviderErc721TokenTransferTransaction,
 	EtherscanProviderInternalTransaction,
 	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
 } from '$eth/types/etherscan-transaction';
 import type { EthereumChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
-import type { EthAddress } from '$lib/types/address';
+import type { Address, EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
+import type { NftId } from '$lib/types/nft';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish } from '@dfinity/utils';
 import {
 	EtherscanProvider as EtherscanProviderLib,
@@ -180,6 +187,138 @@ export class EtherscanProvider {
 				chainId: this.chainId
 			})
 		);
+	};
+
+	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc721-token-transfer-events-by-address
+	erc721Transactions = async ({
+		address,
+		contract: { address: contractAddress }
+	}: {
+		address: EthAddress;
+		contract: Erc721Token;
+	}): Promise<Transaction[]> => {
+		const params = {
+			action: 'tokennfttx',
+			contractAddress,
+			address,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderErc721TokenTransferTransaction[] | string =
+			await this.provider.fetch('account', params);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(
+			({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				tokenID
+			}: EtherscanProviderErc721TokenTransferTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				value: BigInt(1),
+				tokenId: parseInt(tokenID),
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
+				chainId: this.chainId
+			})
+		);
+	};
+
+	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc1155-token-transfer-events-by-address
+	erc1155Transactions = async ({
+		address,
+		contract: { address: contractAddress }
+	}: {
+		address: EthAddress;
+		contract: Erc1155Token;
+	}): Promise<Transaction[]> => {
+		const params = {
+			action: 'token1155tx',
+			contractAddress,
+			address,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderErc1155TokenTransferTransaction[] | string =
+			await this.provider.fetch('account', params);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(
+			({
+				nonce,
+				gas,
+				gasPrice,
+				hash,
+				blockNumber,
+				timeStamp,
+				from,
+				to,
+				tokenID,
+				tokenValue
+			}: EtherscanProviderErc1155TokenTransferTransaction): Transaction => ({
+				hash,
+				blockNumber: parseInt(blockNumber),
+				timestamp: parseInt(timeStamp),
+				from,
+				to,
+				value: BigInt(tokenValue),
+				tokenId: parseInt(tokenID),
+				nonce: parseInt(nonce),
+				gasLimit: BigInt(gas),
+				gasPrice: BigInt(gasPrice),
+				chainId: this.chainId
+			})
+		);
+	};
+
+	// https://docs.etherscan.io/api-endpoints/tokens#get-address-erc721-token-inventory-by-contract-address
+	erc721TokenInventory = async ({
+		address,
+		contractAddress
+	}: {
+		address: EthAddress;
+		contractAddress: Address;
+	}): Promise<NftId[]> => {
+		const params = {
+			action: 'addresstokennftinventory',
+			address,
+			contractaddress: contractAddress,
+			startblock: 0,
+			endblock: 99999999,
+			sort: 'desc'
+		};
+
+		const result: EtherscanProviderTokenId[] | string = await this.provider.fetch(
+			'account',
+			params
+		);
+
+		if (typeof result === 'string') {
+			throw new Error(result);
+		}
+
+		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(parseInt(TokenId)));
 	};
 }
 

@@ -62,7 +62,6 @@
 
 			const params: GetFeeData = {
 				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress),
-
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
@@ -108,7 +107,7 @@
 
 			const erc20GasFeeParams = {
 				contract: sendToken as Erc20Token,
-				amount: parseToken({ value: `${amount ?? '1'}` }),
+				amount: parseToken({ value: `${amount ?? '1'}`, unitName: sendToken.decimals }),
 				sourceNetwork,
 				...params
 			};
@@ -183,6 +182,7 @@
 	});
 	onDestroy(() => {
 		listener?.disconnect();
+		listener = undefined;
 		clearTimeout(listenerCallbackTimer);
 	});
 
@@ -192,10 +192,10 @@
 
 	$: obverseFeeData(observe);
 
-	$: $ckEthMinterInfoStore,
+	$: ($ckEthMinterInfoStore,
 		(() => {
 			observe && debounceUpdateFeeData();
-		})();
+		})());
 
 	/**
 	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.

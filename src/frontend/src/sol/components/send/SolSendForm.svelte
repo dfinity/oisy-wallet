@@ -29,12 +29,12 @@
 </script>
 
 <SendForm
+	{destination}
+	disabled={invalid}
+	{invalidDestination}
+	{selectedContact}
 	on:icNext
 	on:icBack
-	{destination}
-	{selectedContact}
-	{invalidDestination}
-	disabled={invalid}
 >
 	<SolSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
@@ -42,8 +42,8 @@
 
 	<SendFeeInfo
 		slot="info"
-		feeSymbol={$feeSymbolStore}
 		decimals={$feeDecimalsStore}
+		feeSymbol={$feeSymbolStore}
 		feeTokenId={$feeTokenIdStore}
 	/>
 

@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
+			"tokenId": "Token id",
 			"max": "Max",
 			"destination": "Destination",
 			"reject": "Reject",
@@ -32,7 +33,8 @@
 			"add": "Add",
 			"more_items": "+$items more",
 			"select": "Select",
-			"language": "Language"
+			"language": "Language",
+			"currency": "Currency"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -43,7 +45,8 @@
 			"back": "Go back to the previous page",
 			"open_details": "Open details",
 			"close_details": "Close details",
-			"switch_language": "Switch language"
+			"switch_language": "Switch language",
+			"switch_currency": "Switch currency"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -99,7 +102,8 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralized",
-			"logout": "Logout",
+			"logout": "Log out",
+			"lock": "Lock",
 			"authenticate": "Open or Create",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Instant and private access anywhere",
@@ -158,6 +162,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "Unlock to continue",
+			"title_part_2": "You previously locked your wallet to keep it safe. Resume where you left off or log out.",
+			"unlock": "Unlock",
+			"logout": "Log out",
+			"logout_clear_cash_message": "Logging out will clear all cached data",
+			"learn_more": "Learn more"
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "All apps",
@@ -187,7 +201,8 @@
 			"verifiable_credentials": "Verifiable Credentials",
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
-			"game": "Game"
+			"game": "Game",
+			"tools": "Tools"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -269,12 +284,6 @@
 				"call_to_action": "Get warped",
 				"description": "Curve finance is a leading decentralized exchange, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains. It's known for it's advanced automated market-makers for stablecoins and volatile assets, and it's unique soft-liquidation system for loans."
 			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Cutting-edge cryptography and blockchain intertwine to a secure and transparent playing environment for all.",
-				"call_to_action": "You are invited",
-				"description": "Cutting-edge cryptography and blockchain intertwine to provide a secure and transparent playing environment for all.<br/><br/>Play with your choice of digital assets—ICP now, with BTC, ETH, SOL, and USDC coming soon. Fully on-chain, no central points of failure. Our blockchain-based RNG ensures provably fair gaming, using open-source technology from Dfinity’s R&D team."
-			},
 			"sonic": {
 				"name": "Sonic",
 				"one_liner": "Unlock the full potential of DeFi and streamlined trading. Swap tokens, earn as a liquidity provider and harness Bitfinity EVM's leading AMM.",
@@ -311,6 +320,11 @@
 					"text": "Decentr. social media - post, earn, own.",
 					"call_to_action": "Learn more"
 				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "Where governance meets collaboration to ignite innovation.",
+				"description": "Toolkit is a versatile suite for managing Service Nervous Systems (SNS) and projects on the Internet Computer. From governance proposals to canister deployment, it empowers users to innovate, collaborate, and decentralize seamlessly."
 			}
 		}
 	},
@@ -359,12 +373,12 @@
 				"win": {
 					"default": {
 						"title": "Congratulations on earning today’s OISY Sprinkles!",
-						"description": "Share your victory on Twitter to qualify for another chance to earn.",
+						"description": "Share your victory on X/Twitter to qualify for another chance to earn.",
 						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
 					},
 					"jackpot": {
 						"title": "Congratulations on earning today’s largest OISY Sprinkles!",
-						"description": "Share your victory on Twitter to qualify for another chance to earn.",
+						"description": "Share your victory on X/Twitter to qualify for another chance to earn.",
 						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
 					},
 					"referral": {
@@ -457,12 +471,12 @@
 		"error": {
 			"no_alchemy_config": "No Alchemy config for network $network",
 			"no_alchemy_provider": "No Alchemy provider for network $network",
-			"no_alchemy_erc20_provider": "No Alchemy ERC20 provider for network $network",
 			"no_etherscan_provider": "No Etherscan provider for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc721_provider": "No Infura ERC721 provider for network $network",
+			"no_infura_erc1155_provider": "No Infura ERC1155 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
@@ -484,9 +498,10 @@
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
+			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
+			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
 			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
-			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
@@ -499,11 +514,14 @@
 	"hero": {
 		"text": {
 			"available_balance": "Your balance",
-			"unavailable_balance": "$ value is not available",
+			"unavailable_balance": "$currencySymbol value is not available",
 			"hidden_balance": "Your balance is hidden",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
 			"tooltip_toggle_balance": "Double-click to hide/show balance"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Set privacy mode on and off"
 		}
 	},
 	"settings": {
@@ -705,7 +723,13 @@
 			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
 			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
 			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing.",
-			"utxos_fee_missing": "UTXOs fee is missing."
+			"utxos_fee_missing": "UTXOs fee is missing.",
+			"minimum_btc_amount": "Amount too small. Please enter at least $amount BTC.",
+			"btc_insufficient_balance": "No Bitcoin UTXOs available for transaction",
+			"btc_insufficient_balance_for_fee": "Insufficient Bitcoin balance to cover transaction fees",
+			"btc_invalid_utxo_data": "Invalid Bitcoin transaction data",
+			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
+			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed"
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -807,7 +831,15 @@
 			"you_receive": "You receive",
 			"select": "Select >",
 			"select_swap_provider": "Select swap provider",
-			"open_icp_swap": "Open ICP Swap website"
+			"open_icp_swap": "Open ICP Swap website",
+			"open_instructions_link": "Open instructions link",
+			"select_token": "Select token",
+			"select_network_filter": "Select network",
+			"withdrawing": "Withdrawing...",
+			"network_cost": "Network cost",
+			"gasless": "Gasless",
+			"swap_fees": "Swap Fees",
+			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -815,9 +847,16 @@
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
 			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
 			"pool_not_found": "Swap failed. Pool not found.",
-			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
+			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",
 			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
-			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance."
+			"swap_failed_withdraw_success": "The swap failed and your tokens were successfully refunded. Please try again or change the swap provider.",
+			"withdraw_failed_first_part": "The swap failed and your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow ",
+			"withdraw_failed_second_part": "to withdraw them anytime later directly from their website: ",
+			"swap_failed_instruction_link": "these instructions ",
+			"manually_withdraw_success": "The tokens from your previous failed swap were successfully withdrawn. You can try the swap again or change the swap provider.",
+			"manually_withdraw_failed": "Withdrawing your funds failed. <br> Please try again or follow",
+			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
+			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal."
 		}
 	},
 	"buy": {
@@ -896,7 +935,7 @@
 				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},
 			"error": {
-				"loading_metadata": "Error while loading the metadata of the token.",
+				"loading_metadata": "The specified address is not a valid token in the selected network.",
 				"no_metadata": "No metadata for the token is provided. This is unexpected.",
 				"unexpected_ledger": "Something went wrong while validating the Ledger canister.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
@@ -961,17 +1000,52 @@
 			"invalid_contract_address": "Contract address is invalid.",
 			"invalid_token_address": "Token address is invalid.",
 			"invalid_ledger": "The selected token is not linked with an ICRC Ledger canister.",
+			"unrecognised_erc_interface": "Unrecognised ERC interface.",
 			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
-			"loading_metadata": "Error while loading the metadata of the token.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
 			"unexpected_undefined": "Token is undefined. This is unexpected.",
 			"unexpected_error_on_token_delete": "Something went wrong while removing the token.",
 			"unexpected_error_on_token_update": "Something went wrong while updating the token."
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": "NFTs",
+			"title_empty": "Your NFTs will appear here",
+			"description_empty": "It looks like you haven't received NFTs yet",
+			"grouping": "Grouping",
+			"as_plain_list": "Show as plain list",
+			"by_collection": "Group by collection",
+			"show_spam": "Show spam",
+			"show_hidden": "Show hidden",
+			"sorting": "Sorting",
+			"recents_first": "Recents first",
+			"oldest_first": "Oldest first",
+			"collection_atoz": "Collection name A-Z",
+			"collection_ztoa": "Collection name Z-A",
+			"collection_items_count": "$count item(s)",
+			"collection_address": "Collection contract address",
+			"token_standard": "Token standard",
+			"quantity": "Quantity",
+			"item_traits": "Item traits",
+			"collection_not_loaded": "The collection could not be displayed as it has not been loaded yet",
+			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
+			"collections": "Collections",
+			"all_assets": "All assets",
+			"address_copied": "Address $address copied",
+			"open_explorer": "Open this contract in blockchain explorer"
+		},
+		"alt": {
+			"placeholder_image": "No NFTs yet",
+			"card": {
+				"image": "Image of NFT with token ID: $tokenId"
+			},
+			"copy_address": "Copy this address to clipboard"
 		}
 	},
 	"fee": {
@@ -1202,12 +1276,12 @@
 				"reward_received": "Welcome to $oisy_short!",
 				"reward_failed": "Code is expired",
 				"reward_received_description": "You will receive your welcome gift any moment.",
+				"brand_reward_received_description": "Want to earn more? Refer a friend and earn for every person who joins.",
 				"reward_failed_description": "Request a new one and try again"
 			},
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward.",
 				"loading_eligibility": "Error while loading campaign eligibility."
 			}
 		},
@@ -1260,7 +1334,14 @@
 		},
 		"avatar": {
 			"default": "Default avatar",
-			"avatar_for": "Avatar for"
+			"avatar_for": "Avatar for",
+			"avatar_loading": "Avatar is loading..."
+		},
+		"edit_avatar": {
+			"menu_title": "Contact Image",
+			"upload_image": "Upload",
+			"replace_image": "Replace",
+			"remove_image": "Remove"
 		},
 		"show_contact": {
 			"title": "Contact",
@@ -1466,6 +1547,29 @@
 			"minute_plural": "minutes",
 			"second": "second",
 			"second_plural": "seconds"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "$oisy_short AI Assistant",
+			"welcome_message": "Hello there! \uD83D\uDC4B I'm OISY, your personal AI concierge. Here's how I can help you:",
+			"action_button_contacts_title": "Show contacts",
+			"action_button_contacts_subtitle": "Display your saved contacts",
+			"action_button_contacts_prompt": "Show me my contacts.",
+			"action_button_send_tokens_title": "Send assets",
+			"action_button_send_tokens_subtitle": "Setup send in few seconds",
+			"action_button_send_tokens_prompt": "I'd like to send tokens.",
+			"select_contact_message": "Select a contact to initiate the sending process:",
+			"send_to_message": "Send to $contact_name ($address_info).",
+			"send_message": "Send message",
+			"send_message_input_placeholder": "What do you want to do?",
+			"send_token_succeeded": "Transaction completed!",
+			"no_contacts_found_message": "Sorry, I couldn't find any suitable contacts in your address book.",
+			"loading": "Thinking..."
+		},
+		"errors": {
+			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
+			"no_response": "Sorry, I didn't get a response from the LLM."
 		}
 	}
 }

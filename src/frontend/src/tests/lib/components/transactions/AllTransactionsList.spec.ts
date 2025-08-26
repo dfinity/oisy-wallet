@@ -96,8 +96,11 @@ describe('AllTransactionsList', () => {
 			ethTransactionsStore.add({
 				tokenId: ETHEREUM_TOKEN_ID,
 				transactions: createMockEthTransactions(ethTransactionsNumber).map((transaction) => ({
-					...transaction,
-					timestamp: yesterdayTimestamp
+					data: {
+						...transaction,
+						timestamp: yesterdayTimestamp
+					},
+					certified: false
 				}))
 			});
 

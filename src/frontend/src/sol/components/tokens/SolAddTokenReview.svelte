@@ -15,6 +15,8 @@
 	import type { TokenMetadata } from '$lib/types/token';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { hardenMetadata } from '$lib/utils/metadata.utils';
+	import { getTokenInfo } from '$sol/api/solana.api';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
@@ -59,9 +61,11 @@
 		try {
 			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
-			metadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
+			const { decimals } = await getTokenInfo({ address: tokenAddress, network: solNetwork });
 
-			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
+			const splMetadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
+
+			if (isNullish(splMetadata?.symbol) || isNullish(splMetadata?.name)) {
 				toastsError({
 					msg: { text: $i18n.tokens.error.incomplete_metadata }
 				});
@@ -69,6 +73,8 @@
 				dispatch('icBack');
 				return;
 			}
+
+			metadata = { ...hardenMetadata(splMetadata), decimals };
 
 			if (
 				$splTokens?.find(
@@ -84,11 +90,8 @@
 				dispatch('icBack');
 				return;
 			}
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.loading_metadata },
-				err
-			});
+		} catch (_: unknown) {
+			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
 			dispatch('icBack');
 		}
@@ -101,7 +104,7 @@
 </script>
 
 <ContentWithToolbar>
-	<Value ref="contractAddress" element="div">
+	<Value element="div" ref="contractAddress">
 		{#snippet label()}
 			{$i18n.tokens.text.token_address}{/snippet}
 		{#snippet content()}
@@ -109,7 +112,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractName" element="div">
+	<Value element="div" ref="contractName">
 		{#snippet label()}
 			{$i18n.core.text.name}
 		{/snippet}
@@ -123,7 +126,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="network" element="div">
+	<Value element="div" ref="network">
 		{#snippet label()}
 			{$i18n.tokens.manage.text.network}
 		{/snippet}
@@ -133,7 +136,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractSymbol" element="div">
+	<Value element="div" ref="contractSymbol">
 		{#snippet label()}
 			{$i18n.core.text.symbol}
 		{/snippet}
@@ -147,7 +150,7 @@
 		{/snippet}
 	</Value>
 
-	<Value ref="contractDecimals" element="div">
+	<Value element="div" ref="contractDecimals">
 		{#snippet label()}
 			{$i18n.core.text.decimals}
 		{/snippet}
