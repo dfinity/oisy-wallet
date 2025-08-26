@@ -168,6 +168,7 @@
 						text: 'icpswap.com'
 					}
 				});
+				// TODO: Add unit tests to cover failed swap error scenarios
 			} else if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
 				failedSwapError.set({
 					message: replacePlaceholders(
