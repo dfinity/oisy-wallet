@@ -101,13 +101,13 @@
 	"auth": {
 		"text": {
 			"title_part_1": "$oisy_name",
-			"title_part_2": "完全分散型",
+			"title_part_2": "究極の分散型ウォレット",
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "開く／作成",
-			"asset_types": "Bitcoin、Solana、Ethereum、ICP など",
-			"instant_and_private": "いつでもどこでも瞬時かつプライベートにアクセス",
-			"advanced_cryptography": "100%オンチェーン：高度な暗号技術による安全性"
+			"asset_types": "Bitcoin、Solana、Ethereum、ICP 等に対応",
+			"instant_and_private": "いつでもどこでも、すぐにプライベートアクセス",
+			"advanced_cryptography": "100％オンチェーン。高度な暗号技術で守られる安全性。"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
@@ -148,8 +148,8 @@
 				"other_docs": "$oisy_short Docs: Internet Identity",
 				"other_private_key": "誰がネイティブアセットの秘密鍵を管理していますか？",
 				"other_asset_control": "$oisy_shortウォレットにおけるアセット管理、復旧、ガバナンス",
-				"need_help": "サインインに関して",
-				"sign_in": "サポートが必要ですか？"
+				"need_help": "サインイン",
+				"sign_in": "に関してサポートが必要ですか？"
 			},
 			"alt": {
 				"internet_identity": "新しいInternet Identityの画像",
@@ -999,7 +999,7 @@
 		"error": {
 			"invalid_contract_address": "コントラクトアドレスが無効です",
 			"invalid_token_address": "トークンアドレスが無効です",
-			"invalid_ledger": "選択されたトークンはICRC台帳キャニスターにリンクされていません",
+			"invalid_ledger": "選択されたトークンはIcrc台帳キャニスターにリンクされていません",
 			"unrecognised_erc_interface": "認識できないERCインターフェースです。",
 			"no_metadata": "メタデータが取得されませんでした",
 			"unexpected": "トークンの保存中にエラーが発生しました",
