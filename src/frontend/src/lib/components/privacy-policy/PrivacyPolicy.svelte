@@ -4,7 +4,7 @@
 </script>
 
 <MarkdownWithSidebar
-	stringReplacements={{ $date: 'todo' }}
+	stringReplacements={{ $date: '26.08.2025' }}
 	text={$i18n.privacy_policy.text.body}
 	title={$i18n.privacy_policy.text.title}
 />
