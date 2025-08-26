@@ -15,6 +15,7 @@ testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile })
 
 	// Verify the contact was created
 	const contactCard = addressBookPage.getLocatorByTestId({ testId: CONTACT_CARD });
+
 	await expect(contactCard).toBeVisible();
 	await expect(contactCard).toContainText(contactName);
 
@@ -38,6 +39,7 @@ testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile })
 
 	// Verify the transaction was successful (progress modal should be gone)
 	const progressModalVisible = await flowPage.isVisibleByTestId(IN_PROGRESS_MODAL);
+
 	expect(progressModalVisible).toBe(false);
 });
 testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile }) => {
@@ -51,6 +53,7 @@ testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile })
 
 	// Verify the contact was created
 	const contactCard = addressBookPage.getLocatorByTestId({ testId: CONTACT_CARD });
+
 	await expect(contactCard).toBeVisible();
 	await expect(contactCard).toContainText(contactName);
 
@@ -74,5 +77,6 @@ testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile })
 
 	// Verify the transaction was successful (progress modal should be gone)
 	const progressModalVisible = await flowPage.isVisibleByTestId(IN_PROGRESS_MODAL);
+
 	expect(progressModalVisible).toBe(false);
 });
