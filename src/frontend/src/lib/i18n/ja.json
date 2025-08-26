@@ -728,8 +728,7 @@
 			"btc_insufficient_balance_for_fee": "取引手数料を支払うためのBitcoin残高が不足しています",
 			"btc_invalid_utxo_data": "無効なBitcoin取引データです",
 			"btc_utxo_locked": "保留中の取引によりBitcoin資金がロックされています",
-			"btc_invalid_fee_calculation": "Bitcoin取引手数料の検証に失敗しました",
-			"pending_transactions_not_available": "保留中の取引サービスは現在利用できません。後でもう一度お試しください。"
+			"btc_invalid_fee_calculation": "Bitcoin取引手数料の検証に失敗しました"
 		},
 		"error": {
 			"unexpected": "トランザクションの送信中に問題が発生しました",

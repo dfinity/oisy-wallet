@@ -728,8 +728,7 @@
 			"btc_insufficient_balance_for_fee": "Insufficient Bitcoin balance to cover transaction fees",
 			"btc_invalid_utxo_data": "Invalid Bitcoin transaction data",
 			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
-			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed",
-			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later."
+			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed"
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",

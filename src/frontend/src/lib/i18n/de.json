@@ -728,8 +728,7 @@
 			"btc_insufficient_balance_for_fee": "Unzureichender Bitcoin-Saldo zur Deckung der Transaktionsgebühren",
 			"btc_invalid_utxo_data": "Ungültige Bitcoin-Transaktionsdaten",
 			"btc_utxo_locked": "Bitcoin-Guthaben durch ausstehende Transaktionen gesperrt",
-			"btc_invalid_fee_calculation": "Bitcoin-Transaktionsgebühren-Validierung fehlgeschlagen",
-			"pending_transactions_not_available": "Der Service für ausstehende Transaktionen ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut."
+			"btc_invalid_fee_calculation": "Bitcoin-Transaktionsgebühren-Validierung fehlgeschlagen"
 		},
 		"error": {
 			"unexpected": "Beim Senden der Transaktion ist etwas schiefgelaufen.",

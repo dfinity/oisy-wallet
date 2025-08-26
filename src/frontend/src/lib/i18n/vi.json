@@ -728,8 +728,7 @@
 			"btc_insufficient_balance_for_fee": "",
 			"btc_invalid_utxo_data": "",
 			"btc_utxo_locked": "",
-			"btc_invalid_fee_calculation": "",
-			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau."
+			"btc_invalid_fee_calculation": ""
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",

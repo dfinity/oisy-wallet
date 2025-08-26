@@ -160,17 +160,15 @@ describe('btc-wallet.worker', () => {
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(7);
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
 					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageUncertified);
-					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(10); // Change from 8 to 10
-					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusInProgress); // Change from 7 to 8
-					expect(postMessageMock).toHaveBeenNthCalledWith(9, mockPostMessageUncertified); // Add this line
-					expect(postMessageMock).toHaveBeenNthCalledWith(10, mockPostMessageStatusIdle); // Change from 8 to 10
+					expect(postMessageMock).toHaveBeenCalledTimes(8);
+					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
 				});
 
 				it('should start the scheduler with an interval', async () => {
