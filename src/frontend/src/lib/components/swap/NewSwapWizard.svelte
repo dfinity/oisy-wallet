@@ -79,7 +79,6 @@
 			bind:slippageValue
 			bind:swapProgressStep
 			on:icClose
-			on:icClose
 			on:icShowTokensList
 			on:icShowProviderList
 			on:icNext
