@@ -1,6 +1,5 @@
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
 
-
 // Mock the allowance function
 vi.mock('$icp/api/icrc-ledger.api', () => ({
 	allowance: vi.fn()
