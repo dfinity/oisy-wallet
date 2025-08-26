@@ -4,7 +4,6 @@ use candid::{CandidType, Deserialize};
 use serde_bytes::ByteBuf;
 
 use super::account::TokenAccountId;
-
 // Re-export image size limit used by validation so tests and external modules can reference it
 pub use crate::impls::MAX_IMAGE_SIZE_BYTES;
 
