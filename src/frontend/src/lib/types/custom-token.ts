@@ -5,7 +5,7 @@ import type { Token } from '$lib/types/token';
 import type { TokenToggleable, UserTokenState } from '$lib/types/token-toggleable';
 import type { SplToken } from '$sol/types/spl';
 import type { QueryAndUpdateRequestParams } from '@dfinity/utils';
-import type TokenState from '$lib/enums/token-state'
+import type { TokenState } from '$lib/enums/token-state';
 
 type CustomTokenNetworkKeys = BackendToken extends infer T
 	? T extends Record<string, unknown>
