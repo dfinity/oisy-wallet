@@ -14,12 +14,12 @@ let originalIO: typeof IntersectionObserver | undefined;
 
 describe('MarkdownWithSidebar', () => {
 	beforeAll(() => {
-		originalIO = (globalThis as any).IntersectionObserver;
-		(globalThis as any).IntersectionObserver = IOStub as unknown as typeof IntersectionObserver;
+		originalIO = globalThis.IntersectionObserver;
+		globalThis.IntersectionObserver = IOStub as unknown as typeof IntersectionObserver;
 	});
 
 	afterAll(() => {
-		(globalThis as any).IntersectionObserver = originalIO as typeof IntersectionObserver;
+		globalThis.IntersectionObserver = originalIO as typeof IntersectionObserver;
 	});
 
 	beforeEach(() => {
