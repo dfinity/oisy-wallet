@@ -19,6 +19,7 @@
 	import {
 		SUPPORTED_CROSS_SWAP_NETWORKS,
 		SWAP_SLIPPAGE_INVALID_VALUE,
+		SWAP_SLIPPAGE_VELORA_INVALID_VALUE,
 	} from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
