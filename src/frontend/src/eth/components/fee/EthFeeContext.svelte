@@ -62,7 +62,6 @@
 
 			const params: GetFeeData = {
 				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress),
-
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
@@ -108,7 +107,7 @@
 
 			const erc20GasFeeParams = {
 				contract: sendToken as Erc20Token,
-				amount: parseToken({ value: `${amount ?? '1'}` }),
+				amount: parseToken({ value: `${amount ?? '1'}`, unitName: sendToken.decimals }),
 				sourceNetwork,
 				...params
 			};
