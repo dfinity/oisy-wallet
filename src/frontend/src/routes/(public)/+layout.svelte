@@ -12,7 +12,9 @@
 </script>
 
 <header
-	class="z-1 pointer-events-none relative flex w-full max-w-screen-2.5xl items-start justify-between px-4 pt-6 md:px-8 1.5lg:fixed 1.5lg:inset-x-0 1.5lg:top-0 1.5lg:z-10"
+	class="z-1 pointer-events-none relative flex w-full max-w-screen-2.5xl justify-between px-4 pt-6 md:px-8 1.5lg:fixed 1.5lg:inset-x-0 1.5lg:top-0 1.5lg:z-10"
+	class:items-start={NEW_AGREEMENTS_ENABLED}
+	class:items-center={!NEW_AGREEMENTS_ENABLED}
 >
 	{#if NEW_AGREEMENTS_ENABLED}
 		<div class="pointer-events-auto flex w-fit items-center gap-0 no-underline">
@@ -31,7 +33,7 @@
 	class:items-start={NEW_AGREEMENTS_ENABLED}
 	class:lg:w-md={!NEW_AGREEMENTS_ENABLED}
 	class:2xl:w-md={NEW_AGREEMENTS_ENABLED}
-	class:l:w-sm={NEW_AGREEMENTS_ENABLED}
+	class:lg:w-sm={NEW_AGREEMENTS_ENABLED}
 	class:agreements-v2={NEW_AGREEMENTS_ENABLED}
 >
 	{@render children()}
@@ -64,6 +66,7 @@
 
 			a {
 				color: var(--color-foreground-brand-primary);
+				max-width: calc(var(--spacing) * 60);
 			}
 		}
 	}
