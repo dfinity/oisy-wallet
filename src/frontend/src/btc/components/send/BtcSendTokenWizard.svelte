@@ -50,7 +50,8 @@
 
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
-	let utxosFee: UtxosFee | undefined = undefined;
+	let utxosFee: UtxosFee | undefined;
+	$: utxosFee;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sendToken.network.id;
@@ -126,6 +127,7 @@
 			// Handle BtcValidationError with specific toastsError for each type
 			if (err instanceof BtcValidationError) {
 				await handleBtcValidationError({ err });
+				utxosFee.error = err.type;
 			}
 
 			trackEvent({
@@ -136,31 +138,20 @@
 				}
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
-
 			// go back to the previous step so the user can correct/ try again
 			dispatch('icBack');
 			return;
 		}
 
 		try {
+			progress(ProgressStepsSendBtc.SEND);
 			await sendBtc({
 				destination,
 				amount,
 				utxosFee,
 				network,
 				source,
-				identity: $authIdentity,
-				onProgress: () => {
-					if (sendProgressStep === ProgressStepsSendBtc.INITIALIZATION) {
-						progress(ProgressStepsSendBtc.SEND);
-					} else if (sendProgressStep === ProgressStepsSendBtc.SEND) {
-						progress(ProgressStepsSendBtc.DONE);
-					}
-				}
+				identity: $authIdentity
 			});
 
 			trackEvent({
@@ -171,7 +162,7 @@
 				}
 			});
 
-			sendProgressStep = ProgressStepsSendBtc.DONE;
+			progress(ProgressStepsSendBtc.DONE);
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
