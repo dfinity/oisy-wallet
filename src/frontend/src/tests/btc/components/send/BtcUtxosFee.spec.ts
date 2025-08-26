@@ -10,12 +10,12 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-// Mock the debounce function to execute immediately
-vi.mock('@dfinity/utils', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('@dfinity/utils')>();
+// Mock the DFINITY utils module
+vi.mock('@dfinity/utils', async () => {
+	const actual = await vi.importActual('@dfinity/utils');
 	return {
 		...actual,
-		debounce: (fn: Function) => fn // Execute immediately instead of debouncing
+		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
 	};
 });
 
@@ -51,7 +51,7 @@ describe('BtcUtxosFee', () => {
 		);
 	});
 
-	it('fetches and renders utxos fee if not provided', async () => {
+	it('fetches and renders the utxos fee if not provided', async () => {
 		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
 			utxos: mockUtxosFee.utxos
@@ -124,7 +124,7 @@ describe('BtcUtxosFee', () => {
 			});
 		});
 
-		it('should stop scheduler when component is destroyed', async () => {
+		it('should stop scheduler when the component is unmounted', async () => {
 			const prepareBtcSendSpy = vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
 				feeSatoshis: mockUtxosFee.feeSatoshis,
 				utxos: mockUtxosFee.utxos
@@ -152,13 +152,13 @@ describe('BtcUtxosFee', () => {
 				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
 			});
 
-			// Unmount component to trigger onDestroy
+			// The component should be unmounted to trigger onDestroy
 			unmount();
 
 			// Advance timer again - should not call prepareBtcSend anymore
 			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
-			// Should still be 2 calls (no additional calls after unmount)
+			// Should still be 2 calls (no additional calls after the component is unmounted)
 			expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
 		});
 	});
