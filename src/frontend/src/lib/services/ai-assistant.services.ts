@@ -6,18 +6,14 @@ import {
 	AI_ASSISTANT_SYSTEM_PROMPT,
 	AI_ASSISTANT_TOOLS
 } from '$lib/constants/ai-assistant.constants';
-import {
-	contacts,
-	extendedAddressContacts as extendedAddressContactsStore
-} from '$lib/derived/contacts.derived';
+import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import type {
-	AiAssistantContactUi,
 	ChatMessageContent,
+	ShowContactsToolResult,
 	ToolCall,
 	ToolCallArgument,
 	ToolResult
 } from '$lib/types/ai-assistant';
-import type { ContactUi } from '$lib/types/contact';
 import {
 	parseFromAiAssistantContacts,
 	parseToAiAssistantContacts
@@ -86,7 +82,7 @@ export const askLlmToFilterContacts = async ({
 }: {
 	identity: Identity;
 	filterParams: ToolCallArgument[];
-}): Promise<ContactUi[]> => {
+}): Promise<ShowContactsToolResult> => {
 	const extendedAddressContacts = get(extendedAddressContactsStore);
 	const aiAssistantContacts = parseToAiAssistantContacts(extendedAddressContacts);
 
@@ -117,13 +113,14 @@ export const askLlmToFilterContacts = async ({
 		identity
 	});
 
-	const filteredAiAssistantContacts: AiAssistantContactUi[] =
-		JSON.parse(fromNullable(content) ?? '', jsonReplacer)?.contacts ?? [];
+	const data = JSON.parse(fromNullable(content) ?? '', jsonReplacer);
 
-	return parseFromAiAssistantContacts({
-		aiAssistantContacts: filteredAiAssistantContacts,
-		extendedAddressContacts
-	});
+	return {
+		contacts: parseFromAiAssistantContacts({
+			aiAssistantContacts: data?.contacts ?? [],
+			extendedAddressContacts: get(extendedAddressContactsStore)
+		})
+	};
 };
 
 /**
@@ -151,7 +148,7 @@ export const executeTool = async ({
 	if (name === 'show_contacts') {
 		result =
 			isNullish(filterParams) || filterParams.length === 0
-				? get(contacts)
+				? { contacts: Object.values(get(extendedAddressContactsStore)) }
 				: await askLlmToFilterContacts({ filterParams, identity });
 	}
 

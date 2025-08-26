@@ -5,11 +5,7 @@ import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
-import {
-	getPendingTransactionUtxoTxIds,
-	txidStringToUint8Array,
-	utxoTxIdToString
-} from '$icp/utils/btc.utils';
+import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -167,17 +163,17 @@ export const validateBtcSend = async ({
 		address: source
 	});
 
-	const utxoTxIds = getPendingTransactionUtxoTxIds(source);
+	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
 
-	if (isNullish(utxoTxIds)) {
+	if (isNullish(pendingUtxoTxIds)) {
 		// when no pending transactions have been initiated, we cannot validate UTXO's and therefore, validation must fail
 		throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 	}
 
-	if (utxoTxIds.length > 0) {
+	if (pendingUtxoTxIds.length > 0) {
 		const providedUtxoTxIds = extractUtxoTxIds(utxos);
 		for (const utxoTxId of providedUtxoTxIds) {
-			if (utxoTxIds.includes(utxoTxId)) {
+			if (pendingUtxoTxIds.includes(utxoTxId)) {
 				throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 			}
 		}
@@ -238,26 +234,6 @@ export const sendBtc = async ({
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
 
 	onProgress?.();
-
-	console.warn(
-		'🎯 [backend.canister.ts -> btcAddPendingTransaction] Adding pending BTC transaction:',
-		{
-			timestamp: new Date().toISOString(),
-			input: {
-				identity,
-				network: mapToSignerBitcoinNetwork({ network }),
-				address: source,
-				txId: txid,
-				utxos: utxosFee.utxos?.map((utxo) => ({
-					...utxo,
-					outpoint: {
-						...utxo.outpoint,
-						txid: utxoTxIdToString(utxo.outpoint.txid)
-					}
-				}))
-			}
-		}
-	);
 
 	await addPendingBtcTransaction({
 		identity,

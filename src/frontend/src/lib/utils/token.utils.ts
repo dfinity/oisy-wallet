@@ -67,10 +67,10 @@ export const getMaxTransactionAmount = ({
  */
 export const mapDefaultTokenToToggleable = <T extends Token>({
 	defaultToken,
-	userToken
+	customToken
 }: {
 	defaultToken: T;
-	userToken: TokenToggleable<T> | undefined;
+	customToken: TokenToggleable<T> | undefined;
 }): TokenToggleable<T> => {
 	const ledgerCanisterId =
 		'ledgerCanisterId' in defaultToken &&
@@ -89,9 +89,9 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 		...defaultToken,
 		enabled:
 			isEnabledByDefault ||
-			(isNullish(userToken?.enabled) && isSuggestedToken) ||
-			userToken?.enabled === true,
-		version: userToken?.version
+			(isNullish(customToken?.enabled) && isSuggestedToken) ||
+			customToken?.enabled === true,
+		version: customToken?.version
 	};
 };
 
