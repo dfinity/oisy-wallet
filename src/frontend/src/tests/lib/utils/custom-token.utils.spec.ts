@@ -1,6 +1,7 @@
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@dfinity/principal';
+import { toNullable } from '@dfinity/utils';
 
 describe('custom-token.utils', () => {
 	describe('toCustomToken', () => {
@@ -12,7 +13,7 @@ describe('custom-token.utils', () => {
 		const partialExpected = {
 			enabled: true,
 			version: [1n],
-			state: []
+			state: toNullable()
 		};
 
 		it('should convert to CustomToken with nullish version', () => {
