@@ -473,8 +473,7 @@ impl Validate for Token {
         match self {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
-            Token::Erc20(token) | Token::Erc1155(token) => token.validate(),
-            Token::Erc721 { token, .. } => token.validate(),
+            Token::Erc20(token) | Token::Erc1155(token) | Token::Erc721 { token, ..} => token.validate(),
         }
     }
 }
