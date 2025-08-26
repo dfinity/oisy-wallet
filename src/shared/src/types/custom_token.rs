@@ -55,8 +55,15 @@ pub enum Token {
     SplMainnet(SplToken) = 1,
     SplDevnet(SplToken) = 2,
     Erc20(ErcToken) = 3,
-    Erc721(ErcToken) = 4,
+    Erc721 {token: ErcToken, state: TokenState} = 4,
     Erc1155(ErcToken) = 5,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum TokenState {
+    Default = 0,
+    Hidden = 1,
+    Spam = 2,
 }
 
 /// User preferences for any token
