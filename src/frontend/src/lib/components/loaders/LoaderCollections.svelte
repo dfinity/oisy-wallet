@@ -76,10 +76,10 @@
 			return [];
 		}
 
-		const alchemyProvider = alchemyProviders(network.id);
+		const { getTokensForOwner } = alchemyProviders(network.id);
 
 		try {
-			return await alchemyProvider.getTokensForOwner($ethAddress);
+			return await getTokensForOwner($ethAddress);
 		} catch (_: unknown) {
 			return [];
 		}
