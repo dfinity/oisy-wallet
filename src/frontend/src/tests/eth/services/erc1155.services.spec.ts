@@ -9,6 +9,7 @@ import { loadCustomTokens, loadErc1155Tokens } from '$eth/services/erc1155.servi
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { TokenState } from '$lib/enums/token-state';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -19,7 +20,6 @@ import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import { TokenState } from '$lib/enums/token-state';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
