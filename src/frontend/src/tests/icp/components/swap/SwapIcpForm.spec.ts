@@ -1,5 +1,6 @@
 import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -15,8 +16,8 @@ describe('SwapIcpForm', () => {
 
 	beforeEach(() => {
 		const originalSwapContext = initSwapContext({
-			sourceToken: mockValidIcToken,
-			destinationToken: mockValidIcCkToken
+			sourceToken: mockValidIcToken as IcTokenToggleable,
+			destinationToken: mockValidIcCkToken as IcTokenToggleable
 		});
 
 		const mockSwapContext = {
@@ -91,7 +92,7 @@ describe('SwapIcpForm', () => {
 	it('should not render swap details when no destination token', () => {
 		const contextWithoutDestination = new Map();
 		const swapContextWithoutDestination = initSwapContext({
-			sourceToken: mockValidIcToken,
+			sourceToken: mockValidIcToken as IcTokenToggleable,
 			destinationToken: undefined
 		});
 
@@ -123,8 +124,8 @@ describe('SwapIcpForm', () => {
 		const icrc2Context = new Map();
 		const icrc2SwapContext = {
 			...initSwapContext({
-				sourceToken: mockValidIcToken,
-				destinationToken: mockValidIcCkToken
+				sourceToken: mockValidIcToken as IcTokenToggleable,
+				destinationToken: mockValidIcCkToken as IcTokenToggleable
 			}),
 			isSourceTokenIcrc2: readable(true)
 		};
