@@ -1,3 +1,4 @@
+import type { TokenState } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
 import * as nftEnv from '$env/nft.env';
@@ -14,7 +15,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
-import type { TokenState } from '$declarations/backend/backend.did';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
