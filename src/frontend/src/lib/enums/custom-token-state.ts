@@ -1,4 +1,4 @@
-export enum TokenState {
+export enum CustomTokenState {
 	HIDDEN = 'hidden',
 	SPAM = 'spam'
 }

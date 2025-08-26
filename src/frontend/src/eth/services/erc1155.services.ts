@@ -6,7 +6,7 @@ import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.stor
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
-import { TokenState } from '$lib/enums/token-state';
+import { CustomTokenState } from '$lib/enums/custom-token-state';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -109,7 +109,7 @@ const loadCustomTokensWithMetadata = async (
 						enabled,
 						version,
 						...(nonNullish(state) && {
-							state: 'Spam' in state ? TokenState.SPAM : TokenState.HIDDEN
+							state: 'Spam' in state ? CustomTokenState.SPAM : CustomTokenState.HIDDEN
 						})
 					},
 					...metadata
