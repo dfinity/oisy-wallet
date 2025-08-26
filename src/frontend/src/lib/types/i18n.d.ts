@@ -1212,27 +1212,7 @@ interface I18nCarousel {
 }
 
 interface I18nLicense_agreement {
-	text: {
-		accept_terms: string;
-		accept_terms_link: string;
-		title: string;
-		paragraph_1: string;
-		paragraph_2: string;
-		paragraph_3: string;
-		limited_license: string;
-		restrictions: string;
-		applicable_laws: string;
-		reservation_rights: string;
-		feedback: string;
-		termination: string;
-		warranty_liability: string;
-		indemnity: string;
-		governing_law: string;
-		entire_agreement: string;
-		assignment: string;
-		no_waiver: string;
-		english_version: string;
-	};
+	text: { accept_terms: string; accept_terms_link: string; title: string; body: string };
 	alt: { license_agreement: string };
 }
 

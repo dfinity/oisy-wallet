@@ -1481,22 +1481,7 @@
 			"accept_terms": "点击此按钮即表示你同意",
 			"accept_terms_link": "许可协议",
 			"title": "$oisy_name 许可协议（“许可协议”）",
-			"paragraph_1": "感谢你对 $oisy_name 的兴趣。$oisy_name 是基于浏览器的自托管多链钱包应用，托管于 Internet Computer 公有区块链网络（“$oisy_short”）。关于 $oisy_short 的开源代码和相关许可信息，请参阅此 GitHub 仓库：$oisy_repo_url。",
-			"paragraph_2": "本许可协议规范你（“你”）对 $oisy_short 的使用。使用 $oisy_short 即表示你已阅读、理解并同意受此许可协议约束。如不同意，请勿使用 $oisy_short。",
-			"paragraph_3": "若你选择使用 $oisy_short，代表你与 DFINITY 基金会及其附属公司（统称“DFINITY”）达成如下共识：",
-			"limited_license": "<strong>1. 有限许可。</strong> 根据本协议条款和条件，DFINITY 授予你一项有限的、非独占的、不可转让的、不可再许可的、可撤销的许可，仅限于用于接收、持有和发送代币（如 ICP、ICRC-1、ETH、ERC20 及其他未来支持的代币）。你可根据各开源组件的许可条款创建衍生作品。",
-			"restrictions": "<strong>2. 使用限制。</strong> 你对自己使用 $oisy_short 的所有活动负全责，无论是否经你授权或由你、你的员工或第三方代表你进行。你明白 DFINITY 对与你的钱包相关的任何活动或交易（无论是否完成）概不负责。你不得歪曲你与 DFINITY 的关系，不得暗示 DFINITY 支持、赞助或背书你或你的业务。未经许可，你不得使用 $oisy_short 名称、logo 或商标。",
-			"applicable_laws": "<strong>3. 适用法律。</strong> 使用 $oisy_short 过程中你应遵守所有适用法律法规（包括但不限于出口管制、反洗钱或经济制裁等法律）。",
-			"reservation_rights": "<strong>4. 权利保留。</strong> $oisy_short 为 DFINITY 所有，并以许可方式提供。其内容、界面、交互功能、信息、代码和设计等受知识产权保护。DFINITY 保留未明确授予你的所有权利。",
-			"feedback": "<strong>5. 反馈。</strong> 若你向 DFINITY 提供任何反馈（包括建议、bug 报告、改进建议等），即视为非保密性提交，DFINITY 可自由使用该反馈。你授予 DFINITY 永久性、不可撤销、可转让、可再许可、非独占、免版税的全球许可。",
-			"termination": "<strong>6. 期限与终止。</strong> 本协议在你违反协议时立即终止。你可随时通过清空钱包并停止使用 $oisy_short 来终止协议。DFINITY 可随时基于任何理由终止此协议，包括滥用行为或违反协议。",
-			"warranty_liability": "<strong>7. 免责声明及责任限制。</strong> 在法律允许的最大范围内，$oisy_short 按“现状”提供，不附带任何形式的保证。DFINITY 不保证其始终可用、安全、准确或适合特定目的。在任何情况下，DFINITY 对任何间接、附带、惩罚性或特殊损失不承担责任，其责任总额不超过 100 瑞士法郎。",
-			"indemnity": "<strong>8. 赔偿条款。</strong> 你同意赔偿 DFINITY 及其相关方，免受因你使用 $oisy_short 或违反本协议引起的任何索赔与损失（包括合理律师费）。",
-			"governing_law": "<strong>9. 适用法律与管辖权。</strong> 本协议适用瑞士法律，任何争议由瑞士苏黎世法院专属管辖，可上诉至瑞士联邦法院。",
-			"entire_agreement": "<strong>10. 完整协议与可分割性。</strong> 本协议为双方之间就此事项的完整协议。如其中任一条款被认定无效，应按法律允许的最小限度修改或分割，其余条款仍具效力。",
-			"assignment": "<strong>11. 协议转让。</strong> 未经 DFINITY 书面同意，你不得转让本协议，DFINITY 可自由转让本协议。",
-			"no_waiver": "<strong>12. 权利不弃权。</strong> DFINITY 未行使权利不构成放弃，亦不影响未来主张该权利。",
-			"english_version": "<strong>13. 英文版本。</strong> 本协议以英文版本为正式版本，如有冲突，以英文版本为准。"
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "$oisy_name 许可协议"
