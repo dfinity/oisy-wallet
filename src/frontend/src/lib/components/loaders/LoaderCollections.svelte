@@ -60,9 +60,8 @@
 				network,
 				enabled: !contract.isSpam
 			};
-			acc.push(newToken);
 
-			return acc;
+			return [...acc, newToken]
 		}, []);
 
 		if (tokens.length > 0) {
@@ -105,9 +104,8 @@
 				network,
 				enabled: !contract.isSpam
 			};
-			acc = [...acc, newToken];
 
-			return acc;
+			return [...acc, newToken];
 		}, []);
 
 		if (tokens.length > 0) {
