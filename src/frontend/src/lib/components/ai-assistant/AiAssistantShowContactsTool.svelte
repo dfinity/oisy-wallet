@@ -1,15 +1,15 @@
 <script lang="ts">
+	import { notEmptyString } from '@dfinity/utils';
 	import AiAssistantShowContactsToolItem from '$lib/components/ai-assistant/AiAssistantShowContactsToolItem.svelte';
 	import { MAX_DISPLAYED_ADDRESSES_NUMBER } from '$lib/constants/ai-assistant.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ContactAddressUi, ContactUi, ExtendedAddressContactUi } from '$lib/types/contact';
+	import type { ShowContactsToolResult } from '$lib/types/ai-assistant';
+	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	interface Props {
-		contacts: ExtendedAddressContactUi[];
-	}
+	interface Props extends ShowContactsToolResult {}
 
-	let { contacts }: Props = $props();
+	let { contacts, message }: Props = $props();
 
 	let allAddresses = $derived(
 		contacts.reduce<{ contact: ContactUi; address: ContactAddressUi }[]>(
@@ -30,12 +30,14 @@
 </script>
 
 {#if addressesToDisplay.length > 0}
+	<div class="mb-2 text-sm">{$i18n.ai_assistant.text.select_contact_message}</div>
+
 	{#each addressesToDisplay as { contact, address }, index (index)}
 		<AiAssistantShowContactsToolItem {address} {contact} />
 	{/each}
 {:else}
 	<span class="text-sm">
-		{$i18n.ai_assistant.text.no_contacts_found_message}
+		{notEmptyString(message) ? message : $i18n.ai_assistant.text.no_contacts_found_message}
 	</span>
 {/if}
 

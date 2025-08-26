@@ -1555,6 +1555,7 @@
 			"action_button_contacts_title": "アドレス帳を表示",
 			"action_button_contacts_subtitle": "保存したアドレス帳を表示します",
 			"action_button_contacts_prompt": "アドレス帳を表示してください。",
+			"select_contact_message": "",
 			"send_message": "メッセージを送信",
 			"send_message_input_placeholder": "何をしたいですか？",
 			"no_contacts_found_message": "申し訳ありません、アドレス帳に該当する連絡先が見つかりませんでした。",
