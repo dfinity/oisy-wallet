@@ -2,11 +2,11 @@
 	import AiAssistantShowContactsToolItem from '$lib/components/ai-assistant/AiAssistantShowContactsToolItem.svelte';
 	import { MAX_DISPLAYED_ADDRESSES_NUMBER } from '$lib/constants/ai-assistant.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import type { ContactAddressUi, ContactUi, ExtendedAddressContactUi } from '$lib/types/contact';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		contacts: ContactUi[];
+		contacts: ExtendedAddressContactUi[];
 	}
 
 	let { contacts }: Props = $props();
