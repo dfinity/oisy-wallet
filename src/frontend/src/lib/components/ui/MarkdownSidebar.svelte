@@ -13,7 +13,7 @@
 
 	let activeId: string | undefined = $state();
 	let observer: IntersectionObserver | undefined;
-	const observed = new Set<Element>();
+	let observed: Element[] = [];
 
 	onMount(() => {
 		// Scroll spy to highlight active item
@@ -33,7 +33,7 @@
 				const el = document.getElementById(id);
 				if (nonNullish(el) && nonNullish(observer)) {
 					observer.observe(el);
-					observed.add(el);
+					observed = [...observed, el];
 				}
 			}
 		});
@@ -42,7 +42,7 @@
 		return () => {
 			observed.forEach((el) => observer?.unobserve(el));
 			observer?.disconnect();
-			observed.clear();
+			observed = [];
 		};
 	});
 </script>

@@ -1,6 +1,6 @@
 import MarkdownSidebar from '$lib/components/ui/MarkdownSidebar.svelte';
 import type { MarkdownBlockType } from '$lib/types/markdown';
-import { nonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 
 // ---- Mock IntersectionObserver ----
@@ -40,18 +40,18 @@ const insertHeadingsIntoDOM = (blocks: MarkdownBlockType[]) => {
 	});
 };
 
-beforeEach(() => {
-	observedElements = [];
-	ioCallbacks = [];
-});
-
-afterEach(() => {
-	cleanup();
-	// Clean any headings we appended
-	document.body.querySelectorAll('h3').forEach((h) => h.remove());
-});
-
 describe('MarkdownSidebar', () => {
+	beforeEach(() => {
+		observedElements = [];
+		ioCallbacks = [];
+	});
+
+	afterEach(() => {
+		cleanup();
+		// Clean any headings we appended
+		document.body.querySelectorAll('h3').forEach((h) => h.remove());
+	});
+
 	it('renders links for headings with correct hrefs and highlights the first by default', async () => {
 		const headings: MarkdownBlockType[] = [
 			{ type: 'header', text: 'Acceptance of Terms', id: 'heading-1' },
@@ -91,9 +91,13 @@ describe('MarkdownSidebar', () => {
 		expect(span3).not.toHaveClass('text-primary');
 
 		// Component should start observing the actual <h3> nodes
-		const h1 = document.getElementById('heading-1')!;
-		const h2 = document.getElementById('heading-2')!;
-		const h3 = document.getElementById('heading-3')!;
+		const h1 = document.getElementById('heading-1');
+		assertNonNullish(h1);
+		const h2 = document.getElementById('heading-2');
+		assertNonNullish(h2);
+		const h3 = document.getElementById('heading-3');
+		assertNonNullish(h3);
+
 		expect(observedElements).toEqual(expect.arrayContaining([h1, h2, h3]));
 
 		// Simulate that heading-2 becomes the visible one
