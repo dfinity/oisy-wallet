@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Markdown } from '@dfinity/gix-components';
-	import { type I18nSubstitutions, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import MarkdownSidebar from '$lib/components/ui/MarkdownSidebar.svelte';
 	import type { MarkdownBlockType } from '$lib/types/markdown';
+	import { type I18nSubstitutions, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getMarkdownBlocks } from '$lib/utils/markdown.utils';
 
 	interface Props {
