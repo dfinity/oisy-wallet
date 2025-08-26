@@ -71,9 +71,8 @@ pub struct CustomToken {
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum TokenState {
-    Default = 0,
-    Hidden = 1,
-    Spam = 2,
+    Hidden = 0,
+    Spam = 1,
 }
 
 /// A cross-chain token identifier.
