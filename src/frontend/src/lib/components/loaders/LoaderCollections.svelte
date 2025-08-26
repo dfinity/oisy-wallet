@@ -46,7 +46,7 @@
 				}
 
 				const {
-					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
+					Erc721: { token: { token_address: tokenAddress, chain_id: tokenChainId } }
 				} = token;
 
 				return tokenAddress === contract.address && tokenChainId === network.chainId;
