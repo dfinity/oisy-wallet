@@ -1,6 +1,7 @@
 import type { Network } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import * as z from 'zod';
+import type { TokenState } from '$lib/enums/token-state';
 
 export const NftIdSchema = z.number().brand<'NftId'>();
 
@@ -23,7 +24,8 @@ export const NftCollectionSchema = z.object({
 	symbol: z.string().optional(),
 	id: z.custom<TokenId>(),
 	network: z.custom<Network>(),
-	standard: z.custom<TokenStandard>()
+	standard: z.custom<TokenStandard>(),
+	state: z.custom<TokenState>()
 });
 
 export const NftSchema = z.object({

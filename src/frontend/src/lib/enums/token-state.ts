@@ -1,4 +1,4 @@
-export const TokenState = {
-	Hidden: { Hidden: null },
-	Spam: { Spam: null }
-} as const;
+export enum TokenState {
+	HIDDEN = 'hidden',
+	SPAM = 'spam'
+}
