@@ -384,8 +384,10 @@ export const idlFactory = ({ IDL }) => {
 		SplMainnet: SplToken,
 		Erc1155: ErcToken
 	});
+	const TokenSection = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });
 	const CustomToken = IDL.Record({
 		token: Token,
+		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});

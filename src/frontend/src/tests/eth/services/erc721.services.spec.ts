@@ -39,7 +39,8 @@ describe('erc721.services', () => {
 					token_address: mockEthAddress,
 					allow_media_source: toNullable()
 				}
-			}
+			},
+			section: toNullable()
 		},
 		{
 			version: toNullable(2n),
@@ -50,7 +51,8 @@ describe('erc721.services', () => {
 					token_address: mockEthAddress2.toUpperCase(),
 					allow_media_source: toNullable()
 				}
-			}
+			},
+			section: toNullable()
 		},
 		{
 			version: toNullable(),
@@ -61,7 +63,8 @@ describe('erc721.services', () => {
 					token_address: mockEthAddress3,
 					allow_media_source: toNullable()
 				}
-			}
+			},
+			section: toNullable()
 		}
 	];
 

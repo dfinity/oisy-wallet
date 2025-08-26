@@ -178,6 +178,7 @@ export interface CredentialSpec {
 export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
+	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
 }
@@ -344,6 +345,7 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
+export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {

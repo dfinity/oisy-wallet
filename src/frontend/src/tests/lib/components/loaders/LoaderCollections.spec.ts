@@ -1,3 +1,4 @@
+import type { TokenSection } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
 import * as nftEnv from '$env/nft.env';
@@ -117,7 +118,8 @@ describe('LoaderCollections', () => {
 				}
 			},
 			version: toNullable(1n),
-			enabled: true
+			enabled: true,
+			section: toNullable<TokenSection>()
 		}));
 		const existingErc1155CustomTokens = networks.map((network) => ({
 			token: {
@@ -128,7 +130,8 @@ describe('LoaderCollections', () => {
 				}
 			},
 			version: toNullable(1n),
-			enabled: true
+			enabled: true,
+			section: toNullable<TokenSection>()
 		}));
 
 		vi.mocked(listCustomTokens).mockResolvedValue([
