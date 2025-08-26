@@ -728,8 +728,7 @@
 			"btc_insufficient_balance_for_fee": "Solde Bitcoin insuffisant pour couvrir les frais de transaction",
 			"btc_invalid_utxo_data": "Données de transaction Bitcoin invalides",
 			"btc_utxo_locked": "Les fonds Bitcoin sont verrouillés par des transactions en attente",
-			"btc_invalid_fee_calculation": "Échec de la validation des frais de transaction Bitcoin",
-			"pending_transactions_not_available": "Le service de transactions en attente n'est actuellement pas disponible. Veuillez réessayer plus tard."
+			"btc_invalid_fee_calculation": "Échec de la validation des frais de transaction Bitcoin"
 		},
 		"error": {
 			"unexpected": "Quelque chose s'est mal passé lors de l'envoi de la transaction.",

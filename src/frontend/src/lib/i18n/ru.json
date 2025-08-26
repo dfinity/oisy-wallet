@@ -728,8 +728,7 @@
 			"btc_insufficient_balance_for_fee": "",
 			"btc_invalid_utxo_data": "",
 			"btc_utxo_locked": "",
-			"btc_invalid_fee_calculation": "",
-			"pending_transactions_not_available": "Служба ожидающих транзакций в настоящее время недоступна. Пожалуйста, попробуйте позже."
+			"btc_invalid_fee_calculation": ""
 		},
 		"error": {
 			"unexpected": "Что-то пошло не так при отправке транзакции.",

@@ -728,8 +728,7 @@
 			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insufficiente per coprire le commissioni di transazione",
 			"btc_invalid_utxo_data": "Dati della transazione Bitcoin non validi",
 			"btc_utxo_locked": "I fondi Bitcoin sono bloccati da transazioni in sospeso",
-			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita",
-			"pending_transactions_not_available": "Il servizio delle transazioni in sospeso non è attualmente disponibile. Si prega di riprovare più tardi."
+			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita"
 		},
 		"error": {
 			"unexpected": "Qualcosa è andato storto durante l'invio della transazione.",

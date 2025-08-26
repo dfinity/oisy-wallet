@@ -9,6 +9,9 @@ import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/uti
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { nullishSignOut } from '$lib/services/auth.services';
+import { i18n } from '$lib/stores/i18n.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { invalidAmount } from '$lib/utils/input.utils';
@@ -17,6 +20,7 @@ import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 interface BtcSendServiceParams {
 	identity: Identity;
@@ -29,6 +33,82 @@ export type SendBtcParams = BtcSendServiceParams & {
 	source: BtcAddress;
 	utxosFee: UtxosFee;
 	onProgress?: () => void;
+};
+
+/**
+ * This function handles the validation errors thrown by the validateUtxosForSend function
+ * It has been moved to a service so it can be shared between the BTC Send and Convert Wizard
+ * @param err BtcValidationError - The validation error that was thrown
+ * @param $i18n I18n - The i18n store containing translation strings
+ * @returns Promise<void> - Returns void if successful, may throw errors if validation fails
+ */
+export const handleBtcValidationError = async ({ err }: { err: BtcValidationError }) => {
+	switch (err.type) {
+		case BtcSendValidationError.AuthenticationRequired:
+			await nullishSignOut();
+			return;
+		case BtcSendValidationError.NoNetworkId:
+			toastsError({
+				msg: { text: get(i18n).send.error.no_btc_network_id }
+			});
+			break;
+		case BtcSendValidationError.InvalidDestination:
+			toastsError({
+				msg: { text: get(i18n).send.assertion.destination_address_invalid }
+			});
+			break;
+		case BtcSendValidationError.InvalidAmount:
+			toastsError({
+				msg: { text: get(i18n).send.assertion.amount_invalid }
+			});
+			break;
+		case BtcSendValidationError.UtxoFeeMissing:
+			toastsError({
+				msg: { text: get(i18n).send.assertion.utxos_fee_missing }
+			});
+			break;
+		case BtcSendValidationError.TokenUndefined:
+			toastsError({
+				msg: { text: get(i18n).tokens.error.unexpected_undefined }
+			});
+			break;
+		case BtcSendValidationError.InsufficientBalance:
+			toastsError({
+				msg: { text: get(i18n).send.assertion.btc_insufficient_balance }
+			});
+			break;
+		case BtcSendValidationError.InsufficientBalanceForFee:
+			toastsError({
+				msg: { text: get(i18n).send.assertion.btc_insufficient_balance_for_fee }
+			});
+			break;
+		case BtcSendValidationError.InvalidUtxoData:
+			toastsError({
+				msg: { text: get(i18n).send.assertion.btc_invalid_utxo_data }
+			});
+			break;
+		case BtcSendValidationError.UtxoLocked:
+			toastsError({
+				msg: { text: get(i18n).send.assertion.btc_utxo_locked }
+			});
+			break;
+		case BtcSendValidationError.InvalidFeeCalculation:
+			toastsError({
+				msg: { text: get(i18n).send.assertion.btc_invalid_fee_calculation }
+			});
+			break;
+		case BtcSendValidationError.MinimumBalance:
+			toastsError({
+				msg: { text: get(i18n).send.assertion.minimum_btc_amount }
+			});
+			break;
+		default:
+			toastsError({
+				msg: { text: get(i18n).send.error.unexpected },
+				err
+			});
+			break;
+	}
 };
 
 /**
@@ -49,11 +129,6 @@ export const validateBtcSend = async ({
 	network: BitcoinNetwork;
 	identity: Identity;
 }): Promise<void> => {
-	if (nonNullish(utxosFee.error)) {
-		// If the send button was not properly disabled during an error, we return the same error again
-		throw utxosFee.error;
-	}
-
 	// 1. Validate general input parameters first before accessing any properties
 	if (invalidAmount(amount)) {
 		throw new BtcValidationError(BtcSendValidationError.InvalidAmount);
@@ -92,7 +167,7 @@ export const validateBtcSend = async ({
 
 	if (isNullish(pendingUtxoTxIds)) {
 		// when no pending transactions have been initiated, we cannot validate UTXO's and therefore, validation must fail
-		throw new BtcValidationError(BtcSendValidationError.PendingTransactionsNotAvailable);
+		throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 	}
 
 	if (pendingUtxoTxIds.length > 0) {
@@ -158,6 +233,8 @@ export const sendBtc = async ({
 }: SendBtcParams): Promise<void> => {
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
 
+	onProgress?.();
+
 	await addPendingBtcTransaction({
 		identity,
 		network: mapToSignerBitcoinNetwork({ network }),
@@ -165,8 +242,6 @@ export const sendBtc = async ({
 		txId: txidStringToUint8Array(txid),
 		utxos: utxosFee.utxos
 	});
-
-	onProgress?.();
 
 	await waitAndTriggerWallet();
 };

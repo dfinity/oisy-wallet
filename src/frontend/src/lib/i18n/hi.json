@@ -728,8 +728,7 @@
 			"btc_insufficient_balance_for_fee": "",
 			"btc_invalid_utxo_data": "",
 			"btc_utxo_locked": "",
-			"btc_invalid_fee_calculation": "",
-			"pending_transactions_not_available": "लंबित लेनदेन सेवा वर्तमान में उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।"
+			"btc_invalid_fee_calculation": ""
 		},
 		"error": {
 			"unexpected": "लेनदेन भेजते समय कुछ गलत हो गया।",
