@@ -101,13 +101,13 @@
 	"auth": {
 		"text": {
 			"title_part_1": "$oisy_name",
-			"title_part_2": "完全分散型",
+			"title_part_2": "究極の分散型ウォレット",
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "開く／作成",
-			"asset_types": "Bitcoin、Solana、Ethereum、ICP など",
-			"instant_and_private": "いつでもどこでも瞬時かつプライベートにアクセス",
-			"advanced_cryptography": "100%オンチェーン：高度な暗号技術による安全性"
+			"asset_types": "Bitcoin、Solana、Ethereum、ICP 等に対応",
+			"instant_and_private": "いつでもどこでも、すぐにプライベートアクセス",
+			"advanced_cryptography": "100％オンチェーン。高度な暗号技術で守られる安全性。"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
@@ -148,8 +148,8 @@
 				"other_docs": "$oisy_short Docs: Internet Identity",
 				"other_private_key": "誰がネイティブアセットの秘密鍵を管理していますか？",
 				"other_asset_control": "$oisy_shortウォレットにおけるアセット管理、復旧、ガバナンス",
-				"need_help": "サインインに関して",
-				"sign_in": "サポートが必要ですか？"
+				"need_help": "サインイン",
+				"sign_in": "に関してサポートが必要ですか？"
 			},
 			"alt": {
 				"internet_identity": "新しいInternet Identityの画像",
@@ -344,7 +344,7 @@
 			"open_wallet": "ウォレットを開く",
 			"carousel_slide_title": "$oisy_short Sprinkles エピソード4が公開中！",
 			"carousel_slide_cta": "詳細を見る",
-			"sprinkles_earned": "$noOfSprinkles Sprinkles、合計 $amount を獲得しました！ 🎉",
+			"sprinkles_earned": "$noOfSprinkles Sprinkles、合計 $amount を獲得しました！ \uD83C\uDF89",
 			"youre_eligible": "参加資格があります！",
 			"ongoing": "進行中",
 			"ended": "終了済み ($amount)",
@@ -365,7 +365,7 @@
 		"campaigns": {
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: エピソード3公開中 🎉",
+				"card_title": "OISY Sprinkles: エピソード3公開中 \uD83C\uDF89",
 				"one_liner": "アクティブに活動してBTCを獲得し、さらに<strong>友達を招待</strong>して稼ごう。<br/>ログイン、取引、トークン保有で毎日のドロップ対象に。友達を紹介すれば、キャンペーン期間中、その友達の報酬の10%を獲得できます。",
 				"participate_title": "アクティブに活動してBTCを獲得 - そして今、友達を招待することでも獲得できます。",
 				"description": "簡単な週次要件を満たしてください。ログイン、2回の取引、そして少なくとも20ドル相当のトークンを保有して、毎日50回のBTCドロップのいずれかの資格を維持します。<br/><strong>紹介報酬も登場：</strong>友達を招待してウォレットを展開させると、30日間彼らのSprinklesの10%を獲得できます。彼らは100%を保持し、あなたは追加で獲得できます。",
@@ -390,7 +390,7 @@
 			},
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: エピソード4公開中 🎉",
+				"card_title": "OISY Sprinkles: エピソード4公開中 \uD83C\uDF89",
 				"one_liner": "アクティブに活動してBTCを獲得し、さらに紹介で<strong>保証された</strong>Sprinklesを獲得しよう。<br/>ログイン、取引、トークン保有で毎日のドロップ対象に。4人の友達を紹介すれば直接報酬がもらえます。トップリファラーはさらに多くを獲得できます。",
 				"participate_title": "アクティブに活動してBTCを獲得 - そして今、友達を招待することでも獲得できます。",
 				"description": "簡単な週次要件を満たしてください：ログイン、2回の取引、そして少なくとも20ドル相当のトークンを保有して、毎日最大50ドルのBTCドロップの資格を維持します。<br>紹介報酬も登場：友達を招待してウォレットを設定すると、二人とも保証されたSprinklesを獲得できます。トップ4のリファラーに入ると、ジャックポットを獲得できます。",
@@ -998,7 +998,7 @@
 		"error": {
 			"invalid_contract_address": "コントラクトアドレスが無効です",
 			"invalid_token_address": "トークンアドレスが無効です",
-			"invalid_ledger": "選択されたトークンはICRC台帳キャニスターにリンクされていません",
+			"invalid_ledger": "選択されたトークンはIcrc台帳キャニスターにリンクされていません",
 			"unrecognised_erc_interface": "認識できないERCインターフェースです。",
 			"no_metadata": "メタデータが取得されませんでした",
 			"unexpected": "トークンの保存中にエラーが発生しました",
@@ -1555,14 +1555,8 @@
 			"action_button_contacts_title": "アドレス帳を表示",
 			"action_button_contacts_subtitle": "保存したアドレス帳を表示します",
 			"action_button_contacts_prompt": "アドレス帳を表示してください。",
-			"action_button_send_tokens_title": "",
-			"action_button_send_tokens_subtitle": "",
-			"action_button_send_tokens_prompt": "",
-			"select_contact_message": "",
-			"send_to_message": "",
 			"send_message": "メッセージを送信",
 			"send_message_input_placeholder": "何をしたいですか？",
-			"send_token_succeeded": "",
 			"no_contacts_found_message": "申し訳ありません、アドレス帳に該当する連絡先が見つかりませんでした。",
 			"loading": "考え中..."
 		},
