@@ -1,4 +1,4 @@
-import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
+import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 import { AUTH_LICENSE_LINK, AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 import * as auth from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -17,7 +17,7 @@ describe('ButtonAuthenticateWithLicense', () => {
 	});
 
 	it('should render button authenticate with license content', () => {
-		const { container, getByText } = render(ButtonAuthenticateWithLicense);
+		const { container, getByText } = render(ButtonAuthenticateWithHelp);
 
 		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
@@ -40,7 +40,7 @@ describe('ButtonAuthenticateWithLicense', () => {
 	it('should open auth help modal on failed sign in', async () => {
 		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'cancelled' });
 
-		const { container } = render(ButtonAuthenticateWithLicense);
+		const { container } = render(ButtonAuthenticateWithHelp);
 
 		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 
@@ -56,7 +56,7 @@ describe('ButtonAuthenticateWithLicense', () => {
 	it('should do nothing on successful sign in', async () => {
 		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'ok' });
 
-		const { container } = render(ButtonAuthenticateWithLicense);
+		const { container } = render(ButtonAuthenticateWithHelp);
 
 		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
 

@@ -12,9 +12,9 @@
 
 <a
 	class:no-underline={noUnderline}
-	aria-label={replaceOisyPlaceholders($i18n.license_agreement.alt.license_agreement)}
+	aria-label={replaceOisyPlaceholders($i18n.privacy_policy.alt.privacy_policy)}
 	data-tid={testId}
-	href="/license-agreement"
+	href="/privacy-policy"
 >
-	{$i18n.license_agreement.text.license_agreement}
+	{$i18n.privacy_policy.text.privacy_policy}
 </a>
