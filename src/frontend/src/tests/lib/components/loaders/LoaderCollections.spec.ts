@@ -14,6 +14,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
+import type { TokenState } from '$declarations/backend/backend.did';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -112,13 +113,13 @@ describe('LoaderCollections', () => {
 			token: { Erc721: { token_address: mockEthAddress, chain_id: network.chainId } },
 			version: toNullable(1n),
 			enabled: true,
-			state: toNullable()
+			state: toNullable<TokenState>()
 		}));
 		const existingErc1155CustomTokens = networks.map((network) => ({
 			token: { Erc1155: { token_address: mockEthAddress, chain_id: network.chainId } },
 			version: toNullable(1n),
 			enabled: true,
-			state: toNullable()
+			state: toNullable<TokenState>()
 		}));
 
 		vi.mocked(listCustomTokens).mockResolvedValue([
