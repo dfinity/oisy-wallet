@@ -57,7 +57,7 @@ static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc20(ErcToken {
         token_address: ERC20_TOKEN_ID.clone(),
         chain_id: ERC20_CHAIN_ID.clone(),
-        allow_img_source: None,
+        allow_media_source: None,
     }),
     enabled: true,
     version: None,
@@ -69,7 +69,7 @@ static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc721(ErcToken {
         token_address: ERC721_TOKEN_ID.clone(),
         chain_id: ERC721_CHAIN_ID.clone(),
-        allow_img_source: Some(true),
+        allow_media_source: Some(true),
     }),
     enabled: true,
     version: None,
@@ -81,7 +81,7 @@ static ERC1155_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Erc1155(ErcToken {
         token_address: ERC1155_TOKEN_ID.clone(),
         chain_id: ERC1155_CHAIN_ID.clone(),
-        allow_img_source: Some(false),
+        allow_media_source: Some(false),
     }),
     enabled: true,
     version: None,

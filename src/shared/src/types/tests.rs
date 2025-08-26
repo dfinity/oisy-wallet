@@ -260,7 +260,7 @@ mod custom_token {
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 1,
-                        allow_img_source: None,
+                        allow_media_source: None,
                     },
                     valid: true,
                     description: "Valid Erc20Token",
@@ -271,7 +271,7 @@ mod custom_token {
                             "0x12345678901234567890123456789012345678".to_string()
                         ),
                         chain_id: 1,
-                        allow_img_source: None
+                        allow_media_source: None
                     },
                     valid: false,
                     description: "Erc20Token with a token address that is too short",
@@ -280,7 +280,7 @@ mod custom_token {
                     input: ErcToken {
                         token_address: ErcTokenId("1".repeat(99)),
                         chain_id: 1,
-                        allow_img_source: None
+                        allow_media_source: None
                     },
                     valid: false,
                     description: "Erc20Token with a token address that is too long",
@@ -291,7 +291,7 @@ mod custom_token {
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 2 ^ 64 - 1,
-                        allow_img_source: None
+                        allow_media_source: None
                     },
                     valid: true,
                     description: "Maximum chain ID",
@@ -302,7 +302,7 @@ mod custom_token {
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 0,
-                        allow_img_source: None
+                        allow_media_source: None
                     },
                     valid: true,
                     description: "Minimum chain ID",
@@ -313,10 +313,10 @@ mod custom_token {
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 0,
-                        allow_img_source: Some(true)
+                        allow_media_source: Some(true)
                     },
                     valid: true,
-                    description: "Erc20Token with allow_img_source set to true",
+                    description: "Erc20Token with allow_media_source set to true",
                 },
                 TestVector {
                     input: ErcToken {
@@ -324,10 +324,10 @@ mod custom_token {
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 0,
-                        allow_img_source: Some(false)
+                        allow_media_source: Some(false)
                     },
                     valid: true,
-                    description: "Erc20Token with allow_img_source set to false",
+                    description: "Erc20Token with allow_media_source set to false",
                 },
             ]
         );

@@ -74,7 +74,7 @@ describe('erc20.services', () => {
 				Erc20: {
 					chain_id: ETHEREUM_NETWORK.chainId,
 					token_address: mockEthAddress,
-					allow_img_source: toNullable()
+					allow_media_source: toNullable()
 				}
 			}
 		},
@@ -85,7 +85,7 @@ describe('erc20.services', () => {
 				Erc20: {
 					chain_id: BASE_NETWORK.chainId,
 					token_address: mockEthAddress2.toUpperCase(),
-					allow_img_source: toNullable()
+					allow_media_source: toNullable()
 				}
 			}
 		},
@@ -96,7 +96,7 @@ describe('erc20.services', () => {
 				Erc20: {
 					chain_id: POLYGON_AMOY_NETWORK.chainId,
 					token_address: mockEthAddress3,
-					allow_img_source: toNullable()
+					allow_media_source: toNullable()
 				}
 			}
 		}
@@ -661,7 +661,7 @@ describe('erc20.services', () => {
 					Erc20: {
 						chain_id: ETHEREUM_NETWORK.chainId,
 						token_address: EURC_TOKEN.address,
-						allow_img_source: toNullable()
+						allow_media_source: toNullable()
 					}
 				}
 			};
@@ -737,7 +737,7 @@ describe('erc20.services', () => {
 					Erc20: {
 						chain_id: ETHEREUM_NETWORK.chainId,
 						token_address: EURC_TOKEN.address,
-						allow_img_source: toNullable()
+						allow_media_source: toNullable()
 					}
 				}
 			};

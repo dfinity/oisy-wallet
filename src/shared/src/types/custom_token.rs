@@ -45,7 +45,7 @@ pub type ChainId = u64;
 pub struct ErcToken {
     pub token_address: ErcTokenId,
     pub chain_id: ChainId,
-    pub allow_img_source: Option<bool>,
+    pub allow_media_source: Option<bool>,
 }
 
 /// A variant describing any token

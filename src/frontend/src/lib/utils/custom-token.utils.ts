@@ -36,7 +36,7 @@ const toErcCustomToken = ({
 }: ErcSaveCustomToken): ErcToken => ({
 	token_address,
 	chain_id,
-	allow_img_source: toNullable()
+	allow_media_source: toNullable()
 });
 
 const toSplCustomToken = ({
