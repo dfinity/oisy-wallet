@@ -7,7 +7,6 @@
 		type InfuraErc1155Provider,
 		infuraErc1155Providers
 	} from '$eth/providers/infura-erc1155.providers';
-	import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 	import {
 		type InfuraErc721Provider,
 		infuraErc721Providers
