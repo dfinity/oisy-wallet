@@ -34,7 +34,7 @@ import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
-const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
+export const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
 
 export const fetchSolTransactionsForSignature = async ({
@@ -75,7 +75,7 @@ export const fetchSolTransactionsForSignature = async ({
 
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
 
-	// Inside the instructions there could be some that we are unable to decode, but that may have
+	// Inside the instructions, there could be some that we are unable to decode, but that may have
 	// simpler (and decoded) inner instructions. We should try to map those as well.
 	// They are inserted in the instructions array in the order they refer to the main instruction.
 	const { allInstructions } = [...putativeInnerInstructions]
@@ -142,7 +142,7 @@ export const fetchSolTransactionsForSignature = async ({
 
 			// The cumulative balances are updated for every instruction, so we can keep track of the
 			// SOL balance of the address and its associated token account at any given time.
-			// It is useful when mapping for example a `closeAccount` instruction, where the redeemed value
+			// It is useful when mapping, for example, a `closeAccount` instruction, where the redeemed value
 			// is not provided in the data and must be calculated as the latest total SOL balance of the Associated Token Account.
 			const cumulativeBalances = {
 				...accCumulativeBalances,
@@ -159,7 +159,7 @@ export const fetchSolTransactionsForSignature = async ({
 			}
 
 			// If the token address is not the one we are looking for, we can skip this instruction.
-			// In case of Solana native tokens, the token address is undefined.
+			// In the case of Solana native tokens, the token address is undefined.
 			if (mappedTokenAddress !== tokenAddress) {
 				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
