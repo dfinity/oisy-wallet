@@ -1035,13 +1035,16 @@
 			"collection_not_loaded": "",
 			"nft_not_loaded": "",
 			"collections": "",
-			"all_assets": ""
+			"all_assets": "",
+			"address_copied": "",
+			"open_explorer": ""
 		},
 		"alt": {
 			"placeholder_image": "",
 			"card": {
 				"image": ""
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
@@ -1552,8 +1555,14 @@
 			"action_button_contacts_title": "Zobrazit kontakty",
 			"action_button_contacts_subtitle": "Zobrazte své uložené kontakty",
 			"action_button_contacts_prompt": "Ukaž mi moje kontakty.",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "Poslat zprávu",
 			"send_message_input_placeholder": "Co chcete dělat?",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": "Přemýšlím..."
 		},

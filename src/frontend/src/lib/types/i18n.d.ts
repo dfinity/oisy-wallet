@@ -885,8 +885,10 @@ interface I18nNfts {
 		nft_not_loaded: string;
 		collections: string;
 		all_assets: string;
+		address_copied: string;
+		open_explorer: string;
 	};
-	alt: { placeholder_image: string; card: { image: string } };
+	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
 
 interface I18nFee {
@@ -1282,8 +1284,14 @@ interface I18nAi_assistant {
 		action_button_contacts_title: string;
 		action_button_contacts_subtitle: string;
 		action_button_contacts_prompt: string;
+		action_button_send_tokens_title: string;
+		action_button_send_tokens_subtitle: string;
+		action_button_send_tokens_prompt: string;
+		select_contact_message: string;
+		send_to_message: string;
 		send_message: string;
 		send_message_input_placeholder: string;
+		send_token_succeeded: string;
 		no_contacts_found_message: string;
 		loading: string;
 	};

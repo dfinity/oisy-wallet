@@ -1035,13 +1035,16 @@
 			"collection_not_loaded": "",
 			"nft_not_loaded": "",
 			"collections": "",
-			"all_assets": ""
+			"all_assets": "",
+			"address_copied": "",
+			"open_explorer": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",
 			"card": {
 				"image": "Imagem do NFT com token ID: $tokenId"
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
@@ -1552,8 +1555,14 @@
 			"action_button_contacts_title": "Mostrar contatos",
 			"action_button_contacts_subtitle": "Mostrar os seus contatos salvos",
 			"action_button_contacts_prompt": "Mostrar meus contatos.",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "Enviar mensagem",
 			"send_message_input_placeholder": "O que você quer fazer?",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
 			"loading": "A pensar..."
 		},

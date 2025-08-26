@@ -1,4 +1,3 @@
-import { AI_ASSISTANT_SYSTEM_PROMPT } from '$lib/constants/ai-assistant.constants';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import type { ChatMessage } from '$lib/types/ai-assistant';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -8,14 +7,7 @@ import { get } from 'svelte/store';
 describe('ai-assistant.store', () => {
 	const defaultState = {
 		isOpen: false,
-		chatHistory: [
-			{
-				role: 'system',
-				data: {
-					text: AI_ASSISTANT_SYSTEM_PROMPT
-				}
-			}
-		]
+		chatHistory: []
 	};
 
 	beforeEach(() => {

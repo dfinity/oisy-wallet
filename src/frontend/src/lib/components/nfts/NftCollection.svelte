@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
+	import NftCardSkeleton from '$lib/components/nfts/NftCardSkeleton.svelte';
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -43,8 +44,14 @@
 
 <NftCollectionHero {collection} nfts={collectionNfts} />
 
-<div class="mt-4 grid grid-cols-3 gap-2 gap-y-4 pt-4">
-	{#each collectionNfts as nft, index (nft.id + index)}
-		<NftCard {nft} />
-	{/each}
+<div class="mt-4 grid grid-cols-3 gap-3 gap-y-4 py-4">
+	{#if collectionNfts.length > 0}
+		{#each collectionNfts as nft, index (nft.id + index)}
+			<NftCard {nft} />
+		{/each}
+	{:else}
+		<NftCardSkeleton />
+		<NftCardSkeleton />
+		<NftCardSkeleton />
+	{/if}
 </div>

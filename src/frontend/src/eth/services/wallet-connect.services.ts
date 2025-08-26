@@ -163,7 +163,7 @@ export const send = ({
 
 				await listener.approveRequest({ id, topic, message: hash });
 
-				progress(lastProgressStep);
+				progress?.(lastProgressStep);
 
 				trackEvent({
 					name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
