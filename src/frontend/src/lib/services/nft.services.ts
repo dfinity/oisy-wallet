@@ -9,10 +9,10 @@ import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
-import { TRACK_ETH_LOADING_NFT_IDS_ERROR } from '$lib/constants/analytics.contants';
-import { trackEvent } from '$lib/services/analytics.services';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
+import { TRACK_ETH_LOADING_NFT_IDS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
