@@ -162,18 +162,6 @@
 			setTimeout(() => onClose(), 2500);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
-			// TODO: Add unit tests to cover failed swap error scenarios
-			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
-				failedSwapError.set({
-					message: replacePlaceholders(
-						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
-						{
-							$maxSlippage: slippageValue.toString()
-						}
-					),
-					variant: 'info'
-				});
-			}
 
 			if (isSwapError(err)) {
 				failedSwapError.set({
@@ -182,9 +170,19 @@
 					errorType: err.code,
 					swapSucceded: err.swapSucceded,
 					url: {
-						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcToken).ledgerCanisterId}&output=${($destinationToken as IcToken).ledgerCanisterId}`,
+						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcTokenToggleable).ledgerCanisterId}&output=${($destinationToken as IcTokenToggleable).ledgerCanisterId}`,
 						text: 'icpswap.com'
 					}
+				});
+			} else if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: slippageValue.toString()
+						}
+					),
+					variant: 'info'
 				});
 			} else {
 				failedSwapError.set(undefined);
