@@ -76,7 +76,7 @@ describe('erc20.services', () => {
 					token_address: mockEthAddress
 				}
 			},
-			state: toNullable()
+			section: toNullable()
 		},
 		{
 			version: toNullable(2n),
@@ -87,7 +87,7 @@ describe('erc20.services', () => {
 					token_address: mockEthAddress2.toUpperCase()
 				}
 			},
-			state: toNullable()
+			section: toNullable()
 		},
 		{
 			version: toNullable(),
@@ -98,7 +98,7 @@ describe('erc20.services', () => {
 					token_address: mockEthAddress3
 				}
 			},
-			state: toNullable()
+			section: toNullable()
 		}
 	];
 
@@ -663,7 +663,7 @@ describe('erc20.services', () => {
 						token_address: EURC_TOKEN.address
 					}
 				},
-				state: toNullable()
+				section: toNullable()
 			};
 			assert('Erc20' in additionalCustomToken.token);
 
@@ -739,7 +739,7 @@ describe('erc20.services', () => {
 						token_address: EURC_TOKEN.address
 					}
 				},
-				state: toNullable()
+				section: toNullable()
 			};
 
 			vi.mocked(listCustomTokens).mockResolvedValue([...mockCustomTokens, additionalCustomToken]);

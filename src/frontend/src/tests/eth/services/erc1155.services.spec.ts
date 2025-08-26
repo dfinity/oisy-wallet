@@ -39,7 +39,7 @@ describe('erc1155.services', () => {
 					token_address: mockEthAddress
 				}
 			},
-			state: toNullable()
+			section: toNullable()
 		},
 		{
 			version: toNullable(2n),
@@ -50,7 +50,7 @@ describe('erc1155.services', () => {
 					token_address: mockEthAddress2.toUpperCase()
 				}
 			},
-			state: toNullable()
+			section: toNullable()
 		},
 		{
 			version: toNullable(),
@@ -61,7 +61,7 @@ describe('erc1155.services', () => {
 					token_address: mockEthAddress3
 				}
 			},
-			state: toNullable()
+			section: toNullable()
 		}
 	];
 

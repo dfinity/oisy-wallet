@@ -66,7 +66,7 @@ describe('spl-custom-tokens.services', () => {
 						symbol: toNullable('TK1')
 					}
 				},
-				state: toNullable()
+				section: toNullable()
 			},
 			{
 				enabled: true,
@@ -78,7 +78,7 @@ describe('spl-custom-tokens.services', () => {
 						symbol: toNullable('TK2')
 					}
 				},
-				state: toNullable()
+				section: toNullable()
 			},
 			{
 				enabled: true,
@@ -90,7 +90,7 @@ describe('spl-custom-tokens.services', () => {
 						symbol: toNullable('TK3')
 					}
 				},
-				state: toNullable()
+				section: toNullable()
 			}
 		];
 

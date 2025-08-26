@@ -68,7 +68,7 @@ describe('icrc.services', () => {
 			},
 			version: [1n],
 			enabled: true,
-			state: toNullable()
+			section: toNullable()
 		};
 
 		beforeEach(() => {
@@ -151,7 +151,7 @@ describe('icrc.services', () => {
 					},
 					version: [1n],
 					enabled: true,
-					state: toNullable()
+					section: toNullable()
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
@@ -172,7 +172,7 @@ describe('icrc.services', () => {
 					},
 					version: [1n],
 					enabled: true,
-					state: toNullable()
+					section: toNullable()
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);

@@ -6,7 +6,7 @@ import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store'
 import type { Erc721ContractAddress } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
-import { CustomTokenState } from '$lib/enums/custom-token-state';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -74,9 +74,9 @@ const loadCustomTokensWithMetadata = async (
 				(customToken): customToken is CustomToken & { token: { Erc721: ErcToken } } =>
 					'Erc721' in customToken.token
 			)
-			.map(async ({ token, enabled, version: versionNullable, state: stateNullable }) => {
+			.map(async ({ token, enabled, version: versionNullable, section: sectionNullable }) => {
 				const version = fromNullable(versionNullable);
-				const state = fromNullable(stateNullable);
+				const section = fromNullable(sectionNullable);
 
 				const {
 					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
@@ -109,8 +109,8 @@ const loadCustomTokensWithMetadata = async (
 						category: 'custom' as const,
 						enabled,
 						version,
-						...(nonNullish(state) && {
-							state: 'Spam' in state ? CustomTokenState.SPAM : CustomTokenState.HIDDEN
+						...(nonNullish(section) && {
+							section: 'Spam' in section ? CustomTokenSection.SPAM : CustomTokenSection.HIDDEN
 						})
 					},
 					...metadata
