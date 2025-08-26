@@ -13,21 +13,27 @@
 	} from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		slippageValue: OptionAmount;
 		name?: string;
+		maxSlippageInvalidValue: number;
 	}
 
-	let { slippageValue = $bindable(undefined), name = 'swap-slippage' }: Props = $props();
+	let {
+		slippageValue = $bindable(undefined),
+		name = 'swap-slippage',
+		maxSlippageInvalidValue
+	}: Props = $props();
 
 	let parsedValue = $derived(nonNullish(slippageValue) ? Number(slippageValue) : 0);
 
 	let slippageValueWarning = $derived(
-		parsedValue < SWAP_SLIPPAGE_INVALID_VALUE && parsedValue >= SWAP_SLIPPAGE_WARNING_VALUE
+		parsedValue < maxSlippageInvalidValue && parsedValue >= SWAP_SLIPPAGE_WARNING_VALUE
 	);
 
-	let slippageValueError = $derived(parsedValue >= SWAP_SLIPPAGE_INVALID_VALUE || parsedValue <= 0);
+	let slippageValueError = $derived(parsedValue >= maxSlippageInvalidValue || parsedValue <= 0);
 
 	let cmp = $state<Collapsible | undefined>(undefined);
 	let expanded = $state(false);
@@ -114,14 +120,22 @@
 				class:text-warning-primary={slippageValueWarning}
 			>
 				{#if slippageValueError}
-					<div in:fade>{$i18n.swap.text.max_slippage_error}</div>
+					<div in:fade
+						>{replacePlaceholders($i18n.swap.text.max_slippage_error, {
+							$maxSlippage: maxSlippageInvalidValue.toString()
+						})}</div
+					>
 				{:else if slippageValueWarning}
 					<div class="flex gap-1" in:fade>
 						<IconWarning />
 						<span>{$i18n.swap.text.max_slippage_warning}</span>
 					</div>
 				{:else}
-					<div in:fade>{$i18n.swap.text.max_slippage_info}</div>
+					<div in:fade>
+						{replacePlaceholders($i18n.swap.text.max_slippage_info, {
+							$maxSlippage: maxSlippageInvalidValue.toString()
+						})}</div
+					>
 				{/if}
 			</div>
 		</div>

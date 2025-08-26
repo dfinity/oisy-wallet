@@ -18,7 +18,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import {
 		SUPPORTED_CROSS_SWAP_NETWORKS,
-		SWAP_SLIPPAGE_INVALID_VALUE
+		SWAP_SLIPPAGE_INVALID_VALUE,
 	} from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -31,6 +31,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { isNetworkIdICP } from '$lib/utils/network.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -256,7 +257,12 @@
 			</TokenInputNetworkWrapper>
 		</div>
 
-		<SwapSlippage bind:slippageValue />
+		<SwapSlippage
+			bind:slippageValue
+			maxSlippageInvalidValue={isNetworkIdICP($sourceToken?.network.id)
+				? SWAP_SLIPPAGE_INVALID_VALUE
+				: SWAP_SLIPPAGE_VELORA_INVALID_VALUE}
+		/>
 
 		{@render swapDetails?.()}
 	</div>
