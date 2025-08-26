@@ -10,6 +10,15 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
+// Mock the debounce function to execute immediately
+vi.mock('@dfinity/utils', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@dfinity/utils')>();
+	return {
+		...actual,
+		debounce: (fn: Function) => fn // Execute immediately instead of debouncing
+	};
+});
+
 describe('BtcUtxosFee', () => {
 	const mockContext = new Map([]);
 	mockContext.set(
@@ -96,21 +105,21 @@ describe('BtcUtxosFee', () => {
 			});
 
 			// Wait for initial call during onMount
-			await waitFor(() => {
+			await vi.waitFor(() => {
 				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 			});
 
 			// Advance timer by the interval and verify scheduler calls prepareBtcSend
-			await vi.advanceTimersByTimeAsync(BTC_UTXOS_FEE_UPDATE_INTERVAL);
+			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
-			await waitFor(() => {
+			await vi.waitFor(() => {
 				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
 			});
 
 			// Advance timer again to verify continuous scheduling
-			await vi.advanceTimersByTimeAsync(BTC_UTXOS_FEE_UPDATE_INTERVAL);
+			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
-			await waitFor(() => {
+			await vi.waitFor(() => {
 				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(3);
 			});
 		});
@@ -132,14 +141,14 @@ describe('BtcUtxosFee', () => {
 			});
 
 			// Wait for initial call
-			await waitFor(() => {
+			await vi.waitFor(() => {
 				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 			});
 
 			// Advance timer to verify scheduler is working
-			await vi.advanceTimersByTimeAsync(BTC_UTXOS_FEE_UPDATE_INTERVAL);
+			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
-			await waitFor(() => {
+			await vi.waitFor(() => {
 				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
 			});
 
@@ -147,7 +156,7 @@ describe('BtcUtxosFee', () => {
 			unmount();
 
 			// Advance timer again - should not call prepareBtcSend anymore
-			await vi.advanceTimersByTimeAsync(BTC_UTXOS_FEE_UPDATE_INTERVAL);
+			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
 			// Should still be 2 calls (no additional calls after unmount)
 			expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
