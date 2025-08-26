@@ -28,6 +28,8 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
+	import NewSwapModal from './NewSwapModal.svelte';
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
 		store: initSwapAmountsStore()
@@ -103,5 +105,9 @@
 </script>
 
 <SwapButtonWithModal isOpen={$modalSwap} onOpen={onOpenSwap}>
-	<SwapModal on:nnsClose />
+	{#if VELORA_SWAP_ENABLED}
+		<NewSwapModal on:nnsClose />
+	{:else}
+		<SwapModal on:nnsClose />
+	{/if}
 </SwapButtonWithModal>
