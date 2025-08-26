@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { capitalizeFirstLetter } from '../../../tests/utils/string-utils';
 	import { SUPPORTED_CURRENCIES } from '$env/currency.env';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -18,7 +19,6 @@
 	import { currencyStore } from '$lib/stores/currency.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { getCurrencyName, getCurrencySymbol } from '$lib/utils/currency.utils';
-	import { capitalizeFirstLetter } from '../../../tests/utils/string-utils';
 
 	let dropdown = $state<Dropdown>();
 
@@ -91,7 +91,7 @@
 								{/if}
 							</span>
 							<div class="flex w-full flex-row justify-between gap-5">
-						{capitalizeFirstLetter(name)}
+								{capitalizeFirstLetter(name)}
 								<span class="text-right text-tertiary">{symbol}</span>
 							</div>
 						</Button>
