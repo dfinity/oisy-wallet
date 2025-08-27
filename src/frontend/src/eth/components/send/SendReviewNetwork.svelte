@@ -21,7 +21,7 @@
 		isNetworkICP(targetNetwork) && ERC20_CONTRACT_ICP.address === (token as Erc20Token)?.address;
 </script>
 
-<Value ref="source-network" element="div">
+<Value element="div" ref="source-network">
 	{#snippet label()}
 		{#if nonNullish(targetNetwork)}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 				.network}{/if}
@@ -32,7 +32,7 @@
 </Value>
 
 {#if nonNullish(targetNetwork)}
-	<Value ref="target-network" element="div">
+	<Value element="div" ref="target-network">
 		{#snippet label()}
 			{$i18n.send.text.destination_network}
 		{/snippet}

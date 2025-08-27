@@ -381,7 +381,7 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WizardModal {steps} bind:currentStep bind:this={modal} onClose={resetAndClose}>
+	<WizardModal bind:this={modal} onClose={resetAndClose} {steps} bind:currentStep>
 		{#snippet title()}
 			<WalletConnectModalTitle>
 				{`${
@@ -393,12 +393,7 @@
 		{/snippet}
 
 		{#if currentStep?.name === 'Review'}
-			<WalletConnectReview
-				{proposal}
-				on:icReject={reject}
-				on:icApprove={approve}
-				on:icCancel={cancel}
-			/>
+			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
 		{:else}
 			<WalletConnectForm on:icConnect={userConnect} />
 		{/if}

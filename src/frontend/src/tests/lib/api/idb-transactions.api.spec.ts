@@ -4,6 +4,10 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import {
+	clearIdbBtcTransactions,
+	clearIdbEthTransactions,
+	clearIdbIcTransactions,
+	clearIdbSolTransactions,
 	deleteIdbBtcTransactions,
 	deleteIdbEthTransactions,
 	deleteIdbIcTransactions,
@@ -317,6 +321,38 @@ describe('idb-transactions.api', () => {
 				principal: mockPrincipal,
 				store: expect.any(Object)
 			});
+		});
+	});
+
+	describe('clearIdbBtcTransactions', () => {
+		it('should clear BTC transactions', async () => {
+			await clearIdbBtcTransactions();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbEthTransactions', () => {
+		it('should clear ETH transactions', async () => {
+			await clearIdbEthTransactions();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbIcTransactions', () => {
+		it('should clear IC transactions', async () => {
+			await clearIdbIcTransactions();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbSolTransactions', () => {
+		it('should clear SOL transactions', async () => {
+			await clearIdbSolTransactions();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
 		});
 	});
 });

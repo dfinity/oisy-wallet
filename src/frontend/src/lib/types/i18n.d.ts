@@ -17,6 +17,7 @@ interface I18nCore {
 		symbol: string;
 		decimals: string;
 		amount: string;
+		tokenId: string;
 		max: string;
 		destination: string;
 		reject: string;
@@ -153,6 +154,17 @@ interface I18nAuth {
 			other_asset_control: string;
 			sign_in: string;
 		};
+	};
+}
+
+interface I18nLock {
+	text: {
+		title_part_1: string;
+		title_part_2: string;
+		unlock: string;
+		logout: string;
+		logout_clear_cash_message: string;
+		learn_more: string;
 	};
 }
 
@@ -588,6 +600,12 @@ interface I18nSend {
 		cketh_max_transaction_fee_missing: string;
 		utxos_fee_missing: string;
 		minimum_btc_amount: string;
+		btc_insufficient_balance: string;
+		btc_insufficient_balance_for_fee: string;
+		btc_invalid_utxo_data: string;
+		btc_utxo_locked: string;
+		btc_invalid_fee_calculation: string;
+		pending_transactions_not_available: string;
 	};
 	error: {
 		unexpected: string;
@@ -690,6 +708,10 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
+		network_cost: string;
+		gasless: string;
+		swap_fees: string;
+		cross_chain_networks_info: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -841,8 +863,33 @@ interface I18nTokens {
 }
 
 interface I18nNfts {
-	text: { title: string; title_empty: string; description_empty: string };
-	alt: { placeholder_image: string; card: { image: string } };
+	text: {
+		title: string;
+		title_empty: string;
+		description_empty: string;
+		grouping: string;
+		as_plain_list: string;
+		by_collection: string;
+		show_spam: string;
+		show_hidden: string;
+		sorting: string;
+		recents_first: string;
+		oldest_first: string;
+		collection_atoz: string;
+		collection_ztoa: string;
+		collection_items_count: string;
+		collection_address: string;
+		token_standard: string;
+		quantity: string;
+		item_traits: string;
+		collection_not_loaded: string;
+		nft_not_loaded: string;
+		collections: string;
+		all_assets: string;
+		address_copied: string;
+		open_explorer: string;
+	};
+	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
 
 interface I18nFee {
@@ -1047,14 +1094,10 @@ interface I18nVip {
 			reward_received: string;
 			reward_failed: string;
 			reward_received_description: string;
+			brand_reward_received_description: string;
 			reward_failed_description: string;
 		};
-		error: {
-			loading_reward: string;
-			loading_user_data: string;
-			claiming_reward: string;
-			loading_eligibility: string;
-		};
+		error: { loading_reward: string; loading_user_data: string; loading_eligibility: string };
 	};
 	invitation: {
 		text: {
@@ -1190,8 +1233,19 @@ interface I18nLicense_agreement {
 		assignment: string;
 		no_waiver: string;
 		english_version: string;
+		body: string;
 	};
 	alt: { license_agreement: string };
+}
+
+interface I18nTerms_of_use {
+	text: { terms_of_use: string; title: string; body: string };
+	alt: { terms_of_use: string };
+}
+
+interface I18nPrivacy_policy {
+	text: { privacy_policy: string; title: string; body: string };
+	alt: { privacy_policy: string };
 }
 
 interface I18nActivity {
@@ -1242,8 +1296,14 @@ interface I18nAi_assistant {
 		action_button_contacts_title: string;
 		action_button_contacts_subtitle: string;
 		action_button_contacts_prompt: string;
+		action_button_send_tokens_title: string;
+		action_button_send_tokens_subtitle: string;
+		action_button_send_tokens_prompt: string;
+		select_contact_message: string;
+		send_to_message: string;
 		send_message: string;
 		send_message_input_placeholder: string;
+		send_token_succeeded: string;
 		no_contacts_found_message: string;
 		loading: string;
 	};
@@ -1255,6 +1315,7 @@ interface I18n {
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
+	lock: I18nLock;
 	dapps: I18nDapps;
 	rewards: I18nRewards;
 	footer: I18nFooter;
@@ -1285,6 +1346,8 @@ interface I18n {
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
+	terms_of_use: I18nTerms_of_use;
+	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
 	welcome: I18nWelcome;

@@ -7,7 +7,9 @@
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
 	} from '$icp/stores/ic-token-fee.store';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
+	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -16,14 +18,11 @@
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { Currency } from '$lib/enums/currency';
-	import { Languages } from '$lib/enums/languages';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swapService } from '$lib/services/swap.services';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -34,7 +33,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
-	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
 
@@ -79,12 +77,7 @@
 
 	let sourceTokenUsdValue = $derived(
 		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
-			? formatCurrency({
-					value: Number(swapAmount) * $sourceTokenExchangeRate,
-					currency: Currency.USD,
-					exchangeRate: $currencyExchangeStore,
-					language: Languages.ENGLISH
-				})
+			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
 			: undefined
 	);
 
@@ -129,8 +122,8 @@
 			await swapService[$swapAmountsStore.selectedProvider.provider]({
 				identity: $authIdentity,
 				progress,
-				sourceToken: $sourceToken,
-				destinationToken: $destinationToken,
+				sourceToken: $sourceToken as IcTokenToggleable,
+				destinationToken: $destinationToken as IcTokenToggleable,
 				swapAmount,
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
@@ -163,18 +156,6 @@
 			setTimeout(() => close(), 2500);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
-			// TODO: Add unit tests to cover failed swap error scenarios
-			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
-				failedSwapError.set({
-					message: replacePlaceholders(
-						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
-						{
-							$maxSlippage: slippageValue.toString()
-						}
-					),
-					variant: 'info'
-				});
-			}
 
 			if (isSwapError(err)) {
 				failedSwapError.set({
@@ -183,9 +164,20 @@
 					errorType: err.code,
 					swapSucceded: err.swapSucceded,
 					url: {
-						url: `https://app.icpswap.com/swap?input=${$sourceToken.ledgerCanisterId}&output=${$destinationToken.ledgerCanisterId}`,
+						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcTokenToggleable).ledgerCanisterId}&output=${($destinationToken as IcTokenToggleable).ledgerCanisterId}`,
 						text: 'icpswap.com'
 					}
+				});
+				// TODO: Add unit tests to cover failed swap error scenarios
+			} else if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: slippageValue.toString()
+						}
+					),
+					variant: 'info'
 				});
 			} else {
 				failedSwapError.set(undefined);
@@ -222,17 +214,18 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<IcTokenFeeContext token={$sourceToken}>
+<IcTokenFeeContext token={$sourceToken as IcTokenToggleable}>
 	<SwapAmountsContext
 		amount={swapAmount}
-		sourceToken={$sourceToken}
-		destinationToken={$destinationToken}
-		{slippageValue}
+		destinationToken={$destinationToken as IcTokenToggleable}
 		isSourceTokenIcrc2={$isSourceTokenIcrc2}
+		{slippageValue}
+		sourceToken={$sourceToken as IcTokenToggleable}
 		bind:isSwapAmountsLoading
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapForm
+				{isSwapAmountsLoading}
 				on:icClose
 				on:icNext
 				on:icShowTokensList
@@ -240,23 +233,26 @@
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue
-				{isSwapAmountsLoading}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
-				on:icSwap={swap}
-				on:icBack
-				on:icClose
+				onBack={() => dispatch('icBack')}
+				onClose={() => dispatch('icClose')}
+				onSwap={swap}
+				{receiveAmount}
 				{slippageValue}
 				{swapAmount}
-				{receiveAmount}
-			/>
+			>
+				{#snippet swapFees()}
+					<SwapFees />
+				{/snippet}
+			</SwapReview>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
-				bind:swapProgressStep
-				bind:failedSteps={swapFailedProgressSteps}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}
+				bind:swapProgressStep
+				bind:failedSteps={swapFailedProgressSteps}
 			/>
 		{/if}
 	</SwapAmountsContext>

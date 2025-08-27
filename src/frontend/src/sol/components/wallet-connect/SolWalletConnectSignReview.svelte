@@ -8,48 +8,45 @@
 	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Balance } from '$lib/types/balance';
-	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import type { SolanaNetwork } from '$sol/types/network';
 
-	export let amount: bigint | undefined;
-	export let destination: string;
-	export let data: string | undefined;
-	export let token: Token;
+	interface Props {
+		amount?: bigint;
+		destination: string;
+		data?: string;
+		token: Token;
+		onApprove: () => void;
+		onReject: () => void;
+	}
 
-	let network: SolanaNetwork;
-	let decimals: number;
-	$: ({ id: tokenId, network, decimals } = token);
+	let { amount, destination, data, token, onApprove, onReject }: Props = $props();
 
-	let balance: Balance | undefined;
-	$: balance = $balancesStore?.[tokenId]?.data;
+	let balance = $derived($balancesStore?.[token.id]?.data);
 
-	let amountDisplay: OptionAmount;
-	$: amountDisplay = nonNullish(amount)
-		? formatToken({ value: amount, unitName: decimals })
-		: undefined;
+	let amountDisplay = $derived(
+		nonNullish(amount) ? formatToken({ value: amount, unitName: token.decimals }) : undefined
+	);
 </script>
 
 <ContentWithToolbar>
 	<!-- TODO: add address for devnet and testnet -->
 	<SendData
 		amount={amountDisplay}
-		{destination}
-		{token}
 		{balance}
-		source={$solAddressMainnet ?? ''}
+		{destination}
 		showNullishAmountLabel
+		source={$solAddressMainnet ?? ''}
+		{token}
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
 		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
 
-		<ReviewNetwork sourceNetwork={network} slot="network" />
+		<ReviewNetwork slot="network" sourceNetwork={token.network} />
 	</SendData>
 
 	{#snippet toolbar()}
-		<WalletConnectActions on:icApprove on:icReject />
+		<WalletConnectActions {onApprove} {onReject} />
 	{/snippet}
 </ContentWithToolbar>

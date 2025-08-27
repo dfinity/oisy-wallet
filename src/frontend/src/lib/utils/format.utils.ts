@@ -6,7 +6,7 @@ import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
 import type { CurrencyExchangeData } from '$lib/types/currency';
 import { getCurrencyDecimalDigits } from '$lib/utils/currency.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 import Decimal from 'decimal.js';
 import type { BigNumberish } from 'ethers/utils';
@@ -90,13 +90,20 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 
 export const formatSecondsToDate = ({
 	seconds,
-	language
+	language,
+	formatOptions
 }: {
 	seconds: number;
 	language?: Languages;
+	formatOptions?: Intl.DateTimeFormatOptions;
 }): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(
+		language ?? Languages.ENGLISH,
+		nonNullish(formatOptions)
+			? { ...DATE_TIME_FORMAT_OPTIONS, ...formatOptions }
+			: DATE_TIME_FORMAT_OPTIONS
+	);
 };
 
 export const formatNanosecondsToDate = ({

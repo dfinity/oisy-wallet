@@ -24,13 +24,13 @@
 
 <ContentWithToolbar {testId}>
 	<ConvertAmount
+		{destinationTokenFee}
+		{ethereumEstimateFee}
+		{minFee}
+		{totalFee}
 		bind:sendAmount
 		bind:receiveAmount
 		bind:exchangeValueUnit
-		{totalFee}
-		{destinationTokenFee}
-		{minFee}
-		{ethereumEstimateFee}
 	/>
 
 	<div class="mt-6">

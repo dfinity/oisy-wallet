@@ -1,11 +1,10 @@
-import type {
-	ContactAddressUiWithId,
-	ContactUi,
-	ExtendedAddressContactUi
-} from '$lib/types/contact';
+import type { Address } from '$lib/types/address';
+import type { ContactAddressUiWithId, ExtendedAddressContactUi } from '$lib/types/contact';
+import type { Token } from '$lib/types/token';
 
 export interface ChatMessageContent {
 	text?: string;
+	context?: string;
 	tool?: {
 		calls: ToolCall[];
 		results: ToolResult[];
@@ -32,9 +31,22 @@ export interface ToolCall {
 	function: ToolFunction;
 }
 
+export interface ShowContactsToolResult {
+	contacts: ExtendedAddressContactUi[];
+	message?: string;
+}
+
+export interface ReviewSendTokensToolResult {
+	amount: number;
+	token: Token;
+	contact?: ExtendedAddressContactUi;
+	contactAddress?: ContactAddressUiWithId;
+	address?: Address;
+}
+
 export interface ToolResult {
-	type: 'show_contacts';
-	result?: ContactUi[];
+	type: 'show_contacts' | 'review_send_tokens';
+	result?: ShowContactsToolResult | ReviewSendTokensToolResult;
 }
 
 export interface AiAssistantContactUi

@@ -10,7 +10,7 @@ import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
 import { get } from 'svelte/store';
 
@@ -104,6 +104,8 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 			...(nonNullish(metadata.name) && { name: metadata.name }),
 			...('decimals' in metadata &&
 				nonNullish(metadata.decimals) && { decimals: metadata.decimals }),
+			...(nonNullish(metadata.description) &&
+				notEmptyString(metadata.description) && { description: metadata.description }),
 			...(mappedProperties.length > 0 && { attributes: [...mappedAttributes, ...mappedProperties] })
 		};
 	};
@@ -118,7 +120,7 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 		tokenId: NftId;
 	}): Promise<number> => {
 		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);
-		return await erc1155Contract.balanceOf(walletAddress, tokenId);
+		return Number(await erc1155Contract.balanceOf(walletAddress, tokenId));
 	};
 }
 

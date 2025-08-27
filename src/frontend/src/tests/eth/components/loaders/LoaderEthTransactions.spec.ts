@@ -182,7 +182,8 @@ describe('LoaderEthTransactions', () => {
 		await waitFor(() => {
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_TOKEN_ID,
-				networkId: SEPOLIA_NETWORK_ID
+				networkId: SEPOLIA_NETWORK_ID,
+				standard: SEPOLIA_TOKEN.standard
 			});
 		});
 	});
@@ -199,7 +200,8 @@ describe('LoaderEthTransactions', () => {
 		await waitFor(() => {
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: BASE_SEPOLIA_ETH_TOKEN_ID,
-				networkId: BASE_SEPOLIA_NETWORK_ID
+				networkId: BASE_SEPOLIA_NETWORK_ID,
+				standard: BASE_SEPOLIA_ETH_TOKEN.standard
 			});
 		});
 	});
@@ -216,7 +218,8 @@ describe('LoaderEthTransactions', () => {
 		await waitFor(() => {
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_PEPE_TOKEN.id,
-				networkId: SEPOLIA_PEPE_TOKEN.network.id
+				networkId: SEPOLIA_PEPE_TOKEN.network.id,
+				standard: SEPOLIA_PEPE_TOKEN.standard
 			});
 		});
 	});
@@ -234,7 +237,8 @@ describe('LoaderEthTransactions', () => {
 			expect(loadEthereumTransactions).toHaveBeenCalledOnce();
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_TOKEN_ID,
-				networkId: SEPOLIA_NETWORK_ID
+				networkId: SEPOLIA_NETWORK_ID,
+				standard: SEPOLIA_TOKEN.standard
 			});
 		});
 	});
@@ -248,7 +252,8 @@ describe('LoaderEthTransactions', () => {
 		await waitFor(() => {
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_TOKEN_ID,
-				networkId: SEPOLIA_NETWORK_ID
+				networkId: SEPOLIA_NETWORK_ID,
+				standard: SEPOLIA_TOKEN.standard
 			});
 		});
 
@@ -261,7 +266,8 @@ describe('LoaderEthTransactions', () => {
 		await waitFor(() => {
 			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_PEPE_TOKEN.id,
-				networkId: SEPOLIA_PEPE_TOKEN.network.id
+				networkId: SEPOLIA_PEPE_TOKEN.network.id,
+				standard: SEPOLIA_PEPE_TOKEN.standard
 			});
 		});
 
