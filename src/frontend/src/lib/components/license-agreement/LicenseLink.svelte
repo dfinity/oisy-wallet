@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 
 	interface Props {
 		noUnderline?: boolean;

@@ -1,13 +1,13 @@
 <script lang="ts">
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import InviteRewardsBanner from '$lib/components/ui/InviteRewardsBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
-	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 
 	const infoList = $derived([
 		{
