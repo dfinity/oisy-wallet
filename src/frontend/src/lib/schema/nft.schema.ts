@@ -1,7 +1,7 @@
+import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { Network } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import * as z from 'zod';
-import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 export const NftIdSchema = z.number().brand<'NftId'>();
 
