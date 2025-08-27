@@ -478,6 +478,15 @@ describe('format.utils', () => {
 
 			expect(result).toBe('Invalid Date');
 		});
+
+		it('allows to pass custom date formatting', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672531200,
+				formatOptions: { minute: '2-digit', hour: '2-digit' }
+			});
+
+			expect(result).toBe('Jan 1, 2023, 01:00');
+		});
 	});
 
 	describe('formatNanosecondsToDate', () => {
