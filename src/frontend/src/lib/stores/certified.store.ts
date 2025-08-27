@@ -12,7 +12,7 @@ export type CertifiedStoreData<T, Id extends symbol = TokenId> = Record<Id, T | 
 export interface CertifiedStore<T, Id extends symbol = TokenId>
 	extends Readable<CertifiedStoreData<T, Id>> {
 	reset: (id: Id) => void;
-	resetAll: () => void;
+	reinitialize: () => void;
 }
 
 export const initCertifiedStore = <T, Id extends symbol = TokenId>(): CertifiedStore<T, Id> &
@@ -30,6 +30,6 @@ export const initCertifiedStore = <T, Id extends symbol = TokenId>(): CertifiedS
 						[id]: null
 					}) as CertifiedStoreData<T, Id>
 			),
-		resetAll: () => set(undefined)
+		reinitialize: () => set(undefined)
 	};
 };

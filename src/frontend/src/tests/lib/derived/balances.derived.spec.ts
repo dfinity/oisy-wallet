@@ -23,7 +23,7 @@ describe('balances.derived', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			balancesStore.resetAll();
+			balancesStore.reinitialize();
 		});
 
 		it('should return false if balances data are nullish', () => {
@@ -73,7 +73,7 @@ describe('balances.derived', () => {
 
 			tokens = get(enabledFungibleNetworkTokens);
 
-			balancesStore.resetAll();
+			balancesStore.reinitialize();
 
 			splDefaultTokensStore.reset();
 			splCustomTokensStore.resetAll();
@@ -196,7 +196,7 @@ describe('balances.derived', () => {
 
 			tokens = get(enabledFungibleNetworkTokens);
 
-			balancesStore.resetAll();
+			balancesStore.reinitialize();
 
 			splDefaultTokensStore.reset();
 			splCustomTokensStore.resetAll();
