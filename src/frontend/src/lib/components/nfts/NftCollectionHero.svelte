@@ -42,8 +42,8 @@
 				</h1>
 
 				<div class="ml-auto flex gap-2">
-					<NftCollectionSpamButton />
-					<NftCollectionHideButton />
+					<NftCollectionSpamButton {collection} />
+					<NftCollectionHideButton {collection} />
 				</div>
 			</div>
 		{:else}
