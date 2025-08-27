@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "Niewystarczające saldo Bitcoin, aby pokryć opłaty transakcyjne",
 			"btc_invalid_utxo_data": "Nieprawidłowe dane transakcji Bitcoin",
 			"btc_utxo_locked": "Środki Bitcoin są zablokowane przez oczekujące transakcje",
-			"btc_invalid_fee_calculation": "Weryfikacja opłaty transakcyjnej Bitcoin nie powiodła się"
+			"btc_invalid_fee_calculation": "Weryfikacja opłaty transakcyjnej Bitcoin nie powiodła się",
+			"pending_transactions_not_available": ""
 		},
 		"error": {
 			"unexpected": "Coś poszło nie tak podczas wysyłania transakcji.",
@@ -1501,6 +1502,22 @@
 		},
 		"alt": {
 			"license_agreement": "Umowa licencyjna $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
