@@ -30,6 +30,7 @@ export const TRACK_COUNT_ETH_LOADING_BALANCE_ERROR = 'eth_loading_balance_error'
 export const TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR = 'eth_loading_transactions_error';
 export const TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR = 'eth_pending_transactions_error';
 export const TRACK_ETH_ESTIMATE_GAS_ERROR = 'eth_estimate_gas_error';
+export const TRACK_ETH_LOADING_NFT_IDS_ERROR = 'eth_loading_nft_ids_error';
 
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success';
@@ -146,6 +147,9 @@ export const TRACK_LOCK_MODE_DEACTIVATED = 'lock_mode_deactivated';
 // TODO: Remove these events once the issue is resolved.
 export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';
 
-//Links
+// Links
 export const TRACK_OPEN_DOCUMENTATION = 'open_documentation';
 export const TRACK_OPEN_EXTERNAL_LINK = 'open_external_link';
+
+// AI Assistant
+export const AI_ASSISTANT_SEND_TOKEN_SOURCE = 'ai-assistant';

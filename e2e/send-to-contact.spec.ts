@@ -5,7 +5,7 @@ import { AddressBookPage } from './utils/pages/address-book.page';
 import { FlowPage } from './utils/pages/send-and-receive-flow.page';
 
 // Scenario 1
- testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile }) => {
+testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile }) => {
 	// First, create a contact
 	const addressBookPage = new AddressBookPage({ page, iiPage, isMobile });
 	await addressBookPage.waitForReady();
@@ -45,7 +45,7 @@ import { FlowPage } from './utils/pages/send-and-receive-flow.page';
 });
 
 // Scenario 2 (duplicate test retained as-is per original file)
- testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile }) => {
+testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile }) => {
 	// First, create a contact
 	const addressBookPage = new AddressBookPage({ page, iiPage, isMobile });
 	await addressBookPage.waitForReady();

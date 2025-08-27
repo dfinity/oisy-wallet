@@ -7,6 +7,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
+	// TODO: remove this component once NEW_AGREEMENTS feature is implemented and live
+
 	interface Props {
 		fullWidth?: boolean;
 		licenseAlignment?: 'inherit' | 'center';
