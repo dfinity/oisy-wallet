@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Klikając ten przycisk, zgadzasz się na",
 			"accept_terms_link": "Umowę licencyjną",
 			"title": "Umowa licencyjna $oisy_name („Umowa licencyjna”)",
@@ -1501,6 +1502,22 @@
 		},
 		"alt": {
 			"license_agreement": "Umowa licencyjna $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
