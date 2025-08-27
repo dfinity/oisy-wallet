@@ -19,18 +19,6 @@
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { AddressBookWizardSteps } from '$lib/config/addressbook-modalsteps.config';
-	import {
-		TRACK_CONTACT_CREATE_ERROR,
-		TRACK_CONTACT_CREATE_SUCCESS,
-		TRACK_CONTACT_DELETE_ERROR,
-		TRACK_CONTACT_DELETE_SUCCESS,
-		TRACK_CONTACT_UPDATE_ERROR,
-		TRACK_CONTACT_UPDATE_SUCCESS,
-		TRACK_AVATAR_UPDATE_SUCCESS,
-		TRACK_AVATAR_UPDATE_ERROR,
-		TRACK_AVATAR_DELETE_SUCCESS,
-		TRACK_AVATAR_DELETE_ERROR
-	} from '$lib/constants/analytics.contants';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { sortedContacts } from '$lib/derived/contacts.derived';
@@ -78,19 +66,7 @@
 				updateContact,
 				deleteContact,
 				steps,
-				modal,
-				track: {
-					createSuccess: TRACK_CONTACT_CREATE_SUCCESS,
-					createError: TRACK_CONTACT_CREATE_ERROR,
-					updateSuccess: TRACK_CONTACT_UPDATE_SUCCESS,
-					updateError: TRACK_CONTACT_UPDATE_ERROR,
-					deleteSuccess: TRACK_CONTACT_DELETE_SUCCESS,
-					deleteError: TRACK_CONTACT_DELETE_ERROR,
-					avatarUpdateSuccess: TRACK_AVATAR_UPDATE_SUCCESS,
-					avatarUpdateError: TRACK_AVATAR_UPDATE_ERROR,
-					avatarDeleteSuccess: TRACK_AVATAR_DELETE_SUCCESS,
-					avatarDeleteError: TRACK_AVATAR_DELETE_ERROR
-				}
+				modal
 			});
 		}
 	});

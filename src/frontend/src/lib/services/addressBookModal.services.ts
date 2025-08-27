@@ -14,6 +14,18 @@ import type { Identity } from '@dfinity/agent';
 import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import {
+	TRACK_CONTACT_CREATE_ERROR,
+	TRACK_CONTACT_CREATE_SUCCESS,
+	TRACK_CONTACT_DELETE_ERROR,
+	TRACK_CONTACT_DELETE_SUCCESS,
+	TRACK_CONTACT_UPDATE_ERROR,
+	TRACK_CONTACT_UPDATE_SUCCESS,
+	TRACK_AVATAR_UPDATE_SUCCESS,
+	TRACK_AVATAR_UPDATE_ERROR,
+	TRACK_AVATAR_DELETE_SUCCESS,
+	TRACK_AVATAR_DELETE_ERROR
+} from '$lib/constants/analytics.contants';
 
 export interface AddressBookDeps {
 	i18n: I18n;
@@ -23,18 +35,6 @@ export interface AddressBookDeps {
 	deleteContact: (args: { id: bigint; identity: Identity }) => Promise<void>;
 	steps: WizardSteps<AddressBookSteps>;
 	modal: WizardModal<AddressBookSteps>;
-	track: {
-		createSuccess: string;
-		createError: string;
-		updateSuccess: string;
-		updateError: string;
-		deleteSuccess: string;
-		deleteError: string;
-		avatarUpdateSuccess: string;
-		avatarUpdateError: string;
-		avatarDeleteSuccess: string;
-		avatarDeleteError: string;
-	};
 }
 
 interface CreateContactParams {
@@ -69,7 +69,7 @@ export const makeController = (deps: AddressBookDeps) => {
 		wrapCallWith({
 			methodToCall: deps.createContact,
 			toastErrorMessage: deps.i18n.contact.error.create,
-			trackEventNames: { success: deps.track.createSuccess, error: deps.track.createError },
+			trackEventNames: { success: TRACK_CONTACT_CREATE_SUCCESS, error: TRACK_CONTACT_CREATE_ERROR },
 			identity: deps.identity
 		})
 	);
@@ -77,9 +77,9 @@ export const makeController = (deps: AddressBookDeps) => {
 	const callUpdateContact = withState<UpdateContactParams, ContactUi>(
 		wrapCallWith({
 			methodToCall: (params: { contact: ContactUi; identity: Identity }) =>
-				deps.updateContact(params),
+			deps.updateContact(params),
 			toastErrorMessage: deps.i18n.contact.error.update,
-			trackEventNames: { success: deps.track.updateSuccess, error: deps.track.updateError },
+			trackEventNames: { success: TRACK_CONTACT_UPDATE_SUCCESS, error: TRACK_CONTACT_UPDATE_ERROR },
 			identity: deps.identity
 		})
 	);
@@ -88,7 +88,7 @@ export const makeController = (deps: AddressBookDeps) => {
 		wrapCallWith({
 			methodToCall: deps.deleteContact,
 			toastErrorMessage: deps.i18n.contact.error.delete,
-			trackEventNames: { success: deps.track.deleteSuccess, error: deps.track.deleteError },
+			trackEventNames: { success: TRACK_CONTACT_DELETE_SUCCESS, error: TRACK_CONTACT_DELETE_ERROR },
 			identity: deps.identity
 		})
 	);
@@ -108,14 +108,14 @@ export const makeController = (deps: AddressBookDeps) => {
 
 		const isDeleting = isNullish(image);
 		const tracking = {
-			success: isDeleting ? deps.track.avatarDeleteSuccess : deps.track.avatarUpdateSuccess,
-			error: isDeleting ? deps.track.avatarDeleteError : deps.track.avatarUpdateError
+			success: isDeleting ? TRACK_AVATAR_DELETE_SUCCESS : TRACK_AVATAR_UPDATE_SUCCESS,
+			error: isDeleting ? TRACK_AVATAR_DELETE_ERROR : TRACK_AVATAR_UPDATE_ERROR
 		};
 
 		const callUpdateAvatar = withState<UpdateContactParams, ContactUi>(
 			wrapCallWith({
 				methodToCall: (params: { contact: ContactUi; identity: Identity }) =>
-					deps.updateContact({ ...params, contact: { ...params.contact, image } }),
+				deps.updateContact({ ...params, contact: { ...params.contact, image } }),
 				toastErrorMessage: deps.i18n.contact.error.update,
 				trackEventNames: tracking,
 				identity: deps.identity
@@ -135,7 +135,6 @@ export const makeController = (deps: AddressBookDeps) => {
 		currentAddressIndex.set(undefined);
 		qrCodeAddress.set(undefined);
 		await callUpdateContact({ contact: updated });
-
 		return { next: AddressBookSteps.SHOW_CONTACT as const };
 	};
 
