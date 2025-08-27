@@ -1238,6 +1238,16 @@ interface I18nLicense_agreement {
 	alt: { license_agreement: string };
 }
 
+interface I18nTerms_of_use {
+	text: { terms_of_use: string };
+	alt: { terms_of_use: string };
+}
+
+interface I18nPrivacy_policy {
+	text: { privacy_policy: string };
+	alt: { privacy_policy: string };
+}
+
 interface I18nActivity {
 	text: { title: string };
 	info: { btc_transactions: string };
@@ -1336,6 +1346,8 @@ interface I18n {
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
+	terms_of_use: I18nTerms_of_use;
+	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
 	welcome: I18nWelcome;
