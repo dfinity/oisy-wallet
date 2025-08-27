@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
 	import { page } from '$app/state';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import { OISY_REPO_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
@@ -12,10 +16,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
-	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
-	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 
 	let isHomePage = $derived(isRouteTokens(page));
 </script>
@@ -33,9 +33,9 @@
 >
 	<div
 		class="pointer-events-none flex w-full flex-col items-center justify-between md:flex-row md:gap-4"
-		class:sm:items-end={NEW_AGREEMENTS_ENABLED}
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
+		class:sm:items-end={NEW_AGREEMENTS_ENABLED}
 	>
 		{#if NEW_AGREEMENTS_ENABLED}
 			<div
