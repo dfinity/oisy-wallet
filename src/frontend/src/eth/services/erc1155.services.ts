@@ -12,10 +12,10 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
+import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 
 export const isInterfaceErc1155 = async ({
 	networkId,

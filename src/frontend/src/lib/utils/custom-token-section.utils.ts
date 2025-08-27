@@ -1,5 +1,5 @@
-import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { TokenSection } from '$declarations/backend/backend.did';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 export const mapTokenSection = (section: TokenSection): CustomTokenSection | undefined => {
 	if ('Spam' in section) {
