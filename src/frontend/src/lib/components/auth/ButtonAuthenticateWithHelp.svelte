@@ -7,11 +7,11 @@
 
 	interface Props {
 		fullWidth?: boolean;
-		licenseAlignment?: 'inherit' | 'center';
+		helpAlignment?: 'inherit' | 'center';
 		needHelpLink?: boolean;
 	}
 
-	let { fullWidth = false, licenseAlignment = 'inherit', needHelpLink = true }: Props = $props();
+	let { fullWidth = false, helpAlignment = 'inherit', needHelpLink = true }: Props = $props();
 
 	const modalId = Symbol();
 
@@ -26,13 +26,13 @@
 
 <div
 	class="flex w-full flex-col items-center md:items-start"
-	class:md:items-center={licenseAlignment === 'center'}
+	class:md:items-center={helpAlignment === 'center'}
 >
 	<ButtonAuthenticate {fullWidth} {onclick} />
 
 	<span
 		class="mt-4 flex flex-col text-sm text-tertiary"
-		class:text-center={licenseAlignment === 'center'}
+		class:text-center={helpAlignment === 'center'}
 		class:w-full={fullWidth}
 	>
 		{#if needHelpLink}
