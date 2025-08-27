@@ -13,8 +13,9 @@ import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
-import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
+import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 export const isInterfaceErc721 = async ({
 	networkId,
@@ -73,8 +74,9 @@ const loadCustomTokensWithMetadata = async (
 				(customToken): customToken is CustomToken & { token: { Erc721: ErcToken } } =>
 					'Erc721' in customToken.token
 			)
-			.map(async ({ token, enabled, version: versionNullable }) => {
+			.map(async ({ token, enabled, version: versionNullable, section: sectionNullable }) => {
 				const version = fromNullable(versionNullable);
+				const section = fromNullable(sectionNullable);
 
 				const {
 					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
@@ -106,7 +108,10 @@ const loadCustomTokensWithMetadata = async (
 						standard: 'erc721' as const,
 						category: 'custom' as const,
 						enabled,
-						version
+						version,
+						...(nonNullish(section) && {
+							section: 'Spam' in section ? CustomTokenSection.SPAM : CustomTokenSection.HIDDEN
+						})
 					},
 					...metadata
 				};

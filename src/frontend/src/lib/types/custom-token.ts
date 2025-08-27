@@ -5,6 +5,7 @@ import type { Token } from '$lib/types/token';
 import type { TokenToggleable, UserTokenState } from '$lib/types/token-toggleable';
 import type { SplToken } from '$sol/types/spl';
 import type { QueryAndUpdateRequestParams } from '@dfinity/utils';
+import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 type CustomTokenNetworkKeys = BackendToken extends infer T
 	? T extends Record<string, unknown>
@@ -31,6 +32,6 @@ export type SaveCustomTokenWithKey = UserTokenState &
 		| TokenVariant<'SplDevnet' | 'SplMainnet', SplSaveCustomToken>
 	);
 
-export type CustomToken<T extends Token> = TokenToggleable<T>;
+export type CustomToken<T extends Token> = TokenToggleable<T> & { section?: CustomTokenSection };
 
 export type LoadCustomTokenParams = QueryAndUpdateRequestParams & { useCache?: boolean };
