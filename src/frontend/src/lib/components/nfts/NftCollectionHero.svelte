@@ -4,6 +4,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftCollectionSpamButton from '$lib/components/nfts/NftCollectionSpamButton.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
@@ -14,7 +15,6 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import NftCollectionSpamButton from '$lib/components/nfts/NftCollectionSpamButton.svelte';
 
 	interface Props {
 		collection?: NftCollection;
@@ -35,20 +35,20 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(collection)}
-			<div class="flex my-3">
+			<div class="my-3 flex">
 				<h1 class="truncate">
 					{collection.name}
 				</h1>
 
-				<div class="flex gap-2 ml-auto">
+				<div class="ml-auto flex gap-2">
 					<NftCollectionSpamButton />
 					<NftCollectionSpamButton />
 				</div>
 			</div>
 		{:else}
-				<span class="block max-w-40">
-					<SkeletonText />
-				</span>
+			<span class="block max-w-40">
+				<SkeletonText />
+			</span>
 		{/if}
 
 		<List condensed styleClass="text-sm text-tertiary">
