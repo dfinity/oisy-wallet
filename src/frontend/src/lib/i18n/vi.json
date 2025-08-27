@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Bằng cách nhấp vào nút này, bạn đồng ý với",
 			"accept_terms_link": "Thỏa thuận cấp phép",
 			"title": "Thỏa thuận cấp phép $oisy_name (“Thỏa thuận cấp phép”)",

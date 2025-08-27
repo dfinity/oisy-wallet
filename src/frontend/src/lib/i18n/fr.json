@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "En cliquant sur ce bouton, vous acceptez les",
 			"accept_terms_link": "Conditions de licence",
 			"title": "Accord de licence $oisy_name (« Accord de licence »)",

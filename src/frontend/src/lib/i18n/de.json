@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Durch Klicken auf diese Schaltfläche stimmst du der",
 			"accept_terms_link": "Lizenzvereinbarung zu",
 			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",

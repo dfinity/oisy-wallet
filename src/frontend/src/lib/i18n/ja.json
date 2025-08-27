@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "このボタンをクリックすると、以下に同意したことになります。",
 			"accept_terms_link": "ライセンス契約",
 			"title": "$oisy_nameライセンス契約（以下「本ライセンス契約」）",
