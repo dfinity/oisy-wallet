@@ -15,10 +15,6 @@
 	}
 
 	let { collection }: Props = $props();
-
-	$effect(() => {
-		console.log($nonFungibleTokens)
-	})
 </script>
 
 <Button
