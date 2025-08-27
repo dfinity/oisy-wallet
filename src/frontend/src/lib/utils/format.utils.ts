@@ -101,12 +101,15 @@ export const formatSecondsToDate = ({
 
 export const formatToShortDateString = ({
 	date,
-	language
+	language,
+	i18n
 }: {
 	date: Date;
 	language?: Languages;
+	i18n?: { lang: Languages };
 }): string => {
-	return date.toLocaleDateString(language ?? Languages.ENGLISH, {
+	const lang = language ?? i18n?.lang ?? Languages.ENGLISH;
+	return date.toLocaleDateString(lang, {
 		month: 'short',
 		year: 'numeric'
 	});
