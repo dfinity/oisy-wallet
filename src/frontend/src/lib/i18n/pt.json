@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insuficiente para cobrir as taxas de transação",
 			"btc_invalid_utxo_data": "Dados de transação Bitcoin inválidos",
 			"btc_utxo_locked": "Fundos Bitcoin estão bloqueados por transações pendentes",
-			"btc_invalid_fee_calculation": "Validação de taxa de transação Bitcoin falhou"
+			"btc_invalid_fee_calculation": "Validação de taxa de transação Bitcoin falhou",
+			"pending_transactions_not_available": "O serviço de transações pendentes não está disponível no momento. Tente novamente mais tarde."
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",
