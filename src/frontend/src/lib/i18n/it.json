@@ -1497,10 +1497,27 @@
 			"entire_agreement": "<strong>10. INTERO ACCORDO E SEPARABILITÀ.</strong> Il presente Accordo di Licenza costituisce l'intero accordo tra l'Utente e DFINITY e sostituisce tutti gli accordi, le negoziazioni o altre comunicazioni precedenti tra l'Utente e DFINITY, sia orali che scritte, in relazione all'oggetto del presente. DFINITY può apportare modifiche al presente Accordo di Licenza quando vengono rese disponibili nuove versioni di $oisy_short. Nel caso in cui qualsiasi disposizione del presente Accordo di Licenza sia ritenuta non valida o inapplicabile, allora: (a) tale disposizione sarà considerata riformata nella misura strettamente necessaria per rendere tale disposizione valida e applicabile, o se non è suscettibile di tale riforma, sarà considerata separata dal presente Accordo di Licenza; e (b) la validità e l'applicabilità di tutte le altre disposizioni del presente non saranno in alcun modo influenzate o compromesse.",
 			"assignment": "<strong>11. CESSIONE.</strong> L'Utente non può cedere il presente Accordo di Licenza senza il preventivo consenso scritto di DFINITY, sia espressamente che per effetto di legge, anche in relazione a una fusione o a un cambiamento di controllo, e qualsiasi tentativo di cessione sarà nullo e privo di effetto. DFINITY può cedere il presente Accordo di Licenza senza restrizioni e senza alcun preavviso all'Utente. Fatto salvo quanto precede, il presente Accordo di Licenza sarà vincolante per le parti e i loro rispettivi successori e cessionari autorizzati.",
 			"no_waiver": "<strong>12. NESSUNA RINUNCIA.</strong> La mancata esercizio, o il ritardo nell'esercizio, di un diritto, potere o rimedio previsto nel presente Accordo di Licenza o dalla legge non costituirà una rinuncia a tale diritto, potere o rimedio. La rinuncia di DFINITY a qualsiasi obbligo o violazione del presente Accordo di Licenza non opererà come rinuncia a qualsiasi altro obbligo o successiva violazione del presente Accordo di Licenza.",
-			"english_version": "<strong>13. VERSIONE IN INGLESE.</strong> La versione in lingua inglese del presente Accordo di Licenza sarà la versione ufficiale e prevalente in caso di conflitto. Tutte le comunicazioni e le notifiche effettuate ai sensi del presente Accordo di Licenza devono essere in lingua inglese."
+			"english_version": "<strong>13. VERSIONE IN INGLESE.</strong> La versione in lingua inglese del presente Accordo di Licenza sarà la versione ufficiale e prevalente in caso di conflitto. Tutte le comunicazioni e le notifiche effettuate ai sensi del presente Accordo di Licenza devono essere in lingua inglese.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "L'Accordo di Licenza di $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {

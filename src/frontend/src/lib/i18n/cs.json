@@ -1497,10 +1497,27 @@
 			"entire_agreement": "<strong>10. ÚPLNÁ DOHODA A ODDĚLITELNOST.</strong> Tato licenční smlouva představuje úplnou dohodu mezi vámi a společností DFINITY a nahrazuje veškeré předchozí dohody, jednání nebo jiná sdělení mezi vámi a společností DFINITY, ať už ústní nebo písemná, týkající se předmětu této smlouvy. Společnost DFINITY může provádět změny této licenční smlouvy, když budou zpřístupněny nové verze $oisy_short. V případě, že bude jakékoli ustanovení této licenční smlouvy shledáno neplatným nebo nevymahatelným, pak: (a) se takové ustanovení bude považovat za reformované v rozsahu nezbytně nutném k tomu, aby bylo takové ustanovení platné a vymahatelné, nebo pokud není schopno takové reformace, bude se považovat za oddělené od této licenční smlouvy; a (b) platnost a vymahatelnost všech ostatních ustanovení této smlouvy tím nebude nijak ovlivněna ani narušena.",
 			"assignment": "<strong>11. PŘEVOD.</strong> Tuto licenční smlouvu nesmíte převést bez předchozího písemného souhlasu společnosti DFINITY, ať už výslovně nebo na základě zákona, včetně v souvislosti se sloučením nebo změnou kontroly, a jakýkoli takový pokus o převod bude neplatný a bez účinku. Společnost DFINITY může tuto licenční smlouvu převést bez omezení a bez jakéhokoli upozornění. S výhradou výše uvedeného bude tato licenční smlouva závazná pro strany a jejich příslušné nástupce a povolené postupníky.",
 			"no_waiver": "<strong>12. ŽÁDNÉ ZŘEKNUTÍ SE PRÁV.</strong> Nevykonání nebo zpoždění při výkonu práva, pravomoci nebo nápravného prostředku stanoveného v této licenční smlouvě nebo zákonem nepředstavuje zřeknutí se tohoto práva, pravomoci nebo nápravného prostředku. Zřeknutí se společnosti DFINITY jakéhokoli závazku nebo porušení této licenční smlouvy nebude fungovat jako zřeknutí se jakéhokoli jiného závazku nebo následného porušení této licenční smlouvy.",
-			"english_version": "<strong>13. ANGLICKÁ VERZE.</strong> Anglická jazyková verze této licenční smlouvy bude oficiální a řídící verzí smlouvy, pokud dojde k jakémukoli konfliktu. Veškerá sdělení a oznámení učiněná v souladu s touto licenční smlouvou musí být v anglickém jazyce."
+			"english_version": "<strong>13. ANGLICKÁ VERZE.</strong> Anglická jazyková verze této licenční smlouvy bude oficiální a řídící verzí smlouvy, pokud dojde k jakémukoli konfliktu. Veškerá sdělení a oznámení učiněná v souladu s touto licenční smlouvou musí být v anglickém jazyce.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "Licenční smlouva $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
