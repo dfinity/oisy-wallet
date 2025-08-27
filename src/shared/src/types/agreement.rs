@@ -4,6 +4,8 @@ use crate::types::Timestamp;
 /// Per-agreement status/metadata.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct Agreement {
+    /// Whether the user has accepted this agreement (true), rejected it (false), or has not yet responded (null).
+    pub accepted: Option<bool>,
     /// When the user last accepted this agreement (nanos since epoch).
     pub last_accepted_at: Option<Timestamp>,
 }
