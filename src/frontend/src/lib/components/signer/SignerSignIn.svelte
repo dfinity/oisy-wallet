@@ -6,6 +6,8 @@
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 </script>
 
 <div class="flex justify-center pt-7">
@@ -18,7 +20,11 @@
 
 <p class="mb-12 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
 
-<ButtonAuthenticateWithHelp fullWidth licenseAlignment="center" needHelpLink={false} />
+{#if NEW_AGREEMENTS_ENABLED}
+	<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
+{:else}
+	<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" />
+{/if}
 
 {#if $modalAuthHelp && nonNullish($modalAuthHelpData)}
 	<AuthHelpModal usesIdentityHelp={$modalAuthHelpData} />
