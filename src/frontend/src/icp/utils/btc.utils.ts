@@ -170,11 +170,11 @@ export const getPendingTransactionUtxoTxIds = (address: string): string[] | null
  */
 export const getBtcWalletBalance = ({
 	address,
-	confirmedBalance,
+	balance,
 	providerTransactions
 }: {
 	address: string;
-	confirmedBalance: bigint;
+	balance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[] | null;
 }): BtcWalletBalance => {
 	// Retrieve pending outgoing transactions from local store with safe fallback
@@ -211,9 +211,11 @@ export const getBtcWalletBalance = ({
 			}, ZERO)
 		: ZERO;
 
+	const confirmedBalance = balance - lockedBalance;
+
 	// Total balance represents the user's complete Bitcoin holdings
 	// Even if pending data fails, this will still show confirmed + unconfirmed
-	const totalBalance = confirmedBalance + unconfirmedBalance;
+	const totalBalance = balance + unconfirmedBalance;
 
 	return {
 		// Confirmed balance: UTXOs with sufficient confirmations, safe for spending

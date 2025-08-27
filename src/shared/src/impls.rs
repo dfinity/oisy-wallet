@@ -34,6 +34,8 @@ use crate::{
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
 const CONTACT_MAX_ADDRESSES: usize = 40;
 const CONTACT_MAX_LABEL_LENGTH: usize = 50;
+/// Maximum image size in bytes (100 KB)
+pub const MAX_IMAGE_SIZE_BYTES: usize = 100 * 1024;
 
 // Helper functions for validation
 fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> Result<(), Error> {
@@ -565,11 +567,11 @@ impl Validate for ContactAddressData {
 
 impl Validate for ContactImage {
     fn validate(&self) -> Result<(), Error> {
-        // For now, we don't have specific validation rules for ContactImage
-        // In the future, we might want to validate:
-        // - Image size limits
-        // - MIME type consistency with the actual data
-        // - Image dimensions
+        if self.data.len() > MAX_IMAGE_SIZE_BYTES {
+            return Err(Error::msg(format!(
+                "ContactImage.data exceeds max size of {MAX_IMAGE_SIZE_BYTES} bytes"
+            )));
+        }
         Ok(())
     }
 }
@@ -625,6 +627,7 @@ validate_on_deserialize!(Contact);
 validate_on_deserialize!(ContactAddressData);
 validate_on_deserialize!(CreateContactRequest);
 validate_on_deserialize!(UpdateContactRequest);
+validate_on_deserialize!(ContactImage);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
