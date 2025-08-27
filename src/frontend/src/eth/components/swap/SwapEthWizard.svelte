@@ -16,6 +16,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
+	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { evmNativeToken } from '$evm/derived/token.derived';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
@@ -42,7 +43,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
-	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -236,9 +236,9 @@
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapEthForm
+				{isApproveNeeded}
 				{isSwapAmountsLoading}
 				{nativeEthereumToken}
-				{isApproveNeeded}
 				{onClose}
 				{onNext}
 				{onShowTokensList}
