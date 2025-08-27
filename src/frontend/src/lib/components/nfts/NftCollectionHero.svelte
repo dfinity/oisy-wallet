@@ -15,6 +15,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftCollectionHideButton from '$lib/components/nfts/NftCollectionHideButton.svelte';
 
 	interface Props {
 		collection?: NftCollection;
@@ -42,7 +43,7 @@
 
 				<div class="ml-auto flex gap-2">
 					<NftCollectionSpamButton />
-					<NftCollectionSpamButton />
+					<NftCollectionHideButton />
 				</div>
 			</div>
 		{:else}
