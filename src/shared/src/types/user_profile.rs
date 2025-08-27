@@ -7,6 +7,7 @@ use serde::Serialize;
 
 use super::{verifiable_credential::CredentialType, Timestamp};
 use crate::types::{settings::Settings, Version};
+use crate::types::agreement::Agreements;
 
 pub mod impls;
 
@@ -26,6 +27,7 @@ pub struct UserCredential {
 #[serde(remote = "Self")]
 pub struct UserProfile {
     pub settings: Option<Settings>,
+    pub agreements: Option<Agreements>,
     pub credentials: Vec<UserCredential>,
     pub created_timestamp: Timestamp,
     pub updated_timestamp: Timestamp,
@@ -39,6 +41,7 @@ impl UserProfile {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct StoredUserProfile {
     pub settings: Option<Settings>,
+    pub agreements: Option<Agreements>,
     pub credentials: BTreeMap<CredentialType, UserCredential>,
     pub created_timestamp: Timestamp,
     pub updated_timestamp: Timestamp,
