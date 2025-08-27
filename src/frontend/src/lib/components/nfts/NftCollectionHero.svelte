@@ -14,7 +14,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import ButtonSpam from '$lib/components/ui/ButtonSpam.svelte';
+	import CollectionSpamButton from '$lib/components/nfts/CollectionSpamButton.svelte';
 
 	interface Props {
 		collection?: NftCollection;
@@ -41,8 +41,8 @@
 				</h1>
 
 				<div class="flex gap-2 ml-auto">
-					<ButtonSpam />
-					<ButtonSpam />
+					<CollectionSpamButton />
+					<CollectionSpamButton />
 				</div>
 			</div>
 		{:else}
