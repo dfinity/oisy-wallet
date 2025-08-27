@@ -5,17 +5,17 @@ vi.mock('$env/agreements.json', () => {
 	const agreements = {
 		licenceAgreement: {
 			lastUpdatedDate: '2025-08-27T06:15Z',
-			lastUpdatedTimestamp: 1756245600000
+			lastUpdatedTimestamp: 1756245700000
 		},
 
 		termsOfUse: {
 			lastUpdatedDate: '2025-08-27T06:15Z',
-			lastUpdatedTimestamp: 1756245600000
+			lastUpdatedTimestamp: 1756245700000
 		},
 
 		privacyPolicy: {
 			lastUpdatedDate: '2025-08-27T06:15Z',
-			lastUpdatedTimestamp: 1756245600000
+			lastUpdatedTimestamp: 1756245700000
 		}
 	};
 	return { default: agreements };
