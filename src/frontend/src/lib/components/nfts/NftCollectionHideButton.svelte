@@ -9,7 +9,6 @@
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 
 	interface Props {
 		collection: NftCollection;
@@ -29,24 +28,16 @@
 		});
 
 		if(nonNullish(token)) {
-
-			const newToken: SaveErc721CustomToken = {
-				address: token.address,
-				network: token.network,
-				enabled: true,
-				section: CustomTokenSection.HIDDEN
-			}
-
 			if (token.standard === 'erc721') {
 				await saveCustomErc721Token({
 					identity: $authIdentity,
-					tokens: [newToken]
+					tokens: [{ ...token, enabled: true, section: CustomTokenSection.HIDDEN }]
 				});
 			}
 			if (token.standard === 'erc1155') {
 				await saveCustomErc1155Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, section: CustomTokenSection.HIDDEN }]
+					tokens: [{ ...token, enabled: true, section: CustomTokenSection.HIDDEN }]
 				});
 			}
 		}
