@@ -2,6 +2,13 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import type { NftCollection } from '$lib/types/nft';
+	import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
+	import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
+	import { isNullish } from '@dfinity/utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 	interface Props {
 		collection: NftCollection
@@ -13,9 +20,20 @@
 <Button
 	colorStyle="tertiary-alt"
 	innerStyleClass="h-5"
-	onclick={() => {
-		// TODO spam
-		console.log('spam', collection);
+	onclick={async () => {
+			if (isNullish($authIdentity)) {
+			return
+		}
+
+		const token = findNonFungibleToken({tokens: $nonFungibleTokens, address: collection.address, networkId: collection.network.id});
+
+		if (token.standard === 'erc721') {
+			await saveCustomErc721Token({identity: $authIdentity, tokens: [{...token, section: CustomTokenSection.SPAM}]})
+		}
+		if (token.standard === 'erc1155') {
+			await saveCustomErc1155Token({identity: $authIdentity, tokens: [{...token, section: CustomTokenSection.SPAM}]})
+		}
+
 	}}
 	paddingSmall
 	styleClass="rounded-lg border-brand-subtle-30 p-2"
