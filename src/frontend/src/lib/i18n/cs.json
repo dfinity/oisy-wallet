@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Kliknutím na toto tlačítko souhlasíte s",
 			"accept_terms_link": "Licenční smlouvou",
 			"title": "Licenční smlouva $oisy_name („Licenční smlouva“)",

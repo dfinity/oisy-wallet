@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "इस बटन पर क्लिक करके, आप सहमत हैं",
 			"accept_terms_link": "लाइसेंस समझौता",
 			"title": "$oisy_name लाइसेंस समझौता (“लाइसेंस समझौता”)",
