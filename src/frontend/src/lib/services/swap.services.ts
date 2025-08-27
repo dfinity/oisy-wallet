@@ -863,7 +863,6 @@ export const fetchVeloraMarketSwap = async ({
 				if (currentAllowance < parsedSwapAmount) {
 					throw new Error(get(i18n).swap.error.unexpected);
 				}
-				return currentAllowance;
 			}
 		});
 	}
