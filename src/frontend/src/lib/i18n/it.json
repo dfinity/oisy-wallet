@@ -1515,7 +1515,9 @@
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": ""
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
 		},
 		"alt": {
 			"privacy_policy": ""
