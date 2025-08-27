@@ -113,7 +113,7 @@
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
 				{#if NEW_AGREEMENTS_ENABLED}
-					<ButtonAuthenticateWithHelp fullWidth licenseAlignment="center" needHelpLink={false} />
+					<ButtonAuthenticateWithHelp fullWidth needHelpLink={false} />
 				{:else}
 					<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" needHelpLink={false} />
 				{/if}
