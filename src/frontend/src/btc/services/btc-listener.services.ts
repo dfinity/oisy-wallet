@@ -43,10 +43,6 @@ export const syncWallet = async ({
 			transactions: providerTransactions
 		});
 	}
-	// Skip the certified event since it does not contain the required provider transactions
-	if (certified) {
-		return;
-	}
 	if (nonNullish(balance)) {
 		/*
 		 * Balance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
@@ -77,14 +73,14 @@ export const syncWallet = async ({
 		// Use sourceAddress to ensure consistency with the address used for pending transactions
 		const btcWalletBalance = getBtcWalletBalance({
 			address: sourceAddress,
-			confirmedBalance: balance,
+			balance,
 			providerTransactions: storeTransactions
 		});
 
 		balancesStore.set({
 			id: tokenId,
 			data: {
-				data: btcWalletBalance.total,
+				data: btcWalletBalance.confirmed,
 				certified
 			}
 		});
