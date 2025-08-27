@@ -482,10 +482,10 @@ describe('format.utils', () => {
 		it('allows to pass custom date formatting', () => {
 			const result = formatSecondsToDate({
 				seconds: 1672531200,
-				formatOptions: { minute: '2-digit', hour: '2-digit' }
+				formatOptions: { month: 'long', hour: undefined, minute: undefined }
 			});
 
-			expect(result).toBe('Jan 1, 2023, 01:00');
+			expect(result).toBe('January 1, 2023');
 		});
 	});
 
