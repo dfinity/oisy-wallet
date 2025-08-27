@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insuficiente para cobrir as taxas de transação",
 			"btc_invalid_utxo_data": "Dados de transação Bitcoin inválidos",
 			"btc_utxo_locked": "Fundos Bitcoin estão bloqueados por transações pendentes",
-			"btc_invalid_fee_calculation": "Validação de taxa de transação Bitcoin falhou"
+			"btc_invalid_fee_calculation": "Validação de taxa de transação Bitcoin falhou",
+			"pending_transactions_not_available": "O serviço de transações pendentes não está disponível no momento. Tente novamente mais tarde."
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",
@@ -811,9 +812,9 @@
 			"approval_fee": "Taxa de aprovação",
 			"gas_fee": "Taxa de gás",
 			"lp_fee": "Taxa LP",
-			"max_slippage_info": "Digite um valor entre 0% e 50%",
+			"max_slippage_info": "Digite um valor entre 0% e $maxSlippage%",
 			"max_slippage_warning": "Aviso de risco: alto deslizamento pode levar a perdas devido à volatilidade do mercado",
-			"max_slippage_error": "A tolerância a deslizamento não pode ser 0% ou exceder 50%",
+			"max_slippage_error": "A tolerância a deslizamento não pode ser 0% ou exceder $maxSlippage%",
 			"swap_button": "Trocar agora",
 			"swap_is_not_offered": "Esta troca não é oferecida atualmente.",
 			"executing_transaction": "Executando transação...",
@@ -1555,8 +1556,14 @@
 			"action_button_contacts_title": "Mostrar contatos",
 			"action_button_contacts_subtitle": "Mostrar os seus contatos salvos",
 			"action_button_contacts_prompt": "Mostrar meus contatos.",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "Enviar mensagem",
 			"send_message_input_placeholder": "O que você quer fazer?",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
 			"loading": "A pensar..."
 		},

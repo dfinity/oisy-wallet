@@ -9,9 +9,10 @@
 	interface Props {
 		destination: string;
 		selectedContact?: ContactUi;
+		aiAssistantConsoleView?: boolean;
 	}
 
-	const { destination, selectedContact }: Props = $props();
+	const { destination, selectedContact, aiAssistantConsoleView }: Props = $props();
 </script>
 
 <AddressCard>
@@ -21,19 +22,24 @@
 				address={destination}
 				badge={{ type: 'addressType', address: destination }}
 				contact={selectedContact}
+				variant={aiAssistantConsoleView ? 'sm' : 'md'}
 			/>
 		</div>
 	{/snippet}
 
 	{#snippet content()}
-		{#if isNullish(selectedContact)}
-			<span class="font-bold">{$i18n.transaction.text.to}</span>
-		{:else}
-			<SendContactName address={destination} contact={selectedContact}>
-				{$i18n.transaction.text.to} :
-			</SendContactName>
-		{/if}
+		<div class:text-sm={aiAssistantConsoleView}>
+			{#if isNullish(selectedContact)}
+				<span class="font-bold">{$i18n.transaction.text.to}</span>
+			{:else}
+				<SendContactName address={destination} contact={selectedContact}>
+					{$i18n.transaction.text.to} :
+				</SendContactName>
+			{/if}
+		</div>
 
-		<span class="w-full whitespace-normal break-all">{destination}</span>
+		<span class="w-full whitespace-normal break-all" class:text-sm={aiAssistantConsoleView}>
+			{destination}
+		</span>
 	{/snippet}
 </AddressCard>

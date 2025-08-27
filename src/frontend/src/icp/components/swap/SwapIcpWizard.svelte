@@ -10,6 +10,7 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -161,18 +162,6 @@
 			setTimeout(() => onClose(), 2500);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
-			// TODO: Add unit tests to cover failed swap error scenarios
-			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
-				failedSwapError.set({
-					message: replacePlaceholders(
-						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
-						{
-							$maxSlippage: slippageValue.toString()
-						}
-					),
-					variant: 'info'
-				});
-			}
 
 			if (isSwapError(err)) {
 				failedSwapError.set({
@@ -184,6 +173,17 @@
 						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcToken).ledgerCanisterId}&output=${($destinationToken as IcToken).ledgerCanisterId}`,
 						text: 'icpswap.com'
 					}
+				});
+				// TODO: Add unit tests to cover failed swap error scenarios
+			} else if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: slippageValue.toString()
+						}
+					),
+					variant: 'info'
 				});
 			} else {
 				failedSwapError.set(undefined);
@@ -231,7 +231,11 @@
 			bind:slippageValue
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-		<SwapReview {receiveAmount} {slippageValue} {swapAmount} on:icSwap={swap} on:icBack />
+		<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
+			{#snippet swapFees()}
+				<SwapFees />
+			{/snippet}
+		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 		<SwapProgress bind:swapProgressStep />
 	{/if}

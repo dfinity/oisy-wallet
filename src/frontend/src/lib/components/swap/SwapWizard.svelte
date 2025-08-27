@@ -9,6 +9,7 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
+	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -155,18 +156,6 @@
 			setTimeout(() => close(), 2500);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
-			// TODO: Add unit tests to cover failed swap error scenarios
-			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
-				failedSwapError.set({
-					message: replacePlaceholders(
-						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
-						{
-							$maxSlippage: slippageValue.toString()
-						}
-					),
-					variant: 'info'
-				});
-			}
 
 			if (isSwapError(err)) {
 				failedSwapError.set({
@@ -178,6 +167,17 @@
 						url: `https://app.icpswap.com/swap?input=${($sourceToken as IcTokenToggleable).ledgerCanisterId}&output=${($destinationToken as IcTokenToggleable).ledgerCanisterId}`,
 						text: 'icpswap.com'
 					}
+				});
+				// TODO: Add unit tests to cover failed swap error scenarios
+			} else if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: slippageValue.toString()
+						}
+					),
+					variant: 'info'
 				});
 			} else {
 				failedSwapError.set(undefined);
@@ -236,13 +236,17 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
+				onBack={() => dispatch('icBack')}
+				onClose={() => dispatch('icClose')}
+				onSwap={swap}
 				{receiveAmount}
 				{slippageValue}
 				{swapAmount}
-				on:icSwap={swap}
-				on:icBack
-				on:icClose
-			/>
+			>
+				{#snippet swapFees()}
+					<SwapFees />
+				{/snippet}
+			</SwapReview>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
