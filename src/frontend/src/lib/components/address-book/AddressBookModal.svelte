@@ -50,7 +50,7 @@
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	let modal: WizardModal<AddressBookSteps> | undefined;
-	let editContactNameStep: EditContactNameStep | undefined;
+	let editContactNameStep = $state<EditContactNameStep>();
 
 	const steps = $derived(AddressBookWizardSteps({ i18n: $i18n }));
 
@@ -315,7 +315,7 @@
 			}}
 			onDelete={async () => {
 				if (nonNullish($currentAddressIndex)) {
-					const res = await controller?.handleDeleteAddress($currentAddressIndex);
+					await controller?.handleDeleteAddress($currentAddressIndex);
 					currentAddressIndex.set(undefined);
 					gotoStep(AddressBookSteps.EDIT_CONTACT);
 				}
