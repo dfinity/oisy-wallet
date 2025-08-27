@@ -723,12 +723,13 @@
 			"minter_info_not_certified": "حاول مرة أخرى في بضع ثوانٍ، لم يتم اعتماد معلمة تكوين ckETH.",
 			"cketh_max_transaction_fee_missing": "الحد الأقصى لرسوم المعاملة لـ ckETH مفقود.",
 			"utxos_fee_missing": "رسوم UTXOs مفقودة.",
-			"minimum_btc_amount": "",
-			"btc_insufficient_balance": "",
-			"btc_insufficient_balance_for_fee": "",
-			"btc_invalid_utxo_data": "",
-			"btc_utxo_locked": "",
-			"btc_invalid_fee_calculation": ""
+			"minimum_btc_amount": "المبلغ صغير جداً. يرجى إدخال ما لا يقل عن $amount BTC.",
+			"btc_insufficient_balance": "لا توجد UTXOs بيتكوين متاحة للمعاملة",
+			"btc_insufficient_balance_for_fee": "رصيد البيتكوين غير كافٍ لتغطية رسوم المعاملة",
+			"btc_invalid_utxo_data": "بيانات معاملة البيتكوين غير صالحة",
+			"btc_utxo_locked": "أموال البيتكوين مقفلة بواسطة المعاملات المعلقة",
+			"btc_invalid_fee_calculation": "فشل التحقق من رسوم معاملة البيتكوين",
+			"pending_transactions_not_available": "خدمة المعاملات المعلقة غير متاحة حالياً. يرجى المحاولة مرة أخرى لاحقاً."
 		},
 		"error": {
 			"unexpected": "حدث خطأ ما أثناء إرسال المعاملة.",
