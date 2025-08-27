@@ -21,8 +21,6 @@ vi.mock('$env/agreements.json', () => {
 	return { default: agreements };
 });
 
-// Import after mocks so they take effect
-
 describe('agreements.utils', () => {
 	describe('getAgreementLastUpdated', () => {
 		beforeEach(() => {
