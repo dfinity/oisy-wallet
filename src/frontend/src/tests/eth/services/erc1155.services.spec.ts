@@ -36,7 +36,8 @@ describe('erc1155.services', () => {
 			token: {
 				Erc1155: {
 					chain_id: ETHEREUM_NETWORK.chainId,
-					token_address: mockEthAddress
+					token_address: mockEthAddress,
+					allow_media_source: toNullable()
 				}
 			},
 			section: toNullable()
@@ -47,7 +48,8 @@ describe('erc1155.services', () => {
 			token: {
 				Erc1155: {
 					chain_id: BASE_NETWORK.chainId,
-					token_address: mockEthAddress2.toUpperCase()
+					token_address: mockEthAddress2.toUpperCase(),
+					allow_media_source: toNullable()
 				}
 			},
 			section: toNullable()
@@ -58,7 +60,8 @@ describe('erc1155.services', () => {
 			token: {
 				Erc1155: {
 					chain_id: POLYGON_AMOY_NETWORK.chainId,
-					token_address: mockEthAddress3
+					token_address: mockEthAddress3,
+					allow_media_source: toNullable()
 				}
 			},
 			section: toNullable()
