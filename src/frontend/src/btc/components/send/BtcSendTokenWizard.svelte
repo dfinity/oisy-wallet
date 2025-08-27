@@ -47,7 +47,6 @@
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
 	let utxosFee: UtxosFee | undefined;
-	$: utxosFee;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sendToken.network.id;
