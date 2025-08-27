@@ -723,12 +723,13 @@
 			"minter_info_not_certified": "Thử lại sau vài giây, tham số cấu hình ckETH chưa được chứng nhận.",
 			"cketh_max_transaction_fee_missing": "Phí giao dịch tối đa cho ckETH bị thiếu.",
 			"utxos_fee_missing": "Phí UTXO bị thiếu.",
-			"minimum_btc_amount": "Số tiền tối thiểu là $amount BTC.",
-			"btc_insufficient_balance": "",
-			"btc_insufficient_balance_for_fee": "",
-			"btc_invalid_utxo_data": "",
-			"btc_utxo_locked": "",
-			"btc_invalid_fee_calculation": ""
+			"minimum_btc_amount": "Số tiền quá nhỏ. Vui lòng nhập ít nhất $amount BTC.",
+			"btc_insufficient_balance": "Không có Bitcoin UTXOs khả dụng cho giao dịch",
+			"btc_insufficient_balance_for_fee": "Số dư Bitcoin không đủ để chi trả phí giao dịch",
+			"btc_invalid_utxo_data": "Dữ liệu giao dịch Bitcoin không hợp lệ",
+			"btc_utxo_locked": "Tiền Bitcoin bị khóa bởi các giao dịch đang chờ xử lý",
+			"btc_invalid_fee_calculation": "Xác thực phí giao dịch Bitcoin thất bại",
+			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau."
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
@@ -1501,6 +1502,22 @@
 		},
 		"alt": {
 			"license_agreement": "Thỏa thuận cấp phép $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {

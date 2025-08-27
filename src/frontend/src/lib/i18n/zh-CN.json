@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "比特币余额不足以支付交易费用",
 			"btc_invalid_utxo_data": "无效的比特币交易数据",
 			"btc_utxo_locked": "比特币资金被待处理交易锁定",
-			"btc_invalid_fee_calculation": "比特币交易费用验证失败"
+			"btc_invalid_fee_calculation": "比特币交易费用验证失败",
+			"pending_transactions_not_available": "待处理交易服务当前不可用。请稍后重试。"
 		},
 		"error": {
 			"unexpected": "发送交易时发生错误。",
@@ -1501,6 +1502,22 @@
 		},
 		"alt": {
 			"license_agreement": "$oisy_name 许可协议"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
