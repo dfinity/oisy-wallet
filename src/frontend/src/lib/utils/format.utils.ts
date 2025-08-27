@@ -99,6 +99,19 @@ export const formatSecondsToDate = ({
 	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
+export const formatToShortDateString = ({
+	date,
+	language
+}: {
+	date: Date;
+	language?: Languages;
+}): string => {
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, {
+		month: 'short',
+		year: 'numeric'
+	});
+};
+
 export const formatNanosecondsToDate = ({
 	nanoseconds,
 	language

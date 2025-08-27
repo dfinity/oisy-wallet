@@ -4,14 +4,15 @@ import { expect } from '@playwright/test';
 import { AddressBookPage } from './utils/pages/address-book.page';
 import { FlowPage } from './utils/pages/send-and-receive-flow.page';
 
-testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile }) => {
+// Scenario 1
+ testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile }) => {
 	// First, create a contact
 	const addressBookPage = new AddressBookPage({ page, iiPage, isMobile });
 	await addressBookPage.waitForReady();
 
 	const contactName = 'Payment Recipient';
 	const contactAddress = 'tjgkf-baw6u-7lmw2-cbwoi-omgia-jk4kg-yvfcw-jni6g-k7spl-552th-jae';
-	await addressBookPage.addNewContact(contactName, contactAddress);
+	await addressBookPage.addNewContact({ name: contactName, address: contactAddress });
 
 	// Verify the contact was created
 	const contactCard = addressBookPage.getLocatorByTestId({ testId: CONTACT_CARD });
@@ -42,14 +43,16 @@ testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile })
 
 	expect(progressModalVisible).toBe(false);
 });
-testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile }) => {
+
+// Scenario 2 (duplicate test retained as-is per original file)
+ testWithII('should send tokens to a contact', async ({ page, iiPage, isMobile }) => {
 	// First, create a contact
 	const addressBookPage = new AddressBookPage({ page, iiPage, isMobile });
 	await addressBookPage.waitForReady();
 
 	const contactName = 'Payment Recipient';
 	const contactAddress = 'tjgkf-baw6u-7lmw2-cbwoi-omgia-jk4kg-yvfcw-jni6g-k7spl-552th-jae';
-	await addressBookPage.addNewContact(contactName, contactAddress);
+	await addressBookPage.addNewContact({ name: contactName, address: contactAddress });
 
 	// Verify the contact was created
 	const contactCard = addressBookPage.getLocatorByTestId({ testId: CONTACT_CARD });

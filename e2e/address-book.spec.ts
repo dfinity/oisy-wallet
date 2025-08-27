@@ -14,7 +14,7 @@ testWithII('should create a new contact', async ({ page, iiPage, isMobile }) => 
 	await addressBookPage.takeScreenshot('address-book-initial');
 
 	const contactName = 'Test Contact';
-	await addressBookPage.addNewContact(contactName, CONTACT_ADDRESS);
+	await addressBookPage.addNewContact({ name: contactName, address: CONTACT_ADDRESS });
 
 	const contactCard = addressBookPage.getLocatorByTestId({ testId: CONTACT_CARD });
 
@@ -31,7 +31,7 @@ testWithII('should edit an existing contact', async ({ page, iiPage, isMobile })
 	await addressBookPage.waitForReady();
 
 	const contactName = 'Edit Test Contact';
-	await addressBookPage.addNewContact(contactName, CONTACT_ADDRESS);
+	await addressBookPage.addNewContact({ name: contactName, address: CONTACT_ADDRESS });
 
 	const contactCard = addressBookPage.getLocatorByTestId({ testId: CONTACT_CARD });
 
@@ -60,7 +60,7 @@ testWithII('should delete a contact', async ({ page, iiPage, isMobile }) => {
 	await addressBookPage.waitForReady();
 
 	const contactName = 'Delete Test Contact';
-	await addressBookPage.addNewContact(contactName, CONTACT_ADDRESS);
+	await addressBookPage.addNewContact({ name: contactName, address: CONTACT_ADDRESS });
 
 	const contactCard = addressBookPage.getLocatorByTestId({ testId: CONTACT_CARD });
 

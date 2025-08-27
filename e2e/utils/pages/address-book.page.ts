@@ -29,7 +29,7 @@ export class AddressBookPage extends HomepageLoggedIn {
 	}
 
 	// Create a new contact and add an address to it
-	async addNewContact(name: string, address: string): Promise<void> {
+	async addNewContact({ name, address }: { name: string; address: string }): Promise<void> {
 		await this.clickByTestId({ testId: ADDRESS_BOOK_ADD_CONTACT_BUTTON });
 		await this.waitForByTestId({ testId: ADDRESS_BOOK_CONTACT_FORM });
 
