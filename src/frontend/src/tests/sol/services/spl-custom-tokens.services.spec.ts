@@ -65,7 +65,8 @@ describe('spl-custom-tokens.services', () => {
 						decimals: toNullable(6),
 						symbol: toNullable('TK1')
 					}
-				}
+				},
+				section: toNullable()
 			},
 			{
 				enabled: true,
@@ -76,7 +77,8 @@ describe('spl-custom-tokens.services', () => {
 						decimals: toNullable(6),
 						symbol: toNullable('TK2')
 					}
-				}
+				},
+				section: toNullable()
 			},
 			{
 				enabled: true,
@@ -87,7 +89,8 @@ describe('spl-custom-tokens.services', () => {
 						decimals: toNullable(6),
 						symbol: toNullable('TK3')
 					}
-				}
+				},
+				section: toNullable()
 			}
 		];
 
