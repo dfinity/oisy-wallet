@@ -4,7 +4,7 @@ use crate::types::Timestamp;
 
 /// Per-agreement status/metadata.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-pub struct Agreement {
+pub struct UserAgreement {
     /// Whether the user has accepted this agreement (true), rejected it (false), or has not yet
     /// responded (null).
     pub accepted: Option<bool>,
@@ -16,13 +16,13 @@ pub struct Agreement {
 
 /// The user agreements tracked by the system.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-pub struct Agreements {
-    pub license_agreement: Agreement,
-    pub terms_of_use: Agreement,
-    pub privacy_policy: Agreement,
+pub struct UserAgreements {
+    pub license_agreement: UserAgreement,
+    pub terms_of_use: UserAgreement,
+    pub privacy_policy: UserAgreement,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-pub struct UserAgreements {
-    pub agreements: Agreements,
+pub struct Agreements {
+    pub agreements: UserAgreements,
 }
