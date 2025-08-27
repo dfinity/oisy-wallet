@@ -1,7 +1,7 @@
 import * as z from 'zod/v4';
 
 const policyBlockSchema = z.object({
-	lastUpdatedDate: z.string(),
+	lastUpdatedDate: z.iso.datetime(),
 	lastUpdatedTimestamp: z.number()
 });
 
