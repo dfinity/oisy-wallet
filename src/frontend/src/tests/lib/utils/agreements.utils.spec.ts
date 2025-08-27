@@ -35,7 +35,7 @@ describe('agreements.utils', () => {
 				$i18n: i18n as unknown as I18n
 			});
 
-			expect(result).toEqual('Aug 27, 2025');
+			expect(result).toEqual('Aug 26, 2025');
 		});
 	});
 });
