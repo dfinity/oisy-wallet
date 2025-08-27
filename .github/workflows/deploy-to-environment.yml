@@ -448,7 +448,7 @@ jobs:
           VITE_VELORA_SWAP_ENABLED: ${{ steps.set-outputs.outputs.VITE_VELORA_SWAP_ENABLED }}
           VITE_NFTS_ENABLED: ${{ steps.set-outputs.outputs.VITE_NFTS_ENABLED }}
           VITE_FRONTEND_DERIVATION_ENABLED: ${{ steps.set-outputs.outputs.VITE_FRONTEND_DERIVATION_ENABLED }}
-          VITE_FRONTEND_NEW_AGREEMENTS_ENABLED: ${{ secrets.VITE_FRONTEND_NEW_AGREEMENTS_ENABLED }}
+          VITE_FRONTEND_NEW_AGREEMENTS_ENABLED: ${{ steps.set-outputs.outputs.VITE_FRONTEND_NEW_AGREEMENTS_ENABLED }}
           VITE_AI_ASSISTANT_CONSOLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_AI_ASSISTANT_CONSOLE_ENABLED }}
           VITE_AVATAR_ENABLED: ${{ steps.set-outputs.outputs.VITE_AVATAR_ENABLED }}
           VITE_LOCK_SCREEN_ENABLED: ${{ steps.set-outputs.outputs.VITE_LOCK_SCREEN_ENABLED }}
