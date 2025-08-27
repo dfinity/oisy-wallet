@@ -27,7 +27,7 @@
 			networkId: collection.network.id
 		});
 
-		if(nonNullish(token)) {
+		if (nonNullish(token)) {
 			if (token.standard === 'erc721') {
 				await saveCustomErc721Token({
 					identity: $authIdentity,
@@ -41,8 +41,7 @@
 				});
 			}
 		}
-	}
-
+	};
 </script>
 
 <Button
