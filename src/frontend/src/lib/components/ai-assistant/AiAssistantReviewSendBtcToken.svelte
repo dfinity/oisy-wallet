@@ -2,12 +2,10 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
-	import {
-		BtcPendingSentTransactionsStatus,
-		initPendingSentTransactionsStatus
-	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
+	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import {
 		handleBtcValidationError,
 		sendBtc,
@@ -56,8 +54,6 @@
 
 	let source = $derived(getBtcSourceAddress($sendTokenNetworkId));
 
-	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
-
 	let loading = $state(false);
 
 	let parsedAmount = $derived(
@@ -96,7 +92,6 @@
 		invalidDestination ||
 			notEmptyString(amountErrorMessage) ||
 			isNullish(amount) ||
-			$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
 			isNullish(utxosFee) ||
 			(nonNullish(utxosFee) && utxosFee.utxos.length === 0) ||
 			nonNullish(utxosFee.error)
@@ -224,6 +219,11 @@
 </div>
 
 {#if !sendCompleted}
+	<div class="mb-2">
+		<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
+		<BtcSendWarnings pendingTransactionsStatus={BtcPendingSentTransactionsStatus.NONE} {utxosFee} />
+	</div>
+
 	{#if notEmptyString(amountErrorMessage) || invalidDestination}
 		<p class="mb-2 text-center text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
 			{notEmptyString(amountErrorMessage)

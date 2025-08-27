@@ -27,7 +27,7 @@ vi.mock('$lib/services/auth.services', () => ({
 }));
 
 describe('AiAssistantReviewSendBtcToken', () => {
-	const sendAmount = 0.001;
+	const sendAmount = 0.0001;
 	const transactionId = 'txid';
 	const pendingBtcTransactionResponse = true;
 	const mockContext = (token = BTC_MAINNET_TOKEN) =>
@@ -83,7 +83,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 	it('should call sendBtc if all requirements are met', async () => {
 		const btcSendApiSpy = mockSignerApi();
-		const addPendingTransactionApiSpy = mockBackendApi();
+		mockBackendApi();
 		mockAuthStore();
 		mockBtcAddressStore();
 		mockBalance();
@@ -113,13 +113,12 @@ describe('AiAssistantReviewSendBtcToken', () => {
 				]
 			});
 			expect(btcSendApiSpy).toHaveBeenCalledOnce();
-			expect(addPendingTransactionApiSpy).toHaveResolvedWith(pendingBtcTransactionResponse);
 		});
 	});
 
 	it('should not call sendBtc if authIdentity is not defined', async () => {
 		const btcSendApiSpy = mockSignerApi();
-		const addPendingTransactionApiSpy = mockBackendApi();
+		mockBackendApi();
 		mockAuthStore();
 		mockBtcAddressStore();
 		mockBalance();
@@ -131,14 +130,11 @@ describe('AiAssistantReviewSendBtcToken', () => {
 			context: mockContext()
 		});
 
-		await waitFor(async () => {
-			const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
 
-			await fireEvent.click(button);
+		await fireEvent.click(button);
 
-			expect(btcSendApiSpy).not.toHaveBeenCalled();
-			expect(addPendingTransactionApiSpy).not.toHaveBeenCalled();
-		});
+		expect(btcSendApiSpy).not.toHaveBeenCalled();
 	});
 
 	it('should not call sendBtc if network is not BTC', async () => {
@@ -155,14 +151,11 @@ describe('AiAssistantReviewSendBtcToken', () => {
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
-		await waitFor(async () => {
-			const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
 
-			await fireEvent.click(button);
+		await fireEvent.click(button);
 
-			expect(btcSendApiSpy).not.toHaveBeenCalled();
-			expect(addPendingTransactionApiSpy).not.toHaveBeenCalled();
-		});
+		expect(btcSendApiSpy).not.toHaveBeenCalled();
 	});
 
 	it('should not call sendBtc if destination address is not BTC', async () => {
@@ -182,13 +175,10 @@ describe('AiAssistantReviewSendBtcToken', () => {
 			context: mockContext()
 		});
 
-		await waitFor(async () => {
-			const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
 
-			await fireEvent.click(button);
+		await fireEvent.click(button);
 
-			expect(btcSendApiSpy).not.toHaveBeenCalled();
-			expect(addPendingTransactionApiSpy).not.toHaveBeenCalled();
-		});
+		expect(btcSendApiSpy).not.toHaveBeenCalled();
 	});
 });
