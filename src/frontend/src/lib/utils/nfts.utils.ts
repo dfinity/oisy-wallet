@@ -282,5 +282,5 @@ export const findNonFungibleToken = ({
 	tokens: NonFungibleToken[];
 	address: EthAddress;
 	networkId: NetworkId;
-}): NonFungibleToken =>
+}): NonFungibleToken | undefined =>
 	tokens.find((token) => token.address === address && token.network.id === networkId);
