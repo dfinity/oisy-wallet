@@ -14,6 +14,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import ButtonSpam from '$lib/components/ui/ButtonSpam.svelte';
 
 	interface Props {
 		collection?: NftCollection;
@@ -33,15 +34,22 @@
 	<div class="bg-primary p-4">
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
-		<h1 class="my-3 truncate">
-			{#if nonNullish(collection)}
-				{collection.name}
-			{:else}
+		{#if nonNullish(collection)}
+			<div class="flex my-3">
+				<h1 class="truncate">
+					{collection.name}
+				</h1>
+
+				<div class="flex gap-2 ml-auto">
+					<ButtonSpam />
+					<ButtonSpam />
+				</div>
+			</div>
+		{:else}
 				<span class="block max-w-40">
 					<SkeletonText />
 				</span>
-			{/if}
-		</h1>
+		{/if}
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem
