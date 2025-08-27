@@ -1506,7 +1506,9 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": ""
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
 		},
 		"alt": {
 			"terms_of_use": ""
