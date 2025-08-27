@@ -223,11 +223,9 @@ fn test_cannot_exceed_max_user_token_length() {
     let result = pic_setup.update::<()>(caller, "set_user_token", extra_token);
 
     assert!(result.is_err());
-    assert!(result
-        .unwrap_err()
-        .contains(&format!(
-            "Token list length should not exceed {max_token_list_length}"
-        )));
+    assert!(result.unwrap_err().contains(&format!(
+        "Token list length should not exceed {max_token_list_length}"
+    )));
 }
 
 #[test]
