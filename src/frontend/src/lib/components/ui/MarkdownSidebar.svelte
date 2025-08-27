@@ -25,7 +25,7 @@
 					}
 				});
 			},
-			{ rootMargin: '0px 0px -80% 0px', threshold: 0 }
+			{ rootMargin: '0px 0px -90% 0px', threshold: 0 }
 		);
 
 		headings.forEach(({ id }) => {
