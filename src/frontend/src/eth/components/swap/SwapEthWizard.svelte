@@ -123,8 +123,7 @@
 	);
 
 	const isApproveNeeded = $derived<boolean>(
-		nonNullish($swapAmountsStore?.swaps[0].type) &&
-			$swapAmountsStore?.swaps[0].type === VeloraSwapTypes.MARKET &&
+		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
