@@ -16,6 +16,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
+	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { evmNativeToken } from '$evm/derived/token.derived';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
@@ -119,6 +120,11 @@
 			feeExchangeRateStore,
 			evaluateFee
 		})
+	);
+
+	const isApproveNeeded = $derived<boolean>(
+		$swapAmountsStore?.swaps[0].type === VeloraSwapTypes.MARKET &&
+			isNotDefaultEthereumToken($sourceToken)
 	);
 
 	const swap = async () => {
@@ -230,6 +236,7 @@
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapEthForm
+				{isApproveNeeded}
 				{isSwapAmountsLoading}
 				{nativeEthereumToken}
 				{onClose}
