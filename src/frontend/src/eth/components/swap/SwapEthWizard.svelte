@@ -42,6 +42,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -119,6 +120,11 @@
 			feeExchangeRateStore,
 			evaluateFee
 		})
+	);
+
+	const isApproveNeeded = $derived<boolean>(
+		$swapAmountsStore?.swaps[0].type === VeloraSwapTypes.MARKET &&
+			isNotDefaultEthereumToken($sourceToken)
 	);
 
 	const swap = async () => {
@@ -232,6 +238,7 @@
 			<SwapEthForm
 				{isSwapAmountsLoading}
 				{nativeEthereumToken}
+				{isApproveNeeded}
 				{onClose}
 				{onNext}
 				{onShowTokensList}
