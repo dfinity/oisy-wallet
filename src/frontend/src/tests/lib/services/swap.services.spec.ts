@@ -73,7 +73,8 @@ vi.mock('@velora-dex/sdk', () => ({
 }));
 
 vi.mock('$eth/services/send.services', () => ({
-	approve: vi.fn()
+	approve: vi.fn(),
+	erc20ContractAllowance: vi.fn()
 }));
 
 vi.mock('$eth/services/swap.services', () => ({
