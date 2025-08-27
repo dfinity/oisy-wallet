@@ -10,6 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
 	import type { NetworkId, Network as NetworkType, OptionNetworkId } from '$lib/types/network';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		selectedNetworkId?: NetworkId;
@@ -63,7 +64,7 @@
 	{/each}
 </ul>
 
-{#if $testnetsEnabled && $networksTestnets.length}
+{#if $testnetsEnabled && $networksTestnets.length && nonNullish(supportedNetworks)}
 	<span class="mb-3 mt-6 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>
