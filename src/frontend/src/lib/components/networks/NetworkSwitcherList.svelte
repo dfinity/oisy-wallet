@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
@@ -63,7 +64,7 @@
 	{/each}
 </ul>
 
-{#if $testnetsEnabled && $networksTestnets.length}
+{#if $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
 	<span class="mb-3 mt-6 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>
