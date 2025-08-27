@@ -60,6 +60,7 @@
 		feeTokenIdStore
 	} = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
+	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
 	const totalFee = $derived(
 		isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
 	);
