@@ -338,7 +338,7 @@ mod contact_image {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
-                        chain_id: 2 ^ 64 - 1,
+                        chain_id: u64::MAX,
                         allow_media_source: None
                     },
                     valid: true,
