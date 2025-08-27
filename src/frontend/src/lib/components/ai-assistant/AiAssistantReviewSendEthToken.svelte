@@ -77,22 +77,14 @@
 	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	const feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
+
 	$effect(() => {
 		feeSymbolStore.set(nativeEthereumToken.symbol);
-	});
-
-	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$effect(() => {
 		feeTokenIdStore.set(nativeEthereumToken.id);
-	});
-
-	const feeDecimalsStore = writable<number | undefined>(undefined);
-	$effect(() => {
 		feeDecimalsStore.set(nativeEthereumToken.decimals);
-	});
-
-	const feeExchangeRateStore = writable<number | undefined>(undefined);
-	$effect(() => {
 		feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
 	});
 
