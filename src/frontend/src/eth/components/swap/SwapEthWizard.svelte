@@ -70,7 +70,7 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, failedSwapError } =
+	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -126,6 +126,12 @@
 		nonNullish($swapAmountsStore?.swaps[0].type) &&
 			$swapAmountsStore?.swaps[0].type === VeloraSwapTypes.MARKET &&
 			isNotDefaultEthereumToken($sourceToken)
+	);
+
+	let sourceTokenUsdValue = $derived(
+		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
+			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
+			: undefined
 	);
 
 	const swap = async () => {
@@ -198,7 +204,9 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					usdSourceValue: sourceTokenUsdValue ?? '',
+					swapType: $swapAmountsStore.swaps[0].type ?? ''
 				}
 			});
 
@@ -209,7 +217,8 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					swapType: $swapAmountsStore.swaps[0].type ?? ''
 				}
 			});
 
