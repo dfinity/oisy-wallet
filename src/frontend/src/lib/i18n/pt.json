@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Ao clicar neste botão, você concorda com o",
 			"accept_terms_link": "Contrato de Licença",
 			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",

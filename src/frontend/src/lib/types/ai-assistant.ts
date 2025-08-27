@@ -44,8 +44,13 @@ export interface ReviewSendTokensToolResult {
 	address?: Address;
 }
 
+export enum ToolResultType {
+	SHOW_CONTACTS = 'show_contacts',
+	REVIEW_SEND_TOKENS = 'review_send_tokens'
+}
+
 export interface ToolResult {
-	type: 'show_contacts' | 'review_send_tokens';
+	type: ToolResultType;
 	result?: ShowContactsToolResult | ReviewSendTokensToolResult;
 }
 

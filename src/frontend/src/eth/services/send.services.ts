@@ -174,7 +174,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 /**
  * Get the current allowance of an Erc20 contract.
  */
-const erc20ContractAllowance = async ({
+export const erc20ContractAllowance = async ({
 	token,
 	owner,
 	spender,
