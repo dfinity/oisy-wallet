@@ -15,6 +15,7 @@
 	aria-label={replaceOisyPlaceholders($i18n.privacy_policy.alt.privacy_policy)}
 	data-tid={testId}
 	href="/privacy-policy"
+	target="_blank"
 >
 	{$i18n.privacy_policy.text.privacy_policy}
 </a>

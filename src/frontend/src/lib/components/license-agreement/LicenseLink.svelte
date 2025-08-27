@@ -16,6 +16,7 @@
 	aria-label={replaceOisyPlaceholders($i18n.license_agreement.alt.license_agreement)}
 	data-tid={testId}
 	href="/license-agreement"
+	target={NEW_AGREEMENTS_ENABLED ? '_blank' : undefined}
 >
 	{#if NEW_AGREEMENTS_ENABLED}
 		{$i18n.license_agreement.text.license_agreement}

@@ -15,6 +15,7 @@
 	aria-label={replaceOisyPlaceholders($i18n.terms_of_use.alt.terms_of_use)}
 	data-tid={testId}
 	href="/terms-of-use"
+	target="_blank"
 >
 	{$i18n.terms_of_use.text.terms_of_use}
 </a>
