@@ -1504,6 +1504,12 @@
 			"license_agreement": "$oisy_name 许可协议"
 		}
 	},
+	"privacy_policy": {
+		"text": {
+			"title": "",
+			"body": ""
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "最近活动"

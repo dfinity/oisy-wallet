@@ -1504,6 +1504,12 @@
 			"license_agreement": "Лицензионное Соглашение $oisy_name"
 		}
 	},
+	"privacy_policy": {
+		"text": {
+			"title": "",
+			"body": ""
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "Недавняя активность"

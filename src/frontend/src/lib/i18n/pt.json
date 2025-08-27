@@ -1504,6 +1504,12 @@
 			"license_agreement": "O Contrato de Licença $oisy_name"
 		}
 	},
+	"privacy_policy": {
+		"text": {
+			"title": "",
+			"body": ""
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "Atividade Recente"

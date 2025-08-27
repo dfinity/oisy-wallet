@@ -1504,6 +1504,12 @@
 			"license_agreement": "اتفاقية ترخيص $oisy_short"
 		}
 	},
+	"privacy_policy": {
+		"text": {
+			"title": "",
+			"body": ""
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "النشاط الأخير"

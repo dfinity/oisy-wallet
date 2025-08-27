@@ -1504,6 +1504,12 @@
 			"license_agreement": "Licenční smlouva $oisy_name"
 		}
 	},
+	"privacy_policy": {
+		"text": {
+			"title": "",
+			"body": ""
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "Nedávná aktivita"

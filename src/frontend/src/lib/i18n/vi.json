@@ -1504,6 +1504,12 @@
 			"license_agreement": "Thỏa thuận cấp phép $oisy_name"
 		}
 	},
+	"privacy_policy": {
+		"text": {
+			"title": "",
+			"body": ""
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "Hoạt động gần đây"
