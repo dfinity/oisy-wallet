@@ -1504,6 +1504,12 @@
 			"license_agreement": "Umowa licencyjna $oisy_name"
 		}
 	},
+	"termsOfUse": {
+		"text": {
+			"title": "",
+			"body": ""
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "Ostatnia aktywność"

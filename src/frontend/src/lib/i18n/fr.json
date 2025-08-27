@@ -1504,6 +1504,12 @@
 			"license_agreement": "L'accord de licence $oisy_name"
 		}
 	},
+	"termsOfUse": {
+		"text": {
+			"title": "",
+			"body": ""
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "Activité récente"

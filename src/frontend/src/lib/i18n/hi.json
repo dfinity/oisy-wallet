@@ -1504,6 +1504,12 @@
 			"license_agreement": "$oisy_name लाइसेंस समझौता"
 		}
 	},
+	"termsOfUse": {
+		"text": {
+			"title": "",
+			"body": ""
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "हाल की गतिविधि"
