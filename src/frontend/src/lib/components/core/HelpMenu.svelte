@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
@@ -17,10 +21,6 @@
 		NAVIGATION_MENU_DOC_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
-	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 
 	interface Props {
 		visible?: boolean;
