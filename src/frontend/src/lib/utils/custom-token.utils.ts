@@ -93,7 +93,7 @@ export const toCustomToken = ({
 		enabled,
 		version: toNullable(version),
 		token: toCustomTokenMap(),
-		section: toNullable(mapCustomTokenSection(section))
+		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined)
 	};
 };
 
