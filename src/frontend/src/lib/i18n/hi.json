@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "इस बटन पर क्लिक करके, आप सहमत हैं",
 			"accept_terms_link": "लाइसेंस समझौता",
 			"title": "$oisy_name लाइसेंस समझौता (“लाइसेंस समझौता”)",
@@ -1502,6 +1503,26 @@
 		},
 		"alt": {
 			"license_agreement": "$oisy_name लाइसेंस समझौता"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
