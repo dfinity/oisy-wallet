@@ -3,9 +3,14 @@
 	import type { Snippet } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { etherscanProviders } from '$eth/providers/etherscan.providers';
-	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
-	import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
-	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
+	import {
+		type InfuraErc1155Provider,
+		infuraErc1155Providers
+	} from '$eth/providers/infura-erc1155.providers';
+	import {
+		type InfuraErc721Provider,
+		infuraErc721Providers
+	} from '$eth/providers/infura-erc721.providers';
 	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
@@ -28,11 +33,11 @@
 			return;
 		}
 
-		const etherscanProvider = etherscanProviders(token.network.id);
+		const { erc721TokenInventory } = etherscanProviders(token.network.id);
 
 		let inventory: NftId[];
 		try {
-			inventory = await etherscanProvider.erc721TokenInventory({
+			inventory = await erc721TokenInventory({
 				address: $ethAddress,
 				contractAddress: token.address
 			});
@@ -53,10 +58,10 @@
 			return;
 		}
 
-		const alchemyProvider = alchemyProviders(token.network.id);
+		const { getNftIdsForOwner } = alchemyProviders(token.network.id);
 		let inventory: OwnedNft[];
 		try {
-			inventory = await alchemyProvider.getNftIdsForOwner({
+			inventory = await getNftIdsForOwner({
 				address: $ethAddress,
 				contractAddress: token.address
 			});
@@ -80,7 +85,7 @@
 	}: {
 		token: NonFungibleToken;
 		inventory: NftId[];
-		infuraProvider: InfuraErc165Provider;
+		infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	}) => {
 		if (isNullish($ethAddress)) {
 			return;

@@ -14,7 +14,7 @@ import type {
 	QuoteParams,
 	SimpleFetchSDK
 } from '@velora-dex/sdk';
-import type { EthAddress } from './address';
+import type { EthAddress, OptionEthAddress } from './address';
 import type { Amount, OptionAmount } from './send';
 import type { RequiredTransactionFeeData } from './transaction';
 
@@ -54,12 +54,13 @@ export interface ICPSwapResult {
 
 export interface FetchSwapAmountsParams {
 	identity: Identity;
-	sourceToken: IcToken;
-	destinationToken: IcToken;
+	sourceToken: Token;
+	destinationToken: Token;
 	amount: string | number;
 	tokens: Token[];
 	slippage: string | number;
 	isSourceTokenIcrc2: boolean;
+	userEthAddress: OptionEthAddress;
 }
 
 export type Slippage = string | number;
@@ -188,8 +189,8 @@ export interface GetQuoteParams extends QuoteParams<'all'> {
 export interface VeloraQuoteParams {
 	sourceToken: Erc20Token;
 	destinationToken: Erc20Token;
-	amount: string;
-	userAddress: EthAddress;
+	amount: bigint;
+	userEthAddress: OptionEthAddress;
 }
 
 export interface GetWithdrawableTokenParams {

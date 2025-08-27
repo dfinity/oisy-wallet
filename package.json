@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.6.5",
+	"version": "1.6.6",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -88,7 +88,7 @@
 		"@solana/kit": "^2.1.1",
 		"@velora-dex/sdk": "^8.1.0",
 		"@walletconnect/auth-client": "^2.1.2",
-		"alchemy-sdk": "3.6.1",
+		"alchemy-sdk": "3.6.3",
 		"bitcoinjs-lib": "^6.1.7",
 		"browser-image-compression": "^2.0.2",
 		"buffer": "^6.0.3",

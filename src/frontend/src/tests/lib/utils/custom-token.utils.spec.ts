@@ -1,6 +1,7 @@
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@dfinity/principal';
+import { toNullable } from '@dfinity/utils';
 
 describe('custom-token.utils', () => {
 	describe('toCustomToken', () => {
@@ -11,7 +12,8 @@ describe('custom-token.utils', () => {
 
 		const partialExpected = {
 			enabled: true,
-			version: [1n]
+			version: [1n],
+			section: toNullable()
 		};
 
 		it('should convert to CustomToken with nullish version', () => {
@@ -85,7 +87,8 @@ describe('custom-token.utils', () => {
 				token: {
 					Erc20: {
 						token_address: 'mock-token-address',
-						chain_id: 123n
+						chain_id: 123n,
+						allow_media_source: toNullable()
 					}
 				}
 			});
@@ -104,7 +107,8 @@ describe('custom-token.utils', () => {
 				token: {
 					Erc721: {
 						token_address: 'mock-token-address',
-						chain_id: 123n
+						chain_id: 123n,
+						allow_media_source: toNullable()
 					}
 				}
 			});
@@ -123,7 +127,8 @@ describe('custom-token.utils', () => {
 				token: {
 					Erc1155: {
 						token_address: 'mock-token-address',
-						chain_id: 123n
+						chain_id: 123n,
+						allow_media_source: toNullable()
 					}
 				}
 			});

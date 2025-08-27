@@ -14,7 +14,7 @@
 			"symbol": "シンボル",
 			"decimals": "小数桁数",
 			"amount": "数量",
-			"tokenId": "",
+			"tokenId": "トークンID",
 			"max": "最大",
 			"destination": "宛先",
 			"reject": "拒否",
@@ -101,13 +101,13 @@
 	"auth": {
 		"text": {
 			"title_part_1": "$oisy_name",
-			"title_part_2": "完全分散型",
+			"title_part_2": "究極の分散型ウォレット",
 			"logout": "ログアウト",
-			"lock": "",
+			"lock": "ロック",
 			"authenticate": "開く／作成",
-			"asset_types": "Bitcoin、Solana、Ethereum、ICP など",
-			"instant_and_private": "いつでもどこでも瞬時かつプライベートにアクセス",
-			"advanced_cryptography": "100%オンチェーン：高度な暗号技術による安全性"
+			"asset_types": "Bitcoin、Solana、Ethereum、ICP 等に対応",
+			"instant_and_private": "いつでもどこでも、すぐにプライベートアクセス",
+			"advanced_cryptography": "100％オンチェーン。高度な暗号技術で守られる安全性。"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
@@ -148,8 +148,8 @@
 				"other_docs": "$oisy_short Docs: Internet Identity",
 				"other_private_key": "誰がネイティブアセットの秘密鍵を管理していますか？",
 				"other_asset_control": "$oisy_shortウォレットにおけるアセット管理、復旧、ガバナンス",
-				"need_help": "サポートが必要ですか",
-				"sign_in": "サインインについてですか？"
+				"need_help": "サインイン",
+				"sign_in": "に関してサポートが必要ですか？"
 			},
 			"alt": {
 				"internet_identity": "新しいInternet Identityの画像",
@@ -164,12 +164,12 @@
 	},
 	"lock": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
-			"unlock": "",
-			"logout": "",
-			"logout_clear_cash_message": "",
-			"learn_more": ""
+			"title_part_1": "ロックを解除して続行",
+			"title_part_2": "ウォレットは安全のためロックされています。中断したところから再開するか、ログアウトしてください。",
+			"unlock": "ロック解除",
+			"logout": "ログアウト",
+			"logout_clear_cash_message": "ログアウトすると、キャッシュされたデータがすべて消去されます",
+			"learn_more": "詳細はこちら"
 		}
 	},
 	"dapps": {
@@ -486,8 +486,8 @@
 			"spl_tokens": "SPLトークンの読み込み中にエラーが発生しました",
 			"minter_ckbtc_btc": "ckBTCをBTCに変換するには、ミントを設定する必要があります",
 			"minter_cketh_eth": "ckETHをETHに変換するには、ミントを設定する必要があります",
-			"minter_ckerc20_erc20": "ckERC20をErc20に変換するには、ミントを設定する必要があります",
-			"ledger_cketh_eth": "ckErc20をErc20に変換するには、ckETH元帳を設定する必要があります",
+			"minter_ckerc20_erc20": "ckERC20をERC20に変換するには、ミントを設定する必要があります",
+			"ledger_cketh_eth": "ckERC20をERC20に変換するには、ckETH元帳を設定する必要があります",
 			"minter_btc": "BTCを取得するには、ミントを設定する必要があります",
 			"minter_ckbtc_info": "ckBTC情報を取得するには、設定されたミントが必要です",
 			"minter_cketh_info": "ckETH情報を取得するには、設定されたミントが必要です",
@@ -499,7 +499,7 @@
 			"icrc_canisters": "ICRCキャニスターの読み込み中にエラーが発生しました",
 			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",
-			"erc1155_custom_tokens": "",
+			"erc1155_custom_tokens": "ERC1155カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc20_user_tokens": "ERC20ユーザーがトークンを読み込み中にエラーが発生しました",
 			"spl_custom_tokens": "SPLカスタムトークンの読み込み中にエラーが発生しました。",
 			"erc20_user_token": "ERC20ツインの有効化中にエラーが発生しました",
@@ -723,12 +723,13 @@
 			"minter_info_not_certified": "数秒後にもう一度お試しください。ckETHの設定パラメーターが認証されていません。",
 			"cketh_max_transaction_fee_missing": "ckETHの最大トランザクション手数料が設定されていません。",
 			"utxos_fee_missing": "UTXO手数料が不足しています。",
-			"minimum_btc_amount": "",
-			"btc_insufficient_balance": "",
-			"btc_insufficient_balance_for_fee": "",
-			"btc_invalid_utxo_data": "",
-			"btc_utxo_locked": "",
-			"btc_invalid_fee_calculation": ""
+			"minimum_btc_amount": "金額が小さすぎます。最低$amount BTCを入力してください。",
+			"btc_insufficient_balance": "取引に利用できるBitcoinのUTXOがありません",
+			"btc_insufficient_balance_for_fee": "取引手数料を支払うためのBitcoin残高が不足しています",
+			"btc_invalid_utxo_data": "無効なBitcoin取引データです",
+			"btc_utxo_locked": "保留中の取引によりBitcoin資金がロックされています",
+			"btc_invalid_fee_calculation": "Bitcoin取引手数料の検証に失敗しました",
+			"pending_transactions_not_available": "保留中の取引サービスは現在利用できません。後でもう一度お試しください。"
 		},
 		"error": {
 			"unexpected": "トランザクションの送信中に問題が発生しました",
@@ -811,9 +812,9 @@
 			"approval_fee": "承認手数料",
 			"gas_fee": "ガス代",
 			"lp_fee": "流動性プロバイダー手数料",
-			"max_slippage_info": "0%から50%の間で入力してください",
+			"max_slippage_info": "",
 			"max_slippage_warning": "リスク警告：スリッページが大きいと、市場の変動による損失が発生する可能性があります",
-			"max_slippage_error": "スリッページ許容値は0％未満または50％超にはできません",
+			"max_slippage_error": "",
 			"swap_button": "今すぐスワップ",
 			"swap_is_not_offered": "このスワップは現在提供されていません。",
 			"executing_transaction": "取引を実行中...",
@@ -834,11 +835,11 @@
 			"open_instructions_link": "指示リンクを開く",
 			"select_token": "トークンを選択",
 			"select_network_filter": "ネットワークを選択",
-			"withdrawing": "",
-			"network_cost": "",
-			"gasless": "",
-			"swap_fees": "",
-			"cross_chain_networks_info": ""
+			"withdrawing": "出金中...",
+			"network_cost": "ネットワークコスト",
+			"gasless": "ガスレス",
+			"swap_fees": "スワップ手数料",
+			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します"
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください",
@@ -852,10 +853,10 @@
 			"withdraw_failed_first_part": "スワップ失敗。送信されたトークンを自動的に出金できませんでした。 下の出金ボタンをクリックして手動で引き出してください。<br>",
 			"withdraw_failed_second_part": "または、後でいつでもWebサイトから直接引き出すこともできます:",
 			"swap_failed_instruction_link": "これらの指示 ",
-			"manually_withdraw_success": "",
-			"manually_withdraw_failed": "",
-			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": ""
+			"manually_withdraw_success": "前回の失敗したスワップのトークンは正常に出金されました。再度スワップを試すか、スワッププロバイダーを変更してください。",
+			"manually_withdraw_failed": "資金の出金に失敗しました。<br>もう一度試すか、以下に従ってください",
+			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください",
+			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。"
 		}
 	},
 	"buy": {
@@ -875,7 +876,7 @@
 			"balance": "残高",
 			"hide_zero_balances": "ゼロ残高を隠す",
 			"all_tokens_with_zero_hidden": "ゼロ残高のすべての資産は現在非表示です",
-			"filter_nothing_found": "おっと、何も見つかりませんでした",
+			"filter_nothing_found": "有効なトークンが見つかりません",
 			"filter_nothing_found_description": "利用可能なアセットを検索するか、「トークンの管理」を使用してインポートします",
 			"filter_placeholder": "トークンまたはシンボルでフィルタリング",
 			"buy_or_receive": "リストで確認するために、今すぐ最初のトークンを購入または受け取ってください",
@@ -999,7 +1000,7 @@
 			"invalid_contract_address": "コントラクトアドレスが無効です",
 			"invalid_token_address": "トークンアドレスが無効です",
 			"invalid_ledger": "選択されたトークンはIcrc台帳キャニスターにリンクされていません",
-			"unrecognised_erc_interface": "",
+			"unrecognised_erc_interface": "認識できないERCインターフェースです。",
 			"no_metadata": "メタデータが取得されませんでした",
 			"unexpected": "トークンの保存中にエラーが発生しました",
 			"unexpected_hiding": "トークンを隠す際に予期せぬ問題が発生しました",
@@ -1017,34 +1018,34 @@
 			"title": "NFT",
 			"title_empty": "あなたのNFTがここに表示されます",
 			"description_empty": "まだNFTを受け取っていないようです",
-			"grouping": "",
-			"as_plain_list": "",
-			"by_collection": "",
-			"show_spam": "",
-			"show_hidden": "",
-			"sorting": "",
-			"recents_first": "",
-			"oldest_first": "",
-			"collection_atoz": "",
-			"collection_ztoa": "",
-			"collection_items_count": "",
-			"collection_address": "",
-			"token_standard": "",
-			"quantity": "",
-			"item_traits": "",
-			"collection_not_loaded": "",
-			"nft_not_loaded": "",
-			"collections": "",
-			"all_assets": "",
-			"address_copied": "",
-			"open_explorer": ""
+			"grouping": "グループ化",
+			"as_plain_list": "リスト表示",
+			"by_collection": "コレクションでグループ化",
+			"show_spam": "スパムを表示",
+			"show_hidden": "非表示を表示",
+			"sorting": "並べ替え",
+			"recents_first": "新しい順",
+			"oldest_first": "古い順",
+			"collection_atoz": "コレクション名 A-Z",
+			"collection_ztoa": "コレクション名 Z-A",
+			"collection_items_count": "$count 点",
+			"collection_address": "コレクションコントラクトアドレス",
+			"token_standard": "トークン規格",
+			"quantity": "数量",
+			"item_traits": "アイテムの特性",
+			"collection_not_loaded": "コレクションはまだ読み込まれていないため表示できません",
+			"nft_not_loaded": "NFTはまだ読み込まれていないため表示できません",
+			"collections": "コレクション",
+			"all_assets": "すべての資産",
+			"address_copied": "アドレス $address をコピーしました",
+			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く"
 		},
 		"alt": {
 			"placeholder_image": "まだNFTがありません",
 			"card": {
 				"image": "トークンIDが$tokenIdのNFTの画像"
 			},
-			"copy_address": ""
+			"copy_address": "このアドレスをクリップボードにコピー"
 		}
 	},
 	"fee": {
@@ -1275,7 +1276,7 @@
 				"reward_received": "$oisy_shortへようこそ！",
 				"reward_failed": "コードの有効期限が切れました",
 				"reward_received_description": "まもなくウェルカムギフトが届きます",
-				"brand_reward_received_description": "",
+				"brand_reward_received_description": "もっと稼ぎたいですか？友達を紹介して、参加者ごとに報酬を獲得しましょう。",
 				"reward_failed_description": "新しいコードをリクエストして再試行してください"
 			},
 			"error": {
@@ -1286,12 +1287,12 @@
 		},
 		"invitation": {
 			"text": {
-				"title": "",
-				"binance_title": "",
-				"invitation_link_copied": "",
-				"generate_new_link": "",
-				"generating_new_code": "",
-				"regenerate_countdown_text": ""
+				"title": "招待リンクを生成",
+				"binance_title": "バイナンス クラブハウスQR",
+				"invitation_link_copied": "招待リンクがコピーされました。",
+				"generate_new_link": "新しいリンクを生成",
+				"generating_new_code": "新しいコードを生成中",
+				"regenerate_countdown_text": "$counter秒後に新しいリンクが生成されます"
 			}
 		}
 	},
@@ -1334,7 +1335,7 @@
 		"avatar": {
 			"default": "デフォルトアバター",
 			"avatar_for": "のアバター",
-			"avatar_loading": ""
+			"avatar_loading": "アバターを読み込み中..."
 		},
 		"edit_avatar": {
 			"menu_title": "連絡先の画像",
@@ -1478,7 +1479,8 @@
 	},
 	"license_agreement": {
 		"text": {
-			"accept_terms": "このボタンをクリックすると、以下に同意したことになります",
+			"license_agreement": "",
+			"accept_terms": "このボタンをクリックすると、以下に同意したことになります。",
 			"accept_terms_link": "ライセンス契約",
 			"title": "$oisy_nameライセンス契約（以下「本ライセンス契約」）",
 			"paragraph_1": "ブラウザベースの自己管理型マルチチェーンウォレット分散型アプリケーションである$oisy_name（以下「$oisy_short」）は、Internet Computerの公開ブロックチェーンネットワーク上でホストされています。$oisy_short、そのオープンソースコード、および関連するライセンスの詳細については、$oisy_shortのGitHubリポジトリ($oisy_repo_url)を参照してください。",
@@ -1493,13 +1495,34 @@
 			"warranty_liability": "<strong>7. 保証の免責事項および責任の制限。</strong>適用される法律によって許容される最大限の範囲で、$oisy_shortは「現状のまま」提供され、いかなる種類の保証もありません。適用される法律によって許容される最大限の範囲で、DFINITYは、特定の目的への適合性、市場性、所有権、品質、結果、および非侵害の黙示の保証または条件を含むがこれらに限定されない、明示的、黙示的、法定またはその他のすべての保証および条件を否認します。DFINITYは、$oisy_shortが常に利用可能で安全であること（現在および将来にわたって）を保証しません。DFINITYは、$oisy_shortの正確性または機能性、および$oisy_shortの使用を通じて利用可能になる情報または機能（現在および将来にわたって）の正確性、有効性、または完全性、または$oisy_shortの品質または一貫性、またはその使用によって得られる結果に関して、いかなる種類の保証も明示的に否認します。適用される法律によって許容される最大限の範囲で、DFINITYは、$oisy_shortまたはDFINITY資料の使用または使用不能およびアクセスから生じるいかなる結果的、特別、間接的、偶発的、または懲罰的損害に対しても、DFINITYがそのような損害の可能性について知らされていたとしても、またいかなる限定的な救済策の本質的な目的の失敗にもかかわらず、責任を負わないものとします。適用される法律によって許容される最大限の範囲で、本ライセンス契約またはお客様の$oisy_shortの使用または使用不能から生じる損害に対するDFINITYの総責任は、いかなる場合も100 CHFを超えないものとします。",
 			"indemnity": "<strong>8. 免責。</strong>お客様は、お客様の$oisy_shortの使用または誤用、あるいは本ライセンス契約または適用される法律または規制の違反に関連して発生するいかなる責任および費用（当該当事者が負担する合理的な弁護士費用を含む）についても、DFINITYおよびその関連会社、役員、取締役、サプライヤー、ライセンサー、およびその他の顧客を免責し、防御し、損害を与えないことに同意します。",
 			"governing_law": "<strong>9. 準拠法; 管轄。</strong>$oisy_shortに関するいかなる請求も、抵触法の規則を除き、スイスの法律に準拠します。本ライセンス契約に関連する、またはこれに関するいかなる請求または紛争（非契約上の紛争または請求およびその解釈を含む）も、スイス連邦裁判所への上訴の可能性を留保しつつ、スイス、チューリッヒの裁判所の専属管轄に服するものとします。",
-			"entire_agreement": "",
+			"entire_agreement": "<strong>10. 完全合意および分離可能性。</strong>本ライセンス契約は、お客様とDFINITYとの間の完全な合意を構成し、その主題に関するお客様とDFINITYとの間の口頭または書面による以前のすべての合意、交渉、またはその他のコミュニケーションに優先します。DFINITYは、$oisy_shortの新しいバージョンが利用可能になったときに、本ライセンス契約を変更することがあります。本ライセンス契約のいずれかの条項が無効または執行不能であると判断された場合、(a)当該条項は、当該条項を有効かつ執行可能にするために厳密に必要な範囲で修正されたものとみなされ、またはそのような修正が不可能な場合は本ライセンス契約から分離されたものとみなされ、(b)本契約の他のすべての条項の有効性および執行可能性は、いかなる形でも影響を受けたり損なわれたりすることはありません。",
 			"assignment": "<strong>11. 譲渡。</strong>お客様は、DFINITYの事前の書面による同意なしに本ライセンス契約を譲渡することはできません。これには、合併または支配権の変更に関連して明示的にまたは法律の運用により譲渡される場合も含まれ、そのような譲渡の試みは無効となります。DFINITYは、お客様に何ら通知することなく、本ライセンス契約を制限なく譲渡することができます。上記を条件として、本ライセンス契約は、両当事者およびそれぞれの後継者および許可された譲受人を拘束するものとします。",
 			"no_waiver": "<strong>12. 権利放棄なし。</strong>本ライセンス契約または法律で規定された権利、権限、または救済措置を行使しないこと、または行使を遅らせることは、その権利、権限、または救済措置の放棄を構成するものではありません。DFINITYが本ライセンス契約のいずれかの義務または違反を放棄しても、他の義務または本ライセンス契約のその後の違反を放棄するものではありません。",
-			"english_version": "<strong>13. 英語版。</strong>本ライセンス契約の英語版が、紛争が生じた場合の公式かつ優勢なバージョンとなります。本ライセンス契約に基づいて行われるすべての通信および通知は英語でなければなりません。"
+			"english_version": "<strong>13. 英語版。</strong>本ライセンス契約の英語版が、紛争が生じた場合の公式かつ優勢なバージョンとなります。本ライセンス契約に基づいて行われるすべての通信および通知は英語でなければなりません。",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "$oisy_nameライセンス契約"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1540,8 +1563,8 @@
 			"month_plural": "ヶ月",
 			"day": "日",
 			"day_plural": "日",
-			"hour": "時",
-			"hour_plural": "時",
+			"hour": "時間",
+			"hour_plural": "時間",
 			"minute": "分",
 			"minute_plural": "分",
 			"second": "秒",
@@ -1555,9 +1578,15 @@
 			"action_button_contacts_title": "アドレス帳を表示",
 			"action_button_contacts_subtitle": "保存したアドレス帳を表示します",
 			"action_button_contacts_prompt": "アドレス帳を表示してください。",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "メッセージを送信",
 			"send_message_input_placeholder": "何をしたいですか？",
-			"no_contacts_found_message": "",
+			"send_token_succeeded": "",
+			"no_contacts_found_message": "申し訳ありません、アドレス帳に該当する連絡先が見つかりませんでした。",
 			"loading": "考え中..."
 		},
 		"errors": {
