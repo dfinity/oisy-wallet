@@ -38,7 +38,8 @@ describe('erc721.services', () => {
 					chain_id: ETHEREUM_NETWORK.chainId,
 					token_address: mockEthAddress
 				}
-			}
+			},
+			section: toNullable()
 		},
 		{
 			version: toNullable(2n),
@@ -48,7 +49,8 @@ describe('erc721.services', () => {
 					chain_id: BASE_NETWORK.chainId,
 					token_address: mockEthAddress2.toUpperCase()
 				}
-			}
+			},
+			section: toNullable()
 		},
 		{
 			version: toNullable(),
@@ -58,7 +60,8 @@ describe('erc721.services', () => {
 					chain_id: POLYGON_AMOY_NETWORK.chainId,
 					token_address: mockEthAddress3
 				}
-			}
+			},
+			section: toNullable()
 		}
 	];
 
