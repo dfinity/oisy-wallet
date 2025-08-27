@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insufficiente per coprire le commissioni di transazione",
 			"btc_invalid_utxo_data": "Dati della transazione Bitcoin non validi",
 			"btc_utxo_locked": "I fondi Bitcoin sono bloccati da transazioni in sospeso",
-			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita"
+			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita",
+			"pending_transactions_not_available": "Il servizio delle transazioni in sospeso non è attualmente disponibile. Si prega di riprovare più tardi."
 		},
 		"error": {
 			"unexpected": "Qualcosa è andato storto durante l'invio della transazione.",
@@ -811,9 +812,9 @@
 			"approval_fee": "Fee di approvazione",
 			"gas_fee": "Gas fee",
 			"lp_fee": "Fee LP",
-			"max_slippage_info": "Inserisci un valore tra 0% e 50%",
+			"max_slippage_info": "Inserisci un valore tra 0% e $maxSlippage%",
 			"max_slippage_warning": "Avviso di rischio: un elevato slippage può comportare perdite a causa della volatilità del mercato",
-			"max_slippage_error": "La tolleranza allo slippage non può essere 0% o superare il 50%",
+			"max_slippage_error": "La tolleranza allo slippage non può essere 0% o superare il $maxSlippage%",
 			"swap_button": "Scambia ora",
 			"swap_is_not_offered": "Questo scambio non è attualmente offerto.",
 			"executing_transaction": "Esecuzione transazione...",
@@ -1555,8 +1556,14 @@
 			"action_button_contacts_title": "",
 			"action_button_contacts_subtitle": "",
 			"action_button_contacts_prompt": "",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": ""
 		},

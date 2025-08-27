@@ -1,8 +1,8 @@
-import { AI_ASSISTANT_SYSTEM_PROMPT } from '$lib/constants/ai-assistant.constants';
 import {
 	aiAssistantChatMessages,
 	aiAssistantConsoleOpen,
-	aiAssistantLlmMessages
+	aiAssistantLlmMessages,
+	aiAssistantSystemMessage
 } from '$lib/derived/ai-assistant.derived';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import type { ChatMessage } from '$lib/types/ai-assistant';
@@ -30,39 +30,39 @@ describe('ai-assistant.derived', () => {
 
 	describe('aiAssistantChatMessages', () => {
 		it('should return correct values', () => {
-			const defaultMessage = {
-				role: 'system',
-				data: { text: AI_ASSISTANT_SYSTEM_PROMPT }
-			} as ChatMessage;
-
-			expect(get(aiAssistantChatMessages)).toStrictEqual([defaultMessage]);
+			expect(get(aiAssistantChatMessages)).toStrictEqual([]);
 
 			aiAssistantStore.appendMessage(message);
 
-			expect(get(aiAssistantChatMessages)).toStrictEqual([defaultMessage, message]);
+			expect(get(aiAssistantChatMessages)).toStrictEqual([message]);
 		});
 	});
 
 	describe('aiAssistantLlmMessages', () => {
 		it('should return correct values', () => {
-			const defaultLlmMessage = {
-				system: {
-					content: AI_ASSISTANT_SYSTEM_PROMPT
-				}
-			};
+			const systemMessage = get(aiAssistantSystemMessage);
 
-			expect(get(aiAssistantLlmMessages)).toStrictEqual([defaultLlmMessage]);
+			expect(get(aiAssistantLlmMessages)).toStrictEqual([systemMessage]);
 
 			aiAssistantStore.appendMessage(message);
 
 			expect(get(aiAssistantLlmMessages)).toStrictEqual([
-				defaultLlmMessage,
+				systemMessage,
 				{
 					user: {
 						content: message.data.text
 					}
 				}
 			]);
+		});
+	});
+
+	describe('ainAssistantSystemMessage', () => {
+		it('should include available tokens and contacts sections', () => {
+			const store = get(aiAssistantSystemMessage) as { system: { content: string } };
+
+			expect(store.system.content.includes('AVAILABLE TOKENS')).toBeTruthy();
+			expect(store.system.content.includes('AVAILABLE CONTACTS')).toBeTruthy();
 		});
 	});
 });

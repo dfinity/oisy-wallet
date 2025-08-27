@@ -46,7 +46,7 @@ export interface ReviewSendTokensToolResult {
 
 export interface ToolResult {
 	type: 'show_contacts' | 'review_send_tokens';
-	result?: ShowContactsToolResult;
+	result?: ShowContactsToolResult | ReviewSendTokensToolResult;
 }
 
 export interface AiAssistantContactUi
