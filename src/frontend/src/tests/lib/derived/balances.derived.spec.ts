@@ -1,6 +1,10 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { ZERO } from '$lib/constants/app.constants';
-import { allBalancesZero, anyBalanceNonZero } from '$lib/derived/balances.derived';
+import {
+	allBalancesZero,
+	anyBalanceNonZero,
+	noPositiveBalanceAndNotAllBalancesZero
+} from '$lib/derived/balances.derived';
 import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token } from '$lib/types/token';
@@ -88,11 +92,6 @@ describe('balances.derived', () => {
 		it('should return true if all balances are nullish', () => {
 			tokens.forEach(({ id }) => {
 				balancesStore.reset(id);
-			});
-
-			balancesStore.set({
-				id: tokens[0].id,
-				data: { data: ZERO, certified: false }
 			});
 
 			expect(get(allBalancesZero)).toBeTruthy();
@@ -187,5 +186,127 @@ describe('balances.derived', () => {
 		});
 	});
 
-	describe('noPositiveBalanceAndNotAllBalancesZero', () => {});
+	describe('noPositiveBalanceAndNotAllBalancesZero', () => {
+		let tokens: Token[];
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			setupUserNetworksStore('allEnabled');
+
+			tokens = get(enabledFungibleNetworkTokens);
+
+			balancesStore.resetAll();
+
+			splDefaultTokensStore.reset();
+			splCustomTokensStore.resetAll();
+		});
+
+		it('should return true if balances data are nullish', () => {
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeTruthy();
+		});
+
+		it('should return true if balances data are empty', () => {
+			balancesStore.reset(tokens[0].id);
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeTruthy();
+		});
+
+		it('should return true if all balances are nullish except for one that is not loaded', () => {
+			tokens.slice(1).forEach(({ id }) => {
+				balancesStore.reset(id);
+			});
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeTruthy();
+		});
+
+		it('should return true if all balances are zero except for one that is not loaded', () => {
+			tokens.slice(1).forEach(({ id }) => {
+				balancesStore.set({
+					id,
+					data: { data: ZERO, certified: false }
+				});
+			});
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeTruthy();
+		});
+
+		it('should return false if all balances are positive except for one that is not loaded', () => {
+			tokens.slice(1).forEach(({ id }) => {
+				balancesStore.set({
+					id,
+					data: { data: bn1Bi, certified: false }
+				});
+			});
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeFalsy();
+		});
+
+		it('should return false if all balances are nullish but loaded', () => {
+			tokens.forEach(({ id }) => {
+				balancesStore.reset(id);
+			});
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeFalsy();
+		});
+
+		it('should return false if all balances are zero', () => {
+			tokens.forEach(({ id }) => {
+				balancesStore.set({
+					id,
+					data: { data: ZERO, certified: false }
+				});
+			});
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeFalsy();
+		});
+
+		it('should return false if all balances are positive', () => {
+			tokens.forEach(({ id }) => {
+				balancesStore.set({
+					id,
+					data: { data: bn1Bi, certified: false }
+				});
+			});
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeFalsy();
+		});
+
+		it('should return false if all balances are either zero or positive', () => {
+			tokens.forEach(({ id }, index) => {
+				balancesStore.set({
+					id,
+					data: { data: index % 2 === 0 ? ZERO : bn1Bi, certified: false }
+				});
+			});
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeFalsy();
+		});
+
+		it('should return false if there is at least one positive balance', () => {
+			balancesStore.set({
+				id: tokens[0].id,
+				data: { data: bn1Bi, certified: false }
+			});
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeFalsy();
+
+			balancesStore.reset(tokens[1].id);
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeFalsy();
+		});
+
+		it('should return true if there is at least one zero balance', () => {
+			balancesStore.set({
+				id: tokens[0].id,
+				data: { data: ZERO, certified: false }
+			});
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeTruthy();
+
+			balancesStore.reset(tokens[1].id);
+
+			expect(get(noPositiveBalanceAndNotAllBalancesZero)).toBeTruthy();
+		});
+	});
 });
