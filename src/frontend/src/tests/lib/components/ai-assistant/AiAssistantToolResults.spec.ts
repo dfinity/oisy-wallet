@@ -2,7 +2,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import AiAssistantToolResults from '$lib/components/ai-assistant/AiAssistantToolResults.svelte';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
-import type { ToolResult } from '$lib/types/ai-assistant';
+import { ToolResultType, type ToolResult } from '$lib/types/ai-assistant';
 import type { ContactUi } from '$lib/types/contact';
 import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -26,7 +26,7 @@ describe('AiAssistantToolResults', () => {
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
-						type: 'show_contacts',
+						type: ToolResultType.SHOW_CONTACTS,
 						result: { contacts: Object.values(extendedContacts) }
 					}
 				]
@@ -42,7 +42,7 @@ describe('AiAssistantToolResults', () => {
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
-						type: 'review_send_tokens',
+						type: ToolResultType.REVIEW_SEND_TOKENS,
 						result: { amount: 1, token: ICP_TOKEN, address: mockPrincipalText }
 					}
 				]
