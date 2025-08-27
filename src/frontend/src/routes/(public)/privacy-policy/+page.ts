@@ -1,7 +1,6 @@
 import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 import { resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
-import type { LoadEvent } from '@sveltejs/kit';
-import { redirect } from '@sveltejs/kit';
+import { redirect, type LoadEvent } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
 // We reset the data because a public route operates without a network or token selected.
