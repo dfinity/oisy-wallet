@@ -5,7 +5,9 @@ export class BtcAmountAssertionError extends Error {}
 export enum BtcPrepareSendError {
 	InsufficientBalance = 'insufficient_balance',
 	InsufficientBalanceForFee = 'insufficient_balance_for_fee',
-	MinimumBalance = 'minimum_btc_amount'
+	MinimumBalance = 'minimum_btc_amount',
+	PendingTransactionsNotAvailable = 'pending_transactions_not_available',
+	UtxoLocked = 'utxo_locked'
 }
 
 export class BtcValidationError extends Error {
@@ -20,6 +22,7 @@ export enum BtcSendValidationError {
 	InsufficientBalanceForFee = 'InsufficientBalanceForFee',
 	InvalidUtxoData = 'InvalidUtxoData',
 	UtxoLocked = 'UtxoLocked',
+	PendingTransactionsNotAvailable = 'PendingTransactionsNotAvailable',
 	InvalidFeeCalculation = 'InvalidFeeCalculation',
 	MinimumBalance = 'MinimumBalance',
 	AuthenticationRequired = 'AuthenticationRequired',
@@ -33,5 +36,5 @@ export enum BtcSendValidationError {
 export interface UtxosFee {
 	feeSatoshis: bigint;
 	utxos: Utxo[];
-	error?: BtcPrepareSendError;
+	error?: BtcPrepareSendError | BtcSendValidationError;
 }
