@@ -2,61 +2,6 @@ import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
-export interface AccountSnapshot {
-	decimals: number;
-	token_address: EthAddress;
-	network: {};
-	approx_usd_per_token: number;
-	last_transactions: Array<Transaction>;
-	account: EthAddress;
-	timestamp: bigint;
-	amount: bigint;
-}
-export type AccountSnapshotFor =
-	| { Erc20Sepolia: AccountSnapshot }
-	| { EthSepolia: AccountSnapshot }
-	| { BtcMainnet: AccountSnapshot_1 }
-	| { SolDevnet: AccountSnapshot_2 }
-	| { Erc20Mainnet: AccountSnapshot }
-	| { Icrcv2: AccountSnapshot_3 }
-	| { BtcRegtest: AccountSnapshot_1 }
-	| { SplDevnet: AccountSnapshot_2 }
-	| { EthMainnet: AccountSnapshot }
-	| { SplMainnet: AccountSnapshot_2 }
-	| { SolLocal: AccountSnapshot_2 }
-	| { BtcTestnet: AccountSnapshot_1 }
-	| { SplLocal: AccountSnapshot_2 }
-	| { SolMainnet: AccountSnapshot_2 };
-export interface AccountSnapshot_1 {
-	decimals: number;
-	token_address: BtcTokenId;
-	network: {};
-	approx_usd_per_token: number;
-	last_transactions: Array<Transaction_1>;
-	account: BtcAddress;
-	timestamp: bigint;
-	amount: bigint;
-}
-export interface AccountSnapshot_2 {
-	decimals: number;
-	token_address: string;
-	network: {};
-	approx_usd_per_token: number;
-	last_transactions: Array<Transaction_2>;
-	account: string;
-	timestamp: bigint;
-	amount: bigint;
-}
-export interface AccountSnapshot_3 {
-	decimals: number;
-	token_address: IcrcTokenId;
-	network: {};
-	approx_usd_per_token: number;
-	last_transactions: Array<Transaction_3>;
-	account: Icrcv2AccountId;
-	timestamp: bigint;
-	amount: bigint;
-}
 export type AddDappSettingsError =
 	| { MaxHiddenDappIds: null }
 	| { VersionMismatch: null }
@@ -125,6 +70,17 @@ export type BtcAddress =
 	| { P2WSH: string }
 	| { P2SH: string }
 	| { P2TR: string };
+export interface BtcGetFeePercentilesRequest {
+	network: BitcoinNetwork;
+}
+export interface BtcGetFeePercentilesResponse {
+	fee_percentiles: BigUint64Array | bigint[];
+}
+export type BtcGetFeePercentilesResult =
+	| {
+			Ok: BtcGetFeePercentilesResponse;
+	  }
+	| { Err: SelectedUtxosFeeError };
 export interface BtcGetPendingTransactionsReponse {
 	transactions: Array<PendingTransaction>;
 }
@@ -140,7 +96,6 @@ export type BtcGetPendingTransactionsResult =
 export type BtcSelectUserUtxosFeeResult =
 	| { Ok: SelectedUtxosFeeResponse }
 	| { Err: SelectedUtxosFeeError };
-export type BtcTokenId = { Native: null };
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -178,6 +133,7 @@ export interface Contact {
 	name: string;
 	update_timestamp_ns: bigint;
 	addresses: Array<ContactAddressData>;
+	image: [] | [ContactImage];
 }
 export interface ContactAddressData {
 	label: [] | [string];
@@ -185,8 +141,18 @@ export interface ContactAddressData {
 }
 export type ContactError =
 	| { InvalidContactData: null }
+	| { CanisterMemoryNearCapacity: null }
+	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
-	| { RandomnessError: null };
+	| { ImageTooLarge: null }
+	| { RandomnessError: null }
+	| { ImageExceedsMaxSize: null }
+	| { CanisterStatusError: null }
+	| { TooManyContactsWithImages: null };
+export interface ContactImage {
+	data: Uint8Array | number[];
+	mime_type: ImageMimeType;
+}
 export type CreateChallengeError =
 	| { ChallengeInProgress: null }
 	| { MissingUserProfile: null }
@@ -199,6 +165,7 @@ export interface CreateChallengeResponse {
 }
 export interface CreateContactRequest {
 	name: string;
+	image: [] | [ContactImage];
 }
 export type CreateContactResult = { Ok: Contact } | { Err: ContactError };
 export type CreatePowChallengeResult =
@@ -211,6 +178,7 @@ export interface CredentialSpec {
 export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
+	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
 }
@@ -228,6 +196,10 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
+export interface ErcToken {
+	token_address: string;
+	chain_id: bigint;
+}
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
@@ -258,11 +230,6 @@ export interface IcrcToken {
 	ledger_id: Principal;
 	index_id: [] | [Principal];
 }
-export type IcrcTokenId =
-	| {
-			Icrc: { ledger: Principal; index: [] | [Principal] };
-	  }
-	| { Native: null };
 export type Icrcv2AccountId =
 	| { Account: Uint8Array | number[] }
 	| {
@@ -271,6 +238,11 @@ export type Icrcv2AccountId =
 				subaccount: [] | [Uint8Array | number[]];
 			};
 	  };
+export type ImageMimeType =
+	| { 'image/gif': null }
+	| { 'image/png': null }
+	| { 'image/jpeg': null }
+	| { 'image/webp': null };
 export interface InitArg {
 	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
@@ -360,12 +332,19 @@ export interface SupportedCredential {
 export interface TestnetsSettings {
 	show_testnets: boolean;
 }
-export type Token = { Icrc: IcrcToken } | { SplDevnet: SplToken } | { SplMainnet: SplToken };
+export type Token =
+	| { Erc20: ErcToken }
+	| { Icrc: IcrcToken }
+	| { Erc721: ErcToken }
+	| { SplDevnet: SplToken }
+	| { SplMainnet: SplToken }
+	| { Erc1155: ErcToken };
 export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
+export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {
@@ -393,35 +372,6 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
-export interface Transaction {
-	transaction_type: TransactionType;
-	network: {};
-	counterparty: EthAddress;
-	timestamp: bigint;
-	amount: bigint;
-}
-export type TransactionType = { Send: null } | { Receive: null };
-export interface Transaction_1 {
-	transaction_type: TransactionType;
-	network: {};
-	counterparty: BtcAddress;
-	timestamp: bigint;
-	amount: bigint;
-}
-export interface Transaction_2 {
-	transaction_type: TransactionType;
-	network: {};
-	counterparty: string;
-	timestamp: bigint;
-	amount: bigint;
-}
-export interface Transaction_3 {
-	transaction_type: TransactionType;
-	network: {};
-	counterparty: Icrcv2AccountId;
-	timestamp: bigint;
-	amount: bigint;
-}
 export interface UserCredential {
 	issuer: string;
 	verified_date_timestamp: [] | [bigint];
@@ -433,10 +383,6 @@ export interface UserProfile {
 	settings: [] | [Settings];
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
-}
-export interface UserSnapshot {
-	accounts: Array<AccountSnapshotFor>;
-	timestamp: [] | [bigint];
 }
 export interface UserToken {
 	decimals: [] | [number];
@@ -463,6 +409,10 @@ export interface _SERVICE {
 		[BtcAddPendingTransactionRequest],
 		BtcAddPendingTransactionResult
 	>;
+	btc_get_current_fee_percentiles: ActorMethod<
+		[BtcGetFeePercentilesRequest],
+		BtcGetFeePercentilesResult
+	>;
 	btc_get_pending_transactions: ActorMethod<
 		[BtcGetPendingTransactionsRequest],
 		BtcGetPendingTransactionsResult
@@ -478,7 +428,6 @@ export interface _SERVICE {
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_contact: ActorMethod<[bigint], GetContactResult>;
 	get_contacts: ActorMethod<[], GetContactsResult>;
-	get_snapshot: ActorMethod<[], [] | [UserSnapshot]>;
 	get_user_profile: ActorMethod<[], GetUserProfileResult>;
 	has_user_profile: ActorMethod<[], HasUserProfileResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
@@ -489,7 +438,6 @@ export interface _SERVICE {
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
-	set_snapshot: ActorMethod<[UserSnapshot], undefined>;
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;

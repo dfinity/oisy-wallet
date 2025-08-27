@@ -56,6 +56,8 @@ on:
         required: true
       VITE_ALCHEMY_API_KEY_STAGING:
         required: true
+      VITE_ALCHEMY_API_KEY_TEST_FE:
+        required: true
       VITE_QUICKNODE_API_KEY_STAGING:
         required: true
       VITE_WALLET_CONNECT_PROJECT_ID_STAGING:
@@ -72,7 +74,17 @@ on:
         required: true
       VITE_ICP_SWAP_ENABLED_STAGING:
         required: true
+      VITE_VELORA_SWAP_ENABLED_STAGING:
+        required: true
+      VITE_NFTS_ENABLED_STAGING:
+        required: true
       VITE_FRONTEND_DERIVATION_ENABLED_STAGING:
+        required: true
+      VITE_AI_ASSISTANT_CONSOLE_ENABLED_STAGING:
+        required: true
+      VITE_AVATAR_ENABLED_STAGING:
+        required: true
+      VITE_LOCK_SCREEN_ENABLED_STAGING:
         required: true
       VITE_ONRAMPER_API_KEY_DEV_STAGING:
         required: true
@@ -108,7 +120,17 @@ on:
         required: true
       VITE_ICP_SWAP_ENABLED_BETA:
         required: true
+      VITE_VELORA_SWAP_ENABLED_BETA:
+        required: true
+      VITE_NFTS_ENABLED_BETA:
+        required: true
       VITE_FRONTEND_DERIVATION_ENABLED_BETA:
+        required: true
+      VITE_AI_ASSISTANT_CONSOLE_ENABLED_BETA:
+        required: true
+      VITE_AVATAR_ENABLED_BETA:
+        required: true
+      VITE_LOCK_SCREEN_ENABLED_BETA:
         required: true
       VITE_ONRAMPER_API_KEY_PROD_BETA:
         required: true
@@ -200,7 +222,7 @@ jobs:
           REF: ${{ github.ref }}
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           fetch-depth: 2
           persist-credentials: false
@@ -214,11 +236,23 @@ jobs:
       - name: Set Output Variables Based on Network
         id: set-outputs
         run: |
+          if [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
+            {
+              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_TEST_FE"
+            } >> $GITHUB_OUTPUT
+          elif [[ "$NETWORK" == "staging" ]]; then
+           {
+              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING"
+            } >> $GITHUB_OUTPUT
+          elif [[ "$NETWORK" == "beta" ]]; then
+            {
+              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA"
+            } >> $GITHUB_OUTPUT
+          fi
           if [[ "$NETWORK" == "staging" ]] || [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
             {
               echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_STAGING"
               echo "VITE_INFURA_API_KEY=$VITE_INFURA_API_KEY_STAGING"
-              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING"
               echo "VITE_QUICKNODE_API_KEY=$VITE_QUICKNODE_API_KEY_STAGING"
               echo "VITE_WALLET_CONNECT_PROJECT_ID=$VITE_WALLET_CONNECT_PROJECT_ID_STAGING"
               echo "VITE_COINGECKO_API_KEY=$VITE_COINGECKO_API_KEY_STAGING"
@@ -229,7 +263,12 @@ jobs:
               echo "VITE_ONRAMPER_API_KEY_PROD=$VITE_ONRAMPER_API_KEY_PROD_STAGING"
               echo "VITE_PLAUSIBLE_ENABLED=$VITE_PLAUSIBLE_ENABLED_STAGING"
               echo "VITE_ICP_SWAP_ENABLED=$VITE_ICP_SWAP_ENABLED_STAGING"
+              echo "VITE_VELORA_SWAP_ENABLED=$VITE_VELORA_SWAP_ENABLED_STAGING"
+              echo "VITE_NFTS_ENABLED=$VITE_NFTS_ENABLED_STAGING"
               echo "VITE_FRONTEND_DERIVATION_ENABLED=$VITE_FRONTEND_DERIVATION_ENABLED_STAGING"
+              echo "VITE_AI_ASSISTANT_CONSOLE_ENABLED=$VITE_AI_ASSISTANT_CONSOLE_ENABLED_STAGING"
+              echo "VITE_AVATAR_ENABLED=$VITE_AVATAR_ENABLED_STAGING"
+              echo "VITE_LOCK_SCREEN_ENABLED=$VITE_LOCK_SCREEN_ENABLED_STAGING"
             } >> $GITHUB_OUTPUT
             if [[ "$NETWORK" == "staging" ]]; then
               echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING" >> $GITHUB_OUTPUT
@@ -246,7 +285,6 @@ jobs:
             {
               echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_BETA"
               echo "VITE_INFURA_API_KEY=$VITE_INFURA_API_KEY_BETA"
-              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA"
               echo "VITE_QUICKNODE_API_KEY=$VITE_QUICKNODE_API_KEY_BETA"
               echo "VITE_WALLET_CONNECT_PROJECT_ID=$VITE_WALLET_CONNECT_PROJECT_ID_BETA"
               echo "VITE_COINGECKO_API_KEY=$VITE_COINGECKO_API_KEY_BETA"
@@ -258,7 +296,12 @@ jobs:
               echo "VITE_ONRAMPER_API_KEY_PROD=$VITE_ONRAMPER_API_KEY_PROD_BETA"
               echo "VITE_PLAUSIBLE_ENABLED=$VITE_PLAUSIBLE_ENABLED_BETA"
               echo "VITE_ICP_SWAP_ENABLED=$VITE_ICP_SWAP_ENABLED_BETA"
+              echo "VITE_VELORA_SWAP_ENABLED=$VITE_VELORA_SWAP_ENABLED_BETA"
+              echo "VITE_NFTS_ENABLED=$VITE_NFTS_ENABLED_BETA"
               echo "VITE_FRONTEND_DERIVATION_ENABLED=$VITE_FRONTEND_DERIVATION_ENABLED_BETA"
+              echo "VITE_AI_ASSISTANT_CONSOLE_ENABLED=$VITE_AI_ASSISTANT_CONSOLE_ENABLED_BETA"
+              echo "VITE_AVATAR_ENABLED=$VITE_AVATAR_ENABLED_BETA"
+              echo "VITE_LOCK_SCREEN_ENABLED=$VITE_LOCK_SCREEN_ENABLED_BETA"
             } >> $GITHUB_OUTPUT
             {
               echo "DFX_DEPLOY_KEY<<EOF"
@@ -270,6 +313,7 @@ jobs:
           VITE_ETHERSCAN_API_KEY_STAGING: ${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}
           VITE_INFURA_API_KEY_STAGING: ${{ secrets.VITE_INFURA_API_KEY_STAGING }}
           VITE_ALCHEMY_API_KEY_STAGING: ${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}
+          VITE_ALCHEMY_API_KEY_TEST_FE: ${{ secrets.VITE_ALCHEMY_API_KEY_TEST_FE }}
           VITE_QUICKNODE_API_KEY_STAGING: ${{ secrets.VITE_QUICKNODE_API_KEY_STAGING }}
           VITE_WALLET_CONNECT_PROJECT_ID_STAGING: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}
           VITE_COINGECKO_API_KEY_STAGING: ${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}
@@ -278,7 +322,12 @@ jobs:
           VITE_POW_FEATURE_ENABLED_STAGING: ${{ secrets.VITE_POW_FEATURE_ENABLED_STAGING }}
           VITE_PLAUSIBLE_ENABLED_STAGING: ${{ secrets.VITE_PLAUSIBLE_ENABLED_STAGING }}
           VITE_ICP_SWAP_ENABLED_STAGING: ${{ secrets.VITE_ICP_SWAP_ENABLED_STAGING }}
+          VITE_VELORA_SWAP_ENABLED_STAGING: ${{ secrets.VITE_VELORA_SWAP_ENABLED_STAGING }}
+          VITE_NFTS_ENABLED_STAGING: ${{ secrets.VITE_NFTS_ENABLED_STAGING }}
           VITE_FRONTEND_DERIVATION_ENABLED_STAGING: ${{ secrets.VITE_FRONTEND_DERIVATION_ENABLED_STAGING }}
+          VITE_AI_ASSISTANT_CONSOLE_ENABLED_STAGING: ${{ secrets.VITE_AI_ASSISTANT_CONSOLE_ENABLED_STAGING }}
+          VITE_AVATAR_ENABLED_STAGING: ${{ secrets.VITE_AVATAR_ENABLED_STAGING }}
+          VITE_LOCK_SCREEN_ENABLED_STAGING: ${{ secrets.VITE_LOCK_SCREEN_ENABLED_STAGING }}
           VITE_ONRAMPER_API_KEY_DEV_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}
           VITE_ONRAMPER_API_KEY_PROD_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
           VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}
@@ -297,7 +346,12 @@ jobs:
           VITE_POW_FEATURE_ENABLED_BETA: ${{ secrets.VITE_POW_FEATURE_ENABLED_BETA }}
           VITE_PLAUSIBLE_ENABLED_BETA: ${{ secrets.VITE_PLAUSIBLE_ENABLED_BETA }}
           VITE_ICP_SWAP_ENABLED_BETA: ${{ secrets.VITE_ICP_SWAP_ENABLED_BETA }}
+          VITE_VELORA_SWAP_ENABLED_BETA: ${{ secrets.VITE_VELORA_SWAP_ENABLED_BETA }}
+          VITE_NFTS_ENABLED_BETA: ${{ secrets.VITE_NFTS_ENABLED_BETA }}
           VITE_FRONTEND_DERIVATION_ENABLED_BETA: ${{ secrets.VITE_FRONTEND_DERIVATION_ENABLED_BETA }}
+          VITE_AI_ASSISTANT_CONSOLE_ENABLED_BETA: ${{ secrets.VITE_AI_ASSISTANT_CONSOLE_ENABLED_BETA }}
+          VITE_AVATAR_ENABLED_BETA: ${{ secrets.VITE_AVATAR_ENABLED_BETA }}
+          VITE_LOCK_SCREEN_ENABLED_BETA: ${{ secrets.VITE_LOCK_SCREEN_ENABLED_BETA }}
           VITE_ONRAMPER_API_KEY_PROD_BETA: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}
           DFX_DEPLOY_KEY_BETA: ${{ secrets.DFX_DEPLOY_KEY_BETA }}
 
@@ -311,7 +365,7 @@ jobs:
           DFX_DEPLOY_KEY: ${{ steps.set-outputs.outputs.DFX_DEPLOY_KEY }}
 
       - name: Restore cargo cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: |
             /home/runner/.cargo/registry
@@ -355,7 +409,12 @@ jobs:
           VITE_POW_FEATURE_ENABLED: ${{ steps.set-outputs.outputs.VITE_POW_FEATURE_ENABLED }}
           VITE_PLAUSIBLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_PLAUSIBLE_ENABLED }}
           VITE_ICP_SWAP_ENABLED: ${{ steps.set-outputs.outputs.VITE_ICP_SWAP_ENABLED }}
+          VITE_VELORA_SWAP_ENABLED: ${{ steps.set-outputs.outputs.VITE_VELORA_SWAP_ENABLED }}
+          VITE_NFTS_ENABLED: ${{ steps.set-outputs.outputs.VITE_NFTS_ENABLED }}
           VITE_FRONTEND_DERIVATION_ENABLED: ${{ steps.set-outputs.outputs.VITE_FRONTEND_DERIVATION_ENABLED }}
+          VITE_AI_ASSISTANT_CONSOLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_AI_ASSISTANT_CONSOLE_ENABLED }}
+          VITE_AVATAR_ENABLED: ${{ steps.set-outputs.outputs.VITE_AVATAR_ENABLED }}
+          VITE_LOCK_SCREEN_ENABLED: ${{ steps.set-outputs.outputs.VITE_LOCK_SCREEN_ENABLED }}
           VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}
@@ -377,7 +436,12 @@ jobs:
           VITE_POW_FEATURE_ENABLED: ${{ steps.set-outputs.outputs.VITE_POW_FEATURE_ENABLED }}
           VITE_PLAUSIBLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_PLAUSIBLE_ENABLED }}
           VITE_ICP_SWAP_ENABLED: ${{ steps.set-outputs.outputs.VITE_ICP_SWAP_ENABLED }}
+          VITE_VELORA_SWAP_ENABLED: ${{ steps.set-outputs.outputs.VITE_VELORA_SWAP_ENABLED }}
+          VITE_NFTS_ENABLED: ${{ steps.set-outputs.outputs.VITE_NFTS_ENABLED }}
           VITE_FRONTEND_DERIVATION_ENABLED: ${{ steps.set-outputs.outputs.VITE_FRONTEND_DERIVATION_ENABLED }}
+          VITE_AI_ASSISTANT_CONSOLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_AI_ASSISTANT_CONSOLE_ENABLED }}
+          VITE_AVATAR_ENABLED: ${{ steps.set-outputs.outputs.VITE_AVATAR_ENABLED }}
+          VITE_LOCK_SCREEN_ENABLED: ${{ steps.set-outputs.outputs.VITE_LOCK_SCREEN_ENABLED }}
           VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}

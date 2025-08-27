@@ -178,20 +178,6 @@
 		"screenshots": ["/images/dapps/curve-finance.webp"]
 	},
 	{
-		"id": "zkpoker",
-		"name": "dapps.descriptions.zkpoker.name",
-		"oneLiner": "dapps.descriptions.zkpoker.one_liner",
-		"callToAction": "dapps.descriptions.zkpoker.call_to_action",
-		"website": "https://zkpoker.app/",
-		"twitter": "https://x.com/zkpokerapp",
-		"tags": ["dapps.categories.walletconnect", "dapps.categories.game"],
-		"stats": "",
-		"usesInternetIdentity": true,
-		"description": "dapps.descriptions.zkpoker.description",
-		"logo": "/images/dapps/zkpoker-logo.svg",
-		"screenshots": ["/images/dapps/zkpoker.webp"]
-	},
-	{
 		"id": "sonic",
 		"name": "dapps.descriptions.sonic.name",
 		"oneLiner": "dapps.descriptions.sonic.one_liner",
@@ -265,6 +251,26 @@
 		"display": "Large",
 		"stats": "",
 		"logo": "/images/dapps/taggr.webp",
-		"screenshots": ["/images/dapps/taggr-screenshot.webp"]
+		"screenshots": ["/images/dapps/taggr-screenshot.webp"],
+		"carousel": {
+			"text": "dapps.descriptions.taggr.carousel.text",
+			"callToAction": "dapps.descriptions.taggr.carousel.call_to_action"
+		}
+	},
+	{
+		"id": "toolkit",
+		"name": "dapps.descriptions.toolkit.name",
+		"oneLiner": "dapps.descriptions.toolkit.one_liner",
+		"website": "https://ic-toolkit.app/",
+		"github": "https://github.com/toolkit-development",
+		"openChat": "https://oc.app/community/wprdh-xyaaa-aaaaf-bmziq-cai/?ref=tjknq-jqaaa-aaaaf-abekq-cai",
+		"twitter": "https://x.com/ic_toolkit",
+		"tags": ["dapps.categories.tools"],
+		"description": "dapps.descriptions.toolkit.description",
+		"usesInternetIdentity": true,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/toolkit-logo-inv.svg",
+		"screenshots": ["/images/dapps/toolkit-screenshot.webp"]
 	}
 ]

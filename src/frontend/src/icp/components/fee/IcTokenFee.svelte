@@ -13,10 +13,12 @@
 </script>
 
 <FeeDisplay
-	feeAmount={fee}
 	decimals={$sendTokenDecimals}
-	symbol={$sendTokenSymbol}
 	exchangeRate={$sendTokenExchangeRate}
+	feeAmount={fee}
+	symbol={$sendTokenSymbol}
 >
-	<span slot="label">{$i18n.fee.text.fee}</span>
+	{#snippet label()}
+		<span>{$i18n.fee.text.fee}</span>
+	{/snippet}
 </FeeDisplay>

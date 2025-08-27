@@ -19,8 +19,8 @@ import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import {
-	combinedDerivedSortedNetworkTokens,
-	combinedDerivedSortedNetworkTokensUi
+	combinedDerivedSortedFungibleNetworkTokens,
+	combinedDerivedSortedFungibleNetworkTokensUi
 } from '$lib/derived/network-tokens.derived';
 import {
 	networkAddress,
@@ -35,12 +35,7 @@ import { networks, networksMainnets, networksTestnets } from '$lib/derived/netwo
 import { pageToken } from '$lib/derived/page-token.derived';
 import { hideZeroBalances, showZeroBalances } from '$lib/derived/settings.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
-import {
-	tokenId,
-	tokenStandard,
-	tokenToggleable,
-	tokenWithFallback
-} from '$lib/derived/token.derived';
+import { tokenId, tokenWithFallback } from '$lib/derived/token.derived';
 import {
 	enabledErc20Tokens,
 	enabledIcTokens,
@@ -63,8 +58,8 @@ const derivedList: Record<string, Readable<unknown>> = {
 	balanceZero,
 	btcAddressMainnet,
 	btcAddressTestnet,
-	combinedDerivedSortedNetworkTokens,
-	combinedDerivedSortedNetworkTokensUi,
+	combinedDerivedSortedFungibleNetworkTokens,
+	combinedDerivedSortedFungibleNetworkTokensUi,
 	enabledErc20Tokens,
 	enabledIcTokens,
 	enabledMainnetTokensUsdBalancesPerNetwork,
@@ -93,8 +88,6 @@ const derivedList: Record<string, Readable<unknown>> = {
 	showZeroBalances,
 	testnetsEnabled,
 	tokenId,
-	tokenStandard,
-	tokenToggleable,
 	tokenWithFallback,
 	tokenWithFallbackAsIcToken,
 	tokens,

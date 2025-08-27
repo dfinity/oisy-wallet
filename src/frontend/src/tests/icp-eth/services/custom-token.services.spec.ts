@@ -17,16 +17,6 @@ import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
-
 vi.mock('$app/environment', () => ({
 	browser: true
 }));
@@ -104,7 +94,8 @@ describe('custom-token.services', () => {
 								index_id: isNullish(indexCanisterId) ? [] : [Principal.fromText(indexCanisterId)],
 								ledger_id: Principal.fromText(mockSendToken.ledgerCanisterId)
 							}
-						}
+						},
+						section: toNullable()
 					}
 				});
 
@@ -154,7 +145,8 @@ describe('custom-token.services', () => {
 								}
 							},
 							version: [1n],
-							enabled: true
+							enabled: true,
+							section: toNullable()
 						}
 					]);
 
@@ -253,7 +245,8 @@ describe('custom-token.services', () => {
 								}
 							},
 							version: [1n],
-							enabled: true
+							enabled: true,
+							section: toNullable()
 						}
 					]);
 
@@ -307,7 +300,8 @@ describe('custom-token.services', () => {
 										isNullish(indexCanisterId) ? undefined : Principal.fromText(indexCanisterId)
 									)
 								}
-							}
+							},
+							section: toNullable()
 						}
 					});
 				});

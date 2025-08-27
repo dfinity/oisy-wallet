@@ -1,8 +1,9 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
+import type { Token } from '$lib/types/token';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import en from '$tests/mocks/i18n.mock';
-import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIndexCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 describe('TokenModalContent', () => {
@@ -27,10 +28,10 @@ describe('TokenModalContent', () => {
 		expect(getByText(ICP_TOKEN.decimals)).toBeInTheDocument();
 	});
 
-	it('renders all values correctly for ICRC token', () => {
+	it('renders all values correctly for ICRC token with index canister', () => {
 		const { getByText, container } = render(TokenModalContent, {
 			props: {
-				token: mockValidIcrcToken
+				token: { ...mockValidIcrcToken, indexCanisterId: mockIndexCanisterId } as Token
 			}
 		});
 
@@ -44,6 +45,38 @@ describe('TokenModalContent', () => {
 
 		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
 		expect(getByText(mockValidIcrcToken.standard)).toBeInTheDocument();
+
+		expect(getByText(en.tokens.import.text.index_canister_id)).toBeInTheDocument();
+		expect(getByText(mockIndexCanisterId)).toBeInTheDocument();
+
+		expect(getByText(en.core.text.symbol)).toBeInTheDocument();
+
+		expect(getByText(en.core.text.decimals)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.decimals)).toBeInTheDocument();
+	});
+
+	it('renders all values correctly for ICRC token without index canister', () => {
+		const { getByText, container } = render(TokenModalContent, {
+			props: {
+				token: mockValidIcrcToken,
+				onEditClick: () => {}
+			}
+		});
+
+		expect(container).toHaveTextContent(getTokenDisplaySymbol(mockValidIcrcToken));
+
+		expect(getByText(en.tokens.details.network)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.network.name)).toBeInTheDocument();
+
+		expect(getByText(en.tokens.details.token)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.name)).toBeInTheDocument();
+
+		expect(getByText(en.tokens.details.standard)).toBeInTheDocument();
+		expect(getByText(mockValidIcrcToken.standard)).toBeInTheDocument();
+
+		expect(getByText(en.tokens.import.text.index_canister_id)).toBeInTheDocument();
+		expect(getByText(en.tokens.details.missing_index_canister_id_label)).toBeInTheDocument();
+		expect(getByText(en.tokens.details.missing_index_canister_id_button)).toBeInTheDocument();
 
 		expect(getByText(en.core.text.symbol)).toBeInTheDocument();
 

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
-	import type { UtxosFee } from '$btc/types/btc-send';
-	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
+	import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
@@ -10,23 +10,37 @@
 </script>
 
 {#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
-	<div in:fade>
-		<WarningBanner>
+	<div class="w-full" in:fade>
+		<MessageBox level="warning">
 			<span>{$i18n.send.info.pending_bitcoin_transaction}</span>
-		</WarningBanner>
+		</MessageBox>
 	</div>
 {:else if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.ERROR}
-	<div in:fade>
-		<WarningBanner>
+	<div class="w-full" in:fade>
+		<MessageBox level="warning">
 			<span>{$i18n.send.error.no_pending_bitcoin_transaction}</span>
-		</WarningBanner>
+		</MessageBox>
 	</div>
 {/if}
 
-{#if utxosFee?.utxos.length === 0}
-	<div in:fade>
-		<WarningBanner>
+{#if utxosFee?.error === BtcPrepareSendError.InsufficientBalance}
+	<div class="w-full" in:fade>
+		<MessageBox level="warning">
+			<span>{$i18n.send.assertion.insufficient_funds}</span>
+		</MessageBox>
+	</div>
+{:else if utxosFee?.error === BtcPrepareSendError.InsufficientBalanceForFee}
+	<div class="w-full" in:fade>
+		<MessageBox level="warning">
+			<span data-tid="btc-send-form-insufficient-funds-for-fee"
+				>{$i18n.fee.assertion.insufficient_funds_for_fee}</span
+			>
+		</MessageBox>
+	</div>
+{:else if utxosFee?.utxos.length === 0}
+	<div class="w-full" in:fade>
+		<MessageBox level="warning">
 			<span>{$i18n.send.info.no_available_utxos}</span>
-		</WarningBanner>
+		</MessageBox>
 	</div>
 {/if}

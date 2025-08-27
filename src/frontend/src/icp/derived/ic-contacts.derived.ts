@@ -1,19 +1,18 @@
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { tryToParseIcrcAccountStringToAccountIdentifierText } from '$icp/utils/icp-account.utils';
 import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
-import { isTokenIcrc } from '$icp/utils/icrc.utils';
+import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { contacts } from '$lib/derived/contacts.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import type { NetworkContacts } from '$lib/types/contacts';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
-import { Principal } from '@dfinity/principal';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const icNetworkContacts: Readable<NetworkContacts> = derived(
 	[contacts, tokenWithFallback],
 	([$contacts, $tokenWithFallback]) => {
-		const isIcpToken = $tokenWithFallback.id === ICP_TOKEN_ID;
-		const isIcrcToken = isTokenIcrc({ standard: $tokenWithFallback.standard });
+		const isIcpToken = isTokenIcp($tokenWithFallback);
+		const isIcrcToken = isTokenIcrc($tokenWithFallback);
 
 		const allIcNetworkContacts = getNetworkContacts({ addressType: 'Icrcv2', contacts: $contacts });
 
@@ -23,12 +22,13 @@ export const icNetworkContacts: Readable<NetworkContacts> = derived(
 			const { address, contact } = allIcNetworkContacts[key];
 
 			if (isIcrcAddress(address)) {
+				const accountIdentifierText = tryToParseIcrcAccountStringToAccountIdentifierText(address);
+
 				return {
 					...acc,
-					[contact.id.toString()]: [
-						...(acc[contact.id.toString()] ?? []),
-						getAccountIdentifier(Principal.fromText(address)).toHex()
-					]
+					...(nonNullish(accountIdentifierText) && {
+						[contact.id.toString()]: [...(acc[contact.id.toString()] ?? []), accountIdentifierText]
+					})
 				};
 			}
 

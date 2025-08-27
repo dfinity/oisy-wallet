@@ -7,6 +7,7 @@ import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
@@ -85,6 +86,8 @@ describe('sol-wallet.scheduler', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
+
+		mockAuthStore();
 
 		spyLoadSolBalance = vi
 			.spyOn(solanaApi, 'loadSolLamportsBalance')
@@ -279,6 +282,7 @@ describe('sol-wallet.scheduler', () => {
 					await scheduler.start(startData);
 
 					expect(spyLoadTransactions).toHaveBeenCalledWith({
+						identity: mockIdentity,
 						address: mockSolAddress,
 						network: startData?.solanaNetwork,
 						tokenAddress: startData?.tokenAddress,

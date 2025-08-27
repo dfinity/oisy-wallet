@@ -24,6 +24,11 @@ describe('steps.constants', () => {
 					state: 'next'
 				},
 				{
+					step: ProgressStepsSendSol.CONFIRM,
+					text: en.send.text.confirming,
+					state: 'next'
+				},
+				{
 					step: ProgressStepsSendSol.RELOAD,
 					text: en.send.text.refreshing_ui,
 					state: 'next'

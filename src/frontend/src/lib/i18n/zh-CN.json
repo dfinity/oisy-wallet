@@ -1,0 +1,1574 @@
+{
+	"core": {
+		"text": {
+			"cancel": "取消",
+			"next": "下一步",
+			"save": "保存",
+			"back": "返回",
+			"done": "完成",
+			"close": "关闭",
+			"change": "更改",
+			"apply": "应用",
+			"refresh": "刷新",
+			"name": "名称",
+			"symbol": "符号",
+			"decimals": "小数位数",
+			"amount": "金额",
+			"tokenId": "",
+			"max": "最大",
+			"destination": "目标地址",
+			"reject": "拒绝",
+			"approve": "批准",
+			"view": "查看",
+			"copy": "复制",
+			"delete": "删除",
+			"create": "创建",
+			"clear_filter": "清除筛选",
+			"not_available": "不可用",
+			"new": "新建",
+			"edit": "编辑",
+			"no_results": "无结果",
+			"paste": "粘贴",
+			"to": "至",
+			"add": "添加",
+			"more_items": "+$items 更多",
+			"select": "选择",
+			"language": "语言",
+			"currency": "货币"
+		},
+		"info": {
+			"test_banner": "仅供测试使用！"
+		},
+		"alt": {
+			"logo": "$name 标志",
+			"go_to_home": "前往 $oisy_name 首页",
+			"back": "返回上一页",
+			"open_details": "打开详情",
+			"close_details": "关闭详情",
+			"switch_language": "切换语言",
+			"switch_currency": "切换货币"
+		},
+		"warning": {
+			"do_not_close": "交易完成前请勿关闭此标签页"
+		}
+	},
+	"navigation": {
+		"text": {
+			"tokens": "资产",
+			"settings": "设置",
+			"dapp_explorer": "探索",
+			"activity": "活动",
+			"airdrops": "奖励",
+			"earning": "赚取与奖励",
+			"source_code_on_github": "GitHub 上的源代码",
+			"view_on_explorer": "在浏览器中查看",
+			"source_code": "源代码",
+			"changelog": "更新日志",
+			"documentation": "文档",
+			"support": "支持",
+			"confirm_navigate": "你确定要离开当前页面吗？",
+			"vip_qr_code": "VIP 二维码",
+			"binance_qr_code": "Binance Clubhouse 二维码",
+			"refer_a_friend": "邀请你的朋友",
+			"address_book": "联系人",
+			"hide_balances": "隐藏余额",
+			"show_balances": "显示余额",
+			"privacy_mode_enabled": "隐私模式已开启。按 [P] 键再次显示余额。",
+			"privacy_mode_disabled": "隐私模式已关闭。按 [P] 键隐藏余额。"
+		},
+		"alt": {
+			"tokens": "前往资产视图",
+			"settings": "打开设置",
+			"dapp_explorer": "打开应用浏览器",
+			"activity": "打开活动视图",
+			"airdrops": "打开奖励视图",
+			"menu": "你的钱包地址、设置、登出与外部链接",
+			"changelog": "在 GitHub 上打开 $oisy_name 的更新日志以查看最新更新",
+			"documentation": "打开 $oisy_name 文档",
+			"support": "打开 $oisy_name 文档的支持部分",
+			"open_twitter": "打开 DFINITY 的 X/Twitter 动态",
+			"vip_qr_code": "生成一个邀请链接",
+			"binance_qr_code": "生成一个 Binance Clubhouse 链接",
+			"refer_a_friend": "为朋友生成一个推荐链接",
+			"address_book": "打开联系人",
+			"hide_balances": "隐藏当前显示的余额",
+			"show_balances": "显示已隐藏的余额"
+		},
+		"short": {
+			"documentation": "文档"
+		}
+	},
+	"auth": {
+		"text": {
+			"title_part_1": "$oisy_name",
+			"title_part_2": "100% 去中心化",
+			"logout": "退出登录",
+			"lock": "锁定",
+			"authenticate": "打开或创建",
+			"asset_types": "比特币、Solana、以太坊、ICP 等",
+			"instant_and_private": "随时随地实现即时且私密的访问",
+			"advanced_cryptography": "100% 上链：通过先进加密技术确保安心使用"
+		},
+		"alt": {
+			"preview": "$oisy_name 登录后的桌面和移动端预览图"
+		},
+		"warning": {
+			"not_signed_in": "您尚未登录。请登录以继续。",
+			"session_expired": "由于会话已过期，您已被登出。"
+		},
+		"error": {
+			"no_internet_identity": "没有 Internet Identity。",
+			"invalid_pouh_credential": "抱歉，在验证人类凭证时发生错误。请联系签发方并重新申请凭证。",
+			"error_validating_pouh_credential_oisy": "抱歉，在 $oisy_short 验证人类凭证时发生错误：$error",
+			"error_validating_pouh_credential": "抱歉，在验证人类凭证时发生错误。",
+			"error_requesting_pouh_credential": "抱歉，在请求人类凭证时发生错误。",
+			"missing_pouh_issuer_origin": "抱歉，在请求人类凭证时发生错误。缺少发行方来源。",
+			"no_pouh_credential": "抱歉，在请求人类凭证时发生错误。您在 Decide AI 中是否拥有有效凭证？",
+			"error_while_signing_in": "登录过程中出现错误。",
+			"unexpected_issue_with_syncing": "同步身份验证状态时出现意外问题。"
+		},
+		"help": {
+			"text": {
+				"title": "登录时遇到问题？",
+				"description": "我们注意到您取消了使用 Internet Identity 的登录。我们希望了解发生了什么，以改善您的体验。",
+				"subtitle": "是否以下原因导致了问题？",
+				"lost_identity": "我丢失了我的 Internet Identity 编号",
+				"security": "我对安全或隐私存在顾虑",
+				"got_confused": "我在操作过程中感到困惑",
+				"other": "其他……",
+				"feedback_text": "您的反馈有助于我们改进钱包。",
+				"thanks_text": "谢谢您！",
+				"identity_new_identity": "$oisy_short 钱包已切换 Internet Identity 域名为：<span class=\"font-bold\">identity.internetcomputer.org</span>",
+				"identity_legacy_description": "因此，您的 Internet Identity 编号可能不会自动显示，您可能需要重新输入。",
+				"identity_legacy_sign_in": "使用旧 Internet Identity 域名登录",
+				"identity_learn_more": "在 $oisy_short 文档中了解更多",
+				"other_title": "感谢您的反馈！",
+				"other_description": "以下是关于 $oisy_short 与 Internet Identity 中的 <span class=\"font-bold\">安全</span> 和 <span class=\"font-bold\">隐私</span> 的有用资源，希望能帮助您做出明智选择：",
+				"other_introduction": "$oisy_short 简介",
+				"other_docs": "$oisy_short 文档：Internet Identity",
+				"other_private_key": "谁控制原生资产的私钥？",
+				"other_asset_control": "$oisy_short 钱包中的资产控制、恢复和治理",
+				"need_help": "需要帮助",
+				"sign_in": "正在登录？"
+			},
+			"alt": {
+				"internet_identity": "新 Internet Identity 的图像",
+				"identity_learn_more": "了解旧版 Internet Identity",
+				"other_introduction": "打开 $oisy_short 简介",
+				"other_docs": "打开 $oisy_short 文档：Internet Identity",
+				"other_private_key": "了解谁控制原生资产的私钥",
+				"other_asset_control": "查看 $oisy_short 钱包中的资产控制、恢复和治理信息",
+				"sign_in": "登录时需要帮助？"
+			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "解锁以继续",
+			"title_part_2": "您之前已锁定钱包以确保其安全。请从上次中断的地方继续操作或退出。",
+			"unlock": "开锁",
+			"logout": "退出登录",
+			"logout_clear_cash_message": "注销将清除所有缓存数据",
+			"learn_more": "了解更多"
+		}
+	},
+	"dapps": {
+		"text": {
+			"all_dapps": "所有应用",
+			"featured": "精选",
+			"sign_in": "登录以探索生态系统。",
+			"title": "探索应用",
+			"open_dapp": "打开 $dAppName",
+			"submit_your_dapp": "提交你的应用"
+		},
+		"alt": {
+			"learn_more": "了解更多关于 $dAppName",
+			"logo": "$dAppName 的标志",
+			"show_all": "显示所有应用",
+			"show_tag": "显示带有标签 $tag 的应用",
+			"open_dapp": "打开应用 $dAppName",
+			"open_telegram": "在 Telegram 中打开 $dAppName",
+			"open_open_chat": "在 OpenChat 中打开 $dAppName",
+			"open_twitter": "打开 $dAppName 的 X/Twitter 动态",
+			"source_code_on_github": "在 GitHub 查看 $dAppName 的源代码",
+			"submit_your_dapp": "提交你的应用以展示在应用探索器中",
+			"tags": "与 $dAppName 相关的标签",
+			"website": "$dAppName 的图像"
+		},
+		"categories": {
+			"defi": "DeFi",
+			"social_media": "社交媒体",
+			"verifiable_credentials": "可验证凭证",
+			"staking": "质押",
+			"walletconnect": "WalletConnect",
+			"game": "游戏",
+			"tools": "工具包"
+		},
+		"descriptions": {
+			"kongswap": {
+				"name": "KongSwap",
+				"one_liner": "一站式代币商店 - 使用 KongSwap 轻松跨链交易代币。",
+				"description": "KongSwap 是一个完全去中心化的交易所（DEX），提供跨 ICP、比特币、以太坊和 Solana 的无桥跨链交易。<br/><br/>利用链融合技术和互联网计算机协议，它降低了费用，简化了用户体验，并避免了流动性碎片化。前端和后端都通过智能合约在链上运行，提供无缝的 DeFi 体验。",
+				"carousel": {
+					"text": "在 DEX 上兑换代币",
+					"call_to_action": "试试 KongSwap"
+				}
+			},
+			"openchat": {
+				"name": "OpenChat",
+				"one_liner": "WhatsApp 的去中心化替代品。",
+				"call_to_action": "前往 OpenChat",
+				"description": "OpenChat 是一个功能齐全的聊天应用程序，完全在ICP区块链上端到端运行。<br/><br/>OpenChat 由其社区作为 DAO 进行管理，并拥有自己的 CHAT 代币。CHAT 代币作为奖励发放给用户，以加速增长并创建一个由数百万支持者组成的团队，使 OpenChat 能够成为中心化大型科技竞争对手的可行挑战者！",
+				"stats": "80,000+ 用户",
+				"carousel": {
+					"text": "OpenChat - web3 的沟通之地",
+					"call_to_action": "显示更多"
+				}
+			},
+			"decideid": {
+				"name": "DecideID",
+				"one_liner": "为可信赖的数字互动提供独特的身份验证。",
+				"call_to_action": "打开 DecideID",
+				"stats": "超过 50,000 次推理请求",
+				"description": "Decide ID 是 Decide AI 系统的核心，通过其独特的个人身份证明（PoP）方法确保信任和安全。当您加入时，您将通过一个验证过程，在该过程中您需要提供多个证明并完成一项特殊挑战以确认您的身份。这确保了每个用户都是真实的、独特的，而不是机器人。在此过程中会创建您的 Principal ID，这是一个独特的链上标识符。它可以用于需要验证身份的各种应用程序，确保安全无缝地集成到任何应用程序的注册或登录过程中。此外，零知识证明的使用意味着您的私人数据（如生物特征信息）保持机密和安全。<br/><br/>有了 Decide ID，您就可以享受一种灵活、安全且隐私至上的在线验证和互动方式。",
+				"carousel": {
+					"text": "享受一种隐私至上的在线验证和互动方式",
+					"call_to_action": "感兴趣吗？"
+				}
+			},
+			"icpswap": {
+				"name": "ICPSwap",
+				"one_liner": "ICPSwap 是一个完全链上构建的 AMM DEX，是 ICP 上全栈金融和 DAO 服务的首要中心。",
+				"call_to_action": "遇见未来",
+				"description": "未来去中心化金融的中心！<br/>通过将交易所重塑为中心，ICPSwap 在ICP上提供全栈金融、市场和 DAO 服务。基于 DFINITY 互联网计算机的底层技术，ICPSwap 通过重构用户和开发者共同构建项目的方式，建立了一个真正去中心化的金融生态系统。"
+			},
+			"nnsdapp": {
+				"name": "NNS Dapp",
+				"one_liner": "NNS 前端 dapp 允许任何人通过用户友好的界面与互联网计算机的网络神经系统进行交互。",
+				"call_to_action": "参与其中",
+				"description": "NNS 前端 dapp 允许任何人通过用户友好的界面与互联网计算机的网络神经系统进行交互。该去中心化 dapp 完全通过区块链端到端提供服务，让您可以轻松执行以下操作：<br/><ul><li>发送和接收代币（ICP、ckBTC、CHAT 等）</li><li>质押和管理神经元</li><li>对互联网计算机和 SNS 的治理进行投票</li><li>参与去中心化交换</li><li>创建和充值容器</li><li>赚取治理奖励</li></ul>"
+			},
+			"uniswap": {
+				"name": "Uniswap",
+				"one_liner": "最大的链上市场。在以太坊和超过 11 个其他链上买卖加密货币。",
+				"call_to_action": "开始兑换吧",
+				"description": "Uniswap 是一个去中心化加密货币交易所，它使用一组智能合约来创建流动性池以执行交易。它是一个开源项目，属于 DeFi 产品类别，因为它使用智能合约而不是中心化交易所来促进交易。"
+			},
+			"oneinch": {
+				"name": "1inch",
+				"one_liner": "在多个网络的数百个 DEX 上优化您的交易。",
+				"call_to_action": "看一看",
+				"description": "1inch Network 提供了一个 DeFi 生态系统，其中包括 1inch dApp、钱包、开发者门户、投资组合和 Fusion 等产品，可实现安全的 Web3 操作。1inch 提供对多个区块链上数百个流动性来源的访问。<br/><br/>在 1inch Swap Engine 的支持下，Fusion 模式使用户能够以最优惠的价格兑换代币，而无需支付任何网络费用。此外，Fusion 模式还为用户提供额外的 MEV 保护。Fusion 模式下的所有兑换都由解析器执行——他们是专业的交易员，使用最复杂、最高效的方式保护用户的兑换免受 MEV 的影响。"
+			},
+			"compound_finance": {
+				"name": "Compound Finance",
+				"one_liner": "一个建立在以太坊上的去中心化货币市场和借贷协议。",
+				"call_to_action": "加入我们",
+				"description": "Compound Finance 是一个<b>建立在以太坊上的去中心化货币市场和借贷协议</b>。其 Compound III (Comet) 协议使用户能够从“基础资产”的单抵押池中借贷。Compound III 支持以太坊、Polygon、Base 和 Arbitrum 上的基础资产（例如 USDC、WETH 等）。"
+			},
+			"aave": {
+				"name": "Aave",
+				"one_liner": "Aave 是一个去中心化的非托管流动性协议，用户可以作为供应商或借款人参与。",
+				"call_to_action": "释放 DeFi 的全部力量",
+				"description": "Aave 是一个去中心化的非托管流动性协议，用户可以作为供应商或借款人参与。供应商通过向市场提供流动性来赚取利息，而借款人则可以通过提供超过借款金额的抵押品来获得流动性。\n它完全无需许可，这意味着任何人都可以通过用户友好的界面或直接与支持的区块链网络上的智能合约进行交互来访问和使用 Aave。"
+			},
+			"eigenlayer": {
+				"name": "EigenLayer",
+				"one_liner": "基于以太坊的协议，引入了再质押功能，允许质押任何 ERC20 代币。",
+				"call_to_action": "立即再质押",
+				"description": "EigenLayer 是一个建立在以太坊上的协议，它引入了再质押，这是加密经济安全中的一个新原语。它允许用户将原生 ETH、流动性质押代币（LST）、EIGEN 代币或任何 ERC20 代币等资产质押到 EigenLayer 智能合约中，从而将以太坊的加密经济安全性扩展到网络上的其他应用程序。"
+			},
+			"curve_finance": {
+				"name": "Curve Finance",
+				"one_liner": "在以太坊和 EVM 兼容链上领先的 DEX、稳定币提供商和借贷平台。",
+				"call_to_action": "体验曲面",
+				"description": "Curve Finance 是在以太坊和 EVM 兼容链上领先的去中心化交易所、稳定币提供商和借贷平台。它以其针对稳定币和波动性资产的先进自动做市商以及其独特的贷款软清算系统而闻名。"
+			},
+			"sonic": {
+				"name": "Sonic",
+				"one_liner": "释放 DeFi 的全部潜能和简化的交易流程。兑换代币，作为流动性提供者赚取收益，并利用 Bitfinity EVM 领先的 AMM。",
+				"call_to_action": "打开 Sonic",
+				"description": "Sonic 是一个建立在互联网计算机协议（ICP）上的多链去中心化交易所，提供广泛的 DeFi 服务。用户可以轻松交易代币和永续合约，提供流动性，并参与 LBP 代币销售。用户可以参与 DAO 治理，为奖励而质押，并对平台决策进行投票。<br/><br/>完全上链和开源！像专业人士一样兑换代币，作为流动性提供者累积费用，加入 AMM 的氛围，并成为 Sonic DAO 不可或缺的一部分。",
+				"carousel": {
+					"text": "释放 Defi 的全部潜能",
+					"call_to_action": "打开 Sonic"
+				}
+			},
+			"raydium": {
+				"name": "Raydium",
+				"one_liner": "建立在 Solana 区块链上的 DEX 和自动做市商，提供一个中央限价订单簿，可实现快速交易。",
+				"call_to_action": "推动 DeFi 的演进",
+				"description": "Raydium 是建立在 Solana 区块链上的自动做市商（AMM），它独特地结合了 AMM 技术和对 Serum 去中心化交易所流动性的访问。作为 AMM，Raydium 允许使用流动性池以无需许可的方式交易数字资产。"
+			},
+			"jupiter": {
+				"name": "Jupiter",
+				"one_liner": "基于 Solana 的 DEX 聚合器，可优化任何支持的代币对之间的最佳可用兑换。",
+				"call_to_action": "飞向宇宙，浩瀚无垠",
+				"description": "Jupiter 是 Solana 区块链上的一个去中心化金融平台，它充当流动性聚合器，简化和优化 DeFi 领域的交易活动。其协议旨在促进流动性提供和代币兑换，并确保高效、低延迟和低成本的交易。该平台允许用户通过自动做市商（AMM）模型兑换代币、提供流动性和参与收益农场。"
+			},
+			"waterneuron": {
+				"name": "WaterNeuron",
+				"one_liner": "ICP 流动性质押 - 通过流动性质押您的 ICP 来最大化您的资本效率。",
+				"description": "WaterNeuron 提供了一种更具资本效率的质押方法，让您能够在保持代币流动性的同时，继续获得 ICP 质押奖励。这种方法简化了质押过程，无需选择特定的验证者来最大化奖励。"
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "去中心化社交媒体 - 发布、赚取、拥有。",
+				"call_to_action": "前往 Taggr",
+				"description": "Taggr 是一个完全去中心化的社交媒体平台，它运行在由互联网计算机驱动的公共分布式计算网络上。与由公司控制的传统社交媒体平台不同，Taggr 完全由其用户拥有和管理。",
+				"carousel": {
+					"text": "去中心化社交媒体 - 发布、赚取、拥有。",
+					"call_to_action": "了解更多"
+				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "治理与协作相遇，激发创新。",
+				"description": "Toolkit 是一款多功能套件，用于管理 Service Nervous System (SNS) 和互联网计算机上的项目。从治理提案到容器部署，它使用户能够无缝地进行创新、协作和去中心化。"
+			}
+		}
+	},
+	"rewards": {
+		"text": {
+			"title": "奖励",
+			"upcoming_campaigns": "即将举行的宣发活动",
+			"active_date": "结束时间",
+			"ended_date": "已结束",
+			"share": "分享到 X",
+			"learn_more": "了解更多",
+			"check_status": "检查状态与资格",
+			"view_details": "查看详情",
+			"modal_button_text": "明白了",
+			"activity_button_text": "查看近期活动",
+			"activity_button_text_short": "查看活动",
+			"open_wallet": "前往钱包",
+			"carousel_slide_title": "$oisy_short Sprinkles 第四集现已上线！",
+			"carousel_slide_cta": "了解更多",
+			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount！🎉",
+			"youre_eligible": "你符合资格！",
+			"ongoing": "进行中",
+			"ended": "已结束（$amount）",
+			"banner_text": "通过 OISY Sprinkles 赚取每日奖励"
+		},
+		"requirements": {
+			"requirements_title": "资格标准",
+			"min_logins": "最近 $days 天内登录 $loginsx 次",
+			"min_transactions": "最近 $days 天内完成 $transactions 笔交易",
+			"min_total_assets_usd": "在发放时持有价值 $$usd 的代币",
+			"hangover": "近期无中奖记录 (最近 $days 天)"
+		},
+		"alt": {
+			"upcoming_campaigns": "请密切关注即将到来的空投活动！<a href=\"https://x.com/oisy\" target=\"_blank\">在 X 上关注我们</a>、加入 <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>，或加入 <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> 社区保持更新。",
+			"coming_soon": "$oisy_short 第四集即将上线",
+			"reward_banner": "活动 $campaignName 的横幅"
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles：第 3 期已上线 🎊",
+				"one_liner": "通过保持活跃来赚取 BTC——现在，还可以通过<strong>邀请朋友</strong>来赚取。<br/>登录、进行交易并持有代币，即可获得每日空投资格。推荐朋友，即可在整个活动期间获得其奖励价值的 10%。",
+				"participate_title": "通过保持活跃（现在还可以邀请他人）赚取 BTC。",
+				"description": "满足简单的每周要求。登录、进行两次交易并持有至少价值 20 美元的代币，即可每天有资格获得 50 次 BTC 空投中的一次。<br/><strong>现在还有推荐奖励：</strong>邀请朋友部署钱包，即可在 30 天内获得他们 Sprinkles 的 10%。他们保留 100%——您额外赚取。",
+				"campaign_href": "https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A",
+				"win": {
+					"default": {
+						"title": "恭喜您赢得今天的 OISY Sprinkles！",
+						"description": "在 X/Twitter 上分享您的胜利，以获得另一次获胜的机会。",
+						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+					},
+					"jackpot": {
+						"title": "恭喜您赢得今天最大的 OISY Sprinkles！",
+						"description": "在 X/Twitter 上分享您的胜利，以获得另一次获胜的机会。",
+						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+					},
+					"referral": {
+						"title": "这是一点小小的感谢",
+						"description": "您推荐的一位用户刚刚获得了一些 Sprinkles。",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles：第 4 期已上线 🎊",
+				"one_liner": "通过保持活跃来赚取 BTC——现在，通过推荐还可获得<strong>保证</strong>的 Sprinkles。<br/>登录、进行交易并持有代币，即可获得每日空投资格。推荐 4 位朋友即可直接获得奖励。顶级推荐人将赢得更多。",
+				"participate_title": "通过保持活跃（现在还可以邀请他人）赚取 BTC。",
+				"description": "满足简单的每周要求：登录、进行两次交易并持有至少价值 20 美元的代币，即可每天有资格获得高达 50 美元的 BTC 空投。<br>现在还有推荐奖励：邀请朋友设置钱包，你们都将获得保证的 Sprinkles。进入前 4 名推荐人，即可赢得大奖。",
+				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"win": {
+					"default": {
+						"title": "您已获得奖励",
+						"description": "您的奖励刚刚存入您的钱包<br>别忘了推荐并保持活跃以赢得更多",
+						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
+					},
+					"jackpot": {
+						"title": "您已赢得大奖",
+						"description": "您刚刚赢得了我们最高的 Sprinkles 奖励<br>保持活跃并继续推荐以赢得更多",
+						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+					},
+					"leaderboard": {
+						"title": "您已登上排行榜榜首",
+						"description": "您本赛季排名前 4 名推荐人<br>200 美元已添加到您的钱包",
+						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+					},
+					"referrer": {
+						"title": "您才刚刚开始",
+						"description": "您赚了 1 美元。<br>推荐更多——前 4 名推荐人可获得 200 美元。<br>您快成功了。继续努力。",
+						"share_href": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
+					},
+					"referee": {
+						"title": "推荐可获得更多",
+						"description": "您刚刚赢得了 Sprinkles——推荐您的人也是如此。<br>发送 4 位朋友并赚取 1 美元。<br>前 4 名推荐人每人可赢得 200 美元。",
+						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			}
+		}
+	},
+	"footer": {
+		"text": {
+			"incubated_with": "孵化支持",
+			"by": "来自",
+			"dfinity_foundation": "DFINITY 基金会",
+			"copyright": "© 2025",
+			"ai_assistant_console_button": "AI助手控制台按钮"
+		},
+		"alt": {
+			"dfinity": "访问 DFINITY 基金会官网"
+		}
+	},
+	"wallet": {
+		"text": {
+			"address": "地址",
+			"wallet_address": "钱包地址",
+			"your_addresses": "你的地址",
+			"address_copied": "地址已复制到剪贴板。",
+			"wallet_address_copied": "钱包地址已复制到剪贴板。",
+			"display_wallet_address_qr": "以二维码显示钱包地址",
+			"icp_deposits": "注意：进行 ICP 存款时，请使用 ICP 账户中的“接收”按钮获取正确地址。",
+			"use_address_from_to": "使用此地址将 $token 转入或转出你的钱包。"
+		},
+		"alt": {
+			"open_etherscan": "在 Etherscan 上打开你的地址",
+			"open_solscan": "在 Solscan 上打开你的地址",
+			"qrcode_address": "扫描此二维码以复制地址以接收 $token 代币"
+		}
+	},
+	"init": {
+		"text": {
+			"initializing_wallet": "正在准备你的钱包...",
+			"securing_session": "正在通过 Internet Identity 保护会话",
+			"retrieving_public_keys": "正在获取您在 Bitcoin、Ethereum、Solana、Base、Polygon、BNB 和 Arbitrum 上的公钥",
+			"done": "尽情享受 $oisy_short 吧"
+		},
+		"alt": {
+			"loader_banner": "正在加载 $oisy_name 的初始数据（主题 $theme）"
+		},
+		"info": {
+			"hold_loading": "请稍等，我们正在加载部分信息……",
+			"hold_loading_wallet": "请稍等，我们正在加载你钱包的初始数据……"
+		},
+		"error": {
+			"no_alchemy_config": "没有 $network 网络的 Alchemy 配置",
+			"no_alchemy_provider": "没有 $network 网络的 Alchemy 提供商",
+			"no_etherscan_provider": "没有 $network 网络的 Etherscan 提供商",
+			"no_infura_provider": "没有 $network 网络的 Infura 提供商",
+			"no_infura_cketh_provider": "没有 $network 网络的 Infura CkETH 提供商",
+			"no_infura_erc20_provider": "没有 $network 网络的 Infura ERC20 提供商",
+			"no_infura_erc721_provider": "没有 $network 网络的 Infura ERC721 提供商",
+			"no_infura_erc1155_provider": "没有 $network 网络的 Infura ERC1155 提供商",
+			"no_infura_erc20_icp_provider": "没有 $network 网络的 Infura ERC20 ICP 提供商",
+			"no_solana_network": "没有 $network 网络的 Solana 网络配置",
+			"eth_address_unknown": "ETH 地址未知。",
+			"loading_address": "加载 $symbol 地址时出错。",
+			"loading_balance": "加载 $network 网络上的 $symbol 余额时出错。",
+			"erc20_contracts": "加载 ERC20 合约时出错。",
+			"spl_tokens": "加载 SPL 代币时出错。",
+			"minter_ckbtc_btc": "需要配置铸币人才能将 ckBTC 转换为 BTC。",
+			"minter_cketh_eth": "需要配置铸币人才能将 ckETH 转换为 ETH。",
+			"minter_ckerc20_erc20": "需要配置铸币人才能将 ckERC20 转换为 ERC20。",
+			"ledger_cketh_eth": "需要配置 ckETH 账本才能将 ckERC20 转换为 ERC20。",
+			"minter_btc": "需要配置铸币人才能获取 BTC。",
+			"minter_ckbtc_info": "需要配置铸币人才能获取 ckBTC 信息",
+			"minter_cketh_info": "需要配置铸币人才能获取 ckETH 信息",
+			"minter_ckbtc_loading_info": "加载 ckBTC 铸币人信息时出错。",
+			"minter_cketh_loading_info": "加载 ckETH 铸币人信息时出错。",
+			"btc_fees_estimation": "查询 BTC 手续费预估时出错。",
+			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
+			"transaction_price": "加载交易价格预估时出错。",
+			"icrc_canisters": "加载 ICRC 容器时出错。",
+			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
+			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
+			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
+			"erc20_user_tokens": "加载 ERC20 用户代币时出错。",
+			"spl_custom_tokens": "加载 SPL 用户代币时出错。",
+			"erc20_user_token": "启用 ERC20 双生代币时出错。",
+			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
+			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
+			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
+			"btc_wallet_error": "加载 BTC 钱包信息时出错。",
+			"sol_wallet_error": "加载 SOL 钱包信息时出错。"
+		}
+	},
+	"hero": {
+		"text": {
+			"available_balance": "你的余额",
+			"unavailable_balance": "$currencySymbol 值不可用",
+			"hidden_balance": "你的余额已隐藏",
+			"top_up": "充值你的钱包以开始使用！",
+			"learn_more_about_erc20_icp": "了解更多关于以太坊上的 ERC20 ICP。",
+			"tooltip_toggle_balance": "双击隐藏/显示余额"
+		},
+		"alt": {
+			"toggle_privacy_mode": "切换隐私模式"
+		}
+	},
+	"settings": {
+		"text": {
+			"title": "设置",
+			"principal": "你的 Principal",
+			"principal_copied": "Principal 已复制到剪贴板",
+			"principal_description": "你在 $oisy_name 中的身份标识，由 Internet Identity 创建。",
+			"session_duration": "会话时长",
+			"session_expires_in": "将在以下时间过期",
+			"networks": "网络",
+			"enable_testnets": "启用测试网络",
+			"active_networks": "已启用网络",
+			"active_networks_description": "选择你希望在 $oisy_name 中使用的网络。未启用的网络中的代币和交易将不会显示，也不会包含在可用余额中。",
+			"enable_network": "启用网络",
+			"disable_network": "禁用网络",
+			"credentials_title": "凭证",
+			"pouh_credential": "人类身份凭证",
+			"pouh_credential_description": "人类身份凭证是你人类身份的证明，由 Decide AI 签发。",
+			"present_pouh_credential": "展示",
+			"pouh_credential_verified": "已验证 ✅",
+			"appearance": "外观",
+			"appearance_light": "浅色",
+			"appearance_dark": "深色",
+			"appearance_system": "系统",
+			"git_disclaimer": "仅在测试环境中显示分支和提交信息，仅用于开发目的。",
+			"git_branch_name": "分支：",
+			"git_commit_hash": "提交："
+		},
+		"alt": {
+			"testnets_toggle": "切换是否显示测试网络",
+			"github_release": "$oisy_short 在 GitHub 上的版本说明",
+			"appearance_light": "启用浅色模式",
+			"appearance_dark": "启用深色模式",
+			"appearance_system": "启用操作系统的颜色模式"
+		},
+		"error": {
+			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。"
+		}
+	},
+	"shortcuts": {
+		"privacy_mode": "P"
+	},
+	"networks": {
+		"title": "当前网络。点击可更换选择。",
+		"test_networks": "测试网络",
+		"chain_fusion": "所有网络",
+		"network": "网络",
+		"testnet": "测试网",
+		"number_of_enabled": "$numNetworksTotal 个网络中已启用 $numNetworksEnabled 个",
+		"filter": "筛选网络",
+		"manage": "管理网络"
+	},
+	"receive": {
+		"text": {
+			"receive": "接收",
+			"address": "接收地址",
+			"receive_token": "接收 $token"
+		},
+		"icp": {
+			"text": {
+				"account_id": "ICP 账户 ID",
+				"use_for_all_tokens": "从钱包、用户或其他支持此地址格式的应用接收时使用此地址接收所有代币。",
+				"use_for_icrc_deposit": "在 ICP 网络中接收 ICRC-1 代币，例如 SNS、ck 代币等。",
+				"use_for_icp_deposit": "从仅支持账户 ID 的交易所或其他钱包接收 ICP 时使用此地址。",
+				"your_private_eth_address": "你所有 ERC20 代币的私有地址。",
+				"display_account_id_qr": "将 ICP 账户 ID 显示为二维码",
+				"account_id_copied": "ICP 账户 ID 已复制到剪贴板。",
+				"principal": "ICP 主标识",
+				"internet_computer_principal_copied": "Internet Computer 主标识已复制到剪贴板。",
+				"display_internet_computer_principal_qr": "将 Internet Computer 主标识显示为二维码",
+				"icp_account": "ICP 账户（用于交易所）",
+				"icp_account_copied": "ICP 账户已复制到剪贴板。",
+				"display_icp_account_qr": "将 ICP 账户显示为二维码"
+			}
+		},
+		"ethereum": {
+			"text": {
+				"checking_status": "正在检查 $token 状态…",
+				"from_network": "从 $network 网络接收",
+				"eth_to_cketh_description": "将 $token 转换为 $ckToken 需要在 $network 上调用智能合约，并将你的 IC 主标识作为参数传入——$oisy_name 简化了此流程，使你可以直接在钱包中完成转换。",
+				"learn_how_to_convert": "了解如何将 $token 转换为 $ckToken",
+				"metamask": "从 Metamask 接收",
+				"ethereum": "以太坊",
+				"ethereum_address": "地址",
+				"ethereum_address_copied": "以太坊地址已复制到剪贴板。",
+				"display_ethereum_address_qr": "将以太坊地址显示为二维码"
+			},
+			"error": {
+				"no_metamask": "未检测到 Metamask。"
+			}
+		},
+		"bitcoin": {
+			"text": {
+				"bitcoin": "比特币",
+				"checking_status": "正在检查 BTC 状态…",
+				"refresh_status": "刷新 BTC 状态",
+				"initializing": "正在初始化…",
+				"checking_incoming": "正在检查是否有 BTC 转入…",
+				"refreshing_wallet": "正在刷新钱包…",
+				"bitcoin_address": "比特币",
+				"bitcoin_testnet_address": "比特币（测试网）",
+				"bitcoin_regtest_address": "比特币（回归测试网）",
+				"display_bitcoin_address_qr": "将比特币地址显示为二维码",
+				"bitcoin_address_copied": "比特币地址已复制到剪贴板。",
+				"from_network": "将比特币通过 BTC 网络转入此地址以接收 ckBTC。",
+				"fee_applied": "请注意，将收取大约 $fee BTC 的跨网络手续费。"
+			},
+			"info": {
+				"no_new_btc": "暂无已确认的 BTC。",
+				"check_btc_progress": "正在检查 BTC 到账情况。"
+			},
+			"error": {
+				"unexpected_btc": "检查 BTC 到账时出错。"
+			}
+		},
+		"solana": {
+			"text": {
+				"solana_address": "Solana 地址",
+				"solana_devnet_address": "Solana 开发网地址",
+				"solana_local_address": "Solana 本地地址",
+				"solana_address_copied": "Solana 地址已复制到剪贴板",
+				"display_solana_address_qr": "将 Solana 地址显示为二维码"
+			}
+		}
+	},
+	"send": {
+		"text": {
+			"send": "发送",
+			"destination": "目标地址",
+			"source": "来源地址",
+			"balance": "余额",
+			"review": "预览",
+			"signing_approval": "正在签署批准...",
+			"approving": "正在批准...",
+			"approving_fees": "正在批准手续费...",
+			"approving_transfer": "正在批准转账...",
+			"approving_wallet_connect": "正在批准 WalletConnect 请求...",
+			"refreshing_ui": "正在刷新界面",
+			"initializing": "正在初始化交易...",
+			"signing_transaction": "正在签署交易...",
+			"sending": "发送中...",
+			"signing": "签署中...",
+			"signing_message": "正在签署消息...",
+			"confirming": "确认...",
+			"network": "网络",
+			"source_network": "来源网络",
+			"destination_network": "目标网络",
+			"initializing_transaction": "正在初始化交易",
+			"convert_to_native_icp": "转换为原生 ICP",
+			"open_qr_modal": "开始扫描二维码以获取交易详情",
+			"scan_qr": "扫描二维码",
+			"select_token": "选择要发送的代币",
+			"select_network_filter": "选择网络筛选器",
+			"send_again": "再次发送",
+			"recently_used_tab": "最近使用",
+			"contacts_tab": "联系人",
+			"recently_used_empty_state_title": "最近使用的地址将显示在此处",
+			"recently_used_empty_state_description": "现在就开始你的第一次发送吧！",
+			"contacts_empty_state_title": "你的联系人将显示在此处",
+			"contacts_empty_state_description": "你似乎还没有添加联系人",
+			"send_review_subtitle": "你将发送"
+		},
+		"placeholder": {
+			"enter_eth_address": "输入公共地址（0x）、名称或别名",
+			"enter_recipient_address": "输入收款人地址、名称或别名",
+			"enter_wallet_address": "输入钱包地址、名称或别名",
+			"select_network": "选择网络"
+		},
+		"info": {
+			"ckbtc_certified": "请等待 ckBTC 参数被认证。",
+			"cketh_certified": "请等待 ckETH 参数被认证。",
+			"pending_bitcoin_transaction": "待处理的比特币交易完成后，你可以发送另一笔交易。",
+			"no_available_utxos": "你没有可用的 UTXO 来执行此交易。",
+			"unknown_destination": "你之前未与该地址交互，请确认你认识收款人。",
+			"fee_info": "手续费将以 $feeSymbol 支付。可用余额：<strong>$feeBalance $feeSymbol</strong>"
+		},
+		"assertion": {
+			"invalid_destination_address": "目标地址无效",
+			"insufficient_funds": "资金不足。",
+			"unknown_minimum_ckbtc_amount": "转换为 BTC 所需的 ckBTC 最小金额未知。",
+			"unknown_minimum_cketh_amount": "转换为 ETH 所需的 ckETH 最小金额未知。",
+			"minimum_ckbtc_amount": "金额低于将 ckBTC 转换为 BTC 所需的最低 $amount ckBTC。",
+			"minimum_cketh_amount": "金额低于 $amount $symbol 的最低提取金额。",
+			"minimum_amount": "金额低于 $amount $symbol 的最低提取金额。",
+			"minimum_ledger_fees": "金额低于账本费用 $symbol。",
+			"minimum_cketh_balance": "$symbol 余额低于预计手续费 $amount。",
+			"unknown_cketh": "无法获取 ckETH 代币。",
+			"destination_address_invalid": "目标地址无效。",
+			"amount_invalid": "金额无效。",
+			"insufficient_funds_for_gas": "燃料费不足",
+			"insufficient_funds_for_amount": "金额不足",
+			"insufficient_ethereum_funds_to_cover_the_fees": "以太坊余额不足以支付手续费",
+			"insufficient_solana_funds_to_cover_the_fees": "Solana 余额不足以支付手续费",
+			"not_enough_tokens_for_gas": "$symbol 不足以支付燃料费。余额：$balance $symbol",
+			"gas_fees_not_defined": "燃料费用未定义。",
+			"max_gas_fee_per_gas_undefined": "每单位最大燃料费或优先燃料费未定义。",
+			"address_unknown": "地址未知。",
+			"minter_info_not_loaded": "请稍后再试，ckETH 配置参数尚未加载。",
+			"minter_info_not_certified": "请稍后再试，ckETH 配置参数尚未认证。",
+			"cketh_max_transaction_fee_missing": "ckETH 的最大交易费用缺失。",
+			"utxos_fee_missing": "UTXO费用缺失。",
+			"minimum_btc_amount": "金额太小。请输入至少 $amount BTC。",
+			"btc_insufficient_balance": "没有可用于交易的比特币UTXO",
+			"btc_insufficient_balance_for_fee": "比特币余额不足以支付交易费用",
+			"btc_invalid_utxo_data": "无效的比特币交易数据",
+			"btc_utxo_locked": "比特币资金被待处理交易锁定",
+			"btc_invalid_fee_calculation": "比特币交易费用验证失败"
+		},
+		"error": {
+			"unexpected": "发送交易时发生错误。",
+			"destination_address_unknown": "ETH 目标地址未知",
+			"metamask_connected": "无法获取你的账户。你的 Metamask 是否已开启并已连接？",
+			"metamask_no_accounts": "未找到 Metamask 账户。",
+			"metamask_switch_network": "无法请求 Metamask 切换至链 ID $chain_id。你当前是否已连接到 $network_name？",
+			"erc20_data_undefined": "ERC20 交易数据不能为 undefined 或 null。",
+			"data_undefined": "交易数据不能为 undefined 或 null。",
+			"no_identity_calculate_fee": "未提供身份，无法为其主体计算手续费。",
+			"invalid_destination": "目标地址无效。请使用有效的钱包地址重试。",
+			"incompatible_token": "代币不兼容。请尝试使用兼容的代币。",
+			"no_btc_network_id": "当前网络 ($networkId) 不是比特币网络。",
+			"no_solana_network_id": "当前网络 ($networkId) 不是 Solana 网络。",
+			"no_pending_bitcoin_transaction": "加载待处理的比特币交易时出错。请稍后重试。",
+			"unexpected_utxos_fee": "计算交易手续费时发生错误。",
+			"unable_to_retrieve_amount": "无法获取金额（n/a）",
+			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
+			"solana_confirmation_failed": "Solana确认失败"
+		}
+	},
+	"convert": {
+		"text": {
+			"converting": "正在转换...",
+			"conversion_destination": "转换目标地址",
+			"default_destination": "你的 OISY 钱包",
+			"convert_to_btc": "转换为 BTC",
+			"convert_to_ckbtc": "转换为 ckBTC",
+			"convert_to_token": "转换为 $token",
+			"convert_to_cketh": "转换为 ckETH",
+			"convert_to_ckerc20": "转换为 $ckErc20",
+			"convert_eth_to_cketh": "将 $token 转换为 $ckToken",
+			"cketh_conversions_may_take": "ckETH 转换最多可能需要 20 分钟",
+			"ckerc20_conversions_may_take": "$ckErc20 转换最多可能需要 20 分钟",
+			"how_to_convert_eth_to_cketh": "以下是在 $oisy_name 上将 $token 转换为 $ckToken 的方法",
+			"send_eth": "将 $token 发送至你的 $oisy_name 地址",
+			"wait_eth_current_balance": "等待 $token 到账。当前余额",
+			"set_amount": "设置转换金额",
+			"check_balance_for_fees": "检查 $token 余额是否足以支付转换手续费",
+			"fees_explanation": "你需要足够的 $token 来支付智能合约执行费用。",
+			"current_balance": "👉 当前余额：",
+			"review_button": "审核",
+			"convert_button": "开始转换",
+			"input_reset_button": "重置输入值",
+			"swap_to_token": "转换 $sourceToken → $destinationToken",
+			"review": "审核交易",
+			"max_balance": "最大值",
+			"source_network": "源网络",
+			"destination_network": "目标网络",
+			"conversion_may_take": "转换最多可能需要 1 小时",
+			"executing_transaction": "正在执行交易...",
+			"initializing": "正在初始化交易...",
+			"refreshing_ui": "刷新界面中",
+			"unsupported_token_conversion": "当前不支持所选代币的转换。",
+			"calculating_max_amount": "计算中...",
+			"send_to": "将转换资产发送至",
+			"custom_destination": "其他地址"
+		},
+		"assertion": {
+			"insufficient_funds": "余额不足"
+		},
+		"error": {
+			"loading_cketh_helper": "加载 ckETH 辅助合约地址出错。未初始化 minter canister ID。",
+			"unexpected": "转换代币时发生错误。",
+			"unexpected_missing_data": "初始化转换交易时出错。"
+		}
+	},
+	"swap": {
+		"text": {
+			"swap": "兑换",
+			"select_destination_token": "选择接收的代币",
+			"select_source_token": "选择支付的代币",
+			"switch_tokens_button": "切换代币",
+			"review": "审核交易",
+			"review_button": "审核兑换",
+			"max_slippage": "最大滑点",
+			"value_difference": "价值差异",
+			"total_fee": "总估算费用",
+			"network_fee": "网络费用",
+			"approval_fee": "授权费用",
+			"gas_fee": "Gas 费",
+			"lp_fee": "流动性池费用",
+			"max_slippage_info": "请输入 0% 到 $maxSlippage% 之间的数值",
+			"max_slippage_warning": "风险警告：高滑点可能因市场波动造成损失",
+			"max_slippage_error": "滑点容忍度不能为 0% 或超过 $maxSlippage%",
+			"swap_button": "立即兑换",
+			"swap_is_not_offered": "当前不支持此兑换。",
+			"executing_transaction": "正在执行交易...",
+			"initializing": "正在初始化交易...",
+			"swapping": "正在兑换...",
+			"refreshing_ui": "刷新界面中",
+			"swap_provider": "兑换服务商",
+			"swap_provider_website": "官网",
+			"swap_route": "兑换路径",
+			"included_network_fees": "包含的网络费用",
+			"included_liquidity_fees": "包含的流动性费用",
+			"best_rate": "最佳汇率",
+			"expected_minimum": "预计最少获得",
+			"you_receive": "你将收到",
+			"select": "选择 >",
+			"select_swap_provider": "选择兑换服务商",
+			"open_icp_swap": "打开 ICP Swap 网站",
+			"open_instructions_link": "打开说明链接",
+			"select_token": "选择代币",
+			"select_network_filter": "选择网络",
+			"withdrawing": "正在取款",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
+		},
+		"error": {
+			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
+			"unexpected": "兑换代币时发生错误。",
+			"unexpected_missing_data": "初始化兑换交易时发生错误。",
+			"slippage_exceeded": "$oisy_short 已保护你：本次交易超过了你设置的 $maxSlippage% 滑点容忍度。请调整最大滑点后再试。",
+			"pool_not_found": "兑换失败，未找到兑换池。",
+			"deposit_error": "存款错误",
+			"withdraw_failed": "兑换失败，退款也失败。请检查未使用余额并尝试手动提现：",
+			"swap_failed_withdraw_success": "兑换失败，取款成功",
+			"withdraw_failed_first_part": "取款失败第一部分",
+			"withdraw_failed_second_part": "取款失败第二部分",
+			"swap_failed_instruction_link": "兑换失败说明链接",
+			"manually_withdraw_success": "手动取款成功",
+			"manually_withdraw_failed": "手动取款失败",
+			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
+			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功"
+		}
+	},
+	"buy": {
+		"text": {
+			"buy": "购买",
+			"buy_dev": "购买（开发环境）"
+		},
+		"onramper": {
+			"title": "通过 Onramper 购买"
+		}
+	},
+	"tokens": {
+		"text": {
+			"title": "代币",
+			"contract_address": "合约地址",
+			"token_address": "代币地址",
+			"balance": "余额",
+			"hide_zero_balances": "隐藏零余额",
+			"all_tokens_with_zero_hidden": "所有零余额资产当前已隐藏",
+			"filter_nothing_found": "哎呀，未找到结果",
+			"filter_nothing_found_description": "输入代币代号或名称进行筛选",
+			"filter_placeholder": "按代币或符号筛选",
+			"buy_or_receive": "立即购买或接收您的首个代币以在列表中查看",
+			"initializing": "正在初始化...",
+			"updating_ui": "正在更新界面...",
+			"show_token": "显示代币",
+			"hide_token": "隐藏代币",
+			"select_token": "选择代币",
+			"exchange_is_not_available": "当前无法获取美元价值。",
+			"exchange_is_not_available_short": "无法获取美元价值",
+			"source_token_title": "您支付",
+			"destination_token_title": "您接收",
+			"chain_key": "链密钥",
+			"show_more_networks": "显示另外 $number 个网络",
+			"hide_more_networks": "隐藏更多网络",
+			"on_network": " 于 $network",
+			"delete_token": "删除代币",
+			"edit_token": "编辑代币"
+		},
+		"details": {
+			"title": "代币详情",
+			"token": "代币",
+			"network": "网络",
+			"contract_address_copied": "合约地址已复制到剪贴板。",
+			"token_address_copied": "代币地址已复制到剪贴板。",
+			"twin_token": "双胞代币",
+			"standard": "标准",
+			"confirm_deletion_description": "这将从您的 $oisy_short 代币列表中移除 <span class=\"font-bold\">$token</span>。您的资金不会受到影响 — 您可以随时重新添加该代币。",
+			"deletion_confirmation": "$token 已成功从你的 $oisy_short 代币列表中移除。",
+			"update_confirmation": "$token 已成功更新。",
+			"missing_index_canister_id_label": "未分配",
+			"missing_index_canister_id_warning": "索引 Canister 缺失，因此 $oisy_short 无法获取交易列表",
+			"missing_index_canister_id_button": "设置索引 Canister"
+		},
+		"balance": {
+			"error": {
+				"not_applicable": "不适用"
+			}
+		},
+		"import": {
+			"text": {
+				"title": "导入代币",
+				"review": "审查",
+				"saving": "正在保存...",
+				"updating": "正在更新代币列表",
+				"ledger_canister_id": "账本 Canister ID",
+				"index_canister_id": "索引 Canister ID",
+				"minter_canister_id": "铸币 Canister ID",
+				"ledger_canister_id_copied": "账本 Canister ID 已复制到剪贴板。",
+				"index_canister_id_copied": "索引 Canister ID 已复制到剪贴板。",
+				"minter_canister_id_copied": "铸币 Canister ID 已复制到剪贴板。",
+				"verifying": "正在验证代币详情...",
+				"add_the_token": "添加代币",
+				"info": "账本和索引 Canister ID 通常可在项目网站上找到。",
+				"info_index": "索引 Canister ID 是可选的，但如果没有它，$oisy_short 将无法显示交易历史。",
+				"custom_tokens_not_supported": "所选网络不支持自定义代币。"
+			},
+			"error": {
+				"loading_metadata": "正在加载元数据",
+				"no_metadata": "未提供代币的元数据。此为异常情况。",
+				"unexpected_ledger": "验证账本 Canister 时发生错误。",
+				"unexpected_index": "验证索引 Canister 时发生错误。",
+				"unexpected_index_ledger": "加载与索引 Canister 相关的账本 ID 时出错。",
+				"invalid_ledger_id": "账本 ID 与索引 Canister 无关。",
+				"missing_ledger_id": "缺少账本 ID。您是否填写了值？",
+				"missing_contract_address": "缺少合约地址。您是否填写了值？",
+				"missing_token_address": "缺少代币地址。您是否填写了值？",
+				"no_network": "未选择网络。此为异常情况。"
+			},
+			"warning": {
+				"do_not_close_manage": "$oisy_name 正在准备并保护新代币。请在完成之前不要关闭此标签页。"
+			}
+		},
+		"manage": {
+			"text": {
+				"title": "管理代币",
+				"manage_list": "管理代币",
+				"list_settings": "列表设置",
+				"import_token": "导入代币",
+				"network": "网络",
+				"all_tokens_zero_balance": "所有代币余额均为零。",
+				"enable_more_assets": "启用更多代币"
+			},
+			"placeholder": {
+				"select_network": "选择网络"
+			},
+			"info": {
+				"no_changes": "无需保存更改。"
+			},
+			"error": {
+				"unexpected_build": "构建已知代币列表时发生意外错误。",
+				"empty": "未选择任何要启用或禁用的代币。"
+			}
+		},
+		"hide": {
+			"title": "隐藏代币？",
+			"token": "隐藏 $token",
+			"info": "您可稍后前往钱包视图中的 <strong>“管理代币”</strong> 来重新添加该代币。",
+			"confirm": "隐藏",
+			"hiding": "正在隐藏..."
+		},
+		"alt": {
+			"context_menu": "所选代币的右键菜单",
+			"open_etherscan": "在 Etherscan 上打开该代币详情",
+			"open_blockstream": "在 Blockstream 上打开该代币详情",
+			"open_dashboard": "在 ICP Dashboard 上打开该代币详情",
+			"open_contract_address_block_explorer": "在区块浏览器中打开合约地址",
+			"open_token_address_block_explorer": "在区块浏览器中打开代币地址",
+			"token_group_number": "原生代币 $token 的代币组总数量",
+			"filter_button": "打开/关闭筛选"
+		},
+		"placeholder": {
+			"enter_contract_address": "输入 ERC20 合约地址",
+			"enter_token_address": "输入 SPL 代币地址",
+			"search_token": "搜索代币"
+		},
+		"warning": {
+			"trust_token": "请确保您信任所添加的代币。如果您添加的代币由恶意方控制，他们可能会试图骗取您的资产，例如通过让您误以为收到大量代币从而诱导您返还或执行其他不良操作。了解有关诈骗和安全风险的更多信息，例如 <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">这里</a>。"
+		},
+		"error": {
+			"invalid_contract_address": "合约地址无效。",
+			"invalid_token_address": "代币地址无效。",
+			"invalid_ledger": "所选代币未链接至 ICRC Ledger Canister。",
+			"unrecognised_erc_interface": "无法识别的ERC接口",
+			"no_metadata": "未获取到任何元数据。",
+			"unexpected": "保存代币时发生错误。",
+			"unexpected_hiding": "隐藏代币时发生错误。",
+			"already_available": "代币已存在。",
+			"not_toggleable": "代币不可切换，无法隐藏。",
+			"incomplete_metadata": "元数据中未提供名称或符号。",
+			"duplicate_metadata": "已存在名称或符号相似的代币。",
+			"unexpected_undefined": "代币未定义。此为异常情况。",
+			"unexpected_error_on_token_delete": "移除代币时发生错误。",
+			"unexpected_error_on_token_update": "更新代币时发生错误。"
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": "标题",
+			"title_empty": "标题为空",
+			"description_empty": "描述为空",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": "",
+			"collection_not_loaded": "",
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": "",
+			"address_copied": "",
+			"open_explorer": ""
+		},
+		"alt": {
+			"placeholder_image": "图片占位",
+			"card": {
+				"image": "图片"
+			},
+			"copy_address": ""
+		}
+	},
+	"fee": {
+		"text": {
+			"fee": "手续费",
+			"estimated_btc": "预计 BTC 网络手续费",
+			"estimated_inter_network": "预计跨网络手续费",
+			"estimated_eth": "预计以太坊手续费",
+			"max_fee_eth": "最高手续费 <small>(预计小于 30 秒内确认)</small>",
+			"convert_fee": "转换手续费",
+			"convert_inter_network_fee": "跨网络费用",
+			"convert_btc_network_fee": "比特币网络手续费",
+			"zero_fee": "免费",
+			"total_fee": "总手续费",
+			"ata_fee": "ATA 手续费"
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": "余额不足以支付手续费。"
+		},
+		"error": {
+			"cannot_fetch_gas_fee": "无法获取 Gas 手续费。"
+		}
+	},
+	"info": {
+		"bitcoin": {
+			"title": "接收 BTC 并转换为 ckBTC",
+			"description": "将比特币转换为 ckBTC，享受最快和最便宜的比特币交易。转换过程最多可能需要一个小时。",
+			"note": "您可以随时将 ckBTC 转换回 BTC。",
+			"how_to": "如何转换为 ckBTC"
+		},
+		"ethereum": {
+			"title": "转换为 $ckToken",
+			"description": "只需几个步骤，便可将您原生的 $network $token 直接在 $oisy_name 中转换为其 ICP 对应的 $ckToken。转换过程最多可能需要 20 分钟。",
+			"note": "您可以随时将 $ckToken 转换回 $token。",
+			"how_to": "如何转换为 $ckToken",
+			"how_to_short": "如何转换 $token"
+		}
+	},
+	"wallet_connect": {
+		"text": {
+			"name": "WalletConnect",
+			"session_proposal": "会话提议",
+			"connect": "连接",
+			"connecting": "正在连接...",
+			"disconnect": "断开连接",
+			"scan_qr": "扫描二维码",
+			"or_use_link": "或使用 WalletConnect 链接",
+			"proposer": "发起方",
+			"review": "查看 $chain_name ($key) 所需权限",
+			"method": "方法",
+			"methods": "方法",
+			"events": "事件",
+			"message": "消息",
+			"hex_data": "HEX 数据",
+			"raw_copied": "原始交易数据已复制到剪贴板。",
+			"sign_message": "签名消息"
+		},
+		"alt": {
+			"connect_input": "例如：wc:a281567bb3e4..."
+		},
+		"domain": {
+			"title": "域名验证",
+			"valid": "有效 ✅",
+			"valid_description": "发起方的域名验证通过。",
+			"invalid": "无效 ❌",
+			"invalid_description": "发起方网站的域名与请求发送者不匹配。",
+			"security_risk": "安全风险 ⚠️",
+			"security_risk_description": "发起方网站被标记为不安全。",
+			"unknown": "未知 ❓",
+			"unknown_description": "无法验证发起方的域名。"
+		},
+		"info": {
+			"disconnected": "WalletConnect 已断开连接。",
+			"session_ended": "WalletConnect 会话已结束。",
+			"connected": "WalletConnect 已连接。",
+			"transaction_executed": "WalletConnect “$method” 请求已执行。",
+			"sign_executed": "WalletConnect 签名请求已执行。"
+		},
+		"error": {
+			"qr_code_read": "无法读取二维码。",
+			"missing_uri": "必须提供用于连接的 URI。",
+			"disconnect": "断开钱包连接时发生意外错误。连接已重置。",
+			"connect": "连接钱包时发生意外错误。",
+			"manual_workflow": "请通过打开 WalletConnect 模态框完成已启动的手动操作流程。",
+			"skipping_request": "由于另一个操作正在通过浮层进行，当前 WalletConnect 请求被跳过。",
+			"method_not_support": "请求的方法 “$method” 不受支持。",
+			"unexpected_pair": "尝试配对钱包时发生意外错误。",
+			"no_connection_opened": "意外错误：未建立连接。",
+			"no_session_approval": "意外错误：没有可用的会话提议。",
+			"unexpected": "与 WalletConnect 通信时发生意外错误。",
+			"request_rejected": "WalletConnect 请求已被拒绝",
+			"unknown_parameter": "未知参数。",
+			"wallet_not_initialized": "意外错误：钱包地址尚未初始化。",
+			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
+			"unknown_destination": "未知的接收地址。",
+			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
+			"unexpected_processing_request": "处理 WalletConnect 请求时发生意外错误。"
+		}
+	},
+	"transaction": {
+		"text": {
+			"details": "交易详情",
+			"hash": "交易哈希",
+			"hash_copied": "交易哈希 $hash 已复制到剪贴板。",
+			"id": "交易 ID",
+			"id_copied": "交易 ID 已复制到剪贴板。",
+			"timestamp": "时间戳",
+			"type": "类型",
+			"from": "来自",
+			"from_copied": "发送地址已复制到剪贴板。",
+			"received_from": "接收自 $name",
+			"from_ata": "发送方代币账户 (ATA)",
+			"from_ata_copied": "发送方代币账户 (ATA) 已复制到剪贴板。",
+			"to": "发送至",
+			"to_copied": "接收地址已复制到剪贴板。",
+			"sent_to": "发送给 $name",
+			"to_ata": "接收方代币账户 (ATA)",
+			"to_ata_copied": "接收方代币账户 (ATA) 已复制到剪贴板。",
+			"block": "区块",
+			"interacted_with": "交互对象（接收方）",
+			"status": "状态",
+			"confirmations": "确认数"
+		},
+		"status": {
+			"confirmed": "已确认",
+			"included": "已包含",
+			"finalised": "已最终确认",
+			"finalized": "已最终确认",
+			"processed": "已处理",
+			"pending": "待处理...",
+			"safe": "安全",
+			"unconfirmed": "未确认"
+		},
+		"type": {
+			"send": "转出",
+			"receive": "收款",
+			"withdraw": "提现",
+			"deposit": "充值",
+			"approve": "同意",
+			"burn": "Burn",
+			"mint": "Mint"
+		},
+		"label": {
+			"reimbursement": "退款",
+			"twin_token_sent": "$twinToken 已发送",
+			"ck_token_sent": "$ckToken 已发送",
+			"twin_token_converted": "已从 $twinToken 转换",
+			"ck_token_converted": "已从 $ckToken 转换",
+			"sending_twin_token": "发送 $twinToken 中",
+			"sending_twin_token_failed": "发送 $twinToken 失败",
+			"converting_twin_token": "正在将 $twinToken 转换为 $ckToken",
+			"converting_ck_token": "正在将 $ckToken 转换为 $twinToken",
+			"twin_network": "$twinNetwork 网络",
+			"no_date_available": "无可用日期",
+			"pending": "待处理"
+		},
+		"alt": {
+			"open_block_explorer": "在区块浏览器中打开此交易",
+			"open_from_block_explorer": "在区块浏览器中打开“发送自”地址",
+			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址"
+		},
+		"error": {
+			"get_block_number": "无法获取区块号。",
+			"failed_get_transaction": "无法根据提供的信息（哈希：$hash）获取交易。请重新加载钱包 DApp。"
+		}
+	},
+	"transactions": {
+		"text": {
+			"title": "交易记录",
+			"buy_or_receive": "进行您的第一次交易，现在购买或接收代币！",
+			"transaction_history": "您的交易历史将显示在此处",
+			"mainnet_btc_transactions_info": "BTC 交易信息来自中心化第三方，建议您自行核实。",
+			"transaction_history_unavailable": "交易历史不可用",
+			"missing_index_canister_explanation": "目前，$oisy_short 无法显示您的代币交易历史，因为发行方尚未提供追踪功能。该功能应很快上线。与此同时，请放心，您仍然可以正常发送和接收代币。",
+			"index_canister_not_working_explanation": "目前，$oisy_short 无法显示您的代币交易历史，因为发行方的追踪功能暂时无响应。该问题应很快得到解决。与此同时，请放心，您仍然可以正常发送和接收代币。",
+			"token_needs_enabling": "需启用该代币才能查看交易历史。"
+		},
+		"error": {
+			"loading_transactions": "加载交易记录时出错。",
+			"loading_transactions_symbol": "加载 $symbol 的交易记录时出错。",
+			"no_token_loading_transaction": "未找到代币，无法加载交易记录。",
+			"uncertified_transactions_removed": "检测到一些未经认证的交易，已从显示列表中移除。",
+			"loading_pending_ck_ethereum_transactions": "获取 $network 待处理交易时发生错误。",
+			"get_transaction_for_hash": "根据提供的哈希值（hash: $hash）获取交易失败。",
+			"unexpected_transaction_for_hash": "加载哈希值为 $hash 的待处理交易时发生意外错误。",
+			"loading_token_with_network": "由于不在您的代币列表中，无法加载 $network 网络上的代币 $token。",
+			"loading_token": "提供的代币链接无效。"
+		}
+	},
+	"about": {
+		"why_oisy": {
+			"text": {
+				"label": "为什么选择 $oisy_short",
+				"title": "为什么选择 $oisy_short",
+				"hold_crypto": {
+					"title": "统一管理您的所有数字资产",
+					"description": "$oisy_short 让您能够在一个统一的钱包中管理所有数字资产，包括比特币、Solana、以太坊、ICP 等。无需再为不同加密货币使用多个钱包，实现跨平台无缝高效体验。"
+				},
+				"network_custody": {
+					"title": "使用网络托管再无私钥焦虑",
+					"description": "$oisy_name 引入网络托管机制，利用 Internet Computer 的先进密码学技术，无需直接管理私钥，提供一种更安全、用户友好的替代方案。这种方式符合“链上即在线”的理念，旨在通过去中心化网络增强安全性与抵御网络攻击的能力。"
+				},
+				"fully_on_chain": {
+					"title": "完全链上钱包保障篡改防护",
+					"description": "不仅您的密钥受到保护，整个钱包应用也 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">完全部署在链上</a>，直接通过浏览器从 Internet Computer 加载。这意味着钱包整体受益于去中心化信任模型，具备防篡改和高度安全性。"
+				},
+				"cross_device": {
+					"title": "随时随地访问您的钱包",
+					"description": "通过 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">Internet Identity</a>，您可以在所有与去中心化身份关联的设备上轻松使用 $oisy_short，无论是手机、平板还是桌面设备，确保无缝且安全的访问体验。"
+				},
+				"verifiable_credentials": {
+					"title": "通过可验证凭证解锁额外功能",
+					"description": "$oisy_short 集成了 Internet Computer 的 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">可验证凭证</a>平台。通过获得特定类型的凭证，可解锁空投和专属功能，全面提升使用体验。"
+				},
+				"open_source": {
+					"title": "开源透明值得信赖",
+					"description": "$oisy_short 是一个 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">开源项目</a>，由 <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY 基金会</a>的专业团队维护，获得超过 200 位世界领先密码学家与工程师的支持。开源确保透明度，让社区能够审查、参与并信任钱包的完整性。"
+				}
+			}
+		}
+	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "打开我的钱包",
+				"title_successful": "恭喜！",
+				"title_failed": "邀请码无效",
+				"reward_received": "欢迎加入 $oisy_short！",
+				"reward_failed": "邀请码已过期",
+				"reward_received_description": "您的欢迎礼包即将送达。",
+				"brand_reward_received_description": "",
+				"reward_failed_description": "请申请一个新的邀请码并重试"
+			},
+			"error": {
+				"loading_reward": "加载新的奖励码时出错。",
+				"loading_user_data": "从奖励 canister 加载用户数据失败。",
+				"loading_eligibility": "加载活动资格时发生错误。"
+			}
+		},
+		"invitation": {
+			"text": {
+				"title": "生成邀请链接",
+				"binance_title": "Binance Clubhouse 二维码",
+				"invitation_link_copied": "邀请链接已复制到剪贴板。",
+				"generate_new_link": "生成新链接",
+				"generating_new_code": "正在生成新邀请码",
+				"regenerate_countdown_text": "$counter 秒后生成新链接"
+			}
+		}
+	},
+	"referral": {
+		"invitation": {
+			"text": {
+				"title": "邀请好友",
+				"referral_link_copied": "推荐链接已复制到剪贴板。",
+				"information": "邀请好友，获得额外奖励！",
+				"not_referred_yet": "你还没有推荐任何人",
+				"referred_amount": "你已成功推荐了 $amount 位用户",
+				"learn_more": "了解更多"
+			},
+			"error": {
+				"loading_referrer_info": "加载推荐人信息时出错",
+				"setting_referrer": "设置推荐人时出错"
+			}
+		}
+	},
+	"address_book": {
+		"text": {
+			"title": "联系人",
+			"empty_title": "你的联系人列表为空",
+			"empty_text": "你所有的联系人将显示在此处",
+			"add_new_contact": "添加新联系人",
+			"add_contact": "添加联系人",
+			"search_contact": "搜索联系人",
+			"no_address_found": "没有可用地址。",
+			"no_contact_found": "未找到联系人"
+		},
+		"alt": {
+			"show_addresses_of_contact": "显示联系人的所有地址",
+			"hide_addresses": "隐藏联系人的地址"
+		},
+		"edit_contact": {
+			"title": "编辑联系人",
+			"add_address": "添加地址",
+			"delete_contact": "删除联系人"
+		},
+		"avatar": {
+			"default": "默认头像",
+			"avatar_for": "$contact 的头像",
+			"avatar_loading": "头像加载中"
+		},
+		"edit_avatar": {
+			"menu_title": "联系人图片",
+			"upload_image": "上传",
+			"replace_image": "代替",
+			"remove_image": "消除"
+		},
+		"show_contact": {
+			"title": "联系人",
+			"add_address": "添加地址",
+			"show_address_text": "关联地址将在此处显示",
+			"add_first_address": "为 $contactName 添加第一个地址！"
+		},
+		"create_contact": {
+			"title": "创建联系人"
+		}
+	},
+	"contact": {
+		"form": {
+			"edit_contact": "编辑联系人",
+			"add_new_contact": "添加新联系人"
+		},
+		"fields": {
+			"name": "名称"
+		},
+		"delete": {
+			"title": "删除联系人 $contact？",
+			"delete_contact": "删除联系人",
+			"content_text": "这将从你的地址簿中删除 $contact 以及其所有关联地址。此操作不可撤销。"
+		},
+		"error": {
+			"create": "创建联系人失败",
+			"update": "更新联系人失败",
+			"delete": "删除联系人失败",
+			"name_too_long": "请将名称控制在 $maxCharacters 个字符以内。"
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "Internet Computer",
+			"Btc": "比特币",
+			"Eth": "以太坊",
+			"Sol": "Solana"
+		},
+		"form": {
+			"new_address": "新地址",
+			"address_placeholder": "输入或粘贴地址",
+			"label_placeholder": "例如：“妈妈的钱包”",
+			"invalid_address": "地址无效",
+			"valid_for_networks": "适用于网络：",
+			"error": {
+				"label_too_long": "标签不能超过 $maxCharacters 个字符"
+			}
+		},
+		"fields": {
+			"label": "别名",
+			"address": "地址"
+		},
+		"delete": {
+			"title": "删除地址？",
+			"delete_address": "删除地址",
+			"content_text": "这将从联系人 $contact 的联系人中删除地址 <strong>$address</strong>。<br>此操作不可撤销。"
+		},
+		"save": {
+			"title": "保存地址",
+			"add_to_existing_contact": "添加到现有联系人",
+			"create_contact": "创建联系人"
+		},
+		"qr": {
+			"title": "扫描二维码"
+		}
+	},
+	"signer": {
+		"sign_in": {
+			"text": {
+				"access_your_wallet": "访问你的 $oisy_name",
+				"open_or_create": "打开或创建你的钱包，以安全连接 dApp 并开始管理你的资产。"
+			}
+		},
+		"idle": {
+			"text": {
+				"waiting": "正在等待 dApp 交互..."
+			},
+			"alt": {
+				"img_placeholder": "宇航员 logo 正在左右移动眼睛，等待来自依赖方 dApp 的消息"
+			}
+		},
+		"permissions": {
+			"text": {
+				"title": "查看权限",
+				"requested_permissions": "请求的权限",
+				"your_wallet_address": "你的钱包地址",
+				"icrc27_accounts": "查看你的 $oisy_name 地址",
+				"icrc49_call_canister": "请求交易授权"
+			},
+			"error": {
+				"no_confirm_callback": "无权限确认回调，属意外情况。请关闭钱包并重试。"
+			}
+		},
+		"origin": {
+			"text": {
+				"request_from": "来自的请求：",
+				"invalid_origin": "无效的来源！"
+			},
+			"alt": {
+				"link_to_dapp": "链接到请求权限的 dApp"
+			}
+		},
+		"consent_message": {
+			"text": {
+				"loading": "正在加载确认消息..."
+			},
+			"warning": {
+				"token_without_consent_message": "该代币未提供确认消息，以下信息由 $oisy_short 提取。"
+			},
+			"error": {
+				"no_approve_callback": "无批准确认消息的回调，属意外情况。请关闭钱包并重试。",
+				"no_reject_callback": "无拒绝确认消息的回调，属意外情况。请关闭钱包并重试。",
+				"retrieve": "检索确认消息时出错"
+			}
+		},
+		"call_canister": {
+			"text": {
+				"processing": "正在处理请求...",
+				"executed": "请求已执行",
+				"close_window": "你可以关闭此窗口了",
+				"error": "请求因错误而失败",
+				"try_again": "请再试一次。如果问题仍然存在，请联系你发起请求的 dApp 开发者。"
+			},
+			"error": {
+				"cannot_call": "该调用无法处理"
+			}
+		}
+	},
+	"carousel": {
+		"text": {
+			"next_slide": "下一张幻灯片",
+			"prev_slide": "上一张幻灯片",
+			"indicator": "跳转到第 $index 幻灯片"
+		}
+	},
+	"license_agreement": {
+		"text": {
+			"accept_terms": "点击此按钮即表示你同意",
+			"accept_terms_link": "许可协议",
+			"title": "$oisy_name 许可协议（“许可协议”）",
+			"paragraph_1": "感谢你对 $oisy_name 的兴趣。$oisy_name 是基于浏览器的自托管多链钱包应用，托管于 Internet Computer 公有区块链网络（“$oisy_short”）。关于 $oisy_short 的开源代码和相关许可信息，请参阅此 GitHub 仓库：$oisy_repo_url。",
+			"paragraph_2": "本许可协议规范你（“你”）对 $oisy_short 的使用。使用 $oisy_short 即表示你已阅读、理解并同意受此许可协议约束。如不同意，请勿使用 $oisy_short。",
+			"paragraph_3": "若你选择使用 $oisy_short，代表你与 DFINITY 基金会及其附属公司（统称“DFINITY”）达成如下共识：",
+			"limited_license": "<strong>1. 有限许可。</strong> 根据本协议条款和条件，DFINITY 授予你一项有限的、非独占的、不可转让的、不可再许可的、可撤销的许可，仅限于用于接收、持有和发送代币（如 ICP、ICRC-1、ETH、ERC20 及其他未来支持的代币）。你可根据各开源组件的许可条款创建衍生作品。",
+			"restrictions": "<strong>2. 使用限制。</strong> 你对自己使用 $oisy_short 的所有活动负全责，无论是否经你授权或由你、你的员工或第三方代表你进行。你明白 DFINITY 对与你的钱包相关的任何活动或交易（无论是否完成）概不负责。你不得歪曲你与 DFINITY 的关系，不得暗示 DFINITY 支持、赞助或背书你或你的业务。未经许可，你不得使用 $oisy_short 名称、logo 或商标。",
+			"applicable_laws": "<strong>3. 适用法律。</strong> 使用 $oisy_short 过程中你应遵守所有适用法律法规（包括但不限于出口管制、反洗钱或经济制裁等法律）。",
+			"reservation_rights": "<strong>4. 权利保留。</strong> $oisy_short 为 DFINITY 所有，并以许可方式提供。其内容、界面、交互功能、信息、代码和设计等受知识产权保护。DFINITY 保留未明确授予你的所有权利。",
+			"feedback": "<strong>5. 反馈。</strong> 若你向 DFINITY 提供任何反馈（包括建议、bug 报告、改进建议等），即视为非保密性提交，DFINITY 可自由使用该反馈。你授予 DFINITY 永久性、不可撤销、可转让、可再许可、非独占、免版税的全球许可。",
+			"termination": "<strong>6. 期限与终止。</strong> 本协议在你违反协议时立即终止。你可随时通过清空钱包并停止使用 $oisy_short 来终止协议。DFINITY 可随时基于任何理由终止此协议，包括滥用行为或违反协议。",
+			"warranty_liability": "<strong>7. 免责声明及责任限制。</strong> 在法律允许的最大范围内，$oisy_short 按“现状”提供，不附带任何形式的保证。DFINITY 不保证其始终可用、安全、准确或适合特定目的。在任何情况下，DFINITY 对任何间接、附带、惩罚性或特殊损失不承担责任，其责任总额不超过 100 瑞士法郎。",
+			"indemnity": "<strong>8. 赔偿条款。</strong> 你同意赔偿 DFINITY 及其相关方，免受因你使用 $oisy_short 或违反本协议引起的任何索赔与损失（包括合理律师费）。",
+			"governing_law": "<strong>9. 适用法律与管辖权。</strong> 本协议适用瑞士法律，任何争议由瑞士苏黎世法院专属管辖，可上诉至瑞士联邦法院。",
+			"entire_agreement": "<strong>10. 完整协议与可分割性。</strong> 本协议为双方之间就此事项的完整协议。如其中任一条款被认定无效，应按法律允许的最小限度修改或分割，其余条款仍具效力。",
+			"assignment": "<strong>11. 协议转让。</strong> 未经 DFINITY 书面同意，你不得转让本协议，DFINITY 可自由转让本协议。",
+			"no_waiver": "<strong>12. 权利不弃权。</strong> DFINITY 未行使权利不构成放弃，亦不影响未来主张该权利。",
+			"english_version": "<strong>13. 英文版本。</strong> 本协议以英文版本为正式版本，如有冲突，以英文版本为准。"
+		},
+		"alt": {
+			"license_agreement": "$oisy_name 许可协议"
+		}
+	},
+	"activity": {
+		"text": {
+			"title": "最近活动"
+		},
+		"info": {
+			"btc_transactions": "BTC 交易信息来自中心化第三方，建议自行验证。"
+		},
+		"warning": {
+			"no_index_canister": "无法显示 $token_list 的交易记录。未提供 Index canister。",
+			"unavailable_index_canister": "无法显示 $token_list 的交易记录。Index canister 当前不可用。"
+		}
+	},
+	"earning": {
+		"text": {
+			"title": "赚取"
+		},
+		"cards": {
+			"gold_title": "黄金",
+			"gold_description": "GLDT 质押",
+			"stablecoins_title": "稳定币",
+			"stablecoins_description": "即将推出",
+			"sprinkles_title": "Sprinkles",
+			"sprinkles_description": "OISY 奖励"
+		}
+	},
+	"welcome": {
+		"title": "欢迎来到 $oisy_short！",
+		"subtitle": "准备好赚取收益了吗？",
+		"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐 4 位朋友即可获得保证奖金。"
+	},
+	"temporal": {
+		"seconds_to_duration": {
+			"year": "年（单数）",
+			"year_plural": "年（复数）",
+			"month": "月（单数）",
+			"month_plural": "月（复数）",
+			"day": "天（单数）",
+			"day_plural": "天（复数）",
+			"hour": "小时（单数）",
+			"hour_plural": "小时（复数）",
+			"minute": "分钟（单数）",
+			"minute_plural": "分钟（复数）",
+			"second": "秒（单数）",
+			"second_plural": "秒（复数）"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "标题",
+			"welcome_message": "欢迎信息",
+			"action_button_contacts_title": "联系人标题按钮",
+			"action_button_contacts_subtitle": "联系人副标题按钮",
+			"action_button_contacts_prompt": "联系人提示按钮",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
+			"send_message": "发送消息",
+			"send_message_input_placeholder": "发送消息输入占位符",
+			"send_token_succeeded": "",
+			"no_contacts_found_message": "",
+			"loading": "加载中"
+		},
+		"errors": {
+			"unknown": "未知",
+			"no_response": "无响应"
+		}
+	}
+}

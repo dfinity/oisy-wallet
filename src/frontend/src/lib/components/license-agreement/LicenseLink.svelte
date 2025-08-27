@@ -2,15 +2,19 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let noUnderline = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		noUnderline?: boolean;
+		testId?: string;
+	}
+
+	let { noUnderline = false, testId }: Props = $props();
 </script>
 
 <a
-	href="/license-agreement"
+	class:no-underline={noUnderline}
 	aria-label={replaceOisyPlaceholders($i18n.license_agreement.alt.license_agreement)}
 	data-tid={testId}
-	class:no-underline={noUnderline}
+	href="/license-agreement"
 >
 	{$i18n.license_agreement.text.accept_terms_link}
 </a>

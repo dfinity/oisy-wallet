@@ -5,12 +5,14 @@
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { Languages } from '$lib/enums/languages';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { Languages } from '$lib/types/languages';
 
 	let dropdown = $state<Dropdown>();
 
-	const currentLang: string = $derived(LANGUAGES[$i18n.lang as Languages]);
+	const currentLang: string = $derived(LANGUAGES[$currentLanguage]);
 
 	const handleLangChange = (lang: string) => {
 		i18n.switchLang(Languages[lang as keyof typeof Languages]);
@@ -23,8 +25,8 @@
 		bind:this={dropdown}
 		ariaLabel={$i18n.core.alt.switch_language}
 		asModalOnMobile
-		buttonFullWidth
 		buttonBorder
+		buttonFullWidth
 	>
 		{currentLang}
 
@@ -33,20 +35,20 @@
 		{/snippet}
 
 		{#snippet items()}
-			<List noPadding condensed>
+			<List condensed noPadding testId={LANGUAGE_DROPDOWN}>
 				{#each SUPPORTED_LANGUAGES as [langKey, langVal], index (index + langKey)}
 					<ListItem>
 						<Button
-							onclick={() => handleLangChange(langKey)}
-							fullWidth
 							alignLeft
+							colorStyle="tertiary-alt"
+							fullWidth
+							onclick={() => handleLangChange(langKey)}
 							paddingSmall
 							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
-							colorStyle="tertiary-alt"
 							transparent
 						>
 							<span class="pt-0.75 w-[20px] text-brand-primary">
-								{#if $i18n.lang === langVal}
+								{#if $currentLanguage === langVal}
 									<IconCheck size="20" />
 								{/if}
 							</span>

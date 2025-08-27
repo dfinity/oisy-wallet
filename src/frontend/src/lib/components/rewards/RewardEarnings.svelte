@@ -18,14 +18,17 @@
 	} from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward.services';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isMobile } from '$lib/utils/device.utils';
-	import { formatUSD } from '$lib/utils/format.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
@@ -72,7 +75,7 @@
 
 	const totalRewardUsd = $derived(ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd);
 
-	let loading = $state(true);
+	let loadingRewards = $state(true);
 
 	const loadRewards = async ({
 		ckBtcToken,
@@ -83,6 +86,8 @@
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
 	}) => {
+		loadingRewards = true;
+
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
@@ -99,7 +104,8 @@
 			identity: $authIdentity,
 			campaignId: reward.id
 		}));
-		loading = false;
+
+		loadingRewards = false;
 	};
 
 	onMount(() => {
@@ -116,50 +122,63 @@
 			})
 		);
 	};
+
+	let amount = $derived(
+		formatCurrency({
+			value: totalRewardUsd,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		})
+	);
+
+	let loadingAmount = $derived(isNullish(amount));
+
+	let loading = $derived(loadingRewards || loadingAmount);
 </script>
 
 {#if amountOfRewards > 0}
 	<div transition:fade={SLIDE_DURATION}>
 		<div
 			class="mb-5 mt-2 w-full text-center text-xl font-bold text-success-primary"
-			class:transition={loading}
+			class:animate-pulse={loading}
 			class:duration-500={loading}
 			class:ease-in-out={loading}
-			class:animate-pulse={loading}
+			class:transition={loading}
 			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
 				$noOfSprinkles: amountOfRewards.toString(),
-				$amount: formatUSD({ value: totalRewardUsd })
+				$amount: amount ?? ''
 			})}
 		</div>
 
 		<div class="flex w-full gap-2">
 			<RewardEarningsCard
-				{loading}
-				token={ckBtcToken}
 				amount={ckBtcReward}
-				usdAmount={ckBtcRewardUsd}
+				{loading}
 				testId={`${REWARDS_EARNINGS_CARD}-${BTC_MAINNET_TOKEN.twinTokenSymbol}`}
+				token={ckBtcToken}
+				usdAmount={ckBtcRewardUsd}
 			/>
 			<RewardEarningsCard
-				{loading}
-				token={ckUsdcToken}
 				amount={ckUsdcReward}
-				usdAmount={ckUsdcRewardUsd}
+				{loading}
 				testId={`${REWARDS_EARNINGS_CARD}-${USDC_TOKEN.twinTokenSymbol}`}
+				token={ckUsdcToken}
+				usdAmount={ckUsdcRewardUsd}
 			/>
 			<RewardEarningsCard
-				{loading}
-				token={ICP_TOKEN}
 				amount={icpReward}
-				usdAmount={icpRewardUsd}
+				{loading}
 				testId={`${REWARDS_EARNINGS_CARD}-${ICP_SYMBOL}`}
+				token={ICP_TOKEN}
+				usdAmount={icpRewardUsd}
 			/>
 		</div>
 
 		<div class="my-5 w-full justify-items-center text-center">
 			<Button
-				paddingSmall
 				onclick={gotoActivity}
+				paddingSmall
 				styleClass="font-semibold bg-transparent text-brand-primary-alt"
 				testId={REWARDS_EARNINGS_ACTIVITY_BUTTON}
 			>

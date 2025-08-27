@@ -1,5 +1,5 @@
 import { UrlSchema } from '$lib/validation/url.validation';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 export const SolRpcConnectionConfigSchema = z.object({
 	httpUrl: UrlSchema,

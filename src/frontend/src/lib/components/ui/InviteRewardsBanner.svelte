@@ -2,14 +2,26 @@
 	import IconSprinkles from '$lib/components/icons/IconSprinkles.svelte';
 	import IconUpRight from '$lib/components/icons/lucide/IconUpRight.svelte';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
+	import { TRACK_SPRINKLES_BANNER_CLICK } from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	const handleSprinklesBannerClick = () => {
+		trackEvent({
+			name: TRACK_SPRINKLES_BANNER_CLICK,
+			metadata: {
+				source: 'login-page'
+			}
+		});
+	};
 </script>
 
 <a
-	href="https://docs.oisy.com/rewards/oisy-sprinkles"
-	target="_blank"
-	rel="noopener noreferrer"
 	class="invite-rewards-banner"
+	href="https://docs.oisy.com/rewards/oisy-sprinkles"
+	onclick={handleSprinklesBannerClick}
+	rel="noopener noreferrer"
+	target="_blank"
 >
 	<div class="banner-content">
 		<!-- Sprinkles Animation -->

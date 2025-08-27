@@ -1,14 +1,20 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import { isTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
+import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-import type { OptionToken } from '$lib/types/token';
+import { defaultFallbackToken } from '$lib/derived/token.derived';
+import type { OptionToken, OptionTokenStandard, Token } from '$lib/types/token';
+import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
-import { isNullish } from '@dfinity/utils';
+import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -45,6 +51,10 @@ export const pageToken: Readable<OptionToken> = derived(
 			return ICP_TOKEN;
 		}
 
+		if ($routeToken === TESTICP_TOKEN.name) {
+			return TESTICP_TOKEN;
+		}
+
 		return [
 			...$enabledBitcoinTokens,
 			...$enabledEthereumTokens,
@@ -59,3 +69,30 @@ export const pageToken: Readable<OptionToken> = derived(
 		);
 	}
 );
+
+/**
+ * A derived store which can be used for code convenience reasons.
+ */
+export const pageTokenWithFallback: Readable<Token> = derived(
+	[pageToken, defaultFallbackToken],
+	([$pageToken, $defaultFallbackToken]) => $pageToken ?? $defaultFallbackToken
+);
+
+export const pageTokenStandard: Readable<OptionTokenStandard> = derived(
+	[pageToken],
+	([$pageToken]) => $pageToken?.standard
+);
+
+export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pageToken]) => {
+	if (nonNullish($pageToken)) {
+		return icTokenIcrcCustomToken($pageToken)
+			? isIcrcTokenToggleEnabled($pageToken)
+			: isTokenEthereumUserToken($pageToken)
+				? isNotDefaultEthereumToken($pageToken)
+				: isTokenSpl($pageToken)
+					? isTokenSplToggleable($pageToken)
+					: false;
+	}
+
+	return false;
+});

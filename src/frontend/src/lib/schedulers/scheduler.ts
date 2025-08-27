@@ -1,4 +1,8 @@
-import type { PostMessageResponse, PostMessageResponseStatus } from '$lib/types/post-message';
+import type {
+	PostMessageDataError,
+	PostMessageResponse,
+	PostMessageResponseStatus
+} from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
 import { loadIdentity } from '$lib/utils/auth.utils';
 import type { Identity } from '@dfinity/agent';
@@ -108,7 +112,7 @@ export class SchedulerTimer {
 		this.setStatus('idle');
 	}
 
-	postMsg<T>(data: { msg: PostMessageResponse; data?: T }) {
+	postMsg<T>(data: { msg: PostMessageResponse; data?: T } | PostMessageDataError) {
 		if (this.isIdle()) {
 			// The worker scheduler was stopped between the start of the execution and the actual completion of the job it runs.
 			return;

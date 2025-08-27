@@ -6,6 +6,7 @@ import {
 } from '$icp/schema/ic-token.schema';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
+import { CurrencyExchangeDataSchema, CurrencySchema } from '$lib/schema/currency.schema';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { SyncStateSchema } from '$lib/schema/sync.schema';
 import type { BtcAddress, SolAddress } from '$lib/types/address';
@@ -18,7 +19,7 @@ import type { CertifiedData } from '$lib/types/store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 export const POST_MESSAGE_REQUESTS = [
 	'startIdleTimer',
@@ -61,25 +62,33 @@ export const POST_MESSAGE_REQUESTS = [
 export const PostMessageRequestSchema = z.enum(POST_MESSAGE_REQUESTS);
 
 export const PostMessageDataRequestSchema = z.never();
-export const PostMessageDataResponseSchema = z.object({}).strict();
+export const PostMessageDataResponseSchema = z.strictObject({});
+export const PostMessageDataResponseLooseSchema = z.looseObject({});
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
+	currentCurrency: CurrencySchema,
 	// TODO: generate zod schema for Erc20ContractAddressWithNetwork
 	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>())
 });
 
-export const PostMessageDataRequestIcrcSchema = IcCanistersSchema.merge(
-	NetworkSchema.pick({ env: true })
-);
+export const PostMessageDataRequestIcrcSchema = z.object({
+	...IcCanistersSchema.shape,
+	...NetworkSchema.pick({ env: true }).shape
+});
 
-export const PostMessageDataRequestIcrcStrictSchema = IcCanistersStrictSchema.merge(
-	NetworkSchema.pick({ env: true })
-);
+export const PostMessageDataRequestIcrcStrictSchema = z.object({
+	...IcCanistersStrictSchema.shape,
+	...NetworkSchema.pick({ env: true }).shape
+});
 
 export const PostMessageDataRequestDip20Schema = z.object({
 	canisterId: CanisterIdTextSchema
+});
+
+export const PostMessageDataRequestIcpSchema = z.object({
+	indexCanisterId: CanisterIdTextSchema
 });
 
 export const PostMessageDataRequestIcCkSchema = IcCkMetadataSchema.pick({
@@ -120,34 +129,37 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncPowProtectionStatus'
 ]);
 
-export const PostMessageResponseSchema = z.enum([
-	'signOutIdleTimer',
-	'delegationRemainingTime',
-	'syncExchange',
+export const PostMessageErrorResponseSchema = z.enum([
 	'syncExchangeError',
-	'syncIcpWallet',
-	'syncIcrcWallet',
-	'syncDip20Wallet',
-	'syncBtcWallet',
-	'syncSolWallet',
 	'syncIcpWalletError',
 	'syncIcrcWalletError',
 	'syncDip20WalletError',
 	'syncBtcWalletError',
 	'syncSolWalletError',
+	'syncBtcStatusesError',
+	'syncCkMinterInfoError',
+	'syncPowProtectionError'
+]);
+
+export const PostMessageResponseSchema = z.enum([
+	'signOutIdleTimer',
+	'delegationRemainingTime',
+	'syncExchange',
+	'syncIcpWallet',
+	'syncIcrcWallet',
+	'syncDip20Wallet',
+	'syncBtcWallet',
+	'syncSolWallet',
 	'syncIcpWalletCleanUp',
 	'syncIcrcWalletCleanUp',
 	'syncDip20WalletCleanUp',
 	'syncBtcStatuses',
-	'syncBtcStatusesError',
 	'syncCkMinterInfo',
-	'syncCkMinterInfoError',
 	'syncBtcPendingUtxos',
 	'syncCkBTCUpdateOk',
 	'syncBtcAddress',
 	'syncPowProgress',
 	'syncPowNextAllowance',
-	'syncPowProtectionError',
 	...PostMessageResponseStatusSchema.options
 ]);
 
@@ -157,6 +169,7 @@ export const PostMessageDataResponseAuthSchema = PostMessageDataResponseSchema.e
 
 // TODO: generate zod schema for Coingecko
 export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSchema.extend({
+	currentExchangeRate: CurrencyExchangeDataSchema.optional(),
 	currentEthPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentBtcPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentErc20Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
@@ -188,6 +201,11 @@ export const PostMessageDataResponseErrorSchema = PostMessageDataResponseSchema.
 	error: z.unknown()
 });
 
+export const PostMessageDataErrorSchema = z.object({
+	msg: PostMessageErrorResponseSchema,
+	data: PostMessageDataResponseErrorSchema
+});
+
 export const PostMessageDataResponseWalletCleanUpSchema = PostMessageDataResponseSchema.extend({
 	transactionIds: z.array(z.string())
 });
@@ -216,7 +234,10 @@ export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
 	});
 
 export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
-	z.object({
-		msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
-		data: dataSchema.optional()
-	});
+	z.union([
+		z.object({
+			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
+			data: z.strictObject(dataSchema).shape.optional()
+		}),
+		PostMessageDataErrorSchema
+	]);

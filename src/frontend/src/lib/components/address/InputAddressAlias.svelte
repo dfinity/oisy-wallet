@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import type { ZodError } from 'zod';
+	import type { ZodError } from 'zod/v4';
 	import InputAddress from '$lib/components/address/InputAddress.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { CONTACT_MAX_LABEL_LENGTH } from '$lib/constants/app.constants';
@@ -57,37 +57,37 @@
 	});
 </script>
 
-<div class="w-full" style="--input-font-size: var(--text-base)">
-	<label for="address" class="font-bold">{$i18n.address.fields.address}</label>
+<div style="--input-font-size: var(--text-base)" class="w-full">
+	<label class="font-bold" for="address">{$i18n.address.fields.address}</label>
 
 	<InputAddress
+		name="address"
+		autofocus={isDesktop() && focusField === 'address'}
+		disabled={disableAddressField || disabled}
+		{onQRCodeScan}
+		placeholder={$i18n.address.form.address_placeholder}
+		showPasteButton={!disableAddressField && !disabled}
+		showResetButton={!disableAddressField && !disabled}
+		testId={ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT}
 		bind:parseError={addressParseError}
 		bind:value={address.address}
 		bind:addressType={address.addressType}
-		name="address"
-		placeholder={$i18n.address.form.address_placeholder}
-		testId={ADDRESS_BOOK_ADDRESS_ADDRESS_INPUT}
-		showPasteButton={!disableAddressField && !disabled}
-		showResetButton={!disableAddressField && !disabled}
-		disabled={disableAddressField || disabled}
-		autofocus={isDesktop() && focusField === 'address'}
-		{onQRCodeScan}
 	/>
 
-	<label for="label" class="font-bold">{$i18n.address.fields.label}</label>
+	<label class="font-bold" for="label">{$i18n.address.fields.label}</label>
 	<InputText
 		name="label"
-		placeholder={$i18n.address.form.label_placeholder}
-		bind:value={addressLabel}
-		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
-		{disabled}
-		showResetButton={!disabled}
-		required={false}
 		autofocus={isDesktop() && focusField === 'label'}
+		{disabled}
+		placeholder={$i18n.address.form.label_placeholder}
+		required={false}
+		showResetButton={!disabled}
+		testId={ADDRESS_BOOK_ADDRESS_ALIAS_INPUT}
+		bind:value={addressLabel}
 	/>
 
 	{#if nonNullish(labelError)}
-		<p transition:slide={SLIDE_DURATION} class="pt-2 text-error-primary">
+		<p class="pt-2 text-error-primary" transition:slide={SLIDE_DURATION}>
 			{replacePlaceholders($i18n.address.form.error.label_too_long, {
 				$maxCharacters: `${CONTACT_MAX_LABEL_LENGTH}`
 			})}

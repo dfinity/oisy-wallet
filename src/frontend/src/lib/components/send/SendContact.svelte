@@ -18,18 +18,18 @@
 </script>
 
 <LogoButton
-	styleClass="group"
 	{onClick}
+	styleClass="group"
 	testId={`${SEND_DESTINATION_WIZARD_CONTACT}-${contact.name}`}
 >
 	{#snippet logo()}
 		<div class="mr-2">
-			<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} variant="sm" />
+			<AvatarWithBadge badge={{ type: 'addressType', address }} {contact} variant="sm" />
 		</div>
 	{/snippet}
 
 	{#snippet title()}
-		<SendContactName {contact} {address} />
+		<SendContactName {address} {contact} />
 	{/snippet}
 
 	{#snippet description()}

@@ -23,6 +23,6 @@
 
 {#if nonNullish(token)}
 	<SendTokenContext {token}>
-		<WalletConnectSendTokenModal {request} {firstTransaction} {listener} {sourceNetwork} />
+		<WalletConnectSendTokenModal {firstTransaction} {listener} {request} {sourceNetwork} />
 	</SendTokenContext>
 {/if}

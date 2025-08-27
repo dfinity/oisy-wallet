@@ -1,5 +1,6 @@
 import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 import * as btcPendingSendTransactionsStatusStore from '$btc/derived/btc-pending-sent-transactions-status.derived';
+import { BtcPrepareSendError } from '$btc/types/btc-send';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
@@ -151,10 +152,15 @@ describe('BtcSendReview', () => {
 	});
 
 	it('should disable the next button and render insufficient funds for fee message', () => {
+		mockBtcPendingSendTransactionsStatusStore();
+
 		const { getByTestId } = render(BtcSendReview, {
 			props: {
 				...props,
-				amount: defaultBalance.toString()
+				utxosFee: {
+					...mockUtxosFee,
+					error: BtcPrepareSendError.InsufficientBalanceForFee
+				}
 			},
 			context: mockContext()
 		});

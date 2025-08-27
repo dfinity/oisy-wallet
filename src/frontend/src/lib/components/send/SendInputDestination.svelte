@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import QrButton from '$lib/components/common/QrButton.svelte';
+	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { MIN_DESTINATION_LENGTH_FOR_ERROR_STATE } from '$lib/constants/app.constants';
@@ -18,16 +19,29 @@
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { getKnownDestination } from '$lib/utils/known-destinations.utils';
 
-	export let destination = '';
-	export let networkId: NetworkId | undefined = undefined;
-	export let invalidDestination = false;
-	export let inputPlaceholder: string;
-	export let isInvalidDestination: (() => boolean) | undefined;
-	export let onQRButtonClick: (() => void) | undefined = undefined;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
-	export let networkContacts: NetworkContacts | undefined = undefined;
+	interface Props {
+		destination: string;
+		networkId?: NetworkId;
+		invalidDestination: boolean;
+		inputPlaceholder: string;
+		onInvalidDestination?: () => boolean;
+		onQRButtonClick?: () => void;
+		knownDestinations?: KnownDestinations;
+		networkContacts?: NetworkContacts;
+	}
 
-	const validate = () => (invalidDestination = isInvalidDestination?.() ?? false);
+	let {
+		destination = $bindable(''),
+		networkId,
+		invalidDestination = $bindable(false),
+		inputPlaceholder,
+		onInvalidDestination,
+		onQRButtonClick,
+		knownDestinations,
+		networkContacts
+	}: Props = $props();
+
+	const validate = () => (invalidDestination = onInvalidDestination?.() ?? false);
 
 	const debounceValidate = debounce(validate);
 
@@ -39,79 +53,100 @@
 
 	const destinationToken = nonNullish(convertContext) ? convertContext.destinationToken : undefined;
 
-	let destinationNetworkId: NetworkId | undefined;
-	$: destinationNetworkId = nonNullish(sendTokenNetworkId)
-		? $sendTokenNetworkId
-		: nonNullish(destinationToken)
-			? $destinationToken?.network.id
-			: undefined;
+	let destinationNetworkId: NetworkId | undefined = $derived(
+		nonNullish(sendTokenNetworkId)
+			? $sendTokenNetworkId
+			: nonNullish(destinationToken)
+				? $destinationToken?.network.id
+				: undefined
+	);
 
-	let focused: boolean;
+	let inputElement: HTMLInputElement | undefined = $state();
+
+	let focused: boolean = $state(false);
 	const onFocus = () => (focused = true);
 	const onBlur = () => (focused = false);
 
-	$: destination, networkId, isInvalidDestination, debounceValidate();
+	$effect(() => {
+		destination;
+		networkId;
+		onInvalidDestination;
+		debounceValidate();
+	});
 
-	let isErrorState = false;
-	$: isErrorState =
-		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE;
+	let isErrorState = $derived(
+		invalidDestination && destination.length > MIN_DESTINATION_LENGTH_FOR_ERROR_STATE
+	);
 
-	let isNotKnownDestination = false;
-	$: isNotKnownDestination =
+	let isNotKnownDestination = $derived(
 		nonNullish(knownDestinations) &&
-		nonNullish(destinationNetworkId) &&
-		isNullish(
-			getKnownDestination({
-				knownDestinations,
-				address: destination,
-				networkId: destinationNetworkId
-			})
-		);
+			nonNullish(destinationNetworkId) &&
+			isNullish(
+				getKnownDestination({
+					knownDestinations,
+					address: destination,
+					networkId: destinationNetworkId
+				})
+			)
+	);
 
-	let isNotNetworkContact = false;
-	$: isNotNetworkContact =
+	let isNotNetworkContact = $derived(
 		nonNullish(networkContacts) &&
-		nonNullish(destinationNetworkId) &&
-		isNullish(
-			getNetworkContact({
-				networkContacts,
-				address: destination,
-				networkId: destinationNetworkId
-			})
-		);
+			nonNullish(destinationNetworkId) &&
+			isNullish(
+				getNetworkContact({
+					networkContacts,
+					address: destination,
+					networkId: destinationNetworkId
+				})
+			)
+	);
 </script>
 
 <div
 	class="rounded-lg border border-solid p-5 text-left duration-300"
 	class:bg-brand-subtle-10={focused}
-	class:border-brand-subtle-20={focused}
 	class:bg-secondary={!focused}
+	class:border-brand-subtle-20={focused}
 	class:border-secondary={!focused}
 >
-	<label for="destination" class="font-bold">
+	<label class="font-bold" for="destination">
 		{$i18n.core.text.to}
 	</label>
 
 	<div class="send-input-destination" class:error={isErrorState}>
 		<InputTextWithAction
 			name="destination"
-			bind:value={destination}
+			autofocus={isDesktop()}
 			placeholder={inputPlaceholder}
 			testId={DESTINATION_INPUT}
-			autofocus={isDesktop()}
+			bind:value={destination}
 			on:focus={onFocus}
 			on:blur={onBlur}
 			on:nnsInput
+			bind:inputElement
 		>
 			{#snippet innerEnd()}
-				{#if nonNullish(onQRButtonClick)}
-					<QrButton on:click={onQRButtonClick} />
-				{/if}
+				<span class="flex gap-1 bg-primary">
+					{#if notEmptyString(destination)}
+						<ButtonReset
+							onclick={() => {
+								destination = '';
+								if (nonNullish(inputElement)) {
+									inputElement.focus();
+								}
+							}}
+						/>
+					{/if}
+					{#if nonNullish(onQRButtonClick)}
+						<QrButton on:click={onQRButtonClick} />
+					{/if}
+				</span>
 			{/snippet}
 		</InputTextWithAction>
 
 		{#if isErrorState}
-			<p transition:slide={SLIDE_DURATION} class="mb-0 mt-4 text-error-primary">
+			<p class="mb-0 mt-4 text-error-primary" transition:slide={SLIDE_DURATION}>
 				{$i18n.send.assertion.invalid_destination_address}
 			</p>
 		{/if}

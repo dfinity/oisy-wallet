@@ -9,26 +9,28 @@
 		onclick: () => void;
 		disabled?: boolean;
 		ariaLabel: string;
-		testId?: string | undefined;
+		testId?: string;
 	}
-	let { icon, label, onclick, disabled = false, testId = undefined, ariaLabel }: Props = $props();
+
+	let { icon, label, onclick, disabled = false, testId, ariaLabel }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <Button
-	{onclick}
 	{ariaLabel}
+	colorStyle="tertiary-main-card"
 	{disabled}
 	loading={$loading}
-	{testId}
-	colorStyle="tertiary-main-card"
+	{onclick}
 	paddingSmall
+	styleClass="py-1 min-w-0"
+	{testId}
 >
-	<div class="flex flex-col items-center justify-center gap-2 lg:flex-row">
+	<div class="flex min-w-0 flex-col items-center justify-center">
 		{@render icon()}
-		<div class="min-w-12 max-w-[72px] break-words text-sm lg:text-base">
+		<span class="block w-full truncate text-xs sm:text-sm 1.5md:text-base">
 			{@render label()}
-		</div>
+		</span>
 	</div>
 </Button>

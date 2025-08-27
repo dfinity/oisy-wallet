@@ -1,24 +1,31 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component, Snippet } from 'svelte';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { isTokenNonFungible } from '$lib/utils/nft.utils';
+	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
 		amount?: bigint;
@@ -30,6 +37,7 @@
 		iconType: 'token' | 'transaction';
 		to?: string;
 		from?: string;
+		tokenId?: number;
 		children?: Snippet;
 		onClick?: () => void;
 	}
@@ -44,26 +52,33 @@
 		iconType = 'transaction',
 		to,
 		from,
+		tokenId,
 		children,
 		onClick
 	}: Props = $props();
 
-	let cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
+	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
-	let iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
+	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
-	let contactAddress: string | undefined = $derived(
+	const contactAddress: string | undefined = $derived(
 		type === 'send' ? to : type === 'receive' ? from : undefined
 	);
 
-	let contact: ContactUi | undefined = $derived(
+	const contact: ContactUi | undefined = $derived(
 		nonNullish(contactAddress)
 			? getContactForAddress({ addressString: contactAddress, contactList: $contacts })
 			: undefined
 	);
 
-	let addressAlias: string | undefined = $derived(
+	const addressAlias: string | undefined = $derived(
 		filterAddressFromContact({ contact, address: contactAddress })?.label
+	);
+
+	const nft = $derived(
+		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
+			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
+			: undefined
 	);
 </script>
 
@@ -86,7 +101,11 @@
 			{#snippet icon()}
 				<div>
 					{#if iconType === 'token'}
-						<TokenLogo data={token} badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} />
+						{#if isTokenNonFungible(token) && nonNullish(nft)}
+							<NftLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} {nft} />
+						{:else}
+							<TokenLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} data={token} />
+						{/if}
 					{:else}
 						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
 					{/if}
@@ -94,15 +113,15 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(cardAmount)}
+				{#if nonNullish(cardAmount) && !isTokenErc721(token)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
 						<Amount
 							amount={cardAmount}
 							decimals={token.decimals}
-							symbol={getTokenDisplaySymbol(token)}
 							formatPositiveAmount
+							symbol={getTokenDisplaySymbol(token)}
 						/>
 					{/if}
 				{/if}
@@ -111,7 +130,7 @@
 			{#snippet description()}
 				<span data-tid="receive-tokens-modal-transaction-timestamp">
 					{#if nonNullish(timestamp)}
-						{formatSecondsToDate({ seconds: Number(timestamp), i18n: $i18n })}
+						{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}
 					{/if}
 				</span>
 				<TransactionStatusComponent {status} />

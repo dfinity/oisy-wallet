@@ -22,7 +22,7 @@
 		});
 	};
 
-	$: $payload, onPayload();
+	$: ($payload, onPayload());
 </script>
 
 {#if $payload?.status === 'executing'}

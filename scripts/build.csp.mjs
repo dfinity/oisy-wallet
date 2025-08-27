@@ -3,7 +3,7 @@
 import { config } from 'dotenv';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { ENV, findHtmlFiles } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
@@ -12,7 +12,10 @@ const buildCsp = (htmlFile) => {
 	// 1. We extract the start script parsed by SvelteKit into the html file
 	const indexHTMLWithoutStartScript = extractStartScript(htmlFile);
 	// 2. We add our custom script loader - we inject it at build time because it would throw an error when developing locally if missing
-	const indexHTMLWithScriptLoader = injectScriptLoader(indexHTMLWithoutStartScript);
+	const indexHTMLWithScriptLoader = injectScriptLoader({
+		content: indexHTMLWithoutStartScript,
+		filePath: htmlFile
+	});
 	// 3. Replace preloaders
 	const indexHTMLWithPreloaders = injectLinkPreloader(indexHTMLWithScriptLoader);
 	// 4. remove the content-security-policy tag injected by SvelteKit
@@ -29,16 +32,26 @@ const removeDefaultCspTag = (indexHtml) =>
 /**
  * We need a script loader to implement a proper Content Security Policy. See `updateCSP` doc for more information.
  */
-const injectScriptLoader = (indexHtml) =>
-	indexHtml.replace(
+const injectScriptLoader = ({ content, filePath }) => {
+	// We need to provide the relative path to the script; otherwise, it will be resolved from the root at runtime.
+	// This isn't an issue if all loaders are consistent and use the same name,
+	// but it could become a problem if Svelte changes its approach or we start hashing the script names.
+	const buildDir = join(process.cwd(), 'build');
+	const scriptName = 'main.js';
+
+	const parentFolders = relative(buildDir, dirname(filePath));
+	const loaderSrc = `${parentFolders !== '' ? `/${parentFolders}/` : ''}${scriptName}`;
+
+	return content.replace(
 		'<!-- SCRIPT_LOADER -->',
 		`<script sveltekit-loader>
       const loader = document.createElement("script");
       loader.type = "module";
-      loader.src = "main.js";
+      loader.src = "${loaderSrc}";
       document.head.appendChild(loader);
     </script>`
 	);
+};
 
 /**
  * Calculating the sh256 value for the preloaded link and whitelisting these seem not to be supported by the Content-Security-Policy.
@@ -168,12 +181,14 @@ const updateCSP = (indexHtml) => {
 
 	const coingeckoApiConnectSrc = 'https://pro-api.coingecko.com';
 
+	const paraswapApiConnectSrc = 'https://api.paraswap.io';
+
 	const kongSwapApiConnectSrc = 'https://api.kongswap.io';
 
 	const plausibleApiConnectSrc = 'https://plausible.io/api/event';
 
 	const walletConnectSrc =
-		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org';
+		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org https://pulse.walletconnect.org';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
 	const onramperConnectFrameSrc = 'https://buy.onramper.dev https://buy.onramper.com';
@@ -189,8 +204,8 @@ const updateCSP = (indexHtml) => {
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc};
-        img-src 'self' data:;
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc} ${paraswapApiConnectSrc};
+        img-src 'self' https: ipfs: data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
         script-src 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};

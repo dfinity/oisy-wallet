@@ -26,10 +26,10 @@
 	export let tokenData: Partial<AddTokenData>;
 
 	let networkName: string | undefined = network?.name;
-	$: networkName,
+	$: (networkName,
 		(network = nonNullish(networkName)
 			? $networks.find(({ name }) => name === networkName)
-			: undefined);
+			: undefined));
 
 	let isIcpNetwork = false;
 	$: isIcpNetwork = isNetworkIdICP(network?.id);
@@ -43,7 +43,7 @@
 	let isSolanaNetwork = false;
 	$: isSolanaNetwork = isNetworkIdSolana(network?.id);
 
-	let { ledgerCanisterId, indexCanisterId, erc20ContractAddress, splTokenAddress } = tokenData;
+	let { ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } = tokenData;
 
 	// Since we persist the values of relevant variables when switching networks, this ensures that
 	// only the data related to the selected network is passed.
@@ -54,7 +54,7 @@
 				nonNullish(indexCanisterId) && notEmptyString(indexCanisterId) ? indexCanisterId : undefined
 		};
 	} else if (isEthereumNetwork || isEvmNetwork) {
-		tokenData = { erc20ContractAddress };
+		tokenData = { ethContractAddress };
 	} else if (isSolanaNetwork) {
 		tokenData = { splTokenAddress };
 	} else {
@@ -63,8 +63,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	let invalidErc20 = true;
-	$: invalidErc20 = isNullishOrEmpty(erc20ContractAddress);
+	let invalidEth = true;
+	$: invalidEth = isNullishOrEmpty(ethContractAddress);
 
 	let invalidIc = true;
 	$: invalidIc = isNullishOrEmpty(ledgerCanisterId);
@@ -76,7 +76,7 @@
 	$: invalid = isIcpNetwork
 		? invalidIc
 		: isEthereumNetwork || isEvmNetwork
-			? invalidErc20
+			? invalidEth
 			: isSolanaNetwork
 				? invalidSpl
 				: true;
@@ -91,16 +91,16 @@
 	).filter(({ id }) => !isNetworkIdBitcoin(id));
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
+<form class="min-h-auto" method="POST" on:submit|preventDefault={() => dispatch('icNext')} in:fade>
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
-			<AddTokenByNetworkDropdown bind:networkName {availableNetworks} />
+			<AddTokenByNetworkDropdown {availableNetworks} bind:networkName />
 		{/if}
 
 		{#if isIcpNetwork}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
 		{:else if isEthereumNetwork || isEvmNetwork}
-			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
+			<EthAddTokenForm on:icBack bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />
 		{:else if nonNullish($selectedNetwork)}

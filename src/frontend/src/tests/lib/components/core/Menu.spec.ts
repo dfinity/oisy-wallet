@@ -3,7 +3,9 @@ import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
 	AUTH_LICENSE_LINK,
+	LOCK_BUTTON,
 	LOGIN_BUTTON,
+	LOGOUT_BUTTON,
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON,
 	NAVIGATION_MENU_DOC_BUTTON,
@@ -18,8 +20,11 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
-import en from '$tests/mocks/i18n.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
+
+vi.mock('$env/lock-screen.env', () => ({
+	LOCK_SCREEN_ENABLED: false
+}));
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
@@ -47,7 +52,7 @@ describe('Menu', () => {
 		mockAuthSignedIn(true);
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 		vi.spyOn(toastsStore, 'toastsShow');
-		setPrivacyMode(false);
+		setPrivacyMode({ enabled: false });
 	});
 
 	const mockUserData = (powers: Array<string>): UserData => ({
@@ -128,46 +133,6 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemReferralButtonSelector });
 	});
 
-	it('enables privacy mode and show toast', async () => {
-		const settingsModule = await import('$lib/stores/settings.store');
-		settingsModule.privacyModeStore.subscribe = (fn) => {
-			fn({ enabled: false });
-			return () => {};
-		};
-
-		await openMenu();
-		const button = (await waitForElement({
-			selector: menuItemPrivacyModeButtonSelector
-		})) as HTMLButtonElement;
-		button.click();
-
-		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
-			text: en.navigation.text.privacy_mode_enabled,
-			level: 'info',
-			duration: 2000
-		});
-	});
-
-	it('disables privacy mode and show toast', async () => {
-		const settingsModule = await import('$lib/stores/settings.store');
-		settingsModule.privacyModeStore.subscribe = (fn) => {
-			fn({ enabled: true });
-			return () => {};
-		};
-
-		await openMenu();
-		const button = (await waitForElement({
-			selector: menuItemPrivacyModeButtonSelector
-		})) as HTMLButtonElement;
-		button.click();
-
-		expect(toastsStore.toastsShow).toHaveBeenCalledWith({
-			text: en.navigation.text.privacy_mode_disabled,
-			level: 'info',
-			duration: 2000
-		});
-	});
-
 	it('should render the logged out version if not signed in', async () => {
 		mockAuthSignedIn(false);
 
@@ -177,5 +142,27 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemSupportButtonSelector });
 		await waitForElement({ selector: loginOrCreateButton });
 		await waitForElement({ selector: authLicenseLink });
+	});
+
+	it('should show direct logout button when LOCK_SCREEN_ENABLED is false', async () => {
+		vi.doMock('$env/lock-screen.env', () => ({
+			LOCK_SCREEN_ENABLED: false
+		}));
+
+		const { default: MenuWithLockDisabled } = await import('$lib/components/core/Menu.svelte');
+
+		({ container } = render(MenuWithLockDisabled));
+		const menuButton = container.querySelector(menuButtonSelector) as HTMLElement;
+
+		expect(menuButton).toBeInTheDocument();
+
+		menuButton?.click();
+
+		const logoutButton = await screen.findByTestId(LOGOUT_BUTTON);
+
+		expect(logoutButton).toBeInTheDocument();
+		expect(logoutButton).toHaveTextContent(/log out/i);
+
+		expect(screen.queryByTestId(LOCK_BUTTON)).not.toBeInTheDocument();
 	});
 });

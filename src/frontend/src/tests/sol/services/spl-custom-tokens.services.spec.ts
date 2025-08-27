@@ -12,7 +12,6 @@ import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
-import { expect } from 'vitest';
 
 vi.mock('$lib/api/backend.api', () => ({
 	setManyCustomTokens: vi.fn()
@@ -66,7 +65,8 @@ describe('spl-custom-tokens.services', () => {
 						decimals: toNullable(6),
 						symbol: toNullable('TK1')
 					}
-				}
+				},
+				section: toNullable()
 			},
 			{
 				enabled: true,
@@ -77,7 +77,8 @@ describe('spl-custom-tokens.services', () => {
 						decimals: toNullable(6),
 						symbol: toNullable('TK2')
 					}
-				}
+				},
+				section: toNullable()
 			},
 			{
 				enabled: true,
@@ -88,7 +89,8 @@ describe('spl-custom-tokens.services', () => {
 						decimals: toNullable(6),
 						symbol: toNullable('TK3')
 					}
-				}
+				},
+				section: toNullable()
 			}
 		];
 

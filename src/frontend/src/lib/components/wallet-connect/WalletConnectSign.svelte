@@ -38,6 +38,6 @@
 	{#if nonNullish(ethChainId)}
 		<WalletConnectSignModal {request} bind:listener />
 	{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
-		<SolWalletConnectSignModal {request} network={sourceSolNetwork} bind:listener />
+		<SolWalletConnectSignModal network={sourceSolNetwork} {request} bind:listener />
 	{/if}
 {/if}

@@ -18,10 +18,9 @@
 	let { fromRoute }: Props = $props();
 
 	let twinToken = $derived(($pageToken as OptionIcCkToken)?.twinToken);
-
 	let ckToken = $derived($pageToken as OptionIcCkToken);
 
-	let undeletableToken = $derived(
+	let knownIcrcToken = $derived(
 		nonNullish($pageToken) && isTokenIcrc($pageToken)
 			? $allKnownIcrcTokensLedgerCanisterIds.some(
 					(ledgerCanisterId) => $pageToken.ledgerCanisterId === ledgerCanisterId
@@ -30,7 +29,12 @@
 	);
 </script>
 
-<TokenModal token={$pageToken} isDeletable={!undeletableToken} {fromRoute}>
+<TokenModal
+	{fromRoute}
+	isDeletable={!knownIcrcToken}
+	isEditable={!knownIcrcToken}
+	token={$pageToken}
+>
 	{#if nonNullish(twinToken)}
 		<ModalListItem>
 			{#snippet label()}
@@ -40,9 +44,9 @@
 			{#snippet content()}
 				<output>{twinToken.name}</output>
 				<Logo
-					src={twinToken.icon}
 					alt={replacePlaceholders($i18n.core.alt.logo, { $name: twinToken.name })}
 					color="white"
+					src={twinToken.icon}
 				/>
 			{/snippet}
 		</ModalListItem>
@@ -58,28 +62,9 @@
 				{#snippet content()}
 					<output class="break-all">{ckToken.ledgerCanisterId}</output>
 					<Copy
-						value={ckToken.ledgerCanisterId}
+						inline
 						text={$i18n.tokens.import.text.ledger_canister_id_copied}
-						inline
-					/>
-				{/snippet}
-			</ModalListItem>
-		{/if}
-
-		{#if nonNullish(ckToken.indexCanisterId)}
-			{@const { indexCanisterId: safeIndexCanisterId } = ckToken}
-
-			<ModalListItem>
-				{#snippet label()}
-					{$i18n.tokens.import.text.index_canister_id}
-				{/snippet}
-
-				{#snippet content()}
-					<output>{safeIndexCanisterId}</output>
-					<Copy
-						value={safeIndexCanisterId}
-						text={$i18n.tokens.import.text.index_canister_id_copied}
-						inline
+						value={ckToken.ledgerCanisterId}
 					/>
 				{/snippet}
 			</ModalListItem>
@@ -96,9 +81,9 @@
 				{#snippet content()}
 					<output>{safeMinterCanisterId}</output>
 					<Copy
-						value={safeMinterCanisterId}
-						text={$i18n.tokens.import.text.minter_canister_id_copied}
 						inline
+						text={$i18n.tokens.import.text.minter_canister_id_copied}
+						value={safeMinterCanisterId}
 					/>
 				{/snippet}
 			</ModalListItem>

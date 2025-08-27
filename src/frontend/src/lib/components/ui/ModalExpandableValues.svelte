@@ -1,16 +1,26 @@
 <script lang="ts">
 	import { Collapsible } from '@dfinity/gix-components';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+
+	interface Props {
+		listHeader: Snippet;
+		listItems: Snippet;
+	}
+
+	let { listHeader, listItems }: Props = $props();
 </script>
 
-<div in:fade class="modal-expandable-values">
+<div class="modal-expandable-values" in:fade>
 	<Collapsible>
-		<!-- The width of the item below should be 100% - collapsible expand button width (1.5rem) -->
-		<div class="flex w-[calc(100%-1.5rem)] items-center" slot="header">
-			<slot name="list-header" />
-		</div>
+		{#snippet header()}
+			<!-- The width of the item below should be 100% - collapsible expand button width (1.5rem) -->
+			<div class="flex w-[calc(100%-1.5rem)] items-center">
+				{@render listHeader()}
+			</div>
+		{/snippet}
 
-		<slot name="list-items" />
+		{@render listItems()}
 	</Collapsible>
 </div>
 

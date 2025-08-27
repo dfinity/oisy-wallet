@@ -126,7 +126,7 @@
 
 		// Stop the worker if it was started
 		if (powWorker) {
-			powWorker.stop();
+			onDestroy(() => powWorker?.destroy());
 		}
 	});
 </script>
@@ -141,10 +141,10 @@
 					<div class="banner-container mb-8 block">
 						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
 							<ImgBanner
-								{src}
 								alt={replacePlaceholders(replaceOisyPlaceholders($i18n.init.alt.loader_banner), {
 									$theme: $themeStore ?? 'light'
 								})}
+								{src}
 								styleClass="aspect-auto"
 							/>
 						{/await}

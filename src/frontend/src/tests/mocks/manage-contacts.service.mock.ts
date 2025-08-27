@@ -1,7 +1,6 @@
 import * as manageContactsService from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
-import { vi } from 'vitest';
 
 export const mockManageContactsService = () => {
 	// Mock createContact

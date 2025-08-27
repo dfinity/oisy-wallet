@@ -81,7 +81,7 @@
 	 * Modal
 	 */
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsSign> = [
 		{
 			name: WizardStepsSign.REVIEW,
 			title: $i18n.send.text.review
@@ -92,8 +92,8 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsSign> | undefined;
+	let modal: WizardModal<WizardStepsSign>;
 
 	const close = () => modalStore.close();
 
@@ -132,10 +132,12 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	<WalletConnectModalTitle slot="title"
-		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
-	>
+<WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
+	{#snippet title()}
+		<WalletConnectModalTitle>
+			{$i18n.wallet_connect.text.sign_message}
+		</WalletConnectModalTitle>
+	{/snippet}
 
 	{#if currentStep?.name === WizardStepsSign.SIGNING}
 		<InProgressWizard
@@ -145,11 +147,11 @@
 	{:else}
 		<SolWalletConnectSignReview
 			{amount}
-			destination={destination ?? ''}
 			{data}
+			destination={destination ?? ''}
+			onApprove={sign}
+			onReject={reject}
 			{token}
-			on:icApprove={sign}
-			on:icReject={reject}
 		/>
 	{/if}
 </WizardModal>

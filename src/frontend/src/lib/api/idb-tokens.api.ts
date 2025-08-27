@@ -7,7 +7,7 @@ import { nullishSignOut } from '$lib/services/auth.services';
 import type { DeleteIdbTokenParams, SetIdbTokensParams } from '$lib/types/idb-tokens';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
+import { clear, createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
 const idbTokensStore = (key: string): UseStore =>
@@ -16,6 +16,10 @@ const idbTokensStore = (key: string): UseStore =>
 		: ({} as unknown as UseStore);
 
 const idbIcTokensStore = idbTokensStore(ICP_NETWORK_SYMBOL.toLowerCase());
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+const idbEthTokensStoreDeprecated = idbTokensStore(
+	`${ETHEREUM_NETWORK_SYMBOL.toLowerCase()}-deprecated`
+);
 const idbEthTokensStore = idbTokensStore(ETHEREUM_NETWORK_SYMBOL.toLowerCase());
 const idbSolTokensStore = idbTokensStore(SOLANA_MAINNET_NETWORK_SYMBOL.toLowerCase());
 
@@ -37,7 +41,11 @@ export const setIdbTokensStore = async <T extends CustomToken | UserToken>({
 export const setIdbIcTokens = (params: SetIdbTokensParams<CustomToken>): Promise<void> =>
 	setIdbTokensStore({ ...params, idbTokensStore: idbIcTokensStore });
 
-export const setIdbEthTokens = (params: SetIdbTokensParams<UserToken>): Promise<void> =>
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+export const setIdbEthTokensDeprecated = (params: SetIdbTokensParams<UserToken>): Promise<void> =>
+	setIdbTokensStore({ ...params, idbTokensStore: idbEthTokensStoreDeprecated });
+
+export const setIdbEthTokens = (params: SetIdbTokensParams<CustomToken>): Promise<void> =>
 	setIdbTokensStore({ ...params, idbTokensStore: idbEthTokensStore });
 
 export const setIdbSolTokens = (params: SetIdbTokensParams<CustomToken>): Promise<void> =>
@@ -48,9 +56,15 @@ export const getIdbIcTokens = (
 ): Promise<SetIdbTokensParams<CustomToken>['tokens'] | undefined> =>
 	get(principal.toText(), idbIcTokensStore);
 
-export const getIdbEthTokens = (
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+export const getIdbEthTokensDeprecated = (
 	principal: Principal
 ): Promise<SetIdbTokensParams<UserToken>['tokens'] | undefined> =>
+	get(principal.toText(), idbEthTokensStoreDeprecated);
+
+export const getIdbEthTokens = (
+	principal: Principal
+): Promise<SetIdbTokensParams<CustomToken>['tokens'] | undefined> =>
 	get(principal.toText(), idbEthTokensStore);
 
 export const getIdbSolTokens = (
@@ -61,13 +75,18 @@ export const getIdbSolTokens = (
 export const deleteIdbIcTokens = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbIcTokensStore);
 
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+export const deleteIdbEthTokensDeprecated = (principal: Principal): Promise<void> =>
+	del(principal.toText(), idbEthTokensStoreDeprecated);
+
 export const deleteIdbEthTokens = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbEthTokensStore);
 
 export const deleteIdbSolTokens = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbSolTokensStore);
 
-export const deleteIdbEthToken = async ({
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+export const deleteIdbEthTokenDeprecated = async ({
 	identity,
 	token
 }: DeleteIdbTokenParams<UserToken>): Promise<void> => {
@@ -76,13 +95,49 @@ export const deleteIdbEthToken = async ({
 		return;
 	}
 
+	const currentTokens = await getIdbEthTokensDeprecated(identity.getPrincipal());
+
+	if (nonNullish(currentTokens)) {
+		await setIdbEthTokensDeprecated({
+			identity,
+			tokens: currentTokens.filter(({ contract_address, chain_id }) =>
+				token.chain_id === chain_id ? token.contract_address !== contract_address : true
+			)
+		});
+	}
+};
+
+export const deleteIdbEthToken = async ({
+	identity,
+	token
+}: DeleteIdbTokenParams<CustomToken>): Promise<void> => {
+	if (isNullish(identity)) {
+		await nullishSignOut();
+		return;
+	}
+
+	const { token: tokenToDelete } = token;
+
+	if (!('Erc20' in tokenToDelete)) {
+		return;
+	}
+
+	const {
+		Erc20: { token_address: tokenToDeleteAddress, chain_id: tokenToDeleteChainId }
+	} = tokenToDelete;
+
 	const currentTokens = await getIdbEthTokens(identity.getPrincipal());
 
 	if (nonNullish(currentTokens)) {
 		await setIdbEthTokens({
 			identity,
-			tokens: currentTokens.filter(({ contract_address, chain_id }) =>
-				token.chain_id === chain_id ? token.contract_address !== contract_address : true
+			tokens: currentTokens.filter(({ token: savedToken }) =>
+				'Erc20' in savedToken
+					? !(
+							savedToken.Erc20.token_address === tokenToDeleteAddress &&
+							savedToken.Erc20.chain_id === tokenToDeleteChainId
+						)
+					: true
 			)
 		});
 	}
@@ -159,3 +214,12 @@ export const deleteIdbSolToken = async ({
 		});
 	}
 };
+
+export const clearIdbIcTokens = (): Promise<void> => clear(idbIcTokensStore);
+
+// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+export const clearIdbEthTokensDeprecated = (): Promise<void> => clear(idbEthTokensStoreDeprecated);
+
+export const clearIdbEthTokens = (): Promise<void> => clear(idbEthTokensStore);
+
+export const clearIdbSolTokens = (): Promise<void> => clear(idbSolTokensStore);

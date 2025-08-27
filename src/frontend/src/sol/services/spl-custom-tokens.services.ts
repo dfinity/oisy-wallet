@@ -17,7 +17,7 @@ export const saveCustomTokens = async ({
 	identity,
 	tokens
 }: SaveTokensParams<SaveSplCustomToken>) => {
-	progress(ProgressStepsAddToken.SAVE);
+	progress?.(ProgressStepsAddToken.SAVE);
 
 	const customTokens: CustomToken[] = tokens.map((token) =>
 		toCustomToken({
@@ -32,7 +32,7 @@ export const saveCustomTokens = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	progress(ProgressStepsAddToken.UPDATE_UI);
+	progress?.(ProgressStepsAddToken.UPDATE_UI);
 
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled, id }) => !enabled && nonNullish(id));

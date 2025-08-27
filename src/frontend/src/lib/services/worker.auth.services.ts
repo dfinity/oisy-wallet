@@ -7,30 +7,31 @@ export const initAuthWorker = async () => {
 	const authWorker: Worker = new AuthWorker.default();
 
 	authWorker.onmessage = async ({
-		data
+		data: dataMsg
 	}: MessageEvent<PostMessage<PostMessageDataResponseAuth>>) => {
-		const { msg, data: value } = data;
+		const { msg, data } = dataMsg;
 
 		switch (msg) {
 			case 'signOutIdleTimer':
 				await idleSignOut();
 				return;
 			case 'delegationRemainingTime':
-				authRemainingTimeStore.set(value?.authRemainingTime);
+				authRemainingTimeStore.set(data?.authRemainingTime);
 				return;
 		}
 	};
 
+	// TODO Investigate extra 'signOutIdleTimer' tick after lock
+	// syncAuthIdle stop the idle timer when the user is logOut or locked
+
 	return {
-		syncAuthIdle: (auth: AuthStoreData) => {
-			if (!auth.identity) {
+		syncAuthIdle: ({ auth, locked = false }: { auth: AuthStoreData; locked?: boolean }) => {
+			if (locked || !auth.identity) {
 				authWorker.postMessage({ msg: 'stopIdleTimer' });
 				return;
 			}
 
-			authWorker.postMessage({
-				msg: 'startIdleTimer'
-			});
+			authWorker.postMessage({ msg: 'startIdleTimer' });
 		}
 	};
 };

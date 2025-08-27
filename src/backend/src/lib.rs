@@ -24,11 +24,12 @@ use shared::{
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
+            BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{Contact, CreateContactRequest, UpdateContactRequest},
+        contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -38,16 +39,16 @@ use shared::{
         },
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
-            BtcAddPendingTransactionResult, BtcGetPendingTransactionsResult,
-            BtcSelectUserUtxosFeeResult, CreateContactResult, CreatePowChallengeResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
+            BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
+            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
+            UpdateContactResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
         },
-        snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
@@ -65,6 +66,7 @@ use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::assert_token_enabled_is_some,
+    bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     types::{ContactMap, PowChallengeMap},
@@ -196,6 +198,10 @@ pub fn init(arg: Arg) {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
@@ -216,6 +222,9 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
@@ -371,6 +380,34 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+
+/// Retrieves the current fee percentiles for Bitcoin transactions from the cache
+/// for the specified network. Fee percentiles are measured in millisatoshi per byte
+/// and are periodically updated in the background.
+///
+/// # Returns
+/// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
+/// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+///
+/// # Errors
+/// - `InternalError`: If fee percentiles are not available in the cache for the requested network
+///
+/// # Note
+/// This function only returns data from the in-memory cache and doesn't make any calls
+/// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
+/// an error is returned rather than fetching fresh data.
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub async fn btc_get_current_fee_percentiles(
+    params: BtcGetFeePercentilesRequest,
+) -> BtcGetFeePercentilesResult {
+    match get_current_fee_percentiles(params.network).await {
+        Ok(fee_percentiles) => Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into(),
+        Err(err) => {
+            BtcGetFeePercentilesResult::Err(SelectedUtxosFeeError::InternalError { msg: err })
+        }
+    }
+}
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
 ///
@@ -873,19 +910,6 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
     })
 }
 
-/// Saves a snapshot of the user's account.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)] // Canister API methods are always pass by value.
-pub fn set_snapshot(snapshot: UserSnapshot) {
-    todo!("TODO: Set snapshot to: {:?}", snapshot);
-}
-/// Gets the caller's last snapshot.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_snapshot() -> Option<UserSnapshot> {
-    todo!()
-}
-
 /// Creates a new contact for the caller.
 ///
 /// # Errors
@@ -910,14 +934,7 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    let contact = Contact {
-        id: request.id,
-        name: request.name,
-        addresses: request.addresses,
-        update_timestamp_ns: request.update_timestamp_ns,
-    };
-
-    let result = contacts::update_contact(contact);
+    let result = contacts::update_contact(request);
     result.into()
 }
 
@@ -942,7 +959,7 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 /// # Returns
 /// * `Ok(GetContactResult)` - The requested contact if found
 /// # Errors
-/// * `ContactNotFound` - If no contact for the proivided contact_id could be found
+/// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_contact(contact_id: u64) -> GetContactResult {

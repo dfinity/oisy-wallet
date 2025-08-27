@@ -68,7 +68,7 @@
 				: undefined;
 	};
 
-	$: $payload, onPayload();
+	$: ($payload, onPayload());
 
 	type Text = { title: string; content: string } | undefined;
 
@@ -125,14 +125,14 @@
 {:else if nonNullish(text)}
 	{@const { title, content } = text}
 
-	<form in:fade on:submit|preventDefault={onApprove} method="POST">
+	<form method="POST" on:submit|preventDefault={onApprove} in:fade>
 		<h2 class="mb-4 text-center">{title}</h2>
 
 		<SignerOrigin payload={$payload} />
 
 		<SignerConsentMessageWarning {consentInfo} />
 
-		<div class="msg mb-6 rounded-lg border border-off-white px-8 py-4">
+		<div class="msg mb-6 break-all rounded-lg border border-off-white px-8 py-4">
 			<Markdown text={content} />
 		</div>
 

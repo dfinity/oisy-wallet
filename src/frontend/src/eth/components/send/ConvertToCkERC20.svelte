@@ -31,17 +31,17 @@
 </script>
 
 <ConvertETH
-	nativeTokenId={$ethereumTokenId}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
 		$ckErc20: convertToSymbol
 	})}
+	nativeTokenId={$ethereumTokenId}
 >
-	<IconCkConvert size="28" slot="icon" />
+	<IconCkConvert slot="icon" size="24" />
 	<span>{convertToSymbol}</span>
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckToken) && nonNullish($pageToken)}
 	<FeeStoreContext token={$ethereumToken}>
-		<ConvertModal sourceToken={$pageToken} destinationToken={ckToken} />
+		<ConvertModal destinationToken={ckToken} sourceToken={$pageToken} />
 	</FeeStoreContext>
 {/if}

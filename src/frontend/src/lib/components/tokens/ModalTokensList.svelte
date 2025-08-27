@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { IconExpandMore } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
-	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
@@ -42,30 +44,31 @@
 	let noTokensMatch = $derived($filteredTokens.length === 0);
 </script>
 
-<div class="flex items-end justify-between">
-	<div class="mr-3 flex-1">
+<div>
+	<div class="input-field condensed mb-4 flex-1">
 		<InputSearch
-			bind:filter
-			showResetButton={notEmptyString(filter)}
-			placeholder={$i18n.tokens.placeholder.search_token}
 			autofocus={isDesktop()}
+			placeholder={$i18n.tokens.placeholder.search_token}
+			showResetButton={notEmptyString(filter)}
+			bind:filter
 		/>
 	</div>
 
-	<button
-		class="dropdown-button h-[3.375rem] rounded-lg border border-solid border-primary"
-		class:hover:border-brand-primary={!networkSelectorViewOnly}
-		disabled={networkSelectorViewOnly}
-		onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
-		aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
-	>
-		<NetworkSwitcherLogo network={$filterNetwork} />
-
-		<span class="hidden md:block">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
-	</button>
+	<div class="flex items-center">
+		<button
+			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
+			class:hover:border-brand-primary={networkSelectorViewOnly}
+			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+			disabled={networkSelectorViewOnly}
+			onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
+		>
+			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
+			<IconExpandMore size="24" />
+		</button>
+	</div>
 </div>
 
-<div class="my-6 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
+<div class="my-4 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
 	<div class="gap-6 overflow-y-auto overscroll-contain">
 		<TokensSkeletons {loading}>
 			{#if noTokensMatch}
@@ -77,13 +80,13 @@
 					</p>
 				{/if}
 			{:else}
-				<ul class="list-none">
+				<List noPadding>
 					{#each $filteredTokens as token (token.id)}
-						<li class="logo-button-list-item">
+						<ListItem styleClass="first-of-type:border-t-1">
 							{@render tokenListItem(token, () => dispatch('icTokenButtonClick', token))}
-						</li>
+						</ListItem>
 					{/each}
-				</ul>
+				</List>
 			{/if}
 		</TokensSkeletons>
 	</div>

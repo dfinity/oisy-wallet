@@ -28,10 +28,10 @@
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { modalIcToken, modalIcTokenData, modalIcTransaction } from '$lib/derived/modal.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
-	import type { OptionToken } from '$lib/types/token';
+	import type { OptionToken, Token } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckEthereum: boolean;
@@ -56,7 +56,10 @@
 		}));
 
 	let noTransactions = false;
-	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
+	$: noTransactions = nonNullish($pageToken) && $icTransactionsStore?.[$pageToken.id] === null;
+
+	let token: Token;
+	$: token = $pageToken ?? ICP_TOKEN;
 </script>
 
 <Info />
@@ -76,14 +79,14 @@
 <IcTransactionsSkeletons>
 	<svelte:component
 		this={additionalListener}
-		token={$token ?? ICP_TOKEN}
 		ckEthereumNativeToken={$ckEthereumNativeToken}
+		{token}
 	>
 		{#if $icTransactions.length > 0}
-			<IcTransactionsScroll token={$token ?? ICP_TOKEN}>
+			<IcTransactionsScroll {token}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction transaction={transaction.data} token={$token ?? ICP_TOKEN} />
+						<IcTransaction {token} transaction={transaction.data} />
 					</li>
 				{/each}
 			</IcTransactionsScroll>
@@ -100,7 +103,7 @@
 </IcTransactionsSkeletons>
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
-	<IcTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<IcTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalIcToken}
 	<IcTokenModal fromRoute={$modalIcTokenData} />
 {/if}
