@@ -6,8 +6,7 @@ use ic_verifiable_credentials::issuer_api::CredentialSpec;
 use serde::Serialize;
 
 use super::{verifiable_credential::CredentialType, Timestamp};
-use crate::types::{settings::Settings, Version};
-use crate::types::agreement::Agreements;
+use crate::types::{agreement::Agreements, settings::Settings, Version};
 
 pub mod impls;
 
