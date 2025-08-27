@@ -95,7 +95,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				}
 
 				// If block_height is null (unconfirmed/pending), include the transaction
-				if (transaction.block_height === null) {
+				if (isNullish(transaction.block_height)) {
 					return true;
 				}
 
