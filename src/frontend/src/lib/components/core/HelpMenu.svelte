@@ -17,6 +17,10 @@
 		NAVIGATION_MENU_DOC_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 
 	interface Props {
 		visible?: boolean;
@@ -81,4 +85,14 @@
 
 		<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
 	</div>
+
+	{#if NEW_AGREEMENTS_ENABLED}
+		<Hr />
+
+		<div class="mt-2 flex gap-2 text-nowrap text-xs text-tertiary">
+			<TermsOfUseLink />
+			<PrivacyPolicyLink />
+			<LicenseLink />
+		</div>
+	{/if}
 </Popover>
