@@ -1,4 +1,16 @@
 import type { ContactImage } from '$declarations/backend/backend.did';
+import {
+	TRACK_AVATAR_DELETE_ERROR,
+	TRACK_AVATAR_DELETE_SUCCESS,
+	TRACK_AVATAR_UPDATE_ERROR,
+	TRACK_AVATAR_UPDATE_SUCCESS,
+	TRACK_CONTACT_CREATE_ERROR,
+	TRACK_CONTACT_CREATE_SUCCESS,
+	TRACK_CONTACT_DELETE_ERROR,
+	TRACK_CONTACT_DELETE_SUCCESS,
+	TRACK_CONTACT_UPDATE_ERROR,
+	TRACK_CONTACT_UPDATE_SUCCESS
+} from '$lib/constants/analytics.contants';
 import { AddressBookSteps } from '$lib/enums/progress-steps';
 import { wrapCallWith } from '$lib/services/utils.services';
 import {
@@ -14,18 +26,6 @@ import type { Identity } from '@dfinity/agent';
 import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import {
-	TRACK_CONTACT_CREATE_ERROR,
-	TRACK_CONTACT_CREATE_SUCCESS,
-	TRACK_CONTACT_DELETE_ERROR,
-	TRACK_CONTACT_DELETE_SUCCESS,
-	TRACK_CONTACT_UPDATE_ERROR,
-	TRACK_CONTACT_UPDATE_SUCCESS,
-	TRACK_AVATAR_UPDATE_SUCCESS,
-	TRACK_AVATAR_UPDATE_ERROR,
-	TRACK_AVATAR_DELETE_SUCCESS,
-	TRACK_AVATAR_DELETE_ERROR
-} from '$lib/constants/analytics.contants';
 
 export interface AddressBookDeps {
 	i18n: I18n;
@@ -77,7 +77,7 @@ export const makeController = (deps: AddressBookDeps) => {
 	const callUpdateContact = withState<UpdateContactParams, ContactUi>(
 		wrapCallWith({
 			methodToCall: (params: { contact: ContactUi; identity: Identity }) =>
-			deps.updateContact(params),
+				deps.updateContact(params),
 			toastErrorMessage: deps.i18n.contact.error.update,
 			trackEventNames: { success: TRACK_CONTACT_UPDATE_SUCCESS, error: TRACK_CONTACT_UPDATE_ERROR },
 			identity: deps.identity
@@ -115,7 +115,7 @@ export const makeController = (deps: AddressBookDeps) => {
 		const callUpdateAvatar = withState<UpdateContactParams, ContactUi>(
 			wrapCallWith({
 				methodToCall: (params: { contact: ContactUi; identity: Identity }) =>
-				deps.updateContact({ ...params, contact: { ...params.contact, image } }),
+					deps.updateContact({ ...params, contact: { ...params.contact, image } }),
 				toastErrorMessage: deps.i18n.contact.error.update,
 				trackEventNames: tracking,
 				identity: deps.identity
@@ -160,7 +160,6 @@ export const makeController = (deps: AddressBookDeps) => {
 
 		const addresses = contact.addresses.filter((_, i) => i !== index);
 		await callUpdateContact({ contact: { ...contact, addresses } });
-		currentAddressIndex.set(undefined);
 		return { next: AddressBookSteps.EDIT_CONTACT as const };
 	};
 

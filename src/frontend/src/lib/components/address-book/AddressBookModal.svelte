@@ -316,7 +316,8 @@
 			onDelete={async () => {
 				if (nonNullish($currentAddressIndex)) {
 					const res = await controller?.handleDeleteAddress($currentAddressIndex);
-					gotoStep(res?.next ?? AddressBookSteps.EDIT_CONTACT);
+					currentAddressIndex.set(undefined);
+					gotoStep(AddressBookSteps.EDIT_CONTACT);
 				}
 			}}
 		/>
@@ -390,6 +391,7 @@
 		onDelete={async () => {
 			if (nonNullish($currentAddressIndex)) {
 				const res = await controller?.handleDeleteAddress($currentAddressIndex);
+				currentAddressIndex.set(undefined);
 				gotoStep(res?.next ?? AddressBookSteps.EDIT_CONTACT);
 			}
 		}}
@@ -401,10 +403,12 @@
 		onCancel={() => {
 			isDeletingContact.set(false);
 		}}
-		onDelete={() => {
+		onDelete={async () => {
 			isDeletingContact.set(false);
-			if (nonNullish($currentContact)) {
-				controller?.handleDeleteContact($currentContact.id);
+			const id = $currentContact?.id;
+			if (nonNullish(id)) {
+				const res = await controller?.handleDeleteContact(id);
+				gotoStep(res?.next ?? AddressBookSteps.ADDRESS_BOOK);
 			}
 		}}
 	/>
