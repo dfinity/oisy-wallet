@@ -247,7 +247,7 @@
 			</TokenInput>
 		</div>
 
-		<SwapSlippage bind:slippageValue />
+		<SwapSlippage maxSlippageInvalidValue={SWAP_SLIPPAGE_INVALID_VALUE} bind:slippageValue />
 
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
