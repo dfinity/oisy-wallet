@@ -19,7 +19,7 @@ vi.mock('$btc/utils/btc-address.utils', () => ({
 }));
 
 vi.mock('$icp/utils/btc.utils', () => ({
-	getBtcWalletBalance: vi.fn().mockReturnValue({ total: 1000n }),
+	getBtcWalletBalance: vi.fn().mockReturnValue({ confirmed: 1000n, total: 1000n }),
 	mapTokenIdToNetworkId: vi.fn().mockReturnValue('test-network-id')
 }));
 
