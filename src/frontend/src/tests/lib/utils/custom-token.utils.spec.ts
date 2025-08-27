@@ -87,7 +87,8 @@ describe('custom-token.utils', () => {
 				token: {
 					Erc20: {
 						token_address: 'mock-token-address',
-						chain_id: 123n
+						chain_id: 123n,
+						allow_media_source: toNullable()
 					}
 				}
 			});
@@ -106,7 +107,8 @@ describe('custom-token.utils', () => {
 				token: {
 					Erc721: {
 						token_address: 'mock-token-address',
-						chain_id: 123n
+						chain_id: 123n,
+						allow_media_source: toNullable()
 					}
 				}
 			});
@@ -125,7 +127,8 @@ describe('custom-token.utils', () => {
 				token: {
 					Erc1155: {
 						token_address: 'mock-token-address',
-						chain_id: 123n
+						chain_id: 123n,
+						allow_media_source: toNullable()
 					}
 				}
 			});
