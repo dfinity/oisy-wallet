@@ -35,7 +35,8 @@ const toErcCustomToken = ({
 	chainId: chain_id
 }: ErcSaveCustomToken): ErcToken => ({
 	token_address,
-	chain_id
+	chain_id,
+	allow_media_source: toNullable()
 });
 
 const toSplCustomToken = ({
