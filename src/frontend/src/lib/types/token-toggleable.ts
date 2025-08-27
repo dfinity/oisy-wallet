@@ -4,7 +4,7 @@ import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 // Type pick and omit fields to make the reader aware that we are redefining the two fields we are interested in.
 export type UserTokenState = Omit<
-	Pick<UserToken | CustomToken, 'version' | 'enabled' | 'section'>,
+	Pick<UserToken | CustomToken, 'version' | 'enabled'>,
 	'version' | 'enabled' | 'section'
 > & {
 	version?: bigint;
