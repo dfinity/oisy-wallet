@@ -1504,10 +1504,24 @@
 			"license_agreement": "L'accord de licence $oisy_name"
 		}
 	},
-	"termsOfUse": {
+	"terms_of_use": {
 		"text": {
+			"terms_of_use": "",
 			"title": "",
 			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {

@@ -1238,8 +1238,14 @@ interface I18nLicense_agreement {
 	alt: { license_agreement: string };
 }
 
-interface I18nTermsOfUse {
-	text: { title: string; body: string };
+interface I18nTerms_of_use {
+	text: { terms_of_use: string; title: string; body: string };
+	alt: { terms_of_use: string };
+}
+
+interface I18nPrivacy_policy {
+	text: { privacy_policy: string; title: string; body: string };
+	alt: { privacy_policy: string };
 }
 
 interface I18nActivity {
@@ -1340,7 +1346,8 @@ interface I18n {
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
-	termsOfUse: I18nTermsOfUse;
+	terms_of_use: I18nTerms_of_use;
+	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
 	welcome: I18nWelcome;
