@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
@@ -10,7 +11,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LabelSize } from '$lib/types/components';
 	import type { NetworkId, Network as NetworkType, OptionNetworkId } from '$lib/types/network';
-	import { isNullish } from '@dfinity/utils';
 
 	interface Props {
 		selectedNetworkId?: NetworkId;
