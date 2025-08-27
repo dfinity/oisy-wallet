@@ -35,13 +35,13 @@
 			if (token.standard === 'erc721') {
 				await saveCustomErc721Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, section: CustomTokenSection.SPAM }]
+					tokens: [{ ...token, enabled: true, section: CustomTokenSection.SPAM }]
 				});
 			}
 			if (token.standard === 'erc1155') {
 				await saveCustomErc1155Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, section: CustomTokenSection.SPAM }]
+					tokens: [{ ...token, enabled: true, section: CustomTokenSection.SPAM }]
 				});
 			}
 		}
