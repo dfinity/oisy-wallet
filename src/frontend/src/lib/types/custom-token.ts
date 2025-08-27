@@ -6,7 +6,6 @@ import type { Token } from '$lib/types/token';
 import type { TokenToggleable, UserTokenState } from '$lib/types/token-toggleable';
 import type { SplToken } from '$sol/types/spl';
 import type { QueryAndUpdateRequestParams } from '@dfinity/utils';
-import type { Erc721Token } from '$eth/types/erc721';
 
 type CustomTokenNetworkKeys = BackendToken extends infer T
 	? T extends Record<string, unknown>
@@ -21,9 +20,6 @@ export type IcrcSaveCustomToken = Pick<IcrcCustomToken, 'ledgerCanisterId' | 'in
 export type ErcSaveCustomToken = Pick<Erc20Token, 'address'> &
 	Pick<Erc20Token['network'], 'chainId'>;
 
-export type NonFungibleSaveCustomToken = Pick<Erc721Token, 'address'> &
-	Pick<Erc721Token['network'], 'chainId'>;
-
 export type SplSaveCustomToken = Pick<SplToken, 'address' | 'decimals' | 'symbol'>;
 
 export type SaveCustomToken = UserTokenState &
@@ -32,9 +28,8 @@ export type SaveCustomToken = UserTokenState &
 export type SaveCustomTokenWithKey = UserTokenState &
 	(
 		| TokenVariant<'Icrc', IcrcSaveCustomToken>
-		| TokenVariant<'Erc20', ErcSaveCustomToken>
+		| TokenVariant<'Erc20' | 'Erc721' | 'Erc1155', ErcSaveCustomToken>
 		| TokenVariant<'SplDevnet' | 'SplMainnet', SplSaveCustomToken>
-		| TokenVariant<'Erc721' | 'Erc1155', NonFungibleSaveCustomToken>
 	);
 
 export type CustomToken<T extends Token> = TokenToggleable<T> & { section?: CustomTokenSection };
