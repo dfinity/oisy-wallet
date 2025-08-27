@@ -51,11 +51,7 @@
 	variant={sendCompleted ? 'success' : 'default'}
 >
 	{#snippet content()}
-		<SendReviewDestination
-			aiAssistantConsoleView={true}
-			destination={contactAddress?.address ?? address ?? ''}
-			selectedContact={contact}
-		/>
+		<SendReviewDestination aiAssistantConsoleView={true} {destination} selectedContact={contact} />
 
 		<div class="mb-2 mt-4">
 			<ReviewNetwork sourceNetwork={$sendToken.network} />
