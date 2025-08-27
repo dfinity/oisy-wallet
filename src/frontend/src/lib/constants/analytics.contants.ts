@@ -150,3 +150,6 @@ export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';
 // Links
 export const TRACK_OPEN_DOCUMENTATION = 'open_documentation';
 export const TRACK_OPEN_EXTERNAL_LINK = 'open_external_link';
+
+// AI Assistant
+export const AI_ASSISTANT_SEND_TOKEN_SOURCE = 'ai-assistant';

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
+	import NewSwapModal from './NewSwapModal.svelte';
+	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
 	import {
 		loadDisabledIcrcTokensBalances,
 		loadDisabledIcrcTokensExchanges
@@ -103,5 +105,9 @@
 </script>
 
 <SwapButtonWithModal isOpen={$modalSwap} onOpen={onOpenSwap}>
-	<SwapModal on:nnsClose />
+	{#if VELORA_SWAP_ENABLED}
+		<NewSwapModal on:nnsClose />
+	{:else}
+		<SwapModal on:nnsClose />
+	{/if}
 </SwapButtonWithModal>

@@ -69,7 +69,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				...state,
 				sourceToken: token
 			})),
-		setDestinationToken: (token: Token) =>
+		setDestinationToken: (token: Token | undefined) =>
 			update((state) => ({
 				...state,
 				destinationToken: token
@@ -92,7 +92,7 @@ export interface SwapContext {
 	isSourceTokenIcrc2: Readable<boolean>;
 	failedSwapError: Writable<SwapError | undefined>;
 	setSourceToken: (token: Token) => void;
-	setDestinationToken: (token: Token) => void;
+	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;
 }
 
