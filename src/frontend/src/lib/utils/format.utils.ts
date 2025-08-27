@@ -105,7 +105,8 @@ export const formatToShortDateString = ({
 }: {
 	date: Date;
 	language?: Languages;
-}): string => date.toLocaleDateString(language ?? Languages.ENGLISH, {
+}): string =>
+	date.toLocaleDateString(language ?? Languages.ENGLISH, {
 		month: 'short',
 		year: 'numeric'
 	});
