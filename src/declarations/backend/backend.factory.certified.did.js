@@ -253,6 +253,17 @@ export const idlFactory = ({ IDL }) => {
 		Ok: CreateChallengeResponse,
 		Err: CreateChallengeError
 	});
+	const UserAgreement = IDL.Record({
+		last_accepted_at: IDL.Opt(IDL.Nat64),
+		last_updated_at: IDL.Opt(IDL.Nat64),
+		accepted: IDL.Opt(IDL.Bool)
+	});
+	const UserAgreements = IDL.Record({
+		license_agreement: UserAgreement,
+		privacy_policy: UserAgreement,
+		terms_of_use: UserAgreement
+	});
+	const Agreements = IDL.Record({ agreements: UserAgreements });
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -295,6 +306,7 @@ export const idlFactory = ({ IDL }) => {
 		dapp: DappSettings
 	});
 	const UserProfile = IDL.Record({
+		agreements: IDL.Opt(Agreements),
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
 		settings: IDL.Opt(Settings),

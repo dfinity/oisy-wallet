@@ -22,6 +22,7 @@ type AddUserCredentialRequest = record {
 };
 type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
 type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
+type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
 	PowChallenge : ChallengeCompletionError;
@@ -350,12 +351,23 @@ type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
+type UserAgreement = record {
+	last_accepted_at : opt nat64;
+	last_updated_at : opt nat64;
+	accepted : opt bool
+};
+type UserAgreements = record {
+	license_agreement : UserAgreement;
+	privacy_policy : UserAgreement;
+	terms_of_use : UserAgreement
+};
 type UserCredential = record {
 	issuer : text;
 	verified_date_timestamp : opt nat64;
 	credential_type : CredentialType
 };
 type UserProfile = record {
+	agreements : opt Agreements;
 	credentials : vec UserCredential;
 	version : opt nat64;
 	settings : opt Settings;

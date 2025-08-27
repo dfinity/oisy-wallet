@@ -24,6 +24,9 @@ export interface AddUserCredentialRequest {
 }
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
+export interface Agreements {
+	agreements: UserAgreements;
+}
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { PowChallenge: ChallengeCompletionError }
@@ -373,12 +376,23 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export interface UserAgreement {
+	last_accepted_at: [] | [bigint];
+	last_updated_at: [] | [bigint];
+	accepted: [] | [boolean];
+}
+export interface UserAgreements {
+	license_agreement: UserAgreement;
+	privacy_policy: UserAgreement;
+	terms_of_use: UserAgreement;
+}
 export interface UserCredential {
 	issuer: string;
 	verified_date_timestamp: [] | [bigint];
 	credential_type: CredentialType;
 }
 export interface UserProfile {
+	agreements: [] | [Agreements];
 	credentials: Array<UserCredential>;
 	version: [] | [bigint];
 	settings: [] | [Settings];
