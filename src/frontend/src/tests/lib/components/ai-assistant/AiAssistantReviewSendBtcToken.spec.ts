@@ -139,7 +139,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 	it('should not call sendBtc if network is not BTC', async () => {
 		const btcSendApiSpy = mockSignerApi();
-		const addPendingTransactionApiSpy = mockBackendApi();
+		mockBackendApi();
 		mockAuthStore();
 		mockBtcAddressStore();
 		mockBalance();
@@ -160,7 +160,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 	it('should not call sendBtc if destination address is not BTC', async () => {
 		const btcSendApiSpy = mockSignerApi();
-		const addPendingTransactionApiSpy = mockBackendApi();
+		mockBackendApi();
 		mockAuthStore();
 		mockBtcAddressStore();
 		mockBalance();
