@@ -852,7 +852,7 @@ export const fetchVeloraMarketSwap = async ({
 		});
 
 		await retryWithDelay({
-			maxRetries: 3,
+			maxRetries: 10,
 			request: async () => {
 				const currentAllowance = await erc20ContractAllowance({
 					token: sourceToken,
