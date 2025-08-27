@@ -16,7 +16,7 @@ export const createAuthClient = (): Promise<AuthClient> =>
 
 /**
  * When the user signs out, we create a new AuthClient.
- * Since agent-js persists identity keys in IndexedDB by default,
+ * Since icp-js-core persists identity keys in IndexedDB by default,
  * if the old keys remain in storage, they could be tampered with and affect the next login.
  * To ensure each session starts clean and safe, we clear the stored keys before creating a new AuthClient.
  */
