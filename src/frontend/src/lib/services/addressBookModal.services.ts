@@ -10,16 +10,17 @@ import {
 } from '$lib/stores/addressBookModal.store';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { Identity } from '@dfinity/agent';
 import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export type AddressBookDeps = {
+export interface AddressBookDeps {
 	i18n: I18n;
 	identity: OptionIdentity;
-	createContact: (args: any) => Promise<ContactUi>;
-	updateContact: (args: any) => Promise<ContactUi>;
-	deleteContact: (args: any) => Promise<void>;
+	createContact: (args: { name: string; identity: Identity }) => Promise<ContactUi>;
+	updateContact: (args: { contact: ContactUi; identity: Identity }) => Promise<ContactUi>;
+	deleteContact: (args: { id: bigint; identity: Identity }) => Promise<void>;
 	steps: WizardSteps<AddressBookSteps>;
 	modal: WizardModal<AddressBookSteps>;
 	track: {
@@ -34,21 +35,37 @@ export type AddressBookDeps = {
 		avatarDeleteSuccess: string;
 		avatarDeleteError: string;
 	};
-};
+}
+
+interface CreateContactParams {
+	name: string;
+}
+
+interface UpdateContactParams {
+	contact: ContactUi;
+	image?: ContactImage | null;
+}
+
+interface DeleteContactParams {
+	id: bigint;
+}
+
+// Create a more specific type for wrapped functions
+type WrappedFunction<T, R> = (params: T) => Promise<R | undefined>;
 
 const withState =
-	<T extends (...a: any[]) => Promise<any>>(fn: T) =>
-	async (...args: Parameters<T>) => {
+	<T, R>(wrappedFn: WrappedFunction<T, R>) =>
+	async (params: T): Promise<R | undefined> => {
 		loading.set(true);
 		try {
-			return await fn(...args);
+			return await wrappedFn(params);
 		} finally {
 			loading.set(false);
 		}
 	};
 
-export function makeController(deps: AddressBookDeps) {
-	const callCreateContact = withState(
+export const makeController = (deps: AddressBookDeps) => {
+	const callCreateContact = withState<CreateContactParams, ContactUi>(
 		wrapCallWith({
 			methodToCall: deps.createContact,
 			toastErrorMessage: deps.i18n.contact.error.create,
@@ -57,16 +74,17 @@ export function makeController(deps: AddressBookDeps) {
 		})
 	);
 
-	const callUpdateContact = withState(
+	const callUpdateContact = withState<UpdateContactParams, ContactUi>(
 		wrapCallWith({
-			methodToCall: deps.updateContact,
+			methodToCall: (params: { contact: ContactUi; identity: Identity }) =>
+				deps.updateContact(params),
 			toastErrorMessage: deps.i18n.contact.error.update,
 			trackEventNames: { success: deps.track.updateSuccess, error: deps.track.updateError },
 			identity: deps.identity
 		})
 	);
 
-	const callDeleteContact = withState(
+	const callDeleteContact = withState<DeleteContactParams, void>(
 		wrapCallWith({
 			methodToCall: deps.deleteContact,
 			toastErrorMessage: deps.i18n.contact.error.delete,
@@ -75,16 +93,18 @@ export function makeController(deps: AddressBookDeps) {
 		})
 	);
 
-	async function handleDeleteContact(id: bigint) {
+	const handleDeleteContact = async (id: bigint) => {
 		await callDeleteContact({ id });
 		currentAddressIndex.set(undefined);
 		currentContactId.set(undefined);
 		return { next: AddressBookSteps.ADDRESS_BOOK as const };
-	}
+	};
 
-	async function handleAddAvatar(image: ContactImage | null) {
+	const handleAddAvatar = async (image: ContactImage | null) => {
 		const contact = get(currentContact);
-		if (isNullish(contact)) return;
+		if (isNullish(contact)) {
+			return;
+		}
 
 		const isDeleting = isNullish(image);
 		const tracking = {
@@ -92,21 +112,24 @@ export function makeController(deps: AddressBookDeps) {
 			error: isDeleting ? deps.track.avatarDeleteError : deps.track.avatarUpdateError
 		};
 
-		const callUpdateAvatar = withState(
+		const callUpdateAvatar = withState<UpdateContactParams, ContactUi>(
 			wrapCallWith({
-				methodToCall: deps.updateContact,
+				methodToCall: (params: { contact: ContactUi; identity: Identity }) =>
+					deps.updateContact({ ...params, contact: { ...params.contact, image } }),
 				toastErrorMessage: deps.i18n.contact.error.update,
 				trackEventNames: tracking,
 				identity: deps.identity
 			})
 		);
 
-		await callUpdateAvatar({ contact, image });
-	}
+		await callUpdateAvatar({ contact });
+	};
 
-	async function handleAddAddress(address: ContactAddressUi) {
+	const handleAddAddress = async (address: ContactAddressUi) => {
 		const contact = get(currentContact);
-		if (isNullish(contact)) return;
+		if (isNullish(contact)) {
+			return;
+		}
 
 		const updated = { ...contact, addresses: [...contact.addresses, address] };
 		currentAddressIndex.set(undefined);
@@ -114,29 +137,33 @@ export function makeController(deps: AddressBookDeps) {
 		await callUpdateContact({ contact: updated });
 
 		return { next: AddressBookSteps.SHOW_CONTACT as const };
-	}
+	};
 
-	async function handleSaveAddress(address: ContactAddressUi) {
+	const handleSaveAddress = async (address: ContactAddressUi) => {
 		const contact = get(currentContact);
 		const index = get(currentAddressIndex);
-		if (isNullish(contact) || isNullish(index)) return;
+		if (isNullish(contact) || isNullish(index)) {
+			return;
+		}
 
 		const addresses = [...contact.addresses];
 		addresses[index] = { ...address };
 		await callUpdateContact({ contact: { ...contact, addresses } });
 		currentAddressIndex.set(undefined);
 		return { next: AddressBookSteps.EDIT_CONTACT as const };
-	}
+	};
 
-	async function handleDeleteAddress(index: number) {
+	const handleDeleteAddress = async (index: number) => {
 		const contact = get(currentContact);
-		if (isNullish(contact)) return;
+		if (isNullish(contact)) {
+			return;
+		}
 
 		const addresses = contact.addresses.filter((_, i) => i !== index);
 		await callUpdateContact({ contact: { ...contact, addresses } });
 		currentAddressIndex.set(undefined);
 		return { next: AddressBookSteps.EDIT_CONTACT as const };
-	}
+	};
 
 	return {
 		handleAddAvatar,
@@ -147,4 +174,4 @@ export function makeController(deps: AddressBookDeps) {
 		callCreateContact,
 		callUpdateContact
 	};
-}
+};

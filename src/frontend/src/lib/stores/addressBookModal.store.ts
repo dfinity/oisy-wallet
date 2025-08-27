@@ -1,5 +1,5 @@
 import { sortedContacts } from '$lib/derived/contacts.derived';
-import { AddressBookSteps } from '$lib/enums/progress-steps';
+import type { AddressBookSteps } from '$lib/enums/progress-steps';
 import type { WizardStep } from '@dfinity/gix-components';
 import { derived, writable } from 'svelte/store';
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import type { ContactImage } from '$declarations/backend/backend.did';
@@ -35,18 +35,13 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { sortedContacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
+	import { makeController } from '$lib/services/addressBookModal.services';
 	import {
 		createContact,
 		deleteContact,
 		updateContact
 	} from '$lib/services/manage-contacts.service';
 	import { addressBookStore } from '$lib/stores/address-book.store';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import type { AddressBookModalParams } from '$lib/types/address-book';
-	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 	import {
 		loading,
 		currentStep,
@@ -59,7 +54,12 @@
 		isDeletingContact,
 		editContactNameTitle
 	} from '$lib/stores/addressBookModal.store';
-	import { makeController } from '$lib/services/addressBookModal.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { AddressBookModalParams } from '$lib/types/address-book';
+	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	let modal: WizardModal<AddressBookSteps> | undefined;
 	let editContactNameStep: EditContactNameStep | undefined;
@@ -70,28 +70,29 @@
 
 	let controller: ReturnType<typeof makeController> | undefined;
 	$effect(() => {
-		if (!modal) return;
-		controller = makeController({
-			i18n: $i18n,
-			identity: $authIdentity,
-			createContact,
-			updateContact,
-			deleteContact,
-			steps,
-			modal,
-			track: {
-				createSuccess: TRACK_CONTACT_CREATE_SUCCESS,
-				createError: TRACK_CONTACT_CREATE_ERROR,
-				updateSuccess: TRACK_CONTACT_UPDATE_SUCCESS,
-				updateError: TRACK_CONTACT_UPDATE_ERROR,
-				deleteSuccess: TRACK_CONTACT_DELETE_SUCCESS,
-				deleteError: TRACK_CONTACT_DELETE_ERROR,
-				avatarUpdateSuccess: TRACK_AVATAR_UPDATE_SUCCESS,
-				avatarUpdateError: TRACK_AVATAR_UPDATE_ERROR,
-				avatarDeleteSuccess: TRACK_AVATAR_DELETE_SUCCESS,
-				avatarDeleteError: TRACK_AVATAR_DELETE_ERROR
-			}
-		});
+		if (nonNullish(modal)) {
+			controller = makeController({
+				i18n: $i18n,
+				identity: $authIdentity,
+				createContact,
+				updateContact,
+				deleteContact,
+				steps,
+				modal,
+				track: {
+					createSuccess: TRACK_CONTACT_CREATE_SUCCESS,
+					createError: TRACK_CONTACT_CREATE_ERROR,
+					updateSuccess: TRACK_CONTACT_UPDATE_SUCCESS,
+					updateError: TRACK_CONTACT_UPDATE_ERROR,
+					deleteSuccess: TRACK_CONTACT_DELETE_SUCCESS,
+					deleteError: TRACK_CONTACT_DELETE_ERROR,
+					avatarUpdateSuccess: TRACK_AVATAR_UPDATE_SUCCESS,
+					avatarUpdateError: TRACK_AVATAR_UPDATE_ERROR,
+					avatarDeleteSuccess: TRACK_AVATAR_DELETE_SUCCESS,
+					avatarDeleteError: TRACK_AVATAR_DELETE_ERROR
+				}
+			});
+		}
 	});
 
 	onMount(() => {
@@ -113,31 +114,31 @@
 		modalStore.close();
 	};
 
-	function gotoStep(stepName: AddressBookSteps) {
+	const gotoStep = (stepName: AddressBookSteps) => {
 		if (nonNullish(modal)) {
 			previousStepName.set($currentStepName);
 			goToWizardStep({ modal, steps, stepName });
 		}
-	}
+	};
 
-	function handleClose() {
+	const handleClose = () => {
 		const prev = $previousStepName;
 		gotoStep(prev ?? AddressBookSteps.ADDRESS_BOOK);
 		previousStepName.set(undefined);
-	}
+	};
 
-	function confirmDeleteContact() {
+	const confirmDeleteContact = () => {
 		if (nonNullish($currentContact)) {
 			gotoStep(AddressBookSteps.DELETE_CONTACT);
 		}
-	}
+	};
 
-	function confirmDeleteAddress(index: number) {
+	const confirmDeleteAddress = (index: number) => {
 		if (nonNullish($currentContact)) {
 			currentAddressIndex.set(index);
 			gotoStep(AddressBookSteps.DELETE_ADDRESS);
 		}
-	}
+	};
 </script>
 
 <WizardModal
@@ -272,7 +273,9 @@
 				const created = await controller?.callCreateContact({ name });
 				if (modalData?.entrypoint) {
 					currentAddressIndex.set(undefined);
-					if (created) currentContactId.set(created.id);
+					if (created) {
+						currentContactId.set(created.id);
+					}
 					gotoStep(AddressBookSteps.EDIT_ADDRESS);
 					previousStepName.set(AddressBookSteps.SAVE_ADDRESS);
 				} else {
@@ -309,7 +312,9 @@
 					close();
 					return;
 				}
-				if (res?.next) gotoStep(res.next);
+				if (res?.next) {
+					gotoStep(res.next);
+				}
 			}}
 			onClose={() => {
 				currentAddressIndex.set(undefined);
@@ -318,7 +323,9 @@
 			onQRCodeScan={() => gotoStep(AddressBookSteps.QR_CODE_SCAN)}
 			onSaveAddress={async (addr: ContactAddressUi) => {
 				const res = await controller?.handleSaveAddress(addr);
-				if (res?.next) gotoStep(res.next);
+				if (res?.next) {
+					gotoStep(res.next);
+				}
 			}}
 		/>
 	{:else if $currentStepName === AddressBookSteps.DELETE_ADDRESS && nonNullish($currentContact) && nonNullish($currentAddressIndex)}
@@ -356,7 +363,9 @@
 			}}
 			onDelete={async (id: bigint) => {
 				const res = await controller?.handleDeleteContact(id);
-				if (res?.next) gotoStep(res.next);
+				if (res?.next) {
+					gotoStep(res.next);
+				}
 			}}
 		/>
 	{:else if $currentStepName === AddressBookSteps.SAVE_ADDRESS}
