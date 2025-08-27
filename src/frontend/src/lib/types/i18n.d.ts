@@ -1240,12 +1240,12 @@ interface I18nLicense_agreement {
 }
 
 interface I18nTerms_of_use {
-	text: { terms_of_use: string };
+	text: { terms_of_use: string; title: string; body: string };
 	alt: { terms_of_use: string };
 }
 
 interface I18nPrivacy_policy {
-	text: { privacy_policy: string };
+	text: { privacy_policy: string; title: string; body: string };
 	alt: { privacy_policy: string };
 }
 

@@ -1507,7 +1507,9 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": ""
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
 		},
 		"alt": {
 			"terms_of_use": ""
@@ -1515,7 +1517,9 @@
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": ""
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
 		},
 		"alt": {
 			"privacy_policy": ""
