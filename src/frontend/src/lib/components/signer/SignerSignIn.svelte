@@ -21,7 +21,7 @@
 <p class="mb-12 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
 
 {#if NEW_AGREEMENTS_ENABLED}
-	<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
+	<ButtonAuthenticateWithHelp fullWidth needHelpLink={false} />
 {:else}
 	<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" />
 {/if}
