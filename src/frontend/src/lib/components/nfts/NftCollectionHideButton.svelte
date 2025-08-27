@@ -8,7 +8,6 @@
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import type { NftCollection } from '$lib/types/nft';
-	import type { NonEmptyArray } from '$lib/types/utils';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 
@@ -30,10 +29,18 @@
 		});
 
 		if(nonNullish(token)) {
+
+			const newToken: SaveErc721CustomToken = {
+				address: token.address,
+				network: token.network,
+				enabled: true,
+				section: CustomTokenSection.HIDDEN
+			}
+
 			if (token.standard === 'erc721') {
 				await saveCustomErc721Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, section: CustomTokenSection.HIDDEN }] as NonEmptyArray<SaveErc721CustomToken>
+					tokens: [newToken]
 				});
 			}
 			if (token.standard === 'erc1155') {
