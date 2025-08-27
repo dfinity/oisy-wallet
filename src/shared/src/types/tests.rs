@@ -171,17 +171,62 @@ mod bitcoin {
     );
 }
 
-mod custom_token {
-    //! Tests for the `custom_token` module.
+mod contact_image {
+    //! Tests for ContactImage validation
     use candid::{Decode, Encode};
+    use serde_bytes::ByteBuf;
 
-    use crate::types::custom_token::*;
+    use crate::{
+        types::contact::{ContactImage, ImageMimeType, MAX_IMAGE_SIZE_BYTES},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    test_validate_on_deserialize!(
+        ContactImage,
+        vec![
+            TestVector {
+                description: "ContactImage at max size (100 KB)",
+                input: ContactImage {
+                    data: ByteBuf::from(vec![0u8; MAX_IMAGE_SIZE_BYTES]),
+                    mime_type: ImageMimeType::Png,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "ContactImage exceeding max size (100 KB + 1)",
+                input: ContactImage {
+                    data: ByteBuf::from(vec![0u8; MAX_IMAGE_SIZE_BYTES + 1]),
+                    mime_type: ImageMimeType::Jpeg,
+                },
+                valid: false,
+            },
+        ]
+    );
+
+    // Additional unit test ensuring Validate::validate works directly
+    #[test]
+    fn contact_image_validate_direct() {
+        let ok = ContactImage {
+            data: ByteBuf::from(vec![0u8; MAX_IMAGE_SIZE_BYTES]),
+            mime_type: ImageMimeType::Webp,
+        };
+        assert!(ok.validate().is_ok());
+
+        let too_big = ContactImage {
+            data: ByteBuf::from(vec![0u8; MAX_IMAGE_SIZE_BYTES + 1]),
+            mime_type: ImageMimeType::Gif,
+        };
+        assert!(too_big.validate().is_err());
+    }
 
     mod spl {
         //! Tests for the spl module.
         use super::*;
         use crate::{
-            types::MAX_SYMBOL_LENGTH,
+            types::{
+                custom_token::{SplToken, SplTokenId},
+                MAX_SYMBOL_LENGTH,
+            },
             validate::{test_validate_on_deserialize, TestVector, Validate},
         };
 
@@ -249,7 +294,10 @@ mod custom_token {
     mod erc20 {
         //! Tests for the erc20 module.
         use super::*;
-        use crate::validate::{test_validate_on_deserialize, TestVector, Validate};
+        use crate::{
+            types::custom_token::{ErcToken, ErcTokenId},
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
 
         test_validate_on_deserialize!(
             ErcToken,
@@ -338,7 +386,10 @@ mod custom_token {
         use candid::Principal;
 
         use super::*;
-        use crate::validate::{test_validate_on_deserialize, TestVector, Validate};
+        use crate::{
+            types::custom_token::IcrcToken,
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
 
         fn canister_id1() -> Principal {
             Principal::from_text("um5iw-rqaaa-aaaaq-qaaba-cai").unwrap()
