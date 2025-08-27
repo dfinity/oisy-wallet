@@ -229,7 +229,6 @@ fn test_cannot_exceed_max_user_token_length() {
     );
 }
 
-
 #[test]
 fn test_anonymous_cannot_add_user_token() {
     let pic_setup = setup();
