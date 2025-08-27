@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "Niewystarczające saldo Bitcoin, aby pokryć opłaty transakcyjne",
 			"btc_invalid_utxo_data": "Nieprawidłowe dane transakcji Bitcoin",
 			"btc_utxo_locked": "Środki Bitcoin są zablokowane przez oczekujące transakcje",
-			"btc_invalid_fee_calculation": "Weryfikacja opłaty transakcyjnej Bitcoin nie powiodła się"
+			"btc_invalid_fee_calculation": "Weryfikacja opłaty transakcyjnej Bitcoin nie powiodła się",
+			"pending_transactions_not_available": ""
 		},
 		"error": {
 			"unexpected": "Coś poszło nie tak podczas wysyłania transakcji.",
@@ -811,9 +812,9 @@
 			"approval_fee": "Opłata za zatwierdzenie",
 			"gas_fee": "Opłata za gaz",
 			"lp_fee": "Opłata LP",
-			"max_slippage_info": "Wprowadź wartość od 0% do 50%",
+			"max_slippage_info": "Wprowadź wartość od 0% do $maxSlippage%",
 			"max_slippage_warning": "Ostrzeżenie o ryzyku: wysoki poślizg może prowadzić do strat z powodu zmienności rynku",
-			"max_slippage_error": "Tolerancja poślizgu nie może wynosić 0% ani przekraczać 50%",
+			"max_slippage_error": "Tolerancja poślizgu nie może wynosić 0% ani przekraczać $maxSlippage%",
 			"swap_button": "Wymień teraz",
 			"swap_is_not_offered": "Ta wymiana nie jest obecnie oferowana.",
 			"executing_transaction": "Wykonywanie transakcji...",
