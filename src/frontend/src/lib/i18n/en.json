@@ -1504,6 +1504,22 @@
 			"license_agreement": "The $oisy_name License Agreement"
 		}
 	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "Terms of Use"
+		},
+		"alt": {
+			"terms_of_use": "Terms of Use Link"
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "Privacy Policy"
+		},
+		"alt": {
+			"privacy_policy": "Privacy Policy Link"
+		}
+	},
 	"activity": {
 		"text": {
 			"title": "Recent Activity"
