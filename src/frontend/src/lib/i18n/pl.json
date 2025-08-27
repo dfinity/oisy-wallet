@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "Niewystarczające saldo Bitcoin, aby pokryć opłaty transakcyjne",
 			"btc_invalid_utxo_data": "Nieprawidłowe dane transakcji Bitcoin",
 			"btc_utxo_locked": "Środki Bitcoin są zablokowane przez oczekujące transakcje",
-			"btc_invalid_fee_calculation": "Weryfikacja opłaty transakcyjnej Bitcoin nie powiodła się"
+			"btc_invalid_fee_calculation": "Weryfikacja opłaty transakcyjnej Bitcoin nie powiodła się",
+			"pending_transactions_not_available": ""
 		},
 		"error": {
 			"unexpected": "Coś poszło nie tak podczas wysyłania transakcji.",
@@ -811,9 +812,9 @@
 			"approval_fee": "Opłata za zatwierdzenie",
 			"gas_fee": "Opłata za gaz",
 			"lp_fee": "Opłata LP",
-			"max_slippage_info": "Wprowadź wartość od 0% do 50%",
+			"max_slippage_info": "Wprowadź wartość od 0% do $maxSlippage%",
 			"max_slippage_warning": "Ostrzeżenie o ryzyku: wysoki poślizg może prowadzić do strat z powodu zmienności rynku",
-			"max_slippage_error": "Tolerancja poślizgu nie może wynosić 0% ani przekraczać 50%",
+			"max_slippage_error": "Tolerancja poślizgu nie może wynosić 0% ani przekraczać $maxSlippage%",
 			"swap_button": "Wymień teraz",
 			"swap_is_not_offered": "Ta wymiana nie jest obecnie oferowana.",
 			"executing_transaction": "Wykonywanie transakcji...",
@@ -1496,10 +1497,27 @@
 			"entire_agreement": "<strong>10. CAŁOŚĆ UMOWY I ROZDZIELNOŚĆ.</strong> Niniejsza Umowa Licencyjna stanowi całość umowy między Tobą a DFINITY i zastępuje wszelkie wcześniejsze umowy, negocjacje lub inne komunikaty między Tobą a DFINITY, zarówno ustne, jak i pisemne, dotyczące jej przedmiotu. DFINITY może wprowadzać zmiany do niniejszej Umowy Licencyjnej, gdy udostępniane są nowe wersje $oisy_short. W przypadku, gdy którekolwiek postanowienie niniejszej Umowy Licencyjnej zostanie uznane za nieważne lub niewykonalne, wówczas: (a) takie postanowienie zostanie uznane za zmienione w zakresie ściśle niezbędnym do nadania mu ważności i wykonalności, lub jeśli taka zmiana nie jest możliwa, zostanie uznane za usunięte z niniejszej Umowy Licencyjnej; oraz (b) ważność i wykonalność wszystkich pozostałych postanowień niniejszej Umowy w żaden sposób nie zostanie naruszona ani osłabiona.",
 			"assignment": "<strong>11. PRZENIESIENIE.</strong> Nie możesz przenieść niniejszej Umowy Licencyjnej bez uprzedniej pisemnej zgody DFINITY, ani wyraźnie, ani w drodze działania prawa, w tym w związku z fuzją lub zmianą kontroli, a każda taka próba przeniesienia będzie nieważna i bezskuteczna. DFINITY może przenieść niniejszą Umowę Licencyjną bez ograniczeń i bez żadnego powiadomienia. Z zastrzeżeniem powyższego, niniejsza Umowa Licencyjna będzie wiążąca dla stron oraz ich odpowiednich następców prawnych i dozwolonych cesjonariuszy.",
 			"no_waiver": "<strong>12. BRAK ZRZECZENIA SIĘ.</strong> Niewykonanie lub opóźnienie w wykonaniu prawa, uprawnienia lub środka zaradczego przewidzianego w niniejszej Umowie Licencyjnej lub przez prawo nie stanowi zrzeczenia się tego prawa, uprawnienia lub środka zaradczego. Zrzeczenie się przez DFINITY jakiegokolwiek zobowiązania lub naruszenia niniejszej Umowy Licencyjnej nie będzie stanowiło zrzeczenia się jakiegokolwiek innego zobowiązania lub późniejszego naruszenia niniejszej Umowy Licencyjnej.",
-			"english_version": "<strong>13. WERSJA ANGIELSKA.</strong> Wersja niniejszej Umowy Licencyjnej w języku angielskim będzie oficjalną i kontrolującą wersją umowy w przypadku jakiegokolwiek konfliktu. Wszelkie komunikaty i powiadomienia dokonywane na podstawie niniejszej Umowy Licencyjnej muszą być w języku angielskim."
+			"english_version": "<strong>13. WERSJA ANGIELSKA.</strong> Wersja niniejszej Umowy Licencyjnej w języku angielskim będzie oficjalną i kontrolującą wersją umowy w przypadku jakiegokolwiek konfliktu. Wszelkie komunikaty i powiadomienia dokonywane na podstawie niniejszej Umowy Licencyjnej muszą być w języku angielskim.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "Umowa licencyjna $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {

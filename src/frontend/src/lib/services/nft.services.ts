@@ -11,6 +11,8 @@ import {
 } from '$eth/providers/infura-erc721.providers';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
+import { TRACK_ETH_LOADING_NFT_IDS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
@@ -68,7 +70,7 @@ const loadNftsOfToken = async ({
 	loadedNfts,
 	walletAddress
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	token: NonFungibleToken;
 	loadedNfts: Nft[];
 	walletAddress: EthAddress;
@@ -90,7 +92,7 @@ export const loadNftIdsOfToken = async ({
 	tokenIds,
 	walletAddress
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	token: NonFungibleToken;
 	tokenIds: NftId[];
 	walletAddress: EthAddress;
@@ -118,7 +120,7 @@ const loadNftsOfBatch = async ({
 	token,
 	tokenIds
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	walletAddress: EthAddress;
 	token: NonFungibleToken;
 	tokenIds: NftId[];
@@ -137,7 +139,7 @@ const loadNftsMetadata = async ({
 	token,
 	tokenIds
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	token: NonFungibleToken;
 	tokenIds: NftId[];
 }): Promise<NftMetadata[]> => {
@@ -165,7 +167,7 @@ const loadNftMetadata = async ({
 	token,
 	tokenId
 }: {
-	infuraProvider: InfuraErc165Provider;
+	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
 	token: NonFungibleToken;
 	tokenId: NftId;
 }): Promise<NftMetadata> => {
@@ -175,15 +177,16 @@ const loadNftMetadata = async ({
 
 	try {
 		if (isTokenErc721(token)) {
-			const infuraErc721Provider = infuraProvider as InfuraErc721Provider;
-			return await infuraErc721Provider.getNftMetadata({
+			const { getNftMetadata } = infuraProvider;
+			return await getNftMetadata({
 				contractAddress: token.address,
 				tokenId
 			});
 		}
+
 		if (isTokenErc1155(token)) {
-			const infuraErc1155Provider = infuraProvider as InfuraErc1155Provider;
-			return await infuraErc1155Provider.getNftMetadata({
+			const { getNftMetadata } = infuraProvider;
+			return await getNftMetadata({
 				contractAddress: token.address,
 				tokenId
 			});
@@ -294,26 +297,38 @@ const loadHoldersTokenIds = async ({
 }): Promise<NftId[]> => {
 	try {
 		if (isTokenErc721(token)) {
-			const etherscanProvider = etherscanProviders(token.network.id);
+			const { erc721TokenInventory } = etherscanProviders(token.network.id);
 
-			return await etherscanProvider.erc721TokenInventory({
+			return await erc721TokenInventory({
 				address: walletAddress,
 				contractAddress: token.address
 			});
 		}
+
 		if (isTokenErc1155(token)) {
-			const alchemyProvider = alchemyProviders(token.network.id);
+			const { getNftIdsForOwner } = alchemyProviders(token.network.id);
 
 			return (
-				await alchemyProvider.getNftIdsForOwner({
+				await getNftIdsForOwner({
 					address: walletAddress,
 					contractAddress: token.address
 				})
-			).map((ownedNft) => parseNftId(ownedNft.id));
+			).map(({ id }) => id);
 		}
 
 		return [];
-	} catch (_: unknown) {
+	} catch (err: unknown) {
+		trackEvent({
+			name: TRACK_ETH_LOADING_NFT_IDS_ERROR,
+			metadata: {
+				tokenId: `${token.id.description}`,
+				networkId: `${token.network.id.description}`,
+				standard: token.standard,
+				error: `${err}`
+			},
+			warning: `Failed to load NFT IDs: ${err}`
+		});
+
 		return [];
 	}
 };

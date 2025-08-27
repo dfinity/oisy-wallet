@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "Solde Bitcoin insuffisant pour couvrir les frais de transaction",
 			"btc_invalid_utxo_data": "Données de transaction Bitcoin invalides",
 			"btc_utxo_locked": "Les fonds Bitcoin sont verrouillés par des transactions en attente",
-			"btc_invalid_fee_calculation": "Échec de la validation des frais de transaction Bitcoin"
+			"btc_invalid_fee_calculation": "Échec de la validation des frais de transaction Bitcoin",
+			"pending_transactions_not_available": "Le service de transactions en attente n'est actuellement pas disponible. Veuillez réessayer plus tard."
 		},
 		"error": {
 			"unexpected": "Quelque chose s'est mal passé lors de l'envoi de la transaction.",
@@ -811,9 +812,9 @@
 			"approval_fee": "Frais d'approbation",
 			"gas_fee": "Frais de gaz",
 			"lp_fee": "Frais LP",
-			"max_slippage_info": "Entrez une valeur entre 0% et 50%",
+			"max_slippage_info": "Entrez une valeur entre 0% et $maxSlippage%",
 			"max_slippage_warning": "Avertissement de risque : un glissement élevé peut entraîner des pertes en raison de la volatilité du marché",
-			"max_slippage_error": "La tolérance de glissement ne peut pas être de 0% ou dépasser 50%",
+			"max_slippage_error": "La tolérance de glissement ne peut pas être de 0% ou dépasser $maxSlippage%",
 			"swap_button": "Échanger maintenant",
 			"swap_is_not_offered": "Cet échange n'est actuellement pas proposé.",
 			"executing_transaction": "Exécution de la transaction...",
@@ -1496,10 +1497,27 @@
 			"entire_agreement": "",
 			"assignment": "<strong>11. CESSION.</strong> Vous ne pouvez pas céder le présent Accord de Licence sans le consentement écrit préalable de DFINITY, que ce soit expressément ou par l'effet de la loi, y compris dans le cadre d'une fusion ou d'un changement de contrôle, et toute tentative de cession sera nulle et non avenue. DFINITY peut céder le présent Accord de Licence sans restriction et sans aucun préavis. Sous réserve de ce qui précède, le présent Accord de Licence sera contraignant pour les parties et leurs successeurs respectifs et cessionnaires autorisés.",
 			"no_waiver": "<strong>12. NON-RENONCIATION.</strong> Le fait de ne pas exercer, ou de retarder l'exercice, un droit, un pouvoir ou un recours prévu dans le présent Accord de Licence ou par la loi ne constitue pas une renonciation à ce droit, pouvoir ou recours. La renonciation de DFINITY à toute obligation ou violation du présent Accord de Licence ne constitue pas une renonciation à toute autre obligation ou violation ultérieure du présent Accord de Licence.",
-			"english_version": "<strong>13. VERSION ANGLAISE.</strong> La version en langue anglaise du présent Accord de Licence sera la version officielle et prévaudra en cas de conflit. Toutes les communications et notifications faites en vertu du présent Accord de Licence doivent être en langue anglaise."
+			"english_version": "<strong>13. VERSION ANGLAISE.</strong> La version en langue anglaise du présent Accord de Licence sera la version officielle et prévaudra en cas de conflit. Toutes les communications et notifications faites en vertu du présent Accord de Licence doivent être en langue anglaise.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "L'accord de licence $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
