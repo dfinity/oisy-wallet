@@ -15,6 +15,7 @@
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 
 	let isHomePage = $derived(isRouteTokens(page));
 </script>
@@ -31,14 +32,42 @@
 	class:sm:sticky={$authNotSignedIn}
 >
 	<div
-		class="pointer-events-none flex w-full flex-col items-center justify-between sm:items-end md:flex-row md:gap-4"
+		class="pointer-events-none flex w-full flex-col items-center justify-between md:flex-row md:gap-4"
+		class:sm:items-end={NEW_AGREEMENTS_ENABLED}
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
 	>
-		<div
-			class={`pointer-events-auto flex flex-col items-center gap-4 sm:items-start ${isHomePage ? '' : 'hidden md:flex'}`}
-		>
-			<div class="flex items-center gap-4">
+		{#if NEW_AGREEMENTS_ENABLED}
+			<div
+				class={`pointer-events-auto flex flex-col items-center gap-4 sm:items-start ${isHomePage ? '' : 'hidden md:flex'}`}
+			>
+				<div class="flex items-center gap-4">
+					<ExternalLinkIcon
+						ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
+						href={OISY_TWITTER_URL}
+					>
+						<IconTwitter />
+					</ExternalLinkIcon>
+
+					<ExternalLinkIcon
+						ariaLabel={$i18n.navigation.text.source_code_on_github}
+						href={OISY_REPO_URL}
+					>
+						<IconGitHub />
+					</ExternalLinkIcon>
+				</div>
+				{#if $authNotSignedIn}
+					<div class="mb-2 flex gap-2 text-nowrap text-xs text-tertiary">
+						<TermsOfUseLink />
+						<PrivacyPolicyLink />
+						<LicenseLink />
+					</div>
+				{/if}
+			</div>
+		{:else}
+			<div
+				class={`pointer-events-auto flex flex-row items-center gap-4 ${isHomePage ? '' : 'hidden md:flex'}`}
+			>
 				<ExternalLinkIcon
 					ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
 					href={OISY_TWITTER_URL}
@@ -53,14 +82,7 @@
 					<IconGitHub />
 				</ExternalLinkIcon>
 			</div>
-			{#if $authNotSignedIn}
-				<div class="mb-2 flex gap-2 text-nowrap text-xs text-tertiary">
-					<TermsOfUseLink />
-					<PrivacyPolicyLink />
-					<LicenseLink />
-				</div>
-			{/if}
-		</div>
+		{/if}
 
 		<div
 			class="item pointer-events-auto flex flex-col items-end px-6 text-xs md:px-0 lg:max-w-48 2xl:text-sm"

@@ -6,6 +6,8 @@
 	import InviteRewardsBanner from '$lib/components/ui/InviteRewardsBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 
 	const infoList = $derived([
 		{
@@ -48,5 +50,9 @@
 		{/each}
 	</div>
 
-	<ButtonAuthenticateWithHelp needHelpLink={false} />
+	{#if NEW_AGREEMENTS_ENABLED}
+		<ButtonAuthenticateWithHelp needHelpLink={false} />
+	{:else}
+		<ButtonAuthenticateWithLicense />
+	{/if}
 </div>

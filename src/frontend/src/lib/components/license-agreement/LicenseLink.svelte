@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 
 	interface Props {
 		noUnderline?: boolean;
@@ -16,5 +17,9 @@
 	data-tid={testId}
 	href="/license-agreement"
 >
-	{$i18n.license_agreement.text.license_agreement}
+	{#if NEW_AGREEMENTS_ENABLED}
+		{$i18n.license_agreement.text.license_agreement}
+	{:else}
+		{$i18n.license_agreement.text.accept_terms_link}
+	{/if}
 </a>

@@ -49,6 +49,8 @@
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 
 	interface Props {
 		visible?: boolean;
@@ -110,7 +112,11 @@
 	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				<ButtonAuthenticateWithHelp fullWidth licenseAlignment="center" needHelpLink={false} />
+				{#if NEW_AGREEMENTS_ENABLED}
+					<ButtonAuthenticateWithHelp fullWidth licenseAlignment="center" needHelpLink={false} />
+				{:else}
+					<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" needHelpLink={false} />
+				{/if}
 			</span>
 			<Hr />
 
