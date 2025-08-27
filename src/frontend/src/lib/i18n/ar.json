@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "بالنقر على هذا الزر، فإنك توافق على",
 			"accept_terms_link": "اتفاقية الترخيص",
 			"title": "اتفاقية ترخيص $oisy_name (\"اتفاقية الترخيص\")",

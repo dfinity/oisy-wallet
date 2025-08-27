@@ -1214,6 +1214,7 @@ interface I18nCarousel {
 
 interface I18nLicense_agreement {
 	text: {
+		license_agreement: string;
 		accept_terms: string;
 		accept_terms_link: string;
 		title: string;

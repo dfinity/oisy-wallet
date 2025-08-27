@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Нажимая эту кнопку, вы соглашаетесь с",
 			"accept_terms_link": "Лицензионное Соглашение",
 			"title": "Лицензионное Соглашение $oisy_name («Лицензионное Соглашение»)",

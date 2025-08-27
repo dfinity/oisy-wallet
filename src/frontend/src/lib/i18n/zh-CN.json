@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "点击此按钮即表示你同意",
 			"accept_terms_link": "许可协议",
 			"title": "$oisy_name 许可协议（“许可协议”）",
