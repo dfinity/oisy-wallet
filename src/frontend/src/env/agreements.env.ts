@@ -12,15 +12,14 @@ export const NEW_AGREEMENTS_ENABLED = parseBoolEnvVar(
 	import.meta.env.VITE_FRONTEND_NEW_AGREEMENTS_ENABLED
 );
 
-export const getAgreementLastUpdated = (type: keyof EnvAgreement) => {
-	const { data } = z.safeParse(EnvAgreementsSchema, agreementsJson);
+const parseAgreementsJson = () => z.parse(EnvAgreementsSchema, agreementsJson);
 
-	return formatSecondsToDate({
-		seconds: data[type]?.lastUpdatedTimestamp / MILLISECONDS_IN_SECOND,
+export const getAgreementLastUpdated = (type: keyof EnvAgreement) =>
+	formatSecondsToDate({
+		seconds: parseAgreementsJson()[type]?.lastUpdatedTimestamp / MILLISECONDS_IN_SECOND,
 		language: get(i18n).lang,
 		formatOptions: {
 			minute: undefined,
 			hour: undefined
 		}
 	});
-};
