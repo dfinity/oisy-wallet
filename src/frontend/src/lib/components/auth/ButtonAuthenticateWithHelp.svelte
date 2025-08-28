@@ -1,6 +1,7 @@
 <script lang="ts">
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { modalStore } from '$lib/stores/modal.store';
