@@ -1,27 +1,4 @@
 import type { tool } from '$declarations/llm/llm.did';
-import {
-	ARBITRUM_MAINNET_NETWORK_SYMBOL,
-	ARBITRUM_SEPOLIA_NETWORK_SYMBOL
-} from '$env/networks/networks-evm/networks.evm.arbitrum.env';
-import {
-	BASE_NETWORK_SYMBOL,
-	BASE_SEPOLIA_NETWORK_SYMBOL
-} from '$env/networks/networks-evm/networks.evm.base.env';
-import {
-	BSC_MAINNET_NETWORK_SYMBOL,
-	BSC_TESTNET_NETWORK_SYMBOL
-} from '$env/networks/networks-evm/networks.evm.bsc.env';
-import {
-	BTC_MAINNET_NETWORK_SYMBOL,
-	BTC_REGTEST_NETWORK_SYMBOL,
-	BTC_TESTNET_NETWORK_SYMBOL
-} from '$env/networks/networks.btc.env';
-import { ETHEREUM_NETWORK_SYMBOL, SEPOLIA_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
-import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
-import {
-	SOLANA_DEVNET_NETWORK_SYMBOL,
-	SOLANA_MAINNET_NETWORK_SYMBOL
-} from '$env/networks/networks.sol.env';
 import { toNullable } from '@dfinity/utils';
 
 export const AI_ASSISTANT_LLM_MODEL = 'qwen3:32b';
@@ -143,7 +120,13 @@ Arguments: "${filterParams}".
 Do NOT include json or any Markdown.
 Do NOT include extra text.`;
 
-export const getAiAssistantToolsDescription = (enabledTokensSymbols: string[]) =>
+export const getAiAssistantToolsDescription = ({
+	enabledNetworksSymbols,
+	enabledTokensSymbols
+}: {
+	enabledNetworksSymbols: string[];
+	enabledTokensSymbols: string[];
+}) =>
 	[
 		{
 			function: {
@@ -229,22 +212,7 @@ export const getAiAssistantToolsDescription = (enabledTokensSymbols: string[]) =
 						{
 							type: 'string',
 							name: 'networkId',
-							enum: toNullable([
-								ICP_NETWORK_SYMBOL,
-								ETHEREUM_NETWORK_SYMBOL,
-								SEPOLIA_NETWORK_SYMBOL,
-								BASE_NETWORK_SYMBOL,
-								BASE_SEPOLIA_NETWORK_SYMBOL,
-								ARBITRUM_MAINNET_NETWORK_SYMBOL,
-								ARBITRUM_SEPOLIA_NETWORK_SYMBOL,
-								BSC_MAINNET_NETWORK_SYMBOL,
-								BSC_TESTNET_NETWORK_SYMBOL,
-								BTC_MAINNET_NETWORK_SYMBOL,
-								BTC_TESTNET_NETWORK_SYMBOL,
-								BTC_REGTEST_NETWORK_SYMBOL,
-								SOLANA_MAINNET_NETWORK_SYMBOL,
-								SOLANA_DEVNET_NETWORK_SYMBOL
-							]),
+							enum: toNullable(enabledNetworksSymbols),
 							description: toNullable(
 								'The blockchain network where the token will be sent (e.g., ETH, BASE, ARB, ICP, SOL, BTC). Must come from AVAILABLE TOKENS.'
 							)
