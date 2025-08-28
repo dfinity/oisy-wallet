@@ -15,6 +15,7 @@
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
+	import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -24,33 +25,35 @@
 </script>
 
 <LoaderUserProfile>
-	<AddressGuard>
-		<Loader>
-			<UrlGuard>
-				<ShortcutGuard>
-					<RewardGuard>
-						<LoaderEthBalances>
-							<LoaderWallets>
-								<ExchangeWorker>
-									<LoaderMetamask>
-										<UserSnapshotWorker>
-											<LoaderContacts>
-												<TransactionsIdbSetter>
-													<BalancesIdbSetter>
-														{@render children()}
-													</BalancesIdbSetter>
-												</TransactionsIdbSetter>
-											</LoaderContacts>
-										</UserSnapshotWorker>
-									</LoaderMetamask>
-								</ExchangeWorker>
-							</LoaderWallets>
-						</LoaderEthBalances>
-					</RewardGuard>
-				</ShortcutGuard>
-			</UrlGuard>
-		</Loader>
-	</AddressGuard>
+	<AgreementsGuard>
+		<AddressGuard>
+			<Loader>
+				<UrlGuard>
+					<ShortcutGuard>
+						<RewardGuard>
+							<LoaderEthBalances>
+								<LoaderWallets>
+									<ExchangeWorker>
+										<LoaderMetamask>
+											<UserSnapshotWorker>
+												<LoaderContacts>
+													<TransactionsIdbSetter>
+														<BalancesIdbSetter>
+															{@render children()}
+														</BalancesIdbSetter>
+													</TransactionsIdbSetter>
+												</LoaderContacts>
+											</UserSnapshotWorker>
+										</LoaderMetamask>
+									</ExchangeWorker>
+								</LoaderWallets>
+							</LoaderEthBalances>
+						</RewardGuard>
+					</ShortcutGuard>
+				</UrlGuard>
+			</Loader>
+		</AddressGuard>
+	</AgreementsGuard>
 </LoaderUserProfile>
 
 <!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
