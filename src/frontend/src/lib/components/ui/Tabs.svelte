@@ -38,7 +38,7 @@
 			class:border-brand-primary={activeTab === id}
 			class:border-primary={activeTab !== id}
 			class:h-6={tabVariant === 'menu'}
-			class:hover:text-black={tabVariant === 'menu'}
+			class:hover:text-primary={tabVariant === 'menu'}
 			class:hover:text-brand-primary={tabVariant === 'default'}
 			class:ml-4={index !== 0}
 			class:p-2={tabVariant === 'default'}
