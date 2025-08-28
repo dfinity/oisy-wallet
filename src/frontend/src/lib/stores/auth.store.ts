@@ -105,7 +105,7 @@ const initAuthStore = (): AuthStore => {
 		 * This is a hack and should **only** be used in a testing environment.
 		 *
 		 * Ensure that the `TEST` flag is enabled (e.g., via `npm run test`) before using this function.
-		 * If invoked outside of the testing environment, it will throw an error.
+		 * If invoked outside the testing environment, it will throw an error.
 		 *
 		 * @param {Identity} identity - The mock identity object to be set for testing.
 		 * @throws {Error} Throws an error if the function is called outside the test environment.
