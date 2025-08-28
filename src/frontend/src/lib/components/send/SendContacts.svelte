@@ -50,12 +50,12 @@
 
 <div in:fade>
 	{#if nonNullish(networkContacts) && Object.keys(filteredNetworkContacts).length > 0}
-		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
+		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]" in:fade>
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each Object.values(filteredNetworkContacts) as { contact, address }, index (index)}
 					<SendContact
-						{contact}
 						{address}
+						{contact}
 						onClick={() => {
 							selectedContact = contact;
 							destination = address;
@@ -67,8 +67,8 @@
 		</div>
 	{:else}
 		<EmptyState
-			title={$i18n.send.text.contacts_empty_state_title}
 			description={$i18n.send.text.contacts_empty_state_description}
+			title={$i18n.send.text.contacts_empty_state_title}
 		/>
 	{/if}
 </div>

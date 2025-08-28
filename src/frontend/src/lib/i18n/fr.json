@@ -14,6 +14,7 @@
 			"symbol": "Symbole",
 			"decimals": "Décimales",
 			"amount": "Montant",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Destination",
 			"reject": "Rejeter",
@@ -722,7 +723,13 @@
 			"minter_info_not_certified": "Réessayez dans quelques secondes, un paramètre de configuration ckETH n'a pas été certifié.",
 			"cketh_max_transaction_fee_missing": "Les frais de transaction maximum pour ckETH sont manquants.",
 			"utxos_fee_missing": "Les frais UTXO sont manquants.",
-			"minimum_btc_amount": "Montant trop petit. Veuillez saisir au moins $amount BTC."
+			"minimum_btc_amount": "Montant trop petit. Veuillez saisir au moins $amount BTC.",
+			"btc_insufficient_balance": "Aucun UTXO Bitcoin disponible pour la transaction",
+			"btc_insufficient_balance_for_fee": "Solde Bitcoin insuffisant pour couvrir les frais de transaction",
+			"btc_invalid_utxo_data": "Données de transaction Bitcoin invalides",
+			"btc_utxo_locked": "Les fonds Bitcoin sont verrouillés par des transactions en attente",
+			"btc_invalid_fee_calculation": "Échec de la validation des frais de transaction Bitcoin",
+			"pending_transactions_not_available": "Le service de transactions en attente n'est actuellement pas disponible. Veuillez réessayer plus tard."
 		},
 		"error": {
 			"unexpected": "Quelque chose s'est mal passé lors de l'envoi de la transaction.",
@@ -828,7 +835,11 @@
 			"open_instructions_link": "Ouvrir le lien des instructions",
 			"select_token": "Sélectionner le token",
 			"select_network_filter": "Sélectionner le réseau",
-			"withdrawing": ""
+			"withdrawing": "",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "Il n'y a actuellement aucun échange disponible pour échanger des tokens. Veuillez réessayer plus tard.",
@@ -1006,13 +1017,35 @@
 		"text": {
 			"title": "NFT",
 			"title_empty": "Vos NFT apparaîtront ici",
-			"description_empty": "Il semble que vous n'ayez pas encore reçu de NFT"
+			"description_empty": "Il semble que vous n'ayez pas encore reçu de NFT",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": "",
+			"collection_not_loaded": "",
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": "",
+			"address_copied": "",
+			"open_explorer": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
 			"card": {
 				"image": "Image du NFT avec l'ID de token : $tokenId"
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
@@ -1446,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "En cliquant sur ce bouton, vous acceptez les",
 			"accept_terms_link": "Conditions de licence",
 			"title": "Accord de licence $oisy_name (« Accord de licence »)",
@@ -1464,10 +1498,31 @@
 			"entire_agreement": "",
 			"assignment": "<strong>11. CESSION.</strong> Vous ne pouvez pas céder le présent Accord de Licence sans le consentement écrit préalable de DFINITY, que ce soit expressément ou par l'effet de la loi, y compris dans le cadre d'une fusion ou d'un changement de contrôle, et toute tentative de cession sera nulle et non avenue. DFINITY peut céder le présent Accord de Licence sans restriction et sans aucun préavis. Sous réserve de ce qui précède, le présent Accord de Licence sera contraignant pour les parties et leurs successeurs respectifs et cessionnaires autorisés.",
 			"no_waiver": "<strong>12. NON-RENONCIATION.</strong> Le fait de ne pas exercer, ou de retarder l'exercice, un droit, un pouvoir ou un recours prévu dans le présent Accord de Licence ou par la loi ne constitue pas une renonciation à ce droit, pouvoir ou recours. La renonciation de DFINITY à toute obligation ou violation du présent Accord de Licence ne constitue pas une renonciation à toute autre obligation ou violation ultérieure du présent Accord de Licence.",
-			"english_version": "<strong>13. VERSION ANGLAISE.</strong> La version en langue anglaise du présent Accord de Licence sera la version officielle et prévaudra en cas de conflit. Toutes les communications et notifications faites en vertu du présent Accord de Licence doivent être en langue anglaise."
+			"english_version": "<strong>13. VERSION ANGLAISE.</strong> La version en langue anglaise du présent Accord de Licence sera la version officielle et prévaudra en cas de conflit. Toutes les communications et notifications faites en vertu du présent Accord de Licence doivent être en langue anglaise.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "L'accord de licence $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1523,8 +1578,14 @@
 			"action_button_contacts_title": "Afficher les contacts",
 			"action_button_contacts_subtitle": "Afficher vos contacts enregistrés",
 			"action_button_contacts_prompt": "Montrez-moi mes contacts.",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "Envoyer un message",
 			"send_message_input_placeholder": "Que voulez-vous faire ?",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": "Réflexion..."
 		},

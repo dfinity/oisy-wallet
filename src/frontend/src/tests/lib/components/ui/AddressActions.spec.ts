@@ -1,13 +1,13 @@
-import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+import AddressActions from '$lib/components/ui/AddressActions.svelte';
 import { render } from '@testing-library/svelte';
 
-describe('TransactionAddressActions', () => {
-	describe('TransactionAddressActions', () => {
+describe('AddressActions', () => {
+	describe('AddressActions', () => {
 		it('renders nothing when no props are passed', () => {
-			const { queryByTestId } = render(TransactionAddressActions, {
+			const { queryByTestId } = render(AddressActions, {
 				props: {
 					copyAddressTestId: 'copy',
-					explorerUrlTestId: 'explorer'
+					externalLinkTestId: 'explorer'
 				}
 			});
 
@@ -16,12 +16,12 @@ describe('TransactionAddressActions', () => {
 		});
 
 		it('renders only Copy when copyAddress and copyAddressText are provided', () => {
-			const { getByTestId, queryByTestId } = render(TransactionAddressActions, {
+			const { getByTestId, queryByTestId } = render(AddressActions, {
 				props: {
 					copyAddress: '0x123',
 					copyAddressText: 'Copy this address',
 					copyAddressTestId: 'copy',
-					explorerUrlTestId: 'explorer'
+					externalLinkTestId: 'explorer'
 				}
 			});
 
@@ -29,13 +29,13 @@ describe('TransactionAddressActions', () => {
 			expect(queryByTestId('explorer')).not.toBeInTheDocument();
 		});
 
-		it('renders only ExternalLink when explorerUrl and explorerUrlAriaLabel are provided', () => {
-			const { getByTestId, queryByTestId } = render(TransactionAddressActions, {
+		it('renders only ExternalLink when externalLink and externalLinkAriaLabel are provided', () => {
+			const { getByTestId, queryByTestId } = render(AddressActions, {
 				props: {
-					explorerUrl: 'https://example.com',
-					explorerUrlAriaLabel: 'Go to explorer',
+					externalLink: 'https://example.com',
+					externalLinkAriaLabel: 'Go to explorer',
 					copyAddressTestId: 'copy',
-					explorerUrlTestId: 'explorer'
+					externalLinkTestId: 'explorer'
 				}
 			});
 
@@ -44,14 +44,14 @@ describe('TransactionAddressActions', () => {
 		});
 
 		it('renders both Copy and ExternalLink when all props are provided', () => {
-			const { getByTestId } = render(TransactionAddressActions, {
+			const { getByTestId } = render(AddressActions, {
 				props: {
 					copyAddress: '0x123',
 					copyAddressText: 'Copy this address',
-					explorerUrl: 'https://example.com',
-					explorerUrlAriaLabel: 'Go to explorer',
+					externalLink: 'https://example.com',
+					externalLinkAriaLabel: 'Go to explorer',
 					copyAddressTestId: 'copy',
-					explorerUrlTestId: 'explorer'
+					externalLinkTestId: 'explorer'
 				}
 			});
 
@@ -60,11 +60,11 @@ describe('TransactionAddressActions', () => {
 		});
 
 		it('renders nothing if only copyAddress is provided', () => {
-			const { queryByTestId } = render(TransactionAddressActions, {
+			const { queryByTestId } = render(AddressActions, {
 				props: {
 					copyAddress: '0x123',
 					copyAddressTestId: 'copy',
-					explorerUrlTestId: 'explorer'
+					externalLinkTestId: 'explorer'
 				}
 			});
 
@@ -73,11 +73,11 @@ describe('TransactionAddressActions', () => {
 		});
 
 		it('renders nothing if only copyAddressText is provided', () => {
-			const { queryByTestId } = render(TransactionAddressActions, {
+			const { queryByTestId } = render(AddressActions, {
 				props: {
 					copyAddressText: 'Copy this address',
 					copyAddressTestId: 'copy',
-					explorerUrlTestId: 'explorer'
+					externalLinkTestId: 'explorer'
 				}
 			});
 
@@ -85,12 +85,12 @@ describe('TransactionAddressActions', () => {
 			expect(queryByTestId('explorer')).not.toBeInTheDocument();
 		});
 
-		it('renders nothing if only explorerUrl is provided', () => {
-			const { queryByTestId } = render(TransactionAddressActions, {
+		it('renders nothing if only externalLink is provided', () => {
+			const { queryByTestId } = render(AddressActions, {
 				props: {
-					explorerUrl: 'https://example.com',
+					externalLink: 'https://example.com',
 					copyAddressTestId: 'copy',
-					explorerUrlTestId: 'explorer'
+					externalLinkTestId: 'explorer'
 				}
 			});
 
@@ -98,12 +98,12 @@ describe('TransactionAddressActions', () => {
 			expect(queryByTestId('copy')).not.toBeInTheDocument();
 		});
 
-		it('renders nothing if only explorerUrlAriaLabel is provided', () => {
-			const { queryByTestId } = render(TransactionAddressActions, {
+		it('renders nothing if only externalLinkAriaLabel is provided', () => {
+			const { queryByTestId } = render(AddressActions, {
 				props: {
-					explorerUrlAriaLabel: 'Go to explorer',
+					externalLinkAriaLabel: 'Go to explorer',
 					copyAddressTestId: 'copy',
-					explorerUrlTestId: 'explorer'
+					externalLinkTestId: 'explorer'
 				}
 			});
 

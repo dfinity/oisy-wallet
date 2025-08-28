@@ -138,12 +138,12 @@
 			<ButtonGroup>
 				<ButtonCloseModal />
 				<Button
-					paddingSmall
 					colorStyle="primary"
-					type="button"
 					fullWidth
 					onclick={regenerateCode}
+					paddingSmall
 					testId={VIP_CODE_REGENERATE_BUTTON}
+					type="button"
 				>
 					{$i18n.vip.invitation.text.generate_new_link}
 				</Button>

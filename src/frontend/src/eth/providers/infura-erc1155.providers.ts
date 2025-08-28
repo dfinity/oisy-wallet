@@ -120,7 +120,7 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 		tokenId: NftId;
 	}): Promise<number> => {
 		const erc1155Contract = new Contract(contractAddress, ERC1155_ABI, this.provider);
-		return await erc1155Contract.balanceOf(walletAddress, tokenId);
+		return Number(await erc1155Contract.balanceOf(walletAddress, tokenId));
 	};
 }
 

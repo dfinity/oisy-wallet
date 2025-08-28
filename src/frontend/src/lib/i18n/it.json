@@ -14,6 +14,7 @@
 			"symbol": "Simbolo",
 			"decimals": "Decimali",
 			"amount": "Importo",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Destinazione",
 			"reject": "Rifiuta",
@@ -721,8 +722,14 @@
 			"minter_info_not_loaded": "Riprova tra qualche secondo, un parametro di configurazione ckETH non è ancora stato caricato.",
 			"minter_info_not_certified": "Riprova tra qualche secondo, un parametro di configurazione ckETH non è stato certificato.",
 			"cketh_max_transaction_fee_missing": "Manca la fee massima di transazione per ckETH.",
-			"utxos_fee_missing": "Mancano le fee UTXO.",
-			"minimum_btc_amount": "L'importo minimo è $amount BTC."
+			"utxos_fee_missing": "La commissione UTXO è mancante.",
+			"minimum_btc_amount": "Importo troppo piccolo. Inserisci almeno $amount BTC.",
+			"btc_insufficient_balance": "Nessun UTXO Bitcoin disponibile per la transazione",
+			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insufficiente per coprire le commissioni di transazione",
+			"btc_invalid_utxo_data": "Dati della transazione Bitcoin non validi",
+			"btc_utxo_locked": "I fondi Bitcoin sono bloccati da transazioni in sospeso",
+			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita",
+			"pending_transactions_not_available": "Il servizio delle transazioni in sospeso non è attualmente disponibile. Si prega di riprovare più tardi."
 		},
 		"error": {
 			"unexpected": "Qualcosa è andato storto durante l'invio della transazione.",
@@ -805,9 +812,9 @@
 			"approval_fee": "Fee di approvazione",
 			"gas_fee": "Gas fee",
 			"lp_fee": "Fee LP",
-			"max_slippage_info": "Inserisci un valore tra 0% e 50%",
+			"max_slippage_info": "Inserisci un valore tra 0% e $maxSlippage%",
 			"max_slippage_warning": "Avviso di rischio: un elevato slippage può comportare perdite a causa della volatilità del mercato",
-			"max_slippage_error": "La tolleranza allo slippage non può essere 0% o superare il 50%",
+			"max_slippage_error": "La tolleranza allo slippage non può essere 0% o superare il $maxSlippage%",
 			"swap_button": "Scambia ora",
 			"swap_is_not_offered": "Questo scambio non è attualmente offerto.",
 			"executing_transaction": "Esecuzione transazione...",
@@ -828,7 +835,11 @@
 			"open_instructions_link": "Apri il link con le istruzioni",
 			"select_token": "Seleziona il token",
 			"select_network_filter": "Seleziona la rete",
-			"withdrawing": ""
+			"withdrawing": "",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -1006,13 +1017,35 @@
 		"text": {
 			"title": "NFT",
 			"title_empty": "I tuoi NFT appariranno qui",
-			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT"
+			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": "",
+			"collection_not_loaded": "",
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": "",
+			"address_copied": "",
+			"open_explorer": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
 			"card": {
 				"image": "Immagine dell'NFT con token ID: $tokenId"
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
@@ -1446,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Cliccando su questo pulsante, accetti l'",
 			"accept_terms_link": "Accordo di Licenza",
 			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
@@ -1464,10 +1498,31 @@
 			"entire_agreement": "<strong>10. INTERO ACCORDO E SEPARABILITÀ.</strong> Il presente Accordo di Licenza costituisce l'intero accordo tra l'Utente e DFINITY e sostituisce tutti gli accordi, le negoziazioni o altre comunicazioni precedenti tra l'Utente e DFINITY, sia orali che scritte, in relazione all'oggetto del presente. DFINITY può apportare modifiche al presente Accordo di Licenza quando vengono rese disponibili nuove versioni di $oisy_short. Nel caso in cui qualsiasi disposizione del presente Accordo di Licenza sia ritenuta non valida o inapplicabile, allora: (a) tale disposizione sarà considerata riformata nella misura strettamente necessaria per rendere tale disposizione valida e applicabile, o se non è suscettibile di tale riforma, sarà considerata separata dal presente Accordo di Licenza; e (b) la validità e l'applicabilità di tutte le altre disposizioni del presente non saranno in alcun modo influenzate o compromesse.",
 			"assignment": "<strong>11. CESSIONE.</strong> L'Utente non può cedere il presente Accordo di Licenza senza il preventivo consenso scritto di DFINITY, sia espressamente che per effetto di legge, anche in relazione a una fusione o a un cambiamento di controllo, e qualsiasi tentativo di cessione sarà nullo e privo di effetto. DFINITY può cedere il presente Accordo di Licenza senza restrizioni e senza alcun preavviso all'Utente. Fatto salvo quanto precede, il presente Accordo di Licenza sarà vincolante per le parti e i loro rispettivi successori e cessionari autorizzati.",
 			"no_waiver": "<strong>12. NESSUNA RINUNCIA.</strong> La mancata esercizio, o il ritardo nell'esercizio, di un diritto, potere o rimedio previsto nel presente Accordo di Licenza o dalla legge non costituirà una rinuncia a tale diritto, potere o rimedio. La rinuncia di DFINITY a qualsiasi obbligo o violazione del presente Accordo di Licenza non opererà come rinuncia a qualsiasi altro obbligo o successiva violazione del presente Accordo di Licenza.",
-			"english_version": "<strong>13. VERSIONE IN INGLESE.</strong> La versione in lingua inglese del presente Accordo di Licenza sarà la versione ufficiale e prevalente in caso di conflitto. Tutte le comunicazioni e le notifiche effettuate ai sensi del presente Accordo di Licenza devono essere in lingua inglese."
+			"english_version": "<strong>13. VERSIONE IN INGLESE.</strong> La versione in lingua inglese del presente Accordo di Licenza sarà la versione ufficiale e prevalente in caso di conflitto. Tutte le comunicazioni e le notifiche effettuate ai sensi del presente Accordo di Licenza devono essere in lingua inglese.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "L'Accordo di Licenza di $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1523,8 +1578,14 @@
 			"action_button_contacts_title": "",
 			"action_button_contacts_subtitle": "",
 			"action_button_contacts_prompt": "",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": ""
 		},

@@ -238,6 +238,7 @@ export const CONVERT_AMOUNT_EXCHANGE_VALUE = 'convert-amount-exchange-value';
 export const CONVERT_AMOUNT_EXCHANGE_SKELETON = 'convert-amount-exchange-skeleton';
 
 export const SEND_FEE_INFO = 'send-fee-info';
+export const SWAP_FEE_INFO = 'swap-fee-info';
 
 // Avatar
 export const AVATAR_IMAGE = 'avatar-image';
@@ -269,3 +270,5 @@ export const CONTACT_REMOVE_MENU_ITEM = 'contact-remove-menu-item';
 // AI Assistant
 export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';
 export const AI_ASSISTANT_SEND_MESSAGE_BUTTON = 'ai-assistant-send-message-button';
+export const AI_ASSISTANT_SEND_TOKENS_BUTTON = 'ai-assistant-send-tokens-button';
+export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-tokens-success-message';

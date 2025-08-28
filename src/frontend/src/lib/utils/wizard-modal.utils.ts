@@ -5,12 +5,14 @@ import type {
 	WizardStepsConvert,
 	WizardStepsHowToConvert,
 	WizardStepsReceive,
-	WizardStepsSend
+	WizardStepsSend,
+	WizardStepsSwap
 } from '$lib/enums/wizard-steps';
 import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
 
 type StepName =
 	| WizardStepsSend
+	| WizardStepsSwap
 	| WizardStepsConvert
 	| WizardStepsAuthHelp
 	| WizardStepsHowToConvert

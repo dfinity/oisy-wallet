@@ -17,9 +17,9 @@
 </script>
 
 <ButtonHero
-	{onclick}
-	disabled={$isBusy || $outflowActionsDisabled}
 	ariaLabel={$i18n.send.text.send}
+	disabled={$isBusy || $outflowActionsDisabled}
+	{onclick}
 	testId={SEND_TOKENS_MODAL_OPEN_BUTTON}
 >
 	{#snippet icon()}

@@ -4,6 +4,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import TokenInputCurrencyFiat from '$lib/components/tokens/TokenInputCurrencyFiat.svelte';
 	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
@@ -35,6 +36,7 @@
 	export let autofocus = false;
 	export let customValidate: (userAmount: bigint) => TokenActionErrorType = () => undefined;
 	export let customErrorValidate: (userAmount: bigint) => Error | undefined = () => undefined;
+	export let showTokenNetwork = false;
 
 	const dispatch = createEventDispatcher();
 
@@ -69,53 +71,59 @@
 <div
 	class="rounded-lg border border-solid p-5 text-left duration-300"
 	class:bg-brand-subtle-10={focused}
-	class:border-brand-subtle-20={focused}
 	class:bg-secondary={!focused}
+	class:border-brand-subtle-20={focused}
 	class:border-secondary={!focused}
 >
-	<div class="mb-2 text-sm font-bold">
+	<div class="space-between mb-2 flex justify-between text-sm font-bold">
 		<slot name="title" />
+		{#if showTokenNetwork && nonNullish(token)}
+			<div class="flex text-xs font-normal text-tertiary">
+				<span class="mr-1 text-sm">On {token.network.name}</span>
+				<NetworkLogo network={token.network} />
+			</div>
+		{/if}
 	</div>
 
 	<TokenInputContainer
+		error={nonNullish(errorType) || nonNullish(error)}
 		{focused}
 		styleClass="h-14 text-3xl"
-		error={nonNullish(errorType) || nonNullish(error)}
 	>
 		<div class="flex h-full w-full items-center">
 			{#if token}
 				{#if displayUnit === 'token'}
 					<TokenInputCurrencyToken
-						bind:value={amount}
 						{name}
-						{placeholder}
-						{disabled}
-						{loading}
 						{autofocus}
 						decimals={token.decimals}
+						{disabled}
 						error={nonNullish(errorType)}
+						{loading}
+						{placeholder}
+						bind:value={amount}
 						on:focus={onFocus}
 						on:blur={onBlur}
 						on:nnsInput={onInput}
 					/>
 				{:else if displayUnit === 'usd'}
 					<TokenInputCurrencyFiat
-						bind:tokenAmount={amount}
-						tokenDecimals={token.decimals}
-						{exchangeRate}
 						{name}
-						{placeholder}
-						{disabled}
-						{loading}
 						{autofocus}
+						{disabled}
 						error={nonNullish(errorType)}
+						{exchangeRate}
+						{loading}
+						{placeholder}
+						tokenDecimals={token.decimals}
+						bind:tokenAmount={amount}
 						on:focus={onFocus}
 						on:blur={onBlur}
 						on:nnsInput={onInput}
 					/>
 				{/if}
 			{:else}
-				<button on:click class="h-full w-full pl-3 text-base"
+				<button class="h-full w-full pl-3 text-base" on:click
 					>{$i18n.tokens.text.select_token}</button
 				>
 			{/if}
@@ -123,14 +131,14 @@
 
 		<div class="h-3/4 w-[1px] bg-disabled"></div>
 
-		<button class="flex h-full gap-1 px-3" on:click disabled={!isSelectable}>
+		<button class="flex h-full gap-1 px-3" disabled={!isSelectable} on:click>
 			{#if token}
 				<TokenLogo data={token} logoSize="xs" />
 				<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
 			{:else}
 				<span
-					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
 					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
+					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
 				>
 					<IconPlus />
 				</span>
@@ -150,5 +158,5 @@
 </div>
 
 {#if nonNullish(error)}
-	<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{error.message}</p>
+	<p class="pb-2 text-error-primary" transition:slide={SLIDE_DURATION}>{error.message}</p>
 {/if}

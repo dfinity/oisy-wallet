@@ -18,14 +18,14 @@
 </script>
 
 <Button
-	{onclick}
 	{ariaLabel}
+	colorStyle="tertiary-main-card"
 	{disabled}
 	loading={$loading}
-	{testId}
-	colorStyle="tertiary-main-card"
+	{onclick}
 	paddingSmall
 	styleClass="py-1 min-w-0"
+	{testId}
 >
 	<div class="flex min-w-0 flex-col items-center justify-center">
 		{@render icon()}

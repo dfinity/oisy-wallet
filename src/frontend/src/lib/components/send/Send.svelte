@@ -7,6 +7,6 @@
 	export let isTransactionsPage: boolean;
 </script>
 
-<SendButtonWithModal open={modalStore.openSend} isOpen={$modalSend}>
-	<SendModal {isTransactionsPage} on:nnsClose slot="modal" />
+<SendButtonWithModal isOpen={$modalSend} open={modalStore.openSend}>
+	<SendModal slot="modal" {isTransactionsPage} on:nnsClose />
 </SendButtonWithModal>

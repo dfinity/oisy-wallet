@@ -32,6 +32,7 @@
 </script>
 
 <div
+	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 	class="flex items-center justify-center overflow-hidden ring-primary"
 	class:bg-off-white={color === 'off-white' && !isReady}
 	class:bg-white={color === 'white' && !isReady}
@@ -39,17 +40,16 @@
 	class:ring-2={ring}
 	class:rounded-full={circle}
 	class:rounded-lg={!circle}
-	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 	data-tid={testId}
 >
 	{#if nonNullish(src) && !loadingError}
 		<Img
-			{src}
 			{alt}
 			fitHeight
 			height={sizePx}
-			onLoad={() => (loadingError = false)}
 			onError={() => (loadingError = true)}
+			onLoad={() => (loadingError = false)}
+			{src}
 		/>
 	{:else}
 		<IconRandom size={sizePx} text={alt} />
