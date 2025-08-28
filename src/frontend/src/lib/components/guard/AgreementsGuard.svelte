@@ -72,10 +72,10 @@
 
 	let { children }: Props = $props();
 
-	let needToSignAgreements = $derived($noAgreementVisionedYet || $hasOutdatedAgreements);
+	let needsToSignAgreements = $derived($noAgreementVisionedYet || $hasOutdatedAgreements);
 </script>
 
-{#if needToSignAgreements}
+{#if needsToSignAgreements}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<Modal testId={LOADER_MODAL}>
 			<div class="stretch"> MOCK MODAL to sign all agreements to whoever never did or to sign the outdated ones </div>
