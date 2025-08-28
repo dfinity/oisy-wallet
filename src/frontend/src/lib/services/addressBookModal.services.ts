@@ -50,7 +50,6 @@ interface DeleteContactParams {
 	id: bigint;
 }
 
-// Create a more specific type for wrapped functions
 type WrappedFunction<T, R> = (params: T) => Promise<R | undefined>;
 
 const withState =
