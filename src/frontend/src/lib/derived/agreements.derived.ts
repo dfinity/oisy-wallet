@@ -70,6 +70,11 @@ export const hasOutdatedAgreements: Readable<boolean> = derived(
 	([$outdatedAgreements]) => Object.keys($outdatedAgreements).length > 0
 );
 
+const allAgreementsAreUpToDate: Readable<boolean> = derived(
+	[hasOutdatedAgreements],
+	([$hasOutdatedAgreements]) => !$hasOutdatedAgreements
+);
+
 const hasAcceptedAllAgreements: Readable<boolean> = derived(
 	[userAgreements],
 	([$userAgreements]) =>
@@ -80,7 +85,7 @@ const hasAcceptedAllAgreements: Readable<boolean> = derived(
 );
 
 export const hasAcceptedAllLatestAgreements: Readable<boolean> = derived(
-	[hasAcceptedAllAgreements, hasOutdatedAgreements],
-	([$hasAcceptedAllAgreements, $hasOutdatedAgreements]) =>
-		$hasAcceptedAllAgreements && !$hasOutdatedAgreements
+	[hasAcceptedAllAgreements, allAgreementsAreUpToDate],
+	([$hasAcceptedAllAgreements, $allAgreementsAreUpToDate]) =>
+		$hasAcceptedAllAgreements && $allAgreementsAreUpToDate
 );
