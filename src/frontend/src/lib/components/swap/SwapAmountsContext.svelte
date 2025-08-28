@@ -40,7 +40,7 @@
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let timer: NodeJS.Timeout | undefined = undefined;
+	let timer: NodeJS.Timeout | undefined;
 
 	let isFetching = $state(false);
 
