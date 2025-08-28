@@ -578,7 +578,7 @@ service : (Arg) -> {
 	// Errors are enumerated by: `ContactError`.
 	update_contact : (Contact) -> (GetContactResult);
 	// Updates the user's agreements, merging with any existing ones.
-	// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at` is
+	// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
 	// set to `now`.
 	//
 	// # Returns
