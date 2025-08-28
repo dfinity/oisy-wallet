@@ -19,7 +19,6 @@ import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
 import { get } from 'svelte/store';
 import type { MockedFunction } from 'vitest';
 
-// --- Typed mock for wrapCallWith (no 'any', no 'require-await') ---
 vi.mock('$lib/services/utils.services', () => ({
 		wrapCallWith:
 			<TArgs extends Record<string, unknown>, R>({
