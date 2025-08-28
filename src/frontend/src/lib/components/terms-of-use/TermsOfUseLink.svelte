@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_OPEN_AGREEMENT } from '$lib/constants/analytics.contants';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 
 	interface Props {
 		noUnderline?: boolean;
@@ -8,6 +11,13 @@
 	}
 
 	let { noUnderline = false, testId }: Props = $props();
+
+	const handleClick = () => {
+		trackEvent({
+			name: TRACK_OPEN_AGREEMENT,
+			metadata: { type: 'terms-of-use', source: $authSignedIn ? 'app' : 'landing-page' }
+		});
+	};
 </script>
 
 <a
@@ -16,6 +26,7 @@
 	data-tid={testId}
 	href="/terms-of-use"
 	target="_blank"
+	onclick={handleClick}
 >
 	{$i18n.terms_of_use.text.terms_of_use}
 </a>
