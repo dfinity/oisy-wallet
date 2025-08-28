@@ -1,4 +1,7 @@
 import {
+	clearIdbBtcAddressMainnet,
+	clearIdbEthAddress,
+	clearIdbSolAddressMainnet,
 	deleteIdbBtcAddressMainnet,
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet,
@@ -14,16 +17,6 @@ import {
 } from '$lib/api/idb-addresses.api';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
-
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
 
 vi.mock('$app/environment', () => ({
 	browser: true
@@ -172,6 +165,30 @@ describe('idb-addresses.api', () => {
 			await updateIdbSolAddressMainnetLastUsage(mockPrincipal);
 
 			expect(idbKeyval.update).toHaveBeenCalled();
+		});
+	});
+
+	describe('clearIdbBtcAddressMainnet', () => {
+		it('should clear BTC addresses', async () => {
+			await clearIdbBtcAddressMainnet();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbEthAddress', () => {
+		it('should clear ETH addresses', async () => {
+			await clearIdbEthAddress();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
+		});
+	});
+
+	describe('clearIdbSolAddressMainnet', () => {
+		it('should clear SOL addresses', async () => {
+			await clearIdbSolAddressMainnet();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
 		});
 	});
 

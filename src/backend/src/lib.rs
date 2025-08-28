@@ -29,7 +29,7 @@ use shared::{
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{Contact, CreateContactRequest, UpdateContactRequest},
+        contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
@@ -49,7 +49,6 @@ use shared::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
         },
-        snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
@@ -382,6 +381,21 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 
+/// Retrieves the current fee percentiles for Bitcoin transactions from the cache
+/// for the specified network. Fee percentiles are measured in millisatoshi per byte
+/// and are periodically updated in the background.
+///
+/// # Returns
+/// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
+/// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+///
+/// # Errors
+/// - `InternalError`: If fee percentiles are not available in the cache for the requested network
+///
+/// # Note
+/// This function only returns data from the in-memory cache and doesn't make any calls
+/// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
+/// an error is returned rather than fetching fresh data.
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub async fn btc_get_current_fee_percentiles(
@@ -896,19 +910,6 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
     })
 }
 
-/// Saves a snapshot of the user's account.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)] // Canister API methods are always pass by value.
-pub fn set_snapshot(snapshot: UserSnapshot) {
-    todo!("TODO: Set snapshot to: {:?}", snapshot);
-}
-/// Gets the caller's last snapshot.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_snapshot() -> Option<UserSnapshot> {
-    todo!()
-}
-
 /// Creates a new contact for the caller.
 ///
 /// # Errors
@@ -933,14 +934,7 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    let contact = Contact {
-        id: request.id,
-        name: request.name,
-        addresses: request.addresses,
-        update_timestamp_ns: request.update_timestamp_ns,
-    };
-
-    let result = contacts::update_contact(contact);
+    let result = contacts::update_contact(request);
     result.into()
 }
 
@@ -965,7 +959,7 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 /// # Returns
 /// * `Ok(GetContactResult)` - The requested contact if found
 /// # Errors
-/// * `ContactNotFound` - If no contact for the proivided contact_id could be found
+/// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_contact(contact_id: u64) -> GetContactResult {

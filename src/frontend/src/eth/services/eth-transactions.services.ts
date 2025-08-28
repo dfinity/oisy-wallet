@@ -1,7 +1,15 @@
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
+import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
+import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
+import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
+import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
@@ -10,8 +18,10 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
-import type { TokenId } from '$lib/types/token';
+import type { TokenId, TokenStandard } from '$lib/types/token';
+import type { Transaction } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
@@ -20,11 +30,13 @@ import { get } from 'svelte/store';
 export const loadEthereumTransactions = ({
 	networkId,
 	tokenId,
+	standard,
 	updateOnly = false,
 	silent = false
 }: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	standard: TokenStandard;
 	updateOnly?: boolean;
 	silent?: boolean;
 }): Promise<ResultSuccess> => {
@@ -32,7 +44,7 @@ export const loadEthereumTransactions = ({
 		return loadEthTransactions({ networkId, tokenId, updateOnly, silent });
 	}
 
-	return loadErc20Transactions({ networkId, tokenId, updateOnly });
+	return loadErcTransactions({ networkId, tokenId, standard, updateOnly });
 };
 
 // If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
@@ -40,6 +52,7 @@ export const loadEthereumTransactions = ({
 export const reloadEthereumTransactions = (params: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	standard: TokenStandard;
 	silent?: boolean;
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
@@ -74,10 +87,18 @@ const loadEthTransactions = async ({
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({ address });
 
+		const certifiedTransactions = transactions.map((transaction) => ({
+			data: transaction,
+			// We set the certified property to false because we don't have a way to certify ETH transactions for now.
+			certified: false
+		}));
+
 		if (updateOnly) {
-			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+			certifiedTransactions.forEach((transaction) =>
+				ethTransactionsStore.update({ tokenId, transaction })
+			);
 		} else {
-			ethTransactionsStore.set({ tokenId, transactions });
+			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
@@ -95,16 +116,11 @@ const loadEthTransactions = async ({
 					tokenId: `${tokenId.description}`,
 					networkId: `${networkId.description}`,
 					error: `${err}`
-				}
-			});
-
-			// We print the error to console just for debugging purposes
-			console.warn(
-				replacePlaceholders(loading_transactions_symbol, {
+				},
+				warning: `${replacePlaceholders(loading_transactions_symbol, {
 					$symbol: ETHEREUM_NETWORK_SYMBOL
-				}),
-				err
-			);
+				})} ${err}`
+			});
 		}
 
 		return { success: false };
@@ -113,13 +129,15 @@ const loadEthTransactions = async ({
 	return { success: true };
 };
 
-const loadErc20Transactions = async ({
+const loadErcTransactions = async ({
 	networkId,
 	tokenId,
+	standard,
 	updateOnly = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
+	standard: TokenStandard;
 	updateOnly?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
@@ -138,8 +156,15 @@ const loadErc20Transactions = async ({
 		return { success: false };
 	}
 
-	const tokens = get(enabledErc20Tokens);
-	const token = tokens.find(({ id }) => id === tokenId);
+	const tokens = [
+		...get(enabledErc20Tokens),
+		...get(enabledErc721Tokens),
+		...get(enabledErc1155Tokens)
+	];
+	const token = tokens.find(
+		({ id, network, standard: tokenStandard }) =>
+			id === tokenId && network.id === networkId && tokenStandard === standard
+	);
 
 	if (isNullish(token)) {
 		const {
@@ -156,15 +181,26 @@ const loadErc20Transactions = async ({
 	}
 
 	try {
-		const { erc20Transactions } = etherscanProviders(networkId);
-		const transactions = await retryWithDelay({
-			request: async () => await erc20Transactions({ contract: token, address })
-		});
+		const transactions = isTokenErc20(token)
+			? await loadErc20Transactions({ networkId, token, address })
+			: isTokenErc721(token)
+				? await loadErc721Transactions({ networkId, token, address })
+				: isTokenErc1155(token)
+					? await loadErc1155Transactions({ networkId, token, address })
+					: [];
+
+		const certifiedTransactions = transactions.map((transaction) => ({
+			data: transaction,
+			// We set the certified property to false because we don't have a way to certify ERC transactions for now.
+			certified: false
+		}));
 
 		if (updateOnly) {
-			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+			certifiedTransactions.forEach((transaction) =>
+				ethTransactionsStore.update({ tokenId, transaction })
+			);
 		} else {
-			ethTransactionsStore.set({ tokenId, transactions });
+			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
@@ -181,19 +217,59 @@ const loadErc20Transactions = async ({
 				tokenId: `${tokenId.description}`,
 				networkId: `${networkId.description}`,
 				error: `${err}`
-			}
-		});
-
-		// We print the error to console just for debugging purposes
-		console.warn(
-			replacePlaceholders(loading_transactions_symbol, {
+			},
+			warning: `${replacePlaceholders(loading_transactions_symbol, {
 				$symbol: token.symbol
-			}),
-			err
-		);
+			})} ${err}`
+		});
 
 		return { success: false };
 	}
 
 	return { success: true };
+};
+
+const loadErc20Transactions = async ({
+	networkId,
+	token,
+	address
+}: {
+	networkId: NetworkId;
+	token: Erc20TokenToggleable;
+	address: Address;
+}): Promise<Transaction[]> => {
+	const { erc20Transactions } = etherscanProviders(networkId);
+	return await retryWithDelay({
+		request: async () => await erc20Transactions({ contract: token, address })
+	});
+};
+
+const loadErc721Transactions = async ({
+	networkId,
+	token,
+	address
+}: {
+	networkId: NetworkId;
+	token: Erc721TokenToggleable;
+	address: Address;
+}): Promise<Transaction[]> => {
+	const { erc721Transactions } = etherscanProviders(networkId);
+	return await retryWithDelay({
+		request: async () => await erc721Transactions({ contract: token, address })
+	});
+};
+
+const loadErc1155Transactions = async ({
+	networkId,
+	token,
+	address
+}: {
+	networkId: NetworkId;
+	token: Erc1155TokenToggleable;
+	address: Address;
+}): Promise<Transaction[]> => {
+	const { erc1155Transactions } = etherscanProviders(networkId);
+	return await retryWithDelay({
+		request: async () => await erc1155Transactions({ contract: token, address })
+	});
 };

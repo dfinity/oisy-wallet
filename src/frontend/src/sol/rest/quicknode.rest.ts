@@ -7,7 +7,7 @@ import type { TokenMetadata } from '$lib/types/token';
 import type { UrlSchema } from '$lib/validation/url.validation';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type { z } from 'zod';
+import type { z } from 'zod/v4';
 
 interface QuicknodeApiError {
 	error: {

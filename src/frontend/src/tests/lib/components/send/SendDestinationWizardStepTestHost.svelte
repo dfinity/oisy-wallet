@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import type { Writable } from 'svelte/store';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 	import { allSendWizardSteps } from '$lib/config/send.config';
@@ -18,15 +18,15 @@
 		selectedContact: Writable<ContactUi>;
 	} = $props();
 
-	const steps: WizardSteps = allSendWizardSteps({ i18n: $i18n });
+	const steps = allSendWizardSteps({ i18n: $i18n });
 
-	let currentStep: WizardStep = $state(steps[0]);
+	let currentStep = $state(steps[0]);
 </script>
 
-<WizardModal {steps} bind:currentStep testId={SEND_TOKENS_MODAL}>
+<WizardModal {steps} testId={SEND_TOKENS_MODAL} bind:currentStep>
 	<SendDestinationWizardStep
-		{destination}
 		{activeSendDestinationTab}
+		{destination}
 		bind:selectedContact={$selectedContact}
 	/>
 </WizardModal>

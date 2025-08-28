@@ -1,4 +1,7 @@
-import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import {
+	BTC_BALANCE_MIN_CONFIRMATIONS,
+	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+} from '$btc/constants/btc.constants';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
@@ -82,11 +85,27 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		try {
 			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
-			const newTransactions = fetchedTransactions.filter(({ hash }) =>
-				isNullish(this.store.transactions[`${hash}`])
-			);
-
 			const latestBitcoinBlockHeight = await btcLatestBlockHeight();
+
+			// Keep transactions that are either unconfirmed (no block_height) or have fewer than the required number of confirmations.
+			// This ensures proper recalculation of confirmation status until final confirmation is reached.
+			const newTransactions = fetchedTransactions.filter((transaction) => {
+				// Include transactions that are NOT already in the store
+				if (isNullish(this.store.transactions[`${transaction.hash}`])) {
+					return true;
+				}
+
+				// If block_height is null (unconfirmed/pending), include the transaction
+				if (isNullish(transaction.block_height)) {
+					return true;
+				}
+
+				// Calculate confirmations and include if less than required confirmations
+				return (
+					latestBitcoinBlockHeight - transaction.block_height + 1 <
+					CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+				);
+			});
 
 			return newTransactions.map((transaction) => ({
 				data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight }),

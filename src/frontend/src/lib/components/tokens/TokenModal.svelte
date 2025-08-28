@@ -1,17 +1,22 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 	import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import { assertIndexLedgerId } from '$icp/services/ic-add-custom-tokens.service';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { icTokenIcrcCustomToken, isTokenIcrc } from '$icp/utils/icrc.utils';
 	import { toUserToken } from '$icp-eth/services/user-token.services';
 	import { removeCustomToken, removeUserToken, setCustomToken } from '$lib/api/backend.api';
-	import { deleteIdbEthToken, deleteIdbIcToken, deleteIdbSolToken } from '$lib/api/idb-tokens.api';
+	import {
+		deleteIdbEthTokenDeprecated,
+		deleteIdbIcToken,
+		deleteIdbSolToken
+	} from '$lib/api/idb-tokens.api';
 	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import TokenModalContent from '$lib/components/tokens/TokenModalContent.svelte';
 	import TokenModalDeleteConfirmation from '$lib/components/tokens/TokenModalDeleteConfirmation.svelte';
@@ -39,7 +44,6 @@
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -69,10 +73,10 @@
 		nonNullish(token) && isTokenIcrc(token) ? (token.indexCanisterId ?? '') : ''
 	);
 
-	let modal: WizardModal | undefined = $state();
+	let modal: WizardModal<TokenModalSteps> | undefined = $state();
 	const close = () => modalStore.close();
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<TokenModalSteps> = [
 		{
 			name: TokenModalSteps.CONTENT,
 			title: $i18n.tokens.details.title
@@ -90,8 +94,8 @@
 			title: $i18n.tokens.import.text.updating
 		}
 	];
-	let currentStep: WizardStep | undefined = $state();
-	let currentStepName = $derived(currentStep?.name as TokenModalSteps | undefined);
+	let currentStep: WizardStep<TokenModalSteps> | undefined = $state();
+	let currentStepName = $derived(currentStep?.name);
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
@@ -165,7 +169,7 @@
 				});
 
 				erc20UserTokensStore.reset(tokenToDelete.id);
-				await deleteIdbEthToken({ identity: $authIdentity, token: userToken });
+				await deleteIdbEthTokenDeprecated({ identity: $authIdentity, token: userToken });
 
 				await onTokenDeleteSuccess(tokenToDelete);
 			} else if (isTokenIcrc(tokenToDelete)) {
@@ -229,12 +233,29 @@
 
 		try {
 			if (icTokenIcrcCustomToken(tokenToEdit)) {
+				loading = true;
 				gotoStep(TokenModalSteps.EDIT_PROGRESS);
 				progress(ProgressStepsAddToken.SAVE);
 
+				const { valid } = notEmptyString(icrcTokenIndexCanisterId)
+					? await assertIndexLedgerId({
+							identity: $authIdentity,
+							ledgerCanisterId: tokenToEdit.ledgerCanisterId,
+							indexCanisterId: icrcTokenIndexCanisterId
+						})
+					: { valid: true };
+
+				if (!valid) {
+					loading = false;
+					icrcTokenIndexCanisterId = tokenToEdit.indexCanisterId ?? '';
+					progress(ProgressStepsAddToken.INITIALIZATION);
+					gotoStep(TokenModalSteps.CONTENT);
+					return;
+				}
+
 				await setCustomToken({
 					token: toCustomToken({
-						...(!isNullishOrEmpty(icrcTokenIndexCanisterId) && {
+						...(notEmptyString(icrcTokenIndexCanisterId) && {
 							indexCanisterId: icrcTokenIndexCanisterId
 						}),
 						ledgerCanisterId: tokenToEdit.ledgerCanisterId,
@@ -249,7 +270,12 @@
 				// Similar as on token "save", we reload all custom tokens for simplicity reason.
 				await loadCustomTokens({
 					identity: $authIdentity,
-					onQuerySuccess: () => {
+					onSuccess: () => {
+						if (!loading) {
+							return;
+						}
+
+						loading = false;
 						progress(ProgressStepsAddToken.DONE);
 						close();
 
@@ -282,6 +308,10 @@
 				err
 			});
 
+			loading = false;
+			icrcTokenIndexCanisterId = isTokenIcrc(tokenToEdit)
+				? (tokenToEdit.indexCanisterId ?? '')
+				: '';
 			progress(ProgressStepsAddToken.INITIALIZATION);
 			gotoStep(TokenModalSteps.CONTENT);
 		}
@@ -289,13 +319,13 @@
 </script>
 
 <WizardModal
-	{steps}
-	bind:currentStep
 	bind:this={modal}
 	disablePointerEvents={loading || currentStepName === TokenModalSteps.EDIT_PROGRESS}
-	on:nnsClose={close}
+	onClose={close}
+	{steps}
+	bind:currentStep
 >
-	<svelte:fragment slot="title">{currentStep?.title}</svelte:fragment>
+	{#snippet title()}{currentStep?.title}{/snippet}
 
 	{#if currentStepName === TokenModalSteps.CONTENT}
 		<Responsive up="md">
@@ -322,23 +352,23 @@
 		</Responsive>
 	{:else if currentStepName === TokenModalSteps.DELETE_CONFIRMATION}
 		<TokenModalDeleteConfirmation
-			{token}
 			{loading}
 			onCancel={() => gotoStep(TokenModalSteps.CONTENT)}
 			onConfirm={() => onTokenDelete(token)}
+			{token}
 		/>
 	{:else if currentStepName === TokenModalSteps.EDIT && nonNullish(token) && isTokenIcrc(token)}
 		<ContentWithToolbar>
 			<AddTokenByNetworkDropdown
-				networkName={token.network.name}
 				availableNetworks={[token.network]}
 				disabled
+				networkName={token.network.name}
 			/>
 
 			<IcAddTokenForm
+				editMode
 				ledgerCanisterId={token.ledgerCanisterId}
 				bind:indexCanisterId={icrcTokenIndexCanisterId}
-				editMode
 			/>
 
 			{#snippet toolbar()}
@@ -362,8 +392,8 @@
 
 {#if currentStepName === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}
 	<BottomSheetConfirmationPopup
-		onCancel={() => (showBottomSheetDeleteConfirmation = false)}
 		disabled={loading}
+		onCancel={() => (showBottomSheetDeleteConfirmation = false)}
 	>
 		{#snippet title()}
 			{$i18n.tokens.text.delete_token}
@@ -371,10 +401,10 @@
 
 		{#snippet content()}
 			<TokenModalDeleteConfirmation
-				{token}
 				{loading}
 				onCancel={() => (showBottomSheetDeleteConfirmation = false)}
 				onConfirm={() => onTokenDelete(token)}
+				{token}
 			/>
 		{/snippet}
 	</BottomSheetConfirmationPopup>

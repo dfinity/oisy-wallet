@@ -1,19 +1,22 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
+	import type { IcTransactionType } from '$icp/types/ic-transaction';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		label: string | undefined;
-		fallback: string;
+		fallback: IcTransactionType | undefined;
 		token: OptionToken;
 	}
 
-	const { label, fallback = '', token }: Props = $props();
+	const { label, fallback, token }: Props = $props();
 
-	let fallbackLabel: string = $derived(fallback.charAt(0).toUpperCase() + fallback.slice(1));
+	let fallbackLabel: string = $derived(
+		nonNullish(fallback) ? $i18n.transaction.type[fallback] : ''
+	);
 
 	let twinToken: Token | undefined = $derived((token as OptionIcCkToken)?.twinToken);
 

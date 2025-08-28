@@ -2,6 +2,8 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import type { GetFeeData } from '$eth/services/fee.services';
+import { TRACK_ETH_ESTIMATE_GAS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -27,6 +29,23 @@ export class InfuraProvider {
 	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
 
 	estimateGas = (params: GetFeeData): Promise<bigint> => this.provider.estimateGas(params);
+
+	safeEstimateGas = async (params: GetFeeData): Promise<bigint | undefined> => {
+		try {
+			return await this.estimateGas(params);
+		} catch (err: unknown) {
+			trackEvent({
+				name: TRACK_ETH_ESTIMATE_GAS_ERROR,
+				metadata: {
+					error: `${err}`,
+					network: this.network.toString()
+				},
+				warning: `Error estimating gas for network ${this.network}: ${err}`
+			});
+
+			return undefined;
+		}
+	};
 
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
 		this.provider.broadcastTransaction(signedTransaction);

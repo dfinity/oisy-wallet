@@ -1,6 +1,18 @@
-import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+import {
+	saveErc1155CustomTokens,
+	saveErc20CustomTokens,
+	saveErc20UserTokens,
+	saveErc721CustomTokens
+} from '$eth/services/manage-tokens.services';
+import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
+import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { Erc20CustomToken, SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -24,6 +36,7 @@ import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -182,7 +195,7 @@ export const sumMainnetTokensUsdBalancesPerNetwork = ({
  * @param $tokens - The list of tokens.
  * @returns The list of "enabled" tokens.
  */
-export const filterEnabledTokens = ([$tokens]: [$tokens: Token[]]): Token[] =>
+export const filterEnabledTokens = <T extends Token>([$tokens]: [$tokens: T[]]): T[] =>
 	$tokens.filter((token) => ('enabled' in token ? token.enabled : true));
 
 /** Pins enabled tokens at the top of the list, preserving the order of the parts.
@@ -261,23 +274,29 @@ export const groupTogglableTokens = (
 	tokens: Record<string, Token>
 ): {
 	icrc: IcrcCustomToken[];
-	erc20: Erc20UserToken[];
+	erc20: (Erc20UserToken | Erc20CustomToken)[];
+	erc721: Erc721CustomToken[];
+	erc1155: Erc1155CustomToken[];
 	spl: SplTokenToggleable[];
 } =>
 	Object.values(tokens ?? {}).reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
+		erc721: Erc721CustomToken[];
+		erc1155: Erc1155CustomToken[];
 		spl: SplTokenToggleable[];
 	}>(
-		({ icrc, erc20, spl }, token) => ({
+		({ icrc, erc20, erc721, erc1155, spl }, token) => ({
 			icrc: [
 				...icrc,
 				...(isTokenIcrc(token) || isTokenDip20(token) ? [token as IcrcCustomToken] : [])
 			],
 			erc20: [...erc20, ...(isTokenErc20UserToken(token) ? [token] : [])],
+			erc721: [...erc721, ...(isTokenErc721CustomToken(token) ? [token] : [])],
+			erc1155: [...erc1155, ...(isTokenErc1155CustomToken(token) ? [token] : [])],
 			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 		}),
-		{ icrc: [], erc20: [], spl: [] }
+		{ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] }
 	);
 
 export const saveAllCustomTokens = async ({
@@ -297,9 +316,15 @@ export const saveAllCustomTokens = async ({
 	$authIdentity: OptionIdentity;
 	$i18n: I18n;
 }): Promise<void> => {
-	const { icrc, erc20, spl } = groupTogglableTokens(tokens);
+	const { icrc, erc20, erc721, erc1155, spl } = groupTogglableTokens(tokens);
 
-	if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
+	if (
+		icrc.length === 0 &&
+		erc20.length === 0 &&
+		erc721.length === 0 &&
+		erc1155.length === 0 &&
+		spl.length === 0
+	) {
 		toastsShow({
 			text: $i18n.tokens.manage.info.no_changes,
 			level: 'info',
@@ -317,6 +342,35 @@ export const saveAllCustomTokens = async ({
 		identity: $authIdentity
 	};
 
+	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
+	const customTokens = get(erc20CustomTokensStore) ?? [];
+	const currentUserTokens = (get(erc20UserTokensStore) ?? []).map(({ data: token }) => token);
+	const erc20UserTokens = [...erc20, ...currentUserTokens].filter(
+		(token, index, self) =>
+			index ===
+			self.findIndex(
+				(t) => t.address === token.address && t.network.chainId === token.network.chainId
+			)
+	);
+	const erc20CustomTokens = erc20UserTokens.reduce<SaveErc20CustomToken[]>((acc, token) => {
+		const customToken = customTokens.find(
+			({
+				data: {
+					address,
+					network: { chainId }
+				}
+			}) => address === token.address && chainId === token.network.chainId
+		);
+
+		return [
+			...acc,
+			{
+				...token,
+				...(nonNullish(customToken) ? { version: customToken.data.version } : {})
+			}
+		];
+	}, []);
+
 	await Promise.allSettled([
 		...(icrc.length > 0
 			? [
@@ -328,9 +382,30 @@ export const saveAllCustomTokens = async ({
 			: []),
 		...(erc20.length > 0
 			? [
+					// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 					saveErc20UserTokens({
 						...commonParams,
 						tokens: erc20
+					}),
+					saveErc20CustomTokens({
+						...commonParams,
+						tokens: erc20CustomTokens
+					})
+				]
+			: []),
+		...(erc721.length > 0
+			? [
+					saveErc721CustomTokens({
+						...commonParams,
+						tokens: erc721
+					})
+				]
+			: []),
+		...(erc1155.length > 0
+			? [
+					saveErc1155CustomTokens({
+						...commonParams,
+						tokens: erc1155
 					})
 				]
 			: []),

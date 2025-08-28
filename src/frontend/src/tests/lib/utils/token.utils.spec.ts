@@ -28,7 +28,6 @@ import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import type { MockedFunction } from 'vitest';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
@@ -51,7 +50,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(Number(balance - fee) / 10 ** tokenDecimals);
+				expect(result).toBe((Number(balance - fee) / 10 ** tokenDecimals).toString());
 			});
 		});
 
@@ -64,7 +63,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(0);
+				expect(result).toBe('0');
 			});
 		});
 
@@ -77,7 +76,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(0);
+				expect(result).toBe('0');
 			});
 		});
 
@@ -90,7 +89,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(0);
+				expect(result).toBe('0');
 
 				result = getMaxTransactionAmount({
 					balance,
@@ -99,7 +98,7 @@ describe('token.utils', () => {
 					tokenStandard
 				});
 
-				expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+				expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 			});
 		});
 
@@ -111,7 +110,7 @@ describe('token.utils', () => {
 				tokenStandard: 'erc20'
 			});
 
-			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 		});
 
 		it('should return the untouched amount if the token is SPL', () => {
@@ -122,12 +121,12 @@ describe('token.utils', () => {
 				tokenStandard: 'spl'
 			});
 
-			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 		});
 	});
 
 	describe('calculateTokenUsdBalance', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -179,7 +178,7 @@ describe('token.utils', () => {
 	});
 
 	describe('calculateTokenUsdAmount', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -221,7 +220,7 @@ describe('token.utils', () => {
 	});
 
 	describe('mapTokenUi', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -390,7 +389,7 @@ describe('token.utils', () => {
 				it('should enable the token if user enables it', () => {
 					const result = mapDefaultTokenToToggleable({
 						defaultToken: token,
-						userToken: { ...token, enabled: true }
+						customToken: { ...token, enabled: true }
 					});
 
 					expect(result.enabled).toBeTruthy();
@@ -399,16 +398,16 @@ describe('token.utils', () => {
 				it('should not enable the token if user has not enabled it', () => {
 					const result = mapDefaultTokenToToggleable({
 						defaultToken: token,
-						userToken: { ...token, enabled: false }
+						customToken: { ...token, enabled: false }
 					});
 
 					expect(result.enabled).toBeFalsy();
 				});
 
-				it('should not enable the token if userToken is undefined', () => {
+				it('should not enable the token if customToken is undefined', () => {
 					const result = mapDefaultTokenToToggleable({
 						defaultToken: token,
-						userToken: undefined
+						customToken: undefined
 					});
 
 					expect(result.enabled).toBeFalsy();
@@ -435,25 +434,25 @@ describe('token.utils', () => {
 		])('$description - Default/Suggested Tokens', ({ token, setupMock }) => {
 			beforeEach(() => setupMock(token.ledgerCanisterId));
 
-			it('should enable the token if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
+			it('should enable the token if no customToken', () => {
+				const result = mapDefaultTokenToToggleable({ defaultToken: token, customToken: undefined });
 
 				expect(result.enabled).toBeTruthy();
 			});
 
-			it('should enable the token if userToken has enabled false', () => {
+			it('should enable the token if customToken has enabled false', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: false }
+					customToken: { ...token, enabled: false }
 				});
 
 				expect(result.enabled).toBeTruthy();
 			});
 
-			it('should enable the token if userToken has enabled true', () => {
+			it('should enable the token if customToken has enabled true', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: true }
+					customToken: { ...token, enabled: true }
 				});
 
 				expect(result.enabled).toBeTruthy();
@@ -478,25 +477,25 @@ describe('token.utils', () => {
 				beforeEach(() => setupMock(token.ledgerCanisterId));
 			}
 
-			it('should enable the token if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
+			it('should enable the token if no customToken', () => {
+				const result = mapDefaultTokenToToggleable({ defaultToken: token, customToken: undefined });
 
 				expect(result.enabled).toBeTruthy();
 			});
 
-			it('should not enable the token if userToken has enabled false', () => {
+			it('should not enable the token if customToken has enabled false', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: false }
+					customToken: { ...token, enabled: false }
 				});
 
 				expect(result.enabled).toBeFalsy();
 			});
 
-			it('should enable the token if userToken has enabled true', () => {
+			it('should enable the token if customToken has enabled true', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: true }
+					customToken: { ...token, enabled: true }
 				});
 
 				expect(result.enabled).toBeTruthy();

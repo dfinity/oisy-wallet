@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
-	import { prepareTransactionUtxos } from '$btc/services/btc-review.services';
+	import { isNullish, nonNullish, debounce } from '@dfinity/utils';
+	import { createEventDispatcher, getContext, onMount, onDestroy } from 'svelte';
+	import { BTC_UTXOS_FEE_UPDATE_INTERVAL } from '$btc/constants/btc.constants';
+	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -31,22 +32,19 @@
 
 	const dispatch = createEventDispatcher();
 
-	const selectUtxosFee = async () => {
+	let schedulerTimer: NodeJS.Timeout | undefined;
+	let isActive = true;
+
+	const updatePrepareBtcSend = async () => {
 		try {
 			// all required params should be already defined at this stage
-			if (
-				isNullish(amount) ||
-				isNullish(networkId) ||
-				isNullish($authIdentity) ||
-				isNullish(source)
-			) {
+			if (isNullish(amount) || isNullish(networkId) || isNullish($authIdentity)) {
 				return;
 			}
 
 			const network = mapNetworkIdToBitcoinNetwork(networkId);
-
 			utxosFee = nonNullish(network)
-				? await prepareTransactionUtxos({
+				? await prepareBtcSend({
 						identity: $authIdentity,
 						network,
 						amount,
@@ -54,7 +52,6 @@
 					})
 				: undefined;
 		} catch (err: unknown) {
-			console.error('Error selecting utxos fee', err);
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected_utxos_fee },
 				err
@@ -64,18 +61,56 @@
 		}
 	};
 
-	onMount(async () => {
-		if (isNullish(utxosFee)) {
-			await selectUtxosFee();
+	const debouncedPrepareBtcSend = debounce(updatePrepareBtcSend);
+
+	const startScheduler = () => {
+		// Stop existing scheduler if it exists
+		stopScheduler();
+		isActive = true;
+
+		// Start the recurring scheduler
+		const scheduleNext = () => {
+			schedulerTimer = setTimeout(() => {
+				// only execute next update if still active
+				if (isActive) {
+					debouncedPrepareBtcSend();
+					scheduleNext();
+				}
+			}, BTC_UTXOS_FEE_UPDATE_INTERVAL);
+		};
+
+		scheduleNext();
+	};
+
+	const stopScheduler = () => {
+		isActive = false;
+
+		if (schedulerTimer) {
+			// Clear existing timer
+			clearTimeout(schedulerTimer);
+			schedulerTimer = undefined;
 		}
+	};
+
+	onMount(() => {
+		if (isNullish(utxosFee)) {
+			debouncedPrepareBtcSend();
+		}
+
+		// Start the scheduler after initial load
+		startScheduler();
+	});
+
+	onDestroy(() => {
+		stopScheduler();
 	});
 </script>
 
 <FeeDisplay
-	feeAmount={utxosFee?.feeSatoshis}
 	decimals={$sendTokenDecimals}
-	symbol={$sendTokenSymbol}
 	exchangeRate={$sendTokenExchangeRate}
+	feeAmount={utxosFee?.feeSatoshis}
+	symbol={$sendTokenSymbol}
 >
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+	{#snippet label()}{$i18n.fee.text.fee}{/snippet}
 </FeeDisplay>

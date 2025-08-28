@@ -1,4 +1,5 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import * as icAddCustomTokensService from '$icp/services/ic-add-custom-tokens.service';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import * as backendApi from '$lib/api/backend.api';
 import * as idbTokensApi from '$lib/api/idb-tokens.api';
@@ -39,7 +40,9 @@ describe('TokenModal', () => {
 	const mockSetCustomToken = () =>
 		vi.spyOn(backendApi, 'setCustomToken').mockResolvedValue(undefined);
 	const mockIdbTokensApi = () =>
-		vi.spyOn(idbTokensApi, 'deleteIdbEthToken').mockResolvedValue(undefined);
+		vi.spyOn(idbTokensApi, 'deleteIdbEthTokenDeprecated').mockResolvedValue(undefined);
+	const mockIcAddCustomTokensService = (result = true) =>
+		vi.spyOn(icAddCustomTokensService, 'assertIndexLedgerId').mockResolvedValue({ valid: result });
 	const mockToastsShow = () => vi.spyOn(toastsStore, 'toastsShow').mockImplementation(vi.fn());
 	const mockToastsError = () => vi.spyOn(toastsStore, 'toastsError').mockImplementation(vi.fn());
 	const mockGoToRoot = () => vi.spyOn(navUtils, 'gotoReplaceRoot').mockImplementation(vi.fn());
@@ -98,6 +101,7 @@ describe('TokenModal', () => {
 		});
 
 		const setCustomTokenMock = mockSetCustomToken();
+		mockIcAddCustomTokensService();
 		mockAuthStore();
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
@@ -137,6 +141,7 @@ describe('TokenModal', () => {
 
 		const setCustomTokenMock = mockSetCustomToken();
 		mockAuthStore();
+		mockIcAddCustomTokensService();
 
 		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
 
@@ -158,6 +163,36 @@ describe('TokenModal', () => {
 			identity: mockIdentity
 		});
 		expect(loadCustomTokens).toHaveBeenCalledOnce();
+	});
+
+	it('does not save token if indexCanisterId assertion failed', async () => {
+		const { getByTestId, getByText } = render(TokenModal, {
+			props: {
+				token: {
+					...mockIcToken,
+					indexCanisterId: 'test',
+					enabled: true
+				} as Token,
+				isEditable: true
+			}
+		});
+
+		const setCustomTokenMock = mockSetCustomToken();
+		mockAuthStore();
+		mockIcAddCustomTokensService(false);
+
+		expect(getByText(en.tokens.details.title)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON));
+
+		await fireEvent.input(getByTestId(TOKEN_MODAL_INDEX_CANISTER_ID_INPUT), {
+			target: { value: MOCK_CANISTER_ID_1 }
+		});
+
+		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
+
+		expect(setCustomTokenMock).not.toHaveBeenCalledOnce();
+		expect(loadCustomTokens).not.toHaveBeenCalledOnce();
 	});
 
 	it('does not delete token if it is not erc20', async () => {

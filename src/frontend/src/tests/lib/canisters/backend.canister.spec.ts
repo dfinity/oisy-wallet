@@ -1166,7 +1166,7 @@ describe('backend.canister', () => {
 
 			const res = await createContact('John');
 
-			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John' });
+			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John', image: [] });
 			expect(res).toEqual(mockContact);
 		});
 
@@ -1325,6 +1325,108 @@ describe('backend.canister', () => {
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('btc_get_current_fee_percentiles', () => {
+		const btcGetFeePercentilesParams = {
+			network: btcAddPendingTransactionParams.network
+		};
+
+		it('should return fee percentiles with success response', async () => {
+			const response = {
+				Ok: {
+					fee_percentiles: [5n, 10n, 15n, 20n, 30n]
+				}
+			};
+
+			service.btc_get_current_fee_percentiles.mockResolvedValue(response);
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			expect(service.btc_get_current_fee_percentiles).toHaveBeenCalledWith(
+				btcGetFeePercentilesParams
+			);
+			expect(res).toEqual(response.Ok);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles returns an internal error', async () => {
+			service.btc_get_current_fee_percentiles.mockResolvedValue(errorResponse);
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(errorResponse.Err.InternalError.msg)
+			);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles returns a pending-transactions error', async () => {
+			service.btc_get_current_fee_percentiles.mockResolvedValue({
+				Err: { PendingTransactions: null }
+			});
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(
+					'Selecting utxos fee is not possible - pending transactions found.'
+				)
+			);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_get_current_fee_percentiles.mockResolvedValue({ Err: { CanisterError: null } });
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
+			);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles throws', async () => {
+			service.btc_get_current_fee_percentiles.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_get_current_fee_percentiles.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow();
 		});
 	});
 });

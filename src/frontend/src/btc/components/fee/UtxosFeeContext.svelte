@@ -5,12 +5,13 @@
 		BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
 		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
 	} from '$btc/constants/btc.constants';
-	import { selectUtxosFeeCompatible } from '$btc/services/btc-review.services';
+	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	export let source: string;
@@ -44,8 +45,7 @@
 		if (
 			amountError ||
 			isNullish(networkId) ||
-			isNullish(source) ||
-			source === '' ||
+			isNullishOrEmpty(source) ||
 			(nonNullish($store) && $store.amountForFee === parsedAmount)
 		) {
 			return;
@@ -63,29 +63,26 @@
 
 		const network = mapNetworkIdToBitcoinNetwork(networkId);
 
-		const utxosFee = nonNullish(network)
-			? await selectUtxosFeeCompatible({
-					amount: parsedAmount,
-					network,
-					identity: $authIdentity,
-					source
-				})
-			: undefined;
+		if (nonNullish(network)) {
+			const utxosFee = await prepareBtcSend({
+				amount: parsedAmount,
+				network,
+				identity: $authIdentity,
+				source
+			});
 
-		if (isNullish(utxosFee)) {
+			store.setUtxosFee({
+				utxosFee,
+				amountForFee: parsedAmount
+			});
+		} else {
 			store.reset();
-			return;
 		}
-
-		store.setUtxosFee({
-			utxosFee,
-			amountForFee: parsedAmount
-		});
 	};
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	$: amount, networkId, amountError, source, debounceEstimateFee();
+	$: (amount, networkId, amountError, source, debounceEstimateFee());
 </script>
 
 <slot />

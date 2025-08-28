@@ -18,7 +18,7 @@ import { mapToFrontendContact } from '$lib/utils/contact.utils';
 import { getNetworkContacts } from '$lib/utils/contacts.utils';
 import SendDestinationWizardStepTestHost from '$tests/lib/components/send/SendDestinationWizardStepTestHost.svelte';
 import { getMockContacts, mockBackendContactAddressEth } from '$tests/mocks/contacts.mock';
-import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, writable, type Writable } from 'svelte/store';

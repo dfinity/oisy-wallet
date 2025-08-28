@@ -174,11 +174,11 @@
 		await connect($walletConnectUri);
 	};
 
-	$: $ethAddress,
+	$: ($ethAddress,
 		$solAddressMainnet,
 		$walletConnectUri,
 		$loading,
-		(async () => await uriConnect())();
+		(async () => await uriConnect())());
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);
@@ -381,22 +381,19 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={resetAndClose}>
-		<WalletConnectModalTitle slot="title">
-			{`${
-				currentStep?.name === 'Review' && nonNullish(proposal)
-					? $i18n.wallet_connect.text.session_proposal
-					: $i18n.wallet_connect.text.name
-			}`}
-		</WalletConnectModalTitle>
+	<WizardModal bind:this={modal} onClose={resetAndClose} {steps} bind:currentStep>
+		{#snippet title()}
+			<WalletConnectModalTitle>
+				{`${
+					currentStep?.name === 'Review' && nonNullish(proposal)
+						? $i18n.wallet_connect.text.session_proposal
+						: $i18n.wallet_connect.text.name
+				}`}
+			</WalletConnectModalTitle>
+		{/snippet}
 
 		{#if currentStep?.name === 'Review'}
-			<WalletConnectReview
-				{proposal}
-				on:icReject={reject}
-				on:icApprove={approve}
-				on:icCancel={cancel}
-			/>
+			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
 		{:else}
 			<WalletConnectForm on:icConnect={userConnect} />
 		{/if}

@@ -2,20 +2,6 @@ name: Backend Tests
 
 on:
   pull_request:
-    paths:
-      - # Scripts, GitHub actions that contain 'backend' in their path.
-        '**/*backend*'
-      - # The backend source code
-        'src/backend/**'
-      - 'src/shared/**'
-      - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
-        '**/Cargo*'
-      - '**/*rust*'
-      - # The dockerfile used in this CI run, and the scripts it COPY's.
-        'Dockerfile'
-      - 'docker/**'
-      - # There may be some files in frontend folder that contains 'backend' in their name.
-        '!src/frontend/**'
   merge_group:
   workflow_dispatch:
 
@@ -28,11 +14,16 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
+      - name: Check if backend files changed
+        id: changes
+        uses: ./.github/actions/check-backend-changes
+
       - name: Build Base Docker Image
+        if: steps.changes.outputs.backend == 'true'
         uses: ./.github/actions/docker-build-base
 
   docker-build:
@@ -48,11 +39,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
+      - name: Check if backend files changed
+        id: changes
+        uses: ./.github/actions/check-backend-changes
+
       - name: Build canister WASM
+        if: steps.changes.outputs.backend == 'true'
         uses: ./.github/actions/docker-build-backend
         with:
           name: ${{ matrix.name }}
@@ -65,11 +61,16 @@ jobs:
       contents: read
     needs: ['docker-build']
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
-      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      - name: Check if backend files changed
+        id: changes
+        uses: ./.github/actions/check-backend-changes
+
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        if: steps.changes.outputs.backend == 'true'
         with:
           path: |
             ~/.cargo/registry
@@ -78,15 +79,18 @@ jobs:
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
 
       - name: Download backend.wasm.gz
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        if: steps.changes.outputs.backend == 'true'
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: backend.wasm.gz
           path: .
 
       - name: Install dfx
+        if: steps.changes.outputs.backend == 'true'
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
       - name: 'Run backend tests'
+        if: steps.changes.outputs.backend == 'true'
         working-directory: .
         run: ./scripts/test.backend.sh
 
@@ -101,22 +105,27 @@ jobs:
       TITLE: ${{ github.event.pull_request.title }}
       DESCRIPTION: ${{ github.event.pull_request.body }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
+      - name: Check if backend files changed
+        id: changes
+        uses: ./.github/actions/check-backend-changes
       - name: 'Run when backend candid interface changes'
+        if: steps.changes.outputs.backend == 'true'
         # Goal: Run only when the backend candid interface changes, otherwise
         # every PR after a breaking change will also have to be marked as a breaking change
         # until deployment to production.  As it is, any PRs that change the backend candid
         # will still need to be announced as a breaking change, but that is probably acceptable,
         # and it makes it clear if the API is revised to no longer be breaking.
         uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-        id: changes
+        id: api-changes
         with:
           filters: |
             api:
               - 'src/backend/backend.did'
       - name: 'Check whether the PR description & title mention "breaking interface"'
+        if: steps.changes.outputs.backend == 'true'
         id: conventional-commit
         run: |
           # See the conventional commit conventions for how to mark a breaking change: https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with-both--and-breaking-change-footer
@@ -132,12 +141,12 @@ jobs:
           fi
       - name: Need to check for breaking changes
         id: check-for-breaking-changes
-        # Run if the interface has changed but the PR is NOT marked as a breaking change.
-        if: (steps.changes.outputs.api == 'true') && !((steps.conventional-commit.outputs.BREAKING_DESCRIPTION == 'true') && (steps.conventional-commit.outputs.BREAKING_TITLE == 'true'))
+        # Run if the interface has changed, but the PR is NOT marked as a breaking change.
+        if: (steps.changes.outputs.backend == 'true') && (steps.api-changes.outputs.api == 'true') && !((steps.conventional-commit.outputs.BREAKING_DESCRIPTION == 'true') && (steps.conventional-commit.outputs.BREAKING_TITLE == 'true'))
         run: echo "EXPECT_NO_BREAKING_CHANGES=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
         with:
           path: |
             ~/.cargo/registry
@@ -146,18 +155,18 @@ jobs:
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
 
       - name: Install dfx
-        if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
+        if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
       - name: Download backend.wasm.gz
-        if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: backend.wasm.gz
           path: .
 
       - name: 'Run backend tests'
-        if: steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true'
+        if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
         working-directory: .
         run: |
           set -euxo pipefail # Ensure that the `exit 1` causes this step to fail.
@@ -182,7 +191,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
       - uses: ./.github/actions/needs_success

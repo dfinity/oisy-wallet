@@ -1,7 +1,10 @@
 import { ICP_NETWORK, ICP_PSEUDO_TESTNET_NETWORK } from '$env/networks/networks.icp.env';
 import {
+	BITCAT_LEDGER_CANISTER_ID,
+	FORSETISCN_LEDGER_CANISTER_ID,
 	GHOSTNODE_LEDGER_CANISTER_ID,
-	ICONFUCIUS_LEDGER_CANISTER_ID
+	ICONFUCIUS_LEDGER_CANISTER_ID,
+	ODINDOG_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
@@ -10,7 +13,7 @@ import type {
 	IcTokenWithoutIdExtended,
 	IcrcCustomToken
 } from '$icp/types/icrc-custom-token';
-import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
+import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -30,8 +33,11 @@ export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 };
 
 const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
+	[BITCAT_LEDGER_CANISTER_ID]: 'BITCAT',
+	[FORSETISCN_LEDGER_CANISTER_ID]: 'FORSETISCN',
 	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE',
-	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS'
+	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS',
+	[ODINDOG_LEDGER_CANISTER_ID]: 'ODINDOG'
 };
 
 /**
@@ -58,7 +64,7 @@ const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string>
  *          - `ICP_PSEUDO_TESTNET_NETWORK` for known "testnet" tokens
  */
 const mapIcNetwork = (ledgerCanisterId: LedgerCanisterIdText) =>
-	isTokenIcrcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
+	isTokenIcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
 
 export const mapIcrcToken = ({
 	metadata,

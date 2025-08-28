@@ -5,7 +5,6 @@ import { selectColorForName } from '$lib/utils/contact.utils';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
-import { vi } from 'vitest';
 
 describe('ContactHeader', () => {
 	// Mock the i18n store

@@ -11,7 +11,7 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
+import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import * as appContants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
@@ -39,13 +39,14 @@ import {
 } from '$lib/utils/tokens.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import { bn1Bi, bn2Bi, bn3Bi, certified, mockBalances } from '$tests/mocks/balances.mock';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import i18nMock from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
-import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
@@ -168,7 +169,7 @@ describe('tokens.utils', () => {
 	});
 
 	describe('pinTokensWithBalanceAtTop', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -341,7 +342,7 @@ describe('tokens.utils', () => {
 	});
 
 	describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -682,26 +683,30 @@ describe('tokens.utils', () => {
 		it('should return empty arrays if no tokens passed', () => {
 			const result = groupTogglableTokens({});
 
-			expect(result).toEqual({ icrc: [], erc20: [], spl: [] });
+			expect(result).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
 		});
 
 		it('should return empty arrays if invalid data passed', () => {
 			const result1 = groupTogglableTokens({ invalidkey: ICP_TOKEN });
 			const result2 = groupTogglableTokens(null as unknown as Record<string, Token>);
 
-			expect(result1).toEqual({ icrc: [], erc20: [], spl: [] });
-			expect(result2).toEqual({ icrc: [], erc20: [], spl: [] });
+			expect(result1).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
+			expect(result2).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
 		});
 
 		it('should group the tokens correctly', () => {
 			const mockToggleableIcToken1 = { ...mockValidIcrcToken, name: 'token1', enabled: true };
 			const mockToggleableIcToken2 = { ...mockValidIcrcToken, name: 'token2', enabled: true };
 			const mockToggleableErc20Token = { ...mockValidErc20Token, enabled: true };
+			const mockToggleableErc721Token = { ...mockValidErc721Token, enabled: true };
+			const mockToggleableErc1155Token = { ...mockValidErc1155Token, enabled: true };
 			const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 
-			const { icrc, spl, erc20 } = groupTogglableTokens({
+			const { icrc, spl, erc20, erc721, erc1155 } = groupTogglableTokens({
 				SOL: mockToggleableSplToken,
 				ETH: mockToggleableErc20Token,
+				erc721: mockToggleableErc721Token,
+				erc1155: mockToggleableErc1155Token,
 				'ICP-t1': mockToggleableIcToken1,
 				'ICP-t2': mockToggleableIcToken2
 			});
@@ -709,6 +714,8 @@ describe('tokens.utils', () => {
 			expect(icrc).toEqual([mockToggleableIcToken1, mockToggleableIcToken2]);
 			expect(spl).toEqual([mockToggleableSplToken]);
 			expect(erc20).toEqual([mockToggleableErc20Token]);
+			expect(erc721).toEqual([mockToggleableErc721Token]);
+			expect(erc1155).toEqual([mockToggleableErc1155Token]);
 		});
 	});
 
@@ -723,7 +730,8 @@ describe('tokens.utils', () => {
 			}));
 
 			vi.mock('$eth/services/manage-tokens.services', () => ({
-				saveErc20UserTokens: vi.fn().mockResolvedValue(undefined)
+				saveErc20UserTokens: vi.fn().mockResolvedValue(undefined),
+				saveErc20CustomTokens: vi.fn().mockResolvedValue(undefined)
 			}));
 
 			vi.mock('$sol/services/manage-tokens.services', () => ({
@@ -756,6 +764,7 @@ describe('tokens.utils', () => {
 
 			expect(saveIcrcCustomTokens).not.toHaveBeenCalled();
 			expect(saveErc20UserTokens).not.toHaveBeenCalled();
+			expect(saveErc20CustomTokens).not.toHaveBeenCalled();
 			expect(saveSplCustomTokens).not.toHaveBeenCalled();
 		});
 
@@ -786,6 +795,23 @@ describe('tokens.utils', () => {
 			});
 
 			expect(saveErc20UserTokens).toHaveBeenCalledWith(
+				expect.objectContaining({
+					tokens: expect.arrayContaining([expect.objectContaining(token)]),
+					identity: mockIdentity
+				})
+			);
+		});
+
+		it('should call saveErc20CustomTokens when ERC20 tokens are present', async () => {
+			const token = { ...mockValidErc20Token, enabled: true } as unknown as TokenUi;
+
+			await saveAllCustomTokens({
+				tokens: { erc20: token },
+				$authIdentity: mockIdentity,
+				$i18n: i18nMock
+			});
+
+			expect(saveErc20CustomTokens).toHaveBeenCalledWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
 					identity: mockIdentity

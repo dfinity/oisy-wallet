@@ -16,6 +16,7 @@
 		initEthFeeStore
 	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
@@ -100,7 +101,7 @@
 	 * Modal
 	 */
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.REVIEW,
 			title: $i18n.send.text.review
@@ -111,8 +112,8 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsSend> | undefined;
+	let modal: WizardModal<WizardStepsSend>;
 
 	const close = () => modalStore.close();
 
@@ -150,7 +151,7 @@
 			fee: $feeStore,
 			modalNext: modal.next,
 			token: $sendToken,
-			progress: (step: ProgressStepsSend) => (sendProgressStep = step),
+			progress: (step: ProgressStep) => (sendProgressStep = step),
 			identity: $authIdentity,
 			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			sourceNetwork,
@@ -161,21 +162,24 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
+<WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{@const { data } = firstTransaction}
 
-	<WalletConnectModalTitle slot="title"
-		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
-	>
+	{#snippet title()}
+		<WalletConnectModalTitle
+			>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
+		>
+	{/snippet}
 
 	<EthFeeContext
 		amount={amount.toString()}
+		{data}
+		{destination}
+		nativeEthereumToken={$ethereumToken}
+		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
-		{destination}
-		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		{sourceNetwork}
-		nativeEthereumToken={$ethereumToken}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
 			{#if currentStep?.name === WizardStepsSend.SENDING}
@@ -186,13 +190,13 @@
 			{:else}
 				<WalletConnectSendReview
 					{amount}
-					{destination}
 					{data}
+					{destination}
 					{erc20Approve}
+					onApprove={send}
+					onReject={reject}
 					{sourceNetwork}
 					{targetNetwork}
-					on:icApprove={send}
-					on:icReject={reject}
 				/>
 			{/if}
 		</CkEthLoader>

@@ -8,6 +8,7 @@ import type {
 } from '$icp/types/pow-protector-listener';
 import type {
 	PostMessage,
+	PostMessageDataRequest,
 	PostMessageDataResponseError,
 	PostMessageDataResponsePowProtectorNextAllowance,
 	PostMessageDataResponsePowProtectorProgress
@@ -17,10 +18,10 @@ import type {
 export const initPowProtectorWorker: PowProtectorWorker =
 	async (): Promise<PowProtectorWorkerInitResult> => {
 		const PowWorker = await import('$lib/workers/workers?worker');
-		const worker: Worker = new PowWorker.default();
+		let worker: Worker | null = new PowWorker.default();
 
 		worker.onmessage = ({
-			data
+			data: dataMsg
 		}: MessageEvent<
 			PostMessage<
 				| PostMessageDataResponsePowProtectorProgress
@@ -28,40 +29,54 @@ export const initPowProtectorWorker: PowProtectorWorker =
 				| PostMessageDataResponseError
 			>
 		>) => {
-			const { msg } = data;
+			const { msg, data } = dataMsg;
 
 			switch (msg) {
 				case 'syncPowProgress': {
 					syncPowProgress({
-						data: data.data as PostMessageDataResponsePowProtectorProgress
+						data: data as PostMessageDataResponsePowProtectorProgress
 					});
 					return;
 				}
 				case 'syncPowNextAllowance': {
 					// Check if data.data exists and has proper structure
 					syncPowNextAllowance({
-						data: data.data as PostMessageDataResponsePowProtectorNextAllowance
+						data: data as PostMessageDataResponsePowProtectorNextAllowance
 					});
 					return;
 				}
 			}
 		};
 
+		const stop = () => {
+			worker?.postMessage({
+				msg: 'stopPowProtectionTimer'
+			});
+		};
+
+		let isDestroying = false;
+
 		return {
 			start: () => {
-				worker.postMessage({
+				worker?.postMessage({
 					msg: 'startPowProtectionTimer'
-				});
+				} as PostMessage<PostMessageDataRequest>);
 			},
-			stop: () => {
-				worker.postMessage({
-					msg: 'stopPowProtectionTimer'
-				});
-			},
+			stop,
 			trigger: () => {
-				worker.postMessage({
+				worker?.postMessage({
 					msg: 'triggerPowProtectionTimer'
-				});
+				} as PostMessage<PostMessageDataRequest>);
+			},
+			destroy: () => {
+				if (isDestroying) {
+					return;
+				}
+				isDestroying = true;
+				stop();
+				worker?.terminate();
+				worker = null;
+				isDestroying = false;
 			}
 		};
 	};

@@ -56,7 +56,7 @@
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	$: amount, networkId, token, (() => debounceEstimateFee())();
+	$: (amount, networkId, token, (() => debounceEstimateFee())());
 </script>
 
 <slot />

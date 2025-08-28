@@ -144,15 +144,15 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<UtxosFeeContext source={sourceAddress} amount={sendAmount} {networkId} {amountError}>
+<UtxosFeeContext amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
 		<BtcConvertForm
+			source={sourceAddress}
 			on:icNext
 			on:icClose
 			bind:sendAmount
 			bind:receiveAmount
 			bind:amountError
-			source={sourceAddress}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
@@ -163,7 +163,7 @@
 			</svelte:fragment>
 		</BtcConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<BtcConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
+		<BtcConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack>
 			<ButtonBack slot="cancel" onclick={back} />
 		</BtcConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}

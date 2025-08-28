@@ -556,6 +556,31 @@
 					"audit": "vi6cu-aiaaa-aaaad-aad7q-cai"
 				}
 			}
+		},
+		"llm": {
+			"type": "custom",
+			"build": "scripts/build.llm.sh",
+			"candid": "target/llm.did",
+			"wasm": "target/llm.wasm.gz",
+			"init_arg_file": "target/llm.arg.did",
+			"specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
+			"shrink": false,
+			"remote": {
+				"id": {
+					"ic": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"beta": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"staging": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_be_1": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_1": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_2": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_3": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_4": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_5": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_6": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"e2e": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"audit": "w36hm-eqaaa-aaaal-qr76a-cai"
+				}
+			}
 		}
 	},
 	"defaults": {

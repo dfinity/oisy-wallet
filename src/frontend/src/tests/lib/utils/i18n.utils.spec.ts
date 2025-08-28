@@ -6,14 +6,13 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
-import { Languages } from '$lib/types/languages';
+import { Languages } from '$lib/enums/languages';
 import {
 	getDefaultLang,
 	mergeWithFallback,
 	replaceOisyPlaceholders,
 	replacePlaceholders
 } from '$lib/utils/i18n.utils';
-import { describe, expect } from 'vitest';
 
 describe('i18n-utils', () => {
 	describe('replacePlaceholders', () => {
@@ -202,7 +201,7 @@ describe('i18n-utils', () => {
 		};
 
 		it('returns ENGLISH when language is unsupported', () => {
-			mockNavigatorLanguage('fr-FR');
+			mockNavigatorLanguage('la-VA');
 
 			expect(getDefaultLang()).toBe(Languages.ENGLISH);
 		});

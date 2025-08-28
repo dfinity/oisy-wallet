@@ -5,8 +5,8 @@
 
 <div
 	class="flex justify-center pt-12"
-	role="presentation"
 	aria-label={$i18n.signer.idle.alt.img_placeholder}
+	role="presentation"
 >
 	<SignerIdleAnimatedAstronaut />
 </div>

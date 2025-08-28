@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher } from 'svelte';
 	import type IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
 	import type IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
 	import type IcReceiveInfoIcrc from '$icp/components/receive/IcReceiveInfoIcrc.svelte';
@@ -30,8 +31,8 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsReceiveAddress> | undefined;
+	let modal: WizardModal<WizardStepsReceiveAddress>;
 
 	let address: undefined | string;
 	let addressLabel: undefined | string;
@@ -50,26 +51,34 @@
 		addressToken = undefined;
 		copyAriaLabel = undefined;
 	};
+
+	const dispatch = createEventDispatcher();
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose testId={RECEIVE_TOKENS_MODAL}>
-	<svelte:fragment slot="title">
+<WizardModal
+	bind:this={modal}
+	onClose={() => dispatch('nnsClose')}
+	{steps}
+	testId={RECEIVE_TOKENS_MODAL}
+	bind:currentStep
+>
+	{#snippet title()}
 		{#if currentStep?.name === steps[1].name}
 			<ReceiveTitle title={addressToken?.network.name} />
 		{:else}
 			{$i18n.receive.text.receive}
-		{/if}</svelte:fragment
-	>
+		{/if}
+	{/snippet}
 
 	{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
 		<ReceiveAddressQrCode
-			on:icBack={displayAddresses}
 			{address}
 			{addressLabel}
 			{addressToken}
+			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
 			network={addressToken.network}
 			qrCodeAction={{ enabled: false }}
-			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
+			on:icBack={displayAddresses}
 		/>
 	{:else}
 		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />

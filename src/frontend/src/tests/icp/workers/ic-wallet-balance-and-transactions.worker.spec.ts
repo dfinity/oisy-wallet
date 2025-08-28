@@ -1,3 +1,4 @@
+import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { Dip20TransactionWithId } from '$icp/types/api';
@@ -19,7 +20,7 @@ import {
 	type IcrcIndexNgTransactionWithId
 } from '@dfinity/ledger-icrc';
 import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
-import { describe, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('ic-wallet-balance-and-transactions.worker', () => {
@@ -493,6 +494,10 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			identity: mockIdentity
 		});
 
+		const startData = {
+			indexCanisterId: ICP_INDEX_CANISTER_ID
+		};
+
 		beforeEach(() => {
 			vi.spyOn(IndexCanister, 'create').mockImplementation(() => indexCanisterMock);
 		});
@@ -501,7 +506,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			const { setup, teardown, tests } = initWithTransactions({
 				msg: 'syncIcpWallet',
 				initScheduler: initIcpWalletScheduler,
-				transaction: mockMappedTransaction
+				transaction: mockMappedTransaction,
+				startData
 			});
 
 			beforeEach(() => {
@@ -522,7 +528,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		describe('without transactions', () => {
 			const { setup, teardown, tests } = initWithoutTransactions({
 				msg: 'syncIcpWallet',
-				initScheduler: initIcpWalletScheduler
+				initScheduler: initIcpWalletScheduler,
+				startData
 			});
 
 			beforeEach(() => {
@@ -564,6 +571,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			const { setup, teardown, tests } = initOtherScenarios({
 				initScheduler: initIcpWalletScheduler,
+				startData,
 				initCleanupMock,
 				initErrorMock,
 				msg: 'syncIcpWallet'

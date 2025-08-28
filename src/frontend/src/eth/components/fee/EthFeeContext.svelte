@@ -37,6 +37,7 @@
 	export let observe: boolean;
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
+	export let data: string | undefined = undefined;
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 	export let nativeEthereumToken: Token;
@@ -61,11 +62,10 @@
 
 			const params: GetFeeData = {
 				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress),
-
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
-			const { getFeeData, estimateGas } = infuraProviders(sendToken.network.id);
+			const { getFeeData, safeEstimateGas } = infuraProviders(sendToken.network.id);
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
@@ -91,7 +91,11 @@
 				)
 			});
 
-			const estimatedGas = await estimateGas(params);
+			// We estimate gas only when it is not a ck-conversion (i.e. target network is not ICP).
+			// Otherwise, we would need to emulate the data that are provided to the minter contract address.
+			const estimatedGas = isNetworkICP(targetNetwork)
+				? undefined
+				: await safeEstimateGas({ ...params, data });
 
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
@@ -103,7 +107,7 @@
 
 			const erc20GasFeeParams = {
 				contract: sendToken as Erc20Token,
-				amount: parseToken({ value: `${amount ?? '1'}` }),
+				amount: parseToken({ value: `${amount ?? '1'}`, unitName: sendToken.decimals }),
 				sourceNetwork,
 				...params
 			};
@@ -178,6 +182,7 @@
 	});
 	onDestroy(() => {
 		listener?.disconnect();
+		listener = undefined;
 		clearTimeout(listenerCallbackTimer);
 	});
 
@@ -187,10 +192,10 @@
 
 	$: obverseFeeData(observe);
 
-	$: $ckEthMinterInfoStore,
+	$: ($ckEthMinterInfoStore,
 		(() => {
 			observe && debounceUpdateFeeData();
-		})();
+		})());
 
 	/**
 	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.

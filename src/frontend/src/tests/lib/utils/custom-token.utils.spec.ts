@@ -1,6 +1,7 @@
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@dfinity/principal';
+import { toNullable } from '@dfinity/utils';
 
 describe('custom-token.utils', () => {
 	describe('toCustomToken', () => {
@@ -11,7 +12,8 @@ describe('custom-token.utils', () => {
 
 		const partialExpected = {
 			enabled: true,
-			version: [1n]
+			version: [1n],
+			section: toNullable()
 		};
 
 		it('should convert to CustomToken with nullish version', () => {
@@ -35,7 +37,7 @@ describe('custom-token.utils', () => {
 			});
 		});
 
-		it('should return correct type for Icrc network', () => {
+		it('should return correct type for Icrc network key', () => {
 			const networkKey = 'Icrc';
 
 			expect(
@@ -72,7 +74,67 @@ describe('custom-token.utils', () => {
 			});
 		});
 
-		it('should return correct type for SplMainnet network', () => {
+		it('should return correct type for Ethereum/EVM Erc20 network key', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'Erc20',
+					address: 'mock-token-address',
+					chainId: 123n
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					Erc20: {
+						token_address: 'mock-token-address',
+						chain_id: 123n,
+						allow_media_source: toNullable()
+					}
+				}
+			});
+		});
+
+		it('should return correct type for Ethereum/EVM Erc721 network key', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'Erc721',
+					address: 'mock-token-address',
+					chainId: 123n
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					Erc721: {
+						token_address: 'mock-token-address',
+						chain_id: 123n,
+						allow_media_source: toNullable()
+					}
+				}
+			});
+		});
+
+		it('should return correct type for Ethereum/EVM Erc1155 network key', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'Erc1155',
+					address: 'mock-token-address',
+					chainId: 123n
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					Erc1155: {
+						token_address: 'mock-token-address',
+						chain_id: 123n,
+						allow_media_source: toNullable()
+					}
+				}
+			});
+		});
+
+		it('should return correct type for SplMainnet network key', () => {
 			expect(
 				toCustomToken({
 					...mockParams,
@@ -93,7 +155,7 @@ describe('custom-token.utils', () => {
 			});
 		});
 
-		it('should return correct type for SplDevnet network', () => {
+		it('should return correct type for SplDevnet network key', () => {
 			expect(
 				toCustomToken({
 					...mockParams,
@@ -112,6 +174,19 @@ describe('custom-token.utils', () => {
 					}
 				}
 			});
+		});
+
+		it('should throw an error for unsupported network key', () => {
+			expect(() =>
+				toCustomToken({
+					...mockParams,
+					// @ts-expect-error we test this in purposes
+					networkKey: 'UnsupportedNetwork',
+					address: 'mock-token-address',
+					decimals: 8,
+					symbol: 'mock-symbol'
+				})
+			).toThrow('Unsupported network key: UnsupportedNetwork');
 		});
 	});
 });

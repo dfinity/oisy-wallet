@@ -40,7 +40,7 @@
 	};
 	const debounceLoadIcTokenFee = debounce(loadIcTokenFee);
 
-	$: token, debounceLoadIcTokenFee();
+	$: (token, debounceLoadIcTokenFee());
 </script>
 
 <slot />

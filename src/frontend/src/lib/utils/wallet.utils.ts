@@ -3,9 +3,10 @@ import type { InitWalletWorkerFn, WalletWorker } from '$lib/types/listener';
 import type { Token, TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
+import { nonNullish } from '@dfinity/utils';
 
 /**
- * Wait few seconds and trigger the wallet to fetch optimistically new transactions twice.
+ * Wait a few seconds and trigger the wallet to fetch optimistically new transactions twice.
  */
 export const waitAndTriggerWallet = async () => {
 	await waitForMilliseconds(INDEX_RELOAD_DELAY);
@@ -15,6 +16,27 @@ export const waitAndTriggerWallet = async () => {
 
 	// In case the best case scenario was not met, we optimistically try to retrieve the transactions on more time given that we generally retrieve transactions every WALLET_TIMER_INTERVAL_MILLIS seconds without blocking the UI.
 	waitForMilliseconds(INDEX_RELOAD_DELAY).then(() => emit({ message: 'oisyTriggerWallet' }));
+};
+
+/**
+ * Properly destroy a worker and remove it from the workers map.
+ *
+ * @param workers The map of workers defined as `Map<TokenId, WalletWorker>`.
+ * @param tokenId The token ID of the worker to destroy.
+ */
+const destroyWorker = ({
+	workers,
+	tokenId
+}: {
+	workers: Map<TokenId, WalletWorker>;
+	tokenId: TokenId;
+}) => {
+	const worker = workers.get(tokenId);
+	if (nonNullish(worker)) {
+		worker.stop();
+		worker.destroy();
+		workers.delete(tokenId);
+	}
 };
 
 /**
@@ -33,9 +55,9 @@ export const cleanWorkers = ({
 	Array.from(workers.keys())
 		.filter((workerTokenId) => !tokens.some(({ id: tokenId }) => workerTokenId === tokenId))
 		.forEach((tokenId) => {
+			// Trigger the stop event to properly cleanup the worker thread
 			// TODO: use a more functional approach instead of deleting the worker from the map.
-			workers.get(tokenId)?.stop();
-			workers.delete(tokenId);
+			destroyWorker({ workers, tokenId });
 		});
 
 /**
@@ -45,14 +67,14 @@ export const cleanWorkers = ({
  * @param token The token to load the worker for.
  * @param initWalletWorker The initialisation function of a wallet worker.
  */
-export const loadWorker = async ({
+export const loadWorker = async <T extends Token = Token>({
 	workers,
 	token,
 	initWalletWorker
 }: {
 	workers: Map<TokenId, WalletWorker>;
-	token: Token;
-	initWalletWorker: InitWalletWorkerFn;
+	token: T;
+	initWalletWorker: InitWalletWorkerFn<T>;
 }) => {
 	if (!workers.has(token.id)) {
 		const worker = await initWalletWorker({ token });

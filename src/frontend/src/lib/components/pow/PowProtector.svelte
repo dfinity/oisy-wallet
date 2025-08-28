@@ -20,7 +20,7 @@
 			powWorker.start();
 		});
 
-		onDestroy(() => powWorker?.stop());
+		onDestroy(() => powWorker?.destroy());
 	}
 </script>
 

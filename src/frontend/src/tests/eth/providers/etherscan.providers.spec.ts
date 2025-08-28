@@ -3,6 +3,8 @@ import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/net
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import type {
+	EtherscanProviderErc1155TokenTransferTransaction,
+	EtherscanProviderErc721TokenTransferTransaction,
 	EtherscanProviderInternalTransaction,
 	EtherscanProviderTokenTransferTransaction,
 	EtherscanProviderTransaction
@@ -10,15 +12,16 @@ import type {
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
+import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import {
 	createMockEtherscanInternalTransactions,
 	createMockEtherscanTransactions
 } from '$tests/mocks/etherscan.mock';
 import en from '$tests/mocks/i18n.mock';
 import { EtherscanProvider as EtherscanProviderLib, Network } from 'ethers/providers';
-import type { MockedClass } from 'vitest';
 
 vi.mock('$env/rest/etherscan.env', () => ({
 	ETHERSCAN_API_KEY: 'test-api-key'
@@ -47,7 +50,7 @@ describe('etherscan.providers', () => {
 		const address = mockEthAddress;
 
 		const mockFetch = vi.fn();
-		const mockProvider = EtherscanProviderLib as MockedClass<typeof EtherscanProviderLib>;
+		const mockProvider = vi.mocked(EtherscanProviderLib);
 		mockProvider.prototype.fetch = mockFetch;
 
 		beforeEach(() => {
@@ -183,7 +186,7 @@ describe('etherscan.providers', () => {
 				await expect(provider.transactions({ address })).rejects.toThrow('Network error');
 			});
 
-			describe('erc20Transactions method', () => {
+			describe('erc20Transactions', () => {
 				const mockApiResponse: EtherscanProviderTokenTransferTransaction[] = [
 					{
 						nonce: '1',
@@ -250,6 +253,199 @@ describe('etherscan.providers', () => {
 						provider.erc20Transactions({ address: mockEthAddress, contract: mockValidErc20Token })
 					).rejects.toThrow('Network error');
 				});
+			});
+
+			describe('erc721Transactions', () => {
+				const mockApiResponse: EtherscanProviderErc721TokenTransferTransaction[] = [
+					{
+						nonce: '1',
+						gas: '21000',
+						gasPrice: '20000000000',
+						hash: '0x123abc',
+						blockNumber: '123456',
+						blockHash: '0x456def',
+						timeStamp: '1697049600',
+						confirmations: '10',
+						from: '0xabc...',
+						to: '0xdef...',
+						tokenID: '132',
+						contractAddress: mockValidErc721Token.address,
+						tokenName: mockValidErc721Token.name,
+						tokenSymbol: mockValidErc721Token.symbol,
+						tokenDecimal: mockValidErc721Token.decimals.toString(),
+						transactionIndex: '0',
+						gasUsed: '21000',
+						cumulativeGasUsed: '21000',
+						input: '0x'
+					}
+				];
+
+				const expectedTransactions: Transaction[] = [
+					{
+						hash: '0x123abc',
+						blockNumber: 123456,
+						timestamp: 1697049600,
+						from: '0xabc...',
+						to: '0xdef...',
+						nonce: 1,
+						gasLimit: 21000n,
+						gasPrice: 20000000000n,
+						value: BigInt(1),
+						tokenId: 132,
+						chainId
+					}
+				];
+
+				beforeEach(() => {
+					mockFetch.mockResolvedValue(mockApiResponse);
+				});
+
+				it('should fetch and map transactions correctly', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+
+					const result = await provider.erc721Transactions({
+						address: mockEthAddress,
+						contract: mockValidErc721Token
+					});
+
+					expect(provider).toBeDefined();
+
+					expect(mockFetch).toHaveBeenCalledOnce();
+
+					expect(result).toStrictEqual(expectedTransactions);
+				});
+
+				it('should throw an error if the API call fails', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+					mockFetch.mockRejectedValue(new Error('Network error'));
+
+					await expect(
+						provider.erc721Transactions({ address: mockEthAddress, contract: mockValidErc721Token })
+					).rejects.toThrow('Network error');
+				});
+			});
+
+			describe('erc1155Transactions', () => {
+				const mockApiResponse: EtherscanProviderErc1155TokenTransferTransaction[] = [
+					{
+						nonce: '1',
+						gas: '21000',
+						gasPrice: '20000000000',
+						hash: '0x123abc',
+						blockNumber: '123456',
+						blockHash: '0x456def',
+						timeStamp: '1697049600',
+						confirmations: '10',
+						from: '0xabc...',
+						to: '0xdef...',
+						tokenID: '132',
+						tokenValue: '3',
+						contractAddress: mockValidErc1155Token.address,
+						tokenName: mockValidErc1155Token.name,
+						tokenSymbol: mockValidErc1155Token.symbol,
+						transactionIndex: '0',
+						gasUsed: '21000',
+						cumulativeGasUsed: '21000',
+						input: '0x'
+					}
+				];
+
+				const expectedTransactions: Transaction[] = [
+					{
+						hash: '0x123abc',
+						blockNumber: 123456,
+						timestamp: 1697049600,
+						from: '0xabc...',
+						to: '0xdef...',
+						nonce: 1,
+						gasLimit: 21000n,
+						gasPrice: 20000000000n,
+						value: BigInt(3),
+						tokenId: 132,
+						chainId
+					}
+				];
+
+				beforeEach(() => {
+					mockFetch.mockResolvedValue(mockApiResponse);
+				});
+
+				it('should fetch and map transactions correctly', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+
+					const result = await provider.erc1155Transactions({
+						address: mockEthAddress,
+						contract: mockValidErc1155Token
+					});
+
+					expect(provider).toBeDefined();
+
+					expect(mockFetch).toHaveBeenCalledOnce();
+
+					expect(result).toStrictEqual(expectedTransactions);
+				});
+
+				it('should throw an error if the API call fails', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+					mockFetch.mockRejectedValue(new Error('Network error'));
+
+					await expect(
+						provider.erc1155Transactions({
+							address: mockEthAddress,
+							contract: mockValidErc1155Token
+						})
+					).rejects.toThrow('Network error');
+				});
+			});
+		});
+
+		describe('erc721TokenInventory', () => {
+			const mockApiResponse = [
+				{
+					TokenAddress: mockEthAddress,
+					TokenId: '1'
+				},
+				{
+					TokenAddress: mockEthAddress2,
+					TokenId: '2'
+				},
+				{
+					TokenAddress: mockEthAddress3,
+					TokenId: '3'
+				}
+			];
+
+			const expectedTokenIds = [1, 2, 3];
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+
+				mockFetch.mockResolvedValue(mockApiResponse);
+			});
+
+			it('should fetch and map token ids correctly', async () => {
+				const provider = new EtherscanProvider(network, chainId);
+
+				const tokenIds = await provider.erc721TokenInventory({
+					address: mockEthAddress,
+					contractAddress: mockValidErc721Token.address
+				});
+
+				expect(mockFetch).toHaveBeenCalledOnce();
+
+				expect(tokenIds).toStrictEqual(expectedTokenIds);
+			});
+
+			it('should throw an error if the API call fails', async () => {
+				const provider = new EtherscanProvider(network, chainId);
+				mockFetch.mockRejectedValue(new Error('Network error'));
+
+				await expect(
+					provider.erc721TokenInventory({
+						address: mockEthAddress,
+						contractAddress: mockValidErc721Token.address
+					})
+				).rejects.toThrow('Network error');
 			});
 		});
 	});

@@ -5,7 +5,7 @@
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { children }: Props = $props();
@@ -16,12 +16,16 @@
 
 		if (!isInputField) {
 			if (e.key.toLowerCase() === $i18n.shortcuts.privacy_mode.toLowerCase() && !hasModifier) {
-				setPrivacyMode({ enabled: !$isPrivacyMode, withToast: true });
+				setPrivacyMode({
+					enabled: !$isPrivacyMode,
+					withToast: true,
+					source: 'Keypress P'
+				});
 			}
 		}
 	};
 </script>
 
-{@render children?.()}
+{@render children()}
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />

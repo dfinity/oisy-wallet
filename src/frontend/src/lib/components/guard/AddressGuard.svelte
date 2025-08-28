@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { validateBtcAddressMainnet } from '$btc/services/btc-address.services';
 	import { validateEthAddress } from '$eth/services/eth-address.services';
 	import {
@@ -14,6 +15,12 @@
 		solAddressMainnetStore
 	} from '$lib/stores/address.store';
 	import { validateSolAddressMainnet } from '$sol/services/sol-address.services';
+
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	let signerAllowanceLoaded = false;
 
@@ -48,16 +55,20 @@
 		]);
 	};
 
-	$: $btcAddressMainnetStore,
-		$ethAddressStore,
-		$solAddressMainnetStore,
-		$networkBitcoinMainnetEnabled,
-		$networkEthereumEnabled,
-		$networkEvmMainnetEnabled,
-		$networkSolanaMainnetEnabled,
+	$effect(() => {
+		[
+			$btcAddressMainnetStore,
+			$ethAddressStore,
+			$solAddressMainnetStore,
+			$networkBitcoinMainnetEnabled,
+			$networkEthereumEnabled,
+			$networkEvmMainnetEnabled,
+			$networkSolanaMainnetEnabled
+		];
 		(async () => await validateAddresses())();
+	});
 </script>
 
 <svelte:window on:oisyValidateAddresses={loadSignerAllowanceAndValidateAddresses} />
 
-<slot />
+{@render children()}

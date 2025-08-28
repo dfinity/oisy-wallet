@@ -2,20 +2,6 @@ name: Backend Checks
 
 on:
   pull_request:
-    paths:
-      - # Scripts, GitHub actions that contain 'backend' in their path.
-        '**/*backend*'
-      - # The backend source code
-        'src/backend/**'
-      - 'src/shared/**'
-      - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
-        '**/Cargo*'
-      - '**/*rust*'
-      - # The dockerfile used in this CI run, and the scripts it COPY's.
-        'Dockerfile'
-      - 'docker/**'
-      - # There may be some files in frontend folder that contains 'backend' in their name.
-        '!src/frontend/**'
   merge_group:
   workflow_dispatch:
 
@@ -27,10 +13,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      - name: Check if backend files changed
+        id: changes
+        uses: ./.github/actions/check-backend-changes
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        if: steps.changes.outputs.backend == 'true'
         with:
           path: |
             ~/.cargo/registry
@@ -38,10 +28,13 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
       - name: Install rust
+        if: steps.changes.outputs.backend == 'true'
         run: ./scripts/setup rust
       - name: Lint rust
+        if: steps.changes.outputs.backend == 'true'
         run: ./scripts/lint.rust.sh
       - name: Lint candid
+        if: steps.changes.outputs.backend == 'true'
         run: ./scripts/lint.did.sh
 
   workspace-dependencies:
@@ -49,11 +42,17 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-      - run: sudo snap install yq
+      - name: Check if backend files changed
+        id: changes
+        uses: ./.github/actions/check-backend-changes
+      - name: Install yq
+        if: steps.changes.outputs.backend == 'true'
+        run: sudo snap install yq
       - name: Dependencies are defined in the workspace
+        if: steps.changes.outputs.backend == 'true'
         run: ./scripts/lint.cargo-workspace-dependencies.sh
 
   backend-checks-pass:
@@ -63,7 +62,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
       - uses: ./.github/actions/needs_success

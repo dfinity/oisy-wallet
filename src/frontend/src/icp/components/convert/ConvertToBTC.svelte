@@ -39,12 +39,12 @@
 </script>
 
 <ButtonHero
+	ariaLabel={$i18n.convert.text.convert_to_btc}
 	disabled={$networkBitcoinMainnetDisabled || $isBusy || $outflowActionsDisabled}
 	onclick={async () => await openConvert()}
-	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
 	{#snippet icon()}
-		<IconCkConvert size="28" />
+		<IconCkConvert size="24" />
 	{/snippet}
 	{#snippet label()}
 		{BTC_MAINNET_SYMBOL}
@@ -52,5 +52,5 @@
 </ButtonHero>
 
 {#if $modalConvertCkBTCToBTC && nonNullish(ckBtcToken) && nonNullish(ckBtcToken.twinToken)}
-	<ConvertModal sourceToken={ckBtcToken} destinationToken={ckBtcToken.twinToken} />
+	<ConvertModal destinationToken={ckBtcToken.twinToken} sourceToken={ckBtcToken} />
 {/if}

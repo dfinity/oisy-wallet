@@ -9,36 +9,32 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 interface BitcoinCanisterParams {
 	identity: OptionIdentity;
-	address: string;
-	network: BitcoinNetwork;
 	bitcoinCanisterId: CanisterIdText;
+	network: BitcoinNetwork;
+	address: string;
+	minConfirmations?: number;
 }
 
 let directCanister: BitcoinDirectCanister | undefined = undefined;
 
 export const getUtxosQuery = async ({
-	identity,
-	address,
-	network,
-	bitcoinCanisterId
-}: BitcoinCanisterParams): Promise<get_utxos_response> => {
+																			identity,
+																			bitcoinCanisterId,
+																			address,
+																			network,
+																			minConfirmations
+																		}: BitcoinCanisterParams): Promise<get_utxos_response> => {
 	assertNonNullish(identity);
 
-	// Workaround: The BitcoinCanister.getUtxosQuery() method from @dfinity/ckbtc
-	// maps 'regtest' network to 'mainnet' in its toGetUtxosParams() function.
-	// Use custom bitcoinDirectCanister for regtest to preserve correct network mapping,
-	// otherwise use the standard bitcoinCanister for mainnet/testnet.
 	const { getUtxosQuery } =
 		network === 'regtest'
 			? await bitcoinDirectCanister({ identity, bitcoinCanisterId })
 			: await bitcoinCanister({ identity, bitcoinCanisterId });
 
-	const minConfirmations = 1;
-
 	return getUtxosQuery({
 		address,
 		network,
-		filter: { minConfirmations }
+		...(!isNullish(minConfirmations) && { filter: { minConfirmations } })
 	});
 };
 

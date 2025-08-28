@@ -22,7 +22,7 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import type { ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -182,6 +182,17 @@
 				}
 			});
 
+			if (sendProgressStep === ProgressStepsSendSol.CONFIRM) {
+				toastsError({
+					msg: { text: $i18n.send.error.solana_confirmation_failed },
+					err
+				});
+
+				setTimeout(() => close(), 750);
+
+				return;
+			}
+
 			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)
 				? $i18n.send.error.solana_transaction_expired
 				: $i18n.send.error.unexpected;
@@ -196,22 +207,22 @@
 	};
 </script>
 
-<SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
+<SolFeeContext {destination} observe={currentStep?.name !== WizardStepsSend.SENDING}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview on:icBack on:icSend={send} {destination} {selectedContact} {amount} {network} />
+		<SolSendReview {amount} {destination} {network} {selectedContact} on:icBack on:icSend={send} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<SolSendForm
+			{selectedContact}
 			on:icNext
 			on:icClose
 			on:icTokensList
 			on:icBack
-			{selectedContact}
 			bind:destination
 			bind:amount
 		>
-			<ButtonBack onclick={back} slot="cancel" />
+			<ButtonBack slot="cancel" onclick={back} />
 		</SolSendForm>
 	{:else}
 		<slot />

@@ -1,14 +1,14 @@
 @use '../mixins/media';
 
-/************* USE OF !IMPORTANT ********************
-**   Only in this file the use of !important       **
-**   CAN be warranted. As this file is the last    **
-**   instance where the gix components can be      **
-**   styled, !important can be used to override    **
-**   certain styles. However, it still is a last   **
-**   resort solution and if possible, a proper     **
-**   solution must be tried and still is prefered. **
-****************************************************/
+/************* USE OF !IMPORTANT *********************
+**   Only in this file the use of !important        **
+**   CAN be warranted. As this file is the last     **
+**   instance where the gix components can be       **
+**   styled, !important can be used to override     **
+**   certain styles. However, it still is a last    **
+**   resort solution and if possible, a proper      **
+**   solution must be tried and still is preferred. **
+*****************************************************/
 
 :root {
 	--toggle-disabled-opacity: 1;
@@ -335,6 +335,13 @@ div.step {
 		}
 	}
 
+	&.failed {
+		.state {
+			color: var(--negative-emphasis) !important;
+			background: var(--color-background-error-light) !important;
+		}
+	}
+
 	&.next {
 		.text {
 			color: var(--color-foreground-primary);
@@ -391,12 +398,13 @@ div.select {
 	}
 }
 
-// TOASTS
-// Toasts other than error are not used
-// Also, it seems that gix components dont apply the success and warn classes correctly
-div.error .toast {
-	--overlay-background: var(--color-background-error-light);
-	--overlay-background-contrast: var(--color-foreground-error-secondary);
+// Toasts
+.toast {
+	--toast-error-background: var(--color-background-error-light);
+	--toast-error-color: var(--color-foreground-error-secondary);
+
+	--toast-warn-background: var(--color-background-warning-light);
+	--toast-warn-color: var(--color-foreground-warning-secondary);
 }
 
 // Tooltip

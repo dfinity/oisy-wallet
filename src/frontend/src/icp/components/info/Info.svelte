@@ -50,7 +50,7 @@
 		{#if ckBTC}
 			<InfoBitcoin />
 		{:else}
-			<InfoEthereum {sourceToken} {destinationToken} />
+			<InfoEthereum {destinationToken} {sourceToken} />
 		{/if}
 	</InfoBoxWrapper>
 {/if}
