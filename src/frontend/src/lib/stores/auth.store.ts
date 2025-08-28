@@ -55,7 +55,12 @@ const initAuthStore = (): AuthStore => {
 		signIn: ({ domain }: AuthSignInParams) =>
 			// eslint-disable-next-line no-async-promise-executor
 			new Promise<void>(async (resolve, reject) => {
-				authClient = authClient ?? (await safeCreateAuthClient());
+				/**
+				 * When the user signs out, we modify the storage, triggering a call to `sync()` method through `<svelte:window onstorage={syncAuthStore} />` in the page.
+				 * The sync() method creates a new AuthClient (since the previous one was being nullified on sign out), causing the creation of new identity keys in IndexedDB.
+				 * To avoid using such keys (or tampered ones) for the next login, we use method `safeCreateAuthClient()` which clears any stored keys before creating a new AuthClient.
+				 */
+				authClient = await safeCreateAuthClient();
 
 				const identityProvider = nonNullish(INTERNET_IDENTITY_CANISTER_ID)
 					? /apple/i.test(navigator?.vendor)
