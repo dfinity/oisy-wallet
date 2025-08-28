@@ -44,11 +44,11 @@
 
 	let enableAmountUpdates = $derived(!isNetworkIdICP($sourceToken?.network?.id));
 
-	const stopTriggerAmount = () => {
+	const onStopTriggerAmount = () => {
 		manualPause = true;
 	};
 
-	const startTriggerAmount = () => {
+	const onStartTriggerAmount = () => {
 		manualPause = false;
 	};
 
@@ -90,8 +90,8 @@
 			{onClose}
 			{onNext}
 			{onShowTokensList}
-			{stopTriggerAmount}
-			{startTriggerAmount}
+			{onStopTriggerAmount}
+			{onStartTriggerAmount}
 			bind:swapAmount
 			bind:receiveAmount
 			bind:slippageValue

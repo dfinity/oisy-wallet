@@ -56,8 +56,8 @@
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
-		stopTriggerAmount: () => void;
-		startTriggerAmount: () => void;
+		onstopTriggerAmount: () => void;
+		onStartTriggerAmount: () => void;
 	}
 
 	let {
@@ -67,8 +67,8 @@
 		swapProgressStep = $bindable(),
 		currentStep,
 		isSwapAmountsLoading,
-		stopTriggerAmount,
-		startTriggerAmount,
+		onStopTriggerAmount,
+		onStartTriggerAmount,
 		onShowTokensList,
 		onClose,
 		onNext,
@@ -190,7 +190,7 @@
 		}
 
 		onNext();
-		stopTriggerAmount();
+		onStopTriggerAmount();
 
 		try {
 			failedSwapError.set(undefined);
@@ -251,7 +251,7 @@
 			});
 
 			onBack();
-			startTriggerAmount();
+			onStartTriggerAmount();
 		}
 	};
 </script>
