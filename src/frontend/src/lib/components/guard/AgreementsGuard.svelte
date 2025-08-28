@@ -17,6 +17,8 @@
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
+	import { warnSignOut } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		children: Snippet;
@@ -38,17 +40,21 @@
 		(acceptedAgreements[type] = !acceptedAgreements[type]);
 </script>
 
-{#if $noAgreementVisionedYet || hasOutdatedAgreements}
+{#if $noAgreementVisionedYet || $hasOutdatedAgreements}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<Modal testId={LOADER_MODAL}>
-			<h4 slot="title">Review terms & conditions</h4>
+			<h4 slot="title">
+				{$hasOutdatedAgreements
+					? $i18n.agreements.text.review_title_updated
+					: $i18n.agreements.text.review_title}
+			</h4>
 			<ContentWithToolbar>
 				<Img src={agreementsBanner} styleClass="mb-6" />
-				<p
-					>Before you can use OISY Wallet, you must review and agree to our Terms of Service and
-					Privacy Policy. These documents explain the rules of our service and how we protect your
-					data.</p
-				>
+				<p>
+					{$hasOutdatedAgreements
+						? $i18n.agreements.text.review_description_updated
+						: $i18n.agreements.text.review_description}
+				</p>
 
 				<div class="flex flex-col font-bold" style="--checkbox-label-order: 1">
 					<span class="flex items-center gap-1">
@@ -58,11 +64,18 @@
 							checked={acceptedAgreements['termsOfUse']}
 							preventDefault={true}
 						>
-							I have read and agree to the
+							{#if $hasOutdatedAgreements}
+								{$i18n.agreements.text.i_have_accepted_updated}
+							{:else}
+								{$i18n.agreements.text.i_have_accepted}
+							{/if}
 						</Checkbox>
 						<span class="flex items-center gap-1 text-brand-primary">
-							<TermsOfUseLink noUnderline />
-							<IconExternalLink size="18" />
+							<TermsOfUseLink noUnderline>
+								{#snippet icon()}
+									<IconExternalLink size="18" />
+								{/snippet}
+							</TermsOfUseLink>
 						</span>
 					</span>
 					<span class="flex items-center gap-1">
@@ -71,11 +84,18 @@
 							on:nnsChange={() => toggleAccept('privacyPolicy')}
 							checked={acceptedAgreements['privacyPolicy']}
 						>
-							I have read and agree to the
+							{#if $hasOutdatedAgreements}
+								{$i18n.agreements.text.i_have_accepted_updated}
+							{:else}
+								{$i18n.agreements.text.i_have_accepted}
+							{/if}
 						</Checkbox>
 						<span class="flex items-center gap-1 text-brand-primary">
-							<PrivacyPolicyLink noUnderline />
-							<IconExternalLink size="18" />
+							<PrivacyPolicyLink noUnderline>
+								{#snippet icon()}
+									<IconExternalLink size="18" />
+								{/snippet}
+							</PrivacyPolicyLink>
 						</span>
 					</span>
 
@@ -85,20 +105,33 @@
 							on:nnsChange={() => toggleAccept('licenseAgreement')}
 							checked={acceptedAgreements['licenseAgreement']}
 						>
-							I have read and agree to the
+							{#if $hasOutdatedAgreements}
+								{$i18n.agreements.text.i_have_accepted_updated}
+							{:else}
+								{$i18n.agreements.text.i_have_accepted}
+							{/if}
 						</Checkbox>
 						<span class="flex items-center gap-1 text-brand-primary">
-							<LicenseLink noUnderline />
-							<IconExternalLink size="18" />
+							<LicenseLink noUnderline>
+								{#snippet icon()}
+									<IconExternalLink size="18" />
+								{/snippet}
+							</LicenseLink>
 						</span>
 					</span>
 				</div>
 
 				{#snippet toolbar()}
 					<ButtonGroup>
-						<Button colorStyle="secondary-light">Reject</Button>
+						<Button
+							colorStyle="secondary-light"
+							onclick={() =>
+								warnSignOut(
+									'You must accept the Terms and Conditions to proceed. Feel free to try again anytime.'
+								)}>{$i18n.agreements.text.reject}</Button
+						>
 						<Button colorStyle="primary" disabled={!acceptedAllAgreements}
-							>Accept and continue</Button
+							>{$i18n.agreements.text.accept_and_continue}</Button
 						>
 					</ButtonGroup>
 				{/snippet}

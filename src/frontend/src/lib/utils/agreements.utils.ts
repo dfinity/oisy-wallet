@@ -31,6 +31,6 @@ export const getAgreementLastUpdated = ({
 
 export const mapUserAgreement = (backendUserAgreement: BackendUserAgreement): AgreementData => ({
 	accepted: fromNullable(backendUserAgreement.accepted),
-	lastAcceptedTimestamp: fromNullable(backendUserAgreement.last_accepted_at),
-	lastUpdatedTimestamp: fromNullable(backendUserAgreement.last_updated_at)
+	lastAcceptedTimestamp: fromNullable(backendUserAgreement.last_accepted_at_ns),
+	lastUpdatedTimestamp: fromNullable(backendUserAgreement.last_updated_at_ms)
 });
