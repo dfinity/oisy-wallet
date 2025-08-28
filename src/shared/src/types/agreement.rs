@@ -38,4 +38,3 @@ pub struct SaveAgreementsRequest {
     pub current_user_version: Option<Version>,
     pub agreements: UserAgreements,
 }
-
