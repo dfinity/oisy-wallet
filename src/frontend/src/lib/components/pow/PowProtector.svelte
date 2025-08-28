@@ -29,8 +29,8 @@
 	let checkAttempts = $state(0);
 	let powWorker: PowProtectorWorkerInitResult | undefined;
 
-	const MAX_CHECK_ATTEMPTS = 60;
-	const CHECK_INTERVAL_MS = 4000;
+	const MAX_CHECK_ATTEMPTS = 20;
+	const CHECK_INTERVAL_MS = 5000;
 
 	// Initialize with default value, but it will be reactively updated from the store
 	let progressStep = $state(ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE);
@@ -134,6 +134,7 @@
 {#if loading}
 	{#if hasCycles}
 		{@render children?.()}
+		<!-- as long as we can continue with the app -->
 	{:else}
 		<div class="insufficient-cycles-modal">
 			<Modal>
