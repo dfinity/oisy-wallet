@@ -477,6 +477,15 @@ describe('format.utils', () => {
 
 			expect(result).toBe('Invalid Date');
 		});
+
+		it('allows to pass custom date formatting', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672531200,
+				formatOptions: { month: 'long', hour: undefined, minute: undefined }
+			});
+
+			expect(result).toBe('January 1, 2023');
+		});
 	});
 
 	describe('formatNanosecondsToDate', () => {

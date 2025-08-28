@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
 	import { page } from '$app/state';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import { OISY_REPO_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
@@ -31,24 +35,54 @@
 		class="pointer-events-none flex w-full flex-col items-center justify-between md:flex-row md:gap-4"
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
+		class:sm:items-end={NEW_AGREEMENTS_ENABLED}
 	>
-		<div
-			class={`pointer-events-auto flex flex-row items-center gap-4 ${isHomePage ? '' : 'hidden md:flex'}`}
-		>
-			<ExternalLinkIcon
-				ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
-				href={OISY_TWITTER_URL}
+		{#if NEW_AGREEMENTS_ENABLED}
+			<div
+				class={`pointer-events-auto flex flex-col items-center gap-4 sm:items-start ${isHomePage ? '' : 'hidden md:flex'}`}
 			>
-				<IconTwitter />
-			</ExternalLinkIcon>
+				<div class="flex items-center gap-4">
+					<ExternalLinkIcon
+						ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
+						href={OISY_TWITTER_URL}
+					>
+						<IconTwitter />
+					</ExternalLinkIcon>
 
-			<ExternalLinkIcon
-				ariaLabel={$i18n.navigation.text.source_code_on_github}
-				href={OISY_REPO_URL}
+					<ExternalLinkIcon
+						ariaLabel={$i18n.navigation.text.source_code_on_github}
+						href={OISY_REPO_URL}
+					>
+						<IconGitHub />
+					</ExternalLinkIcon>
+				</div>
+				{#if $authNotSignedIn}
+					<div class="mb-2 flex gap-2 text-nowrap text-xs text-tertiary">
+						<TermsOfUseLink />
+						<PrivacyPolicyLink />
+						<LicenseLink />
+					</div>
+				{/if}
+			</div>
+		{:else}
+			<div
+				class={`pointer-events-auto flex flex-row items-center gap-4 ${isHomePage ? '' : 'hidden md:flex'}`}
 			>
-				<IconGitHub />
-			</ExternalLinkIcon>
-		</div>
+				<ExternalLinkIcon
+					ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
+					href={OISY_TWITTER_URL}
+				>
+					<IconTwitter />
+				</ExternalLinkIcon>
+
+				<ExternalLinkIcon
+					ariaLabel={$i18n.navigation.text.source_code_on_github}
+					href={OISY_REPO_URL}
+				>
+					<IconGitHub />
+				</ExternalLinkIcon>
+			</div>
+		{/if}
 
 		<div
 			class="item pointer-events-auto flex flex-col items-end px-6 text-xs md:px-0 lg:max-w-48 2xl:text-sm"
