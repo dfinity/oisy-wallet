@@ -24,9 +24,6 @@ export interface AddUserCredentialRequest {
 }
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
-export interface Agreements {
-	agreements: UserAgreements;
-}
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { PowChallenge: ChallengeCompletionError }
@@ -181,7 +178,6 @@ export interface CredentialSpec {
 export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
-	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
 }
@@ -202,7 +198,6 @@ export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
-	allow_media_source: [] | [boolean];
 }
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
@@ -348,7 +343,6 @@ export type TokenAccountId =
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
-export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {
@@ -376,23 +370,12 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
-export interface UserAgreement {
-	last_accepted_at: [] | [bigint];
-	last_updated_at: [] | [bigint];
-	accepted: [] | [boolean];
-}
-export interface UserAgreements {
-	license_agreement: UserAgreement;
-	privacy_policy: UserAgreement;
-	terms_of_use: UserAgreement;
-}
 export interface UserCredential {
 	issuer: string;
 	verified_date_timestamp: [] | [bigint];
 	credential_type: CredentialType;
 }
 export interface UserProfile {
-	agreements: [] | [Agreements];
 	credentials: Array<UserCredential>;
 	version: [] | [bigint];
 	settings: [] | [Settings];

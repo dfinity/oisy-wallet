@@ -6,7 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        agreement::Agreements,
+        agreement::{Agreements, SaveAgreementsSettingsError, UserAgreements},
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -362,6 +362,68 @@ impl StoredUserProfile {
         new_settings.dapp = new_dapp_settings;
         new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with the specified user agreements updated.
+    ///
+    /// If `overwrite` is true, the agreements map will be replaced with the new value.
+    /// If `overwrite` is false, the new value will be merged with the existing agreements.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_agreements(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        agreements: UserAgreements,
+        overwrite: bool,
+    ) -> Result<StoredUserProfile, SaveAgreementsSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveAgreementsSettingsError::VersionMismatch);
+        }
+
+        let current = self.agreements.clone().unwrap_or_default();
+
+        let mut new_agreements = if overwrite {
+            agreements
+        } else {
+            let mut merged = current.agreements.clone();
+
+            if agreements.license_agreement.accepted.is_some() {
+                merged.license_agreement = agreements.license_agreement;
+            }
+            if agreements.terms_of_use.accepted.is_some() {
+                merged.terms_of_use = agreements.terms_of_use;
+            }
+            if agreements.privacy_policy.accepted.is_some() {
+                merged.privacy_policy = agreements.privacy_policy;
+            }
+
+            merged
+        };
+
+        if matches!(new_agreements.license_agreement.accepted, Some(true)) {
+            new_agreements.license_agreement.last_accepted_at = Some(now);
+        }
+        if matches!(new_agreements.terms_of_use.accepted, Some(true)) {
+            new_agreements.terms_of_use.last_accepted_at = Some(now);
+        }
+        if matches!(new_agreements.privacy_policy.accepted, Some(true)) {
+            new_agreements.privacy_policy.last_accepted_at = Some(now);
+        }
+
+        if current.agreements == new_agreements {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.agreements = Some(Agreements {
+            agreements: new_agreements,
+        });
+        new_profile.updated_timestamp = now;
+
         Ok(new_profile)
     }
 }
