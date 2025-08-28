@@ -44,6 +44,7 @@
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -239,7 +240,8 @@
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
-					swapType: $swapAmountsStore.swaps[0].type ?? ''
+					swapType: $swapAmountsStore.swaps[0].type ?? '',
+					error: errorDetailToString(err) ?? ''
 				}
 			});
 
