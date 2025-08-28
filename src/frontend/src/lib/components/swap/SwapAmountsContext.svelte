@@ -45,7 +45,7 @@
 	let isFetching = $state(false);
 
 	const clearTimer = () => {
-		if (timer !== undefined) {
+		if (isNullish(timer)) {
 			clearInterval(timer);
 			timer = undefined;
 		}
