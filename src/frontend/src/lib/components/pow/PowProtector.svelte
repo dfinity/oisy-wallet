@@ -116,7 +116,7 @@
 	onMount(async () => {
 		if (POW_FEATURE_ENABLED) {
 			// Initial check
-			hasCycles = await handleInsufficientCycles();
+			hasCycles = false; // await handleInsufficientCycles();
 			loading = true;
 
 			// Always initialize the worker regardless of cycles status
