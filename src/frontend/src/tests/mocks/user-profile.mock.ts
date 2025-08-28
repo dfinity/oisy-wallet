@@ -34,8 +34,8 @@ export const mockUserSettings: Settings = {
 };
 
 const mockUserAgreement: UserAgreement = {
-	last_accepted_at: toNullable(),
-	last_updated_at: toNullable(),
+	last_accepted_at_ns: toNullable(),
+	last_updated_at_ms: toNullable(),
 	accepted: toNullable()
 };
 
