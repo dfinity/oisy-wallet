@@ -188,7 +188,11 @@ type DefiniteCanisterSettingsArgs = record {
 	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
-type ErcToken = record { token_address : text; chain_id : nat64 };
+type ErcToken = record {
+	token_address : text;
+	chain_id : nat64;
+	allow_media_source : opt bool
+};
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;

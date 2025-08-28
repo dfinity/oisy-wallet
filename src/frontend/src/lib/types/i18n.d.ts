@@ -606,6 +606,7 @@ interface I18nSend {
 		btc_invalid_utxo_data: string;
 		btc_utxo_locked: string;
 		btc_invalid_fee_calculation: string;
+		pending_transactions_not_available: string;
 	};
 	error: {
 		unexpected: string;
@@ -1224,6 +1225,7 @@ interface I18nCarousel {
 
 interface I18nLicense_agreement {
 	text: {
+		license_agreement: string;
 		accept_terms: string;
 		accept_terms_link: string;
 		title: string;
@@ -1243,8 +1245,19 @@ interface I18nLicense_agreement {
 		assignment: string;
 		no_waiver: string;
 		english_version: string;
+		body: string;
 	};
 	alt: { license_agreement: string };
+}
+
+interface I18nTerms_of_use {
+	text: { terms_of_use: string; title: string; body: string };
+	alt: { terms_of_use: string };
+}
+
+interface I18nPrivacy_policy {
+	text: { privacy_policy: string; title: string; body: string };
+	alt: { privacy_policy: string };
 }
 
 interface I18nActivity {
@@ -1346,6 +1359,8 @@ interface I18n {
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
+	terms_of_use: I18nTerms_of_use;
+	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
 	welcome: I18nWelcome;

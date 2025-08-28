@@ -28,6 +28,7 @@
 		slippageValue: OptionAmount;
 		nativeEthereumToken: Token;
 		isSwapAmountsLoading: boolean;
+		isApproveNeeded: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -39,6 +40,7 @@
 		slippageValue = $bindable(),
 		nativeEthereumToken,
 		isSwapAmountsLoading,
+		isApproveNeeded,
 		onShowTokensList,
 		onClose,
 		onNext
@@ -57,6 +59,11 @@
 		feeDecimalsStore,
 		feeTokenIdStore
 	} = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+
+	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
+	const totalFee = $derived(
+		isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
+	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
 		if (isNullish($storeFeeData) || isNullish($sourceToken?.id)) {
@@ -100,7 +107,7 @@
 
 <NewSwapForm
 	{errorType}
-	fee={$maxGasFee}
+	fee={totalFee}
 	{isSwapAmountsLoading}
 	{onClose}
 	onCustomValidate={customValidate}
@@ -127,7 +134,7 @@
 
 			<div class="flex flex-col gap-3">
 				<SwapProvider {slippageValue} on:icShowProviderList />
-				<EthFeeDisplay>
+				<EthFeeDisplay {isApproveNeeded}>
 					{#snippet label()}
 						<Html text={$i18n.fee.text.total_fee} />
 					{/snippet}
