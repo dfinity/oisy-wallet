@@ -2,6 +2,7 @@ import LockPage from '$lib/components/auth/LockPage.svelte';
 import * as authServices from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { authLocked } from '$lib/stores/locked.store';
+import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -44,7 +45,7 @@ describe('LockPage', () => {
 
 		await fireEvent.click(unlockButton);
 
-		expect(signInMock).toHaveBeenCalledWith({});
+		expect(signInMock).toHaveBeenCalledWith({ i18n: en });
 		expect(authLocked.unlock).toHaveBeenCalledWith({
 			source: 'login from lock page'
 		});

@@ -5,7 +5,6 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
-import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
@@ -14,7 +13,7 @@ import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { get, writable, type Readable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
 	identity: OptionIdentity;
@@ -24,6 +23,7 @@ let authClient: Option<AuthClient>;
 
 export interface AuthSignInParams {
 	domain?: 'ic0.app' | 'internetcomputer.org';
+	i18n: I18n;
 }
 
 export interface AuthStore extends Readable<AuthStoreData> {
@@ -50,14 +50,14 @@ const initAuthStore = (): AuthStore => {
 			});
 		},
 
-		signIn: ({ domain }: AuthSignInParams) =>
+		signIn: ({ domain, i18n }: AuthSignInParams) =>
 			// eslint-disable-next-line no-async-promise-executor
 			new Promise<void>(async (resolve, reject) => {
 				// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
 				// We are not able to recreate authClient safely here since there are some browsers (like Safari) that block popups if there is an addition async call in this call stack.
 				if (isNullish(authClient)) {
 					toastsError({
-						msg: { text: get(i18n).auth.warning.reload_and_retry }
+						msg: { text: i18n.auth.warning.reload_and_retry }
 					});
 					return;
 				}
@@ -68,7 +68,7 @@ const initAuthStore = (): AuthStore => {
 						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
 					: `https://identity.${domain ?? 'internetcomputer.org'}`;
 
-				await authClient?.login({
+				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
 					onSuccess: () => {
 						update((state: AuthStoreData) => ({
