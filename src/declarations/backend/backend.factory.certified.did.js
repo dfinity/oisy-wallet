@@ -254,9 +254,9 @@ export const idlFactory = ({ IDL }) => {
 		Err: CreateChallengeError
 	});
 	const UserAgreement = IDL.Record({
-		last_accepted_at: IDL.Opt(IDL.Nat64),
-		last_updated_at: IDL.Opt(IDL.Nat64),
-		accepted: IDL.Opt(IDL.Bool)
+		last_accepted_at_ms: IDL.Opt(IDL.Nat64),
+		accepted: IDL.Opt(IDL.Bool),
+		last_updated_at_ns: IDL.Opt(IDL.Nat64)
 	});
 	const UserAgreements = IDL.Record({
 		license_agreement: UserAgreement,
