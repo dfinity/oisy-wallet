@@ -1,22 +1,22 @@
 <script lang="ts">
 	import { Modal, Checkbox } from '@dfinity/gix-components';
-	import { type Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import agreementsBanner from '$lib/assets/banner-agreements.svg';
+	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import {
 		hasAcceptedAllLatestAgreements,
 		hasOutdatedAgreements,
 		noAgreementVisionedYet
 	} from '$lib/derived/agreements.derived';
-	import agreementsBanner from '$lib/assets/banner-agreements.svg';
-	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
-	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -56,13 +56,13 @@
 						: $i18n.agreements.text.review_description}
 				</p>
 
-				<div class="flex flex-col font-bold" style="--checkbox-label-order: 1">
+				<div style="--checkbox-label-order: 1" class="flex flex-col font-bold">
 					<span class="flex items-center gap-1">
 						<Checkbox
-							inputId="termsOfUseCheckbox"
-							on:nnsChange={() => toggleAccept('termsOfUse')}
 							checked={acceptedAgreements['termsOfUse']}
+							inputId="termsOfUseCheckbox"
 							preventDefault={true}
+							on:nnsChange={() => toggleAccept('termsOfUse')}
 						>
 							{#if $hasOutdatedAgreements}
 								{$i18n.agreements.text.i_have_accepted_updated}
@@ -80,9 +80,9 @@
 					</span>
 					<span class="flex items-center gap-1">
 						<Checkbox
+							checked={acceptedAgreements['privacyPolicy']}
 							inputId="privacyPolicyCheckbox"
 							on:nnsChange={() => toggleAccept('privacyPolicy')}
-							checked={acceptedAgreements['privacyPolicy']}
 						>
 							{#if $hasOutdatedAgreements}
 								{$i18n.agreements.text.i_have_accepted_updated}
@@ -101,9 +101,9 @@
 
 					<span class="flex items-center gap-1">
 						<Checkbox
+							checked={acceptedAgreements['licenseAgreement']}
 							inputId="licenseAgreementCheckbox"
 							on:nnsChange={() => toggleAccept('licenseAgreement')}
-							checked={acceptedAgreements['licenseAgreement']}
 						>
 							{#if $hasOutdatedAgreements}
 								{$i18n.agreements.text.i_have_accepted_updated}

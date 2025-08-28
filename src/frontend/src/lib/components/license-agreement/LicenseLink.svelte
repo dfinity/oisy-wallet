@@ -1,11 +1,11 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import { TRACK_OPEN_AGREEMENT } from '$lib/constants/analytics.contants';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		noUnderline?: boolean;
