@@ -151,5 +151,8 @@ export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';
 export const TRACK_OPEN_DOCUMENTATION = 'open_documentation';
 export const TRACK_OPEN_EXTERNAL_LINK = 'open_external_link';
 
+// Agreements
+export const TRACK_OPEN_AGREEMENT = 'open_agreement';
+
 // AI Assistant
 export const AI_ASSISTANT_SEND_TOKEN_SOURCE = 'ai-assistant';
