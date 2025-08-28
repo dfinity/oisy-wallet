@@ -75,35 +75,47 @@
 		} as ProgressStep
 	] as NonEmptyArray<ProgressStep | StaticStep>);
 
+	/**
+	 * Is periodically checks if the user has sufficient cycles for POW protection.
+	 * It will either clear the interval when cycles are sufficient, or sign out the user
+	 * if maximum retry attempts are exceeded.
+	 */
 	const checkCycles = async (): Promise<void> => {
+		// Check current cycles status and update the reactive state
 		hasCycles = await handleInsufficientCycles();
+
+		// Increment attempt counter to track how many times we've checked
 		checkAttempts++;
 
 		if (hasCycles) {
+			// Success: User now has sufficient cycles, stop polling
 			if (checkInterval) {
 				clearInterval(checkInterval);
 				checkInterval = undefined;
 			}
 		} else if (checkAttempts >= MAX_CHECK_ATTEMPTS) {
-			// Too many failed attempts, sign out
+			// Failure: Too many failed attempts, clean up and sign out user
 			if (checkInterval) {
 				clearInterval(checkInterval);
 				checkInterval = undefined;
 			}
+			// Sign out with appropriate error message about cycle waiting timeout
 			await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
 		}
 	};
 
 	const initWorker = async (): Promise<void> => {
 		if (!powWorker) {
+			// Run the worker in the background that continuously checks if the user has sufficient cycles and requests/solves
+			// a challenge to grant cycles when needed
 			powWorker = await initPowProtectorWorker();
 			powWorker.start();
 		}
 	};
 
 	onMount(async () => {
-		// Initial check
 		if (POW_FEATURE_ENABLED) {
+			// Initial check
 			hasCycles = await handleInsufficientCycles();
 			loading = true;
 
@@ -118,24 +130,36 @@
 	});
 
 	onDestroy(() => {
-		// Clear interval if component is destroyed
-		if (checkInterval) {
-			clearInterval(checkInterval);
-			checkInterval = undefined;
-		}
+		if (POW_FEATURE_ENABLED) {
+			// Clear interval if component is destroyed
+			if (checkInterval) {
+				clearInterval(checkInterval);
+				checkInterval = undefined;
+			}
 
-		// Stop the worker if it was started
-		if (powWorker) {
-			onDestroy(() => powWorker?.destroy());
+			// Stop the worker if it was started
+			if (powWorker) {
+				onDestroy(() => powWorker?.destroy());
+			}
 		}
 	});
 </script>
 
-{#if loading}
+{#if !POW_FEATURE_ENABLED}
+	<!-- POW feature is globally disabled. So we bypass all protection logic and render the app content directly -->
+	{@render children?.()}
+{:else if loading}
+	<!-- POW feature is enabled and component has started loading -->
 	{#if hasCycles}
+		<!-- User has sufficient cycles so, user can proceed normally -->
 		{@render children?.()}
-		<!-- as long as we can continue with the app -->
 	{:else}
+		<!-- 
+			User lacks sufficient cycles for POW, so we display modal with progress indicator while cycles are being obtained
+			This modal will be displayed until either:
+			- User obtains sufficient cycles (checkCycles polling succeeds)
+			- Maximum retry attempts reached (user gets signed out)
+		-->
 		<div class="insufficient-cycles-modal">
 			<Modal>
 				<div class="stretch">
@@ -152,7 +176,6 @@
 					</div>
 
 					<h3 class="my-3">{$i18n.pow_protector.text.title}</h3>
-
 					<p class="mt-3">{$i18n.pow_protector.text.description}</p>
 
 					<InProgress {progressStep} {steps} />
