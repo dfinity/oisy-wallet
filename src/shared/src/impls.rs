@@ -199,6 +199,24 @@ impl TokenVersion for StoredUserProfile {
     }
 }
 
+impl UserAgreements {
+    /// Equality ignoring `last_accepted_at_ns`.
+    fn equals_ignoring_ts(&self, other: &UserAgreements) -> bool {
+        let mut a = self.clone();
+        let mut b = other.clone();
+
+        a.license_agreement.last_accepted_at_ns = None;
+        a.terms_of_use.last_accepted_at_ns = None;
+        a.privacy_policy.last_accepted_at_ns = None;
+
+        b.license_agreement.last_accepted_at_ns = None;
+        b.terms_of_use.last_accepted_at_ns = None;
+        b.privacy_policy.last_accepted_at_ns = None;
+
+        a == b
+    }
+}
+
 impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
@@ -394,6 +412,10 @@ impl StoredUserProfile {
             new_agreements.privacy_policy = agreements.privacy_policy;
         }
 
+        if current.equals_ignoring_ts(&new_agreements) {
+            return Ok(self.clone());
+        }
+
         if matches!(new_agreements.license_agreement.accepted, Some(true)) {
             new_agreements.license_agreement.last_accepted_at_ns = Some(now);
         }
@@ -402,10 +424,6 @@ impl StoredUserProfile {
         }
         if matches!(new_agreements.privacy_policy.accepted, Some(true)) {
             new_agreements.privacy_policy.last_accepted_at_ns = Some(now);
-        }
-
-        if current == new_agreements {
-            return Ok(self.clone());
         }
 
         let mut new_profile = self.with_incremented_version();
