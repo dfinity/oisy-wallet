@@ -21,7 +21,7 @@
 	}: Props = $props();
 
 	const formattedDate = $derived(
-		`${formatToShortDateString({ date, i18n: $i18n })} ${date.getDate()}`
+		`${formatToShortDateString({ date, language: $i18n.lang })} ${date.getDate()}`
 	);
 </script>
 
