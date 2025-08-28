@@ -83,6 +83,4 @@
 	<div in:fade>
 		{@render children()}
 	</div>
-{:else}
-	SIGNOUT here or something
 {/if}
