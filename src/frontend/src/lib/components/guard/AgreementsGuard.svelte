@@ -73,16 +73,10 @@
 	let { children }: Props = $props();
 </script>
 
-{#if $noAgreementVisionedYet}
+{#if $noAgreementVisionedYet || $hasOutdatedAgreements}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<Modal testId={LOADER_MODAL}>
-			<div class="stretch"> MOCK MODAL to sign all agreements to whoever never did </div>
-		</Modal>
-	</div>
-{:else if $hasOutdatedAgreements}
-	<div in:fade={{ delay: 0, duration: 250 }}>
-		<Modal testId={LOADER_MODAL}>
-			<div class="stretch"> MOCK MODAL to sign updated agreements </div>
+			<div class="stretch"> MOCK MODAL to sign all agreements to whoever never did or to sign the outdated ones </div>
 		</Modal>
 	</div>
 {:else if $hasAcceptedAllLatestAgreements}
