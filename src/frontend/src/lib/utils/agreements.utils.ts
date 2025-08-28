@@ -8,8 +8,22 @@ import { formatSecondsToDate } from '$lib/utils/format.utils';
 import { fromNullable } from '@dfinity/utils';
 import * as z from 'zod/v4';
 
-export const parseAgreementsJson = (): EnvAgreements =>
-	z.parse(EnvAgreementsSchema, agreementsJson);
+const transformJsonBigint = (
+	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string } }>
+) => {
+	const res: Record<string, { lastUpdatedTimestamp: bigint }> = {};
+	Object.entries(json).forEach(([key, value]) => {
+		res[key] = {
+			...value,
+			lastUpdatedTimestamp: BigInt(value.lastUpdatedTimestamp.__bigint__)
+		};
+	});
+	return res;
+};
+
+export const parseAgreementsJson = (): EnvAgreements => {
+	return z.parse(EnvAgreementsSchema, transformJsonBigint(agreementsJson));
+};
 
 export const getAgreementLastUpdated = ({
 	type,

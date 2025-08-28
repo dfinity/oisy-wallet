@@ -45,14 +45,14 @@
 		<Modal testId={LOADER_MODAL}>
 			<h4 slot="title">
 				{$hasOutdatedAgreements
-					? $i18n.agreements.text.review_title_updated
+					? $i18n.agreements.text.review_updated_title
 					: $i18n.agreements.text.review_title}
 			</h4>
 			<ContentWithToolbar>
 				<Img src={agreementsBanner} styleClass="mb-6" />
 				<p>
 					{$hasOutdatedAgreements
-						? $i18n.agreements.text.review_description_updated
+						? $i18n.agreements.text.review_updated_description
 						: $i18n.agreements.text.review_description}
 				</p>
 
