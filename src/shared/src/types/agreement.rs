@@ -10,8 +10,8 @@ pub struct UserAgreement {
     pub accepted: Option<bool>,
     /// When the user last accepted this agreement (millis since epoch).
     pub last_accepted_at_ms: Option<Timestamp>,
-    /// When the agreement itself was last updated (millis since epoch).
-    pub last_updated_at_ms: Option<Timestamp>,
+    /// When the agreement itself was last updated (nanos since epoch).
+    pub last_updated_at_ns: Option<Timestamp>,
 }
 
 /// The user agreements tracked by the system.
