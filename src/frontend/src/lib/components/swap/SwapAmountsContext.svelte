@@ -52,7 +52,7 @@
 	};
 
 	const startTimer = () => {
-		if (timer !== undefined || !enableAmountUpdates || pauseAmountUpdates) {
+		if (isNullish(timer) || !enableAmountUpdates || pauseAmountUpdates) {
 			return;
 		}
 
