@@ -279,7 +279,8 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
-				{isSwapAmountsLoading}
+				isSwapAmountsLoading={isSwapAmountsLoading &&
+					receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount}
 				{onBack}
 				onSwap={swap}
 				{receiveAmount}
