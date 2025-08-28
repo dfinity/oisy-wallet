@@ -7,7 +7,4 @@ export const NEW_AGREEMENTS_ENABLED = parseBoolEnvVar(
 	import.meta.env.VITE_FRONTEND_NEW_AGREEMENTS_ENABLED
 );
 
-const parseResult = EnvAgreementsSchema.safeParse(agreementsJson);
-export const agreementsData: EnvAgreements = parseResult.success
-	? parseResult.data
-	: ({} as EnvAgreements);
+export const agreementsData: EnvAgreements = EnvAgreementsSchema.parse(agreementsJson);
