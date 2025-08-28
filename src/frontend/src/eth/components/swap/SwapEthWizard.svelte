@@ -57,7 +57,7 @@
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
-		onstopTriggerAmount: () => void;
+		onStopTriggerAmount: () => void;
 		onStartTriggerAmount: () => void;
 	}
 
