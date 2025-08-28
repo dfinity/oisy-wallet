@@ -10,7 +10,7 @@ export const NEW_AGREEMENTS_ENABLED = parseBoolEnvVar(
 const agreementsParseResult = EnvAgreementsSchema.safeParse(agreementsJson);
 if (!agreementsParseResult.success) {
 	throw new Error(
-		`Failed to parse agreements.json: ${  JSON.stringify(agreementsParseResult.error.format())}`
+		`Failed to parse agreements.json: ${JSON.stringify(agreementsParseResult.error.format())}`
 	);
 }
 export const agreementsData: EnvAgreements = agreementsParseResult.data;
