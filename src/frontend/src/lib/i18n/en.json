@@ -114,7 +114,8 @@
 		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
-			"session_expired": "You have been logged out because your session has expired."
+			"session_expired": "You have been logged out because your session has expired.",
+			"reload_and_retry": "Something went wrong when signing in. Please reload the page and try again. If this error persists, please contact support.",
 		},
 		"error": {
 			"no_internet_identity": "No internet identity.",
@@ -499,7 +500,7 @@
 			"icrc_canisters": "Error while loading the ICRC canisters.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
-			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
+			"erc1155_custom_tokens": "Error while loading the ERC1155 @Luca Bertelli @David Dal Busco may you please re-review the PR? https://github.com/dfinity/oisy-wallet/pull/8398\n\nI will provide the changes in the signIn in another PR, if it's ok with youcustom tokens.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
 			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
