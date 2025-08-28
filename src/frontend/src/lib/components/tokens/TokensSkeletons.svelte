@@ -12,7 +12,9 @@
 </script>
 
 {#if loading}
-	<SkeletonCards rows={5} />
+	<div class="flex flex-col gap-2 p-2">
+		<SkeletonCards rows={5} />
+	</div>
 {:else}
 	<div in:fade>
 		{@render children()}
