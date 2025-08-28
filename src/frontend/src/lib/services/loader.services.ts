@@ -66,9 +66,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		await allowSigning({
-			identity
-		});
+		await allowSigning({	identity});
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, as we assume that the Oisy Wallet cannot function without ETH or Bitcoin addresses.
 		await errorSignOut(get(i18n).init.error.allow_signing);
