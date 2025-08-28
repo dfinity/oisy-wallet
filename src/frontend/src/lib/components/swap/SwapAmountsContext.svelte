@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, type Snippet } from 'svelte';
-	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
+	import {
+		PERIODIC_FETCH_INTERVAL_MS,
+		SWAP_DEFAULT_SLIPPAGE_VALUE
+	} from '$lib/constants/swap.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
@@ -52,17 +55,13 @@
 	};
 
 	const startTimer = () => {
-		if (isNullish(timer) || !enableAmountUpdates || pauseAmountUpdates) {
+		if (nonNullish(timer) || !enableAmountUpdates || pauseAmountUpdates) {
 			return;
 		}
 
 		timer = setInterval(() => {
-			if (pauseAmountUpdates || !enableAmountUpdates) {
-				clearTimer();
-				return;
-			}
 			loadSwapAmounts(true);
-		}, 5000);
+		}, PERIODIC_FETCH_INTERVAL_MS);
 	};
 
 	const loadSwapAmounts = async (isPeriodicUpdate = false) => {

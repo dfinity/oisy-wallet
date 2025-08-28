@@ -114,18 +114,15 @@
 
 	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)
 	$effect(() => {
-		if (
+		receiveAmount =
 			nonNullish($destinationToken) &&
 			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
-		) {
-			receiveAmount = formatTokenBigintToNumber({
-				value: $swapAmountsStore.selectedProvider.receiveAmount,
-				unitName: $destinationToken.decimals,
-				displayDecimals: $destinationToken.decimals
-			});
-		} else {
-			receiveAmount = undefined;
-		}
+				? formatTokenBigintToNumber({
+						value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+						unitName: $destinationToken.decimals,
+						displayDecimals: $destinationToken.decimals
+					})
+				: undefined;
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
