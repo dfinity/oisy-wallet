@@ -78,7 +78,9 @@
 {#if needsToSignAgreements}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<Modal testId={LOADER_MODAL}>
-			<div class="stretch"> MOCK MODAL to sign all agreements to whoever never did or to sign the outdated ones </div>
+			<div class="stretch">
+				MOCK MODAL to sign all agreements to whoever never did or to sign the outdated ones
+			</div>
 		</Modal>
 	</div>
 {:else if $hasAcceptedAllLatestAgreements}
