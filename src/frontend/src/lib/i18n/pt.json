@@ -506,6 +506,7 @@
 			"icrc_custom_token": "Erro ao carregar o token personalizado ICRC.",
 			"loading_wallet_timeout": "Sua carteira requer alguns dados iniciais que ainda não foram carregados. Por favor, tente novamente.",
 			"allow_signing": "Ocorreu um problema ao configurar sua carteira para assinar. Você foi desconectado. Se o problema persistir, entre em contato com o suporte.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Erro ao carregar informações da carteira BTC.",
 			"sol_wallet_error": "Erro ao carregar informações da carteira SOL."
 		}
@@ -1406,6 +1407,15 @@
 		},
 		"qr": {
 			"title": "Scan do QR code"
+		}
+	},
+	"pow_protector": {
+		"text": {
+			"title": "",
+			"description": "",
+			"request_challenge": "",
+			"solve_challenge": "",
+			"grant_cycles": ""
 		}
 	},
 	"signer": {
