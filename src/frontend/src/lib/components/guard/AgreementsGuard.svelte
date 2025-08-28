@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { type Snippet } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import {
