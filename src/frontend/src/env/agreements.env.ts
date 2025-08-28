@@ -7,4 +7,11 @@ export const NEW_AGREEMENTS_ENABLED = parseBoolEnvVar(
 	import.meta.env.VITE_FRONTEND_NEW_AGREEMENTS_ENABLED
 );
 
-export const agreementsData: EnvAgreements = EnvAgreementsSchema.parse(agreementsJson);
+const agreementsParseResult = EnvAgreementsSchema.safeParse(agreementsJson);
+if (!agreementsParseResult.success) {
+    throw new Error(
+        "Failed to parse agreements.json: " +
+        JSON.stringify(agreementsParseResult.error.format())
+    );
+}
+export const agreementsData: EnvAgreements = agreementsParseResult.data;
