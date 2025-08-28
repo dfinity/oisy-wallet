@@ -9,6 +9,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
+	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -39,6 +40,19 @@
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let isSwapAmountsLoading = $state(false);
+	let manualPause = $state(false);
+
+	let enableAmountUpdates = $derived(!isNetworkIdICP($sourceToken?.network?.id));
+
+	const stopTriggerAmount = () => {
+		manualPause = true;
+	};
+
+	const startTriggerAmount = () => {
+		manualPause = false;
+	};
+
+	let shouldPause = $derived(manualPause || currentStep?.name === WizardStepsSwap.SWAPPING);
 </script>
 
 <SwapAmountsContext
@@ -47,6 +61,8 @@
 	isSourceTokenIcrc2={$isSourceTokenIcrc2}
 	{slippageValue}
 	sourceToken={$sourceToken}
+	{enableAmountUpdates}
+	pauseAmountUpdates={shouldPause}
 	bind:isSwapAmountsLoading
 >
 	{#if isNullish($sourceToken) || isNetworkIdICP($sourceToken.network.id)}
@@ -74,6 +90,8 @@
 			{onClose}
 			{onNext}
 			{onShowTokensList}
+			{stopTriggerAmount}
+			{startTriggerAmount}
 			bind:swapAmount
 			bind:receiveAmount
 			bind:slippageValue

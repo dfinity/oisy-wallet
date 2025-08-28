@@ -25,13 +25,15 @@
 
 	interface Props {
 		swapAmount: OptionAmount;
-		receiveAmount: number | undefined;
+		receiveAmount?: number;
 		slippageValue: OptionAmount;
 		onBack: () => void;
 		onClose?: () => void;
 		onSwap: () => Promise<void>;
 		swapFees: Snippet;
+		isSwapAmountsLoading?: boolean;
 	}
+
 	let {
 		swapAmount = $bindable(),
 		receiveAmount = $bindable(),
@@ -39,7 +41,8 @@
 		onBack,
 		onClose,
 		onSwap,
-		swapFees
+		swapFees,
+		isSwapAmountsLoading
 	}: Props = $props();
 
 	const {
@@ -164,7 +167,7 @@
 			{:else}
 				<ButtonBack onclick={handleBack} />
 
-				<Button onclick={onSwap}>
+				<Button onclick={onSwap} disabled={isSwapAmountsLoading}>
 					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
 						? $i18n.transaction.type.withdraw
 						: $i18n.swap.text.swap_button}

@@ -43,6 +43,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -55,6 +56,8 @@
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
+		stopTriggerAmount: () => void;
+		startTriggerAmount: () => void;
 	}
 
 	let {
@@ -64,6 +67,8 @@
 		swapProgressStep = $bindable(),
 		currentStep,
 		isSwapAmountsLoading,
+		stopTriggerAmount,
+		startTriggerAmount,
 		onShowTokensList,
 		onClose,
 		onNext,
@@ -104,6 +109,22 @@
 
 	$effect(() => {
 		feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+	});
+
+	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)
+	$effect(() => {
+		if (
+			nonNullish($destinationToken) &&
+			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			receiveAmount = formatTokenBigintToNumber({
+				value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			});
+		} else {
+			receiveAmount = undefined;
+		}
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
@@ -169,6 +190,7 @@
 		}
 
 		onNext();
+		stopTriggerAmount();
 
 		try {
 			failedSwapError.set(undefined);
@@ -229,6 +251,7 @@
 			});
 
 			onBack();
+			startTriggerAmount();
 		}
 	};
 </script>
@@ -256,7 +279,14 @@
 				bind:slippageValue
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
+			<SwapReview
+				{onBack}
+				onSwap={swap}
+				{receiveAmount}
+				{slippageValue}
+				{swapAmount}
+				{isSwapAmountsLoading}
+			>
 				{#snippet swapFees()}
 					<EthFeeDisplay>
 						{#snippet label()}
