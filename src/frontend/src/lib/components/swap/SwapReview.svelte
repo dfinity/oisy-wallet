@@ -12,6 +12,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import {
 		TRACK_OPEN_DOCUMENTATION,
 		TRACK_OPEN_EXTERNAL_LINK
@@ -104,6 +105,8 @@
 	</div>
 
 	{#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
+		<Hr spacing="md" />
+
 		<MessageBox styleClass="sm:text-sm">
 			<Html
 				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
