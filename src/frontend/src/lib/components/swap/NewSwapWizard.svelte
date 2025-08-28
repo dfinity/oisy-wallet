@@ -6,10 +6,10 @@
 	import SwapIcpWizard from '$icp/components/swap/SwapIcpWizard.svelte';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
+	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
-	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -58,11 +58,11 @@
 <SwapAmountsContext
 	amount={swapAmount}
 	destinationToken={$destinationToken}
+	{enableAmountUpdates}
 	isSourceTokenIcrc2={$isSourceTokenIcrc2}
+	pauseAmountUpdates={shouldPause}
 	{slippageValue}
 	sourceToken={$sourceToken}
-	{enableAmountUpdates}
-	pauseAmountUpdates={shouldPause}
 	bind:isSwapAmountsLoading
 >
 	{#if isNullish($sourceToken) || isNetworkIdICP($sourceToken.network.id)}
@@ -90,8 +90,8 @@
 			{onClose}
 			{onNext}
 			{onShowTokensList}
-			{onStopTriggerAmount}
 			{onStartTriggerAmount}
+			{onStopTriggerAmount}
 			bind:swapAmount
 			bind:receiveAmount
 			bind:slippageValue

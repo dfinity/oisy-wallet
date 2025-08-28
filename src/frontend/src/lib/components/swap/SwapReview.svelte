@@ -170,7 +170,7 @@
 			{:else}
 				<ButtonBack onclick={handleBack} />
 
-				<Button onclick={onSwap} disabled={isSwapAmountsLoading}>
+				<Button disabled={isSwapAmountsLoading} onclick={onSwap}>
 					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
 						? $i18n.transaction.type.withdraw
 						: $i18n.swap.text.swap_button}

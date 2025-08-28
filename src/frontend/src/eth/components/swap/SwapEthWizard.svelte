@@ -43,8 +43,8 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -282,12 +282,12 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
+				{isSwapAmountsLoading}
 				{onBack}
 				onSwap={swap}
 				{receiveAmount}
 				{slippageValue}
 				{swapAmount}
-				{isSwapAmountsLoading}
 			>
 				{#snippet swapFees()}
 					<EthFeeDisplay>
