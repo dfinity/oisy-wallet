@@ -120,7 +120,7 @@
 			{/if}
 			{#if nonNullish(nft?.attributes) && nft.attributes.length > 0}
 				<ListItem>{$i18n.nfts.text.item_traits}</ListItem>
-				<div class="mt-2 flex gap-2">
+				<div class="mt-2 flex flex-wrap gap-2">
 					{#each nft.attributes as trait, index (trait.value + index)}
 						<div class="flex">
 							<Badge variant="nft-trait"
