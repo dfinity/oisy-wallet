@@ -152,12 +152,6 @@
 			: undefined
 	);
 
-	let swapAmountsLoading = $derived(
-		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
-			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap) && isSwapAmountsLoading
-			: false
-	);
-
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
@@ -285,7 +279,7 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
-				isSwapAmountsLoading={swapAmountsLoading}
+				{isSwapAmountsLoading}
 				{onBack}
 				onSwap={swap}
 				{receiveAmount}

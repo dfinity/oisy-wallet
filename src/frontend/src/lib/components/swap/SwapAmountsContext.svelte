@@ -140,6 +140,10 @@
 	$effect(() => {
 		[amount, sourceToken, destinationToken];
 
+		if (nonNullish(amount) && nonNullish(sourceToken) && nonNullish(destinationToken)) {
+			isSwapAmountsLoading = true;
+		}
+
 		debounceLoadSwapAmounts();
 	});
 
