@@ -22,6 +22,7 @@ type AddUserCredentialRequest = record {
 };
 type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
 type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
+type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
 	PowChallenge : ChallengeCompletionError;
@@ -174,6 +175,7 @@ type CredentialSpec = record {
 type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
 	token : Token;
+	section : opt TokenSection;
 	version : opt nat64;
 	enabled : bool
 };
@@ -187,7 +189,11 @@ type DefiniteCanisterSettingsArgs = record {
 	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
-type ErcToken = record { token_address : text; chain_id : nat64 };
+type ErcToken = record {
+	token_address : text;
+	chain_id : nat64;
+	allow_media_source : opt bool
+};
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
@@ -262,6 +268,10 @@ type NetworksSettings = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
+type SaveAgreementsRequest = record {
+	agreements : UserAgreements;
+	current_user_version : opt nat64
+};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -322,6 +332,7 @@ type TokenAccountId = variant {
 	Sol : text;
 	Icrcv2 : Icrcv2AccountId
 };
+type TokenSection = variant { Spam; Hidden };
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;
@@ -344,12 +355,23 @@ type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
+type UserAgreement = record {
+	last_accepted_at : opt nat64;
+	last_updated_at : opt nat64;
+	accepted : opt bool
+};
+type UserAgreements = record {
+	license_agreement : UserAgreement;
+	privacy_policy : UserAgreement;
+	terms_of_use : UserAgreement
+};
 type UserCredential = record {
 	issuer : text;
 	verified_date_timestamp : opt nat64;
 	credential_type : CredentialType
 };
 type UserProfile = record {
+	agreements : opt Agreements;
 	credentials : vec UserCredential;
 	version : opt nat64;
 	settings : opt Settings;
@@ -457,7 +479,7 @@ service : (Arg) -> {
 	// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
 	// internal errors.
 	create_pow_challenge : () -> (CreatePowChallengeResult);
-	// It create a new user profile for the caller.
+	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
 	create_user_profile : () -> (UserProfile);
 	// Deletes a contact for the caller.
@@ -555,6 +577,19 @@ service : (Arg) -> {
 	// # Errors
 	// Errors are enumerated by: `ContactError`.
 	update_contact : (Contact) -> (GetContactResult);
+	// Updates the user's agreements, merging with any existing ones.
+	// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at` is
+	// set to `now`.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
+	// same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	update_user_agreements : (SaveAgreementsRequest) -> (
+		SetUserShowTestnetsResult
+	);
 	// Updates the user's preference to enable (or disable) networks in the interface, merging with any
 	// existing settings.
 	//

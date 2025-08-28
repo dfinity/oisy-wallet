@@ -253,6 +253,17 @@ export const idlFactory = ({ IDL }) => {
 		Ok: CreateChallengeResponse,
 		Err: CreateChallengeError
 	});
+	const UserAgreement = IDL.Record({
+		last_accepted_at: IDL.Opt(IDL.Nat64),
+		last_updated_at: IDL.Opt(IDL.Nat64),
+		accepted: IDL.Opt(IDL.Bool)
+	});
+	const UserAgreements = IDL.Record({
+		license_agreement: UserAgreement,
+		privacy_policy: UserAgreement,
+		terms_of_use: UserAgreement
+	});
+	const Agreements = IDL.Record({ agreements: UserAgreements });
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -295,6 +306,7 @@ export const idlFactory = ({ IDL }) => {
 		dapp: DappSettings
 	});
 	const UserProfile = IDL.Record({
+		agreements: IDL.Opt(Agreements),
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
 		settings: IDL.Opt(Settings),
@@ -364,7 +376,8 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const ErcToken = IDL.Record({
 		token_address: IDL.Text,
-		chain_id: IDL.Nat64
+		chain_id: IDL.Nat64,
+		allow_media_source: IDL.Opt(IDL.Bool)
 	});
 	const IcrcToken = IDL.Record({
 		ledger_id: IDL.Principal,
@@ -383,8 +396,10 @@ export const idlFactory = ({ IDL }) => {
 		SplMainnet: SplToken,
 		Erc1155: ErcToken
 	});
+	const TokenSection = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });
 	const CustomToken = IDL.Record({
 		token: Token,
+		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});
@@ -442,6 +457,10 @@ export const idlFactory = ({ IDL }) => {
 	const TopUpCyclesLedgerResult = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
+	});
+	const SaveAgreementsRequest = IDL.Record({
+		agreements: UserAgreements,
+		current_user_version: IDL.Opt(IDL.Nat64)
 	});
 	const SaveNetworksSettingsRequest = IDL.Record({
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
@@ -504,6 +523,7 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
+		update_user_agreements: IDL.Func([SaveAgreementsRequest], [SetUserShowTestnetsResult], []),
 		update_user_network_settings: IDL.Func(
 			[SaveNetworksSettingsRequest],
 			[SetUserShowTestnetsResult],
