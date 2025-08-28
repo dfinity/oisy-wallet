@@ -5,6 +5,7 @@ use candid::{CandidType, Deserialize};
 pub type Timestamp = u64;
 
 pub mod account;
+pub mod agreement;
 pub mod backend_config;
 pub mod bitcoin;
 pub mod contact;
