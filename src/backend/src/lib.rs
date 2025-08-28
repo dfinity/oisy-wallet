@@ -700,8 +700,7 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 }
 
 /// Updates the user's agreements, merging with any existing ones.
-/// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at` is
-/// set to `now`.
+/// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is set to `now`.
 ///
 /// # Returns
 /// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the

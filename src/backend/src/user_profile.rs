@@ -147,7 +147,7 @@ pub fn add_hidden_dapp_id(
 
 /// Updates the user's agreements, merging with any existing agreements.
 /// Only fields provided in `agreements` (i.e., where `accepted` is `Some(_)`) will be updated.
-/// If an agreement is newly accepted (`Some(true)`), `last_accepted_at` is set to `now`.
+/// If an agreement is newly accepted (`Some(true)`), `last_accepted_at_ns` is set to `now`.
 ///
 /// # Arguments
 /// * `principal` - The principal of the user.
@@ -169,7 +169,7 @@ pub fn update_agreements(
     let user_profile = find_profile(principal, user_profile_model)
         .map_err(|_| SaveAgreementsSettingsError::UserNotFound)?;
     let now = time();
-    let new_profile = user_profile.with_agreements(profile_version, now, agreements, false)?;
+    let new_profile = user_profile.with_agreements(profile_version, now, agreements)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }
