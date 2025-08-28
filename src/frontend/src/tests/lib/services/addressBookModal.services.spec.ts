@@ -1,6 +1,6 @@
 import type { ContactImage } from '$declarations/backend/backend.did';
 import { AddressBookSteps } from '$lib/enums/progress-steps';
-import { type AddressBookDeps , makeController } from '$lib/services/addressBookModal.services';
+import { makeController, type AddressBookDeps } from '$lib/services/addressBookModal.services';
 import {
 	currentAddressIndex,
 	currentContactId,
@@ -20,21 +20,21 @@ import { get } from 'svelte/store';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/services/utils.services', () => ({
-		wrapCallWith:
-			<TArgs extends Record<string, unknown>, R>({
-				methodToCall,
-				identity
-			}: {
-				methodToCall: (args: TArgs & { identity: Identity | undefined }) => Promise<R>;
-				toastErrorMessage?: string;
-				trackEventNames?: { success: string; error: string };
+	wrapCallWith:
+		<TArgs extends Record<string, unknown>, R>({
+			methodToCall,
+			identity
+		}: {
+			methodToCall: (args: TArgs & { identity: Identity | undefined }) => Promise<R>;
+			toastErrorMessage?: string;
+			trackEventNames?: { success: string; error: string };
+			identity: Identity | undefined;
+		}) =>
+		(args: TArgs) =>
+			methodToCall({ ...(args as object), identity } as TArgs & {
 				identity: Identity | undefined;
-			}) =>
-			(args: TArgs) =>
-				methodToCall({ ...(args as object), identity } as TArgs & {
-					identity: Identity | undefined;
-				})
-	}));
+			})
+}));
 
 const i18nStub = {
 	contact: { error: { create: 'e', update: 'e', delete: 'e' } }
@@ -90,7 +90,7 @@ describe('addressBookModal.services (makeController)', () => {
 			[{ contact: ContactUi; identity: Identity | undefined }]
 		];
 
-		expect((firstCallArg.contact).addresses).toEqual([mockContactBtcAddressUi]);
+		expect(firstCallArg.contact.addresses).toEqual([mockContactBtcAddressUi]);
 		expect(get(currentAddressIndex)).toBeUndefined();
 		expect(get(qrCodeAddress)).toBeUndefined();
 	});
@@ -124,7 +124,7 @@ describe('addressBookModal.services (makeController)', () => {
 			[{ contact: ContactUi; identity: Identity | undefined }]
 		];
 
-		expect((firstCallArg.contact).addresses).toEqual([mockContactBtcAddressUi]);
+		expect(firstCallArg.contact.addresses).toEqual([mockContactBtcAddressUi]);
 		expect(get(currentAddressIndex)).toBeUndefined();
 	});
 
@@ -159,7 +159,7 @@ describe('addressBookModal.services (makeController)', () => {
 			[{ contact: ContactUi; identity: Identity | undefined }]
 		];
 
-		expect((firstCallArg.contact).addresses).toEqual([mockContactEthAddressUi]);
+		expect(firstCallArg.contact.addresses).toEqual([mockContactEthAddressUi]);
 	});
 
 	it('handleAddAvatar: delegates to updateContact with image set', async () => {
@@ -194,7 +194,7 @@ describe('addressBookModal.services (makeController)', () => {
 			[{ contact: ContactUi; identity: Identity | undefined }]
 		];
 
-		expect((firstCallArg.contact).image).toEqual(image);
+		expect(firstCallArg.contact.image).toEqual(image);
 	});
 
 	it('handleDeleteContact: clears selection and returns ADDRESS_BOOK', async () => {
