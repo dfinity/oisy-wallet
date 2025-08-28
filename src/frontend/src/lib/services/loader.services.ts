@@ -19,7 +19,7 @@ import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -37,6 +37,7 @@ import { get } from 'svelte/store';
 export const handleInsufficientCycles = async (): Promise<boolean> => {
 	try {
 		const { identity } = get(authStore);
+		assertNonNullish(identity, 'Cannot continue without an identity.');
 		return await hasRequiredCycles({ identity });
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.

@@ -3,8 +3,8 @@
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import { POW_FEATURE_ENABLED } from '$env/pow.env';
-	import type { PowProtectorWorkerInitResult } from '$icp/services/pow-protector-listener';
 	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
+	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
