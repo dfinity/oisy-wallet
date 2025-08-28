@@ -50,7 +50,7 @@ const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 				const userAgreement =
 					key in $userAgreements ? $userAgreements[key as keyof UserAgreements] : undefined;
 
-				if (userAgreement?.lastAcceptedTimestamp !== lastUpdatedTimestamp) {
+				if (userAgreement?.lastAcceptedTimestamp !== lastUpdatedTimestamp || isNullish(userAgreement.accepted) || !userAgreement.accepted) {
 					return { ...outdatedAcc, [key]: userAgreement };
 				}
 
@@ -80,3 +80,5 @@ export const hasAcceptedAllLatestAgreements: Readable<boolean> = derived(
 	([$hasAcceptedAllAgreements, $hasOutdatedAgreements]) =>
 		$hasAcceptedAllAgreements && !$hasOutdatedAgreements
 );
+
+export const
