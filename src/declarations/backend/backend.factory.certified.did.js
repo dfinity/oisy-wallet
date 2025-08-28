@@ -364,7 +364,8 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const ErcToken = IDL.Record({
 		token_address: IDL.Text,
-		chain_id: IDL.Nat64
+		chain_id: IDL.Nat64,
+		allow_media_source: IDL.Opt(IDL.Bool)
 	});
 	const IcrcToken = IDL.Record({
 		ledger_id: IDL.Principal,
@@ -383,8 +384,10 @@ export const idlFactory = ({ IDL }) => {
 		SplMainnet: SplToken,
 		Erc1155: ErcToken
 	});
+	const TokenSection = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });
 	const CustomToken = IDL.Record({
 		token: Token,
+		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});

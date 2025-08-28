@@ -17,12 +17,12 @@
 
 {#if visible}
 	<div class="z-14 fixed inset-0">
-		<BottomSheet on:nnsClose={() => (visible = false)} transition>
+		<BottomSheet transition on:nnsClose={() => (visible = false)}>
 			<div slot="header" class="w-full p-4">
 				<ButtonIcon
+					ariaLabel={$i18n.core.alt.close_details}
 					onclick={() => (visible = false)}
 					styleClass="text-disabled float-right"
-					ariaLabel={$i18n.core.alt.close_details}
 				>
 					{#snippet icon()}
 						<IconClose size="24" />

@@ -1,6 +1,7 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
+import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc721ContractAddress } from '$eth/types/erc721';
@@ -8,7 +9,8 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { NftId } from '$lib/types/nft';
+import type { OwnedContract, OwnedNft } from '$lib/types/nft';
+import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -142,19 +144,49 @@ export class AlchemyProvider {
 		};
 	};
 
+	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftIdsForOwner = async ({
 		address,
 		contractAddress
 	}: {
 		address: EthAddress;
 		contractAddress: Erc721ContractAddress['address'] | Erc1155ContractAddress['address'];
-	}): Promise<NftId[]> => {
+	}): Promise<OwnedNft[]> => {
 		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
 			contractAddresses: [contractAddress],
 			omitMetadata: true
 		});
 
-		return result.ownedNfts.map((nft) => parseNftId(parseInt(nft.tokenId)));
+		return result.ownedNfts.map((ownedNft) => ({
+			id: parseNftId(parseInt(ownedNft.tokenId)),
+			balance: Number(ownedNft.balance)
+		}));
+	};
+
+	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
+	getTokensForOwner = async (address: EthAddress): Promise<OwnedContract[]> => {
+		const result: AlchemyProviderContracts = await this.provider.nft.getContractsForOwner(address);
+
+		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
+			const tokenStandard =
+				ownedContract.tokenType === 'ERC721'
+					? 'erc721'
+					: ownedContract.tokenType === 'ERC1155'
+						? 'erc1155'
+						: undefined;
+			if (isNullish(tokenStandard)) {
+				return acc;
+			}
+
+			const newContract = {
+				address: ownedContract.address,
+				isSpam: ownedContract.isSpam,
+				standard: tokenStandard as TokenStandard
+			};
+			acc.push(newContract);
+
+			return acc;
+		}, []);
 	};
 }
 

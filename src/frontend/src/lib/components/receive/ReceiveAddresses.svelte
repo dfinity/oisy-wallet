@@ -262,13 +262,13 @@
 			{#if condition !== false}
 				{#if nonNullish(_text)}
 					<ReceiveAddress
-						on:click={on.click}
-						{labelRef}
 						{address}
-						{network}
-						{testId}
 						{copyAriaLabel}
+						{labelRef}
+						{network}
 						{qrCodeAction}
+						{testId}
+						on:click={on.click}
 					>
 						{#snippet title()}
 							{_title}
@@ -279,13 +279,13 @@
 					</ReceiveAddress>
 				{:else}
 					<ReceiveAddress
-						on:click={on.click}
-						{labelRef}
 						{address}
-						{network}
-						{testId}
 						{copyAriaLabel}
+						{labelRef}
+						{network}
 						{qrCodeAction}
+						{testId}
+						on:click={on.click}
 					>
 						{#snippet title()}
 							{_title}
@@ -297,6 +297,6 @@
 	</div>
 
 	{#snippet toolbar()}
-		<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={modalStore.close} />
+		<ButtonDone onclick={modalStore.close} testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} />
 	{/snippet}
 </ContentWithToolbar>

@@ -1,7 +1,11 @@
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
 import {
 	parseFromAiAssistantContacts,
+	parseReviewSendTokensToolArguments,
 	parseToAiAssistantContacts
 } from '$lib/utils/ai-assistant.utils';
 import { mapToFrontendContact } from '$lib/utils/contact.utils';
@@ -50,7 +54,69 @@ describe('ai-assistant.utils', () => {
 					aiAssistantContacts: [aiAssistantContact],
 					extendedAddressContacts: storeData
 				})
-			).toEqual([...contactsData]);
+			).toEqual(Object.values(storeData));
+		});
+	});
+
+	describe('parseReviewSendTokenToolArguments', () => {
+		const sendValue = 0.00001;
+
+		it('returns correct result when addressId is provided', () => {
+			expect(
+				parseReviewSendTokensToolArguments({
+					filterParams: [
+						{
+							value: extendedAddressContactUi.addresses[0].id,
+							name: 'addressId'
+						},
+						{
+							value: `${sendValue}`,
+							name: 'amountNumber'
+						},
+						{
+							value: 'ICP',
+							name: 'tokenSymbol'
+						}
+					],
+					tokens: [ICP_TOKEN, ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
+					extendedAddressContacts: storeData
+				})
+			).toEqual({
+				token: ICP_TOKEN,
+				contactAddress: extendedAddressContactUi.addresses[0],
+				contact: extendedAddressContactUi,
+				amount: sendValue,
+				address: undefined
+			});
+		});
+
+		it('returns correct result when address is provided', () => {
+			expect(
+				parseReviewSendTokensToolArguments({
+					filterParams: [
+						{
+							value: mockEthAddress,
+							name: 'address'
+						},
+						{
+							value: `${sendValue}`,
+							name: 'amountNumber'
+						},
+						{
+							value: 'ETH',
+							name: 'tokenSymbol'
+						}
+					],
+					tokens: [ICP_TOKEN, ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],
+					extendedAddressContacts: storeData
+				})
+			).toEqual({
+				token: ETHEREUM_TOKEN,
+				contactAddress: undefined,
+				contact: undefined,
+				amount: sendValue,
+				address: mockEthAddress
+			});
 		});
 	});
 });

@@ -51,13 +51,13 @@
 </script>
 
 <NavigationItem
+	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
 		path: AppPath.Tokens,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	ariaLabel={$i18n.navigation.alt.tokens}
 	selected={isRouteTokens(page) || isRouteNfts(page) || isRouteTransactions(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
@@ -70,13 +70,13 @@
 </NavigationItem>
 
 <NavigationItem
+	ariaLabel={$i18n.navigation.alt.activity}
 	href={networkUrl({
 		path: AppPath.Activity,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	ariaLabel={$i18n.navigation.alt.activity}
 	selected={isRouteActivity(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_ACTIVITY)}
 >
@@ -90,13 +90,13 @@
 </NavigationItem>
 
 <NavigationItem
+	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	href={networkUrl({
 		path: AppPath.Explore,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	selected={isRouteDappExplorer(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
@@ -111,17 +111,17 @@
 <!-- Todo: remove condition once the feature is completed -->
 {#if EARNING_ENABLED}
 	<NavigationItem
+		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Earning,
 			networkId: $networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
-		ariaLabel={$i18n.navigation.alt.airdrops}
 		selected={isRouteEarning(page)}
-		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
 	>
 		{#snippet icon()}
 			<IconGift />
@@ -132,17 +132,17 @@
 	</NavigationItem>
 {:else}
 	<NavigationItem
+		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Rewards,
 			networkId: $networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
-		ariaLabel={$i18n.navigation.alt.airdrops}
 		selected={isRouteRewards(page)}
-		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
 	>
 		{#snippet icon()}
 			<IconGift />
@@ -154,13 +154,13 @@
 {/if}
 
 <NavigationItem
+	ariaLabel={$i18n.navigation.alt.settings}
 	href={networkUrl({
 		path: AppPath.Settings,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	ariaLabel={$i18n.navigation.alt.settings}
 	selected={isRouteSettings(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_SETTINGS)}
 >

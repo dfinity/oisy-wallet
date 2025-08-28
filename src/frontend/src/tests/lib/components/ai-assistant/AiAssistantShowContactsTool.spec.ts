@@ -1,11 +1,14 @@
 import AiAssistantShowContactsTool from '$lib/components/ai-assistant/AiAssistantShowContactsTool.svelte';
 import { MAX_DISPLAYED_ADDRESSES_NUMBER } from '$lib/constants/ai-assistant.constants';
+import { extendedAddressContacts } from '$lib/derived/contacts.derived';
+import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('AiAssistantShowContactsTool', () => {
 	const contacts = getMockContactsUi({
@@ -13,13 +16,18 @@ describe('AiAssistantShowContactsTool', () => {
 		name: 'Multiple Addresses Contact',
 		addresses: [mockContactBtcAddressUi]
 	}) as unknown as ContactUi[];
+	contacts.forEach((contact) => contactsStore.addContact(contact));
+
+	const extendedContacts = get(extendedAddressContacts);
 	const props = {
-		contacts
+		onSendMessage: () => Promise.resolve(),
+		contacts: Object.values(extendedContacts)
 	};
 
 	it('renders no contacts found message', () => {
 		const { container } = render(AiAssistantShowContactsTool, {
 			props: {
+				...props,
 				contacts: []
 			}
 		});
@@ -43,6 +51,7 @@ describe('AiAssistantShowContactsTool', () => {
 
 	it('renders addresses and more label if the addresses number is greater than the max amount', () => {
 		const newProps = {
+			...props,
 			contacts: [...props.contacts, ...props.contacts]
 		};
 		const { container } = render(AiAssistantShowContactsTool, {

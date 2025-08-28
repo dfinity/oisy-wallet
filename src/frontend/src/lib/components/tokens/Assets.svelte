@@ -3,6 +3,8 @@
 	import { fade } from 'svelte/transition';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
+	import NftSettingsMenu from '$lib/components/nfts/NftSettingsMenu.svelte';
+	import NftSortMenu from '$lib/components/nfts/NftSortMenu.svelte';
 	import NftsList from '$lib/components/nfts/NftsList.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
@@ -40,12 +42,13 @@
 					{#snippet overflowableContent()}
 						{#if NFTS_ENABLED}
 							<Tabs
-								bind:activeTab
+								styleClass="mt-2 mb-8"
+								tabVariant="menu"
 								tabs={[
 									{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS, path: AppPath.Tokens },
 									{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
 								]}
-								tabVariant="menu"
+								bind:activeTab
 							/>
 						{:else}
 							<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
@@ -53,9 +56,18 @@
 					{/snippet}
 				</TokensFilter>
 			</div>
-			<div class="flex">
-				<TokensMenu />
-			</div>
+			{#if tab === TokenTypes.TOKENS}
+				<div class="flex">
+					<TokensMenu />
+				</div>
+			{:else}
+				<div class="flex">
+					<NftSortMenu />
+				</div>
+				<div class="flex">
+					<NftSettingsMenu />
+				</div>
+			{/if}
 		</div>
 	</StickyHeader>
 
@@ -65,7 +77,7 @@
 		<NftsList />
 	{/if}
 
-	<div in:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
+	<div class="mb-4 mt-12 flex w-full justify-center sm:w-auto" in:fade>
 		<ManageTokensButton />
 	</div>
 </div>

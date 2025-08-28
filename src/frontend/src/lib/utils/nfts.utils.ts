@@ -1,4 +1,5 @@
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
+import type { NftListSortingType } from '$lib/stores/nft-list.store';
 import type { NftError } from '$lib/types/errors';
 import type {
 	Nft,
@@ -6,7 +7,8 @@ import type {
 	NftCollectionUi,
 	NftId,
 	NftsByNetwork,
-	NonFungibleToken
+	NonFungibleToken,
+	OwnedNft
 } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
@@ -61,6 +63,58 @@ export const findNft = ({
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
 
+export const findNewNftIds = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: NftId[];
+}): NftId[] => inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId })));
+
+export const findRemovedNfts = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: NftId[];
+}): Nft[] =>
+	nfts.filter(
+		(nft) =>
+			nft.collection.network === token.network &&
+			nft.collection.address === token.address &&
+			isNullish(inventory.find((nftId) => nftId === nft.id))
+	);
+
+export const getUpdatedNfts = ({
+	nfts,
+	token,
+	inventory
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+	inventory: OwnedNft[];
+}): Nft[] =>
+	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
+		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
+			return acc;
+		}
+
+		const ownedNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
+
+		if (nonNullish(ownedNft) && nft.balance !== ownedNft.balance) {
+			acc.push({
+				...nft,
+				balance: ownedNft.balance
+			});
+		}
+
+		return acc;
+	}, []);
+
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
 	const IPFS_GATEWAY = 'https://ipfs.io/ipfs/';
@@ -103,7 +157,8 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		network: token.network,
 		standard: token.standard,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
-		...(notEmptyString(token.name) && { name: token.name })
+		...(notEmptyString(token.name) && { name: token.name }),
+		...(nonNullish(token.section) && { state: token.section })
 	});
 
 export const getEnabledNfts = ({
@@ -154,4 +209,65 @@ export const getNftCollectionUi = ({
 		acc = [...acc, entry];
 		return acc;
 	}, []);
+};
+
+const collator = new Intl.Collator(new Intl.Locale(navigator.language), {
+	sensitivity: 'base', // case-insensitive
+	numeric: true // natural sort for names with numbers
+});
+
+const cmpByCollectionName =
+	(dir: number) =>
+	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number => {
+		const an = a.collection?.name ?? '';
+		const bn = b.collection?.name ?? '';
+		return collator.compare(an, bn) * dir;
+	};
+
+// Overloads (so TS keeps the exact array element type on return)
+interface NftBaseFilterAndSortParams<T> {
+	items: T[];
+	filter?: string;
+	sort?: NftListSortingType;
+}
+
+interface NftFilterAndSortParams extends NftBaseFilterAndSortParams<Nft> {
+	items: Nft[];
+}
+
+interface NftCollectionFilterAndSortParams extends NftBaseFilterAndSortParams<NftCollectionUi> {
+	items: NftCollectionUi[];
+}
+
+interface FilterSortByCollection {
+	(params: NftFilterAndSortParams): Nft[];
+	(params: NftCollectionFilterAndSortParams): NftCollectionUi[];
+}
+
+// Single implementation (T is Nft or NftCollectionUi)
+export const filterSortByCollection: FilterSortByCollection = <T extends Nft | NftCollectionUi>({
+	items,
+	filter,
+	sort
+}: NftBaseFilterAndSortParams<T>): T[] => {
+	let result = items;
+
+	if (nonNullish(filter)) {
+		result = result.filter((it) =>
+			(it.collection?.name?.toLowerCase() ?? '').includes(filter.toLowerCase())
+		);
+	}
+
+	if (nonNullish(sort)) {
+		const dir = sort.order === 'asc' ? 1 : -1;
+
+		if (sort.type === 'collection-name') {
+			result = [...result].sort((a, b) => cmpByCollectionName(dir)({ a, b }));
+		} else {
+			// extendable, for now we return a copy of the list
+			result = [...result];
+		}
+	}
+
+	return result;
 };

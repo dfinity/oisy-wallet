@@ -174,6 +174,7 @@ type CredentialSpec = record {
 type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
 	token : Token;
+	section : opt TokenSection;
 	version : opt nat64;
 	enabled : bool
 };
@@ -187,7 +188,11 @@ type DefiniteCanisterSettingsArgs = record {
 	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
-type ErcToken = record { token_address : text; chain_id : nat64 };
+type ErcToken = record {
+	token_address : text;
+	chain_id : nat64;
+	allow_media_source : opt bool
+};
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
@@ -322,6 +327,7 @@ type TokenAccountId = variant {
 	Sol : text;
 	Icrcv2 : Icrcv2AccountId
 };
+type TokenSection = variant { Spam; Hidden };
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;
@@ -367,54 +373,203 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
+	// Adds a verifiable credential to the user profile.
+	//
+	// # Errors
+	// Errors are enumerated by: `AddUserCredentialError`.
 	add_user_credential : (AddUserCredentialRequest) -> (AddUserCredentialResult);
+	// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
+	//
+	// # Arguments
+	// * `request` - The request to add a hidden dApp ID.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (
 		AddUserHiddenDappIdResult
 	);
+	// This function authorizes the caller to spend a specific
+	//
+	// Note:
+	// - The chain fusion signer performs threshold key operations including providing public keys,
+	// creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+	//
+	// # Errors
+	// Errors are enumerated by: `AllowSigningError`.
 	allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
+	// Adds a pending Bitcoin transaction for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `BtcAddPendingTransactionError`.
 	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (
 		BtcAddPendingTransactionResult
 	);
+	// Retrieves the current fee percentiles for Bitcoin transactions from the cache
+	// for the specified network. Fee percentiles are measured in millisatoshi per byte
+	// and are periodically updated in the background.
+	//
+	// # Returns
+	// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
+	// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+	//
+	// # Errors
+	// - `InternalError`: If fee percentiles are not available in the cache for the requested network
+	//
+	// # Note
+	// This function only returns data from the in-memory cache and doesn't make any calls
+	// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
+	// an error is returned rather than fetching fresh data.
 	btc_get_current_fee_percentiles : (BtcGetFeePercentilesRequest) -> (
 		BtcGetFeePercentilesResult
 	) query;
+	// Returns the pending Bitcoin transactions for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
+	// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+	//
+	// # Errors
+	// Errors are enumerated by: `SelectedUtxosFeeError`.
 	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
 		BtcSelectUserUtxosFeeResult
 	);
+	// Gets the canister configuration.
 	config : () -> (Config) query;
+	// Creates a new contact for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `ContactError`.
+	//
+	// # Returns
+	// The created contact on success.
+	//
+	// # Test
+	// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
+	// Creates a new proof-of-work challenge for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `CreateChallengeError`.
+	//
+	// # Returns
+	//
+	// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
+	// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
+	// internal errors.
 	create_pow_challenge : () -> (CreatePowChallengeResult);
+	// It create a new user profile for the caller.
+	// If the user has already a profile, it will return that profile.
 	create_user_profile : () -> (UserProfile);
+	// Deletes a contact for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `ContactError`.
+	//
+	// # Notes
+	// This operation is idempotent - it will return OK if the contact has already been deleted.
 	delete_contact : (nat64) -> (DeleteContactResult);
+	// Gets account creation timestamps.
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }
 	) query;
+	// Retrieves the amount of cycles that the signer canister is allowed to spend
+	// on behalf of the current user
+	// # Returns
+	// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
+	// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong
+	//
+	// # Errors
+	// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
+	// - `Other`: If another error occurred during the operation
 	get_allowed_cycles : () -> (GetAllowedCyclesResult);
+	// API method to get cycle balance and burn rate.
 	get_canister_status : () -> (CanisterStatusResultV2);
+	// Gets a contact by ID for the caller.
+	//
+	// # Arguments
+	// * `contact_id` - The unique identifier of the contact to retrieve
+	// # Returns
+	// * `Ok(GetContactResult)` - The requested contact if found
+	// # Errors
+	// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
 	get_contact : (nat64) -> (GetContactResult) query;
+	// Returns all contacts for the caller
+	//
+	// This query function returns a list of the user's contacts.
+	// # Returns
+	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
+	// Returns the caller's user profile.
+	//
+	// # Errors
+	// Errors are enumerated by: `GetUserProfileError`.
+	//
+	// # Panics
+	// - If the caller is anonymous.  See: `may_read_user_data`.
 	get_user_profile : () -> (GetUserProfileResult) query;
+	// Checks if the caller has an associated user profile.
+	//
+	// # Returns
+	// - `Ok(true)` if a user profile exists for the caller.
+	// - `Ok(false)` if no user profile exists for the caller.
+	// # Errors
+	// Does not return any error
 	has_user_profile : () -> (HasUserProfileResponse) query;
+	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
 	list_user_tokens : () -> (vec UserToken) query;
+	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
 	remove_user_token : (UserTokenId) -> ();
+	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
 	set_many_user_tokens : (vec UserToken) -> ();
+	// Sets the user's preference to show (or hide) testnets in the interface.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
+	// the same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	set_user_show_testnets : (SetShowTestnetsRequest) -> (
 		SetUserShowTestnetsResult
 	);
 	set_user_token : (UserToken) -> ();
+	// Gets statistics about the canister.
+	//
+	// Note: This is a private method, restricted to authorized users, as some stats may not be
+	// suitable for public consumption.
 	stats : () -> (Stats) query;
+	// Adds cycles to the cycles ledger, if it is below a certain threshold.
+	//
+	// # Errors
+	// Error conditions are enumerated by: `TopUpCyclesLedgerError`
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
 		TopUpCyclesLedgerResult
 	);
+	// Updates an existing contact for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `ContactError`.
 	update_contact : (Contact) -> (GetContactResult);
+	// Updates the user's preference to enable (or disable) networks in the interface, merging with any
+	// existing settings.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the network settings were updated successfully, or if they were already
+	// set to the same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	update_user_network_settings : (SaveNetworksSettingsRequest) -> (
 		SetUserShowTestnetsResult
 	)

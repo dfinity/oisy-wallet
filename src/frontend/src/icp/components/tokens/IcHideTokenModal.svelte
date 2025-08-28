@@ -64,6 +64,7 @@
 			token: {
 				enabled: false,
 				version: toNullable(version),
+				section: toNullable(),
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),
@@ -80,4 +81,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />
+<HideTokenModal {assertHide} {fromRoute} {hideToken} {updateUi} />

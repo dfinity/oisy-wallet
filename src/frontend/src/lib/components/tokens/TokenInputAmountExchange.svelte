@@ -44,9 +44,9 @@
 	{#if nonNullish(exchangeRate)}
 		<button
 			class:hover:cursor-default={disabled}
+			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 			{disabled}
 			on:click|preventDefault={handleUnitSwitch}
-			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 		>
 			<IconArrowUpDown size="14" />
 		</button>
