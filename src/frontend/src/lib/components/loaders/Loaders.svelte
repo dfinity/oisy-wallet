@@ -38,10 +38,10 @@
 											<UserSnapshotWorker>
 												<LoaderContacts>
 													<TransactionsIdbSetter>
-													<BalancesIdbSetter>
-														{@render children()}
-													</BalancesIdbSetter>
-												</TransactionsIdbSetter>
+														<BalancesIdbSetter>
+															{@render children()}
+														</BalancesIdbSetter>
+													</TransactionsIdbSetter>
 												</LoaderContacts>
 											</UserSnapshotWorker>
 										</LoaderMetamask>
