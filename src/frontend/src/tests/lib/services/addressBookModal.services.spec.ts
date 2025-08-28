@@ -1,200 +1,249 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { get } from 'svelte/store';
-import { makeController } from '$lib/services/addressBookModal.services';
-import { AddressBookSteps } from '$lib/enums/progress-steps';
-import { contactsStore } from '$lib/stores/contacts.store';
-import {
-  currentContactId,
-  currentAddressIndex,
-  loading,
-  qrCodeAddress
-} from '$lib/stores/addressBookModal.store';
-import {
-  mockContactBtcAddressUi,
-  mockContactEthAddressUi,
-  getMockContactsUi
-} from '$tests/mocks/contacts.mock';
 import type { ContactImage } from '$declarations/backend/backend.did';
+import { AddressBookSteps } from '$lib/enums/progress-steps';
+import { type AddressBookDeps , makeController } from '$lib/services/addressBookModal.services';
+import {
+	currentAddressIndex,
+	currentContactId,
+	loading,
+	qrCodeAddress
+} from '$lib/stores/addressBookModal.store';
+import { contactsStore } from '$lib/stores/contacts.store';
+import type { ContactUi } from '$lib/types/contact';
+import {
+	getMockContactsUi,
+	mockContactBtcAddressUi,
+	mockContactEthAddressUi
+} from '$tests/mocks/contacts.mock';
+import type { Identity } from '@dfinity/agent';
+import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
+import { get } from 'svelte/store';
+import type { MockedFunction } from 'vitest';
 
-vi.mock('$lib/services/utils.services', async () => {
-  return {
-    wrapCallWith: ({ methodToCall }: { methodToCall: (args: any) => Promise<any> }) =>
-      (args: any) => methodToCall(args)
-  };
-});
+// --- Typed mock for wrapCallWith (no 'any', no 'require-await') ---
+vi.mock('$lib/services/utils.services', () => ({
+		wrapCallWith:
+			<TArgs extends Record<string, unknown>, R>({
+				methodToCall,
+				identity
+			}: {
+				methodToCall: (args: TArgs & { identity: Identity | undefined }) => Promise<R>;
+				toastErrorMessage?: string;
+				trackEventNames?: { success: string; error: string };
+				identity: Identity | undefined;
+			}) =>
+			(args: TArgs) =>
+				methodToCall({ ...(args as object), identity } as TArgs & {
+					identity: Identity | undefined;
+				})
+	}));
 
 const i18nStub = {
-  contact: { error: { create: 'e', update: 'e', delete: 'e' } }
+	contact: { error: { create: 'e', update: 'e', delete: 'e' } }
 } as unknown as I18n;
 
-const stepsStub = [] as any;
-const modalStub = {} as any;
+const step0: WizardStep<AddressBookSteps> = {
+	name: AddressBookSteps.ADDRESS_BOOK,
+	title: 'Address Book'
+};
+
+const stepsStub: WizardSteps<AddressBookSteps> = [step0];
+const modalStub = {} as AddressBookDeps['modal'];
 
 const resetStores = () => {
-  contactsStore.reset();
-  currentContactId.set(undefined);
-  currentAddressIndex.set(undefined);
-  qrCodeAddress.set(undefined);
-  loading.set(false);
+	contactsStore.reset();
+	currentContactId.set(undefined);
+	currentAddressIndex.set(undefined);
+	qrCodeAddress.set(undefined);
+	loading.set(false);
 };
 
 describe('addressBookModal.services (makeController)', () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
-    resetStores();
-  });
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		resetStores();
+	});
 
-  it('handleAddAddress: appends address, clears indices, returns SHOW_CONTACT', async () => {
-    const base = getMockContactsUi({ n: 1, addresses: [] })[0];
-    contactsStore.set([base]);                      
-    currentContactId.set(base.id);
+	it('handleAddAddress: appends address, clears indices, returns SHOW_CONTACT', async () => {
+		const [base] = getMockContactsUi({ n: 1, addresses: [] });
+		contactsStore.set([base]);
+		currentContactId.set(base.id);
 
-    const updateContactSpy = vi.fn().mockResolvedValue(base);
-    const controller = makeController({
-      i18n: i18nStub,
-      identity: undefined,
-      createContact: vi.fn(),                      
-      updateContact: updateContactSpy,
-      deleteContact: vi.fn(),
-      steps: stepsStub,
-      modal: modalStub
-    });
+		const updateContactSpy: MockedFunction<AddressBookDeps['updateContact']> = vi
+			.fn<AddressBookDeps['updateContact']>()
+			.mockResolvedValue(base);
 
-    const res = await controller.handleAddAddress(mockContactBtcAddressUi);
+		const controller = makeController({
+			i18n: i18nStub,
+			identity: undefined,
+			createContact: vi.fn<AddressBookDeps['createContact']>(),
+			updateContact: updateContactSpy,
+			deleteContact: vi.fn<AddressBookDeps['deleteContact']>(),
+			steps: stepsStub,
+			modal: modalStub
+		});
 
-    expect(res?.next).toBe(AddressBookSteps.SHOW_CONTACT);
-    expect(updateContactSpy).toHaveBeenCalledTimes(1);
+		const res = await controller.handleAddAddress(mockContactBtcAddressUi);
 
-    const arg = updateContactSpy.mock.calls[0][0].contact as typeof base;
-    expect(arg.addresses).toEqual([mockContactBtcAddressUi]);
-    expect(get(currentAddressIndex)).toBeUndefined();
-    expect(get(qrCodeAddress)).toBeUndefined();
-  });
+		expect(res?.next).toBe(AddressBookSteps.SHOW_CONTACT);
+		expect(updateContactSpy).toHaveBeenCalledOnce();
 
-  it('handleSaveAddress: updates address at index, clears index, returns EDIT_CONTACT', async () => {
-    const withEth = getMockContactsUi({ n: 1, addresses: [mockContactEthAddressUi] })[0];
-    contactsStore.set([withEth]);
-    currentContactId.set(withEth.id);
-    currentAddressIndex.set(0);
+		const [[firstCallArg]] = updateContactSpy.mock.calls as unknown[][] as [
+			[{ contact: ContactUi; identity: Identity | undefined }]
+		];
 
-    const updateContactSpy = vi.fn().mockResolvedValue(withEth);
-    const controller = makeController({
-      i18n: i18nStub,
-      identity: undefined,
-      createContact: vi.fn(),
-      updateContact: updateContactSpy,
-      deleteContact: vi.fn(),
-      steps: stepsStub,
-      modal: modalStub
-    });
+		expect((firstCallArg.contact).addresses).toEqual([mockContactBtcAddressUi]);
+		expect(get(currentAddressIndex)).toBeUndefined();
+		expect(get(qrCodeAddress)).toBeUndefined();
+	});
 
-    const res = await controller.handleSaveAddress(mockContactBtcAddressUi);
+	it('handleSaveAddress: updates address at index, clears index, returns EDIT_CONTACT', async () => {
+		const [withEth] = getMockContactsUi({ n: 1, addresses: [mockContactEthAddressUi] });
+		contactsStore.set([withEth]);
+		currentContactId.set(withEth.id);
+		currentAddressIndex.set(0);
 
-    expect(res?.next).toBe(AddressBookSteps.EDIT_CONTACT);
-    expect(updateContactSpy).toHaveBeenCalledTimes(1);
+		const updateContactSpy: MockedFunction<AddressBookDeps['updateContact']> = vi
+			.fn<AddressBookDeps['updateContact']>()
+			.mockResolvedValue(withEth);
 
-    const arg = updateContactSpy.mock.calls[0][0].contact as typeof withEth;
-    expect(arg.addresses).toEqual([mockContactBtcAddressUi]);
-    expect(get(currentAddressIndex)).toBeUndefined();
-  });
+		const controller = makeController({
+			i18n: i18nStub,
+			identity: undefined,
+			createContact: vi.fn<AddressBookDeps['createContact']>(),
+			updateContact: updateContactSpy,
+			deleteContact: vi.fn<AddressBookDeps['deleteContact']>(),
+			steps: stepsStub,
+			modal: modalStub
+		});
 
-  it('handleDeleteAddress: removes address by index and returns EDIT_CONTACT', async () => {
-    const base = getMockContactsUi({
-      n: 1,
-      addresses: [mockContactBtcAddressUi, mockContactEthAddressUi]
-    })[0];
-    contactsStore.set([base]);
-    currentContactId.set(base.id);
+		const res = await controller.handleSaveAddress(mockContactBtcAddressUi);
 
-    const updateContactSpy = vi.fn().mockResolvedValue(base);
-    const controller = makeController({
-      i18n: i18nStub,
-      identity: undefined,
-      createContact: vi.fn(),
-      updateContact: updateContactSpy,
-      deleteContact: vi.fn(),
-      steps: stepsStub,
-      modal: modalStub
-    });
+		expect(res?.next).toBe(AddressBookSteps.EDIT_CONTACT);
+		expect(updateContactSpy).toHaveBeenCalledOnce();
 
-    const res = await controller.handleDeleteAddress(0);
+		const [[firstCallArg]] = updateContactSpy.mock.calls as unknown[][] as [
+			[{ contact: ContactUi; identity: Identity | undefined }]
+		];
 
-    expect(res?.next).toBe(AddressBookSteps.EDIT_CONTACT);
-    expect(updateContactSpy).toHaveBeenCalledTimes(1);
+		expect((firstCallArg.contact).addresses).toEqual([mockContactBtcAddressUi]);
+		expect(get(currentAddressIndex)).toBeUndefined();
+	});
 
-    const arg = updateContactSpy.mock.calls[0][0].contact as typeof base;
-    expect(arg.addresses).toEqual([mockContactEthAddressUi]);
-  });
+	it('handleDeleteAddress: removes address by index and returns EDIT_CONTACT', async () => {
+		const [base] = getMockContactsUi({
+			n: 1,
+			addresses: [mockContactBtcAddressUi, mockContactEthAddressUi]
+		});
+		contactsStore.set([base]);
+		currentContactId.set(base.id);
 
-  it('handleAddAvatar: delegates to updateContact with image set', async () => {
-    const base = getMockContactsUi({ n: 1, addresses: [] })[0];
-    contactsStore.set([base]);
-    currentContactId.set(base.id);
+		const updateContactSpy: MockedFunction<AddressBookDeps['updateContact']> = vi
+			.fn<AddressBookDeps['updateContact']>()
+			.mockResolvedValue(base);
 
-    const image: ContactImage = {
-      data: new Uint8Array([1]),
-      mime_type: { 'image/png': null }
-    };
+		const controller = makeController({
+			i18n: i18nStub,
+			identity: undefined,
+			createContact: vi.fn<AddressBookDeps['createContact']>(),
+			updateContact: updateContactSpy,
+			deleteContact: vi.fn<AddressBookDeps['deleteContact']>(),
+			steps: stepsStub,
+			modal: modalStub
+		});
 
-    const updateContactSpy = vi.fn().mockResolvedValue({ ...base, image });
-    const controller = makeController({
-      i18n: i18nStub,
-      identity: undefined,
-      createContact: vi.fn(),
-      updateContact: updateContactSpy,
-      deleteContact: vi.fn(),
-      steps: stepsStub,
-      modal: modalStub
-    });
+		const res = await controller.handleDeleteAddress(0);
 
-    await controller.handleAddAvatar(image);
+		expect(res?.next).toBe(AddressBookSteps.EDIT_CONTACT);
+		expect(updateContactSpy).toHaveBeenCalledOnce();
 
-    expect(updateContactSpy).toHaveBeenCalledTimes(1);
-    const arg = updateContactSpy.mock.calls[0][0].contact;
-    expect(arg.image).toEqual(image);
-  });
+		const [[firstCallArg]] = updateContactSpy.mock.calls as unknown[][] as [
+			[{ contact: ContactUi; identity: Identity | undefined }]
+		];
 
-  it('handleDeleteContact: clears selection and returns ADDRESS_BOOK', async () => {
-    const base = getMockContactsUi({ n: 1, addresses: [] })[0];
-    contactsStore.set([base]);
-    currentContactId.set(base.id);
+		expect((firstCallArg.contact).addresses).toEqual([mockContactEthAddressUi]);
+	});
 
-    const deleteContactSpy = vi.fn().mockResolvedValue(undefined);
-    const controller = makeController({
-      i18n: i18nStub,
-      identity: undefined,
-      createContact: vi.fn(),
-      updateContact: vi.fn(),
-      deleteContact: deleteContactSpy,
-      steps: stepsStub,
-      modal: modalStub
-    });
+	it('handleAddAvatar: delegates to updateContact with image set', async () => {
+		const [base] = getMockContactsUi({ n: 1, addresses: [] });
+		contactsStore.set([base]);
+		currentContactId.set(base.id);
 
-    const res = await controller.handleDeleteContact(base.id);
-    expect(res?.next).toBe(AddressBookSteps.ADDRESS_BOOK);
-    expect(deleteContactSpy).toHaveBeenCalledWith({ id: base.id });
-    expect(get(currentContactId)).toBeUndefined();
-    expect(get(currentAddressIndex)).toBeUndefined();
-  });
+		const image: ContactImage = {
+			data: new Uint8Array([1]),
+			mime_type: { 'image/png': null }
+		};
 
-  it('no-ops when currentContact is nullish', async () => {
-    const updateContactSpy = vi.fn();
+		const updateContactSpy: MockedFunction<AddressBookDeps['updateContact']> = vi
+			.fn<AddressBookDeps['updateContact']>()
+			.mockResolvedValue({ ...base, image });
 
-    const controller = makeController({
-      i18n: i18nStub,
-      identity: undefined,
-      createContact: vi.fn(),
-      updateContact: updateContactSpy,
-      deleteContact: vi.fn(),
-      steps: stepsStub,
-      modal: modalStub
-    });
+		const controller = makeController({
+			i18n: i18nStub,
+			identity: undefined,
+			createContact: vi.fn<AddressBookDeps['createContact']>(),
+			updateContact: updateContactSpy,
+			deleteContact: vi.fn<AddressBookDeps['deleteContact']>(),
+			steps: stepsStub,
+			modal: modalStub
+		});
 
-    await controller.handleAddAddress(mockContactBtcAddressUi);
-    await controller.handleSaveAddress(mockContactBtcAddressUi);
-    await controller.handleDeleteAddress(0);
-    await controller.handleAddAvatar(null);
+		await controller.handleAddAvatar(image);
 
-    expect(updateContactSpy).not.toHaveBeenCalled();
-  });
+		expect(updateContactSpy).toHaveBeenCalledOnce();
+
+		const [[firstCallArg]] = updateContactSpy.mock.calls as unknown[][] as [
+			[{ contact: ContactUi; identity: Identity | undefined }]
+		];
+
+		expect((firstCallArg.contact).image).toEqual(image);
+	});
+
+	it('handleDeleteContact: clears selection and returns ADDRESS_BOOK', async () => {
+		const [base] = getMockContactsUi({ n: 1, addresses: [] });
+		contactsStore.set([base]);
+		currentContactId.set(base.id);
+
+		const deleteContactSpy: MockedFunction<AddressBookDeps['deleteContact']> = vi
+			.fn<AddressBookDeps['deleteContact']>()
+			.mockResolvedValue(undefined);
+
+		const controller = makeController({
+			i18n: i18nStub,
+			identity: undefined,
+			createContact: vi.fn<AddressBookDeps['createContact']>(),
+			updateContact: vi.fn<AddressBookDeps['updateContact']>(),
+			deleteContact: deleteContactSpy,
+			steps: stepsStub,
+			modal: modalStub
+		});
+
+		const res = await controller.handleDeleteContact(base.id);
+
+		expect(res?.next).toBe(AddressBookSteps.ADDRESS_BOOK);
+		expect(deleteContactSpy).toHaveBeenCalledWith({ id: base.id });
+		expect(get(currentContactId)).toBeUndefined();
+		expect(get(currentAddressIndex)).toBeUndefined();
+	});
+
+	it('no-ops when currentContact is nullish', async () => {
+		const updateContactSpy: MockedFunction<AddressBookDeps['updateContact']> =
+			vi.fn<AddressBookDeps['updateContact']>();
+
+		const controller = makeController({
+			i18n: i18nStub,
+			identity: undefined,
+			createContact: vi.fn<AddressBookDeps['createContact']>(),
+			updateContact: updateContactSpy,
+			deleteContact: vi.fn<AddressBookDeps['deleteContact']>(),
+			steps: stepsStub,
+			modal: modalStub
+		});
+
+		await controller.handleAddAddress(mockContactBtcAddressUi);
+		await controller.handleSaveAddress(mockContactBtcAddressUi);
+		await controller.handleDeleteAddress(0);
+		await controller.handleAddAvatar(null);
+
+		expect(updateContactSpy).not.toHaveBeenCalled();
+	});
 });
