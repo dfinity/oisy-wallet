@@ -9,9 +9,9 @@ pub struct UserAgreement {
     /// responded (null).
     pub accepted: Option<bool>,
     /// When the user last accepted this agreement (nanos since epoch).
-    pub last_accepted_at: Option<Timestamp>,
-    /// When the agreement itself was last updated (nanos since epoch).
-    pub last_updated_at: Option<Timestamp>,
+    pub last_accepted_at_ns: Option<Timestamp>,
+    /// When the agreement itself was last updated (millis since epoch).
+    pub last_updated_at_ms: Option<Timestamp>,
 }
 
 /// The user agreements tracked by the system.
@@ -38,3 +38,4 @@ pub struct SaveAgreementsRequest {
     pub current_user_version: Option<Version>,
     pub agreements: UserAgreements,
 }
+
