@@ -21,9 +21,7 @@ const transformJsonBigint = (
 	return res;
 };
 
-export const parseAgreementsJson = (): EnvAgreements => {
-	return z.parse(EnvAgreementsSchema, transformJsonBigint(agreementsJson));
-};
+export const parseAgreementsJson = (): EnvAgreements => z.parse(EnvAgreementsSchema, transformJsonBigint(agreementsJson));
 
 export const getAgreementLastUpdated = ({
 	type,
