@@ -2,7 +2,7 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, type Snippet } from 'svelte';
 	import {
-		PERIODIC_FETCH_INTERVAL_MS,
+		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
 		SWAP_DEFAULT_SLIPPAGE_VALUE
 	} from '$lib/constants/swap.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -61,7 +61,7 @@
 
 		timer = setInterval(() => {
 			loadSwapAmounts(true);
-		}, PERIODIC_FETCH_INTERVAL_MS);
+		}, SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS);
 	};
 
 	const loadSwapAmounts = async (isPeriodicUpdate = false) => {
