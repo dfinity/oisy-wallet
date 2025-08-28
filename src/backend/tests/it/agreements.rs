@@ -76,9 +76,9 @@ fn test_update_user_agreements_saves_settings() {
     assert_eq!(agreements.terms_of_use.accepted, None);
     assert_eq!(agreements.privacy_policy.accepted, None);
 
-    assert!(agreements.license_agreement.last_accepted_at.is_some());
-    assert!(agreements.terms_of_use.last_accepted_at.is_none());
-    assert!(agreements.privacy_policy.last_accepted_at.is_none());
+    assert!(agreements.license_agreement.last_accepted_at_ns.is_some());
+    assert!(agreements.terms_of_use.last_accepted_at_ns.is_none());
+    assert!(agreements.privacy_policy.last_accepted_at_ns.is_none());
 }
 
 #[test]
@@ -133,9 +133,9 @@ fn test_update_user_agreements_merges_with_existing_settings() {
         *UPDATED_AGREEMENTS_ACCEPTED
     );
 
-    assert!(a.license_agreement.last_accepted_at.is_some());
-    assert!(a.terms_of_use.last_accepted_at.is_some());
-    assert!(a.privacy_policy.last_accepted_at.is_none());
+    assert!(a.license_agreement.last_accepted_at_ns.is_some());
+    assert!(a.terms_of_use.last_accepted_at_ns.is_some());
+    assert!(a.privacy_policy.last_accepted_at_ns.is_none());
 }
 
 #[test]
