@@ -3,18 +3,11 @@ import { allowance } from '$icp/api/icrc-ledger.api';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, hashText } from '@dfinity/utils';
+import { hashText } from '@dfinity/utils';
 
-export const hasRequiredCycles = async ({
-	identity
-}: {
-	identity: OptionIdentity;
-}): Promise<boolean> => {
-	assertNonNullish(identity);
-	assertNonNullish(SIGNER_CANISTER_ID);
-
+export const hasRequiredCycles = async ({ identity }: { identity: Identity }): Promise<boolean> => {
 	const allowanceResult = await allowance({
 		identity,
 		certified: false,
