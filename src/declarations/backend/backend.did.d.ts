@@ -377,9 +377,9 @@ export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
 export interface UserAgreement {
-	last_accepted_at: [] | [bigint];
-	last_updated_at: [] | [bigint];
+	last_accepted_at_ms: [] | [bigint];
 	accepted: [] | [boolean];
+	last_updated_at_ns: [] | [bigint];
 }
 export interface UserAgreements {
 	license_agreement: UserAgreement;
