@@ -1479,6 +1479,7 @@
 	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "En cliquant sur ce bouton, vous acceptez les",
 			"accept_terms_link": "Conditions de licence",
 			"title": "Accord de licence $oisy_name (« Accord de licence »)",
@@ -1497,10 +1498,31 @@
 			"entire_agreement": "",
 			"assignment": "<strong>11. CESSION.</strong> Vous ne pouvez pas céder le présent Accord de Licence sans le consentement écrit préalable de DFINITY, que ce soit expressément ou par l'effet de la loi, y compris dans le cadre d'une fusion ou d'un changement de contrôle, et toute tentative de cession sera nulle et non avenue. DFINITY peut céder le présent Accord de Licence sans restriction et sans aucun préavis. Sous réserve de ce qui précède, le présent Accord de Licence sera contraignant pour les parties et leurs successeurs respectifs et cessionnaires autorisés.",
 			"no_waiver": "<strong>12. NON-RENONCIATION.</strong> Le fait de ne pas exercer, ou de retarder l'exercice, un droit, un pouvoir ou un recours prévu dans le présent Accord de Licence ou par la loi ne constitue pas une renonciation à ce droit, pouvoir ou recours. La renonciation de DFINITY à toute obligation ou violation du présent Accord de Licence ne constitue pas une renonciation à toute autre obligation ou violation ultérieure du présent Accord de Licence.",
-			"english_version": "<strong>13. VERSION ANGLAISE.</strong> La version en langue anglaise du présent Accord de Licence sera la version officielle et prévaudra en cas de conflit. Toutes les communications et notifications faites en vertu du présent Accord de Licence doivent être en langue anglaise."
+			"english_version": "<strong>13. VERSION ANGLAISE.</strong> La version en langue anglaise du présent Accord de Licence sera la version officielle et prévaudra en cas de conflit. Toutes les communications et notifications faites en vertu du présent Accord de Licence doivent être en langue anglaise.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "L'accord de licence $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {

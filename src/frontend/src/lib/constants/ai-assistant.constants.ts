@@ -29,7 +29,10 @@ export const getAiAssistantSystemPrompt = ({
 	- Never use the token name to filter contacts directly — always use addressType derived from networkId.
 	
 	GLOBAL INPUT PARSING RULES:
-	- Always attempt to parse both the amount (amountNumber) and token (tokenSymbol) from every user message.
+	- Parsing must always happen in this order:
+		1. First, always extract a numeric string into "amountNumber". It must contain only a number (e.g., "10", "0.5").
+		2. Then, always check if the token string matches one of the AVAILABLE TOKENS exactly before assigning it to "tokenSymbol".
+		3. If the token is not in AVAILABLE TOKENS, reject immediately with: "That token is not supported in your wallet." Do not proceed to other parameters.
 	- If both are present in the same message (e.g., "Send 10 ICP"), extract and update them in memory immediately, even if one or both were previously provided, and never re-ask for those parameters once both are known.
 	- When both a number and a token symbol are present:
 			- Assign the number to the "amountNumber" parameter (type: string).
@@ -37,21 +40,28 @@ export const getAiAssistantSystemPrompt = ({
 			- Never swap their positions.
 	- Always validate the token symbol before assignment to ensure it’s in the AVAILABLE TOKENS list.
 	- Always validate and enforce typing:
-		- "amountNumber" must ALWAYS be a numeric value (unquoted). If the extracted amount is not numeric, reject and ask the user to rephrase.
+		- "amountNumber" must ALWAYS be a string containing only a numeric value (e.g., "10", "0.5"). If the extracted amount is not numeric, reject and ask the user to rephrase.
 		- "tokenSymbol" must ALWAYS be a string and must match one of the AVAILABLE TOKENS exactly.
 	- Never assign a string (e.g., "ICP") to amountNumber. Never assign a number (e.g., "10") to tokenSymbol.
 	- If you cannot correctly identify both, ask the user again instead of guessing.
 	- If a token symbol is NOT in AVAILABLE TOKENS, reject it immediately at the parsing step and respond with: "That token is not supported in your wallet."
 	- Do not proceed to ask for other parameters (like amount or destination) if the token is invalid.
-	- When calling any tool that needs amount and token (e.g., review_send_tokens), always include BOTH fields explicitly: amountNumber (number) and tokenSymbol (string). Never omit tokenSymbol.
+	- When calling any tool that needs amount and token (e.g., review_send_tokens), always include THREE fields explicitly: amountNumber (string), tokenSymbol (string), and networkId (string).
+	- The networkId must be taken from the AVAILABLE TOKENS list.
+	- As soon as a token is detected, immediately check how many networkIds it maps to:
+    - If exactly 1 → assign it immediately.
+    - If more than 1 → stop and ask the user: "On which network would you like to send ETH?" before proceeding.
+	- Never invent a networkId that isn’t in AVAILABLE TOKENS.
 	
 	TOOL USAGE RULES:
 	- For 'review_send_tokens':
-		- Required parameters: "amountNumber" (string), "tokenSymbol" (string), and either "addressId" or "address" (string).
+		- Required parameters: "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "addressId" or "address" (string).
 		- If both destination and amount are missing, ask: 'Who would you like to send tokens to, and how much?'
 		- If destination is missing, ask: 'What is the destination address or contact name?'
 		- If amount is missing, ask: 'How much would you like to send?'
-		- Only when all required parameters are provided, call 'review_send_tokens'.
+		- Only when all required parameters are provided (amountNumber, tokenSymbol, networkId, and destination), call 'review_send_tokens'.
+		- If tokenSymbol maps to multiple networkIds and networkId is not specified yet, ask the user: "On which network would you like to send {tokenSymbol}?". Only after user picks, include networkId and proceed to "review_send_tokens".
+		- If the tokenSymbol corresponds to multiple possible networkIds, you must ask the user to choose one before proceeding.
 		- After review_send_tokens, the UI will handle the final send or cancel action.
 			
 	- For 'show_contacts':
@@ -110,7 +120,13 @@ Arguments: "${filterParams}".
 Do NOT include json or any Markdown.
 Do NOT include extra text.`;
 
-export const getAiAssistantToolsDescription = (enabledTokensSymbols: string[]) =>
+export const getAiAssistantToolsDescription = ({
+	enabledNetworksSymbols,
+	enabledTokensSymbols
+}: {
+	enabledNetworksSymbols: string[];
+	enabledTokensSymbols: string[];
+}) =>
 	[
 		{
 			function: {
@@ -148,15 +164,16 @@ export const getAiAssistantToolsDescription = (enabledTokensSymbols: string[]) =
 				name: 'review_send_tokens',
 				description:
 					toNullable(`Display an overview of the pending token transfer for user confirmation. 
-				When filling parameters:
-				- Assign the numeric amount to "amountNumber" (type: number). Use numerals without quotes (e.g., 10, 0.5).
-				- Assign the token symbol (string) to "tokenSymbol".
-				- Never assign the token symbol to "amountNumber".
-				Correct example: {"addressId":"abc","amountNumber":"10","tokenSymbol":"ICP"}
-				Incorrect (never do): {"addressId":"abc","amountNumber":"ICP"}
-				Do NOT send tokens yourself; sending will only happen via the UI button.
-				There should always be 3 arguments returned: "tokenSymbol", "amountNumber" and either "addressId" or "address".
-				If one of those 3 arguments is not available, ask the user to provide it.`),
+						When filling parameters:
+						- Assign the numeric amount to "amountNumber" (type: string). Example: "10" for 10 ICP, "0.5" for 0.5 BTC.
+						- Assign the token symbol (string) to "tokenSymbol".
+						- Assign the correct "networkId" (string) from the AVAILABLE TOKENS list.
+						- Never assign the token symbol to "amountNumber".
+						Correct example: {"addressId":"abc","amountNumber":"10","tokenSymbol":"ICP","networkId":"ICP"}
+						Incorrect (never do): {"addressId":"abc","amountNumber":"ICP"}
+						Do NOT send tokens yourself; sending will only happen via the UI button.
+						There should always be 4 arguments returned: "tokenSymbol", "amountNumber", "networkId" and either "addressId" or "address".
+						If one of those arguments is not available, ask the user to provide it.`),
 				parameters: toNullable({
 					type: 'object',
 					properties: toNullable([
@@ -191,9 +208,17 @@ export const getAiAssistantToolsDescription = (enabledTokensSymbols: string[]) =
 							description: toNullable(
 								"Token symbol or identifier to send. Example: 'ICP', 'BTC', 'ckUSDC'. Must be one of the AVAILABLE TOKENS."
 							)
+						},
+						{
+							type: 'string',
+							name: 'networkId',
+							enum: toNullable(enabledNetworksSymbols),
+							description: toNullable(
+								'The blockchain network where the token will be sent (e.g., ETH, BASE, ARB, ICP, SOL, BTC). Must come from AVAILABLE TOKENS.'
+							)
 						}
 					]),
-					required: toNullable(['amountNumber', 'tokenSymbol'])
+					required: toNullable(['amountNumber', 'tokenSymbol', 'networkId'])
 				})
 			}
 		}

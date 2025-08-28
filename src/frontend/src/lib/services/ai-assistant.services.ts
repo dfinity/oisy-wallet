@@ -7,13 +7,15 @@ import {
 } from '$lib/constants/ai-assistant.constants';
 import { aiAssistantSystemMessage } from '$lib/derived/ai-assistant.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
+import { enabledNetworksSymbols } from '$lib/derived/networks.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
-import type {
-	ChatMessageContent,
-	ShowContactsToolResult,
-	ToolCall,
-	ToolCallArgument,
-	ToolResult
+import {
+	ToolResultType,
+	type ChatMessageContent,
+	type ShowContactsToolResult,
+	type ToolCall,
+	type ToolCallArgument,
+	type ToolResult
 } from '$lib/types/ai-assistant';
 import {
 	parseFromAiAssistantContacts,
@@ -45,7 +47,12 @@ export const askLlm = async ({
 		request: {
 			model: AI_ASSISTANT_LLM_MODEL,
 			messages,
-			tools: toNullable(getAiAssistantToolsDescription(get(enabledUniqueTokensSymbols)))
+			tools: toNullable(
+				getAiAssistantToolsDescription({
+					enabledNetworksSymbols: get(enabledUniqueTokensSymbols),
+					enabledTokensSymbols: get(enabledUniqueTokensSymbols)
+				})
+			)
 		},
 		identity
 	});
@@ -98,7 +105,12 @@ export const askLlmToFilterContacts = async ({
 					}
 				}
 			],
-			tools: toNullable(getAiAssistantToolsDescription(get(enabledUniqueTokensSymbols)))
+			tools: toNullable(
+				getAiAssistantToolsDescription({
+					enabledNetworksSymbols: get(enabledNetworksSymbols),
+					enabledTokensSymbols: get(enabledUniqueTokensSymbols)
+				})
+			)
 		},
 		identity
 	});
@@ -136,12 +148,12 @@ export const executeTool = async ({
 
 	let result: ToolResult['result'] | undefined;
 
-	if (name === 'show_contacts') {
+	if (name === ToolResultType.SHOW_CONTACTS) {
 		result =
 			isNullish(filterParams) || filterParams.length === 0
 				? { contacts: Object.values(get(extendedAddressContactsStore)) }
 				: await askLlmToFilterContacts({ filterParams, identity });
-	} else if (name === 'review_send_tokens') {
+	} else if (name === ToolResultType.REVIEW_SEND_TOKENS) {
 		result = parseReviewSendTokensToolArguments({
 			filterParams,
 			extendedAddressContacts: get(extendedAddressContactsStore),

@@ -42,6 +42,7 @@
 					{#snippet overflowableContent()}
 						{#if NFTS_ENABLED}
 							<Tabs
+								styleClass="mt-2 mb-8"
 								tabVariant="menu"
 								tabs={[
 									{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS, path: AppPath.Tokens },
