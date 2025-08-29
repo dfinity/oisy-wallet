@@ -15,7 +15,7 @@ import {
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
@@ -26,6 +26,7 @@ let authClient: Option<AuthClient>;
 
 export interface AuthSignInParams {
 	domain?: 'ic0.app' | 'internetcomputer.org';
+	i18n: I18n;
 }
 
 export interface AuthStore extends Readable<AuthStoreData> {
@@ -65,10 +66,16 @@ const initAuthStore = (): AuthStore => {
 			});
 		},
 
-		signIn: ({ domain }: AuthSignInParams) =>
+		signIn: ({ domain, i18n }: AuthSignInParams) =>
 			// eslint-disable-next-line no-async-promise-executor
 			new Promise<void>(async (resolve, reject) => {
-				authClient = authClient ?? (await createAuthClient());
+				// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
+				// We are not able to recreate authClient safely here since there are some browsers (like Safari) that block popups if there is an addition async call in this call stack.
+				if (isNullish(authClient)) {
+					reject(i18n.auth.warning.reload_and_retry);
+
+					return;
+				}
 
 				const identityProvider = nonNullish(INTERNET_IDENTITY_CANISTER_ID)
 					? /apple/i.test(navigator?.vendor)
@@ -76,7 +83,7 @@ const initAuthStore = (): AuthStore => {
 						: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
 					: `https://identity.${domain ?? 'internetcomputer.org'}`;
 
-				await authClient?.login({
+				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
 					onSuccess: () => {
 						update((state: AuthStoreData) => ({

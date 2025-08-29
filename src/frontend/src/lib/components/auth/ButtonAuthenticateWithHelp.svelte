@@ -3,6 +3,7 @@
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
@@ -16,7 +17,7 @@
 	const modalId = Symbol();
 
 	const onclick = async () => {
-		const { success } = await signIn({});
+		const { success } = await signIn({ i18n: $i18n });
 
 		if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });

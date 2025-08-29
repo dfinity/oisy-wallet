@@ -18,7 +18,7 @@
 	const imgStyleClass = 'h-full object-contain mx-auto object-top';
 
 	const handleUnlock = async () => {
-		const { success } = await signIn({});
+		const { success } = await signIn({ i18n: $i18n });
 
 		if (success === 'ok') {
 			authLocked.unlock({ source: 'login from lock page' });
