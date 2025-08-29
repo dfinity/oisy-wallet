@@ -1,7 +1,8 @@
+import { agreementsData } from '$env/agreements.env';
 import { userAgreementsData } from '$lib/derived/user-profile.derived';
 import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
 import { mapUserAgreement } from '$lib/utils/agreements.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const userAgreements: Readable<UserAgreements> = derived(
@@ -29,4 +30,59 @@ export const userAgreements: Readable<UserAgreements> = derived(
 			termsOfUse: nullishAgreement
 		};
 	}
+);
+
+export const noAgreementVisionedYet: Readable<boolean> = derived(
+	[userAgreements],
+	([$userAgreements]) =>
+		isNullish($userAgreements.licenseAgreement.accepted) &&
+		isNullish($userAgreements.privacyPolicy.accepted) &&
+		isNullish($userAgreements.termsOfUse.accepted)
+);
+
+const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
+	[userAgreements],
+	([$userAgreements]) =>
+		Object.entries(agreementsData).reduce<Partial<UserAgreements>>(
+			(outdatedAcc, [key, { lastUpdatedTimestamp }]) => {
+				const userAgreement =
+					key in $userAgreements ? $userAgreements[key as keyof UserAgreements] : undefined;
+
+				if (
+					userAgreement?.lastAcceptedTimestamp !== lastUpdatedTimestamp ||
+					isNullish(userAgreement.accepted) ||
+					!userAgreement.accepted
+				) {
+					return { ...outdatedAcc, [key]: userAgreement };
+				}
+
+				return outdatedAcc;
+			},
+			{}
+		)
+);
+
+export const hasOutdatedAgreements: Readable<boolean> = derived(
+	[outdatedAgreements],
+	([$outdatedAgreements]) => Object.keys($outdatedAgreements).length > 0
+);
+
+const allAgreementsAreUpToDate: Readable<boolean> = derived(
+	[hasOutdatedAgreements],
+	([$hasOutdatedAgreements]) => !$hasOutdatedAgreements
+);
+
+const hasAcceptedAllAgreements: Readable<boolean> = derived(
+	[userAgreements],
+	([$userAgreements]) =>
+		($userAgreements.licenseAgreement.accepted &&
+			$userAgreements.privacyPolicy.accepted &&
+			$userAgreements.termsOfUse.accepted) ??
+		false
+);
+
+export const hasAcceptedAllLatestAgreements: Readable<boolean> = derived(
+	[hasAcceptedAllAgreements, allAgreementsAreUpToDate],
+	([$hasAcceptedAllAgreements, $allAgreementsAreUpToDate]) =>
+		$hasAcceptedAllAgreements && $allAgreementsAreUpToDate
 );
