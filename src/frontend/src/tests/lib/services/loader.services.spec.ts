@@ -70,6 +70,7 @@ describe('loader.services', () => {
 			});
 
 			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
+			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
 			vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 			const result = await initSignerAllowance();
@@ -87,6 +88,7 @@ describe('loader.services', () => {
 			});
 
 			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
+			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
 			vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 			const spySignOut = vi.spyOn(authServices, 'errorSignOut');
