@@ -1,5 +1,5 @@
 import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
-import * as agreementsDerived from '$lib/derived/agreements.derived';
+import * as agreementsDerived from '$lib/derived/user-agreements.derived';
 import * as authServices from '$lib/services/auth.services.js';
 import { i18n } from '$lib/stores/i18n.store';
 import type { UserAgreements } from '$lib/types/user-agreements';
