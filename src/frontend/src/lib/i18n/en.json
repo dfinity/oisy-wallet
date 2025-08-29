@@ -1479,8 +1479,15 @@
 	},
 	"agreements": {
 		"text": {
-			"i_have_accepted": "I have read and agree to the",
-			"i_have_accepted_updated": "I have read and agree to the updated"
+          "review_title": "Review Terms & Conditions",
+          "review_updated_title": "Review Updated Terms & Conditions",
+          "review_description": "Before you can use OISY Wallet, you must review and agree to our Terms of Service and Privacy Policy. These documents explain the rules of our service and how we protect your data.",
+          "review_updated_description": "To continue using OISY Wallet, please review and agree to our updated Terms of Service and Privacy Policy. These changes are important for keeping our service secure and compliant.",
+          "reject_warning": "You must accept the Terms and Conditions to proceed. Feel free to try again anytime.",
+          "i_have_accepted": "I have read and agree to the",
+          "i_have_accepted_updated": "I have read and agree to the updated",
+          "reject": "Reject",
+          "accept_and_continue": "Accept and continue"
 		}
 	},
 	"license_agreement": {

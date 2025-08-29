@@ -9,7 +9,7 @@
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
-	import { outdatedAgreements, hasOutdatedAgreements } from '$lib/derived/agreements.derived';
+	import { outdatedAgreements, hasOutdatedAgreements } from '$lib/derived/user-agreements.derived';
 	import type { EnvAgreements } from '$env/types/env-agreements';
 	import { Modal } from '@dfinity/gix-components';
 	import Img from '$lib/components/ui/Img.svelte';
