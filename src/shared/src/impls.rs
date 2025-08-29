@@ -17,8 +17,8 @@ use crate::{
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
-            NetworkSettingsMap, NetworksSettings, UpdateNetworksSettingsError,
-            SetTestnetsSettingsError,
+            NetworkSettingsMap, NetworksSettings, SetTestnetsSettingsError,
+            UpdateNetworksSettingsError,
         },
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},

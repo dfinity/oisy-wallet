@@ -2,7 +2,7 @@ use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{
     agreement::{
-        UpdateUserAgreementsRequest, UpdateAgreementsError, UserAgreement, UserAgreements,
+        UpdateAgreementsError, UpdateUserAgreementsRequest, UserAgreement, UserAgreements,
     },
     user_profile::{GetUserProfileError, UserProfile},
 };

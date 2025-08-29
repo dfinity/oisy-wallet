@@ -4,7 +4,7 @@ use ic_cdk::api::time;
 use shared::types::{
     agreement::{UpdateAgreementsError, UserAgreements},
     dapp::AddDappSettingsError,
-    network::{NetworkSettingsMap, UpdateNetworksSettingsError, SetTestnetsSettingsError},
+    network::{NetworkSettingsMap, SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     verifiable_credential::CredentialType,
     Version,

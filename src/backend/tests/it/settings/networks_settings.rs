@@ -4,8 +4,8 @@ use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{
     network::{
-        NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, UpdateNetworksSettingsError,
-        SaveNetworksSettingsRequest,
+        NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsRequest,
+        UpdateNetworksSettingsError,
     },
     user_profile::{GetUserProfileError, UserProfile},
 };

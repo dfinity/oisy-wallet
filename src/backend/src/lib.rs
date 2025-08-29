@@ -33,7 +33,9 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        network::{UpdateNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
+        network::{
+            SaveNetworksSettingsRequest, SetShowTestnetsRequest, UpdateNetworksSettingsError,
+        },
         pow::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
