@@ -1,3 +1,4 @@
+import * as agreementsEnv from '$env/agreements.env';
 import { agreementsData } from '$env/agreements.env';
 import {
 	hasOutdatedAgreements,
@@ -254,6 +255,10 @@ describe('user-agreements.derived', () => {
 	});
 
 	describe('hasOutdatedAgreements', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
 		it('should return true when user profile is not set', () => {
 			userProfileStore.reset();
 
@@ -467,7 +472,49 @@ describe('user-agreements.derived', () => {
 			expect(get(hasOutdatedAgreements)).toBeTruthy();
 		});
 
-		it.todo('should handle a new agreement that is not in the user profile');
+		it('should handle a new agreement that is not in the user profile', () => {
+			const oldAgreementsData = { ...agreementsData };
+
+			vi.spyOn(agreementsEnv, 'agreementsData', 'get').mockImplementation(() => ({
+				...oldAgreementsData,
+				newAgreement: {
+					lastUpdatedDate: '2025-08-27T06:15Z',
+					lastUpdatedTimestamp: {
+						__bigint__: '1756245600000'
+					}
+				}
+			}));
+
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							...mockUserAgreements.agreements,
+							license_agreement: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(agreementsData.licenseAgreement.lastUpdatedTimestamp)
+							},
+							privacy_policy: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(agreementsData.privacyPolicy.lastUpdatedTimestamp)
+							},
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(agreementsData.termsOfUse.lastUpdatedTimestamp)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(hasOutdatedAgreements)).toBeTruthy();
+		});
 	});
 
 	describe('hasAcceptedAllLatestAgreements', () => {});
