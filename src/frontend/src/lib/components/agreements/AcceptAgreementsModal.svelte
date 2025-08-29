@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants.js';
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
-	import { warnSignOut } from '$lib/services/auth.services.js';
+	import { warnSignOut } from '$lib/services/auth.services';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';

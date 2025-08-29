@@ -1,6 +1,6 @@
 import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
 import * as agreementsDerived from '$lib/derived/user-agreements.derived';
-import * as authServices from '$lib/services/auth.services.js';
+import * as authServices from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
 import { cleanup, fireEvent, render } from '@testing-library/svelte';
