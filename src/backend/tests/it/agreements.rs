@@ -2,7 +2,7 @@ use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{
     agreement::{
-        SaveAgreementsRequest, SaveAgreementsSettingsError, UserAgreement, UserAgreements,
+        UpdateUserAgreementsRequest, UpdateAgreementsError, UserAgreement, UserAgreements,
     },
     user_profile::{GetUserProfileError, UserProfile},
 };
@@ -49,12 +49,12 @@ fn test_update_user_agreements_saves_settings() {
         .update::<UserProfile>(caller, "create_user_profile", ())
         .expect("Create failed");
 
-    let arg = SaveAgreementsRequest {
+    let arg = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
         agreements: INITIAL_AGREEMENTS.clone(),
     };
 
-    let resp = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg,
@@ -90,11 +90,11 @@ fn test_update_user_agreements_merges_with_existing_settings() {
         .update::<UserProfile>(caller, "create_user_profile", ())
         .expect("Create failed");
 
-    let arg1 = SaveAgreementsRequest {
+    let arg1 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
         agreements: INITIAL_AGREEMENTS.clone(),
     };
-    let resp1 = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp1 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg1,
@@ -106,11 +106,11 @@ fn test_update_user_agreements_merges_with_existing_settings() {
         .unwrap()
         .unwrap();
 
-    let arg2 = SaveAgreementsRequest {
+    let arg2 = UpdateUserAgreementsRequest {
         current_user_version: user_profile.version,
         agreements: NEW_AGREEMENTS.clone(),
     };
-    let resp2 = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp2 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg2,
@@ -147,28 +147,28 @@ fn test_update_user_agreements_cannot_update_wrong_version() {
         .update::<UserProfile>(caller, "create_user_profile", ())
         .expect("Create failed");
 
-    let arg1 = SaveAgreementsRequest {
+    let arg1 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
         agreements: INITIAL_AGREEMENTS.clone(),
     };
-    let resp1 = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp1 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg1,
     );
     assert_eq!(resp1, Ok(Ok(())));
 
-    let arg2 = SaveAgreementsRequest {
+    let arg2 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
         agreements: NEW_AGREEMENTS.clone(),
     };
-    let resp2 = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp2 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg2,
     );
 
-    assert_eq!(resp2, Ok(Err(SaveAgreementsSettingsError::VersionMismatch)));
+    assert_eq!(resp2, Ok(Err(UpdateAgreementsError::VersionMismatch)));
 
     let user_profile = pic_setup
         .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
@@ -190,11 +190,11 @@ fn test_update_user_agreements_no_change_when_none_passed() {
         .update::<UserProfile>(caller, "create_user_profile", ())
         .expect("Create failed");
 
-    let arg1 = SaveAgreementsRequest {
+    let arg1 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
         agreements: INITIAL_AGREEMENTS.clone(),
     };
-    let resp1 = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp1 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg1,
@@ -206,11 +206,11 @@ fn test_update_user_agreements_no_change_when_none_passed() {
         .unwrap()
         .unwrap();
 
-    let arg2 = SaveAgreementsRequest {
+    let arg2 = UpdateUserAgreementsRequest {
         current_user_version: user_profile_before.version,
         agreements: EMPTY_AGREEMENTS.clone(),
     };
-    let resp2 = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp2 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg2,

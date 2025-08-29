@@ -2,9 +2,9 @@ use std::result::Result;
 
 use ic_cdk::api::time;
 use shared::types::{
-    agreement::{SaveAgreementsSettingsError, UserAgreements},
+    agreement::{UpdateAgreementsError, UserAgreements},
     dapp::AddDappSettingsError,
-    network::{NetworkSettingsMap, SaveNetworksSettingsError, SaveTestnetsSettingsError},
+    network::{NetworkSettingsMap, UpdateNetworksSettingsError, SetTestnetsSettingsError},
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     verifiable_credential::CredentialType,
     Version,
@@ -81,9 +81,9 @@ pub fn update_network_settings(
     profile_version: Option<Version>,
     networks: NetworkSettingsMap,
     user_profile_model: &mut UserProfileModel,
-) -> Result<(), SaveNetworksSettingsError> {
+) -> Result<(), UpdateNetworksSettingsError> {
     let user_profile = find_profile(principal, user_profile_model)
-        .map_err(|_| SaveNetworksSettingsError::UserNotFound)?;
+        .map_err(|_| UpdateNetworksSettingsError::UserNotFound)?;
     let now = time();
     let new_profile = user_profile.with_networks(profile_version, now, networks, false)?;
     user_profile_model.store_new(principal, now, &new_profile);
@@ -109,9 +109,9 @@ pub fn set_show_testnets(
     profile_version: Option<Version>,
     show_testnets: bool,
     user_profile_model: &mut UserProfileModel,
-) -> Result<(), SaveTestnetsSettingsError> {
+) -> Result<(), SetTestnetsSettingsError> {
     let user_profile = find_profile(principal, user_profile_model)
-        .map_err(|_| SaveTestnetsSettingsError::UserNotFound)?;
+        .map_err(|_| SetTestnetsSettingsError::UserNotFound)?;
     let now = time();
     let new_profile = user_profile.with_show_testnets(profile_version, now, show_testnets)?;
     user_profile_model.store_new(principal, now, &new_profile);
@@ -165,9 +165,9 @@ pub fn update_agreements(
     profile_version: Option<Version>,
     agreements: UserAgreements,
     user_profile_model: &mut UserProfileModel,
-) -> Result<(), SaveAgreementsSettingsError> {
+) -> Result<(), UpdateAgreementsError> {
     let user_profile = find_profile(principal, user_profile_model)
-        .map_err(|_| SaveAgreementsSettingsError::UserNotFound)?;
+        .map_err(|_| UpdateAgreementsError::UserNotFound)?;
     let now = time();
     let new_profile = user_profile.with_agreements(profile_version, now, agreements)?;
     user_profile_model.store_new(principal, now, &new_profile);

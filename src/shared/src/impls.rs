@@ -6,7 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        agreement::{Agreements, SaveAgreementsSettingsError, UserAgreements},
+        agreement::{Agreements, UpdateAgreementsError, UserAgreements},
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -17,8 +17,8 @@ use crate::{
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
-            NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
-            SaveTestnetsSettingsError,
+            NetworkSettingsMap, NetworksSettings, UpdateNetworksSettingsError,
+            SetTestnetsSettingsError,
         },
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
@@ -280,9 +280,9 @@ impl StoredUserProfile {
         now: Timestamp,
         networks: NetworkSettingsMap,
         overwrite: bool,
-    ) -> Result<StoredUserProfile, SaveNetworksSettingsError> {
+    ) -> Result<StoredUserProfile, UpdateNetworksSettingsError> {
         if profile_version != self.version {
-            return Err(SaveNetworksSettingsError::VersionMismatch);
+            return Err(UpdateNetworksSettingsError::VersionMismatch);
         }
 
         let settings = self.settings.clone().unwrap_or_default();
@@ -319,9 +319,9 @@ impl StoredUserProfile {
         profile_version: Option<Version>,
         now: Timestamp,
         show_testnets: bool,
-    ) -> Result<StoredUserProfile, SaveTestnetsSettingsError> {
+    ) -> Result<StoredUserProfile, SetTestnetsSettingsError> {
         if profile_version != self.version {
-            return Err(SaveTestnetsSettingsError::VersionMismatch);
+            return Err(SetTestnetsSettingsError::VersionMismatch);
         }
 
         let settings = self.settings.clone().unwrap_or_default();
@@ -393,9 +393,9 @@ impl StoredUserProfile {
         profile_version: Option<Version>,
         now: Timestamp,
         agreements: UserAgreements,
-    ) -> Result<StoredUserProfile, SaveAgreementsSettingsError> {
+    ) -> Result<StoredUserProfile, UpdateAgreementsError> {
         if profile_version != self.version {
-            return Err(SaveAgreementsSettingsError::VersionMismatch);
+            return Err(UpdateAgreementsError::VersionMismatch);
         }
 
         let current = self.agreements.clone().unwrap_or_default().agreements;
