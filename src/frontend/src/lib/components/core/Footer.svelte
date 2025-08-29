@@ -32,7 +32,7 @@
 	class:sm:sticky={$authNotSignedIn}
 >
 	<div
-		class="pointer-events-none flex w-full flex-col items-end justify-between md:flex-row md:gap-4"
+		class="pointer-events-none flex w-full flex-col items-center justify-between sm:items-end md:flex-row md:gap-4"
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
 	>
