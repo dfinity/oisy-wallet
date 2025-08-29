@@ -106,7 +106,7 @@
 				<Button
 					colorStyle="secondary-light"
 					onclick={() => warnSignOut($i18n.agreements.text.reject_warning)}
-					>{$i18n.agreements.text.reject}</Button
+					>{$i18n.core.text.reject}</Button
 				>
 				<Button colorStyle="primary" disabled={!acceptedAllAgreements}
 					>{$i18n.agreements.text.accept_and_continue}</Button
