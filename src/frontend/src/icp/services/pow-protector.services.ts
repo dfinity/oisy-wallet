@@ -1,4 +1,4 @@
-import { IC_CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { allowance } from '$icp/api/icrc-ledger.api';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
@@ -11,7 +11,7 @@ export const hasRequiredCycles = async ({ identity }: { identity: Identity }): P
 	const allowanceResult = await allowance({
 		identity,
 		certified: false,
-		ledgerCanisterId: IC_CYCLES_LEDGER_CANISTER_ID,
+		ledgerCanisterId: CYCLES_LEDGER_CANISTER_ID,
 		owner: {
 			owner: BACKEND_CANISTER_PRINCIPAL,
 			subaccount: undefined
