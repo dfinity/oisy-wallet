@@ -1,17 +1,12 @@
-import type { UserAgreement as BackendUserAgreement } from '$declarations/backend/backend.did';
-import agreementsJson from '$env/agreements.json';
-import { EnvAgreementsSchema } from '$env/schema/env-agreements.schema';
+import { agreementsData } from '$env/agreements.env';
 import type { EnvAgreements } from '$env/types/env-agreements';
 import { MILLISECONDS_IN_SECOND } from '$lib/constants/app.constants';
-import type { AgreementData } from '$lib/types/user-agreements';
 import { formatSecondsToDate } from '$lib/utils/format.utils';
-import { fromNullable } from '@dfinity/utils';
-import * as z from 'zod/v4';
 
-export const transformJsonBigint = (
-	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string } }>
-) => {
-	const res: Record<string, { lastUpdatedTimestamp: bigint }> = {};
+export const transformAgreementsJsonBigint = (
+	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string }; lastUpdatedDate: string }>
+): EnvAgreements => {
+	const res: Record<string, { lastUpdatedTimestamp: bigint; lastUpdatedDate: string }> = {};
 	Object.entries(json).forEach(
 		([
 			key,
@@ -26,11 +21,8 @@ export const transformJsonBigint = (
 			};
 		}
 	);
-	return res;
+	return res as EnvAgreements;
 };
-
-export const parseAgreementsJson = (): EnvAgreements =>
-	z.parse(EnvAgreementsSchema, transformJsonBigint(agreementsJson));
 
 export const getAgreementLastUpdated = ({
 	type,
@@ -40,18 +32,10 @@ export const getAgreementLastUpdated = ({
 	$i18n: I18n;
 }): string =>
 	formatSecondsToDate({
-		seconds: Number(
-			parseAgreementsJson()[type]?.lastUpdatedTimestamp / BigInt(MILLISECONDS_IN_SECOND)
-		),
+		seconds: Number(agreementsData[type]?.lastUpdatedTimestamp / BigInt(MILLISECONDS_IN_SECOND)),
 		language: $i18n.lang,
 		formatOptions: {
 			minute: undefined,
 			hour: undefined
 		}
 	});
-
-export const mapUserAgreement = (backendUserAgreement: BackendUserAgreement): AgreementData => ({
-	accepted: fromNullable(backendUserAgreement.accepted),
-	lastAcceptedTimestamp: fromNullable(backendUserAgreement.last_accepted_at_ns),
-	lastUpdatedTimestamp: fromNullable(backendUserAgreement.last_updated_at_ms)
-});
