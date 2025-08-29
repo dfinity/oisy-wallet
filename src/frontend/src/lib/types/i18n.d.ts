@@ -1221,7 +1221,6 @@ interface I18nAgreements {
 		reject_warning: string;
 		i_have_accepted: string;
 		i_have_accepted_updated: string;
-		reject: string;
 		accept_and_continue: string;
 	};
 }
