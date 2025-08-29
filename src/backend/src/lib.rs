@@ -21,6 +21,7 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        agreement::SaveAgreementsRequest,
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -43,7 +44,7 @@ use shared::{
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
             GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
-            UpdateContactResult,
+            UpdateContactResult, UpdateUserAgreementsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -70,7 +71,9 @@ use crate::{
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     types::{ContactMap, PowChallengeMap},
-    user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
+    user_profile::{
+        add_hidden_dapp_id, set_show_testnets, update_agreements, update_network_settings,
+    },
 };
 
 mod assertions;
@@ -696,7 +699,36 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
     inner(request).into()
 }
 
-/// It create a new user profile for the caller.
+/// Updates the user's agreements, merging with any existing ones.
+/// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
+/// set to `now`.
+///
+/// # Returns
+/// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
+///   same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn update_user_agreements(request: SaveAgreementsRequest) -> UpdateUserAgreementsResult {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        update_agreements(
+            stored_principal,
+            request.current_user_version,
+            request.agreements,
+            &mut user_profile_model,
+        )
+    })
+    .into()
+}
+
+/// It creates a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
