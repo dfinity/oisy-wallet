@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LOADER_MODAL } from '$lib/constants/test-ids.constants.js';
+	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
