@@ -54,24 +54,27 @@ export const parseReviewSendTokensToolArguments = ({
 	tokens: Token[];
 	extendedAddressContacts: ExtendedAddressContactUiMap;
 }): ReviewSendTokensToolResult => {
-	const { addressIdFilter, amountNumberFilter, tokenSymbolFilter, addressFilter } =
+	const { addressIdFilter, amountNumberFilter, tokenSymbolFilter, addressFilter, networkIdFilter } =
 		filterParams.reduce<{
 			addressIdFilter?: string;
 			amountNumberFilter?: string;
 			tokenSymbolFilter?: string;
 			addressFilter?: string;
+			networkIdFilter?: string;
 		}>(
 			(acc, { value, name }) => ({
 				addressIdFilter: name === 'addressId' ? value : acc.addressIdFilter,
 				addressFilter: name === 'address' ? value : acc.addressFilter,
 				amountNumberFilter: name === 'amountNumber' ? value : acc.amountNumberFilter,
-				tokenSymbolFilter: name === 'tokenSymbol' ? value : acc.tokenSymbolFilter
+				tokenSymbolFilter: name === 'tokenSymbol' ? value : acc.tokenSymbolFilter,
+				networkIdFilter: name === 'networkId' ? value : acc.networkIdFilter
 			}),
 			{
 				addressIdFilter: undefined,
 				amountNumberFilter: undefined,
 				tokenSymbolFilter: undefined,
-				addressFilter: undefined
+				addressFilter: undefined,
+				networkIdFilter: undefined
 			}
 		);
 
@@ -96,7 +99,10 @@ export const parseReviewSendTokensToolArguments = ({
 	);
 
 	const tokenWithFallback =
-		tokens.find(({ id }) => id.description === tokenSymbolFilter) ?? ICP_TOKEN;
+		tokens.find(
+			({ id, network: { id: networkId } }) =>
+				id.description === tokenSymbolFilter && networkId.description === networkIdFilter
+		) ?? ICP_TOKEN;
 
 	const parsedAmount = Number(amountNumberFilter);
 
