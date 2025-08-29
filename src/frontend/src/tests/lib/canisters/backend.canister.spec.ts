@@ -21,8 +21,9 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockUserAgreements } from '$tests/mocks/user-agreements.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
-import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
+import { mockDefinedUserAgreements, mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
 import type { ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
@@ -1081,6 +1082,45 @@ describe('backend.canister', () => {
 
 			const res = updateUserNetworkSettings({
 				networks: mockUserNetworks
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('updateUserAgreements', () => {
+		it('should update user agreements', async () => {
+			const response = { Ok: null };
+
+			service.update_user_agreements.mockResolvedValue(response);
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateUserAgreements({
+				agreements: mockUserAgreements
+			});
+
+			expect(service.update_user_agreements).toHaveBeenCalledWith({
+				agreements: mockDefinedUserAgreements.agreements,
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if update_user_agreements throws', async () => {
+			service.update_user_agreements.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateUserAgreements({
+				agreements: mockUserAgreements
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
