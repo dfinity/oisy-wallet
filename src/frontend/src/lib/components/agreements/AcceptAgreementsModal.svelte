@@ -35,6 +35,16 @@
 	const toggleAccept = (type: keyof AgreementsToAcceptType) => {
 		agreementsToAccept[type] = !agreementsToAccept[type];
 	};
+
+	const onReject = () => {
+		// TODO: Add (non-awaited?) services to save the user agreements rejection status
+
+		warnSignOut($i18n.agreements.text.reject_warning);
+	};
+
+	const onAccept = () => {
+		// TODO: Add services to update the user agreements acceptance status
+	};
 </script>
 
 <Modal testId={LOADER_MODAL}>
@@ -104,14 +114,12 @@
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<Button
-					colorStyle="secondary-light"
-					onclick={() => warnSignOut($i18n.agreements.text.reject_warning)}
-					>{$i18n.core.text.reject}</Button
-				>
-				<Button colorStyle="primary" disabled={!acceptedAllAgreements}
-					>{$i18n.agreements.text.accept_and_continue}</Button
-				>
+				<Button colorStyle="secondary-light" onclick={onReject}>
+					{$i18n.core.text.reject}
+				</Button>
+				<Button colorStyle="primary" disabled={!acceptedAllAgreements} onclick={onAccept}>
+					{$i18n.agreements.text.accept_and_continue}
+				</Button>
 			</ButtonGroup>
 		{/snippet}
 	</ContentWithToolbar>
