@@ -4,8 +4,8 @@ import {
 	hasAcceptedAllLatestAgreements,
 	hasOutdatedAgreements,
 	noAgreementVisionedYet,
+	userAgreements
 } from '$lib/derived/user-agreements.derived';
-import { userAgreements } from '$lib/derived/user-agreements.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
 import { mockUserAgreements, mockUserProfile } from '$tests/mocks/user-profile.mock';

@@ -3,10 +3,6 @@ import { userAgreementsData } from '$lib/derived/user-profile.derived';
 import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
 import { mapUserAgreement } from '$lib/utils/agreements.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { userAgreementsData } from '$lib/derived/user-profile.derived';
-import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
-import { mapUserAgreement } from '$lib/utils/agreements.utils';
-import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const userAgreements: Readable<UserAgreements> = derived(
