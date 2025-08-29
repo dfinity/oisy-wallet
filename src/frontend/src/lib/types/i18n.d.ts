@@ -1212,6 +1212,10 @@ interface I18nCarousel {
 	text: { next_slide: string; prev_slide: string; indicator: string };
 }
 
+interface I18nAgreements {
+	text: { i_have_accepted: string; i_have_accepted_updated: string };
+}
+
 interface I18nLicense_agreement {
 	text: {
 		license_agreement: string;
@@ -1346,6 +1350,7 @@ interface I18n {
 	address: I18nAddress;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
+	agreements: I18nAgreements;
 	license_agreement: I18nLicense_agreement;
 	terms_of_use: I18nTerms_of_use;
 	privacy_policy: I18nPrivacy_policy;
