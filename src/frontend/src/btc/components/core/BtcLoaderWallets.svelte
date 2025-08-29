@@ -3,7 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
-	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+	import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
@@ -26,32 +26,41 @@
 
 	let { children }: Props = $props();
 
-	let ckBtcToken = $derived(
+	let ckBtcMainnetToken = $derived(
 		findTwinToken({
 			tokenToPair: BTC_MAINNET_TOKEN,
 			tokens: $tokens
 		})
 	);
 
-	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
+	let ckBtcTestnetToken = $derived(
+		findTwinToken({
+			tokenToPair: BTC_TESTNET_TOKEN,
+			tokens: $tokens
+		})
+	);
+
+	// Locally, only the Regtest worer has to be launched, in all other envs - testnet and mainnet
 	let walletWorkerTokens = $derived(
-		$enabledBitcoinTokens.filter(({ network: { id: networkId } }) =>
-			LOCAL
-				? isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)
-				: !isNetworkIdBTCRegtest(networkId) &&
-					((isNetworkIdBTCTestnet(networkId) && nonNullish($btcAddressTestnet)) ||
-						// To query mainnet BTC balance, we need to wait for ckBtcToken.minterCanisterId to be available
-						(nonNullish(ckBtcToken) &&
-							isNetworkIdBTCMainnet(networkId) &&
-							nonNullish($btcAddressMainnet)))
+		$enabledBitcoinTokens.filter(
+			({ network: { id: networkId } }) =>
+				(isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)) ||
+				(isNetworkIdBTCTestnet(networkId) && nonNullish($btcAddressTestnet)) ||
+				(isNetworkIdBTCMainnet(networkId) && nonNullish($btcAddressMainnet))
 		)
 	);
 
 	const initWalletWorker: InitWalletWorkerFn = ({ token }) =>
 		initBtcWalletWorker({
 			token,
+			// Only provide minterCanisterId for mainnet and testnet networks.
+			// Regtest networks don't get a minterCanisterId (undefined), which is correct
+			// as the initBtcWalletWorker function signature has minterCanisterId as optional,
+			// so regtest will fall back to the signer API for balance queries.
 			...((isNetworkIdBTCMainnet(token.network.id) || isNetworkIdBTCTestnet(token.network.id)) && {
-				minterCanisterId: ckBtcToken?.minterCanisterId
+				minterCanisterId: isNetworkIdBTCMainnet(token.network.id)
+					? ckBtcMainnetToken?.minterCanisterId
+					: ckBtcTestnetToken?.minterCanisterId
 			})
 		});
 </script>
