@@ -2,9 +2,7 @@ import { getMarkdownBlocks } from '$lib/utils/markdown.utils';
 
 describe('getMarkdownBlocks', () => {
 	it('splits markdown into blocks with headers and defaults', () => {
-		const markdown = `### First Heading
-Some paragraph text
-### Second Heading`;
+		const markdown = '### First Heading\n\nSome paragraph text\n\n### Second Heading';
 
 		const result = getMarkdownBlocks({ markdown, headingDesignator: '###' });
 
@@ -41,8 +39,7 @@ Some paragraph text
 	});
 
 	it('supports custom heading designators', () => {
-		const markdown = `## Custom H2
-Some text`;
+		const markdown = '## Custom H2\n\nSome text';
 		const result = getMarkdownBlocks({ markdown, headingDesignator: '##' });
 
 		expect(result[0]).toEqual({
