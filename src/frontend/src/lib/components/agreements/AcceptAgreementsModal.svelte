@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
-	import agreementsBanner from '$lib/assets/banner-agreements.svg';
-	import { warnSignOut } from '$lib/services/auth.services';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
-	import { outdatedAgreements, hasOutdatedAgreements } from '$lib/derived/user-agreements.derived';
-	import type { EnvAgreements } from '$env/types/env-agreements';
 	import { Modal } from '@dfinity/gix-components';
-	import Img from '$lib/components/ui/Img.svelte';
+	import type { EnvAgreements } from '$env/types/env-agreements';
+	import agreementsBanner from '$lib/assets/banner-agreements.svg';
+	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
+	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
+	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
+	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/user-agreements.derived';
+	import { warnSignOut } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	type AgreementsToAcceptType = {
 		[K in keyof EnvAgreements]?: boolean;
@@ -55,8 +55,8 @@
 				<AcceptAgreementsCheckbox
 					checked={agreementsToAccept['termsOfUse'] ?? false}
 					inputId="termsOfUseCheckbox"
-					onChange={() => toggleAccept('termsOfUse')}
 					isOutdated={$hasOutdatedAgreements}
+					onChange={() => toggleAccept('termsOfUse')}
 				>
 					{#snippet agreementLink()}
 						<TermsOfUseLink noUnderline>
@@ -71,8 +71,8 @@
 				<AcceptAgreementsCheckbox
 					checked={agreementsToAccept['privacyPolicy'] ?? false}
 					inputId="privacyPolicyCheckbox"
-					onChange={() => toggleAccept('privacyPolicy')}
 					isOutdated={$hasOutdatedAgreements}
+					onChange={() => toggleAccept('privacyPolicy')}
 				>
 					{#snippet agreementLink()}
 						<PrivacyPolicyLink noUnderline>
@@ -87,8 +87,8 @@
 				<AcceptAgreementsCheckbox
 					checked={agreementsToAccept['licenseAgreement'] ?? false}
 					inputId="licenseAgreementCheckbox"
-					onChange={() => toggleAccept('licenseAgreement')}
 					isOutdated={$hasOutdatedAgreements}
+					onChange={() => toggleAccept('licenseAgreement')}
 				>
 					{#snippet agreementLink()}
 						<LicenseLink noUnderline>
