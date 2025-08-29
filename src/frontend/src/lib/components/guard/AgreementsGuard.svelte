@@ -15,7 +15,7 @@
 	let { children }: Props = $props();
 </script>
 
-{#if $noAgreementVisionedYet || $hasOutdatedAgreements}
+{#if $noAgreementVisionedYet || $hasOutdatedAgreements || !$hasAcceptedAllLatestAgreements}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<AcceptAgreementsModal />
 	</div>
@@ -23,6 +23,4 @@
 	<div in:fade>
 		{@render children()}
 	</div>
-{:else}
-	SIGNOUT here or something
 {/if}
