@@ -12,9 +12,14 @@
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import type { EnvAgreements } from '$env/types/env-agreements.js';
-	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/agreements.derived';
+	import {
+		hasOutdatedAgreements,
+		outdatedAgreements,
+		noAgreementVisionedYet
+	} from '$lib/derived/agreements.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
+	import { agreementsData } from '$env/agreements.env';
 
 	type AgreementsToAcceptType = {
 		[K in keyof EnvAgreements]?: boolean;
@@ -23,7 +28,13 @@
 	let agreementsToAccept: AgreementsToAcceptType = $state({});
 
 	$effect(() => {
-		Object.keys($outdatedAgreements).forEach(
+		let list;
+		if ($noAgreementVisionedYet) {
+			list = Object.keys(agreementsData);
+		} else {
+			list = Object.keys($outdatedAgreements);
+		}
+		list.forEach(
 			(agreementType) => (agreementsToAccept[agreementType as keyof EnvAgreements] = false)
 		);
 	});
