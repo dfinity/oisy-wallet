@@ -29,6 +29,7 @@ describe('AcceptAgreementsModal – extended', () => {
 			privacyPolicy: nullish,
 			termsOfUse: nullish
 		});
+
 		vi.spyOn(agreementsDerived, 'outdatedAgreements', 'get').mockReturnValue(outdatedStore);
 
 		// Warn sign out stub
@@ -61,6 +62,7 @@ describe('AcceptAgreementsModal – extended', () => {
 
 		// Only one checkbox is present
 		const checkboxes = getAllByRole('checkbox');
+
 		expect(checkboxes).toHaveLength(1);
 
 		// The other rows should not exist (test IDs from AcceptAgreementsCheckbox/inputs)
@@ -69,9 +71,11 @@ describe('AcceptAgreementsModal – extended', () => {
 
 		// Accept is disabled until that one is toggled
 		const acceptBtn = getByRole('button', { name: get(i18n).agreements.text.accept_and_continue });
+
 		expect(acceptBtn).toBeDisabled();
 
 		await fireEvent.click(checkboxes[0]);
+
 		expect(acceptBtn).not.toBeDisabled();
 	});
 
@@ -91,19 +95,23 @@ describe('AcceptAgreementsModal – extended', () => {
 		const { getAllByRole, queryByTestId, getByRole } = render(AcceptAgreementsModal);
 
 		const checkboxes = getAllByRole('checkbox');
+
 		expect(checkboxes).toHaveLength(2);
 
 		// licenseAgreement row not rendered
 		expect(queryByTestId('licenseAgreementCheckbox')).toBeNull();
 
 		const acceptBtn = getByRole('button', { name: get(i18n).agreements.text.accept_and_continue });
+
 		expect(acceptBtn).toBeDisabled();
 
 		// Toggle both -> enabled
 		await fireEvent.click(checkboxes[0]);
+
 		expect(acceptBtn).toBeDisabled();
 
 		await fireEvent.click(checkboxes[1]);
+
 		expect(acceptBtn).not.toBeDisabled();
 	});
 
@@ -113,6 +121,7 @@ describe('AcceptAgreementsModal – extended', () => {
 		const { getAllByText } = render(AcceptAgreementsModal);
 
 		const labels = getAllByText(get(i18n).agreements.text.i_have_accepted_updated);
+
 		expect(labels).toHaveLength(3); // all three checkboxes show updated text
 	});
 
