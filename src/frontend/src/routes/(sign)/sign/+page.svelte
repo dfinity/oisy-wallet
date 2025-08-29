@@ -2,6 +2,8 @@
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy, setContext } from 'svelte';
 	import { fade, type FadeParams } from 'svelte/transition';
+	import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
+	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import SignerAccounts from '$lib/components/signer/SignerAccounts.svelte';
 	import SignerCallCanister from '$lib/components/signer/SignerCallCanister.svelte';
 	import SignerConsentMessage from '$lib/components/signer/SignerConsentMessage.svelte';
@@ -10,8 +12,6 @@
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
 	import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { initSignerContext, SIGNER_CONTEXT_KEY } from '$lib/stores/signer.store';
-	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
-	import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
 
 	const { idle, reset, ...context } = initSignerContext();
 	setContext(SIGNER_CONTEXT_KEY, {
