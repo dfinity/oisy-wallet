@@ -101,7 +101,7 @@
 
 				<Responsive down="md">
 					<div class="z-2 fixed bottom-16 right-2 block md:hidden">
-						<AiAssistantConsoleButton size="60" styleClass="mb-2" />
+						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				</Responsive>
 
