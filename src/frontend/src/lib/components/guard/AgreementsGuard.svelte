@@ -2,6 +2,7 @@
 	import { Modal, Checkbox } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import type { EnvAgreements } from '$env/types/env-agreements';
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
@@ -20,7 +21,6 @@
 	} from '$lib/derived/agreements.derived';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { EnvAgreements } from '$env/types/env-agreements';
 
 	interface Props {
 		children: Snippet;
