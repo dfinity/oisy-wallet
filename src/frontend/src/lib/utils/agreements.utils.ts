@@ -4,9 +4,9 @@ import { MILLISECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import { formatSecondsToDate } from '$lib/utils/format.utils';
 
 export const transformAgreementsJsonBigint = (
-	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string } }>
+	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string }; lastUpdatedDate: string }>
 ) => {
-	const res: Record<string, { lastUpdatedTimestamp: bigint }> = {};
+	const res: Record<string, { lastUpdatedTimestamp: bigint; lastUpdatedDate: string }> = {};
 	Object.entries(json).forEach(
 		([
 			key,

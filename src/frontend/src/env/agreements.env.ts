@@ -16,4 +16,5 @@ if (!agreementsParseResult.success) {
 		`Failed to parse agreements.json: ${JSON.stringify(agreementsParseResult.error.format())}`
 	);
 }
+
 export const agreementsData: EnvAgreements = agreementsParseResult.data;
