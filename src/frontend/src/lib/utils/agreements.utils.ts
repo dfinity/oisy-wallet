@@ -6,6 +6,27 @@ import type { AgreementData } from '$lib/types/user-agreements';
 import { formatSecondsToDate } from '$lib/utils/format.utils';
 import { fromNullable } from '@dfinity/utils';
 
+export const transformAgreementsJsonBigint = (
+	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string }; lastUpdatedDate: string }>
+): EnvAgreements => {
+	const res: Record<string, { lastUpdatedTimestamp: bigint; lastUpdatedDate: string }> = {};
+	Object.entries(json).forEach(
+		([
+			key,
+			{
+				lastUpdatedTimestamp: { __bigint__ },
+				...rest
+			}
+		]) => {
+			res[key] = {
+				...rest,
+				lastUpdatedTimestamp: BigInt(__bigint__)
+			};
+		}
+	);
+	return res as EnvAgreements;
+};
+
 export const getAgreementLastUpdated = ({
 	type,
 	$i18n
@@ -14,7 +35,7 @@ export const getAgreementLastUpdated = ({
 	$i18n: I18n;
 }): string =>
 	formatSecondsToDate({
-		seconds: agreementsData[type]?.lastUpdatedTimestamp / MILLISECONDS_IN_SECOND,
+		seconds: Number(agreementsData[type]?.lastUpdatedTimestamp / BigInt(MILLISECONDS_IN_SECOND)),
 		language: $i18n.lang,
 		formatOptions: {
 			minute: undefined,
