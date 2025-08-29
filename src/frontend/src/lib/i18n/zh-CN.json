@@ -506,6 +506,7 @@
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "加载 BTC 钱包信息时出错。",
 			"sol_wallet_error": "加载 SOL 钱包信息时出错。"
 		}
@@ -1406,6 +1407,15 @@
 		},
 		"qr": {
 			"title": "扫描二维码"
+		}
+	},
+	"pow_protector": {
+		"text": {
+			"title": "",
+			"description": "",
+			"request_challenge": "",
+			"solve_challenge": "",
+			"grant_cycles": ""
 		}
 	},
 	"signer": {
