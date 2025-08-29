@@ -9,6 +9,6 @@
 
 <AcceptAgreementsCheckbox {checked} {inputId} {isOutdated} {onChange}>
 	{#snippet agreementLink()}
-		<a href="/agreements" data-tid="agreement-link">View agreement</a>
+		<a data-tid="agreement-link" href="/agreements">View agreement</a>
 	{/snippet}
 </AcceptAgreementsCheckbox>

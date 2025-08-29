@@ -34,6 +34,7 @@ describe('AcceptAgreementsCheckbox', () => {
 
 		// Snippet should render the anchor we provided in the host
 		const link = getByTestId('agreement-link');
+
 		expect(link).toBeInTheDocument();
 		expect(link).toHaveAttribute('href', '/agreements');
 	});
@@ -83,9 +84,10 @@ describe('AcceptAgreementsCheckbox', () => {
 
 		const checkbox = getByRole('checkbox') as HTMLInputElement;
 
-		expect(checkbox.checked).toBe(true);
+		expect(checkbox.checked).toBeTruthy();
 
 		await fireEvent.click(checkbox);
+
 		expect(onChange).toHaveBeenCalledOnce();
 
 		await rerender({
@@ -95,6 +97,6 @@ describe('AcceptAgreementsCheckbox', () => {
 			onChange
 		});
 
-		expect(checkbox.checked).toBe(false);
+		expect(checkbox.checked).toBeFalsy();
 	});
 });

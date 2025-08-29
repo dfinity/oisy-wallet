@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Checkbox } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
 	import type { Snippet } from 'svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		checked?: boolean;
