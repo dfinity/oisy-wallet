@@ -47,6 +47,26 @@
 		});
 	});
 
+	// Debug ckBTC tokens
+	$effect(() => {
+		console.warn('ckBTC Tokens:', {
+			mainnet: ckBtcMainnetToken,
+			testnet: ckBtcTestnetToken
+		});
+	});
+
+	// Debug walletWorkerTokens
+	$effect(() => {
+		console.warn('Wallet Worker Tokens:', {
+			count: walletWorkerTokens.length,
+			tokens: walletWorkerTokens.map((t) => ({
+				symbol: t.symbol,
+				networkId: t.network.id.toString(),
+				networkName: t.network.name
+			}))
+		});
+	});
+
 	// Debug enabled tokens
 	$effect(() => {
 		console.warn(
