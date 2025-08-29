@@ -4,6 +4,8 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftCollectionHideButton from '$lib/components/nfts/NftCollectionHideButton.svelte';
+	import NftCollectionSpamButton from '$lib/components/nfts/NftCollectionSpamButton.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
@@ -33,15 +35,22 @@
 	<div class="bg-primary p-4">
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
-		<h1 class="my-3 truncate">
-			{#if nonNullish(collection)}
-				{collection.name}
-			{:else}
-				<span class="block max-w-40">
-					<SkeletonText />
-				</span>
-			{/if}
-		</h1>
+		{#if nonNullish(collection)}
+			<div class="my-3 flex">
+				<h1 class="truncate">
+					{collection.name}
+				</h1>
+
+				<div class="ml-auto flex gap-2">
+					<NftCollectionSpamButton {collection} />
+					<NftCollectionHideButton {collection} />
+				</div>
+			</div>
+		{:else}
+			<span class="block max-w-40">
+				<SkeletonText />
+			</span>
+		{/if}
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem

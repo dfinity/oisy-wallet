@@ -11,3 +11,14 @@ export const mapTokenSection = (section: TokenSection): CustomTokenSection | und
 
 	return undefined;
 };
+
+export const mapCustomTokenSection = (section: CustomTokenSection): TokenSection | undefined => {
+	if (section === CustomTokenSection.SPAM) {
+		return { Spam: null };
+	}
+	if (section === CustomTokenSection.HIDDEN) {
+		return { Hidden: null };
+	}
+
+	return undefined;
+};
