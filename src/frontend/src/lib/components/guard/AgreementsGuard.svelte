@@ -15,7 +15,8 @@
 	import {
 		hasAcceptedAllLatestAgreements,
 		hasOutdatedAgreements,
-		noAgreementVisionedYet
+		noAgreementVisionedYet,
+		userAgreements
 	} from '$lib/derived/agreements.derived';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -27,9 +28,9 @@
 	let { children }: Props = $props();
 
 	let acceptedAgreements = $state({
-		privacyPolicy: false,
-		termsOfUse: false,
-		licenseAgreement: false
+		privacyPolicy: $userAgreements.privacyPolicy.accepted ?? false,
+		termsOfUse: $userAgreements.termsOfUse.accepted ?? false,
+		licenseAgreement: $userAgreements.licenseAgreement.accepted ?? false
 	});
 
 	const acceptedAllAgreements = $derived(

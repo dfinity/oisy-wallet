@@ -8,7 +8,7 @@ import { formatSecondsToDate } from '$lib/utils/format.utils';
 import { fromNullable } from '@dfinity/utils';
 import * as z from 'zod/v4';
 
-const transformJsonBigint = (
+export const transformJsonBigint = (
 	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string } }>
 ) => {
 	const res: Record<string, { lastUpdatedTimestamp: bigint }> = {};
