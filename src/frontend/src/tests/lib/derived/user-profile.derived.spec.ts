@@ -94,7 +94,7 @@ describe('user-profile.derived', () => {
 			expect(get(userSettingsNetworks)).toBeUndefined();
 		});
 
-		it('should return user settings network if it is not nullish', () => {
+		it('should return user settings networks if it is not nullish', () => {
 			userProfileStore.set({ certified, profile: mockUserProfile });
 
 			expect(get(userSettingsNetworks)).toEqual(mockNetworksSettings);
