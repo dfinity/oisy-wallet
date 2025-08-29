@@ -80,11 +80,19 @@ const allAgreementsAreUpToDate: Readable<boolean> = derived(
 
 const hasAcceptedAllAgreements: Readable<boolean> = derived(
 	[userAgreements],
-	([$userAgreements]) =>
-		($userAgreements.licenseAgreement.accepted &&
-			$userAgreements.privacyPolicy.accepted &&
-			$userAgreements.termsOfUse.accepted) ??
-		false
+	([
+		{
+			licenseAgreement: { accepted: licenseAgreementAccepted },
+			privacyPolicy: { accepted: privacyPolicyAccepted },
+			termsOfUse: { accepted: termsOfUseAccepted }
+		}
+	]) =>
+		nonNullish(licenseAgreementAccepted) &&
+		licenseAgreementAccepted &&
+		nonNullish(privacyPolicyAccepted) &&
+		privacyPolicyAccepted &&
+		nonNullish(termsOfUseAccepted) &&
+		termsOfUseAccepted
 );
 
 export const hasAcceptedAllLatestAgreements: Readable<boolean> = derived(
