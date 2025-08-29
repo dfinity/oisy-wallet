@@ -114,13 +114,13 @@ pub struct NetworksSettings {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SaveNetworksSettingsError {
+pub enum UpdateNetworksSettingsError {
     UserNotFound,
     VersionMismatch,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SaveTestnetsSettingsError {
+pub enum SetTestnetsSettingsError {
     UserNotFound,
     VersionMismatch,
 }

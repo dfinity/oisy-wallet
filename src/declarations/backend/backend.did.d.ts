@@ -289,15 +289,10 @@ export interface PendingTransaction {
 	txid: Uint8Array | number[];
 	utxos: Array<Utxo>;
 }
-export interface SaveAgreementsRequest {
-	agreements: UserAgreements;
-	current_user_version: [] | [bigint];
-}
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
-export type SaveTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -314,7 +309,8 @@ export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
 }
-export type SetUserShowTestnetsResult = { Ok: null } | { Err: SaveTestnetsSettingsError };
+export type SetTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+export type SetUserShowTestnetsResult = { Ok: null } | { Err: UpdateAgreementsError };
 export interface Settings {
 	networks: NetworksSettings;
 	dapp: DappSettings;
@@ -380,6 +376,11 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
+export interface UpdateUserAgreementsRequest {
+	agreements: UserAgreements;
+	current_user_version: [] | [bigint];
+}
 export interface UserAgreement {
 	last_accepted_at_ns: [] | [bigint];
 	accepted: [] | [boolean];
@@ -462,7 +463,7 @@ export interface _SERVICE {
 	stats: ActorMethod<[], Stats>;
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
 	update_contact: ActorMethod<[Contact], GetContactResult>;
-	update_user_agreements: ActorMethod<[SaveAgreementsRequest], SetUserShowTestnetsResult>;
+	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], SetUserShowTestnetsResult>;
 	update_user_network_settings: ActorMethod<
 		[SaveNetworksSettingsRequest],
 		SetUserShowTestnetsResult

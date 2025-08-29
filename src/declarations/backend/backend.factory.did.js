@@ -419,13 +419,13 @@ export const idlFactory = ({ IDL }) => {
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
 	});
-	const SaveTestnetsSettingsError = IDL.Variant({
+	const UpdateAgreementsError = IDL.Variant({
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
 	const SetUserShowTestnetsResult = IDL.Variant({
 		Ok: IDL.Null,
-		Err: SaveTestnetsSettingsError
+		Err: UpdateAgreementsError
 	});
 	const Stats = IDL.Record({
 		user_profile_count: IDL.Nat64,
@@ -458,7 +458,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
-	const SaveAgreementsRequest = IDL.Record({
+	const UpdateUserAgreementsRequest = IDL.Record({
 		agreements: UserAgreements,
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
@@ -523,7 +523,11 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
-		update_user_agreements: IDL.Func([SaveAgreementsRequest], [SetUserShowTestnetsResult], []),
+		update_user_agreements: IDL.Func(
+			[UpdateUserAgreementsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		),
 		update_user_network_settings: IDL.Func(
 			[SaveNetworksSettingsRequest],
 			[SetUserShowTestnetsResult],
