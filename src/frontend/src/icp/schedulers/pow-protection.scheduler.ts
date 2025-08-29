@@ -45,7 +45,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 */
 	private requestSignerCycles = async ({ identity }: SchedulerJobData<PostMessageDataRequest>) => {
 		if (await hasRequiredCycles({ identity })) {
-			// we can skip the PoW process if the user has not enough cycles
+			// We can skip the PoW process if the user has enough cycles
 			return;
 		}
 
