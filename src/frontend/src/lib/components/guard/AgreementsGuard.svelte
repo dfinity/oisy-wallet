@@ -16,10 +16,11 @@
 		hasAcceptedAllLatestAgreements,
 		hasOutdatedAgreements,
 		noAgreementVisionedYet,
-		userAgreements
+		outdatedAgreements
 	} from '$lib/derived/agreements.derived';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { EnvAgreements } from '$env/types/env-agreements';
 
 	interface Props {
 		children: Snippet;
@@ -27,18 +28,24 @@
 
 	let { children }: Props = $props();
 
-	let acceptedAgreements = $state({
-		privacyPolicy: $userAgreements.privacyPolicy.accepted ?? false,
-		termsOfUse: $userAgreements.termsOfUse.accepted ?? false,
-		licenseAgreement: $userAgreements.licenseAgreement.accepted ?? false
+	type AgreementsToAcceptType = {
+		[K in keyof EnvAgreements]?: boolean;
+	};
+
+	let agreementsToAccept: AgreementsToAcceptType = $state({});
+
+	$effect(() => {
+		Object.keys($outdatedAgreements).forEach(
+			(agreementType) => (agreementsToAccept[agreementType as keyof EnvAgreements] = false)
+		);
 	});
 
 	const acceptedAllAgreements = $derived(
-		Object.values(acceptedAgreements).filter((a) => !a).length === 0
+		Object.values(agreementsToAccept).filter((a) => !a).length === 0
 	);
 
-	const toggleAccept = (type: keyof typeof acceptedAgreements) =>
-		(acceptedAgreements[type] = !acceptedAgreements[type]);
+	const toggleAccept = (type: keyof AgreementsToAcceptType) =>
+		(agreementsToAccept[type] = !agreementsToAccept[type]);
 </script>
 
 {#if $noAgreementVisionedYet || $hasOutdatedAgreements}
@@ -58,78 +65,81 @@
 				</p>
 
 				<div style="--checkbox-label-order: 1" class="flex flex-col font-bold">
-					<span class="flex items-center gap-1">
-						<Checkbox
-							checked={acceptedAgreements['termsOfUse']}
-							inputId="termsOfUseCheckbox"
-							preventDefault={true}
-							on:nnsChange={() => toggleAccept('termsOfUse')}
-						>
-							{#if $hasOutdatedAgreements}
-								{$i18n.agreements.text.i_have_accepted_updated}
-							{:else}
-								{$i18n.agreements.text.i_have_accepted}
-							{/if}
-						</Checkbox>
-						<span class="flex items-center gap-1 text-brand-primary">
-							<TermsOfUseLink noUnderline>
-								{#snippet icon()}
-									<IconExternalLink size="18" />
-								{/snippet}
-							</TermsOfUseLink>
+					{#if 'termsOfUse' in agreementsToAccept}
+						<span class="flex items-center gap-1">
+							<Checkbox
+								checked={agreementsToAccept['termsOfUse'] ?? false}
+								inputId="termsOfUseCheckbox"
+								preventDefault={true}
+								on:nnsChange={() => toggleAccept('termsOfUse')}
+							>
+								{#if $hasOutdatedAgreements}
+									{$i18n.agreements.text.i_have_accepted_updated}
+								{:else}
+									{$i18n.agreements.text.i_have_accepted}
+								{/if}
+							</Checkbox>
+							<span class="flex items-center gap-1 text-brand-primary">
+								<TermsOfUseLink noUnderline>
+									{#snippet icon()}
+										<IconExternalLink size="18" />
+									{/snippet}
+								</TermsOfUseLink>
+							</span>
 						</span>
-					</span>
-					<span class="flex items-center gap-1">
-						<Checkbox
-							checked={acceptedAgreements['privacyPolicy']}
-							inputId="privacyPolicyCheckbox"
-							on:nnsChange={() => toggleAccept('privacyPolicy')}
-						>
-							{#if $hasOutdatedAgreements}
-								{$i18n.agreements.text.i_have_accepted_updated}
-							{:else}
-								{$i18n.agreements.text.i_have_accepted}
-							{/if}
-						</Checkbox>
-						<span class="flex items-center gap-1 text-brand-primary">
-							<PrivacyPolicyLink noUnderline>
-								{#snippet icon()}
-									<IconExternalLink size="18" />
-								{/snippet}
-							</PrivacyPolicyLink>
+					{/if}
+					{#if 'privacyPolicy' in agreementsToAccept}
+						<span class="flex items-center gap-1">
+							<Checkbox
+								checked={agreementsToAccept['privacyPolicy'] ?? false}
+								inputId="privacyPolicyCheckbox"
+								on:nnsChange={() => toggleAccept('privacyPolicy')}
+							>
+								{#if $hasOutdatedAgreements}
+									{$i18n.agreements.text.i_have_accepted_updated}
+								{:else}
+									{$i18n.agreements.text.i_have_accepted}
+								{/if}
+							</Checkbox>
+							<span class="flex items-center gap-1 text-brand-primary">
+								<PrivacyPolicyLink noUnderline>
+									{#snippet icon()}
+										<IconExternalLink size="18" />
+									{/snippet}
+								</PrivacyPolicyLink>
+							</span>
 						</span>
-					</span>
-
-					<span class="flex items-center gap-1">
-						<Checkbox
-							checked={acceptedAgreements['licenseAgreement']}
-							inputId="licenseAgreementCheckbox"
-							on:nnsChange={() => toggleAccept('licenseAgreement')}
-						>
-							{#if $hasOutdatedAgreements}
-								{$i18n.agreements.text.i_have_accepted_updated}
-							{:else}
-								{$i18n.agreements.text.i_have_accepted}
-							{/if}
-						</Checkbox>
-						<span class="flex items-center gap-1 text-brand-primary">
-							<LicenseLink noUnderline>
-								{#snippet icon()}
-									<IconExternalLink size="18" />
-								{/snippet}
-							</LicenseLink>
+					{/if}
+					{#if 'licenceAgreement' in agreementsToAccept}
+						<span class="flex items-center gap-1">
+							<Checkbox
+								checked={agreementsToAccept['licenceAgreement'] ?? false}
+								inputId="licenseAgreementCheckbox"
+								on:nnsChange={() => toggleAccept('licenceAgreement')}
+							>
+								{#if $hasOutdatedAgreements}
+									{$i18n.agreements.text.i_have_accepted_updated}
+								{:else}
+									{$i18n.agreements.text.i_have_accepted}
+								{/if}
+							</Checkbox>
+							<span class="flex items-center gap-1 text-brand-primary">
+								<LicenseLink noUnderline>
+									{#snippet icon()}
+										<IconExternalLink size="18" />
+									{/snippet}
+								</LicenseLink>
+							</span>
 						</span>
-					</span>
+					{/if}
 				</div>
 
 				{#snippet toolbar()}
 					<ButtonGroup>
 						<Button
 							colorStyle="secondary-light"
-							onclick={() =>
-								warnSignOut(
-									'You must accept the Terms and Conditions to proceed. Feel free to try again anytime.'
-								)}>{$i18n.agreements.text.reject}</Button
+							onclick={() => warnSignOut($i18n.agreements.text.reject_warning)}
+							>{$i18n.agreements.text.reject}</Button
 						>
 						<Button colorStyle="primary" disabled={!acceptedAllAgreements}
 							>{$i18n.agreements.text.accept_and_continue}</Button

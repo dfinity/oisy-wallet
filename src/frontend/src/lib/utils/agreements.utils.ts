@@ -1,7 +1,10 @@
+import type { UserAgreement as BackendUserAgreement } from '$declarations/backend/backend.did';
 import { agreementsData } from '$env/agreements.env';
 import type { EnvAgreements } from '$env/types/env-agreements';
 import { MILLISECONDS_IN_SECOND } from '$lib/constants/app.constants';
+import type { AgreementData } from '$lib/types/user-agreements';
 import { formatSecondsToDate } from '$lib/utils/format.utils';
+import { fromNullable } from '@dfinity/utils';
 
 export const transformAgreementsJsonBigint = (
 	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string }; lastUpdatedDate: string }>
@@ -39,3 +42,9 @@ export const getAgreementLastUpdated = ({
 			hour: undefined
 		}
 	});
+
+export const mapUserAgreement = (backendUserAgreement: BackendUserAgreement): AgreementData => ({
+	accepted: fromNullable(backendUserAgreement.accepted),
+	lastAcceptedTimestamp: fromNullable(backendUserAgreement.last_accepted_at_ns),
+	lastUpdatedTimestamp: fromNullable(backendUserAgreement.last_updated_at_ms)
+});
