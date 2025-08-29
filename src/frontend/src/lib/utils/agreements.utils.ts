@@ -1,10 +1,13 @@
-import type { UserAgreement as BackendUserAgreement } from '$declarations/backend/backend.did';
+import type {
+	UserAgreement as BackendUserAgreement,
+	UserAgreements as BackendUserAgreements
+} from '$declarations/backend/backend.did';
 import { agreementsData } from '$env/agreements.env';
 import type { EnvAgreements } from '$env/types/env-agreements';
 import { MILLISECONDS_IN_SECOND } from '$lib/constants/app.constants';
-import type { AgreementData } from '$lib/types/user-agreements';
+import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
 import { formatSecondsToDate } from '$lib/utils/format.utils';
-import { fromNullable } from '@dfinity/utils';
+import { fromNullable, toNullable } from '@dfinity/utils';
 
 export const getAgreementLastUpdated = ({
 	type,
@@ -26,4 +29,20 @@ export const mapUserAgreement = (backendUserAgreement: BackendUserAgreement): Ag
 	accepted: fromNullable(backendUserAgreement.accepted),
 	lastAcceptedTimestamp: fromNullable(backendUserAgreement.last_accepted_at_ns),
 	lastUpdatedTimestamp: fromNullable(backendUserAgreement.last_updated_at_ms)
+});
+
+const mapBackendUserAgreement = (userAgreement: AgreementData): BackendUserAgreement => ({
+	accepted: toNullable(userAgreement.accepted),
+	last_accepted_at_ns: toNullable(userAgreement.lastAcceptedTimestamp),
+	last_updated_at_ms: toNullable(userAgreement.lastUpdatedTimestamp)
+});
+
+export const mapBackendUserAgreements = ({
+	licenseAgreement,
+	privacyPolicy,
+	termsOfUse
+}: UserAgreements): BackendUserAgreements => ({
+	license_agreement: mapBackendUserAgreement(licenseAgreement),
+	privacy_policy: mapBackendUserAgreement(privacyPolicy),
+	terms_of_use: mapBackendUserAgreement(termsOfUse)
 });
