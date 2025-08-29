@@ -39,12 +39,17 @@
 		})
 	);
 
+	// Debug all tokens to see what's available
 	$effect(() => {
-		console.warn('BTC Addresses:', {
-			mainnet: $btcAddressMainnet,
-			testnet: $btcAddressTestnet,
-			regtest: $btcAddressRegtest
-		});
+		console.warn(
+			'All tokens:',
+			$tokens.map((t) => ({
+				symbol: t.symbol,
+				id: t.id.toString(),
+				network: t.network.name,
+				standard: t.standard
+			}))
+		);
 	});
 
 	// Debug ckBTC tokens
@@ -53,30 +58,12 @@
 			mainnet: ckBtcMainnetToken,
 			testnet: ckBtcTestnetToken
 		});
-	});
 
-	// Debug walletWorkerTokens
-	$effect(() => {
-		console.warn('Wallet Worker Tokens:', {
-			count: walletWorkerTokens.length,
-			tokens: walletWorkerTokens.map((t) => ({
-				symbol: t.symbol,
-				networkId: t.network.id.toString(),
-				networkName: t.network.name
-			}))
+		// Also log what findTwinToken is looking for
+		console.warn('Looking for twin token of:', {
+			symbol: BTC_TESTNET_TOKEN.symbol,
+			twinTokenSymbol: BTC_TESTNET_TOKEN.twinTokenSymbol
 		});
-	});
-
-	// Debug enabled tokens
-	$effect(() => {
-		console.warn(
-			'Enabled Bitcoin tokens:',
-			$enabledBitcoinTokens.map((t) => ({
-				symbol: t.symbol,
-				networkId: t.network.id.toString(),
-				networkName: t.network.name
-			}))
-		);
 	});
 
 	// Locally, only the Regtest worer has to be launched, in all other envs - testnet and mainnet
