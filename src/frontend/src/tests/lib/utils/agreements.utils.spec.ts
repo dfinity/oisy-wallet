@@ -1,6 +1,6 @@
-// Mock the env JSON
 import { getAgreementLastUpdated } from '$lib/utils/agreements.utils';
 
+// Mock the env JSON
 vi.mock('$env/agreements.json', () => {
 	const agreements = {
 		licenceAgreement: {
