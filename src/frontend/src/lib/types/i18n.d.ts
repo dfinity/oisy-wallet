@@ -1213,7 +1213,17 @@ interface I18nCarousel {
 }
 
 interface I18nAgreements {
-	text: { i_have_accepted: string; i_have_accepted_updated: string };
+	text: {
+		review_title: string;
+		review_updated_title: string;
+		review_description: string;
+		review_updated_description: string;
+		reject_warning: string;
+		i_have_accepted: string;
+		i_have_accepted_updated: string;
+		reject: string;
+		accept_and_continue: string;
+	};
 }
 
 interface I18nLicense_agreement {

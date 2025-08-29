@@ -1479,8 +1479,15 @@
 	},
 	"agreements": {
 		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
 			"i_have_accepted": "",
-			"i_have_accepted_updated": ""
+			"i_have_accepted_updated": "",
+			"reject": "",
+			"accept_and_continue": ""
 		}
 	},
 	"license_agreement": {
