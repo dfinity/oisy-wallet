@@ -47,7 +47,7 @@
 			const isMainnet = isNetworkIdBTCMainnet(networkId) && nonNullish($btcAddressMainnet);
 
 			// Debug logging
-			console.log('Bitcoin token filter:', {
+			console.warn('Bitcoin token filter:', {
 				networkId: networkId.toString(),
 				isRegtest: {
 					check: isNetworkIdBTCRegtest(networkId),
