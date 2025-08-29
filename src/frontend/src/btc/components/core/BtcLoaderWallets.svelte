@@ -39,34 +39,7 @@
 		})
 	);
 
-	// Debug all tokens to see what's available
-	$effect(() => {
-		console.warn(
-			'All tokens:',
-			$tokens.map((t) => ({
-				symbol: t.symbol,
-				id: t.id.toString(),
-				network: t.network.name,
-				standard: t.standard
-			}))
-		);
-	});
-
-	// Debug ckBTC tokens
-	$effect(() => {
-		console.warn('ckBTC Tokens:', {
-			mainnet: ckBtcMainnetToken,
-			testnet: ckBtcTestnetToken
-		});
-
-		// Also log what findTwinToken is looking for
-		console.warn('Looking for twin token of:', {
-			symbol: BTC_TESTNET_TOKEN.symbol,
-			twinTokenSymbol: BTC_TESTNET_TOKEN.twinTokenSymbol
-		});
-	});
-
-	// Locally, only the Regtest worer has to be launched, in all other envs - testnet and mainnet
+	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
 	let walletWorkerTokens = $derived.by(() =>
 		$enabledBitcoinTokens.filter(
 			({ network: { id: networkId } }) =>
