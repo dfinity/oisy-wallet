@@ -76,6 +76,9 @@ const initAuthStore = (): AuthStore => {
 					toastsError({
 						msg: { text: i18n.auth.warning.reload_and_retry }
 					});
+
+					resolve();
+
 					return;
 				}
 
