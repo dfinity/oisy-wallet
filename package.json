@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.6.7",
+	"version": "1.6.8",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
