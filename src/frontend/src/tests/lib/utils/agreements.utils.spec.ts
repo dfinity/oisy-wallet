@@ -18,8 +18,7 @@ const mockJson = {
 	}
 };
 // Mock the env JSON
-vi.mock('$env/agreements.json', () => {
-	return {
+vi.mock('$env/agreements.json', () => ({
 		default: {
 			licenceAgreement: {
 				lastUpdatedDate: '2025-08-27T06:15Z',
@@ -34,8 +33,7 @@ vi.mock('$env/agreements.json', () => {
 				lastUpdatedTimestamp: { __bigint__: '1756245600000' }
 			}
 		}
-	};
-});
+	}));
 
 describe('agreements.utils', () => {
 	describe('getAgreementLastUpdated', () => {
