@@ -8,6 +8,7 @@ import fr from '$lib/i18n/fr.json';
 import it from '$lib/i18n/it.json';
 import ja from '$lib/i18n/ja.json';
 import pt from '$lib/i18n/pt.json';
+import ru from '$lib/i18n/ru.json';
 import vi from '$lib/i18n/vi.json';
 import zhcn from '$lib/i18n/zh-CN.json';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -50,6 +51,11 @@ const ptI18n = (): I18n => ({
 	lang: Languages.PORTUGUESE
 });
 
+const ruI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: ru as I18n }),
+	lang: Languages.RUSSIAN
+});
+
 const viI18n = (): I18n => ({
 	...mergeWithFallback({ refLang: enI18n(), targetLang: vi as I18n }),
 	lang: Languages.VIETNAMESE
@@ -76,6 +82,8 @@ const loadLang = (lang: Languages): I18n => {
 			return jaI18n();
 		case Languages.PORTUGUESE:
 			return ptI18n();
+		case Languages.RUSSIAN:
+			return ruI18n();
 		case Languages.VIETNAMESE:
 			return viI18n();
 		default:

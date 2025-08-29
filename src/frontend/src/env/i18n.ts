@@ -11,6 +11,7 @@ export const LANGUAGES = {
 	[Languages.ITALIAN]: 'Italiano',
 	[Languages.JAPANESE]: '日本語',
 	[Languages.PORTUGUESE]: 'Português',
+	[Languages.RUSSIAN]: 'Русский',
 	[Languages.VIETNAMESE]: 'Tiếng việt',
 	[Languages.CHINESE_SIMPLIFIED]: '中文 (简体)'
 };
