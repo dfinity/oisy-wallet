@@ -289,6 +289,10 @@ export interface PendingTransaction {
 	txid: Uint8Array | number[];
 	utxos: Array<Utxo>;
 }
+export interface SaveAgreementsRequest {
+	agreements: UserAgreements;
+	current_user_version: [] | [bigint];
+}
 export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
@@ -458,6 +462,7 @@ export interface _SERVICE {
 	stats: ActorMethod<[], Stats>;
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
 	update_contact: ActorMethod<[Contact], GetContactResult>;
+	update_user_agreements: ActorMethod<[SaveAgreementsRequest], SetUserShowTestnetsResult>;
 	update_user_network_settings: ActorMethod<
 		[SaveNetworksSettingsRequest],
 		SetUserShowTestnetsResult
