@@ -268,6 +268,10 @@ type NetworksSettings = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
+type SaveAgreementsRequest = record {
+	agreements : UserAgreements;
+	current_user_version : opt nat64
+};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
@@ -475,7 +479,7 @@ service : (Arg) -> {
 	// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
 	// internal errors.
 	create_pow_challenge : () -> (CreatePowChallengeResult);
-	// It create a new user profile for the caller.
+	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
 	create_user_profile : () -> (UserProfile);
 	// Deletes a contact for the caller.
@@ -573,6 +577,19 @@ service : (Arg) -> {
 	// # Errors
 	// Errors are enumerated by: `ContactError`.
 	update_contact : (Contact) -> (GetContactResult);
+	// Updates the user's agreements, merging with any existing ones.
+	// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
+	// set to `now`.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
+	// same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	update_user_agreements : (SaveAgreementsRequest) -> (
+		SetUserShowTestnetsResult
+	);
 	// Updates the user's preference to enable (or disable) networks in the interface, merging with any
 	// existing settings.
 	//
