@@ -23,6 +23,7 @@
 		"build:tokens-icrc": "vite-node scripts/build.tokens.icrc.ts && npm run format:file --file=src/frontend/src/env/tokens/tokens.icrc.json",
 		"dev": "vite dev",
 		"build": "tsc --noEmit && vite build && npm run build:post-process",
+		"build:dev": "tsc --noEmit && vite build --mode development --sourcemap && npm run build:post-process",
 		"prepare": "svelte-kit sync",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
