@@ -29,6 +29,7 @@ export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeee
 
 export const SWAP_DELTA_TIMEOUT_MS = 5 * 60_000;
 export const SWAP_DELTA_INTERVAL_MS = 3_000;
+export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
