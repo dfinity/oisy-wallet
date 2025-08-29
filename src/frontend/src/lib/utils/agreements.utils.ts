@@ -12,12 +12,20 @@ const transformJsonBigint = (
 	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string } }>
 ) => {
 	const res: Record<string, { lastUpdatedTimestamp: bigint }> = {};
-	Object.entries(json).forEach(([key, value]) => {
-		res[key] = {
-			...value,
-			lastUpdatedTimestamp: BigInt(value.lastUpdatedTimestamp.__bigint__)
-		};
-	});
+	Object.entries(json).forEach(
+		([
+			key,
+			{
+				lastUpdatedTimestamp: { __bigint__ },
+				...rest
+			}
+		]) => {
+			res[key] = {
+				...rest,
+				lastUpdatedTimestamp: BigInt(__bigint__)
+			};
+		}
+	);
 	return res;
 };
 
