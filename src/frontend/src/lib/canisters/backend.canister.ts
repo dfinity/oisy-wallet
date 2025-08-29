@@ -32,10 +32,12 @@ import type {
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse,
+	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
@@ -283,6 +285,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await update_user_network_settings({
 			networks: mapUserNetworks(networks),
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	updateUserAgreements = async ({
+		agreements,
+		currentUserVersion
+	}: SaveUserAgreements): Promise<void> => {
+		const { update_user_agreements } = this.caller({ certified: true });
+
+		await update_user_agreements({
+			agreements: mapBackendUserAgreements(agreements),
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};
