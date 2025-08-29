@@ -40,7 +40,7 @@ export const noAgreementVisionedYet: Readable<boolean> = derived(
 		isNullish($userAgreements.termsOfUse.accepted)
 );
 
-const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
+export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 	[userAgreements],
 	([$userAgreements]) =>
 		Object.entries(agreementsData).reduce<Partial<UserAgreements>>(
@@ -49,7 +49,14 @@ const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 					key in $userAgreements ? $userAgreements[key as keyof UserAgreements] : undefined;
 
 				if (isNullish(userAgreement)) {
-					return { ...outdatedAcc, [key]: userAgreement };
+					return {
+						...outdatedAcc,
+						[key]: {
+							accepted: undefined,
+							lastAcceptedTimestamp: undefined,
+							lastUpdatedTimestamp: undefined
+						}
+					};
 				}
 
 				const { lastUpdatedTimestamp: userAgreementUpdatedTimestamp, accepted } = userAgreement;
