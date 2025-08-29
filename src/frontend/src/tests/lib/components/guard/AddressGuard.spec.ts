@@ -71,12 +71,17 @@ describe('AddressGuard', () => {
 			expect(spy).toHaveBeenCalledOnce();
 		});
 
-		it('should sign out if signer allowance fails', async () => {
+		it('should sign out and ultimately reload the window if signer allowance fails', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
 
-			const spySignOut = vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
+			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+			const spySignOut = vi.spyOn(authServices, 'errorSignOut');
+
+			const spy = vi.spyOn(window.location, 'reload');
 
 			render(AddressGuard, { children: mockSnippet });
 
@@ -84,7 +89,12 @@ describe('AddressGuard', () => {
 
 			await waitFor(() => {
 				expect(spySignOut).toHaveBeenCalledOnce();
+				expect(spy).toHaveBeenCalledOnce();
 			});
+
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
+			);
 		});
 	});
 

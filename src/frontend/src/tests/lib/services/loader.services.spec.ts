@@ -69,11 +69,16 @@ describe('loader.services', () => {
 				throw new CanisterInternalError('Test');
 			});
 
-			vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
+			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 			const result = await initSignerAllowance();
 
 			expect(result.success).toBeFalsy();
+
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
+			);
 		});
 
 		it('should sign out', async () => {
@@ -81,11 +86,21 @@ describe('loader.services', () => {
 				throw new CanisterInternalError('Test');
 			});
 
-			const spySignOut = vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
+			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+			const spySignOut = vi.spyOn(authServices, 'errorSignOut');
+
+			const spy = vi.spyOn(window.location, 'reload');
 
 			await initSignerAllowance();
 
 			expect(spySignOut).toHaveBeenCalledOnce();
+			expect(spy).toHaveBeenCalledOnce();
+
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
+			);
 		});
 	});
 
