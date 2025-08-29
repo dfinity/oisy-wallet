@@ -467,7 +467,7 @@ describe('user-agreements.derived', () => {
 			expect(get(hasOutdatedAgreements)).toBeTruthy();
 		});
 
-		it('should handle a new agreement that is not in the user profile', () => {});
+		it.todo('should handle a new agreement that is not in the user profile');
 	});
 
 	describe('hasAcceptedAllLatestAgreements', () => {});
