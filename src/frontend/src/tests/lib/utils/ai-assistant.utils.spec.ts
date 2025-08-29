@@ -105,6 +105,10 @@ describe('ai-assistant.utils', () => {
 						{
 							value: 'ETH',
 							name: 'tokenSymbol'
+						},
+						{
+							value: 'ETH',
+							name: 'networkId'
 						}
 					],
 					tokens: [ICP_TOKEN, ETHEREUM_TOKEN, BTC_MAINNET_TOKEN],

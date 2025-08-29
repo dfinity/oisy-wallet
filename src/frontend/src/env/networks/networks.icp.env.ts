@@ -40,7 +40,7 @@ export const ICP_NETWORK: Network = {
  * It will be associated with what we call "testnet" tokens.
  * This allows us to simplify the filters of the token list and avoid polluting "real" ICP balance with the balances of the testnet tokens.
  */
-const ICP_PSEUDO_TESTNET_NETWORK_SYMBOL = 'ICP-PSEUDO-TESTNET';
+export const ICP_PSEUDO_TESTNET_NETWORK_SYMBOL = 'ICP-PSEUDO-TESTNET';
 
 export const ICP_PSEUDO_TESTNET_NETWORK_ID: NetworkId = parseNetworkId(
 	ICP_PSEUDO_TESTNET_NETWORK_SYMBOL

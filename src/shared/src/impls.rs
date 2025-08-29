@@ -6,6 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
+        agreement::Agreements,
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -209,9 +210,11 @@ impl StoredUserProfile {
                 },
             },
         };
+        let agreements = Agreements::default();
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
             settings: Some(settings),
+            agreements: Some(agreements),
             credentials,
             created_timestamp: now,
             updated_timestamp: now,
@@ -371,6 +374,7 @@ impl From<&StoredUserProfile> for UserProfile {
             version,
             credentials,
             settings,
+            agreements,
         } = user;
         UserProfile {
             created_timestamp: *created_timestamp,
@@ -378,6 +382,7 @@ impl From<&StoredUserProfile> for UserProfile {
             version: *version,
             credentials: credentials.clone().into_values().collect(),
             settings: settings.clone(),
+            agreements: agreements.clone(),
         }
     }
 }
