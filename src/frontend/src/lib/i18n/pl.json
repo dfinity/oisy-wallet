@@ -1477,6 +1477,12 @@
 			"indicator": "Przejdź do slajdu $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"i_have_accepted": "",
+			"i_have_accepted_updated": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
 			"license_agreement": "",

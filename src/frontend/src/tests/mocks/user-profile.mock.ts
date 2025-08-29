@@ -39,7 +39,7 @@ const mockUserAgreement: UserAgreement = {
 	accepted: toNullable()
 };
 
-const mockUserAgreements: Agreements = {
+export const mockUserAgreements: Agreements = {
 	agreements: {
 		license_agreement: mockUserAgreement,
 		privacy_policy: mockUserAgreement,
