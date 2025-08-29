@@ -5,7 +5,6 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import {
@@ -73,11 +72,7 @@ const initAuthStore = (): AuthStore => {
 				// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
 				// We are not able to recreate authClient safely here since there are some browsers (like Safari) that block popups if there is an addition async call in this call stack.
 				if (isNullish(authClient)) {
-					toastsError({
-						msg: { text: i18n.auth.warning.reload_and_retry }
-					});
-
-					resolve();
+					reject(i18n.auth.warning.reload_and_retry);
 
 					return;
 				}
