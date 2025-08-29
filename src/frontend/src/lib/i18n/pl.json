@@ -506,6 +506,7 @@
 			"icrc_custom_token": "Błąd podczas ładowania niestandardowego tokena ICRC.",
 			"loading_wallet_timeout": "Twój portfel wymaga danych początkowych, które nie zostały jeszcze załadowane. Spróbuj ponownie.",
 			"allow_signing": "Wystąpił problem podczas konfigurowania portfela do podpisywania. Zostałeś wylogowany. Jeśli problem będzie się powtarzał, skontaktuj się z pomocą techniczną.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Błąd podczas ładowania informacji o portfelu BTC.",
 			"sol_wallet_error": "Błąd podczas ładowania informacji o portfelu SOL."
 		}
