@@ -15,7 +15,7 @@
 	let { children }: Props = $props();
 </script>
 
-{#if $noAgreementVisionedYet || $hasOutdatedAgreements || !$hasAcceptedAllLatestAgreements}
+{#if $noAgreementVisionedYet || $hasOutdatedAgreements}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<AcceptAgreementsModal />
 	</div>
