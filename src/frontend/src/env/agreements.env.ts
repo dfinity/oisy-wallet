@@ -1,7 +1,7 @@
 import agreementsJson from '$env/agreements.json';
 import { EnvAgreementsSchema } from '$env/schema/env-agreements.schema';
 import type { EnvAgreements } from '$env/types/env-agreements';
-import { transformAgreementsJsonBigint } from '$lib/utils/agreements.utils';
+import { transformAgreementsJsonBigint } from '$lib/utils/env.agreements.utils';
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
 
 export const NEW_AGREEMENTS_ENABLED = parseBoolEnvVar(
