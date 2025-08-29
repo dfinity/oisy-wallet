@@ -48,7 +48,7 @@ const initAuthStore = (): AuthStore => {
 			const isAuthenticated: boolean = await authClient.isAuthenticated();
 
 			if (!isAuthenticated) {
-				// When the user signs out, we modify the storage, triggering a call to `sync()` method through `<svelte:window onstorage={syncAuthStore} />` in the page.
+				// When the user signs out, we trigger a call to `sync()`.
 				// The `sync()` method creates a new `AuthClient` (since the previous one was nullified on sign out), causing the creation of new identity keys in IndexedDB.
 				// To avoid using such keys (or tampered ones) for the next login, we use method `safeCreateAuthClient()` which clears any stored keys before creating a new `AuthClient`.
 				// We do it only if the user is not authenticated, because if it is, then it is theoretically already safe (or at least, it is out of our control to make it safer).
