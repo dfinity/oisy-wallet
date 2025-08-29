@@ -7,18 +7,18 @@
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { LOADER_MODAL } from '$lib/constants/test-ids.constants.js';
-	import { warnSignOut } from '$lib/services/auth.services.js';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
+	import { LOADER_MODAL } from '$lib/constants/test-ids.constants.js';
 	import {
 		hasOutdatedAgreements,
 		outdatedAgreements,
 		noAgreementVisionedYet
 	} from '$lib/derived/user-agreements.derived';
+	import { warnSignOut } from '$lib/services/auth.services.js';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	type AgreementsToAcceptType = {
