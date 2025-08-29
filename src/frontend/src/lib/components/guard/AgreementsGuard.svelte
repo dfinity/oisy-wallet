@@ -5,7 +5,7 @@
 		hasAcceptedAllLatestAgreements,
 		hasOutdatedAgreements,
 		noAgreementVisionedYet
-	} from '$lib/derived/agreements.derived';
+	} from '$lib/derived/user-agreements.derived';
 	import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
 
 	interface Props {

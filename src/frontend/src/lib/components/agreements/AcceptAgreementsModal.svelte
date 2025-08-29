@@ -16,7 +16,7 @@
 		hasOutdatedAgreements,
 		outdatedAgreements,
 		noAgreementVisionedYet
-	} from '$lib/derived/agreements.derived';
+	} from '$lib/derived/user-agreements.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
 	import { agreementsData } from '$env/agreements.env';
