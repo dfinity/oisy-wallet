@@ -58,6 +58,7 @@
 
 			ul {
 				padding-inline-start: calc(var(--spacing) * 4);
+				margin-bottom: calc(var(--spacing) * clamp(4, 6, 8));
 
 				li {
 					list-style: disc;
@@ -67,6 +68,24 @@
 			a {
 				color: var(--color-foreground-brand-primary);
 				max-width: calc(var(--spacing) * 60);
+			}
+
+			table {
+				margin-bottom: calc(var(--spacing) * 4);
+
+				td,
+				thead {
+					padding: calc(var(--spacing) * 2);
+					vertical-align: top;
+					border: 1px solid var(--color-background-brand-subtle-30);
+					font-size: clamp(0.5rem, 0.5rem + 1vw, 1rem);
+					line-height: clamp(1rem, 1rem + 1vw, 1.75rem);
+				}
+
+				tr:nth-child(even) > td,
+				thead {
+					background-color: var(--color-background-brand-subtle-10);
+				}
 			}
 		}
 	}

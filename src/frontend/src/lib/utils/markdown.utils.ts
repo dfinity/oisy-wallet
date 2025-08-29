@@ -7,7 +7,7 @@ export const getMarkdownBlocks = ({
 	markdown: string;
 	headingDesignator: string;
 }): MarkdownBlockType[] =>
-	markdown.split('\n').map((line: string) => {
+	markdown.split('\n\n').map((line: string) => {
 		if (line.startsWith(headingDesignator)) {
 			const title = line.slice(headingDesignator.length).trim();
 			const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
