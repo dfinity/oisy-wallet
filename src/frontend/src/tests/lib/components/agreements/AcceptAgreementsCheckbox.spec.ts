@@ -1,19 +1,8 @@
+import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
+import { i18n } from '$lib/stores/i18n.store';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { cleanup, fireEvent, render } from '@testing-library/svelte';
-import Host from './AcceptAgreementsCheckboxHost.svelte';
-
-// --- Mock i18n store so $i18n.* is available (typed, no any) -----------
-vi.mock('$lib/stores/i18n.store', async () => {
-	const { readable } = await import('svelte/store');
-	const i18n = readable({
-		agreements: {
-			text: {
-				i_have_accepted: 'I have accepted',
-				i_have_accepted_updated: 'I have accepted (updated)'
-			}
-		}
-	});
-	return { i18n };
-});
+import { get } from 'svelte/store';
 
 describe('AcceptAgreementsCheckbox', () => {
 	beforeEach(() => {
@@ -21,44 +10,48 @@ describe('AcceptAgreementsCheckbox', () => {
 	});
 
 	it('renders non-outdated label by default and shows the snippet link', () => {
-		const { getByTestId, getByText } = render(Host, {
+		const { getByTestId, getByText } = render(AcceptAgreementsCheckbox, {
 			props: {
 				checked: false,
 				inputId: 'accept-1',
-				isOutdated: false
+				isOutdated: false,
+				agreementLink: createMockSnippet('agreement-link'),
+				onChange: vi.fn()
 			}
 		});
 
 		// Label content (inside <Checkbox> slot) should be the non-outdated string
-		expect(getByText('I have accepted')).toBeInTheDocument();
+		expect(getByText(get(i18n).agreements.text.i_have_accepted)).toBeInTheDocument();
 
 		// Snippet should render the anchor we provided in the host
 		const link = getByTestId('agreement-link');
 		expect(link).toBeInTheDocument();
-		expect(link).toHaveAttribute('href', '/agreements');
 	});
 
 	it('renders the updated label when isOutdated=true', () => {
-		const { getByText } = render(Host, {
+		const { getByText } = render(AcceptAgreementsCheckbox, {
 			props: {
 				checked: false,
 				inputId: 'accept-2',
-				isOutdated: true
+				isOutdated: true,
+				agreementLink: createMockSnippet('agreement-link'),
+				onChange: vi.fn()
 			}
 		});
 
-		expect(getByText('I have accepted (updated)')).toBeInTheDocument();
+		expect(getByText(get(i18n).agreements.text.i_have_accepted_updated)).toBeInTheDocument();
 	});
 
 	it('calls onChange when clicked', async () => {
 		const onChange = vi.fn();
 
-		const { getByRole } = render(Host, {
+		const { getByRole } = render(AcceptAgreementsCheckbox, {
 			props: {
 				checked: false,
 				inputId: 'accept-1',
 				isOutdated: false,
-				onChange
+				onChange,
+				agreementLink: createMockSnippet('agreement-link')
 			}
 		});
 
@@ -72,12 +65,13 @@ describe('AcceptAgreementsCheckbox', () => {
 	it('is controlled: click triggers onChange, parent updates checked', async () => {
 		const onChange = vi.fn();
 
-		const { getByRole, rerender } = render(Host, {
+		const { getByRole, rerender } = render(AcceptAgreementsCheckbox, {
 			props: {
 				checked: true,
 				inputId: 'accept-4',
 				isOutdated: false,
-				onChange
+				onChange,
+				agreementLink: createMockSnippet('agreement-link')
 			}
 		});
 
