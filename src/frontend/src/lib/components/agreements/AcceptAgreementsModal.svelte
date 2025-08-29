@@ -1,25 +1,20 @@
 <script lang="ts">
-	import { LOADER_MODAL } from '$lib/constants/test-ids.constants.js';
+	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
-	import { warnSignOut } from '$lib/services/auth.services.js';
+	import { warnSignOut } from '$lib/services/auth.services';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
-	import { Modal } from '@dfinity/gix-components';
-	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
-	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
-	import type { EnvAgreements } from '$env/types/env-agreements.js';
-	import {
-		hasOutdatedAgreements,
-		outdatedAgreements,
-		noAgreementVisionedYet
-	} from '$lib/derived/agreements.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
-	import { agreementsData } from '$env/agreements.env';
+	import { outdatedAgreements, hasOutdatedAgreements } from '$lib/derived/user-agreements.derived';
+	import type { EnvAgreements } from '$env/types/env-agreements';
+	import { Modal } from '@dfinity/gix-components';
+	import Img from '$lib/components/ui/Img.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 
 	type AgreementsToAcceptType = {
 		[K in keyof EnvAgreements]?: boolean;
@@ -28,13 +23,7 @@
 	let agreementsToAccept: AgreementsToAcceptType = $state({});
 
 	$effect(() => {
-		let list;
-		if ($noAgreementVisionedYet) {
-			list = Object.keys(agreementsData);
-		} else {
-			list = Object.keys($outdatedAgreements);
-		}
-		list.forEach(
+		Object.keys($outdatedAgreements).forEach(
 			(agreementType) => (agreementsToAccept[agreementType as keyof EnvAgreements] = false)
 		);
 	});
@@ -117,7 +106,7 @@
 				<Button
 					colorStyle="secondary-light"
 					onclick={() => warnSignOut($i18n.agreements.text.reject_warning)}
-					>{$i18n.agreements.text.reject}</Button
+					>{$i18n.core.text.reject}</Button
 				>
 				<Button colorStyle="primary" disabled={!acceptedAllAgreements}
 					>{$i18n.agreements.text.accept_and_continue}</Button
