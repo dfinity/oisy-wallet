@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
 	import {
 		hasAcceptedAllLatestAgreements,
 		hasOutdatedAgreements,
 		noAgreementVisionedYet
 	} from '$lib/derived/user-agreements.derived';
-	import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
 
 	interface Props {
 		children: Snippet;
