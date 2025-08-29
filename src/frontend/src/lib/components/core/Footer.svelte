@@ -35,7 +35,7 @@
 		class="pointer-events-none flex w-full flex-col items-center justify-between md:flex-row md:gap-4"
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
-		class:sm:items-end={NEW_AGREEMENTS_ENABLED}
+		class:sm:items-end={NEW_AGREEMENTS_ENABLED || $authSignedIn}
 	>
 		{#if NEW_AGREEMENTS_ENABLED}
 			<div
@@ -100,7 +100,7 @@
 			class:xl:max-w-80={$authSignedIn}
 			class:xl:max-w-none={$authNotSignedIn}
 		>
-			<AiAssistantConsoleButton styleClass="mb-4" />
+			<AiAssistantConsoleButton styleClass="mb-4 hidden md:block" />
 			<div class="flex flex-col items-center pt-2 sm:flex-row sm:items-start sm:gap-2">
 				<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 				<span
