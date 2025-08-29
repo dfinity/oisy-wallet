@@ -1,15 +1,10 @@
 import type { UserAgreement as BackendUserAgreement } from '$declarations/backend/backend.did';
-import agreementsJson from '$env/agreements.json';
-import { EnvAgreementsSchema } from '$env/schema/env-agreements.schema';
-import type { EnvAgreement } from '$env/types/env-agreements';
 import { agreementsData } from '$env/agreements.env';
 import type { EnvAgreements } from '$env/types/env-agreements';
 import { MILLISECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import type { AgreementData } from '$lib/types/user-agreements';
 import { formatSecondsToDate } from '$lib/utils/format.utils';
 import { fromNullable } from '@dfinity/utils';
-import * as z from 'zod/v4';
-
 
 export const getAgreementLastUpdated = ({
 	type,
