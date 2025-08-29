@@ -8,7 +8,11 @@ import {
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
-import { createAuthClient, getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
+import {
+	createAuthClient,
+	getOptionalDerivationOrigin,
+	safeCreateAuthClient
+} from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
@@ -45,8 +49,21 @@ const initAuthStore = (): AuthStore => {
 			authClient = authClient ?? (await createAuthClient());
 			const isAuthenticated: boolean = await authClient.isAuthenticated();
 
+			if (!isAuthenticated) {
+				// When the user signs out, we trigger a call to `sync()`.
+				// The `sync()` method creates a new `AuthClient` (since the previous one was nullified on sign out), causing the creation of new identity keys in IndexedDB.
+				// To avoid using such keys (or tampered ones) for the next login, we use method `safeCreateAuthClient()` which clears any stored keys before creating a new `AuthClient`.
+				// We do it only if the user is not authenticated, because if it is, then it is theoretically already safe (or at least, it is out of our control to make it safer).
+				authClient = await safeCreateAuthClient();
+
+				set({ identity: null });
+
+				return;
+			}
+
+			// If it is already authenticated, it is theoretically already safe (or at least, it is out of our control to make it safer)
 			set({
-				identity: isAuthenticated ? authClient.getIdentity() : null
+				identity: authClient.getIdentity()
 			});
 		},
 
@@ -110,7 +127,7 @@ const initAuthStore = (): AuthStore => {
 		 * This is a hack and should **only** be used in a testing environment.
 		 *
 		 * Ensure that the `TEST` flag is enabled (e.g., via `npm run test`) before using this function.
-		 * If invoked outside of the testing environment, it will throw an error.
+		 * If invoked outside the testing environment, it will throw an error.
 		 *
 		 * @param {Identity} identity - The mock identity object to be set for testing.
 		 * @throws {Error} Throws an error if the function is called outside the test environment.
