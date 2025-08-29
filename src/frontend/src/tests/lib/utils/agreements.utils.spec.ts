@@ -1,9 +1,11 @@
 import * as agreementsEnv from '$env/agreements.env';
 import type { EnvAgreements } from '$env/types/env-agreements';
+import { MILLISECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import {
 	getAgreementLastUpdated,
 	transformAgreementsJsonBigint
 } from '$lib/utils/agreements.utils';
+import { formatSecondsToDate } from '$lib/utils/format.utils';
 
 const mock = {
 	licenceAgreement: {
@@ -38,7 +40,18 @@ describe('agreements.utils', () => {
 				$i18n: i18n as unknown as I18n
 			});
 
-			expect(result).toEqual('Aug 27, 2025');
+			expect(result).toEqual(
+				formatSecondsToDate({
+					seconds: Number(
+						transformAgreementsJsonBigint(mock).privacyPolicy.lastUpdatedTimestamp /
+							BigInt(MILLISECONDS_IN_SECOND)
+					),
+					formatOptions: {
+						hour: undefined,
+						minute: undefined
+					}
+				})
+			);
 		});
 	});
 

@@ -5,7 +5,7 @@ import { formatSecondsToDate } from '$lib/utils/format.utils';
 
 export const transformAgreementsJsonBigint = (
 	json: Record<string, { lastUpdatedTimestamp: { __bigint__: string }; lastUpdatedDate: string }>
-) => {
+): EnvAgreements => {
 	const res: Record<string, { lastUpdatedTimestamp: bigint; lastUpdatedDate: string }> = {};
 	Object.entries(json).forEach(
 		([
@@ -21,7 +21,7 @@ export const transformAgreementsJsonBigint = (
 			};
 		}
 	);
-	return res;
+	return res as EnvAgreements;
 };
 
 export const getAgreementLastUpdated = ({
