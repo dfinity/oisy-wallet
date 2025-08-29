@@ -47,6 +47,7 @@ describe('AcceptAgreementsModal', () => {
 		const { getByRole } = render(AcceptAgreementsModal);
 
 		await fireEvent.click(getByRole('button', { name: get(i18n).agreements.text.reject }));
+
 		expect(authServices.warnSignOut).toHaveBeenCalledWith(get(i18n).agreements.text.reject_warning);
 	});
 });
