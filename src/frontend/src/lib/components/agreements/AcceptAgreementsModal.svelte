@@ -32,8 +32,9 @@
 		Object.values(agreementsToAccept).filter((a) => !a).length === 0
 	);
 
-	const toggleAccept = (type: keyof AgreementsToAcceptType) =>
-		(agreementsToAccept[type] = !agreementsToAccept[type]);
+	const toggleAccept = (type: keyof AgreementsToAcceptType) => {
+		agreementsToAccept[type] = !agreementsToAccept[type];
+	};
 </script>
 
 <Modal testId={LOADER_MODAL}>
