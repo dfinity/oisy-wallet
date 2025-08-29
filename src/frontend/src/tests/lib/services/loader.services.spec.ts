@@ -81,7 +81,7 @@ describe('loader.services', () => {
 			);
 		});
 
-		it('should sign out', async () => {
+		it('should sign out and ultimately reload the window', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
