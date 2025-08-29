@@ -1,4 +1,4 @@
-import { idbStorage } from '$lib/api/idb-auth.api';
+import { idbStorage } from '$lib/api/auth-client.api';
 import { AUTH_ALTERNATIVE_ORIGINS, AUTH_DERIVATION_ORIGIN } from '$lib/constants/app.constants';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import type { Identity } from '@dfinity/agent';
