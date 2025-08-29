@@ -1,4 +1,4 @@
-import { idbStorage } from '$lib/api/auth-client.api';
+import { authClientStorage } from '$lib/api/auth-client.api';
 import { AUTH_ALTERNATIVE_ORIGINS, AUTH_DERIVATION_ORIGIN } from '$lib/constants/app.constants';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import type { Identity } from '@dfinity/agent';
@@ -7,7 +7,7 @@ import { notEmptyString } from '@dfinity/utils';
 
 export const createAuthClient = (): Promise<AuthClient> =>
 	AuthClient.create({
-		storage: idbStorage,
+		storage: authClientStorage,
 		idleOptions: {
 			disableIdle: true,
 			disableDefaultIdleCallback: true
@@ -20,7 +20,7 @@ export const createAuthClient = (): Promise<AuthClient> =>
  * To ensure each session starts clean and safe, we clear the stored keys before creating a new AuthClient.
  */
 export const safeCreateAuthClient = async (): Promise<AuthClient> => {
-	await idbStorage.remove(KEY_STORAGE_KEY);
+	await authClientStorage.remove(KEY_STORAGE_KEY);
 	return await createAuthClient();
 };
 

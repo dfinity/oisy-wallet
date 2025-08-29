@@ -1,4 +1,4 @@
-import { idbStorage } from '$lib/api/auth-client.api';
+import { authClientStorage } from '$lib/api/auth-client.api';
 import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import { createAuthClient } from '$lib/utils/auth.utils';
@@ -69,7 +69,7 @@ const checkDelegationChain = async (): Promise<{
 	valid: boolean;
 	delegation: DelegationChain | null;
 }> => {
-	const delegationChain: string | null = await idbStorage.get(KEY_STORAGE_DELEGATION);
+	const delegationChain: string | null = await authClientStorage.get(KEY_STORAGE_DELEGATION);
 
 	const delegation = delegationChain !== null ? DelegationChain.fromJSON(delegationChain) : null;
 
