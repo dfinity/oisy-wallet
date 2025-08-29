@@ -128,7 +128,7 @@ describe('AcceptAgreementsModal – extended', () => {
 	it('clicking Reject calls warnSignOut with the i18n message', async () => {
 		const { getByRole } = render(AcceptAgreementsModal);
 
-		await fireEvent.click(getByRole('button', { name: get(i18n).agreements.text.reject }));
+		await fireEvent.click(getByRole('button', { name: get(i18n).core.text.reject }));
 
 		expect(authServices.warnSignOut).toHaveBeenCalledWith(get(i18n).agreements.text.reject_warning);
 	});
