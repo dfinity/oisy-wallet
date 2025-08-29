@@ -27,6 +27,12 @@
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
 
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import type { ComponentProps } from 'svelte'; 
+	type NetworkLogoProps = ComponentProps<typeof NetworkLogo>; 
+	type Network = NetworkLogoProps['network'];
+	type LogoColor = NetworkLogoProps['color'];
+
 	interface Props {
 		amount?: bigint;
 		type: TransactionType;
@@ -80,12 +86,20 @@
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
 			: undefined
 	);
+
+	const network: Network | undefined = $derived(
+		isTokenNonFungible(token)
+			? (token as any)?.network ?? (token as any)?.collection?.network
+			: (token as any)?.network
+	); 
+
+	const networkLogoColor: LogoColor = $derived('transparent'); 
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
 	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin>
-			<span class="inline-block first-letter:capitalize">
+			<span class="inline-flex items-center gap-1 relative whitespace-nowrap">
 				{#if nonNullish(contact)}
 					{type === 'send'
 						? replacePlaceholders($i18n.transaction.text.sent_to, { $name: contact.name })
@@ -96,6 +110,13 @@
 				{:else}
 					{@render children?.()}
 				{/if}
+
+				{#if nonNullish(network)}
+					<div class="flex">
+						<NetworkLogo color={networkLogoColor} {network} testId="network-tx" />
+					</div>
+				{/if}
+			
 			</span>
 
 			{#snippet icon()}

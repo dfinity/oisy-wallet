@@ -8,7 +8,7 @@
 	interface Props {
 		network: Network;
 		size?: LogoSize;
-		color?: 'off-white' | 'white';
+		color?: 'off-white' | 'white' | 'transparent';
 		testId?: string;
 	}
 
