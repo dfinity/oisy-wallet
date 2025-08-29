@@ -1,4 +1,3 @@
-import { utxoTxIdToString } from '$btc/utils/btc-utxos.utils';
 import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -6,6 +5,7 @@ import type { BtcStatusesData } from '$icp/stores/btc.store';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import {
 	extendCkBTCTransaction,
 	getCkBtcPendingUtxoTransactions,

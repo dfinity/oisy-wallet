@@ -37,7 +37,6 @@ interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	shouldFetchTransactions?: boolean;
 	minterCanisterId?: OptionCanisterIdText;
 }
-
 interface BtcWalletStore {
 	balance: CertifiedData<bigint | null> | undefined;
 	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;

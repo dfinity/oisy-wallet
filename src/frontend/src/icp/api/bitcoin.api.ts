@@ -18,12 +18,12 @@ interface BitcoinCanisterParams {
 let directCanister: BitcoinDirectCanister | undefined = undefined;
 
 export const getUtxosQuery = async ({
-																			identity,
-																			bitcoinCanisterId,
-																			address,
-																			network,
-																			minConfirmations
-																		}: BitcoinCanisterParams): Promise<get_utxos_response> => {
+	identity,
+	bitcoinCanisterId,
+	address,
+	network,
+	minConfirmations
+}: BitcoinCanisterParams): Promise<get_utxos_response> => {
 	assertNonNullish(identity);
 
 	const { getUtxosQuery } =
