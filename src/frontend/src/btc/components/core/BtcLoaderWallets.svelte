@@ -40,35 +40,34 @@
 		})
 	);
 
+	$effect(() => {
+		console.warn('BTC Addresses:', {
+			mainnet: $btcAddressMainnet,
+			testnet: $btcAddressTestnet,
+			regtest: $btcAddressRegtest
+		});
+	});
+
+	// Debug enabled tokens
+	$effect(() => {
+		console.warn(
+			'Enabled Bitcoin tokens:',
+			$enabledBitcoinTokens.map((t) => ({
+				symbol: t.symbol,
+				networkId: t.network.id.toString(),
+				networkName: t.network.name
+			}))
+		);
+	});
+
+	// Locally, only the Regtest worer has to be launched, in all other envs - testnet and mainnet
 	let walletWorkerTokens = $derived(
-		$enabledBitcoinTokens.filter(({ network: { id: networkId } }) => {
-			const isRegtest = isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest);
-			const isTestnet = isNetworkIdBTCTestnet(networkId) && nonNullish($btcAddressTestnet);
-			const isMainnet = isNetworkIdBTCMainnet(networkId) && nonNullish($btcAddressMainnet);
-
-			// Debug logging
-			console.warn('Bitcoin token filter:', {
-				networkId: networkId.toString(),
-				isRegtest: {
-					check: isNetworkIdBTCRegtest(networkId),
-					address: !!$btcAddressRegtest,
-					result: isRegtest
-				},
-				isTestnet: {
-					check: isNetworkIdBTCTestnet(networkId),
-					address: !!$btcAddressTestnet,
-					result: isTestnet
-				},
-				isMainnet: {
-					check: isNetworkIdBTCMainnet(networkId),
-					address: !!$btcAddressMainnet,
-					result: isMainnet
-				},
-				passes: isRegtest || isTestnet || isMainnet
-			});
-
-			return isRegtest || isTestnet || isMainnet;
-		})
+		$enabledBitcoinTokens.filter(
+			({ network: { id: networkId } }) =>
+				(isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)) ||
+				(isNetworkIdBTCTestnet(networkId) && nonNullish($btcAddressTestnet)) ||
+				(isNetworkIdBTCMainnet(networkId) && nonNullish($btcAddressMainnet))
+		)
 	);
 
 	const initWalletWorker: InitWalletWorkerFn = ({ token }) =>
@@ -84,18 +83,6 @@
 					: ckBtcTestnetToken?.minterCanisterId
 			})
 		});
-
-	// Debug the final result
-	$effect(() => {
-		console.log(
-			'Final walletWorkerTokens:',
-			walletWorkerTokens.map((t) => ({
-				symbol: t.symbol,
-				networkId: t.network.id.toString(),
-				networkName: t.network.name
-			}))
-		);
-	});
 </script>
 
 <WalletWorkers {initWalletWorker} tokens={walletWorkerTokens}>
