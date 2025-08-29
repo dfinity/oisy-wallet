@@ -10,6 +10,8 @@
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
 	import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { initSignerContext, SIGNER_CONTEXT_KEY } from '$lib/stores/signer.store';
+	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
+	import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
 
 	const { idle, reset, ...context } = initSignerContext();
 	setContext(SIGNER_CONTEXT_KEY, {
@@ -46,18 +48,22 @@
 	{#if $authNotSignedIn}
 		<SignerSignIn />
 	{:else}
-		<SignerAccounts>
-			{#if $idle}
-				<div in:fade={fadeParams}>
-					<SignerIdle />
-				</div>
-			{:else}
-				<SignerPermissions />
+		<LoaderUserProfile
+			><AgreementsGuard>
+				<SignerAccounts>
+					{#if $idle}
+						<div in:fade={fadeParams}>
+							<SignerIdle />
+						</div>
+					{:else}
+						<SignerPermissions />
 
-				<SignerConsentMessage />
+						<SignerConsentMessage />
 
-				<SignerCallCanister />
-			{/if}
-		</SignerAccounts>
+						<SignerCallCanister />
+					{/if}
+				</SignerAccounts>
+			</AgreementsGuard></LoaderUserProfile
+		>
 	{/if}
 </article>
