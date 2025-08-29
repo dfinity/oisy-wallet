@@ -1,9 +1,11 @@
 import type {
+	Agreements,
 	DappSettings,
 	NetworkSettings,
 	NetworkSettingsFor,
 	NetworksSettings,
 	Settings,
+	UserAgreement,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { toNullable } from '@dfinity/utils';
@@ -31,12 +33,27 @@ export const mockUserSettings: Settings = {
 	dapp: mockDappSettings
 };
 
+const mockUserAgreement: UserAgreement = {
+	last_accepted_at_ns: toNullable(),
+	last_updated_at_ms: toNullable(),
+	accepted: toNullable()
+};
+
+export const mockUserAgreements: Agreements = {
+	agreements: {
+		license_agreement: mockUserAgreement,
+		privacy_policy: mockUserAgreement,
+		terms_of_use: mockUserAgreement
+	}
+};
+
 export const mockUserProfileVersion = 1n;
 
 export const mockUserProfile: UserProfile = {
 	credentials: [],
 	version: toNullable(mockUserProfileVersion),
 	settings: toNullable(mockUserSettings),
+	agreements: toNullable(mockUserAgreements),
 	created_timestamp: 1234n,
 	updated_timestamp: 1234n
 };
