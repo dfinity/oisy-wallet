@@ -1,3 +1,4 @@
+import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { Network } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import * as z from 'zod';
@@ -23,11 +24,23 @@ export const NftCollectionSchema = z.object({
 	symbol: z.string().optional(),
 	id: z.custom<TokenId>(),
 	network: z.custom<Network>(),
-	standard: z.custom<TokenStandard>()
+	standard: z.custom<TokenStandard>(),
+	section: z.custom<CustomTokenSection>().optional()
 });
 
 export const NftSchema = z.object({
 	balance: z.number().optional(),
 	...NftMetadataSchema.shape,
 	collection: NftCollectionSchema
+});
+
+export const OwnedNftSchema = z.object({
+	id: NftIdSchema,
+	balance: z.number()
+});
+
+export const OwnedContractSchema = z.object({
+	address: z.string(),
+	isSpam: z.boolean(),
+	standard: z.custom<TokenStandard>()
 });

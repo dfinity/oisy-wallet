@@ -5,7 +5,9 @@ import type {
 	NftCollectionSchema,
 	NftIdSchema,
 	NftMetadataSchema,
-	NftSchema
+	NftSchema,
+	OwnedContractSchema,
+	OwnedNftSchema
 } from '$lib/schema/nft.schema';
 import type { NetworkId } from '$lib/types/network';
 import type * as z from 'zod';
@@ -18,7 +20,16 @@ export type NftMetadata = z.infer<typeof NftMetadataSchema>;
 
 export type NftCollection = z.infer<typeof NftCollectionSchema>;
 
+export interface NftCollectionUi {
+	collection: NftCollection;
+	nfts: Nft[];
+}
+
 export type Nft = z.infer<typeof NftSchema>;
+
+export type OwnedNft = z.infer<typeof OwnedNftSchema>;
+
+export type OwnedContract = z.infer<typeof OwnedContractSchema>;
 
 export type NftsByNetwork = Record<NetworkId, Record<string, Nft[]>>;
 

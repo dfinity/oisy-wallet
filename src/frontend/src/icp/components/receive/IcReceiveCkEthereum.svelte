@@ -42,11 +42,11 @@
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>
+<ReceiveButtonWithModal isOpen={$modalCkETHReceive} open={openModal}>
 	{#snippet modal()}
 		{#if nonNullish(sourceToken) && nonNullish(destinationToken)}
 			<FeeStoreContext token={$ethereumToken}>
-				<IcReceiveCkEthereumModal on:nnsClose={close} {sourceToken} {destinationToken} />
+				<IcReceiveCkEthereumModal {destinationToken} {sourceToken} on:nnsClose={close} />
 			</FeeStoreContext>
 		{/if}
 	{/snippet}

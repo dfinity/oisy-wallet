@@ -48,13 +48,13 @@
 	};
 </script>
 
-<ReceiveButtonWithModal open={openReceive} isOpen={$modalSolReceive}>
+<ReceiveButtonWithModal isOpen={$modalSolReceive} open={openReceive}>
 	{#snippet modal()}
 		<ReceiveModal
 			{address}
 			addressToken={token}
-			network={token.network}
 			copyAriaLabel={$i18n.receive.solana.text.solana_address_copied}
+			network={token.network}
 		/>
 	{/snippet}
 </ReceiveButtonWithModal>

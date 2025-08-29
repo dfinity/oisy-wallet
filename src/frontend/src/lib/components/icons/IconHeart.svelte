@@ -9,10 +9,10 @@
 <!-- source: DFINITY foundation -->
 <svg
 	class={styleClass}
-	width="16"
+	fill="none"
 	height="16"
 	viewBox="0 0 16 16"
-	fill="none"
+	width="16"
 	xmlns="http://www.w3.org/2000/svg"
 >
 	<path
@@ -31,11 +31,11 @@
 	<defs>
 		<linearGradient
 			id="paint0_linear_4052_760"
-			x1="8"
-			y1="1"
-			x2="8"
-			y2="16"
 			gradientUnits="userSpaceOnUse"
+			x1="8"
+			x2="8"
+			y1="1"
+			y2="16"
 		>
 			<stop stop-color="#FD4538" />
 			<stop offset="0.4375" stop-color="#FD4538" />
@@ -43,11 +43,11 @@
 		</linearGradient>
 		<linearGradient
 			id="paint1_linear_4052_760"
-			x1="8"
-			y1="1.9375"
-			x2="8"
-			y2="4.28125"
 			gradientUnits="userSpaceOnUse"
+			x1="8"
+			x2="8"
+			y1="1.9375"
+			y2="4.28125"
 		>
 			<stop stop-color="white" />
 			<stop offset="1" stop-color="white" stop-opacity="0" />

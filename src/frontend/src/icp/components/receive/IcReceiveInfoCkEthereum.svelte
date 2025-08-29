@@ -24,7 +24,7 @@
 
 	<Hr spacing="lg" />
 
-	<Value ref="ethereum-helper-contract" element="div">
+	<Value element="div" ref="ethereum-helper-contract">
 		{#snippet label()}
 			{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
 				$network: $ckEthereumTwinTokenNetwork.name
@@ -47,7 +47,7 @@
 
 	{#snippet toolbar()}
 		<div class="flex w-full flex-col gap-3">
-			<Button paddingSmall colorStyle="secondary" onclick={() => dispatch('icHowToConvert')}>
+			<Button colorStyle="secondary" onclick={() => dispatch('icHowToConvert')} paddingSmall>
 				<span class="text-dark-slate-blue font-bold"
 					>{replacePlaceholders(
 						replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
