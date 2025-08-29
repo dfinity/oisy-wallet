@@ -8,15 +8,15 @@ import {
 const mock = {
 	licenceAgreement: {
 		lastUpdatedDate: '2025-08-27T06:15Z',
-		lastUpdatedTimestamp: { __bigint__: '1756245000000' }
+		lastUpdatedTimestamp: { __bigint__: '1756245600000' }
 	},
 	termsOfUse: {
 		lastUpdatedDate: '2025-08-27T06:15Z',
-		lastUpdatedTimestamp: { __bigint__: '1756245000000' }
+		lastUpdatedTimestamp: { __bigint__: '1756245600000' }
 	},
 	privacyPolicy: {
 		lastUpdatedDate: '2025-08-27T06:15Z',
-		lastUpdatedTimestamp: { __bigint__: '1756245000000' }
+		lastUpdatedTimestamp: { __bigint__: '1756245600000' }
 	}
 };
 
@@ -38,7 +38,7 @@ describe('agreements.utils', () => {
 				$i18n: i18n as unknown as I18n
 			});
 
-			expect(result).toEqual('Aug 26, 2025');
+			expect(result).toEqual('Aug 27, 2025');
 		});
 	});
 
@@ -52,9 +52,9 @@ describe('agreements.utils', () => {
 			expect(typeof out.privacyPolicy.lastUpdatedTimestamp).toBe('bigint');
 
 			// Exact bigint value
-			expect(out.licenceAgreement.lastUpdatedTimestamp).toBe(1756245000000n);
-			expect(out.termsOfUse.lastUpdatedTimestamp).toBe(1756245000000n);
-			expect(out.privacyPolicy.lastUpdatedTimestamp).toBe(1756245000000n);
+			expect(out.licenceAgreement.lastUpdatedTimestamp).toBe(1756245600000n);
+			expect(out.termsOfUse.lastUpdatedTimestamp).toBe(1756245600000n);
+			expect(out.privacyPolicy.lastUpdatedTimestamp).toBe(1756245600000n);
 
 			// Other fields preserved
 			expect(out.licenceAgreement.lastUpdatedDate).toBe('2025-08-27T06:15Z');
