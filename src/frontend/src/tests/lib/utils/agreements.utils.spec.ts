@@ -8,7 +8,7 @@ import { formatSecondsToDate } from '$lib/utils/format.utils';
 describe('agreements.utils', () => {
 	describe('getAgreementLastUpdated', () => {
 		const mock = {
-			licenceAgreement: {
+			licenseAgreement: {
 				lastUpdatedDate: '2025-08-27T06:15Z',
 				lastUpdatedTimestamp: { __bigint__: '1756245600000' }
 			},
