@@ -5,7 +5,6 @@
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
 	import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
-	import { LOCAL } from '$lib/constants/app.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
@@ -61,7 +60,7 @@
 	});
 
 	// Locally, only the Regtest worer has to be launched, in all other envs - testnet and mainnet
-	let walletWorkerTokens = $derived(
+	let walletWorkerTokens = $derived.by(() =>
 		$enabledBitcoinTokens.filter(
 			({ network: { id: networkId } }) =>
 				(isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)) ||
