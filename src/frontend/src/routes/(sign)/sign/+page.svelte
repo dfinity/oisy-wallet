@@ -48,8 +48,8 @@
 	{#if $authNotSignedIn}
 		<SignerSignIn />
 	{:else}
-		<LoaderUserProfile
-			><AgreementsGuard>
+		<LoaderUserProfile>
+			<AgreementsGuard>
 				<SignerAccounts>
 					{#if $idle}
 						<div in:fade={fadeParams}>
@@ -63,7 +63,7 @@
 						<SignerCallCanister />
 					{/if}
 				</SignerAccounts>
-			</AgreementsGuard></LoaderUserProfile
-		>
+			</AgreementsGuard>
+		</LoaderUserProfile>
 	{/if}
 </article>
