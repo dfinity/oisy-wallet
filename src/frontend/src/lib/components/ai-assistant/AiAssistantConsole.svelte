@@ -95,7 +95,7 @@
 </script>
 
 <div
-	class="fixed bottom-0 right-0 z-10 flex h-full min-h-full w-full flex-col justify-between rounded-2xl bg-primary md:bottom-6 md:right-8 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[22.5rem]"
+	class="pointer-events-auto fixed bottom-0 right-0 flex h-full min-h-full w-full flex-col justify-between rounded-2xl bg-primary md:bottom-6 md:right-8 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[22.5rem]"
 	transition:fade
 >
 	<div class="border-b-1 flex items-center justify-between border-brand-subtle-10 px-4 py-2">
