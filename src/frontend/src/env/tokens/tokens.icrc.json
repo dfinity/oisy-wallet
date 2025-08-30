@@ -133,15 +133,6 @@
 			"__bigint__": "10"
 		}
 	},
-	"RSIC.OT": {
-		"ledgerCanisterId": "i44ka-paaaa-aaaar-qbonq-cai",
-		"decimals": 0,
-		"name": "RSIC•GENESIS•RUNE",
-		"symbol": "RSIC.OT",
-		"fee": {
-			"__bigint__": "10"
-		}
-	},
 	"BDC.OT": {
 		"ledgerCanisterId": "2ulkl-dqaaa-aaaar-qaijq-cai",
 		"decimals": 0,
