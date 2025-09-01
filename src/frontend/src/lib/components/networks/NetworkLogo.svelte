@@ -5,36 +5,58 @@
 	import type { Network } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	// address-type icons
+	import IconAddressTypeBtc from '$lib/components/icons/IconAddressTypeBtc.svelte';
+	import IconAddressTypeEth from '$lib/components/icons/IconAddressTypeEth.svelte';
+	import IconAddressTypeIcrc2 from '$lib/components/icons/IconAddressTypeIcrcv2.svelte';
+	import IconAddressTypeSol from '$lib/components/icons/IconAddressTypeSol.svelte';
+
 	interface Props {
 		network: Network;
 		size?: LogoSize;
 		color?: 'off-white' | 'white' | 'transparent';
+		addressType?: 'Icrcv2' | 'Btc' | 'Eth' | 'Sol';
 		testId?: string;
 	}
 
-	let { network, size = 'xxs', color = 'off-white', testId }: Props = $props();
+	let {
+		network,
+		size = 'xxs',
+		color = 'off-white',
+		addressType,
+		testId
+	}: Props = $props();
 </script>
 
-<div class="dark-hidden block" data-tid={`${testId}-light-container`}>
-	<Logo
-		alt={replacePlaceholders($i18n.core.alt.logo, {
-			$name: network.name
-		})}
-		{color}
-		{size}
-		src={network.iconLight}
-		testId={`${testId}-light`}
-	/>
-</div>
+{#if color === 'transparent' && addressType}
+	<div data-tid={`${testId}-transparent`} >
+		{#if addressType === 'Icrcv2'}
+			<IconAddressTypeIcrc2 size="16" />
+		{:else if addressType === 'Btc'}
+			<IconAddressTypeBtc size="16" />
+		{:else if addressType === 'Eth'}
+			<IconAddressTypeEth size="16" />
+		{:else if addressType === 'Sol'}
+			<IconAddressTypeSol size="16" />
+		{/if}
+	</div>
+{:else}
+	<!-- Normal logos -->
+	<div class="dark-hidden block" data-tid={`${testId}-light-container`}>
+		<Logo
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
+			{size}
+			src={network.iconLight}
+			testId={`${testId}-light`}
+		/>
+	</div>
 
-<div class="dark-block hidden" data-tid={`${testId}-dark-container`}>
-	<Logo
-		alt={replacePlaceholders($i18n.core.alt.logo, {
-			$name: network.name
-		})}
-		{color}
-		{size}
-		src={network.iconDark}
-		testId={`${testId}-dark`}
-	/>
-</div>
+	<div class="dark-block hidden" data-tid={`${testId}-dark-container`}>
+		<Logo
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
+			{size}
+			src={network.iconDark}
+			testId={`${testId}-dark`}
+		/>
+	</div>
+{/if}

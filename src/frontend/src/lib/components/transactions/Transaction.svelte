@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Component, Snippet } from 'svelte';
+	import type { Component, Snippet ,ComponentProps } from 'svelte';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
@@ -26,10 +27,10 @@
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import type { ComponentProps } from 'svelte'; 
-	type NetworkLogoProps = ComponentProps<typeof NetworkLogo>; 
+	type NetworkLogoProps = ComponentProps<typeof NetworkLogo>;
 	type Network = NetworkLogoProps['network'];
 	type LogoColor = NetworkLogoProps['color'];
 
@@ -89,17 +90,37 @@
 
 	const network: Network | undefined = $derived(
 		isTokenNonFungible(token)
-			? (token as any)?.network ?? (token as any)?.collection?.network
+			? ((token as any)?.network ?? (token as any)?.collection?.network)
 			: (token as any)?.network
-	); 
+	);
+	const networkLogoColor: LogoColor = $derived('transparent');
+	type AddressType = NetworkLogoProps['addressType'];
 
-	const networkLogoColor: LogoColor = $derived('transparent'); 
+function mapNetworkToAddressType(network: Network | undefined): AddressType {
+  const raw = String(
+    (network as any)?.addressType ?? 
+    (network as any)?.type ??
+    (network as any)?.id ??
+    (network as any)?.symbol ??
+    (network as any)?.name ??
+    ''
+  ).toLowerCase();
+
+  if (raw.includes('btc') || raw.includes('bitcoin')) return 'Btc';
+  if (raw.includes('eth') || raw.includes('ethereum')) return 'Eth';
+  if (raw.includes('sol') || raw.includes('solana')) return 'Sol';
+  if (raw.includes('icrc') || raw.includes('icp') || raw.includes('internet computer')) return 'Icrcv2';
+  return undefined;
+}
+
+const networkAddressType: AddressType = $derived(mapNetworkToAddressType(network));
+
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
 	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin>
-			<span class="inline-flex items-center gap-1 relative whitespace-nowrap">
+			<span class="relative inline-flex items-center gap-1 whitespace-nowrap">
 				{#if nonNullish(contact)}
 					{type === 'send'
 						? replacePlaceholders($i18n.transaction.text.sent_to, { $name: contact.name })
@@ -111,12 +132,18 @@
 					{@render children?.()}
 				{/if}
 
+	
 				{#if nonNullish(network)}
 					<div class="flex">
-						<NetworkLogo color={networkLogoColor} {network} testId="network-tx" />
+						<NetworkLogo
+						color={networkLogoColor}
+						{network}
+						addressType={networkAddressType}
+						testId="network-tx"
+						/>
 					</div>
-				{/if}
-			
+					{/if}
+
 			</span>
 
 			{#snippet icon()}
@@ -149,21 +176,53 @@
 			{/snippet}
 
 			{#snippet amountDescription()}
-			{#if nonNullish(timestamp)}
-			  <span data-tid="receive-tokens-modal-transaction-timestamp">
-				{new Intl.DateTimeFormat($currentLanguage, {
-				  hour: '2-digit',
-				  minute: '2-digit',
-				  hour12: false
-				}).format(new Date(Number(timestamp) * 1000))}
-			  </span>
-			{/if}
-		  {/snippet}
-		  
+				{#if nonNullish(timestamp)}
+					<span data-tid="receive-tokens-modal-transaction-timestamp">
+						{new Intl.DateTimeFormat($currentLanguage, {
+							hour: '2-digit',
+							minute: '2-digit',
+							hour12: false
+						}).format(new Date(Number(timestamp) * 1000))}
+					</span>
+				{/if}
+			{/snippet}
 
 			{#snippet description()}
-				<TransactionStatusComponent {status} />
-			{/snippet}
+  <span class="inline-flex items-center gap-2 min-w-0">
+    {#if type === 'send'}
+      <span class="text-tertiary shrink-0">To</span>
+    {:else if type === 'receive'}
+      <span class="text-tertiary shrink-0">From</span>
+    {/if}
+	
+    <span class="shrink-0">
+      <Avatar
+        name={(contact?.name) ?? (addressAlias ?? contactAddress)}
+        image={contact?.image}
+        variant="xs"
+      />
+    </span>
+
+    <!-- Primary text (name or shortened address) + optional alias -->
+    <span class="inline-flex items-center gap-1 min-w-0">
+      <span class="truncate">
+        {#if contact}
+          {contact.name}
+        {:else if contactAddress}
+          {shortenWithMiddleEllipsis({ text: contactAddress })}
+        {/if}
+      </span>
+
+      {#if addressAlias && addressAlias !== ''}
+        <span class="text-tertiary truncate">
+        	<Divider />{addressAlias} 
+        </span>
+      {/if}
+    </span>
+    <TransactionStatusComponent {status} />
+  </span>
+{/snippet}
+		  
 		</Card>
 	</span>
 </button>
