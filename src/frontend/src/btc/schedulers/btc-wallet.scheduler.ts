@@ -77,14 +77,16 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}
 
 	private async loadBtcTransactionsData({
-		btcAddress
+		btcAddress,
+		bitcoinNetwork
 	}: {
 		btcAddress: BtcAddress;
+		bitcoinNetwork: BitcoinNetwork;
 	}): Promise<CertifiedData<BtcTransactionUi>[]> {
 		try {
 			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
-			const latestBitcoinBlockHeight = await btcLatestBlockHeight();
+			const latestBitcoinBlockHeight = await btcLatestBlockHeight({ bitcoinNetwork });
 
 			// Keep transactions that are either unconfirmed (no block_height) or have fewer than the required number of confirmations.
 			// This ensures proper recalculation of confirmation status until final confirmation is reached.
@@ -176,7 +178,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		// TODO: investigate and implement "update" call for BTC transactions
 		const uncertifiedTransactions =
 			shouldFetchTransactions && !certified
-				? await this.loadBtcTransactionsData({ btcAddress })
+				? await this.loadBtcTransactionsData({ btcAddress, bitcoinNetwork })
 				: [];
 
 		return { balance, uncertifiedTransactions };
