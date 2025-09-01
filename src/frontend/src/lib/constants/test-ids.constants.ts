@@ -31,6 +31,10 @@ export const TOKEN_BALANCE = 'token-balance';
 export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
 export const NFT_CARD = 'nft-card';
+export const NFT_COLLECTION_ACTION_SPAM = 'nft-collection-action-spam';
+export const NFT_COLLECTION_ACTION_NOT_SPAM = 'nft-collection-action-not-spam';
+export const NFT_COLLECTION_ACTION_HIDE = 'nft-collection-action-hide';
+export const NFT_COLLECTION_ACTION_UNHIDE = 'nft-collection-action-unhide';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
