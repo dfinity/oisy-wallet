@@ -95,7 +95,8 @@ describe('custom-token.services', () => {
 								ledger_id: Principal.fromText(mockSendToken.ledgerCanisterId)
 							}
 						},
-						section: toNullable()
+						section: toNullable(),
+						allow_external_content_source: toNullable()
 					}
 				});
 
@@ -146,7 +147,8 @@ describe('custom-token.services', () => {
 							},
 							version: [1n],
 							enabled: true,
-							section: toNullable()
+							section: toNullable(),
+							allow_external_content_source: toNullable()
 						}
 					]);
 
@@ -246,7 +248,8 @@ describe('custom-token.services', () => {
 							},
 							version: [1n],
 							enabled: true,
-							section: toNullable()
+							section: toNullable(),
+							allow_external_content_source: toNullable()
 						}
 					]);
 
@@ -301,7 +304,8 @@ describe('custom-token.services', () => {
 									)
 								}
 							},
-							section: toNullable()
+							section: toNullable(),
+							allow_external_content_source: toNullable()
 						}
 					});
 				});

@@ -888,6 +888,10 @@ interface I18nNfts {
 		all_assets: string;
 		address_copied: string;
 		open_explorer: string;
+		spam: string;
+		not_spam: string;
+		hide: string;
+		unhide: string;
 	};
 	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
@@ -1223,6 +1227,7 @@ interface I18nAgreements {
 		i_have_accepted_updated: string;
 		accept_and_continue: string;
 	};
+	error: { cannot_update_user_agreements: string };
 }
 
 interface I18nLicense_agreement {

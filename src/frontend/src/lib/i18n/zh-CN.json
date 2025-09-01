@@ -1040,7 +1040,11 @@
 			"collections": "合集",
 			"all_assets": "所有资产",
 			"address_copied": "地址 $address 已复制",
-			"open_explorer": "在区块链浏览器中打开此合约"
+			"open_explorer": "在区块链浏览器中打开此合约",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
@@ -1489,6 +1493,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {

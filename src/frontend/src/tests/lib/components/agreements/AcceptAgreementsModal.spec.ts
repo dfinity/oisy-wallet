@@ -1,21 +1,39 @@
+import { agreementsData } from '$env/agreements.env';
+import * as backendApi from '$lib/api/backend.api';
 import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
+import {
+	AGREEMENTS_MODAL_ACCEPT_BUTTON,
+	AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY,
+	AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE
+} from '$lib/constants/test-ids.constants';
 import * as agreementsDerived from '$lib/derived/user-agreements.derived';
 import * as authServices from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
+import * as eventsUtils from '$lib/utils/events.utils';
+import { emit } from '$lib/utils/events.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { cleanup, fireEvent, render } from '@testing-library/svelte';
 import { get, writable, type Writable } from 'svelte/store';
 
 describe('AcceptAgreementsModal', () => {
-	let hasOutdatedStore: Writable<boolean>;
+	let noAgreementVisionedStore: Writable<boolean>;
 	type PartialAgreements = Partial<UserAgreements>;
 	let outdatedStore: Writable<PartialAgreements>;
 
 	beforeEach(() => {
 		cleanup();
 
-		hasOutdatedStore = writable(false);
-		vi.spyOn(agreementsDerived, 'hasOutdatedAgreements', 'get').mockReturnValue(hasOutdatedStore);
+		mockAuthStore();
+
+		noAgreementVisionedStore = writable(false);
+		vi.spyOn(agreementsDerived, 'noAgreementVisionedYet', 'get').mockReturnValue(
+			noAgreementVisionedStore
+		);
 
 		const nullish: AgreementData = {
 			accepted: undefined,
@@ -32,12 +50,18 @@ describe('AcceptAgreementsModal', () => {
 
 		vi.spyOn(agreementsDerived, 'outdatedAgreements', 'get').mockReturnValue(outdatedStore);
 
-		// Warn sign out stub
-		vi.spyOn(authServices, 'warnSignOut').mockImplementation(() => new Promise<void>(() => {}));
+		vi.spyOn(authServices, 'warnSignOut').mockImplementation(vi.fn());
+		vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
+
+		vi.spyOn(backendApi, 'updateUserAgreements').mockImplementation(vi.fn());
+
+		vi.spyOn(toastsStore, 'toastsError');
+
+		vi.spyOn(eventsUtils, 'emit');
 	});
 
-	it('shows updated title when hasOutdatedAgreements = true', () => {
-		hasOutdatedStore.set(true);
+	it('shows updated title when noAgreementVisionedYet = false', () => {
+		noAgreementVisionedStore.set(false);
 
 		const { getByRole } = render(AcceptAgreementsModal);
 
@@ -115,8 +139,8 @@ describe('AcceptAgreementsModal', () => {
 		expect(acceptBtn).not.toBeDisabled();
 	});
 
-	it('uses updated checkbox label text when hasOutdatedAgreements = true', () => {
-		hasOutdatedStore.set(true);
+	it('uses updated checkbox label text when noAgreementVisionedYet = false', () => {
+		noAgreementVisionedStore.set(false);
 
 		const { getAllByText } = render(AcceptAgreementsModal);
 
@@ -133,6 +157,75 @@ describe('AcceptAgreementsModal', () => {
 		expect(authServices.warnSignOut).toHaveBeenCalledWith(get(i18n).agreements.text.reject_warning);
 	});
 
+	it('clicking Accept calls nullishSignOut if the identity is nullish', async () => {
+		mockAuthStore(null);
+
+		const { getByTestId } = render(AcceptAgreementsModal);
+
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
+
+		expect(authServices.nullishSignOut).toHaveBeenCalledOnce();
+
+		expect(backendApi.updateUserAgreements).not.toHaveBeenCalled();
+
+		expect(emit).not.toHaveBeenCalled();
+	});
+
+	it('clicking Accept calls updateUserAgreements with no selected agreement', async () => {
+		const { getByTestId } = render(AcceptAgreementsModal);
+
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
+
+		expect(backendApi.updateUserAgreements).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			agreements: {}
+		});
+
+		expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyRefreshUserProfile' });
+	});
+
+	it('clicking Accept calls updateUserAgreements with some agreements selected', async () => {
+		const { getByTestId } = render(AcceptAgreementsModal);
+
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE));
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY));
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
+
+		expect(backendApi.updateUserAgreements).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			agreements: {
+				termsOfUse: {
+					accepted: true,
+					lastAcceptedTimestamp: expect.any(BigInt),
+					lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp
+				},
+				privacyPolicy: {
+					accepted: true,
+					lastAcceptedTimestamp: expect.any(BigInt),
+					lastUpdatedTimestamp: agreementsData.privacyPolicy.lastUpdatedTimestamp
+				}
+			}
+		});
+
+		expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyRefreshUserProfile' });
+	});
+
+	it('clicking Accept shows an error toast when updateUserAgreements fails', async () => {
+		const mockError = new Error('Failed to update');
+		vi.spyOn(backendApi, 'updateUserAgreements').mockRejectedValue(mockError);
+
+		const { getByTestId } = render(AcceptAgreementsModal);
+
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
+
+		expect(toastsError).toHaveBeenCalledWith({
+			msg: { text: en.agreements.error.cannot_update_user_agreements },
+			err: mockError
+		});
+
+		expect(emit).not.toHaveBeenCalled();
+	});
+
 	it('accept button is disabled initially with all three rendered', () => {
 		const { getByRole } = render(AcceptAgreementsModal);
 
@@ -144,7 +237,9 @@ describe('AcceptAgreementsModal', () => {
 	it('accept button enables after all three are toggled when all three are rendered', async () => {
 		const { getByRole, getAllByRole } = render(AcceptAgreementsModal);
 
-		const acceptBtn = getByRole('button', { name: get(i18n).agreements.text.accept_and_continue });
+		const acceptBtn = getByRole('button', {
+			name: get(i18n).agreements.text.accept_and_continue
+		});
 		const checkboxes = getAllByRole('checkbox');
 
 		for (const cb of checkboxes) {

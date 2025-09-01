@@ -1040,7 +1040,11 @@
 			"collections": "コレクション",
 			"all_assets": "すべての資産",
 			"address_copied": "アドレス $address をコピーしました",
-			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く"
+			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": ""
 		},
 		"alt": {
 			"placeholder_image": "まだNFTがありません",
@@ -1489,6 +1493,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {

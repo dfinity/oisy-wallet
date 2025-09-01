@@ -31,6 +31,10 @@ export const TOKEN_BALANCE = 'token-balance';
 export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
 export const NFT_CARD = 'nft-card';
+export const NFT_COLLECTION_ACTION_SPAM = 'nft-collection-action-spam';
+export const NFT_COLLECTION_ACTION_NOT_SPAM = 'nft-collection-action-not-spam';
+export const NFT_COLLECTION_ACTION_HIDE = 'nft-collection-action-hide';
+export const NFT_COLLECTION_ACTION_UNHIDE = 'nft-collection-action-unhide';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
@@ -275,3 +279,8 @@ export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-token
 
 // Agreements
 export const AGREEMENTS_MODAL = 'agreements-modal';
+export const AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE = 'agreements-modal-checkbox-terms-of-use';
+export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkbox-privacy-policy';
+export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
+	'agreements-modal-checkbox-license-agreement';
+export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';
