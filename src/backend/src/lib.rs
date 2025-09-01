@@ -34,7 +34,7 @@ use shared::{
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         network::{
-            SaveNetworksSettingsRequest, SetShowTestnetsRequest, UpdateNetworksSettingsError,
+            SaveNetworksSettingsRequest, SetShowTestnetsRequest
         },
         pow::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,

@@ -17,9 +17,9 @@ use crate::types::{
     agreement::UpdateAgreementsError,
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
-    network::{SaveNetworksSettingsError, SaveTestnetsSettingsError},
     user_profile::AddUserCredentialError,
 };
+use crate::types::network::{SetTestnetsSettingsError, UpdateNetworksSettingsError};
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum AddUserCredentialResult {
@@ -144,10 +144,10 @@ pub enum UpdateUserNetworkSettingsResult {
     /// The user's network settings were updated successfully.
     Ok(()),
     /// The user's network settings were not updated due to an error.
-    Err(SaveNetworksSettingsError),
+    Err(UpdateNetworksSettingsError),
 }
-impl From<Result<(), SaveNetworksSettingsError>> for UpdateUserNetworkSettingsResult {
-    fn from(result: Result<(), SaveNetworksSettingsError>) -> Self {
+impl From<Result<(), UpdateNetworksSettingsError>> for UpdateUserNetworkSettingsResult {
+    fn from(result: Result<(), UpdateNetworksSettingsError>) -> Self {
         match result {
             Ok(()) => UpdateUserNetworkSettingsResult::Ok(()),
             Err(err) => UpdateUserNetworkSettingsResult::Err(err),
