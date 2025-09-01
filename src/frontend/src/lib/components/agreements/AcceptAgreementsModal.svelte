@@ -24,6 +24,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/user-agreements.derived';
+	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -99,7 +100,8 @@
 		try {
 			await updateUserAgreements({
 				identity: $authIdentity,
-				agreements
+				agreements,
+				currentUserVersion: $userProfileVersion
 			});
 
 			emit({ message: 'oisyRefreshUserProfile' });
