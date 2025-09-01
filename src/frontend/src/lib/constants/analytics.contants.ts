@@ -1,6 +1,7 @@
 // Authentication
 export const TRACK_COUNT_SIGN_IN_SUCCESS = 'sign_in_success';
 export const TRACK_SIGN_IN_CANCELLED_COUNT = 'sign_in_cancelled';
+export const TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR = 'sign_in_undefined_auth_client_error';
 export const TRACK_SIGN_IN_ERROR_COUNT = 'sign_in_error';
 export const TRACK_SYNC_AUTH_AUTHENTICATED_COUNT = 'sync_auth_authenticated';
 export const TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT = 'sync_auth_not_authenticated';
@@ -158,3 +159,7 @@ export const TRACK_OPEN_AGREEMENT = 'open_agreement';
 export const AI_ASSISTANT_SEND_TOKEN_SOURCE = 'ai-assistant';
 export const AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION =
 	'ai_assistant_review_send_tool_confirmation';
+export const AI_ASSISTANT_OPEN_CONSOLE = 'ai_assistant_open_console';
+export const AI_ASSISTANT_MESSAGE_SENT = 'ai_assistant_message_sent';
+export const AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED = 'ai_assistant_message_failed_to_be_parsed';
+export const AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED = 'ai_assistant_tool_execution_triggered';

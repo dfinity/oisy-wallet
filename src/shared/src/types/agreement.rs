@@ -28,13 +28,13 @@ pub struct Agreements {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SaveAgreementsSettingsError {
+pub enum UpdateAgreementsError {
     UserNotFound,
     VersionMismatch,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub struct SaveAgreementsRequest {
+pub struct UpdateUserAgreementsRequest {
     pub current_user_version: Option<Version>,
     pub agreements: UserAgreements,
 }
