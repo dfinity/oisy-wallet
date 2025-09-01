@@ -55,7 +55,10 @@
 	{/if}
 
 	{#if collection.section !== CustomTokenSection.HIDDEN}
-		<NftCollectionActionButton label="Hide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
+		<NftCollectionActionButton
+			label="Hide"
+			onclick={() => updateSection(CustomTokenSection.HIDDEN)}
+		>
 			{#snippet icon()}
 				<IconEyeOff size="18" />
 			{/snippet}
