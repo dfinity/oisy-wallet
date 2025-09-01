@@ -37,7 +37,8 @@
 			"currency": "通貨"
 		},
 		"info": {
-			"test_banner": "テスト目的のみ！"
+			"test_banner": "テスト目的のみ！",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "$name ロゴ",
@@ -114,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
-			"session_expired": "セッションの有効期限が切れました。ログアウトされました。"
+			"session_expired": "セッションの有効期限が切れました。ログアウトされました。",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "internet identityが見つかりません",

@@ -37,7 +37,8 @@
 			"currency": "Valuta"
 		},
 		"info": {
-			"test_banner": "Solo a scopo di test!"
+			"test_banner": "Solo a scopo di test!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo di $name",
@@ -114,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
-			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta."
+			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Nessuna Internet Identity.",

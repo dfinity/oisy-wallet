@@ -17,6 +17,7 @@
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
+		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_BTC_SEND_ERROR,
 		TRACK_COUNT_BTC_SEND_SUCCESS,
@@ -102,9 +103,18 @@
 			? mapNetworkIdToBitcoinNetwork($sendTokenNetworkId)
 			: undefined;
 
-		const trackingEventMetadata = {
+		const sharedTrackingEventMetadata = {
 			token: $sendTokenSymbol,
-			network: `${$sendTokenNetworkId.description}`,
+			network: `${$sendTokenNetworkId.description}`
+		};
+
+		trackEvent({
+			name: AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
+			metadata: sharedTrackingEventMetadata
+		});
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
 			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
 		};
 
@@ -170,7 +180,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
@@ -192,7 +202,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_SUCCESS,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			loading = false;
@@ -203,7 +213,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_ERROR,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
