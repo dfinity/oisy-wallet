@@ -156,3 +156,5 @@ export const TRACK_OPEN_AGREEMENT = 'open_agreement';
 
 // AI Assistant
 export const AI_ASSISTANT_SEND_TOKEN_SOURCE = 'ai-assistant';
+export const AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION =
+	'ai_assistant_review_send_tool_confirmation';
