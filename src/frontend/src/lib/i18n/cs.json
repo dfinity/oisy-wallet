@@ -14,7 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Desetinná místa",
 			"amount": "Částka",
-			"tokenId": "",
+			"tokenId": "ID tokenu",
 			"max": "Max",
 			"destination": "Cíl",
 			"reject": "Odmítnout",
@@ -837,10 +837,10 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
-			"network_cost": "",
-			"gasless": "",
-			"swap_fees": "",
-			"cross_chain_networks_info": ""
+			"network_cost": "Náklady sítě",
+			"gasless": "Gasless",
+			"swap_fees": "Poplatky za swap",
+			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>"
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
@@ -1016,37 +1016,37 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "",
-			"title_empty": "",
-			"description_empty": "",
-			"grouping": "",
-			"as_plain_list": "",
-			"by_collection": "",
-			"show_spam": "",
-			"show_hidden": "",
-			"sorting": "",
-			"recents_first": "",
-			"oldest_first": "",
-			"collection_atoz": "",
-			"collection_ztoa": "",
-			"collection_items_count": "",
-			"collection_address": "",
-			"token_standard": "",
-			"quantity": "",
-			"item_traits": "",
-			"collection_not_loaded": "",
-			"nft_not_loaded": "",
-			"collections": "",
-			"all_assets": "",
-			"address_copied": "",
-			"open_explorer": ""
+			"title": "NFTs",
+			"title_empty": "Your NFTs will appear here",
+			"description_empty": "Vypadá to, že jste ještě neobdrželi NFT.",
+			"grouping": "Seskupování",
+			"as_plain_list": "Zobrazit jako prostý seznam",
+			"by_collection": "Seskupit podle kolekce",
+			"show_spam": "Zobrazit spam",
+			"show_hidden": "Zobrazit skryté",
+			"sorting": "Řazení",
+			"recents_first": "Od nejnovějších",
+			"oldest_first": "Od nejstarších",
+			"collection_atoz": "Název kolekce A-Z",
+			"collection_ztoa": "Název kolekce Z-A",
+			"collection_items_count": "$count položek",
+			"collection_address": "Adresa kontraktu kolekce",
+			"token_standard": "Standard tokenu",
+			"quantity": "Množství",
+			"item_traits": "Vlastnosti položky",
+			"collection_not_loaded": "Kolekci nelze zobrazit, protože ještě nebyla načtena",
+			"nft_not_loaded": "NFT nelze zobrazit, protože ještě nebylo načteno",
+			"collections": "Kolekce",
+			"all_assets": "Všechna aktiva",
+			"address_copied": "Adresa $address zkopírována",
+			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru"
 		},
 		"alt": {
-			"placeholder_image": "",
+			"placeholder_image": "Zatím žádné NFT",
 			"card": {
-				"image": ""
+				"image": "Obrázek NFT s ID tokenu: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "Zkopírovat tuto adresu do schránky"
 		}
 	},
 	"fee": {
@@ -1277,7 +1277,7 @@
 				"reward_received": "Vítejte v $oisy_short!",
 				"reward_failed": "Kód vypršel",
 				"reward_received_description": "Svůj uvítací dárek obdržíte kdykoli.",
-				"brand_reward_received_description": "",
+				"brand_reward_received_description": "Chcete vydělat více? Doporučte přítele a vydělávejte za každého, kdo se připojí.",
 				"reward_failed_description": "Požádejte o nový a zkuste to znovu"
 			},
 			"error": {
@@ -1480,13 +1480,19 @@
 	},
 	"agreements": {
 		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
 			"i_have_accepted": "",
-			"i_have_accepted_updated": ""
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
 		}
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Licenční smlouva",
 			"accept_terms": "Kliknutím na toto tlačítko souhlasíte s",
 			"accept_terms_link": "Licenční smlouvou",
 			"title": "Licenční smlouva $oisy_name („Licenční smlouva“)",
@@ -1506,7 +1512,7 @@
 			"assignment": "<strong>11. PŘEVOD.</strong> Tuto licenční smlouvu nesmíte převést bez předchozího písemného souhlasu společnosti DFINITY, ať už výslovně nebo na základě zákona, včetně v souvislosti se sloučením nebo změnou kontroly, a jakýkoli takový pokus o převod bude neplatný a bez účinku. Společnost DFINITY může tuto licenční smlouvu převést bez omezení a bez jakéhokoli upozornění. S výhradou výše uvedeného bude tato licenční smlouva závazná pro strany a jejich příslušné nástupce a povolené postupníky.",
 			"no_waiver": "<strong>12. ŽÁDNÉ ZŘEKNUTÍ SE PRÁV.</strong> Nevykonání nebo zpoždění při výkonu práva, pravomoci nebo nápravného prostředku stanoveného v této licenční smlouvě nebo zákonem nepředstavuje zřeknutí se tohoto práva, pravomoci nebo nápravného prostředku. Zřeknutí se společnosti DFINITY jakéhokoli závazku nebo porušení této licenční smlouvy nebude fungovat jako zřeknutí se jakéhokoli jiného závazku nebo následného porušení této licenční smlouvy.",
 			"english_version": "<strong>13. ANGLICKÁ VERZE.</strong> Anglická jazyková verze této licenční smlouvy bude oficiální a řídící verzí smlouvy, pokud dojde k jakémukoli konfliktu. Veškerá sdělení a oznámení učiněná v souladu s touto licenční smlouvou musí být v anglickém jazyce.",
-			"body": ""
+			"body": "Děkujeme za váš zájem o $oisy_name, decentralizovanou aplikaci peněženku s více řetězci, která je založena na prohlížeči a je hostována na veřejné blockchainové síti Internet Computer („$oisy_short“). Více informací o aplikaci $oisy_short, jejím open source kódu a souvisejících licencích naleznete v repozitáři $oisy_short na GitHubu, který naleznete zde: $oisy_repo_url.\n\nTato licenční smlouva upravuje vaše používání aplikace $oisy_short („Vy“). POUŽÍVÁNÍM aplikace $oisy_short SOUHLASÍTE S TÍM, ŽE JSTE SI TUTO LICENČNÍ SMLOUVU PŘEČETLI, ROZUMÍTE JI A SOUHLASÍTE S TÍM, ŽE JSTE SE JÍ ŘÍDILI. POKUD NESOUHLASÍTE, NESMÍTE $oisy_short POUŽÍVAT.\n\nPokud se rozhodnete používat $oisy_short, vy a nadace DFINITY, včetně jejích přidružených společností a dceřiných společností (souhrnně „DFINITY“), berete na vědomí a souhlasíte s následujícím:\n\n### 1. OMEZENÁ LICENCE.\nV souladu s podmínkami uvedenými v této licenční smlouvě vám DFINITY uděluje omezenou, nevýhradní, nepřenosnou, nesublicencovatelnou a odvolatelnou licenci k používání $oisy_short pouze za účelem přijímání, držení a odesílání tokenů, jako jsou nativní tokeny ICP, ICRC-1, ETH a ERC20, jakož i další tokeny, které mohou být čas od času k dispozici. Můžete vytvářet odvozená díla v rozsahu povoleném licenčními podmínkami upravujícími použití jakýchkoli komponent s otevřeným zdrojovým kódem, které jsou součástí $oisy_short.\n\n### 2. OMEZENÍ.\nJste zodpovědní za veškeré činnosti související s vaším používáním $oisy_short, bez ohledu na to, zda jsou tyto činnosti vámi schváleny nebo zda je provádíte vy, vaši zaměstnanci nebo třetí strana vaším jménem. BERETE NA VĚDOMÍ, ŽE DFINITY NENÍ ZODPOVĚDNÁ ZA ŽÁDNÉ AKTIVITY NEBO TRANSAKCE (AŤ UŽ DOKONČENÉ NEBO JINAK) SPOJENÉ S VAŠÍM $oisy_name. Nebudete zkreslovat ani přikrášlovat vztah mezi vámi a DFINITY, včetně vyjadřování nebo naznačování, že DFINITY podporuje, sponzoruje, schvaluje nebo přispívá k vám nebo vašim obchodním snahám prostřednictvím vašeho používání $oisy_short. Nebudete naznačovat žádný vztah ani spojení s DFINITY, s výjimkou případů výslovně povolených touto licenční smlouvou. Je zakázáno používat název, logo nebo jakékoli jiné ochranné známky $oisy_short související s $oisy_short jakýmkoli způsobem, který by mohl naznačovat schválení nebo přidružení, zkreslovat váš vztah s $oisy_short nebo vyvolávat zmatek ohledně zdroje $oisy_short.\n\n### 3. PŘÍSLUŠNÉ ZÁKONY.\nBudete dodržovat všechny platné zákony a předpisy (včetně, mimo jiné, zákonů a předpisů týkajících se kontroly vývozu, praní špinavých peněz nebo ekonomických sankcí) v souvislosti s vaším používáním $oisy_short a veškerými transakcemi spojenými s vaším $oisy_name.\n\n### 4. VYHRAZENÍ PRÁV SPOLEČNOSTI DFINITY.\n$oisy_short je majetkem společnosti DFINITY a je vám licencován, nikoli prodáván. Obsah, vizuální rozhraní, interaktivní prvky, informace, grafika, design, kompilace, počítačový kód, produkty, služby a všechny ostatní prvky $oisy_short a související dokumentace jsou chráněny platnými zákony o duševním vlastnictví. Ve vztahu mezi vámi a DFINITY jsou veškeré materiály DFINITY a $oisy_short, včetně práv duševního vlastnictví k nim a k nim, výhradním a výhradním vlastnictvím společnosti DFINITY nebo jejích dceřiných společností nebo přidružených společností a/nebo jejích poskytovatelů licencí třetích stran, s výhradou jakýchkoli licencí na software s otevřeným zdrojovým kódem. DFINITY si vyhrazuje veškerá práva, která nejsou výslovně udělena v této licenční smlouvě. Nezískáváte žádná práva, nároky ani podíly k materiálům DFINITY ani k $oisy_short, ať už implicitně, na základě překážky nebo jinak, s výjimkou omezených práv stanovených v této licenční smlouvě a práv udělených licenčními podmínkami upravujícími používání jakýchkoli komponent s otevřeným zdrojovým kódem, které jsou součástí $oisy_short. Tato licenční smlouva vám neuděluje žádné právo používat název, logo ani jiné ochranné známky $oisy_short související s $oisy_short nebo DFINITY.\n\n### 5. ZPĚTNÁ VAZBA.\nPokud poskytnete DFINITY jakékoli komentáře, nápady, hlášení o chybách, zpětnou vazbu, vylepšení, doporučení nebo úpravy týkající se $oisy_short („Zpětná vazba“), je taková zpětná vazba poskytována na nedůvěrné bázi a DFINITY má právo tuto zpětnou vazbu použít dle vlastního uvážení, včetně, ale nikoli výhradně, začlenění těchto navrhovaných změn do materiálů DFINITY, $oisy_short nebo jiných služeb. Tímto udělujete DFINITY trvalou, neodvolatelnou, převoditelnou, sublicencovatelnou, nevýhradní, bezplatnou licenci na základě všech práv nezbytných k začlenění a použití vaší zpětné vazby pro jakýkoli účel, včetně výroby a prodeje produktů a služeb, a souhlasíte s tím, že poskytnete DFINITY veškerou pomoc potřebnou k dokumentaci, zdokonalení a udržování práv DFINITY k zpětné vazbě. Souhlasíte s tím, že vás společnost DFINITY bude moci čas od času kontaktovat za účelem zpětné vazby, ale můžete se odhlásit zasláním písemného oznámení na adresu legalnotice@dfinity.org.\n\n### 6. PODMÍNKY A UKONČENÍ.\nTato licenční smlouva zůstává v platnosti až do jejího ukončení. Licenční smlouva a vaše práva a licence z ní vyplývající zaniknou okamžitě po jejím porušení. Licenční smlouvu můžete kdykoli ukončit vyprázdněním tokenů vašeho účtu $oisy_name a ukončením veškerého používání účtu $oisy_short. Společnost DFINITY může tuto licenční smlouvu kdykoli ukončit z jakéhokoli důvodu, včetně, mimo jiné, jakéhokoli skutečného nebo domnělého zneužití nebo zneužití účtu $oisy_short z vaší strany nebo jakéhokoli porušení této licenční smlouvy. Oddíly 3 až 13 zůstávají v platnosti i po ukončení této licenční smlouvy.\n\n### 7. VYLOUČENÍ ZÁRUKY A OMEZENÍ ODPOVĚDNOSTI.\nV MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY JE $oisy_short POSKYTOVÁN „TAK, JAK JE“, BEZ ZÁRUKY JAKÉHOKOLI DRUHU. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY SE DFINITY ZŘÍKÁ VEŠKERÝCH ZÁRUK A PODMÍNEK, AŤ UŽ VÝSLOVNÝCH, PŘEDPOKLÁDANÝCH, ZÁKONNÝCH NEBO JINÝCH, VČETNĚ, ALE NEJEN, PŘEDPOKLÁDANÝCH ZÁRUK NEBO PODMÍNEK VHODNOSTI PRO URČITÝ ÚČEL, OBCHODOVATELNOSTI, VLASTNICTVÍ, KVALITY, VÝSLEDKŮ A NEPORUŠENÍ PRÁV. DFINITY NEZÁRUČUJE, ŽE $oisy_short BUDE VŽDY DOSTUPNÝ, BEZPEČNÝ NEBO ZAJIŠTĚNÝ (NYNÍ I V BUDOUCNOSTI). SPOLEČNOST DFINITY VÝSLOVNĚ ODMÍTÁ VEŠKERÉ ZÁRUKY JAKÉHOKOLI DRUHU OHLEDNĚ PŘESNOSTI NEBO FUNKČNOSTI SOUČÁSTKY $oisy_short A OHLEDNĚ PŘESNOSTI, PLATNOSTI NEBO ÚPLNOSTI INFORMACÍ NEBO FUNKCÍ (NYNÍ I V BUDOUCNOSTI) ZDOSTUPNĚNÝCH PROSTŘEDNICTVÍM VAŠEHO POUŽÍVÁNÍ SOUČÁSTKY $oisy_short, NEBO KVALITY NEBO KONZISTENCE SOUČÁSTKY $oisy_short NEBO VÝSLEDKŮ ZÍSKANÝCH JEHO POUŽÍVÁNÍM. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PLATNÝMI ZÁKONY NEBUDE SPOLEČNOST DFINITY ZA ŽÁDNÝCH OKOLNOSTÍ ODPOVĚDNÁ ZA ŽÁDNÉ NÁSLEDNÉ, ZVLÁŠTNÍ, NEPŘÍMÉ, NÁHODNÉ NEBO TRESTNÍ ŠKODY VZNIKLÉ Z POUŽÍVÁNÍ NEBO NEMOŽNOSTI POUŽÍVAT A PŘÍSTUPOVAT K MATERIÁLŮM $oisy_short NEBO DFINITY, ATO I V PŘÍPADĚ, ŽE SPOLEČNOST DFINITY BYLA NA MOŽNOST TAKOVÝCH ŠKOD UPOZORNĚNA, A BEZ OHLEDU NA JAKÉKOLI SELHÁNÍ ZÁKLADNÍHO ÚČELU JAKÉHOKOLI OMEZENÉHO NÁPRAVNÉHO PROSTŘEDKU. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY V ŽÁDNÉM PŘÍPADĚ NEPŘEKROČÍ CELKOVÁ ODPOVĚDNOST SPOLEČNOSTI DFINITY ZA ŠKODY VYPLÝVAJÍCÍ Z TÉTO LICENČNÍ SMLOUVY NEBO Z VAŠEHO POUŽÍVÁNÍ ČI NEMOŽNOSTI POUŽÍVAT $oisy_short 100 CHF.\n\n### 8. ODŠKODNĚNÍ.\nSouhlasíte s tím, že odškodníte, budete bránit a ochráníte společnost DFINITY a její přidružené společnosti, vedoucí pracovníky, ředitele, dodavatele, poskytovatele licencí a další zákazníky před jakoukoli odpovědností a náklady, včetně přiměřených poplatků za právní zastoupení, které těmto stranám vzniknou v souvislosti s vaším používáním nebo zneužitím $oisy_short nebo s vaším porušením této Licenční smlouvy nebo jakéhokoli platného zákona či předpisu.\n\n### 9. ROZHODNÉ PRÁVO; MÍSTO KONÁNÍ.\nVeškerý nárok týkající se $oisy_short se řídí zákony Švýcarska, s vyloučením kolizních norem. Veškerý nárok nebo spor týkající se této Licenční smlouvy nebo v souvislosti s ní podléhá (včetně mimosmluvních sporů nebo nároků a jejich výkladu) výlučné jurisdikci soudů v Curychu ve Švýcarsku s výhradou odvolání ke Švýcarskému federálnímu soudu.\n\n### 10. CELÁ SMLOUVA A ODDĚLITELNOST.\nTato Licenční smlouva představuje úplnou dohodu mezi Vámi a společností DFINITY a nahrazuje veškeré předchozí dohody, jednání nebo jinou komunikaci mezi Vámi a společností DFINITY, ať už ústní nebo písemnou, týkající se předmětu této smlouvy. Společnost DFINITY může tuto Licenční smlouvu změnit, jakmile budou k dispozici nové verze $oisy_short. V případě, že se jakékoli ustanovení této Licenční smlouvy ukáže jako neplatné nebo nevymahatelné, pak: (a) takové ustanovení se považuje za upravené v rozsahu nezbytně nutném k tomu, aby se toto ustanovení stalo platným a vymahatelným, nebo pokud takové úpravy nelze provést, považuje se za oddělené od této Licenční smlouvy; a (b) platnost a vymahatelnost všech ostatních ustanovení této smlouvy tím nebudou nijak dotčeny ani narušeny.\n\n### 11. POSTOUPENÍ.\nTuto licenční smlouvu nesmíte postoupit bez předchozího písemného souhlasu společnosti DFINITY, ať už výslovně nebo ze zákona, a to i v souvislosti s fúzí nebo změnou kontroly, a jakýkoli takový pokus o postoupení bude neplatný a bez účinku. Společnost DFINITY může tuto licenční smlouvu postoupit bez omezení a bez jakéhokoli oznámení Vám. S výhradou výše uvedeného je tato licenční smlouva závazná pro strany a jejich příslušné nástupce a povolené postupníky.\n\n### 12. ŽÁDNÉ VZDÁNÍ SE PRÁV.\nNeuplatnění nebo opožděné uplatnění práva, pravomoci nebo nápravného prostředku stanoveného v této licenční smlouvě nebo ze zákona nepředstavuje vzdání se tohoto práva, pravomoci nebo nápravného prostředku. Zřeknutí se jakékoli povinnosti nebo porušení této licenční smlouvy ze strany DFINITY neznamená zřeknutí se jakékoli jiné povinnosti ani následné porušení licenční smlouvy.\n\n### 13. ANGLICKÁ VERZE.\nAnglická verze této licenční smlouvy je oficiální a rozhodující verzí smlouvy v případě jakéhokoli rozporu. Veškerá komunikace a oznámení učiněná na základě této licenční smlouvy musí být v anglickém jazyce."
 		},
 		"alt": {
 			"license_agreement": "Licenční smlouva $oisy_name"
@@ -1514,22 +1520,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
-			"title": "",
-			"body": ""
+			"terms_of_use": "Podmínky použití",
+			"title": "Podmínky použití",
+			"body": "Datum účinnosti: $date\n\n### 1. Souhlas s podmínkami\n\nPoužíváním peněženky OISY, webových stránek na adrese oisy.com nebo jakýchkoli jiných služeb, ze kterých odkazujeme na tyto Podmínky použití („Služby“), souhlasíte s námi, nadací DFINITY, včetně našich přidružených společností a dceřiných společností (souhrnně „DFINITY“), s těmito Podmínkami použití a s naší [Licenční smlouvou](https://oisy.com/license-agreement/) (souhrnně „Smlouva“). V případě jakéhokoli rozporu nebo nesrovnalosti mezi těmito Podmínkami použití a Licenční smlouvou mají přednost Podmínky použití. Pokud s nimi nesouhlasíte, nepoužívejte naše Služby. Používáním našich Služeb prohlašujete, že vám je alespoň 18 let.\n\n### 2. Popis našich Služeb\n\n* Peněženka OISY je decentralizovaná aplikace peněženky založená na prohlížeči, s vlastní správou a více řetězci, hostovaná na veřejné blockchainové síti Internet Computer, která vám umožňuje přístup k určitým tokenům podporovaným peněženkou OISY a dalšími službami třetích stran. Tyto třetí strany nevlastníme, nekontrolujeme ani neprovozujeme a služby třetích stran používáte na vlastní nebezpečí.\n \n* Některé funkce peněženky OISY jsou experimentální nebo v beta verzi.\n \n\n### 3. Přístup k účtu a zabezpečení\n\nJste zodpovědní za obojí:\n\n* Provedení všech nezbytných opatření pro váš přístup na webové stránky.\n \n* Ochrana vašich přístupových údajů, včetně vaší internetové identity.\n \n\nPokud ztratíte svou internetovou identitu nebo pokud je jinak ohrožena, nebudeme moci obnovit přístup k vašemu účtu.\n\nPro přístup na webové stránky nebo k některým zdrojům, které nabízejí, můžete být požádáni o poskytnutí určitých registračních údajů nebo jiných informací. Podmínkou vašeho používání webových stránek je, aby všechny informace, které na webových stránkách poskytnete, byly správné, aktuální a úplné. Souhlasíte s tím, že veškeré informace, které poskytnete k registraci na těchto webových stránkách nebo jinak, včetně, ale nikoli výhradně, prostřednictvím použití jakýchkoli interaktivních funkcí na webových stránkách, se řídí našimi _Zásadami ochrany osobních údajů_ \\[ODKAZ NA ZÁSADY OCHRANY OSOBNÍCH ÚDAJŮ\\], a souhlasíte se všemi kroky, které podnikneme s ohledem na vaše informace v souladu s našimi Zásadami ochrany osobních údajů.\n\nSouhlasíte s tím, že na konci každé relace opustíte svůj účet. Při přístupu k účtu z veřejného nebo sdíleného počítače byste měli být obzvláště opatrní, aby ostatní nemohli zobrazit nebo zaznamenat vaše heslo nebo jiné osobní údaje.\n\nBerete také na vědomí, že nemáme úschovu, přístup ani kontrolu nad finančními prostředky ve vaší peněžence OISY. Berete na vědomí, že peněženka OISY je výhradně pod kontrolou uživatele.\n\n### 4. Prohlášení o vyloučení záruky a omezení odpovědnosti\n\nV MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY JSOU NAŠE SLUŽBY POSKYTOVÁNY „TAK, JAK JSOU“ BEZ ZÁRUKY JAKÉHOKOLI DRUHU, VČETNĚ TOHO, ŽE OISY NEPOSKYTUJE ZÁRUKU ANI GARANCI ZA JAKOUKOLI ZTRÁTU FINANČNÍCH PROSTŘEDKŮ NEBO TECHNICKÉ PORUCHY. PŘEBÍRÁTE RIZIKA SPOJENÁ S POUŽÍVÁNÍM DECENTRALIZOVANÉ INFRASTRUKTURY A BERETE NA VĚDOMÍ, ŽE NEJSME ZODPOVĚDNÍ ZA ŽÁDNOU ZTRÁTU FINANČNÍCH PROSTŘEDKŮ, BEZ OHLEDU NA PŘÍČINU ZTRÁTY.\n\nV MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY SE DFINITY ZŘÍKÁ VEŠKERÝCH ZÁRUK A PODMÍNEK, VÝSLOVNÝCH, PŘEDPOKLÁDANÝCH, ZÁKONNÝCH NEBO JINÝCH, VČETNĚ, ALE NEJEN, PŘEDPOKLÁDANÝCH ZÁRUK NEBO PODMÍNEK VHODNOSTI PRO URČITÝ ÚČEL, OBCHODOVATELNOSTI, VLASTNICTVÍ, KVALITY, VÝSLEDKŮ A NEPORUŠENÍ PRÁV. DFINITY NEZÁRUČUJE, ŽE SLUŽBY BUDOU VŽDY DOSTUPNÉ, BEZPEČNÉ NEBO ZAJIŠTĚNÉ (NYNÍ I V BUDOUCNOSTI). SPOLEČNOST DFINITY VÝSLOVNĚ ODMÍTÁ JAKÉKOLI ZÁRUKY JAKÉHOKOLI DRUHU OHLEDNĚ PŘESNOSTI NEBO FUNKČNOSTI SLUŽEB A OHLEDNĚ PŘESNOSTI, PLATNOSTI NEBO ÚPLNOSTI INFORMACÍ NEBO FUNKCÍ (NYNÍ I V BUDOUCNOSTI) ZDOSTUPNĚNÝCH PROSTŘEDNICTVÍM VAŠEHO POUŽÍVÁNÍ SLUŽEB, NEBO KVALITY NEBO KONZISTENCE SLUŽEB NEBO VÝSLEDKŮ ZÍSKANÝCH PROSTŘEDNICTVÍM JEJICH POUŽÍVÁNÍ. SPOLEČNOST DFINITY NEZARUČUJE, ŽE SLUŽBY MOHOU PŘEVÉST VLASTNICTVÍ NEBO PRÁVO K JAKÉMUKOLI TOKENU NEBO DIGITÁLNÍMU AKTIVU, ANI NEPOSKYTUJE JAKÉKOLI ZÁRUKY OHLEDNĚ VLASTNICTVÍ. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PLATNÝMI ZÁKONY NEBUDE SPOLEČNOST DFINITY ZA ŽÁDNÝCH OKOLNOSTÍ ODPOVĚDNÁ ZA ŽÁDNÉ NÁSLEDNÉ, ZVLÁŠTNÍ, NEPŘÍMÉ, NÁHODNÉ NEBO TRESTNÍ ŠKODY VYPLÝVAJÍCÍ Z POUŽÍVÁNÍ NEBO MOŽNOSTI POUŽÍVAT A PŘÍSTUPOVAT K SLUŽBÁM NEBO MATERIÁLŮM DFINITY NEBO K JAKÝMKOLI POLOŽKÁM TŘETÍCH STRAN, JAK JE ZDE DEFINOVÁNO, ATO I V PŘÍPADĚ, ŽE SPOLEČNOST DFINITY BYLA NA MOŽNOST TAKOVÝCH ŠKOD UPOZORNĚNA, A BEZ OHLEDU NA JAKÉKOLI SELHÁNÍ ZÁKLADNÍHO ÚČELU JAKÉHOKOLI OMEZENÉHO NÁPRAVNÉHO PROSTŘEDKU. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY V ŽÁDNÉM PŘÍPADĚ NEPŘEKROČÍ CELKOVÁ ODPOVĚDNOST SPOLEČNOSTI DFINITY ZA ŠKODY VYPLÝVAJÍCÍ Z TÉTO SMLOUVY NEBO Z VAŠEHO POUŽÍVÁNÍ NEBO MOŽNOSTI POUŽÍVAT SLUŽBY 100 CHF.\n\n### 5. Odškodnění\n\nSouhlasíte s tím, že odškodníte, budete bránit a ochráníte společnost DFINITY a její přidružené společnosti, vedoucí pracovníky, ředitele, dodavatele, poskytovatele licencí a další zákazníky před jakoukoli odpovědností a náklady, včetně přiměřených poplatků za právní zastoupení, které těmto stranám vzniknou v souvislosti s vaším používáním nebo zneužitím našich Služeb nebo s vaším porušením této Smlouvy nebo jakéhokoli platného zákona či předpisu.\n\n### 6. Programy odměn\n\nÚčastí v našich programech odměn souhlasíte s [INICIATIVA ODMĚN OISY - OBCHODNÍ PODMÍNKY](https://docs.oisy.com/rewards/oisy-sprinkles/t-and-cs), které jsou zde zahrnuty a mohou se změnit. čas od času.\n\n### 7. Dodržování zákonů a přijatelné užívání\n\nV souvislosti s užíváním Služeb budete dodržovat všechny platné zákony a předpisy (včetně, mimo jiné, zákonů a předpisů týkajících se kontroly vývozu, praní špinavých peněz nebo ekonomických sankcí). Naše Služby nebudete používat k žádným nezákonným účelům ani způsobem, který porušuje práva jakékoli entity DFINITY, jiných uživatelů nebo jiných osob.\n\n### 8. Daňová povinnost\n\nJste zodpovědní za dodržování všech platných federálních, státních a místních zákonů a předpisů týkajících se výběru a placení daní a poplatků.\n\n### 9. Rozhodné právo; místo konání\n\nVeškeré nároky týkající se Služeb se řídí zákony Švýcarska, s vyloučením kolizních norem. Jakýkoli nárok nebo spor týkající se této Smlouvy nebo v souvislosti s ní (včetně mimosmluvních sporů nebo nároků a jejich výkladu) podléhá výlučné jurisdikci soudů v Curychu ve Švýcarsku s výhradou odvolání u Švýcarského federálního soudu.\n\n### 10. Třetí strany a jiné aplikace\n\nNevlastníme, nekontrolujeme, neschvalujeme ani nepřijímáme žádný obsah, aplikace, služby, webové stránky ani jiné položky třetích stran („Položky třetích stran“), které můžete vidět nebo se s nimi propojit při používání našich Služeb. Zříkáme se jakékoli odpovědnosti související s Položkami třetích stran nebo s nimiž se můžete setkat. Vaše používání, jednání nebo korespondence s třetími stranami a Položkami třetích stran jsou výhradně mezi vámi a třetí stranou a činíte tak na vlastní nebezpečí.\n\nNic v této Smlouvě, výslovné ani implicitní, není zamýšleno k tomu, aby udělovalo jakákoli práva, výhody nebo opravné prostředky jakékoli třetí straně, včetně ostatních uživatelů našich Služeb, ani je neuděluje žádné třetí straně, včetně ostatních uživatelů našich Služeb.\n\n### 11. Oddělitelnost\n\nV případě, že se jakékoli ustanovení těchto Podmínek používání ukáže jako nezákonné, neplatné nebo nevymahatelné, bude takové ustanovení i přesto vymahatelné v plném rozsahu povoleném platnými právními předpisy a nevymahatelná část se považuje za oddělenou od těchto Podmínek používání. Toto rozhodnutí neovlivní platnost a vymahatelnost jakýchkoli ostatních zbývajících ustanovení.\n\n### 12. Podmínky a ukončení\n\nTato Smlouva zůstává v platnosti, dokud nebude ukončena. Smlouva a vaše práva a licence z ní vyplývající zaniknou okamžitě po jejím porušení. Společnost DFINITY může tuto Smlouvu kdykoli vypovědět z jakéhokoli důvodu, včetně, mimo jiné, jakéhokoli skutečného nebo domnělého zneužití Služeb z vaší strany nebo jakéhokoli porušení této Smlouvy.\n\n### 13. Celá Smlouva\n\nNeuplatnění nebo nevymáhání jakéhokoli práva nebo ustanovení těchto Podmínek užívání z naší strany nepředstavuje vzdání se takového práva nebo ustanovení.\n\nTyto Podmínky užívání a jakékoli zásady nebo provozní pravidla zveřejněné námi na těchto stránkách nebo v souvislosti se Službou představují úplnou dohodu a porozumění mezi vámi a námi a upravují vaše užívání Služby a nahrazují jakékoli předchozí nebo současné dohody, sdělení a návrhy, ať už ústní nebo písemné, mezi vámi a námi (včetně, mimo jiné, jakýchkoli předchozích verzí Podmínek užívání).\n\nJakékoli nejasnosti ve výkladu těchto Podmínek užívání nebudou vykládány v neprospěch strany, která je sepsala.\n\n### 14. Osobní údaje\n\nPřečtěte si prosím naše Zásady ochrany osobních údajů zde \\[odkaz na Zásady ochrany osobních údajů OISY je uveden samostatně\\].\n\nPokud vy Používáním peněženky OISY nebo jiných služeb třetích stran a blockchainových technologií sdílíte informace s globální komunitou, která je na nás oddělená a nezávislá a kterou nekontrolujeme. Protože blockchainy jsou decentralizované a služby třetích stran nejsou kontrolovány ani provozovány námi ani našimi přidruženými společnostmi, nejsme schopni kontrolovat, mazat, upravovat ani měnit osobní údaje zpracovávané během používání těchto blockchainových technologií.\n\n### 15. Změny podmínek\n\nTuto smlouvu můžeme aktualizovat dle vlastního uvážení. Pokračování v používání představuje přijetí změn.\n\n### 16. Kontakt\n\nS dotazy navštivte [support@oisy.com](mailto:support@oisy.com)."
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Odkaz na podmínky použití"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
-			"title": "",
-			"body": ""
+			"privacy_policy": "Zásady ochrany osobních údajů",
+			"title": "Zásady ochrany osobních údajů",
+			"body": "Datum účinnosti: $date\n\nMy, DFINITY Stiftung, Genferstrasse 11, 8002 Curych, Švýcarsko („DFINITY“ nebo „nás“) v těchto Zásadách ochrany osobních údajů OISY („Zásady ochrany osobních údajů“) zveřejňujeme, jak zpracováváme osobní údaje, které nám poskytnete při používání OISY Wallet, webových stránek na adrese oisy.com nebo jakýchkoli jiných webových stránek, ze kterých odkazujeme na tyto Zásady ochrany osobních údajů („Stránky“). Tyto Zásady ochrany osobních údajů se nevztahují na žádné jiné zpracování dat, včetně, mimo jiné, osobních údajů, které shromažďujeme offline nebo prostřednictvím jiných webových stránek, které neodkazují na tyto Zásady ochrany osobních údajů; osobních údajů, které sdílíte s ostatními uživateli Stránek nebo jiných technologií založených na blockchainu, když tyto technologie používáte; nebo osobních údajů, které sdílíte se službami třetích stran, které nevlastníme ani nekontrolujeme.\n\nPokud používáte OISY Wallet nebo jiné služby třetích stran a technologie blockchainu, sdílíte informace s globální komunitou, která je od nás oddělená a nezávislá a není námi kontrolována. Protože blockchainy jsou decentralizované a služby třetích stran nejsou kontrolovány ani provozovány námi ani našimi přidruženými společnostmi, nejsme schopni kontrolovat, mazat, upravovat ani měnit osobní údaje zpracovávané během používání těchto blockchainových technologií.\n\n### 1. Kategorie zpracovávaných údajů a účely použití\nKdyž navštívíte naše stránky, automaticky odesíláte svou IP adresu. Toto zpracování je nezbytné pro náš oprávněný zájem optimalizovat výkon našich stránek a nepřevažuje nad ochranou soukromí a jinými zájmy vás ani jiných uživatelů. [Vložte jakékoli další údaje, které DFINITY shromažďuje, např. informace o zařízení, přihlašovací údaje, informace o transakcích. Jak DFINITY dodržuje povinnosti KYC?] Společnost DFINITY může být povinna shromažďovat určité údaje pro účely dodržování právních předpisů, např. jméno, adresu, telefonní číslo, informace o bankovním účtu.]\n\n### 2. Sdílení údajů\nVaše údaje můžeme sdílet s dalšími subjekty DFINITY, poskytovateli služeb a třetími stranami za účelem poskytování našich služeb vám a v souvislosti s naším úsilím o prevenci a vyšetřování podvodné činnosti.\n\n### 3. Uchovávání údajů\nVaše osobní údaje uchováváme ve Švýcarsku a tam, kde pracují naši zaměstnanci a dodavatelé, včetně Spojených států, až 24 měsíců od jejich shromáždění.\n\n### 4. Uživatelská práva a dodržování předpisů\nMůžete požádat o přístup k vašim osobním údajům, jejich opravu, smazání a omezení nebo vznést námitku proti jejich zpracování kontaktováním nás na adrese privacy@dfinity.com. Můžete mít také právo podat stížnost u příslušného orgánu. Nebudete to však moci učinit u dat zpracovávaných v blockchainech nebo v souvislosti se službami třetích stran, protože ty nejsou kontrolovány námi ani našimi přidruženými společnostmi.\n\n### 5. Změny těchto zásad\nTyto zásady ochrany osobních údajů můžeme čas od času aktualizovat dle vlastního uvážení a nové verze můžeme zveřejnit na našich stránkách.\n\n ### 6. Kontakt\nV případě dotazů nebo uplatnění vašich práv navštivte support@oisy.com."
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Odkaz na zásady ochrany osobních údajů"
 		}
 	},
 	"activity": {
@@ -1585,15 +1591,15 @@
 			"action_button_contacts_title": "Zobrazit kontakty",
 			"action_button_contacts_subtitle": "Zobrazte své uložené kontakty",
 			"action_button_contacts_prompt": "Ukaž mi moje kontakty.",
-			"action_button_send_tokens_title": "",
-			"action_button_send_tokens_subtitle": "",
-			"action_button_send_tokens_prompt": "",
-			"select_contact_message": "",
-			"send_to_message": "",
+			"action_button_send_tokens_title": "Odeslat aktiva",
+			"action_button_send_tokens_subtitle": "Nastavení odeslání během několika sekund",
+			"action_button_send_tokens_prompt": "Chtěl bych poslat tokeny.",
+			"select_contact_message": "Vyberte kontakt pro zahájení procesu odeslání:",
+			"send_to_message": "Odeslat do $contact_name ($address_info).",
 			"send_message": "Poslat zprávu",
 			"send_message_input_placeholder": "Co chcete dělat?",
-			"send_token_succeeded": "",
-			"no_contacts_found_message": "",
+			"send_token_succeeded": "Transakce dokončena!",
+			"no_contacts_found_message": "Omlouvám se, ale ve vašem adresáři jsem nenašel žádné vhodné kontakty.",
 			"loading": "Přemýšlím..."
 		},
 		"errors": {
