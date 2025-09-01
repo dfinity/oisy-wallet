@@ -150,14 +150,16 @@
 
 			{#snippet amountDescription()}
 			{#if nonNullish(timestamp)}
-			<span data-tid="receive-tokens-modal-transaction-timestamp">
+			  <span data-tid="receive-tokens-modal-transaction-timestamp">
 				{new Intl.DateTimeFormat($currentLanguage, {
-				hour: '2-digit',
-				minute: '2-digit'
+				  hour: '2-digit',
+				  minute: '2-digit',
+				  hour12: false
 				}).format(new Date(Number(timestamp) * 1000))}
-			</span>
+			  </span>
 			{/if}
-			{/snippet}
+		  {/snippet}
+		  
 
 			{#snippet description()}
 				<TransactionStatusComponent {status} />
