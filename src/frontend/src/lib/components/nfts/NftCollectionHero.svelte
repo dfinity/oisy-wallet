@@ -4,8 +4,6 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import NftCollectionHideButton from '$lib/components/nfts/NftCollectionHideButton.svelte';
-	import NftCollectionSpamButton from '$lib/components/nfts/NftCollectionSpamButton.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
@@ -16,6 +14,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 
 	interface Props {
 		collection?: NftCollection;
@@ -41,9 +40,8 @@
 					{collection.name}
 				</h1>
 
-				<div class="ml-auto flex gap-2">
-					<NftCollectionSpamButton {collection} />
-					<NftCollectionHideButton {collection} />
+				<div class="ml-auto">
+					<NftCollectionActionButtons {collection} />
 				</div>
 			</div>
 		{:else}
