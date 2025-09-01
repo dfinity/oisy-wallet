@@ -162,8 +162,8 @@ pub enum SetUserShowTestnetsResult {
     /// The user's show testnets was not set due to an error.
     Err(SetTestnetsSettingsError),
 }
-impl From<Result<(), SaveTestnetsSettingsError>> for SetUserShowTestnetsResult {
-    fn from(result: Result<(), SaveTestnetsSettingsError>) -> Self {
+impl From<Result<(), SetTestnetsSettingsError >> for SetUserShowTestnetsResult {
+    fn from(result: Result<(), SetTestnetsSettingsError >) -> Self {
         match result {
             Ok(()) => SetUserShowTestnetsResult::Ok(()),
             Err(err) => SetUserShowTestnetsResult::Err(err),
