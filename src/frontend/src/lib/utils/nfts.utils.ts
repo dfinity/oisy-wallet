@@ -1,5 +1,3 @@
-import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import type { NftListSortingType } from '$lib/stores/nft-list.store';
 import type { EthAddress } from '$lib/types/address';
@@ -280,8 +278,8 @@ export const findNonFungibleToken = ({
 	address,
 	networkId
 }: {
-	tokens: (Erc721CustomToken | Erc1155CustomToken)[];
+	tokens: NonFungibleToken[];
 	address: EthAddress;
 	networkId: NetworkId;
-}): Erc721CustomToken | Erc1155CustomToken | undefined =>
+}): NonFungibleToken | undefined =>
 	tokens.find((token) => token.address === address && token.network.id === networkId);
