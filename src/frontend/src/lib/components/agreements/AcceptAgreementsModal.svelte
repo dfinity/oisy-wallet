@@ -129,7 +129,10 @@
 				: $i18n.agreements.text.review_description}
 		</p>
 
-		<div style="--checkbox-label-order: 1" class="flex flex-col font-bold">
+		<div
+			style="--checkbox-label-order: 1; --text-white-space: normal"
+			class="flex flex-col font-bold"
+		>
 			{#if 'termsOfUse' in agreementsToAccept}
 				<AcceptAgreementsCheckbox
 					checked={agreementsToAccept['termsOfUse'] ?? false}
