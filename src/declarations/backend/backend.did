@@ -177,7 +177,8 @@ type CustomToken = record {
 	token : Token;
 	section : opt TokenSection;
 	version : opt nat64;
-	enabled : bool
+	enabled : bool;
+	allow_media_source : opt bool
 };
 type DappCarouselSettings = record { hidden_dapp_ids : vec text };
 type DappSettings = record { dapp_carousel : DappCarouselSettings };
@@ -189,11 +190,7 @@ type DefiniteCanisterSettingsArgs = record {
 	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
-type ErcToken = record {
-	token_address : text;
-	chain_id : nat64;
-	allow_media_source : opt bool
-};
+type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;

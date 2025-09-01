@@ -184,6 +184,7 @@ export interface CustomToken {
 	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
+	allow_media_source: [] | [boolean];
 }
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
@@ -202,7 +203,6 @@ export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
-	allow_media_source: [] | [boolean];
 }
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
