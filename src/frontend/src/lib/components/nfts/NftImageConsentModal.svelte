@@ -26,9 +26,10 @@
 
 	interface Props {
 		nft: Nft;
+		testId?: string;
 	}
 
-	const { nft }: Props = $props();
+	const { nft, testId }: Props = $props();
 
 	const hasConsent = $derived(
 		getAllowMediaForNft({
@@ -80,7 +81,7 @@
 	);
 </script>
 
-<Modal on:nnsClose={() => modalStore.close()}>
+<Modal on:nnsClose={() => modalStore.close()} {testId}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
@@ -120,7 +121,9 @@
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
 				<span>
-					<output>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output>
+					<output data-tid={`${testId}-collectionAddress`}
+						>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output
+					>
 					<AddressActions
 						copyAddress={nft.collection.address}
 						copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
@@ -135,13 +138,13 @@
 				</span>
 			</div>
 			<div class="flex w-full justify-between">
-				<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span><span
-					>{hasConsent ? $i18n.nfts.text.media_enabled : $i18n.nfts.text.media_disabled}</span
-				>
+				<span class="text-tertiary" data-tid={`${testId}-displayPreferences`}
+					>{$i18n.nfts.text.display_preference}</span
+				><span>{hasConsent ? $i18n.nfts.text.media_enabled : $i18n.nfts.text.media_disabled}</span>
 			</div>
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.nfts.text.media_urls}</span>
-				<span class="flex-col justify-items-end">
+				<span class="flex-col justify-items-end" data-tid={`${testId}-nfts-media`}>
 					{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 						{#if nonNullish(nft?.imageUrl)}
 							<span class="flex">
@@ -166,8 +169,8 @@
 
 		{#snippet toolbar()}
 			<div class="flex w-full gap-3">
-				<ButtonCancel onclick={() => modalStore.close()} />
-				<Button colorStyle="primary" onclick={() => save()}
+				<ButtonCancel onclick={() => modalStore.close()} testId={`${testId}-cancelButton`} />
+				<Button colorStyle="primary" onclick={() => save()} testId={`${testId}-saveButton`}
 					>{hasConsent ? $i18n.nfts.text.disable_media : $i18n.nfts.text.enable_media}</Button
 				>
 			</div>
