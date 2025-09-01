@@ -1,13 +1,13 @@
-import { render, waitFor } from '@testing-library/svelte';
 import NftCollectionActionButton from '$lib/components/nfts/NftCollectionActionButton.svelte';
-import { createRawSnippet } from 'svelte';
 import { assertNonNullish } from '@dfinity/utils';
+import { render, waitFor } from '@testing-library/svelte';
+import { createRawSnippet } from 'svelte';
 
 describe('NftCollectionActionButton', () => {
 	const mockOnAction = vi.fn();
 
 	const icon = 'icon';
-	const label = "Test label";
+	const label = 'Test label';
 
 	const testId = 'test-id';
 
@@ -38,6 +38,6 @@ describe('NftCollectionActionButton', () => {
 
 		await waitFor(() => {
 			expect(mockOnAction).toHaveBeenCalled();
-		})
-	})
-})
+		});
+	});
+});
