@@ -1,9 +1,8 @@
-import type { Erc20Token } from '$eth/types/erc20';
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { Balance } from '$lib/types/balance';
+import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
@@ -16,8 +15,8 @@ export interface SwapError {
 }
 
 export interface SwapData {
-	sourceToken?: Erc20Token | IcTokenToggleable;
-	destinationToken?: Erc20Token | IcTokenToggleable;
+	sourceToken?: Token;
+	destinationToken?: Token;
 }
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
@@ -65,12 +64,12 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
 		failedSwapError: writable<SwapError | undefined>(undefined),
-		setSourceToken: (token: IcTokenToggleable) =>
+		setSourceToken: (token: Token) =>
 			update((state) => ({
 				...state,
 				sourceToken: token
 			})),
-		setDestinationToken: (token: IcTokenToggleable) =>
+		setDestinationToken: (token: Token | undefined) =>
 			update((state) => ({
 				...state,
 				destinationToken: token
@@ -84,16 +83,16 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 };
 
 export interface SwapContext {
-	sourceToken: Readable<Erc20Token | IcTokenToggleable | undefined>;
-	destinationToken: Readable<Erc20Token | IcTokenToggleable | undefined>;
+	sourceToken: Readable<Token | undefined>;
+	destinationToken: Readable<Token | undefined>;
 	sourceTokenBalance: Readable<Balance | undefined>;
 	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean>;
 	failedSwapError: Writable<SwapError | undefined>;
-	setSourceToken: (token: IcTokenToggleable) => void;
-	setDestinationToken: (token: IcTokenToggleable) => void;
+	setSourceToken: (token: Token) => void;
+	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;
 }
 

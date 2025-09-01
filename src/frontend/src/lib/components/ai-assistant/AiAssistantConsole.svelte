@@ -7,12 +7,18 @@
 	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
 	import IconOisy from '$lib/components/icons/IconOisy.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
+	import {
+		AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
+		AI_ASSISTANT_MESSAGE_SENT
+	} from '$lib/constants/analytics.contants';
 	import {
 		aiAssistantLlmMessages,
 		aiAssistantChatMessages
 	} from '$lib/derived/ai-assistant.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { askLlm } from '$lib/services/ai-assistant.services';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -31,7 +37,13 @@
 		)
 	);
 
-	const sendMessage = async (messageText: string) => {
+	const sendMessage = async ({
+		messageText,
+		context
+	}: {
+		messageText: string;
+		context?: string;
+	}) => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
@@ -39,11 +51,13 @@
 
 		aiAssistantStore.appendMessage({
 			role: 'user',
-			data: { text: messageText }
+			data: { text: messageText, context }
 		});
 
 		try {
 			loading = true;
+
+			trackEvent({ name: AI_ASSISTANT_MESSAGE_SENT });
 
 			const { text, tool } = await askLlm({
 				messages: $aiAssistantLlmMessages,
@@ -70,6 +84,8 @@
 					text: $i18n.ai_assistant.errors.unknown
 				}
 			});
+
+			trackEvent({ name: AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED });
 		}
 
 		loading = false;
@@ -83,12 +99,12 @@
 		const nextMessage = userInput;
 		userInput = '';
 
-		await sendMessage(nextMessage);
+		await sendMessage({ messageText: nextMessage });
 	};
 </script>
 
 <div
-	class="fixed bottom-0 right-0 z-10 flex h-full min-h-full w-full flex-col justify-between rounded-2xl bg-primary md:bottom-6 md:right-8 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[21.5rem]"
+	class="pointer-events-auto fixed bottom-0 right-0 flex h-full min-h-full w-full flex-col justify-between rounded-2xl bg-primary md:bottom-6 md:right-8 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[22.5rem]"
 	transition:fade
 >
 	<div class="border-b-1 flex items-center justify-between border-brand-subtle-10 px-4 py-2">
@@ -113,7 +129,7 @@
 			<div class="my-6">
 				<AiAssistantActionButton
 					onClick={() => {
-						sendMessage($i18n.ai_assistant.text.action_button_contacts_prompt);
+						sendMessage({ messageText: $i18n.ai_assistant.text.action_button_contacts_prompt });
 					}}
 					subtitle={$i18n.ai_assistant.text.action_button_contacts_subtitle}
 					title={$i18n.ai_assistant.text.action_button_contacts_title}
@@ -122,10 +138,21 @@
 						<IconSend />
 					{/snippet}
 				</AiAssistantActionButton>
+				<AiAssistantActionButton
+					onClick={() => {
+						sendMessage({ messageText: $i18n.ai_assistant.text.action_button_send_tokens_prompt });
+					}}
+					subtitle={$i18n.ai_assistant.text.action_button_send_tokens_subtitle}
+					title={$i18n.ai_assistant.text.action_button_send_tokens_title}
+				>
+					{#snippet icon()}
+						<IconlySend />
+					{/snippet}
+				</AiAssistantActionButton>
 			</div>
 		{:else}
 			<div in:fade>
-				<AiAssistantMessages {loading} messages={messagesToDisplay} />
+				<AiAssistantMessages {loading} messages={messagesToDisplay} onSendMessage={sendMessage} />
 			</div>
 		{/if}
 	</div>

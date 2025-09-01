@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
-	import type { Erc20Token } from '$eth/types/erc20';
-	import type { IcToken } from '$icp/types/ic-token';
-	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
+	import { getContext, onDestroy, type Snippet } from 'svelte';
+	import {
+		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
+		SWAP_DEFAULT_SLIPPAGE_VALUE
+	} from '$lib/constants/swap.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
@@ -14,15 +15,18 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 
 	interface Props {
 		amount: OptionAmount;
-		sourceToken?: IcToken | Erc20Token;
-		destinationToken?: IcToken | Erc20Token;
+		sourceToken?: Token;
+		destinationToken?: Token;
 		slippageValue: OptionAmount;
 		children?: Snippet;
 		isSourceTokenIcrc2: boolean;
 		isSwapAmountsLoading: boolean;
+		enableAmountUpdates?: boolean;
+		pauseAmountUpdates?: boolean;
 	}
 
 	let {
@@ -32,14 +36,41 @@
 		slippageValue,
 		children,
 		isSourceTokenIcrc2,
-		isSwapAmountsLoading = $bindable(false)
+		isSwapAmountsLoading = $bindable(false),
+		enableAmountUpdates = true,
+		pauseAmountUpdates = false
 	}: Props = $props();
 
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	const loadSwapAmounts = async () => {
+	let timer: NodeJS.Timeout | undefined;
+
+	let isFetching = $state(false);
+
+	const clearTimer = () => {
+		if (isNullish(timer)) {
+			clearInterval(timer);
+			timer = undefined;
+		}
+	};
+
+	const startTimer = () => {
+		if (nonNullish(timer) || !enableAmountUpdates || pauseAmountUpdates) {
+			return;
+		}
+
+		timer = setInterval(() => {
+			loadSwapAmounts(true);
+		}, SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS);
+	};
+
+	const loadSwapAmounts = async (isPeriodicUpdate = false) => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
+			return;
+		}
+
+		if (isFetching) {
 			return;
 		}
 
@@ -50,13 +81,12 @@
 
 		const parsedAmount = Number(amount);
 
-		// WizardModal re-renders content on step change (e.g. when switching between Swap to Review steps)
-		// To avoid re-fetching the fees, we need to check if amount hasn't changed since the last request
-		if (nonNullish($store) && $store.amountForSwap === parsedAmount) {
+		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
 			return;
 		}
 
 		isSwapAmountsLoading = true;
+		isFetching = true;
 
 		try {
 			const swapAmounts = await fetchSwapAmounts({
@@ -93,13 +123,28 @@
 			});
 		} finally {
 			isSwapAmountsLoading = false;
+			isFetching = false;
 		}
 	};
-	const debounceLoadSwapAmounts = debounce(loadSwapAmounts);
+
+	const debounceLoadSwapAmounts = debounce(() => loadSwapAmounts(false));
+
+	$effect(() => {
+		if (pauseAmountUpdates || !enableAmountUpdates) {
+			clearTimer();
+		} else {
+			startTimer();
+		}
+	});
 
 	$effect(() => {
 		[amount, sourceToken, destinationToken];
+
 		debounceLoadSwapAmounts();
+	});
+
+	onDestroy(() => {
+		clearTimer();
 	});
 </script>
 

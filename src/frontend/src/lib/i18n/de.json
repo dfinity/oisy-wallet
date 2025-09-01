@@ -37,7 +37,8 @@
 			"currency": "Währung"
 		},
 		"info": {
-			"test_banner": "Nur zu Testzwecken!"
+			"test_banner": "Nur zu Testzwecken!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "$name-Logo",
@@ -728,7 +729,8 @@
 			"btc_insufficient_balance_for_fee": "Unzureichender Bitcoin-Saldo zur Deckung der Transaktionsgebühren",
 			"btc_invalid_utxo_data": "Ungültige Bitcoin-Transaktionsdaten",
 			"btc_utxo_locked": "Bitcoin-Guthaben durch ausstehende Transaktionen gesperrt",
-			"btc_invalid_fee_calculation": "Bitcoin-Transaktionsgebühren-Validierung fehlgeschlagen"
+			"btc_invalid_fee_calculation": "Bitcoin-Transaktionsgebühren-Validierung fehlgeschlagen",
+			"pending_transactions_not_available": "Der Service für ausstehende Transaktionen ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut."
 		},
 		"error": {
 			"unexpected": "Beim Senden der Transaktion ist etwas schiefgelaufen.",
@@ -811,9 +813,9 @@
 			"approval_fee": "Genehmigungsgebühr",
 			"gas_fee": "Gasgebühr",
 			"lp_fee": "LP-Gebühr",
-			"max_slippage_info": "Gib einen Wert zwischen 0% und 50% ein",
+			"max_slippage_info": "Gib einen Wert zwischen 0% und $maxSlippage% ein",
 			"max_slippage_warning": "Warnung: Hohe Slippage kann durch Marktvolatilität zu Verlusten führen",
-			"max_slippage_error": "Slippage-Toleranz darf nicht 0% sein oder 50% überschreiten",
+			"max_slippage_error": "Slippage-Toleranz darf nicht 0% sein oder $maxSlippage% überschreiten",
 			"swap_button": "Jetzt tauschen",
 			"swap_is_not_offered": "Dieser Tausch ist derzeit nicht verfügbar.",
 			"executing_transaction": "Führe Transaktion aus...",
@@ -1476,8 +1478,21 @@
 			"indicator": "Zur Folie $index springen"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Durch Klicken auf diese Schaltfläche stimmst du der",
 			"accept_terms_link": "Lizenzvereinbarung zu",
 			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
@@ -1496,10 +1511,31 @@
 			"entire_agreement": "<strong>10. GESAMTVEREINBARUNG UND SALVATORISCHE KLAUSEL.</strong> Diese Lizenzvereinbarung stellt die gesamte Vereinbarung zwischen Dir und DFINITY dar und ersetzt alle vorherigen Vereinbarungen, Verhandlungen oder Mitteilungen zwischen Dir und DFINITY in Bezug auf den Gegenstand. DFINITY kann diese Lizenzvereinbarung ändern, wenn neue Versionen von $oisy_short verfügbar gemacht werden. Sollte eine Bestimmung dieser Lizenzvereinbarung ungültig oder undurchsetzbar sein, wird sie so weit wie nötig angepasst, um gültig und durchsetzbar zu sein, oder, wenn das nicht möglich ist, aus dieser Lizenzvereinbarung entfernt; die Gültigkeit und Durchsetzbarkeit der übrigen Bestimmungen bleibt unberührt.",
 			"assignment": "<strong>11. ABTRETUNG.</strong> Du darfst diese Lizenzvereinbarung nicht ohne vorherige schriftliche Zustimmung von DFINITY abtreten, sonst ist sie ungültig. DFINITY kann diese Lizenzvereinbarung ohne Einschränkung und ohne Benachrichtigung Dir gegenüber abtreten. Vorbehaltlich dessen bleibt diese Lizenzvereinbarung für die Parteien und deren rechtliche Nachfolger und zulässige Abtretungsempfänger verbindlich.",
 			"no_waiver": "<strong>12. KEIN VERZICHT.</strong> Der Verzicht auf Ausübung oder Verzögerung bei Ausübung eines Rechts, einer Befugnis oder eines Rechtsmittels aus dieser Lizenzvereinbarung oder gesetzlich gilt nicht als Verzicht. Der Verzicht von DFINITY auf eine Verpflichtung oder einen Verstoß gegen diese Lizenzvereinbarung gilt nicht als Verzicht auf andere Verpflichtungen oder künftige Verstöße.",
-			"english_version": "<strong>13. ENGLISCHE VERSION.</strong> Die englische Version dieser Lizenzvereinbarung ist verbindlich, falls ein Konflikt entsteht. Alle Mitteilungen und Benachrichtigungen gemäß dieser Lizenzvereinbarung müssen in Englisch erfolgen."
+			"english_version": "<strong>13. ENGLISCHE VERSION.</strong> Die englische Version dieser Lizenzvereinbarung ist verbindlich, falls ein Konflikt entsteht. Alle Mitteilungen und Benachrichtigungen gemäß dieser Lizenzvereinbarung müssen in Englisch erfolgen.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "Die Lizenzvereinbarung von $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1555,8 +1591,14 @@
 			"action_button_contacts_title": "",
 			"action_button_contacts_subtitle": "",
 			"action_button_contacts_prompt": "",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": ""
 		},

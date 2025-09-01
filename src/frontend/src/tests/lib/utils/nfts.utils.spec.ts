@@ -8,6 +8,7 @@ import {
 	filterSortByCollection,
 	findNewNftIds,
 	findNft,
+	findNonFungibleToken,
 	findRemovedNfts,
 	getEnabledNfts,
 	getNftCollectionUi,
@@ -770,6 +771,30 @@ describe('nfts.utils', () => {
 			});
 
 			expect(res).not.toBe(input);
+		});
+	});
+
+	describe('findNonFungibleToken', () => {
+		const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
+
+		it('should return the found token', () => {
+			const result = findNonFungibleToken({
+				tokens,
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				networkId: AZUKI_ELEMENTAL_BEANS_TOKEN.network.id
+			});
+
+			expect(result).toEqual(AZUKI_ELEMENTAL_BEANS_TOKEN);
+		});
+
+		it('should return undefined if no token was found', () => {
+			const result = findNonFungibleToken({
+				tokens,
+				address: mockEthAddress,
+				networkId: ETHEREUM_NETWORK.id
+			});
+
+			expect(result).toBeUndefined();
 		});
 	});
 });
