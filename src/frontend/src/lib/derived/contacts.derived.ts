@@ -1,4 +1,3 @@
-import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi, ExtendedAddressContactUiMap } from '$lib/types/contact';
 import { nonNullish } from '@dfinity/utils';
@@ -32,8 +31,7 @@ export const extendedAddressContacts: Readable<ExtendedAddressContactUiMap> = de
 					id,
 					addresses: addresses.map((address) => ({
 						...address,
-						id: crypto.randomUUID().toString(),
-						...(address.addressType === 'Icrcv2' && { isPrincipal: isIcrcAddress(address.address) })
+						id: crypto.randomUUID().toString()
 					}))
 				}
 			}),
