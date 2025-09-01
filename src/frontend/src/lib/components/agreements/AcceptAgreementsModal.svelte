@@ -92,8 +92,6 @@
 				err
 			});
 		}
-
-		// TODO: Add services to update the user agreements acceptance status
 	};
 </script>
 
