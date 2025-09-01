@@ -17,7 +17,7 @@
 	const modalId = Symbol();
 
 	const onclick = async () => {
-		const { success } = await signIn({  });
+		const { success } = await signIn({});
 
 		if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
