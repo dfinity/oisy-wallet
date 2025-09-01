@@ -11,6 +11,7 @@
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nonFungibleCustomTokens } from '$eth/derived/tokens.derived';
 
 	interface Props {
 		collection: NftCollection;
@@ -28,7 +29,7 @@
 		}
 
 		const token = findNonFungibleToken({
-			tokens: [...$erc721CustomTokens, ...$erc1155CustomTokens],
+			tokens: $nonFungibleCustomTokens,
 			address: collection.address,
 			networkId: collection.network.id
 		});
