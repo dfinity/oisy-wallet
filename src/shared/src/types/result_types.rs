@@ -20,6 +20,7 @@ use crate::types::{
     network::SaveTestnetsSettingsError,
     user_profile::AddUserCredentialError,
 };
+use crate::types::network::SaveNetworksSettingsError;
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum AddUserCredentialResult {
@@ -140,13 +141,28 @@ impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateUserNetworkSettingsResult {
+    /// The user's network settings were updated successfully.
+    Ok(()),
+    /// The user's network settings were not updated due to an error.
+    Err(SaveNetworksSettingsError),
+}
+impl From<Result<(), SaveNetworksSettingsError>> for UpdateUserNetworkSettingsResult {
+    fn from(result: Result<(), SaveNetworksSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateUserNetworkSettingsResult::Ok(()),
+            Err(err) => UpdateUserNetworkSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SetUserShowTestnetsResult {
     /// The user's show testnets was set successfully.
     Ok(()),
     /// The user's show testnets was not set due to an error.
     Err(SaveTestnetsSettingsError),
 }
-
 impl From<Result<(), SaveTestnetsSettingsError>> for SetUserShowTestnetsResult {
     fn from(result: Result<(), SaveTestnetsSettingsError>) -> Self {
         match result {
@@ -219,6 +235,8 @@ impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelect
         }
     }
 }
+
+
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetFeePercentilesResult {

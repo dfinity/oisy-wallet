@@ -33,7 +33,7 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
+        network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
@@ -57,6 +57,7 @@ use shared::{
         Stats, Timestamp,
     },
 };
+use shared::types::result_types::UpdateUserNetworkSettingsResult;
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
@@ -623,7 +624,7 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
 #[update(guard = "caller_is_not_anonymous")]
 pub fn update_user_network_settings(
     request: SaveNetworksSettingsRequest,
-) -> Result<(), SaveNetworksSettingsError> {
+) -> UpdateUserNetworkSettingsResult {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
 
@@ -636,7 +637,7 @@ pub fn update_user_network_settings(
             request.networks,
             &mut user_profile_model,
         )
-    })
+    }).into()
 }
 
 /// Sets the user's preference to show (or hide) testnets in the interface.
