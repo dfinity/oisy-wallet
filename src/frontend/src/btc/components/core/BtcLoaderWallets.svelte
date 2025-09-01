@@ -3,7 +3,8 @@
 	import type { Snippet } from 'svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
-	import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+	import type { IcCkToken } from '$icp/types/ic-token';
+	import { isIcCkToken } from '$icp/validation/ic-token.validation';
 	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
 	import {
 		btcAddressMainnet,
@@ -17,7 +18,6 @@
 		isNetworkIdBTCRegtest,
 		isNetworkIdBTCTestnet
 	} from '$lib/utils/network.utils';
-	import { findTwinToken } from '$lib/utils/token.utils';
 
 	interface Props {
 		children: Snippet;
@@ -25,19 +25,38 @@
 
 	let { children }: Props = $props();
 
-	let ckBtcMainnetToken = $derived(
-		findTwinToken({
-			tokenToPair: BTC_MAINNET_TOKEN,
-			tokens: $tokens
-		})
+	// Find all ckBTC tokens (there may be multiple for different environments)
+	let ckBtcTokens = $derived(
+		$tokens.filter((token): token is IcCkToken => token.symbol === 'ckBTC' && isIcCkToken(token))
 	);
 
-	let ckBtcTestnetToken = $derived(
-		findTwinToken({
-			tokenToPair: BTC_TESTNET_TOKEN,
-			tokens: $tokens
-		})
-	);
+	// Find the mainnet ckBTC token (environment: mainnet)
+	let ckBtcMainnetToken = $derived(ckBtcTokens.find((token) => token.network.env === 'mainnet'));
+
+	// Find the testnet ckBTC token (environment: testnet)
+	let ckBtcTestnetToken = $derived(ckBtcTokens.find((token) => token.network.env === 'testnet'));
+
+	// Debug ckBTC tokens
+	$effect(() => {
+		console.warn('Debug ckBTC tokens:', {
+			mainnet: ckBtcMainnetToken
+				? {
+						symbol: ckBtcMainnetToken.symbol,
+						network: ckBtcMainnetToken.network.name,
+						env: ckBtcMainnetToken.network.env,
+						minterCanisterId: ckBtcMainnetToken.minterCanisterId
+					}
+				: undefined,
+			testnet: ckBtcTestnetToken
+				? {
+						symbol: ckBtcTestnetToken.symbol,
+						network: ckBtcTestnetToken.network.name,
+						env: ckBtcTestnetToken.network.env,
+						minterCanisterId: ckBtcTestnetToken.minterCanisterId
+					}
+				: undefined
+		});
+	});
 
 	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
 	let walletWorkerTokens = $derived.by(() =>
