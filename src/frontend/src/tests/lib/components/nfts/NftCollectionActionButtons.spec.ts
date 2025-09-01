@@ -1,19 +1,19 @@
-import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
-import { render, waitFor } from '@testing-library/svelte';
-import { mapTokenToCollection } from '$lib/utils/nfts.utils';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
 	NFT_COLLECTION_ACTION_NOT_SPAM,
 	NFT_COLLECTION_ACTION_SPAM,
 	NFT_COLLECTION_ACTION_UNHIDE
 } from '$lib/constants/test-ids.constants';
-import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import type { MockInstance } from 'vitest';
-import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { render, waitFor } from '@testing-library/svelte';
+import type { MockInstance } from 'vitest';
 
 describe('NftCollectionActionButtons', () => {
 	let erc721CustomTokensSpy: MockInstance;
@@ -31,7 +31,7 @@ describe('NftCollectionActionButtons', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		mockAuthStore()
+		mockAuthStore();
 
 		erc721CustomTokensStore.resetAll();
 
@@ -109,7 +109,8 @@ describe('NftCollectionActionButtons', () => {
 		});
 
 		await waitFor(() => {
-			const notSpamButton: HTMLButtonElement | null = container.querySelector(notSpamButtonSelector);
+			const notSpamButton: HTMLButtonElement | null =
+				container.querySelector(notSpamButtonSelector);
 
 			expect(notSpamButton).toBeInTheDocument();
 		});
@@ -137,7 +138,7 @@ describe('NftCollectionActionButtons', () => {
 
 			spamButton?.click();
 
-			expect(erc721CustomTokensSpy).toHaveBeenCalled()
+			expect(erc721CustomTokensSpy).toHaveBeenCalled();
 		});
 	});
 });

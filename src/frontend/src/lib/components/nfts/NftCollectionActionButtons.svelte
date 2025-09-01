@@ -6,17 +6,18 @@
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NftCollectionActionButton from '$lib/components/nfts/NftCollectionActionButton.svelte';
+	import {
+		NFT_COLLECTION_ACTION_HIDE,
+		NFT_COLLECTION_ACTION_NOT_SPAM,
+		NFT_COLLECTION_ACTION_SPAM,
+		NFT_COLLECTION_ACTION_UNHIDE
+	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import {
-		NFT_COLLECTION_ACTION_HIDE,
-		NFT_COLLECTION_ACTION_NOT_SPAM,
-		NFT_COLLECTION_ACTION_SPAM, NFT_COLLECTION_ACTION_UNHIDE
-	} from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		collection: NftCollection;
