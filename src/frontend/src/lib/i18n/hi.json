@@ -1039,7 +1039,11 @@
 			"collections": "संग्रह",
 			"all_assets": "सभी एसेट्स",
 			"address_copied": "पता $address कॉपी किया गया",
-			"open_explorer": "इस अनुबंध को ब्लॉकचेन एक्सप्लोरर में खोलें"
+			"open_explorer": "इस अनुबंध को ब्लॉकचेन एक्सप्लोरर में खोलें",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": ""
 		},
 		"alt": {
 			"placeholder_image": "अभी तक कोई NFTs नहीं",
