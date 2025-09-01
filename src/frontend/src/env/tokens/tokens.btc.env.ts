@@ -36,7 +36,7 @@ export const BTC_TESTNET_SYMBOL = 'BTC (Testnet)';
 
 export const BTC_TESTNET_TOKEN_ID: TokenId = parseTokenId(BTC_TESTNET_SYMBOL);
 
-export const BTC_TESTNET_TOKEN: TokenWithLinkedData = {
+export const BTC_TESTNET_TOKEN: Token = {
 	id: BTC_TESTNET_TOKEN_ID,
 	network: BTC_TESTNET_NETWORK,
 	standard: 'bitcoin',
@@ -44,15 +44,14 @@ export const BTC_TESTNET_TOKEN: TokenWithLinkedData = {
 	name: 'Bitcoin (Testnet)',
 	symbol: BTC_TESTNET_SYMBOL,
 	decimals: BTC_DECIMALS,
-	icon: bitcoinTestnet,
-	twinTokenSymbol: 'ckBTC'
+	icon: bitcoinTestnet
 };
 
 export const BTC_REGTEST_SYMBOL = 'BTC (Regtest)';
 
 export const BTC_REGTEST_TOKEN_ID: TokenId = parseTokenId(BTC_REGTEST_SYMBOL);
 
-export const BTC_REGTEST_TOKEN: TokenWithLinkedData = {
+export const BTC_REGTEST_TOKEN: Token = {
 	id: BTC_REGTEST_TOKEN_ID,
 	network: BTC_REGTEST_NETWORK,
 	standard: 'bitcoin',
@@ -60,8 +59,7 @@ export const BTC_REGTEST_TOKEN: TokenWithLinkedData = {
 	name: 'Bitcoin (Regtest)',
 	symbol: BTC_REGTEST_SYMBOL,
 	decimals: BTC_DECIMALS,
-	icon: bitcoinTestnet,
-	twinTokenSymbol: 'ckBTC'
+	icon: bitcoinTestnet
 };
 
 // The following tokens are used as fallback for any Bitcoin token defined in the token store.
