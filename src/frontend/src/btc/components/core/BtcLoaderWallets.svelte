@@ -3,15 +3,18 @@
 	import type { Snippet } from 'svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
-	import type { IcCkToken } from '$icp/types/ic-token';
-	import { isIcCkToken } from '$icp/validation/ic-token.validation';
+	import {
+		IC_CKBTC_MINTER_CANISTER_ID,
+		STAGING_CKBTC_MINTER_CANISTER_ID,
+		LOCAL_CKBTC_MINTER_CANISTER_ID
+	} from '$env/networks/networks.icrc.env';
 	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
+	import { LOCAL } from '$lib/constants/app.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet
 	} from '$lib/derived/address.derived';
-	import { tokens } from '$lib/derived/tokens.derived';
 	import type { InitWalletWorkerFn } from '$lib/types/listener';
 	import {
 		isNetworkIdBTCMainnet,
@@ -25,36 +28,13 @@
 
 	let { children }: Props = $props();
 
-	// Find all ckBTC tokens (there may be multiple for different environments)
-	let ckBtcTokens = $derived(
-		$tokens.filter((token): token is IcCkToken => token.symbol === 'ckBTC' && isIcCkToken(token))
-	);
-
-	// Find the mainnet ckBTC token (environment: mainnet)
-	let ckBtcMainnetToken = $derived(ckBtcTokens.find((token) => token.network.env === 'mainnet'));
-
-	// Find the testnet ckBTC token (environment: testnet)
-	let ckBtcTestnetToken = $derived(ckBtcTokens.find((token) => token.network.env === 'testnet'));
-
-	// Debug ckBTC tokens
+	// Debug minter canister IDs
 	$effect(() => {
-		console.warn('Debug ckBTC tokens:', {
-			mainnet: ckBtcMainnetToken
-				? {
-						symbol: ckBtcMainnetToken.symbol,
-						network: ckBtcMainnetToken.network.name,
-						env: ckBtcMainnetToken.network.env,
-						minterCanisterId: ckBtcMainnetToken.minterCanisterId
-					}
-				: undefined,
-			testnet: ckBtcTestnetToken
-				? {
-						symbol: ckBtcTestnetToken.symbol,
-						network: ckBtcTestnetToken.network.name,
-						env: ckBtcTestnetToken.network.env,
-						minterCanisterId: ckBtcTestnetToken.minterCanisterId
-					}
-				: undefined
+		console.warn('Debug ckBTC minter canister IDs:', {
+			mainnet: IC_CKBTC_MINTER_CANISTER_ID,
+			testnet: STAGING_CKBTC_MINTER_CANISTER_ID,
+			local: LOCAL_CKBTC_MINTER_CANISTER_ID,
+			isLocal: LOCAL
 		});
 	});
 
@@ -68,19 +48,21 @@
 		)
 	);
 
-	const initWalletWorker: InitWalletWorkerFn = ({ token }) =>
-		initBtcWalletWorker({
+	const initWalletWorker: InitWalletWorkerFn = ({ token }) => {
+		let minterCanisterId;
+
+		if (isNetworkIdBTCMainnet(token.network.id)) {
+			minterCanisterId = IC_CKBTC_MINTER_CANISTER_ID;
+		} else if (isNetworkIdBTCTestnet(token.network.id)) {
+			minterCanisterId = LOCAL ? LOCAL_CKBTC_MINTER_CANISTER_ID : STAGING_CKBTC_MINTER_CANISTER_ID;
+		}
+		// For regtest, minterCanisterId remains undefined
+
+		return initBtcWalletWorker({
 			token,
-			// Only provide minterCanisterId for mainnet and testnet networks.
-			// Regtest networks don't get a minterCanisterId (undefined), which is correct
-			// as the initBtcWalletWorker function signature has minterCanisterId as optional,
-			// so regtest will fall back to the signer API for balance queries.
-			...((isNetworkIdBTCMainnet(token.network.id) || isNetworkIdBTCTestnet(token.network.id)) && {
-				minterCanisterId: isNetworkIdBTCMainnet(token.network.id)
-					? ckBtcMainnetToken?.minterCanisterId
-					: ckBtcTestnetToken?.minterCanisterId
-			})
+			minterCanisterId
 		});
+	};
 </script>
 
 <WalletWorkers {initWalletWorker} tokens={walletWorkerTokens}>
