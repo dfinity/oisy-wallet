@@ -18,16 +18,14 @@
 
 	let { collection }: Props = $props();
 
+	const token = $derived(findNonFungibleToken({tokens: $nonFungibleCustomTokens,
+		address: collection.address,
+		networkId: collection.network.id}))
+
 	const updateSection = async (section: CustomTokenSection) => {
 		if (isNullish($authIdentity)) {
 			return;
 		}
-
-		const token = findNonFungibleToken({
-			tokens: $nonFungibleCustomTokens,
-			address: collection.address,
-			networkId: collection.network.id
-		});
 
 		if (nonNullish(token)) {
 			if (token.standard === 'erc721') {
@@ -47,7 +45,7 @@
 </script>
 
 <div class="flex gap-2">
-	{#if collection.section !== CustomTokenSection.SPAM}
+	{#if token.section !== CustomTokenSection.SPAM}
 		<NftCollectionActionButton label="Spam" onclick={() => updateSection(CustomTokenSection.SPAM)}>
 			{#snippet icon()}
 				<IconAlertOctagon size="18" />
@@ -55,14 +53,14 @@
 		</NftCollectionActionButton>
 	{/if}
 
-	{#if collection.section !== CustomTokenSection.HIDDEN}
+	{#if token.section !== CustomTokenSection.HIDDEN}
 		<NftCollectionActionButton label="Hide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
 			{#snippet icon()}
 				<IconEyeOff size="18" />
 			{/snippet}
 		</NftCollectionActionButton>
 	{:else}
-		<NftCollectionActionButton colorStyle="primary" label="Unhide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
+		<NftCollectionActionButton colorStyle="primary" label="Unhide" onclick={() => updateSection(undefined)}>
 			{#snippet icon()}
 				<IconEye size="18" />
 			{/snippet}
