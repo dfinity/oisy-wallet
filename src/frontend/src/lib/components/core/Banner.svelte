@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { IconClose, IconWarning } from '@dfinity/gix-components';
+	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 
 	let visible = true;
 
