@@ -1489,7 +1489,6 @@
 			"accept_and_continue": "Accept and continue"
 		},
 		"error": {
-			"discordant_agreements_number": "Not all agreements were accepted. Please accept all agreements and try again.",
 			"cannot_update_user_agreements": "Something went wrong when updating your agreements."
 		}
 	},
