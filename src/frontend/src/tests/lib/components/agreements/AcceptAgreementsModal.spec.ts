@@ -12,6 +12,8 @@ import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
+import * as eventsUtils from '$lib/utils/events.utils';
+import { emit } from '$lib/utils/events.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -52,6 +54,8 @@ describe('AcceptAgreementsModal', () => {
 		vi.spyOn(backendApi, 'updateUserAgreements').mockImplementation(vi.fn());
 
 		vi.spyOn(toastsStore, 'toastsError');
+
+		vi.spyOn(eventsUtils, 'emit');
 	});
 
 	it('shows updated title when hasOutdatedAgreements = true', () => {
@@ -161,6 +165,8 @@ describe('AcceptAgreementsModal', () => {
 		expect(authServices.nullishSignOut).toHaveBeenCalledOnce();
 
 		expect(backendApi.updateUserAgreements).not.toHaveBeenCalled();
+
+		expect(emit).not.toHaveBeenCalled();
 	});
 
 	it('clicking Accept calls updateUserAgreements with no selected agreement', async () => {
@@ -172,6 +178,8 @@ describe('AcceptAgreementsModal', () => {
 			identity: mockIdentity,
 			agreements: {}
 		});
+
+		expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyRefreshUserProfile' });
 	});
 
 	it('clicking Accept calls updateUserAgreements with some agreements selected', async () => {
@@ -196,6 +204,8 @@ describe('AcceptAgreementsModal', () => {
 				}
 			}
 		});
+
+		expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyRefreshUserProfile' });
 	});
 
 	it('clicking Accept shows an error toast when updateUserAgreements fails', async () => {
@@ -210,6 +220,8 @@ describe('AcceptAgreementsModal', () => {
 			msg: { text: en.agreements.error.cannot_update_user_agreements },
 			err: mockError
 		});
+
+		expect(emit).not.toHaveBeenCalled();
 	});
 
 	it('accept button is disabled initially with all three rendered', () => {
@@ -223,7 +235,9 @@ describe('AcceptAgreementsModal', () => {
 	it('accept button enables after all three are toggled when all three are rendered', async () => {
 		const { getByRole, getAllByRole } = render(AcceptAgreementsModal);
 
-		const acceptBtn = getByRole('button', { name: get(i18n).agreements.text.accept_and_continue });
+		const acceptBtn = getByRole('button', {
+			name: get(i18n).agreements.text.accept_and_continue
+		});
 		const checkboxes = getAllByRole('checkbox');
 
 		for (const cb of checkboxes) {
