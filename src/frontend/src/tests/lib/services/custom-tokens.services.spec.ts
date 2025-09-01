@@ -30,7 +30,8 @@ describe('custom-tokens.services', () => {
 				},
 				version: toNullable(2n),
 				enabled: true,
-				section: toNullable()
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			},
 			{
 				token: {
@@ -41,7 +42,8 @@ describe('custom-tokens.services', () => {
 				},
 				version: toNullable(1n),
 				enabled: false,
-				section: toNullable()
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			},
 			{
 				token: {
@@ -53,7 +55,8 @@ describe('custom-tokens.services', () => {
 				},
 				version: toNullable(),
 				enabled: true,
-				section: toNullable()
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			}
 		];
 
@@ -225,7 +228,8 @@ describe('custom-tokens.services', () => {
 					},
 					version: toNullable(2n),
 					enabled: true,
-					section: toNullable()
+					section: toNullable(),
+					allow_external_content_source: toNullable()
 				}
 			]);
 

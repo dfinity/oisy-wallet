@@ -14,7 +14,13 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { AGREEMENTS_MODAL } from '$lib/constants/test-ids.constants';
+	import {
+		AGREEMENTS_MODAL,
+		AGREEMENTS_MODAL_ACCEPT_BUTTON,
+		AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT,
+		AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY,
+		AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE
+	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/user-agreements.derived';
 	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
@@ -129,6 +135,7 @@
 					inputId="termsOfUseCheckbox"
 					isOutdated={$hasOutdatedAgreements}
 					onChange={() => toggleAccept('termsOfUse')}
+					testId={AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE}
 				>
 					{#snippet agreementLink()}
 						<TermsOfUseLink noUnderline>
@@ -145,6 +152,7 @@
 					inputId="privacyPolicyCheckbox"
 					isOutdated={$hasOutdatedAgreements}
 					onChange={() => toggleAccept('privacyPolicy')}
+					testId={AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY}
 				>
 					{#snippet agreementLink()}
 						<PrivacyPolicyLink noUnderline>
@@ -161,6 +169,7 @@
 					inputId="licenseAgreementCheckbox"
 					isOutdated={$hasOutdatedAgreements}
 					onChange={() => toggleAccept('licenseAgreement')}
+					testId={AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT}
 				>
 					{#snippet agreementLink()}
 						<LicenseLink noUnderline>
@@ -178,7 +187,13 @@
 				<Button colorStyle="secondary-light" onclick={onReject}>
 					{$i18n.core.text.reject}
 				</Button>
-				<Button colorStyle="primary" {disabled} loading={savingAgreements} onclick={onAccept}>
+				<Button
+					colorStyle="primary"
+					{disabled}
+					loading={savingAgreements}
+					onclick={onAccept}
+					testId={AGREEMENTS_MODAL_ACCEPT_BUTTON}
+				>
 					{$i18n.agreements.text.accept_and_continue}
 				</Button>
 			</ButtonGroup>
