@@ -38,7 +38,7 @@
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
-			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Tokens betroffen sein können."
+			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können."
 		},
 		"alt": {
 			"logo": "$name-Logo",
@@ -367,7 +367,7 @@
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
 				"card_title": "OISY Sprinkles: Episode 3 ist aktiv 🎉",
-				"one_liner": "Sei aktiv und verdiene BTC — und jetzt, fürs <strong>Einladen von Freunden</strong>.<br/>Logge ein, führe Transaktionen aus und halte Tokens um dich für tägliche Gewinne zu qualifizieren. Lade Freunde ein und verdiene zusätzlich 10% ihrer Gewinne.",
+				"one_liner": "Sei aktiv und verdiene BTC — und jetzt, fürs <strong>Einladen von Freunden</strong>.<br/>Logge ein, führe Transaktionen aus und halte Token um dich für tägliche Gewinne zu qualifizieren. Lade Freunde ein und verdiene zusätzlich 10% ihrer Gewinne.",
 				"participate_title": "Sei aktiv und verdiene BTC - und jetzt auch durchs Einladen von Freunden.",
 				"description": "Erfülle einfache wöchentliche Anforderungen. Melde dich an, führe zwei Transaktionen durch und halte Token im Wert von mindestens $20, um täglich 50 BTC-Drops zu erhalten.<br/><strong>Jetzt mit Empfehlungsprämien:</strong> Lade Freunde ein um eine Wallet einzurichten und verdiene 30 Tage lang 10 % ihrer Sprinkles. Sie behalten 100 % – du verdienst zusätzlich.",
 				"campaign_href": "https://x.com/intent/post?text=Noch%20nicht%20f%C3%BCr%20%40OISY%20Sprinkles%20qualifiziert%3F%0ASie%20liefern%20%24BTC%20frei%20Haus%20-%20Tag%20ein%2C%20Tag%20aus.%0ABesuche%20OISY.com%20und%20entdecke%20es%20selber.%20%F0%9F%9A%80",
@@ -392,10 +392,10 @@
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
 				"card_title": "OISY Sprinkles: Episode 4 ist aktiv 🎉",
-				"one_liner": "Verdiene BTC durch Aktivität – und jetzt auch <strong>garantierte</strong> Sprinkles für Einladungen.<br/>Melde dich an, mach Transaktionen und halte Tokens, um dich für tägliche Drops zu qualifizieren. Lade 4 Freunde ein und erhalte direkt eine Belohnung. Top-Werber gewinnen noch mehr.",
+				"one_liner": "Verdiene BTC durch Aktivität – und jetzt auch <strong>garantierte</strong> Sprinkles für Einladungen.<br/>Melde dich an, mach Transaktionen und halte Token, um dich für tägliche Drops zu qualifizieren. Lade 4 Freunde ein und erhalte direkt eine Belohnung. Top-Werber gewinnen noch mehr.",
 				"participate_title": "Verdiene BTC durch Aktivität – und jetzt auch durch Einladungen.",
-				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Tokens, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
-				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Tokens%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
+				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Token, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
+				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Token%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
 				"win": {
 					"default": {
 						"title": "Du wurdest belohnt",
