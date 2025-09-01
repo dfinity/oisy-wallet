@@ -27,7 +27,7 @@
 	const onLegacySignIn = async () => {
 		onDone();
 
-		await signIn({ domain: 'ic0.app', i18n: $i18n });
+		await signIn({ domain: 'ic0.app' });
 	};
 </script>
 

@@ -5,6 +5,7 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
+import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import {
@@ -26,7 +27,6 @@ let authClient: Option<AuthClient>;
 
 export interface AuthSignInParams {
 	domain?: 'ic0.app' | 'internetcomputer.org';
-	i18n: I18n;
 }
 
 export interface AuthStore extends Readable<AuthStoreData> {
@@ -66,13 +66,13 @@ const initAuthStore = (): AuthStore => {
 			});
 		},
 
-		signIn: ({ domain, i18n }: AuthSignInParams) =>
+		signIn: ({ domain }: AuthSignInParams) =>
 			// eslint-disable-next-line no-async-promise-executor
 			new Promise<void>(async (resolve, reject) => {
 				// When signing in, we require the authClient to be safely defined through the sync method (called when the window loads).
 				// We are not able to recreate authClient safely here since there are some browsers (like Safari) that block popups if there is an addition async call in this call stack.
 				if (isNullish(authClient)) {
-					reject(i18n.auth.warning.reload_and_retry);
+					reject(new AuthClientNotInitializedError());
 
 					return;
 				}
