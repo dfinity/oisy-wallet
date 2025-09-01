@@ -1040,6 +1040,10 @@
 			"collections": "Kollektionen",
 			"all_assets": "Alle Assets",
 			"address_copied": "Adresse $address kopiert",
+			"spam": "Spam",
+			"not_spam": "Kein Spam",
+			"hide": "Verstecken",
+			"unhide": "Anzeigen",
 			"open_explorer": "Öffne diesen Contract im Blockchain Explorer",
 			"collection_name": "Kollektionsname",
 			"media_urls": "Medien URLs",
@@ -1500,6 +1504,9 @@
 			"i_have_accepted": "Ich habe die Dokumente gelesen und stimme ihnen zu.",
 			"i_have_accepted_updated": "Ich habe die angepassten Dokumente gelesen und stimme ihnen zu.",
 			"accept_and_continue": "Zustimmen und weiterfahren"
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {
