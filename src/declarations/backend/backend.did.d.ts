@@ -181,10 +181,10 @@ export interface CredentialSpec {
 export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
+	allow_external_content_source: [] | [boolean];
 	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
-	allow_media_source: [] | [boolean];
 }
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;

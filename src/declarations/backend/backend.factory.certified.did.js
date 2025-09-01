@@ -398,10 +398,10 @@ export const idlFactory = ({ IDL }) => {
 	const TokenSection = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });
 	const CustomToken = IDL.Record({
 		token: Token,
+		allow_external_content_source: IDL.Opt(IDL.Bool),
 		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
-		enabled: IDL.Bool,
-		allow_media_source: IDL.Opt(IDL.Bool)
+		enabled: IDL.Bool
 	});
 	const UserToken = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
