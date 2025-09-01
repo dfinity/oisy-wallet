@@ -283,3 +283,13 @@ export const findNonFungibleToken = ({
 	networkId: NetworkId;
 }): NonFungibleToken | undefined =>
 	tokens.find((token) => token.address === address && token.network.id === networkId);
+
+// We offer this util so we dont mistakingly take the value from the nfts collection prop,
+// as it is not updated after updating the consent. Going through this function ensures no stale data
+export const getAllowMediaForNft = (params: {
+	tokens: NonFungibleToken[];
+	address: EthAddress;
+	networkId: NetworkId;
+}): boolean =>
+	(findNonFungibleToken(params) as unknown as { allowMediaUrls: boolean | undefined })
+		?.allowMediaUrls ?? false; // todo: use real prop
