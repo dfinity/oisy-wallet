@@ -148,11 +148,11 @@ fn test_update_user_agreement_tracks_last_updated_time() {
         .update::<UserProfile>(caller, "create_user_profile", ())
         .expect("Create failed");
 
-    let arg1 = SaveAgreementsRequest {
+    let arg1 = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
         agreements: INITIAL_AGREEMENTS.clone(),
     };
-    let resp1 = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp1 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg1,
@@ -165,7 +165,7 @@ fn test_update_user_agreement_tracks_last_updated_time() {
         .unwrap()
         .unwrap();
 
-    let arg2 = SaveAgreementsRequest {
+    let arg2 = UpdateUserAgreementsRequest {
         current_user_version: user_profile_after_first.version,
         agreements: UserAgreements {
             license_agreement: UserAgreement {
@@ -177,7 +177,7 @@ fn test_update_user_agreement_tracks_last_updated_time() {
         },
     };
 
-    let resp2 = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp2 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg2,
@@ -205,7 +205,7 @@ fn test_update_user_agreement_tracks_last_updated_time() {
     assert!(a.license_agreement.last_accepted_at_ns.is_some());
 
     let new_last_updated_2: Timestamp = 1_800_000_000_000;
-    let arg3 = SaveAgreementsRequest {
+    let arg3 = UpdateUserAgreementsRequest {
         current_user_version: user_profile_after_update.version,
         agreements: UserAgreements {
             license_agreement: UserAgreement {
@@ -216,7 +216,7 @@ fn test_update_user_agreement_tracks_last_updated_time() {
             ..Default::default()
         },
     };
-    let resp3 = pic_setup.update::<Result<(), SaveAgreementsSettingsError>>(
+    let resp3 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
         caller,
         "update_user_agreements",
         arg3,
