@@ -4,6 +4,7 @@
 	import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
+	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NftCollectionActionButton from '$lib/components/nfts/NftCollectionActionButton.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -58,6 +59,12 @@
 		<NftCollectionActionButton label="Hide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
 			{#snippet icon()}
 				<IconEyeOff size="18" />
+			{/snippet}
+		</NftCollectionActionButton>
+	{:else}
+		<NftCollectionActionButton colorStyle="primary" label="Unhide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
+			{#snippet icon()}
+				<IconEye size="18" />
 			{/snippet}
 		</NftCollectionActionButton>
 	{/if}

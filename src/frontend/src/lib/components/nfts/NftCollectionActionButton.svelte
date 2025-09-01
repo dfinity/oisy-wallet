@@ -2,18 +2,20 @@
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
 	import Button from '$lib/components/ui/Button.svelte';
+	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
 		icon: Snippet;
 		onclick: MouseEventHandler<HTMLButtonElement>;
 		label: string;
+		colorStyle?: ButtonColorStyle;
 	}
 
-	let { icon, onclick, label }: Props = $props();
+	let { icon, onclick, label, colorStyle = 'tertiary-alt' }: Props = $props();
 </script>
 
 <Button
-	colorStyle="tertiary-alt"
+	{colorStyle}
 	innerStyleClass="h-5"
 	{onclick}
 	paddingSmall
