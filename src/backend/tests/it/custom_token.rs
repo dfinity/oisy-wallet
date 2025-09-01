@@ -82,7 +82,7 @@ static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     enabled: true,
     version: None,
     section: None,
-    allow_external_content_source: None,
+    allow_external_content_source: Some(true),
 });
 static ERC1155_TOKEN_ID: LazyLock<ErcTokenId> =
     LazyLock::new(|| ErcTokenId("0x6a00bfd7f89204721aaf9aec39592cf444bff845".to_string()));
@@ -95,7 +95,7 @@ static ERC1155_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     enabled: true,
     version: None,
     section: None,
-    allow_external_content_source: None,
+    allow_external_content_source: Some(false),
 });
 static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
     vec![
