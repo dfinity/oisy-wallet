@@ -62,7 +62,7 @@
 			<ExternalLink
 				iconAsLast
 				styleClass="font-bold ml-2"
-				href="#"
+				href="https://docs.oisy.com/using-oisy-wallet/how-tos/nfts"
 				ariaLabel={$i18n.nfts.text.learn_more}
 				iconSize="18">{$i18n.nfts.text.learn_more}</ExternalLink
 			>
