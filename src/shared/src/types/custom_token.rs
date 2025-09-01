@@ -44,7 +44,7 @@ pub type ChainId = u64;
 #[serde(remote = "Self")]
 pub struct ErcToken {
     pub token_address: ErcTokenId,
-    pub chain_id: ChainId
+    pub chain_id: ChainId,
 }
 
 /// A variant describing any token
