@@ -2,7 +2,6 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@dfinity/principal';
-import { toNullable } from '@dfinity/utils';
 
 describe('custom-token.utils', () => {
 	describe('toCustomToken', () => {

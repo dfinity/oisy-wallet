@@ -125,7 +125,7 @@ describe('LoaderCollections', () => {
 			token: {
 				Erc1155: {
 					token_address: mockEthAddress,
-					chain_id: network.chainId,
+					chain_id: network.chainId
 				}
 			},
 			version: toNullable(1n),
