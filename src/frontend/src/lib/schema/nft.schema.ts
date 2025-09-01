@@ -1,4 +1,3 @@
-import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { Network } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import * as z from 'zod';
@@ -24,8 +23,7 @@ export const NftCollectionSchema = z.object({
 	symbol: z.string().optional(),
 	id: z.custom<TokenId>(),
 	network: z.custom<Network>(),
-	standard: z.custom<TokenStandard>(),
-	section: z.custom<CustomTokenSection>().optional()
+	standard: z.custom<TokenStandard>()
 });
 
 export const NftSchema = z.object({
