@@ -37,7 +37,8 @@
 			"currency": "Valuta"
 		},
 		"info": {
-			"test_banner": "Solo a scopo di test!"
+			"test_banner": "Solo a scopo di test!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo di $name",

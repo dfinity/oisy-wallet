@@ -37,7 +37,8 @@
 			"currency": "通貨"
 		},
 		"info": {
-			"test_banner": "テスト目的のみ！"
+			"test_banner": "テスト目的のみ！",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "$name ロゴ",

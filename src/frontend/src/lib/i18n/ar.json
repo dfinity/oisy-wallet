@@ -37,7 +37,8 @@
 			"currency": "العملة"
 		},
 		"info": {
-			"test_banner": "لأغراض الاختبار فقط!"
+			"test_banner": "لأغراض الاختبار فقط!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "شعار $name",

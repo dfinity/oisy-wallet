@@ -37,7 +37,8 @@
 			"currency": "货币"
 		},
 		"info": {
-			"test_banner": "仅供测试使用！"
+			"test_banner": "仅供测试使用！",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "$name 标志",

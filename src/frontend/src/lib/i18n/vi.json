@@ -37,7 +37,8 @@
 			"currency": "Tiền tệ"
 		},
 		"info": {
-			"test_banner": "Chỉ dành cho mục đích thử nghiệm!"
+			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo $name",
