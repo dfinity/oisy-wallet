@@ -1,3 +1,4 @@
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@dfinity/principal';
@@ -7,13 +8,14 @@ describe('custom-token.utils', () => {
 	describe('toCustomToken', () => {
 		const mockParams = {
 			enabled: true,
-			version: 1n
+			version: 1n,
+			section: CustomTokenSection.SPAM
 		};
 
 		const partialExpected = {
 			enabled: true,
 			version: [1n],
-			section: toNullable()
+			section: [{ Spam: null }]
 		};
 
 		it('should convert to CustomToken with nullish version', () => {
@@ -28,6 +30,27 @@ describe('custom-token.utils', () => {
 			).toEqual({
 				...partialExpected,
 				version: [],
+				token: {
+					Icrc: {
+						ledger_id: Principal.fromText(mockLedgerCanisterId),
+						index_id: [Principal.fromText(mockIndexCanisterId)]
+					}
+				}
+			});
+		});
+
+		it('should convert to CustomToken with nullish section', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					section: undefined,
+					networkKey: 'Icrc',
+					ledgerCanisterId: mockLedgerCanisterId,
+					indexCanisterId: mockIndexCanisterId
+				})
+			).toEqual({
+				...partialExpected,
+				section: [],
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(mockLedgerCanisterId),

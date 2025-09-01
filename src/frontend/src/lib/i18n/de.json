@@ -14,7 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Dezimalstellen",
 			"amount": "Betrag",
-			"tokenId": "",
+			"tokenId": "Token ID",
 			"max": "Max",
 			"destination": "Ziel",
 			"reject": "Ablehnen",
@@ -37,7 +37,8 @@
 			"currency": "Währung"
 		},
 		"info": {
-			"test_banner": "Nur zu Testzwecken!"
+			"test_banner": "Nur zu Testzwecken!",
+			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können."
 		},
 		"alt": {
 			"logo": "$name-Logo",
@@ -366,7 +367,7 @@
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
 				"card_title": "OISY Sprinkles: Episode 3 ist aktiv 🎉",
-				"one_liner": "Sei aktiv und verdiene BTC — und jetzt, fürs <strong>Einladen von Freunden</strong>.<br/>Logge ein, führe Transaktionen aus und halte Tokens um dich für tägliche Gewinne zu qualifizieren. Lade Freunde ein und verdiene zusätzlich 10% ihrer Gewinne.",
+				"one_liner": "Sei aktiv und verdiene BTC — und jetzt, fürs <strong>Einladen von Freunden</strong>.<br/>Logge ein, führe Transaktionen aus und halte Token um dich für tägliche Gewinne zu qualifizieren. Lade Freunde ein und verdiene zusätzlich 10% ihrer Gewinne.",
 				"participate_title": "Sei aktiv und verdiene BTC - und jetzt auch durchs Einladen von Freunden.",
 				"description": "Erfülle einfache wöchentliche Anforderungen. Melde dich an, führe zwei Transaktionen durch und halte Token im Wert von mindestens $20, um täglich 50 BTC-Drops zu erhalten.<br/><strong>Jetzt mit Empfehlungsprämien:</strong> Lade Freunde ein um eine Wallet einzurichten und verdiene 30 Tage lang 10 % ihrer Sprinkles. Sie behalten 100 % – du verdienst zusätzlich.",
 				"campaign_href": "https://x.com/intent/post?text=Noch%20nicht%20f%C3%BCr%20%40OISY%20Sprinkles%20qualifiziert%3F%0ASie%20liefern%20%24BTC%20frei%20Haus%20-%20Tag%20ein%2C%20Tag%20aus.%0ABesuche%20OISY.com%20und%20entdecke%20es%20selber.%20%F0%9F%9A%80",
@@ -391,10 +392,10 @@
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
 				"card_title": "OISY Sprinkles: Episode 4 ist aktiv 🎉",
-				"one_liner": "Verdiene BTC durch Aktivität – und jetzt auch <strong>garantierte</strong> Sprinkles für Einladungen.<br/>Melde dich an, mach Transaktionen und halte Tokens, um dich für tägliche Drops zu qualifizieren. Lade 4 Freunde ein und erhalte direkt eine Belohnung. Top-Werber gewinnen noch mehr.",
+				"one_liner": "Verdiene BTC durch Aktivität – und jetzt auch <strong>garantierte</strong> Sprinkles für Einladungen.<br/>Melde dich an, mach Transaktionen und halte Token, um dich für tägliche Drops zu qualifizieren. Lade 4 Freunde ein und erhalte direkt eine Belohnung. Top-Werber gewinnen noch mehr.",
 				"participate_title": "Verdiene BTC durch Aktivität – und jetzt auch durch Einladungen.",
-				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Tokens, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
-				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Tokens%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
+				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Token, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
+				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Token%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
 				"win": {
 					"default": {
 						"title": "Du wurdest belohnt",
@@ -431,7 +432,7 @@
 			"by": "von",
 			"dfinity_foundation": "DFINITY Foundation",
 			"copyright": "© 2025",
-			"ai_assistant_console_button": ""
+			"ai_assistant_console_button": "$oisy_short Assistent"
 		},
 		"alt": {
 			"dfinity": "Zur Website der DFINITY Foundation gehen"
@@ -835,11 +836,11 @@
 			"open_instructions_link": "Link mit Anweisungen öffnen",
 			"select_token": "Token auswählen",
 			"select_network_filter": "Netzwerk auswählen",
-			"withdrawing": "",
-			"network_cost": "",
-			"gasless": "",
-			"swap_fees": "",
-			"cross_chain_networks_info": ""
+			"withdrawing": "Abheben...",
+			"network_cost": "Netzwerk Kosten",
+			"gasless": "Gasless",
+			"swap_fees": "Swap Gebühren",
+			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk"
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
@@ -849,14 +850,14 @@
 			"pool_not_found": "Tausch fehlgeschlagen. Pool nicht gefunden.",
 			"deposit_error": "Das Senden der Token für den Tausch ist fehlgeschlagen. Please try again or change the swap provider. Versuche es erneut oder wähle einen anderen Anbieter.",
 			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
-			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Tokens wurden erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
-			"withdraw_failed_first_part": "",
-			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": "diesen Anweisungen ",
-			"manually_withdraw_success": "",
-			"manually_withdraw_failed": "",
-			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": ""
+			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Token wurden erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
+			"withdraw_failed_first_part": "Der Tausch ist fehlgeschlagen und deine Token konnten nicht automatisch zurückgeholt werden. Drücke unten den Abheben Knopf um die manuell abzuheben.<br> Oder folge ",
+			"withdraw_failed_second_part": "um sie jederzeit später von direkt von ihrer Webseite abzuheben: ",
+			"swap_failed_instruction_link": "diese Instruktionen ",
+			"manually_withdraw_success": "Die Token deines vorherigen fehlgeschlagenen Tauschs wurden erfolgreich zurückgeholt. Du kannst den Tausch erneut versuchen, oder den Tausch Provider wechseln.",
+			"manually_withdraw_failed": "Das Zuruckholen deiner Token ist fehlgeschlagen. <br> Bitte versuche es erneut, oder folge ",
+			"swap_sucess_withdraw_failed": "Der Tausch war erfolgreich, aber deine Token konnten nicht automatisch zurückgeholt werden. Drücke unten den Abheben Knopf um die manuell abzuheben.<br> Oder folge ",
+			"swap_sucess_manually_withdraw_success": "Die Token deines vorherigen Tauschs wurden erfolgeich zurückgeholt. Die kannst dieses Fenster jetzt schliessen."
 		}
 	},
 	"buy": {
@@ -1000,7 +1001,7 @@
 			"invalid_contract_address": "Vertragsadresse ist ungültig.",
 			"invalid_token_address": "Token-Adresse ist ungültig.",
 			"invalid_ledger": "Das ausgewählte Token ist nicht mit einem ICRC-Ledger-Canister verknüpft.",
-			"unrecognised_erc_interface": "",
+			"unrecognised_erc_interface": "Unbekanntes ERC Interface.",
 			"no_metadata": "Es wurden keine Metadaten abgerufen.",
 			"unexpected": "Beim Speichern des Tokens ist etwas schiefgelaufen.",
 			"unexpected_hiding": "Beim Verbergen des Tokens ist etwas schiefgelaufen.",
@@ -1276,7 +1277,7 @@
 				"reward_received": "Willkommen bei $oisy_short!",
 				"reward_failed": "Code ist abgelaufen",
 				"reward_received_description": "Du erhältst dein Willkommensgeschenk in Kürze.",
-				"brand_reward_received_description": "",
+				"brand_reward_received_description": "Willst du mehr verdienen? Empfehle einen Freund und verdiene an jeder Person die du empfohlen hast.",
 				"reward_failed_description": "Fordere einen neuen an und versuche es erneut"
 			},
 			"error": {
@@ -1335,7 +1336,7 @@
 		"avatar": {
 			"default": "Standard-Avatar",
 			"avatar_for": "Avatar für",
-			"avatar_loading": ""
+			"avatar_loading": "Avatar wird geladen..."
 		},
 		"edit_avatar": {
 			"menu_title": "Kontakt Avatar",
@@ -1479,19 +1480,19 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "Überprüfen der Geschäftsbedingungen",
+			"review_updated_title": "Überprüfen der angepassten Geschäftsbedingungen",
+			"review_description": "Um OISY Wallet zu benutzen, musst du unseren Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
+			"review_updated_description": "Um OISY Wallet weiterhin zu benutzen, musst du unseren angepassten Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
+			"reject_warning": "Du musst den Geschäftsbedingungen zustimmen um weiterzufahren.",
+			"i_have_accepted": "Ich habe die Dokumente gelesen und stimme ihnen zu.",
+			"i_have_accepted_updated": "Ich habe die angepassten Dokumente gelesen und stimme ihnen zu.",
+			"accept_and_continue": "Zustimmen und weiterfahren"
 		}
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Lizenzvereinbarung",
 			"accept_terms": "Durch Klicken auf diese Schaltfläche stimmst du der",
 			"accept_terms_link": "Lizenzvereinbarung zu",
 			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
@@ -1519,22 +1520,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
-			"title": "",
+			"terms_of_use": "Nutzungsbedingungen",
+			"title": "Nutzungsbedingungen",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Link zu den Nutzungsbedingungen"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
-			"title": "",
+			"privacy_policy": "Datenschutzrichtlinie",
+			"title": "Datenschutzrichtlinie",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Link zur Datenschutzrichtlinie"
 		}
 	},
 	"activity": {
