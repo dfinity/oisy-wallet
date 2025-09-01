@@ -17,10 +17,9 @@ use crate::types::{
     agreement::SaveAgreementsSettingsError,
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
-    network::SaveTestnetsSettingsError,
+    network::{SaveNetworksSettingsError, SaveTestnetsSettingsError},
     user_profile::AddUserCredentialError,
 };
-use crate::types::network::SaveNetworksSettingsError;
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum AddUserCredentialResult {
@@ -235,8 +234,6 @@ impl From<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>> for BtcSelect
         }
     }
 }
-
-
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum BtcGetFeePercentilesResult {

@@ -44,7 +44,7 @@ use shared::{
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
             GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
-            UpdateContactResult, UpdateUserAgreementsResult,
+            UpdateContactResult, UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -57,7 +57,6 @@ use shared::{
         Stats, Timestamp,
     },
 };
-use shared::types::result_types::UpdateUserNetworkSettingsResult;
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
@@ -637,7 +636,8 @@ pub fn update_user_network_settings(
             request.networks,
             &mut user_profile_model,
         )
-    }).into()
+    })
+    .into()
 }
 
 /// Sets the user's preference to show (or hide) testnets in the interface.
