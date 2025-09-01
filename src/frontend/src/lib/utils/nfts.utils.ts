@@ -1,3 +1,5 @@
+import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import type { NftListSortingType } from '$lib/stores/nft-list.store';
 import type { EthAddress } from '$lib/types/address';
@@ -14,8 +16,6 @@ import type {
 } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 
 export const getNftsByNetworks = ({
 	tokens,

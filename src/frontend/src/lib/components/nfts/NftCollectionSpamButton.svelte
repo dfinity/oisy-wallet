@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { erc1155CustomTokens } from '$eth/derived/erc1155.derived';
+	import { erc721CustomTokens } from '$eth/derived/erc721.derived';
 	import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
@@ -9,8 +11,6 @@
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { erc721CustomTokens } from '$eth/derived/erc721.derived';
-	import { erc1155CustomTokens } from '$eth/derived/erc1155.derived';
 
 	interface Props {
 		collection: NftCollection;
