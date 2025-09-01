@@ -1,6 +1,5 @@
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
-import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { RequiredToken, Token, TokenMetadata, TokenStandard } from '$lib/types/token';
 
 type Erc1155Standard = Extract<TokenStandard, 'erc1155'>;
