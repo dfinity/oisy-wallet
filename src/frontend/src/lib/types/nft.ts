@@ -11,6 +11,7 @@ import type {
 } from '$lib/schema/nft.schema';
 import type { NetworkId } from '$lib/types/network';
 import type * as z from 'zod';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 
 export type NftId = z.infer<typeof NftIdSchema>;
 
@@ -33,4 +34,4 @@ export type OwnedContract = z.infer<typeof OwnedContractSchema>;
 
 export type NftsByNetwork = Record<NetworkId, Record<string, Nft[]>>;
 
-export type NonFungibleToken = Erc721Token | Erc1155Token;
+export type NonFungibleToken = TokenToggleable<Erc721Token | Erc1155Token>;
