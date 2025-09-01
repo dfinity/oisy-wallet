@@ -9,7 +9,6 @@ export type Erc721Token = Erc721Contract &
 	Omit<Token, 'network' | 'standard'> & {
 		network: EthereumNetwork;
 		standard: Erc721Standard;
-		section?: CustomTokenSection;
 	};
 
 export type RequiredErc721Token = RequiredToken<Omit<Erc721Token, 'section'>>;
