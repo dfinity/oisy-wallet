@@ -148,12 +148,18 @@
 				{/if}
 			{/snippet}
 
+			{#snippet amountDescription()}
+			{#if nonNullish(timestamp)}
+			<span data-tid="receive-tokens-modal-transaction-timestamp">
+				{new Intl.DateTimeFormat($currentLanguage, {
+				hour: '2-digit',
+				minute: '2-digit'
+				}).format(new Date(Number(timestamp) * 1000))}
+			</span>
+			{/if}
+			{/snippet}
+
 			{#snippet description()}
-				<span data-tid="receive-tokens-modal-transaction-timestamp">
-					{#if nonNullish(timestamp)}
-						{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}
-					{/if}
-				</span>
 				<TransactionStatusComponent {status} />
 			{/snippet}
 		</Card>
