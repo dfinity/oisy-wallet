@@ -14,6 +14,7 @@ use super::{
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
+    agreement::SaveAgreementsSettingsError,
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
     network::SaveTestnetsSettingsError,
@@ -301,6 +302,22 @@ impl From<Result<(), AddDappSettingsError>> for AddUserHiddenDappIdResult {
         match result {
             Ok(()) => AddUserHiddenDappIdResult::Ok(()),
             Err(err) => AddUserHiddenDappIdResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateUserAgreementsResult {
+    /// The user's agreements were updated successfully.
+    Ok(()),
+    /// The user's agreements were not updated due to an error.
+    Err(SaveAgreementsSettingsError),
+}
+impl From<Result<(), SaveAgreementsSettingsError>> for UpdateUserAgreementsResult {
+    fn from(result: Result<(), SaveAgreementsSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateUserAgreementsResult::Ok(()),
+            Err(err) => UpdateUserAgreementsResult::Err(err),
         }
     }
 }

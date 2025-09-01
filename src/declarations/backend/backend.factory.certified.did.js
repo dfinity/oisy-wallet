@@ -458,6 +458,10 @@ export const idlFactory = ({ IDL }) => {
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
+	const SaveAgreementsRequest = IDL.Record({
+		agreements: UserAgreements,
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
 	const SaveNetworksSettingsRequest = IDL.Record({
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		current_user_version: IDL.Opt(IDL.Nat64)
@@ -514,6 +518,7 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
+		update_user_agreements: IDL.Func([SaveAgreementsRequest], [SetUserShowTestnetsResult], []),
 		update_user_network_settings: IDL.Func(
 			[SaveNetworksSettingsRequest],
 			[SetUserShowTestnetsResult],
