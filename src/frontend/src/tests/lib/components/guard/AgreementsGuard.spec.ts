@@ -146,7 +146,7 @@ describe('AgreementsGuard', () => {
 		expect(getByTestId(AGREEMENTS_MODAL)).toBeInTheDocument();
 	});
 
-	it('should render the modal if there is at least one agreement that was not visioned yet', () => {
+	it('should render the modal if there is at least one agreement that was not viewed yet', () => {
 		userProfileStore.set({
 			certified,
 			profile: {
