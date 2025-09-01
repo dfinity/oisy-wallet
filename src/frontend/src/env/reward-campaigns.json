@@ -45,7 +45,7 @@
 		"campaignHref": "rewards.campaigns.sprinkles_s1e4.campaign_href",
 		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
 		"startDate": "2025-06-26T12:00:00.000Z",
-		"endDate": "2025-08-31T12:00:00.000Z",
+		"endDate": "2025-09-17T12:00:00.000Z",
 		"win": {
 			"default": {
 				"title": "rewards.campaigns.sprinkles_s1e4.win.default.title",
