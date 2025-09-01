@@ -113,25 +113,25 @@ describe('LoaderCollections', () => {
 			token: {
 				Erc721: {
 					token_address: mockEthAddress,
-					chain_id: network.chainId,
-					allow_media_source: toNullable(false)
+					chain_id: network.chainId
 				}
 			},
 			version: toNullable(1n),
 			enabled: true,
-			section: toNullable<TokenSection>()
+			section: toNullable<TokenSection>(),
+			allow_external_content_source: toNullable(false)
 		}));
 		const existingErc1155CustomTokens = networks.map((network) => ({
 			token: {
 				Erc1155: {
 					token_address: mockEthAddress,
 					chain_id: network.chainId,
-					allow_media_source: toNullable(true)
 				}
 			},
 			version: toNullable(1n),
 			enabled: true,
-			section: toNullable<TokenSection>()
+			section: toNullable<TokenSection>(),
+			allow_external_content_source: toNullable(true)
 		}));
 
 		vi.mocked(listCustomTokens).mockResolvedValue([
