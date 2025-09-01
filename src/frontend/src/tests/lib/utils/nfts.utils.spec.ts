@@ -3,13 +3,14 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
-import type { Nft, NftId, NftsByNetwork, OwnedNft } from '$lib/types/nft';
+import type { Nft, NftId, NftsByNetwork, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 import {
 	filterSortByCollection,
 	findNewNftIds,
 	findNft,
 	findNonFungibleToken,
 	findRemovedNfts,
+	getAllowMediaForNft,
 	getEnabledNfts,
 	getNftCollectionUi,
 	getNftsByNetworks,
@@ -795,6 +796,29 @@ describe('nfts.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('getAllowMediaForNft', () => {
+		const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
+
+		it('should correctly return the allow media prop for an nft contract address', () => {
+			const params = {
+				tokens,
+				networkId: ETHEREUM_NETWORK.id,
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address
+			};
+			const expected: NonFungibleToken | undefined = findNonFungibleToken(params);
+			const result = getAllowMediaForNft(params);
+
+			expect(result).toEqual(expected?.allowMediaUrls);
+		});
+
+		it('should fallback to false if the nft cant be found', () => {
+			const params = { tokens, networkId: ETHEREUM_NETWORK.id, address: 'invalid address' };
+			const result = getAllowMediaForNft(params);
+
+			expect(result).toBeFalsy();
 		});
 	});
 });
