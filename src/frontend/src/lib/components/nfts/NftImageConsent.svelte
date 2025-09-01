@@ -6,6 +6,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	interface Props {
 		nft?: Nft;
@@ -16,7 +18,15 @@
 
 	const { nft, children, showMessage = true, type }: Props = $props();
 
-	let hasConsent = $state();
+	const hasConsent = $derived(
+		nonNullish(nft)
+			? (getAllowMediaForNft({
+					tokens: $nonFungibleTokens,
+					networkId: nft.collection.network.id,
+					address: nft.collection.address
+				}) ?? false)
+			: false
+	);
 
 	const handleConsent = () => {
 		if (nonNullish(nft)) {

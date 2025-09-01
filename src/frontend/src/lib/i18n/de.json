@@ -1039,12 +1039,15 @@
 			"all_assets": "Alle Assets",
 			"address_copied": "Adresse $address kopiert",
 			"open_explorer": "Öffne diesen Contract im Blockchain Explorer",
-			"img_consent_disabled": "",
-			"img_consent_none": "",
-			"review_button": "",
-			"collection_name": "",
-			"media_urls": "",
-			"display_preference": ""
+			"img_consent_disabled": "Du hast diese Kollektion deaktiviert",
+			"img_consent_none": "Bild sicherheitsbedingt deaktiviert",
+			"review_button": "Prüfen",
+			"collection_name": "Kollektionsname",
+			"media_urls": "Medien URLs",
+			"display_preference": "Anzeigeeinstellung",
+            "media_enabled": "Medien aktiviert",
+            "media_disabled": "Medien deaktiviert",
+            "open_in_new_tab": "In neuem Tab öffnen"
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",

@@ -1044,7 +1044,10 @@
 			"review_button": "Review",
 			"collection_name": "Collection name",
 			"media_urls": "Media URLs",
-			"display_preference": "Display preference"
+			"display_preference": "Display preference",
+            "media_enabled": "Media enabled",
+            "media_disabled": "Media disabled",
+            "open_in_new_tab": "Open in new tab"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",

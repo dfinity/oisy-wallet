@@ -91,6 +91,16 @@
 					</span>
 				{/if}
 			</ListItem>
+			<ListItem>
+				<span>{$i18n.nfts.text.token_standard}</span>
+				{#if nonNullish(collection)}
+					<span class="uppercase">{collection.standard}</span>
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
 		</List>
 	</div>
 </div>

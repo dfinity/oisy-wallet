@@ -283,3 +283,11 @@ export const findNonFungibleToken = ({
 	networkId: NetworkId;
 }): NonFungibleToken | undefined =>
 	tokens.find((token) => token.address === address && token.network.id === networkId);
+
+export const getAllowMediaForNft = (params: {
+	tokens: NonFungibleToken[];
+	address: EthAddress;
+	networkId: NetworkId;
+}) =>
+	(findNonFungibleToken(params) as unknown as { allowMediaUrls: boolean | undefined })
+		?.allowMediaUrls ?? false;

@@ -15,6 +15,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { nonNullish } from '@dfinity/utils';
+	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 
 	interface Props {
 		nft: Nft;
@@ -69,9 +70,12 @@
 					<output>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output>
 					<AddressActions
 						copyAddress={nft.collection.address}
-						copyAddressText="Copied"
-						externalLink=""
-						externalLinkAriaLabel=""
+						copyAddressText={$i18n.nfts.text.address_copied}
+						externalLink={getContractExplorerUrl({
+							network: nft.collection.network,
+							contractAddress: nft.collection.address
+						})}
+						externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
 					/>
 				</span>
 			</div>
@@ -91,9 +95,9 @@
 							>
 							<AddressActions
 								copyAddress={nft.imageUrl}
-								copyAddressText="Copied"
+								copyAddressText={$i18n.nfts.text.address_copied}
 								externalLink={nft.imageUrl}
-								externalLinkAriaLabel="Open in new tab"
+								externalLinkAriaLabel={$i18n.nfts.text.open_in_new_tab}
 							/>
 						</span>
 					{/each}
