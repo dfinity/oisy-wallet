@@ -7,7 +7,11 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import { getAllowMediaForNft, getNftCollectionUi } from '$lib/utils/nfts.utils';
+	import {
+		findNonFungibleToken,
+		getAllowMediaForNft,
+		getNftCollectionUi
+	} from '$lib/utils/nfts.utils';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
@@ -17,6 +21,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		nft: Nft;
@@ -40,6 +46,29 @@
 				})
 			: undefined
 	);
+
+	const token = $derived(
+		findNonFungibleToken({
+			tokens: $nonFungibleTokens,
+			networkId: nft.collection.network.id,
+			address: nft.collection.address
+		})
+	);
+
+	const save = () => {
+		if (nonNullish(token)) {
+			saveAllCustomTokens({
+				tokens: {
+					[`${token.id.description}-${token.network.id.description}`]: {
+						...token,
+						allowMedia: !hasConsent // todo: use real prop
+					}
+				},
+				$authIdentity,
+				$i18n
+			});
+		}
+	};
 </script>
 
 <Modal on:nnsClose={() => modalStore.close()}>
