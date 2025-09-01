@@ -3,6 +3,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { agreementsData } from '$env/agreements.env';
 	import type { EnvAgreements } from '$env/types/env-agreements';
+	import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 	import { updateUserAgreements } from '$lib/api/backend.api';
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
@@ -84,7 +85,7 @@
 						...acc,
 						[agreement]: {
 							accepted,
-							lastAcceptedTimestamp: Date.now(),
+							lastAcceptedTimestamp: nowInBigIntNanoSeconds(),
 							lastUpdatedTimestamp:
 								agreementsData[agreement as keyof EnvAgreements].lastUpdatedTimestamp
 						}
