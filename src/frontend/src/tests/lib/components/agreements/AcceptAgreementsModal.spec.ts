@@ -6,7 +6,7 @@ import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
 import { cleanup, fireEvent, render } from '@testing-library/svelte';
 import { get, writable, type Writable } from 'svelte/store';
 
-describe('AcceptAgreementsModal – extended', () => {
+describe('AcceptAgreementsModal', () => {
 	let hasOutdatedStore: Writable<boolean>;
 	type PartialAgreements = Partial<UserAgreements>;
 	let outdatedStore: Writable<PartialAgreements>;
