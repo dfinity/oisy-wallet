@@ -1038,7 +1038,11 @@
 			"collections": "Kolekce",
 			"all_assets": "Všechna aktiva",
 			"address_copied": "Adresa $address zkopírována",
-			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru"
+			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": ""
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
