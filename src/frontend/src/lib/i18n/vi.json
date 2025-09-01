@@ -1477,6 +1477,18 @@
 			"indicator": "Chuyển đến trang chiếu $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
 			"license_agreement": "",

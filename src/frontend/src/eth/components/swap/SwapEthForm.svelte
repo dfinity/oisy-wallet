@@ -103,6 +103,20 @@
 			return 'insufficient-funds-for-fee';
 		}
 	};
+
+	$effect(() => {
+		if (nonNullish($sourceToken) && nonNullish(swapAmount)) {
+			const parsedAmount = parseToken({
+				value: `${swapAmount}`,
+				unitName: $sourceToken.decimals
+			});
+
+			const newErrorType = customValidate(parsedAmount);
+			if (newErrorType !== errorType) {
+				errorType = newErrorType;
+			}
+		}
+	});
 </script>
 
 <NewSwapForm

@@ -6,6 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
+        agreement::{Agreements, SaveAgreementsSettingsError, UserAgreements},
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -198,6 +199,24 @@ impl TokenVersion for StoredUserProfile {
     }
 }
 
+impl UserAgreements {
+    /// Equality ignoring `last_accepted_at_ns`.
+    fn equals_ignoring_ts(&self, other: &UserAgreements) -> bool {
+        let mut a = self.clone();
+        let mut b = other.clone();
+
+        a.license_agreement.last_accepted_at_ns = None;
+        a.terms_of_use.last_accepted_at_ns = None;
+        a.privacy_policy.last_accepted_at_ns = None;
+
+        b.license_agreement.last_accepted_at_ns = None;
+        b.terms_of_use.last_accepted_at_ns = None;
+        b.privacy_policy.last_accepted_at_ns = None;
+
+        a == b
+    }
+}
+
 impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
@@ -209,9 +228,11 @@ impl StoredUserProfile {
                 },
             },
         };
+        let agreements = Agreements::default();
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
             settings: Some(settings),
+            agreements: Some(agreements),
             credentials,
             created_timestamp: now,
             updated_timestamp: now,
@@ -361,6 +382,58 @@ impl StoredUserProfile {
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
+
+    /// Returns a copy with the specified user agreements updated.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_agreements(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        agreements: UserAgreements,
+    ) -> Result<StoredUserProfile, SaveAgreementsSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveAgreementsSettingsError::VersionMismatch);
+        }
+
+        let current = self.agreements.clone().unwrap_or_default().agreements;
+
+        let mut new_agreements = current.clone();
+
+        if agreements.license_agreement.accepted.is_some() {
+            new_agreements.license_agreement = agreements.license_agreement;
+        }
+        if agreements.terms_of_use.accepted.is_some() {
+            new_agreements.terms_of_use = agreements.terms_of_use;
+        }
+        if agreements.privacy_policy.accepted.is_some() {
+            new_agreements.privacy_policy = agreements.privacy_policy;
+        }
+
+        if current.equals_ignoring_ts(&new_agreements) {
+            return Ok(self.clone());
+        }
+
+        if matches!(new_agreements.license_agreement.accepted, Some(true)) {
+            new_agreements.license_agreement.last_accepted_at_ns = Some(now);
+        }
+        if matches!(new_agreements.terms_of_use.accepted, Some(true)) {
+            new_agreements.terms_of_use.last_accepted_at_ns = Some(now);
+        }
+        if matches!(new_agreements.privacy_policy.accepted, Some(true)) {
+            new_agreements.privacy_policy.last_accepted_at_ns = Some(now);
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.agreements = Some(Agreements {
+            agreements: new_agreements,
+        });
+        new_profile.updated_timestamp = now;
+
+        Ok(new_profile)
+    }
 }
 
 impl From<&StoredUserProfile> for UserProfile {
@@ -371,6 +444,7 @@ impl From<&StoredUserProfile> for UserProfile {
             version,
             credentials,
             settings,
+            agreements,
         } = user;
         UserProfile {
             created_timestamp: *created_timestamp,
@@ -378,6 +452,7 @@ impl From<&StoredUserProfile> for UserProfile {
             version: *version,
             credentials: credentials.clone().into_values().collect(),
             settings: settings.clone(),
+            agreements: agreements.clone(),
         }
     }
 }

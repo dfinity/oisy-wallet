@@ -7,6 +7,7 @@ import {
 } from '$lib/constants/ai-assistant.constants';
 import { aiAssistantSystemMessage } from '$lib/derived/ai-assistant.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
+import { enabledNetworksSymbols } from '$lib/derived/networks.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
 import {
 	ToolResultType,
@@ -46,7 +47,12 @@ export const askLlm = async ({
 		request: {
 			model: AI_ASSISTANT_LLM_MODEL,
 			messages,
-			tools: toNullable(getAiAssistantToolsDescription(get(enabledUniqueTokensSymbols)))
+			tools: toNullable(
+				getAiAssistantToolsDescription({
+					enabledNetworksSymbols: get(enabledUniqueTokensSymbols),
+					enabledTokensSymbols: get(enabledUniqueTokensSymbols)
+				})
+			)
 		},
 		identity
 	});
@@ -99,7 +105,12 @@ export const askLlmToFilterContacts = async ({
 					}
 				}
 			],
-			tools: toNullable(getAiAssistantToolsDescription(get(enabledUniqueTokensSymbols)))
+			tools: toNullable(
+				getAiAssistantToolsDescription({
+					enabledNetworksSymbols: get(enabledNetworksSymbols),
+					enabledTokensSymbols: get(enabledUniqueTokensSymbols)
+				})
+			)
 		},
 		identity
 	});
