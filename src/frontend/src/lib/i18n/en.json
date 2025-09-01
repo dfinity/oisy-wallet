@@ -115,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
-			"session_expired": "You have been logged out because your session has expired."
+			"session_expired": "You have been logged out because your session has expired.",
+			"reload_and_retry": "Something went wrong when signing in. Please reload the page and try again. If this error persists, please contact support."
 		},
 		"error": {
 			"no_internet_identity": "No internet identity.",
@@ -1492,6 +1493,9 @@
 			"i_have_accepted": "I have read and agree to the",
 			"i_have_accepted_updated": "I have read and agree to the updated",
 			"accept_and_continue": "Accept and continue"
+		},
+		"error": {
+			"cannot_update_user_agreements": "Something went wrong when updating your agreements."
 		}
 	},
 	"license_agreement": {

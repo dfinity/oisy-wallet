@@ -115,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "您尚未登录。请登录以继续。",
-			"session_expired": "由于会话已过期，您已被登出。"
+			"session_expired": "由于会话已过期，您已被登出。",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "没有 Internet Identity。",
@@ -1492,6 +1493,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {

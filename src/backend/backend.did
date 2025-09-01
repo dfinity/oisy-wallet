@@ -265,15 +265,10 @@ type NetworksSettings = record {
 };
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
-type SaveAgreementsRequest = record {
-	agreements : UserAgreements;
-	current_user_version : opt nat64
-};
 type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
 };
-type SaveTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
 	InternalError : record { msg : text }
@@ -291,10 +286,8 @@ type SetShowTestnetsRequest = record {
 	current_user_version : opt nat64;
 	show_testnets : bool
 };
-type SetUserShowTestnetsResult = variant {
-	Ok;
-	Err : SaveTestnetsSettingsError
-};
+type SetTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
+type SetUserShowTestnetsResult = variant { Ok; Err : UpdateAgreementsError };
 type Settings = record { networks : NetworksSettings; dapp : DappSettings };
 type SplToken = record {
 	decimals : opt nat8;
@@ -351,6 +344,11 @@ type TopUpCyclesLedgerResponse = record {
 type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
+};
+type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
+type UpdateUserAgreementsRequest = record {
+	agreements : UserAgreements;
+	current_user_version : opt nat64
 };
 type UserAgreement = record {
 	last_accepted_at_ns : opt nat64;
@@ -584,7 +582,7 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-	update_user_agreements : (SaveAgreementsRequest) -> (
+	update_user_agreements : (UpdateUserAgreementsRequest) -> (
 		SetUserShowTestnetsResult
 	);
 	// Updates the user's preference to enable (or disable) networks in the interface, merging with any
