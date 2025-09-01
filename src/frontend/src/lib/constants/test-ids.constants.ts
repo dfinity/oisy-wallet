@@ -272,3 +272,6 @@ export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';
 export const AI_ASSISTANT_SEND_MESSAGE_BUTTON = 'ai-assistant-send-message-button';
 export const AI_ASSISTANT_SEND_TOKENS_BUTTON = 'ai-assistant-send-tokens-button';
 export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-tokens-success-message';
+
+// Agreements
+export const AGREEMENTS_MODAL = 'agreements-modal';

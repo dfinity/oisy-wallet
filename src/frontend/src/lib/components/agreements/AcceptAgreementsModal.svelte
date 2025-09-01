@@ -14,8 +14,8 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { AGREEMENTS_MODAL } from '$lib/constants/test-ids.constants';
 	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/user-agreements.derived';
 	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -96,7 +96,7 @@
 </script>
 
 <!-- TODO: remove the close button from the modal -->
-<Modal testId={LOADER_MODAL}>
+<Modal testId={AGREEMENTS_MODAL}>
 	<h4 slot="title">
 		{$hasOutdatedAgreements
 			? $i18n.agreements.text.review_updated_title
