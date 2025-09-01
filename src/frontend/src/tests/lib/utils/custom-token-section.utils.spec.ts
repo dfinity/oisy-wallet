@@ -14,7 +14,7 @@ describe('custom-token-section.utils', () => {
 
 			expect(result).toEqual(CustomTokenSection.HIDDEN);
 		});
-	})
+	});
 
 	describe('mapCustomTokenSection', () => {
 		it('should return token section spam', () => {
