@@ -6,7 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        agreement::{Agreements, SaveAgreementsSettingsError, UserAgreement, UserAgreements},
+        agreement::{Agreements, SaveAgreementsSettingsError, UserAgreements},
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -196,25 +196,6 @@ impl TokenVersion for StoredUserProfile {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
-    }
-}
-
-impl UserAgreement {
-    fn without_accept_ts(mut self) -> Self {
-        self.last_accepted_at_ns = None;
-        self
-    }
-}
-
-impl UserAgreements {
-    /// Equality ignoring `last_accepted_at_ns`.
-    fn equals_ignoring_ts(&self, other: &UserAgreements) -> bool {
-        self.license_agreement.clone().without_accept_ts()
-            == other.license_agreement.clone().without_accept_ts()
-            && self.terms_of_use.clone().without_accept_ts()
-                == other.terms_of_use.clone().without_accept_ts()
-            && self.privacy_policy.clone().without_accept_ts()
-                == other.privacy_policy.clone().without_accept_ts()
     }
 }
 
@@ -413,7 +394,7 @@ impl StoredUserProfile {
             new_agreements.privacy_policy = agreements.privacy_policy;
         }
 
-        if current.equals_ignoring_ts(&new_agreements) {
+        if current.eq(&new_agreements) {
             return Ok(self.clone());
         }
 
