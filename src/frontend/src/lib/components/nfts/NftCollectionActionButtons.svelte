@@ -57,7 +57,10 @@
 				{/snippet}
 			</NftCollectionActionButton>
 		{:else}
-			<NftCollectionActionButton label="Spam" onclick={() => updateSection(CustomTokenSection.SPAM)}>
+			<NftCollectionActionButton
+				label="Spam"
+				onclick={() => updateSection(CustomTokenSection.SPAM)}
+			>
 				{#snippet icon()}
 					<IconAlertOctagon size="18" />
 				{/snippet}
