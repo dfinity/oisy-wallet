@@ -37,7 +37,8 @@
 			"currency": "Currency"
 		},
 		"info": {
-			"test_banner": "For testing purposes only!"
+			"test_banner": "For testing purposes only!",
+			"test_banner_beta": "This is a beta release. You may encounter bugs. Real assets are in play - please use with care."
 		},
 		"alt": {
 			"logo": "$name logo",
