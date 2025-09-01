@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "比特币余额不足以支付交易费用",
 			"btc_invalid_utxo_data": "无效的比特币交易数据",
 			"btc_utxo_locked": "比特币资金被待处理交易锁定",
-			"btc_invalid_fee_calculation": "比特币交易费用验证失败"
+			"btc_invalid_fee_calculation": "比特币交易费用验证失败",
+			"pending_transactions_not_available": "待处理交易服务当前不可用。请稍后重试。"
 		},
 		"error": {
 			"unexpected": "发送交易时发生错误。",
@@ -811,9 +812,9 @@
 			"approval_fee": "授权费用",
 			"gas_fee": "Gas 费",
 			"lp_fee": "流动性池费用",
-			"max_slippage_info": "请输入 0% 到 50% 之间的数值",
+			"max_slippage_info": "请输入 0% 到 $maxSlippage% 之间的数值",
 			"max_slippage_warning": "风险警告：高滑点可能因市场波动造成损失",
-			"max_slippage_error": "滑点容忍度不能为 0% 或超过 50%",
+			"max_slippage_error": "滑点容忍度不能为 0% 或超过 $maxSlippage%",
 			"swap_button": "立即兑换",
 			"swap_is_not_offered": "当前不支持此兑换。",
 			"executing_transaction": "正在执行交易...",
@@ -1482,8 +1483,21 @@
 			"indicator": "跳转到第 $index 幻灯片"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "点击此按钮即表示你同意",
 			"accept_terms_link": "许可协议",
 			"title": "$oisy_name 许可协议（“许可协议”）",
@@ -1502,10 +1516,31 @@
 			"entire_agreement": "<strong>10. 完整协议与可分割性。</strong> 本协议为双方之间就此事项的完整协议。如其中任一条款被认定无效，应按法律允许的最小限度修改或分割，其余条款仍具效力。",
 			"assignment": "<strong>11. 协议转让。</strong> 未经 DFINITY 书面同意，你不得转让本协议，DFINITY 可自由转让本协议。",
 			"no_waiver": "<strong>12. 权利不弃权。</strong> DFINITY 未行使权利不构成放弃，亦不影响未来主张该权利。",
-			"english_version": "<strong>13. 英文版本。</strong> 本协议以英文版本为正式版本，如有冲突，以英文版本为准。"
+			"english_version": "<strong>13. 英文版本。</strong> 本协议以英文版本为正式版本，如有冲突，以英文版本为准。",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "$oisy_name 许可协议"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1561,8 +1596,14 @@
 			"action_button_contacts_title": "联系人标题按钮",
 			"action_button_contacts_subtitle": "联系人副标题按钮",
 			"action_button_contacts_prompt": "联系人提示按钮",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "发送消息",
 			"send_message_input_placeholder": "发送消息输入占位符",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": "加载中"
 		},

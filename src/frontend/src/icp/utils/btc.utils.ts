@@ -15,7 +15,13 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
-import { isNullish, nonNullish, notEmptyString, uint8ArrayToHexString } from '@dfinity/utils';
+import {
+	hexStringToUint8Array,
+	isNullish,
+	nonNullish,
+	notEmptyString,
+	uint8ArrayToHexString
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -42,56 +48,108 @@ export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
 	uint8ArrayToHexString(Uint8Array.from(txid).toReversed());
 
 /**
- * Converts a PendingTransaction txid to a hex string format
- * @param tx - The pending transaction containing the txid
- * @returns The txid as a hex string, or null if conversion fails
+ * Convert a Bitcoin transaction ID hex string to Uint8Array with proper byte reversal.
+ * Bitcoin transaction IDs are displayed in reverse byte order compared to their binary representation.
+ *
+ * @param txidHex - Bitcoin transaction ID as hex string (human-readable format)
+ * @returns Uint8Array - Transaction ID in binary format (bytes reversed)
  */
-export const convertPendingTransactionTxid = (tx: PendingTransaction): string | null => {
-	let txidString: string;
+export const txidStringToUint8Array = (txidHex: string): Uint8Array =>
+	Uint8Array.from(hexStringToUint8Array(txidHex)).reverse();
 
-	// Handle Uint8Array case (txid: Uint8Array )
-	if (tx.txid instanceof Uint8Array) {
-		txidString = Array.from(tx.txid)
-			.map((b: number) => b.toString(16).padStart(2, '0'))
-			.join('');
-	}
-	// Handle number array case (txid: number[])
-	else if (Array.isArray(tx.txid)) {
-		txidString = tx.txid.map((b: number) => b.toString(16).padStart(2, '0')).join('');
-	}
-	// Fallback, convert to string representation
-	else {
-		txidString = String(tx.txid);
-	}
+/**
+ * Convert a pending transaction's txid to human-readable hex string format.
+ * Uses the same byte reversal logic as utxoTxIdToString for consistency.
+ *
+ * @param tx - PendingTransaction containing the txid
+ * @returns string | null - Human-readable transaction ID or null if empty
+ */
+export const pendingTransactionTxidToString = (tx: PendingTransaction): string | null => {
+	const txidString = utxoTxIdToString(tx.txid);
 
 	// Return the txid string only if it's not empty
 	return notEmptyString(txidString) ? txidString : null;
 };
 
-export const getPendingTransactions = (
-	address: string
-): Omit<CertifiedData<Array<PendingTransaction> | null>, 'certified'> & {
-	certified: true;
-} => {
+/**
+ * Safely retrieves pending transactions for a given Bitcoin address from the store.
+ *
+ * @param address - The Bitcoin address to get pending transactions for
+ * @returns Array of pending transactions, or null when:
+ *   - Store hasn't been initialized yet
+ *   - Address doesn't exist in store (hasn't been loaded)
+ *   - Backend retrieval failed (setPendingTransactionsError was called)
+ */
+export const getPendingTransactions = (address: string): Array<PendingTransaction> | null => {
 	const storeData = get(btcPendingSentTransactionsStore);
-	return storeData[address];
+
+	// Case 1: Store not initialized, return null
+	if (isNullish(storeData) || Object.keys(storeData).length === 0) {
+		return null;
+	}
+
+	// Case 2: Address exists in store, return actual data (may be null if backend failed)
+	if (address in storeData) {
+		return storeData[address].data;
+	}
+
+	// Case 3: Address not in store yet, return empty array for transactions
+	return [];
 };
 
 /**
  * Get pending transaction IDs from the store to exclude locked UTXOs
+ * @param address - Bitcoin address to get pending transaction IDs for
+ * @returns Array of pending transaction ID strings, or null if no pending data available
+ * @throws Error when the store has not been initialized
  */
-export const getPendingTransactionIds = (address: string): string[] => {
+export const getPendingTransactionIds = (address: string): string[] | null => {
 	const pendingTransactions = getPendingTransactions(address);
 
-	if (isNullish(pendingTransactions?.data)) {
-		return [];
+	if (isNullish(pendingTransactions)) {
+		return null;
 	}
 
-	// Use the utility function to convert txids and filter out nulls
-	return pendingTransactions.data
-		.map(convertPendingTransactionTxid)
+	// Use the utility function to convert transaction IDs and filter out nulls
+	return pendingTransactions
+		.map(pendingTransactionTxidToString)
 		.filter((txid): txid is string => nonNullish(txid));
 };
+
+/**
+ * Get all UTXO transaction IDs from all pending transactions for a given address.
+ * These are the transaction IDs that UTXOs reference (inputs being spent), not the pending transaction IDs themselves.
+ *
+ * @param address - Bitcoin address to get pending UTXO transaction IDs for
+ * @returns Array of UTXO transaction ID strings, or null if no pending data available
+ */
+export const getPendingTransactionUtxoTxIds = (address: string): string[] | null => {
+	const pendingTransactions = getPendingTransactions(address);
+
+	if (isNullish(pendingTransactions)) {
+		return null;
+	}
+
+	// Extract all UTXO transaction IDs from all pending transactions
+	const utxoTxIds: string[] = [];
+
+	for (const tx of pendingTransactions) {
+		if (nonNullish(tx.utxos)) {
+			for (const utxo of tx.utxos) {
+				if (nonNullish(utxo?.outpoint?.txid)) {
+					const utxoTxId = utxoTxIdToString(utxo.outpoint.txid);
+					if (notEmptyString(utxoTxId)) {
+						utxoTxIds.push(utxoTxId);
+					}
+				}
+			}
+		}
+	}
+
+	// Remove duplicates and return
+	return Array.from(new Set(utxoTxIds));
+};
+
 /**
  * Calculates Bitcoin wallet balance breakdown following standard Bitcoin accounting principles.
  *
@@ -112,21 +170,15 @@ export const getPendingTransactionIds = (address: string): string[] => {
  */
 export const getBtcWalletBalance = ({
 	address,
-	confirmedBalance,
+	balance,
 	providerTransactions
 }: {
 	address: string;
-	confirmedBalance: bigint;
+	balance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[] | null;
 }): BtcWalletBalance => {
 	// Retrieve pending outgoing transactions from local store with safe fallback
-	const pendingData = getPendingTransactions(address);
-	let pendingTransactions: Array<PendingTransaction> = [];
-
-	// Handle the various states the store data can be in
-	if (nonNullish(pendingData?.data)) {
-		pendingTransactions = pendingData.data;
-	}
+	const pendingTransactions = getPendingTransactions(address) ?? [];
 
 	// Calculate locked balance: UTXOs being used as inputs in pending outgoing transactions
 	// If pendingTransactions is empty (due to error or no data), locked balance will be 0
@@ -159,9 +211,11 @@ export const getBtcWalletBalance = ({
 			}, ZERO)
 		: ZERO;
 
+	const confirmedBalance = balance - lockedBalance;
+
 	// Total balance represents the user's complete Bitcoin holdings
 	// Even if pending data fails, this will still show confirmed + unconfirmed
-	const totalBalance = confirmedBalance + unconfirmedBalance;
+	const totalBalance = balance + unconfirmedBalance;
 
 	return {
 		// Confirmed balance: UTXOs with sufficient confirmations, safe for spending

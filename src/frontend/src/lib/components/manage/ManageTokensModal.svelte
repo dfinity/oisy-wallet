@@ -3,6 +3,7 @@
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
@@ -139,26 +140,28 @@
 			enabled: true
 		};
 
-		const isErc721 = await isInterfaceErc721({
-			address: ethContractAddress,
-			networkId: network.id
-		});
+		if (NFTS_ENABLED) {
+			const isErc721 = await isInterfaceErc721({
+				address: ethContractAddress,
+				networkId: network.id
+			});
 
-		if (isErc721) {
-			await saveErc721([newToken]);
+			if (isErc721) {
+				await saveErc721([newToken]);
 
-			return;
-		}
+				return;
+			}
 
-		const isErc1155 = await isInterfaceErc1155({
-			address: ethContractAddress,
-			networkId: network.id
-		});
+			const isErc1155 = await isInterfaceErc1155({
+				address: ethContractAddress,
+				networkId: network.id
+			});
 
-		if (isErc1155) {
-			await saveErc1155([newToken]);
+			if (isErc1155) {
+				await saveErc1155([newToken]);
 
-			return;
+				return;
+			}
 		}
 
 		if (ethMetadata.decimals > 0) {

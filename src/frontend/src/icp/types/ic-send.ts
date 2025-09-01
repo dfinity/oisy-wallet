@@ -6,7 +6,7 @@ import type { PartialSpecific } from '$lib/types/utils';
 
 export type IcTransferParams = Pick<TransferParams, 'amount' | 'to'> & {
 	identity: OptionIdentity;
-	progress: (step: ProgressStepsSendIc) => void;
+	progress?: (step: ProgressStepsSendIc) => void;
 	ckErc20ToErc20MaxCkEthFees?: bigint;
 };
 

@@ -12,8 +12,9 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { LoadCustomTokenParams } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
+import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
-import { assertNonNullish, fromNullable, queryAndUpdate } from '@dfinity/utils';
+import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const isInterfaceErc1155 = async ({
@@ -73,8 +74,10 @@ const loadCustomTokensWithMetadata = async (
 				(customToken): customToken is CustomToken & { token: { Erc1155: ErcToken } } =>
 					'Erc1155' in customToken.token
 			)
-			.map(async ({ token, enabled, version: versionNullable }) => {
+			.map(async ({ token, enabled, version: versionNullable, section: sectionNullable }) => {
 				const version = fromNullable(versionNullable);
+				const section = fromNullable(sectionNullable);
+				const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
 
 				const {
 					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
@@ -105,7 +108,10 @@ const loadCustomTokensWithMetadata = async (
 						standard: 'erc1155' as const,
 						category: 'custom' as const,
 						enabled,
-						version
+						version,
+						...(nonNullish(mappedSection) && {
+							section: mappedSection
+						})
 					},
 					...metadata
 				};

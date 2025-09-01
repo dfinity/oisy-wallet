@@ -1,12 +1,14 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
-import { approve as approveToken } from '$eth/services/send.services';
+import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
+import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
+import type { IcToken } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
@@ -40,6 +42,7 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { EthAddress } from '$lib/types/address';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -56,6 +59,7 @@ import {
 	type VeloraQuoteParams
 } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
@@ -77,6 +81,7 @@ import {
 } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 import { trackEvent } from './analytics.services';
+import { retryWithDelay } from './rest.services';
 import { throwSwapError } from './swap-errors.services';
 import { autoLoadSingleToken } from './token.services';
 
@@ -176,17 +181,53 @@ export const fetchSwapAmounts = async ({
 	amount,
 	tokens,
 	slippage,
-	isSourceTokenIcrc2
+	isSourceTokenIcrc2,
+	userEthAddress
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
 		unitName: sourceToken.decimals
 	});
+
+	return isNetworkIdICP(sourceToken.network.id)
+		? await fetchSwapAmountsICP({
+				identity,
+				sourceToken,
+				destinationToken,
+				amount: sourceAmount,
+				tokens,
+				slippage,
+				isSourceTokenIcrc2
+			})
+		: await fetchSwapAmountsEVM({
+				sourceToken: sourceToken as Erc20Token,
+				destinationToken: destinationToken as Erc20Token,
+				amount: sourceAmount,
+				userEthAddress
+			});
+};
+
+const fetchSwapAmountsICP = async ({
+	identity,
+	sourceToken,
+	destinationToken,
+	amount,
+	tokens,
+	slippage,
+	isSourceTokenIcrc2
+}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & { amount: bigint }): Promise<
+	SwapMappedResult[]
+> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
-			getQuote({ identity, sourceToken, destinationToken, sourceAmount })
+			getQuote({
+				identity,
+				sourceToken: sourceToken as IcToken,
+				destinationToken: destinationToken as IcToken,
+				sourceAmount: amount
+			})
 		)
 	);
 
@@ -528,13 +569,16 @@ export const fetchSwapAmountsEVM = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userAddress
+	userEthAddress
 }: VeloraQuoteParams): Promise<SwapMappedResult[]> => {
+	if (isNullish(userEthAddress)) {
+		return [];
+	}
 	const swapAmountsResults = await fetchVeloraSwapAmount({
 		sourceToken,
 		destinationToken,
 		amount,
-		userAddress
+		userEthAddress
 	});
 
 	if (isNullish(swapAmountsResults)) {
@@ -548,8 +592,8 @@ const fetchVeloraSwapAmount = async ({
 	sourceToken,
 	destinationToken,
 	amount,
-	userAddress
-}: VeloraQuoteParams): Promise<SwapMappedResult | null> => {
+	userEthAddress
+}: VeloraQuoteParams & { userEthAddress: EthAddress }): Promise<SwapMappedResult | null> => {
 	const {
 		network: { chainId: destChainId }
 	} = destinationToken;
@@ -564,14 +608,14 @@ const fetchVeloraSwapAmount = async ({
 	});
 
 	const baseParams: GetQuoteParams = {
-		amount,
+		amount: `${amount}`,
 		srcToken: geSwapEthTokenAddress(sourceToken),
 		destToken: geSwapEthTokenAddress(destinationToken),
 		srcDecimals: sourceToken.decimals,
 		destDecimals: destinationToken.decimals,
 		mode: SWAP_MODE,
 		side: SWAP_SIDE,
-		userAddress
+		userAddress: userEthAddress
 	};
 
 	const data = await sdk.quote.getQuote(
@@ -805,6 +849,21 @@ export const fetchVeloraMarketSwap = async ({
 			shouldSwapWithApproval: true,
 			progress,
 			progressSteps: ProgressStepsSwap
+		});
+
+		await retryWithDelay({
+			maxRetries: 10,
+			request: async () => {
+				const currentAllowance = await erc20ContractAllowance({
+					token: sourceToken,
+					owner: userAddress,
+					spender: TokenTransferProxy,
+					networkId: sourceNetwork.id
+				});
+				if (currentAllowance < parsedSwapAmount) {
+					throw new Error(get(i18n).swap.error.unexpected);
+				}
+			}
 		});
 	}
 

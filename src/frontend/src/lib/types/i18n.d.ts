@@ -605,6 +605,7 @@ interface I18nSend {
 		btc_invalid_utxo_data: string;
 		btc_utxo_locked: string;
 		btc_invalid_fee_calculation: string;
+		pending_transactions_not_available: string;
 	};
 	error: {
 		unexpected: string;
@@ -1217,8 +1218,22 @@ interface I18nCarousel {
 	text: { next_slide: string; prev_slide: string; indicator: string };
 }
 
+interface I18nAgreements {
+	text: {
+		review_title: string;
+		review_updated_title: string;
+		review_description: string;
+		review_updated_description: string;
+		reject_warning: string;
+		i_have_accepted: string;
+		i_have_accepted_updated: string;
+		accept_and_continue: string;
+	};
+}
+
 interface I18nLicense_agreement {
 	text: {
+		license_agreement: string;
 		accept_terms: string;
 		accept_terms_link: string;
 		title: string;
@@ -1238,8 +1253,19 @@ interface I18nLicense_agreement {
 		assignment: string;
 		no_waiver: string;
 		english_version: string;
+		body: string;
 	};
 	alt: { license_agreement: string };
+}
+
+interface I18nTerms_of_use {
+	text: { terms_of_use: string; title: string; body: string };
+	alt: { terms_of_use: string };
+}
+
+interface I18nPrivacy_policy {
+	text: { privacy_policy: string; title: string; body: string };
+	alt: { privacy_policy: string };
 }
 
 interface I18nActivity {
@@ -1290,8 +1316,14 @@ interface I18nAi_assistant {
 		action_button_contacts_title: string;
 		action_button_contacts_subtitle: string;
 		action_button_contacts_prompt: string;
+		action_button_send_tokens_title: string;
+		action_button_send_tokens_subtitle: string;
+		action_button_send_tokens_prompt: string;
+		select_contact_message: string;
+		send_to_message: string;
 		send_message: string;
 		send_message_input_placeholder: string;
+		send_token_succeeded: string;
 		no_contacts_found_message: string;
 		loading: string;
 	};
@@ -1333,7 +1365,10 @@ interface I18n {
 	address: I18nAddress;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
+	agreements: I18nAgreements;
 	license_agreement: I18nLicense_agreement;
+	terms_of_use: I18nTerms_of_use;
+	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
 	welcome: I18nWelcome;

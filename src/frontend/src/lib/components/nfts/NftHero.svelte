@@ -38,6 +38,13 @@
 		}
 		return breadcrumbs;
 	});
+
+	const normalizedNftName = $derived.by(() => {
+		if (nonNullish(nft?.name)) {
+			// sometimes NFT names include the number itself, in that case we do not display the number
+			return nft.name.includes(`#${nft.id}`) ? nft.name : `${nft.name} #${nft.id}`;
+		}
+	});
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:fade>
@@ -66,8 +73,8 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		<h1 class="my-3">
-			{#if nonNullish(nft)}
-				{nft.name} #{nft.id}
+			{#if nonNullish(normalizedNftName)}
+				{normalizedNftName}
 			{:else}
 				<span class="block max-w-80">
 					<SkeletonText />
@@ -127,7 +134,7 @@
 			{/if}
 			{#if nonNullish(nft?.attributes) && nft.attributes.length > 0}
 				<ListItem>{$i18n.nfts.text.item_traits}</ListItem>
-				<div class="mt-2 flex gap-2">
+				<div class="mt-2 flex flex-wrap gap-2">
 					{#each nft.attributes as trait, index (trait.value + index)}
 						<div class="flex">
 							<Badge variant="nft-trait"
