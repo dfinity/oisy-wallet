@@ -1,7 +1,9 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
-import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte'; // ⬅️ adjust path
+import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+import { i18n } from '$lib/stores/i18n.store';
 import * as modalStoreMod from '$lib/stores/modal.store';
 import { nftStore } from '$lib/stores/nft.store';
+import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import * as tokensUtils from '$lib/utils/tokens.utils';
@@ -16,6 +18,7 @@ import { beforeAll } from 'vitest';
 const nftAzuki1 = {
 	...mockValidErc721Nft,
 	id: parseNftId(1),
+	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/1.png',
 	collection: {
 		...mockValidErc721Nft.collection,
 		name: 'Azuki Elemental Beans',
@@ -27,6 +30,7 @@ const nftAzuki1 = {
 const nftAzuki2 = {
 	...mockValidErc721Nft,
 	id: parseNftId(2),
+	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/2.png',
 	collection: {
 		...mockValidErc721Nft.collection,
 		name: 'Azuki Elemental Beans',
@@ -52,10 +56,8 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('calls saveAllCustomTokens with toggled allowMedia and correct key on Save', async () => {
-		// hasConsent TRUE -> button label "Disable media" -> we expect toggled to FALSE
 		getAllowMediaSpy.mockReturnValue(true);
 
-		// token found for the collection
 		const token = {
 			id: { description: 'token-123' },
 			network: { id: { description: 'net-icp' } },
@@ -66,33 +68,22 @@ describe('NftImageConsentModal', () => {
 		const TEST_ID = 'nft-modal';
 		render(NftImageConsentModal, { props: { nft: nftAzuki1, testId: TEST_ID } });
 
-		// Click save
 		const saveBtn = screen.getByTestId(`${TEST_ID}-saveButton`);
 		await fireEvent.click(saveBtn);
 
-		// Expect save util called once with toggled allowMedia = false
 		expect(saveSpy).toHaveBeenCalledTimes(1);
 
 		const arg = saveSpy.mock.calls[0][0];
 		assertNonNullish(arg);
 
-		// tokens key
 		const expectedKey = `${token.id.description}-${token.network.id.description}`;
+
 		expect(Object.keys(arg.tokens)).toContain(expectedKey);
-
-		// toggled allowMedia
-		expect(arg.tokens[expectedKey].allowMedia).toBe(false);
-
-		// onSuccess is modalStore.close
+		expect(arg.tokens[expectedKey].allowMedia).toBe(false); // todo: adjust
 		expect(arg.onSuccess).toBe(modalStoreMod.modalStore.close);
 	});
 
 	it('closes the modal when clicking Cancel', async () => {
-		// consent can be anything; not relevant
-		getAllowMediaSpy.mockReturnValue(false);
-		findTokenSpy.mockReturnValue(undefined as never);
-		getCollectionUiSpy.mockReturnValue([] as never);
-
 		const TEST_ID = 'nft-modal';
 		render(NftImageConsentModal, { props: { nft: nftAzuki1, testId: TEST_ID } });
 
@@ -103,41 +94,44 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('renders address, display preference, and NFT media list under the expected testIds', () => {
-		// hasConsent FALSE -> display shows "Disabled" and Save button text "Enable media"
 		getAllowMediaSpy.mockReturnValue(false);
-
-		const token = {
-			id: { description: 'token-xyz' },
-			network: { id: { description: 'net-icp' } }
-		} as const;
-		findTokenSpy.mockReturnValue(token as never);
+		findTokenSpy.mockReturnValue(mockValidErc721Nft as unknown as NonFungibleToken);
+		getCollectionUiSpy.mockReturnValue([
+			{
+				collection: nftAzuki1.collection,
+				nfts: [nftAzuki1, nftAzuki2]
+			}
+		]);
 
 		const TEST_ID = 'nft-modal';
 		render(NftImageConsentModal, { props: { nft: nftAzuki1, testId: TEST_ID } });
 
-		// Address (shortened) — compute the expected via the same util
+		// Collection address
 		const addrOut = screen.getByTestId(`${TEST_ID}-collectionAddress`);
 		const expectedShortAddr = shortenWithMiddleEllipsis({ text: nftAzuki1.collection.address });
+
 		expect(addrOut).toHaveTextContent(expectedShortAddr);
 
-		// Display preference: find the label by testId, then check the sibling value
+		// Display preference
 		const prefLabel = screen.getByTestId(`${TEST_ID}-displayPreferences`);
 		assertNonNullish(prefLabel.parentElement);
 		const valueSpan = prefLabel.parentElement.querySelector('span:last-child');
 		assertNonNullish(valueSpan);
-		expect(valueSpan).toHaveTextContent('Disabled');
 
-		// NFT media list: only items with imageUrl appear (2 of them)
+		expect(valueSpan).toHaveTextContent(get(i18n).nfts.text.media_disabled);
+
+		// NFT media list
 		const mediaContainer = screen.getByTestId(`${TEST_ID}-nfts-media`);
 		const utils = within(mediaContainer);
 
-		// Each row includes "#<id>" and a shortened URL
 		for (const nft of get(nftStore) ?? []) {
 			if (nft.imageUrl) {
 				const idText = `#${nft.id}`;
+
 				expect(utils.getByText(idText)).toBeInTheDocument();
 
 				const shortenedUrl = shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 });
+
 				expect(utils.getByText(shortenedUrl)).toBeInTheDocument();
 			} else {
 				// Rows without imageUrl should not appear
