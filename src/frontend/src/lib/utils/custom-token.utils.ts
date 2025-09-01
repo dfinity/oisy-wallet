@@ -19,6 +19,7 @@ import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
+import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,
@@ -52,6 +53,7 @@ const toSplCustomToken = ({
 export const toCustomToken = ({
 	enabled,
 	version,
+	section,
 	...rest
 }: SaveCustomTokenWithKey): CustomToken => {
 	const toCustomTokenMap = (): Token => {
@@ -91,7 +93,7 @@ export const toCustomToken = ({
 		enabled,
 		version: toNullable(version),
 		token: toCustomTokenMap(),
-		section: toNullable()
+		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined)
 	};
 };
 
