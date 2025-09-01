@@ -16,10 +16,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { AGREEMENTS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import {
-		hasOutdatedAgreements,
-		outdatedAgreements
-	} from '$lib/derived/user-agreements.derived';
+	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/user-agreements.derived';
 	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -181,12 +178,7 @@
 				<Button colorStyle="secondary-light" onclick={onReject}>
 					{$i18n.core.text.reject}
 				</Button>
-				<Button
-					colorStyle="primary"
-					{disabled}
-					loading={savingAgreements}
-					onclick={onAccept}
-				>
+				<Button colorStyle="primary" {disabled} loading={savingAgreements} onclick={onAccept}>
 					{$i18n.agreements.text.accept_and_continue}
 				</Button>
 			</ButtonGroup>
