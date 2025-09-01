@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft } from '$lib/types/nft';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -16,13 +19,10 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { nftStore } from '$lib/stores/nft.store';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
-	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		nft: Nft;
@@ -70,6 +70,14 @@
 			});
 		}
 	};
+
+	const collectionNfts: Nft[] = $derived(
+		getNftCollectionUi({ $nftStore, $nonFungibleTokens }).find(
+			(coll) =>
+				coll.collection.id === nft.collection.id &&
+				coll.collection.address === nft.collection.address
+		)?.nfts ?? []
+	);
 </script>
 
 <Modal on:nnsClose={() => modalStore.close()}>
@@ -134,21 +142,23 @@
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.nfts.text.media_urls}</span>
 				<span class="flex-col justify-items-end">
-					{#each getNftCollectionUi( { $nftStore, $nonFungibleTokens } ).find((coll) => coll.collection.id === nft.collection.id && coll.collection.address === nft.collection.address)?.nfts ?? [] as nft}
-						<span class="flex">
-							#{nft.id} &nbsp;
-							<output class="text-tertiary"
-								>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
-							>
-							<AddressActions
-								copyAddress={nft.imageUrl}
-								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-									$address: nft.imageUrl
-								})}
-								externalLink={nft.imageUrl}
-								externalLinkAriaLabel={$i18n.nfts.text.open_in_new_tab}
-							/>
-						</span>
+					{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
+						{#if nonNullish(nft?.imageUrl)}
+							<span class="flex">
+								#{nft.id} &nbsp;
+								<output class="text-tertiary"
+									>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
+								>
+								<AddressActions
+									copyAddress={nft.imageUrl}
+									copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+										$address: nft.imageUrl
+									})}
+									externalLink={nft.imageUrl}
+									externalLinkAriaLabel={$i18n.nfts.text.open_in_new_tab}
+								/>
+							</span>
+						{/if}
 					{/each}
 				</span>
 			</div>
