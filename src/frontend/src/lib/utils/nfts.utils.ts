@@ -1,6 +1,8 @@
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import type { NftListSortingType } from '$lib/stores/nft-list.store';
+import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
+import type { NetworkId } from '$lib/types/network';
 import type {
 	Nft,
 	NftCollection,
@@ -270,3 +272,14 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 
 	return result;
 };
+
+export const findNonFungibleToken = ({
+	tokens,
+	address,
+	networkId
+}: {
+	tokens: NonFungibleToken[];
+	address: EthAddress;
+	networkId: NetworkId;
+}): NonFungibleToken | undefined =>
+	tokens.find((token) => token.address === address && token.network.id === networkId);
