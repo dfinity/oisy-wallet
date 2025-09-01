@@ -28,6 +28,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { UserAgreements } from '$lib/types/user-agreements';
 	import { emit } from '$lib/utils/events.utils';
+    import {nowInBigIntNanoSeconds} from "$icp/utils/date.utils";
 
 	type AgreementsToAcceptType = {
 		[K in keyof EnvAgreements]?: boolean;
@@ -84,7 +85,7 @@
 						...acc,
 						[agreement]: {
 							accepted,
-							lastAcceptedTimestamp: Date.now(),
+                            lastAcceptedTimestamp: nowInBigIntNanoSeconds(),
 							lastUpdatedTimestamp:
 								agreementsData[agreement as keyof EnvAgreements].lastUpdatedTimestamp
 						}
