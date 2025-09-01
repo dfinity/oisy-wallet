@@ -51,9 +51,12 @@
 <div class="flex gap-2">
 	{#if nonNullish(token)}
 		{#if token.section === CustomTokenSection.SPAM}
-<!--			TODO not spam button -->
+			<!--			TODO not spam button -->
 		{:else}
-			<NftCollectionActionButton label="Spam" onclick={() => updateSection(CustomTokenSection.SPAM)}>
+			<NftCollectionActionButton
+				label="Spam"
+				onclick={() => updateSection(CustomTokenSection.SPAM)}
+			>
 				{#snippet icon()}
 					<IconAlertOctagon size="18" />
 				{/snippet}
