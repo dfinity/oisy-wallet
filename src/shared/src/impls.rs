@@ -30,6 +30,7 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
+use crate::types::agreement::UserAgreement;
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -88,20 +89,20 @@ impl From<&Token> for CustomTokenId {
                 CustomTokenId::SolDevnet(token_address.clone())
             }
             Token::Erc20(ErcToken {
-                token_address,
-                chain_id,
-                ..
-            })
+                             token_address,
+                             chain_id,
+                             ..
+                         })
             | Token::Erc721(ErcToken {
-                token_address,
-                chain_id,
-                ..
-            })
+                                token_address,
+                                chain_id,
+                                ..
+                            })
             | Token::Erc1155(ErcToken {
-                token_address,
-                chain_id,
-                ..
-            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
+                                 token_address,
+                                 chain_id,
+                                 ..
+                             }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
         }
     }
 }
@@ -199,21 +200,22 @@ impl TokenVersion for StoredUserProfile {
     }
 }
 
+impl UserAgreement {
+    fn without_accept_ts(mut self) -> Self {
+        self.last_accepted_at_ns = None;
+        self
+    }
+}
+
 impl UserAgreements {
     /// Equality ignoring `last_accepted_at_ns`.
     fn equals_ignoring_ts(&self, other: &UserAgreements) -> bool {
-        let mut a = self.clone();
-        let mut b = other.clone();
-
-        a.license_agreement.last_accepted_at_ns = None;
-        a.terms_of_use.last_accepted_at_ns = None;
-        a.privacy_policy.last_accepted_at_ns = None;
-
-        b.license_agreement.last_accepted_at_ns = None;
-        b.terms_of_use.last_accepted_at_ns = None;
-        b.privacy_policy.last_accepted_at_ns = None;
-
-        a == b
+        self.license_agreement.clone().without_accept_ts()
+            == other.license_agreement.clone().without_accept_ts()
+            && self.terms_of_use.clone().without_accept_ts()
+            == other.terms_of_use.clone().without_accept_ts()
+            && self.privacy_policy.clone().without_accept_ts()
+            == other.privacy_policy.clone().without_accept_ts()
     }
 }
 
