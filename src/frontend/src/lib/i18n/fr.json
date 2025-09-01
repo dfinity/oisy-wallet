@@ -37,7 +37,8 @@
 			"currency": "Devise"
 		},
 		"info": {
-			"test_banner": "À des fins de test uniquement !"
+			"test_banner": "À des fins de test uniquement !",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo de $name",

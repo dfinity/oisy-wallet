@@ -37,7 +37,8 @@
 			"currency": "Měna"
 		},
 		"info": {
-			"test_banner": "Pouze pro testovací účely!"
+			"test_banner": "Pouze pro testovací účely!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "logo $name",
