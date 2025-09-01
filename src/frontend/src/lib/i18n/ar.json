@@ -37,7 +37,8 @@
 			"currency": "العملة"
 		},
 		"info": {
-			"test_banner": "لأغراض الاختبار فقط!"
+			"test_banner": "لأغراض الاختبار فقط!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "شعار $name",
@@ -114,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
-			"session_expired": "تم تسجيل خروجك لانتهاء صلاحية جلستك."
+			"session_expired": "تم تسجيل خروجك لانتهاء صلاحية جلستك.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "لا توجد هوية إنترنت.",
@@ -1488,6 +1490,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {
