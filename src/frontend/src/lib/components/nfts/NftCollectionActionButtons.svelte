@@ -18,9 +18,13 @@
 
 	let { collection }: Props = $props();
 
-	const token = $derived(findNonFungibleToken({tokens: $nonFungibleCustomTokens,
-		address: collection.address,
-		networkId: collection.network.id}))
+	const token = $derived(
+		findNonFungibleToken({
+			tokens: $nonFungibleCustomTokens,
+			address: collection.address,
+			networkId: collection.network.id
+		})
+	);
 
 	const updateSection = async (section: CustomTokenSection) => {
 		if (isNullish($authIdentity)) {
@@ -55,13 +59,20 @@
 
 	{#if token.section !== CustomTokenSection.SPAM}
 		{#if token.section !== CustomTokenSection.HIDDEN}
-			<NftCollectionActionButton label="Hide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
+			<NftCollectionActionButton
+				label="Hide"
+				onclick={() => updateSection(CustomTokenSection.HIDDEN)}
+			>
 				{#snippet icon()}
 					<IconEyeOff size="18" />
 				{/snippet}
 			</NftCollectionActionButton>
 		{:else}
-			<NftCollectionActionButton colorStyle="primary" label="Unhide" onclick={() => updateSection(undefined)}>
+			<NftCollectionActionButton
+				colorStyle="primary"
+				label="Unhide"
+				onclick={() => updateSection(undefined)}
+			>
 				{#snippet icon()}
 					<IconEye size="18" />
 				{/snippet}
