@@ -1,6 +1,7 @@
 // Authentication
 export const TRACK_COUNT_SIGN_IN_SUCCESS = 'sign_in_success';
 export const TRACK_SIGN_IN_CANCELLED_COUNT = 'sign_in_cancelled';
+export const TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR = 'sign_in_undefined_auth_client_error';
 export const TRACK_SIGN_IN_ERROR_COUNT = 'sign_in_error';
 export const TRACK_SYNC_AUTH_AUTHENTICATED_COUNT = 'sync_auth_authenticated';
 export const TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT = 'sync_auth_not_authenticated';
