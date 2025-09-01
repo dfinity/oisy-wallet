@@ -228,7 +228,8 @@ describe('custom-tokens.services', () => {
 					},
 					version: toNullable(2n),
 					enabled: true,
-					section: toNullable()
+					section: toNullable(),
+					allow_external_content_source: toNullable()
 				}
 			]);
 
