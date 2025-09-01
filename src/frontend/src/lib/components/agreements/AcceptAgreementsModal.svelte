@@ -3,6 +3,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { agreementsData } from '$env/agreements.env';
 	import type { EnvAgreements } from '$env/types/env-agreements';
+	import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 	import { updateUserAgreements } from '$lib/api/backend.api';
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
@@ -23,6 +24,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { noAgreementVisionedYet, outdatedAgreements } from '$lib/derived/user-agreements.derived';
+	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -84,7 +86,7 @@
 						...acc,
 						[agreement]: {
 							accepted,
-							lastAcceptedTimestamp: Date.now(),
+							lastAcceptedTimestamp: nowInBigIntNanoSeconds(),
 							lastUpdatedTimestamp:
 								agreementsData[agreement as keyof EnvAgreements].lastUpdatedTimestamp
 						}
@@ -98,7 +100,8 @@
 		try {
 			await updateUserAgreements({
 				identity: $authIdentity,
-				agreements
+				agreements,
+				currentUserVersion: $userProfileVersion
 			});
 
 			emit({ message: 'oisyRefreshUserProfile' });

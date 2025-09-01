@@ -194,12 +194,12 @@ describe('AcceptAgreementsModal', () => {
 			agreements: {
 				termsOfUse: {
 					accepted: true,
-					lastAcceptedTimestamp: expect.any(Number),
+					lastAcceptedTimestamp: expect.any(BigInt),
 					lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp
 				},
 				privacyPolicy: {
 					accepted: true,
-					lastAcceptedTimestamp: expect.any(Number),
+					lastAcceptedTimestamp: expect.any(BigInt),
 					lastUpdatedTimestamp: agreementsData.privacyPolicy.lastUpdatedTimestamp
 				}
 			}
