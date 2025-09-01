@@ -1489,6 +1489,9 @@
 			"i_have_accepted": "I have read and agree to the",
 			"i_have_accepted_updated": "I have read and agree to the updated",
 			"accept_and_continue": "Accept and continue"
+		},
+		"error": {
+			"cannot_update_user_agreements": "Something went wrong when updating your agreements."
 		}
 	},
 	"license_agreement": {

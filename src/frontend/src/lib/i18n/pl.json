@@ -1489,6 +1489,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {

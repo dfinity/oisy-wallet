@@ -1489,6 +1489,9 @@
 			"i_have_accepted": "Ich habe die Dokumente gelesen und stimme ihnen zu.",
 			"i_have_accepted_updated": "Ich habe die angepassten Dokumente gelesen und stimme ihnen zu.",
 			"accept_and_continue": "Zustimmen und weiterfahren"
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {
