@@ -6,7 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        agreement::{Agreements, SaveAgreementsSettingsError, UserAgreements},
+        agreement::{Agreements, SaveAgreementsSettingsError, UserAgreement, UserAgreements},
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -30,7 +30,6 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
-use crate::types::agreement::UserAgreement;
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -89,20 +88,20 @@ impl From<&Token> for CustomTokenId {
                 CustomTokenId::SolDevnet(token_address.clone())
             }
             Token::Erc20(ErcToken {
-                             token_address,
-                             chain_id,
-                             ..
-                         })
+                token_address,
+                chain_id,
+                ..
+            })
             | Token::Erc721(ErcToken {
-                                token_address,
-                                chain_id,
-                                ..
-                            })
+                token_address,
+                chain_id,
+                ..
+            })
             | Token::Erc1155(ErcToken {
-                                 token_address,
-                                 chain_id,
-                                 ..
-                             }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
+                token_address,
+                chain_id,
+                ..
+            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
         }
     }
 }
@@ -213,9 +212,9 @@ impl UserAgreements {
         self.license_agreement.clone().without_accept_ts()
             == other.license_agreement.clone().without_accept_ts()
             && self.terms_of_use.clone().without_accept_ts()
-            == other.terms_of_use.clone().without_accept_ts()
+                == other.terms_of_use.clone().without_accept_ts()
             && self.privacy_policy.clone().without_accept_ts()
-            == other.privacy_policy.clone().without_accept_ts()
+                == other.privacy_policy.clone().without_accept_ts()
     }
 }
 
