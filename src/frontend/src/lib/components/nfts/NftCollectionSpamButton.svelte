@@ -31,8 +31,6 @@
 			networkId: collection.network.id
 		});
 
-		console.log(token);
-
 		if (nonNullish(token)) {
 			if (token.standard === 'erc721') {
 				await saveCustomErc721Token({
