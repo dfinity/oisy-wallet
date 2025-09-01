@@ -275,3 +275,8 @@ export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-token
 
 // Agreements
 export const AGREEMENTS_MODAL = 'agreements-modal';
+export const AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE = 'agreements-modal-checkbox-terms-of-use';
+export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkbox-privacy-policy';
+export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
+	'agreements-modal-checkbox-license-agreement';
+export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';
