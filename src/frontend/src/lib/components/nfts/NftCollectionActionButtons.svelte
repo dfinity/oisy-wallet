@@ -46,15 +46,19 @@
 </script>
 
 <div class="flex gap-2">
-	<NftCollectionActionButton label="Spam" onclick={() => updateSection(CustomTokenSection.SPAM)}>
-		{#snippet icon()}
-			<IconAlertOctagon size="18" />
-		{/snippet}
-	</NftCollectionActionButton>
+	{#if collection.section !== CustomTokenSection.SPAM}
+		<NftCollectionActionButton label="Spam" onclick={() => updateSection(CustomTokenSection.SPAM)}>
+			{#snippet icon()}
+				<IconAlertOctagon size="18" />
+			{/snippet}
+		</NftCollectionActionButton>
+	{/if}
 
-	<NftCollectionActionButton label="Hide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
-		{#snippet icon()}
-			<IconEyeOff size="18" />
-		{/snippet}
-	</NftCollectionActionButton>
+	{#if collection.section !== CustomTokenSection.HIDDEN}
+		<NftCollectionActionButton label="Hide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
+			{#snippet icon()}
+				<IconEyeOff size="18" />
+			{/snippet}
+		</NftCollectionActionButton>
+	{/if}
 </div>
