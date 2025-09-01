@@ -9,11 +9,16 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
 	import {
+		AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
+		AI_ASSISTANT_MESSAGE_SENT
+	} from '$lib/constants/analytics.contants';
+	import {
 		aiAssistantLlmMessages,
 		aiAssistantChatMessages
 	} from '$lib/derived/ai-assistant.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { askLlm } from '$lib/services/ai-assistant.services';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -52,6 +57,8 @@
 		try {
 			loading = true;
 
+			trackEvent({ name: AI_ASSISTANT_MESSAGE_SENT });
+
 			const { text, tool } = await askLlm({
 				messages: $aiAssistantLlmMessages,
 				identity: $authIdentity
@@ -77,6 +84,8 @@
 					text: $i18n.ai_assistant.errors.unknown
 				}
 			});
+
+			trackEvent({ name: AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED });
 		}
 
 		loading = false;
