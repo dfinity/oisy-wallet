@@ -26,7 +26,7 @@
 		})
 	);
 
-	const updateSection = async (section: CustomTokenSection) => {
+	const updateSection = async (section: CustomTokenSection | undefined) => {
 		if (isNullish($authIdentity)) {
 			return;
 		}
@@ -50,15 +50,15 @@
 
 <div class="flex gap-2">
 	{#if nonNullish(token)}
-		{#if token.section !== CustomTokenSection.SPAM}
+		{#if token.section === CustomTokenSection.SPAM}
+<!--			TODO not spam button -->
+		{:else}
 			<NftCollectionActionButton label="Spam" onclick={() => updateSection(CustomTokenSection.SPAM)}>
 				{#snippet icon()}
 					<IconAlertOctagon size="18" />
 				{/snippet}
 			</NftCollectionActionButton>
-		{/if}
 
-		{#if token.section !== CustomTokenSection.SPAM}
 			{#if token.section !== CustomTokenSection.HIDDEN}
 				<NftCollectionActionButton
 					label="Hide"
