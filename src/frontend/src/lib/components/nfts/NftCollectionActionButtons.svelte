@@ -12,6 +12,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import {
+		NFT_COLLECTION_ACTION_HIDE,
+		NFT_COLLECTION_ACTION_NOT_SPAM,
+		NFT_COLLECTION_ACTION_SPAM, NFT_COLLECTION_ACTION_UNHIDE
+	} from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		collection: NftCollection;
@@ -51,10 +56,11 @@
 
 <div class="flex gap-2">
 	{#if nonNullish(token)}
-		{#if token.section === CustomTokenSection.SPAM}
+		{#if nonNullish(token.section) && token.section === CustomTokenSection.SPAM}
 			<NftCollectionActionButton
 				label={$i18n.nfts.text.not_spam}
 				onclick={() => updateSection(undefined)}
+				testId={NFT_COLLECTION_ACTION_NOT_SPAM}
 			>
 				{#snippet icon()}
 					<IconAlertOctagon size="18" />
@@ -64,29 +70,32 @@
 			<NftCollectionActionButton
 				label={$i18n.nfts.text.spam}
 				onclick={() => updateSection(CustomTokenSection.SPAM)}
+				testId={NFT_COLLECTION_ACTION_SPAM}
 			>
 				{#snippet icon()}
 					<IconAlertOctagon size="18" />
 				{/snippet}
 			</NftCollectionActionButton>
 
-			{#if token.section !== CustomTokenSection.HIDDEN}
-				<NftCollectionActionButton
-					label={$i18n.nfts.text.hide}
-					onclick={() => updateSection(CustomTokenSection.HIDDEN)}
-				>
-					{#snippet icon()}
-						<IconEyeOff size="18" />
-					{/snippet}
-				</NftCollectionActionButton>
-			{:else}
+			{#if nonNullish(token.section) && token.section === CustomTokenSection.HIDDEN}
 				<NftCollectionActionButton
 					colorStyle="primary"
 					label={$i18n.nfts.text.unhide}
 					onclick={() => updateSection(undefined)}
+					testId={NFT_COLLECTION_ACTION_UNHIDE}
 				>
 					{#snippet icon()}
 						<IconEye size="18" />
+					{/snippet}
+				</NftCollectionActionButton>
+			{:else}
+				<NftCollectionActionButton
+					label={$i18n.nfts.text.hide}
+					onclick={() => updateSection(CustomTokenSection.HIDDEN)}
+					testId={NFT_COLLECTION_ACTION_HIDE}
+				>
+					{#snippet icon()}
+						<IconEyeOff size="18" />
 					{/snippet}
 				</NftCollectionActionButton>
 			{/if}
