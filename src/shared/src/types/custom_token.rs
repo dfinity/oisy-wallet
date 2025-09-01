@@ -67,7 +67,7 @@ pub struct CustomToken {
     pub enabled: bool,
     pub version: Option<Version>,
     pub section: Option<TokenSection>,
-    pub allow_media_source: Option<bool>,
+    pub allow_external_content_source: Option<bool>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
