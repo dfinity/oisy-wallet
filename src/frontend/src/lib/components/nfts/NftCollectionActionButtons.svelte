@@ -42,7 +42,7 @@
 				});
 			}
 		}
-	}
+	};
 </script>
 
 <div class="flex gap-2">
