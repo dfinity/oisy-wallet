@@ -14,7 +14,7 @@ use super::{
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
-    agreement::SaveAgreementsSettingsError,
+    agreement::UpdateAgreementsError,
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
     network::{SaveNetworksSettingsError, SaveTestnetsSettingsError},
@@ -160,7 +160,7 @@ pub enum SetUserShowTestnetsResult {
     /// The user's show testnets was set successfully.
     Ok(()),
     /// The user's show testnets was not set due to an error.
-    Err(SaveTestnetsSettingsError),
+    Err(SetTestnetsSettingsError),
 }
 impl From<Result<(), SaveTestnetsSettingsError>> for SetUserShowTestnetsResult {
     fn from(result: Result<(), SaveTestnetsSettingsError>) -> Self {
@@ -326,10 +326,10 @@ pub enum UpdateUserAgreementsResult {
     /// The user's agreements were updated successfully.
     Ok(()),
     /// The user's agreements were not updated due to an error.
-    Err(SaveAgreementsSettingsError),
+    Err(UpdateAgreementsError),
 }
-impl From<Result<(), SaveAgreementsSettingsError>> for UpdateUserAgreementsResult {
-    fn from(result: Result<(), SaveAgreementsSettingsError>) -> Self {
+impl From<Result<(), UpdateAgreementsError>> for UpdateUserAgreementsResult {
+    fn from(result: Result<(), UpdateAgreementsError>) -> Self {
         match result {
             Ok(()) => UpdateUserAgreementsResult::Ok(()),
             Err(err) => UpdateUserAgreementsResult::Err(err),

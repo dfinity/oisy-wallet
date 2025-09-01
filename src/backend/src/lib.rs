@@ -21,7 +21,7 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
-        agreement::SaveAgreementsRequest,
+        agreement::UpdateUserAgreementsRequest,
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -33,7 +33,9 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
+        network::{
+            SaveNetworksSettingsRequest, SetShowTestnetsRequest, UpdateNetworksSettingsError,
+        },
         pow::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
@@ -712,7 +714,7 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn update_user_agreements(request: SaveAgreementsRequest) -> UpdateUserAgreementsResult {
+pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
 
