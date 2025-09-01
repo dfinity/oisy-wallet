@@ -5,10 +5,12 @@ import {
 	getAiAssistantFilterContactsPrompt,
 	getAiAssistantToolsDescription
 } from '$lib/constants/ai-assistant.constants';
+import { AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED } from '$lib/constants/analytics.contants';
 import { aiAssistantSystemMessage } from '$lib/derived/ai-assistant.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import { enabledNetworksSymbols } from '$lib/derived/networks.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
+import { trackEvent } from '$lib/services/analytics.services';
 import {
 	ToolResultType,
 	type ChatMessageContent,
@@ -147,6 +149,13 @@ export const executeTool = async ({
 	} = toolCall;
 
 	let result: ToolResult['result'] | undefined;
+
+	trackEvent({
+		name: AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED,
+		metadata: {
+			toolName: name
+		}
+	});
 
 	if (name === ToolResultType.SHOW_CONTACTS) {
 		result =
