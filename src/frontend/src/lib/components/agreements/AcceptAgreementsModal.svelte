@@ -3,6 +3,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { agreementsData } from '$env/agreements.env';
 	import type { EnvAgreements } from '$env/types/env-agreements';
+	import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 	import { updateUserAgreements } from '$lib/api/backend.api';
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
@@ -28,7 +29,6 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { UserAgreements } from '$lib/types/user-agreements';
 	import { emit } from '$lib/utils/events.utils';
-    import {nowInBigIntNanoSeconds} from "$icp/utils/date.utils";
 
 	type AgreementsToAcceptType = {
 		[K in keyof EnvAgreements]?: boolean;
@@ -85,7 +85,7 @@
 						...acc,
 						[agreement]: {
 							accepted,
-                            lastAcceptedTimestamp: nowInBigIntNanoSeconds(),
+							lastAcceptedTimestamp: nowInBigIntNanoSeconds(),
 							lastUpdatedTimestamp:
 								agreementsData[agreement as keyof EnvAgreements].lastUpdatedTimestamp
 						}
