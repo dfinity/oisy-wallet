@@ -1,6 +1,8 @@
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import type { NftListSortingType } from '$lib/stores/nft-list.store';
+import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
+import type { NetworkId } from '$lib/types/network';
 import type {
 	Nft,
 	NftCollection,
@@ -12,8 +14,6 @@ import type {
 } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-import type { EthAddress } from '$lib/types/address';
-import type { NetworkId } from '$lib/types/network';
 
 export const getNftsByNetworks = ({
 	tokens,
@@ -273,12 +273,11 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 	return result;
 };
 
-
 export const findNonFungibleToken = ({
-																			 tokens,
-																			 address,
-																			 networkId
-																		 }: {
+	tokens,
+	address,
+	networkId
+}: {
 	tokens: NonFungibleToken[];
 	address: EthAddress;
 	networkId: NetworkId;
