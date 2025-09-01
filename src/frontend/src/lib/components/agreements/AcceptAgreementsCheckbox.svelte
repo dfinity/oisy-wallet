@@ -15,7 +15,7 @@
 </script>
 
 <span class="flex items-center gap-1">
-	<Checkbox checked={checked ?? false} {inputId} on:nnsChange={onChange}>
+	<Checkbox checked={checked ?? false} {inputId} preventDefault={true} on:nnsChange={onChange}>
 		{#if isOutdated}
 			{$i18n.agreements.text.i_have_accepted_updated}
 		{:else}
