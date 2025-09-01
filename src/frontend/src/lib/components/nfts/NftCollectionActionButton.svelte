@@ -8,7 +8,7 @@
 		icon: Snippet;
 		onclick: MouseEventHandler<HTMLButtonElement>;
 		label: string;
-		colorStyle?: ButtonColorStyle;
+		colorStyle?: Extract<ButtonColorStyle, 'primary' | 'tertiary-alt'>;
 		testId?: string;
 	}
 
