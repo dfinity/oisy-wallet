@@ -1223,6 +1223,7 @@ interface I18nAgreements {
 		i_have_accepted_updated: string;
 		accept_and_continue: string;
 	};
+	error: { cannot_update_user_agreements: string };
 }
 
 interface I18nLicense_agreement {
