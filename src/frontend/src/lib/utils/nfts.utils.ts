@@ -157,8 +157,7 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		network: token.network,
 		standard: token.standard,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
-		...(notEmptyString(token.name) && { name: token.name }),
-		...(nonNullish(token.section) && { state: token.section })
+		...(notEmptyString(token.name) && { name: token.name })
 	});
 
 export const getEnabledNfts = ({
