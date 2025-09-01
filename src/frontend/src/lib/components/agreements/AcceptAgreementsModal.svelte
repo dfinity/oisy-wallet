@@ -11,7 +11,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
+	import { AGREEMENTS_MODAL } from '$lib/constants/test-ids.constants';
 	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/user-agreements.derived';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,23 +20,47 @@
 		[K in keyof EnvAgreements]?: boolean;
 	};
 
-	let agreementsToAccept: AgreementsToAcceptType = $state({});
+	let agreementsToAccept = $state<AgreementsToAcceptType>({});
+
+	let updatingAgreements = $state(true);
 
 	$effect(() => {
-		Object.keys($outdatedAgreements).forEach(
-			(agreementType) => (agreementsToAccept[agreementType as keyof EnvAgreements] = false)
+		updatingAgreements = true;
+
+		agreementsToAccept = Object.keys($outdatedAgreements).reduce<AgreementsToAcceptType>(
+			(acc, agreementType) => ({
+				...acc,
+				[agreementType as keyof EnvAgreements]: false
+			}),
+			{}
 		);
+
+		updatingAgreements = false;
 	});
 
 	const acceptedAllAgreements = $derived(
 		Object.values(agreementsToAccept).filter((a) => !a).length === 0
 	);
 
-	const toggleAccept = (type: keyof AgreementsToAcceptType) =>
-		(agreementsToAccept[type] = !agreementsToAccept[type]);
+	let disabled = $derived(!acceptedAllAgreements || updatingAgreements);
+
+	const toggleAccept = (type: keyof AgreementsToAcceptType) => {
+		agreementsToAccept[type] = !agreementsToAccept[type];
+	};
+
+	const onReject = () => {
+		// TODO: Add (non-awaited?) services to save the user agreements rejection status
+
+		warnSignOut($i18n.agreements.text.reject_warning);
+	};
+
+	const onAccept = async () => {
+		// TODO: Add services to save the user agreements acceptance status
+	};
 </script>
 
-<Modal testId={LOADER_MODAL}>
+<!-- TODO: remove the close button from the modal -->
+<Modal testId={AGREEMENTS_MODAL}>
 	<h4 slot="title">
 		{$hasOutdatedAgreements
 			? $i18n.agreements.text.review_updated_title
@@ -103,14 +127,12 @@
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<Button
-					colorStyle="secondary-light"
-					onclick={() => warnSignOut($i18n.agreements.text.reject_warning)}
-					>{$i18n.core.text.reject}</Button
-				>
-				<Button colorStyle="primary" disabled={!acceptedAllAgreements}
-					>{$i18n.agreements.text.accept_and_continue}</Button
-				>
+				<Button colorStyle="secondary-light" onclick={onReject}>
+					{$i18n.core.text.reject}
+				</Button>
+				<Button colorStyle="primary" {disabled} onclick={onAccept}>
+					{$i18n.agreements.text.accept_and_continue}
+				</Button>
 			</ButtonGroup>
 		{/snippet}
 	</ContentWithToolbar>

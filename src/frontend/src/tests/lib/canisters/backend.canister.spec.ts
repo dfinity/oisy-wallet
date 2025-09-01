@@ -1109,6 +1109,33 @@ describe('backend.canister', () => {
 			expect(res).toBeUndefined();
 		});
 
+		it('should update partial user agreements', async () => {
+			const response = { Ok: null };
+
+			service.update_user_agreements.mockResolvedValue(response);
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const { licenseAgreement: _, ...agreements } = mockUserAgreements;
+
+			const res = await updateUserAgreements({ agreements });
+
+			expect(service.update_user_agreements).toHaveBeenCalledWith({
+				agreements: {
+					...mockDefinedUserAgreements.agreements,
+					license_agreement: {
+						accepted: toNullable(),
+						last_accepted_at_ns: toNullable(),
+						last_updated_at_ms: toNullable()
+					}
+				},
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
 		it('should throw an error if update_user_agreements throws', async () => {
 			service.update_user_agreements.mockImplementation(async () => {
 				await Promise.resolve();
