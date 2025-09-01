@@ -9,7 +9,6 @@ export type Erc1155Token = Erc1155Contract &
 	Omit<Token, 'network' | 'standard'> & {
 		network: EthereumNetwork;
 		standard: Erc1155Standard;
-		enabled: boolean;
 		section?: CustomTokenSection;
 	};
 

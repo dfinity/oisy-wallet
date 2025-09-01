@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { erc1155CustomTokens } from '$eth/derived/erc1155.derived';
+	import { erc721CustomTokens } from '$eth/derived/erc721.derived';
 	import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
@@ -22,7 +23,7 @@
 		}
 
 		const token = findNonFungibleToken({
-			tokens: $nonFungibleTokens,
+			tokens: [...$erc721CustomTokens, ...$erc1155CustomTokens],
 			address: collection.address,
 			networkId: collection.network.id
 		});
