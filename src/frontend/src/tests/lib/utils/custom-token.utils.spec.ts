@@ -8,15 +8,14 @@ describe('custom-token.utils', () => {
 		const mockParams = {
 			enabled: true,
 			version: 1n,
-			section: CustomTokenSection.SPAM,
-			allow_external_content_source: false
+			section: CustomTokenSection.SPAM
 		};
 
 		const partialExpected = {
 			enabled: true,
 			version: [1n],
 			section: [{ Spam: null }],
-			allow_external_content_source: [false]
+			allow_external_content_source: []
 		};
 
 		it('should convert to CustomToken with nullish version', () => {
