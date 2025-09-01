@@ -181,6 +181,7 @@ export interface CredentialSpec {
 export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
+	allow_external_content_source: [] | [boolean];
 	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
@@ -202,7 +203,6 @@ export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
 export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
-	allow_media_source: [] | [boolean];
 }
 export type EthAddress = { Public: string };
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
