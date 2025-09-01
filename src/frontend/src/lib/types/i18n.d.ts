@@ -888,6 +888,10 @@ interface I18nNfts {
 		all_assets: string;
 		address_copied: string;
 		open_explorer: string;
+		spam: string;
+		not_spam: string;
+		hide: string;
+		unhide: string;
 	};
 	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }

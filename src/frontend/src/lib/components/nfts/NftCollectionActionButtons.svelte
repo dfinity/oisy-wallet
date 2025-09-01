@@ -11,6 +11,7 @@
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		collection: NftCollection;
@@ -51,14 +52,14 @@
 <div class="flex gap-2">
 	{#if nonNullish(token)}
 		{#if token.section === CustomTokenSection.SPAM}
-			<NftCollectionActionButton label="Not spam" onclick={() => updateSection(undefined)}>
+			<NftCollectionActionButton label={$i18n.nfts.text.not_spam} onclick={() => updateSection(undefined)}>
 				{#snippet icon()}
 					<IconAlertOctagon size="18" />
 				{/snippet}
 			</NftCollectionActionButton>
 		{:else}
 			<NftCollectionActionButton
-				label="Spam"
+				label={$i18n.nfts.text.spam}
 				onclick={() => updateSection(CustomTokenSection.SPAM)}
 			>
 				{#snippet icon()}
@@ -68,7 +69,7 @@
 
 			{#if token.section !== CustomTokenSection.HIDDEN}
 				<NftCollectionActionButton
-					label="Hide"
+					label={$i18n.nfts.text.hide}
 					onclick={() => updateSection(CustomTokenSection.HIDDEN)}
 				>
 					{#snippet icon()}
@@ -78,7 +79,7 @@
 			{:else}
 				<NftCollectionActionButton
 					colorStyle="primary"
-					label="Unhide"
+					label={$i18n.nfts.text.unhide}
 					onclick={() => updateSection(undefined)}
 				>
 					{#snippet icon()}
