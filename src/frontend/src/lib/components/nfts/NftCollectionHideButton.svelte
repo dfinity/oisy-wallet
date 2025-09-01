@@ -31,13 +31,13 @@
 			if (token.standard === 'erc721') {
 				await saveCustomErc721Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, enabled: true, section: CustomTokenSection.HIDDEN }]
+					tokens: [{ ...token, section: CustomTokenSection.HIDDEN }]
 				});
 			}
 			if (token.standard === 'erc1155') {
 				await saveCustomErc1155Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, enabled: true, section: CustomTokenSection.HIDDEN }]
+					tokens: [{ ...token, section: CustomTokenSection.HIDDEN }]
 				});
 			}
 		}

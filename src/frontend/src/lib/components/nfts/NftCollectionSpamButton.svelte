@@ -34,17 +34,19 @@
 			networkId: collection.network.id
 		});
 
+		console.log(token);
+
 		if (nonNullish(token)) {
 			if (token.standard === 'erc721') {
 				await saveCustomErc721Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, enabled: true, section: CustomTokenSection.SPAM }]
+					tokens: [{ ...token, section: CustomTokenSection.SPAM }]
 				});
 			}
 			if (token.standard === 'erc1155') {
 				await saveCustomErc1155Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, enabled: true, section: CustomTokenSection.SPAM }]
+					tokens: [{ ...token, section: CustomTokenSection.SPAM }]
 				});
 			}
 		}
