@@ -7,7 +7,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import { getNftCollectionUi } from '$lib/utils/nfts.utils';
+	import { getAllowMediaForNft, getNftCollectionUi } from '$lib/utils/nfts.utils';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
@@ -16,12 +16,21 @@
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		nft: Nft;
 	}
 
 	const { nft }: Props = $props();
+
+	const hasConsent = $derived(
+		getAllowMediaForNft({
+			tokens: $nonFungibleTokens,
+			networkId: nft.collection.network.id,
+			address: nft.collection.address
+		}) ?? false
+	);
 
 	const shortCollectionName = $derived(
 		nonNullish(nft.collection.name)
@@ -39,17 +48,23 @@
 			<span class="flex text-warning-primary">
 				<IconImageDownload />
 			</span>
-			<h3>Review media sources for <br />"{shortCollectionName}"</h3>
+			{#if nonNullish(shortCollectionName)}
+				<h3
+					>{@html replacePlaceholders($i18n.nfts.text.review_title, {
+						$collectionName: shortCollectionName
+					})}</h3
+				>
+			{/if}
 		</div>
 
 		<p class="mb-5">
-			Heads up! These images are from an unverified source. Enabling them could share your IP
-			address with a third party and poses a potential security risk. <ExternalLink
+			{$i18n.nfts.text.review_description}
+			<ExternalLink
 				iconAsLast
 				styleClass="font-bold ml-2"
 				href="#"
-				ariaLabel="learn more"
-				iconSize="18">Learn more</ExternalLink
+				ariaLabel={$i18n.nfts.text.learn_more}
+				iconSize="18">{$i18n.nfts.text.learn_more}</ExternalLink
 			>
 		</p>
 
@@ -70,7 +85,9 @@
 					<output>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output>
 					<AddressActions
 						copyAddress={nft.collection.address}
-						copyAddressText={$i18n.nfts.text.address_copied}
+						copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+							$address: nft.collection.address
+						})}
 						externalLink={getContractExplorerUrl({
 							network: nft.collection.network,
 							contractAddress: nft.collection.address
@@ -81,7 +98,7 @@
 			</div>
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span><span
-					>Media enabled</span
+					>{hasConsent ? $i18n.nfts.text.media_enabled : $i18n.nfts.text.media_disabled}</span
 				>
 			</div>
 			<div class="flex w-full justify-between">
@@ -95,7 +112,9 @@
 							>
 							<AddressActions
 								copyAddress={nft.imageUrl}
-								copyAddressText={$i18n.nfts.text.address_copied}
+								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+									$address: nft.imageUrl
+								})}
 								externalLink={nft.imageUrl}
 								externalLinkAriaLabel={$i18n.nfts.text.open_in_new_tab}
 							/>
@@ -108,7 +127,9 @@
 		{#snippet toolbar()}
 			<div class="flex w-full gap-3">
 				<ButtonCancel onclick={() => modalStore.close()} />
-				<Button colorStyle="primary">Disable media</Button>
+				<Button colorStyle="primary"
+					>{hasConsent ? $i18n.nfts.text.disable_media : $i18n.nfts.text.enable_media}</Button
+				>
 			</div>
 		{/snippet}
 	</ContentWithToolbar>

@@ -1047,7 +1047,12 @@
 			"display_preference": "Anzeigeeinstellung",
             "media_enabled": "Medien aktiviert",
             "media_disabled": "Medien deaktiviert",
-            "open_in_new_tab": "In neuem Tab öffnen"
+            "enable_media": "Medien aktivieren",
+            "disable_media": "Medien deaktivieren",
+            "open_in_new_tab": "In neuem Tab öffnen",
+            "review_title": "Medienquelle überprüfen für <br />\"$collectionName\"",
+            "review_description": "Aufgepasst! Diese Bilder kommen von einer unverifizierten Quelle. Diese zu aktivieren könnte deine IP-Adresse mit einem Drittanbieter teilen und potentiell ein Sicherheitsrisiko darstellen.",
+            "learn_more": "Erfahre mehr"
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
