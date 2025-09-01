@@ -14,9 +14,12 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import { AGREEMENTS_MODAL } from '$lib/constants/test-ids.constants';
-	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/user-agreements.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import {
+		hasOutdatedAgreements,
+		outdatedAgreements
+	} from '$lib/derived/user-agreements.derived';
 	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -29,19 +32,33 @@
 
 	let agreementsToAccept = $state<AgreementsToAcceptType>({});
 
+	let updatingAgreements = $state(true);
+
 	$effect(() => {
-		Object.keys($outdatedAgreements).forEach(
-			(agreementType) => (agreementsToAccept[agreementType as keyof EnvAgreements] = false)
+		updatingAgreements = true;
+
+		agreementsToAccept = Object.keys($outdatedAgreements).reduce<AgreementsToAcceptType>(
+			(acc, agreementType) => ({
+				...acc,
+				[agreementType as keyof EnvAgreements]: false
+			}),
+			{}
 		);
+
+		updatingAgreements = false;
 	});
 
 	const acceptedAllAgreements = $derived(
 		Object.values(agreementsToAccept).filter((a) => !a).length === 0
 	);
 
+	let disabled = $derived(!acceptedAllAgreements || updatingAgreements);
+
 	const toggleAccept = (type: keyof AgreementsToAcceptType) => {
 		agreementsToAccept[type] = !agreementsToAccept[type];
 	};
+
+	let savingAgreements = $state(false);
 
 	const onReject = () => {
 		// TODO: Add (non-awaited?) services to save the user agreements rejection status
@@ -54,6 +71,8 @@
 			await nullishSignOut();
 			return;
 		}
+
+		savingAgreements = true;
 
 		const agreements: UserAgreements = Object.entries(agreementsToAccept).reduce<UserAgreements>(
 			(acc, [agreement, accepted]) => {
@@ -73,12 +92,6 @@
 			{} as UserAgreements
 		);
 
-		if (Object.keys(agreements).length !== Object.keys(agreementsData).length) {
-			toastsError({
-				msg: { text: metamask_connected }
-			});
-		}
-
 		try {
 			await updateUserAgreements({
 				identity: $authIdentity,
@@ -88,9 +101,11 @@
 			emit({ message: 'oisyRefreshUserProfile' });
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: metamask_connected },
+				msg: { text: $i18n.agreements.error.cannot_update_user_agreements },
 				err
 			});
+		} finally {
+			savingAgreements = false;
 		}
 	};
 </script>
@@ -166,7 +181,12 @@
 				<Button colorStyle="secondary-light" onclick={onReject}>
 					{$i18n.core.text.reject}
 				</Button>
-				<Button colorStyle="primary" disabled={!acceptedAllAgreements} onclick={onAccept}>
+				<Button
+					colorStyle="primary"
+					{disabled}
+					loading={savingAgreements}
+					onclick={onAccept}
+				>
 					{$i18n.agreements.text.accept_and_continue}
 				</Button>
 			</ButtonGroup>
