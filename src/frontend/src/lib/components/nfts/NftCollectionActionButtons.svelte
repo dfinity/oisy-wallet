@@ -11,6 +11,7 @@
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	interface Props {
 		collection: NftCollection;
@@ -20,7 +21,7 @@
 
 	const token = $derived(
 		findNonFungibleToken({
-			tokens: $nonFungibleCustomTokens,
+			tokens: $nonFungibleTokens,
 			address: collection.address,
 			networkId: collection.network.id
 		})
