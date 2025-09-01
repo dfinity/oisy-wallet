@@ -14,12 +14,12 @@ import type {
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
 import type { TokenId, TokenMetadata } from '$lib/types/token';
+import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
-import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,
