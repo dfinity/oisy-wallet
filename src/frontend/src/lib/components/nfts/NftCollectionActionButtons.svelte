@@ -53,17 +53,19 @@
 		</NftCollectionActionButton>
 	{/if}
 
-	{#if token.section !== CustomTokenSection.HIDDEN}
-		<NftCollectionActionButton label="Hide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
-			{#snippet icon()}
-				<IconEyeOff size="18" />
-			{/snippet}
-		</NftCollectionActionButton>
-	{:else}
-		<NftCollectionActionButton colorStyle="primary" label="Unhide" onclick={() => updateSection(undefined)}>
-			{#snippet icon()}
-				<IconEye size="18" />
-			{/snippet}
-		</NftCollectionActionButton>
+	{#if token.section !== CustomTokenSection.SPAM}
+		{#if token.section !== CustomTokenSection.HIDDEN}
+			<NftCollectionActionButton label="Hide" onclick={() => updateSection(CustomTokenSection.HIDDEN)}>
+				{#snippet icon()}
+					<IconEyeOff size="18" />
+				{/snippet}
+			</NftCollectionActionButton>
+		{:else}
+			<NftCollectionActionButton colorStyle="primary" label="Unhide" onclick={() => updateSection(undefined)}>
+				{#snippet icon()}
+					<IconEye size="18" />
+				{/snippet}
+			</NftCollectionActionButton>
+		{/if}
 	{/if}
 </div>
