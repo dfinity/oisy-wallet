@@ -37,7 +37,8 @@
 			"currency": "Валюта"
 		},
 		"info": {
-			"test_banner": "Только для тестирования!"
+			"test_banner": "Только для тестирования!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Логотип $name",

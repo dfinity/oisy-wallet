@@ -51,12 +51,7 @@ export const getAiAssistantSystemPrompt = ({
     - If exactly 1 → assign it immediately.
     - If more than 1 → stop and ask the user: "On which network would you like to send ETH?" before proceeding.
 	- Never invent a networkId that isn’t in AVAILABLE TOKENS.
-	- For "Icrcv2" addresses (ICP network):
-		- There are two valid subtypes: isPrincipal = true (principals) and isPrincipal = false (account IDs).
-		- "ICP" token can be sent to both principals and accounts (isPrincipal: true or false).
-		- "ICRC tokens" (any token whose networkId is ICP but not exactly "ICP") can ONLY be sent to principals (isPrincipal: true). 
-		- If the user selects an account (isPrincipal: false) for an ICRC token, reject with: "This token can only be sent to ICP principals, not accounts."
-
+	
 	TOOL USAGE RULES:
 	- For 'review_send_tokens':
 		- Always return 4 arguments: "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "addressId" or "address" (string).
@@ -69,21 +64,17 @@ export const getAiAssistantSystemPrompt = ({
 	
 	- For 'show_contacts':
 		- Use when the user specifies a contact name or wants to choose from saved contacts **and there are matching contacts for the token's addressType**.
-		- If tokenSymbol is "ICP" → allow both (isPrincipal: true and isPrincipal: false) from "Icrcv2".
-		- If tokenSymbol is not "ICP" but networkId = ICP (ICRC token) → only return addresses where isPrincipal: true. Exclude all with isPrincipal: false.
-		- If no valid principals are found for an ICRC token, respond with: "This token can only be sent to ICP principals, not accounts." 
 		- When filtering, always use "addressType" (values: 'Btc', 'Eth', 'Sol', 'Icrcv2') instead of the raw address.
 		- Once the tool returns a contact list, do NOT call 'show_contacts' again for the same contact unless explicitly requested.
 		- If the user confirms a selection, immediately call 'review_send_tokens' with the selected "addressId" and previously provided "amountNumber" + "tokenSymbol".
 	
 	MEMORY & CHAINING BEHAVIOR:
-	- Always remember values from earlier in the conversation (destination, addressId, amountNumber, tokenSymbol) until the send action is complete.
+	- Always remember values from earlier in the conversation (destination, addressId, amountNumber, tokenSymbol, networkId) until the send action is complete.
 	- If "show_contacts" was called and the user confirms a specific contact/address, you MUST reuse the "addressId" from the tool result and proceed to "review_send_tokens" without asking for contact info again.
 	
 	NETWORKID → addressType mapping:
 	- BTC → Btc
-	- ICP → Icrcv2 (principals and accounts)
-	- ICRC tokens → Icrcv2 (principals only)
+	- ICP → Icrcv2
 	- SOL → Sol
 	- ETH, BASE, BSC, POL, ARB → Eth
 	
@@ -104,10 +95,7 @@ export const getAiAssistantFilterContactsPrompt = (
 ) => `You are a strict semantic filter engine.
 Given a list of contacts and a user query, return ONLY contacts that semantically match.
 - Use concept reasoning: e.g., "fruit" → pineapple.
-- Filter addresses by "addressType" if provided, and also enforce ICP-specific rules (only for addressType = Icrcv2):
-	- If tokenSymbol is "ICP" or "TESTICP" → allow both (isPrincipal: true and false).
-	- If tokenSymbol is not "ICP" but networkId = ICP (ICRC token) → strictly allow only isPrincipal: true. Exclude all isPrincipal: false addresses.
-	- If no valid principals exist for an ICRC token, return an empty contacts array and include a "message" field: "This token can only be sent to ICP principals, not accounts."
+- Filter addresses by "addressType" if provided
 - If no matching contacts are found (after applying the above rules), return an empty contacts array and include a "message" field using this exact format: "It looks like you don’t have any saved contacts with a {networkName} address. You can either provide a {networkName} address directly or choose a different token." Replace {networkName} with the friendly blockchain name derived from the token (e.g., SOL → Sol, ICP → ICP).
 
 Return ONLY this JSON schema:
@@ -117,7 +105,7 @@ Return ONLY this JSON schema:
     	"id": string,
       "name": string,
       "addresses": [
-        { "id": string, "label"?: string, "addressType": "Btc" | "Eth" | "Sol" | "Icrcv2", "isPrincipal"?: boolean }
+        { "id": string, "label"?: string, "addressType": "Btc" | "Eth" | "Sol" | "Icrcv2" }
       ]
     }
   ],
