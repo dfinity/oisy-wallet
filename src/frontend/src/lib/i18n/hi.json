@@ -37,7 +37,8 @@
 			"currency": ""
 		},
 		"info": {
-			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!"
+			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "$name लोगो",
