@@ -728,7 +728,8 @@
 			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insuficiente para cobrir as taxas de transação",
 			"btc_invalid_utxo_data": "Dados de transação Bitcoin inválidos",
 			"btc_utxo_locked": "Fundos Bitcoin estão bloqueados por transações pendentes",
-			"btc_invalid_fee_calculation": "Validação de taxa de transação Bitcoin falhou"
+			"btc_invalid_fee_calculation": "Validação de taxa de transação Bitcoin falhou",
+			"pending_transactions_not_available": "O serviço de transações pendentes não está disponível no momento. Tente novamente mais tarde."
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",
@@ -811,9 +812,9 @@
 			"approval_fee": "Taxa de aprovação",
 			"gas_fee": "Taxa de gás",
 			"lp_fee": "Taxa LP",
-			"max_slippage_info": "Digite um valor entre 0% e 50%",
+			"max_slippage_info": "Digite um valor entre 0% e $maxSlippage%",
 			"max_slippage_warning": "Aviso de risco: alto deslizamento pode levar a perdas devido à volatilidade do mercado",
-			"max_slippage_error": "A tolerância a deslizamento não pode ser 0% ou exceder 50%",
+			"max_slippage_error": "A tolerância a deslizamento não pode ser 0% ou exceder $maxSlippage%",
 			"swap_button": "Trocar agora",
 			"swap_is_not_offered": "Esta troca não é oferecida atualmente.",
 			"executing_transaction": "Executando transação...",
@@ -834,7 +835,11 @@
 			"open_instructions_link": "Abrir o link com as instruções",
 			"select_token": "Selecionar token",
 			"select_network_filter": "Selecionar rede",
-			"withdrawing": "A retirar..."
+			"withdrawing": "A retirar...",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "Atualmente, não há uma troca disponível para trocar tokens. Por favor, tente novamente mais tarde.",
@@ -1029,13 +1034,18 @@
 			"quantity": "",
 			"item_traits": "",
 			"collection_not_loaded": "",
-			"nft_not_loaded": ""
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": "",
+			"address_copied": "",
+			"open_explorer": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",
 			"card": {
 				"image": "Imagem do NFT com token ID: $tokenId"
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
@@ -1467,8 +1477,21 @@
 			"indicator": "Ir para o slide $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Ao clicar neste botão, você concorda com o",
 			"accept_terms_link": "Contrato de Licença",
 			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
@@ -1487,10 +1510,31 @@
 			"entire_agreement": "<strong>10. ACORDO INTEGRAL E SEPARABILIDADE.</strong> Este Contrato de Licença é o acordo integral entre Você e a DFINITY e substitui quaisquer e todos os acordos, negociações ou outras comunicações anteriores entre Você e a DFINITY, sejam orais ou escritas, com relação ao assunto aqui tratado. A DFINITY pode fazer alterações neste Contrato de Licença quando novas versões de $oisy_short forem disponibilizadas. No caso de qualquer disposição deste Contrato de Licença ser considerada inválida ou inexequível, então: (a) tal disposição será considerada reformada na medida estritamente necessária para tornar tal disposição válida e exequível, ou se não for passível de tal reforma, será considerada separada deste Contrato de Licença; e (b) a validade e a exequibilidade de todas as outras disposições aqui contidas não serão de forma alguma afetadas ou prejudicadas.",
 			"assignment": "<strong>11. CESSÃO.</strong> Você não pode ceder este Contrato de Licença sem o consentimento prévio por escrito da DFINITY, seja expressamente ou por força da lei, inclusive em conexão com uma fusão ou mudança de controle, e qualquer tentativa de cessão será nula e sem efeito. A DFINITY pode ceder este Contrato de Licença sem restrições e sem qualquer aviso a você. Sujeito ao exposto, este Contrato de Licença será vinculativo para as partes e seus respectivos sucessores e cessionários permitidos.",
 			"no_waiver": "<strong>12. NÃO RENÚNCIA.</strong> A falha em exercer, ou o atraso em exercer, um direito, poder ou recurso previsto neste Contrato de Licença ou por lei não constituirá uma renúncia a esse direito, poder ou recurso. A renúncia da DFINITY a qualquer obrigação ou violação deste Contrato de Licença não operará como uma renúncia a qualquer outra obrigação ou violação subsequente do Contrato de Licença.",
-			"english_version": "<strong>13. VERSÃO EM INGLÊS.</strong> A versão em inglês deste Contrato de Licença será a versão oficial e controladora do contrato se surgir algum conflito. Todas as comunicações e avisos feitos de acordo com este Contrato de Licença devem ser em inglês."
+			"english_version": "<strong>13. VERSÃO EM INGLÊS.</strong> A versão em inglês deste Contrato de Licença será a versão oficial e controladora do contrato se surgir algum conflito. Todas as comunicações e avisos feitos de acordo com este Contrato de Licença devem ser em inglês.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "O Contrato de Licença $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1546,8 +1590,14 @@
 			"action_button_contacts_title": "Mostrar contatos",
 			"action_button_contacts_subtitle": "Mostrar os seus contatos salvos",
 			"action_button_contacts_prompt": "Mostrar meus contatos.",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "Enviar mensagem",
 			"send_message_input_placeholder": "O que você quer fazer?",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
 			"loading": "A pensar..."
 		},

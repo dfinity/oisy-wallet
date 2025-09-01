@@ -16,43 +16,47 @@
 </script>
 
 <a
-	class="flex w-full flex-col gap-2 p-1 text-left no-underline hover:text-inherit"
+	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
+	class:cursor-not-allowed={disabled}
+	class:hover:-translate-y-1={!disabled}
+	class:hover:bg-primary={!disabled}
 	data-tid={testId}
 	href={`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`}
 	onclick={disabled ? (e) => e.preventDefault() : undefined}
-	class:cursor-not-allowed={disabled}
 >
 	<div
-		class="relative aspect-square overflow-hidden rounded-xl bg-primary-light"
+		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		{#if nonNullish(nft.imageUrl)}
-			<BgImg imageUrl={nft?.imageUrl} size="contain" shadow="none" testId={`${testId}-image`} />
-		{:else}
-			<div class="bg-black/16 rounded-lg" data-tid={`${testId}-placeholder`}></div>
-		{/if}
+		<BgImg
+			imageUrl={nft?.imageUrl}
+			shadow="inset"
+			size="cover"
+			styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+			testId={`${testId}-image`}
+		/>
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
 			{#if nonNullish(nft.balance)}
-				<Badge variant="outline" testId={`${testId}-balance`}>{nft.balance}x</Badge>
+				<Badge testId={`${testId}-balance`} variant="outline">{nft.balance}x</Badge>
 			{/if}
 
 			<NetworkLogo
+				color="white"
 				network={nft.collection.network}
 				size="xs"
-				color="white"
 				testId={`${testId}-network`}
 			/>
 		</div>
 	</div>
 
-	<div class="flex w-full flex-col gap-1">
+	<div class="flex w-full flex-col gap-1 px-2 pb-2">
 		<span
 			class="truncate text-sm font-bold"
-			class:text-primary={!disabled}
-			class:text-disabled={disabled}>{nft.collection.name}</span
+			class:text-disabled={disabled}
+			class:text-primary={!disabled}>{nft.name}</span
 		>
-		<span class="text-xs" class:text-tertiary={!disabled} class:text-disabled={disabled}
+		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
 			>#{nft.id}</span
 		>
 	</div>

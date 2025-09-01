@@ -47,10 +47,10 @@
 <div>
 	<div class="input-field condensed mb-4 flex-1">
 		<InputSearch
-			bind:filter
-			showResetButton={notEmptyString(filter)}
-			placeholder={$i18n.tokens.placeholder.search_token}
 			autofocus={isDesktop()}
+			placeholder={$i18n.tokens.placeholder.search_token}
+			showResetButton={notEmptyString(filter)}
+			bind:filter
 		/>
 	</div>
 
@@ -58,9 +58,9 @@
 		<button
 			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
 			class:hover:border-brand-primary={networkSelectorViewOnly}
+			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			disabled={networkSelectorViewOnly}
 			onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
-			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 		>
 			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 			<IconExpandMore size="24" />

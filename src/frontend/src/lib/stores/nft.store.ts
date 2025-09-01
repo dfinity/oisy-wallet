@@ -27,7 +27,8 @@ const initNftStore = (): NftStore => {
 						!currentNfts.some(
 							(existingNft) =>
 								existingNft.id === newNft.id &&
-								existingNft.collection.address === newNft.collection.address
+								existingNft.collection.address === newNft.collection.address &&
+								existingNft.collection.network === newNft.collection.network
 						)
 				);
 

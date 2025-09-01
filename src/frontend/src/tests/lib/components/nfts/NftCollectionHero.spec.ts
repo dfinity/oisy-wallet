@@ -1,4 +1,5 @@
 import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockNftollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -22,7 +23,9 @@ describe('NftCollectionHero', () => {
 
 		expect(standard).toBeInTheDocument();
 
-		const address: HTMLElement | null = getByText(mockNftollectionUi.collection.address);
+		const address: HTMLElement | null = getByText(
+			shortenWithMiddleEllipsis({ text: mockNftollectionUi.collection.address })
+		);
 
 		expect(address).toBeInTheDocument();
 

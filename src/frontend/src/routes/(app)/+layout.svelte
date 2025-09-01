@@ -66,13 +66,13 @@
 	<div class:h-dvh={$authNotSignedIn}>
 		<div
 			class="relative min-h-[640px] pb-5 md:pb-0 lg:flex lg:h-full lg:flex-col"
-			class:overflow-hidden={$authNotSignedIn}
 			class:flex={$authSignedIn}
-			class:h-full={$authSignedIn}
 			class:flex-col={$authSignedIn}
+			class:h-full={$authSignedIn}
 			class:md:flex={$authNotSignedIn}
 			class:md:flex-col={$authNotSignedIn}
 			class:md:h-full={$authNotSignedIn}
+			class:overflow-hidden={$authNotSignedIn}
 		>
 			<Header />
 
@@ -82,7 +82,7 @@
 						<NavigationMenu>
 							{#if tokensRoute || nftsRoute}
 								<Responsive up="xl">
-									<div transition:fade class="hidden xl:block">
+									<div class="hidden xl:block" transition:fade>
 										<DappsCarousel />
 									</div>
 								</Responsive>
@@ -101,7 +101,7 @@
 
 				<Responsive down="md">
 					<div class="z-2 fixed bottom-16 right-2 block md:hidden">
-						<AiAssistantConsoleButton styleClass="mb-2" size="60" />
+						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				</Responsive>
 

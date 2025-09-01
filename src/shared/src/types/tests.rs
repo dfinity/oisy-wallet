@@ -171,17 +171,62 @@ mod bitcoin {
     );
 }
 
-mod custom_token {
-    //! Tests for the `custom_token` module.
+mod contact_image {
+    //! Tests for ContactImage validation
     use candid::{Decode, Encode};
+    use serde_bytes::ByteBuf;
 
-    use crate::types::custom_token::*;
+    use crate::{
+        types::contact::{ContactImage, ImageMimeType, MAX_IMAGE_SIZE_BYTES},
+        validate::{test_validate_on_deserialize, TestVector, Validate},
+    };
+
+    test_validate_on_deserialize!(
+        ContactImage,
+        vec![
+            TestVector {
+                description: "ContactImage at max size (100 KB)",
+                input: ContactImage {
+                    data: ByteBuf::from(vec![0u8; MAX_IMAGE_SIZE_BYTES]),
+                    mime_type: ImageMimeType::Png,
+                },
+                valid: true,
+            },
+            TestVector {
+                description: "ContactImage exceeding max size (100 KB + 1)",
+                input: ContactImage {
+                    data: ByteBuf::from(vec![0u8; MAX_IMAGE_SIZE_BYTES + 1]),
+                    mime_type: ImageMimeType::Jpeg,
+                },
+                valid: false,
+            },
+        ]
+    );
+
+    // Additional unit test ensuring Validate::validate works directly
+    #[test]
+    fn contact_image_validate_direct() {
+        let ok = ContactImage {
+            data: ByteBuf::from(vec![0u8; MAX_IMAGE_SIZE_BYTES]),
+            mime_type: ImageMimeType::Webp,
+        };
+        assert!(ok.validate().is_ok());
+
+        let too_big = ContactImage {
+            data: ByteBuf::from(vec![0u8; MAX_IMAGE_SIZE_BYTES + 1]),
+            mime_type: ImageMimeType::Gif,
+        };
+        assert!(too_big.validate().is_err());
+    }
 
     mod spl {
         //! Tests for the spl module.
         use super::*;
         use crate::{
-            types::MAX_SYMBOL_LENGTH,
+            types::{
+                custom_token::{SplToken, SplTokenId},
+                MAX_SYMBOL_LENGTH,
+            },
             validate::{test_validate_on_deserialize, TestVector, Validate},
         };
 
@@ -249,7 +294,10 @@ mod custom_token {
     mod erc20 {
         //! Tests for the erc20 module.
         use super::*;
-        use crate::validate::{test_validate_on_deserialize, TestVector, Validate};
+        use crate::{
+            types::custom_token::{ErcToken, ErcTokenId},
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
 
         test_validate_on_deserialize!(
             ErcToken,
@@ -259,7 +307,8 @@ mod custom_token {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
-                        chain_id: 1
+                        chain_id: 1,
+                        allow_media_source: None,
                     },
                     valid: true,
                     description: "Valid Erc20Token",
@@ -270,6 +319,7 @@ mod custom_token {
                             "0x12345678901234567890123456789012345678".to_string()
                         ),
                         chain_id: 1,
+                        allow_media_source: None
                     },
                     valid: false,
                     description: "Erc20Token with a token address that is too short",
@@ -278,6 +328,7 @@ mod custom_token {
                     input: ErcToken {
                         token_address: ErcTokenId("1".repeat(99)),
                         chain_id: 1,
+                        allow_media_source: None
                     },
                     valid: false,
                     description: "Erc20Token with a token address that is too long",
@@ -287,7 +338,8 @@ mod custom_token {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
-                        chain_id: 2 ^ 64 - 1,
+                        chain_id: u64::MAX,
+                        allow_media_source: None
                     },
                     valid: true,
                     description: "Maximum chain ID",
@@ -298,9 +350,32 @@ mod custom_token {
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
                         chain_id: 0,
+                        allow_media_source: None
                     },
                     valid: true,
                     description: "Minimum chain ID",
+                },
+                TestVector {
+                    input: ErcToken {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 0,
+                        allow_media_source: Some(true)
+                    },
+                    valid: true,
+                    description: "Erc20Token with allow_media_source set to true",
+                },
+                TestVector {
+                    input: ErcToken {
+                        token_address: ErcTokenId(
+                            "0x1234567890123456789012345678901234567890".to_string()
+                        ),
+                        chain_id: 0,
+                        allow_media_source: Some(false)
+                    },
+                    valid: true,
+                    description: "Erc20Token with allow_media_source set to false",
                 },
             ]
         );
@@ -311,7 +386,10 @@ mod custom_token {
         use candid::Principal;
 
         use super::*;
-        use crate::validate::{test_validate_on_deserialize, TestVector, Validate};
+        use crate::{
+            types::custom_token::IcrcToken,
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
 
         fn canister_id1() -> Principal {
             Principal::from_text("um5iw-rqaaa-aaaaq-qaaba-cai").unwrap()
@@ -537,6 +615,7 @@ mod user_profile {
                     updated_timestamp: 0,
                     version: None,
                     settings: None,
+                    agreements: None,
                 },
                 valid: true,
             },
@@ -548,6 +627,7 @@ mod user_profile {
                     updated_timestamp: 0,
                     version: None,
                     settings: None,
+                    agreements: None,
                 },
                 valid: false,
             },

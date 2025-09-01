@@ -80,7 +80,7 @@ describe('ai-assistant.services', () => {
 					calls: [noAgumentsToolCall],
 					results: [
 						{
-							result: [],
+							result: { contacts: [] },
 							type: 'show_contacts'
 						}
 					]
@@ -135,7 +135,7 @@ describe('ai-assistant.services', () => {
 				filterParams: [{ value: 'Btc', name: 'addressType' }]
 			});
 
-			expect(result).toStrictEqual([...contacts]);
+			expect(result).toStrictEqual({ contacts: Object.values(storeData), message: undefined });
 		});
 	});
 
@@ -161,7 +161,9 @@ describe('ai-assistant.services', () => {
 
 			expect(result).toEqual({
 				type: 'show_contacts',
-				result: contacts
+				result: {
+					contacts: Object.values(get(extendedAddressContacts))
+				}
 			});
 		});
 
@@ -173,7 +175,9 @@ describe('ai-assistant.services', () => {
 
 			expect(result).toEqual({
 				type: 'show_contacts',
-				result: contacts
+				result: {
+					contacts: Object.values(get(extendedAddressContacts))
+				}
 			});
 		});
 	});

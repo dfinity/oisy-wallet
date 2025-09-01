@@ -53,10 +53,10 @@
 
 		<Button
 			colorStyle="secondary"
+			innerStyleClass="items-center justify-center"
 			onclick={handleLogoutTriggered}
 			paddingSmall
 			styleClass="w-full rounded-lg py-2 flex-1"
-			innerStyleClass="items-center justify-center"
 			testId={LOGOUT_BUTTON}
 		>
 			{$i18n.auth.text.logout}

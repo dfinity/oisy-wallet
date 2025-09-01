@@ -15,13 +15,13 @@
 </script>
 
 <Button
-	{onclick}
-	fullWidth
 	alignLeft
-	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
 	colorStyle="tertiary-alt"
-	transparent
+	fullWidth
+	{onclick}
+	styleClass="py-3 rounded-md text-primary underline-none pl-0.5 min-w-28"
 	{testId}
+	transparent
 >
 	{#if selectable}
 		<span class="pt-0.75 w-[20px] text-brand-primary">

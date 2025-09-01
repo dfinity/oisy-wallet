@@ -29,17 +29,17 @@
 </script>
 
 <div
-	data-tid={testId}
-	aria-label={ariaLabel}
-	class={`flex bg-center bg-no-repeat ${styleClass}`}
-	class:w-full={!hasWidthClass}
-	class:h-full={!hasHeightClass}
-	class:bg-cover={size === 'cover'}
-	class:bg-contain={size === 'contain'}
-	class:bg-auto={size === 'auto'}
-	class:animate-pulse={isNullish(imageUrl)}
-	class:bg-disabled-alt={isNullish(imageUrl)}
 	style={`background-image: url(${imageUrl}); ${shadow === 'inset' ? 'box-shadow: inset 0px 0px 5px 1px #0000000D' : ''}`}
+	class={`flex bg-center bg-no-repeat ${styleClass}`}
+	class:animate-pulse={isNullish(imageUrl)}
+	class:bg-auto={size === 'auto'}
+	class:bg-contain={size === 'contain'}
+	class:bg-cover={size === 'cover'}
+	class:bg-disabled-alt={isNullish(imageUrl)}
+	class:h-full={!hasHeightClass}
+	class:w-full={!hasWidthClass}
+	aria-label={ariaLabel}
+	data-tid={testId}
 >
 	{@render children?.()}
 </div>

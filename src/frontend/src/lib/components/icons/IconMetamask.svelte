@@ -1,14 +1,14 @@
 <!-- source: https://github.com/MetaMask/brand-resources/blob/master/SVG/SVG_MetaMask_Icon_Color.svg -->
 <svg
+	style="enable-background:new 0 0 204.8 192.4;"
+	height="24"
 	version="1.1"
+	viewBox="0 0 204.8 192.4"
+	x="0px"
 	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
-	x="0px"
 	y="0px"
-	viewBox="0 0 204.8 192.4"
-	style="enable-background:new 0 0 204.8 192.4;"
 	xml:space="preserve"
-	height="24"
 >
 	<style type="text/css">
 		.st0 {

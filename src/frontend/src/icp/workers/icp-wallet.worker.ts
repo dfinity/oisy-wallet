@@ -10,19 +10,24 @@ import type {
 	Transaction,
 	TransactionWithId
 } from '@dfinity/ledger-icp';
-import { isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 const getBalanceAndTransactions = ({
 	identity,
-	certified
-}: SchedulerJobParams<PostMessageDataRequestIcp>): Promise<GetAccountIdentifierTransactionsResponse> =>
-	getTransactions({
+	certified,
+	data
+}: SchedulerJobParams<PostMessageDataRequestIcp>): Promise<GetAccountIdentifierTransactionsResponse> => {
+	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
+
+	return getTransactions({
 		identity,
 		certified,
 		owner: identity.getPrincipal(),
 		// We query tip to discover the new transactions
-		start: undefined
+		start: undefined,
+		...data
 	});
+};
 
 const mapTransaction = ({
 	transaction,
