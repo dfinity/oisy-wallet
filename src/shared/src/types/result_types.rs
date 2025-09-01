@@ -17,9 +17,9 @@ use crate::types::{
     agreement::UpdateAgreementsError,
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
+    network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::AddUserCredentialError,
 };
-use crate::types::network::{SetTestnetsSettingsError, UpdateNetworksSettingsError};
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum AddUserCredentialResult {
@@ -162,8 +162,8 @@ pub enum SetUserShowTestnetsResult {
     /// The user's show testnets was not set due to an error.
     Err(SetTestnetsSettingsError),
 }
-impl From<Result<(), SetTestnetsSettingsError >> for SetUserShowTestnetsResult {
-    fn from(result: Result<(), SetTestnetsSettingsError >) -> Self {
+impl From<Result<(), SetTestnetsSettingsError>> for SetUserShowTestnetsResult {
+    fn from(result: Result<(), SetTestnetsSettingsError>) -> Self {
         match result {
             Ok(()) => SetUserShowTestnetsResult::Ok(()),
             Err(err) => SetUserShowTestnetsResult::Err(err),
