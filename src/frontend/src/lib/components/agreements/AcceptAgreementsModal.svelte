@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
+	import { agreementsData } from '$env/agreements.env';
 	import type { EnvAgreements } from '$env/types/env-agreements';
+	import { updateUserAgreements } from '$lib/api/backend.api';
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
@@ -12,15 +15,19 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/user-agreements.derived';
-	import { warnSignOut } from '$lib/services/auth.services';
+	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { UserAgreements } from '$lib/types/user-agreements';
+	import { emit } from '$lib/utils/events.utils';
 
 	type AgreementsToAcceptType = {
 		[K in keyof EnvAgreements]?: boolean;
 	};
 
-	let agreementsToAccept: AgreementsToAcceptType = $state({});
+	let agreementsToAccept = $state<AgreementsToAcceptType>({});
 
 	$effect(() => {
 		Object.keys($outdatedAgreements).forEach(
@@ -42,11 +49,55 @@
 		warnSignOut($i18n.agreements.text.reject_warning);
 	};
 
-	const onAccept = () => {
+	const onAccept = async () => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		const agreements: UserAgreements = Object.entries(agreementsToAccept).reduce<UserAgreements>(
+			(acc, [agreement, accepted]) => {
+				if (accepted) {
+					return {
+						...acc,
+						[agreement]: {
+							accepted,
+							lastAcceptedTimestamp: Date.now(),
+							lastUpdatedTimestamp:
+								agreementsData[agreement as keyof EnvAgreements].lastUpdatedTimestamp
+						}
+					};
+				}
+				return acc;
+			},
+			{} as UserAgreements
+		);
+
+		if (Object.keys(agreements).length !== Object.keys(agreementsData).length) {
+			toastsError({
+				msg: { text: metamask_connected }
+			});
+		}
+
+		try {
+			await updateUserAgreements({
+				identity: $authIdentity,
+				agreements
+			});
+
+			emit({ message: 'oisyRefreshUserProfile' });
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: metamask_connected },
+				err
+			});
+		}
+
 		// TODO: Add services to update the user agreements acceptance status
 	};
 </script>
 
+<!-- TODO: remove the close button from the modal -->
 <Modal testId={LOADER_MODAL}>
 	<h4 slot="title">
 		{$hasOutdatedAgreements
