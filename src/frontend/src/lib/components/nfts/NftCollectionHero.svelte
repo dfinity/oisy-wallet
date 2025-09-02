@@ -44,7 +44,7 @@
 				</h1>
 
 				{#if token.section === CustomTokenSection.HIDDEN}
-					<Badge styleClass="pl-1 pr-2 " variant="disabled" width="w-fit">
+					<Badge styleClass="pl-1 pr-2" variant="disabled" width="w-fit">
 						<div class="flex items-center gap-1">
 							<IconEyeOff size="18" />
 							{$i18n.nfts.text.hidden}
