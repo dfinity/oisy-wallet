@@ -30,7 +30,7 @@
 
 	const handleConsent = () => {
 		if (nonNullish(nft)) {
-			modalStore.openNftImageConsent({ id: Symbol('NftImageConsentModal'), data: nft });
+			modalStore.openNftImageConsent({ id: Symbol('NftImageConsentModal'), data: nft.collection });
 		}
 	};
 

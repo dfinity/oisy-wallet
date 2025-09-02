@@ -58,6 +58,6 @@
 			<RewardModal reward={$modalRewardDetailsData} />
 		</RewardsEligibilityContext>
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
-		<NftImageConsentModal nft={$modalNftImageConsentData} />
+		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{/if}
 {/if}
