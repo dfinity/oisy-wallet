@@ -26,9 +26,11 @@
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 
-	type Props = ReviewSendTokensToolResult;
+	interface Props extends ReviewSendTokensToolResult {
+		sendEnabled: boolean;
+	}
 
-	let { amount, contact, address, contactAddress }: Props = $props();
+	let { amount, contact, address, contactAddress, sendEnabled }: Props = $props();
 
 	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -64,6 +66,7 @@
 				{amount}
 				{destination}
 				nativeEthereumToken={$ethereumToken}
+				{sendEnabled}
 				sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 				bind:sendCompleted
 			/>
@@ -72,15 +75,16 @@
 				{amount}
 				{destination}
 				nativeEthereumToken={evmNativeEthereumToken}
+				{sendEnabled}
 				sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 				bind:sendCompleted
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
-			<AiAssistantReviewSendBtcToken {amount} {destination} bind:sendCompleted />
+			<AiAssistantReviewSendBtcToken {amount} {destination} {sendEnabled} bind:sendCompleted />
 		{:else if isNetworkIdSolana($sendToken.network.id)}
-			<AiAssistantReviewSendSolToken {amount} {destination} bind:sendCompleted />
+			<AiAssistantReviewSendSolToken {amount} {destination} {sendEnabled} bind:sendCompleted />
 		{:else if isNetworkIdICP($sendTokenNetworkId)}
-			<AiAssistantReviewSendIcToken {amount} {destination} bind:sendCompleted />
+			<AiAssistantReviewSendIcToken {amount} {destination} {sendEnabled} bind:sendCompleted />
 		{/if}
 	{/snippet}
 </SendTokenReview>
