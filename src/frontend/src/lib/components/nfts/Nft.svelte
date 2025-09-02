@@ -33,10 +33,10 @@
 	const token: NonFungibleToken | undefined = $derived(
 		nonNullish(nft) && nonNullish(nft.collection)
 			? findNonFungibleToken({
-				tokens: $nonFungibleTokens,
-				address: nft.collection.address,
-				networkId: nft.collection.network.id
-			})
+					tokens: $nonFungibleTokens,
+					address: nft.collection.address,
+					networkId: nft.collection.network.id
+				})
 			: undefined
 	);
 
