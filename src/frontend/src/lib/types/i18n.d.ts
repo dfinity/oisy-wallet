@@ -892,6 +892,7 @@ interface I18nNfts {
 		not_spam: string;
 		hide: string;
 		unhide: string;
+		hidden: string;
 		open_explorer: string;
 		collection_name: string;
 		media_urls: string;
