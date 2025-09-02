@@ -56,6 +56,7 @@
 		destination: Address;
 		sourceNetwork: EthereumNetwork;
 		sendCompleted: boolean;
+		sendEnabled: boolean;
 	}
 
 	let {
@@ -63,7 +64,8 @@
 		destination,
 		nativeEthereumToken,
 		sourceNetwork,
-		sendCompleted = $bindable()
+		sendCompleted = $bindable(),
+		sendEnabled
 	}: Props = $props();
 
 	const {
@@ -146,7 +148,8 @@
 	let invalidDestination = $derived(isNullishOrEmpty(destination) || !isEthAddress(destination));
 
 	let invalid = $derived(
-		invalidDestination ||
+		!sendEnabled ||
+			invalidDestination ||
 			notEmptyString(insufficientFundsErrorMessage) ||
 			isNullish(amount) ||
 			isNullish($ckEthMinterInfoStore?.[nativeEthereumToken.id])
