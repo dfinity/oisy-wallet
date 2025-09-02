@@ -13,6 +13,7 @@
 	import { nftListGroupByCollection } from '$lib/derived/nfts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
+	import NftCollectionShowSpamToggle from '$lib/components/nfts/NftCollectionShowSpamToggle.svelte';
 
 	let visible = $state(false);
 
@@ -74,7 +75,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_spam} checked={false} disabled />
+						<NftCollectionShowSpamToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
