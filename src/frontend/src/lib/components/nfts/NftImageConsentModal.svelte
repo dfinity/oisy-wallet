@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import type { Nft } from '$lib/types/nft';
+	import type { Nft, NftCollection } from '$lib/types/nft';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -26,24 +26,24 @@
 	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
 
 	interface Props {
-		nft: Nft;
+		collection: NftCollection;
 		testId?: string;
 	}
 
-	const { nft, testId }: Props = $props();
+	const { collection, testId }: Props = $props();
 
 	const hasConsent = $derived(
 		getAllowMediaForNft({
 			tokens: $nonFungibleTokens,
-			networkId: nft.collection.network.id,
-			address: nft.collection.address
+			networkId: collection.network.id,
+			address: collection.address
 		}) ?? false
 	);
 
 	const shortCollectionName = $derived(
-		nonNullish(nft.collection.name)
+		nonNullish(collection.name)
 			? shortenWithMiddleEllipsis({
-					text: nft.collection.name,
+					text: collection.name,
 					splitLength: 12
 				})
 			: undefined
@@ -52,8 +52,8 @@
 	const token = $derived(
 		findNonFungibleToken({
 			tokens: $nonFungibleTokens,
-			networkId: nft.collection.network.id,
-			address: nft.collection.address
+			networkId: collection.network.id,
+			address: collection.address
 		})
 	);
 
@@ -88,8 +88,7 @@
 	const collectionNfts: Nft[] = $derived(
 		getNftCollectionUi({ $nftStore, $nonFungibleTokens }).find(
 			(coll) =>
-				coll.collection.id === nft.collection.id &&
-				coll.collection.address === nft.collection.address
+				coll.collection.id === collection.id && coll.collection.address === collection.address
 		)?.nfts ?? []
 	);
 </script>
@@ -128,23 +127,23 @@
 			</div>
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.networks.network}</span><span
-					><NetworkWithLogo network={nft.collection.network} /></span
+					><NetworkWithLogo network={collection.network} /></span
 				>
 			</div>
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
 				<span>
 					<output data-tid={`${testId}-collectionAddress`}
-						>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output
+						>{shortenWithMiddleEllipsis({ text: collection.address })}</output
 					>
 					<AddressActions
-						copyAddress={nft.collection.address}
+						copyAddress={collection.address}
 						copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-							$address: nft.collection.address
+							$address: collection.address
 						})}
 						externalLink={getContractExplorerUrl({
-							network: nft.collection.network,
-							contractAddress: nft.collection.address
+							network: collection.network,
+							contractAddress: collection.address
 						})}
 						externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
 					/>
