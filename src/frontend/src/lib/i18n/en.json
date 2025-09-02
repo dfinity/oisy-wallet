@@ -1045,7 +1045,8 @@
 			"spam": "Spam",
 			"not_spam": "Not spam",
 			"hide": "Hide",
-			"unhide": "Unhide"
+			"unhide": "Unhide",
+			"hidden": "Hidden"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
