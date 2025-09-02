@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import type { Nft, NftCollection } from '$lib/types/nft';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
+	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
+	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import {
 		findNonFungibleToken,
@@ -22,8 +24,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
-	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
 
 	interface Props {
 		collection: NftCollection;
@@ -93,7 +93,7 @@
 	);
 </script>
 
-<Modal on:nnsClose={() => modalStore.close()} {testId}>
+<Modal {testId} on:nnsClose={() => modalStore.close()}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
@@ -101,7 +101,7 @@
 			</span>
 			{#if nonNullish(shortCollectionName)}
 				<h3
-					>{@html replacePlaceholders($i18n.nfts.text.review_title, {
+					>{replacePlaceholders($i18n.nfts.text.review_title, {
 						$collectionName: shortCollectionName
 					})}</h3
 				>
@@ -111,11 +111,11 @@
 		<p class="mb-5">
 			{$i18n.nfts.text.review_description}
 			<ExternalLink
-				iconAsLast
-				styleClass="font-bold ml-2"
 				href="https://docs.oisy.com/using-oisy-wallet/how-tos/nfts"
 				ariaLabel={$i18n.nfts.text.learn_more}
-				iconSize="18">{$i18n.nfts.text.learn_more}</ExternalLink
+				iconAsLast
+				iconSize="18"
+				styleClass="font-bold ml-2">{$i18n.nfts.text.learn_more}</ExternalLink
 			>
 		</p>
 
