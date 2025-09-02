@@ -23,7 +23,7 @@
 <div class="border-t border-secondary px-4 py-3 pb-4 text-xs">
 	<form method="POST" onsubmit={onSubmit}>
 		<InputText
-			name="message" 
+			name="message"
 			autofocus={isDesktop()}
 			placeholder={$i18n.ai_assistant.text.send_message_input_placeholder}
 			bind:value
