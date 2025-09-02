@@ -31,11 +31,13 @@
 	);
 
 	const token: NonFungibleToken | undefined = $derived(
-		findNonFungibleToken({
-			tokens: $nonFungibleTokens,
-			address: nft?.collection.address,
-			networkId: nft?.collection.network.id
-		})
+		nonNullish(nft.collection) ?
+			findNonFungibleToken({
+				tokens: $nonFungibleTokens,
+				address: nft.collection.address,
+				networkId: nft.collection.network.id
+			})
+	: undefined
 	);
 
 	// redirect to assets page if nft cant be loaded within 10s
