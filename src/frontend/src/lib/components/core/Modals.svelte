@@ -4,6 +4,7 @@
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
+	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
@@ -24,7 +25,9 @@
 		modalIcHideTokenData,
 		modalHideTokenData,
 		modalRewardDetails,
-		modalRewardDetailsData
+		modalRewardDetailsData,
+		modalNftImageConsent,
+		modalNftImageConsentData
 	} from '$lib/derived/modal.derived';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
 
@@ -54,5 +57,7 @@
 		<RewardsEligibilityContext>
 			<RewardModal reward={$modalRewardDetailsData} />
 		</RewardsEligibilityContext>
+	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
+		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{/if}
 {/if}
