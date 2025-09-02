@@ -98,7 +98,7 @@
 		}
 
 		// Start the scheduler after initial load
-		startScheduler();
+		// startScheduler();
 	});
 
 	onDestroy(() => {
