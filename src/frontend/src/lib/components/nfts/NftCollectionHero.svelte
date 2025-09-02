@@ -3,13 +3,17 @@
 	import { slide } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -35,14 +39,28 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(token)}
-			<div class="my-3 flex items-center">
-				<h1 class="truncate">
-					{token.name}
-				</h1>
+			<div class="my-3 flex w-full justify-between">
+				<div class="flex items-center gap-3">
+					<h1 class="truncate">
+						{token.name}
+					</h1>
 
-				<div class="ml-auto">
-					<NftCollectionActionButtons {token} />
+					{#if token.section === CustomTokenSection.HIDDEN}
+						<Badge
+							styleClass="pl-1 pr-2"
+							testId={NFT_HIDDEN_BADGE}
+							variant="disabled"
+							width="w-fit"
+						>
+							<div class="flex items-center gap-1">
+								<IconEyeOff size="18" />
+								{$i18n.nfts.text.hidden}
+							</div>
+						</Badge>
+					{/if}
 				</div>
+
+				<NftCollectionActionButtons {token} />
 			</div>
 		{:else}
 			<span class="block max-w-40">

@@ -1045,6 +1045,7 @@
 			"not_spam": "Not spam",
 			"hide": "Hide",
 			"unhide": "Unhide",
+			"hidden": "Hidden",
 			"open_explorer": "Open this contract in blockchain explorer",
 			"collection_name": "Collection name",
 			"media_urls": "Media URLs",

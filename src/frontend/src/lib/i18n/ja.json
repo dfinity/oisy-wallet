@@ -1045,6 +1045,7 @@
 			"not_spam": "",
 			"hide": "",
 			"unhide": "",
+			"hidden": "",
 			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く",
 			"collection_name": "",
 			"media_urls": "",

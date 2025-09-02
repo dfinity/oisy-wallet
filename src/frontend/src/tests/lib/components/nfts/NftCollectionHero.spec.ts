@@ -2,8 +2,10 @@ import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm
 import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
-	NFT_COLLECTION_ACTION_SPAM
+	NFT_COLLECTION_ACTION_SPAM,
+	NFT_HIDDEN_BADGE
 } from '$lib/constants/test-ids.constants';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
@@ -14,6 +16,7 @@ import { render, waitFor } from '@testing-library/svelte';
 describe('NftCollectionHero', () => {
 	const spamButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_SPAM}"]`;
 	const hideButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_HIDE}"]`;
+	const hiddenBadgeSelector = `span[data-tid="${NFT_HIDDEN_BADGE}"]`;
 
 	const mockToken: NonFungibleToken = {
 		...AZUKI_ELEMENTAL_BEANS_TOKEN,
@@ -78,5 +81,18 @@ describe('NftCollectionHero', () => {
 		expect(imageElement.getAttribute('style')).toContain(
 			`background-image: url("${mockNftollectionUi.nfts[0].imageUrl}")`
 		);
+	});
+
+	it('should render the hidden badge in the banner', () => {
+		const { container } = render(NftCollectionHero, {
+			props: {
+				nfts: mockNftollectionUi.nfts,
+				token: { ...mockToken, section: CustomTokenSection.HIDDEN }
+			}
+		});
+
+		const hiddenBadge: HTMLSpanElement | null = container.querySelector(hiddenBadgeSelector);
+
+		expect(hiddenBadge).toBeInTheDocument();
 	});
 });
