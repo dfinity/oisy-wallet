@@ -391,6 +391,7 @@ interface I18nInit {
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;
+		waiting_for_allowed_cycles_aborted: string;
 		btc_wallet_error: string;
 		sol_wallet_error: string;
 	};
