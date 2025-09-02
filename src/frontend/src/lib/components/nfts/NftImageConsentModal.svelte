@@ -1,5 +1,14 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
+	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
+	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
@@ -7,23 +16,14 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft, NftCollection } from '$lib/types/nft';
-	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
-	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import {
 		findNonFungibleToken,
 		getAllowMediaForNft,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
-	import AddressActions from '$lib/components/ui/AddressActions.svelte';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		collection: NftCollection;
@@ -111,8 +111,8 @@
 		<p class="mb-5">
 			{$i18n.nfts.text.review_description}
 			<ExternalLink
-				href="https://docs.oisy.com/using-oisy-wallet/how-tos/nfts"
 				ariaLabel={$i18n.nfts.text.learn_more}
+				href="https://docs.oisy.com/using-oisy-wallet/how-tos/nfts"
 				iconAsLast
 				iconSize="18"
 				styleClass="font-bold ml-2">{$i18n.nfts.text.learn_more}</ExternalLink
