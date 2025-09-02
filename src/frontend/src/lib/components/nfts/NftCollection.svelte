@@ -28,8 +28,8 @@
 	const token: NonFungibleToken | undefined = $derived(
 		findNonFungibleToken({
 			tokens: $nonFungibleTokens,
-			address: collection.address,
-			networkId: collection.network.id
+			address: collection?.address,
+			networkId: collection?.network.id
 		})
 	);
 
