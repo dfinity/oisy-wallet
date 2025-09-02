@@ -99,7 +99,7 @@
 		await disconnectListener();
 
 		try {
-			// Connect and disconnect buttons are disabled until the address is loaded; therefore, this should never happens.
+			// Connect and disconnect buttons are disabled until the address is loaded; therefore, this should never happen.
 			if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
