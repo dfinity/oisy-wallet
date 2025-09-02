@@ -59,9 +59,10 @@
 		amount: number;
 		destination: Address;
 		sendCompleted: boolean;
+		sendEnabled: boolean;
 	}
 
-	let { amount, destination, sendCompleted = $bindable() }: Props = $props();
+	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
 
 	const {
 		sendToken,
@@ -145,7 +146,7 @@
 	);
 
 	let invalid = $derived(
-		invalidDestination || notEmptyString(amountErrorMessage) || isNullish(amount)
+		!sendEnabled || invalidDestination || notEmptyString(amountErrorMessage) || isNullish(amount)
 	);
 
 	const send = async () => {
