@@ -126,7 +126,7 @@
 		}
 	};
 
-    onDestroy(async () => await disconnectListener());
+	onDestroy(async () => await disconnectListener());
 
 	const goToFirstStep = () => modal?.set?.(0);
 
