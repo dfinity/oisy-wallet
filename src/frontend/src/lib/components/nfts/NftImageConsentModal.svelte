@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft } from '$lib/types/nft';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import {
 		findNonFungibleToken,
@@ -18,7 +19,6 @@
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
