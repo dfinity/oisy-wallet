@@ -3,11 +3,11 @@
 	import { slide } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
+	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
@@ -45,12 +45,11 @@
 					</h1>
 
 					{#if token.section === CustomTokenSection.HIDDEN}
-						<Badge styleClass="pl-1 pr-2" variant="disabled" width="w-fit">
-							<div class="flex items-center gap-1">
-								<IconEyeOff size="18" />
-								{$i18n.nfts.text.hidden}
-							</div>
-						</Badge>
+						<NftBadgeHidden />
+					{/if}
+
+					{#if token.section === CustomTokenSection.SPAM}
+						<NftBadgeSpam />
 					{/if}
 				</div>
 

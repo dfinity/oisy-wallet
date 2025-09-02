@@ -34,9 +34,10 @@
 		amount: number;
 		destination: Address;
 		sendCompleted: boolean;
+		sendEnabled: boolean;
 	}
 
-	let { amount, destination, sendCompleted = $bindable() }: Props = $props();
+	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
 
 	const { sendToken, sendBalance, sendTokenStandard, sendTokenSymbol, sendTokenDecimals } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -58,7 +59,7 @@
 			})
 	);
 
-	let invalid = $derived(invalidDestination || amountError || isNullish(amount));
+	let invalid = $derived(!sendEnabled || invalidDestination || amountError || isNullish(amount));
 
 	let loading = $state(false);
 

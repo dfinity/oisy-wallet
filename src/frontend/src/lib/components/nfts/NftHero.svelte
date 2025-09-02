@@ -5,6 +5,8 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
+	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
@@ -12,17 +14,19 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Nft } from '$lib/types/nft';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 
 	interface Props {
+		token?: NonFungibleToken;
 		nft?: Nft;
 	}
 
-	const { nft }: Props = $props();
+	const { token, nft }: Props = $props();
 
 	const breadcrumbItems = $derived.by(() => {
 		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];
@@ -65,15 +69,27 @@
 	<div class="bg-primary p-4">
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
-		<h1 class="my-3">
-			{#if nonNullish(normalizedNftName)}
-				{normalizedNftName}
-			{:else}
-				<span class="block max-w-80">
-					<SkeletonText />
-				</span>
-			{/if}
-		</h1>
+		{#if nonNullish(normalizedNftName)}
+			<div class="my-3 w-full justify-between">
+				<div class="flex items-center gap-3">
+					<h1 class="truncate">
+						{normalizedNftName}
+					</h1>
+
+					{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
+						<NftBadgeHidden />
+					{/if}
+
+					{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
+						<NftBadgeSpam />
+					{/if}
+				</div>
+			</div>
+		{:else}
+			<span class="block max-w-80">
+				<SkeletonText />
+			</span>
+		{/if}
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem>
