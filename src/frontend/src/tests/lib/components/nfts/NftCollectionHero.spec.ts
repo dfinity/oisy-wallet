@@ -2,15 +2,16 @@ import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm
 import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
-	NFT_COLLECTION_ACTION_SPAM, NFT_HIDDEN_BADGE
+	NFT_COLLECTION_ACTION_SPAM,
+	NFT_HIDDEN_BADGE
 } from '$lib/constants/test-ids.constants';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
-import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 describe('NftCollectionHero', () => {
 	const spamButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_SPAM}"]`;
