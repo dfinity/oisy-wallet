@@ -45,7 +45,7 @@
 						$contact_name: contact.name,
 						$address_info: `${isEmptyString(address.label) ? '' : `${address.label}: `}${shortenWithMiddleEllipsis({ text: address.address })}`
 					}),
-					context: `Send destination information: contact id - ${contact.id}; address id - ${address.id}; address type: ${address.addressType}.`
+					context: `Send destination information for the review_send_tokens tool: contact id - ${contact.id}; address id - ${address.id}; address type: ${address.addressType}.`
 				})}
 		/>
 	{/each}
