@@ -6,9 +6,9 @@ describe('NftImageConsent', () => {
 		render(NftImageConsent, {});
 	});
 
-	it('should open the review consent modal when review is clicked', () => {});
+	it.todo('should open the review consent modal when review is clicked');
 
-	it('should render the children if hasConsent is true', () => {});
+	it.todo('should render the children if hasConsent is true');
 
-	it('should not show the text if showMessage is false', () => {});
+	it.todo('should not show the text if showMessage is false');
 });
