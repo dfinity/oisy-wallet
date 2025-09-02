@@ -14,6 +14,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -33,15 +34,21 @@
 	<div class="bg-primary p-4">
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
-		<h1 class="my-3 truncate">
-			{#if nonNullish(token)}
-				{token.name}
-			{:else}
-				<span class="block max-w-40">
-					<SkeletonText />
-				</span>
-			{/if}
-		</h1>
+		{#if nonNullish(token)}
+			<div class="my-3 flex items-center">
+				<h1 class="truncate">
+					{token.name}
+				</h1>
+
+				<div class="ml-auto">
+					<NftCollectionActionButtons {token} />
+				</div>
+			</div>
+		{:else}
+			<span class="block max-w-40">
+				<SkeletonText />
+			</span>
+		{/if}
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem
