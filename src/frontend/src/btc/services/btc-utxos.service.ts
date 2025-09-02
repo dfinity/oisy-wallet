@@ -3,6 +3,7 @@ import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-t
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
+import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getPendingTransactionUtxoTxIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
@@ -37,7 +38,7 @@ export const prepareBtcSend = async ({
 	source
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
 	const networkId: NetworkId = mapBitcoinNetworkToNetworkId(network);
-	const bitcoinCanisterId = mapBitcoinNetworkIdToMinterCanisterId(networkId);
+	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[mapBitcoinNetworkIdToMinterCanisterId(networkId)];
 
 	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
