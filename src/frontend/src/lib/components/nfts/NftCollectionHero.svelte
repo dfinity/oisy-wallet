@@ -3,21 +3,21 @@
 	import { slide } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
