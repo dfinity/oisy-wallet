@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { NFTS_ENABLED } from '$env/nft.env.js';
 import { config } from 'dotenv';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -151,14 +152,64 @@ const updateCSP = (indexHtml) => {
 		indexHashes.push(`'sha256-${createHash('sha256').update(content).digest('base64')}'`);
 	}
 
+	const ethMainnetConnectSrc =
+		'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com https://mainnet.infura.io';
+	const ethSepoliaConnectSrc =
+		'https://api-sepolia.etherscan.io https://sepolia.infura.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
+
+	const baseMainnetConnectSrc =
+		'wss://base-mainnet.g.alchemy.com https://base-mainnet.g.alchemy.com https://base-mainnet.infura.io';
+	const baseSepoliaConnectSrc =
+		'wss://base-sepolia.g.alchemy.com https://base-sepolia.g.alchemy.com https://base-sepolia.infura.io';
+	const arbitrumMainnetConnectSrc =
+		'wss://arb-mainnet.g.alchemy.com https://arb-mainnet.g.alchemy.com https://arbitrum-mainnet.infura.io';
+	const arbitrumSepoliaConnectSrc =
+		'wss://arb-sepolia.g.alchemy.com https://arb-sepolia.g.alchemy.com https://arbitrum-sepolia.infura.io';
+	const bnbMainnetConnectSrc =
+		'wss://bnb-mainnet.g.alchemy.com https://bnb-mainnet.g.alchemy.com https://bsc-mainnet.infura.io';
+	const bnbTestnetConnectSrc =
+		'wss://bnb-testnet.g.alchemy.com https://bnb-testnet.g.alchemy.com https://bsc-testnet.infura.io';
+	const polygonMainnetConnectSrc =
+		'wss://polygon-mainnet.g.alchemy.com https://polygon-mainnet.g.alchemy.com https://polygon-mainnet.infura.io https://gasstation.polygon.technology';
+	const polygonAmoyConnectSrc =
+		'wss://polygon-amoy.g.alchemy.com https://polygon-amoy.g.alchemy.com https://polygon-amoy.infura.io';
+	const evmConnectSrc = `${baseMainnetConnectSrc} ${baseSepoliaConnectSrc} ${arbitrumMainnetConnectSrc} ${arbitrumSepoliaConnectSrc} ${bnbMainnetConnectSrc} ${bnbTestnetConnectSrc} ${polygonMainnetConnectSrc} ${polygonAmoyConnectSrc}`;
+
+	const infuraConnectSrc = 'https://gas.api.infura.io';
+
+	const blockstreamApiConnectSrc = 'https://blockstream.info';
+	const blockchainApiConnectSrc = 'https://blockchain.info';
+
+	const coingeckoApiConnectSrc = 'https://pro-api.coingecko.com';
+
+	const paraswapApiConnectSrc = 'https://api.paraswap.io';
+
+	const kongSwapApiConnectSrc = 'https://api.kongswap.io';
+
+	const plausibleApiConnectSrc = 'https://plausible.io/api/event';
+
+	const walletConnectSrc =
+		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org https://pulse.walletconnect.org';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
 	const onramperConnectFrameSrc = 'https://buy.onramper.dev https://buy.onramper.com';
 
+	const solanaRpcApiConnectSrc =
+		'https://api.mainnet-beta.solana.com wss://api.mainnet-beta.solana.com https://api.testnet.solana.com wss://api.testnet.solana.com https://api.devnet.solana.com wss://api.devnet.solana.com';
+	const solanaAlchemyApiConnectSrc =
+		'https://solana-mainnet.g.alchemy.com wss://solana-mainnet.g.alchemy.com https://solana-testnet.g.alchemy.com wss://solana-testnet.g.alchemy.com https://solana-devnet.g.alchemy.com wss://solana-devnet.g.alchemy.com';
+	const solanaQuicknodeApiConnectSrc =
+		'https://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-testnet.quiknode.pro wss://burned-little-dinghy.solana-devnet.quiknode.pro';
+	const solanaApiConnectSrc = `${solanaRpcApiConnectSrc} ${solanaAlchemyApiConnectSrc} ${solanaQuicknodeApiConnectSrc}`;
+
+	const allConnectSrc =
+		'https://ic0.app https://icp0.io https://icp-api.io' +
+		` ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc} ${paraswapApiConnectSrc}`;
+
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https:;
+        connect-src 'self' ${NFTS_ENABLED ? 'https:' : allConnectSrc};
         img-src 'self' https: ipfs: data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
