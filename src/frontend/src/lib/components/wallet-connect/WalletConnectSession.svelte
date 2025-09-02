@@ -155,7 +155,7 @@
 		}
 
 		// For simplicity reason we just display an error for now if the user has already opened the WalletConnect modal.
-		// Technically, we could potentially check which step is in progress and eventually jump or not, but, let's keep it simple for now.
+		// Technically, we could potentially check which steps are in progress and eventually jump or not, but let's keep it simple for now.
 		if ($modalWalletConnectAuth) {
 			toastsError({
 				msg: {
