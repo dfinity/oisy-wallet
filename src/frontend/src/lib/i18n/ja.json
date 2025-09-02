@@ -508,6 +508,7 @@
 			"icrc_custom_token": "ICRCカスタムトークンの読み込み中にエラーが発生しました",
 			"loading_wallet_timeout": "ウォレットにはまだロードされていない初期データが必要です。もう一度お試しください。",
 			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "BTCウォレット情報の読み込み中にエラーが発生しました",
 			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました"
 		}
