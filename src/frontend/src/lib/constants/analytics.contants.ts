@@ -163,3 +163,4 @@ export const AI_ASSISTANT_OPEN_CONSOLE = 'ai_assistant_open_console';
 export const AI_ASSISTANT_MESSAGE_SENT = 'ai_assistant_message_sent';
 export const AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED = 'ai_assistant_message_failed_to_be_parsed';
 export const AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED = 'ai_assistant_tool_execution_triggered';
+export const AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED = 'ai_assistant_textual_response_received';
