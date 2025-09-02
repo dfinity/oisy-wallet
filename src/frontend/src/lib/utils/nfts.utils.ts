@@ -290,6 +290,4 @@ export const getAllowMediaForNft = (params: {
 	tokens: NonFungibleToken[];
 	address: EthAddress;
 	networkId: NetworkId;
-}): boolean =>
-	(findNonFungibleToken(params) as unknown as { allowMediaUrls: boolean | undefined })
-		?.allowMediaUrls ?? false; // todo: use real prop
+}): boolean => findNonFungibleToken(params)?.allowExternalContentSource ?? false;

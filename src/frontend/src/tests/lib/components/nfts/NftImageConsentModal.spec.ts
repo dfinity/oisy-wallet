@@ -1,18 +1,22 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import * as erc721TokenServices from '$eth/services/erc721-custom-tokens.services';
+import type { Erc721Token } from '$eth/types/erc721';
 import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+import * as authDerived from '$lib/derived/auth.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import * as modalStoreMod from '$lib/stores/modal.store';
 import { nftStore } from '$lib/stores/nft.store';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import * as nftsUtils from '$lib/utils/nfts.utils';
-import * as tokensUtils from '$lib/utils/tokens.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, screen, within } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 import { beforeAll } from 'vitest';
 
 const nftAzuki1 = {
@@ -44,12 +48,16 @@ describe('NftImageConsentModal', () => {
 	const closeSpy = vi.spyOn(modalStoreMod.modalStore, 'close').mockImplementation(() => {});
 
 	// save util
-	const saveSpy = vi.spyOn(tokensUtils, 'saveAllCustomTokens').mockResolvedValue(undefined);
+	const saveSpy = vi.spyOn(erc721TokenServices, 'saveCustomTokens').mockResolvedValue(undefined);
 
 	// NFT utils: toggle & collection
 	const getAllowMediaSpy = vi.spyOn(nftsUtils, 'getAllowMediaForNft');
 	const findTokenSpy = vi.spyOn(nftsUtils, 'findNonFungibleToken');
 	const getCollectionUiSpy = vi.spyOn(nftsUtils, 'getNftCollectionUi');
+
+	vi.spyOn(authDerived, 'authIdentity', 'get').mockReturnValue(
+		readable(mockIdentity as unknown as OptionIdentity)
+	);
 
 	beforeAll(() => {
 		nftStore.addAll([nftAzuki1, nftAzuki2]);
@@ -61,9 +69,10 @@ describe('NftImageConsentModal', () => {
 		const token = {
 			id: { description: 'token-123' },
 			network: { id: { description: 'net-icp' } },
-			allowMedia: true
-		} as const;
-		findTokenSpy.mockReturnValue(token as never);
+			allowExternalContentSource: true,
+			standard: 'erc721'
+		} as Erc721Token;
+		findTokenSpy.mockReturnValue(token);
 
 		const TEST_ID = 'nft-modal';
 		render(NftImageConsentModal, { props: { nft: nftAzuki1, testId: TEST_ID } });
@@ -76,11 +85,7 @@ describe('NftImageConsentModal', () => {
 		const arg = saveSpy.mock.calls[0][0];
 		assertNonNullish(arg);
 
-		const expectedKey = `${token.id.description}-${token.network.id.description}`;
-
-		expect(Object.keys(arg.tokens)).toContain(expectedKey);
-		expect(arg.tokens[expectedKey].allowMedia).toBe(false); // todo: adjust
-		expect(arg.onSuccess).toBe(modalStoreMod.modalStore.close);
+		expect(arg.tokens[0].allowExternalContentSource).toBe(false);
 	});
 
 	it('closes the modal when clicking Cancel', async () => {

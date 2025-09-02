@@ -22,7 +22,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
+	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
 
 	interface Props {
 		nft: Nft;
@@ -57,18 +58,30 @@
 	);
 
 	const save = async () => {
-		if (nonNullish(token)) {
-			await saveAllCustomTokens({
-				tokens: {
-					[`${token.id.description}-${token.network.id.description}`]: {
-						...token,
-						allowMedia: !hasConsent // todo: use real prop
-					}
-				},
-				$authIdentity,
-				$i18n,
-				onSuccess: modalStore.close
-			});
+		if (nonNullish(token) && nonNullish($authIdentity)) {
+			if (token.standard === 'erc721') {
+				await saveErc721CustomTokens({
+					tokens: [
+						{
+							...token,
+							allowExternalContentSource: !hasConsent,
+							enabled: true // must be true otherwise we couldnt see it at this point
+						}
+					],
+					identity: $authIdentity
+				});
+			} else if (token.standard === 'erc1155') {
+				await saveErc1155CustomTokens({
+					tokens: [
+						{
+							...token,
+							allowExternalContentSource: !hasConsent,
+							enabled: true // must be true otherwise we couldnt see it at this point
+						}
+					],
+					identity: $authIdentity
+				});
+			}
 		}
 	};
 
