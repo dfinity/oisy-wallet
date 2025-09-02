@@ -11,10 +11,9 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
 
 describe('NftCollectionActionButtons', () => {
 	let erc721CustomTokensSpy: MockInstance;
