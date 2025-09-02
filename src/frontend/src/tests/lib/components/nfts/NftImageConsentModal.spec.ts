@@ -74,22 +74,20 @@ describe('NftImageConsentModal', () => {
 		findTokenSpy.mockReturnValue(token);
 
 		const TEST_ID = 'nft-modal';
-		render(NftImageConsentModal, { props: { nft: nftAzuki1, testId: TEST_ID } });
+		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
 
 		const saveBtn = screen.getByTestId(`${TEST_ID}-saveButton`);
 		await fireEvent.click(saveBtn);
 
-		expect(saveSpy).toHaveBeenCalledOnce();
-
-		const [[arg]] = saveSpy.mock.calls;
-		assertNonNullish(arg);
-
-		expect(arg.tokens[0].allowExternalContentSource).toBeFalsy();
+		expect(saveSpy).toHaveBeenCalledWith({
+			identity: mockIdentity,
+			tokens: [{ ...token, allowExternalContentSource: false, enabled: true }]
+		});
 	});
 
 	it('closes the modal when clicking Cancel', async () => {
 		const TEST_ID = 'nft-modal';
-		render(NftImageConsentModal, { props: { nft: nftAzuki1, testId: TEST_ID } });
+		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
 
 		const cancelBtn = screen.getByTestId(`${TEST_ID}-cancelButton`);
 		await fireEvent.click(cancelBtn);
@@ -108,7 +106,7 @@ describe('NftImageConsentModal', () => {
 		]);
 
 		const TEST_ID = 'nft-modal';
-		render(NftImageConsentModal, { props: { nft: nftAzuki1, testId: TEST_ID } });
+		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
 
 		// Collection address
 		const addrOut = screen.getByTestId(`${TEST_ID}-collectionAddress`);
