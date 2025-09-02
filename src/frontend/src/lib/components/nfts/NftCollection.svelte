@@ -9,12 +9,12 @@
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 	const [collectionId, networkId] = $derived([page.params.collectionId, page.params.networkId]);
 

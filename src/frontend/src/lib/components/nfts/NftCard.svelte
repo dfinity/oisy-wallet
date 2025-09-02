@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
-	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 
 	interface Props {
 		nft: Nft;
@@ -39,7 +39,7 @@
 		/>
 
 		{#if hidden}
-			<div class="absolute top-2 left-2 invert dark:invert-0">
+			<div class="absolute left-2 top-2 invert dark:invert-0">
 				<IconEyeOff size="24" />
 			</div>
 		{/if}
