@@ -7,7 +7,7 @@
 	let { size = '52' }: Props = $props();
 </script>
 
-<svg viewBox="0 0 54 52" height={size} width={size} xmlns="http://www.w3.org/2000/svg">
+<svg height={size} viewBox="0 0 54 52" width={size} xmlns="http://www.w3.org/2000/svg">
 	<path
 		d="M0.117676 26C0.117676 11.6406 11.7583 0 26.1177 0H27.8823C42.2417 0 53.8823 11.6406 53.8823 26C53.8823 40.3594 42.2417 52 27.8823 52H26.1177C11.7583 52 0.117676 40.3594 0.117676 26Z"
 		fill="currentColor"
@@ -29,8 +29,8 @@
 	<path
 		d="M34.8906 35.4116V29.5293"
 		stroke="white"
-		stroke-miterlimit="10"
 		stroke-linecap="round"
+		stroke-miterlimit="10"
 		stroke-width="1.5"
 	/>
 	<path
