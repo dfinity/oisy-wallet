@@ -74,10 +74,11 @@ const loadCustomTokensWithMetadata = async (
 				(customToken): customToken is CustomToken & { token: { Erc1155: ErcToken } } =>
 					'Erc1155' in customToken.token
 			)
-			.map(async ({ token, enabled, version: versionNullable, section: sectionNullable }) => {
+			.map(async ({ token, enabled, version: versionNullable, section: sectionNullable, allow_external_content_source: allowExternalContentSourceNullable }) => {
 				const version = fromNullable(versionNullable);
 				const section = fromNullable(sectionNullable);
 				const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
 				const {
 					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
@@ -111,7 +112,8 @@ const loadCustomTokensWithMetadata = async (
 						version,
 						...(nonNullish(mappedSection) && {
 							section: mappedSection
-						})
+						}),
+						allowExternalContentSource
 					},
 					...metadata
 				};
