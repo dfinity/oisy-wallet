@@ -23,7 +23,11 @@
 		{:else if message.role === 'assistant' && nonNullish(message.data.text)}
 			<AiAssistantBotMessage content={message.data.text} />
 		{:else if message.role === 'assistant' && nonNullish(message.data.tool?.results)}
-			<AiAssistantToolResults {onSendMessage} results={message.data.tool.results} />
+			<AiAssistantToolResults
+				isLastItem={messages.length - 1 === index}
+				{onSendMessage}
+				results={message.data.tool.results}
+			/>
 		{/if}
 	</div>
 {/each}

@@ -5,10 +5,15 @@ import {
 	getAiAssistantFilterContactsPrompt,
 	getAiAssistantToolsDescription
 } from '$lib/constants/ai-assistant.constants';
+import {
+	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
+	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
+} from '$lib/constants/analytics.contants';
 import { aiAssistantSystemMessage } from '$lib/derived/ai-assistant.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import { enabledNetworksSymbols } from '$lib/derived/networks.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
+import { trackEvent } from '$lib/services/analytics.services';
 import {
 	ToolResultType,
 	type ChatMessageContent,
@@ -41,6 +46,8 @@ export const askLlm = async ({
 	messages: chat_message_v1[];
 	identity: Identity;
 }): Promise<ChatMessageContent> => {
+	const requestStartTimestamp = Date.now();
+
 	const {
 		message: { content, tool_calls }
 	} = await llmChat({
@@ -60,10 +67,15 @@ export const askLlm = async ({
 
 	if (nonNullish(tool_calls) && tool_calls.length > 0) {
 		for (const toolCall of tool_calls) {
-			const result = await executeTool({ toolCall, identity });
+			const result = await executeTool({ toolCall, identity, requestStartTimestamp });
 
 			nonNullish(result) && toolResults.push(result);
 		}
+	} else {
+		trackEvent({
+			name: AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
+			metadata: { responseTime: `${(Date.now() - requestStartTimestamp) / 1000}s` }
+		});
 	}
 
 	return {
@@ -137,10 +149,12 @@ export const askLlmToFilterContacts = async ({
  */
 export const executeTool = async ({
 	toolCall,
-	identity
+	identity,
+	requestStartTimestamp
 }: {
 	toolCall: ToolCall;
 	identity: Identity;
+	requestStartTimestamp: number;
 }): Promise<ToolResult | undefined> => {
 	const {
 		function: { name, arguments: filterParams }
@@ -160,6 +174,14 @@ export const executeTool = async ({
 			tokens: get(enabledTokens)
 		});
 	}
+
+	trackEvent({
+		name: AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED,
+		metadata: {
+			toolName: name,
+			responseTime: `${(Date.now() - requestStartTimestamp) / 1000}s`
+		}
+	});
 
 	return { type: name as ToolResult['type'], result };
 };
