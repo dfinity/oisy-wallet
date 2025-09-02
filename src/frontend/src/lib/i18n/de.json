@@ -508,6 +508,7 @@
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Fehler beim Laden der BTC-Wallet-Informationen.",
 			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen."
 		}
@@ -1040,11 +1041,23 @@
 			"collections": "Kollektionen",
 			"all_assets": "Alle Assets",
 			"address_copied": "Adresse $address kopiert",
+			"spam": "Spam",
+			"not_spam": "Kein Spam",
+			"hide": "Verstecken",
+			"unhide": "Anzeigen",
+			"hidden": "Versteckt",
 			"open_explorer": "Öffne diesen Contract im Blockchain Explorer",
-			"spam": "",
-			"not_spam": "",
-			"hide": "",
-			"unhide": ""
+			"collection_name": "Kollektionsname",
+			"media_urls": "Medien URLs",
+			"display_preference": "Anzeigeeinstellung",
+			"media_enabled": "Medien aktiviert",
+			"media_disabled": "Medien deaktiviert",
+			"enable_media": "Medien aktivieren",
+			"disable_media": "Medien deaktivieren",
+			"open_in_new_tab": "In neuem Tab öffnen",
+			"review_title": "Medienquelle überprüfen für \"$collectionName\"",
+			"review_description": "Aufgepasst! Diese Bilder kommen von einer unverifizierten Quelle. Diese zu aktivieren könnte deine IP-Adresse mit Dritten teilen und potentiell ein Sicherheitsrisiko darstellen.",
+			"learn_more": "Erfahre mehr"
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
