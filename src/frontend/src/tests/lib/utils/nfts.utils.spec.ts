@@ -825,7 +825,7 @@ describe('nfts.utils', () => {
 			const params = { tokens, networkId: ETHEREUM_NETWORK.id, address: 'invalid address' };
 			const result = getAllowMediaForNft(params);
 
-			expect(result).toEqual(undefined);
+			expect(result).toBeUndefined();
 		});
 	});
 });
