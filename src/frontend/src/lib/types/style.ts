@@ -18,7 +18,7 @@ export type BadgeVariant =
 	| 'outline'
 	| 'disabled'
 	| 'nft-trait'
- 	| 'nft-spam';
+	| 'nft-spam';
 
 export type TagVariant =
 	| 'default'
