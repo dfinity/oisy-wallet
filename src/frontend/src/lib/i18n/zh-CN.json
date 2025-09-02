@@ -14,7 +14,7 @@
 			"symbol": "符号",
 			"decimals": "小数位数",
 			"amount": "金额",
-			"tokenId": "",
+			"tokenId": "代币ID",
 			"max": "最大",
 			"destination": "目标地址",
 			"reject": "拒绝",
@@ -37,7 +37,8 @@
 			"currency": "货币"
 		},
 		"info": {
-			"test_banner": "仅供测试使用！"
+			"test_banner": "仅供测试使用！",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "$name 标志",
@@ -114,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "您尚未登录。请登录以继续。",
-			"session_expired": "由于会话已过期，您已被登出。"
+			"session_expired": "由于会话已过期，您已被登出。",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "没有 Internet Identity。",
@@ -506,6 +508,7 @@
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "加载 BTC 钱包信息时出错。",
 			"sol_wallet_error": "加载 SOL 钱包信息时出错。"
 		}
@@ -836,10 +839,10 @@
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
 			"withdrawing": "正在取款",
-			"network_cost": "",
-			"gasless": "",
-			"swap_fees": "",
-			"cross_chain_networks_info": ""
+			"network_cost": "网络成本",
+			"gasless": "无需气费",
+			"swap_fees": "交易费",
+			"cross_chain_networks_info": "跨链网络信息"
 		},
 		"error": {
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
@@ -1018,34 +1021,50 @@
 			"title": "标题",
 			"title_empty": "标题为空",
 			"description_empty": "描述为空",
-			"grouping": "",
-			"as_plain_list": "",
-			"by_collection": "",
-			"show_spam": "",
-			"show_hidden": "",
-			"sorting": "",
-			"recents_first": "",
-			"oldest_first": "",
-			"collection_atoz": "",
-			"collection_ztoa": "",
-			"collection_items_count": "",
-			"collection_address": "",
-			"token_standard": "",
-			"quantity": "",
-			"item_traits": "",
-			"collection_not_loaded": "",
-			"nft_not_loaded": "",
-			"collections": "",
-			"all_assets": "",
-			"address_copied": "",
-			"open_explorer": ""
+			"grouping": "分组",
+			"as_plain_list": "以普通列表显示",
+			"by_collection": "按合集分组",
+			"show_spam": "显示垃圾内容",
+			"show_hidden": "显示隐藏项",
+			"sorting": "排序",
+			"recents_first": "最新优先",
+			"oldest_first": "最旧优先",
+			"collection_atoz": "合集名称 A-Z",
+			"collection_ztoa": "合集名称 Z-A",
+			"collection_items_count": "合集有 $count 个单品",
+			"collection_address": "合集地址",
+			"token_standard": "代币标准",
+			"quantity": "数量",
+			"item_traits": "单品特征",
+			"collection_not_loaded": "合集未加载，无法显示",
+			"nft_not_loaded": "NFT未加载，无法显示",
+			"collections": "合集",
+			"all_assets": "所有资产",
+			"address_copied": "地址 $address 已复制",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "在区块链浏览器中打开此合约",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
 			"card": {
 				"image": "图片"
 			},
-			"copy_address": ""
+			"copy_address": "把该地址复制到粘贴版"
 		}
 	},
 	"fee": {
@@ -1276,7 +1295,7 @@
 				"reward_received": "欢迎加入 $oisy_short！",
 				"reward_failed": "邀请码已过期",
 				"reward_received_description": "您的欢迎礼包即将送达。",
-				"brand_reward_received_description": "",
+				"brand_reward_received_description": "想赚更多吗？邀请朋友并赚取每一个新加入者的邀请提成",
 				"reward_failed_description": "请申请一个新的邀请码并重试"
 			},
 			"error": {
@@ -1477,9 +1496,24 @@
 			"indicator": "跳转到第 $index 幻灯片"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "许可协议",
 			"accept_terms": "点击此按钮即表示你同意",
 			"accept_terms_link": "许可协议",
 			"title": "$oisy_name 许可协议（“许可协议”）",
@@ -1499,7 +1533,7 @@
 			"assignment": "<strong>11. 协议转让。</strong> 未经 DFINITY 书面同意，你不得转让本协议，DFINITY 可自由转让本协议。",
 			"no_waiver": "<strong>12. 权利不弃权。</strong> DFINITY 未行使权利不构成放弃，亦不影响未来主张该权利。",
 			"english_version": "<strong>13. 英文版本。</strong> 本协议以英文版本为正式版本，如有冲突，以英文版本为准。",
-			"body": ""
+			"body": "感谢您对 $oisy_name 的关注。$oisy_name 是一个基于浏览器、自托管、支持多链的钱包去中心化应用，托管于 Internet Computer 公共区块链网络（以下简称“$oisy_short”）。如需了解更多关于 $oisy_short 的信息、其开源代码及相关许可，请访问位于此处的 $oisy_short GitHub 仓库：$oisy_repo_url。本许可协议约束您对 $oisy_short 的使用（“您”）。使用 $oisy_short，即表示您已阅读、理解并同意受本许可协议的约束。如果您不同意本协议，则不得使用 $oisy_short。如果您选择使用 $oisy_short，您与 DFINITY 基金会（包括其关联公司及子公司，统称为“DFINITY”）承认并同意如下条款：### 1. 有限许可。在遵守本许可协议条款和条件的前提下，DFINITY 授予您一项有限的、非专属的、不可转让的、不可再许可的、可撤销的许可，仅允许您使用 $oisy_short 以接收、持有和发送代币，如原生 ICP、ICRC-1、ETH 和 ERC20 代币，以及不时可能推出的其他代币。对于包含在 $oisy_short 中的任何开源组件，您可以在适用许可条款允许的范围内创作衍生作品。### 2. 限制。您对与使用 $oisy_short 相关的所有活动负责，无论这些活动是否由您授权，或由您、您的员工或第三方代表您进行。您理解 DFINITY 不对与您的 $oisy_name 相关的任何活动或交易（无论是否完成）负责。您不得歪曲或夸大您与 DFINITY 之间的关系，包括不得表示或暗示 DFINITY 通过您使用 $oisy_short 支持、赞助、认可或参与您或您的商业活动。除非本许可协议明确允许，您不得暗示与 DFINITY 之间存在任何关系或关联。您不得以任何方式使用 $oisy_short 的名称、标识或任何相关商标，从而暗示认可或关联，歪曲与 $oisy_short 的关系，或引起关于 $oisy_short 来源的混淆。### 3. 适用法律。您在使用 $oisy_short 以及与您的 $oisy_name 相关的任何交易中，必须遵守所有适用的法律法规（包括但不限于出口管制、反洗钱或经济制裁方面的法律法规）。### 4. DFINITY 的权利保留。$oisy_short 由 DFINITY 拥有并许可给您使用，而非出售。$oisy_short 的内容、可视界面、交互功能、信息、图形、设计、汇编、计算机代码、产品、服务以及所有其他元素及相关文档，均受适用的知识产权法律保护。DFINITY 拥有 $oisy_short 及其相关知识产权的全部和唯一所有权，或拥有其子公司、关联公司或第三方许可方的授权，适用开源许可除外。DFINITY 保留本许可协议未明确授予的所有权利。您不因本协议获得任何权利、所有权或利益，无论是明示、默示还是其他方式，除非本许可协议或开源组件的相关许可条款明确规定。您无权使用 $oisy_short 的名称、标识或其他相关商标。### 5. 反馈。若您向 DFINITY 提供任何评论、建议、错误报告、增强意见、推荐或修改（统称为“反馈”），则该反馈为非保密性质，DFINITY 有权自行决定如何使用，包括但不限于将其整合进 DFINITY 材料、$oisy_short 或其他服务中。您在此授予 DFINITY 一项永久性的、不可撤销的、可转让的、可再许可的、非排他性、免版税的许可，以使用您的反馈用于任何目的，包括制造和销售产品及服务，并同意提供所需协助以帮助 DFINITY 完善和维护其对反馈的权利。您同意 DFINITY 可不时联系您以获取反馈，但您可通过发送书面通知至 legalnotice@dfinity.org 来选择退出。### 6. 条款与终止。本许可协议在终止前一直有效。若您违反本许可协议，协议及您的使用权和许可将立即终止。您可随时通过清空 $oisy_name 中的代币并停止使用 $oisy_short 来终止本协议。DFINITY 可基于任何理由随时终止本协议，包括但不限于您对 $oisy_short 的实际或涉嫌滥用或违反本协议的行为。第 3 至第 13 条在协议终止后仍然有效。### 7. 免责声明与责任限制。在适用法律允许的最大范围内，$oisy_short 以“按现状”提供，不附带任何形式的担保。DFINITY 在适用法律允许的最大范围内，明确不提供任何明示、默示、法定或其他形式的担保，包括但不限于适销性、特定用途适用性、权利、质量、结果或非侵权性。DFINITY 不保证 $oisy_short 当前或将来始终可用、安全或可靠。DFINITY 明确不对 $oisy_short 的准确性或功能性、您使用过程中获得的信息或功能（当前或将来）、或通过使用获得的结果的准确性、有效性或完整性提供任何担保。在适用法律允许的最大范围内，DFINITY 不对因您使用或无法使用 $oisy_short 或 DFINITY 材料而引起的任何间接、特殊、附带、惩罚性或后果性损害负责，即使已被告知可能发生此类损害，且即使任何有限救济未能实现其基本目的。在任何情况下，DFINITY 所承担的损害赔偿责任总额不超过 100 瑞士法郎（CHF）。### 8. 赔偿。您同意对因您使用或滥用 $oisy_short、违反本许可协议或适用法律法规所导致的任何责任和费用（包括合理的律师费用），为 DFINITY 及其附属公司、高管、董事、供应商、许可方和其他用户进行赔偿、辩护并使其免受损害。### 9. 适用法律与争议解决。任何与 $oisy_short 有关的索赔应适用瑞士法律，并排除其法律冲突规则。与本许可协议相关的任何争议（包括非合同争议及其解释）应由瑞士苏黎世法院专属管辖，且可上诉至瑞士联邦法院。### 10. 完整协议与可分割性。本许可协议构成您与 DFINITY 之间关于本协议主题事项的完整协议，取代此前所有的书面或口头协议、协商或沟通。当 DFINITY 发布新版本的 $oisy_short 时，可能会修改本协议。若本协议某条款被裁定为无效或不可执行：（a）该条款应在严格必要的范围内进行修改以使其有效可执行；如无法修改，则应视为与本协议分离；（b）本协议其他条款的有效性与可执行性不受影响。### 11. 不得转让。未经 DFINITY 事先书面同意，您不得转让本协议，无论是明示还是法律上转让（包括合并或控制权变更），任何此类尝试转让将视为无效。DFINITY 可在无需通知您的情况下自由转让本协议。在此前提下，本协议对双方及其各自的继承人和被许可的受让人具有约束力。### 12. 权利不放弃。未行使或延迟行使本协议或法律授予的任何权利、权力或救济，不构成对该权利的放弃。DFINITY 对您违反本协议的容忍或放弃不构成对其他违约行为的放弃。### 13. 英文版本为准。如出现任何争议，本许可协议的英文版本为正式且具约束力的版本。根据本协议进行的所有沟通与通知必须使用英文。"
 		},
 		"alt": {
 			"license_agreement": "$oisy_name 许可协议"
@@ -1507,22 +1541,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
-			"title": "",
-			"body": ""
+			"terms_of_use": "使用条款",
+			"title": "使用条款",
+			"body": "生效日期：$date。通过使用 OISY 钱包、访问 oisy.com 网站或使用我们链接到本使用条款的其他服务（统称为“服务”），您即表示您与 DFINITY 基金会（包括我们的附属公司和子公司，统称为“DFINITY”）同意遵守本使用条款以及我们的许可协议（统称为“协议”）。若本使用条款与许可协议存在冲突或不一致之处，以本使用条款为准。若您不同意，请勿使用我们的服务。通过使用服务，您确认您已年满 18 岁。OISY 钱包是一个基于浏览器的、自托管的、支持多链的钱包去中心化应用，托管于 Internet Computer 公共区块链网络，允许您访问 OISY 钱包支持的特定代币及其他第三方服务。我们不拥有、控制或运营此类第三方服务，您自行承担使用第三方服务的风险。部分 OISY 钱包功能为实验性或测试版本。您有责任：（1）自行安排访问本网站所需的一切条件；（2）妥善保管您的访问凭证，包括您的 Internet Identity。如果您丢失 Internet Identity 或其遭到泄露，我们无法为您恢复账户访问权限。若您要访问网站或其部分资源，可能需提供某些注册信息或其他资料。您提供的信息必须准确、最新且完整。您同意您提供的所有注册信息，包括通过网站交互功能所提交的资料，将受我们的《隐私政策》约束，并同意我们依据该政策处理您的信息。您同意在每次会话结束时退出账户，特别是在公共或共享电脑上使用账户时需格外小心，防止他人查看或记录您的密码或个人信息。您也承认我们不托管、访问或控制您 OISY 钱包中的资金，OISY 钱包完全由用户自行控制。在适用法律允许的最大范围内，我们的服务按“原样”提供，不附带任何形式的担保，包括但不限于对资金损失或技术故障的担保或保证。您需自行承担使用去中心化基础设施的风险，并承认我们对任何资金损失不承担责任，无论损失原因为何。DFINITY 在法律允许的最大范围内，否认所有明示、默示、法定或其他形式的担保，包括但不限于适用于特定目的的适用性、适销性、所有权、质量、结果和不侵权性。DFINITY 不保证服务始终可用、安全或可靠（无论现在还是将来），也不对服务的准确性、功能性、信息的真实性或完整性，以及服务的一致性或使用结果承担任何担保。DFINITY 不保证服务能转移任何代币或数字资产的所有权或权利，也不对所有权作出任何担保。在适用法律允许的最大范围内，DFINITY 不对因使用或无法使用服务、DFINITY 材料或文中定义的任何第三方项目所引起的任何间接、特殊、附带、惩罚性或后果性损害承担责任，即使已被告知该类损害可能发生，且即使任何有限救济未能实现其基本目的。在任何情况下，DFINITY 所承担的赔偿责任总额不超过 100 瑞士法郎（CHF）。您同意为因您使用或滥用服务、违反本协议或适用法律法规所导致的任何责任和费用（包括合理律师费）为 DFINITY 及其附属公司、高管、董事、供应商、许可方及其他用户进行赔偿、抗辩并使其免责。通过参与我们的奖励计划，您同意 OISY REWARDS INITIATIVE - TERMS AND CONDITIONS，该协议作为本协议的一部分，且可随时变更。您同意遵守所有适用法律和法规（包括但不限于出口管制、反洗钱和经济制裁相关法律法规），并不得将服务用于任何非法目的，或以侵犯 DFINITY 实体、其他用户或任何其他人的权利的方式使用服务。您需遵守所有适用的联邦、州和地方法律法规，负责相关税费的申报与支付。与服务有关的任何索赔应适用瑞士法律，不适用法律冲突规则。与本协议相关的任何争议（包括非合同争议及其解释）应由瑞士苏黎世法院专属管辖，且可上诉至瑞士联邦法院。我们不拥有、控制、认可或采纳您在使用服务时可能看到或连接的任何第三方内容、应用、服务、网站或其他项目（统称为“第三方项目”），并对其不承担任何责任。您与第三方及第三方项目的任何使用、交易或通信仅在您与该第三方之间进行，风险自负。本协议不旨在向任何第三方，包括其他服务用户，授予任何权利、利益或救济。若本使用条款的任何条款被判定为非法、无效或不可执行，该条款仍应在适用法律允许的最大范围内执行，不可执行的部分视为从本条款中分离，且不影响其他条款的有效性与可执行性。本协议在被终止前持续有效，如您违反本协议，您的权利和许可将立即终止。DFINITY 可基于任何理由随时终止本协议，包括但不限于您对服务的实际或涉嫌滥用或违反协议的行为。如我们未行使或执行本使用条款中的任何权利或规定，不构成对该权利或规定的放弃。本使用条款及我们在本网站发布的任何政策或运营规则构成您与我们之间关于服务使用的完整协议，取代之前任何口头或书面形式的协议、沟通或提议（包括旧版本使用条款）。若条款存在解释上的歧义，不应对起草方不利解释。请参阅我们的隐私政策 [链接另附]。如您使用 OISY 钱包或其他第三方服务与区块链技术，您将与一个独立于我们、且不受我们控制的全球社区共享信息。由于区块链是去中心化的，且第三方服务不由我们或我们的附属公司控制或运营，我们无法控制、删除、修改或更改在使用这些区块链技术时所处理的个人数据。我们可自行决定更新本协议。继续使用即视为接受更新。如有疑问，请联系 support@oisy.com"
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "使用条款链接"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
-			"title": "",
-			"body": ""
+			"privacy_policy": "隐私政策",
+			"title": "隐私政策",
+			"body": "生效日期：$date。我们，DFINITY Stiftung，地址为瑞士苏黎世 Genferstrasse 11，邮编8002（以下简称“DFINITY”或“我们”），在本《OISY 隐私政策》（“隐私政策”）中披露您在使用 OISY 钱包、访问 oisy.com 网站或任何链接至本隐私政策的网站（统称为“网站”）时所提交的个人数据的处理方式。本隐私政策不适用于任何其他数据处理活动，包括但不限于：我们在线下收集的个人数据，或通过未链接本隐私政策的网站收集的个人数据；您在使用网站或其他基于区块链的技术时与其他用户共享的个人数据；或您与我们不拥有或控制的第三方服务共享的个人数据。如果您使用 OISY 钱包或其他第三方服务与区块链技术，您将信息共享给一个独立于我们且不受我们控制的全球社区。由于区块链是去中心化的，且第三方服务不由我们或我们的附属机构控制或运营，我们无法控制、删除、修改或更改在使用此类区块链技术过程中处理的个人数据。### 1. 处理的数据类别及使用目的：当您访问我们的网站时，您的 IP 地址会被自动提交。此处理行为是出于我们优化网站性能的合法利益，且不会被您或其他用户的隐私及其他权利所取代。[插入 DFINITY 收集的其他数据，例如设备信息、登录信息、交易信息。DFINITY 如何履行 KYC（了解您的客户）义务？DFINITY 可能需要出于法律合规目的收集某些数据，例如姓名、地址、电话号码、银行账户信息。] ### 2. 数据共享：我们可能会将您的数据共享给其他 DFINITY 实体、服务提供商和第三方，以便为您提供服务，并用于我们打击和调查欺诈行为的努力中。### 3. 数据保留：我们将在瑞士及我们的员工和承包商所在的地区（包括美国）保留您的个人数据，最长保留时间为自收集之日起 24 个月。### 4. 用户权利与合规性：您可以通过联系我们（privacy@dfinity.com）请求访问、更正、删除或限制我们对您个人数据的处理，或对处理行为提出异议。您还可能有权向主管机构提出投诉。但如果数据是在区块链或与第三方服务相关的环境中处理的，由于这些数据不受我们或我们的附属机构控制，您将无法就此类数据行使上述权利。### 5. 本政策的变更：我们可能会不时自行决定更新本隐私政策，并可能在我们的网站上发布新版本。### 6. 联系方式：如有问题或希望行使您的权利，请访问 support@oisy.com"
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "隐私政策链接"
 		}
 	},
 	"activity": {
@@ -1578,20 +1612,20 @@
 			"action_button_contacts_title": "联系人标题按钮",
 			"action_button_contacts_subtitle": "联系人副标题按钮",
 			"action_button_contacts_prompt": "联系人提示按钮",
-			"action_button_send_tokens_title": "",
-			"action_button_send_tokens_subtitle": "",
-			"action_button_send_tokens_prompt": "",
-			"select_contact_message": "",
-			"send_to_message": "",
+			"action_button_send_tokens_title": "发送资产",
+			"action_button_send_tokens_subtitle": "设置发送于几秒钟后",
+			"action_button_send_tokens_prompt": "我想发送代币",
+			"select_contact_message": "选择一个联系人来开启发送过程",
+			"send_to_message": "发给 $contact_name（$address_info）",
 			"send_message": "发送消息",
 			"send_message_input_placeholder": "发送消息输入占位符",
-			"send_token_succeeded": "",
-			"no_contacts_found_message": "",
-			"loading": "加载中"
+			"send_token_succeeded": "交易完成",
+			"no_contacts_found_message": "抱歉，我无法在你的地址簿中找到相应的联系人",
+			"loading": "思考中"
 		},
 		"errors": {
-			"unknown": "未知",
-			"no_response": "无响应"
+			"unknown": "抱歉，从大语言模型中获取反馈出错",
+			"no_response": "抱歉，我没有从大语言模型中获取反馈"
 		}
 	}
 }

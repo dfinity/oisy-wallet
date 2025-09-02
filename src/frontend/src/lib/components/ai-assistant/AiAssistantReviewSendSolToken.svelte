@@ -12,6 +12,7 @@
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
+		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
@@ -58,9 +59,10 @@
 		amount: number;
 		destination: Address;
 		sendCompleted: boolean;
+		sendEnabled: boolean;
 	}
 
-	let { amount, destination, sendCompleted = $bindable() }: Props = $props();
+	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
 
 	const {
 		sendToken,
@@ -144,12 +146,21 @@
 	);
 
 	let invalid = $derived(
-		invalidDestination || notEmptyString(amountErrorMessage) || isNullish(amount)
+		!sendEnabled || invalidDestination || notEmptyString(amountErrorMessage) || isNullish(amount)
 	);
 
 	const send = async () => {
-		const trackingEventMetadata = {
-			token: $sendTokenSymbol,
+		const sharedTrackingEventMetadata = {
+			token: $sendTokenSymbol
+		};
+
+		trackEvent({
+			name: AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
+			metadata: sharedTrackingEventMetadata
+		});
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
 			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
 		};
 
@@ -203,7 +214,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_SUCCESS,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			sendCompleted = true;
@@ -214,7 +225,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_ERROR,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)

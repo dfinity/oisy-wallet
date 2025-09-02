@@ -37,7 +37,8 @@
 			"currency": "Tiền tệ"
 		},
 		"info": {
-			"test_banner": "Chỉ dành cho mục đích thử nghiệm!"
+			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo $name",
@@ -114,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
-			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn."
+			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Không có Internet Identity.",
@@ -506,6 +508,7 @@
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Lỗi khi tải thông tin ví BTC.",
 			"sol_wallet_error": "Lỗi khi tải thông tin ví SOL."
 		}
@@ -1038,7 +1041,23 @@
 			"collections": "",
 			"all_assets": "",
 			"address_copied": "",
-			"open_explorer": ""
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"placeholder_image": "Không có ảnh NFT",
@@ -1475,6 +1494,21 @@
 			"next_slide": "Trang chiếu tiếp theo",
 			"prev_slide": "Trang chiếu trước",
 			"indicator": "Chuyển đến trang chiếu $index"
+		}
+	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {

@@ -9,6 +9,7 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
+		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_IC_SEND_ERROR,
 		TRACK_COUNT_IC_SEND_SUCCESS
@@ -33,9 +34,10 @@
 		amount: number;
 		destination: Address;
 		sendCompleted: boolean;
+		sendEnabled: boolean;
 	}
 
-	let { amount, destination, sendCompleted = $bindable() }: Props = $props();
+	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
 
 	const { sendToken, sendBalance, sendTokenStandard, sendTokenSymbol, sendTokenDecimals } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -57,13 +59,22 @@
 			})
 	);
 
-	let invalid = $derived(invalidDestination || amountError || isNullish(amount));
+	let invalid = $derived(!sendEnabled || invalidDestination || amountError || isNullish(amount));
 
 	let loading = $state(false);
 
 	const send = async () => {
-		const trackingEventMetadata = {
-			token: $sendTokenSymbol,
+		const sharedTrackingEventMetadata = {
+			token: $sendTokenSymbol
+		};
+
+		trackEvent({
+			name: AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
+			metadata: sharedTrackingEventMetadata
+		});
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
 			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
 		};
 
@@ -105,7 +116,7 @@
 			const trackAnalyticsOnSendComplete = () => {
 				trackEvent({
 					name: TRACK_COUNT_IC_SEND_SUCCESS,
-					metadata: trackingEventMetadata
+					metadata: sendTrackingEventMetadata
 				});
 			};
 
@@ -123,7 +134,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_IC_SEND_ERROR,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({

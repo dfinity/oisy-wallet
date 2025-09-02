@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { userProfileLoaded } from '$lib/derived/user-profile.derived';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 
@@ -32,4 +33,6 @@
 
 <svelte:window on:oisyRefreshUserProfile={reload} />
 
-{@render children()}
+{#if $userProfileLoaded}
+	{@render children()}
+{/if}

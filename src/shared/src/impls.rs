@@ -6,7 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
-        agreement::Agreements,
+        agreement::{Agreements, UpdateAgreementsError, UserAgreements},
         backend_config::{Config, InitArg},
         contact::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
@@ -17,8 +17,8 @@ use crate::{
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
-            NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
-            SaveTestnetsSettingsError,
+            NetworkSettingsMap, NetworksSettings, SetTestnetsSettingsError,
+            UpdateNetworksSettingsError,
         },
         settings::Settings,
         token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
@@ -262,9 +262,9 @@ impl StoredUserProfile {
         now: Timestamp,
         networks: NetworkSettingsMap,
         overwrite: bool,
-    ) -> Result<StoredUserProfile, SaveNetworksSettingsError> {
+    ) -> Result<StoredUserProfile, UpdateNetworksSettingsError> {
         if profile_version != self.version {
-            return Err(SaveNetworksSettingsError::VersionMismatch);
+            return Err(UpdateNetworksSettingsError::VersionMismatch);
         }
 
         let settings = self.settings.clone().unwrap_or_default();
@@ -301,9 +301,9 @@ impl StoredUserProfile {
         profile_version: Option<Version>,
         now: Timestamp,
         show_testnets: bool,
-    ) -> Result<StoredUserProfile, SaveTestnetsSettingsError> {
+    ) -> Result<StoredUserProfile, SetTestnetsSettingsError> {
         if profile_version != self.version {
-            return Err(SaveTestnetsSettingsError::VersionMismatch);
+            return Err(SetTestnetsSettingsError::VersionMismatch);
         }
 
         let settings = self.settings.clone().unwrap_or_default();
@@ -362,6 +362,58 @@ impl StoredUserProfile {
         new_settings.dapp = new_dapp_settings;
         new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with the specified user agreements updated.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_agreements(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        agreements: UserAgreements,
+    ) -> Result<StoredUserProfile, UpdateAgreementsError> {
+        if profile_version != self.version {
+            return Err(UpdateAgreementsError::VersionMismatch);
+        }
+
+        let current = self.agreements.clone().unwrap_or_default().agreements;
+
+        let mut new_agreements = current.clone();
+
+        if agreements.license_agreement.accepted.is_some() {
+            new_agreements.license_agreement = agreements.license_agreement;
+        }
+        if agreements.terms_of_use.accepted.is_some() {
+            new_agreements.terms_of_use = agreements.terms_of_use;
+        }
+        if agreements.privacy_policy.accepted.is_some() {
+            new_agreements.privacy_policy = agreements.privacy_policy;
+        }
+
+        if current.eq(&new_agreements) {
+            return Ok(self.clone());
+        }
+
+        if matches!(new_agreements.license_agreement.accepted, Some(true)) {
+            new_agreements.license_agreement.last_accepted_at_ns = Some(now);
+        }
+        if matches!(new_agreements.terms_of_use.accepted, Some(true)) {
+            new_agreements.terms_of_use.last_accepted_at_ns = Some(now);
+        }
+        if matches!(new_agreements.privacy_policy.accepted, Some(true)) {
+            new_agreements.privacy_policy.last_accepted_at_ns = Some(now);
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.agreements = Some(Agreements {
+            agreements: new_agreements,
+        });
+        new_profile.updated_timestamp = now;
+
         Ok(new_profile)
     }
 }
