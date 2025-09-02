@@ -10,8 +10,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Nft } from '$lib/types/nft';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	const [networkId, collectionId, nftId] = $derived([
 		page.params.networkId,
@@ -26,6 +28,14 @@
 				nft.collection.address === collectionId &&
 				nft.collection.network.name === networkId
 		)
+	);
+
+	const token: NonFungibleToken | undefined = $derived(
+		findNonFungibleToken({
+			tokens: $nonFungibleTokens,
+			address: nft?.collection.address,
+			networkId: nft?.collection.network.id
+		})
 	);
 
 	// redirect to assets page if nft cant be loaded within 10s
@@ -47,6 +57,6 @@
 	});
 </script>
 
-<NftHero {nft} />
+<NftHero {token} {nft} />
 
 <NftDescription {nft} />

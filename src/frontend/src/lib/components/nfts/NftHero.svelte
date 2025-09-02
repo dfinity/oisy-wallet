@@ -13,16 +13,19 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Nft } from '$lib/types/nft';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 
 	interface Props {
+		token?: NonFungibleToken;
 		nft?: Nft;
 	}
 
-	const { nft }: Props = $props();
+	const { token, nft }: Props = $props();
 
 	const breadcrumbItems = $derived.by(() => {
 		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];
@@ -65,15 +68,28 @@
 	<div class="bg-primary p-4">
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
-		<h1 class="my-3">
-			{#if nonNullish(normalizedNftName)}
-				{normalizedNftName}
-			{:else}
+		{#if nonNullish(normalizedNftName)}
+			<div class="my-3 w-full justify-between">
+				<div class="flex gap-3 items-center">
+					<h1 class="truncate">
+						{normalizedNftName}
+					</h1>
+
+					{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
+						<Badge styleClass="pl-1 pr-2" variant="disabled" width="w-fit">
+							<div class="flex items-center gap-1">
+								<IconEyeOff size="18" />
+								{$i18n.nfts.text.hidden}
+							</div>
+						</Badge>
+					{/if}
+				</div>
+			</div>
+		{:else}
 				<span class="block max-w-80">
 					<SkeletonText />
 				</span>
-			{/if}
-		</h1>
+		{/if}
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem>
