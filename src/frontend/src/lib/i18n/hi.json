@@ -508,6 +508,7 @@
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
 			"loading_wallet_timeout": "आपके वॉलेट को कुछ प्रारंभिक डेटा की आवश्यकता है जो अभी तक लोड नहीं हुआ है। कृपया पुनः प्रयास करें।",
 			"allow_signing": "आपके वॉलेट को साइन करने के लिए सेट करते समय एक समस्या हुई। आपको साइन आउट कर दिया गया है। यदि समस्या बनी रहती है, तो सहायता से संपर्क करें।",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "BTC वॉलेट जानकारी लोड करते समय त्रुटि।",
 			"sol_wallet_error": "SOL वॉलेट जानकारी लोड करते समय त्रुटि।"
 		}
@@ -1040,7 +1041,11 @@
 			"collections": "संग्रह",
 			"all_assets": "सभी एसेट्स",
 			"address_copied": "पता $address कॉपी किया गया",
-			"open_explorer": "इस अनुबंध को ब्लॉकचेन एक्सप्लोरर में खोलें"
+			"open_explorer": "इस अनुबंध को ब्लॉकचेन एक्सप्लोरर में खोलें",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": ""
 		},
 		"alt": {
 			"placeholder_image": "अभी तक कोई NFTs नहीं",
@@ -1489,6 +1494,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {

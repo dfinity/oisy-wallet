@@ -36,8 +36,7 @@ const toErcCustomToken = ({
 	chainId: chain_id
 }: ErcSaveCustomToken): ErcToken => ({
 	token_address,
-	chain_id,
-	allow_media_source: toNullable()
+	chain_id
 });
 
 const toSplCustomToken = ({
@@ -54,6 +53,7 @@ export const toCustomToken = ({
 	enabled,
 	version,
 	section,
+	allowExternalContentSource,
 	...rest
 }: SaveCustomTokenWithKey): CustomToken => {
 	const toCustomTokenMap = (): Token => {
@@ -93,7 +93,8 @@ export const toCustomToken = ({
 		enabled,
 		version: toNullable(version),
 		token: toCustomTokenMap(),
-		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined)
+		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined),
+		allow_external_content_source: toNullable(allowExternalContentSource)
 	};
 };
 
