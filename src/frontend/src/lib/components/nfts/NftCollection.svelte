@@ -58,7 +58,7 @@
 <div class="mt-4 grid grid-cols-3 gap-3 gap-y-4 py-4">
 	{#if collectionNfts.length > 0}
 		{#each collectionNfts as nft, index (nft.id + index)}
-			<NftCard hidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN} {nft} />
+			<NftCard spam={nonNullish(token) && token.section === CustomTokenSection.SPAM} hidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN} {nft} />
 		{/each}
 	{:else}
 		<NftCardSkeleton />
