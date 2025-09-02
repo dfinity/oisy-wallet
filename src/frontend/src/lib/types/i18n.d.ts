@@ -888,12 +888,23 @@ interface I18nNfts {
 		collections: string;
 		all_assets: string;
 		address_copied: string;
-		open_explorer: string;
 		spam: string;
 		not_spam: string;
 		hide: string;
 		unhide: string;
 		hidden: string;
+		open_explorer: string;
+		collection_name: string;
+		media_urls: string;
+		display_preference: string;
+		media_enabled: string;
+		media_disabled: string;
+		enable_media: string;
+		disable_media: string;
+		open_in_new_tab: string;
+		review_title: string;
+		review_description: string;
+		learn_more: string;
 	};
 	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
