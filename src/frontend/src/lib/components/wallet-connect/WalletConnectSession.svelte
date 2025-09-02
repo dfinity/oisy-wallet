@@ -18,7 +18,6 @@
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
-	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
@@ -29,7 +28,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { Option } from '$lib/types/utils';
-    import type {OptionWalletConnectListener, WalletConnectListener} from '$lib/types/wallet-connect';
+	import type {
+		OptionWalletConnectListener,
+		WalletConnectListener
+	} from '$lib/types/wallet-connect';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
@@ -124,13 +126,7 @@
 		}
 	};
 
-	$: ($authNotSignedIn,
-		(async () => {
-			if ($authNotSignedIn) {
-				console.log('disconnecting');
-				await disconnectListener();
-			}
-		})());
+    onDestroy(async () => await disconnectListener());
 
 	const goToFirstStep = () => modal?.set?.(0);
 
@@ -266,13 +262,13 @@
 		}
 	};
 
-    const attachHandlers = (listener: WalletConnectListener) => {
-        listener.sessionProposal(onSessionProposal);
+	const attachHandlers = (listener: WalletConnectListener) => {
+		listener.sessionProposal(onSessionProposal);
 
-        listener.sessionDelete(onSessionDelete);
+		listener.sessionDelete(onSessionDelete);
 
-        listener.sessionRequest(onSessionRequest);
-    }
+		listener.sessionRequest(onSessionRequest);
+	};
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);
@@ -281,8 +277,7 @@
 			return { result: 'error' };
 		}
 
-        attachHandlers(listener)
-
+		attachHandlers(listener);
 
 		try {
 			await listener.pair();
@@ -406,7 +401,7 @@
 		}
 
 		// Reattach handlers so incoming requests work after refresh
-        attachHandlers(listener)
+		attachHandlers(listener);
 
 		// Check for persisted sessions
 		const sessions = listener.getActiveSessions();
@@ -437,9 +432,9 @@
 </script>
 
 {#if nonNullish(listener)}
-	<WalletConnectButton on:click={disconnect}
-		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
-	>
+	<WalletConnectButton on:click={disconnect}>
+		{$i18n.wallet_connect.text.disconnect}
+	</WalletConnectButton>
 {:else}
 	<WalletConnectButton
 		ariaLabel={$i18n.wallet_connect.text.name}
