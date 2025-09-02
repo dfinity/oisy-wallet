@@ -32,6 +32,7 @@ export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
 export const NFT_CARD = 'nft-card';
 export const NFT_HIDDEN_BADGE = 'nft-hidden-badge';
+export const NFT_SPAM_BADGE = 'nft-hidden-badge';
 export const NFT_COLLECTION_ACTION_SPAM = 'nft-collection-action-spam';
 export const NFT_COLLECTION_ACTION_NOT_SPAM = 'nft-collection-action-not-spam';
 export const NFT_COLLECTION_ACTION_HIDE = 'nft-collection-action-hide';
