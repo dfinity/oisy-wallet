@@ -1045,6 +1045,7 @@
 			"not_spam": "",
 			"hide": "",
 			"unhide": "",
+			"hidden": "",
 			"open_explorer": "在区块链浏览器中打开此合约",
 			"img_consent_disabled": "",
 			"img_consent_none": "",

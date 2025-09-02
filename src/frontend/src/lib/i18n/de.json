@@ -1045,6 +1045,7 @@
 			"not_spam": "Kein Spam",
 			"hide": "Verstecken",
 			"unhide": "Anzeigen",
+			"hidden": "Versteckt",
 			"open_explorer": "Öffne diesen Contract im Blockchain Explorer",
 			"img_consent_disabled": "Du hast diese Kollektion deaktiviert",
 			"img_consent_none": "Bild sicherheitsbedingt deaktiviert",

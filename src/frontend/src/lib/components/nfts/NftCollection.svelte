@@ -9,6 +9,7 @@
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -57,7 +58,11 @@
 <div class="mt-4 grid grid-cols-3 gap-3 gap-y-4 py-4">
 	{#if collectionNfts.length > 0}
 		{#each collectionNfts as nft, index (nft.id + index)}
-			<NftCard {nft} />
+			<NftCard
+				hidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
+				{nft}
+				spam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
+			/>
 		{/each}
 	{:else}
 		<NftCardSkeleton />
