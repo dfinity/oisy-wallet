@@ -47,9 +47,11 @@ export const syncWallet = async ({
 		 * The worker provides the confirmed balance from the Bitcoin canister, and we calculate the structured
 		 * balance (confirmed, unconfirmed, total) using newTransactions data to determine confirmation states.
 		 */
+
 		const btcWalletBalance = await calculateBtcWalletBalance({
 			balance,
-			tokenId
+			tokenId,
+			loadPendingTransactions: !certified
 		});
 
 		balancesStore.set({
