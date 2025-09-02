@@ -116,8 +116,7 @@
 	};
 </script>
 
-<!-- TODO: remove the close button from the modal -->
-<Modal testId={AGREEMENTS_MODAL}>
+<Modal disablePointerEvents={true} testId={AGREEMENTS_MODAL}>
 	<h4 slot="title">
 		{$noAgreementVisionedYet
 			? $i18n.agreements.text.review_title
