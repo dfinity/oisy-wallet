@@ -17,7 +17,6 @@ import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
-import { beforeAll } from 'vitest';
 
 const nftAzuki1 = {
 	...mockValidErc721Nft,
@@ -80,12 +79,12 @@ describe('NftImageConsentModal', () => {
 		const saveBtn = screen.getByTestId(`${TEST_ID}-saveButton`);
 		await fireEvent.click(saveBtn);
 
-		expect(saveSpy).toHaveBeenCalledTimes(1);
+		expect(saveSpy).toHaveBeenCalledOnce();
 
-		const arg = saveSpy.mock.calls[0][0];
+		const [[arg]] = saveSpy.mock.calls;
 		assertNonNullish(arg);
 
-		expect(arg.tokens[0].allowExternalContentSource).toBe(false);
+		expect(arg.tokens[0].allowExternalContentSource).toBeFalsy();
 	});
 
 	it('closes the modal when clicking Cancel', async () => {
@@ -95,7 +94,7 @@ describe('NftImageConsentModal', () => {
 		const cancelBtn = screen.getByTestId(`${TEST_ID}-cancelButton`);
 		await fireEvent.click(cancelBtn);
 
-		expect(closeSpy).toHaveBeenCalledTimes(1);
+		expect(closeSpy).toHaveBeenCalledOnce();
 	});
 
 	it('renders address, display preference, and NFT media list under the expected testIds', () => {
