@@ -78,7 +78,7 @@ export interface SaveUserNetworksSettings {
 }
 
 export interface SaveUserAgreements {
-	agreements: UserAgreements;
+	agreements: Partial<UserAgreements>;
 	currentUserVersion?: bigint;
 }
 

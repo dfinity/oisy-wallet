@@ -37,7 +37,8 @@
 			"currency": "Moeda"
 		},
 		"info": {
-			"test_banner": "Apenas para fins de teste!"
+			"test_banner": "Apenas para fins de teste!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logotipo $name",
@@ -114,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
-			"session_expired": "Você foi desconectado porque sua sessão expirou."
+			"session_expired": "Você foi desconectado porque sua sessão expirou.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Nenhuma Internet Identity.",
@@ -1038,7 +1040,11 @@
 			"collections": "",
 			"all_assets": "",
 			"address_copied": "",
-			"open_explorer": ""
+			"open_explorer": "",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",
@@ -1487,6 +1493,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {

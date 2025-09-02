@@ -37,7 +37,8 @@
 			"currency": "Devise"
 		},
 		"info": {
-			"test_banner": "À des fins de test uniquement !"
+			"test_banner": "À des fins de test uniquement !",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo de $name",
@@ -114,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Vous n'êtes pas connecté. Veuillez vous connecter pour continuer.",
-			"session_expired": "Vous avez été déconnecté car votre session a expiré."
+			"session_expired": "Vous avez été déconnecté car votre session a expiré.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Pas d'Internet Identity.",
@@ -1038,7 +1040,11 @@
 			"collections": "",
 			"all_assets": "",
 			"address_copied": "",
-			"open_explorer": ""
+			"open_explorer": "",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
@@ -1487,6 +1493,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {
