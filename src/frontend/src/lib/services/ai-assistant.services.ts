@@ -23,6 +23,7 @@ import {
 	type ToolResult
 } from '$lib/types/ai-assistant';
 import {
+	generateAiAssistantResponseEventMetadata,
 	parseFromAiAssistantContacts,
 	parseReviewSendTokensToolArguments
 } from '$lib/utils/ai-assistant.utils';
@@ -74,7 +75,7 @@ export const askLlm = async ({
 	} else {
 		trackEvent({
 			name: AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
-			metadata: { responseTime: `${(Date.now() - requestStartTimestamp) / 1000}s` }
+			metadata: generateAiAssistantResponseEventMetadata({ requestStartTimestamp })
 		});
 	}
 
@@ -177,10 +178,7 @@ export const executeTool = async ({
 
 	trackEvent({
 		name: AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED,
-		metadata: {
-			toolName: name,
-			responseTime: `${(Date.now() - requestStartTimestamp) / 1000}s`
-		}
+		metadata: generateAiAssistantResponseEventMetadata({ toolName: name, requestStartTimestamp })
 	});
 
 	return { type: name as ToolResult['type'], result };
