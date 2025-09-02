@@ -31,7 +31,7 @@
 	);
 
 	const token: NonFungibleToken | undefined = $derived(
-		nonNullish(nft.collection)
+		nonNullish(nft) && nonNullish(nft.collection)
 			? findNonFungibleToken({
 					tokens: $nonFungibleTokens,
 					address: nft.collection.address,
