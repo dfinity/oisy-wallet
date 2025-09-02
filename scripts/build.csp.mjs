@@ -80,7 +80,7 @@ const injectLinkPreloader = (indexHtml) => {
           preloadLink.href = link;
           preloadLink.rel = "preload";
           preloadLink.as = "script";
-          document.head.appendChild(loader);
+          document.head.appendChild(preloadLink);
       }
     </script>`;
 
