@@ -3,6 +3,7 @@ import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
+import type { Nft } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
@@ -257,4 +258,14 @@ export const modalAuthHelp: Readable<boolean> = derived(
 export const modalAuthHelpData: Readable<boolean | undefined> = derived(
 	modalStore,
 	($modalStore) => ($modalStore?.type === 'auth-help' ? ($modalStore?.data as boolean) : undefined)
+);
+
+export const modalNftImageConsent: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'nft-image-consent'
+);
+export const modalNftImageConsentData: Readable<Nft | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'nft-image-consent' ? ($modalStore?.data as Nft) : undefined
 );
