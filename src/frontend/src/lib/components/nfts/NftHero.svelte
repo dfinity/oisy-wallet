@@ -13,6 +13,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
@@ -76,7 +77,7 @@
 					</h1>
 
 					{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
-						<Badge styleClass="pl-1 pr-2" variant="disabled" width="w-fit">
+						<Badge styleClass="pl-1 pr-2" testId={NFT_HIDDEN_BADGE} variant="disabled" width="w-fit">
 							<div class="flex items-center gap-1">
 								<IconEyeOff size="18" />
 								{$i18n.nfts.text.hidden}

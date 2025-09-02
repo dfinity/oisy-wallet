@@ -18,6 +18,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -44,7 +45,7 @@
 				</h1>
 
 				{#if token.section === CustomTokenSection.HIDDEN}
-					<Badge styleClass="pl-1 pr-2" variant="disabled" width="w-fit">
+					<Badge styleClass="pl-1 pr-2" testId={NFT_HIDDEN_BADGE} variant="disabled" width="w-fit">
 						<div class="flex items-center gap-1">
 							<IconEyeOff size="18" />
 							{$i18n.nfts.text.hidden}
