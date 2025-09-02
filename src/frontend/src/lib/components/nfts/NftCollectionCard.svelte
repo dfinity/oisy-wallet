@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -19,10 +19,10 @@
 
 <a
 	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300"
-	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 	class:cursor-not-allowed={disabled}
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}
+	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 >
 	<div class="relative h-full w-full">
 		<NftImageConsent nft={collection.nfts[0]} type="card">
@@ -45,8 +45,8 @@
 								imageUrl={nft?.imageUrl}
 								shadow="inset"
 								size="cover"
-								testId={`${testId}-image-${index}`}
 								styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+								testId={`${testId}-image-${index}`}
 							/>
 						</div>
 					{/if}
