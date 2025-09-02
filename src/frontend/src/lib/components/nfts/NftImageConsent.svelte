@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
-	import type { Nft } from '$lib/types/nft';
-	import Button from '$lib/components/ui/Button.svelte';
-	import IconShieldHalftone from '$lib/components/icons/IconShieldHalftone.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
+	import IconShieldHalftone from '$lib/components/icons/IconShieldHalftone.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Nft } from '$lib/types/nft';
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	interface Props {
 		nft?: Nft;
@@ -43,10 +43,10 @@
 {:else}
 	<div
 		class="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 bg-secondary-alt text-center"
-		class:rounded-xl={type !== 'hero-banner'}
-		class:rounded-t-xl={type === 'hero-banner'}
 		class:animate-pulse={isLoading}
 		class:bg-disabled-alt={isLoading}
+		class:rounded-t-xl={type === 'hero-banner'}
+		class:rounded-xl={type !== 'hero-banner'}
 	>
 		{#if showMessage && !isLoading}
 			<span class="text-tertiary"><IconShieldHalftone /></span>
@@ -57,8 +57,8 @@
 			>
 			<span
 				class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100"
-				class:lg:opacity-0={type === 'card'}
 				class:lg:max-h-0={type === 'card'}
+				class:lg:opacity-0={type === 'card'}
 			>
 				<Button
 					colorStyle="secondary-light"
@@ -66,8 +66,8 @@
 						e.preventDefault();
 						handleConsent();
 					}}
-					styleClass="py-1 rounded-md"
 					paddingSmall
+					styleClass="py-1 rounded-md"
 				>
 					{$i18n.nfts.text.review_button}
 				</Button>

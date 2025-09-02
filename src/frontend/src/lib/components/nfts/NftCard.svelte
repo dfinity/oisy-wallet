@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 
 	interface Props {
 		nft: Nft;
@@ -35,8 +35,8 @@
 					imageUrl={nft?.imageUrl}
 					shadow="inset"
 					size="cover"
-					testId={`${testId}-image`}
 					styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+					testId={`${testId}-image`}
 				/>
 			</div>
 		</NftImageConsent>
