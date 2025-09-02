@@ -7,13 +7,13 @@
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { parseNftId } from '$lib/validation/nft.validation';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	const [networkId, collectionId, nftId] = $derived([
 		page.params.networkId,
@@ -57,6 +57,6 @@
 	});
 </script>
 
-<NftHero {token} {nft} />
+<NftHero {nft} {token} />
 
 <NftDescription {nft} />
