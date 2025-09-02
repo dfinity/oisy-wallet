@@ -13,7 +13,9 @@ export type Erc721Token = Erc721Contract &
 		allowExternalContentSource?: boolean;
 	};
 
-export type RequiredErc721Token = RequiredToken<Omit<Erc721Token, 'section' | 'allowExternalContentSource'>>;
+export type RequiredErc721Token = RequiredToken<
+	Omit<Erc721Token, 'section' | 'allowExternalContentSource'>
+>;
 
 export type Erc721ContractAddress = ContractAddress;
 export type Erc721Contract = Erc721ContractAddress;

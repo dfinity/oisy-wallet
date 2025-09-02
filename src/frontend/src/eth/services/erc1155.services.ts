@@ -74,50 +74,58 @@ const loadCustomTokensWithMetadata = async (
 				(customToken): customToken is CustomToken & { token: { Erc1155: ErcToken } } =>
 					'Erc1155' in customToken.token
 			)
-			.map(async ({ token, enabled, version: versionNullable, section: sectionNullable, allow_external_content_source: allowExternalContentSourceNullable }) => {
-				const version = fromNullable(versionNullable);
-				const section = fromNullable(sectionNullable);
-				const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
-				const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+			.map(
+				async ({
+					token,
+					enabled,
+					version: versionNullable,
+					section: sectionNullable,
+					allow_external_content_source: allowExternalContentSourceNullable
+				}) => {
+					const version = fromNullable(versionNullable);
+					const section = fromNullable(sectionNullable);
+					const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+					const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
-				const {
-					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
-				} = token;
+					const {
+						Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
+					} = token;
 
-				const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
-					({ chainId }) => tokenChainId === chainId
-				);
+					const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
+						({ chainId }) => tokenChainId === chainId
+					);
 
-				// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
-				assertNonNullish(
-					network,
-					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
-				);
-
-				const metadata = await infuraErc1155Providers(network.id).metadata({
-					address: tokenAddress
-				});
-
-				return {
-					...{
-						id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
-						name: tokenAddress,
-						address: tokenAddress,
+					// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
+					assertNonNullish(
 						network,
-						symbol: tokenAddress,
-						decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-						standard: 'erc1155' as const,
-						category: 'custom' as const,
-						enabled,
-						version,
-						...(nonNullish(mappedSection) && {
-							section: mappedSection
-						}),
-						allowExternalContentSource
-					},
-					...metadata
-				};
-			});
+						`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
+					);
+
+					const metadata = await infuraErc1155Providers(network.id).metadata({
+						address: tokenAddress
+					});
+
+					return {
+						...{
+							id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+							name: tokenAddress,
+							address: tokenAddress,
+							network,
+							symbol: tokenAddress,
+							decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
+							standard: 'erc1155' as const,
+							category: 'custom' as const,
+							enabled,
+							version,
+							...(nonNullish(mappedSection) && {
+								section: mappedSection
+							}),
+							allowExternalContentSource
+						},
+						...metadata
+					};
+				}
+			);
 
 		return Promise.all(customTokenPromises);
 	};

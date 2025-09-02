@@ -10,10 +10,12 @@ export type Erc1155Token = Erc1155Contract &
 		network: EthereumNetwork;
 		standard: Erc1155Standard;
 		section?: CustomTokenSection;
-	allowExternalContentSource?: boolean;
+		allowExternalContentSource?: boolean;
 	};
 
-export type RequiredErc1155Token = RequiredToken<Omit<Erc1155Token, 'section' | 'allowExternalContentSource'>>;
+export type RequiredErc1155Token = RequiredToken<
+	Omit<Erc1155Token, 'section' | 'allowExternalContentSource'>
+>;
 
 export type Erc1155ContractAddress = ContractAddress;
 export type Erc1155Contract = Erc1155ContractAddress;

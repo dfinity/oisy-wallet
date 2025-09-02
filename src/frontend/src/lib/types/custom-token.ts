@@ -32,6 +32,9 @@ export type SaveCustomTokenWithKey = UserTokenState &
 		| TokenVariant<'SplDevnet' | 'SplMainnet', SplSaveCustomToken>
 	);
 
-export type CustomToken<T extends Token> = TokenToggleable<T> & { section?: CustomTokenSection, allowExternalContentSource?: boolean };
+export type CustomToken<T extends Token> = TokenToggleable<T> & {
+	section?: CustomTokenSection;
+	allowExternalContentSource?: boolean;
+};
 
 export type LoadCustomTokenParams = QueryAndUpdateRequestParams & { useCache?: boolean };
