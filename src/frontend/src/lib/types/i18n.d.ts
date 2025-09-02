@@ -39,7 +39,7 @@ interface I18nCore {
 		language: string;
 		currency: string;
 	};
-	info: { test_banner: string };
+	info: { test_banner: string; test_banner_beta: string };
 	alt: {
 		logo: string;
 		go_to_home: string;
@@ -109,7 +109,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
-	warning: { not_signed_in: string; session_expired: string };
+	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
 		invalid_pouh_credential: string;
@@ -887,13 +887,22 @@ interface I18nNfts {
 		collections: string;
 		all_assets: string;
 		address_copied: string;
+		spam: string;
+		not_spam: string;
+		hide: string;
+		unhide: string;
 		open_explorer: string;
-		img_consent_disabled: string;
-		img_consent_none: string;
-		review_button: string;
 		collection_name: string;
 		media_urls: string;
 		display_preference: string;
+		media_enabled: string;
+		media_disabled: string;
+		enable_media: string;
+		disable_media: string;
+		open_in_new_tab: string;
+		review_title: string;
+		review_description: string;
+		learn_more: string;
 	};
 	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
@@ -1229,6 +1238,7 @@ interface I18nAgreements {
 		i_have_accepted_updated: string;
 		accept_and_continue: string;
 	};
+	error: { cannot_update_user_agreements: string };
 }
 
 interface I18nLicense_agreement {
