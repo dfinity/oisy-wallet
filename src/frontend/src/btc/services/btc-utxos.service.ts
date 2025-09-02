@@ -3,14 +3,18 @@ import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-t
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
-import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getPendingTransactionUtxoTxIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddress } from '$lib/types/address';
+import type { NetworkId } from '$lib/types/network';
 import type { Amount } from '$lib/types/send';
-import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import {
+	mapBitcoinNetworkIdToMinterCanisterId,
+	mapBitcoinNetworkToNetworkId,
+	mapToSignerBitcoinNetwork
+} from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { isNullish } from '@dfinity/utils';
@@ -32,7 +36,8 @@ export const prepareBtcSend = async ({
 	amount,
 	source
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
-	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
+	const networkId: NetworkId = mapBitcoinNetworkToNetworkId(network);
+	const bitcoinCanisterId = mapBitcoinNetworkIdToMinterCanisterId(networkId);
 
 	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
@@ -40,7 +45,7 @@ export const prepareBtcSend = async ({
 	// It is very important that the pending transactions are updated before validating the UTXOs
 	await loadBtcPendingSentTransactions({
 		identity,
-		networkId: mapBitcoinNetworkToNetworkId(network), // we want to avoid having to pass redundant data to the function
+		networkId,
 		address: source
 	});
 	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
