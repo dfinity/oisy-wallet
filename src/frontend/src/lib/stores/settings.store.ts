@@ -17,4 +17,4 @@ export const privacyModeStore = initStorageStore<SettingsData>({
 export const showSpamStore = initStorageStore<SettingsData>({
 	key: 'show-spam',
 	defaultValue: { enabled: false }
-})
+});

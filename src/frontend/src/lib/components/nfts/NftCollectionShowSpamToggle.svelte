@@ -6,7 +6,7 @@
 
 	let checked = $derived($showSpam);
 
-	const toggleShow = () => showSpamStore.set({key: 'show-spam', value: { enabled: !checked }})
+	const toggleShow = () => showSpamStore.set({ key: 'show-spam', value: { enabled: !checked } });
 </script>
 
 <Toggle ariaLabel={$i18n.nfts.text.show_spam} bind:checked on:nnsToggle={toggleShow} />
