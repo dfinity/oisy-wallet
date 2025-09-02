@@ -15,6 +15,11 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import Badge from '$lib/components/ui/Badge.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 	interface Props {
 		collection?: NftCollection;
@@ -22,6 +27,14 @@
 	}
 
 	const { collection, nfts }: Props = $props();
+
+	const token = $derived(
+		findNonFungibleToken({
+			tokens: $nonFungibleTokens,
+			address: collection.address,
+			networkId: collection.network.id
+		})
+	);
 
 	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
 </script>
@@ -35,14 +48,25 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(collection)}
-			<div class="my-3 flex">
+			<div class="my-3 flex items-center gap-3">
 				<h1 class="truncate">
 					{collection.name}
 				</h1>
 
-				<div class="ml-auto">
-					<NftCollectionActionButtons {collection} />
-				</div>
+				{#if nonNullish(token)}
+					{#if token.section === CustomTokenSection.HIDDEN}
+						<Badge variant="disabled" width="w-fit" styleClass="pl-1 pr-2 ">
+							<div class="flex gap-1 items-center">
+								<IconEyeOff size="18" />
+								{$i18n.nfts.text.hidden}
+							</div>
+						</Badge>
+					{/if}
+
+					<div class="ml-auto">
+						<NftCollectionActionButtons {token} />
+					</div>
+				{/if}
 			</div>
 		{:else}
 			<span class="block max-w-40">

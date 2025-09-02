@@ -892,6 +892,7 @@ interface I18nNfts {
 		not_spam: string;
 		hide: string;
 		unhide: string;
+		hidden: string;
 	};
 	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
