@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 	import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
@@ -32,13 +32,13 @@
 			if (token.standard === 'erc721') {
 				await saveCustomErc721Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, enabled: true, section }]
+					tokens: [{ ...token, enabled: true, section, ...(section === CustomTokenSection.SPAM && {allowExternalContentSource: false}) }]
 				});
 			}
 			if (token.standard === 'erc1155') {
 				await saveCustomErc1155Token({
 					identity: $authIdentity,
-					tokens: [{ ...token, enabled: true, section }]
+					tokens: [{ ...token, enabled: true, section, ...(section === CustomTokenSection.SPAM && {allowExternalContentSource: false}) }]
 				});
 			}
 		}
