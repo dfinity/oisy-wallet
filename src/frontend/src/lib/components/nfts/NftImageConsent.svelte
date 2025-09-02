@@ -18,19 +18,18 @@
 
 	const { nft, children, showMessage = true, type }: Props = $props();
 
-	const hasConsent = $derived(
+	const hasConsent: boolean | undefined = $derived(
 		nonNullish(nft)
-			? (getAllowMediaForNft({
+			? getAllowMediaForNft({
 					tokens: $nonFungibleTokens,
 					networkId: nft.collection.network.id,
 					address: nft.collection.address
-				}) ?? false)
+				})
 			: false
 	);
 
 	const handleConsent = () => {
 		if (nonNullish(nft)) {
-			//hasConsent = true;
 			modalStore.openNftImageConsent({ id: Symbol('NftImageConsentModal'), data: nft });
 		}
 	};
@@ -38,7 +37,9 @@
 	const isLoading = $derived(isNullish(nft));
 </script>
 
-{#if hasConsent}
+{nonNullish(hasConsent) ? (hasConsent ? 'true' : 'false') : 'undefined'}
+
+{#if nonNullish(hasConsent) && hasConsent}
 	{@render children()}
 {:else}
 	<div
