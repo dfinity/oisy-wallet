@@ -1,3 +1,4 @@
+import { isBitcoinNetworkRegtest, isBitcoinNetworkTestnet } from '$btc/utils/network.utils';
 import {
 	BLOCKSTREAM_API_URL,
 	BLOCKSTREAM_REGTEST_API_URL,
@@ -28,14 +29,11 @@ const fetchBlockstreamApi = async <T>({
 	endpointPath: string;
 	bitcoinNetwork: BitcoinNetwork;
 }): Promise<T> => {
-	let baseUrl;
-	if (bitcoinNetwork === 'testnet') {
-		baseUrl = BLOCKSTREAM_TESTNET_API_URL;
-	} else if (bitcoinNetwork === 'regtest') {
-		baseUrl = BLOCKSTREAM_REGTEST_API_URL;
-	} else {
-		baseUrl = BLOCKSTREAM_API_URL;
-	}
+	const baseUrl = isBitcoinNetworkTestnet(bitcoinNetwork)
+		? BLOCKSTREAM_TESTNET_API_URL
+		: isBitcoinNetworkRegtest(bitcoinNetwork)
+			? BLOCKSTREAM_REGTEST_API_URL
+			: BLOCKSTREAM_API_URL;
 
 	const response = await fetch(`${baseUrl}/${endpointPath}`);
 

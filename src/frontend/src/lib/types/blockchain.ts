@@ -1,4 +1,5 @@
 import type { BtcAddress } from '$lib/types/address';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 
 interface SpendingOutpoint {
 	tx_index: number;
@@ -69,4 +70,5 @@ export interface BitcoinAddressData {
 
 export interface BlockchainBtcAddressDataParams {
 	btcAddress: BtcAddress;
+	bitcoinNetwork: BitcoinNetwork;
 }

@@ -84,7 +84,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		bitcoinNetwork: BitcoinNetwork;
 	}): Promise<CertifiedData<BtcTransactionUi>[]> {
 		try {
-			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
+			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress, bitcoinNetwork });
 
 			const latestBitcoinBlockHeight = await btcLatestBlockHeight({ bitcoinNetwork });
 
