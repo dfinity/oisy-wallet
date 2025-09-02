@@ -46,7 +46,7 @@ describe('NftImageConsent', () => {
 		expect(btn).toBeInTheDocument();
 	});
 
-	it('should render the review consent with a different text when hasConsent is false', async () => {
+	it('should render the review consent with a different text when hasConsent is false', () => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(false);
 
 		const { getByRole, getByText } = render(NftImageConsent, {
