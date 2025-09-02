@@ -12,9 +12,7 @@
 		erc1155CustomTokensInitialized,
 		erc1155CustomTokensNotInitialized
 	} from '$eth/derived/erc1155.derived';
-	import {
-		erc20UserTokensNotInitialized
-	} from '$eth/derived/erc20.derived';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import {
 		erc721CustomTokensInitialized,
 		erc721CustomTokensNotInitialized
