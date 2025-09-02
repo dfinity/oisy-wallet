@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import type { Nft, NftCollection } from '$lib/types/nft';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
+	import type { Nft, NftCollection } from '$lib/types/nft';
 	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import {
 		findNonFungibleToken,
