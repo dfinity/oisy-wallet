@@ -1045,6 +1045,7 @@
 			"not_spam": "",
 			"hide": "",
 			"unhide": "",
+			"hidden": "",
 			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru",
 			"collection_name": "",
 			"media_urls": "",
