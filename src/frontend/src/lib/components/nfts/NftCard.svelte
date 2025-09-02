@@ -5,14 +5,16 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 
 	interface Props {
 		nft: Nft;
 		testId?: string;
 		disabled?: boolean;
+		hidden?: boolean;
 	}
 
-	let { nft, testId, disabled }: Props = $props();
+	let { nft, testId, disabled, hidden }: Props = $props();
 </script>
 
 <a
@@ -35,6 +37,12 @@
 			styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
 			testId={`${testId}-image`}
 		/>
+
+		{#if hidden}
+			<div class="absolute left-2 top-2 invert dark:invert-0">
+				<IconEyeOff size="24" />
+			</div>
+		{/if}
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
 			{#if nonNullish(nft.balance)}
