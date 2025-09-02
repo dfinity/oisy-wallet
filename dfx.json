@@ -305,6 +305,55 @@
 				}
 			}
 		},
+		"testicp_ledger": {
+			"type": "custom",
+			"build": "scripts/build.testicp_ledger.sh",
+			"candid": "target/ic/testicp_ledger.did",
+			"wasm": "target/ic/testicp_ledger.wasm",
+			"specified_id": "xafvr-biaaa-aaaai-aql5q-cai",
+			"init_arg_file": "target/ic/testicp_ledger.args.did",
+			"remote": {
+				"id": {
+					"test_be_1": "xafvr-biaaa-aaaai-aql5q-cai",
+					"test_fe_1": "xafvr-biaaa-aaaai-aql5q-cai",
+					"test_fe_2": "xafvr-biaaa-aaaai-aql5q-cai",
+					"test_fe_3": "xafvr-biaaa-aaaai-aql5q-cai",
+					"test_fe_4": "xafvr-biaaa-aaaai-aql5q-cai",
+					"test_fe_5": "xafvr-biaaa-aaaai-aql5q-cai",
+					"test_fe_6": "xafvr-biaaa-aaaai-aql5q-cai",
+					"audit": "xafvr-biaaa-aaaai-aql5q-cai",
+					"staging": "xafvr-biaaa-aaaai-aql5q-cai",
+					"beta": "xafvr-biaaa-aaaai-aql5q-cai",
+					"ic": "xafvr-biaaa-aaaai-aql5q-cai",
+					"e2e": "xafvr-biaaa-aaaai-aql5q-cai"
+				}
+			}
+		},
+		"testicp_index": {
+			"dependencies": ["testicp_ledger"],
+			"type": "custom",
+			"build": "scripts/build.testicp_index.sh",
+			"candid": "target/ic/testicp_index.did",
+			"wasm": "target/ic/testicp_index.wasm",
+			"init_arg_file": "target/ic/testicp_index.args.did",
+			"specified_id": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+			"remote": {
+				"id": {
+					"test_be_1": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"test_fe_1": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"test_fe_2": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"test_fe_3": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"test_fe_4": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"test_fe_5": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"test_fe_6": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"audit": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"staging": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"beta": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"ic": "qcuy6-bqaaa-aaaai-aqmqq-cai",
+					"e2e": "qcuy6-bqaaa-aaaai-aqmqq-cai"
+				}
+			}
+		},
 		"ckbtc_minter": {
 			"type": "custom",
 			"build": "scripts/build.ckbtc_minter.sh",
