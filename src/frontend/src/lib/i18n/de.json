@@ -1045,7 +1045,7 @@
 			"not_spam": "Kein Spam",
 			"hide": "Verstecken",
 			"unhide": "Anzeigen",
-            "hidden": "Versteckt",
+			"hidden": "Versteckt",
 			"open_explorer": "Öffne diesen Contract im Blockchain Explorer",
 			"collection_name": "Kollektionsname",
 			"media_urls": "Medien URLs",
