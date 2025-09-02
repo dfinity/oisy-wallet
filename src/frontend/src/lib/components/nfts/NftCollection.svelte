@@ -11,7 +11,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Nft, NftCollection } from '$lib/types/nft';
+	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	const [collectionId, networkId] = $derived([page.params.collectionId, page.params.networkId]);
 
@@ -22,6 +24,14 @@
 	);
 
 	const collection: NftCollection | undefined = $derived(collectionNfts?.[0]?.collection);
+
+	const token: NonFungibleToken | undefined = $derived(
+		findNonFungibleToken({
+			tokens: $nonFungibleTokens,
+			address: collection?.address,
+			networkId: collection?.network.id
+		})
+	);
 
 	// redirect to assets page if collection cant be loaded within 10s
 	let timeout: NodeJS.Timeout | undefined = $state();
@@ -42,7 +52,7 @@
 	});
 </script>
 
-<NftCollectionHero {collection} nfts={collectionNfts} />
+<NftCollectionHero {token} nfts={collectionNfts} />
 
 <div class="mt-4 grid grid-cols-3 gap-3 gap-y-4 py-4">
 	{#if collectionNfts.length > 0}

@@ -11,30 +11,20 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Nft, NftCollection } from '$lib/types/nft';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 	interface Props {
-		collection?: NftCollection;
+		token?: NonFungibleToken;
 		nfts: Nft[];
 	}
 
-	const { collection, nfts }: Props = $props();
-
-	const token = $derived(
-		findNonFungibleToken({
-			tokens: $nonFungibleTokens,
-			address: collection.address,
-			networkId: collection.network.id
-		})
-	);
+	const { token, nfts }: Props = $props();
 
 	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
 </script>
@@ -47,26 +37,24 @@
 	<div class="bg-primary p-4">
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
-		{#if nonNullish(collection)}
+		{#if nonNullish(token)}
 			<div class="my-3 flex items-center gap-3">
 				<h1 class="truncate">
-					{collection.name}
+					{token.name}
 				</h1>
 
-				{#if nonNullish(token)}
-					{#if token.section === CustomTokenSection.HIDDEN}
-						<Badge variant="disabled" width="w-fit" styleClass="pl-1 pr-2 ">
-							<div class="flex gap-1 items-center">
-								<IconEyeOff size="18" />
-								{$i18n.nfts.text.hidden}
-							</div>
-						</Badge>
-					{/if}
-
-					<div class="ml-auto">
-						<NftCollectionActionButtons {token} />
-					</div>
+				{#if token.section === CustomTokenSection.HIDDEN}
+					<Badge variant="disabled" width="w-fit" styleClass="pl-1 pr-2 ">
+						<div class="flex gap-1 items-center">
+							<IconEyeOff size="18" />
+							{$i18n.nfts.text.hidden}
+						</div>
+					</Badge>
 				{/if}
+
+				<div class="ml-auto">
+					<NftCollectionActionButtons {token} />
+				</div>
 			</div>
 		{:else}
 			<span class="block max-w-40">
@@ -78,17 +66,17 @@
 			<ListItem
 				><span>{$i18n.nfts.text.collection_address}</span>
 
-				{#if nonNullish(collection)}
+				{#if nonNullish(token)}
 					<span class="flex items-center">
-						<output>{shortenWithMiddleEllipsis({ text: collection.address })}</output>
+						<output>{shortenWithMiddleEllipsis({ text: token.address })}</output>
 						<AddressActions
-							copyAddress={collection.address}
+							copyAddress={token.address}
 							copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-								$address: collection.address
+								$address: token.address
 							})}
 							externalLink={getContractExplorerUrl({
-								network: collection.network,
-								contractAddress: collection.address
+								network: token.network,
+								contractAddress: token.address
 							})}
 							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
 						/>
@@ -101,8 +89,8 @@
 			</ListItem>
 			<ListItem>
 				<span>{$i18n.networks.network}</span>
-				{#if nonNullish(collection)}
-					<NetworkWithLogo network={collection.network} />
+				{#if nonNullish(token)}
+					<NetworkWithLogo network={token.network} />
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />
@@ -111,8 +99,8 @@
 			</ListItem>
 			<ListItem>
 				<span>{$i18n.nfts.text.token_standard}</span>
-				{#if nonNullish(collection)}
-					<span class="uppercase">{collection.standard}</span>
+				{#if nonNullish(token)}
+					<span class="uppercase">{token.standard}</span>
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />
