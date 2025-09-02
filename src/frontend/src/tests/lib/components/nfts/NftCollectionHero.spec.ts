@@ -1,14 +1,17 @@
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
+import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
-import type { NonFungibleToken } from '$lib/types/nft';
 
 describe('NftCollectionHero', () => {
-	const mockToken: NonFungibleToken = {...AZUKI_ELEMENTAL_BEANS_TOKEN, network: POLYGON_MAINNET_NETWORK}
+	const mockToken: NonFungibleToken = {
+		...AZUKI_ELEMENTAL_BEANS_TOKEN,
+		network: POLYGON_MAINNET_NETWORK
+	};
 
 	it('should render the collection data', () => {
 		const { getByText } = render(NftCollectionHero, {
