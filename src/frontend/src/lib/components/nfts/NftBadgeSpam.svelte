@@ -1,7 +1,7 @@
-<script>
-	import { NFT_SPAM_BADGE } from '$lib/constants/test-ids.constants.js';
+<script lang="ts">
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import { NFT_SPAM_BADGE } from '$lib/constants/test-ids.constants.js';
 	import { i18n } from '$lib/stores/i18n.store.js';
 </script>
 

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants.js';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
