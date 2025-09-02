@@ -22,6 +22,7 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { assertNonNullish } from '@dfinity/utils';
 
 describe('nfts.utils', () => {
 	const erc721Tokens: Erc721CustomToken[] = [
@@ -800,18 +801,24 @@ describe('nfts.utils', () => {
 	});
 
 	describe('getAllowMediaForNft', () => {
-		const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
+		const tokens = [
+			{ ...AZUKI_ELEMENTAL_BEANS_TOKEN, allowExternalContentSource: false },
+			{ ...DE_GODS_TOKEN, allowExternalContentSource: false }
+		] as Erc721CustomToken[];
 
 		it('should correctly return the allow media prop for an nft contract address', () => {
 			const params = {
 				tokens,
-				networkId: ETHEREUM_NETWORK.id,
+				networkId: AZUKI_ELEMENTAL_BEANS_TOKEN.network.id,
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address
 			};
 			const expected: NonFungibleToken | undefined = findNonFungibleToken(params);
+
+			assertNonNullish(expected);
+
 			const result = getAllowMediaForNft(params);
 
-			expect(result).toEqual(expected?.allowMediaUrls);
+			expect(result).toEqual(expected?.allowExternalContentSource);
 		});
 
 		it('should fallback to false if the nft cant be found', () => {
