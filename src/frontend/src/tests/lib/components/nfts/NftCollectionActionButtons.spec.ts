@@ -11,6 +11,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
@@ -81,7 +82,32 @@ describe('NftCollectionActionButtons', () => {
 		});
 	});
 
-	it('should save the token on button click', async () => {
+	it('should save the token on hide button click', async () => {
+		const { container } = render(NftCollectionActionButtons, {
+			token: mockToken
+		});
+
+		await waitFor(() => {
+			const hideButton: HTMLButtonElement | null = container.querySelector(hideButtonSelector);
+
+			expect(hideButton).toBeInTheDocument();
+
+			hideButton?.click();
+
+			expect(erc721CustomTokensSpy).toHaveBeenCalledWith({
+				tokens: [
+					{
+						...mockToken,
+						enabled: true,
+						section: CustomTokenSection.HIDDEN
+					}
+				],
+				identity: mockIdentity
+			});
+		});
+	});
+
+	it('should set allowExternalContentSource to false on spam button click', async () => {
 		const { container } = render(NftCollectionActionButtons, {
 			token: mockToken
 		});
@@ -93,7 +119,17 @@ describe('NftCollectionActionButtons', () => {
 
 			spamButton?.click();
 
-			expect(erc721CustomTokensSpy).toHaveBeenCalled();
+			expect(erc721CustomTokensSpy).toHaveBeenCalledWith({
+				tokens: [
+					{
+						...mockToken,
+						enabled: true,
+						section: CustomTokenSection.SPAM,
+						allowExternalContentSource: false
+					}
+				],
+				identity: mockIdentity
+			});
 		});
 	});
 });
