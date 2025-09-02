@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
@@ -12,9 +13,10 @@
 		testId?: string;
 		disabled?: boolean;
 		hidden?: boolean;
+		spam?: boolean;
 	}
 
-	let { nft, testId, disabled, hidden }: Props = $props();
+	let { nft, testId, disabled, hidden, spam }: Props = $props();
 </script>
 
 <a
@@ -41,6 +43,12 @@
 		{#if hidden}
 			<div class="absolute left-2 top-2 invert dark:invert-0">
 				<IconEyeOff size="24" />
+			</div>
+		{/if}
+
+		{#if spam}
+			<div class="absolute left-2 top-2 text-warning-primary">
+				<IconAlertOctagon size="24" />
 			</div>
 		{/if}
 
