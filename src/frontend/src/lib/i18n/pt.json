@@ -1044,7 +1044,8 @@
 			"spam": "",
 			"not_spam": "",
 			"hide": "",
-			"unhide": ""
+			"unhide": "",
+			"hidden": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",
