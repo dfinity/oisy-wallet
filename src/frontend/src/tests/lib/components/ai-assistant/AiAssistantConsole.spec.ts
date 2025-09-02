@@ -51,6 +51,21 @@ describe('AiAssistantConsole', () => {
 		});
 	});
 
+	it('calls nullishSignOut if no identity available', async () => {
+		const { getByTestId, getByPlaceholderText } = render(AiAssistantConsole);
+
+		const input = getByPlaceholderText(en.ai_assistant.text.send_message_input_placeholder);
+		const button = getByTestId(AI_ASSISTANT_SEND_MESSAGE_BUTTON);
+
+		await fireEvent.input(input, { target: { value: newMessageContent } });
+
+		await waitFor(async () => {
+			await fireEvent.click(button);
+
+			expect(nullishSignOut).toHaveBeenCalledOnce();
+		});
+	});
+
 	it('sends sends message correctly', async () => {
 		mockAuthStore();
 
@@ -66,23 +81,6 @@ describe('AiAssistantConsole', () => {
 
 			expect(getByText(newMessageContent)).toBeInTheDocument();
 			expect(getByText(responseContent)).toBeInTheDocument();
-		});
-	});
-
-	it('calls nullishSignOut if no identity available', async () => {
-		vi.resetAllMocks();
-
-		const { getByTestId, getByPlaceholderText } = render(AiAssistantConsole);
-
-		const input = getByPlaceholderText(en.ai_assistant.text.send_message_input_placeholder);
-		const button = getByTestId(AI_ASSISTANT_SEND_MESSAGE_BUTTON);
-
-		await fireEvent.input(input, { target: { value: newMessageContent } });
-
-		await waitFor(async () => {
-			await fireEvent.click(button);
-
-			expect(nullishSignOut).toHaveBeenCalledOnce();
 		});
 	});
 });
