@@ -39,7 +39,7 @@ interface I18nCore {
 		language: string;
 		currency: string;
 	};
-	info: { test_banner: string };
+	info: { test_banner: string; test_banner_beta: string };
 	alt: {
 		logo: string;
 		go_to_home: string;
@@ -109,7 +109,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
-	warning: { not_signed_in: string; session_expired: string };
+	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
 		invalid_pouh_credential: string;
@@ -391,6 +391,7 @@ interface I18nInit {
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;
+		waiting_for_allowed_cycles_aborted: string;
 		btc_wallet_error: string;
 		sol_wallet_error: string;
 	};
@@ -888,6 +889,10 @@ interface I18nNfts {
 		all_assets: string;
 		address_copied: string;
 		open_explorer: string;
+		spam: string;
+		not_spam: string;
+		hide: string;
+		unhide: string;
 	};
 	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
 }
@@ -1223,6 +1228,7 @@ interface I18nAgreements {
 		i_have_accepted_updated: string;
 		accept_and_continue: string;
 	};
+	error: { cannot_update_user_agreements: string };
 }
 
 interface I18nLicense_agreement {

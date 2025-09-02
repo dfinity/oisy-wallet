@@ -18,7 +18,7 @@
 	const handleClick = () => {
 		trackEvent({
 			name: TRACK_OPEN_AGREEMENT,
-			metadata: { type: 'licence-agreement', source: $authSignedIn ? 'app' : 'landing-page' }
+			metadata: { type: 'license-agreement', source: $authSignedIn ? 'app' : 'landing-page' }
 		});
 	};
 </script>

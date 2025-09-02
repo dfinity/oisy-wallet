@@ -37,7 +37,8 @@
 			"currency": "通貨"
 		},
 		"info": {
-			"test_banner": "テスト目的のみ！"
+			"test_banner": "テスト目的のみ！",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "$name ロゴ",
@@ -114,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
-			"session_expired": "セッションの有効期限が切れました。ログアウトされました。"
+			"session_expired": "セッションの有効期限が切れました。ログアウトされました。",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "internet identityが見つかりません",
@@ -506,6 +508,7 @@
 			"icrc_custom_token": "ICRCカスタムトークンの読み込み中にエラーが発生しました",
 			"loading_wallet_timeout": "ウォレットにはまだロードされていない初期データが必要です。もう一度お試しください。",
 			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "BTCウォレット情報の読み込み中にエラーが発生しました",
 			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました"
 		}
@@ -1038,7 +1041,11 @@
 			"collections": "コレクション",
 			"all_assets": "すべての資産",
 			"address_copied": "アドレス $address をコピーしました",
-			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く"
+			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": ""
 		},
 		"alt": {
 			"placeholder_image": "まだNFTがありません",
@@ -1487,6 +1494,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {
