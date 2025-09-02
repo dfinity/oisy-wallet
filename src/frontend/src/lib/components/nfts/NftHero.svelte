@@ -13,13 +13,14 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
-	import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
+	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -77,17 +78,11 @@
 					</h1>
 
 					{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
-						<Badge
-							styleClass="pl-1 pr-2"
-							testId={NFT_HIDDEN_BADGE}
-							variant="disabled"
-							width="w-fit"
-						>
-							<div class="flex items-center gap-1">
-								<IconEyeOff size="18" />
-								{$i18n.nfts.text.hidden}
-							</div>
-						</Badge>
+						<NftBadgeHidden />
+					{/if}
+
+					{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
+						<NftBadgeSpam />
 					{/if}
 				</div>
 			</div>
