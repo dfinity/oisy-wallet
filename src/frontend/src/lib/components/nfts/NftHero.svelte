@@ -3,7 +3,6 @@
 	import { fade } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
