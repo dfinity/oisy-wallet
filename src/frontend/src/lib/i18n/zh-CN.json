@@ -115,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "您尚未登录。请登录以继续。",
-			"session_expired": "由于会话已过期，您已被登出。"
+			"session_expired": "由于会话已过期，您已被登出。",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "没有 Internet Identity。",
@@ -507,6 +508,7 @@
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "加载 BTC 钱包信息时出错。",
 			"sol_wallet_error": "加载 SOL 钱包信息时出错。"
 		}
@@ -1039,7 +1041,23 @@
 			"collections": "合集",
 			"all_assets": "所有资产",
 			"address_copied": "地址 $address 已复制",
-			"open_explorer": "在区块链浏览器中打开此合约"
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "在区块链浏览器中打开此合约",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
@@ -1488,6 +1506,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {

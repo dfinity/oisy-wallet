@@ -54,7 +54,7 @@ export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 			$aiAssistantSystemMessage,
 
 			// Parse chat messages into LLM-compatible messages
-			...recentHistory.reduce<chat_message_v1[]>((acc, { role, data: { text, tool } }) => {
+			...recentHistory.reduce<chat_message_v1[]>((acc, { role, data: { text, tool, context } }) => {
 				if (role === 'assistant') {
 					return [
 						...acc,
@@ -71,7 +71,7 @@ export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 						...acc,
 						{
 							user: {
-								content: text
+								content: `${text}${notEmptyString(context) ? ` CONTEXT: ${context}` : ''}`
 							}
 						}
 					];

@@ -115,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
-			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta."
+			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Nessuna Internet Identity.",
@@ -507,6 +508,7 @@
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
 			"allow_signing": "Si è verificato un problema durante la configurazione del tuo wallet per la firma. Sei stato disconnesso. Se il problema persiste, contatta il supporto.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Errore durante il caricamento delle informazioni del wallet BTC.",
 			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL."
 		}
@@ -1039,7 +1041,23 @@
 			"collections": "",
 			"all_assets": "",
 			"address_copied": "",
-			"open_explorer": ""
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
@@ -1488,6 +1506,9 @@
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
 			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {
