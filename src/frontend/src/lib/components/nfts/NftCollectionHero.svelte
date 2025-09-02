@@ -38,23 +38,23 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(token)}
-			<div class="my-3 flex items-center gap-3">
-				<h1 class="truncate">
-					{token.name}
-				</h1>
+			<div class="my-3 w-full flex justify-between">
+				<div class="flex gap-3 items-center">
+					<h1 class="truncate">
+						{token.name}
+					</h1>
 
-				{#if token.section === CustomTokenSection.HIDDEN}
-					<Badge styleClass="pl-1 pr-2" variant="disabled" width="w-fit">
-						<div class="flex items-center gap-1">
-							<IconEyeOff size="18" />
-							{$i18n.nfts.text.hidden}
-						</div>
-					</Badge>
-				{/if}
-
-				<div class="ml-auto">
-					<NftCollectionActionButtons {token} />
+					{#if token.section === CustomTokenSection.HIDDEN}
+						<Badge styleClass="pl-1 pr-2" variant="disabled" width="w-fit">
+							<div class="flex items-center gap-1">
+								<IconEyeOff size="18" />
+								{$i18n.nfts.text.hidden}
+							</div>
+						</Badge>
+					{/if}
 				</div>
+
+				<NftCollectionActionButtons {token} />
 			</div>
 		{:else}
 			<span class="block max-w-40">
