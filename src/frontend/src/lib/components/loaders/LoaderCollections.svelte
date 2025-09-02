@@ -50,7 +50,13 @@
 					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
-				return areAddressesEqual({address1: tokenAddress, address2: contract.address, networkId: network.id}) && tokenChainId === network.chainId;
+				return (
+					areAddressesEqual({
+						address1: tokenAddress,
+						address2: contract.address,
+						networkId: network.id
+					}) && tokenChainId === network.chainId
+				);
 			});
 			if (nonNullish(existingToken)) {
 				return acc;
@@ -94,7 +100,13 @@
 					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
-				return areAddressesEqual({address1: tokenAddress, address2: contract.address, networkId: network.id}) && tokenChainId === network.chainId;
+				return (
+					areAddressesEqual({
+						address1: tokenAddress,
+						address2: contract.address,
+						networkId: network.id
+					}) && tokenChainId === network.chainId
+				);
 			});
 			if (nonNullish(existingToken)) {
 				return acc;
