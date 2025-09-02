@@ -15,9 +15,9 @@
 	const { checked, agreementLink, onChange, inputId, testId, isOutdated }: Props = $props();
 </script>
 
-<span class="flex items-center break-normal" style="--color-primary: var(--color-border-primary);">
+<span style="--color-primary: var(--color-border-primary);" class="flex items-center break-normal">
 	<Checkbox checked={checked ?? false} {inputId} {testId} on:nnsChange={onChange} />
-	<label for={inputId} class="mr-1 inline-block cursor-pointer break-normal">
+	<label class="mr-1 inline-block cursor-pointer break-normal" for={inputId}>
 		{#if isOutdated}
 			{$i18n.agreements.text.i_have_accepted_updated}
 		{:else}
