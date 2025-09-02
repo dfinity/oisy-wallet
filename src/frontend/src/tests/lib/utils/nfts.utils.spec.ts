@@ -821,11 +821,11 @@ describe('nfts.utils', () => {
 			expect(result).toEqual(expected?.allowExternalContentSource);
 		});
 
-		it('should fallback to false if the nft cant be found', () => {
+		it('should fallback to undefined if the nft cant be found or the consent has never been set', () => {
 			const params = { tokens, networkId: ETHEREUM_NETWORK.id, address: 'invalid address' };
 			const result = getAllowMediaForNft(params);
 
-			expect(result).toBeFalsy();
+			expect(result).toEqual(undefined);
 		});
 	});
 });
