@@ -35,11 +35,11 @@
 	onMount(() => {
 		// This call will load the pending sent transactions for the source address in the store.
 		// This data will then be used in the review step. That's why we don't wait here.
-		loadBtcPendingSentTransactions({
+		/*loadBtcPendingSentTransactions({
 			identity: $authIdentity,
 			networkId: $sendTokenNetworkId,
 			address: source
-		});
+		});*/
 	});
 </script>
 
