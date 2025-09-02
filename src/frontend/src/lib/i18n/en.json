@@ -1057,7 +1057,7 @@
 			"enable_media": "Enable media",
 			"disable_media": "Disable media",
 			"open_in_new_tab": "Open in new tab",
-			"review_title": "Review media sources for <br />\"$collectionName\"",
+			"review_title": "Review media sources for \"$collectionName\"",
 			"review_description": "Heads up! These images are from an unverified source. Enabling them could share your IP address with a third party and poses a potential security risk.",
 			"learn_more": "Learn more"
 		},
