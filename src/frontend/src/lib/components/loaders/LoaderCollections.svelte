@@ -21,6 +21,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 
 	interface Props {
 		children?: Snippet;
@@ -49,7 +50,7 @@
 					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
-				return tokenAddress === contract.address && tokenChainId === network.chainId;
+				return areAddressesEqual({address1: tokenAddress, address2: contract.address, networkId: network.id}) && tokenChainId === network.chainId;
 			});
 			if (nonNullish(existingToken)) {
 				return acc;
@@ -93,7 +94,7 @@
 					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
-				return tokenAddress === contract.address && tokenChainId === network.chainId;
+				return areAddressesEqual({address1: tokenAddress, address2: contract.address, networkId: network.id}) && tokenChainId === network.chainId;
 			});
 			if (nonNullish(existingToken)) {
 				return acc;
