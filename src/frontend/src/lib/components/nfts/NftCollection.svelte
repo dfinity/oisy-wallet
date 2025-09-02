@@ -14,6 +14,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 	const [collectionId, networkId] = $derived([page.params.collectionId, page.params.networkId]);
 
@@ -57,7 +58,7 @@
 <div class="mt-4 grid grid-cols-3 gap-3 gap-y-4 py-4">
 	{#if collectionNfts.length > 0}
 		{#each collectionNfts as nft, index (nft.id + index)}
-			<NftCard {nft} />
+			<NftCard hidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN} {nft} />
 		{/each}
 	{:else}
 		<NftCardSkeleton />
