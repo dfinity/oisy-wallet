@@ -8,12 +8,12 @@
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	const [collectionId, networkId] = $derived([page.params.collectionId, page.params.networkId]);
 
@@ -52,7 +52,7 @@
 	});
 </script>
 
-<NftCollectionHero {token} nfts={collectionNfts} />
+<NftCollectionHero nfts={collectionNfts} {token} />
 
 <div class="mt-4 grid grid-cols-3 gap-3 gap-y-4 py-4">
 	{#if collectionNfts.length > 0}
