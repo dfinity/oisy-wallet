@@ -80,7 +80,7 @@
 						<NftBadgeHidden />
 					{/if}
 
-					{#if token.section === CustomTokenSection.SPAM}
+					{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
 						<NftBadgeSpam />
 					{/if}
 				</div>
