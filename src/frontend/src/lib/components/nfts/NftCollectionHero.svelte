@@ -38,8 +38,8 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(token)}
-			<div class="my-3 w-full flex justify-between">
-				<div class="flex gap-3 items-center">
+			<div class="my-3 flex w-full justify-between">
+				<div class="flex items-center gap-3">
 					<h1 class="truncate">
 						{token.name}
 					</h1>
