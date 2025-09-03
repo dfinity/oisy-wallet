@@ -6,6 +6,7 @@
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import NftCollectionShowHiddenToggle from '$lib/components/nfts/NftCollectionShowHiddenToggle.svelte';
 	import NftCollectionShowSpamToggle from '$lib/components/nfts/NftCollectionShowSpamToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -14,7 +15,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import { emit } from '$lib/utils/events.utils';
-	import NftCollectionShowHiddenToggle from '$lib/components/nfts/NftCollectionShowHiddenToggle.svelte';
 
 	let visible = $state(false);
 
@@ -26,13 +26,13 @@
 
 	const toggleShowSpam = () => {
 		document.dispatchEvent(new CustomEvent('show-spam'));
-		emit({message: 'oisyToggleShowSpam'});
-	}
+		emit({ message: 'oisyToggleShowSpam' });
+	};
 
 	const toggleShowHidden = () => {
 		document.dispatchEvent(new CustomEvent('show-hidden'));
-		emit({message: 'oisyToggleShowHidden'});
-	}
+		emit({ message: 'oisyToggleShowHidden' });
+	};
 </script>
 
 <ButtonIcon

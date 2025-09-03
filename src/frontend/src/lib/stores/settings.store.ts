@@ -22,4 +22,4 @@ export const showSpamStore = initStorageStore<SettingsData>({
 export const showHiddenStore = initStorageStore<SettingsData>({
 	key: 'show-hidden',
 	defaultValue: { enabled: false }
-})
+});
