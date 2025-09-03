@@ -39,11 +39,11 @@
 
 			if (nonNullish(token)) {
 				if (token.section === CustomTokenSection.SPAM) {
-					spam = [...spam, collection]
+					spam = [...spam, collection];
 				} else if (token.section === CustomTokenSection.HIDDEN) {
-					hidden = [...hidden, collection]
+					hidden = [...hidden, collection];
 				} else {
-					common = [...common, collection]
+					common = [...common, collection];
 				}
 			}
 		});
