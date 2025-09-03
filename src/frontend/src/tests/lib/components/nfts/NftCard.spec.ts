@@ -1,4 +1,5 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
+import * as nftsUtils from '$lib/utils/nfts.utils';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -9,6 +10,10 @@ describe('NftCard', () => {
 	const imageSelector = `div[data-tid="${testId}-image"]`;
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
 	const balanceSelector = `span[data-tid="${testId}-balance"]`;
+
+	beforeAll(() => {
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+	});
 
 	it('should render nft with metadata', () => {
 		const { container, getByText } = render(NftCard, {
