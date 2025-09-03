@@ -31,7 +31,8 @@
 		common: commonCollections,
 		hidden: hiddenCollections,
 		spam: spamCollections
-	} = $derived.by(() => nftCollections.reduce<CollectionBuckets>(
+	} = $derived.by(() =>
+		nftCollections.reduce<CollectionBuckets>(
 			(acc, collection) => {
 				const token = findNonFungibleToken({
 					tokens: $nonFungibleTokens,
@@ -42,17 +43,18 @@
 				if (nonNullish(token)) {
 					if (token.section === CustomTokenSection.SPAM) {
 						return { ...acc, spam: [...acc.spam, collection] };
-					} if (token.section === CustomTokenSection.HIDDEN) {
+					}
+					if (token.section === CustomTokenSection.HIDDEN) {
 						return { ...acc, hidden: [...acc.hidden, collection] };
-					} 
-						return { ...acc, common: [...acc.common, collection] };
-					
+					}
+					return { ...acc, common: [...acc.common, collection] };
 				}
 
 				return acc;
 			},
 			{ common: [], hidden: [], spam: [] }
-		));
+		)
+	);
 
 	const isEmptyList = $derived.by(() => {
 		const hasNoCollections = nftCollections.length === 0;
