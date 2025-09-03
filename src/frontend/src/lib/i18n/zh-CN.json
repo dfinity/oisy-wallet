@@ -1625,7 +1625,8 @@
 			"send_message_input_placeholder": "发送消息输入占位符",
 			"send_token_succeeded": "交易完成",
 			"no_contacts_found_message": "抱歉，我无法在你的地址簿中找到相应的联系人",
-			"loading": "思考中"
+			"loading": "思考中",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "抱歉，从大语言模型中获取反馈出错",

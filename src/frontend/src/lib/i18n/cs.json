@@ -1625,7 +1625,8 @@
 			"send_message_input_placeholder": "Co chcete dělat?",
 			"send_token_succeeded": "Transakce dokončena!",
 			"no_contacts_found_message": "Omlouvám se, ale ve vašem adresáři jsem nenašel žádné vhodné kontakty.",
-			"loading": "Přemýšlím..."
+			"loading": "Přemýšlím...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "Omlouvám se, něco se pokazilo při získávání odpovědi od LLM.",

@@ -29,7 +29,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { Option } from '$lib/types/utils';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type {
+		OptionWalletConnectListener,
+		WalletConnectListener
+	} from '$lib/types/wallet-connect';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
@@ -265,6 +268,14 @@
 		}
 	};
 
+	const attachHandlers = (listener: WalletConnectListener) => {
+		listener.sessionProposal(onSessionProposal);
+
+		listener.sessionDelete(onSessionDelete);
+
+		listener.sessionRequest(onSessionRequest);
+	};
+
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);
 
@@ -272,11 +283,7 @@
 			return { result: 'error' };
 		}
 
-		listener.sessionProposal(onSessionProposal);
-
-		listener.sessionDelete(onSessionDelete);
-
-		listener.sessionRequest(onSessionRequest);
+		attachHandlers(listener);
 
 		try {
 			await listener.pair();
@@ -370,6 +377,55 @@
 
 	$: walletConnectPaired.set(nonNullish(listener));
 
+	const reconnect = async () => {
+		// If the listener is already initialized, we don't need to do anything.
+		if (nonNullish(listener)) {
+			return;
+		}
+
+		if ($loading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
+			return;
+		}
+
+		// Create listener, but DO NOT pair()
+		try {
+			listener = await initWalletConnect({
+				uri: '', // no URI – just init client
+				ethAddress: $ethAddress,
+				solAddress: $solAddressMainnet,
+				cleanSlate: false
+			});
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.wallet_connect.error.connect },
+				err
+			});
+
+			resetListener();
+
+			return;
+		}
+
+		// Reattach handlers so incoming requests work after refresh
+		attachHandlers(listener);
+
+		// Check for persisted sessions
+		const sessions = listener.getActiveSessions();
+
+		if (Object.keys(sessions).length === 0) {
+			walletConnectPaired.set(false);
+
+			await disconnectListener();
+
+			return;
+		}
+
+		// We have at least one active session – consider ourselves connected
+		walletConnectPaired.set(true);
+	};
+
+	$: ($ethAddress, $solAddressMainnet, $loading, (async () => await reconnect())());
+
 	onDestroy(() => walletConnectPaired.set(false));
 
 	const openWalletConnectAuth = () => {
@@ -382,9 +438,9 @@
 </script>
 
 {#if nonNullish(listener)}
-	<WalletConnectButton on:click={disconnect}
-		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
-	>
+	<WalletConnectButton on:click={disconnect}>
+		{$i18n.wallet_connect.text.disconnect}
+	</WalletConnectButton>
 {:else}
 	<WalletConnectButton
 		ariaLabel={$i18n.wallet_connect.text.name}
