@@ -7,6 +7,7 @@
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
 	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
+	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
@@ -109,6 +110,16 @@
 							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
 						/>
 					</span>
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
+			<ListItem>
+				<span>{$i18n.nfts.text.display_preference}</span>
+				{#if nonNullish(nft)}
+					<NftImageConsentPreference {nft} />
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />
