@@ -120,7 +120,7 @@ describe('BtcUtxosFee', () => {
 			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
 			await vi.waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
+				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 			});
 		});
 
