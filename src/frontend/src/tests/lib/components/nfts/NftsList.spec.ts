@@ -114,6 +114,77 @@ describe('NftsList', () => {
 		});
 	});
 
+	describe('display nfts', () => {
+		const commonNftListSelector = `div[data-tid="${NFT_LIST_COMMON}"]`;
+		const hiddenNftListSelector = `div[data-tid="${NFT_LIST_HIDDEN}"]`;
+		const spamNftListSelector = `div[data-tid="${NFT_LIST_SPAM}"]`;
+
+		beforeEach(() => {
+			vi.spyOn(settingsDerived, 'nftGroupByCollection', 'get').mockReturnValue(writable(false));
+		});
+
+		it('should render common nft lists', () => {
+			nftStore.addAll(mockNfts);
+
+			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+
+			const { container } = render(NftsList);
+
+			const commonNftList: HTMLDivElement | null = container.querySelector(commonNftListSelector);
+
+			expect(commonNftList).toBeInTheDocument();
+		});
+
+		it('should render hidden nft lists', () => {
+			nftStore.addAll(mockNfts);
+
+			vi.spyOn(settingsDerived, 'showHidden', 'get').mockReturnValue(writable(true));
+
+			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+				writable([
+					{ ...mockNonFungibleToken1, section: CustomTokenSection.HIDDEN },
+					{ ...mockNonFungibleToken2, section: CustomTokenSection.HIDDEN }
+				])
+			);
+
+			const { container } = render(NftsList);
+
+			const hiddenNftList: HTMLDivElement | null = container.querySelector(hiddenNftListSelector);
+
+			expect(hiddenNftList).toBeInTheDocument();
+		});
+
+		it('should render spam nft lists', () => {
+			nftStore.addAll(mockNfts);
+
+			vi.spyOn(settingsDerived, 'showSpam', 'get').mockReturnValue(writable(true));
+
+			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+				writable([
+					{ ...mockNonFungibleToken1, section: CustomTokenSection.SPAM },
+					{ ...mockNonFungibleToken2, section: CustomTokenSection.SPAM }
+				])
+			);
+
+			const { container } = render(NftsList);
+
+			const spamNftList: HTMLDivElement | null = container.querySelector(spamNftListSelector);
+
+			expect(spamNftList).toBeInTheDocument();
+		});
+	});
+
 	it('should render a placeholder if no collections', () => {
 		const { getByText } = render(NftsList);
 
