@@ -1,8 +1,12 @@
 import {
 	hideZeroBalancesStore,
+	nftGroupByCollectionStore,
+	nftSortStore,
 	privacyModeStore,
 	showHiddenStore,
-	showSpamStore
+	showSpamStore,
+	type NftSortOrder,
+	type NftSortType
 } from '$lib/stores/settings.store';
 import { derived, type Readable } from 'svelte/store';
 
@@ -29,4 +33,19 @@ export const showHidden: Readable<boolean> = derived(
 export const showSpam: Readable<boolean> = derived(
 	[showSpamStore],
 	([$showSpamStore]) => $showSpamStore.enabled
+);
+
+export const nftSortOrder: Readable<NftSortOrder> = derived(
+	[nftSortStore],
+	([$nftSortStore]) => $nftSortStore.order
+);
+
+export const nftSortType: Readable<NftSortType> = derived(
+	[nftSortStore],
+	([$nftSortStore]) => $nftSortStore.type
+);
+
+export const nftGroupByCollection: Readable<boolean> = derived(
+	[nftGroupByCollectionStore],
+	([$nftGroupByCollectionStore]) => $nftGroupByCollectionStore
 );
