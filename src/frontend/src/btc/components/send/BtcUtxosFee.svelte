@@ -62,7 +62,7 @@
 	};
 
 	const debouncedPrepareBtcSend = debounce(updatePrepareBtcSend);
-
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const startScheduler = () => {
 		// Stop existing scheduler if it exists
 		stopScheduler();
@@ -97,7 +97,9 @@
 			debouncedPrepareBtcSend();
 		}
 
+		// TODO remove this line and uncomment the line below to enable the scheduler once the to many pending transactions all isssue is fixed
 		// Start the scheduler after initial load
+		// startScheduler();
 		// startScheduler();
 	});
 
