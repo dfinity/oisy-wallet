@@ -5,10 +5,10 @@
 		times?: number;
 	}
 
-	let {times = 1}: Props = $props();
+	let { times = 1 }: Props = $props();
 </script>
 
-{#each Array.from({length: times}) as _, index (index)}
+{#each Array.from({ length: times }) as _, index (index)}
 	<div class="flex w-full flex-col">
 		<div class="mb-2.5 flex aspect-square animate-pulse rounded-xl bg-disabled-alt"></div>
 		<span class="mb-1"><SkeletonText /></span>
