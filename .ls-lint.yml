@@ -1,0 +1,18 @@
+ls:
+  .js: kebab-case
+  .ts: kebab-case
+  .d.ts: kebab-case
+
+  src/frontend/src:
+    .dir: kebab-case
+
+ignore:
+  - .dfx
+  - .git
+  - .idea
+  - .svelte-kit
+  - build
+  - node_modules
+  - target
+  - src/frontend/src/lib/ic-pub-key
+  - src/frontend/src/routes
