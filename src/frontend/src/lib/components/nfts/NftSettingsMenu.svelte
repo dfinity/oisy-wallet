@@ -25,7 +25,6 @@
 	};
 
 	const toggleShowHidden = () => {
-		document.dispatchEvent(new CustomEvent('show-hidden'));
 		emit({ message: 'oisyToggleShowHidden' });
 	};
 </script>
