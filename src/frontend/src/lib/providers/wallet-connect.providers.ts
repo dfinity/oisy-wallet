@@ -24,6 +24,7 @@ import {
 	type ErrorResponse,
 	type JsonRpcResponse
 } from '@walletconnect/jsonrpc-utils';
+import type { SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
@@ -31,12 +32,14 @@ const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 export const initWalletConnect = async ({
 	uri,
 	ethAddress,
-	solAddress
+	solAddress,
+	cleanSlate = true
 }: {
 	uri: string;
 	ethAddress: OptionEthAddress;
 	// TODO add other networks for solana
 	solAddress: OptionSolAddress;
+	cleanSlate?: boolean;
 }): Promise<WalletConnectListener> => {
 	const clearLocalStorage = () => {
 		const keys = Object.keys(localStorage).filter((key) => key.startsWith('wc@'));
@@ -70,8 +73,10 @@ export const initWalletConnect = async ({
 		await Promise.all(promises);
 	};
 
-	// Some previous sessions might have not been properly closed, so we disconnect those to have a clean state.
-	await disconnectActiveSessions();
+	if (cleanSlate) {
+		// Some previous sessions might have not been properly closed, so we disconnect those to have a clean state.
+		await disconnectActiveSessions();
+	}
 
 	const sessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
 		walletKit.on('session_proposal', callback);
@@ -175,6 +180,9 @@ export const initWalletConnect = async ({
 			response: formatJsonRpcResult(id, message)
 		});
 
+	const getActiveSessions = (): Record<string, SessionTypes.Struct> =>
+		walletKit.getActiveSessions();
+
 	return {
 		pair: () => walletKit.core.pairing.pair({ uri }),
 		approveSession,
@@ -184,6 +192,7 @@ export const initWalletConnect = async ({
 		sessionProposal,
 		sessionDelete,
 		sessionRequest,
+		getActiveSessions,
 		disconnect: async () => {
 			const disconnectPairings = async () => {
 				const pairings = walletKit.engine.signClient.core.pairing.pairings.values;
