@@ -7,9 +7,11 @@
 		title: string;
 		icon?: Snippet;
 		nfts: Nft[];
+		hidden?: boolean;
+		spam?: boolean;
 	}
 
-	let { title, icon, nfts }: Props = $props();
+	let { title, icon, nfts, hidden, spam }: Props = $props();
 </script>
 
 {#if nfts.length > 0}
@@ -20,7 +22,7 @@
 
 	<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">
 		{#each nfts as nft, index (`${String(nft.id)}-${index}`)}
-			<NftCard {nft} />
+			<NftCard {nft} {hidden} {spam} />
 		{/each}
 	</div>
 {/if}
