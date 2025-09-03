@@ -27,6 +27,12 @@
 		spam: NftCollectionUi[];
 	}
 
+	type NftBuckets = {
+		common: Nft[];
+		hidden: Nft[];
+		spam: Nft[];
+	};
+
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
 
@@ -64,11 +70,7 @@
 		spam: spamNfts,
 		hidden: hiddenNfts
 	} = $derived.by(() => {
-		const common: Nft[] = [];
-		const spam: Nft[] = [];
-		const hidden: Nft[] = [];
-
-		nfts.forEach((nft) => {
+		return nfts.reduce<NftBuckets>((acc, nft) => {
 			const token = findNonFungibleToken({
 				tokens: $nonFungibleTokens,
 				address: nft.collection.address,
@@ -77,16 +79,16 @@
 
 			if (nonNullish(token)) {
 				if (token.section === CustomTokenSection.SPAM) {
-					spam.push(nft);
+					return { ...acc, spam: [...acc.spam, nft]}
 				} else if (token.section === CustomTokenSection.HIDDEN) {
-					hidden.push(nft);
+					return { ...acc, hidden: [...acc.hidden, nft]}
 				} else {
-					common.push(nft);
+					return { ...acc, common: [...acc.common, nft]}
 				}
 			}
-		});
 
-		return { common, spam, hidden };
+			return acc;
+		}, {common: [], hidden: [], spam: []})
 	});
 
 	const isEmptyList = $derived.by(() => {
