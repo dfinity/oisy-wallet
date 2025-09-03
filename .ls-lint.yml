@@ -1,9 +1,13 @@
 ls:
   .js: kebab-case
   .ts: kebab-case
+  .svelte: PascalCase
 
   src/frontend/src:
     .dir: kebab-case
+    .js: kebab-case
+    .ts: kebab-case
+    .svelte: PascalCase
 
 ignore:
   - .dfx
