@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { IconClose } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import AiAssistantActionButton from '$lib/components/ai-assistant/AiAssistantActionButton.svelte';
 	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
@@ -31,6 +31,8 @@
 	let userInput = $state('');
 	let loading = $state(false);
 	let disabled = $derived(loading || isNullishOrEmpty(userInput));
+	let messagesContainer: HTMLDivElement | undefined;
+	let shouldScrollMessagesContainer = $state(true);
 
 	let messagesToDisplay = $derived(
 		$aiAssistantChatMessages.reduce<ChatMessage[]>(
@@ -38,6 +40,29 @@
 			[]
 		)
 	);
+
+	const handleMessagesContainerScroll = () => {
+		if (isNullish(messagesContainer)) {
+			return;
+		}
+
+		// 10 - a small tolerance in scroll measurements
+		shouldScrollMessagesContainer =
+			messagesContainer.scrollTop + messagesContainer.clientHeight >=
+			messagesContainer.scrollHeight - 10;
+	};
+
+	$effect(() => {
+		// add messages as a dependency to trigger the scroll when new content arrives
+		messagesToDisplay;
+
+		if (nonNullish(messagesContainer) && shouldScrollMessagesContainer) {
+			messagesContainer.scrollTo({
+				top: messagesContainer.scrollHeight,
+				behavior: 'smooth'
+			});
+		}
+	});
 
 	const sendMessage = async ({
 		messageText,
@@ -59,6 +84,7 @@
 		const requestStartTimestamp = Date.now();
 
 		try {
+			shouldScrollMessagesContainer = true;
 			loading = true;
 
 			trackEvent({ name: AI_ASSISTANT_MESSAGE_SENT });
@@ -140,7 +166,11 @@
 		</button>
 	</div>
 
-	<div class="h-full overflow-y-auto overflow-x-hidden px-4 py-6">
+	<div
+		bind:this={messagesContainer}
+		class="h-full overflow-y-auto overflow-x-hidden px-4 py-6"
+		onscroll={handleMessagesContainerScroll}
+	>
 		{#if !loading && messagesToDisplay.length <= 0}
 			<div in:fade>
 				<h4 class="text-brand-primary">
