@@ -8,6 +8,7 @@
 	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
@@ -19,7 +20,6 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;

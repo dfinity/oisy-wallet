@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
-	import Button from '$lib/components/ui/Button.svelte';
-	import type { Nft } from '$lib/types/nft';
 	import { nonNullish } from '@dfinity/utils';
-	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
+	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
-	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { Nft } from '$lib/types/nft';
+	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		nft?: Nft;
@@ -43,19 +43,19 @@
 		{/if}
 		<Responsive up="md">
 			<Button
-				styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
-				transparent
 				colorStyle="secondary-light"
-				onclick={openConsentModal}>{$i18n.nfts.text.review_preference}</Button
+				onclick={openConsentModal}
+				styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
+				transparent>{$i18n.nfts.text.review_preference}</Button
 			>
 		</Responsive>
 		<Responsive down="sm">
 			<ButtonIcon
-				styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2 h-auto"
-				transparent
+				ariaLabel={$i18n.nfts.text.review_preference}
 				colorStyle="secondary-light"
 				onclick={openConsentModal}
-				ariaLabel={$i18n.nfts.text.review_preference}
+				styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2 h-auto"
+				transparent
 			>
 				{#snippet icon()}
 					<IconPenLine />
