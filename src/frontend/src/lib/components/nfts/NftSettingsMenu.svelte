@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -7,19 +6,30 @@
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import NftsShowHiddenToggle from '$lib/components/nfts/NftsShowHiddenToggle.svelte';
+	import NftsShowSpamToggle from '$lib/components/nfts/NftsShowSpamToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { nftListGroupByCollection } from '$lib/derived/nfts.derived';
+	import { nftGroupByCollection } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { nftListStore } from '$lib/stores/nft-list.store';
+	import { nftGroupByCollectionStore } from '$lib/stores/settings.store';
+	import { emit } from '$lib/utils/events.utils';
 
 	let visible = $state(false);
 
 	let button = $state<HTMLButtonElement | undefined>();
 
 	const setGrouping = (grouping: boolean) => {
-		nftListStore.setGroupByCollection(grouping);
+		nftGroupByCollectionStore.set({ key: 'nft-group-by-collection', value: grouping });
+	};
+
+	const toggleShowHidden = () => {
+		emit({ message: 'oisyToggleShowHidden' });
+	};
+
+	const toggleShowSpam = () => {
+		emit({ message: 'oisyToggleShowSpam' });
 	};
 </script>
 
@@ -46,7 +56,7 @@
 				<ListItemButton
 					onclick={() => setGrouping(false)}
 					selectable
-					selected={!$nftListGroupByCollection}
+					selected={!$nftGroupByCollection}
 				>
 					{$i18n.nfts.text.as_plain_list}
 				</ListItemButton>
@@ -55,7 +65,7 @@
 				<ListItemButton
 					onclick={() => setGrouping(true)}
 					selectable
-					selected={$nftListGroupByCollection}
+					selected={$nftGroupByCollection}
 				>
 					{$i18n.nfts.text.by_collection}
 				</ListItemButton>
@@ -66,7 +76,7 @@
 
 		<List condensed noPadding>
 			<ListItem>
-				<LogoButton fullWidth>
+				<LogoButton fullWidth onClick={toggleShowHidden}>
 					{#snippet logo()}
 						<IconEyeOff />
 					{/snippet}
@@ -74,12 +84,12 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_hidden}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_hidden} checked={false} disabled />
+						<NftsShowHiddenToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
 			<ListItem>
-				<LogoButton fullWidth>
+				<LogoButton fullWidth onClick={toggleShowSpam}>
 					{#snippet logo()}
 						<IconWarning />
 					{/snippet}
@@ -87,7 +97,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_spam} checked={false} disabled />
+						<NftsShowSpamToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
