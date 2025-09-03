@@ -8,28 +8,31 @@
 		title: string;
 		icon?: Snippet;
 		nftCollections: NftCollectionUi[];
+		testId?: string;
 	}
 
-	let { title, icon, nftCollections }: Props = $props();
+	let { title, icon, nftCollections, testId }: Props = $props();
 </script>
 
 {#if nftCollections.length > 0}
-	<div class="mt-2 flex items-center gap-2">
-		{@render icon?.()}
-		<h5>{title}</h5>
-	</div>
+	<div data-tid={testId}>
+		<div class="mt-2 flex items-center gap-2">
+			{@render icon?.()}
+			<h5>{title}</h5>
+		</div>
 
-	<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">
-		{#if nftCollections.filter((c) => c.nfts.length > 0).length > 0}
-			{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
-				{#if collection.nfts.length > 0}
-					<NftCollectionCard {collection} />
-				{/if}
-			{/each}
-		{:else}
-			<NftCardSkeleton />
-			<NftCardSkeleton />
-			<NftCardSkeleton />
-		{/if}
+		<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">
+			{#if nftCollections.filter((c) => c.nfts.length > 0).length > 0}
+				{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
+					{#if collection.nfts.length > 0}
+						<NftCollectionCard {collection} />
+					{/if}
+				{/each}
+			{:else}
+				<NftCardSkeleton />
+				<NftCardSkeleton />
+				<NftCardSkeleton />
+			{/if}
+		</div>
 	</div>
 {/if}

@@ -13,6 +13,12 @@
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import {
+		NFT_COLLECTION_LIST_COMMON,
+		NFT_COLLECTION_LIST_HIDDEN,
+		NFT_COLLECTION_LIST_SPAM,
+		NFT_LIST_COMMON, NFT_LIST_HIDDEN, NFT_LIST_SPAM
+	} from '$lib/constants/test-ids.constants';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
@@ -95,10 +101,10 @@
 		{#if isEmptyList}
 			<EmptyNftsList />
 		{:else}
-			<NftCollectionList nftCollections={commonCollections} title={$i18n.nfts.text.collections} />
+			<NftCollectionList nftCollections={commonCollections} title={$i18n.nfts.text.collections} testId={NFT_COLLECTION_LIST_COMMON} />
 
 			{#if $showHidden}
-				<NftCollectionList nftCollections={hiddenCollections} title={$i18n.nfts.text.hidden}>
+				<NftCollectionList nftCollections={hiddenCollections} title={$i18n.nfts.text.hidden} testId={NFT_COLLECTION_LIST_HIDDEN}>
 					{#snippet icon()}
 						<IconEyeOff size="24" />
 					{/snippet}
@@ -106,7 +112,7 @@
 			{/if}
 
 			{#if $showSpam}
-				<NftCollectionList nftCollections={spamCollections} title={$i18n.nfts.text.spam}>
+				<NftCollectionList nftCollections={spamCollections} title={$i18n.nfts.text.spam} testId={NFT_COLLECTION_LIST_SPAM}>
 					{#snippet icon()}
 						<IconAlertOctagon size="24" />
 					{/snippet}
@@ -116,10 +122,10 @@
 	{:else if isEmptyList}
 		<EmptyNftsList />
 	{:else}
-		<NftList nfts={commonNfts} title={$i18n.nfts.text.all_assets} />
+		<NftList nfts={commonNfts} title={$i18n.nfts.text.all_assets} testId={NFT_LIST_COMMON} />
 
 		{#if $showHidden}
-			<NftList hidden nfts={hiddenNfts} title={$i18n.nfts.text.hidden}>
+			<NftList hidden nfts={hiddenNfts} title={$i18n.nfts.text.hidden} testId={NFT_LIST_HIDDEN}>
 				{#snippet icon()}
 					<IconEyeOff size="24" />
 				{/snippet}
@@ -127,7 +133,7 @@
 		{/if}
 
 		{#if $showSpam}
-			<NftList nfts={spamNfts} spam title={$i18n.nfts.text.spam}>
+			<NftList nfts={spamNfts} spam title={$i18n.nfts.text.spam} testId={NFT_LIST_SPAM}>
 				{#snippet icon()}
 					<IconAlertOctagon size="24" />
 				{/snippet}
