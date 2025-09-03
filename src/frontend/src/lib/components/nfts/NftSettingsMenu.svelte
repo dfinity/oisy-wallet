@@ -6,8 +6,8 @@
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
-	import NftCollectionShowHiddenToggle from '$lib/components/nfts/NftCollectionShowHiddenToggle.svelte';
-	import NftCollectionShowSpamToggle from '$lib/components/nfts/NftCollectionShowSpamToggle.svelte';
+	import NftsShowHiddenToggle from '$lib/components/nfts/NftsShowHiddenToggle.svelte';
+	import NftsShowSpamToggle from '$lib/components/nfts/NftsShowSpamToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
@@ -86,7 +86,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_hidden}</span>
 					{/snippet}
 					{#snippet action()}
-						<NftCollectionShowHiddenToggle />
+						<NftsShowHiddenToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
@@ -99,7 +99,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
 					{/snippet}
 					{#snippet action()}
-						<NftCollectionShowSpamToggle />
+						<NftsShowSpamToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
