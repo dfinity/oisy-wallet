@@ -14,11 +14,10 @@
 		NFT_LIST_HIDDEN,
 		NFT_LIST_SPAM
 	} from '$lib/constants/test-ids.constants';
-	import { showHidden, showSpam } from '$lib/derived/settings.derived';
+	import { showHidden, showSpam , nftGroupByCollection } from '$lib/derived/settings.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
-	import { nftGroupByCollection } from '$lib/derived/settings.derived';
-	import { i18n } from '$lib/stores/i18n.store';
+		import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
