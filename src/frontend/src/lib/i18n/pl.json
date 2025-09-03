@@ -1621,7 +1621,8 @@
 			"send_message_input_placeholder": "Co chcesz zrobić?",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Przepraszamy, nie udało mi się znaleźć odpowiednich kontaktów w Twojej książce adresowej.",
-			"loading": "Myślenie..."
+			"loading": "Myślenie...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "Przepraszamy, coś poszło nie tak z uzyskaniem odpowiedzi od LLM.",

@@ -18,6 +18,7 @@
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
@@ -99,8 +100,8 @@
 		await disconnectListener();
 
 		try {
-			// Connect and disconnect buttons are disabled until the address is loaded; therefore, this should never happen.
-			if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
+			// Connect and disconnect buttons are disabled until at least one of the address is loaded; therefore, this should never happen.
+			if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
 				});
@@ -123,7 +124,12 @@
 		}
 	};
 
-	onDestroy(async () => await disconnectListener());
+	$: ($authNotSignedIn,
+		(async () => {
+			if ($authNotSignedIn) {
+				await disconnectListener();
+			}
+		})());
 
 	const goToFirstStep = () => modal?.set?.(0);
 
@@ -149,8 +155,8 @@
 			return;
 		}
 
-		// Address is not defined. We need it.
-		if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
+		// Address is not defined. We need it at least one between the Ethereum address and the Solana address.
+		if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
 			return;
 		}
 

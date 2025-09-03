@@ -1621,7 +1621,8 @@
 			"send_message_input_placeholder": "Que voulez-vous faire ?",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
-			"loading": "Réflexion..."
+			"loading": "Réflexion...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "Désolé, une erreur s'est produite lors de l'obtention d'une réponse du LLM.",
