@@ -1050,6 +1050,7 @@
 			"collection_name": "Collection name",
 			"media_urls": "Media URLs",
 			"display_preference": "Display preference",
+			"review_preference": "Review preference",
 			"media_enabled": "Media enabled",
 			"media_disabled": "Media disabled",
 			"enable_media": "Enable media",
