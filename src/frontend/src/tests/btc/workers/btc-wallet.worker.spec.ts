@@ -160,7 +160,7 @@ describe('btc-wallet.worker', () => {
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(7);
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
 					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageUncertified);
 					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusIdle);

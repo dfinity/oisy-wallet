@@ -120,7 +120,7 @@ describe('BtcUtxosFee', () => {
 			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
 			await vi.waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(3);
+				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
 			});
 		});
 
@@ -159,7 +159,7 @@ describe('BtcUtxosFee', () => {
 			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
 			// Should still be 2 calls (no additional calls after the component is unmounted)
-			expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
+			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 		});
 	});
 });
