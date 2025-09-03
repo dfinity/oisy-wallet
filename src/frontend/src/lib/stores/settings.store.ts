@@ -14,12 +14,13 @@ export const privacyModeStore = initStorageStore<SettingsData>({
 	defaultValue: { enabled: false }
 });
 
+export const showHiddenStore = initStorageStore<SettingsData>({
+	key: 'show-hidden',
+	defaultValue: { enabled: false }
+});
+
 export const showSpamStore = initStorageStore<SettingsData>({
 	key: 'show-spam',
 	defaultValue: { enabled: false }
 });
 
-export const showHiddenStore = initStorageStore<SettingsData>({
-	key: 'show-hidden',
-	defaultValue: { enabled: false }
-});

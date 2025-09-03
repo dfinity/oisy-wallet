@@ -21,12 +21,12 @@ export const isPrivacyMode: Readable<boolean> = derived(
 	([$privacyModeStore]) => $privacyModeStore.enabled
 );
 
-export const showSpam: Readable<boolean> = derived(
-	[showSpamStore],
-	([$showSpamStore]) => $showSpamStore.enabled
-);
-
 export const showHidden: Readable<boolean> = derived(
 	[showHiddenStore],
 	([$showHiddenStore]) => $showHiddenStore.enabled
+);
+
+export const showSpam: Readable<boolean> = derived(
+	[showSpamStore],
+	([$showSpamStore]) => $showSpamStore.enabled
 );

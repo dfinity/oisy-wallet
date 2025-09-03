@@ -24,12 +24,12 @@
 		nftListStore.setGroupByCollection(grouping);
 	};
 
-	const toggleShowSpam = () => {
-		emit({ message: 'oisyToggleShowSpam' });
-	};
-
 	const toggleShowHidden = () => {
 		emit({ message: 'oisyToggleShowHidden' });
+	};
+
+	const toggleShowSpam = () => {
+		emit({ message: 'oisyToggleShowSpam' });
 	};
 </script>
 
