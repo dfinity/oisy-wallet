@@ -27,11 +27,11 @@
 		spam: NftCollectionUi[];
 	}
 
-	type NftBuckets = {
+	interface NftBuckets {
 		common: Nft[];
 		hidden: Nft[];
 		spam: Nft[];
-	};
+	}
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
@@ -69,27 +69,28 @@
 		common: commonNfts,
 		spam: spamNfts,
 		hidden: hiddenNfts
-	} = $derived.by(() => {
-		return nfts.reduce<NftBuckets>((acc, nft) => {
-			const token = findNonFungibleToken({
-				tokens: $nonFungibleTokens,
-				address: nft.collection.address,
-				networkId: nft.collection.network.id
-			});
+	} = $derived.by(() => nfts.reduce<NftBuckets>(
+			(acc, nft) => {
+				const token = findNonFungibleToken({
+					tokens: $nonFungibleTokens,
+					address: nft.collection.address,
+					networkId: nft.collection.network.id
+				});
 
-			if (nonNullish(token)) {
-				if (token.section === CustomTokenSection.SPAM) {
-					return { ...acc, spam: [...acc.spam, nft]}
-				} else if (token.section === CustomTokenSection.HIDDEN) {
-					return { ...acc, hidden: [...acc.hidden, nft]}
-				} else {
-					return { ...acc, common: [...acc.common, nft]}
+				if (nonNullish(token)) {
+					if (token.section === CustomTokenSection.SPAM) {
+						return { ...acc, spam: [...acc.spam, nft] };
+					} if (token.section === CustomTokenSection.HIDDEN) {
+						return { ...acc, hidden: [...acc.hidden, nft] };
+					} 
+						return { ...acc, common: [...acc.common, nft] };
+					
 				}
-			}
 
-			return acc;
-		}, {common: [], hidden: [], spam: []})
-	});
+				return acc;
+			},
+			{ common: [], hidden: [], spam: [] }
+		));
 
 	const isEmptyList = $derived.by(() => {
 		const hasNoCollections = nftCollections.length === 0;
