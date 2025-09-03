@@ -76,11 +76,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
-	private async loadBtcTransactionsData({
-		btcAddress
-	}: {
-		btcAddress: BtcAddress;
-	}): Promise<{
+	private async loadBtcTransactionsData({ btcAddress }: { btcAddress: BtcAddress }): Promise<{
 		transactions: CertifiedData<BtcTransactionUi>[];
 		latestBitcoinBlockHeight: number;
 	}> {
