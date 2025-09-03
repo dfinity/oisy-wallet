@@ -12,7 +12,6 @@ import * as settingsDerived from '$lib/derived/settings.derived';
 import * as tokens from '$lib/derived/tokens.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
-import { nftListStore } from '$lib/stores/nft-list.store';
 import { nftStore } from '$lib/stores/nft.store';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -123,7 +122,7 @@ describe('NftsList', () => {
 		const spamNftListSelector = `div[data-tid="${NFT_LIST_SPAM}"]`;
 
 		beforeEach(() => {
-			nftListStore.setGroupByCollection(false);
+			vi.spyOn(settingsDerived, 'nftGroupByCollection', 'get').mockReturnValue(writable(false));
 		});
 
 		it('should render common nft lists', () => {
