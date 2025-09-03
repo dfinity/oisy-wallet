@@ -1625,7 +1625,8 @@
 			"send_message_input_placeholder": "O que você quer fazer?",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
-			"loading": "A pensar..."
+			"loading": "A pensar...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "Desculpe, ocorreu um erro ao obter uma resposta do LLM.",

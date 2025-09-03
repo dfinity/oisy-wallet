@@ -1342,6 +1342,7 @@ interface I18nAi_assistant {
 		send_token_succeeded: string;
 		no_contacts_found_message: string;
 		loading: string;
+		reset_chat_history: string;
 	};
 	errors: { unknown: string; no_response: string };
 }
