@@ -20,6 +20,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
+import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { SystemInstruction } from '@solana-program/system';
 
@@ -356,6 +357,10 @@ export const parseSolInstruction = (
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
 		return parseSolTokenInstruction(instruction);
+	}
+
+	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
+		return parseSolToken2022Instruction(instruction);
 	}
 
 	return instruction;
