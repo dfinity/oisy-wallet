@@ -3,6 +3,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import type { Nft } from '$lib/types/nft';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 
 	interface Props {
 		nft?: Nft;
@@ -25,7 +26,9 @@
 
 			{#if nonNullish(nft.imageUrl)}
 				<div class="ml-3 max-w-16 grow-0 self-start overflow-hidden rounded-lg">
-					<Img src={nft.imageUrl} />
+					<NftImageConsent type="nft-display" showMessage={false} {nft}>
+						<Img src={nft.imageUrl} />
+					</NftImageConsent>
 				</div>
 			{/if}
 		{:else}

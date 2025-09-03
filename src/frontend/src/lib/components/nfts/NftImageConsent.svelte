@@ -37,8 +37,6 @@
 	const isLoading = $derived(isNullish(nft));
 </script>
 
-{nonNullish(hasConsent) ? (hasConsent ? 'true' : 'false') : 'undefined'}
-
 {#if nonNullish(hasConsent) && hasConsent}
 	{@render children()}
 {:else}

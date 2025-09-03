@@ -57,7 +57,10 @@
 		})
 	);
 
+	let saveLoading = $state(false);
+
 	const save = async () => {
+		saveLoading = true;
 		if (nonNullish(token) && nonNullish($authIdentity)) {
 			if (token.standard === 'erc721') {
 				await saveErc721CustomTokens({
@@ -83,6 +86,8 @@
 				});
 			}
 		}
+		saveLoading = false;
+		modalStore.close();
 	};
 
 	const collectionNfts: Nft[] = $derived(
@@ -93,7 +98,7 @@
 	);
 </script>
 
-<Modal {testId} on:nnsClose={() => modalStore.close()}>
+<Modal {testId} on:nnsClose={() => (!saveLoading ? modalStore.close() : undefined)}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
@@ -182,7 +187,11 @@
 		{#snippet toolbar()}
 			<div class="flex w-full gap-3">
 				<ButtonCancel onclick={() => modalStore.close()} testId={`${testId}-cancelButton`} />
-				<Button colorStyle="primary" onclick={() => save()} testId={`${testId}-saveButton`}
+				<Button
+					colorStyle="primary"
+					onclick={() => save()}
+					testId={`${testId}-saveButton`}
+					loading={saveLoading}
 					>{hasConsent ? $i18n.nfts.text.disable_media : $i18n.nfts.text.enable_media}</Button
 				>
 			</div>

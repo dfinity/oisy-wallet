@@ -19,6 +19,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -103,6 +104,16 @@
 				<span>{$i18n.nfts.text.token_standard}</span>
 				{#if nonNullish(token)}
 					<span class="uppercase">{token.standard}</span>
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
+			<ListItem>
+				<span>{$i18n.nfts.text.display_preference}</span>
+				{#if nonNullish(nfts?.[0])}
+					<NftImageConsentPreference nft={nfts?.[0]} />
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />
