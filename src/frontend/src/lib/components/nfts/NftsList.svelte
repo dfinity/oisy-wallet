@@ -17,8 +17,8 @@
 	import { showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import { nftGroupByCollection } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { nftListStore } from '$lib/stores/nft-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
@@ -99,7 +99,7 @@
 </script>
 
 <NftsDisplayHandler bind:nfts bind:nftCollections>
-	{#if $nftListStore.groupByCollection}
+	{#if $nftGroupByCollection}
 		{#if isEmptyList}
 			<EmptyNftsList />
 		{:else}
