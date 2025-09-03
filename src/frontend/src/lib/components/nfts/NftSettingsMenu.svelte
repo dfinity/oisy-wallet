@@ -7,12 +7,14 @@
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import NftsShowHiddenToggle from '$lib/components/nfts/NftsShowHiddenToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
 	import { nftListGroupByCollection } from '$lib/derived/nfts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
+	import { emit } from '$lib/utils/events.utils';
 
 	let visible = $state(false);
 
@@ -20,6 +22,10 @@
 
 	const setGrouping = (grouping: boolean) => {
 		nftListStore.setGroupByCollection(grouping);
+	};
+
+	const toggleShowHidden = () => {
+		emit({ message: 'oisyToggleShowHidden' });
 	};
 </script>
 
@@ -66,7 +72,7 @@
 
 		<List condensed noPadding>
 			<ListItem>
-				<LogoButton fullWidth>
+				<LogoButton fullWidth onClick={toggleShowHidden}>
 					{#snippet logo()}
 						<IconEyeOff />
 					{/snippet}
@@ -74,7 +80,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_hidden}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_hidden} checked={false} disabled />
+						<NftsShowHiddenToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
