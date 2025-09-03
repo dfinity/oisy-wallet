@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -14,6 +13,8 @@
 	import { nftListGroupByCollection } from '$lib/derived/nfts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
+	import { emit } from '$lib/utils/events.utils';
+	import NftCollectionShowHiddenToggle from '$lib/components/nfts/NftCollectionShowHiddenToggle.svelte';
 
 	let visible = $state(false);
 
@@ -22,6 +23,16 @@
 	const setGrouping = (grouping: boolean) => {
 		nftListStore.setGroupByCollection(grouping);
 	};
+
+	const toggleShowSpam = () => {
+		document.dispatchEvent(new CustomEvent('show-spam'));
+		emit({message: 'oisyToggleShowSpam'});
+	}
+
+	const toggleShowHidden = () => {
+		document.dispatchEvent(new CustomEvent('show-hidden'));
+		emit({message: 'oisyToggleShowHidden'});
+	}
 </script>
 
 <ButtonIcon
@@ -67,7 +78,7 @@
 
 		<List condensed noPadding>
 			<ListItem>
-				<LogoButton fullWidth>
+				<LogoButton fullWidth onClick={toggleShowSpam}>
 					{#snippet logo()}
 						<IconWarning />
 					{/snippet}
@@ -80,7 +91,7 @@
 				</LogoButton>
 			</ListItem>
 			<ListItem>
-				<LogoButton fullWidth>
+				<LogoButton fullWidth onClick={toggleShowHidden}>
 					{#snippet logo()}
 						<IconEyeOff />
 					{/snippet}
@@ -88,7 +99,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_hidden}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_hidden} checked={false} disabled />
+						<NftCollectionShowHiddenToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
