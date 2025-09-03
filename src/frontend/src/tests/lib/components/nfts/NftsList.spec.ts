@@ -2,7 +2,10 @@ import NftsList from '$lib/components/nfts/NftsList.svelte';
 import {
 	NFT_COLLECTION_LIST_COMMON,
 	NFT_COLLECTION_LIST_HIDDEN,
-	NFT_COLLECTION_LIST_SPAM, NFT_LIST_COMMON, NFT_LIST_HIDDEN, NFT_LIST_SPAM
+	NFT_COLLECTION_LIST_SPAM,
+	NFT_LIST_COMMON,
+	NFT_LIST_HIDDEN,
+	NFT_LIST_SPAM
 } from '$lib/constants/test-ids.constants';
 import * as networkTokens from '$lib/derived/network-tokens.derived';
 import * as settingsDerived from '$lib/derived/settings.derived';

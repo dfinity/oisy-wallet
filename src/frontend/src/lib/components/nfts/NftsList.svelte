@@ -4,11 +4,15 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
+	import NftList from '$lib/components/nfts/NftList.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
 	import {
 		NFT_COLLECTION_LIST_COMMON,
 		NFT_COLLECTION_LIST_HIDDEN,
-		NFT_COLLECTION_LIST_SPAM, NFT_LIST_COMMON, NFT_LIST_HIDDEN, NFT_LIST_SPAM
+		NFT_COLLECTION_LIST_SPAM,
+		NFT_LIST_COMMON,
+		NFT_LIST_HIDDEN,
+		NFT_LIST_SPAM
 	} from '$lib/constants/test-ids.constants';
 	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
@@ -16,7 +20,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import NftList from '$lib/components/nfts/NftList.svelte';
 
 	interface CollectionBuckets {
 		common: NftCollectionUi[];
