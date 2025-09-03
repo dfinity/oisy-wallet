@@ -133,7 +133,6 @@
 </script>
 
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
-	{request}
 	{#snippet title()}
 		<WalletConnectModalTitle>
 			{$i18n.wallet_connect.text.sign_message}
