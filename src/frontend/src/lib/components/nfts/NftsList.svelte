@@ -29,9 +29,9 @@
 		spam: spamCollections,
 		hidden: hiddenCollections
 	} = $derived.by(() => {
-		const common: NftCollectionUi[] = [];
-		const spam: NftCollectionUi[] = [];
-		const hidden: NftCollectionUi[] = [];
+		let common: NftCollectionUi[] = [];
+		let spam: NftCollectionUi[] = [];
+		let hidden: NftCollectionUi[] = [];
 
 		nftCollections.forEach((collection) => {
 			const token = findNonFungibleToken({
@@ -42,11 +42,11 @@
 
 			if (nonNullish(token)) {
 				if (token.section === CustomTokenSection.SPAM) {
-					spam.push(collection);
+					spam = [...spam, collection];
 				} else if (token.section === CustomTokenSection.HIDDEN) {
-					hidden.push(collection);
+					hidden = [...hidden, collection];
 				} else {
-					common.push(collection);
+					common = [...common, collection];
 				}
 			}
 		});
