@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
-	import { nftListStore } from '$lib/stores/nft-list.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
@@ -10,6 +9,7 @@
 		getEnabledNfts,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
+	import { nftSortStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		children: Snippet;
@@ -23,7 +23,7 @@
 		nfts = filterSortByCollection({
 			items: getEnabledNfts({ $nftStore, $enabledNonFungibleNetworkTokens }),
 			filter: $tokenListStore.filter,
-			sort: $nftListStore.sort
+			sort: $nftSortStore
 		});
 		nftCollections = filterSortByCollection({
 			items: getNftCollectionUi({
@@ -31,7 +31,7 @@
 				$nonFungibleTokens: $enabledNonFungibleNetworkTokens
 			}),
 			filter: $tokenListStore.filter,
-			sort: $nftListStore.sort
+			sort: $nftSortStore
 		});
 	});
 </script>

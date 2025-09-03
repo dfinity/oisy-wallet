@@ -11,17 +11,17 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { nftListGroupByCollection } from '$lib/derived/nfts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { nftListStore } from '$lib/stores/nft-list.store';
 	import { emit } from '$lib/utils/events.utils';
+	import { nftGroupByCollectionStore } from '$lib/stores/settings.store';
+	import { nftGroupByCollection } from '$lib/derived/settings.derived';
 
 	let visible = $state(false);
 
 	let button = $state<HTMLButtonElement | undefined>();
 
 	const setGrouping = (grouping: boolean) => {
-		nftListStore.setGroupByCollection(grouping);
+		nftGroupByCollectionStore.set({ key: 'nft-group-by-collection', value: grouping });
 	};
 
 	const toggleShowHidden = () => {
@@ -56,7 +56,7 @@
 				<ListItemButton
 					onclick={() => setGrouping(false)}
 					selectable
-					selected={!$nftListGroupByCollection}
+					selected={!$nftGroupByCollection}
 				>
 					{$i18n.nfts.text.as_plain_list}
 				</ListItemButton>
@@ -65,7 +65,7 @@
 				<ListItemButton
 					onclick={() => setGrouping(true)}
 					selectable
-					selected={$nftListGroupByCollection}
+					selected={$nftGroupByCollection}
 				>
 					{$i18n.nfts.text.by_collection}
 				</ListItemButton>

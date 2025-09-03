@@ -5,15 +5,15 @@
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { nftListStore } from '$lib/stores/nft-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
+	import { nftGroupByCollection } from '$lib/derived/settings.derived';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
 </script>
 
 <NftsDisplayHandler bind:nfts bind:nftCollections>
-	{#if $nftListStore.groupByCollection}
+	{#if $nftGroupByCollection}
 		{#if nftCollections.length === 0}
 			<EmptyNftsList />
 		{:else}
