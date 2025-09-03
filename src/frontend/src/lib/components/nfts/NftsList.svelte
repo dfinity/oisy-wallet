@@ -6,6 +6,14 @@
 	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
+	import {
+		NFT_COLLECTION_LIST_COMMON,
+		NFT_COLLECTION_LIST_HIDDEN,
+		NFT_COLLECTION_LIST_SPAM,
+		NFT_LIST_COMMON,
+		NFT_LIST_HIDDEN,
+		NFT_LIST_SPAM
+	} from '$lib/constants/test-ids.constants';
 	import { showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -13,12 +21,6 @@
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import {
-		NFT_COLLECTION_LIST_COMMON,
-		NFT_COLLECTION_LIST_HIDDEN,
-		NFT_COLLECTION_LIST_SPAM,
-		NFT_LIST_COMMON, NFT_LIST_HIDDEN, NFT_LIST_SPAM
-	} from '$lib/constants/test-ids.constants';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
@@ -101,10 +103,18 @@
 		{#if isEmptyList}
 			<EmptyNftsList />
 		{:else}
-			<NftCollectionList nftCollections={commonCollections} title={$i18n.nfts.text.collections} testId={NFT_COLLECTION_LIST_COMMON} />
+			<NftCollectionList
+				nftCollections={commonCollections}
+				testId={NFT_COLLECTION_LIST_COMMON}
+				title={$i18n.nfts.text.collections}
+			/>
 
 			{#if $showHidden}
-				<NftCollectionList nftCollections={hiddenCollections} title={$i18n.nfts.text.hidden} testId={NFT_COLLECTION_LIST_HIDDEN}>
+				<NftCollectionList
+					nftCollections={hiddenCollections}
+					testId={NFT_COLLECTION_LIST_HIDDEN}
+					title={$i18n.nfts.text.hidden}
+				>
 					{#snippet icon()}
 						<IconEyeOff size="24" />
 					{/snippet}
@@ -112,7 +122,11 @@
 			{/if}
 
 			{#if $showSpam}
-				<NftCollectionList nftCollections={spamCollections} title={$i18n.nfts.text.spam} testId={NFT_COLLECTION_LIST_SPAM}>
+				<NftCollectionList
+					nftCollections={spamCollections}
+					testId={NFT_COLLECTION_LIST_SPAM}
+					title={$i18n.nfts.text.spam}
+				>
 					{#snippet icon()}
 						<IconAlertOctagon size="24" />
 					{/snippet}
@@ -122,10 +136,10 @@
 	{:else if isEmptyList}
 		<EmptyNftsList />
 	{:else}
-		<NftList nfts={commonNfts} title={$i18n.nfts.text.all_assets} testId={NFT_LIST_COMMON} />
+		<NftList nfts={commonNfts} testId={NFT_LIST_COMMON} title={$i18n.nfts.text.all_assets} />
 
 		{#if $showHidden}
-			<NftList hidden nfts={hiddenNfts} title={$i18n.nfts.text.hidden} testId={NFT_LIST_HIDDEN}>
+			<NftList hidden nfts={hiddenNfts} testId={NFT_LIST_HIDDEN} title={$i18n.nfts.text.hidden}>
 				{#snippet icon()}
 					<IconEyeOff size="24" />
 				{/snippet}
@@ -133,7 +147,7 @@
 		{/if}
 
 		{#if $showSpam}
-			<NftList nfts={spamNfts} spam title={$i18n.nfts.text.spam} testId={NFT_LIST_SPAM}>
+			<NftList nfts={spamNfts} spam testId={NFT_LIST_SPAM} title={$i18n.nfts.text.spam}>
 				{#snippet icon()}
 					<IconAlertOctagon size="24" />
 				{/snippet}

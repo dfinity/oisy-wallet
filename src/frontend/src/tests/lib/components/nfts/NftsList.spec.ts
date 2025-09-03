@@ -1,6 +1,18 @@
 import NftsList from '$lib/components/nfts/NftsList.svelte';
+import {
+	NFT_COLLECTION_LIST_COMMON,
+	NFT_COLLECTION_LIST_HIDDEN,
+	NFT_COLLECTION_LIST_SPAM,
+	NFT_LIST_COMMON,
+	NFT_LIST_HIDDEN,
+	NFT_LIST_SPAM
+} from '$lib/constants/test-ids.constants';
 import * as networkTokens from '$lib/derived/network-tokens.derived';
+import * as settingsDerived from '$lib/derived/settings.derived';
 import * as tokens from '$lib/derived/tokens.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { i18n } from '$lib/stores/i18n.store';
+import { nftListStore } from '$lib/stores/nft-list.store';
 import { nftStore } from '$lib/stores/nft.store';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -9,19 +21,9 @@ import {
 	mockNonFungibleToken2,
 	mockValidErc1155Nft
 } from '$tests/mocks/nfts.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
-import {
-	NFT_COLLECTION_LIST_COMMON, NFT_COLLECTION_LIST_HIDDEN, NFT_COLLECTION_LIST_SPAM,
-	NFT_LIST_COMMON,
-	NFT_LIST_HIDDEN,
-	NFT_LIST_SPAM
-} from '$lib/constants/test-ids.constants';
-import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { nftListStore } from '$lib/stores/nft-list.store';
-import * as settingsDerived from '$lib/derived/settings.derived';
-import { assertNonNullish } from '@dfinity/utils';
-import { i18n } from '$lib/stores/i18n.store';
 
 describe('NftsList', () => {
 	const mockNfts = [
@@ -59,7 +61,9 @@ describe('NftsList', () => {
 
 			const { container } = render(NftsList);
 
-			const commonCollectionList: HTMLDivElement | null = container.querySelector(commonCollectionListSelector);
+			const commonCollectionList: HTMLDivElement | null = container.querySelector(
+				commonCollectionListSelector
+			);
 
 			expect(commonCollectionList).toBeInTheDocument();
 		});
@@ -67,9 +71,7 @@ describe('NftsList', () => {
 		it('should render hidden nft collections', () => {
 			nftStore.addAll(mockNfts);
 
-			vi.spyOn(settingsDerived, 'showHidden', 'get').mockReturnValue(
-				writable(true)
-			);
+			vi.spyOn(settingsDerived, 'showHidden', 'get').mockReturnValue(writable(true));
 
 			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
 				writable([mockNonFungibleToken1, mockNonFungibleToken2])
@@ -83,7 +85,9 @@ describe('NftsList', () => {
 
 			const { container } = render(NftsList);
 
-			const hiddenCollectionList: HTMLDivElement | null = container.querySelector(hiddenCollectionListSelector);
+			const hiddenCollectionList: HTMLDivElement | null = container.querySelector(
+				hiddenCollectionListSelector
+			);
 
 			expect(hiddenCollectionList).toBeInTheDocument();
 		});
@@ -91,9 +95,7 @@ describe('NftsList', () => {
 		it('should render spam nft collections', () => {
 			nftStore.addAll(mockNfts);
 
-			vi.spyOn(settingsDerived, 'showSpam', 'get').mockReturnValue(
-				writable(true)
-			);
+			vi.spyOn(settingsDerived, 'showSpam', 'get').mockReturnValue(writable(true));
 
 			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
 				writable([mockNonFungibleToken1, mockNonFungibleToken2])
@@ -107,7 +109,9 @@ describe('NftsList', () => {
 
 			const { container } = render(NftsList);
 
-			const spamCollectionList: HTMLDivElement | null = container.querySelector(spamCollectionListSelector);
+			const spamCollectionList: HTMLDivElement | null = container.querySelector(
+				spamCollectionListSelector
+			);
 
 			expect(spamCollectionList).toBeInTheDocument();
 		});
@@ -142,9 +146,7 @@ describe('NftsList', () => {
 		it('should render hidden nft lists', () => {
 			nftStore.addAll(mockNfts);
 
-			vi.spyOn(settingsDerived, 'showHidden', 'get').mockReturnValue(
-				writable(true)
-			);
+			vi.spyOn(settingsDerived, 'showHidden', 'get').mockReturnValue(writable(true));
 
 			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
 				writable([mockNonFungibleToken1, mockNonFungibleToken2])
@@ -166,9 +168,7 @@ describe('NftsList', () => {
 		it('should render spam nft lists', () => {
 			nftStore.addAll(mockNfts);
 
-			vi.spyOn(settingsDerived, 'showSpam', 'get').mockReturnValue(
-				writable(true)
-			);
+			vi.spyOn(settingsDerived, 'showSpam', 'get').mockReturnValue(writable(true));
 
 			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
 				writable([mockNonFungibleToken1, mockNonFungibleToken2])
