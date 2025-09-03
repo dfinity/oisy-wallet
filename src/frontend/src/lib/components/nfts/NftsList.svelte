@@ -11,13 +11,13 @@
 		NFT_COLLECTION_LIST_HIDDEN,
 		NFT_COLLECTION_LIST_SPAM
 	} from '$lib/constants/test-ids.constants';
-	import { nftGroupByCollection , showHidden, showSpam } from '$lib/derived/settings.derived';
+	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	
+
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
 
