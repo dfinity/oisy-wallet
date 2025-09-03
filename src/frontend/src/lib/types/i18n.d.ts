@@ -900,6 +900,7 @@ interface I18nNfts {
 		collection_name: string;
 		media_urls: string;
 		display_preference: string;
+		review_preference: string;
 		media_enabled: string;
 		media_disabled: string;
 		enable_media: string;
