@@ -53,10 +53,11 @@
 	};
 
 	$effect(() => {
-		// add messages as a dependency to trigger the scroll when new content arrives
-		messagesToDisplay;
-
-		if (nonNullish(messagesContainer) && shouldScrollMessagesContainer) {
+		if (
+			nonNullish(messagesContainer) &&
+			shouldScrollMessagesContainer &&
+			messagesToDisplay.length > 0
+		) {
 			messagesContainer.scrollTo({
 				top: messagesContainer.scrollHeight,
 				behavior: 'smooth'
