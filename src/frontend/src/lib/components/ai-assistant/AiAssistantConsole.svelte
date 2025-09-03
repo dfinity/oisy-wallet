@@ -24,6 +24,7 @@
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ChatMessage } from '$lib/types/ai-assistant';
+	import { generateAiAssistantResponseEventMetadata } from '$lib/utils/ai-assistant.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
@@ -54,6 +55,8 @@
 			role: 'user',
 			data: { text: messageText, context }
 		});
+
+		const requestStartTimestamp = Date.now();
 
 		try {
 			loading = true;
@@ -86,7 +89,10 @@
 				}
 			});
 
-			trackEvent({ name: AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED });
+			trackEvent({
+				name: AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
+				metadata: generateAiAssistantResponseEventMetadata({ requestStartTimestamp })
+			});
 		}
 
 		loading = false;
