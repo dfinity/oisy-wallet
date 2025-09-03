@@ -89,6 +89,8 @@ describe('NftImageConsentModal', () => {
 		const TEST_ID = 'nft-modal';
 		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
 
+		closeSpy.mockClear();
+
 		const cancelBtn = screen.getByTestId(`${TEST_ID}-cancelButton`);
 		await fireEvent.click(cancelBtn);
 
