@@ -1,5 +1,5 @@
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
-import type { NftListSortingType } from '$lib/stores/nft-list.store';
+import type { NftSortingType } from '$lib/stores/settings.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
@@ -229,7 +229,7 @@ const cmpByCollectionName =
 interface NftBaseFilterAndSortParams<T> {
 	items: T[];
 	filter?: string;
-	sort?: NftListSortingType;
+	sort?: NftSortingType;
 }
 
 interface NftFilterAndSortParams extends NftBaseFilterAndSortParams<Nft> {
