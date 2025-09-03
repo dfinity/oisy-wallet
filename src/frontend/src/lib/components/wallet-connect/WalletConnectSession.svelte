@@ -380,7 +380,7 @@
 	let reconnecting = true;
 
 	const reconnect = async () => {
-		reconnecting = true
+		reconnecting = true;
 
 		// If the listener is already initialised, we don't need to do anything.
 		if (nonNullish(listener)) {
