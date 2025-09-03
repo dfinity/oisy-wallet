@@ -1,7 +1,6 @@
 ls:
   .js: kebab-case
   .ts: kebab-case
-  .d.ts: kebab-case
 
   src/frontend/src:
     .dir: kebab-case
