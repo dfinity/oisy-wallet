@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { MouseEventHandler } from 'svelte/elements';
 
 	interface Props {
 		onclick: () => void;
