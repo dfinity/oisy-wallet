@@ -193,6 +193,7 @@
 {:else if currentStep?.name === WizardStepsSend.SEND}
 	<BtcSendForm
 		{selectedContact}
+		{source}
 		on:icNext
 		on:icClose
 		on:icBack
