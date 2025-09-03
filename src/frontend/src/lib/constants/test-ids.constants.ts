@@ -40,6 +40,9 @@ export const NFT_COLLECTION_ACTION_UNHIDE = 'nft-collection-action-unhide';
 export const NFT_COLLECTION_LIST_COMMON = 'nft-collection-list-common';
 export const NFT_COLLECTION_LIST_HIDDEN = 'nft-collection-list-hidden';
 export const NFT_COLLECTION_LIST_SPAM = 'nft-collection-list-spam';
+export const NFT_LIST_COMMON = 'nft-list-common';
+export const NFT_LIST_HIDDEN = 'nft-list-hidden';
+export const NFT_LIST_SPAM = 'nft-list-spam';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
