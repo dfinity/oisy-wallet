@@ -94,8 +94,7 @@ describe('btc-wallet.worker', () => {
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 
-		let mockBlockHeight = 1000;
-		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(mockBlockHeight++);
+		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(1000);
 
 		vi.spyOn(blockchainRest, 'btcAddressData').mockResolvedValue(mockBlockchainResponse);
 
@@ -141,8 +140,7 @@ describe('btc-wallet.worker', () => {
 				// reset internal store with transactions
 				scheduler['store'] = {
 					transactions: {},
-					balance: undefined,
-					latestBitcoinBlockHeight: undefined
+					balance: undefined
 				};
 
 				scheduler.stop();
@@ -162,9 +160,9 @@ describe('btc-wallet.worker', () => {
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenCalledTimes(7);
 					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageUncertified);
 					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);

@@ -1,4 +1,7 @@
-import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import {
+	BTC_BALANCE_MIN_CONFIRMATIONS,
+	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+} from '$btc/constants/btc.constants';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
@@ -37,13 +40,11 @@ interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 interface BtcWalletStore {
 	balance: CertifiedData<bigint | null> | undefined;
 	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;
-	latestBitcoinBlockHeight?: number;
 }
 
 interface BtcWalletData {
 	balance: CertifiedData<bigint | null>;
 	uncertifiedTransactions: CertifiedData<BtcTransactionUi>[];
-	latestBitcoinBlockHeight?: number;
 }
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
@@ -53,8 +54,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 
 	private store: BtcWalletStore = {
 		balance: undefined,
-		transactions: {},
-		latestBitcoinBlockHeight: undefined
+		transactions: {}
 	};
 
 	stop() {
@@ -76,44 +76,45 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
-	private async loadBtcTransactionsData({ btcAddress }: { btcAddress: BtcAddress }): Promise<{
-		transactions: CertifiedData<BtcTransactionUi>[];
-		latestBitcoinBlockHeight: number;
-	}> {
+	private async loadBtcTransactionsData({
+		btcAddress
+	}: {
+		btcAddress: BtcAddress;
+	}): Promise<CertifiedData<BtcTransactionUi>[]> {
 		try {
 			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
 			const latestBitcoinBlockHeight = await btcLatestBlockHeight();
 
-			// Check if the block height has changed since last sync
-			const blockHeightChanged = this.store.latestBitcoinBlockHeight !== latestBitcoinBlockHeight;
-
-			// Only include transactions when they are not in store or block height has changed
+			// Keep transactions that are either unconfirmed (no block_height) or have fewer than the required number of confirmations.
+			// This ensures proper recalculation of confirmation status until final confirmation is reached.
 			const newTransactions = fetchedTransactions.filter((transaction) => {
 				// Include transactions that are NOT already in the store
 				if (isNullish(this.store.transactions[`${transaction.hash}`])) {
 					return true;
 				}
 
-				// If block height has changed, include the transaction (confirmations may have changed)
-				return blockHeightChanged;
+				// If block_height is null (unconfirmed/pending), include the transaction
+				if (isNullish(transaction.block_height)) {
+					return true;
+				}
+
+				// Calculate confirmations and include if less than required confirmations
+				return (
+					latestBitcoinBlockHeight - transaction.block_height + 1 <
+					CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+				);
 			});
 
-			return {
-				transactions: newTransactions.map((transaction) => ({
-					data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight }),
-					certified: false
-				})),
-				latestBitcoinBlockHeight
-			};
+			return newTransactions.map((transaction) => ({
+				data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight }),
+				certified: false
+			}));
 		} catch (error) {
 			// We don't want to disrupt the user experience if we can't fetch the transactions or latest block height.
 			console.error('Error fetching BTC transactions data:', error);
 			// TODO: Return an error instead of an empty array.
-			return {
-				transactions: [],
-				latestBitcoinBlockHeight: this.store.latestBitcoinBlockHeight ?? 0
-			};
+			return [];
 		}
 	}
 
@@ -173,16 +174,12 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 
 		// TODO: investigate and implement "update" call for BTC transactions
-		const transactionData =
+		const uncertifiedTransactions =
 			shouldFetchTransactions && !certified
 				? await this.loadBtcTransactionsData({ btcAddress })
-				: { transactions: [], latestBitcoinBlockHeight: this.store.latestBitcoinBlockHeight };
+				: [];
 
-		return {
-			balance,
-			uncertifiedTransactions: transactionData.transactions,
-			latestBitcoinBlockHeight: transactionData.latestBitcoinBlockHeight
-		};
+		return { balance, uncertifiedTransactions };
 	};
 
 	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestBtc>) => {
@@ -218,7 +215,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	};
 
 	private syncWalletData = ({
-		response: { balance, uncertifiedTransactions, latestBitcoinBlockHeight }
+		response: { balance, uncertifiedTransactions }
 	}: {
 		response: BtcWalletData;
 	}) => {
@@ -228,9 +225,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			// TODO, align with sol-wallet.scheduler.ts, crash if certified changes
 			(!this.store.balance.certified && balance.certified);
 		const newTransactions = uncertifiedTransactions.length > 0;
-		const blockHeightChanged =
-			nonNullish(latestBitcoinBlockHeight) &&
-			this.store.latestBitcoinBlockHeight !== latestBitcoinBlockHeight;
 
 		this.store = {
 			...this.store,
@@ -246,8 +240,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 						{}
 					)
 				}
-			}),
-			...(blockHeightChanged && { latestBitcoinBlockHeight })
+			})
 		};
 
 		if (!newBalance && !newTransactions) {
