@@ -25,7 +25,6 @@
 	};
 
 	const toggleShowSpam = () => {
-		document.dispatchEvent(new CustomEvent('show-spam'));
 		emit({ message: 'oisyToggleShowSpam' });
 	};
 </script>
