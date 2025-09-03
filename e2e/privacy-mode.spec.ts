@@ -1,8 +1,9 @@
+import type { TestFixtures } from '@playwright/test';
 import { testWithII } from '@dfinity/internet-identity-playwright';
 import { HomepageLoggedIn } from './utils/pages/homepage.page';
 import { FlowPage } from './utils/pages/send-and-receive-flow.page';
 
-testWithII('should display privacy mode on homepage', async ({ page, iiPage, isMobile }) => {
+testWithII('should display privacy mode on homepage', async ({ page, iiPage, isMobile }: TestFixtures) => {
 	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage, isMobile });
 
 	await homepageLoggedIn.waitForReady();
@@ -16,7 +17,7 @@ testWithII('should display privacy mode on homepage', async ({ page, iiPage, isM
 
 testWithII(
 	'should display privacy mode on network selector',
-	async ({ page, iiPage, isMobile }) => {
+	async ({ page, iiPage, isMobile }: TestFixtures) => {
 		const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage, isMobile });
 
 		await homepageLoggedIn.waitForReady();
@@ -31,7 +32,7 @@ testWithII(
 
 testWithII(
 	'should display privacy mode on transactions page',
-	async ({ page, iiPage, isMobile }) => {
+	async ({ page, iiPage, isMobile }: TestFixtures) => {
 		const flowPage = new FlowPage({ page, iiPage, isMobile });
 
 		await flowPage.waitForReady();
@@ -50,7 +51,7 @@ testWithII(
 	}
 );
 
-testWithII('should display privacy mode on activity page', async ({ page, iiPage, isMobile }) => {
+testWithII('should display privacy mode on activity page', async ({ page, iiPage, isMobile }: TestFixtures) => {
 	const flowPage = new FlowPage({ page, iiPage, isMobile });
 
 	await flowPage.waitForReady();
