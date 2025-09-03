@@ -1621,7 +1621,8 @@
 			"send_message_input_placeholder": "",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
-			"loading": ""
+			"loading": "",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "",

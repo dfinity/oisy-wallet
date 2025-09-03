@@ -1621,7 +1621,8 @@
 			"send_message_input_placeholder": "ماذا تريد أن تفعل؟",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
-			"loading": "جارٍ التفكير..."
+			"loading": "جارٍ التفكير...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "عذرًا، حدث خطأ ما في الحصول على رد من LLM.",
