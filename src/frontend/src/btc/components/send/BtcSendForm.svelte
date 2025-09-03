@@ -12,7 +12,6 @@
 
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
-	// export let source: string;
 	export let selectedContact: ContactUi | undefined = undefined;
 
 	let amountError: BtcAmountAssertionError | undefined;
