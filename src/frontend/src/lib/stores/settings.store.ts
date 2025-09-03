@@ -23,4 +23,3 @@ export const showSpamStore = initStorageStore<SettingsData>({
 	key: 'show-spam',
 	defaultValue: { enabled: false }
 });
-

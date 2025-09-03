@@ -119,7 +119,7 @@
 		<NftList nfts={commonNfts} title={$i18n.nfts.text.all_assets} />
 
 		{#if $showHidden}
-			<NftList nfts={hiddenNfts} title={$i18n.nfts.text.hidden} hidden>
+			<NftList hidden nfts={hiddenNfts} title={$i18n.nfts.text.hidden}>
 				{#snippet icon()}
 					<IconEyeOff size="24" />
 				{/snippet}
@@ -127,7 +127,7 @@
 		{/if}
 
 		{#if $showSpam}
-			<NftList nfts={spamNfts} title={$i18n.nfts.text.spam} spam>
+			<NftList nfts={spamNfts} spam title={$i18n.nfts.text.spam}>
 				{#snippet icon()}
 					<IconAlertOctagon size="24" />
 				{/snippet}

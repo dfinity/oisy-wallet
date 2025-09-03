@@ -22,7 +22,7 @@
 
 	<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">
 		{#each nfts as nft, index (`${String(nft.id)}-${index}`)}
-			<NftCard {nft} {hidden} {spam} />
+			<NftCard {hidden} {nft} {spam} />
 		{/each}
 	</div>
 {/if}
