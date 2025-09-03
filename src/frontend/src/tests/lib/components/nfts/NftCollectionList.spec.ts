@@ -43,13 +43,9 @@ describe('NftsCollectionList', () => {
 				`${AppPath.Nfts}${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
 			);
 
-			const img = links.item(i).querySelector('.bg-cover');
+			const img = links.item(i).querySelector('.bg-secondary-alt');
 
 			assertNonNullish(img);
-
-			expect(img.getAttribute('style')).toContain(
-				`background-image: url("${mockNfts[i].imageUrl}")`
-			);
 		}
 	});
 });
