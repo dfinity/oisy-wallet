@@ -7,6 +7,7 @@
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import NftsShowHiddenToggle from '$lib/components/nfts/NftsShowHiddenToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
@@ -14,7 +15,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import { emit } from '$lib/utils/events.utils';
-	import NftsShowHiddenToggle from '$lib/components/nfts/NftsShowHiddenToggle.svelte';
 
 	let visible = $state(false);
 
