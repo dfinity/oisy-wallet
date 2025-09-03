@@ -874,6 +874,16 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolComputeBudgetInstruction).toHaveBeenCalledTimes(2);
 			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
 			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
+
+			expect(console.warn).toHaveBeenCalledTimes(2);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				1,
+				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
+			);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				2,
+				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
+			);
 		});
 
 		it('should map a valid System instruction', () => {
@@ -899,6 +909,8 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolSystemInstruction).toHaveBeenCalledTimes(2);
 			expect(parseSolSystemInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
 			expect(parseSolSystemInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
+
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should map a valid Token instruction', () => {
@@ -917,6 +929,16 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolTokenInstruction).toHaveBeenCalledTimes(2);
 			expect(parseSolTokenInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
 			expect(parseSolTokenInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
+
+			expect(console.warn).toHaveBeenCalledTimes(2);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				1,
+				`Could not map Solana instruction for program ${TOKEN_PROGRAM_ADDRESS}`
+			);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				2,
+				`Could not map Solana instruction for program ${TOKEN_PROGRAM_ADDRESS}`
+			);
 		});
 
 		it('should return undefined for unrecognized instruction', () => {
@@ -940,6 +962,8 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolSystemInstruction).not.toHaveBeenCalled();
 			expect(parseSolTokenInstruction).not.toHaveBeenCalled();
 			expect(parseSolToken2022Instruction).not.toHaveBeenCalled();
+
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 	});
 });

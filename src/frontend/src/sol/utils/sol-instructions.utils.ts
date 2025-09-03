@@ -399,6 +399,8 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		};
 	}
 
+	console.warn(`Could not map Solana System instruction of type ${instructionType}`);
+
 	return { amount: undefined };
 };
 
@@ -414,6 +416,8 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
 		return mapSolSystemInstruction(parsedInstruction);
 	}
+
+	console.warn(`Could not map Solana instruction for program ${programAddress}`);
 
 	return { amount: undefined };
 };
