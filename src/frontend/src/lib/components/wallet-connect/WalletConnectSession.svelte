@@ -18,6 +18,7 @@
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
@@ -123,7 +124,12 @@
 		}
 	};
 
-	onDestroy(async () => await disconnectListener());
+	$: ($authNotSignedIn,
+		(async () => {
+			if ($authNotSignedIn) {
+				await disconnectListener();
+			}
+		})());
 
 	const goToFirstStep = () => modal?.set?.(0);
 
