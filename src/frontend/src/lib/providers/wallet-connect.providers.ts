@@ -7,7 +7,7 @@ import {
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
 import { WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
-import type { EthAddress, OptionSolAddress } from '$lib/types/address';
+import type { OptionEthAddress, OptionSolAddress } from '$lib/types/address';
 import type {
 	WalletConnectApproveRequestMessage,
 	WalletConnectListener
@@ -16,6 +16,7 @@ import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
+import { nonNullish } from '@dfinity/utils';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import {
@@ -33,7 +34,7 @@ export const initWalletConnect = async ({
 	solAddress
 }: {
 	uri: string;
-	ethAddress: EthAddress;
+	ethAddress: OptionEthAddress;
 	// TODO add other networks for solana
 	solAddress: OptionSolAddress;
 }): Promise<WalletConnectListener> => {
@@ -93,18 +94,22 @@ export const initWalletConnect = async ({
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
 			supportedNamespaces: {
-				eip155: {
-					chains: EIP155_CHAINS_KEYS,
-					methods: [
-						SESSION_REQUEST_ETH_SEND_TRANSACTION,
-						SESSION_REQUEST_ETH_SIGN,
-						SESSION_REQUEST_PERSONAL_SIGN,
-						SESSION_REQUEST_ETH_SIGN_V4
-					],
-					events: ['accountsChanged', 'chainChanged'],
-					accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
-				},
-				...(solAddress
+				...(nonNullish(ethAddress)
+					? {
+							eip155: {
+								chains: EIP155_CHAINS_KEYS,
+								methods: [
+									SESSION_REQUEST_ETH_SEND_TRANSACTION,
+									SESSION_REQUEST_ETH_SIGN,
+									SESSION_REQUEST_PERSONAL_SIGN,
+									SESSION_REQUEST_ETH_SIGN_V4
+								],
+								events: ['accountsChanged', 'chainChanged'],
+								accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
+							}
+						}
+					: {}),
+				...(nonNullish(solAddress)
 					? {
 							solana: {
 								chains: [solMainnetNamespace],
