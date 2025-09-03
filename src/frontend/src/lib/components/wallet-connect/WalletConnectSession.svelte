@@ -152,8 +152,8 @@
 			return;
 		}
 
-		// Address is not defined. We need it at least one between Ethereum address and Solana address.
-		if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
+		// Address is not defined. We need it.
+		if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
 			return;
 		}
 
@@ -377,7 +377,7 @@
 			return;
 		}
 
-		if ($loading || isNullish($ethAddress) || isNullish($solAddressMainnet)) {
+		if ($loading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
 			return;
 		}
 
