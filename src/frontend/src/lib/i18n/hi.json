@@ -1621,7 +1621,8 @@
 			"send_message_input_placeholder": "आप क्या करना चाहते हैं?",
 			"send_token_succeeded": "लेनदेन पूरा हुआ!",
 			"no_contacts_found_message": "क्षमा करें, मुझे आपकी पता पुस्तिका में कोई उपयुक्त संपर्क नहीं मिला।",
-			"loading": "सोच रहा है..."
+			"loading": "सोच रहा है...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "क्षमा करें, LLM से प्रतिक्रिया प्राप्त करने में कुछ गलत हो गया।",
