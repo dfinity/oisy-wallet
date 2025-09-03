@@ -1,9 +1,15 @@
 import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
-import type { BtcTransactionUi } from '$btc/types/btc';
+import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
+import type {
+	BitcoinNetwork as BackendBitcoinNetwork,
+	PendingTransaction
+} from '$declarations/backend/backend.did';
 import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
+import { getBtcWalletBalance } from '$icp/utils/btc.utils';
+import { getPendingBtcTransactions } from '$lib/api/backend.api';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
@@ -35,13 +41,13 @@ interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	minterCanisterId?: OptionCanisterIdText;
 }
 interface BtcWalletStore {
-	balance: CertifiedData<bigint | null> | undefined;
+	balance: CertifiedData<BtcWalletBalance | null> | undefined;
 	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;
 	latestBitcoinBlockHeight?: number;
 }
 
 interface BtcWalletData {
-	balance: CertifiedData<bigint | null>;
+	balance: CertifiedData<BtcWalletBalance | null>;
 	uncertifiedTransactions: CertifiedData<BtcTransactionUi>[];
 	latestBitcoinBlockHeight?: number;
 }
@@ -56,6 +62,20 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		transactions: {},
 		latestBitcoinBlockHeight: undefined
 	};
+
+	/**
+	 * Convert ckBTC BitcoinNetwork type to backend BitcoinNetwork variant type
+	 */
+	private mapToBackendBitcoinNetwork(network: BitcoinNetwork): BackendBitcoinNetwork {
+		switch (network) {
+			case 'mainnet':
+				return { mainnet: null };
+			case 'testnet':
+				return { testnet: null };
+			case 'regtest':
+				return { regtest: null };
+		}
+	}
 
 	stop() {
 		this.timer.stop();
@@ -122,37 +142,70 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		bitcoinNetwork,
 		btcAddress,
 		minterCanisterId,
-		certified = true
-	}: Omit<LoadBtcWalletParams, 'shouldFetchTransactions'>): Promise<
-		CertifiedData<bigint | null>
-	> => {
+		certified = true,
+		shouldFetchTransactions,
+		uncertifiedTransactions = []
+	}: Omit<LoadBtcWalletParams, 'shouldFetchTransactions'> & {
+		shouldFetchTransactions?: boolean;
+		uncertifiedTransactions?: CertifiedData<BtcTransactionUi>[];
+	}): Promise<CertifiedData<BtcWalletBalance | null>> => {
+		let confirmedBalance: bigint | null;
+
 		if (!certified) {
 			// Query BTC balance only if minterCanisterId and BITCOIN_CANISTER_IDS[minterCanisterId] are available
 			// These values will be there only for "mainnet", for other networks - balance on "query" will be null
-			return {
-				data:
-					nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]
-						? await getBalanceQuery({
-								identity,
-								network: bitcoinNetwork,
-								address: btcAddress,
-								bitcoinCanisterId: BITCOIN_CANISTER_IDS[minterCanisterId],
-								minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
-							})
-						: null,
-				certified: false
-			};
-		}
-
-		return {
-			data: await getBtcBalance({
+			confirmedBalance =
+				nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]
+					? await getBalanceQuery({
+							identity,
+							network: bitcoinNetwork,
+							address: btcAddress,
+							bitcoinCanisterId: BITCOIN_CANISTER_IDS[minterCanisterId],
+							minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
+						})
+					: null;
+		} else {
+			confirmedBalance = await getBtcBalance({
 				identity,
 				network: mapToSignerBitcoinNetwork({
 					network: bitcoinNetwork
 				}),
 				minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
-			}),
-			certified: true
+			});
+		}
+
+		// If no confirmed balance available, return null
+		if (isNullish(confirmedBalance)) {
+			return {
+				data: null,
+				certified
+			};
+		}
+
+		// Get pending transactions for balance calculation
+		let pendingTransactions: PendingTransaction[] = [];
+		if (shouldFetchTransactions && !certified) {
+			try {
+				pendingTransactions = await getPendingBtcTransactions({
+					identity,
+					network: this.mapToBackendBitcoinNetwork(bitcoinNetwork),
+					address: btcAddress
+				});
+			} catch (error) {
+				console.error('Error fetching pending BTC transactions:', error);
+			}
+		}
+
+		// Calculate the structured balance using the uncertified transactions and pending transactions
+		const structuredBalance = getBtcWalletBalance({
+			balance: confirmedBalance,
+			providerTransactions: uncertifiedTransactions,
+			pendingTransactions
+		});
+
+		return {
+			data: structuredBalance,
+			certified
 		};
 	};
 
@@ -164,19 +217,21 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		minterCanisterId,
 		shouldFetchTransactions
 	}: LoadBtcWalletParams) => {
-		const balance = await this.loadBtcBalance({
-			identity,
-			bitcoinNetwork,
-			certified,
-			btcAddress,
-			minterCanisterId
-		});
-
 		// TODO: investigate and implement "update" call for BTC transactions
 		const transactionData =
 			shouldFetchTransactions && !certified
 				? await this.loadBtcTransactionsData({ btcAddress })
 				: { transactions: [], latestBitcoinBlockHeight: this.store.latestBitcoinBlockHeight };
+
+		const balance = await this.loadBtcBalance({
+			identity,
+			bitcoinNetwork,
+			certified,
+			btcAddress,
+			minterCanisterId,
+			shouldFetchTransactions,
+			uncertifiedTransactions: transactionData.transactions
+		});
 
 		return {
 			balance,
@@ -224,7 +279,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}) => {
 		const newBalance =
 			isNullish(this.store.balance) ||
-			this.store.balance.data !== balance.data ||
+			// Compare balance data properly using JSON comparison for structured balance
+			JSON.stringify(this.store.balance.data) !== JSON.stringify(balance.data) ||
 			// TODO, align with sol-wallet.scheduler.ts, crash if certified changes
 			(!this.store.balance.certified && balance.certified);
 		const newTransactions = uncertifiedTransactions.length > 0;
