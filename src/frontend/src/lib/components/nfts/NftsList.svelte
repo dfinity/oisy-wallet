@@ -1,23 +1,27 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
+	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
+	import { showHidden, showSpam } from '$lib/derived/settings.derived';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
-	import { nonNullish } from '@dfinity/utils';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
-	import { showHidden, showSpam } from '$lib/derived/settings.derived';
-	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
-	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
-	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
 
-	const {common: commonCollections, spam: spamCollections, hidden: hiddenCollections} = $derived.by(() => {
+	const {
+		common: commonCollections,
+		spam: spamCollections,
+		hidden: hiddenCollections
+	} = $derived.by(() => {
 		const common: NftCollectionUi[] = [];
 		const spam: NftCollectionUi[] = [];
 		const hidden: NftCollectionUi[] = [];
@@ -49,7 +53,10 @@
 		const hasVisibleSpamCollections = $showSpam && spamCollections.length > 0;
 		const hasVisibleHiddenCollections = $showHidden && hiddenCollections.length > 0;
 
-		return hasNoCollections || !(hasCommonCollections || hasVisibleSpamCollections || hasVisibleHiddenCollections);
+		return (
+			hasNoCollections ||
+			!(hasCommonCollections || hasVisibleSpamCollections || hasVisibleHiddenCollections)
+		);
 	});
 </script>
 
@@ -58,10 +65,10 @@
 		{#if isEmptyList}
 			<EmptyNftsList />
 		{:else}
-			<NftCollectionList title={$i18n.nfts.text.collections} nftCollections={commonCollections} />
+			<NftCollectionList nftCollections={commonCollections} title={$i18n.nfts.text.collections} />
 
 			{#if $showHidden}
-				<NftCollectionList title={$i18n.nfts.text.hidden} nftCollections={hiddenCollections}>
+				<NftCollectionList nftCollections={hiddenCollections} title={$i18n.nfts.text.hidden}>
 					{#snippet icon()}
 						<IconEyeOff size="24" />
 					{/snippet}
@@ -69,7 +76,7 @@
 			{/if}
 
 			{#if $showSpam}
-				<NftCollectionList title={$i18n.nfts.text.spam} nftCollections={spamCollections}>
+				<NftCollectionList nftCollections={spamCollections} title={$i18n.nfts.text.spam}>
 					{#snippet icon()}
 						<IconAlertOctagon size="24" />
 					{/snippet}
