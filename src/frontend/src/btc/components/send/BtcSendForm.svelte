@@ -28,8 +28,6 @@
 	// TODO: check if we can align this validation flag with other SendForm components (e.g IcSendForm)
 	let invalid = true;
 	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
-
-	onMount(() => {});
 </script>
 
 <SendForm
