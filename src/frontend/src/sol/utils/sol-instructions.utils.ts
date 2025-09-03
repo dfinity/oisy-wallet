@@ -20,6 +20,7 @@ import type {
 } from '$sol/types/sol-instructions';
 import type { MappedSolTransaction, SolMappedTransaction } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	ComputeBudgetInstruction,
@@ -664,6 +665,10 @@ export const parseSolInstruction = (
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
 		return parseSolTokenInstruction(instruction);
+	}
+
+	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
+		return parseSolToken2022Instruction(instruction);
 	}
 
 	return instruction;
