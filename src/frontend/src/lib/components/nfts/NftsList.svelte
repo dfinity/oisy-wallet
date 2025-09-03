@@ -31,7 +31,8 @@
 		common: commonCollections,
 		hidden: hiddenCollections,
 		spam: spamCollections
-	} = $derived(nftCollections.reduce<CollectionBuckets>(
+	} = $derived(
+		nftCollections.reduce<CollectionBuckets>(
 			(acc, collection) => {
 				const token = findNonFungibleToken({
 					tokens: $nonFungibleTokens,
