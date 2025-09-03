@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
+	import { nftSortStore } from '$lib/stores/settings.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import {
@@ -9,7 +10,6 @@
 		getEnabledNfts,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
-	import { nftSortStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		children: Snippet;
