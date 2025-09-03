@@ -21,7 +21,7 @@
 			<h5>{title}</h5>
 		</div>
 
-		<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">
+		<div class="grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
 			{#if nftCollections.filter((c) => c.nfts.length > 0).length > 0}
 				{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
 					{#if collection.nfts.length > 0}
