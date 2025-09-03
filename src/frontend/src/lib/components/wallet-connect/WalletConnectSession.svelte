@@ -100,8 +100,8 @@
 		await disconnectListener();
 
 		try {
-			// Connect and disconnect buttons are disabled until the address is loaded; therefore, this should never happen.
-			if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
+			// Connect and disconnect buttons are disabled until at least one of the address is loaded; therefore, this should never happen.
+			if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
 				});
@@ -155,8 +155,8 @@
 			return;
 		}
 
-		// Address is not defined. We need it.
-		if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
+		// Address is not defined. We need it at least one between the Ethereum address and the Solana address.
+		if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
 			return;
 		}
 
