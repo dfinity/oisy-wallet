@@ -918,8 +918,8 @@ describe('sol-instructions.utils', () => {
 				({ programAddress }) => programAddress === TOKEN_PROGRAM_ADDRESS
 			);
 
-			assertNonNullish(mockInstruction1, 'System instruction 1 not found');
-			assertNonNullish(mockInstruction2, 'System instruction 2 not found');
+			assertNonNullish(mockInstruction1, 'Token instruction 1 not found');
+			assertNonNullish(mockInstruction2, 'Token instruction 2 not found');
 
 			expect(mockInstruction3).toBeUndefined();
 
