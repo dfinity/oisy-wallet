@@ -6,19 +6,22 @@
 	import { ethAddressNotLoaded, solAddressMainnetNotLoaded } from '$lib/derived/address.derived';
 
 	interface Props {
+		loading?: boolean;
 		ariaLabel?: string;
 		onclick: () => void;
 		children?: Snippet;
 	}
 
-	let { ariaLabel, onclick, children }: Props = $props();
+	let { loading = false, ariaLabel, onclick, children }: Props = $props();
+
+	let disabled = $derived(loading || ($ethAddressNotLoaded && $solAddressMainnetNotLoaded));
 </script>
 
 <button
 	class="tertiary-alt h-10"
 	class:icon={isNullish(children)}
 	aria-label={ariaLabel}
-	disabled={$ethAddressNotLoaded && $solAddressMainnetNotLoaded}
+	{disabled}
 	{onclick}
 	in:fade
 >
