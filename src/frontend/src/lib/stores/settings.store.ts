@@ -13,3 +13,8 @@ export const privacyModeStore = initStorageStore<SettingsData>({
 	key: 'privacy-mode',
 	defaultValue: { enabled: false }
 });
+
+export const showHiddenStore = initStorageStore<SettingsData>({
+	key: 'show-hidden',
+	defaultValue: { enabled: false }
+});

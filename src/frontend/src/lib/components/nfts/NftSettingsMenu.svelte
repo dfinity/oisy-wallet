@@ -13,6 +13,8 @@
 	import { nftListGroupByCollection } from '$lib/derived/nfts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftListStore } from '$lib/stores/nft-list.store';
+	import { emit } from '$lib/utils/events.utils';
+	import NftsShowHiddenToggle from '$lib/components/nfts/NftsShowHiddenToggle.svelte';
 
 	let visible = $state(false);
 
@@ -20,6 +22,11 @@
 
 	const setGrouping = (grouping: boolean) => {
 		nftListStore.setGroupByCollection(grouping);
+	};
+
+	const toggleShowHidden = () => {
+		document.dispatchEvent(new CustomEvent('show-hidden'));
+		emit({ message: 'oisyToggleShowHidden' });
 	};
 </script>
 
@@ -68,19 +75,6 @@
 			<ListItem>
 				<LogoButton fullWidth>
 					{#snippet logo()}
-						<IconWarning />
-					{/snippet}
-					{#snippet title()}
-						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
-					{/snippet}
-					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_spam} checked={false} disabled />
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-			<ListItem>
-				<LogoButton fullWidth>
-					{#snippet logo()}
 						<IconEyeOff />
 					{/snippet}
 					{#snippet title()}
@@ -88,6 +82,19 @@
 					{/snippet}
 					{#snippet action()}
 						<Toggle ariaLabel={$i18n.nfts.text.show_hidden} checked={false} disabled />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+			<ListItem>
+				<LogoButton fullWidth onClick={toggleShowHidden}>
+					{#snippet logo()}
+						<IconWarning />
+					{/snippet}
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
+					{/snippet}
+					{#snippet action()}
+						<NftsShowHiddenToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
