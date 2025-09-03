@@ -17,7 +17,7 @@ use crate::types::{
     agreement::UpdateAgreementsError,
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
-    network::SetTestnetsSettingsError,
+    network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::AddUserCredentialError,
 };
 
@@ -140,13 +140,28 @@ impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateUserNetworkSettingsResult {
+    /// The user's network settings were updated successfully.
+    Ok(()),
+    /// The user's network settings were not updated due to an error.
+    Err(UpdateNetworksSettingsError),
+}
+impl From<Result<(), UpdateNetworksSettingsError>> for UpdateUserNetworkSettingsResult {
+    fn from(result: Result<(), UpdateNetworksSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateUserNetworkSettingsResult::Ok(()),
+            Err(err) => UpdateUserNetworkSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SetUserShowTestnetsResult {
     /// The user's show testnets was set successfully.
     Ok(()),
     /// The user's show testnets was not set due to an error.
     Err(SetTestnetsSettingsError),
 }
-
 impl From<Result<(), SetTestnetsSettingsError>> for SetUserShowTestnetsResult {
     fn from(result: Result<(), SetTestnetsSettingsError>) -> Self {
         match result {
