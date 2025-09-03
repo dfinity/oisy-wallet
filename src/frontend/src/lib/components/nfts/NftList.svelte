@@ -9,11 +9,11 @@
 		nfts: Nft[];
 	}
 
-	let {title, icon, nfts}: Props = $props();
+	let { title, icon, nfts }: Props = $props();
 </script>
 
 {#if nfts.length > 0}
-	<div class="flex gap-2 items-center mt-5">
+	<div class="mt-5 flex items-center gap-2">
 		{@render icon?.()}
 		<h5>{title}</h5>
 	</div>

@@ -4,6 +4,7 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
+	import NftList from '$lib/components/nfts/NftList.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
 	import { showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
@@ -12,7 +13,6 @@
 	import { nftListStore } from '$lib/stores/nft-list.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import NftList from '$lib/components/nfts/NftList.svelte';
 
 	let nfts: Nft[] = $state([]);
 	let nftCollections: NftCollectionUi[] = $state([]);
@@ -47,7 +47,11 @@
 		return { common, spam, hidden };
 	});
 
-	const {common: commonNfts, spam: spamNfts, hidden: hiddenNfts} = $derived.by(() => {
+	const {
+		common: commonNfts,
+		spam: spamNfts,
+		hidden: hiddenNfts
+	} = $derived.by(() => {
 		const common: Nft[] = [];
 		const spam: Nft[] = [];
 		const hidden: Nft[] = [];
@@ -71,7 +75,7 @@
 		});
 
 		return { common, spam, hidden };
-	})
+	});
 
 	const isEmptyList = $derived.by(() => {
 		const hasNoCollections = nftCollections.length === 0;
