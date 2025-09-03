@@ -68,19 +68,6 @@
 			<ListItem>
 				<LogoButton fullWidth>
 					{#snippet logo()}
-						<IconWarning />
-					{/snippet}
-					{#snippet title()}
-						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
-					{/snippet}
-					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_spam} checked={false} disabled />
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-			<ListItem>
-				<LogoButton fullWidth>
-					{#snippet logo()}
 						<IconEyeOff />
 					{/snippet}
 					{#snippet title()}
@@ -88,6 +75,19 @@
 					{/snippet}
 					{#snippet action()}
 						<Toggle ariaLabel={$i18n.nfts.text.show_hidden} checked={false} disabled />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+			<ListItem>
+				<LogoButton fullWidth>
+					{#snippet logo()}
+						<IconWarning />
+					{/snippet}
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
+					{/snippet}
+					{#snippet action()}
+						<Toggle ariaLabel={$i18n.nfts.text.show_spam} checked={false} disabled />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
