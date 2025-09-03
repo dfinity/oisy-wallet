@@ -1047,9 +1047,13 @@
 			"unhide": "",
 			"hidden": "",
 			"open_explorer": "",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
 			"display_preference": "",
+			"review_preference": "",
 			"media_enabled": "",
 			"media_disabled": "",
 			"enable_media": "",
@@ -1621,7 +1625,8 @@
 			"send_message_input_placeholder": "Bạn muốn làm gì?",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Xin lỗi, tôi không thể tìm thấy bất kỳ liên hệ phù hợp nào trong danh bạ của bạn.",
-			"loading": "Đang suy nghĩ..."
+			"loading": "Đang suy nghĩ...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",

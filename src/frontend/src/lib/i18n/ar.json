@@ -1047,9 +1047,13 @@
 			"unhide": "",
 			"hidden": "",
 			"open_explorer": "",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
 			"display_preference": "",
+			"review_preference": "",
 			"media_enabled": "",
 			"media_disabled": "",
 			"enable_media": "",
@@ -1621,7 +1625,8 @@
 			"send_message_input_placeholder": "ماذا تريد أن تفعل؟",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
-			"loading": "جارٍ التفكير..."
+			"loading": "جارٍ التفكير...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "عذرًا، حدث خطأ ما في الحصول على رد من LLM.",

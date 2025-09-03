@@ -894,9 +894,13 @@ interface I18nNfts {
 		unhide: string;
 		hidden: string;
 		open_explorer: string;
+		img_consent_disabled: string;
+		img_consent_none: string;
+		review_button: string;
 		collection_name: string;
 		media_urls: string;
 		display_preference: string;
+		review_preference: string;
 		media_enabled: string;
 		media_disabled: string;
 		enable_media: string;
@@ -1338,6 +1342,7 @@ interface I18nAi_assistant {
 		send_token_succeeded: string;
 		no_contacts_found_message: string;
 		loading: string;
+		reset_chat_history: string;
 	};
 	errors: { unknown: string; no_response: string };
 }

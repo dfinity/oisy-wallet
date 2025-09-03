@@ -1047,9 +1047,13 @@
 			"unhide": "Anzeigen",
 			"hidden": "Versteckt",
 			"open_explorer": "Öffne diesen Contract im Blockchain Explorer",
+			"img_consent_disabled": "Du hast diese Kollektion deaktiviert",
+			"img_consent_none": "Bild sicherheitsbedingt deaktiviert",
+			"review_button": "Prüfen",
 			"collection_name": "Kollektionsname",
 			"media_urls": "Medien URLs",
 			"display_preference": "Anzeigeeinstellung",
+			"review_preference": "Einstellung anpassen",
 			"media_enabled": "Medien aktiviert",
 			"media_disabled": "Medien deaktiviert",
 			"enable_media": "Medien aktivieren",
@@ -1621,7 +1625,8 @@
 			"send_message_input_placeholder": "",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
-			"loading": ""
+			"loading": "",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "",
