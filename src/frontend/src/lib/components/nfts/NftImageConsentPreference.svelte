@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
-	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
@@ -12,7 +11,7 @@
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
-		nft?: Nft;
+		nft: Nft;
 	}
 
 	const { nft }: Props = $props();
@@ -34,33 +33,31 @@
 	};
 </script>
 
-{#if nonNullish(nft)}
-	<span class="flex items-center text-right">
-		{#if hasConsent}
-			{$i18n.nfts.text.media_enabled}
-		{:else}
-			{$i18n.nfts.text.media_disabled}
-		{/if}
-		<Responsive up="md">
-			<Button
-				colorStyle="secondary-light"
-				onclick={openConsentModal}
-				styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
-				transparent>{$i18n.nfts.text.review_preference}</Button
-			>
-		</Responsive>
-		<Responsive down="sm">
-			<ButtonIcon
-				ariaLabel={$i18n.nfts.text.review_preference}
-				colorStyle="secondary-light"
-				onclick={openConsentModal}
-				styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2 h-auto"
-				transparent
-			>
-				{#snippet icon()}
-					<IconPenLine />
-				{/snippet}
-			</ButtonIcon>
-		</Responsive>
-	</span>
-{/if}
+<span class="flex items-center text-right">
+	{#if hasConsent}
+		{$i18n.nfts.text.media_enabled}
+	{:else}
+		{$i18n.nfts.text.media_disabled}
+	{/if}
+	<Responsive up="md">
+		<Button
+			colorStyle="secondary-light"
+			onclick={openConsentModal}
+			styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
+			transparent>{$i18n.nfts.text.review_preference}</Button
+		>
+	</Responsive>
+	<Responsive down="sm">
+		<ButtonIcon
+			ariaLabel={$i18n.nfts.text.review_preference}
+			colorStyle="secondary-light"
+			onclick={openConsentModal}
+			styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2 h-auto"
+			transparent
+		>
+			{#snippet icon()}
+				<IconPenLine />
+			{/snippet}
+		</ButtonIcon>
+	</Responsive>
+</span>

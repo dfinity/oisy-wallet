@@ -7,8 +7,8 @@
 	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
 	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
@@ -113,7 +113,7 @@
 			<ListItem>
 				<span>{$i18n.nfts.text.display_preference}</span>
 				{#if nonNullish(nfts?.[0])}
-					<NftImageConsentPreference nft={nfts?.[0]} />
+					<NftImageConsentPreference nft={nfts[0]} />
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />
