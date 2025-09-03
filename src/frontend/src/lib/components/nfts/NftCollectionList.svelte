@@ -16,7 +16,7 @@
 {#if nftCollections.length > 0}
 	<div class="mt-2 flex items-center gap-2">
 		{@render icon?.()}
-		<h5 class="">{title}</h5>
+		<h5>{title}</h5>
 	</div>
 
 	<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">

@@ -78,19 +78,6 @@
 
 		<List condensed noPadding>
 			<ListItem>
-				<LogoButton fullWidth onClick={toggleShowSpam}>
-					{#snippet logo()}
-						<IconWarning />
-					{/snippet}
-					{#snippet title()}
-						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
-					{/snippet}
-					{#snippet action()}
-						<NftCollectionShowSpamToggle />
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-			<ListItem>
 				<LogoButton fullWidth onClick={toggleShowHidden}>
 					{#snippet logo()}
 						<IconEyeOff />
@@ -100,6 +87,19 @@
 					{/snippet}
 					{#snippet action()}
 						<NftCollectionShowHiddenToggle />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+			<ListItem>
+				<LogoButton fullWidth onClick={toggleShowSpam}>
+					{#snippet logo()}
+						<IconWarning />
+					{/snippet}
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
+					{/snippet}
+					{#snippet action()}
+						<NftCollectionShowSpamToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
