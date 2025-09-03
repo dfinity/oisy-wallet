@@ -186,13 +186,7 @@
 
 		{#snippet toolbar()}
 			<div class="flex w-full gap-3">
-				<ButtonCancel
-					onclick={(e) => {
-						e.stopPropagation();
-						modalStore.close();
-					}}
-					testId={`${testId}-cancelButton`}
-				/>
+				<ButtonCancel onclick={() => modalStore.close} testId={`${testId}-cancelButton`} />
 				<Button
 					colorStyle="primary"
 					loading={saveLoading}
