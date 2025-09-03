@@ -195,9 +195,9 @@
 				/>
 				<Button
 					colorStyle="primary"
+					loading={saveLoading}
 					onclick={() => save()}
 					testId={`${testId}-saveButton`}
-					loading={saveLoading}
 					>{hasConsent ? $i18n.nfts.text.disable_media : $i18n.nfts.text.enable_media}</Button
 				>
 			</div>
