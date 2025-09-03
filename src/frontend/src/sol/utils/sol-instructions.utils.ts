@@ -19,8 +19,8 @@ import type { MappedSolTransaction, SolMappedTransaction } from '$sol/types/sol-
 import type { SplTokenAddress } from '$sol/types/spl';
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
-import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
+import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { SystemInstruction } from '@solana-program/system';
 
