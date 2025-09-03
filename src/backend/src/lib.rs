@@ -33,9 +33,7 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        network::{
-            SaveNetworksSettingsRequest, SetShowTestnetsRequest, UpdateNetworksSettingsError,
-        },
+        network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
@@ -46,7 +44,7 @@ use shared::{
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
             GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
-            UpdateContactResult, UpdateUserAgreementsResult,
+            UpdateContactResult, UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -623,9 +621,10 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
+#[must_use]
 pub fn update_user_network_settings(
     request: SaveNetworksSettingsRequest,
-) -> Result<(), UpdateNetworksSettingsError> {
+) -> UpdateUserNetworkSettingsResult {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
 
@@ -639,6 +638,7 @@ pub fn update_user_network_settings(
             &mut user_profile_model,
         )
     })
+    .into()
 }
 
 /// Sets the user's preference to show (or hide) testnets in the interface.
