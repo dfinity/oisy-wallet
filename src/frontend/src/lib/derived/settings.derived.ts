@@ -1,7 +1,8 @@
 import {
 	hideZeroBalancesStore,
 	privacyModeStore,
-	showHiddenStore, showSpamStore
+	showHiddenStore,
+	showSpamStore
 } from '$lib/stores/settings.store';
 import { derived, type Readable } from 'svelte/store';
 
