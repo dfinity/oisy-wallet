@@ -342,7 +342,7 @@ export const mapSolParsedInstruction = async ({
  * @param instruction - The Solana instruction to parse.
  * @returns The parsed instruction or the original instruction if it could not be parsed.
  */
-export const parseSolInstruction = (
+const parseSolInstruction = (
 	instruction: SolInstruction
 ): SolInstruction | SolParsedInstruction => {
 	const { programAddress } = instruction;
@@ -402,8 +402,6 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	return { amount: undefined };
 };
 
-// TODO: find a way to map correctly all the transaction message instructions
-// TODO: create tests
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
 	const parsedInstruction = parseSolInstruction(instruction);
 
