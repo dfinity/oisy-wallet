@@ -1,7 +1,8 @@
 import {
 	hideZeroBalancesStore,
 	privacyModeStore,
-	showHiddenStore
+	showHiddenStore,
+	showSpamStore
 } from '$lib/stores/settings.store';
 import { derived, type Readable } from 'svelte/store';
 
@@ -23,4 +24,9 @@ export const isPrivacyMode: Readable<boolean> = derived(
 export const showHidden: Readable<boolean> = derived(
 	[showHiddenStore],
 	([$showHiddenStore]) => $showHiddenStore.enabled
+);
+
+export const showSpam: Readable<boolean> = derived(
+	[showSpamStore],
+	([$showSpamStore]) => $showSpamStore.enabled
 );

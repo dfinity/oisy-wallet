@@ -31,6 +31,7 @@ declare namespace svelteHTML {
 		'on:oisyToggleZeroBalances'?: (event: CustomEvent<any>) => void;
 		'on:oisyRefreshContacts'?: (event: CustomEvent<any>) => void;
 		'on:oisyToggleShowHidden'?: (event: CustomEvent<any>) => void;
+		'on:oisyToggleShowSpam'?: (event: CustomEvent<any>) => void;
 	}
 }
 
