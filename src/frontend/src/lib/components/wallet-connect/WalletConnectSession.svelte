@@ -18,6 +18,7 @@
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
 	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
@@ -28,7 +29,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { Option } from '$lib/types/utils';
-	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type {
+		OptionWalletConnectListener,
+		WalletConnectListener
+	} from '$lib/types/wallet-connect';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
@@ -99,8 +103,8 @@
 		await disconnectListener();
 
 		try {
-			// Connect and disconnect buttons are disabled until the address is loaded therefore this should never happens.
-			if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
+			// Connect and disconnect buttons are disabled until at least one of the address is loaded; therefore, this should never happen.
+			if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
 				});
@@ -123,11 +127,16 @@
 		}
 	};
 
-	onDestroy(async () => await disconnectListener());
+	$: ($authNotSignedIn,
+		(async () => {
+			if ($authNotSignedIn) {
+				await disconnectListener();
+			}
+		})());
 
 	const goToFirstStep = () => modal?.set?.(0);
 
-	// One try to manually sign-in by entering the URL manually or scanning a QR code
+	// One try to manually sign in by entering the URL manually or scanning a QR code
 	const userConnect = async ({ detail: uri }: CustomEvent<string>) => {
 		modal.next();
 
@@ -138,7 +147,7 @@
 		}
 	};
 
-	// One try to sign-in using the Oisy Wallet listed in the WalletConnect app and the sign-in occurs through URL
+	// One try to sign in using the Oisy Wallet listed in the WalletConnect app and the sign-in occurs through URL
 	const uriConnect = async () => {
 		if (isNullish($walletConnectUri)) {
 			return;
@@ -149,13 +158,13 @@
 			return;
 		}
 
-		// Address is not defined. We need it.
-		if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
+		// Address is not defined. We need it at least one between the Ethereum address and the Solana address.
+		if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
 			return;
 		}
 
-		// For simplicity reason we just display an error for now if user has already opened the WalletConnect modal.
-		// Technically we could potentially check which steps is in progress and eventually jump or not but, let's keep it simple for now.
+		// For simplicity reason we just display an error for now if the user has already opened the WalletConnect modal.
+		// Technically, we could potentially check which steps are in progress and eventually jump or not, but let's keep it simple for now.
 		if ($modalWalletConnectAuth) {
 			toastsError({
 				msg: {
@@ -180,6 +189,93 @@
 		$loading,
 		(async () => await uriConnect())());
 
+	const onSessionProposal = (sessionProposal: WalletKitTypes.SessionProposal) => {
+		// Prevent race condition
+		if (isNullish(listener)) {
+			return;
+		}
+
+		proposal = sessionProposal;
+	};
+
+	const onSessionDelete = () => {
+		// Prevent race condition
+		if (isNullish(listener)) {
+			return;
+		}
+
+		resetListener();
+
+		toastsShow({
+			text: $i18n.wallet_connect.info.session_ended,
+			level: 'info',
+			duration: 2000
+		});
+
+		goToFirstStep();
+	};
+
+	const onSessionRequest = async (sessionRequest: WalletKitTypes.SessionRequest) => {
+		// Prevent race condition
+		if (isNullish(listener)) {
+			return;
+		}
+
+		// Another modal, like Send or Receive, is already in progress
+		if (nonNullish($modalStore) && !$modalWalletConnect) {
+			toastsError({
+				msg: {
+					text: $i18n.wallet_connect.error.skipping_request
+				}
+			});
+			return;
+		}
+
+		const {
+			id,
+			topic,
+			params: {
+				request: { method }
+			}
+		} = sessionRequest;
+
+		switch (method) {
+			case SESSION_REQUEST_ETH_SIGN_V4:
+			case SESSION_REQUEST_ETH_SIGN:
+			case SESSION_REQUEST_PERSONAL_SIGN:
+			case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
+			case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
+				modalStore.openWalletConnectSign({ id: signModalId, data: sessionRequest });
+				return;
+			}
+			case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
+				modalStore.openWalletConnectSend({ id: sendModalId, data: sessionRequest });
+				return;
+			}
+			default: {
+				await listener?.rejectRequest({ topic, id, error: getSdkError('UNSUPPORTED_METHODS') });
+
+				toastsError({
+					msg: {
+						text: replacePlaceholders($i18n.wallet_connect.error.method_not_support, {
+							$method: method
+						})
+					}
+				});
+
+				close();
+			}
+		}
+	};
+
+	const attachHandlers = (listener: WalletConnectListener) => {
+		listener.sessionProposal(onSessionProposal);
+
+		listener.sessionDelete(onSessionDelete);
+
+		listener.sessionRequest(onSessionRequest);
+	};
+
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);
 
@@ -187,84 +283,7 @@
 			return { result: 'error' };
 		}
 
-		listener.sessionProposal((sessionProposal) => {
-			// Prevent race condition
-			if (isNullish(listener)) {
-				return;
-			}
-
-			proposal = sessionProposal;
-		});
-
-		listener.sessionDelete(() => {
-			// Prevent race condition
-			if (isNullish(listener)) {
-				return;
-			}
-
-			resetListener();
-
-			toastsShow({
-				text: $i18n.wallet_connect.info.session_ended,
-				level: 'info',
-				duration: 2000
-			});
-
-			goToFirstStep();
-		});
-
-		listener.sessionRequest(async (sessionRequest: WalletKitTypes.SessionRequest) => {
-			// Prevent race condition
-			if (isNullish(listener)) {
-				return;
-			}
-
-			// Another modal, like Send or Receive, is already in progress
-			if (nonNullish($modalStore) && !$modalWalletConnect) {
-				toastsError({
-					msg: {
-						text: $i18n.wallet_connect.error.skipping_request
-					}
-				});
-				return;
-			}
-
-			const {
-				id,
-				topic,
-				params: {
-					request: { method }
-				}
-			} = sessionRequest;
-
-			switch (method) {
-				case SESSION_REQUEST_ETH_SIGN_V4:
-				case SESSION_REQUEST_ETH_SIGN:
-				case SESSION_REQUEST_PERSONAL_SIGN:
-				case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
-				case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
-					modalStore.openWalletConnectSign({ id: signModalId, data: sessionRequest });
-					return;
-				}
-				case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
-					modalStore.openWalletConnectSend({ id: sendModalId, data: sessionRequest });
-					return;
-				}
-				default: {
-					await listener?.rejectRequest({ topic, id, error: getSdkError('UNSUPPORTED_METHODS') });
-
-					toastsError({
-						msg: {
-							text: replacePlaceholders($i18n.wallet_connect.error.method_not_support, {
-								$method: method
-							})
-						}
-					});
-
-					close();
-				}
-			}
-		});
+		attachHandlers(listener);
 
 		try {
 			await listener.pair();
@@ -358,6 +377,55 @@
 
 	$: walletConnectPaired.set(nonNullish(listener));
 
+	const reconnect = async () => {
+		// If the listener is already initialized, we don't need to do anything.
+		if (nonNullish(listener)) {
+			return;
+		}
+
+		if ($loading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
+			return;
+		}
+
+		// Create listener, but DO NOT pair()
+		try {
+			listener = await initWalletConnect({
+				uri: '', // no URI – just init client
+				ethAddress: $ethAddress,
+				solAddress: $solAddressMainnet,
+				cleanSlate: false
+			});
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.wallet_connect.error.connect },
+				err
+			});
+
+			resetListener();
+
+			return;
+		}
+
+		// Reattach handlers so incoming requests work after refresh
+		attachHandlers(listener);
+
+		// Check for persisted sessions
+		const sessions = listener.getActiveSessions();
+
+		if (Object.keys(sessions).length === 0) {
+			walletConnectPaired.set(false);
+
+			await disconnectListener();
+
+			return;
+		}
+
+		// We have at least one active session – consider ourselves connected
+		walletConnectPaired.set(true);
+	};
+
+	$: ($ethAddress, $solAddressMainnet, $loading, (async () => await reconnect())());
+
 	onDestroy(() => walletConnectPaired.set(false));
 
 	const openWalletConnectAuth = () => {
@@ -370,9 +438,9 @@
 </script>
 
 {#if nonNullish(listener)}
-	<WalletConnectButton on:click={disconnect}
-		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
-	>
+	<WalletConnectButton on:click={disconnect}>
+		{$i18n.wallet_connect.text.disconnect}
+	</WalletConnectButton>
 {:else}
 	<WalletConnectButton
 		ariaLabel={$i18n.wallet_connect.text.name}

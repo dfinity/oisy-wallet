@@ -156,7 +156,8 @@ describe('ai-assistant.services', () => {
 		it('parses show_contacts tool and returns all contacts if no filter params provided', async () => {
 			const result = await executeTool({
 				identity: mockIdentity,
-				toolCall: noAgumentsToolCall
+				toolCall: noAgumentsToolCall,
+				requestStartTimestamp: 1000
 			});
 
 			expect(result).toEqual({
@@ -170,7 +171,8 @@ describe('ai-assistant.services', () => {
 		it('parses show_contacts tool and returns contacts if filter params provided', async () => {
 			const result = await executeTool({
 				identity: mockIdentity,
-				toolCall
+				toolCall,
+				requestStartTimestamp: 1000
 			});
 
 			expect(result).toEqual({

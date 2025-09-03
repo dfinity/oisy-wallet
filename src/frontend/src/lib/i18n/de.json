@@ -508,6 +508,7 @@
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Fehler beim Laden der BTC-Wallet-Informationen.",
 			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen."
 		}
@@ -1040,7 +1041,27 @@
 			"collections": "Kollektionen",
 			"all_assets": "Alle Assets",
 			"address_copied": "Adresse $address kopiert",
-			"open_explorer": "Öffne diesen Contract im Blockchain Explorer"
+			"spam": "Spam",
+			"not_spam": "Kein Spam",
+			"hide": "Verstecken",
+			"unhide": "Anzeigen",
+			"hidden": "Versteckt",
+			"open_explorer": "Öffne diesen Contract im Blockchain Explorer",
+			"img_consent_disabled": "Du hast diese Kollektion deaktiviert",
+			"img_consent_none": "Bild sicherheitsbedingt deaktiviert",
+			"review_button": "Prüfen",
+			"collection_name": "Kollektionsname",
+			"media_urls": "Medien URLs",
+			"display_preference": "Anzeigeeinstellung",
+			"review_preference": "Einstellung anpassen",
+			"media_enabled": "Medien aktiviert",
+			"media_disabled": "Medien deaktiviert",
+			"enable_media": "Medien aktivieren",
+			"disable_media": "Medien deaktivieren",
+			"open_in_new_tab": "In neuem Tab öffnen",
+			"review_title": "Medienquelle überprüfen für \"$collectionName\"",
+			"review_description": "Aufgepasst! Diese Bilder kommen von einer unverifizierten Quelle. Diese zu aktivieren könnte deine IP-Adresse mit Dritten teilen und potentiell ein Sicherheitsrisiko darstellen.",
+			"learn_more": "Erfahre mehr"
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
@@ -1489,6 +1510,9 @@
 			"i_have_accepted": "Ich habe die Dokumente gelesen und stimme ihnen zu.",
 			"i_have_accepted_updated": "Ich habe die angepassten Dokumente gelesen und stimme ihnen zu.",
 			"accept_and_continue": "Zustimmen und weiterfahren"
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
 		}
 	},
 	"license_agreement": {
@@ -1601,7 +1625,8 @@
 			"send_message_input_placeholder": "",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
-			"loading": ""
+			"loading": "",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "",
