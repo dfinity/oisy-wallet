@@ -1,10 +1,10 @@
+import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
+import { AppPath } from '$lib/constants/routes.constants';
+import type { NftCollectionUi } from '$lib/types/nft';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { parseNftId } from '$lib/validation/nft.validation';
 import { render } from '@testing-library/svelte';
-import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
-import type { NftCollectionUi } from '$lib/types/nft';
-import { AppPath } from '$lib/constants/routes.constants';
 
 describe('NftsCollectionList', () => {
 	const mockNfts = [
@@ -14,9 +14,9 @@ describe('NftsCollectionList', () => {
 	];
 
 	const mockCollections: NftCollectionUi[] = [
-		{collection: mockNfts[0].collection, nfts: mockNfts},
-		{collection: mockNfts[1].collection, nfts: mockNfts},
-	]
+		{ collection: mockNfts[0].collection, nfts: mockNfts },
+		{ collection: mockNfts[1].collection, nfts: mockNfts }
+	];
 
 	it('should render a list of collections', () => {
 		const title = 'Collections';

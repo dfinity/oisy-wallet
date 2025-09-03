@@ -1,6 +1,13 @@
 import NftsList from '$lib/components/nfts/NftsList.svelte';
+import {
+	NFT_COLLECTION_LIST_COMMON,
+	NFT_COLLECTION_LIST_HIDDEN,
+	NFT_COLLECTION_LIST_SPAM
+} from '$lib/constants/test-ids.constants';
 import * as networkTokens from '$lib/derived/network-tokens.derived';
+import * as settingsDerived from '$lib/derived/settings.derived';
 import * as tokens from '$lib/derived/tokens.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
 import * as nftsUtils from '$lib/utils/nfts.utils';
@@ -13,13 +20,6 @@ import {
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get, writable } from 'svelte/store';
-import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import {
-	NFT_COLLECTION_LIST_COMMON,
-	NFT_COLLECTION_LIST_HIDDEN,
-	NFT_COLLECTION_LIST_SPAM
-} from '$lib/constants/test-ids.constants';
-import * as settingsDerived from '$lib/derived/settings.derived';
 
 describe('NftsList', () => {
 	const mockNfts = [
@@ -84,6 +84,7 @@ describe('NftsList', () => {
 			const hiddenCollectionList: HTMLDivElement | null = container.querySelector(
 				hiddenCollectionListSelector
 			);
+
 			expect(hiddenCollectionList).toBeInTheDocument();
 		});
 
