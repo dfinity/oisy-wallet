@@ -6,6 +6,7 @@
 	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
 	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
 	import IconOisy from '$lib/components/icons/IconOisy.svelte';
+	import IconRepeat from '$lib/components/icons/IconRepeat.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
 	import {
@@ -113,9 +114,21 @@
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
 
 		<button
+			class="mr-2 transition-colors"
+			class:hover:text-primary={!loading}
+			class:text-tertiary={!loading}
+			class:text-tertiary-inverted={loading}
+			aria-label={$i18n.ai_assistant.text.reset_chat_history}
+			disabled={loading}
+			onclick={aiAssistantStore.resetChatHistory}
+		>
+			<IconRepeat size="18" />
+		</button>
+
+		<button
 			class="text-tertiary transition-colors hover:text-primary"
 			aria-label={$i18n.core.text.close}
-			onclick={() => aiAssistantStore.close()}
+			onclick={aiAssistantStore.close}
 		>
 			<IconClose />
 		</button>
@@ -123,32 +136,36 @@
 
 	<div class="h-full overflow-y-auto overflow-x-hidden px-4 py-6">
 		{#if !loading && messagesToDisplay.length <= 0}
-			<h4 class="text-brand-primary">
-				{$i18n.ai_assistant.text.welcome_message}
-			</h4>
-			<div class="my-6">
-				<AiAssistantActionButton
-					onClick={() => {
-						sendMessage({ messageText: $i18n.ai_assistant.text.action_button_contacts_prompt });
-					}}
-					subtitle={$i18n.ai_assistant.text.action_button_contacts_subtitle}
-					title={$i18n.ai_assistant.text.action_button_contacts_title}
-				>
-					{#snippet icon()}
-						<IconSend />
-					{/snippet}
-				</AiAssistantActionButton>
-				<AiAssistantActionButton
-					onClick={() => {
-						sendMessage({ messageText: $i18n.ai_assistant.text.action_button_send_tokens_prompt });
-					}}
-					subtitle={$i18n.ai_assistant.text.action_button_send_tokens_subtitle}
-					title={$i18n.ai_assistant.text.action_button_send_tokens_title}
-				>
-					{#snippet icon()}
-						<IconlySend />
-					{/snippet}
-				</AiAssistantActionButton>
+			<div in:fade>
+				<h4 class="text-brand-primary">
+					{$i18n.ai_assistant.text.welcome_message}
+				</h4>
+				<div class="my-6">
+					<AiAssistantActionButton
+						onClick={() => {
+							sendMessage({ messageText: $i18n.ai_assistant.text.action_button_contacts_prompt });
+						}}
+						subtitle={$i18n.ai_assistant.text.action_button_contacts_subtitle}
+						title={$i18n.ai_assistant.text.action_button_contacts_title}
+					>
+						{#snippet icon()}
+							<IconSend />
+						{/snippet}
+					</AiAssistantActionButton>
+					<AiAssistantActionButton
+						onClick={() => {
+							sendMessage({
+								messageText: $i18n.ai_assistant.text.action_button_send_tokens_prompt
+							});
+						}}
+						subtitle={$i18n.ai_assistant.text.action_button_send_tokens_subtitle}
+						title={$i18n.ai_assistant.text.action_button_send_tokens_title}
+					>
+						{#snippet icon()}
+							<IconlySend />
+						{/snippet}
+					</AiAssistantActionButton>
+				</div>
 			</div>
 		{:else}
 			<div in:fade>
