@@ -952,7 +952,7 @@ describe('sol-instructions.utils', () => {
 					].includes(programAddress)
 			);
 
-			assertNonNullish(mockInstruction1, 'System instruction 1 not found');
+			assertNonNullish(mockInstruction1, 'Unrecognized instruction 1 not found');
 
 			expect(mockInstruction2).toBeUndefined();
 
