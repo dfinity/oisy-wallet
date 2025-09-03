@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -8,6 +7,7 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import NftsShowHiddenToggle from '$lib/components/nfts/NftsShowHiddenToggle.svelte';
+	import NftsShowSpamToggle from '$lib/components/nfts/NftsShowSpamToggle.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
@@ -26,6 +26,10 @@
 
 	const toggleShowHidden = () => {
 		emit({ message: 'oisyToggleShowHidden' });
+	};
+
+	const toggleShowSpam = () => {
+		emit({ message: 'oisyToggleShowSpam' });
 	};
 </script>
 
@@ -85,7 +89,7 @@
 				</LogoButton>
 			</ListItem>
 			<ListItem>
-				<LogoButton fullWidth>
+				<LogoButton fullWidth onClick={toggleShowSpam}>
 					{#snippet logo()}
 						<IconWarning />
 					{/snippet}
@@ -93,7 +97,7 @@
 						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
 					{/snippet}
 					{#snippet action()}
-						<Toggle ariaLabel={$i18n.nfts.text.show_spam} checked={false} disabled />
+						<NftsShowSpamToggle />
 					{/snippet}
 				</LogoButton>
 			</ListItem>
