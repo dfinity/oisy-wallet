@@ -12,7 +12,7 @@ import type { TokenId } from '$lib/types/token';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const syncWallet = async ({
+export const syncWallet = ({
 	data,
 	tokenId
 }: {
