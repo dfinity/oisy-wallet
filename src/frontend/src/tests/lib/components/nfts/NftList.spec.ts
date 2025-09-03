@@ -1,9 +1,9 @@
-import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
-import { parseNftId } from '$lib/validation/nft.validation';
 import NftList from '$lib/components/nfts/NftList.svelte';
-import { render } from '@testing-library/svelte';
-import { assertNonNullish } from '@dfinity/utils';
 import { AppPath } from '$lib/constants/routes.constants';
+import { parseNftId } from '$lib/validation/nft.validation';
+import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { assertNonNullish } from '@dfinity/utils';
+import { render } from '@testing-library/svelte';
 
 describe('NftList', () => {
 	const mockNfts = [
@@ -15,12 +15,12 @@ describe('NftList', () => {
 	it('should render a list of nfts', () => {
 		const title = 'Nfts';
 
-		const {container, getByText} = render(NftList, {
+		const { container, getByText } = render(NftList, {
 			props: {
 				title,
-				nfts: mockNfts,
+				nfts: mockNfts
 			}
-		})
+		});
 
 		expect(getByText(title)).toBeInTheDocument();
 
