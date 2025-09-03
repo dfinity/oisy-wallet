@@ -153,7 +153,7 @@
 		}
 
 		// Address is not defined. We need it.
-		if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
+		if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
 			return;
 		}
 
