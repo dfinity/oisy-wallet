@@ -21,7 +21,7 @@ import { cleanup, fireEvent, render } from '@testing-library/svelte';
 import { get, writable, type Writable } from 'svelte/store';
 
 describe('AcceptAgreementsModal', () => {
-	let hasOutdatedStore: Writable<boolean>;
+	let noAgreementVisionedStore: Writable<boolean>;
 	type PartialAgreements = Partial<UserAgreements>;
 	let outdatedStore: Writable<PartialAgreements>;
 
@@ -30,8 +30,10 @@ describe('AcceptAgreementsModal', () => {
 
 		mockAuthStore();
 
-		hasOutdatedStore = writable(false);
-		vi.spyOn(agreementsDerived, 'hasOutdatedAgreements', 'get').mockReturnValue(hasOutdatedStore);
+		noAgreementVisionedStore = writable(false);
+		vi.spyOn(agreementsDerived, 'noAgreementVisionedYet', 'get').mockReturnValue(
+			noAgreementVisionedStore
+		);
 
 		const nullish: AgreementData = {
 			accepted: undefined,
@@ -58,8 +60,8 @@ describe('AcceptAgreementsModal', () => {
 		vi.spyOn(eventsUtils, 'emit');
 	});
 
-	it('shows updated title when hasOutdatedAgreements = true', () => {
-		hasOutdatedStore.set(true);
+	it('shows updated title when noAgreementVisionedYet = false', () => {
+		noAgreementVisionedStore.set(false);
 
 		const { getByRole } = render(AcceptAgreementsModal);
 
@@ -137,8 +139,8 @@ describe('AcceptAgreementsModal', () => {
 		expect(acceptBtn).not.toBeDisabled();
 	});
 
-	it('uses updated checkbox label text when hasOutdatedAgreements = true', () => {
-		hasOutdatedStore.set(true);
+	it('uses updated checkbox label text when noAgreementVisionedYet = false', () => {
+		noAgreementVisionedStore.set(false);
 
 		const { getAllByText } = render(AcceptAgreementsModal);
 

@@ -23,7 +23,7 @@
 		AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { hasOutdatedAgreements, outdatedAgreements } from '$lib/derived/user-agreements.derived';
+	import { noAgreementVisionedYet, outdatedAgreements } from '$lib/derived/user-agreements.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -116,27 +116,29 @@
 	};
 </script>
 
-<!-- TODO: remove the close button from the modal -->
-<Modal testId={AGREEMENTS_MODAL}>
+<Modal disablePointerEvents={true} testId={AGREEMENTS_MODAL}>
 	<h4 slot="title">
-		{$hasOutdatedAgreements
-			? $i18n.agreements.text.review_updated_title
-			: $i18n.agreements.text.review_title}
+		{$noAgreementVisionedYet
+			? $i18n.agreements.text.review_title
+			: $i18n.agreements.text.review_updated_title}
 	</h4>
 	<ContentWithToolbar>
 		<Img src={agreementsBanner} styleClass="mb-6" />
 		<p>
-			{$hasOutdatedAgreements
-				? $i18n.agreements.text.review_updated_description
-				: $i18n.agreements.text.review_description}
+			{$noAgreementVisionedYet
+				? $i18n.agreements.text.review_description
+				: $i18n.agreements.text.review_updated_description}
 		</p>
 
-		<div style="--checkbox-label-order: 1" class="flex flex-col font-bold">
+		<div
+			style="--checkbox-label-order: 1; --text-white-space: normal"
+			class="flex flex-col gap-1 font-bold"
+		>
 			{#if 'termsOfUse' in agreementsToAccept}
 				<AcceptAgreementsCheckbox
 					checked={agreementsToAccept['termsOfUse'] ?? false}
 					inputId="termsOfUseCheckbox"
-					isOutdated={$hasOutdatedAgreements}
+					isOutdated={!$noAgreementVisionedYet}
 					onChange={() => toggleAccept('termsOfUse')}
 					testId={AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE}
 				>
@@ -153,7 +155,7 @@
 				<AcceptAgreementsCheckbox
 					checked={agreementsToAccept['privacyPolicy'] ?? false}
 					inputId="privacyPolicyCheckbox"
-					isOutdated={$hasOutdatedAgreements}
+					isOutdated={!$noAgreementVisionedYet}
 					onChange={() => toggleAccept('privacyPolicy')}
 					testId={AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY}
 				>
@@ -170,7 +172,7 @@
 				<AcceptAgreementsCheckbox
 					checked={agreementsToAccept['licenseAgreement'] ?? false}
 					inputId="licenseAgreementCheckbox"
-					isOutdated={$hasOutdatedAgreements}
+					isOutdated={!$noAgreementVisionedYet}
 					onChange={() => toggleAccept('licenseAgreement')}
 					testId={AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT}
 				>

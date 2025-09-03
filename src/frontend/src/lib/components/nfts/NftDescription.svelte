@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import type { Nft } from '$lib/types/nft';
@@ -25,7 +26,9 @@
 
 			{#if nonNullish(nft.imageUrl)}
 				<div class="ml-3 max-w-16 grow-0 self-start overflow-hidden rounded-lg">
-					<Img src={nft.imageUrl} />
+					<NftImageConsent {nft} showMessage={false} type="nft-display">
+						<Img src={nft.imageUrl} />
+					</NftImageConsent>
 				</div>
 			{/if}
 		{:else}

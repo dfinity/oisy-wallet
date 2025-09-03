@@ -1,4 +1,4 @@
-import { solvePowChallenge } from '$icp/services/pow-protector.services';
+import { hasRequiredCycles, solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { CreateChallengeEnum, PowCreateChallengeError } from '$lib/canisters/backend.errors';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
@@ -44,6 +44,11 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 * @throws Errors if any step with no specific error handling in the sequence fails.
 	 */
 	private requestSignerCycles = async ({ identity }: SchedulerJobData<PostMessageDataRequest>) => {
+		if (await hasRequiredCycles({ identity })) {
+			// We can skip the PoW process if the user has enough cycles
+			return;
+		}
+
 		// Step 1: Request creation of the Proof-of-Work (PoW) challenge (throws when unsuccessful).
 		this.postMessagePowProgress({ progress: 'REQUEST_CHALLENGE' });
 		try {
