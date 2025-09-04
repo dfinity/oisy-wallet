@@ -436,14 +436,11 @@
 </script>
 
 {#if nonNullish(listener)}
-	<WalletConnectButton on:click={disconnect}>
+	<WalletConnectButton onclick={disconnect}>
 		{$i18n.wallet_connect.text.disconnect}
 	</WalletConnectButton>
 {:else}
-	<WalletConnectButton
-		ariaLabel={$i18n.wallet_connect.text.name}
-		on:click={openWalletConnectAuth}
-	/>
+	<WalletConnectButton ariaLabel={$i18n.wallet_connect.text.name} onclick={openWalletConnectAuth} />
 {/if}
 
 {#if $modalWalletConnectAuth}
