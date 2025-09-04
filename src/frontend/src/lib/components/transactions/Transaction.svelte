@@ -91,7 +91,9 @@
 		typeof t === 'object' && t !== null && 'network' in (t as Record<string, unknown>);
 
 	const hasCollectionNetwork = (t: unknown): t is { collection: { network?: Network } } => {
-		if (typeof t !== 'object' || t === null) {return false;}
+		if (typeof t !== 'object' || t === null) {
+			return false;
+		}
 		const maybe = (t as { collection?: unknown }).collection;
 		return (
 			typeof maybe === 'object' && maybe !== null && 'network' in (maybe as Record<string, unknown>)
@@ -114,10 +116,18 @@
 
 	const mapNetworkToAccountType = (net: Network | undefined): TokenAccountIdTypes | undefined => {
 		const id = net?.id;
-		if (isNetworkIdBitcoin(id)) {return 'Btc';}
-		if (isNetworkIdEthereum(id) || isNetworkIdEvm(id)) {return 'Eth';}
-		if (isNetworkIdSolana(id)) {return 'Sol';}
-		if (isNetworkIdICP(id)) {return 'Icrcv2';}
+		if (isNetworkIdBitcoin(id)) {
+			return 'Btc';
+		}
+		if (isNetworkIdEthereum(id) || isNetworkIdEvm(id)) {
+			return 'Eth';
+		}
+		if (isNetworkIdSolana(id)) {
+			return 'Sol';
+		}
+		if (isNetworkIdICP(id)) {
+			return 'Icrcv2';
+		}
 		return undefined;
 	};
 	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
