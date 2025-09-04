@@ -5,7 +5,6 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -58,9 +57,7 @@ export const loadCustomTokens = ({
 const loadErc1155CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
 		...params,
-		filterTokens: ({ token }) => 'Erc1155' in token,
-		setIdbTokens: setIdbEthTokens,
-		getIdbTokens: getIdbEthTokens
+		filterTokens: ({ token }) => 'Erc1155' in token
 	});
 
 const loadCustomTokensWithMetadata = async (
