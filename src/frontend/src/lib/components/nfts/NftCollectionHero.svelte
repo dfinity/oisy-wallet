@@ -7,6 +7,7 @@
 	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
 	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
@@ -32,7 +33,9 @@
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="flex h-64 w-full">
-		<BgImg imageUrl={nfts?.[0]?.imageUrl} size="cover" />
+		<NftImageConsent nft={nfts?.[0]} type="hero-banner">
+			<BgImg imageUrl={nfts?.[0]?.imageUrl} size="cover" />
+		</NftImageConsent>
 	</div>
 
 	<div class="bg-primary p-4">

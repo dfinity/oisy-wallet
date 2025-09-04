@@ -147,7 +147,7 @@
 		}
 	};
 
-	// One try to sign in using the Oisy Wallet listed in the WalletConnect app and the sign-in occurs through URL
+	// One try to sign in using the Oisy Wallet listed in the WalletConnect app, and the sign-in occurs through URL
 	const uriConnect = async () => {
 		if (isNullish($walletConnectUri)) {
 			return;
@@ -377,13 +377,21 @@
 
 	$: walletConnectPaired.set(nonNullish(listener));
 
+	let reconnecting = true;
+
 	const reconnect = async () => {
-		// If the listener is already initialized, we don't need to do anything.
+		reconnecting = true;
+
+		// If the listener is already initialised, we don't need to do anything.
 		if (nonNullish(listener)) {
+			reconnecting = false;
+
 			return;
 		}
 
 		if ($loading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
+			reconnecting = false;
+
 			return;
 		}
 
@@ -395,6 +403,21 @@
 				solAddress: $solAddressMainnet,
 				cleanSlate: false
 			});
+
+			// Reattach handlers so incoming requests work after refresh
+			attachHandlers(listener);
+
+			// Check for persisted sessions
+			const sessions = listener.getActiveSessions();
+
+			if (Object.keys(sessions).length === 0) {
+				walletConnectPaired.set(false);
+
+				await disconnectListener();
+			} else {
+				// We have at least one active session – consider ourselves connected
+				walletConnectPaired.set(true);
+			}
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.connect },
@@ -402,26 +425,9 @@
 			});
 
 			resetListener();
-
-			return;
+		} finally {
+			reconnecting = false;
 		}
-
-		// Reattach handlers so incoming requests work after refresh
-		attachHandlers(listener);
-
-		// Check for persisted sessions
-		const sessions = listener.getActiveSessions();
-
-		if (Object.keys(sessions).length === 0) {
-			walletConnectPaired.set(false);
-
-			await disconnectListener();
-
-			return;
-		}
-
-		// We have at least one active session – consider ourselves connected
-		walletConnectPaired.set(true);
 	};
 
 	$: ($ethAddress, $solAddressMainnet, $loading, (async () => await reconnect())());
@@ -438,13 +444,14 @@
 </script>
 
 {#if nonNullish(listener)}
-	<WalletConnectButton on:click={disconnect}>
+	<WalletConnectButton onclick={disconnect}>
 		{$i18n.wallet_connect.text.disconnect}
 	</WalletConnectButton>
 {:else}
 	<WalletConnectButton
 		ariaLabel={$i18n.wallet_connect.text.name}
-		on:click={openWalletConnectAuth}
+		loading={reconnecting}
+		onclick={openWalletConnectAuth}
 	/>
 {/if}
 
