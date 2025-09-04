@@ -3,7 +3,7 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import aznx from '$sol/assets/aznx.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import type { RequiredSplToken } from '$sol/types/spl';
+import type { RequiredSpl2022Token, RequiredSplToken } from '$sol/types/spl';
 
 export const AZNX_DECIMALS = 8;
 
@@ -11,7 +11,7 @@ export const AZNX_SYMBOL = 'AZNx';
 
 export const AZNX_TOKEN_ID: TokenId = parseTokenId(AZNX_SYMBOL);
 
-export const AZNX_TOKEN: RequiredSplToken = {
+export const AZNX_TOKEN: RequiredSpl2022Token = {
 	id: AZNX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',

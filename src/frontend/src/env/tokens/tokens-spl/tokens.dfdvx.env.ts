@@ -3,7 +3,7 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import dfdvx from '$sol/assets/dfdvx.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import type { RequiredSplToken } from '$sol/types/spl';
+import type { RequiredSpl2022Token, RequiredSplToken } from '$sol/types/spl';
 
 export const DFDVX_DECIMALS = 8;
 
@@ -11,7 +11,7 @@ export const DFDVX_SYMBOL = 'DFDVx';
 
 export const DFDVX_TOKEN_ID: TokenId = parseTokenId(DFDVX_SYMBOL);
 
-export const DFDVX_TOKEN: RequiredSplToken = {
+export const DFDVX_TOKEN: RequiredSpl2022Token = {
 	id: DFDVX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',

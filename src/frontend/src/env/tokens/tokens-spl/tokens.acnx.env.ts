@@ -3,7 +3,7 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import acnx from '$sol/assets/acnx.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import type { RequiredSplToken } from '$sol/types/spl';
+import type { RequiredSpl2022Token, RequiredSplToken } from '$sol/types/spl';
 
 export const ACNX_DECIMALS = 8;
 
@@ -11,7 +11,7 @@ export const ACNX_SYMBOL = 'ACNx';
 
 export const ACNX_TOKEN_ID: TokenId = parseTokenId(ACNX_SYMBOL);
 
-export const ACNX_TOKEN: RequiredSplToken = {
+export const ACNX_TOKEN: RequiredSpl2022Token = {
 	id: ACNX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',

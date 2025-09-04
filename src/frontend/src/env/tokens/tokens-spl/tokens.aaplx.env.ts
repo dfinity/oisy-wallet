@@ -3,7 +3,7 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import aaplx from '$sol/assets/aaplx.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import type { RequiredSplToken } from '$sol/types/spl';
+import type { RequiredSpl2022Token, RequiredSplToken } from '$sol/types/spl';
 
 export const AAPLX_DECIMALS = 8;
 
@@ -11,7 +11,7 @@ export const AAPLX_SYMBOL = 'AAPLx';
 
 export const AAPLX_TOKEN_ID: TokenId = parseTokenId(AAPLX_SYMBOL);
 
-export const AAPLX_TOKEN: RequiredSplToken = {
+export const AAPLX_TOKEN: RequiredSpl2022Token = {
 	id: AAPLX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',
