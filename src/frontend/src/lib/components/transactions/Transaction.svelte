@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Component, Snippet ,ComponentProps } from 'svelte';
+	import type { Component, Snippet, ComponentProps } from 'svelte';
+
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
-	import Divider from '$lib/components/common/Divider.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
@@ -11,28 +12,30 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
+
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
-	import { formatSecondsToDate } from '$lib/utils/format.utils';
+
+	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import Avatar from '$lib/components/contact/Avatar.svelte';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	type NetworkLogoProps = ComponentProps<typeof NetworkLogo>;
 	type Network = NetworkLogoProps['network'];
 	type LogoColor = NetworkLogoProps['color'];
+	type AddressType = NetworkLogoProps['addressType'];
 
 	interface Props {
 		amount?: bigint;
@@ -65,56 +68,48 @@
 	}: Props = $props();
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
-
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
-	const contactAddress: string | undefined = $derived(
+	const address: string | undefined = $derived(
 		type === 'send' ? to : type === 'receive' ? from : undefined
 	);
 
 	const contact: ContactUi | undefined = $derived(
-		nonNullish(contactAddress)
-			? getContactForAddress({ addressString: contactAddress, contactList: $contacts })
+		nonNullish(address)
+			? getContactForAddress({
+					contactList: $contacts,
+					addressString: address
+				})
 			: undefined
 	);
 
-	const addressAlias: string | undefined = $derived(
-		filterAddressFromContact({ contact, address: contactAddress })?.label
+	const network: Network | undefined = $derived(
+		isTokenNonFungible(token)
+			? ((token as any)?.collection?.network ?? (token as any)?.network)
+			: (token as any)?.network
 	);
+
+	const networkLogoColor: LogoColor = $derived('transparent');
+
+	const mapNetworkToAddressType = (net: Network | undefined): AddressType => {
+		const raw = String(
+			net?.addressType ?? net?.type ?? net?.id ?? net?.symbol ?? net?.name ?? ''
+		).toLowerCase();
+
+		if (raw.includes('btc') || raw.includes('bitcoin')) return 'Btc';
+		if (raw.includes('eth') || raw.includes('ethereum')) return 'Eth';
+		if (raw.includes('sol') || raw.includes('solana')) return 'Sol';
+		if (raw.includes('icrc') || raw.includes('icp') || raw.includes('internet computer')) return 'Icrcv2';
+		return undefined;
+	};
+
+	const networkAddressType: AddressType = $derived(mapNetworkToAddressType(network));
 
 	const nft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
 			: undefined
 	);
-
-	const network: Network | undefined = $derived(
-		isTokenNonFungible(token)
-			? ((token as any)?.network ?? (token as any)?.collection?.network)
-			: (token as any)?.network
-	);
-	const networkLogoColor: LogoColor = $derived('transparent');
-	type AddressType = NetworkLogoProps['addressType'];
-
-function mapNetworkToAddressType(network: Network | undefined): AddressType {
-  const raw = String(
-    (network as any)?.addressType ?? 
-    (network as any)?.type ??
-    (network as any)?.id ??
-    (network as any)?.symbol ??
-    (network as any)?.name ??
-    ''
-  ).toLowerCase();
-
-  if (raw.includes('btc') || raw.includes('bitcoin')) return 'Btc';
-  if (raw.includes('eth') || raw.includes('ethereum')) return 'Eth';
-  if (raw.includes('sol') || raw.includes('solana')) return 'Sol';
-  if (raw.includes('icrc') || raw.includes('icp') || raw.includes('internet computer')) return 'Icrcv2';
-  return undefined;
-}
-
-const networkAddressType: AddressType = $derived(mapNetworkToAddressType(network));
-
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
@@ -125,25 +120,20 @@ const networkAddressType: AddressType = $derived(mapNetworkToAddressType(network
 					{type === 'send'
 						? replacePlaceholders($i18n.transaction.text.sent_to, { $name: contact.name })
 						: replacePlaceholders($i18n.transaction.text.received_from, { $name: contact.name })}
-					{#if nonNullish(addressAlias) && addressAlias !== ''}
-						<span class="text-tertiary"><Divider />{addressAlias}</span>
-					{/if}
 				{:else}
 					{@render children?.()}
 				{/if}
 
-	
 				{#if nonNullish(network)}
 					<div class="flex">
 						<NetworkLogo
-						color={networkLogoColor}
-						{network}
-						addressType={networkAddressType}
-						testId="network-tx"
+							addressType={networkAddressType}
+							color={networkLogoColor}
+							{network}
+							testId="network-tx"
 						/>
 					</div>
-					{/if}
-
+				{/if}
 			</span>
 
 			{#snippet icon()}
@@ -188,41 +178,32 @@ const networkAddressType: AddressType = $derived(mapNetworkToAddressType(network
 			{/snippet}
 
 			{#snippet description()}
-  <span class="inline-flex items-center gap-2 min-w-0">
-    {#if type === 'send'}
-      <span class="text-tertiary shrink-0">To</span>
-    {:else if type === 'receive'}
-      <span class="text-tertiary shrink-0">From</span>
-    {/if}
-	
-    <span class="shrink-0">
-      <Avatar
-        name={(contact?.name) ?? (addressAlias ?? contactAddress)}
-        image={contact?.image}
-        variant="xs"
-      />
-    </span>
+				<span class="inline-flex min-w-0 items-center gap-2">
+					{#if type === 'send'}
+						<span class="shrink-0 text-tertiary">{$i18n.transaction.text.to}</span>
+					{:else if type === 'receive'}
+						<span class="shrink-0 text-tertiary">{$i18n.transaction.text.from}</span>
+					{/if}
 
-    <!-- Primary text (name or shortened address) + optional alias -->
-    <span class="inline-flex items-center gap-1 min-w-0">
-      <span class="truncate">
-        {#if contact}
-          {contact.name}
-        {:else if contactAddress}
-          {shortenWithMiddleEllipsis({ text: contactAddress })}
-        {/if}
-      </span>
+					{#if nonNullish(contact)}
+						<span class="shrink-0">
+							<Avatar name={contact.name} image={contact.image} variant="xxs" />
+						</span>
+					{/if}
 
-      {#if addressAlias && addressAlias !== ''}
-        <span class="text-tertiary truncate">
-        	<Divider />{addressAlias} 
-        </span>
-      {/if}
-    </span>
-    <TransactionStatusComponent {status} />
-  </span>
-{/snippet}
-		  
+					<span class="inline-flex min-w-0 items-center gap-1">
+						<span class="truncate">
+							{#if nonNullish(contact)}
+								{contact.name}
+							{:else if nonNullish(address)}
+								{shortenWithMiddleEllipsis({ text: address })}
+							{/if}
+						</span>
+					</span>
+
+					<TransactionStatusComponent {status} />
+				</span>
+			{/snippet}
 		</Card>
 	</span>
 </button>
