@@ -35,7 +35,6 @@
 		amount={amountDisplay}
 		{balance}
 		{destination}
-		showNullishAmountLabel
 		source={$solAddressMainnet ?? ''}
 		{token}
 	>
