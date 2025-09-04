@@ -20,7 +20,6 @@
 	const manageTokensId = Symbol();
 
 	const toggleHideZeros = () => {
-		document.dispatchEvent(new CustomEvent('toggleHideZeros'));
 		emit({ message: 'oisyToggleZeroBalances' });
 	};
 
