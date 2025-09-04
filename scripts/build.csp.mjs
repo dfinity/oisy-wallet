@@ -211,7 +211,7 @@ const updateCSP = (indexHtml) => {
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' ${NFTS_ENABLED ? 'https: wss:' : allConnectSrc};
+        connect-src 'self' ${NFTS_ENABLED ? 'https: wss: ipfs:' : allConnectSrc};
         img-src 'self' https: ipfs: data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
