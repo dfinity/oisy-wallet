@@ -5,21 +5,26 @@ import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { last } from '$lib/utils/array.utils';
+import * as solApi from '$sol/api/solana.api';
 import {
 	fetchSignatures,
 	fetchTransactionDetailForSignature,
 	loadSolLamportsBalance,
 	loadTokenBalance
 } from '$sol/api/solana.api';
+import * as solSigSvc from '$sol/services/sol-signatures.services';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import { extractFeePayer } from '$sol/services/sol-transactions.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { loadJsonFixture, sigSlug } from '$tests/utils/fixture.test-utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
 import { signature, address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
+
+const USE_FIXTURES = true;
 
 vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
@@ -74,11 +79,41 @@ describe('sol-signatures.services integration', () => {
 			vi.clearAllMocks();
 
 			mockAuthStore();
+
+			if (USE_FIXTURES) {
+				// fetchSignatures → fixtures
+				vi.spyOn(solApi, 'fetchSignatures').mockImplementation(
+					// eslint-disable-next-line require-await
+					async ({ wallet, before, limit }) => {
+						const addr = wallet.toString();
+						const file = `${sigSlug(before?.toString())}.json`;
+						const page = loadJsonFixture<ReadonlyArray<SolSignature>>(
+							'solana',
+							addr,
+							'signatures',
+							file
+						);
+						return page.slice(0, limit ?? page.length);
+					}
+				);
+
+				// getSolTransactions → fixtures
+				// eslint-disable-next-line require-await
+				vi.spyOn(solSigSvc, 'getSolTransactions').mockImplementation(async (args) => {
+					const { address, before, limit } = args;
+					const file = `${sigSlug(before)}.json`;
+					const page = loadJsonFixture<ReadonlyArray<SolTransactionUi>>(
+						'solana',
+						address,
+						'transactions',
+						file
+					);
+					return page.slice(0, limit ?? page.length);
+				});
+			}
 		});
 
-		// FIXME: It takes too many simultaneous requests to the Alchemy API, which causes the test to fail.
-		// This is a known issue with the Alchemy API, which has a rate limit
-		it.skip.each(addresses)(
+		it.each(addresses)(
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
 				const loadTransactions = async (
