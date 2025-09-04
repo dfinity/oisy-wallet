@@ -6,6 +6,7 @@ import {
 	MAX_BUTTON,
 	NAVIGATION_ITEM_ACTIVITY,
 	NAVIGATION_ITEM_TOKENS,
+	NO_TRANSACTIONS_PLACEHOLDER,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_DONE_BUTTON,
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
@@ -92,7 +93,10 @@ export class FlowPage extends HomepageLoggedIn {
 	async navigateToActivity(): Promise<void> {
 		await this.navigateTo({ testId: NAVIGATION_ITEM_ACTIVITY, expectedPath: AppPath.Activity });
 
-		await new Promise((resolve) => setTimeout(resolve, 5000));
+		await this.waitForByTestId({
+			testId: NO_TRANSACTIONS_PLACEHOLDER,
+			options: { state: 'hidden', timeout: 30000 }
+		});
 
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
@@ -117,7 +121,10 @@ export class FlowPage extends HomepageLoggedIn {
 			expectedPath: AppPath.Transactions
 		});
 
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await this.waitForByTestId({
+			testId: NO_TRANSACTIONS_PLACEHOLDER,
+			options: { state: 'hidden', timeout: 30000 }
+		});
 
 		await this.mockSelectorAll({
 			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'

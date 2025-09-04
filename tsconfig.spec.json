@@ -25,7 +25,7 @@
 			"$routes": ["./src/frontend/src/routes"],
 			"$routes/*": ["./src/frontend/src/routes/*"]
 		},
-		"types": ["vitest/globals", "@testing-library/jest-dom"]
+		"types": ["vitest/globals", "@testing-library/jest-dom", "@playwright/test"]
 	},
 	"exclude": [],
 	"include": [

@@ -183,7 +183,7 @@ abstract class Homepage {
 			}
 		});
 
-		await elementsLocator.locator('text=placeholder').first().waitFor();
+			await elementsLocator.locator('text=placeholder').first().waitFor();
 	}
 
 	private async goto(): Promise<void> {
@@ -271,6 +271,10 @@ abstract class Homepage {
 
 	protected async clickSelector({ selector }: SelectorOperationParams): Promise<void> {
 		await this.#page.locator(selector).click();
+	}
+
+	protected getLocator({ selector }: SelectorOperationParams): Locator {
+		return this.#page.locator(selector);
 	}
 
 	protected getLocatorByTestId({ testId }: TestIdOperationParams): Locator {
