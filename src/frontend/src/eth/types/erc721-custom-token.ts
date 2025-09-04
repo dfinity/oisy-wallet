@@ -5,6 +5,6 @@ export type Erc721CustomToken = CustomToken<Erc721Token>;
 
 export type SaveErc721CustomToken = Pick<
 	Erc721CustomToken,
-	'enabled' | 'version' | 'address' | 'network' | 'section'
+	'enabled' | 'version' | 'address' | 'network' | 'section' | 'allowExternalContentSource'
 > &
 	Partial<Pick<Erc721CustomToken, 'id'>>;

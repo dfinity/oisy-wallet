@@ -2,6 +2,7 @@ import type {
 	AllowSigningResponse,
 	CreateChallengeResponse
 } from '$declarations/backend/backend.did';
+import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
 import * as powProtectorServices from '$icp/services/pow-protector.services';
 import * as backendApi from '$lib/api/backend.api';
@@ -22,6 +23,8 @@ describe('pow-protector.worker', () => {
 	let spyCreatePowChallenge: MockInstance;
 	let spyAllowSigning: MockInstance;
 	let spySolvePowChallenge: MockInstance;
+	let spyHasRequiredCycles: MockInstance;
+	let _spyAllowance: MockInstance;
 
 	let originalPostmessage: unknown;
 
@@ -82,6 +85,13 @@ describe('pow-protector.worker', () => {
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 
+		// Mock the allowance API call that hasRequiredCycles depends on
+		_spyAllowance = vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({
+			allowance: 0n,
+			expires_at: []
+		}); // Return insufficient allowance by default
+
+		// Reset all spies to their default successful behavior
 		// Mock the API canister calls
 		spyCreatePowChallenge = vi
 			.spyOn(backendApi, 'createPowChallenge')
@@ -94,6 +104,11 @@ describe('pow-protector.worker', () => {
 		spySolvePowChallenge = vi
 			.spyOn(powProtectorServices, 'solvePowChallenge')
 			.mockResolvedValue(42n);
+
+		// Mock hasRequiredCycles to return false so the scheduler logic is executed
+		spyHasRequiredCycles = vi
+			.spyOn(powProtectorServices, 'hasRequiredCycles')
+			.mockResolvedValue(false);
 	});
 
 	afterEach(() => {
@@ -132,6 +147,7 @@ describe('pow-protector.worker', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
+					expect(spyHasRequiredCycles).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
 
@@ -157,6 +173,10 @@ describe('pow-protector.worker', () => {
 				it('should trigger pow protection periodically', async () => {
 					await scheduler.start(startData);
 
+					// Wait for initial execution to complete
+					await vi.advanceTimersByTimeAsync(100);
+
+					// After start() - should have run once immediately
 					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
 					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
 
@@ -172,14 +192,18 @@ describe('pow-protector.worker', () => {
 						request: { nonce: 42n }
 					});
 
+					// Advance timer to trigger the first interval execution
 					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
 
+					// After first interval - should have run twice total
 					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(2);
 					expect(spySolvePowChallenge).toHaveBeenCalledTimes(2);
 					expect(spyAllowSigning).toHaveBeenCalledTimes(2);
 
+					// Advance timer to trigger the second interval execution
 					await vi.advanceTimersByTimeAsync(POW_CHALLENGE_INTERVAL_MILLIS);
 
+					// After second interval - should have run three times total
 					expect(spyCreatePowChallenge).toHaveBeenCalledTimes(3);
 					expect(spySolvePowChallenge).toHaveBeenCalledTimes(3);
 					expect(spyAllowSigning).toHaveBeenCalledTimes(3);
@@ -240,6 +264,8 @@ describe('pow-protector.worker', () => {
 		return {
 			setup: () => {
 				scheduler = new PowProtectionScheduler();
+				// Ensure hasRequiredCycles returns false so the PoW logic runs
+				spyHasRequiredCycles.mockResolvedValue(false);
 				// Create a ChallengeInProgressError and mock createPowChallenge to reject with it
 				const err = new PowCreateChallengeError(
 					'Challenge is in progress',
@@ -255,6 +281,8 @@ describe('pow-protector.worker', () => {
 			tests: () => {
 				it('should handle ChallengeInProgressError gracefully', async () => {
 					await scheduler.start(startData);
+
+					await awaitJobExecution();
 
 					// For ChallengeInProgressError, we just start and end normally
 					// because the error is handled internally without propagating
@@ -282,6 +310,8 @@ describe('pow-protector.worker', () => {
 		return {
 			setup: () => {
 				scheduler = new PowProtectionScheduler();
+				// Ensure hasRequiredCycles returns false so the PoW logic runs
+				spyHasRequiredCycles.mockResolvedValue(false);
 				// For ExpiredChallengeError, we need to make allowSigning fail with the right error
 				spyCreatePowChallenge.mockResolvedValue(mockCreateChallengeResponse);
 				const err = new PowChallengeError(
@@ -301,12 +331,11 @@ describe('pow-protector.worker', () => {
 
 					await awaitJobExecution();
 
-					// Even with ExpiredChallengeError, we should complete normally
-					// because the error is caught and handled internally
+					// With ExpiredChallengeError, we should see the error status
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusError);
 
-					// Make sure error status was not set
+					// Make sure error status was set
 					const errorCalls = postMessageMock.mock.calls.filter(
 						(call) => call[0].data?.state === 'error'
 					);
@@ -327,6 +356,8 @@ describe('pow-protector.worker', () => {
 		return {
 			setup: () => {
 				scheduler = new PowProtectionScheduler();
+				// Ensure hasRequiredCycles returns false so the PoW logic runs
+				spyHasRequiredCycles.mockResolvedValue(false);
 				// Use a general error that isn't specially handled
 				const err = new Error('Unhandled error');
 				spyCreatePowChallenge.mockRejectedValue(err);
@@ -340,9 +371,55 @@ describe('pow-protector.worker', () => {
 				it('should set error status for unhandled errors', async () => {
 					await scheduler.start(startData);
 
+					await awaitJobExecution();
+
 					// For unhandled errors, we should see the error status
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusError);
+				});
+			}
+		};
+	};
+
+	const initWithSufficientCycles = ({
+		startData = undefined
+	}: {
+		startData?: PostMessageDataRequest | undefined;
+	}): TestUtil => {
+		let scheduler: PowProtectionScheduler;
+
+		return {
+			setup: () => {
+				scheduler = new PowProtectionScheduler();
+				// Mock hasRequiredCycles to return true to trigger early return
+				spyHasRequiredCycles.mockResolvedValue(true);
+			},
+
+			teardown: () => {
+				scheduler.stop();
+			},
+
+			tests: () => {
+				it('should skip PoW when user has sufficient cycles', async () => {
+					await scheduler.start(startData);
+
+					await awaitJobExecution();
+
+					// Should only see status messages, no progress messages
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+
+					// Should not call PoW-related functions
+					expect(spyCreatePowChallenge).not.toHaveBeenCalled();
+					expect(spySolvePowChallenge).not.toHaveBeenCalled();
+					expect(spyAllowSigning).not.toHaveBeenCalled();
+
+					// Should not see any progress messages
+					const progressCalls = postMessageMock.mock.calls.filter(
+						(call) => call[0].msg === 'syncPowProgress'
+					);
+
+					expect(progressCalls).toHaveLength(0);
 				});
 			}
 		};
@@ -380,6 +457,16 @@ describe('pow-protector.worker', () => {
 
 	describe('with unhandled error', () => {
 		const { setup, teardown, tests } = initWithUnhandledError({});
+
+		beforeEach(setup);
+
+		afterEach(teardown);
+
+		tests();
+	});
+
+	describe('with sufficient cycles', () => {
+		const { setup, teardown, tests } = initWithSufficientCycles({});
 
 		beforeEach(setup);
 

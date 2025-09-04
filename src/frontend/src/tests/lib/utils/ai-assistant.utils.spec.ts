@@ -4,6 +4,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
 import {
+	generateAiAssistantResponseEventMetadata,
 	parseFromAiAssistantContacts,
 	parseReviewSendTokensToolArguments,
 	parseToAiAssistantContacts
@@ -120,6 +121,42 @@ describe('ai-assistant.utils', () => {
 				contact: undefined,
 				amount: sendValue,
 				address: mockEthAddress
+			});
+		});
+	});
+
+	describe('generateAiAssistantResponseEventMetadata', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('returns correct result with a tool name', () => {
+			const requestStartTimestamp = 1000000;
+			vi.spyOn(Date, 'now').mockReturnValue(requestStartTimestamp + 4000000);
+
+			expect(
+				generateAiAssistantResponseEventMetadata({
+					toolName: 'test',
+					requestStartTimestamp
+				})
+			).toEqual({
+				toolName: 'test',
+				responseTime: '4000s',
+				responseTimeCategory: '100000+'
+			});
+		});
+
+		it('returns correct result without a tool name', () => {
+			const requestStartTimestamp = 9000000;
+			vi.spyOn(Date, 'now').mockReturnValue(requestStartTimestamp + 65579);
+
+			expect(
+				generateAiAssistantResponseEventMetadata({
+					requestStartTimestamp
+				})
+			).toEqual({
+				responseTime: '65.579s',
+				responseTimeCategory: '20001-100000'
 			});
 		});
 	});

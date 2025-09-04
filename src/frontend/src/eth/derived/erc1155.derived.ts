@@ -3,7 +3,6 @@ import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.stor
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
 import { enabledEvmNetworksIds } from '$evm/derived/networks.derived';
-import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -43,5 +42,10 @@ export const enabledErc1155Tokens: Readable<Erc1155TokenToggleable[]> = derived(
 
 export const erc1155CustomTokensInitialized: Readable<boolean> = derived(
 	[erc1155CustomTokensStore],
-	([$erc1155CustomTokensStore]) => nonNullish($erc1155CustomTokensStore)
+	([$erc1155CustomTokensStore]) => $erc1155CustomTokensStore !== undefined
+);
+
+export const erc1155CustomTokensNotInitialized: Readable<boolean> = derived(
+	[erc1155CustomTokensInitialized],
+	([$erc1155CustomTokensInitialized]) => !$erc1155CustomTokensInitialized
 );

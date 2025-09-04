@@ -5,7 +5,6 @@ import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721ContractAddress } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { getIdbEthTokens, setIdbEthTokens } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -58,9 +57,7 @@ export const loadCustomTokens = ({
 const loadErc721CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
 		...params,
-		filterTokens: ({ token }) => 'Erc721' in token,
-		setIdbTokens: setIdbEthTokens,
-		getIdbTokens: getIdbEthTokens
+		filterTokens: ({ token }) => 'Erc721' in token
 	});
 
 const loadCustomTokensWithMetadata = async (
@@ -74,49 +71,59 @@ const loadCustomTokensWithMetadata = async (
 				(customToken): customToken is CustomToken & { token: { Erc721: ErcToken } } =>
 					'Erc721' in customToken.token
 			)
-			.map(async ({ token, enabled, version: versionNullable, section: sectionNullable }) => {
-				const version = fromNullable(versionNullable);
-				const section = fromNullable(sectionNullable);
-				const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+			.map(
+				async ({
+					token,
+					enabled,
+					version: versionNullable,
+					section: sectionNullable,
+					allow_external_content_source: allowExternalContentSourceNullable
+				}) => {
+					const version = fromNullable(versionNullable);
+					const section = fromNullable(sectionNullable);
+					const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+					const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
-				const {
-					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
-				} = token;
+					const {
+						Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
+					} = token;
 
-				const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
-					({ chainId }) => tokenChainId === chainId
-				);
+					const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
+						({ chainId }) => tokenChainId === chainId
+					);
 
-				// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
-				assertNonNullish(
-					network,
-					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
-				);
-
-				const metadata = await infuraErc721Providers(network.id).metadata({
-					address: tokenAddress
-				});
-				const { symbol } = metadata;
-
-				return {
-					...{
-						id: parseCustomTokenId({ identifier: symbol, chainId: network.chainId }),
-						name: tokenAddress,
-						address: tokenAddress,
+					// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
+					assertNonNullish(
 						network,
-						symbol,
-						decimals: 0, // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-						standard: 'erc721' as const,
-						category: 'custom' as const,
-						enabled,
-						version,
-						...(nonNullish(mappedSection) && {
-							section: mappedSection
-						})
-					},
-					...metadata
-				};
-			});
+						`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
+					);
+
+					const metadata = await infuraErc721Providers(network.id).metadata({
+						address: tokenAddress
+					});
+					const { symbol } = metadata;
+
+					return {
+						...{
+							id: parseCustomTokenId({ identifier: symbol, chainId: network.chainId }),
+							name: tokenAddress,
+							address: tokenAddress,
+							network,
+							symbol,
+							decimals: 0, // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
+							standard: 'erc721' as const,
+							category: 'custom' as const,
+							enabled,
+							version,
+							...(nonNullish(mappedSection) && {
+								section: mappedSection
+							}),
+							allowExternalContentSource
+						},
+						...metadata
+					};
+				}
+			);
 
 		return Promise.all(customTokenPromises);
 	};

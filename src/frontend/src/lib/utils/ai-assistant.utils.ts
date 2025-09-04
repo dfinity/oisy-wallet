@@ -7,7 +7,7 @@ import type {
 } from '$lib/types/ai-assistant';
 import type { ExtendedAddressContactUi, ExtendedAddressContactUiMap } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
-import { nonNullish } from '@dfinity/utils';
+import { nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const parseToAiAssistantContacts = (
 	extendedAddressContacts: ExtendedAddressContactUiMap
@@ -112,5 +112,38 @@ export const parseReviewSendTokensToolArguments = ({
 		address: addressFilter,
 		amount: parsedAmount,
 		token: tokenWithFallback
+	};
+};
+
+export const generateAiAssistantResponseEventMetadata = ({
+	requestStartTimestamp,
+	toolName
+}: {
+	requestStartTimestamp: number;
+	toolName?: string;
+}) => {
+	const responseTimeMs = Date.now() - requestStartTimestamp;
+
+	return {
+		...(notEmptyString(toolName) && { toolName }),
+		responseTime: `${responseTimeMs / 1000}s`,
+		responseTimeCategory:
+			responseTimeMs <= 100
+				? '0-100'
+				: responseTimeMs <= 500
+					? '101-500'
+					: responseTimeMs <= 1000
+						? '501-1000'
+						: responseTimeMs <= 2000
+							? '1001-2000'
+							: responseTimeMs <= 5000
+								? '2001-5000'
+								: responseTimeMs <= 10000
+									? '5001-10000'
+									: responseTimeMs <= 20000
+										? '10001-20000'
+										: responseTimeMs <= 100000
+											? '20001-100000'
+											: '100000+'
 	};
 };
