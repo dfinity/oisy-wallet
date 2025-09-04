@@ -227,6 +227,24 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			this.store.balance.data !== balance.data ||
 			// TODO, align with sol-wallet.scheduler.ts, crash if certified changes
 			(!this.store.balance.certified && balance.certified);
+
+		console.warn('=== Debug newBalance condition ===');
+		console.warn('this.store.balance:', this.store.balance);
+		console.warn('balance.data:', balance.data);
+		console.warn('balance.certified:', balance.certified);
+		console.warn('===================================');
+		console.warn('isNullish(this.store.balance):', isNullish(this.store.balance));
+		console.warn(
+			'this.store.balance?.data !== balance.data:',
+			this.store.balance?.data !== balance.data
+		);
+		console.warn(
+			'(!this.store.balance?.certified && balance.certified):',
+			!this.store.balance?.certified && balance.certified
+		);
+		console.warn('Final newBalance result:', newBalance);
+		console.warn('===================================');
+
 		const newTransactions = uncertifiedTransactions.length > 0;
 		const blockHeightChanged =
 			nonNullish(latestBitcoinBlockHeight) &&
