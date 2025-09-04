@@ -17,7 +17,6 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { getIdbIcTokens, setIdbIcTokens } from '$lib/api/idb-tokens.api';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
@@ -144,8 +143,6 @@ const loadIcrcCustomTokens = async ({
 		identity,
 		certified,
 		filterTokens: ({ token }) => 'Icrc' in token,
-		setIdbTokens: setIdbIcTokens,
-		getIdbTokens: getIdbIcTokens,
 		useCache
 	});
 
