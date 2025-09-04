@@ -174,7 +174,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 /**
  * Get the current allowance of an Erc20 contract.
  */
-const erc20ContractAllowance = async ({
+export const erc20ContractAllowance = async ({
 	token,
 	owner,
 	spender,
@@ -275,7 +275,7 @@ export const send = async ({
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
 	RequiredTransactionFeeData): Promise<{ hash: string }> => {
-	progress(ProgressStepsSend.INITIALIZATION);
+	progress?.(ProgressStepsSend.INITIALIZATION);
 
 	const { transactionNeededApproval, nonce } = await approve({
 		progress,
@@ -297,7 +297,7 @@ export const send = async ({
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	processTransactionSent({ token, transaction: transactionSent });
 
-	progress(lastProgressStep);
+	progress?.(lastProgressStep);
 
 	return { hash: transactionSent.hash };
 };
@@ -409,7 +409,7 @@ const sendTransaction = async ({
 							: infuraErc20Providers(networkId).populateTransaction
 				}));
 
-	progress(ProgressStepsSend.SIGN_TRANSFER);
+	progress?.(ProgressStepsSend.SIGN_TRANSFER);
 
 	const rawTransaction = await signTransaction({
 		identity,
@@ -417,7 +417,7 @@ const sendTransaction = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	progress(ProgressStepsSend.TRANSFER);
+	progress?.(ProgressStepsSend.TRANSFER);
 
 	return await sendTransaction(rawTransaction);
 };
@@ -570,7 +570,7 @@ export const approve = async ({
 	});
 
 	if (approvalCheckResult === 'existingApprovalIsEnough') {
-		progress(progressSteps.APPROVE);
+		progress?.(progressSteps.APPROVE);
 		return { transactionNeededApproval: false, nonce };
 	}
 

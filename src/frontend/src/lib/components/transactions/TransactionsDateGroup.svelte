@@ -21,13 +21,13 @@
 
 			<div in:slide={SLIDE_DURATION}>
 				{#if component === 'bitcoin'}
-					<BtcTransaction {transaction} {token} iconType="token" />
+					<BtcTransaction iconType="token" {token} {transaction} />
 				{:else if component === 'ethereum'}
-					<EthTransaction {transaction} {token} iconType="token" />
+					<EthTransaction iconType="token" {token} {transaction} />
 				{:else if component === 'solana'}
-					<SolTransaction {transaction} {token} iconType="token" />
+					<SolTransaction iconType="token" {token} {transaction} />
 				{:else}
-					<IcTransaction {transaction} {token} iconType="token" />
+					<IcTransaction iconType="token" {token} {transaction} />
 				{/if}
 			</div>
 		{/each}

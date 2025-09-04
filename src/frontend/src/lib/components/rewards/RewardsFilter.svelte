@@ -31,24 +31,24 @@
 	data-tid={REWARDS_FILTER}
 >
 	<Button
-		paddingSmall
 		ariaLabel={$i18n.rewards.text.ongoing}
-		onclick={() => changeFilter(RewardStates.ONGOING)}
-		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ONGOING ? 'primary' : 'tertiary'}
+		onclick={() => changeFilter(RewardStates.ONGOING)}
+		paddingSmall
+		styleClass="text-nowrap max-w-28 text-sm"
 		testId={`${REWARDS_FILTER}-${RewardStates.ONGOING}-button`}
 	>
 		{$i18n.rewards.text.ongoing}
 	</Button>
 
 	<Button
-		paddingSmall
 		ariaLabel={$i18n.rewards.text.ended}
-		onclick={() => changeFilter(RewardStates.ENDED)}
-		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ENDED ? 'primary' : 'tertiary'}
-		testId={`${REWARDS_FILTER}-${RewardStates.ENDED}-button`}
 		disabled={endedCampaignsAmount === 0}
+		onclick={() => changeFilter(RewardStates.ENDED)}
+		paddingSmall
+		styleClass="text-nowrap max-w-28 text-sm"
+		testId={`${REWARDS_FILTER}-${RewardStates.ENDED}-button`}
 	>
 		{replacePlaceholders($i18n.rewards.text.ended, { $amount: endedCampaignsAmount.toString() })}
 	</Button>

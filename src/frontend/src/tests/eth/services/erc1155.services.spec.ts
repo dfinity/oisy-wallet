@@ -3,8 +3,11 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import type { InfuraErc1155Provider } from '$eth/providers/infura-erc1155.providers';
+import * as infuraProvidersModule from '$eth/providers/infura-erc1155.providers';
 import { loadCustomTokens, loadErc1155Tokens } from '$eth/services/erc1155.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
+import type { Erc1155Metadata } from '$eth/types/erc1155';
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -15,6 +18,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -34,7 +38,9 @@ describe('erc1155.services', () => {
 					chain_id: ETHEREUM_NETWORK.chainId,
 					token_address: mockEthAddress
 				}
-			}
+			},
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		},
 		{
 			version: toNullable(2n),
@@ -44,7 +50,9 @@ describe('erc1155.services', () => {
 					chain_id: BASE_NETWORK.chainId,
 					token_address: mockEthAddress2.toUpperCase()
 				}
-			}
+			},
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		},
 		{
 			version: toNullable(),
@@ -54,9 +62,23 @@ describe('erc1155.services', () => {
 					chain_id: POLYGON_AMOY_NETWORK.chainId,
 					token_address: mockEthAddress3
 				}
-			}
+			},
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		}
 	];
+
+	const mockMetadata1: Erc1155Metadata = {
+		name: 'Test Token',
+		symbol: 'MetadataTTK',
+		decimals: 0
+	};
+
+	const mockMetadata2: Erc1155Metadata = {
+		name: 'Test Token 2',
+		symbol: 'MetadataTTK2',
+		decimals: 0
+	};
 
 	const expectedCustomTokens = [
 		{
@@ -69,8 +91,8 @@ describe('erc1155.services', () => {
 				network: ETHEREUM_NETWORK,
 				address: mockEthAddress,
 				decimals: 0,
-				name: mockEthAddress,
-				symbol: mockEthAddress
+				name: mockMetadata1.name,
+				symbol: mockMetadata1.symbol
 			}
 		},
 		{
@@ -83,8 +105,8 @@ describe('erc1155.services', () => {
 				network: BASE_NETWORK,
 				address: mockEthAddress2.toUpperCase(),
 				decimals: 0,
-				name: mockEthAddress2.toUpperCase(),
-				symbol: mockEthAddress2.toUpperCase()
+				name: mockMetadata2.name,
+				symbol: mockMetadata2.symbol
 			}
 		},
 		{
@@ -97,13 +119,17 @@ describe('erc1155.services', () => {
 				network: POLYGON_AMOY_NETWORK,
 				address: mockEthAddress3,
 				decimals: 0,
-				name: mockEthAddress3,
-				symbol: mockEthAddress3
+				name: mockMetadata2.name,
+				symbol: mockMetadata2.symbol
 			}
 		}
 	];
 
 	describe('loadErc1155Tokens', () => {
+		let infuraProvidersSpy: MockInstance;
+
+		const mockMetadata = vi.fn();
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -115,6 +141,16 @@ describe('erc1155.services', () => {
 			erc1155CustomTokensStore.resetAll();
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+
+			mockMetadata.mockImplementation(({ address }) =>
+				address === mockEthAddress ? mockMetadata1 : mockMetadata2
+			);
+
+			infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraErc1155Providers');
+
+			infuraProvidersSpy.mockReturnValue({
+				metadata: mockMetadata
+			}) as unknown as InfuraErc1155Provider;
 		});
 
 		it('should save the custom tokens in the store', async () => {

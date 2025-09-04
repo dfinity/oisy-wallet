@@ -1,4 +1,3 @@
-import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
@@ -30,6 +29,7 @@ import {
 } from '$icp/utils/ic-send.utils';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import { isTokenIcp } from '$icp/utils/icrc.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CertifiedTransaction } from '$lib/stores/transactions.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -45,11 +45,10 @@ export const mapIcTransaction = ({
 	identity: OptionIdentity;
 }): IcTransactionUi => {
 	const {
-		id: tokenId,
 		network: { env }
 	} = token;
 
-	if (tokenId === ICP_TOKEN_ID) {
+	if (isTokenIcp(token)) {
 		return mapIcpTransaction({ transaction: transaction as IcpTransaction, ...rest });
 	}
 

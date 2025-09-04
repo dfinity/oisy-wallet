@@ -2,28 +2,37 @@
 	import type { Snippet } from 'svelte';
 	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft } from '$lib/types/nft';
+	import { nftSortStore } from '$lib/stores/settings.store';
+	import { tokenListStore } from '$lib/stores/token-list.store';
+	import type { Nft, NftCollectionUi } from '$lib/types/nft';
+	import {
+		filterSortByCollection,
+		getEnabledNfts,
+		getNftCollectionUi
+	} from '$lib/utils/nfts.utils';
 
 	interface Props {
 		children: Snippet;
 		nfts: Nft[];
+		nftCollections: NftCollectionUi[];
 	}
 
-	let { children, nfts = $bindable([]) }: Props = $props();
+	let { children, nfts = $bindable([]), nftCollections = $bindable([]) }: Props = $props();
 
 	$effect(() => {
-		nfts = ($nftStore ?? []).filter(
-			({
-				contract: {
-					address: nftContractAddress,
-					network: { id: nftContractNetworkId }
-				}
-			}) =>
-				$enabledNonFungibleNetworkTokens.some(
-					({ address: contractAddress, network: { id: contractNetworkId } }) =>
-						contractAddress === nftContractAddress && contractNetworkId === nftContractNetworkId
-				)
-		);
+		nfts = filterSortByCollection({
+			items: getEnabledNfts({ $nftStore, $enabledNonFungibleNetworkTokens }),
+			filter: $tokenListStore.filter,
+			sort: $nftSortStore
+		});
+		nftCollections = filterSortByCollection({
+			items: getNftCollectionUi({
+				$nftStore,
+				$nonFungibleTokens: $enabledNonFungibleNetworkTokens
+			}),
+			filter: $tokenListStore.filter,
+			sort: $nftSortStore
+		});
 	});
 </script>
 

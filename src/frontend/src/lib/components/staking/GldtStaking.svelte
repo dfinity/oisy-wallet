@@ -20,10 +20,9 @@
 <div class="flex flex-row items-center">
 	{#if EARNING_ENABLED}
 		<ButtonIcon
-			styleClass="mr-3"
+			ariaLabel="icon"
 			colorStyle="secondary-light"
 			link={false}
-			ariaLabel="icon"
 			onclick={() =>
 				goto(
 					networkUrl({
@@ -33,6 +32,7 @@
 						fromRoute
 					})
 				)}
+			styleClass="mr-3"
 		>
 			{#snippet icon()}
 				<IconBackArrow />

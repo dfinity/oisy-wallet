@@ -22,7 +22,7 @@ import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { fromNullable, nonNullish } from '@dfinity/utils';
+import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -67,7 +67,9 @@ describe('icrc.services', () => {
 				}
 			},
 			version: [1n],
-			enabled: true
+			enabled: true,
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		};
 
 		beforeEach(() => {
@@ -149,7 +151,9 @@ describe('icrc.services', () => {
 						}
 					},
 					version: [1n],
-					enabled: true
+					enabled: true,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
@@ -169,7 +173,9 @@ describe('icrc.services', () => {
 						}
 					},
 					version: [1n],
-					enabled: true
+					enabled: true,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
 				};
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);

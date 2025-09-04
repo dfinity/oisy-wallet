@@ -6,6 +6,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	ICP_SWAP_PROVIDER,
@@ -15,16 +16,18 @@ import {
 	VELORA_SWAP_PROVIDER
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
-import { SwapErrorCodes, VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
+import { SwapErrorCodes, SwapProvider, VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
+	findSwapProvider,
 	formatReceiveOutMinimum,
 	geSwapEthTokenAddress,
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
 	getNetworkFee,
 	getSwapRoute,
+	getWithdrawableToken,
 	isSwapError,
 	mapIcpSwapResult,
 	mapKongSwapResult,
@@ -471,6 +474,96 @@ describe('swap utils', () => {
 			expect(isSwapError(undefined)).toBeFalsy();
 			expect(isSwapError('string')).toBeFalsy();
 			expect(isSwapError({ code: 'deposit_error' })).toBeFalsy();
+		});
+	});
+
+	describe('getWithdrawableToken', () => {
+		const sourceToken = {
+			ledgerCanisterId: 'source-ledger-id',
+			name: 'Source Token'
+		} as IcTokenToggleable;
+
+		const destinationToken = {
+			ledgerCanisterId: 'destination-ledger-id',
+			name: 'Destination Token'
+		} as IcTokenToggleable;
+
+		it('should return sourceToken if tokenAddress matches sourceToken.ledgerCanisterId', () => {
+			const result = getWithdrawableToken({
+				tokenAddress: 'source-ledger-id',
+				sourceToken,
+				destinationToken
+			});
+
+			expect(result).toBe(sourceToken);
+		});
+
+		it('should return destinationToken if tokenAddress matches destinationToken.ledgerCanisterId', () => {
+			const result = getWithdrawableToken({
+				tokenAddress: 'destination-ledger-id',
+				sourceToken,
+				destinationToken
+			});
+
+			expect(result).toBe(destinationToken);
+		});
+
+		it('should throw an error if tokenAddress matches neither', () => {
+			expect(() =>
+				getWithdrawableToken({
+					tokenAddress: 'unknown-ledger-id',
+					sourceToken,
+					destinationToken
+				})
+			).toThrow('Unknown token address');
+		});
+	});
+
+	describe('findSwapProviderDetails', () => {
+		it('returns Velora provider details when given SwapProvider.VELORA', () => {
+			const result = findSwapProvider(SwapProvider.VELORA);
+
+			expect(result).include({
+				id: 'velora',
+				website: 'https://app.velora.xyz/',
+				logo: '/images/dapps/velora-logo.svg'
+			});
+		});
+
+		it('returns Velora provider details when given the string VELORA', () => {
+			const result = findSwapProvider('VELORA');
+
+			expect(result).include({
+				id: 'velora',
+				website: 'https://app.velora.xyz/',
+				logo: '/images/dapps/velora-logo.svg'
+			});
+		});
+
+		it('returns Kongswap provider details when given kongswap', () => {
+			const result = findSwapProvider(SwapProvider.KONG_SWAP);
+
+			expect(result).include({
+				id: 'kongswap',
+				logo: '/images/dapps/kong-swap-logo.svg',
+				website: 'https://www.kongswap.io/'
+			});
+		});
+
+		it('returns ICPSWAP provider details when given icpSwap', () => {
+			const result = findSwapProvider(SwapProvider.ICP_SWAP);
+
+			expect(result).include({
+				id: 'icpswap',
+				website: 'https://icpswap.com',
+				logo: '/images/dapps/icp-swap-logo.svg'
+			});
+		});
+
+		it('should return undefined if dapp is not found', () => {
+			const result = findSwapProvider('test');
+
+			expect(result).toBeUndefined();
 		});
 	});
 });

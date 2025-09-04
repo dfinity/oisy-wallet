@@ -7,6 +7,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
+	// TODO: remove this component once NEW_AGREEMENTS feature is implemented and live
+
 	interface Props {
 		fullWidth?: boolean;
 		licenseAlignment?: 'inherit' | 'center';
@@ -30,7 +32,7 @@
 	class="flex w-full flex-col items-center md:items-start"
 	class:md:items-center={licenseAlignment === 'center'}
 >
-	<ButtonAuthenticate {onclick} {fullWidth} />
+	<ButtonAuthenticate {fullWidth} {onclick} />
 
 	<span
 		class="mt-4 flex flex-col text-sm text-tertiary"

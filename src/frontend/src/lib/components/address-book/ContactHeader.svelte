@@ -29,11 +29,11 @@
 
 <div class={`relative flex w-full flex-col items-center ${styleClass}`}>
 	<Button
-		styleClass="absolute z-1 top-2.5 right-2.5 bg-black/16 dark:bg-black/10 px-3 py-2 font-xs"
 		ariaLabel={$i18n.core.text.edit}
 		colorStyle="secondary"
-		testId={CONTACT_HEADER_EDIT_BUTTON}
 		onclick={onEdit}
+		styleClass="absolute z-1 top-2.5 right-2.5 bg-black/16 dark:bg-black/10 px-3 py-2 font-xs"
+		testId={CONTACT_HEADER_EDIT_BUTTON}
 	>
 		<span class="flex items-center">
 			<IconPencil />
@@ -41,11 +41,11 @@
 		{$i18n.core.text.edit}
 	</Button>
 
-	<div class={`self-stretch ${color} transition-colors duration-1000`} style={headerStyles}>
+	<div style={headerStyles} class={`self-stretch ${color} transition-colors duration-1000`}>
 		<IconContactHeader />
 	</div>
 	<div>
-		<Avatar variant="xl" {name} {image} styleClass="mt-[-50%] border-3 border-primary-inverted"
+		<Avatar {name} {image} styleClass="mt-[-50%] border-3 border-primary-inverted" variant="xl"
 		></Avatar>
 	</div>
 	<div class="pt-5 text-2xl font-bold text-primary md:text-3xl">

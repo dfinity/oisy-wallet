@@ -106,21 +106,21 @@
 <div
 	class="rounded-lg border border-solid p-5 text-left duration-300"
 	class:bg-brand-subtle-10={focused}
-	class:border-brand-subtle-20={focused}
 	class:bg-secondary={!focused}
+	class:border-brand-subtle-20={focused}
 	class:border-secondary={!focused}
 >
-	<label for="destination" class="font-bold">
+	<label class="font-bold" for="destination">
 		{$i18n.core.text.to}
 	</label>
 
 	<div class="send-input-destination" class:error={isErrorState}>
 		<InputTextWithAction
 			name="destination"
-			bind:value={destination}
+			autofocus={isDesktop()}
 			placeholder={inputPlaceholder}
 			testId={DESTINATION_INPUT}
-			autofocus={isDesktop()}
+			bind:value={destination}
 			on:focus={onFocus}
 			on:blur={onBlur}
 			on:nnsInput
@@ -146,7 +146,7 @@
 		</InputTextWithAction>
 
 		{#if isErrorState}
-			<p transition:slide={SLIDE_DURATION} class="mb-0 mt-4 text-error-primary">
+			<p class="mb-0 mt-4 text-error-primary" transition:slide={SLIDE_DURATION}>
 				{$i18n.send.assertion.invalid_destination_address}
 			</p>
 		{/if}
