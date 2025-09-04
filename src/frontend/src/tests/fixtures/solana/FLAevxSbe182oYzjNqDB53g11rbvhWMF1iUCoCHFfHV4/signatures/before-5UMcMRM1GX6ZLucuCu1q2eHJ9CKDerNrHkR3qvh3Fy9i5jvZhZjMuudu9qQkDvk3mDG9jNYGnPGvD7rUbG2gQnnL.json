@@ -1,10 +1,1 @@
-[
-	{
-		"blockTime": { "__bigint__": "1737572370" },
-		"confirmationStatus": "finalized",
-		"err": null,
-		"memo": null,
-		"signature": "664J86ZFeBHp5d5PYTyT5mzjkyyunW6wrFLEKaACZ7VvACVY7KXUTQys2aZoWp8D6YpcFHCSMH9oVw9DAQUWs1Uk",
-		"slot": { "__bigint__": "315694686" }
-	}
-]
+[{"blockTime":{"__bigint__":"1737572370"},"confirmationStatus":"finalized","err":null,"memo":null,"signature":"664J86ZFeBHp5d5PYTyT5mzjkyyunW6wrFLEKaACZ7VvACVY7KXUTQys2aZoWp8D6YpcFHCSMH9oVw9DAQUWs1Uk","slot":{"__bigint__":"315694686"}}]

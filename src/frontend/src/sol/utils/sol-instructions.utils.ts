@@ -147,9 +147,10 @@ const mapTokenParsedInstruction = async ({
 			account: SolAddress;
 		};
 
-		// In case of `closeAccount` transaction we take the accumulated balance of SOL (or WSOL) of the Associated Token Account (this is the `from` address).
-		// We do this because the entire amount of SOL (or WSOL) is redeemed by the owner of the ATA.
-		const value = cumulativeBalances?.[from] ?? ZERO;
+		// In case of `closeAccount` transaction, we take the accumulated balance of SOL (or WSOL) of the Associated Token Account (this is the `from` address).
+		// If we don't find the balance, we take the negative of the accumulated balance of the owner of the ATA (this is the `to` address).
+		// We do this because the owner of the ATA redeems the entire amount of SOL (or WSOL).
+		const value = cumulativeBalances?.[from] ?? -(cumulativeBalances?.[to] ?? ZERO);
 
 		return { value, from, to };
 	}
