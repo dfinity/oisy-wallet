@@ -4,12 +4,13 @@
 	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
+	import Img from '$lib/components/ui/Img.svelte';
 
 	interface Props {
-		children: Snippet;
+		imageSrc: string;
 	}
 
-	let { children }: Props = $props();
+	let { imageSrc }: Props = $props();
 </script>
 
 <div class="fixed bottom-0 left-0 right-0 top-0 z-10" transition:fade>
@@ -18,7 +19,9 @@
 	>
 	<div class="z-9 pointer-events-none absolute inset-0 grid place-items-center">
 		<div class="fullscreen-modal max-h-[90vh] max-w-[90vw] overflow-hidden">
-			{@render children()}
+			<div class="overflow-hidden rounded-lg">
+				<Img src={imageSrc} />
+			</div>
 		</div>
 	</div>
 	<Backdrop on:nnsClose={() => modalStore.close()} />

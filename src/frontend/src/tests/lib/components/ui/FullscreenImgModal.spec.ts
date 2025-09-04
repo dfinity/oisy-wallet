@@ -1,39 +1,38 @@
 import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
 import { modalStore } from '$lib/stores/modal.store';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('FullscreenImgModal', () => {
 	const closeSpy = vi.spyOn(modalStore, 'close').mockImplementation(() => {});
 
 	it('renders children inside the fullscreen modal container', () => {
-		const TEST_ID = 'modal-child';
-		const { getByTestId } = render(FullscreenImgModal, {
+		const { container } = render(FullscreenImgModal, {
 			props: {
-				children: createMockSnippet(TEST_ID)
+				imageSrc: 'test-image.png'
 			}
 		});
 
-		const child = getByTestId(TEST_ID);
+		const child = container.querySelector('img');
+
 		expect(child).toBeInTheDocument();
 	});
 
 	it('shows the close icon in the top-right corner', () => {
-		render(FullscreenImgModal, {
+		const { container } = render(FullscreenImgModal, {
 			props: {
-				children: createMockSnippet('dummy')
+				imageSrc: 'test-image.png'
 			}
 		});
 
-		// Adjust if IconClose doesn’t expose testId
-		const icon = document.querySelector('svg');
+		const icon = container.querySelector('svg');
+
 		expect(icon).toBeInTheDocument();
 	});
 
 	it('calls modalStore.close when backdrop is clicked', async () => {
 		const { getByTestId } = render(FullscreenImgModal, {
 			props: {
-				children: createMockSnippet('dummy')
+				imageSrc: 'test-image.png'
 			}
 		});
 
@@ -46,11 +45,12 @@ describe('FullscreenImgModal', () => {
 	it('applies max size constraints to the fullscreen-modal container', () => {
 		render(FullscreenImgModal, {
 			props: {
-				children: createMockSnippet('dummy')
+				imageSrc: 'test-image.png'
 			}
 		});
 
 		const container = document.querySelector('.fullscreen-modal');
+
 		expect(container).toBeInTheDocument();
 		expect(container).toHaveClass('max-h-[90vh]', 'max-w-[90vw]');
 	});
