@@ -206,9 +206,16 @@ describe('exchange.derived', () => {
 			splCustomTokensStore.resetAll();
 
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
-			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
+			erc20UserTokensStore.setAll([
+				{ data: { ...mockErc20DefaultToken, enabled: true, version: undefined }, certified: false },
+				{ data: mockEr20UserToken, certified: false }
+			]);
+
 			splDefaultTokensStore.add(mockSplDefaultToken);
-			splCustomTokensStore.setAll([{ data: mockSplCustomToken, certified: false }]);
+			splCustomTokensStore.setAll([
+				{ data: { ...mockSplDefaultToken, enabled: true, version: undefined }, certified: false },
+				{ data: mockSplCustomToken, certified: false }
+			]);
 		});
 
 		it('should return nullish values when exchange store is nullish', () => {
