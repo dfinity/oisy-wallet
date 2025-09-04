@@ -13,7 +13,6 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
-	import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
@@ -75,7 +74,7 @@
 								})}
 						>
 							<Img
-								src={nft?.imageUrl}
+								src={nft.imageUrl}
 								styleClass="block h-auto w-auto max-h-full max-w-full object-contain"
 							/>
 						</button>
