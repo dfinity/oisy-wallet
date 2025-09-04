@@ -75,7 +75,9 @@ describe('erc20.services', () => {
 					chain_id: ETHEREUM_NETWORK.chainId,
 					token_address: mockEthAddress
 				}
-			}
+			},
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		},
 		{
 			version: toNullable(2n),
@@ -85,7 +87,9 @@ describe('erc20.services', () => {
 					chain_id: BASE_NETWORK.chainId,
 					token_address: mockEthAddress2.toUpperCase()
 				}
-			}
+			},
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		},
 		{
 			version: toNullable(),
@@ -95,7 +99,9 @@ describe('erc20.services', () => {
 					chain_id: POLYGON_AMOY_NETWORK.chainId,
 					token_address: mockEthAddress3
 				}
-			}
+			},
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		}
 	];
 
@@ -659,7 +665,9 @@ describe('erc20.services', () => {
 						chain_id: ETHEREUM_NETWORK.chainId,
 						token_address: EURC_TOKEN.address
 					}
-				}
+				},
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			};
 			assert('Erc20' in additionalCustomToken.token);
 
@@ -734,7 +742,9 @@ describe('erc20.services', () => {
 						chain_id: ETHEREUM_NETWORK.chainId,
 						token_address: EURC_TOKEN.address
 					}
-				}
+				},
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			};
 
 			vi.mocked(listCustomTokens).mockResolvedValue([...mockCustomTokens, additionalCustomToken]);

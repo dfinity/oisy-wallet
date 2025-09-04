@@ -37,7 +37,8 @@
 			"currency": "العملة"
 		},
 		"info": {
-			"test_banner": "لأغراض الاختبار فقط!"
+			"test_banner": "لأغراض الاختبار فقط!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "شعار $name",
@@ -114,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
-			"session_expired": "تم تسجيل خروجك لانتهاء صلاحية جلستك."
+			"session_expired": "تم تسجيل خروجك لانتهاء صلاحية جلستك.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "لا توجد هوية إنترنت.",
@@ -506,6 +508,7 @@
 			"icrc_custom_token": "خطأ أثناء تحميل التوكن المخصص ICRC.",
 			"loading_wallet_timeout": "تتطلب محفظتك بعض البيانات الأولية التي لم يتم تحميلها بعد. يرجى المحاولة مرة أخرى.",
 			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "خطأ أثناء تحميل معلومات محفظة BTC.",
 			"sol_wallet_error": "خطأ أثناء تحميل معلومات محفظة SOL."
 		}
@@ -723,12 +726,13 @@
 			"minter_info_not_certified": "حاول مرة أخرى في بضع ثوانٍ، لم يتم اعتماد معلمة تكوين ckETH.",
 			"cketh_max_transaction_fee_missing": "الحد الأقصى لرسوم المعاملة لـ ckETH مفقود.",
 			"utxos_fee_missing": "رسوم UTXOs مفقودة.",
-			"minimum_btc_amount": "",
-			"btc_insufficient_balance": "",
-			"btc_insufficient_balance_for_fee": "",
-			"btc_invalid_utxo_data": "",
-			"btc_utxo_locked": "",
-			"btc_invalid_fee_calculation": ""
+			"minimum_btc_amount": "المبلغ صغير جداً. يرجى إدخال ما لا يقل عن $amount BTC.",
+			"btc_insufficient_balance": "لا توجد UTXOs بيتكوين متاحة للمعاملة",
+			"btc_insufficient_balance_for_fee": "رصيد البيتكوين غير كافٍ لتغطية رسوم المعاملة",
+			"btc_invalid_utxo_data": "بيانات معاملة البيتكوين غير صالحة",
+			"btc_utxo_locked": "أموال البيتكوين مقفلة بواسطة المعاملات المعلقة",
+			"btc_invalid_fee_calculation": "فشل التحقق من رسوم معاملة البيتكوين",
+			"pending_transactions_not_available": "خدمة المعاملات المعلقة غير متاحة حالياً. يرجى المحاولة مرة أخرى لاحقاً."
 		},
 		"error": {
 			"unexpected": "حدث خطأ ما أثناء إرسال المعاملة.",
@@ -811,9 +815,9 @@
 			"approval_fee": "رسوم الموافقة",
 			"gas_fee": "رسوم الغاز",
 			"lp_fee": "رسوم السيولة",
-			"max_slippage_info": "أدخل قيمة بين 0% و 50%",
+			"max_slippage_info": "",
 			"max_slippage_warning": "تحذير من المخاطر: قد يؤدي الانزلاق المرتفع إلى خسائر بسبب تقلبات السوق",
-			"max_slippage_error": "لا يمكن أن تكون نسبة تحمل الانزلاق 0% أو تتجاوز 50%",
+			"max_slippage_error": "",
 			"swap_button": "تبديل الآن",
 			"swap_is_not_offered": "هذا التبديل غير متاح حاليًا.",
 			"executing_transaction": "جاري تنفيذ المعاملة...",
@@ -837,7 +841,8 @@
 			"withdrawing": "",
 			"network_cost": "",
 			"gasless": "",
-			"swap_fees": ""
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",
@@ -1034,13 +1039,36 @@
 			"collection_not_loaded": "",
 			"nft_not_loaded": "",
 			"collections": "",
-			"all_assets": ""
+			"all_assets": "",
+			"address_copied": "",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"review_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"placeholder_image": "لا توجد NFTs بعد",
 			"card": {
 				"image": "صورة NFT مع معرف التوكن: $tokenId"
-			}
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
@@ -1472,8 +1500,24 @@
 			"indicator": "انتقل إلى الشريحة $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "بالنقر على هذا الزر، فإنك توافق على",
 			"accept_terms_link": "اتفاقية الترخيص",
 			"title": "اتفاقية ترخيص $oisy_name (\"اتفاقية الترخيص\")",
@@ -1492,10 +1536,31 @@
 			"entire_agreement": "",
 			"assignment": "<strong>11. التنازل.</strong> لا يجوز لك التنازل عن اتفاقية الترخيص هذه دون موافقة كتابية مسبقة من DFINITY، سواء بشكل صريح أو بحكم القانون، بما في ذلك فيما يتعلق بالاندماج أو تغيير السيطرة، وأي محاولة تنازل من هذا القبيل تكون باطلة ولاغية. يجوز لـ DFINITY التنازل عن اتفاقية الترخيص هذه دون قيود ودون أي إشعار لك. مع مراعاة ما سبق، تكون اتفاقية الترخيص هذه ملزمة للأطراف وخلفائهم المعنيين والمتنازل لهم المسموح لهم.",
 			"no_waiver": "<strong>12. لا تنازل.</strong> لا يشكل عدم ممارسة، أو التأخير في ممارسة، أي حق أو سلطة أو علاج منصوص عليه في اتفاقية الترخيص هذه أو بموجب القانون تنازلاً عن ذلك الحق أو السلطة أو العلاج. لا يُعد تنازل DFINITY عن أي التزام أو خرق لاتفاقية الترخيص هذه بمثابة تنازل عن أي التزام آخر أو خرق لاحق لاتفاقية الترخيص.",
-			"english_version": "<strong>13. النسخة الإنجليزية.</strong> ستكون النسخة الإنجليزية من اتفاقية الترخيص هذه هي النسخة الرسمية والمتحكمة في الاتفاقية في حالة نشوء أي تعارض. يجب أن تكون جميع المراسلات والإشعارات التي تتم بموجب اتفاقية الترخيص هذه باللغة الإنجليزية."
+			"english_version": "<strong>13. النسخة الإنجليزية.</strong> ستكون النسخة الإنجليزية من اتفاقية الترخيص هذه هي النسخة الرسمية والمتحكمة في الاتفاقية في حالة نشوء أي تعارض. يجب أن تكون جميع المراسلات والإشعارات التي تتم بموجب اتفاقية الترخيص هذه باللغة الإنجليزية.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "اتفاقية ترخيص $oisy_short"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1551,10 +1616,17 @@
 			"action_button_contacts_title": "عرض جهات الاتصال",
 			"action_button_contacts_subtitle": "عرض جهات الاتصال المحفوظة لديك",
 			"action_button_contacts_prompt": "أرني جهات اتصالي.",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "إرسال رسالة",
 			"send_message_input_placeholder": "ماذا تريد أن تفعل؟",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
-			"loading": "جارٍ التفكير..."
+			"loading": "جارٍ التفكير...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "عذرًا، حدث خطأ ما في الحصول على رد من LLM.",

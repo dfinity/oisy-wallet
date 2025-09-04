@@ -39,7 +39,7 @@ import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
-import { fungibleTokens, tokens } from '$lib/derived/tokens.derived';
+import { enabledUniqueTokensSymbols, fungibleTokens, tokens } from '$lib/derived/tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -262,6 +262,21 @@ describe('tokens.derived', () => {
 				{ ...mockIcrcCustomToken, id: result[11].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
+			]);
+		});
+	});
+
+	describe('enabledUniqueTokensSymbols', () => {
+		it('should return all unique enabled tokens symbols', () => {
+			const result = get(enabledUniqueTokensSymbols);
+
+			expect(result).toEqual([
+				ICP_TOKEN.symbol,
+				BTC_MAINNET_TOKEN.symbol,
+				ETHEREUM_TOKEN.symbol,
+				SOLANA_TOKEN.symbol,
+				BNB_MAINNET_TOKEN.symbol,
+				POL_MAINNET_TOKEN.symbol
 			]);
 		});
 	});

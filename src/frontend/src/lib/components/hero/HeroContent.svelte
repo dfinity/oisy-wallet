@@ -3,7 +3,6 @@
 	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/state';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
 		isGLDTToken as isGLDTTokenUtil,
@@ -24,7 +23,7 @@
 		balanceZero,
 		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
-	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkBase,
 		networkBitcoin,
@@ -65,7 +64,7 @@
 		loading.set(
 			isRouteTransactions(page)
 				? isNullish(pageTokenUi?.balance)
-				: $exchangeNotInitialized || $noPositiveBalanceAndNotAllBalancesZero
+				: $noPositiveBalanceAndNotAllBalancesZero
 		);
 	});
 
@@ -131,7 +130,7 @@
 
 				<div>
 					<div class="my-0.5 flex items-center justify-center">
-						{#if $erc20UserTokensInitialized && nonNullish($pageToken)}
+						{#if nonNullish($pageToken)}
 							<div in:fade>
 								<TokenLogo badge={{ type: 'network' }} data={$pageToken} ring />
 							</div>

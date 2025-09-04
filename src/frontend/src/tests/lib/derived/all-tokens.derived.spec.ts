@@ -22,6 +22,7 @@ import {
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import * as tokensIcEnv from '$env/tokens/tokens.ic.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -31,8 +32,6 @@ import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
-import * as dip20TokensServices from '$icp/services/dip20-tokens.services';
-import * as icrcCustomTokensServices from '$icp/services/icrc-custom-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
 import {
@@ -116,8 +115,7 @@ describe('all-tokens.derived', () => {
 			return () => {};
 		});
 
-		vi.spyOn(icrcCustomTokensServices, 'buildIcrcCustomTokens').mockReturnValue([]);
-		vi.spyOn(dip20TokensServices, 'buildDip20Tokens').mockReturnValue([]);
+		vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => []);
 
 		vi.spyOn(icrcTokens, 'subscribe').mockImplementation((fn) => {
 			fn([]);
@@ -152,8 +150,10 @@ describe('all-tokens.derived', () => {
 				return () => {};
 			});
 
-			vi.spyOn(icrcCustomTokensServices, 'buildIcrcCustomTokens').mockReturnValue([mockIcrcToken2]);
-			vi.spyOn(dip20TokensServices, 'buildDip20Tokens').mockReturnValue([mockDip20Token]);
+			vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [
+				mockIcrcToken2,
+				mockDip20Token
+			]);
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);
@@ -209,7 +209,7 @@ describe('all-tokens.derived', () => {
 				fn([mockIcrcToken]);
 				return () => {};
 			});
-			vi.spyOn(icrcCustomTokensServices, 'buildIcrcCustomTokens').mockReturnValue([duplicateToken]);
+			vi.spyOn(tokensIcEnv, 'IC_BUILTIN_TOKENS', 'get').mockImplementation(() => [duplicateToken]);
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);

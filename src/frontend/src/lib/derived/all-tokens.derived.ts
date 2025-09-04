@@ -1,4 +1,5 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
@@ -6,12 +7,9 @@ import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
-import { buildDip20Tokens } from '$icp/services/dip20-tokens.services';
-import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
-import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { nonNullish } from '@dfinity/utils';
@@ -25,9 +23,8 @@ export const allIcrcTokens: Readable<IcTokenToggleable[]> = derived(
 	([$icrcTokens]) => {
 		// The list of ICRC tokens (SNSes) is defined as environment variables.
 		// These tokens are not necessarily loaded at boot time if the user has not added them to their list of custom tokens.
-		const tokens = [...buildIcrcCustomTokens(), ...buildDip20Tokens()];
 		const icrcEnvTokens: IcTokenToggleable[] =
-			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
+			IC_BUILTIN_TOKENS.map((token) => ({ ...token, enabled: false })) ?? [];
 
 		// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
 		const knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);

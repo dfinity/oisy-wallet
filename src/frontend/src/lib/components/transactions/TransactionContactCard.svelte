@@ -4,7 +4,7 @@
 	import SkeletonAddressCard from '$lib/components/address/SkeletonAddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
-	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
@@ -78,13 +78,13 @@
 			</span>
 		{/snippet}
 		{#snippet actions()}
-			<TransactionAddressActions
+			<AddressActions
 				copyAddress={address}
 				copyAddressText={type === 'send'
 					? $i18n.transaction.text.to_copied
 					: $i18n.transaction.text.from_copied}
-				explorerUrl={type === 'send' ? toExplorerUrl : fromExplorerUrl}
-				explorerUrlAriaLabel={type === 'send'
+				externalLink={type === 'send' ? toExplorerUrl : fromExplorerUrl}
+				externalLinkAriaLabel={type === 'send'
 					? $i18n.transaction.alt.open_to_block_explorer
 					: $i18n.transaction.alt.open_from_block_explorer}
 			/>

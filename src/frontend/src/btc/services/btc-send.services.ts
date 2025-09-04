@@ -1,10 +1,11 @@
 import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
+import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
-import { getPendingTransactionIds } from '$icp/utils/btc.utils';
+import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
@@ -14,11 +15,11 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { invalidAmount } from '$lib/utils/input.utils';
-import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { hexStringToUint8Array, nonNullish, toNullable } from '@dfinity/utils';
+import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 interface BtcSendServiceParams {
@@ -128,6 +129,11 @@ export const validateBtcSend = async ({
 	network: BitcoinNetwork;
 	identity: Identity;
 }): Promise<void> => {
+	if (nonNullish(utxosFee.error)) {
+		// If the send button was not properly disabled during an error, we return the same error again
+		throw utxosFee.error;
+	}
+
 	// 1. Validate general input parameters first before accessing any properties
 	if (invalidAmount(amount)) {
 		throw new BtcValidationError(BtcSendValidationError.InvalidAmount);
@@ -155,11 +161,24 @@ export const validateBtcSend = async ({
 	}
 
 	// 2. Check if UTXOs are still unspent (not locked by pending transactions)
-	const pendingTxIds = getPendingTransactionIds(source);
-	if (pendingTxIds.length > 0) {
+	// It is very important that the pending transactions are updated before validating the UTXOs
+	await loadBtcPendingSentTransactions({
+		identity,
+		networkId: mapBitcoinNetworkToNetworkId(network), // we want to avoid having to pass redundant data to the function
+		address: source
+	});
+
+	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
+
+	if (isNullish(pendingUtxoTxIds)) {
+		// when no pending transactions have been initiated, we cannot validate UTXO's and therefore, validation must fail
+		throw new BtcValidationError(BtcSendValidationError.PendingTransactionsNotAvailable);
+	}
+
+	if (pendingUtxoTxIds.length > 0) {
 		const providedUtxoTxIds = extractUtxoTxIds(utxos);
 		for (const utxoTxId of providedUtxoTxIds) {
-			if (pendingTxIds.includes(utxoTxId)) {
+			if (pendingUtxoTxIds.includes(utxoTxId)) {
 				throw new BtcValidationError(BtcSendValidationError.UtxoLocked);
 			}
 		}
@@ -172,7 +191,7 @@ export const validateBtcSend = async ({
 	}
 
 	// 4. Validate fee calculation matches expected transaction structure ( recipient + change)
-	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
+	const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
 		network,
 		identity
 	});
@@ -180,7 +199,7 @@ export const validateBtcSend = async ({
 		numInputs: utxos.length,
 		numOutputs: 2
 	});
-	const expectedMinFee = BigInt(estimatedTxSize) * feeRateSatoshisPerVByte;
+	const expectedMinFee = (BigInt(estimatedTxSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 
 	// Allow some tolerance for fee calculation differences (±10%)
 	const feeToleranceRange = expectedMinFee / BTC_SEND_FEE_TOLERANCE_PERCENTAGE;
@@ -219,15 +238,15 @@ export const sendBtc = async ({
 }: SendBtcParams): Promise<void> => {
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
 
-	onProgress?.();
-
 	await addPendingBtcTransaction({
 		identity,
 		network: mapToSignerBitcoinNetwork({ network }),
 		address: source,
-		txId: hexStringToUint8Array(txid),
+		txId: txidStringToUint8Array(txid),
 		utxos: utxosFee.utxos
 	});
+
+	onProgress?.();
 
 	await waitAndTriggerWallet();
 };

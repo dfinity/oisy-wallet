@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -10,26 +13,48 @@
 		nft: Nft;
 		testId?: string;
 		disabled?: boolean;
+		hidden?: boolean;
+		spam?: boolean;
 	}
 
-	let { nft, testId, disabled }: Props = $props();
+	let { nft, testId, disabled, hidden, spam }: Props = $props();
 </script>
 
 <a
-	class="flex w-full flex-col gap-2 p-1 text-left no-underline hover:text-inherit"
+	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
 	class:cursor-not-allowed={disabled}
+	class:hover:-translate-y-1={!disabled}
+	class:hover:bg-primary={!disabled}
 	data-tid={testId}
 	href={`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`}
 	onclick={disabled ? (e) => e.preventDefault() : undefined}
 >
 	<div
-		class="relative aspect-square overflow-hidden rounded-xl bg-primary-light"
+		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		{#if nonNullish(nft.imageUrl)}
-			<BgImg imageUrl={nft?.imageUrl} shadow="none" size="contain" testId={`${testId}-image`} />
-		{:else}
-			<div class="bg-black/16 rounded-lg" data-tid={`${testId}-placeholder`}></div>
+		<NftImageConsent {nft} type="card">
+			<div class="h-full w-full">
+				<BgImg
+					imageUrl={nft?.imageUrl}
+					shadow="inset"
+					size="cover"
+					styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+					testId={`${testId}-image`}
+				/>
+			</div>
+		</NftImageConsent>
+
+		{#if hidden}
+			<div class="absolute left-2 top-2 invert dark:invert-0">
+				<IconEyeOff size="24" />
+			</div>
+		{/if}
+
+		{#if spam}
+			<div class="absolute left-2 top-2 text-warning-primary">
+				<IconAlertOctagon size="24" />
+			</div>
 		{/if}
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
@@ -46,11 +71,11 @@
 		</div>
 	</div>
 
-	<div class="flex w-full flex-col gap-1">
+	<div class="flex w-full flex-col gap-1 px-2 pb-2">
 		<span
 			class="truncate text-sm font-bold"
 			class:text-disabled={disabled}
-			class:text-primary={!disabled}>{nft.collection.name}</span
+			class:text-primary={!disabled}>{nft.name}</span
 		>
 		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
 			>#{nft.id}</span

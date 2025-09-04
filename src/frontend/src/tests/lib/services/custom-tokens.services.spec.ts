@@ -2,6 +2,7 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { listCustomTokens } from '$lib/api/backend.api';
+import * as idbTokensApi from '$lib/api/idb-tokens.api';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import en from '$tests/mocks/i18n.mock';
@@ -29,7 +30,9 @@ describe('custom-tokens.services', () => {
 					}
 				},
 				version: toNullable(2n),
-				enabled: true
+				enabled: true,
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			},
 			{
 				token: {
@@ -39,7 +42,9 @@ describe('custom-tokens.services', () => {
 					}
 				},
 				version: toNullable(1n),
-				enabled: false
+				enabled: false,
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			},
 			{
 				token: {
@@ -50,7 +55,9 @@ describe('custom-tokens.services', () => {
 					}
 				},
 				version: toNullable(),
-				enabled: true
+				enabled: true,
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			}
 		];
 
@@ -60,9 +67,7 @@ describe('custom-tokens.services', () => {
 		const mockParams = {
 			identity: mockIdentity,
 			certified: true,
-			filterTokens: () => true,
-			setIdbTokens: mockSetIdbTokens,
-			getIdbTokens: mockGetIdbTokens
+			filterTokens: () => true
 		};
 
 		beforeEach(() => {
@@ -70,7 +75,8 @@ describe('custom-tokens.services', () => {
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
 
-			mockGetIdbTokens.mockImplementation(vi.fn());
+			vi.spyOn(idbTokensApi, 'setIdbAllCustomTokens').mockImplementation(mockSetIdbTokens);
+			vi.spyOn(idbTokensApi, 'getIdbAllCustomTokens').mockImplementation(mockGetIdbTokens);
 		});
 
 		it('should load the custom tokens from the backend', async () => {
@@ -78,8 +84,7 @@ describe('custom-tokens.services', () => {
 
 			expect(result).toStrictEqual(mockCustomTokens);
 
-			expect(listCustomTokens).toHaveBeenCalledOnce();
-			expect(listCustomTokens).toHaveBeenNthCalledWith(1, {
+			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				identity: mockIdentity,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
@@ -115,8 +120,7 @@ describe('custom-tokens.services', () => {
 		it('should set the IDB tokens if certified call', async () => {
 			await loadNetworkCustomTokens(mockParams);
 
-			expect(mockSetIdbTokens).toHaveBeenCalledOnce();
-			expect(mockSetIdbTokens).toHaveBeenNthCalledWith(1, {
+			expect(mockSetIdbTokens).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				tokens: mockCustomTokens
 			});
@@ -139,13 +143,16 @@ describe('custom-tokens.services', () => {
 			expect(mockSetIdbTokens).not.toHaveBeenCalled();
 		});
 
-		it('should not set the IDB tokens if the filtered tokens are empty', async () => {
+		it('should always set the IDB tokens even if the filtered tokens are empty', async () => {
 			await loadNetworkCustomTokens({
 				...mockParams,
 				filterTokens: () => false
 			});
 
-			expect(mockSetIdbTokens).not.toHaveBeenCalled();
+			expect(mockSetIdbTokens).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				tokens: mockCustomTokens
+			});
 		});
 
 		it('should throw if listCustomTokens fails', async () => {
@@ -183,8 +190,7 @@ describe('custom-tokens.services', () => {
 
 			expect(result).toStrictEqual(mockCustomTokens.slice(0, 2));
 
-			expect(mockGetIdbTokens).toHaveBeenCalledOnce();
-			expect(mockGetIdbTokens).toHaveBeenNthCalledWith(1, mockIdentity.getPrincipal());
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 
 			expect(listCustomTokens).not.toHaveBeenCalled();
 		});
@@ -200,11 +206,9 @@ describe('custom-tokens.services', () => {
 
 			expect(result).toStrictEqual(mockCustomTokens);
 
-			expect(mockGetIdbTokens).toHaveBeenCalledOnce();
-			expect(mockGetIdbTokens).toHaveBeenNthCalledWith(1, mockIdentity.getPrincipal());
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 
-			expect(listCustomTokens).toHaveBeenCalledOnce();
-			expect(listCustomTokens).toHaveBeenNthCalledWith(1, {
+			expect(listCustomTokens).toHaveBeenCalledExactlyOnceWith({
 				certified: false,
 				identity: mockIdentity,
 				nullishIdentityErrorMessage: en.auth.error.no_internet_identity
@@ -221,7 +225,9 @@ describe('custom-tokens.services', () => {
 						}
 					},
 					version: toNullable(2n),
-					enabled: true
+					enabled: true,
+					section: toNullable(),
+					allow_external_content_source: toNullable()
 				}
 			]);
 
@@ -233,8 +239,7 @@ describe('custom-tokens.services', () => {
 
 			expect(result).toStrictEqual(mockCustomTokens.slice(0, 1));
 
-			expect(mockGetIdbTokens).toHaveBeenCalledOnce();
-			expect(mockGetIdbTokens).toHaveBeenNthCalledWith(1, mockIdentity.getPrincipal());
+			expect(mockGetIdbTokens).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 
 			expect(listCustomTokens).not.toHaveBeenCalled();
 		});

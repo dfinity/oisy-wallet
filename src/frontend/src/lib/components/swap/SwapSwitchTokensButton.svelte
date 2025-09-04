@@ -9,7 +9,9 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="absolute bottom-0 left-0 right-0 top-0 m-auto h-9 w-9 rounded-lg bg-surface shadow-sm">
+<div
+	class="z-1 absolute bottom-0 left-0 right-0 top-0 m-auto h-9 w-9 rounded-lg bg-surface shadow-sm"
+>
 	<Button
 		ariaLabel={$i18n.swap.text.switch_tokens_button}
 		colorStyle="primary"

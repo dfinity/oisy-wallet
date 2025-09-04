@@ -23,12 +23,10 @@ export const balanceZero: Readable<boolean> = derived(
 		$balanceStore[$token.id]?.data === ZERO
 );
 
-// TODO: Create tests for this store
 export const anyBalanceNonZero: Readable<boolean> = derived([balancesStore], ([$balanceStore]) =>
 	checkAnyNonZeroBalance($balanceStore)
 );
 
-// TODO: Create tests for this store
 export const allBalancesZero: Readable<boolean> = derived(
 	[balancesStore, enabledFungibleNetworkTokens],
 	([$balancesStore, $enabledNetworkTokens]) =>
@@ -38,7 +36,6 @@ export const allBalancesZero: Readable<boolean> = derived(
 		})
 );
 
-// TODO: Create tests for this store
 export const noPositiveBalanceAndNotAllBalancesZero: Readable<boolean> = derived(
 	[anyBalanceNonZero, allBalancesZero],
 	([$anyBalanceNonZero, $allBalancesZero]) => !$anyBalanceNonZero && !$allBalancesZero

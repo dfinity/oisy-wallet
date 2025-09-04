@@ -1,26 +1,31 @@
 import type { chat_message_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import {
-	AI_ASSISTANT_FILTER_CONTACTS_PROMPT,
 	AI_ASSISTANT_LLM_MODEL,
-	AI_ASSISTANT_SYSTEM_PROMPT,
-	AI_ASSISTANT_TOOLS
+	getAiAssistantFilterContactsPrompt,
+	getAiAssistantToolsDescription
 } from '$lib/constants/ai-assistant.constants';
 import {
-	contacts,
-	extendedAddressContacts as extendedAddressContactsStore
-} from '$lib/derived/contacts.derived';
-import type {
-	AiAssistantContactUi,
-	ChatMessageContent,
-	ToolCall,
-	ToolCallArgument,
-	ToolResult
-} from '$lib/types/ai-assistant';
-import type { ContactUi } from '$lib/types/contact';
+	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
+	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
+} from '$lib/constants/analytics.contants';
+import { aiAssistantSystemMessage } from '$lib/derived/ai-assistant.derived';
+import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
+import { enabledNetworksSymbols } from '$lib/derived/networks.derived';
+import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
+import { trackEvent } from '$lib/services/analytics.services';
 import {
+	ToolResultType,
+	type ChatMessageContent,
+	type ShowContactsToolResult,
+	type ToolCall,
+	type ToolCallArgument,
+	type ToolResult
+} from '$lib/types/ai-assistant';
+import {
+	generateAiAssistantResponseEventMetadata,
 	parseFromAiAssistantContacts,
-	parseToAiAssistantContacts
+	parseReviewSendTokensToolArguments
 } from '$lib/utils/ai-assistant.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, jsonReplacer, nonNullish, toNullable } from '@dfinity/utils';
@@ -42,13 +47,20 @@ export const askLlm = async ({
 	messages: chat_message_v1[];
 	identity: Identity;
 }): Promise<ChatMessageContent> => {
+	const requestStartTimestamp = Date.now();
+
 	const {
 		message: { content, tool_calls }
 	} = await llmChat({
 		request: {
 			model: AI_ASSISTANT_LLM_MODEL,
 			messages,
-			tools: toNullable(AI_ASSISTANT_TOOLS)
+			tools: toNullable(
+				getAiAssistantToolsDescription({
+					enabledNetworksSymbols: get(enabledUniqueTokensSymbols),
+					enabledTokensSymbols: get(enabledUniqueTokensSymbols)
+				})
+			)
 		},
 		identity
 	});
@@ -56,10 +68,15 @@ export const askLlm = async ({
 
 	if (nonNullish(tool_calls) && tool_calls.length > 0) {
 		for (const toolCall of tool_calls) {
-			const result = await executeTool({ toolCall, identity });
+			const result = await executeTool({ toolCall, identity, requestStartTimestamp });
 
 			nonNullish(result) && toolResults.push(result);
 		}
+	} else {
+		trackEvent({
+			name: AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
+			metadata: generateAiAssistantResponseEventMetadata({ requestStartTimestamp })
+		});
 	}
 
 	return {
@@ -86,44 +103,40 @@ export const askLlmToFilterContacts = async ({
 }: {
 	identity: Identity;
 	filterParams: ToolCallArgument[];
-}): Promise<ContactUi[]> => {
-	const extendedAddressContacts = get(extendedAddressContactsStore);
-	const aiAssistantContacts = parseToAiAssistantContacts(extendedAddressContacts);
-
+}): Promise<ShowContactsToolResult> => {
 	const {
 		message: { content }
 	} = await llmChat({
 		request: {
 			model: AI_ASSISTANT_LLM_MODEL,
 			messages: [
-				{
-					system: {
-						content: AI_ASSISTANT_SYSTEM_PROMPT
-					}
-				},
+				get(aiAssistantSystemMessage),
+
 				{
 					user: {
-						content: `
-							${AI_ASSISTANT_FILTER_CONTACTS_PROMPT}
-								
-							Contacts: ${JSON.stringify(aiAssistantContacts, jsonReplacer)}
-							Arguments: "${JSON.stringify(filterParams)}"
-						`
+						content: getAiAssistantFilterContactsPrompt(JSON.stringify(filterParams))
 					}
 				}
 			],
-			tools: toNullable(AI_ASSISTANT_TOOLS)
+			tools: toNullable(
+				getAiAssistantToolsDescription({
+					enabledNetworksSymbols: get(enabledNetworksSymbols),
+					enabledTokensSymbols: get(enabledUniqueTokensSymbols)
+				})
+			)
 		},
 		identity
 	});
 
-	const filteredAiAssistantContacts: AiAssistantContactUi[] =
-		JSON.parse(fromNullable(content) ?? '', jsonReplacer)?.contacts ?? [];
+	const data = JSON.parse(fromNullable(content) ?? '', jsonReplacer);
 
-	return parseFromAiAssistantContacts({
-		aiAssistantContacts: filteredAiAssistantContacts,
-		extendedAddressContacts
-	});
+	return {
+		contacts: parseFromAiAssistantContacts({
+			aiAssistantContacts: data?.contacts ?? [],
+			extendedAddressContacts: get(extendedAddressContactsStore)
+		}),
+		message: data?.message
+	};
 };
 
 /**
@@ -137,10 +150,12 @@ export const askLlmToFilterContacts = async ({
  */
 export const executeTool = async ({
 	toolCall,
-	identity
+	identity,
+	requestStartTimestamp
 }: {
 	toolCall: ToolCall;
 	identity: Identity;
+	requestStartTimestamp: number;
 }): Promise<ToolResult | undefined> => {
 	const {
 		function: { name, arguments: filterParams }
@@ -148,12 +163,23 @@ export const executeTool = async ({
 
 	let result: ToolResult['result'] | undefined;
 
-	if (name === 'show_contacts') {
+	if (name === ToolResultType.SHOW_CONTACTS) {
 		result =
 			isNullish(filterParams) || filterParams.length === 0
-				? get(contacts)
+				? { contacts: Object.values(get(extendedAddressContactsStore)) }
 				: await askLlmToFilterContacts({ filterParams, identity });
+	} else if (name === ToolResultType.REVIEW_SEND_TOKENS) {
+		result = parseReviewSendTokensToolArguments({
+			filterParams,
+			extendedAddressContacts: get(extendedAddressContactsStore),
+			tokens: get(enabledTokens)
+		});
 	}
+
+	trackEvent({
+		name: AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED,
+		metadata: generateAiAssistantResponseEventMetadata({ toolName: name, requestStartTimestamp })
+	});
 
 	return { type: name as ToolResult['type'], result };
 };
