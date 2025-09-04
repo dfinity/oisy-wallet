@@ -17,22 +17,7 @@
 		><IconClose /></div
 	>
 	<div class="z-9 pointer-events-none absolute inset-0 grid place-items-center">
-		<div class="fullscreen-modal max-h-[90vh] max-w-[90vw] overflow-hidden">
-			<div class="overflow-hidden rounded-lg">
-				<Img src={imageSrc} />
-			</div>
-		</div>
+		<Img src={imageSrc} styleClass="rounded-lg w-auto h-auto block max-h-[90dvh] max-w-[90dvw]" />
 	</div>
 	<Backdrop on:nnsClose={() => modalStore.close()} />
 </div>
-
-<style lang="scss">
-	/* Ensure images (or videos, etc.) shrink but never upscale */
-	:global(.fullscreen-modal img) {
-		max-width: 90dvw;
-		max-height: 90dvh;
-		width: auto;
-		height: auto;
-		display: block;
-	}
-</style>
