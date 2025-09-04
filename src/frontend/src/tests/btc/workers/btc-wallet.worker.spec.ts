@@ -170,8 +170,7 @@ describe('btc-wallet.worker', () => {
 
 					expect(postMessageMock).toHaveBeenCalledTimes(8);
 					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageUncertified);
-					expect(postMessageMock).toHaveBeenNthCalledWith(10, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
 				});
 
 				it('should start the scheduler with an interval', async () => {
