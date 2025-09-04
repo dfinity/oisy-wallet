@@ -49,9 +49,9 @@ describe('FullscreenImgModal', () => {
 			}
 		});
 
-		const container = document.querySelector('.fullscreen-modal');
+		const container = document.querySelector('img');
 
 		expect(container).toBeInTheDocument();
-		expect(container).toHaveClass('max-h-[90vh]', 'max-w-[90vw]');
+		expect(container).toHaveClass('max-h-[90dvh]', 'max-w-[90dvw]');
 	});
 });
