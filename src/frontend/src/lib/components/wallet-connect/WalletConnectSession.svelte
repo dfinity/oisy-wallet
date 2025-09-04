@@ -395,6 +395,23 @@
 				solAddress: $solAddressMainnet,
 				cleanSlate: false
 			});
+
+			// Reattach handlers so incoming requests work after refresh
+			attachHandlers(listener);
+
+			// Check for persisted sessions
+			const sessions = listener.getActiveSessions();
+
+			if (Object.keys(sessions).length === 0) {
+				walletConnectPaired.set(false);
+
+				await disconnectListener();
+
+				return;
+			}
+
+			// We have at least one active session – consider ourselves connected
+			walletConnectPaired.set(true);
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.connect },
@@ -402,26 +419,7 @@
 			});
 
 			resetListener();
-
-			return;
 		}
-
-		// Reattach handlers so incoming requests work after refresh
-		attachHandlers(listener);
-
-		// Check for persisted sessions
-		const sessions = listener.getActiveSessions();
-
-		if (Object.keys(sessions).length === 0) {
-			walletConnectPaired.set(false);
-
-			await disconnectListener();
-
-			return;
-		}
-
-		// We have at least one active session – consider ourselves connected
-		walletConnectPaired.set(true);
 	};
 
 	$: ($ethAddress, $solAddressMainnet, $loading, (async () => await reconnect())());
