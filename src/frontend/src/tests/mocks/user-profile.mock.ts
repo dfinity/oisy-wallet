@@ -39,11 +39,31 @@ const mockUserAgreement: UserAgreement = {
 	accepted: toNullable()
 };
 
-const mockUserAgreements: Agreements = {
+export const mockUserAgreements: Agreements = {
 	agreements: {
 		license_agreement: mockUserAgreement,
 		privacy_policy: mockUserAgreement,
 		terms_of_use: mockUserAgreement
+	}
+};
+
+export const mockDefinedUserAgreements: Agreements = {
+	agreements: {
+		license_agreement: {
+			last_accepted_at_ns: toNullable(1677628801n),
+			last_updated_at_ms: toNullable(1677628800n),
+			accepted: toNullable(true)
+		},
+		privacy_policy: {
+			last_accepted_at_ns: toNullable(1677628801n),
+			last_updated_at_ms: toNullable(1677628800n),
+			accepted: toNullable(true)
+		},
+		terms_of_use: {
+			last_accepted_at_ns: toNullable(1677628801n),
+			last_updated_at_ms: toNullable(1677628800n),
+			accepted: toNullable(true)
+		}
 	}
 };
 

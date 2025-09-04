@@ -84,6 +84,13 @@ export const LOCAL_CKBTC_MINTER_CANISTER_ID =
 	(import.meta.env.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText) ??
 	'mqygn-kiaaa-aaaar-qaadq-cai';
 
+export const CYCLES_LEDGER_CANISTER_ID: CanisterIdText =
+	LOCAL && nonNullish(LOCAL_CYCLES_LEDGER_CANISTER_ID)
+		? LOCAL_CYCLES_LEDGER_CANISTER_ID
+		: (STAGING || BETA || PROD) && nonNullish(STAGING_CYCLES_LEDGER_CANISTER_ID)
+			? STAGING_CYCLES_LEDGER_CANISTER_ID
+			: IC_CYCLES_LEDGER_CANISTER_ID;
+
 const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
 	nonNullish(LOCAL_CKBTC_LEDGER_CANISTER_ID) &&

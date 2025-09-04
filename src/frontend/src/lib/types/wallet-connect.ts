@@ -4,7 +4,7 @@ import type { Option } from '$lib/types/utils';
 import type { WalletConnectSolApproveRequestMessage } from '$sol/types/wallet-connect';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { ErrorResponse } from '@walletconnect/jsonrpc-utils';
-import type { PairingTypes } from '@walletconnect/types';
+import type { PairingTypes, SessionTypes } from '@walletconnect/types';
 
 export type WalletConnectApproveRequestMessage =
 	| WalletConnectEthApproveRequestMessage
@@ -18,6 +18,7 @@ export interface WalletConnectListener extends WebSocketListener {
 	sessionDelete: (callback: () => void) => void;
 	sessionRequest: (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => void;
 	rejectRequest: (params: { id: number; topic: string; error: ErrorResponse }) => Promise<void>;
+	getActiveSessions: () => Record<string, SessionTypes.Struct>;
 	approveRequest: (params: {
 		id: number;
 		topic: string;
