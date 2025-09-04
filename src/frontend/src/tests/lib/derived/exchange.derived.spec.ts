@@ -334,5 +334,28 @@ describe('exchange.derived', () => {
 				[mockSplCustomToken.id]: mockSplTokenPrice2
 			});
 		});
+
+		it('should return values for ERC20 token ICP', () => {
+			erc20UserTokensStore.setAll([
+				{
+					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true, version: undefined },
+					certified: false
+				}
+			]);
+
+			exchangeStore.set([
+				{ ethereum: ethPrice },
+				{ bitcoin: btcPrice },
+				{ 'internet-computer': icpPrice },
+				{ solana: solPrice },
+				{ binancecoin: bnbPrice },
+				{ 'polygon-ecosystem-token': polPrice }
+			]);
+
+			expect(get(exchanges)).toStrictEqual({
+				...expectedExchanges,
+				[mockErc20DefaultToken.id]: icpPrice
+			});
+		});
 	});
 });
