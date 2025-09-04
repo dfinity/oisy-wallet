@@ -36,22 +36,22 @@
 
 <div
 	class={`token-input-currency flex h-full w-full items-center font-bold ${styleClass}`}
-	class:text-error-primary={error}
 	class:animate-pulse={loading}
+	class:text-error-primary={error}
 >
 	{@render prefix?.()}
 	<InputCurrency
+		{name}
+		{autofocus}
+		{decimals}
+		{disabled}
+		{innerEnd}
+		{placeholder}
 		{testId}
 		bind:value
-		{name}
-		{placeholder}
-		{disabled}
-		{decimals}
-		{autofocus}
 		on:focus
 		on:blur
 		on:nnsInput
-		{innerEnd}
 	/>
 </div>
 

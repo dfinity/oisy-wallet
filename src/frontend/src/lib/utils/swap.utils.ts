@@ -2,31 +2,36 @@ import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
 } from '$declarations/kong_backend/kong_backend.did';
+import { dAppDescriptions } from '$env/dapp-descriptions.env';
+import type { Erc20Token } from '$eth/types/erc20';
+import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
-	SWAP_ETH_TOKEN_PLACEHOLDER
+	SWAP_ETH_TOKEN_PLACEHOLDER,
+	swapProvidersDetails
 } from '$lib/constants/swap.constants';
+import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
+import type { OisyDappDescription } from '$lib/types/dapp-description';
 import {
 	SwapProvider,
 	VeloraSwapTypes,
 	type FormatSlippageParams,
+	type GetWithdrawableTokenParams,
 	type ICPSwapResult,
 	type ProviderFee,
 	type Slippage,
 	type SwapMappedResult,
+	type SwapProvidersConfig,
 	type VeloraSwapDetails
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
-
-import type { Erc20Token } from '$eth/types/erc20';
-import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
-import { SwapError } from '$lib/services/swap-errors.services';
 import { formatToken } from './format.utils';
 import { isNullishOrEmpty } from './input.utils';
 
@@ -188,3 +193,39 @@ export const geSwapEthTokenAddress = (token: Erc20Token) => {
 };
 
 export const isSwapError = (err: unknown): err is SwapError => err instanceof SwapError;
+
+export const getWithdrawableToken = ({
+	tokenAddress,
+	sourceToken,
+	destinationToken
+}: GetWithdrawableTokenParams): IcTokenToggleable => {
+	if (tokenAddress === sourceToken.ledgerCanisterId) {
+		return sourceToken;
+	}
+
+	if (tokenAddress === destinationToken.ledgerCanisterId) {
+		return destinationToken;
+	}
+
+	throw new Error(`Unknown token address`);
+};
+
+export const findSwapProvider = (
+	providerId: string
+): OisyDappDescription | SwapProvidersConfig | undefined => {
+	const normalizedId = providerId.toLowerCase();
+	const icDAppProvider = dAppDescriptions.find(({ id }) => id === normalizedId);
+
+	if (icDAppProvider) {
+		return icDAppProvider;
+	}
+
+	const swapProviderDetails = swapProvidersDetails[normalizedId];
+
+	if (swapProviderDetails) {
+		return {
+			id: normalizedId,
+			...swapProviderDetails
+		};
+	}
+};

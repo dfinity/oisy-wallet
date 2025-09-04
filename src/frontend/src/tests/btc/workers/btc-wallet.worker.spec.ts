@@ -94,7 +94,8 @@ describe('btc-wallet.worker', () => {
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 
-		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(1000);
+		let mockBlockHeight = 1000;
+		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(mockBlockHeight++);
 
 		vi.spyOn(blockchainRest, 'btcAddressData').mockResolvedValue(mockBlockchainResponse);
 
@@ -140,7 +141,8 @@ describe('btc-wallet.worker', () => {
 				// reset internal store with transactions
 				scheduler['store'] = {
 					transactions: {},
-					balance: undefined
+					balance: undefined,
+					latestBitcoinBlockHeight: undefined
 				};
 
 				scheduler.stop();

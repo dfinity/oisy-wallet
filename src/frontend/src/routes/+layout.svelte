@@ -12,6 +12,7 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
+	import { isLocked } from '$lib/derived/locked.derived';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
@@ -74,13 +75,18 @@
 	 * Workers
 	 */
 
-	let worker = $state<{ syncAuthIdle: (auth: AuthStoreData) => void } | undefined>();
+	let worker = $state<
+		| {
+				syncAuthIdle: (args: { auth: AuthStoreData; locked?: boolean }) => void;
+		  }
+		| undefined
+	>();
 
 	onMount(async () => (worker = await initAuthWorker()));
 
 	$effect(() => {
-		[worker, $authStore];
-		worker?.syncAuthIdle($authStore);
+		[worker, $authStore, $isLocked];
+		worker?.syncAuthIdle({ auth: $authStore, locked: $isLocked });
 	});
 
 	/**

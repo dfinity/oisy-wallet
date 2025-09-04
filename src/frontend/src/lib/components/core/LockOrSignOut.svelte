@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
-	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconLock from '$lib/components/icons/IconLock.svelte';
+	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { LOCK_BUTTON } from '$lib/constants/test-ids.constants';
+	import { LOCK_BUTTON, LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
+	import { lockSession, signOut } from '$lib/services/auth.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { authLocked } from '$lib/stores/locked.store';
 
 	interface Props {
 		onHidePopover?: () => void;
-		hideText?: boolean;
 	}
-	let { onHidePopover, hideText = true }: Props = $props();
+	let { onHidePopover }: Props = $props();
 
 	let remainingTimeMs = $derived($authRemainingTimeStore);
 
@@ -25,23 +26,42 @@
 		});
 	};
 
-	const handleLogoutTriggered = () => {
+	const handleLogoutTriggered = async () => {
 		onHidePopover?.();
+		await signOut({ resetUrl: true, clearAllPrincipalsStorages: true, source: 'menu-button' });
+	};
+
+	const handleLock = async () => {
+		onHidePopover?.();
+		await lockSession({ resetUrl: false });
+		authLocked.lock({ source: 'menu lock button' });
 	};
 </script>
 
 <div class="mb-1 mt-2">
-	<div class="flex justify-between gap-[12px] pl-3">
+	<div class="flex justify-between gap-[12px]">
 		<Button
 			colorStyle="tertiary"
-			styleClass="w-full py-2 flex-1 border-tertiary hover:text-brand-primary hover:bg-brand-subtle-10"
+			onclick={handleLock}
+			paddingSmall
+			styleClass="w-full rounded-lg py-2 flex-1 border-tertiary hover:text-brand-primary hover:bg-brand-subtle-10"
 			testId={LOCK_BUTTON}
 		>
 			{$i18n.auth.text.lock}
 			<IconLock />
 		</Button>
 
-		<SignOut on:icLogoutTriggered={handleLogoutTriggered} {onHidePopover} {hideText} />
+		<Button
+			colorStyle="secondary"
+			innerStyleClass="items-center justify-center"
+			onclick={handleLogoutTriggered}
+			paddingSmall
+			styleClass="w-full rounded-lg py-2 flex-1"
+			testId={LOGOUT_BUTTON}
+		>
+			{$i18n.auth.text.logout}
+			<IconLogout />
+		</Button>
 	</div>
 
 	{#if nonNullish(remainingTimeMs)}

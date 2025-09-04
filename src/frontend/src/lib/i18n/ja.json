@@ -1,0 +1,1636 @@
+{
+	"core": {
+		"text": {
+			"cancel": "キャンセル",
+			"next": "次へ",
+			"save": "保存",
+			"back": "戻る",
+			"done": "完了",
+			"close": "閉じる",
+			"change": "変更",
+			"apply": "適用",
+			"refresh": "再度読み込み",
+			"name": "名前",
+			"symbol": "シンボル",
+			"decimals": "小数桁数",
+			"amount": "数量",
+			"tokenId": "トークンID",
+			"max": "最大",
+			"destination": "宛先",
+			"reject": "拒否",
+			"approve": "承認",
+			"view": "表示",
+			"copy": "コピー",
+			"delete": "削除",
+			"create": "作成",
+			"clear_filter": "フィルターをクリア",
+			"not_available": "該当なし",
+			"new": "新規作成",
+			"edit": "編集",
+			"no_results": "一致する結果はありません",
+			"paste": "貼り付け",
+			"to": "宛先",
+			"add": "追加",
+			"more_items": "さらに$items件",
+			"select": "選択",
+			"language": "言語",
+			"currency": "通貨"
+		},
+		"info": {
+			"test_banner": "テスト目的のみ！",
+			"test_banner_beta": ""
+		},
+		"alt": {
+			"logo": "$name ロゴ",
+			"go_to_home": "$oisy_name ホーム画面へ移動",
+			"back": "前のページに戻る",
+			"open_details": "詳細を開く",
+			"close_details": "詳細を閉じる",
+			"switch_language": "言語を切り替え",
+			"switch_currency": "通貨を切り替え"
+		},
+		"warning": {
+			"do_not_close": "取引完了までタブを閉じないでください"
+		}
+	},
+	"navigation": {
+		"text": {
+			"tokens": "資産",
+			"settings": "設定",
+			"dapp_explorer": "DApp一覧",
+			"activity": "履歴",
+			"airdrops": "エアドロップ",
+			"earning": "獲得と報酬",
+			"source_code_on_github": "GitHub上のソースコード",
+			"view_on_explorer": "エクスプローラーで確認",
+			"source_code": "ソースコード",
+			"changelog": "変更履歴",
+			"documentation": "ドキュメント",
+			"support": "サポート",
+			"confirm_navigate": "ページを離れても良いですか？",
+			"vip_qr_code": "VIP QRコード",
+			"binance_qr_code": "バイナンス クラブハウスQR",
+			"refer_a_friend": "友達紹介",
+			"address_book": "アドレス帳",
+			"hide_balances": "残高を非表示",
+			"show_balances": "残高を表示",
+			"privacy_mode_enabled": "プライバシーモードが有効です。[P]キーを押して残高を再表示します。",
+			"privacy_mode_disabled": "プライバシーモードが無効です。[P]キーを押して残高を非表示にします。"
+		},
+		"alt": {
+			"tokens": "資産一覧に移動",
+			"settings": "設定を表示",
+			"dapp_explorer": "Dapp一覧を表示",
+			"activity": "取引履歴を表示",
+			"airdrops": "エアドロップ報酬を表示",
+			"menu": "ウォレットアドレス、設定、サインアウト、外部リンク",
+			"changelog": "GitHubで $oisy_name の更新履歴を見る",
+			"documentation": "$oisy_nameドキュメントを開く",
+			"support": "$oisy_nameドキュメントのサポートページを開く",
+			"open_twitter": "DFINITY X/Twitterを開く",
+			"vip_qr_code": "招待リンクを生成",
+			"binance_qr_code": "バイナンスクラブハウスリンクを生成",
+			"refer_a_friend": "友達の紹介リンクを生成",
+			"address_book": "アドレス帳を開く",
+			"hide_balances": "表示中の残高を非表示にする",
+			"show_balances": "非表示の残高を表示する"
+		},
+		"short": {
+			"documentation": "ドキュメント"
+		}
+	},
+	"auth": {
+		"text": {
+			"title_part_1": "$oisy_name",
+			"title_part_2": "究極の分散型ウォレット",
+			"logout": "ログアウト",
+			"lock": "ロック",
+			"authenticate": "開く／作成",
+			"asset_types": "Bitcoin、Solana、Ethereum、ICP 等に対応",
+			"instant_and_private": "いつでもどこでも、すぐにプライベートアクセス",
+			"advanced_cryptography": "100％オンチェーン。高度な暗号技術で守られる安全性。"
+		},
+		"alt": {
+			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
+		},
+		"warning": {
+			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
+			"session_expired": "セッションの有効期限が切れました。ログアウトされました。",
+			"reload_and_retry": ""
+		},
+		"error": {
+			"no_internet_identity": "internet identityが見つかりません",
+			"invalid_pouh_credential": "Humanity Credentialの検証中にエラーが発生しました。発行元に再発行を依頼してください。",
+			"error_validating_pouh_credential_oisy": "$oisy_shortでHumanity Credentialを検証中にエラーが発生しました: $error",
+			"error_validating_pouh_credential": "Humanity Credentialの検証中にエラーが発生しました。",
+			"error_requesting_pouh_credential": "Humanity Credentialを要求する際にエラーが発生しました。",
+			"missing_pouh_issuer_origin": "Humanity Credentialを要求する際にエラーが発生しました。発行元が不明です。",
+			"no_pouh_credential": "Humanity Credentialを要求する際にエラーが発生しました。Decide AIに有効なCredentialをお持ちですか？",
+			"error_while_signing_in": "サインイン処理中に問題が発生しました。",
+			"unexpected_issue_with_syncing": "認証状態の同期中に予期せぬ問題が発生しました。。"
+		},
+		"help": {
+			"text": {
+				"title": "認証に問題がありますか？",
+				"description": "Internet Identityでの認証をキャンセルされたようです。より良い体験を提供するために何が起こったのか教えてください。",
+				"subtitle": "以下に該当するものはありますか？",
+				"lost_identity": "Internet Identity 番号を紛失した",
+				"security": "セキュリティまたはプライバシーについて懸念がありました",
+				"got_confused": "手順が分かりづらかった",
+				"other": "その他...",
+				"feedback_text": "フィードバックはウォレット改善に活かされます。",
+				"thanks_text": "ご協力ありがとうございます！",
+				"identity_new_identity": "$oisy_shortウォレットはInternet Identityドメインを<span class=\"font-bold\">identity.internetcomputer.org</span>に切り替えます",
+				"identity_legacy_description": "このため、Internet Identity番号が自動的に表示されない場合があり、再入力が必要になる場合があります。",
+				"identity_legacy_sign_in": "旧Internet Identityドメインでサインイン",
+				"identity_learn_more": "$oisy_short Docsで詳細を確認",
+				"other_title": "フィードバックありがとうございます！",
+				"other_description": "以下は$oisy_shortとInternet Identityにおける<span class=\"font-bold\">セキュリティ</span>と<span class=\"font-bold\">プライバシー</span>に関する役立つリソースです。情報に基づいた意思決定に役立つことを願っています。",
+				"other_introduction": "$oisy_short紹介",
+				"other_docs": "$oisy_short Docs: Internet Identity",
+				"other_private_key": "誰がネイティブアセットの秘密鍵を管理していますか？",
+				"other_asset_control": "$oisy_shortウォレットにおけるアセット管理、復旧、ガバナンス",
+				"need_help": "サインイン",
+				"sign_in": "に関してサポートが必要ですか？"
+			},
+			"alt": {
+				"internet_identity": "新しいInternet Identityの画像",
+				"identity_learn_more": "旧Internet Identityについて詳しく知る",
+				"other_introduction": "$oisy_shortの紹介を開く",
+				"other_docs": "$oisy_shortのドキュメント（Internet Identity）を開く",
+				"other_private_key": "ネイティブアセットの秘密鍵の管理者についてヘルプを確認する",
+				"other_asset_control": "$oisy_shortウォレットにおけるアセット管理、復旧、ガバナンスに関する情報を見る",
+				"sign_in": "サインインに関するサポートが必要ですか"
+			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "ロックを解除して続行",
+			"title_part_2": "ウォレットは安全のためロックされています。中断したところから再開するか、ログアウトしてください。",
+			"unlock": "ロック解除",
+			"logout": "ログアウト",
+			"logout_clear_cash_message": "ログアウトすると、キャッシュされたデータがすべて消去されます",
+			"learn_more": "詳細はこちら"
+		}
+	},
+	"dapps": {
+		"text": {
+			"all_dapps": "すべてのアプリ",
+			"featured": "注目のアプリ",
+			"sign_in": "エコシステムを探索するにはサインインしてください。",
+			"title": "アプリを探索",
+			"open_dapp": "$dAppNameを開く",
+			"submit_your_dapp": "あなたのDappを登録する"
+		},
+		"alt": {
+			"learn_more": "$dAppNameについてもっと知る",
+			"logo": "$dAppNameのロゴ",
+			"show_all": "すべてのアプリケーションを表示",
+			"show_tag": "タグ「$tag」が付いたアプリを表示",
+			"open_dapp": "$dAppName を開く",
+			"open_telegram": "Telegramで $dAppNameを開く",
+			"open_open_chat": "OpenChatで $dAppNameを開く",
+			"open_twitter": "$dAppNameのX/Twitter を開く",
+			"source_code_on_github": "githubで $dAppNameのソースコードを見る",
+			"submit_your_dapp": "アプリを App Explorer に登録する",
+			"tags": "$dAppNameに関連するタグ",
+			"website": "$dAppNameの画像"
+		},
+		"categories": {
+			"defi": "DeFi",
+			"social_media": "ソーシャルメディア",
+			"verifiable_credentials": "検証可能な認証情報",
+			"staking": "ステーキング",
+			"walletconnect": "WalletConnect",
+			"game": "ゲーム",
+			"tools": "ツール"
+		},
+		"descriptions": {
+			"kongswap": {
+				"name": "KongSwap",
+				"one_liner": "ワンストップのトークンショップ - KongSwapを使えば、すべてのチェーンで簡単にトークンを取引できます。",
+				"description": "KongSwapは、ICP、Bitcoin、Ethereum、Solanaにまたがるブリッジレスのクロスチェーン取引を提供する完全分散型取引所（DEX）です。<br/><br/>Chain Fusion技術とInternet Computer Protocolを使用し、手数料を削減し、ユーザーエクスペリエンスを簡素化し、流動性の断片化を回避します。フロントエンドとバックエンドの両方がスマートコントラクトを介してオンチェーンで動作し、シームレスなDeFi体験を提供します。",
+				"carousel": {
+					"text": "DEXでトークンをスワップ",
+					"call_to_action": "KongSwapを試す"
+				}
+			},
+			"openchat": {
+				"name": "OpenChat",
+				"one_liner": "WhatsAppの分散型代替。",
+				"call_to_action": "OpenChatへ",
+				"description": "OpenChatは、Internet Computerブロックチェーン上でエンドツーエンドで動作するフル機能のチャットアプリケーションです。<br/><br/>OpenChatはDAOとしてコミュニティによって統治され、独自のCHATトークンを持っています。CHATトークンはユーザーへの報酬として与えられ、成長を加速させ、OpenChatが中央集権的な大手ハイテク競合他社に対する有力な挑戦者となるための数百万人の支持者チームを作り出します！",
+				"stats": "80,000人以上のユーザー",
+				"carousel": {
+					"text": "OpenChat - web3がコミュニケーションする場所",
+					"call_to_action": "もっと見る"
+				}
+			},
+			"decideid": {
+				"name": "DecideID",
+				"one_liner": "信頼できるデジタルエンゲージメントのためのユニークな本人確認。",
+				"call_to_action": "DecideIDを開く",
+				"stats": "50,000以上の推論リクエスト",
+				"description": "Decide IDは、Decide AIシステムの中核にあり、独自のProof of Personhood（PoP）方法論を通じて信頼とセキュリティを確保します。参加すると、複数の証明を提供し、本人確認のための特別なチャレンジを完了する検証プロセスを経ます。これにより、すべてのユーザーが本物で、ユニークで、ボットではないことが保証されます。このプロセス中に、ユニークなオンチェーン識別子であるプリンシパルIDが作成されます。これは、検証済みの人格を必要とするさまざまなアプリケーションで使用でき、あらゆるアプリのサインアップまたはログインプロセスへの安全でシームレスな統合を保証します。さらに、ゼロ知識証明の使用により、生体情報などの個人データは機密性が保たれ、安全です。<br/><br/>Decide IDで、柔軟で安全、かつプライバシーを第一に考えたオンラインでの本人確認とエンゲージメントをお楽しみください。",
+				"carousel": {
+					"text": "プライバシーを第一に考えたオンラインでの本人確認とエンゲージメントをお楽しみください",
+					"call_to_action": "興味がありますか？"
+				}
+			},
+			"icpswap": {
+				"name": "ICPSwap",
+				"one_liner": "ICPSwapは、ICP上のフルスタックの金融およびDAOサービスの最高のハブである、完全にオンチェーンで構築されたAMM DEXです。",
+				"call_to_action": "未来に出会う",
+				"description": "未来の分散型金融のハブ！<br/>取引所をハブとして再発明し、ICPSwapはInternet Computer上でフルスタックの金融、市場、DAOサービスを提供します。DFINITYのInternet Computerの基盤技術に基づき、ICPSwapはユーザーと開発者が共同でプロジェクトを構築する方法を再構築することにより、真に分散化された金融のエコシステムを確立します。"
+			},
+			"nnsdapp": {
+				"name": "NNS Dapp",
+				"one_liner": "NNSフロントエンドdappは、誰でも使いやすいUIでInternet Computerのネットワークナーバスシステムと対話できるようにします。",
+				"call_to_action": "参加する",
+				"description": "NNSフロントエンドdappは、誰でも使いやすいUIでInternet Computerのネットワークナーバスシステムと対話できるようにします。ブロックチェーンを介して完全にエンドツーエンドで提供されるこの分散型dappを使用すると、次のアクションを簡単に実行できます：<br/><ul><li>トークン（ICP, ckBTC, CHATなど）の送受信</li><li>ニューロンのステーキングと管理</li><li>Internet ComputerとSNSのガバナンスへの投票</li><li>分散化スワップへの参加</li><li>キャニスターの作成と補充</li><li>ガバナンス報酬の獲得</li></ul>"
+			},
+			"uniswap": {
+				"name": "Uniswap",
+				"one_liner": "最大のオンチェーン市場。Ethereumおよびその他11以上のチェーンで暗号資産を売買できます。",
+				"call_to_action": "スワップを始めよう",
+				"description": "Uniswapは、スマートコントラクトのセットを使用して取引実行のための流動性プールを作成する分散型暗号通貨取引所です。これはオープンソースプロジェクトであり、中央集権型取引所の代わりにスマートコントラクトを使用して取引を促進するため、DeFi製品のカテゴリに分類されます。"
+			},
+			"oneinch": {
+				"name": "1inch",
+				"one_liner": "複数のネットワーク上の数百のDEXで取引を最適化します。",
+				"call_to_action": "見てみる",
+				"description": "1inchネットワークは、1inch dApp、ウォレット、開発者ポータル、ポートフォリオ、Fusionなどの製品を備えたDeFiエコシステムを提供し、安全なWeb3操作を実現します。1inchは、複数のブロックチェーン上の数百の流動性ソースへのアクセスを提供します。<br/><br/>1inchスワップエンジンを搭載したFusionモードでは、ユーザーはネットワーク手数料を支払うことなく、最も有利なレートでトークンをスワップできます。さらに、Fusionモードはユーザーに追加のMEV保護を提供します。Fusionモードでのすべてのスワップは、リゾルバー（プロのトレーダー）によって実行され、ユーザーのスワップをMEVから保護するための最も洗練された効率的な方法を使用します。"
+			},
+			"compound_finance": {
+				"name": "Compound Finance",
+				"one_liner": "Ethereum上に構築された分散型マネーマーケットおよびレンディングプロトコル。",
+				"call_to_action": "参加する",
+				"description": "Compound Financeは、<b>Ethereum上に構築された分散型マネーマーケットおよびレンディングプロトコル</b>です。そのCompound III（Comet）プロトコルは、ユーザーが「ベースアセット」の単一担保プールから借り入れまたは貸し出しを行うことを可能にします。Compound IIIは、Ethereum、Polygon、Base、Arbitrum上のベースアセット（例：USDC、WETHなど）をサポートしています。"
+			},
+			"aave": {
+				"name": "Aave",
+				"one_liner": "Aaveは、ユーザーがサプライヤーまたはボロワーとして参加できる分散型の非管理型流動性プロトコルです。",
+				"call_to_action": "DeFiの全能力にアクセス",
+				"description": "Aaveは、ユーザーがサプライヤーまたはボロワーとして参加できる分散型の非管理型流動性プロトコルです。サプライヤーは市場に流動性を提供しながら利息を得ることができ、ボロワーは借り入れた金額を超える担保を提供することで流動性にアクセスできます。\nこれは完全にパーミッションレスであり、誰でも使いやすいインターフェースを通じて、またはサポートされているブロックチェーンネットワーク上のスマートコントラクトと直接対話することでAaveにアクセスできます。"
+			},
+			"eigenlayer": {
+				"name": "EigenLayer",
+				"one_liner": "リステーキングを導入し、任意のERC20トークンのステーキングを可能にするEthereumベースのプロトコル。",
+				"call_to_action": "今すぐリステーク",
+				"description": "EigenLayerは、暗号経済セキュリティの新しいプリミティブであるリステーキングを導入したEthereum上に構築されたプロトコルです。これにより、ユーザーはネイティブETH、リキッドステーキングトークン（LST）、EIGENトークン、または任意のERC20トークンなどの資産をEigenLayerスマートコントラクトにステークし、Ethereumの暗号経済セキュリティをネットワーク上の追加アプリケーションに拡張できます。"
+			},
+			"curve_finance": {
+				"name": "Curve Finance",
+				"one_liner": "EthereumおよびEVM互換チェーン上の主要なDEX、ステーブルコインプロバイダー、およびレンディングプラットフォーム。",
+				"call_to_action": "ワープしよう",
+				"description": "Curve financeは、EthereumおよびEVM互換チェーン上の主要な分散型取引所、ステーブルコインプロバイダー、およびレンディングプラットフォームです。ステーブルコインおよび変動資産向けの高度な自動マーケットメーカー、およびローン向けのユニークなソフト清算システムで知られています。"
+			},
+			"sonic": {
+				"name": "Sonic",
+				"one_liner": "DeFiの可能性を最大限に引き出し、合理化された取引を実現します。トークンをスワップし、流動性プロバイダーとして収益を上げ、Bitfinity EVMの主要なAMMを活用してください。",
+				"call_to_action": "Sonicを開く",
+				"description": "Sonicは、Internet Computer Protocol（ICP）上に構築されたマルチチェーンの分散型取引所で、幅広いDeFiサービスを提供しています。ユーザーは簡単にトークンや無期限契約を取引し、流動性を提供し、LBPトークンセールに参加できます。ユーザーはDAOガバナンスに参加し、報酬のためにステーキングし、プラットフォームの決定に投票することができます。<br/><br/>完全にオンチェーンでオープンソース！プロのようにトークンをスワップし、流動性プロバイダーとして手数料を稼ぎ、AMMの雰囲気に参加し、Sonic DAOの不可欠な一部になりましょう。",
+				"carousel": {
+					"text": "Defiの可能性を最大限に引き出す",
+					"call_to_action": "Sonicを開く"
+				}
+			},
+			"raydium": {
+				"name": "Raydium",
+				"one_liner": "Solanaブロックチェーン上に構築されたDEXおよび自動マーケットメーカーで、迅速な取引を可能にする中央指値注文帳を提供します。",
+				"call_to_action": "DeFiの進化を力強く推進する",
+				"description": "Raydiumは、Solanaブロックチェーン上に構築された自動マーケットメーカー（AMM）で、AMM技術とSerum分散型取引所の流動性へのアクセスのユニークな組み合わせを提供します。AMMとして、Raydiumは流動性プールを使用して、許可なくデジタル資産を取引することを可能にします。"
+			},
+			"jupiter": {
+				"name": "Jupiter",
+				"one_liner": "サポートされている任意のトークンペア間で利用可能な最良のスワップを最適化するSolanaベースのDEXアグリゲーター。",
+				"call_to_action": "無限の彼方へ",
+				"description": "Jupiterは、Solanaブロックチェーン上の分散型金融プラットフォームで、流動性アグリゲーターとして機能し、DeFiスペース内の取引活動を合理化および最適化します。そのプロトコルは、流動性の提供とトークンのスワッピングを容易にし、効率的で低遅延、かつコスト効果の高い取引を保証するように設計されています。このプラットフォームにより、ユーザーはトークンをスワップし、流動性を提供し、自動マーケットメーカー（AMM）モデルを通じてイールドファーミングに参加できます。"
+			},
+			"waterneuron": {
+				"name": "WaterNeuron",
+				"one_liner": "ICPリキッドステーキング - ICPをリキッドステーキングして資本効率を最大化します。",
+				"description": "WaterNeuronは、トークンを流動的に保ちながらICPステーキング報酬へのエクスポージャーを維持できる、より資本効率の高いステーキング方法を提供します。このアプローチはステーキングプロセスを簡素化し、報酬を最大化するために特定のバリデーターを選択する必要がなくなります。"
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "分散型ソーシャルメディア - 投稿、獲得、所有。",
+				"call_to_action": "Taggrへ",
+				"description": "Taggrは、Internet Computerによって動力を与えられた公共の分散コンピューティングネットワーク上に存在する、完全に分散化されたソーシャルメディアプラットフォームです。企業によって管理される従来のソーシャルメディアプラットフォームとは異なり、Taggrは完全にそのユーザーによって所有および統治されています。",
+				"carousel": {
+					"text": "分散型ソーシャルメディア - 投稿、獲得、所有。",
+					"call_to_action": "もっと詳しく"
+				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "ガバナンスとコラボレーションが出会い、イノベーションを促進する場所。",
+				"description": "Toolkitは、Internet Computer上のサービス神経システム（SNS）とプロジェクトを管理するための多機能スイートです。ガバナンス提案からキャニスターのデプロイまで、ユーザーがシームレスにイノベーション、コラボレーション、分散化を行えるようにします。"
+			}
+		}
+	},
+	"rewards": {
+		"text": {
+			"title": "報酬",
+			"upcoming_campaigns": "今後のキャンペーン",
+			"active_date": "終了日",
+			"ended_date": "終了済み",
+			"share": "Xでシェア",
+			"learn_more": "詳細を見る",
+			"check_status": "ステータスと参加資格を確認",
+			"view_details": "詳細を表示",
+			"modal_button_text": "了解",
+			"activity_button_text": "最近のアクティビティを確認",
+			"activity_button_text_short": "アクティビティを確認",
+			"open_wallet": "ウォレットを開く",
+			"carousel_slide_title": "$oisy_short Sprinkles エピソード4が公開中！",
+			"carousel_slide_cta": "詳細を見る",
+			"sprinkles_earned": "$noOfSprinkles Sprinkles、合計 $amount を獲得しました！ 🎉",
+			"youre_eligible": "参加資格があります！",
+			"ongoing": "進行中",
+			"ended": "終了済み ($amount)",
+			"banner_text": "OISY Sprinklesで毎日の報酬を獲得しよう"
+		},
+		"requirements": {
+			"requirements_title": "参加基準",
+			"min_logins": "過去$days日間に$loginsx回以上ログイン",
+			"min_transactions": "過去$days日間に$transactions件以上のトランザクションを完了",
+			"min_total_assets_usd": "発行時点で$$usd相当のトークンを保有",
+			"hangover": "最近の当選なし（過去$days日間）"
+		},
+		"alt": {
+			"upcoming_campaigns": "今後のトークンドロップをお見逃しなく！<a href=\"https://x.com/oisy\" target=\"_blank\">X（旧Twitter）をフォロー</a>、<a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit に参加</a>、または <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord に参加</a>して最新情報をゲット！",
+			"coming_soon": "$oisy_shortエピソード4近日公開",
+			"reward_banner": "キャンペーン$campaignNameのバナー"
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: エピソード3公開中 🎉",
+				"one_liner": "アクティブに活動してBTCを獲得し、さらに<strong>友達を招待</strong>して稼ごう。<br/>ログイン、取引、トークン保有で毎日のドロップ対象に。友達を紹介すれば、キャンペーン期間中、その友達の報酬の10%を獲得できます。",
+				"participate_title": "アクティブに活動してBTCを獲得 - そして今、友達を招待することでも獲得できます。",
+				"description": "簡単な週次要件を満たしてください。ログイン、2回の取引、そして少なくとも20ドル相当のトークンを保有して、毎日50回のBTCドロップのいずれかの資格を維持します。<br/><strong>紹介報酬も登場：</strong>友達を招待してウォレットを展開させると、30日間彼らのSprinklesの10%を獲得できます。彼らは100%を保持し、あなたは追加で獲得できます。",
+				"campaign_href": "https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A",
+				"win": {
+					"default": {
+						"title": "本日のOISY Sprinkles獲得おめでとうございます！",
+						"description": "Twitterで勝利をシェアし、もう一度獲得のチャンスを得ましょう。",
+						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+					},
+					"jackpot": {
+						"title": "本日のOISY最大Sprinkles獲得おめでとうございます！",
+						"description": "Twitterで勝利をシェアし、もう一度獲得のチャンスを得ましょう。",
+						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+					},
+					"referral": {
+						"title": "ささやかな感謝の気持ちです",
+						"description": "紹介したユーザーの一人がSprinklesを獲得しました。",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: エピソード4公開中 🎉",
+				"one_liner": "アクティブに活動してBTCを獲得し、さらに紹介で<strong>保証された</strong>Sprinklesを獲得しよう。<br/>ログイン、取引、トークン保有で毎日のドロップ対象に。4人の友達を紹介すれば直接報酬がもらえます。トップリファラーはさらに多くを獲得できます。",
+				"participate_title": "アクティブに活動してBTCを獲得 - そして今、友達を招待することでも獲得できます。",
+				"description": "簡単な週次要件を満たしてください：ログイン、2回の取引、そして少なくとも20ドル相当のトークンを保有して、毎日最大50ドルのBTCドロップの資格を維持します。<br>紹介報酬も登場：友達を招待してウォレットを設定すると、二人とも保証されたSprinklesを獲得できます。トップ4のリファラーに入ると、ジャックポットを獲得できます。",
+				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"win": {
+					"default": {
+						"title": "報酬を獲得しました",
+						"description": "報酬がウォレットに届きました<br>もっと勝つために紹介とアクティブな活動を忘れずに",
+						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
+					},
+					"jackpot": {
+						"title": "ジャックポットを獲得しました",
+						"description": "トップのSprinkles報酬を獲得しました<br>アクティブに活動し、紹介を続けてさらに勝ちましょう",
+						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+					},
+					"leaderboard": {
+						"title": "リーダーボードのトップに立ちました",
+						"description": "今シーズンのトップ4リファラーにランクインしました<br>ウォレットに200ドルが追加されました",
+						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+					},
+					"referrer": {
+						"title": "まだ始まったばかりです",
+						"description": "1ドル獲得しました。<br>もっと紹介しましょう - トップ4リファラーは200ドル獲得します。<br>もうすぐです。頑張ってください。",
+						"share_href": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
+					},
+					"referee": {
+						"title": "紹介してもっと獲得しよう",
+						"description": "Sprinklesを獲得しました - あなたを紹介した人も同様です。<br>友達を4人紹介して1ドル獲得しましょう。<br>トップ4リファラーはそれぞれ200ドルを獲得します。",
+						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			}
+		}
+	},
+	"footer": {
+		"text": {
+			"incubated_with": "支援・インキュベート：",
+			"by": "提供元：",
+			"dfinity_foundation": "DFINITY財団",
+			"copyright": "© 2025",
+			"ai_assistant_console_button": "$oisy_shortアシスタント"
+		},
+		"alt": {
+			"dfinity": "DFINITY財団の公式ウェブサイトへ移動"
+		}
+	},
+	"wallet": {
+		"text": {
+			"address": "アドレス",
+			"wallet_address": "ウォレットアドレス",
+			"your_addresses": "あなたのアドレス",
+			"address_copied": "アドレスをコピーしました",
+			"wallet_address_copied": "ウォレットアドレスをコピーしました",
+			"display_wallet_address_qr": "ウォレットアドレスをQRコードとして表示",
+			"icp_deposits": "※ ICPを入金する際は、ICPアカウントの「受信」ボタンから正しいアドレスを取得してください",
+			"use_address_from_to": "このアドレスを使用して、$token をウォレットに送金・出金できます"
+		},
+		"alt": {
+			"open_etherscan": "Etherscanでアドレスを表示",
+			"open_solscan": "Solscanでアドレスを表示",
+			"qrcode_address": "$tokenトークンを受け取るためには、このQRコードをスキャンしてください"
+		}
+	},
+	"init": {
+		"text": {
+			"initializing_wallet": "ウォレットを準備しています...",
+			"securing_session": "Internet Identityでセッションを保護しています",
+			"retrieving_public_keys": "Bitcoin、Ethereum、Solana、Base、Polygon、BNB、Arbitrumの公開鍵を取得中",
+			"done": "$oisy_shortをお楽しみください"
+		},
+		"alt": {
+			"loader_banner": "$oisy_name（テーマ$theme）の初期データを読み込み中"
+		},
+		"info": {
+			"hold_loading": "しばらくお待ちください。情報を読み込み中です...",
+			"hold_loading_wallet": "しばらくお待ちください。ウォレットの初期データを読み込み中です..."
+		},
+		"error": {
+			"no_alchemy_config": "ネットワーク$networkのAlchemy設定が見つかりません",
+			"no_alchemy_provider": "ネットワーク$networkのAlchemyプロバイダーが存在しません",
+			"no_etherscan_provider": "ネットワーク$networkのEtherscanプロバイダーが存在しません",
+			"no_infura_provider": "ネットワーク$networkのInfuraプロバイダーが存在しません",
+			"no_infura_cketh_provider": "ネットワーク$networkのInfura CkETHプロバイダーが存在しません",
+			"no_infura_erc20_provider": "ネットワーク$networkのInfura ERC20プロバイダーが存在しません",
+			"no_infura_erc721_provider": "ネットワーク$networkのInfura ERC721プロバイダーが存在しません",
+			"no_infura_erc1155_provider": "ネットワーク$networkのInfura ERC1155プロバイダーが存在しません",
+			"no_infura_erc20_icp_provider": "ネットワーク$networkのInfura ERC20 ICPプロバイダーが存在しません",
+			"no_solana_network": "ネットワーク$networkのSolanaネットワークが存在しません",
+			"eth_address_unknown": "ETHアドレスが不明です",
+			"loading_address": "$symbolアドレスの読み込み中にエラーが発生しました",
+			"loading_balance": "ネットワーク$networkの$symbol残高の読み込み中にエラーが発生しました",
+			"erc20_contracts": "ERC20コントラクトの読み込み中にエラーが発生しました",
+			"spl_tokens": "SPLトークンの読み込み中にエラーが発生しました",
+			"minter_ckbtc_btc": "ckBTCをBTCに変換するには、ミントを設定する必要があります",
+			"minter_cketh_eth": "ckETHをETHに変換するには、ミントを設定する必要があります",
+			"minter_ckerc20_erc20": "ckERC20をERC20に変換するには、ミントを設定する必要があります",
+			"ledger_cketh_eth": "ckERC20をERC20に変換するには、ckETH元帳を設定する必要があります",
+			"minter_btc": "BTCを取得するには、ミントを設定する必要があります",
+			"minter_ckbtc_info": "ckBTC情報を取得するには、設定されたミントが必要です",
+			"minter_cketh_info": "ckETH情報を取得するには、設定されたミントが必要です",
+			"minter_ckbtc_loading_info": "ckBTCミント情報の読み込み中にエラーが発生しました",
+			"minter_cketh_loading_info": "ckETHミント情報の読み込み中にエラーが発生しました",
+			"btc_fees_estimation": "BTC手数料の見積もりを照会中にエラーが発生しました",
+			"btc_withdrawal_statuses": "BTC引き出しステータスの取得中にエラーが発生しました",
+			"transaction_price": "取引価格の見積もりの読み込み中にエラーが発生しました",
+			"icrc_canisters": "ICRCキャニスターの読み込み中にエラーが発生しました",
+			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
+			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",
+			"erc1155_custom_tokens": "ERC1155カスタムトークンの読み込み中にエラーが発生しました。",
+			"erc20_user_tokens": "ERC20ユーザーがトークンを読み込み中にエラーが発生しました",
+			"spl_custom_tokens": "SPLカスタムトークンの読み込み中にエラーが発生しました。",
+			"erc20_user_token": "ERC20ツインの有効化中にエラーが発生しました",
+			"icrc_custom_token": "ICRCカスタムトークンの読み込み中にエラーが発生しました",
+			"loading_wallet_timeout": "ウォレットにはまだロードされていない初期データが必要です。もう一度お試しください。",
+			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
+			"waiting_for_allowed_cycles_aborted": "",
+			"btc_wallet_error": "BTCウォレット情報の読み込み中にエラーが発生しました",
+			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました"
+		}
+	},
+	"hero": {
+		"text": {
+			"available_balance": "残高",
+			"unavailable_balance": "価格情報（$currencySymbol）を取得できません",
+			"hidden_balance": "残高は非表示です",
+			"top_up": "ウォレットに入金して利用を開始しましょう！",
+			"learn_more_about_erc20_icp": "イーサリアム上のERC20 ICPについて詳しく見る",
+			"tooltip_toggle_balance": "ダブルクリックで残高を非表示/表示"
+		},
+		"alt": {
+			"toggle_privacy_mode": "プライバシーモードのオン/オフを切り替える"
+		}
+	},
+	"settings": {
+		"text": {
+			"title": "設定",
+			"principal": "あなたのPrincipal",
+			"principal_copied": "Principalがコピーされました",
+			"principal_description": "$oisy_nameのあなたのIDです。Internet Identityによって作成されます",
+			"session_duration": "セッション有効期間",
+			"session_expires_in": "残り時間",
+			"networks": "ネットワーク",
+			"enable_testnets": "テストネットを有効化",
+			"active_networks": "アクティブなネットワーク",
+			"active_networks_description": "$oisy_nameで操作したいネットワークを選択してください。非アクティブなネットワークのトークンとトランザクションは表示されず、利用可能な残高にも含まれません",
+			"enable_network": "ネットワークを有効化",
+			"disable_network": "ネットワークを無効化",
+			"credentials_title": "認証情報",
+			"pouh_credential": "人間の認証情報",
+			"pouh_credential_description": "人間の認証情報は、人間であることの証明です。Decide AIによって発行されます。",
+			"present_pouh_credential": "提示する",
+			"pouh_credential_verified": "認証済み✅",
+			"appearance": "外観モード",
+			"appearance_light": "ライト",
+			"appearance_dark": "ダーク",
+			"appearance_system": "システムに従う",
+			"git_disclaimer": "開発目的のため、テストキャニスターでのみブランチとコミットを表示します",
+			"git_branch_name": "ブランチ:",
+			"git_commit_hash": "コミット:"
+		},
+		"alt": {
+			"testnets_toggle": "テストネットの表示/非表示を切り替え",
+			"github_release": "GitHub上の$oisy_shortリリースノート",
+			"appearance_light": "ライトモードを有効化",
+			"appearance_dark": "ダークモードを有効化",
+			"appearance_system": "OSのテーマ設定に従う"
+		},
+		"error": {
+			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。"
+		}
+	},
+	"shortcuts": {
+		"privacy_mode": "P"
+	},
+	"networks": {
+		"title": "現在のネットワーク（選択可）",
+		"test_networks": "テストネットワーク",
+		"chain_fusion": "すべてのネットワーク",
+		"network": "ネットワーク",
+		"testnet": "テストネット",
+		"number_of_enabled": "$numNetworksTotalのうち$numNetworksEnabledが有効",
+		"filter": "ネットワークを絞り込み",
+		"manage": "ネットワークを管理"
+	},
+	"receive": {
+		"text": {
+			"receive": "受け取る",
+			"address": "受取アドレス",
+			"receive_token": "$tokenを受け取る"
+		},
+		"icp": {
+			"text": {
+				"account_id": "ICPアカウントID",
+				"use_for_all_tokens": "このアドレス形式をサポートするウォレット、ユーザー、または他のアプリから受信する際に、すべてのトークンに使用します。",
+				"use_for_icrc_deposit": "ICPネットワークでICRC-1トークン（SNS、ckトークンなど）を受信する際に使用します",
+				"use_for_icp_deposit": "アカウントIDのみをサポートする取引所や他のウォレットからICPを入金する際に使用します",
+				"your_private_eth_address": "ERC20 トークン全般で使用するあなた専用の Ethereum アドレスです",
+				"display_account_id_qr": "ICPアカウントIDをQRコードとして表示",
+				"account_id_copied": "ICPアカウントIDをコピーしました",
+				"principal": "ICP Principal",
+				"internet_computer_principal_copied": "Internet Computer Principalをコピーしました。",
+				"display_internet_computer_principal_qr": "Internet Computer PrincipalをQRコードとして表示",
+				"icp_account": "ICPアカウント（取引所用）",
+				"icp_account_copied": "ICPアカウントをコピーしました",
+				"display_icp_account_qr": "ICPアカウントをQRコードとして表示"
+			}
+		},
+		"ethereum": {
+			"text": {
+				"checking_status": "$tokenステータスを確認中...",
+				"from_network": "$networkネットワークから受け取る",
+				"eth_to_cketh_description": "$tokenを$ckTokenに変換するには、$network上でスマートコントラクトを呼び出し、ICプリンシパルを引数として渡す必要があります - $oisy_nameはこの手順をウォレット内でできます",
+				"learn_how_to_convert": "$tokenを$ckTokenに変換する方法を学ぶ",
+				"metamask": "Metamaskから受け取る",
+				"ethereum": "Ethereum",
+				"ethereum_address": "アドレス",
+				"ethereum_address_copied": "Ethereumアドレスをコピーしました。",
+				"display_ethereum_address_qr": "EthereumアドレスをQRコードとして表示"
+			},
+			"error": {
+				"no_metamask": "Metamaskは利用できません。"
+			}
+		},
+		"bitcoin": {
+			"text": {
+				"bitcoin": "Bitcoin",
+				"checking_status": "BTCステータスを確認中...",
+				"refresh_status": "BTCステータスを更新",
+				"initializing": "初期化中...",
+				"checking_incoming": "着金中のBTCを確認中...",
+				"refreshing_wallet": "ウォレットを更新中...",
+				"bitcoin_address": "Bitcoin",
+				"bitcoin_testnet_address": "Bitcoinアドレス（Testnet）",
+				"bitcoin_regtest_address": "Bitcoinアドレス（Regtest）",
+				"display_bitcoin_address_qr": "BitcoinアドレスをQRコードで表示",
+				"bitcoin_address_copied": "Bitcoinアドレスをコピーしました。",
+				"from_network": "このアドレスに BTC ネットワークから Bitcoin を送金すると ckBTC を受け取れます",
+				"fee_applied": "ネットワーク間手数料として約 $fee BTC がかかります"
+			},
+			"info": {
+				"no_new_btc": "新しい着金は確認されていません。",
+				"check_btc_progress": "BTC 着金の確認処理はすでに進行中です"
+			},
+			"error": {
+				"unexpected_btc": "BTC の着金確認中に予期しないエラーが発生しました"
+			}
+		},
+		"solana": {
+			"text": {
+				"solana_address": "Solanaアドレス",
+				"solana_devnet_address": "Solana Devnetアドレス",
+				"solana_local_address": "Solana Localアドレス",
+				"solana_address_copied": "Solanaアドレスをコピーしました。",
+				"display_solana_address_qr": "SolanaアドレスをQRコードで表示"
+			}
+		}
+	},
+	"send": {
+		"text": {
+			"send": "送信",
+			"destination": "宛先",
+			"source": "送信元",
+			"balance": "残高",
+			"review": "確認",
+			"signing_approval": "承認の署名中...",
+			"approving": "承認中...",
+			"approving_fees": "手数料を承認中...",
+			"approving_transfer": "送金を承認中...",
+			"approving_wallet_connect": "WalletConnectリクエスト承認中...",
+			"refreshing_ui": "UI更新中",
+			"initializing": "トランザクション初期化中...",
+			"signing_transaction": "トランザクション署名中...",
+			"sending": "送信中...",
+			"signing": "署名中...",
+			"signing_message": "メッセージ署名中...",
+			"confirming": "確認中...",
+			"network": "ネットワーク",
+			"source_network": "送信元ネットワーク",
+			"destination_network": "宛先ネットワーク",
+			"initializing_transaction": "トランザクション初期化中",
+			"convert_to_native_icp": "ネイティブICPに変換",
+			"open_qr_modal": "取引詳細のQRコードをスキャン開始",
+			"scan_qr": "QRコードをスキャン",
+			"select_token": "送信するトークンを選択",
+			"select_network_filter": "ネットワークフィルターを選択",
+			"send_again": "再度送信",
+			"recently_used_tab": "最近使用したアドレス",
+			"contacts_tab": "アドレス帳",
+			"recently_used_empty_state_title": "最近使用したアドレスがここに表示されます",
+			"recently_used_empty_state_description": "まずは最初の送金をしてみましょう！",
+			"contacts_empty_state_title": "あなたの連絡先がここに表示されます",
+			"contacts_empty_state_description": "まだ連絡先を追加していないようです",
+			"send_review_subtitle": "以下の内容を送信します"
+		},
+		"placeholder": {
+			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
+			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
+			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
+			"select_network": "ネットワークを選択"
+		},
+		"info": {
+			"ckbtc_certified": "ckBTCパラメーターが認証されるまでお待ちください",
+			"cketh_certified": "ckETHパラメーターが認証されるまでお待ちください",
+			"pending_bitcoin_transaction": "現在の BTC トランザクションが完了するまで、新たな送金はできません",
+			"no_available_utxos": "この取引を行うための利用可能なUTXOが不足しています",
+			"unknown_destination": "このアドレスとやり取りは初めてです。送信先を確認してください。",
+			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>"
+		},
+		"assertion": {
+			"invalid_destination_address": "送信先アドレスが無効です",
+			"insufficient_funds": "残高が不足しています。",
+			"unknown_minimum_ckbtc_amount": "BTCに変換するために必要なckBTCの最小量が不明です。",
+			"unknown_minimum_cketh_amount": "ETHに変換するために必要なckETHの最小量が不明です。",
+			"minimum_ckbtc_amount": "金額がBTCへの変換に必要な最低額、$amount ckBTCを下回っています。",
+			"minimum_cketh_amount": "金額が$amount $symbolの最小引き出し金額を下回っています。",
+			"minimum_amount": "金額が$amount $symbolの最小引き出し金額を下回っています。",
+			"minimum_ledger_fees": "金額が台帳手数料$symbolを下回っています。",
+			"minimum_cketh_balance": "$symbol残高が推定手数料$amountを下回っています。",
+			"unknown_cketh": "ckETHトークンは取得できません。",
+			"destination_address_invalid": "送金先アドレスが無効です。",
+			"amount_invalid": "金額が無効です。",
+			"insufficient_funds_for_gas": "ガス代に必要な残高が不足しています",
+			"insufficient_funds_for_amount": "送金額に対して残高が不足しています",
+			"insufficient_ethereum_funds_to_cover_the_fees": "手数料をカバーするイーサリアムの資金が不足しています",
+			"insufficient_solana_funds_to_cover_the_fees": "手数料をカバーするソラナの資金が不足しています",
+			"not_enough_tokens_for_gas": "ガス代に十分な$symbolがありません。残高: $balance $symbol",
+			"gas_fees_not_defined": "ガス料金が定義されていません。",
+			"max_gas_fee_per_gas_undefined": "ガスあたりの最大料金またはガスあたりの最大優先料金が未定義です。",
+			"address_unknown": "アドレスが不明です。",
+			"minter_info_not_loaded": "数秒後にもう一度お試しください。ckETHの設定パラメーターがまだ読み込まれていません。",
+			"minter_info_not_certified": "数秒後にもう一度お試しください。ckETHの設定パラメーターが認証されていません。",
+			"cketh_max_transaction_fee_missing": "ckETHの最大トランザクション手数料が設定されていません。",
+			"utxos_fee_missing": "UTXO手数料が不足しています。",
+			"minimum_btc_amount": "金額が小さすぎます。最低$amount BTCを入力してください。",
+			"btc_insufficient_balance": "取引に利用できるBitcoinのUTXOがありません",
+			"btc_insufficient_balance_for_fee": "取引手数料を支払うためのBitcoin残高が不足しています",
+			"btc_invalid_utxo_data": "無効なBitcoin取引データです",
+			"btc_utxo_locked": "保留中の取引によりBitcoin資金がロックされています",
+			"btc_invalid_fee_calculation": "Bitcoin取引手数料の検証に失敗しました",
+			"pending_transactions_not_available": "保留中の取引サービスは現在利用できません。後でもう一度お試しください。"
+		},
+		"error": {
+			"unexpected": "トランザクションの送信中に問題が発生しました",
+			"destination_address_unknown": "ETHの送信先アドレスが不明です",
+			"metamask_connected": "アカウントを取得できません。Metamaskは起動して接続されていますか？",
+			"metamask_no_accounts": "Metamaskアカウントが見つかりません。",
+			"metamask_switch_network": "MetamaskにチェーンID $chain_idへの切り替えを要求できません。現在$network_nameを使用していますか？",
+			"erc20_data_undefined": "ERC20 トランザクションのデータが未定義または null です",
+			"data_undefined": "トランザクションデータが未定義または null です",
+			"no_identity_calculate_fee": "手数料計算に必要な ID が指定されていません",
+			"invalid_destination": "送信先が無効です。有効なウォレットアドレスまたは送信先で再度お試しください。",
+			"incompatible_token": "トークンが非対応です。互換性のあるトークンで再度お試しください。",
+			"no_btc_network_id": "現在のネットワーク（$networkId）はビットコインネットワークではありません。",
+			"no_solana_network_id": "現在のネットワーク（$networkId）はソラナネットワークではありません。",
+			"no_pending_bitcoin_transaction": "保留中のビットコイン取引の読み込み中にエラーが発生しました。後でもう一度お試しください。",
+			"unexpected_utxos_fee": "取引手数料の計算中に問題が発生しました。",
+			"unable_to_retrieve_amount": "N/A（取得できませんでした）",
+			"solana_transaction_expired": "あなたの送信トランザクションはSolanaネットワークによって処理されず、期限切れになりました。これはおそらく提供された優先手数料が不足していたためです。最新の推奨金額に更新しましたので、もう一度送信を試みてください。",
+			"solana_confirmation_failed": "作成したトランザクションの確認を受信できませんでした。数秒待ってから、トークンのトランザクションリストでトランザクションが正しく作成されたかどうかを確認してください。"
+		}
+	},
+	"convert": {
+		"text": {
+			"converting": "変換中...",
+			"conversion_destination": "変換先",
+			"default_destination": "あなたのOISYウォレット",
+			"convert_to_btc": "BTCに変換",
+			"convert_to_ckbtc": "ckBTCに変換",
+			"convert_to_token": "$tokenに変換",
+			"convert_to_cketh": "ckETHに変換",
+			"convert_to_ckerc20": "$ckErc20に変換",
+			"convert_eth_to_cketh": "$tokenを$ckTokenに変換",
+			"cketh_conversions_may_take": "ckETH変換には最大20分かかる場合があります",
+			"ckerc20_conversions_may_take": "$ckErc20変換には最大20分かかる場合があります",
+			"how_to_convert_eth_to_cketh": "$oisy_nameで$tokenを$ckTokenに変換する方法はこちら",
+			"send_eth": "$tokenを$oisy_nameアドレスに送信",
+			"wait_eth_current_balance": "$tokenが届くまでお待ちください。現在の残高",
+			"set_amount": "変換する金額を設定",
+			"check_balance_for_fees": "変換手数料のために$tokenの残高を確認してください",
+			"fees_explanation": "スマートコントラクトの実行手数料をカバーするのに十分な$tokenが必要です。",
+			"current_balance": "👉 現在の残高:",
+			"review_button": "確認",
+			"convert_button": "変換",
+			"input_reset_button": "入力値をリセット",
+			"swap_to_token": "$sourceToken → $destinationTokenを変換",
+			"review": "取引内容を確認",
+			"max_balance": "最大",
+			"source_network": "送信元ネットワーク",
+			"destination_network": "送信先ネットワーク",
+			"conversion_may_take": "変換には最大1時間かかる場合があります",
+			"executing_transaction": "取引を実行中...",
+			"initializing": "取引を初期化中...",
+			"refreshing_ui": "UIを更新中",
+			"unsupported_token_conversion": "選択されたトークンの変換はサポートされていません",
+			"calculating_max_amount": "計算中...",
+			"send_to": "変換された資産を送信先へ送信",
+			"custom_destination": "別のアドレス"
+		},
+		"assertion": {
+			"insufficient_funds": "残高が不足しています"
+		},
+		"error": {
+			"loading_cketh_helper": "ckETHヘルパーコントラクトアドレスの読み込み中にエラーが発生しました。ミントキャニスターIDが初期化されていません",
+			"unexpected": "トークンを変換中に問題が発生しました",
+			"unexpected_missing_data": "変換トランザクションの開始中に予期しない問題が発生しました"
+		}
+	},
+	"swap": {
+		"text": {
+			"swap": "スワップ",
+			"select_destination_token": "受け取るトークンを選択",
+			"select_source_token": "支払うトークンを選択",
+			"switch_tokens_button": "トークンを切り替える",
+			"review": "取引内容を確認",
+			"review_button": "スワップを内容確認",
+			"max_slippage": "最大スリッページ",
+			"value_difference": "価格差",
+			"total_fee": "合計推定手数料",
+			"network_fee": "ネットワーク手数料",
+			"approval_fee": "承認手数料",
+			"gas_fee": "ガス代",
+			"lp_fee": "流動性プロバイダー手数料",
+			"max_slippage_info": "",
+			"max_slippage_warning": "リスク警告：スリッページが大きいと、市場の変動による損失が発生する可能性があります",
+			"max_slippage_error": "",
+			"swap_button": "今すぐスワップ",
+			"swap_is_not_offered": "このスワップは現在提供されていません。",
+			"executing_transaction": "取引を実行中...",
+			"initializing": "取引を初期化中...",
+			"swapping": "スワップ中...",
+			"refreshing_ui": "UIを更新中",
+			"swap_provider": "スワッププロバイダー",
+			"swap_provider_website": "ウェブサイト",
+			"swap_route": "スワップルート",
+			"included_network_fees": "含まれるネットワーク手数料",
+			"included_liquidity_fees": "含まれる流動性プール手数料",
+			"best_rate": "最良レート",
+			"expected_minimum": "予想される最低受取額",
+			"you_receive": "受取額",
+			"select": "選択 >",
+			"select_swap_provider": "スワッププロバイダーを選択",
+			"open_icp_swap": "ICP Swapウェブサイトを開く",
+			"open_instructions_link": "指示リンクを開く",
+			"select_token": "トークンを選択",
+			"select_network_filter": "ネットワークを選択",
+			"withdrawing": "出金中...",
+			"network_cost": "ネットワークコスト",
+			"gasless": "ガスレス",
+			"swap_fees": "スワップ手数料",
+			"cross_chain_networks_info": "<b>$sourceNetwork</b>ネットワークから<b>$destinationNetwork</b>ネットワークにトークンを移動します"
+		},
+		"error": {
+			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください",
+			"unexpected": "トークンをスワップ中に問題が発生しました。",
+			"unexpected_missing_data": "スワップトランザクションの開始中に予期しない問題が発生しました",
+			"slippage_exceeded": "$oisy_short が保護しています：取引がスリッページ許容範囲の $maxSlippage% を超えています。最大スリッページを調整して再試行してください。",
+			"pool_not_found": "スワップ失敗。プールが見つかりません。",
+			"deposit_error": "スワップの資金を入金できませんでした。もう一度試すか、スワッププロバイダーを変更してください。",
+			"withdraw_failed": "スワップに失敗し、引き出しも失敗しました。未使用の残高を確認し、手動で引き出しを試してください: ",
+			"swap_failed_withdraw_success": "スワップに失敗。トークンは正常に返金されました。もう一度試すか、スワッププロバイダーを変更してください。",
+			"withdraw_failed_first_part": "スワップ失敗。送信されたトークンを自動的に出金できませんでした。 下の出金ボタンをクリックして手動で引き出してください。<br>",
+			"withdraw_failed_second_part": "または、後でいつでもWebサイトから直接引き出すこともできます:",
+			"swap_failed_instruction_link": "これらの指示 ",
+			"manually_withdraw_success": "前回の失敗したスワップのトークンは正常に出金されました。再度スワップを試すか、スワッププロバイダーを変更してください。",
+			"manually_withdraw_failed": "資金の出金に失敗しました。<br>もう一度試すか、以下に従ってください",
+			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください",
+			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。"
+		}
+	},
+	"buy": {
+		"text": {
+			"buy": "購入",
+			"buy_dev": "購入（開発環境）"
+		},
+		"onramper": {
+			"title": "Onramper経由で購入"
+		}
+	},
+	"tokens": {
+		"text": {
+			"title": "トークン",
+			"contract_address": "コントラクトアドレス",
+			"token_address": "トークンアドレス",
+			"balance": "残高",
+			"hide_zero_balances": "ゼロ残高を隠す",
+			"all_tokens_with_zero_hidden": "ゼロ残高のすべての資産は現在非表示です",
+			"filter_nothing_found": "有効なトークンが見つかりません",
+			"filter_nothing_found_description": "利用可能なアセットを検索するか、「トークンの管理」を使用してインポートします",
+			"filter_placeholder": "トークンまたはシンボルでフィルタリング",
+			"buy_or_receive": "リストで確認するために、今すぐ最初のトークンを購入または受け取ってください",
+			"initializing": "初期化中...",
+			"updating_ui": "UIを更新中...",
+			"show_token": "トークンを表示",
+			"hide_token": "トークンを非表示",
+			"select_token": "トークンを選択",
+			"exchange_is_not_available": "USD換算額は現在利用できません。",
+			"exchange_is_not_available_short": "USD換算額が利用できません",
+			"source_token_title": "支払うトークン",
+			"destination_token_title": "受け取るトークン",
+			"chain_key": "Chain Key",
+			"show_more_networks": "$number のネットワークをさらに表示",
+			"hide_more_networks": "ネットワークを非表示",
+			"on_network": "$network上",
+			"delete_token": "トークンを削除",
+			"edit_token": "トークンを編集"
+		},
+		"details": {
+			"title": "トークンの詳細",
+			"token": "トークン",
+			"network": "ネットワーク",
+			"contract_address_copied": "コントラクトアドレスがコピーされました。",
+			"token_address_copied": "トークンアドレスがコピーされました。",
+			"twin_token": "ツイントークン",
+			"standard": "標準",
+			"confirm_deletion_description": "これにより、<span class=\"font-bold\">$token</span>が$oisy_shortのトークンをリストから削除します。あなたの資金はそのまま残ります。トークンはいつでも再度追加できます。",
+			"deletion_confirmation": "$tokenはあなたの$oisy_shortトークンリストから正常に削除されました。",
+			"update_confirmation": "$tokenは正常に更新されました。",
+			"missing_index_canister_id_label": "未割り当て",
+			"missing_index_canister_id_warning": "インデックスキャニスターが見つからないため、$oisy_shortはトランザクションのリストを取得できません",
+			"missing_index_canister_id_button": "インデックスキャニスターを設定"
+		},
+		"balance": {
+			"error": {
+				"not_applicable": "該当なし"
+			}
+		},
+		"import": {
+			"text": {
+				"title": "トークンをインポート",
+				"review": "確認",
+				"saving": "保存中...",
+				"updating": "トークンリストを更新中",
+				"ledger_canister_id": "台帳キャニスターID",
+				"index_canister_id": "インデックスキャニスターID",
+				"minter_canister_id": "ミントキャニスターID",
+				"ledger_canister_id_copied": "台帳キャニスターIDがコピーされました。",
+				"index_canister_id_copied": "インデックスキャニスターIDがコピーされました。",
+				"minter_canister_id_copied": "ミントキャニスターIDがコピーされました。",
+				"verifying": "トークンの詳細を確認中...",
+				"add_the_token": "トークンを追加",
+				"info": "台帳およびインデックスキャニスターIDは通常、プロジェクトのウェブサイトで入手できます。",
+				"info_index": "インデックスキャニスターIDはオプションですが、これがないと$oisy_shortは取引履歴を表示できません。",
+				"custom_tokens_not_supported": "選択したネットワークはカスタムトークンをサポートしていません。"
+			},
+			"error": {
+				"loading_metadata": "指定されたアドレスは選択されたネットワークで有効なトークンではありません。",
+				"no_metadata": "トークンのメタデータが提供されていません。これは予期しないエラーです。",
+				"unexpected_ledger": "台帳キャニスターの検証中に予期しないエラーが発生しました。",
+				"unexpected_index": "インデックスキャニスターの検証中に予期しないエラーが発生しました。",
+				"unexpected_index_ledger": "インデックスキャニスターに関連する台帳IDの読み込み中に予期しないエラーが発生しました。",
+				"invalid_ledger_id": "台帳IDがインデックスキャニスターに関連していません。",
+				"missing_ledger_id": "台帳IDがありません。値を入力しましたか？",
+				"missing_contract_address": "コントラクトアドレスがありません。値を入力しましたか？",
+				"missing_token_address": "トークンアドレスがありません。値を入力しましたか？",
+				"no_network": "ネットワークが選択されていません。これは予期しないエラーです。"
+			},
+			"warning": {
+				"do_not_close_manage": "$oisy_nameは新しいトークンを準備して保護しています。完了するまでこのタブを閉じないでください。"
+			}
+		},
+		"manage": {
+			"text": {
+				"title": "トークンの管理",
+				"manage_list": "トークンの管理",
+				"list_settings": "リスト設定",
+				"import_token": "トークンをインポート",
+				"network": "ネットワーク",
+				"all_tokens_zero_balance": "すべてのトークンの残高がゼロです。",
+				"enable_more_assets": "さらに多くのトークンを有効にする"
+			},
+			"placeholder": {
+				"select_network": "ネットワークを選択"
+			},
+			"info": {
+				"no_changes": "保存する変更はありません。"
+			},
+			"error": {
+				"unexpected_build": "既知のトークンリストの作成中に予期せぬエラーが発生しました。",
+				"empty": "有効または無効にするトークンが選択されていません。"
+			}
+		},
+		"hide": {
+			"title": "トークンを隠しますか？",
+			"token": "$tokenを非表示",
+			"info": "ウォレットビューの<strong>「トークンを管理」</strong>からいつでもこのトークンを再度追加できます。",
+			"confirm": "非表示",
+			"hiding": "非表示にしています..."
+		},
+		"alt": {
+			"context_menu": "選択したトークンのコンテキストメニュー",
+			"open_etherscan": "Etherscanでトークンの詳細を開く",
+			"open_blockstream": "Blockstreamでトークンの詳細を開く",
+			"open_dashboard": "ICPダッシュボードでトークンの詳細を開く",
+			"open_contract_address_block_explorer": "ブロックエクスプローラーでコントラクトアドレスを開く",
+			"open_token_address_block_explorer": "ブロックエクスプローラーでトークンアドレスを開く",
+			"token_group_number": "ネイティブトークン$tokenのグループ内のトークン総数",
+			"filter_button": "フィルターを開く/閉じる"
+		},
+		"placeholder": {
+			"enter_contract_address": "ERC20コントラクトアドレスを入力",
+			"enter_token_address": "SPLトークンアドレスを入力",
+			"search_token": "トークンを検索"
+		},
+		"warning": {
+			"trust_token": "追加するトークンを信頼していることを確認してください。悪意のある第三者がトークンを操作し、ユーザーを騙して資産を送金させる可能性があります。詐欺やセキュリティリスクの詳細については、<a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">こちら</a>をご覧ください。"
+		},
+		"error": {
+			"invalid_contract_address": "コントラクトアドレスが無効です",
+			"invalid_token_address": "トークンアドレスが無効です",
+			"invalid_ledger": "選択されたトークンはIcrc台帳キャニスターにリンクされていません",
+			"unrecognised_erc_interface": "認識できないERCインターフェースです。",
+			"no_metadata": "メタデータが取得されませんでした",
+			"unexpected": "トークンの保存中にエラーが発生しました",
+			"unexpected_hiding": "トークンを隠す際に予期せぬ問題が発生しました",
+			"already_available": "トークンはすでに利用可能です",
+			"not_toggleable": "トークンは切り替え不可であり、非表示にできません",
+			"incomplete_metadata": "メタデータに名前またはシンボルが提供されていません。",
+			"duplicate_metadata": "同じ名前やシンボルのトークンが既に存在します",
+			"unexpected_undefined": "トークンが未定義です。これは予期せぬことです。",
+			"unexpected_error_on_token_delete": "トークンの削除中にエラーが発生しました。",
+			"unexpected_error_on_token_update": "トークンの更新中にエラーが発生しました。"
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": "NFT",
+			"title_empty": "あなたのNFTがここに表示されます",
+			"description_empty": "まだNFTを受け取っていないようです",
+			"grouping": "グループ化",
+			"as_plain_list": "リスト表示",
+			"by_collection": "コレクションでグループ化",
+			"show_spam": "スパムを表示",
+			"show_hidden": "非表示を表示",
+			"sorting": "並べ替え",
+			"recents_first": "新しい順",
+			"oldest_first": "古い順",
+			"collection_atoz": "コレクション名 A-Z",
+			"collection_ztoa": "コレクション名 Z-A",
+			"collection_items_count": "$count 点",
+			"collection_address": "コレクションコントラクトアドレス",
+			"token_standard": "トークン規格",
+			"quantity": "数量",
+			"item_traits": "アイテムの特性",
+			"collection_not_loaded": "コレクションはまだ読み込まれていないため表示できません",
+			"nft_not_loaded": "NFTはまだ読み込まれていないため表示できません",
+			"collections": "コレクション",
+			"all_assets": "すべての資産",
+			"address_copied": "アドレス $address をコピーしました",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"review_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
+		},
+		"alt": {
+			"placeholder_image": "まだNFTがありません",
+			"card": {
+				"image": "トークンIDが$tokenIdのNFTの画像"
+			},
+			"copy_address": "このアドレスをクリップボードにコピー"
+		}
+	},
+	"fee": {
+		"text": {
+			"fee": "手数料",
+			"estimated_btc": "推定BTCネットワーク手数料",
+			"estimated_inter_network": "推定ネットワーク間手数料",
+			"estimated_eth": "推定イーサリアム手数料",
+			"max_fee_eth": "最大手数料<small>（おそらく30秒以内）</small>",
+			"convert_fee": "変換手数料",
+			"convert_inter_network_fee": "変換ネットワーク間手数料",
+			"convert_btc_network_fee": "Bitcoinネットワーク手数料",
+			"zero_fee": "無料",
+			"total_fee": "合計手数料",
+			"ata_fee": "ATA手数料"
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": "手数料をカバーするのに十分な資金がありません。"
+		},
+		"error": {
+			"cannot_fetch_gas_fee": "ガス代を取得できません。"
+		}
+	},
+	"info": {
+		"bitcoin": {
+			"title": "BTCを受け取りckBTCに変換",
+			"description": "BitcoinをckBTCに変換して、利用可能な最も高速で安価なBitcoin取引を実現します。変換プロセスには最大1時間かかる場合があります。",
+			"note": "いつでもckBTCはBTCに変換することができます。",
+			"how_to": "ckBTCへの変換方法"
+		},
+		"ethereum": {
+			"title": "$ckTokenに変換",
+			"description": "いくつかのステップで、$oisy_name内で直接あなたのネイティブ$network $tokenをツインのICP $ckTokenに変換できます。変換プロセスには最大20分かかる場合があります。",
+			"note": "いつでも$ckTokenは$tokenに変換することができます。",
+			"how_to": "$ckTokenへの変換方法",
+			"how_to_short": "$tokenへの変換方法"
+		}
+	},
+	"wallet_connect": {
+		"text": {
+			"name": "WalletConnect",
+			"session_proposal": "セッション提案",
+			"connect": "接続",
+			"connecting": "接続中...",
+			"disconnect": "切断",
+			"scan_qr": "QRコードをスキャン",
+			"or_use_link": "またはWalletConnectリンクを使用",
+			"proposer": "提案者",
+			"review": "$chain_name ($key)のに必須な権限を確認",
+			"method": "方法",
+			"methods": "方法",
+			"events": "イベント",
+			"message": "メッセージ",
+			"hex_data": "HEXデータ",
+			"raw_copied": "生の取引データがコピーされました。",
+			"sign_message": "メッセージに署名"
+		},
+		"alt": {
+			"connect_input": "例: wc:a281567bb3e4..."
+		},
+		"domain": {
+			"title": "ドメイン認証",
+			"valid": "有効 ✅",
+			"valid_description": "提案者のドメインの検証に成功しました。",
+			"invalid": "無効 ❌",
+			"invalid_description": "提案者のウェブサイトのドメインがリクエストの送信者と一致しません",
+			"security_risk": "セキュリティリスク ⚠️",
+			"security_risk_description": "提案者のウェブサイトは安全でないとフラグ付けされています。",
+			"unknown": "不明 ❓",
+			"unknown_description": "提案者のドメインを検証できません。"
+		},
+		"info": {
+			"disconnected": "WalletConnectが切断されました。",
+			"session_ended": "WalletConnectセッションが終了しました。",
+			"connected": "WalletConnectが接続されました。",
+			"transaction_executed": "WalletConnect「$method」リクエストが実行されました。",
+			"sign_executed": "WalletConnect署名リクエストが実行されました。"
+		},
+		"error": {
+			"qr_code_read": "QRコードを読み取れません。",
+			"missing_uri": "接続するためのURIが提供されていません",
+			"disconnect": "ウォレットの切断中に予期しないエラーが発生しました。接続をリセットします。",
+			"connect": "ウォレットの接続中に予期しないエラーが発生しました。",
+			"manual_workflow": "WalletConnectを開いて、すでに開始された手動ワークフローを完了してください。",
+			"skipping_request": "オーバーレイを通じて他のアクションが進行中のため、WalletConnectリクエストをスキップします。",
+			"method_not_support": "リクエストされたメソッド「$method」はサポートされていません。",
+			"unexpected_pair": "ウォレットのペアリング中に予期しないエラーが発生しました。",
+			"no_connection_opened": "予期しないエラー: 接続が開かれていません。",
+			"no_session_approval": "予期しないエラー: セッション提案が利用できません。",
+			"unexpected": "WalletConnectとの通信中に予期しないエラーが発生しました。",
+			"request_rejected": "WalletConnectリクエストが拒否されました",
+			"unknown_parameter": "不明なパラメータです。",
+			"wallet_not_initialized": "予期しないエラー。ウォレットアドレスが初期化されていません。",
+			"from_address_not_wallet": "トランザクションで要求された送信元アドレスがこのウォレットのアドレスではありません。。",
+			"unknown_destination": "不明な宛先アドレスです。",
+			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
+			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"
+		}
+	},
+	"transaction": {
+		"text": {
+			"details": "取引詳細",
+			"hash": "トランザクションハッシュ",
+			"hash_copied": "トランザクションハッシュ$hashがコピーされました。",
+			"id": "トランザクションID",
+			"id_copied": "トランザクションIDがコピーされました。",
+			"timestamp": "タイムスタンプ",
+			"type": "種類",
+			"from": "送信元",
+			"from_copied": "送信元アドレスがコピーされました。",
+			"received_from": "$nameから受信",
+			"from_ata": "送信者トークンアカウント（ATA）",
+			"from_ata_copied": "送信者トークンアカウント（ATA）がコピーされました。",
+			"to": "宛先",
+			"to_copied": "宛先アドレスがコピーされました。",
+			"sent_to": "$nameに送信済み",
+			"to_ata": "受信者トークンアカウント（ATA）",
+			"to_ata_copied": "受信者トークンアカウント（ATA）がクリップボードにコピーされました。",
+			"block": "ブロック",
+			"interacted_with": "相互作用した相手（宛先）",
+			"status": "ステータス",
+			"confirmations": "確認数"
+		},
+		"status": {
+			"confirmed": "確認済み",
+			"included": "含まれる",
+			"finalised": "完了",
+			"finalized": "完了",
+			"processed": "処理済み",
+			"pending": "保留中...",
+			"safe": "安全",
+			"unconfirmed": "未確認"
+		},
+		"type": {
+			"send": "送信",
+			"receive": "受信",
+			"withdraw": "出金",
+			"deposit": "入金",
+			"approve": "承認",
+			"burn": "バーン",
+			"mint": "ミント"
+		},
+		"label": {
+			"reimbursement": "払い戻し",
+			"twin_token_sent": "$twinToken送信済み",
+			"ck_token_sent": "$ckToken送信済み",
+			"twin_token_converted": "$twinTokenから変換済み",
+			"ck_token_converted": "$ckTokenから変換済み",
+			"sending_twin_token": "$twinToken送信中",
+			"sending_twin_token_failed": "$twinToken送信失敗",
+			"converting_twin_token": "$twinTokenを$ckTokenに変換中",
+			"converting_ck_token": "$ckTokenを$twinTokenに変換中",
+			"twin_network": "$twinNetworkネットワーク",
+			"no_date_available": "日付情報なし",
+			"pending": "保留中"
+		},
+		"alt": {
+			"open_block_explorer": "ブロックエクスプローラーでこの取引を開く",
+			"open_from_block_explorer": "ブロックエクスプローラーで「送信元」アドレスを開く",
+			"open_to_block_explorer": "ブロックエクスプローラーで「宛先」アドレスを開く"
+		},
+		"error": {
+			"get_block_number": "ブロック番号を取得できません。",
+			"failed_get_transaction": "提供された（ハッシュ：$hash）から取引を取得できませんでした。ウォレットdappを更新してください。"
+		}
+	},
+	"transactions": {
+		"text": {
+			"title": "トランザクション",
+			"buy_or_receive": "最初の取引を行い、今すぐトークンを購入または受け取ってください！",
+			"transaction_history": "取引履歴がここに表示されます",
+			"mainnet_btc_transactions_info": "BTC取引情報は中央集権型の第三者から取得されており、独自に確認する必要があります。",
+			"transaction_history_unavailable": "取引履歴は利用できません",
+			"missing_index_canister_explanation": "現在、$oisy_shortは発行元がまだ追跡機能を提供していないため、過去のトークン取引を表示できません。間もなく追加される予定です。それまではご心配なく — 通常通りトークンを送受信できます。",
+			"index_canister_not_working_explanation": "現在、$oisy_shortは発行元の追跡機能が現在応答していないため、過去のトークン取引を表示できません。間もなく解決される予定です。それまではご心配なく — 通常通りトークンを送受信できます。",
+			"token_needs_enabling": "取引履歴を表示するにはトークンを有効にする必要があります。"
+		},
+		"error": {
+			"loading_transactions": "取引の読み込み中にエラーが発生しました。",
+			"loading_transactions_symbol": "$symbol取引の読み込み中にエラーが発生しました。",
+			"no_token_loading_transaction": "トークンが見つかりません。取引を読み込むことができません。",
+			"uncertified_transactions_removed": "いくつかの未認証の取引が特定され、表示されたリストから削除されました。",
+			"loading_pending_ck_ethereum_transactions": "保留中の$networkトランザクションの取得中に問題が発生しました。",
+			"get_transaction_for_hash": "提供された（ハッシュ：$hash）から取引を取得できませんでした。",
+			"unexpected_transaction_for_hash": "ハッシュ：$hashの保留中の読み込み中に問題が発生しました。",
+			"loading_token_with_network": "$networkネットワーク上の$tokenトークンは、トークンリストにないため読み込むことができませんでした。",
+			"loading_token": "提供されたトークンへのリンクが無効です。"
+		}
+	},
+	"about": {
+		"why_oisy": {
+			"text": {
+				"label": "なぜ$oisy_shortなのか",
+				"title": "なぜ$oisy_shortなのか",
+				"hold_crypto": {
+					"title": "すべてのデジタル資産の統合管理",
+					"description": "$oisy_shortは、Bitcoin、Solana、Ethereum、ICPなどを含むすべてのデジタル資産をひとつの統合ウォレットで管理できるようにします。複数の暗号通貨ウォレットを切り替える必要がなくなり、様々なプラットフォームでシームレスで効率的な体験をお楽しみいただけます。"
+				},
+				"network_custody": {
+					"title": "ネットワークカストディで秘密鍵の不安を解消",
+					"description": "$oisy_nameは、Internet Computerの高度な暗号技術を活用して秘密鍵を直接扱う必要をなくす革新的なアプローチであるネットワークカストディを実装しています。これにより、従来のメソッドに代わる安全で使いやすい方法が提供され、「オンチェーンが新しいオンラインである」という分散ネットワーク上でのセキュリティ強化と耐障害性の向上を目指す動きに沿っています。"
+				},
+				"fully_on_chain": {
+					"title": "完全にオンチェーンのウォレットによる改ざん防止セキュリティ",
+					"description": "キーが安全であるだけでなく、ウォレットアプリケーション全体が<a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">完全にオンチェーン</a>に保存され、Internet Computerからブラウザに直接提供されます。これは、ウォレット全体が分散型の信頼モデルの恩恵を受け、改ざん防止機能と高いセキュリティを備えていることを意味します。"
+				},
+				"cross_device": {
+					"title": "いつでもどこからでもウォレットにアクセス",
+					"description": "<a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">Internet Identity</a>を使用すると、$oisy_shortは、プライベートな分散型アイデンティティにリンクしているすべてのデバイスで簡単に使用できます。これにより、スマートフォン、タブレット、デスクトップのいずれからでも、ウォレットにシームレスかつ安全にアクセスできます。"
+				},
+				"verifiable_credentials": {
+					"title": "検証可能な認証情報で追加機能を解放",
+					"description": "$oisy_shortは、Internet Computerの<a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">検証可能な認証情報</a>プラットフォームと統合されています。特定の種類の認証情報を取得することで、エアドロップや排他的な機能などの追加機能にアクセスし、全体的な体験を向上させます。"
+				},
+				"open_source": {
+					"title": "オープンソースで透明性に信頼を",
+					"description": "$oisy_shortは、<a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">オープンソース</a>プロジェクトであり、<a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY財団</a>内の専門チームが、200人以上の世界をリードする暗号学者やエンジニアの支援を受けて率いています。オープンソース化により透明性が保証され、コミュニティが監査・貢献し、ウォレットの健全性に信頼を寄せることができます。"
+				}
+			}
+		}
+	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "ウォレットへ移動",
+				"title_successful": "おめでとうございます！",
+				"title_failed": "無効な招待コード",
+				"reward_received": "$oisy_shortへようこそ！",
+				"reward_failed": "コードの有効期限が切れました",
+				"reward_received_description": "まもなくウェルカムギフトが届きます",
+				"brand_reward_received_description": "もっと稼ぎたいですか？友達を紹介して、参加者ごとに報酬を獲得しましょう。",
+				"reward_failed_description": "新しいコードをリクエストして再試行してください"
+			},
+			"error": {
+				"loading_reward": "新しい報酬コードの読み込み中にエラーが発生しました。",
+				"loading_user_data": "報酬キャニスターからユーザーデータを読み込みに失敗しました。",
+				"loading_eligibility": "キャンペーンの資格の読み込み中にエラーが発生しました。"
+			}
+		},
+		"invitation": {
+			"text": {
+				"title": "招待リンクを生成",
+				"binance_title": "バイナンス クラブハウスQR",
+				"invitation_link_copied": "招待リンクがコピーされました。",
+				"generate_new_link": "新しいリンクを生成",
+				"generating_new_code": "新しいコードを生成中",
+				"regenerate_countdown_text": "$counter秒後に新しいリンクが生成されます"
+			}
+		}
+	},
+	"referral": {
+		"invitation": {
+			"text": {
+				"title": "友達を紹介する",
+				"referral_link_copied": "紹介リンクがコピーされました。",
+				"information": "友達がSprinklesを受け取るたびに、ボーナススプリンクルを獲得できます！",
+				"not_referred_yet": "まだ誰も紹介していません",
+				"referred_amount": "すでに$amount人を紹介しました",
+				"learn_more": "詳細を見る"
+			},
+			"error": {
+				"loading_referrer_info": "紹介情報の読み込み中にエラーが発生しました",
+				"setting_referrer": "紹介者の設定中にエラーが発生しました"
+			}
+		}
+	},
+	"address_book": {
+		"text": {
+			"title": "アドレス帳",
+			"empty_title": "アドレス帳が空です。",
+			"empty_text": "すべての連絡先がここに表示されます",
+			"add_new_contact": "新しい連絡先を追加",
+			"add_contact": "連絡先を追加",
+			"search_contact": "連絡先を検索",
+			"no_address_found": "利用可能なアドレスはありません。",
+			"no_contact_found": "連絡先が見つかりません"
+		},
+		"alt": {
+			"show_addresses_of_contact": "連絡先のすべてのアドレスを表示",
+			"hide_addresses": "連絡先のアドレスを隠す"
+		},
+		"edit_contact": {
+			"title": "連絡先を編集",
+			"add_address": "アドレスを追加",
+			"delete_contact": "連絡先を削除"
+		},
+		"avatar": {
+			"default": "デフォルトアバター",
+			"avatar_for": "のアバター",
+			"avatar_loading": "アバターを読み込み中..."
+		},
+		"edit_avatar": {
+			"menu_title": "連絡先の画像",
+			"upload_image": "アップロード",
+			"replace_image": "置換",
+			"remove_image": "削除"
+		},
+		"show_contact": {
+			"title": "連絡先",
+			"add_address": "アドレスを追加",
+			"show_address_text": "関連つけられたアドレスがここに表示されます",
+			"add_first_address": "$contactNameに最初のアドレスを追加！"
+		},
+		"create_contact": {
+			"title": "連絡先を作成"
+		}
+	},
+	"contact": {
+		"form": {
+			"edit_contact": "連絡先を編集",
+			"add_new_contact": "新しい連絡先を追加"
+		},
+		"fields": {
+			"name": "名前"
+		},
+		"delete": {
+			"title": "$contact連絡先を削除しますか？",
+			"delete_contact": "連絡先を削除",
+			"content_text": "これにより、$contactとそのすべてのアドレス帳から関連するアドレスが削除されます。この操作は元に戻せません。"
+		},
+		"error": {
+			"create": "連絡先の作成に失敗しました",
+			"update": "連絡先の更新に失敗しました",
+			"delete": "連絡先の削除に失敗しました",
+			"name_too_long": "名前は$maxCharacters文字以下にしてください。"
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
+		},
+		"form": {
+			"new_address": "新しいアドレス",
+			"address_placeholder": "アドレスを入力または貼り付け",
+			"label_placeholder": "例：「ママのウォレット」",
+			"invalid_address": "無効なアドレス",
+			"valid_for_networks": "対応ネットワーク:",
+			"error": {
+				"label_too_long": "ラベルは$maxCharacters文字以内で入力してください"
+			}
+		},
+		"fields": {
+			"label": "エイリアス",
+			"address": "アドレス"
+		},
+		"delete": {
+			"title": "アドレスを削除しますか？",
+			"delete_address": "アドレスを削除",
+			"content_text": "これにより、$contactの連絡先から<strong>$address</strong>アドレスが削除されます。<br>この操作は元に戻せません。"
+		},
+		"save": {
+			"title": "アドレスを保存",
+			"add_to_existing_contact": "既存の連絡先に追加",
+			"create_contact": "連絡先を作成"
+		},
+		"qr": {
+			"title": "QRコードをスキャン"
+		}
+	},
+	"signer": {
+		"sign_in": {
+			"text": {
+				"access_your_wallet": "あなたの$oisy_nameにアクセス",
+				"open_or_create": "ウォレットを開くか新しく作成して、安全にdAppに接続し、資産の管理を始めましょう"
+			}
+		},
+		"idle": {
+			"text": {
+				"waiting": "dAppのやりとりを待機中..."
+			},
+			"alt": {
+				"img_placeholder": "宇宙飛行士のロゴが、信頼できるパーティdappからのメッセージを待っている間、目を左右に動かします"
+			}
+		},
+		"permissions": {
+			"text": {
+				"title": "権限の確認",
+				"requested_permissions": "要求された権限",
+				"your_wallet_address": "あなたのウォレットアドレス",
+				"icrc27_accounts": "あなたの$oisy_nameアドレスを表示",
+				"icrc49_call_canister": "トランザクションの承認をリクエスト"
+			},
+			"error": {
+				"no_confirm_callback": "権限を確認するためのコールバックがありません。これは予期せぬことです。ウォレットを閉じて再試行してください。"
+			}
+		},
+		"origin": {
+			"text": {
+				"request_from": "リクエスト元:",
+				"invalid_origin": "無効なオリジン!!"
+			},
+			"alt": {
+				"link_to_dapp": "権限をリクエストするdAppへのリンク"
+			}
+		},
+		"consent_message": {
+			"text": {
+				"loading": "同意メッセージを読み込み中..."
+			},
+			"warning": {
+				"token_without_consent_message": "このトークンには確認メッセージが提供されていないため、以下の情報は$oisy_shortによって抽出されました。"
+			},
+			"error": {
+				"no_approve_callback": "同意メッセージを承認するためのコールバックがありません。これは予期せぬことです。ウォレットを閉じて再試行してください。",
+				"no_reject_callback": "同意メッセージを拒否するためのコールバックがありません。これは予期せぬことです。ウォレットを閉じて再試行してください。",
+				"retrieve": "同意メッセージの取得中にエラーが発生しました"
+			}
+		},
+		"call_canister": {
+			"text": {
+				"processing": "リクエストを処理中...",
+				"executed": "リクエストが実行されました",
+				"close_window": "このウィンドウを閉じることができます",
+				"error": "エラーのためリクエストが失敗しました",
+				"try_again": "もう一度お試しください。問題が解決しない場合は、リクエストを開始したdAppの開発者にお問い合わせください。"
+			},
+			"error": {
+				"cannot_call": "呼び出しを処理できません"
+			}
+		}
+	},
+	"carousel": {
+		"text": {
+			"next_slide": "次のスライド",
+			"prev_slide": "前のスライド",
+			"indicator": "スライド$indexにジャンプ"
+		}
+	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
+		}
+	},
+	"license_agreement": {
+		"text": {
+			"license_agreement": "",
+			"accept_terms": "このボタンをクリックすると、以下に同意したことになります。",
+			"accept_terms_link": "ライセンス契約",
+			"title": "$oisy_nameライセンス契約（以下「本ライセンス契約」）",
+			"paragraph_1": "ブラウザベースの自己管理型マルチチェーンウォレット分散型アプリケーションである$oisy_name（以下「$oisy_short」）は、Internet Computerの公開ブロックチェーンネットワーク上でホストされています。$oisy_short、そのオープンソースコード、および関連するライセンスの詳細については、$oisy_shortのGitHubリポジトリ($oisy_repo_url)を参照してください。",
+			"paragraph_2": "本ライセンス契約は、お客様（以下「お客様」）の$oisy_shortの使用を規定します。$oisy_shortを使用することにより、お客様は本ライセンス契約を読み、理解し、これに拘束されることに同意するものとします。同意しない場合、$oisy_shortを使用することはできません。",
+			"paragraph_3": "お客様が$oisy_shortを使用することを選択した場合、お客様およびDFINITY財団（その関連会社および子会社を含む、総称して「DFINITY」）は、以下を認め、同意するものとします。",
+			"limited_license": "<strong>1. 制限付きライセンス。</strong>本ライセンス契約に含まれる条件に従い、DFINITYは、ネイティブICP、ICRC-1、ETH、ERC20トークン、および随時利用可能になるその他のトークンなどのトークンを受領、保持、送信する目的でのみ$oisy_shortを使用するための限定的、非独占的、非譲渡可能、サブライセンス不可、取消可能なライセンスをお客様に付与します。お客様は、$oisy_shortに含まれるオープンソースコンポーネントの使用を規定するライセンス条件が許容する範囲内で派生作品を作成できます。",
+			"restrictions": "<strong>2. 制限事項。</strong>お客様は、お客様による、またはお客様の従業員や第三者によってお客様に代わって行われる活動であるかどうかにかかわらず、$oisy_shortの使用に関連するすべての活動について責任を負います。お客様は、DFINITYがお客様の$oisy_nameに関連するいかなる活動または取引（完了したものか否かにかかわらず）に対しても責任を負わないことを理解しています。お客様は、お客様とDFINITYとの関係を誤解させたり、誇張したりしてはなりません。これには、お客様の$oisy_shortの使用を通じてDFINITYがお客様またはお客様の事業努力を支援、後援、推奨、または貢献していることを表現したり示唆したりすることも含まれます。お客様は、本ライセンス契約で明示的に許可されている場合を除き、DFINITYとのいかなる関係または提携も示唆してはなりません。お客様は、$oisy_shortの名前、ロゴ、または$oisy_shortに関連するその他の商標を、承認や提携を暗示したり、$oisy_shortとの関係を誤解させたり、$oisy_shortの出所に関して混乱を生じさせたりするような方法で使用することは禁止されています。",
+			"applicable_laws": "<strong>3. 適用法。</strong>お客様は、$oisy_shortの使用およびお客様の$oisy_nameに関連するすべての取引に関して、適用されるすべての法律および規制（輸出管理、マネーロンダリングまたは経済制裁に関する法律および規制を含むがこれらに限定されない）を遵守するものとします。",
+			"reservation_rights": "<strong>4. DFINITYの権利の留保。</strong>$oisy_shortはDFINITYが所有しており、お客様に販売されるのではなくライセンスが付与されます。$oisy_shortのコンテンツ、ビジュアルインターフェース、インタラクティブ機能、情報、グラフィック、デザイン、コンパイル、コンピューターコード、製品、サービス、および$oisy_shortのその他のすべての要素と関連文書は、適用される知的財産法によって保護されています。お客様とDFINITYの間では、すべてのDFINITY資料と$oisy_shortは、それらに含まれる知的財産権を含め、DFINITYまたはその子会社もしくは関連会社および/またはその第三者ライセンサーの唯一かつ排他的な財産であり、オープンソースソフトウェアライセンスの対象となります。DFINITYは、本ライセンス契約で明示的に付与されていないすべての権利を留保します。お客様は、明示的、禁反言的、またはその他の方法により、DFINITY資料または$oisy_shortに対するいかなる権利、所有権、または利益も取得しません。ただし、本ライセンス契約に定められた限定的な権利、および$oisy_shortに含まれるオープンソースコンポーネントの使用を規定するライセンス条件によって付与された権利は除きます。本ライセンス契約は、お客様に$oisy_shortの名前、ロゴ、または$oisy_shortまたはDFINITYに関連するその他の商標を使用する権利を付与するものではありません。",
+			"feedback": "<strong>5. フィードバック。</strong>お客様が$oisy_short（「フィードバック」）に関してDFINITYにコメント、アイデア、バグレポート、フィードバック、改善、推奨事項、または修正を提供する場合、そのようなフィードバックは非機密ベースで提供され、DFINITYは、DFINITYの資料、$oisy_shortまたはその他のサービスに提案された変更を組み込むことを含むがこれに限定されない、その裁量でそのようなフィードバックを使用する権利を有します。お客様はここに、DFINITYがお客様のフィードバックを、製品およびサービスの製造および販売を含むあらゆる目的で組み込み、使用するために必要なすべての権利に基づいて永続的、取消不能、譲渡可能、サブライセンス可能、非独占的、ロイヤリティフリーのライセンスを付与し、DFINITYがフィードバックに対するDFINITYの権利を文書化、完成、および維持するために必要なあらゆる支援を提供することに同意します。お客様は、DFINITYがフィードバックのために随時お客様に連絡することを許可することに同意しますが、legalnotice@dfinity.orgに書面で通知することによりオプトアウトできます。",
+			"termination": "<strong>6. 期間と終了。</strong>本ライセンス契約は、終了するまで有効です。本ライセンス契約およびこれに基づくお客様の権利およびライセンスは、お客様が本ライセンス契約に違反した場合、直ちに終了します。お客様は、お客様の$oisy_nameからトークンを空にし、$oisy_shortのすべての使用を中止することにより、いつでも本ライセンス契約を終了できます。DFINITYは、お客様による$oisy_shortの実際のまたは疑わしい誤用または乱用、または本ライセンス契約の違反を含むがこれらに限定されない、いかなる理由であっても本ライセンス契約をいつでも終了できます。第3項から第13項は、本ライセンス契約の終了後も有効です。",
+			"warranty_liability": "<strong>7. 保証の免責事項および責任の制限。</strong>適用される法律によって許容される最大限の範囲で、$oisy_shortは「現状のまま」提供され、いかなる種類の保証もありません。適用される法律によって許容される最大限の範囲で、DFINITYは、特定の目的への適合性、市場性、所有権、品質、結果、および非侵害の黙示の保証または条件を含むがこれらに限定されない、明示的、黙示的、法定またはその他のすべての保証および条件を否認します。DFINITYは、$oisy_shortが常に利用可能で安全であること（現在および将来にわたって）を保証しません。DFINITYは、$oisy_shortの正確性または機能性、および$oisy_shortの使用を通じて利用可能になる情報または機能（現在および将来にわたって）の正確性、有効性、または完全性、または$oisy_shortの品質または一貫性、またはその使用によって得られる結果に関して、いかなる種類の保証も明示的に否認します。適用される法律によって許容される最大限の範囲で、DFINITYは、$oisy_shortまたはDFINITY資料の使用または使用不能およびアクセスから生じるいかなる結果的、特別、間接的、偶発的、または懲罰的損害に対しても、DFINITYがそのような損害の可能性について知らされていたとしても、またいかなる限定的な救済策の本質的な目的の失敗にもかかわらず、責任を負わないものとします。適用される法律によって許容される最大限の範囲で、本ライセンス契約またはお客様の$oisy_shortの使用または使用不能から生じる損害に対するDFINITYの総責任は、いかなる場合も100 CHFを超えないものとします。",
+			"indemnity": "<strong>8. 免責。</strong>お客様は、お客様の$oisy_shortの使用または誤用、あるいは本ライセンス契約または適用される法律または規制の違反に関連して発生するいかなる責任および費用（当該当事者が負担する合理的な弁護士費用を含む）についても、DFINITYおよびその関連会社、役員、取締役、サプライヤー、ライセンサー、およびその他の顧客を免責し、防御し、損害を与えないことに同意します。",
+			"governing_law": "<strong>9. 準拠法; 管轄。</strong>$oisy_shortに関するいかなる請求も、抵触法の規則を除き、スイスの法律に準拠します。本ライセンス契約に関連する、またはこれに関するいかなる請求または紛争（非契約上の紛争または請求およびその解釈を含む）も、スイス連邦裁判所への上訴の可能性を留保しつつ、スイス、チューリッヒの裁判所の専属管轄に服するものとします。",
+			"entire_agreement": "<strong>10. 完全合意および分離可能性。</strong>本ライセンス契約は、お客様とDFINITYとの間の完全な合意を構成し、その主題に関するお客様とDFINITYとの間の口頭または書面による以前のすべての合意、交渉、またはその他のコミュニケーションに優先します。DFINITYは、$oisy_shortの新しいバージョンが利用可能になったときに、本ライセンス契約を変更することがあります。本ライセンス契約のいずれかの条項が無効または執行不能であると判断された場合、(a)当該条項は、当該条項を有効かつ執行可能にするために厳密に必要な範囲で修正されたものとみなされ、またはそのような修正が不可能な場合は本ライセンス契約から分離されたものとみなされ、(b)本契約の他のすべての条項の有効性および執行可能性は、いかなる形でも影響を受けたり損なわれたりすることはありません。",
+			"assignment": "<strong>11. 譲渡。</strong>お客様は、DFINITYの事前の書面による同意なしに本ライセンス契約を譲渡することはできません。これには、合併または支配権の変更に関連して明示的にまたは法律の運用により譲渡される場合も含まれ、そのような譲渡の試みは無効となります。DFINITYは、お客様に何ら通知することなく、本ライセンス契約を制限なく譲渡することができます。上記を条件として、本ライセンス契約は、両当事者およびそれぞれの後継者および許可された譲受人を拘束するものとします。",
+			"no_waiver": "<strong>12. 権利放棄なし。</strong>本ライセンス契約または法律で規定された権利、権限、または救済措置を行使しないこと、または行使を遅らせることは、その権利、権限、または救済措置の放棄を構成するものではありません。DFINITYが本ライセンス契約のいずれかの義務または違反を放棄しても、他の義務または本ライセンス契約のその後の違反を放棄するものではありません。",
+			"english_version": "<strong>13. 英語版。</strong>本ライセンス契約の英語版が、紛争が生じた場合の公式かつ優勢なバージョンとなります。本ライセンス契約に基づいて行われるすべての通信および通知は英語でなければなりません。",
+			"body": ""
+		},
+		"alt": {
+			"license_agreement": "$oisy_nameライセンス契約"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
+		}
+	},
+	"activity": {
+		"text": {
+			"title": "最近のアクティビティ"
+		},
+		"info": {
+			"btc_transactions": "BTC取引情報は中央集権型の第三者から取得されており、独自に検証する必要があります。"
+		},
+		"warning": {
+			"no_index_canister": "$token_listの取引は表示できません。インデックスキャニスターが利用できません。",
+			"unavailable_index_canister": "$token_listの取引は表示できません。インデックスキャニスターは現在利用できません。"
+		}
+	},
+	"earning": {
+		"text": {
+			"title": "獲得"
+		},
+		"cards": {
+			"gold_title": "ゴールド",
+			"gold_description": "GLDT ステーキング",
+			"stablecoins_title": "ステーブルコイン",
+			"stablecoins_description": "近日公開",
+			"sprinkles_title": "Sprinkles",
+			"sprinkles_description": "OISY 報酬"
+		}
+	},
+	"welcome": {
+		"title": "$oisy_shortへようこそ！",
+		"subtitle": "稼ぐ準備はできましたか？",
+		"description": "最初の報酬まであと2ステップ：ログインし、$20以上を保有し、2つのアクションを完了してください。これだけでSprinklesを獲得し始められます。<br><br>もっと欲しいですか？友達を4人紹介して、保証されたボーナスをゲットしましょう。"
+	},
+	"temporal": {
+		"seconds_to_duration": {
+			"year": "年",
+			"year_plural": "年",
+			"month": "ヶ月",
+			"month_plural": "ヶ月",
+			"day": "日",
+			"day_plural": "日",
+			"hour": "時間",
+			"hour_plural": "時間",
+			"minute": "分",
+			"minute_plural": "分",
+			"second": "秒",
+			"second_plural": "秒"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "$oisy_short AIアシスタント",
+			"welcome_message": "こんにちは！ 👋 私はOISY、あなたのパーソナルAIコンシェルジュです。以下がお手伝いできることです：",
+			"action_button_contacts_title": "アドレス帳を表示",
+			"action_button_contacts_subtitle": "保存したアドレス帳を表示します",
+			"action_button_contacts_prompt": "アドレス帳を表示してください。",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
+			"send_message": "メッセージを送信",
+			"send_message_input_placeholder": "何をしたいですか？",
+			"send_token_succeeded": "",
+			"no_contacts_found_message": "申し訳ありません、アドレス帳に該当する連絡先が見つかりませんでした。",
+			"loading": "考え中...",
+			"reset_chat_history": ""
+		},
+		"errors": {
+			"unknown": "申し訳ありませんが、LLMから応答を取得中に問題が発生しました。",
+			"no_response": "申し訳ありませんが、LLMから応答がありませんでした。"
+		}
+	}
+}

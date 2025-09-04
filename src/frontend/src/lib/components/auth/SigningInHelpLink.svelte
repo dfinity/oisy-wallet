@@ -18,7 +18,7 @@
 	};
 </script>
 
-<span data-tid={testId} class={`${styleClass} flex flex-row justify-center gap-1 md:justify-start`}>
+<span class={`${styleClass} flex flex-row justify-center gap-1 md:justify-start`} data-tid={testId}>
 	{$i18n.auth.help.text.need_help}
-	<Button link inlineLink onclick={onClick}>{$i18n.auth.help.text.sign_in}</Button>
+	<Button inlineLink link onclick={onClick}>{$i18n.auth.help.text.sign_in}</Button>
 </span>

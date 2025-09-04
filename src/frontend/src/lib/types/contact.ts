@@ -15,6 +15,7 @@ export interface ContactUi extends Omit<Contact, 'addresses' | 'update_timestamp
 
 export interface ContactAddressUiWithId extends ContactAddressUi {
 	id: string;
+	isPrincipal?: boolean;
 }
 
 export interface ExtendedAddressContactUi extends Omit<ContactUi, 'addresses'> {

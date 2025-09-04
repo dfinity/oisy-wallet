@@ -1,4 +1,4 @@
-import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
+import type { IndexCanisterIdText } from '$icp/types/canister';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
@@ -12,12 +12,14 @@ export const getTransactions = async ({
 	identity,
 	start,
 	maxResults = WALLET_PAGINATION,
+	indexCanisterId,
 	certified = true
 }: {
 	owner: Principal;
 	identity: OptionIdentity;
 	start?: bigint;
 	maxResults?: bigint;
+	indexCanisterId: IndexCanisterIdText;
 } & QueryParams): Promise<GetAccountIdentifierTransactionsResponse> => {
 	assertNonNullish(identity);
 
@@ -25,7 +27,7 @@ export const getTransactions = async ({
 
 	const { getTransactions } = IndexCanister.create({
 		agent,
-		canisterId: Principal.fromText(ICP_INDEX_CANISTER_ID)
+		canisterId: Principal.fromText(indexCanisterId)
 	});
 
 	return getTransactions({

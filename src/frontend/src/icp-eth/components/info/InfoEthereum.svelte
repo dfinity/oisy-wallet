@@ -27,10 +27,10 @@
 <div class="pr-2">
 	<h4 class="flex items-center gap-2 font-medium">
 		<Logo
-			src={eth}
 			alt={replacePlaceholders($i18n.core.alt.logo, {
 				$name: sourceToken.name
 			})}
+			src={eth}
 		/>
 		<span class="w-[70%]"
 			>{replacePlaceholders($i18n.info.ethereum.title, {
@@ -63,6 +63,6 @@
 
 {#if $modalHowToConvertToTwinTokenEth && nonNullish(sourceToken) && nonNullish(destinationToken)}
 	<FeeStoreContext token={$ethereumToken}>
-		<HowToConvertEthereumModal {sourceToken} {destinationToken} />
+		<HowToConvertEthereumModal {destinationToken} {sourceToken} />
 	</FeeStoreContext>
 {/if}
