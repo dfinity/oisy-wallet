@@ -24,6 +24,7 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import {
 	assertNonNullish,
@@ -96,6 +97,38 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
+	private async loadBtcPendingTransactionsData({
+		btcAddress,
+		identity,
+		bitcoinNetwork
+	}: {
+		btcAddress: BtcAddress;
+		identity: Identity;
+		bitcoinNetwork: BitcoinNetwork;
+	}): Promise<{
+		transactions: CertifiedData<PendingTransaction>[];
+	}> {
+		try {
+			// Get pending transactions for balance calculation
+			const pendingTransactions = await getPendingBtcTransactions({
+				identity,
+				network: this.mapToBackendBitcoinNetwork(bitcoinNetwork),
+				address: btcAddress
+			});
+
+			return {
+				transactions: pendingTransactions.map((transaction) => ({
+					data: transaction,
+					certified: false
+				}))
+			};
+		} catch (error) {
+			console.error('Error fetching pending BTC transactions:', error);
+			return {
+				transactions: []
+			};
+		}
+	}
 	private async loadBtcTransactionsData({ btcAddress }: { btcAddress: BtcAddress }): Promise<{
 		transactions: CertifiedData<BtcTransactionUi>[];
 		latestBitcoinBlockHeight: number;
@@ -127,7 +160,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				latestBitcoinBlockHeight
 			};
 		} catch (error) {
-			// We don't want to disrupt the user experience if we can't fetch the transactions or latest block height.
+			// We don't want to disrupt user experience if we can't fetch the transactions or latest block height.
 			console.error('Error fetching BTC transactions data:', error);
 			// TODO: Return an error instead of an empty array.
 			return {
@@ -143,10 +176,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		btcAddress,
 		minterCanisterId,
 		certified = true,
-		shouldFetchTransactions,
+		pendingTransactions = [],
 		uncertifiedTransactions = []
 	}: Omit<LoadBtcWalletParams, 'shouldFetchTransactions'> & {
-		shouldFetchTransactions?: boolean;
+		pendingTransactions: CertifiedData<PendingTransaction>[];
 		uncertifiedTransactions?: CertifiedData<BtcTransactionUi>[];
 	}): Promise<CertifiedData<BtcWalletBalance | null>> => {
 		let confirmedBalance: bigint | null;
@@ -182,25 +215,14 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			};
 		}
 
-		// Get pending transactions for balance calculation
-		let pendingTransactions: PendingTransaction[] = [];
-		if (shouldFetchTransactions && !certified) {
-			try {
-				pendingTransactions = await getPendingBtcTransactions({
-					identity,
-					network: this.mapToBackendBitcoinNetwork(bitcoinNetwork),
-					address: btcAddress
-				});
-			} catch (error) {
-				console.error('Error fetching pending BTC transactions:', error);
-			}
-		}
-
 		// Calculate the structured balance using the uncertified transactions and pending transactions
+		// Extract the actual pending transaction data from the CertifiedData wrapper
+		const pendingTransactionData = pendingTransactions.map((certifiedTx) => certifiedTx.data);
+
 		const structuredBalance = getBtcWalletBalance({
 			balance: confirmedBalance,
 			providerTransactions: uncertifiedTransactions,
-			pendingTransactions
+			pendingTransactions: pendingTransactionData
 		});
 
 		return {
@@ -217,11 +239,22 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		minterCanisterId,
 		shouldFetchTransactions
 	}: LoadBtcWalletParams) => {
+		assertNonNullish(identity, 'Identity is required for loading BTC wallet data');
+
 		// TODO: investigate and implement "update" call for BTC transactions
 		const transactionData =
 			shouldFetchTransactions && !certified
 				? await this.loadBtcTransactionsData({ btcAddress })
 				: { transactions: [], latestBitcoinBlockHeight: this.store.latestBitcoinBlockHeight };
+
+		const pendingTransactionData =
+			shouldFetchTransactions && !certified
+				? await this.loadBtcPendingTransactionsData({
+						btcAddress,
+						identity,
+						bitcoinNetwork
+					})
+				: { transactions: [] };
 
 		const balance = await this.loadBtcBalance({
 			identity,
@@ -229,13 +262,14 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			certified,
 			btcAddress,
 			minterCanisterId,
-			shouldFetchTransactions,
+			pendingTransactions: pendingTransactionData.transactions,
 			uncertifiedTransactions: transactionData.transactions
 		});
 
 		return {
 			balance,
 			uncertifiedTransactions: transactionData.transactions,
+			pendingTransactions: pendingTransactionData.transactions,
 			latestBitcoinBlockHeight: transactionData.latestBitcoinBlockHeight
 		};
 	};
