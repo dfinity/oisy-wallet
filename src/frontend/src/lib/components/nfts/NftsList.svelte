@@ -20,6 +20,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
 
 	interface CollectionBuckets {
 		common: NftCollectionUi[];
@@ -145,20 +146,30 @@
 	{:else if isEmptyList}
 		<EmptyNftsList />
 	{:else}
-		<NftList nfts={commonNfts} testId={NFT_LIST_COMMON} title={$i18n.nfts.text.all_assets} />
+		<NftList nfts={commonNfts} testId={NFT_LIST_COMMON} title={$i18n.nfts.text.all_assets}>
+			{#snippet nftListItem({ nft })}
+				<NftCard {nft} />
+			{/snippet}
+		</NftList>
 
 		{#if $showHidden}
-			<NftList hidden nfts={hiddenNfts} testId={NFT_LIST_HIDDEN} title={$i18n.nfts.text.hidden}>
+			<NftList nfts={hiddenNfts} testId={NFT_LIST_HIDDEN} title={$i18n.nfts.text.hidden}>
 				{#snippet icon()}
 					<IconEyeOff size="24" />
+				{/snippet}
+				{#snippet nftListItem({ nft })}
+					<NftCard {nft} isHidden />
 				{/snippet}
 			</NftList>
 		{/if}
 
 		{#if $showSpam}
-			<NftList nfts={spamNfts} spam testId={NFT_LIST_SPAM} title={$i18n.nfts.text.spam}>
+			<NftList nfts={spamNfts} testId={NFT_LIST_SPAM} title={$i18n.nfts.text.spam}>
 				{#snippet icon()}
 					<IconAlertOctagon size="24" />
+				{/snippet}
+				{#snippet nftListItem({ nft })}
+					<NftCard {nft} isSpam />
 				{/snippet}
 			</NftList>
 		{/if}

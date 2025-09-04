@@ -8,16 +8,29 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
+	import type { MouseEventHandler } from 'svelte/elements';
 
 	interface Props {
 		nft: Nft;
 		testId?: string;
 		disabled?: boolean;
-		hidden?: boolean;
-		spam?: boolean;
+		isHidden?: boolean;
+		isSpam?: boolean;
+		selectable?: boolean;
+		onSelect?: (nft: Nft) => void;
 	}
 
-	let { nft, testId, disabled, hidden, spam }: Props = $props();
+	let { nft, testId, disabled, isHidden, isSpam, selectable, onSelect }: Props = $props();
+
+	const onClick = (e: Event) => {
+		if (disabled || selectable) {
+			e.preventDefault();
+
+			if (selectable && nonNullish(onSelect)) {
+				onSelect(nft);
+			}
+		}
+	};
 </script>
 
 <a
@@ -26,14 +39,16 @@
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}
 	data-tid={testId}
-	href={`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`}
-	onclick={disabled ? (e) => e.preventDefault() : undefined}
+	href={selectable && nonNullish(onSelect)
+		? '#'
+		: `${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`}
+	onclick={onClick}
 >
 	<div
 		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<NftImageConsent {nft} type="card">
+		<NftImageConsent {nft} type="card-selectable">
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
@@ -45,13 +60,13 @@
 			</div>
 		</NftImageConsent>
 
-		{#if hidden}
+		{#if isHidden}
 			<div class="absolute left-2 top-2 invert dark:invert-0">
 				<IconEyeOff size="24" />
 			</div>
 		{/if}
 
-		{#if spam}
+		{#if isSpam}
 			<div class="absolute left-2 top-2 text-warning-primary">
 				<IconAlertOctagon size="24" />
 			</div>

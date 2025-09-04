@@ -10,7 +10,11 @@
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
-	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
+	import {
+		allSendWizardSteps,
+		sendNftsWizardSteps,
+		sendWizardStepsWithQrCodeScan
+	} from '$lib/config/send.config';
 	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnetNotLoaded,
@@ -51,8 +55,10 @@
 	} from '$lib/utils/network.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 
 	export let isTransactionsPage: boolean;
+	export let isNftsPage: boolean;
 
 	let destination = '';
 	let activeSendDestinationTab: SendDestinationTab = 'recentlyUsed';
@@ -63,7 +69,9 @@
 	let steps: WizardSteps<WizardStepsSend>;
 	$: steps = isTransactionsPage
 		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
-		: allSendWizardSteps({ i18n: $i18n });
+		: isNftsPage
+			? sendNftsWizardSteps({ i18n: $i18n })
+			: allSendWizardSteps({ i18n: $i18n });
 
 	let currentStep: WizardStep<WizardStepsSend> | undefined;
 	let modal: WizardModal<WizardStepsSend>;
@@ -180,6 +188,8 @@
 				on:icSendToken={onIcSendToken}
 				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 			/>
+		{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
+			<SendNftsList on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)} onSelect={() => 	goToStep(WizardStepsSend.DESTINATION)} />
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
 		{:else if currentStep?.name === WizardStepsSend.DESTINATION}
