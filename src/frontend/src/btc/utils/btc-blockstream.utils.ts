@@ -14,7 +14,7 @@ export const mapBtcTransaction = ({
 	latestBitcoinBlockHeight: number;
 }): BtcTransactionUi => {
 	// Step 1: Calculate total input value and determine if the trabtcAddressTransactionsnsaction is a "send"
-	const { totalInputValue, isTypeSend } = vin.reduce<{
+	const { isTypeSend } = vin.reduce<{
 		totalInputValue: number;
 		isTypeSend: boolean;
 	}>(
