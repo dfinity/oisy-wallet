@@ -64,7 +64,7 @@
 			positionClass="absolute"
 			size="16"
 			styleClass="-bottom-1 -right-1"
-			testId={`icon-badge`}
+			testId="icon-badge"
 		/>
 	{/if}
 </div>
