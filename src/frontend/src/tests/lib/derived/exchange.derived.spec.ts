@@ -1,5 +1,11 @@
 import * as exchangeEnv from '$env/exchange.env';
 import {
+	CKERC20_LEDGER_CANISTER_IDS,
+	IC_CKBTC_LEDGER_CANISTER_ID,
+	IC_CKETH_LEDGER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import {
 	ARBITRUM_ETH_TOKEN_ID,
 	ARBITRUM_SEPOLIA_ETH_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
@@ -16,11 +22,12 @@ import {
 	POL_MAINNET_TOKEN_ID
 } from '$env/tokens/tokens-evm/tokens-polygon/tokens.pol.env';
 import {
+	BTC_MAINNET_TOKEN,
 	BTC_MAINNET_TOKEN_ID,
 	BTC_REGTEST_TOKEN_ID,
 	BTC_TESTNET_TOKEN_ID
 } from '$env/tokens/tokens.btc.env';
-import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { IC_BUILTIN_TOKENS } from '$env/tokens/tokens.ic.env';
 import { ICP_TOKEN_ID, TESTICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import {
@@ -35,6 +42,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import type { IcCkToken } from '$icp/types/ic-token';
 import {
 	exchangeInitialized,
 	exchangeNotInitialized,
@@ -46,6 +54,7 @@ import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import type { SplToken } from '$sol/types/spl';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { get } from 'svelte/store';
 
@@ -125,6 +134,33 @@ describe('exchange.derived', () => {
 			enabled: true
 		};
 
+		const mockCkBtcToken = {
+			...mockValidIcCkToken,
+			id: parseTokenId('CkBtcTokenId'),
+			name: 'ckBTC',
+			symbol: BTC_MAINNET_TOKEN.twinTokenSymbol,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			twinToken: BTC_MAINNET_TOKEN
+		} as IcCkToken;
+
+		const mockCkEthToken = {
+			...mockValidIcCkToken,
+			id: parseTokenId('CkEthTokenId'),
+			name: 'ckETH',
+			symbol: ETHEREUM_TOKEN.twinTokenSymbol,
+			ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
+			twinToken: ETHEREUM_TOKEN
+		} as IcCkToken;
+
+		const mockCkUsdcToken = {
+			...mockValidIcCkToken,
+			id: parseTokenId('CkUsdcTokenId'),
+			name: 'ckUSDC',
+			symbol: USDC_TOKEN.twinTokenSymbol,
+			ledgerCanisterId: CKERC20_LEDGER_CANISTER_IDS[0],
+			twinToken: USDC_TOKEN
+		} as IcCkToken;
+
 		const mockSplDefaultToken: SplToken = {
 			...mockValidSplToken,
 			id: parseTokenId('SplDefaultTokenId1'),
@@ -140,10 +176,12 @@ describe('exchange.derived', () => {
 
 		const mockErc20TokenPrice1 = { usd: 1.23 };
 		const mockErc20TokenPrice2 = { usd: 12.3 };
-		const mockSplTokenPrice1 = { usd: 4.56 };
-		const mockSplTokenPrice2 = { usd: 45.6 };
+		const mockIcrcTokenPrice1 = { usd: 4.56 };
+		const mockIcrcTokenPrice2 = { usd: 45.6 };
+		const mockSplTokenPrice1 = { usd: 7.89 };
+		const mockSplTokenPrice2 = { usd: 78.9 };
 
-		const expectedNullishExchanges = {
+		const expectedNullishExchangesNative = {
 			[BTC_TESTNET_TOKEN_ID]: undefined,
 			[BTC_MAINNET_TOKEN_ID]: undefined,
 			[BTC_REGTEST_TOKEN_ID]: undefined,
@@ -161,11 +199,18 @@ describe('exchange.derived', () => {
 			[POL_MAINNET_TOKEN_ID]: undefined,
 			[POL_AMOY_TOKEN_ID]: undefined,
 			[ARBITRUM_ETH_TOKEN_ID]: undefined,
-			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: undefined,
-			...IC_BUILTIN_TOKENS.sort((a, b) => a.name.localeCompare(b.name)).reduce(
-				(acc, { id }) => ({ ...acc, [id]: undefined }),
-				{}
-			)
+			[ARBITRUM_SEPOLIA_ETH_TOKEN_ID]: undefined
+		};
+
+		const expectedNullishExchangesIcrc = IC_BUILTIN_TOKENS.sort((a, b) =>
+			a.name.localeCompare(b.name)
+		).reduce((acc, { id }) => ({ ...acc, [id]: undefined }), {});
+
+		const expectedNullishExchanges = {
+			...expectedNullishExchangesNative,
+			[mockCkBtcToken.id]: undefined,
+			[mockCkEthToken.id]: undefined,
+			...expectedNullishExchangesIcrc
 		};
 
 		const expectedExchanges = {
@@ -207,13 +252,18 @@ describe('exchange.derived', () => {
 
 			erc20DefaultTokensStore.add(mockErc20DefaultToken);
 			erc20UserTokensStore.setAll([
-				{ data: { ...mockErc20DefaultToken, enabled: true, version: undefined }, certified: false },
+				{ data: { ...mockErc20DefaultToken, enabled: true }, certified: false },
 				{ data: mockEr20UserToken, certified: false }
 			]);
 
+			icrcDefaultTokensStore.set({ data: mockCkBtcToken, certified: false });
+			icrcCustomTokensStore.set({ data: { ...mockCkBtcToken, enabled: true }, certified: false });
+			icrcDefaultTokensStore.set({ data: mockCkEthToken, certified: false });
+			icrcCustomTokensStore.set({ data: { ...mockCkEthToken, enabled: true }, certified: false });
+
 			splDefaultTokensStore.add(mockSplDefaultToken);
 			splCustomTokensStore.setAll([
-				{ data: { ...mockSplDefaultToken, enabled: true, version: undefined }, certified: false },
+				{ data: { ...mockSplDefaultToken, enabled: true }, certified: false },
 				{ data: mockSplCustomToken, certified: false }
 			]);
 		});
@@ -338,7 +388,7 @@ describe('exchange.derived', () => {
 		it('should return values for ERC20 token ICP', () => {
 			erc20UserTokensStore.setAll([
 				{
-					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true, version: undefined },
+					data: { ...mockErc20DefaultToken, exchange: 'icp', enabled: true },
 					certified: false
 				}
 			]);
@@ -355,6 +405,34 @@ describe('exchange.derived', () => {
 			expect(get(exchanges)).toStrictEqual({
 				...expectedExchanges,
 				[mockErc20DefaultToken.id]: icpPrice
+			});
+		});
+
+		it('should return values for ICRC tokens', () => {
+			exchangeStore.set([
+				{ [mockCkBtcToken.ledgerCanisterId]: mockIcrcTokenPrice1 },
+				{ [mockCkEthToken.ledgerCanisterId]: mockIcrcTokenPrice2 }
+			]);
+
+			expect(get(exchanges)).toStrictEqual({
+				...expectedNullishExchangesNative,
+				[mockCkBtcToken.id]: mockIcrcTokenPrice1,
+				[mockCkEthToken.id]: mockIcrcTokenPrice2,
+				...expectedNullishExchangesIcrc
+			});
+		});
+
+		it('should be case-sensitive for ICRC tokens', () => {
+			exchangeStore.set([
+				{ [mockCkBtcToken.ledgerCanisterId.toUpperCase()]: mockIcrcTokenPrice1 },
+				{ [mockCkEthToken.ledgerCanisterId]: mockIcrcTokenPrice2 }
+			]);
+
+			expect(get(exchanges)).toStrictEqual({
+				...expectedNullishExchangesNative,
+				[mockCkBtcToken.id]: undefined,
+				[mockCkEthToken.id]: mockIcrcTokenPrice2,
+				...expectedNullishExchangesIcrc
 			});
 		});
 	});
